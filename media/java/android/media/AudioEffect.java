@@ -847,39 +847,40 @@ public class AudioEffect {
     // -------------------------------------------------------------------------
 
     /**
-     *  This intent launches an audio effect control panel UI. The goal of this intent is to enable
-     *  separate implementations of music/media player applications and audio effect control
-     *  application or services. This will allow platform vendors to offer more advanced control
-     *  options for standard effects or control for platform specific effects.
+     *  Intent to launch an audio effect control panel UI.
+     *  <p>The goal of this intent is to enable separate implementations of music/media player
+     *  applications and audio effect control application or services.
+     *  This will allow platform vendors to offer more advanced control options for standard effects
+     *  or control for platform specific effects.
      *  <p>The intent carries a number of extras used by the player application to communicate
      *  necessary pieces of information to the control panel application.
      *  <p>The calling application must use the
      *  {@link android.app.Activity#startActivityForResult(Intent, int)} method to launch the
      *  control panel so that its package name is indicated and used by the control panel
      *  application to keep track of changes for this particular application.
-     *  <p>The android.media.EXTRA_AUDIO_SESSION extra will indicate an audio session to which the
+     *  <p>The {@link #EXTRA_AUDIO_SESSION} extra will indicate an audio session to which the
      *  audio effects should be applied. If no audio session is specified, either one of the
      *  follownig will happen:
-     *  - If an audio session was previously opened by the calling application with
+     *  <p>- If an audio session was previously opened by the calling application with
      *  {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} intent, the effect changes will
      *  be applied to that session.
-     *  - If no audio session is opened, the changes will be stored in the package specific storage
-     *  area and applied whenever a new audio session is opened by this application.
-     *  <p>The android.media.EXTRA_CONTENT_TYPE extra will help the control panel application
+     *  <p>- If no audio session is opened, the changes will be stored in the package specific
+     *  storage area and applied whenever a new audio session is opened by this application.
+     *  <p>The {@link #EXTRA_CONTENT_TYPE} extra will help the control panel application
      *  customize both the UI layout and the default audio effect settings if none are already
      *  stored for the calling application.
-     *  {@hide} pending API council approval
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL =
         "android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL";
 
     /**
-     *  This intent indicates to the effect control application or service that a new audio session
-     *  is opened and requires audio effects to be applied. This is different from
-     *  {@link #ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL} in that no UI should be displayed in
-     *  this case. Music player applications can broadcast this intent before starting playback
-     *  to make sure that any audio effect settings previously selected by the user are applied.
+     *  Intent to signal to the effect control application or service that a new audio session
+     *  is opened and requires audio effects to be applied.
+     *  <p>This is different from {@link #ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL} in that no
+     *  UI should be displayed in this case. Music player applications can broadcast this intent
+     *  before starting playback to make sure that any audio effect settings previously selected
+     *  by the user are applied.
      *  <p>The effect control application receiving this intent will look for previously stored
      *  settings for the calling application, create all required audio effects and apply the
      *  effect settings to the specified audio session.
@@ -888,48 +889,50 @@ public class AudioEffect {
      *  <p>If no stored settings are found for the calling application, default settings for the
      *  content type indicated by {@link #EXTRA_CONTENT_TYPE} will be applied. The default settings
      *  for a given content type are platform specific.
-     *  {@hide} pending API council approval
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION =
         "android.media.action.OPEN_AUDIO_EFFECT_CONTROL_SESSION";
 
     /**
-     *  This intent indicates to the effect control application or service that an audio session
+     *  Intent to signal to the effect control application or service that an audio session
      *  is closed and that effects should not be applied anymore.
-     *  <p>The effect control application receiving this intent will delete all effects on this
-     *  session and store current settings in package specific storage.
+     *  <p>The effect control application receiving this intent will delete all effects on
+     *  this session and store current settings in package specific storage.
      *  <p>The calling package name is indicated by the {@link #EXTRA_PACKAGE_NAME} extra and the
      *  audio session ID by the {@link #EXTRA_AUDIO_SESSION} extra. Both extras are mandatory.
      *  <p>It is good practice for applications to broadcast this intent when music playback stops
      *  and/or when exiting to free system resources consumed by audio effect engines.
-     *  {@hide} pending API council approval
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION =
         "android.media.action.CLOSE_AUDIO_EFFECT_CONTROL_SESSION";
 
     /**
-     * This extra indicates the ID of the audio session the effects should be applied to.
+     * Contains the ID of the audio session the effects should be applied to.
+     * <p>This extra is for use with {@link #ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL},
+     * {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} and
+     * {@link #ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION} intents.
      * <p>The extra value is of type int and is the audio session ID.
-     *  @see android.media.MediaPlayer#setAudioSessionId(int) for details on audio sessions.
-     *  {@hide} pending API council approval
+     *
+     *  @see android.media.MediaPlayer#setAudioSessionId(int)
      */
      public static final String EXTRA_AUDIO_SESSION = "android.media.extra.AUDIO_SESSION";
 
     /**
-     * This extra indicates the package name of the calling application for
-     * {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} and
+     * Contains the package name of the calling application.
+     * <p>This extra is for use with {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} and
      * {@link #ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION} intents.
      * <p>The extra value is a string containing the full package name.
-     *  {@hide} pending API council approval
      */
     public static final String EXTRA_PACKAGE_NAME = "android.media.extra.PACKAGE_NAME";
 
     /**
-     * This extra indicates which type of content is played by the application. This information is
-     * used by the effect control application to customize UI and default effect settings.
-     * The content type is one of the following:
+     * Indicates which type of content is played by the application.
+     * <p>This extra is for use with {@link #ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL} and
+     * {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} intents.
+     * <p>This information is used by the effect control application to customize UI and select
+     * appropriate default effect settings. The content type is one of the following:
      * <ul>
      *   <li>{@link #CONTENT_TYPE_MUSIC}</li>
      *   <li>{@link #CONTENT_TYPE_MOVIE}</li>
@@ -937,28 +940,23 @@ public class AudioEffect {
      *   <li>{@link #CONTENT_TYPE_VOICE}</li>
      * </ul>
      * If omitted, the content type defaults to {@link #CONTENT_TYPE_MUSIC}.
-     *  {@hide} pending API council approval
      */
     public static final String EXTRA_CONTENT_TYPE = "android.media.extra.CONTENT_TYPE";
 
     /**
      * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is music
-     *  {@hide} pending API council approval
      */
     public static final int  CONTENT_TYPE_MUSIC = 0;
     /**
-     * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is video of movie
-     *  {@hide} pending API council approval
+     * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is video or movie
      */
     public static final int  CONTENT_TYPE_MOVIE = 1;
     /**
      * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is game audio
-     *  {@hide} pending API council approval
      */
     public static final int  CONTENT_TYPE_GAME = 2;
     /**
      * Value for {@link #EXTRA_CONTENT_TYPE} when the type of content played is voice audio
-     *  {@hide} pending API council approval
      */
     public static final int  CONTENT_TYPE_VOICE = 3;
 

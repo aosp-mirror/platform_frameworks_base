@@ -314,6 +314,8 @@ public class ArrowKeyMovementMethod implements MovementMethod {
      * {@link MotionEvent#ACTION_CANCEL} event), the controller is reset to null.
      *
      * @param cursorController A cursor controller implementation
+     *
+     * @hide
      */
     public void setCursorController(CursorController cursorController) {
         mCursorController = cursorController;

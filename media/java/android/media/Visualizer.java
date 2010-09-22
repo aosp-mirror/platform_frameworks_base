@@ -218,13 +218,16 @@ public class Visualizer {
     public int setEnabled(boolean enabled)
     throws IllegalStateException {
         synchronized (mStateLock) {
-            if ((enabled && mState != STATE_INITIALIZED) ||
-                    (!enabled && mState != STATE_ENABLED)) {
+            if (mState == STATE_UNINITIALIZED) {
                 throw(new IllegalStateException("setEnabled() called in wrong state: "+mState));
             }
-            int status = native_setEnabled(enabled);
-            if (status == SUCCESS) {
-                mState = enabled ? STATE_ENABLED : STATE_INITIALIZED;
+            int status = SUCCESS;
+            if ((enabled && (mState == STATE_INITIALIZED)) ||
+                    (!enabled && (mState == STATE_ENABLED))) {
+                status = native_setEnabled(enabled);
+                if (status == SUCCESS) {
+                    mState = enabled ? STATE_ENABLED : STATE_INITIALIZED;
+                }
             }
             return status;
         }

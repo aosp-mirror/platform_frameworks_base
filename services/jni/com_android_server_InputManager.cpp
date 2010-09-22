@@ -138,6 +138,14 @@ static struct {
     jfieldID mMotionRanges;
 } gInputDeviceClassInfo;
 
+static struct {
+    jclass clazz;
+
+    jfieldID touchscreen;
+    jfieldID keyboard;
+    jfieldID navigation;
+} gConfigurationClassInfo;
+
 // ----------------------------------------------------------------------------
 
 static inline nsecs_t now() {
@@ -698,11 +706,7 @@ void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
 
     JNIEnv* env = jniEnv();
 
-    InputConfiguration config;
-    mInputManager->getReader()->getInputConfiguration(& config);
-
-    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyConfigurationChanged,
-            when, config.touchScreen, config.keyboard, config.navigation);
+    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyConfigurationChanged, when);
     checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
@@ -1270,6 +1274,20 @@ static jintArray android_server_InputManager_nativeGetInputDeviceIds(JNIEnv* env
     return deviceIdsObj;
 }
 
+static void android_server_InputManager_nativeGetInputConfiguration(JNIEnv* env,
+        jclass clazz, jobject configObj) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    InputConfiguration config;
+    gNativeInputManager->getInputManager()->getReader()->getInputConfiguration(& config);
+
+    env->SetIntField(configObj, gConfigurationClassInfo.touchscreen, config.touchScreen);
+    env->SetIntField(configObj, gConfigurationClassInfo.keyboard, config.keyboard);
+    env->SetIntField(configObj, gConfigurationClassInfo.navigation, config.navigation);
+}
+
 static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz) {
     if (checkInputManagerUnitialized(env)) {
         return NULL;
@@ -1316,6 +1334,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeGetInputDevice },
     { "nativeGetInputDeviceIds", "()[I",
             (void*) android_server_InputManager_nativeGetInputDeviceIds },
+    { "nativeGetInputConfiguration", "(Landroid/content/res/Configuration;)V",
+            (void*) android_server_InputManager_nativeGetInputConfiguration },
     { "nativeDump", "()Ljava/lang/String;",
             (void*) android_server_InputManager_nativeDump },
 };
@@ -1343,7 +1363,7 @@ int register_android_server_InputManager(JNIEnv* env) {
     FIND_CLASS(gCallbacksClassInfo.clazz, "com/android/server/InputManager$Callbacks");
 
     GET_METHOD_ID(gCallbacksClassInfo.notifyConfigurationChanged, gCallbacksClassInfo.clazz,
-            "notifyConfigurationChanged", "(JIII)V");
+            "notifyConfigurationChanged", "(J)V");
 
     GET_METHOD_ID(gCallbacksClassInfo.notifyLidSwitchChanged, gCallbacksClassInfo.clazz,
             "notifyLidSwitchChanged", "(JZ)V");
@@ -1542,6 +1562,19 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gInputDeviceClassInfo.mMotionRanges, gInputDeviceClassInfo.clazz,
             "mMotionRanges", "[Landroid/view/InputDevice$MotionRange;");
+
+    // Configuration
+
+    FIND_CLASS(gConfigurationClassInfo.clazz, "android/content/res/Configuration");
+
+    GET_FIELD_ID(gConfigurationClassInfo.touchscreen, gConfigurationClassInfo.clazz,
+            "touchscreen", "I");
+
+    GET_FIELD_ID(gConfigurationClassInfo.keyboard, gConfigurationClassInfo.clazz,
+            "keyboard", "I");
+
+    GET_FIELD_ID(gConfigurationClassInfo.navigation, gConfigurationClassInfo.clazz,
+            "navigation", "I");
 
     return 0;
 }

@@ -920,11 +920,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             newNet = tryFailover(prevNetType);
             if (newNet != null) {
                 NetworkInfo switchTo = newNet.getNetworkInfo();
+                if (!switchTo.isConnected()) {
+                    // if the other net is connected they've already reset this and perhaps even gotten
+                    // a positive report we don't want to overwrite, but if not we need to clear this now
+                    // to turn our cellular sig strength white
+                    mDefaultInetConditionPublished = 0;
+                }
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
             } else {
+                mDefaultInetConditionPublished = 0; // we're not connected anymore
                 intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
             }
         }
+        intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, mDefaultInetConditionPublished);
         // do this before we broadcast the change
         handleConnectivityChange(prevNetType);
 
@@ -1083,12 +1091,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             newNet = tryFailover(info.getType());
             if (newNet != null) {
                 NetworkInfo switchTo = newNet.getNetworkInfo();
+                if (!switchTo.isConnected()) {
+                    // if the other net is connected they've already reset this and perhaps even gotten
+                    // a positive report we don't want to overwrite, but if not we need to clear this now
+                    // to turn our cellular sig strength white
+                    mDefaultInetConditionPublished = 0;
+                }
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
             } else {
+                mDefaultInetConditionPublished = 0;
                 intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
             }
         }
 
+        intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, mDefaultInetConditionPublished);
         sendStickyBroadcast(intent);
         /*
          * If the failover network is already connected, then immediately send

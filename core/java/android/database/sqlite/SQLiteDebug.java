@@ -134,7 +134,7 @@ public final class SQLiteDebug {
 
         public DbStats(String dbName, long pageCount, long pageSize, int lookaside) {
             this.dbName = dbName;
-            this.pageSize = pageSize;
+            this.pageSize = pageSize / 1024;
             dbSize = (pageCount * pageSize) / 1024;
             this.lookaside = lookaside;
         }

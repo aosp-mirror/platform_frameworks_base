@@ -70,8 +70,11 @@ public class LocalSocket {
         if (!implCreated) {
             synchronized (this) {
                 if (!implCreated) {
-                    implCreated = true;
-                    impl.create(true);
+                    try {
+                        impl.create(true);
+                    } finally {
+                        implCreated = true;
+                    }
                 }
             }
         }

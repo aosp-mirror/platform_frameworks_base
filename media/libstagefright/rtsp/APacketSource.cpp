@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "APacketSource"
+#include <utils/Log.h>
+
 #include "APacketSource.h"
 
 #include "ASessionDescription.h"
@@ -188,7 +192,7 @@ static sp<ABuffer> MakeAVCCodecSpecificData(
 
         if (i == 0) {
             FindAVCDimensions(nal, width, height);
-            LOG(INFO) << "dimensions " << *width << "x" << *height;
+            LOGI("dimensions %dx%d", *width, *height);
         }
     }
 
@@ -412,7 +416,7 @@ static bool ExtractDimensionsFromVOLHeader(
     *width = video_object_layer_width;
     *height = video_object_layer_height;
 
-    LOG(INFO) << "VOL dimensions = " << *width << "x" << *height;
+    LOGI("VOL dimensions = %dx%d", *width, *height);
 
     return true;
 }
@@ -711,7 +715,7 @@ void APacketSource::updateNormalPlayTime_l(const sp<ABuffer> &buffer) {
 void APacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
     int32_t damaged;
     if (buffer->meta()->findInt32("damaged", &damaged) && damaged) {
-        LOG(VERBOSE) << "discarding damaged AU";
+        LOGV("discarding damaged AU");
         return;
     }
 
@@ -765,8 +769,9 @@ int64_t APacketSource::getQueueDurationUs(bool *eos) {
     CHECK(last->meta()->findInt64("timeUs", &lastTimeUs));
 
     if (lastTimeUs < firstTimeUs) {
-        LOG(ERROR) << "Huh? Time moving backwards? "
-                   << firstTimeUs << " > " << lastTimeUs;
+        LOGE("Huh? Time moving backwards? %lld > %lld",
+             firstTimeUs, lastTimeUs);
+
         return 0;
     }
 

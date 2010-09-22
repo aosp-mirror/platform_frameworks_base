@@ -307,8 +307,10 @@ public class RecoverySystem {
      * Requires the {@link android.Manifest.permission#REBOOT} permission.
      *
      * @param context      the Context to use
-     * @param packageFile  the update package to install.  Currently
-     * must be on the /cache or /data partitions.
+     * @param packageFile  the update package to install.  Must be on
+     * a partition mountable by recovery.  (The set of partitions
+     * known to recovery may vary from device to device.  Generally,
+     * /cache and /data are safe.)
      *
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
@@ -316,15 +318,6 @@ public class RecoverySystem {
     public static void installPackage(Context context, File packageFile)
         throws IOException {
         String filename = packageFile.getCanonicalPath();
-
-        if (filename.startsWith("/cache/")) {
-            filename = "CACHE:" + filename.substring(7);
-        } else if (filename.startsWith("/data/")) {
-            filename = "DATA:" + filename.substring(6);
-        } else {
-            throw new IllegalArgumentException(
-                "Must start with /cache or /data: " + filename);
-        }
         Log.w(TAG, "!!! REBOOTING TO INSTALL " + filename + " !!!");
         String arg = "--update_package=" + filename;
         bootCommand(context, arg);

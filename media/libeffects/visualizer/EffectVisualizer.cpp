@@ -239,6 +239,24 @@ extern "C" int Visualizer_process(
     }
 
     // all code below assumes stereo 16 bit PCM output and input
+
+    // derive capture scaling factor from peak value in current buffer
+    // this gives more interesting captures for display.
+    int32_t shift = 32;
+    for (size_t i = 0; i < inBuffer->frameCount; i++) {
+        int32_t smp = inBuffer->s16[i];
+        if (smp < 0) smp = -smp;
+        int32_t clz = __builtin_clz(smp);
+        if (shift > clz) shift = clz;
+    }
+    // never scale by less than 8 to avoid returning unaltered PCM signal.
+    // add one to combine the division by 2 needed after summing left and right channels below
+    if (20 > shift) {
+        shift = (31 - 8 + 1) - shift;
+    } else {
+        shift = (3 + 1);
+    }
+
     uint32_t captIdx;
     uint32_t inIdx;
     uint8_t *buf = pContext->mCaptureBuf[pContext->mCurrentBuf];
@@ -246,7 +264,7 @@ extern "C" int Visualizer_process(
          inIdx < inBuffer->frameCount && captIdx < pContext->mCaptureSize;
          inIdx++, captIdx++) {
         int32_t smp = inBuffer->s16[2 * inIdx] + inBuffer->s16[2 * inIdx + 1];
-        smp = (smp + (1 << 8)) >> 9;
+        smp = (smp + (1 << (shift - 1))) >> shift;
         buf[captIdx] = ((uint8_t)smp)^0x80;
     }
     pContext->mCaptureIdx = captIdx;
@@ -369,7 +387,7 @@ extern "C" int Visualizer_command(effect_interface_t self, uint32_t cmdCode, uin
 
 
     case VISU_CMD_CAPTURE:
-        if (pReplyData == NULL || *replySize != (int)pContext->mCaptureSize) {
+        if (pReplyData == NULL || *replySize != pContext->mCaptureSize) {
             LOGV("VISU_CMD_CAPTURE() error *replySize %d pContext->mCaptureSize %d",
                     *replySize, pContext->mCaptureSize);
             return -EINVAL;

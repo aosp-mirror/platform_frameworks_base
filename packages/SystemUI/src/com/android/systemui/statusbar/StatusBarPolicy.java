@@ -711,21 +711,20 @@ public class StatusBarPolicy {
                 ConnectivityManager.EXTRA_NETWORK_INFO));
         int connectionStatus = intent.getIntExtra(ConnectivityManager.EXTRA_INET_CONDITION, 0);
         Slog.d(TAG, "got CONNECTIVITY_ACTION - info=" + info + ", status = " + connectionStatus);
-        if (info.isConnected() == false) return;
+
+        int inetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
 
         switch (info.getType()) {
         case ConnectivityManager.TYPE_MOBILE:
-            if (info.isConnected()) {
-                updateDataNetType(info.getSubtype(), connectionStatus);
-                updateDataIcon();
-                updateSignalStrength(); // apply any change in connectionStatus
-            }
+            mInetCondition = inetCondition;
+            updateDataNetType(info.getSubtype());
+            updateDataIcon();
+            updateSignalStrength(); // apply any change in connectionStatus
             break;
         case ConnectivityManager.TYPE_WIFI:
+            mInetCondition = inetCondition;
             if (info.isConnected()) {
                 mIsWifiConnected = true;
-                mInetCondition =
-                        (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
                 int iconId;
                 if (mLastWifiSignalLevel == -1) {
                     iconId = sWifiSignalImages[mInetCondition][0];
@@ -738,7 +737,6 @@ public class StatusBarPolicy {
             } else {
                 mLastWifiSignalLevel = -1;
                 mIsWifiConnected = false;
-                mInetCondition = 0;
                 int iconId = sWifiSignalImages[0][0];
 
                 mService.setIcon("wifi", iconId, 0);
@@ -777,9 +775,8 @@ public class StatusBarPolicy {
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
             mDataState = state;
-            updateDataNetType(networkType, 0);
+            updateDataNetType(networkType);
             updateDataIcon();
-            updateSignalStrength(); // apply the change in connection status
         }
 
         @Override
@@ -940,8 +937,7 @@ public class StatusBarPolicy {
         return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
     }
 
-    private final void updateDataNetType(int net, int inetCondition) {
-        mInetCondition = (inetCondition > INET_CONDITION_THRESHOLD ? 1 : 0);
+    private final void updateDataNetType(int net) {
         switch (net) {
         case TelephonyManager.NETWORK_TYPE_EDGE:
             mDataIconList = sDataNetType_e[mInetCondition];

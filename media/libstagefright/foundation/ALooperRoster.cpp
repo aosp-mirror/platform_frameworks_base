@@ -74,7 +74,7 @@ void ALooperRoster::postMessage(
     ssize_t index = mHandlers.indexOfKey(msg->target());
 
     if (index < 0) {
-        LOG(WARNING) << "failed to post message. Target handler not registered.";
+        LOGW("failed to post message. Target handler not registered.");
         return;
     }
 
@@ -83,8 +83,8 @@ void ALooperRoster::postMessage(
     sp<ALooper> looper = info.mLooper.promote();
 
     if (looper == NULL) {
-        LOG(WARNING) << "failed to post message. "
-                        "Target handler still registered, but object gone.";
+        LOGW("failed to post message. "
+             "Target handler still registered, but object gone.");
 
         mHandlers.removeItemsAt(index);
         return;
@@ -102,8 +102,7 @@ void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
         ssize_t index = mHandlers.indexOfKey(msg->target());
 
         if (index < 0) {
-            LOG(WARNING) << "failed to deliver message. "
-                         << "Target handler not registered.";
+            LOGW("failed to deliver message. Target handler not registered.");
             return;
         }
 
@@ -111,8 +110,8 @@ void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
         handler = info.mHandler.promote();
 
         if (handler == NULL) {
-            LOG(WARNING) << "failed to deliver message. "
-                            "Target handler registered, but object gone.";
+            LOGW("failed to deliver message. "
+                 "Target handler registered, but object gone.");
 
             mHandlers.removeItemsAt(index);
             return;

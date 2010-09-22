@@ -165,6 +165,7 @@ public class PopupWindow {
                 attrs, com.android.internal.R.styleable.PopupWindow, defStyle, 0);
 
         mBackground = a.getDrawable(R.styleable.PopupWindow_popupBackground);
+        mAnimationStyle = a.getResourceId(R.styleable.PopupWindow_windowAnimationStyle, -1);
 
         // If this is a StateListDrawable, try to find and store the drawable to be
         // used when the drop-down is placed above its anchor view, and the one to be
