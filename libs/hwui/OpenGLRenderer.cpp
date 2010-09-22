@@ -133,6 +133,8 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
 
 OpenGLRenderer::~OpenGLRenderer() {
     LOGD("Destroy OpenGLRenderer");
+    // The context has already been destroyed at this point, do not call
+    // GL APIs. All GL state should be kept in Caches.h
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -615,14 +617,14 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
     const bool isAA = paint->isAntiAlias();
     if (isAA) {
         GLuint textureUnit = 0;
-        setupTextureAlpha8(mLine.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
-                mode, false, true, mLine.getVertices(), mLine.getTexCoords());
+        setupTextureAlpha8(mCaches.line.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
+                mode, false, true, mCaches.line.getVertices(), mCaches.line.getTexCoords());
     } else {
         setupColorRect(0.0f, 0.0f, 1.0f, 1.0f, r, g, b, a, mode, false);
     }
 
     const float strokeWidth = paint->getStrokeWidth();
-    const GLsizei elementsCount = isAA ? mLine.getElementsCount() : gMeshCount;
+    const GLsizei elementsCount = isAA ? mCaches.line.getElementsCount() : gMeshCount;
     const GLenum drawMode = isAA ? GL_TRIANGLES : GL_TRIANGLE_STRIP;
 
     for (int i = 0; i < count; i += 4) {
@@ -630,7 +632,7 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
         float ty = 0.0f;
 
         if (isAA) {
-            mLine.update(points[i], points[i + 1], points[i + 2], points[i + 3],
+            mCaches.line.update(points[i], points[i + 1], points[i + 2], points[i + 3],
                     strokeWidth, tx, ty);
         } else {
             ty = strokeWidth <= 1.0f ? 0.0f : -strokeWidth * 0.5f;
@@ -647,7 +649,8 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
         }
         mModelView.translate(tx, ty, 0.0f);
         if (!isAA) {
-            float length = mLine.getLength(points[i], points[i + 1], points[i + 2], points[i + 3]);
+            float length = mCaches.line.getLength(points[i], points[i + 1],
+                    points[i + 2], points[i + 3]);
             mModelView.scale(length, strokeWidth, 1.0f);
         }
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
@@ -659,7 +662,9 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
         glDrawArrays(drawMode, 0, elementsCount);
     }
 
-    glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
+    if (isAA) {
+        glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
+    }
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {

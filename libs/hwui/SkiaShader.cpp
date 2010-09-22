@@ -94,6 +94,11 @@ void SkiaBitmapShader::describe(ProgramDescription& description, const Extension
         description.isBitmapNpot = true;
         description.bitmapWrapS = gTileModes[mTileX];
         description.bitmapWrapT = gTileModes[mTileY];
+        mWrapS = GL_CLAMP_TO_EDGE;
+        mWrapT = GL_CLAMP_TO_EDGE;
+    } else {
+        mWrapS = gTileModes[mTileX];
+        mWrapT = gTileModes[mTileY];
     }
 }
 
@@ -121,7 +126,7 @@ void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
     }
 
     // Uniforms
-    bindTexture(texture->id, gTileModes[mTileX], gTileModes[mTileY], textureSlot);
+    bindTexture(texture->id, mWrapS, mWrapT, textureSlot);
     glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
             GL_FALSE, &textureTransform.data[0]);
