@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
+import com.android.internal.app.ShutdownThread;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.trustedlogic.trustednfc.android.server.NfcService;
@@ -88,6 +89,24 @@ class ServerThread extends Thread {
 
         BinderInternal.disableBackgroundScheduling(true);
         android.os.Process.setCanSelfBackground(false);
+
+        // Check whether we failed to shut down last time we tried.
+        {
+            final String shutdownAction = SystemProperties.get(
+                    ShutdownThread.SHUTDOWN_ACTION_PROPERTY, "");
+            if (shutdownAction != null && shutdownAction.length() > 0) {
+                boolean reboot = (shutdownAction.charAt(0) == '1');
+
+                final String reason;
+                if (shutdownAction.length() > 1) {
+                    reason = shutdownAction.substring(1, shutdownAction.length());
+                } else {
+                    reason = null;
+                }
+
+                ShutdownThread.rebootOrShutdown(reboot, reason);
+            }
+        }
 
         String factoryTestStr = SystemProperties.get("ro.factorytest");
         int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
