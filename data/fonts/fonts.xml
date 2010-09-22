@@ -44,5 +44,5 @@
         <name>monaco</name>
     </font>
     <fallback ttf="DroidSansFallback" />
-    <fallback ttf="DroidSansJapanese" />
+    <fallback ttf="MTLmr3m" />
 </fonts>
