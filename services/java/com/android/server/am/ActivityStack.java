@@ -1104,26 +1104,30 @@ public class ActivityStack {
         // Okay we are now going to start a switch, to 'next'.  We may first
         // have to pause the current activity, but this is an important point
         // where we have decided to go to 'next' so keep track of that.
-        if (mLastStartedActivity != null && !mLastStartedActivity.finishing) {
-            long now = SystemClock.uptimeMillis();
-            final boolean inTime = mLastStartedActivity.startTime != 0
-                    && (mLastStartedActivity.startTime + START_WARN_TIME) >= now;
-            final int lastUid = mLastStartedActivity.info.applicationInfo.uid;
-            final int nextUid = next.info.applicationInfo.uid;
-            if (inTime && lastUid != nextUid
-                    && lastUid != next.launchedFromUid
-                    && mService.checkPermission(
-                            android.Manifest.permission.STOP_APP_SWITCHES,
-                            -1, next.launchedFromUid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                mService.showLaunchWarningLocked(mLastStartedActivity, next);
+        // XXX "App Redirected" dialog is getting too many false positives
+        // at this point, so turn off for now.
+        if (false) {
+            if (mLastStartedActivity != null && !mLastStartedActivity.finishing) {
+                long now = SystemClock.uptimeMillis();
+                final boolean inTime = mLastStartedActivity.startTime != 0
+                        && (mLastStartedActivity.startTime + START_WARN_TIME) >= now;
+                final int lastUid = mLastStartedActivity.info.applicationInfo.uid;
+                final int nextUid = next.info.applicationInfo.uid;
+                if (inTime && lastUid != nextUid
+                        && lastUid != next.launchedFromUid
+                        && mService.checkPermission(
+                                android.Manifest.permission.STOP_APP_SWITCHES,
+                                -1, next.launchedFromUid)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    mService.showLaunchWarningLocked(mLastStartedActivity, next);
+                } else {
+                    next.startTime = now;
+                    mLastStartedActivity = next;
+                }
             } else {
-                next.startTime = now;
+                next.startTime = SystemClock.uptimeMillis();
                 mLastStartedActivity = next;
             }
-        } else {
-            next.startTime = SystemClock.uptimeMillis();
-            mLastStartedActivity = next;
         }
         
         // We need to start pausing the current activity so the top one

@@ -1182,14 +1182,17 @@ public class Camera {
         public static final String FOCUS_MODE_EDOF = "edof";
 
         /**
-         * Continuous auto focus mode. The camera continuously tries to focus.
-         * This is ideal for shooting video or shooting photo of moving object.
-         * Auto focus starts when the parameter is set. Applications should not
-         * call {@link #autoFocus(AutoFocusCallback)} in this mode. To stop
-         * continuous focus, applications should change the focus mode to other
-         * modes.
+         * Continuous auto focus mode intended for video recording. The camera
+         * continuously tries to focus. This is ideal for shooting video.
+         * Applications still can call {@link
+         * #takePicture(Camera.ShutterCallback, Camera.PictureCallback,
+         * Camera.PictureCallback)} in this mode but the subject may not be in
+         * focus. Auto focus starts when the parameter is set. Applications
+         * should not call {@link #autoFocus(AutoFocusCallback)} in this mode.
+         * To stop continuous focus, applications should change the focus mode
+         * to other modes.
          */
-        public static final String FOCUS_MODE_CONTINUOUS = "continuous";
+        public static final String FOCUS_MODE_CONTINUOUS_VIDEO = "continuous-video";
 
         // Indices for focus distance array.
         /**
@@ -2023,7 +2026,7 @@ public class Camera {
          * @see #FOCUS_MODE_MACRO
          * @see #FOCUS_MODE_FIXED
          * @see #FOCUS_MODE_EDOF
-         * @see #FOCUS_MODE_CONTINUOUS
+         * @see #FOCUS_MODE_CONTINUOUS_VIDEO
          */
         public String getFocusMode() {
             return get(KEY_FOCUS_MODE);
@@ -2225,8 +2228,8 @@ public class Camera {
          * #autoFocus(AutoFocusCallback)}, {@link #cancelAutoFocus}, or {@link
          * #startPreview()}. Applications can call {@link #getParameters()}
          * and this method anytime to get the latest focus distances. If the
-         * focus mode is FOCUS_MODE_CONTINUOUS, focus distances may change from
-         * time to time.
+         * focus mode is FOCUS_MODE_CONTINUOUS_VIDEO, focus distances may change
+         * from time to time.
          *
          * This method is intended to estimate the distance between the camera
          * and the subject. After autofocus, the subject distance may be within

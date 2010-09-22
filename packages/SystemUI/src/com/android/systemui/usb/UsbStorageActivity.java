@@ -30,6 +30,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.hardware.Usb;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -70,11 +71,11 @@ public class UsbStorageActivity extends Activity
     static final boolean localLOGV = false;
 
     /** Used to detect when the USB cable is unplugged, so we can call finish() */
-    private BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mUsbStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction() == Intent.ACTION_BATTERY_CHANGED) {
-                handleBatteryChanged(intent);
+            if (intent.getAction().equals(Usb.ACTION_USB_STATE)) {
+                handleUsbStateChanged(intent);
             }
         }
     };
@@ -139,7 +140,7 @@ public class UsbStorageActivity extends Activity
         super.onResume();
 
         mStorageManager.registerListener(mStorageListener);
-        registerReceiver(mBatteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        registerReceiver(mUsbStateReceiver, new IntentFilter(Usb.ACTION_USB_STATE));
         try {
             switchDisplay(mStorageManager.isUsbMassStorageEnabled());
         } catch (Exception ex) {
@@ -151,15 +152,15 @@ public class UsbStorageActivity extends Activity
     protected void onPause() {
         super.onPause();
         
-        unregisterReceiver(mBatteryReceiver);
+        unregisterReceiver(mUsbStateReceiver);
         if (mStorageManager == null && mStorageListener != null) {
             mStorageManager.unregisterListener(mStorageListener);
         }
     }
 
-    private void handleBatteryChanged(Intent intent) {
-        int pluggedType = intent.getIntExtra("plugged", 0);
-        if (pluggedType == 0) {
+    private void handleUsbStateChanged(Intent intent) {
+        boolean connected = intent.getExtras().getBoolean(Usb.USB_CONNECTED);
+        if (!connected) {
             // It was disconnected from the plug, so finish
             finish();
         }

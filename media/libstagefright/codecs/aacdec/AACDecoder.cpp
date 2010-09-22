@@ -123,6 +123,8 @@ status_t AACDecoder::start(MetaData *params) {
     mAnchorTimeUs = 0;
     mNumSamplesOutput = 0;
     mStarted = true;
+    mNumDecodedBuffers = 0;
+    mUpsamplingFactor = 2;
 
     return OK;
 }
@@ -207,22 +209,65 @@ status_t AACDecoder::read(
 
     Int decoderErr = PVMP4AudioDecodeFrame(mConfig, mDecoderBuf);
 
-    // Check on the sampling rate to see whether it is changed.
-    int32_t sampleRate;
-    CHECK(mMeta->findInt32(kKeySampleRate, &sampleRate));
-    if (mConfig->samplingRate != sampleRate) {
-        mMeta->setInt32(kKeySampleRate, mConfig->samplingRate);
-        LOGW("Sample rate was %d, but now is %d",
-                sampleRate, mConfig->samplingRate);
-        buffer->release();
-        mInputBuffer->release();
-        mInputBuffer = NULL;
-        return INFO_FORMAT_CHANGED;
+    /*
+     * AAC+/eAAC+ streams can be signalled in two ways: either explicitly
+     * or implicitly, according to MPEG4 spec. AAC+/eAAC+ is a dual
+     * rate system and the sampling rate in the final output is actually
+     * doubled compared with the core AAC decoder sampling rate.
+     *
+     * Explicit signalling is done by explicitly defining SBR audio object
+     * type in the bitstream. Implicit signalling is done by embedding
+     * SBR content in AAC extension payload specific to SBR, and hence
+     * requires an AAC decoder to perform pre-checks on actual audio frames.
+     *
+     * Thus, we could not say for sure whether a stream is
+     * AAC+/eAAC+ until the first data frame is decoded.
+     */
+    if (++mNumDecodedBuffers <= 2) {
+        LOGV("audio/extended audio object type: %d + %d",
+            mConfig->audioObjectType, mConfig->extendedAudioObjectType);
+        LOGV("aac+ upsampling factor: %d desired channels: %d",
+            mConfig->aacPlusUpsamplingFactor, mConfig->desiredChannels);
+
+        CHECK(mNumDecodedBuffers > 0);
+        if (mNumDecodedBuffers == 1) {
+            mUpsamplingFactor = mConfig->aacPlusUpsamplingFactor;
+            // Check on the sampling rate to see whether it is changed.
+            int32_t sampleRate;
+            CHECK(mMeta->findInt32(kKeySampleRate, &sampleRate));
+            if (mConfig->samplingRate != sampleRate) {
+                mMeta->setInt32(kKeySampleRate, mConfig->samplingRate);
+                LOGW("Sample rate was %d Hz, but now is %d Hz",
+                        sampleRate, mConfig->samplingRate);
+                buffer->release();
+                mInputBuffer->release();
+                mInputBuffer = NULL;
+                return INFO_FORMAT_CHANGED;
+            }
+        } else {  // mNumDecodedBuffers == 2
+            if (mConfig->extendedAudioObjectType == MP4AUDIO_AAC_LC ||
+                mConfig->extendedAudioObjectType == MP4AUDIO_LTP) {
+                if (mUpsamplingFactor == 2) {
+                    // The stream turns out to be not aacPlus mode anyway
+                    LOGW("Disable AAC+/eAAC+ since extended audio object type is %d",
+                        mConfig->extendedAudioObjectType);
+                    mConfig->aacPlusEnabled = 0;
+                }
+            } else {
+                if (mUpsamplingFactor == 1) {
+                    // aacPlus mode does not buy us anything, but to cause
+                    // 1. CPU load to increase, and
+                    // 2. a half speed of decoding
+                    LOGW("Disable AAC+/eAAC+ since upsampling factor is 1");
+                    mConfig->aacPlusEnabled = 0;
+                }
+            }
+        }
     }
 
     size_t numOutBytes =
         mConfig->frameLength * sizeof(int16_t) * mConfig->desiredChannels;
-    if (mConfig->aacPlusUpsamplingFactor == 2) {
+    if (mUpsamplingFactor == 2) {
         if (mConfig->desiredChannels == 1) {
             memcpy(&mConfig->pOutputBuffer[1024], &mConfig->pOutputBuffer[2048], numOutBytes * 2);
         }

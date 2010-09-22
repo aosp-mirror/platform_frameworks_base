@@ -367,6 +367,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
         Mutex::Autolock _l(mLock);
 
         // zero means default
+        const bool fixedSize = reqWidth && reqHeight;
         if (!reqFormat) reqFormat = mFormat;
         if (!reqWidth)  reqWidth = mWidth;
         if (!reqHeight) reqHeight = mHeight;
@@ -380,7 +381,7 @@ sp<GraphicBuffer> Layer::requestBuffer(int index,
             mReqWidth  = reqWidth;
             mReqHeight = reqHeight;
             mReqFormat = reqFormat;
-            mFixedSize = reqWidth && reqHeight;
+            mFixedSize = fixedSize;
 
             lcblk->reallocateAllExcept(index);
         }

@@ -238,9 +238,7 @@ public final class CallManager {
         Phone.State s = Phone.State.IDLE;
 
         for (Phone phone : mPhones) {
-            if (phone.getState() == Phone.State.ANSWERING) {
-                return Phone.State.ANSWERING;
-            } else if (phone.getState() == Phone.State.RINGING) {
+            if (phone.getState() == Phone.State.RINGING) {
                 s = Phone.State.RINGING;
             } else if (phone.getState() == Phone.State.OFFHOOK) {
                 if (s == Phone.State.IDLE) s = Phone.State.OFFHOOK;
@@ -356,20 +354,6 @@ public final class CallManager {
     public Phone getRingingPhone() {
         return getFirstActiveRingingCall().getPhone();
     }
-
-    /**
-     * @return the first answering call
-     */
-    public Call getFirstAnsweringCall() {
-        for (Phone phone : mPhones) {
-            if (phone.getState() == Phone.State.ANSWERING) {
-                return phone.getForegroundCall();
-            }
-        }
-        return null;
-    }
-
-
 
     public void setAudioMode() {
         Context context = getContext();
@@ -1359,7 +1343,7 @@ public final class CallManager {
      */
     public Call getFirstActiveBgCall() {
         for (Call call : mBackgroundCalls) {
-            if (!call.isIdle()) {
+            if (call.getState() != Call.State.IDLE) {
                 return call;
             }
         }

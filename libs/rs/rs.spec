@@ -338,6 +338,12 @@ ScriptSetVarF {
 	param float value
 	}
 
+ScriptSetVarD {
+	param RsScript s
+	param uint32_t slot
+	param double value
+	}
+
 ScriptSetVarV {
 	param RsScript s
 	param uint32_t slot

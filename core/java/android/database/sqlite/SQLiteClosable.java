@@ -23,12 +23,13 @@ import android.database.CursorWindow;
  */
 public abstract class SQLiteClosable {
     private int mReferenceCount = 1;
+    private Object mLock = new Object(); // STOPSHIP remove this line
 
     protected abstract void onAllReferencesReleased();
     protected void onAllReferencesReleasedFromContainer() {}
 
     public void acquireReference() {
-        synchronized(this) {
+        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
             checkRefCount();
             if (mReferenceCount <= 0) {
                 throw new IllegalStateException(
@@ -39,7 +40,7 @@ public abstract class SQLiteClosable {
     }
 
     public void releaseReference() {
-        synchronized(this) {
+        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
             checkRefCount();
             mReferenceCount--;
             if (mReferenceCount == 0) {
@@ -49,7 +50,7 @@ public abstract class SQLiteClosable {
     }
 
     public void releaseReferenceFromContainer() {
-        synchronized(this) {
+        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
             checkRefCount();
             mReferenceCount--;
             if (mReferenceCount == 0) {

@@ -30,7 +30,7 @@ import junit.framework.TestSuite;
  *
  * To run the download manager tests:
  *
- * adb shell am instrument -e external_download_1mb_uri <uri> external_download_500k_uri <uri> \
+ * adb shell am instrument -e external_download_uri <uri> external_large_download_uri <uri> \
  *     -w com.android.frameworks.downloadmanagertests/.DownloadManagerTestRunner
  */
 
