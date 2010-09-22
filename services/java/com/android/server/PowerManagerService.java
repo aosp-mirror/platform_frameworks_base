@@ -25,6 +25,7 @@ import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentQueryMap;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,6 +37,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Environment;
@@ -108,6 +110,9 @@ class PowerManagerService extends IPowerManager.Stub
 
     // Cached secure settings; see updateSettingsValues()
     private int mShortKeylightDelay = SHORT_KEYLIGHT_DELAY_DEFAULT;
+
+    // Default timeout for screen off, if not found in settings database = 15 seconds.
+    private static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15000;
 
     // flags for setPowerState
     private static final int SCREEN_ON_BIT          = 0x00000001;
@@ -411,24 +416,28 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private class SettingsObserver implements Observer {
-        private int getInt(String name) {
-            return mSettings.getValues(name).getAsInteger(Settings.System.VALUE);
+        private int getInt(String name, int defValue) {
+            ContentValues values = mSettings.getValues(name);
+            Integer iVal = values != null ? values.getAsInteger(Settings.System.VALUE) : null;
+            return iVal != null ? iVal : defValue;
         }
 
         public void update(Observable o, Object arg) {
             synchronized (mLocks) {
-                // STAY_ON_WHILE_PLUGGED_IN
-                mStayOnConditions = getInt(STAY_ON_WHILE_PLUGGED_IN);
+                // STAY_ON_WHILE_PLUGGED_IN, default to when plugged into AC
+                mStayOnConditions = getInt(STAY_ON_WHILE_PLUGGED_IN,
+                        BatteryManager.BATTERY_PLUGGED_AC);
                 updateWakeLockLocked();
 
-                // SCREEN_OFF_TIMEOUT
-                mScreenOffTimeoutSetting = getInt(SCREEN_OFF_TIMEOUT);
+                // SCREEN_OFF_TIMEOUT, default to 15 seconds
+                mScreenOffTimeoutSetting = getInt(SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT);
 
                  // DIM_SCREEN
                 //mDimScreen = getInt(DIM_SCREEN) != 0;
 
-                // SCREEN_BRIGHTNESS_MODE
-                setScreenBrightnessMode(getInt(SCREEN_BRIGHTNESS_MODE));
+                // SCREEN_BRIGHTNESS_MODE, default to manual
+                setScreenBrightnessMode(getInt(SCREEN_BRIGHTNESS_MODE,
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL));
 
                 // recalculate everything
                 setScreenOffTimeoutsLocked();
