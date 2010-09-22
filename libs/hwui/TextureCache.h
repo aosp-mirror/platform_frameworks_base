@@ -79,6 +79,9 @@ private:
      */
     void generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate = false);
 
+    void uploadToTexture(bool resize, GLenum format, GLsizei width, GLsizei height,
+            GLenum type, const GLvoid * data);
+
     void init();
 
     GenerationCache<SkBitmap*, Texture*> mCache;
