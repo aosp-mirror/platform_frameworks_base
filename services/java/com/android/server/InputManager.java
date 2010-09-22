@@ -53,10 +53,6 @@ public class InputManager {
     private final Context mContext;
     private final WindowManagerService mWindowManagerService;
     
-    private int mTouchScreenConfig;
-    private int mKeyboardConfig;
-    private int mNavigationConfig;
-    
     private static native void nativeInit(Callbacks callbacks);
     private static native void nativeStart();
     private static native void nativeSetDisplaySize(int displayId, int width, int height);
@@ -79,6 +75,7 @@ public class InputManager {
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
     private static native void nativeSetFocusedApplication(InputApplication application);
     private static native InputDevice nativeGetInputDevice(int deviceId);
+    private static native void nativeGetInputConfiguration(Configuration configuration);
     private static native int[] nativeGetInputDeviceIds();
     private static native String nativeDump();
     
@@ -113,10 +110,6 @@ public class InputManager {
         this.mWindowManagerService = windowManagerService;
         
         this.mCallbacks = new Callbacks();
-        
-        mTouchScreenConfig = Configuration.TOUCHSCREEN_NOTOUCH;
-        mKeyboardConfig = Configuration.KEYBOARD_NOKEYS;
-        mNavigationConfig = Configuration.NAVIGATION_NONAV;
         
         init();
     }
@@ -154,9 +147,7 @@ public class InputManager {
             throw new IllegalArgumentException("config must not be null.");
         }
         
-        config.touchscreen = mTouchScreenConfig;
-        config.keyboard = mKeyboardConfig;
-        config.navigation = mNavigationConfig;
+        nativeGetInputConfiguration(config);
     }
     
     /**
@@ -367,12 +358,7 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
-        public void notifyConfigurationChanged(long whenNanos,
-                int touchScreenConfig, int keyboardConfig, int navigationConfig) {
-            mTouchScreenConfig = touchScreenConfig;
-            mKeyboardConfig = keyboardConfig;
-            mNavigationConfig = navigationConfig;
-            
+        public void notifyConfigurationChanged(long whenNanos) {
             mWindowManagerService.sendNewConfiguration();
         }
         
