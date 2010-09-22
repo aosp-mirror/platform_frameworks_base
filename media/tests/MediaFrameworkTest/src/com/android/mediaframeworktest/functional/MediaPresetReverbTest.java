@@ -257,13 +257,13 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
         EnergyProbe probe = null;
         AudioEffect vc = null;
         MediaPlayer mp = null;
+        AudioEffect rvb = null;
         AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
         int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         am.setStreamVolume(AudioManager.STREAM_MUSIC,
                            am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
                            0);
         try {
-            probe = new EnergyProbe(0);
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
             // audio after the effects and not before
             vc = new AudioEffect(
@@ -279,6 +279,22 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
             getReverb(mp.getAudioSessionId());
             mReverb.setPreset((short)PresetReverb.PRESET_PLATE);
             mReverb.setEnabled(true);
+
+            // create reverb with UUID instead of PresetReverb constructor otherwise an auxiliary
+            // reverb will be chosen by the effect framework as we are on session 0
+            rvb = new AudioEffect(
+                        AudioEffect.EFFECT_TYPE_NULL,
+                        UUID.fromString("172cdf00-a3bc-11df-a72f-0002a5d5c51b"),
+                        0,
+                        0);
+
+            rvb.setParameter(PresetReverb.PARAM_PRESET, PresetReverb.PRESET_PLATE);
+            rvb.setEnabled(true);
+
+            // create probe after reverb so that it is chained behind the reverb in the
+            // effect chain
+            probe = new EnergyProbe(0);
+
             mp.prepare();
             mp.start();
             Thread.sleep(1000);
@@ -307,6 +323,9 @@ public class MediaPresetReverbTest extends ActivityInstrumentationTestCase2<Medi
             }
             if (vc != null) {
                 vc.release();
+            }
+            if (rvb != null) {
+                rvb.release();
             }
             if (probe != null) {
                 probe.release();
