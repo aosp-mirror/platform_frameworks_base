@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ASessionDescription"
+#include <utils/Log.h>
+
 #include "ASessionDescription.h"
 
 #include <media/stagefright/foundation/ADebug.h>
@@ -49,7 +53,7 @@ bool ASessionDescription::parse(const void *data, size_t size) {
     mFormats.push(AString("[root]"));
 
     AString desc((const char *)data, size);
-    LOG(INFO) << desc;
+    LOGI("%s", desc.c_str());
 
     size_t i = 0;
     for (;;) {
@@ -102,7 +106,7 @@ bool ASessionDescription::parse(const void *data, size_t size) {
                 key.trim();
                 value.trim();
 
-                LOG(VERBOSE) << "adding '" << key << "' => '" << value << "'";
+                LOGV("adding '%s' => '%s'", key.c_str(), value.c_str());
 
                 mTracks.editItemAt(mTracks.size() - 1).add(key, value);
                 break;
@@ -110,7 +114,8 @@ bool ASessionDescription::parse(const void *data, size_t size) {
 
             case 'm':
             {
-                LOG(VERBOSE) << "new section '" << AString(line, 2, line.size() - 2) << "'";
+                LOGV("new section '%s'",
+                     AString(line, 2, line.size() - 2).c_str());
 
                 mTracks.push(Attribs());
                 mFormats.push(AString(line, 2, line.size() - 2));
@@ -129,7 +134,7 @@ bool ASessionDescription::parse(const void *data, size_t size) {
                 key.trim();
                 value.trim();
 
-                LOG(VERBOSE) << "adding '" << key << "' => '" << value << "'";
+                LOGV("adding '%s' => '%s'", key.c_str(), value.c_str());
 
                 mTracks.editItemAt(mTracks.size() - 1).add(key, value);
                 break;

@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "UDPPusher"
+#include <utils/Log.h>
+
 #include "UDPPusher.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
@@ -67,7 +71,7 @@ void UDPPusher::start() {
 bool UDPPusher::onPush() {
     uint32_t length;
     if (fread(&length, 1, sizeof(length), mFile) < sizeof(length)) {
-        LOG(INFO) << "No more data to push.";
+        LOGI("No more data to push.");
         return false;
     }
 
@@ -77,7 +81,7 @@ bool UDPPusher::onPush() {
 
     sp<ABuffer> buffer = new ABuffer(length);
     if (fread(buffer->data(), 1, length, mFile) < length) {
-        LOG(ERROR) << "File truncated?.";
+        LOGE("File truncated?.");
         return false;
     }
 
@@ -89,7 +93,7 @@ bool UDPPusher::onPush() {
 
     uint32_t timeMs;
     if (fread(&timeMs, 1, sizeof(timeMs), mFile) < sizeof(timeMs)) {
-        LOG(INFO) << "No more data to push.";
+        LOGI("No more data to push.");
         return false;
     }
 
@@ -109,7 +113,7 @@ void UDPPusher::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatPush:
         {
             if (!onPush() && !(ntohs(mRemoteAddr.sin_port) & 1)) {
-                LOG(INFO) << "emulating BYE packet";
+                LOGI("emulating BYE packet");
 
                 sp<ABuffer> buffer = new ABuffer(8);
                 uint8_t *data = buffer->data();

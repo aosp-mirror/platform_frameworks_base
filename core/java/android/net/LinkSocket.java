@@ -197,6 +197,17 @@ public class LinkSocket extends Socket {
 
     /**
      * Connect a duplicate socket socket to the same remote host address and port
+     * as the original with a timeout parameter.
+     * @param timeout the timeout value in milliseconds or 0 for infinite timeout
+     * @throws IOException if the socket is already connected or an error occurs
+     *                     while connecting
+     */
+    public void connect(int timeout) throws IOException {
+        if (DBG) log("connect(timeout) EX");
+    }
+
+    /**
+     * Connect a duplicate socket socket to the same remote host address and port
      * as the original.
      * @throws IOException if the socket is already connected or an error occurs
      *                     while connecting
@@ -237,9 +248,9 @@ public class LinkSocket extends Socket {
      */
     @Override
     @Deprecated
-    public void bind(SocketAddress localAddr) throws IOException {
+    public void bind(SocketAddress localAddr) throws UnsupportedOperationException {
         if (DBG) log("bind(localAddr) EX throws IOException");
-        throw new IOException("bind is deprecated for LinkSocket");
+        throw new UnsupportedOperationException("bind is deprecated for LinkSocket");
     }
 
     /**

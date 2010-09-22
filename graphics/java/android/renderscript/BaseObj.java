@@ -32,6 +32,9 @@ class BaseObj {
     }
 
     public int getID() {
+        if (mDestroyed) {
+            throw new IllegalStateException("using a destroyed object.");
+        }
         return mID;
     }
 

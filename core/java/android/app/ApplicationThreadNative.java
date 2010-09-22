@@ -414,6 +414,21 @@ public abstract class ApplicationThreadNative extends Binder
             dumpHeap(managed, path, fd);
             return true;
         }
+
+        case DUMP_ACTIVITY_TRANSACTION: {
+            data.enforceInterface(IApplicationThread.descriptor);
+            ParcelFileDescriptor fd = data.readFileDescriptor();
+            final IBinder activity = data.readStrongBinder();
+            final String[] args = data.readStringArray();
+            if (fd != null) {
+                dumpActivity(fd.getFileDescriptor(), activity, args);
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                }
+            }
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -855,6 +870,17 @@ class ApplicationThreadProxy implements IApplicationThread {
         }
         mRemote.transact(DUMP_HEAP_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    public void dumpActivity(FileDescriptor fd, IBinder token, String[] args)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeFileDescriptor(fd);
+        data.writeStrongBinder(token);
+        data.writeStringArray(args);
+        mRemote.transact(DUMP_ACTIVITY_TRANSACTION, data, null, 0);
         data.recycle();
     }
 }

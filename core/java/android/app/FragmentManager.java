@@ -32,6 +32,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -190,6 +192,16 @@ public interface FragmentManager {
      * the given reference.
      */
     public Fragment getFragment(Bundle bundle, String key);
+
+    /**
+     * Print the FragmentManager's state into the given stream.
+     *
+     * @param prefix Text to print at the front of each line.
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param writer A PrintWriter to which the dump is to be set.
+     * @param args additional arguments to the dump request.
+     */
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args);
 }
 
 final class FragmentManagerState implements Parcelable {
@@ -270,18 +282,23 @@ final class FragmentManagerImpl implements FragmentManager {
             execPendingActions();
         }
     };
+
+    @Override
     public FragmentTransaction openTransaction() {
         return new BackStackRecord(this);
     }
 
+    @Override
     public boolean popBackStack() {
         return popBackStackState(mActivity.mHandler, null, -1, 0);
     }
 
+    @Override
     public boolean popBackStack(String name, int flags) {
         return popBackStackState(mActivity.mHandler, name, -1, flags);
     }
 
+    @Override
     public boolean popBackStack(int id, int flags) {
         if (id < 0) {
             throw new IllegalArgumentException("Bad id: " + id);
@@ -289,14 +306,17 @@ final class FragmentManagerImpl implements FragmentManager {
         return popBackStackState(mActivity.mHandler, null, id, flags);
     }
 
+    @Override
     public int countBackStackEntries() {
         return mBackStack != null ? mBackStack.size() : 0;
     }
 
+    @Override
     public BackStackEntry getBackStackEntry(int index) {
         return mBackStack.get(index);
     }
 
+    @Override
     public void addOnBackStackChangedListener(OnBackStackChangedListener listener) {
         if (mBackStackChangeListeners == null) {
             mBackStackChangeListeners = new ArrayList<OnBackStackChangedListener>();
@@ -304,12 +324,14 @@ final class FragmentManagerImpl implements FragmentManager {
         mBackStackChangeListeners.add(listener);
     }
 
+    @Override
     public void removeOnBackStackChangedListener(OnBackStackChangedListener listener) {
         if (mBackStackChangeListeners != null) {
             mBackStackChangeListeners.remove(listener);
         }
     }
 
+    @Override
     public void putFragment(Bundle bundle, String key, Fragment fragment) {
         if (fragment.mIndex < 0) {
             throw new IllegalStateException("Fragment " + fragment
@@ -318,6 +340,7 @@ final class FragmentManagerImpl implements FragmentManager {
         bundle.putInt(key, fragment.mIndex);
     }
 
+    @Override
     public Fragment getFragment(Bundle bundle, String key) {
         int index = bundle.getInt(key, -1);
         if (index == -1) {
@@ -333,6 +356,51 @@ final class FragmentManagerImpl implements FragmentManager {
                     + key + ": index " + index);
         }
         return f;
+    }
+
+    @Override
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (mActive == null || mActive.size() <= 0) {
+            return;
+        }
+
+        writer.print(prefix); writer.println("Active Fragments:");
+
+        String innerPrefix = prefix + "    ";
+
+        int N = mActive.size();
+        for (int i=0; i<N; i++) {
+            Fragment f = mActive.get(i);
+            if (f != null) {
+                writer.print(prefix); writer.print("  #"); writer.print(i);
+                        writer.print(": "); writer.println(f.toString());
+                f.dump(innerPrefix, fd, writer, args);
+            }
+        }
+
+        if (mAdded != null) {
+            N = mAdded.size();
+            if (N > 0) {
+                writer.print(prefix); writer.println("Added Fragments:");
+                for (int i=0; i<N; i++) {
+                    Fragment f = mAdded.get(i);
+                    writer.print(prefix); writer.print("  #"); writer.print(i);
+                            writer.print(": "); writer.println(f.toString());
+                }
+            }
+        }
+
+        if (mBackStack != null) {
+            N = mBackStack.size();
+            if (N > 0) {
+                writer.print(prefix); writer.println("Back Stack:");
+                for (int i=0; i<N; i++) {
+                    BackStackRecord bs = mBackStack.get(i);
+                    writer.print(prefix); writer.print("  #"); writer.print(i);
+                            writer.print(": "); writer.println(bs.toString());
+                }
+            }
+        }
     }
 
     Animator loadAnimator(Fragment fragment, int transit, boolean enter,
@@ -436,7 +504,7 @@ final class FragmentManagerImpl implements FragmentManager {
                             if (f.mContainerId != 0) {
                                 container = (ViewGroup)mActivity.findViewById(f.mContainerId);
                                 if (container == null) {
-                                    throw new IllegalArgumentException("New view found for id 0x"
+                                    throw new IllegalArgumentException("No view found for id 0x"
                                             + Integer.toHexString(f.mContainerId)
                                             + " for fragment " + f);
                                 }
@@ -519,7 +587,7 @@ final class FragmentManagerImpl implements FragmentManager {
                         if (f.mView != null) {
                             // Need to save the current view state if not
                             // done already.
-                            if (!mActivity.isFinishing() && f.mSavedFragmentState == null) {
+                            if (!mActivity.isFinishing() && f.mSavedViewState == null) {
                                 saveFragmentViewState(f);
                             }
                         }
@@ -581,6 +649,10 @@ final class FragmentManagerImpl implements FragmentManager {
         f.mState = newState;
     }
     
+    void moveToState(Fragment f) {
+        moveToState(f, mCurState, 0, 0);
+    }
+
     void moveToState(int newState, boolean always) {
         moveToState(newState, 0, 0, always);
     }
@@ -655,7 +727,7 @@ final class FragmentManagerImpl implements FragmentManager {
             mNeedMenuInvalidate = true;
         }
         if (moveToStateNow) {
-            moveToState(fragment, mCurState, 0, 0);
+            moveToState(fragment);
         }
     }
     
@@ -1010,37 +1082,42 @@ final class FragmentManagerImpl implements FragmentManager {
                 FragmentState fs = new FragmentState(f);
                 active[i] = fs;
                 
-                if (mStateBundle == null) {
-                    mStateBundle = new Bundle();
-                }
-                f.onSaveInstanceState(mStateBundle);
-                if (!mStateBundle.isEmpty()) {
-                    fs.mSavedFragmentState = mStateBundle;
-                    mStateBundle = null;
-                }
-                
-                if (f.mView != null) {
-                    saveFragmentViewState(f);
-                    if (f.mSavedViewState != null) {
+                if (f.mState > Fragment.INITIALIZING && fs.mSavedFragmentState == null) {
+                    if (mStateBundle == null) {
+                        mStateBundle = new Bundle();
+                    }
+                    f.onSaveInstanceState(mStateBundle);
+                    if (!mStateBundle.isEmpty()) {
+                        fs.mSavedFragmentState = mStateBundle;
+                        mStateBundle = null;
+                    }
+
+                    if (f.mView != null) {
+                        saveFragmentViewState(f);
+                        if (f.mSavedViewState != null) {
+                            if (fs.mSavedFragmentState == null) {
+                                fs.mSavedFragmentState = new Bundle();
+                            }
+                            fs.mSavedFragmentState.putSparseParcelableArray(
+                                    FragmentManagerImpl.VIEW_STATE_TAG, f.mSavedViewState);
+                        }
+                    }
+
+                    if (f.mTarget != null) {
                         if (fs.mSavedFragmentState == null) {
                             fs.mSavedFragmentState = new Bundle();
                         }
-                        fs.mSavedFragmentState.putSparseParcelableArray(
-                                FragmentManagerImpl.VIEW_STATE_TAG, f.mSavedViewState);
+                        putFragment(fs.mSavedFragmentState,
+                                FragmentManagerImpl.TARGET_STATE_TAG, f.mTarget);
+                        if (f.mTargetRequestCode != 0) {
+                            fs.mSavedFragmentState.putInt(
+                                    FragmentManagerImpl.TARGET_REQUEST_CODE_STATE_TAG,
+                                    f.mTargetRequestCode);
+                        }
                     }
-                }
 
-                if (f.mTarget != null) {
-                    if (fs.mSavedFragmentState == null) {
-                        fs.mSavedFragmentState = new Bundle();
-                    }
-                    putFragment(fs.mSavedFragmentState,
-                            FragmentManagerImpl.TARGET_STATE_TAG, f.mTarget);
-                    if (f.mTargetRequestCode != 0) {
-                        fs.mSavedFragmentState.putInt(
-                                FragmentManagerImpl.TARGET_REQUEST_CODE_STATE_TAG,
-                                f.mTargetRequestCode);
-                    }
+                } else {
+                    fs.mSavedFragmentState = f.mSavedFragmentState;
                 }
                 
                 if (DEBUG) Log.v(TAG, "Saved state of " + f + ": "
@@ -1057,13 +1134,15 @@ final class FragmentManagerImpl implements FragmentManager {
         BackStackState[] backStack = null;
         
         // Build list of currently added fragments.
-        N = mAdded.size();
-        if (N > 0) {
-            added = new int[N];
-            for (int i=0; i<N; i++) {
-                added[i] = mAdded.get(i).mIndex;
-                if (DEBUG) Log.v(TAG, "saveAllState: adding fragment #" + i
-                        + ": " + mAdded.get(i));
+        if (mAdded != null) {
+            N = mAdded.size();
+            if (N > 0) {
+                added = new int[N];
+                for (int i=0; i<N; i++) {
+                    added[i] = mAdded.get(i).mIndex;
+                    if (DEBUG) Log.v(TAG, "saveAllState: adding fragment #" + i
+                            + ": " + mAdded.get(i));
+                }
             }
         }
         
@@ -1104,6 +1183,7 @@ final class FragmentManagerImpl implements FragmentManager {
                 fs.mInstance = f;
                 f.mSavedViewState = null;
                 f.mBackStackNesting = 0;
+                f.mInLayout = false;
                 f.mAdded = false;
                 if (fs.mSavedFragmentState != null) {
                     f.mSavedViewState = fs.mSavedFragmentState.getSparseParcelableArray(

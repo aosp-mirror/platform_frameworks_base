@@ -335,9 +335,9 @@ public final class ActivityThread {
         }
     }
 
-    private static final class DumpServiceInfo {
+    private static final class DumpComponentInfo {
         FileDescriptor fd;
-        IBinder service;
+        IBinder token;
         String[] args;
         boolean dumped;
     }
@@ -370,7 +370,8 @@ public final class ActivityThread {
         private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%17s %8d";
         private static final String TWO_COUNT_COLUMNS = "%17s %8d %17s %8d";
-        private static final String DB_INFO_FORMAT = "  %4d %6d %8d %14s  %s";
+        private static final String TWO_COUNT_COLUMNS_DB = "%20s %8d %20s %8d";
+        private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
         // Formatting for checkin service - update version if row format changes
         private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 1;
@@ -591,9 +592,9 @@ public final class ActivityThread {
         }
 
         public void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args) {
-            DumpServiceInfo data = new DumpServiceInfo();
+            DumpComponentInfo data = new DumpComponentInfo();
             data.fd = fd;
-            data.service = servicetoken;
+            data.token = servicetoken;
             data.args = args;
             data.dumped = false;
             queueOrSendMessage(H.DUMP_SERVICE, data);
@@ -662,6 +663,25 @@ public final class ActivityThread {
 
         public void scheduleCrash(String msg) {
             queueOrSendMessage(H.SCHEDULE_CRASH, msg);
+        }
+
+        public void dumpActivity(FileDescriptor fd, IBinder activitytoken, String[] args) {
+            DumpComponentInfo data = new DumpComponentInfo();
+            data.fd = fd;
+            data.token = activitytoken;
+            data.args = args;
+            data.dumped = false;
+            queueOrSendMessage(H.DUMP_ACTIVITY, data);
+            synchronized (data) {
+                while (!data.dumped) {
+                    try {
+                        data.wait();
+                    } catch (InterruptedException e) {
+                        // no need to do anything here, we will keep waiting until
+                        // dumped is set
+                    }
+                }
+            }
         }
         
         @Override
@@ -820,20 +840,23 @@ public final class ActivityThread {
             // SQLite mem info
             pw.println(" ");
             pw.println(" SQL");
-            printRow(pw, TWO_COUNT_COLUMNS, "heap:", sqliteAllocated, "memoryUsed:",
+            printRow(pw, TWO_COUNT_COLUMNS_DB, "heap:", sqliteAllocated, "MEMORY_USED:",
                     stats.memoryUsed / 1024);
-            printRow(pw, TWO_COUNT_COLUMNS, "pageCacheOverflo:", stats.pageCacheOverflo / 1024,
-                    "largestMemAlloc:", stats.largestMemAlloc / 1024);
+            printRow(pw, TWO_COUNT_COLUMNS_DB, "PAGECACHE_OVERFLOW:",
+                    stats.pageCacheOverflo / 1024, "MALLOC_SIZE:", stats.largestMemAlloc / 1024);
             pw.println(" ");
             int N = stats.dbStats.size();
             if (N > 0) {
                 pw.println(" DATABASES");
-                printRow(pw, "  %4s %6s %8s %14s  %s", "pgsz", "dbsz", "lkaside", "cache",
-                    "Dbname");
+                printRow(pw, "  %8s %8s %14s %14s  %s", "pgsz", "dbsz", "Lookaside(b)", "cache",
+                        "Dbname");
                 for (int i = 0; i < N; i++) {
                     DbStats dbStats = stats.dbStats.get(i);
-                    printRow(pw, DB_INFO_FORMAT, dbStats.pageSize, dbStats.dbSize,
-                            dbStats.lookaside, dbStats.cache, dbStats.dbName);
+                    printRow(pw, DB_INFO_FORMAT,
+                            (dbStats.pageSize > 0) ? String.valueOf(dbStats.pageSize) : " ",
+                            (dbStats.dbSize > 0) ? String.valueOf(dbStats.dbSize) : " ",
+                            (dbStats.lookaside > 0) ? String.valueOf(dbStats.lookaside) : " ",
+                            dbStats.cache, dbStats.dbName);
                 }
             }
 
@@ -888,6 +911,7 @@ public final class ActivityThread {
         public static final int DISPATCH_PACKAGE_BROADCAST = 133;
         public static final int SCHEDULE_CRASH          = 134;
         public static final int DUMP_HEAP               = 135;
+        public static final int DUMP_ACTIVITY           = 136;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -927,6 +951,7 @@ public final class ActivityThread {
                     case DISPATCH_PACKAGE_BROADCAST: return "DISPATCH_PACKAGE_BROADCAST";
                     case SCHEDULE_CRASH: return "SCHEDULE_CRASH";
                     case DUMP_HEAP: return "DUMP_HEAP";
+                    case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                 }
             }
             return "(unknown)";
@@ -1021,7 +1046,7 @@ public final class ActivityThread {
                     scheduleGcIdler();
                     break;
                 case DUMP_SERVICE:
-                    handleDumpService((DumpServiceInfo)msg.obj);
+                    handleDumpService((DumpComponentInfo)msg.obj);
                     break;
                 case LOW_MEMORY:
                     handleLowMemory();
@@ -1054,6 +1079,9 @@ public final class ActivityThread {
                     throw new RemoteServiceException((String)msg.obj);
                 case DUMP_HEAP:
                     handleDumpHeap(msg.arg1 != 0, (DumpHeapData)msg.obj);
+                    break;
+                case DUMP_ACTIVITY:
+                    handleDumpActivity((DumpComponentInfo)msg.obj);
                     break;
             }
         }
@@ -2020,12 +2048,28 @@ public final class ActivityThread {
         }
     }
 
-    private void handleDumpService(DumpServiceInfo info) {
+    private void handleDumpService(DumpComponentInfo info) {
         try {
-            Service s = mServices.get(info.service);
+            Service s = mServices.get(info.token);
             if (s != null) {
                 PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
                 s.dump(info.fd, pw, info.args);
+                pw.close();
+            }
+        } finally {
+            synchronized (info) {
+                info.dumped = true;
+                info.notifyAll();
+            }
+        }
+    }
+
+    private void handleDumpActivity(DumpComponentInfo info) {
+        try {
+            ActivityClientRecord r = mActivities.get(info.token);
+            if (r != null && r.activity != null) {
+                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
+                r.activity.dump(info.fd, pw, info.args);
                 pw.close();
             }
         } finally {

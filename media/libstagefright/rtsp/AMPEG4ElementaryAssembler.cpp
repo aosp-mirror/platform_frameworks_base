@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "AMPEG4ElementaryAssembler"
+#include <utils/Log.h>
+
 #include "AMPEG4ElementaryAssembler.h"
 
 #include "ARTPSource.h"
@@ -27,8 +31,6 @@
 
 #include <ctype.h>
 #include <stdint.h>
-
-#define BE_VERBOSE      0
 
 namespace android {
 
@@ -201,9 +203,7 @@ ARTPAssembler::AssemblyStatus AMPEG4ElementaryAssembler::addPacket(
         mNextExpectedSeqNoValid = true;
         mNextExpectedSeqNo = (uint32_t)buffer->int32Data();
     } else if ((uint32_t)buffer->int32Data() != mNextExpectedSeqNo) {
-#if BE_VERBOSE
-        LOG(VERBOSE) << "Not the sequence number I expected";
-#endif
+        LOGV("Not the sequence number I expected");
 
         return WRONG_SEQUENCE_NUMBER;
     }
@@ -336,9 +336,7 @@ ARTPAssembler::AssemblyStatus AMPEG4ElementaryAssembler::addPacket(
 void AMPEG4ElementaryAssembler::submitAccessUnit() {
     CHECK(!mPackets.empty());
 
-#if BE_VERBOSE
-    LOG(VERBOSE) << "Access unit complete (" << mPackets.size() << " nal units)";
-#endif
+    LOGV("Access unit complete (%d nal units)", mPackets.size());
 
     size_t totalSize = 0;
     for (List<sp<ABuffer> >::iterator it = mPackets.begin();
@@ -385,7 +383,7 @@ ARTPAssembler::AssemblyStatus AMPEG4ElementaryAssembler::assembleMore(
 
 void AMPEG4ElementaryAssembler::packetLost() {
     CHECK(mNextExpectedSeqNoValid);
-    LOG(VERBOSE) << "packetLost (expected " << mNextExpectedSeqNo << ")";
+    LOGV("packetLost (expected %d)", mNextExpectedSeqNo);
 
     ++mNextExpectedSeqNo;
 

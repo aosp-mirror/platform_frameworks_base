@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "AAVCAssembler"
+#include <utils/Log.h>
+
 #include "AAVCAssembler.h"
 
 #include "ARTPSource.h"
@@ -24,8 +28,6 @@
 #include <media/stagefright/foundation/hexdump.h>
 
 #include <stdint.h>
-
-#define BE_VERBOSE      0
 
 namespace android {
 
@@ -70,9 +72,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addNALUnit(
         mNextExpectedSeqNoValid = true;
         mNextExpectedSeqNo = (uint32_t)buffer->int32Data();
     } else if ((uint32_t)buffer->int32Data() != mNextExpectedSeqNo) {
-#if BE_VERBOSE
-        LOG(VERBOSE) << "Not the sequence number I expected";
-#endif
+        LOGV("Not the sequence number I expected");
 
         return WRONG_SEQUENCE_NUMBER;
     }
@@ -83,7 +83,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addNALUnit(
     if (size < 1 || (data[0] & 0x80)) {
         // Corrupt.
 
-        LOG(ERROR) << "Ignoring corrupt buffer.";
+        LOGV("Ignoring corrupt buffer.");
         queue->erase(queue->begin());
 
         ++mNextExpectedSeqNo;
@@ -107,7 +107,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addNALUnit(
 
         return success ? OK : MALFORMED_PACKET;
     } else {
-        LOG(ERROR) << "Ignoring unsupported buffer (nalType=" << nalType << ")";
+        LOGV("Ignoring unsupported buffer (nalType=%d)", nalType);
 
         queue->erase(queue->begin());
         ++mNextExpectedSeqNo;
@@ -117,8 +117,8 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addNALUnit(
 }
 
 void AAVCAssembler::addSingleNALUnit(const sp<ABuffer> &buffer) {
-#if BE_VERBOSE
-    LOG(VERBOSE) << "addSingleNALUnit of size " << buffer->size();
+    LOGV("addSingleNALUnit of size %d", buffer->size());
+#if !LOG_NDEBUG
     hexdump(buffer->data(), buffer->size());
 #endif
 
@@ -138,7 +138,7 @@ bool AAVCAssembler::addSingleTimeAggregationPacket(const sp<ABuffer> &buffer) {
     size_t size = buffer->size();
 
     if (size < 3) {
-        LOG(ERROR) << "Discarding too small STAP-A packet.";
+        LOGV("Discarding too small STAP-A packet.");
         return false;
     }
 
@@ -148,7 +148,7 @@ bool AAVCAssembler::addSingleTimeAggregationPacket(const sp<ABuffer> &buffer) {
         size_t nalSize = (data[0] << 8) | data[1];
 
         if (size < nalSize + 2) {
-            LOG(ERROR) << "Discarding malformed STAP-A packet.";
+            LOGV("Discarding malformed STAP-A packet.");
             return false;
         }
 
@@ -164,7 +164,7 @@ bool AAVCAssembler::addSingleTimeAggregationPacket(const sp<ABuffer> &buffer) {
     }
 
     if (size != 0) {
-        LOG(WARNING) << "Unexpected padding at end of STAP-A packet.";
+        LOGV("Unexpected padding at end of STAP-A packet.");
     }
 
     return true;
@@ -184,7 +184,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
     CHECK((indicator & 0x1f) == 28);
 
     if (size < 2) {
-        LOG(ERROR) << "Ignoring malformed FU buffer (size = " << size << ")";
+        LOGV("Ignoring malformed FU buffer (size = %d)", size);
 
         queue->erase(queue->begin());
         ++mNextExpectedSeqNo;
@@ -194,9 +194,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
     if (!(data[1] & 0x80)) {
         // Start bit not set on the first buffer.
 
-#if BE_VERBOSE
-        LOG(ERROR) << "Start bit not set on first buffer";
-#endif
+        LOGV("Start bit not set on first buffer");
 
         queue->erase(queue->begin());
         ++mNextExpectedSeqNo;
@@ -214,17 +212,13 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
     if (data[1] & 0x40) {
         // Huh? End bit also set on the first buffer.
 
-#if BE_VERBOSE
-        LOG(WARNING) << "Grrr. This isn't fragmented at all.";
-#endif
+        LOGV("Grrr. This isn't fragmented at all.");
 
         complete = true;
     } else {
         List<sp<ABuffer> >::iterator it = ++queue->begin();
         while (it != queue->end()) {
-#if BE_VERBOSE
-            LOG(VERBOSE) << "sequence length " << totalCount;
-#endif
+            LOGV("sequence length %d", totalCount);
 
             const sp<ABuffer> &buffer = *it;
 
@@ -232,11 +226,8 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
             size_t size = buffer->size();
 
             if ((uint32_t)buffer->int32Data() != expectedSeqNo) {
-#if BE_VERBOSE
-                LOG(VERBOSE) << "sequence not complete, expected seqNo "
-                     << expectedSeqNo << ", got "
-                     << (uint32_t)buffer->int32Data();
-#endif
+                LOGV("sequence not complete, expected seqNo %d, got %d",
+                     expectedSeqNo, (uint32_t)buffer->int32Data());
 
                 return WRONG_SEQUENCE_NUMBER;
             }
@@ -245,7 +236,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
                     || data[0] != indicator
                     || (data[1] & 0x1f) != nalType
                     || (data[1] & 0x80)) {
-                LOG(ERROR) << "Ignoring malformed FU buffer.\n";
+                LOGV("Ignoring malformed FU buffer.");
 
                 // Delete the whole start of the FU.
 
@@ -296,8 +287,8 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
     for (size_t i = 0; i < totalCount; ++i) {
         const sp<ABuffer> &buffer = *it;
 
-#if BE_VERBOSE
-        LOG(VERBOSE) << "piece #" << (i + 1) << "/" << totalCount;
+        LOGV("piece #%d/%d", i + 1, totalCount);
+#if !LOG_NDEBUG
         hexdump(buffer->data(), buffer->size());
 #endif
 
@@ -311,9 +302,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
 
     addSingleNALUnit(unit);
 
-#if BE_VERBOSE
-    LOG(VERBOSE) << "successfully assembled a NAL unit from fragments.";
-#endif
+    LOGV("successfully assembled a NAL unit from fragments.");
 
     return OK;
 }
@@ -321,9 +310,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::addFragmentedNALUnit(
 void AAVCAssembler::submitAccessUnit() {
     CHECK(!mNALUnits.empty());
 
-#if BE_VERBOSE
-    LOG(VERBOSE) << "Access unit complete (" << mNALUnits.size() << " nal units)";
-#endif
+    LOGV("Access unit complete (%d nal units)", mNALUnits.size());
 
     size_t totalSize = 0;
     for (List<sp<ABuffer> >::iterator it = mNALUnits.begin();
@@ -373,7 +360,7 @@ ARTPAssembler::AssemblyStatus AAVCAssembler::assembleMore(
 
 void AAVCAssembler::packetLost() {
     CHECK(mNextExpectedSeqNoValid);
-    LOG(VERBOSE) << "packetLost (expected " << mNextExpectedSeqNo << ")";
+    LOGV("packetLost (expected %d)", mNextExpectedSeqNo);
 
     ++mNextExpectedSeqNo;
 

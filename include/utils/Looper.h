@@ -205,6 +205,7 @@ private:
 
     int pollInner(int timeoutMillis);
 
+    static void initTLSKey();
     static void threadDestructor(void *st);
 };
 

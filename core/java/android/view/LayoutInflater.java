@@ -67,6 +67,7 @@ public abstract class LayoutInflater {
     // these are optional, set by the caller
     private boolean mFactorySet;
     private Factory mFactory;
+    private Factory2 mFactory2;
     private Filter mFilter;
 
     private final Object[] mConstructorArgs = new Object[2];
@@ -122,18 +123,47 @@ public abstract class LayoutInflater {
         public View onCreateView(String name, Context context, AttributeSet attrs);
     }
 
-    private static class FactoryMerger implements Factory {
+    public interface Factory2 extends Factory {
+        /**
+         * Version of {@link #onCreateView(String, Context, AttributeSet)}
+         * that also supplies the parent that the view created view will be
+         * placed in.
+         *
+         * @param parent The parent that the created view will be placed
+         * in; <em>note that this may be null</em>.
+         * @param name Tag name to be inflated.
+         * @param context The context the view is being created in.
+         * @param attrs Inflation attributes as specified in XML file.
+         *
+         * @return View Newly created view. Return null for the default
+         *         behavior.
+         */
+        public View onCreateView(View parent, String name, Context context, AttributeSet attrs);
+    }
+
+    private static class FactoryMerger implements Factory2 {
         private final Factory mF1, mF2;
+        private final Factory2 mF12, mF22;
         
-        FactoryMerger(Factory f1, Factory f2) {
+        FactoryMerger(Factory f1, Factory2 f12, Factory f2, Factory2 f22) {
             mF1 = f1;
             mF2 = f2;
+            mF12 = f12;
+            mF22 = f22;
         }
         
         public View onCreateView(String name, Context context, AttributeSet attrs) {
             View v = mF1.onCreateView(name, context, attrs);
             if (v != null) return v;
             return mF2.onCreateView(name, context, attrs);
+        }
+
+        public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+            View v = mF12 != null ? mF12.onCreateView(parent, name, context, attrs)
+                    : mF1.onCreateView(name, context, attrs);
+            if (v != null) return v;
+            return mF22 != null ? mF22.onCreateView(parent, name, context, attrs)
+                    : mF2.onCreateView(name, context, attrs);
         }
     }
     
@@ -162,6 +192,7 @@ public abstract class LayoutInflater {
     protected LayoutInflater(LayoutInflater original, Context newContext) {
         mContext = newContext;
         mFactory = original.mFactory;
+        mFactory2 = original.mFactory2;
         mFilter = original.mFilter;
     }
     
@@ -200,12 +231,23 @@ public abstract class LayoutInflater {
     }
 
     /**
-     * Return the current factory (or null). This is called on each element
+     * Return the current {@link Factory} (or null). This is called on each element
      * name. If the factory returns a View, add that to the hierarchy. If it
      * returns null, proceed to call onCreateView(name).
      */
     public final Factory getFactory() {
         return mFactory;
+    }
+
+    /**
+     * Return the current {@link Factory2}.  Returns null if no factory is set
+     * or the set factory does not implement the {@link Factory2} interface.
+     * This is called on each element
+     * name. If the factory returns a View, add that to the hierarchy. If it
+     * returns null, proceed to call onCreateView(name).
+     */
+    public final Factory2 getFactory2() {
+        return mFactory2;
     }
 
     /**
@@ -234,7 +276,26 @@ public abstract class LayoutInflater {
         if (mFactory == null) {
             mFactory = factory;
         } else {
-            mFactory = new FactoryMerger(factory, mFactory);
+            mFactory = new FactoryMerger(factory, null, mFactory, mFactory2);
+        }
+    }
+
+    /**
+     * Like {@link #setFactory}, but allows you to set a {@link Factory2}
+     * interface.
+     */
+    public void setFactory2(Factory2 factory) {
+        if (mFactorySet) {
+            throw new IllegalStateException("A factory has already been set on this LayoutInflater");
+        }
+        if (factory == null) {
+            throw new NullPointerException("Given factory can not be null");
+        }
+        mFactorySet = true;
+        if (mFactory == null) {
+            mFactory = mFactory2 = factory;
+        } else {
+            mFactory = new FactoryMerger(factory, factory, mFactory, mFactory2);
         }
     }
 
@@ -384,7 +445,7 @@ public abstract class LayoutInflater {
                     rInflate(parser, root, attrs, false);
                 } else {
                     // Temp is the root view that was found in the xml
-                    View temp = createViewFromTag(name, attrs);
+                    View temp = createViewFromTag(root, name, attrs);
 
                     ViewGroup.LayoutParams params = null;
 
@@ -557,10 +618,27 @@ public abstract class LayoutInflater {
         return createView(name, "android.view.", attrs);
     }
 
+    /**
+     * Version of {@link #onCreateView(String, AttributeSet)} that also
+     * takes the future parent of the view being constructure.  The default
+     * implementation simply calls {@link #onCreateView(String, AttributeSet)}.
+     *
+     * @param parent The future parent of the returned view.  <em>Note that
+     * this may be null.</em>
+     * @param name The fully qualified class name of the View to be create.
+     * @param attrs An AttributeSet of attributes to apply to the View.
+     *
+     * @return View The View created.
+     */
+    protected View onCreateView(View parent, String name, AttributeSet attrs)
+            throws ClassNotFoundException {
+        return onCreateView(name, attrs);
+    }
+
     /*
      * default visibility so the BridgeInflater can override it.
      */
-    View createViewFromTag(String name, AttributeSet attrs) {
+    View createViewFromTag(View parent, String name, AttributeSet attrs) {
         if (name.equals("view")) {
             name = attrs.getAttributeValue(null, "class");
         }
@@ -568,12 +646,14 @@ public abstract class LayoutInflater {
         if (DEBUG) System.out.println("******** Creating view: " + name);
 
         try {
-            View view = (mFactory == null) ? null : mFactory.onCreateView(name,
-                    mContext, attrs);
+            View view;
+            if (mFactory2 != null) view = mFactory2.onCreateView(parent, name, mContext, attrs);
+            else if (mFactory != null) view = mFactory.onCreateView(name, mContext, attrs);
+            else view = null;
 
             if (view == null) {
                 if (-1 == name.indexOf('.')) {
-                    view = onCreateView(name, attrs);
+                    view = onCreateView(parent, name, attrs);
                 } else {
                     view = createView(name, null, attrs);
                 }
@@ -628,7 +708,7 @@ public abstract class LayoutInflater {
             } else if (TAG_MERGE.equals(name)) {
                 throw new InflateException("<merge /> must be the root element");
             } else {
-                final View view = createViewFromTag(name, attrs);
+                final View view = createViewFromTag(parent, name, attrs);
                 final ViewGroup viewGroup = (ViewGroup) parent;
                 final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
                 rInflate(parser, view, attrs, true);
@@ -689,7 +769,7 @@ public abstract class LayoutInflater {
                         // Inflate all children.
                         rInflate(childParser, parent, childAttrs, false);
                     } else {
-                        final View view = createViewFromTag(childName, childAttrs);
+                        final View view = createViewFromTag(parent, childName, childAttrs);
                         final ViewGroup group = (ViewGroup) parent;
 
                         // We try to load the layout params set in the <include /> tag. If

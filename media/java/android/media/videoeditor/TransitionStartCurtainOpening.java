@@ -30,7 +30,7 @@ public class TransitionStartCurtainOpening extends Transition {
      */
     @SuppressWarnings("unused")
     private TransitionStartCurtainOpening() {
-        this(null, null, 0);
+        this(null, null, 0, Transition.BEHAVIOR_LINEAR);
     }
 
     /**
@@ -40,11 +40,11 @@ public class TransitionStartCurtainOpening extends Transition {
      * @param beforeMediaItem The transition is applied to the beginning of
      *      this media item
      * @param durationMs The duration of the transition in milliseconds
+     * @param behavior The transition behavior
      */
     public TransitionStartCurtainOpening(String transitionId, MediaItem beforeMediaItem,
-            long durationMs) {
-        super(transitionId, null, beforeMediaItem, durationMs,
-                Transition.BEHAVIOR_LINEAR);
+            long durationMs, int behavior) {
+        super(transitionId, null, beforeMediaItem, durationMs, behavior);
     }
 
     /*

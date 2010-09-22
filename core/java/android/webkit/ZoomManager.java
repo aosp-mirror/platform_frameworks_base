@@ -58,9 +58,9 @@ class ZoomManager {
     /*
      * For large screen devices, the defaultScale usually set to 1.0 and
      * equal to the overview scale, to differentiate the zoom level for double tapping,
-     * a minimum reading level scale is used.
+     * a default reading level scale is used.
      */
-    private static final float MIN_READING_LEVEL_SCALE = 1.5f;
+    private static final float DEFAULT_READING_LEVEL_SCALE = 1.5f;
 
     /*
      * The scale factors that determine the upper and lower bounds for the
@@ -258,7 +258,15 @@ class ZoomManager {
     }
 
     public final float getReadingLevelScale() {
-      return Math.max(mDefaultScale, MIN_READING_LEVEL_SCALE);
+        // The reading scale is at least 0.5f apart from the overview scale.
+        final float MIN_SCALE_DIFF = 0.5f;
+        final float zoomOverviewScale = getZoomOverviewScale();
+        if (zoomOverviewScale > DEFAULT_READING_LEVEL_SCALE) {
+            return Math.min(DEFAULT_READING_LEVEL_SCALE,
+                zoomOverviewScale - MIN_SCALE_DIFF);
+        }
+        return Math.max(zoomOverviewScale + MIN_SCALE_DIFF,
+            DEFAULT_READING_LEVEL_SCALE);
     }
 
     public final float getInvDefaultScale() {

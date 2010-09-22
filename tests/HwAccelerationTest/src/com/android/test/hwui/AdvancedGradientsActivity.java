@@ -42,19 +42,25 @@ public class AdvancedGradientsActivity extends Activity {
         private final RadialGradient mRadialGradient;
         private final Matrix mMatrix;
         private final Matrix mMatrix2;
+        private final Matrix mMatrix3;
 
         GradientsView(Context c) {
             super(c);
 
-            mSweepGradient = new SweepGradient(100.0f, 100.0f, 0xff000000, 0xffffffff);
-            mRadialGradient = new RadialGradient(100.0f, 100.0f, 100.0f, 0xff000000, 0xffffffff,
+            mSweepGradient = new SweepGradient(0.0f, 0.0f, 0xff000000, 0xffffffff);
+            mRadialGradient = new RadialGradient(0.0f, 0.0f, 100.0f, 0xff000000, 0xffffffff,
                     Shader.TileMode.MIRROR);
             
             mMatrix = new Matrix();
-            mMatrix.setTranslate(50.0f, 50.0f);
+            mMatrix.setRotate(-45, 0.0f, 0.0f);
+            mMatrix.postTranslate(100.0f, 100.0f);
 
             mMatrix2 = new Matrix();
-            mMatrix2.setScale(2.0f, 2.0f);
+            mMatrix2.setScale(1.0f, 2.0f);
+            mMatrix2.postRotate(-45, 0.0f, 0.0f);
+
+            mMatrix3 = new Matrix();
+            mMatrix3.setTranslate(100.0f, 100.0f);            
             
             mPaint = new Paint();
         }
@@ -64,29 +70,41 @@ public class AdvancedGradientsActivity extends Activity {
             super.onDraw(canvas);
             canvas.drawRGB(255, 255, 255);
 
-            // Bitmap shaders
             canvas.save();
             canvas.translate(130.0f, 100.0f);
 
-            mSweepGradient.setLocalMatrix(null);
+            mSweepGradient.setLocalMatrix(mMatrix3);
             mPaint.setShader(mSweepGradient);
-            canvas.drawRect(0.0f, 0.0f, 200.0f, 200.0f, mPaint);
-
-            canvas.translate(400.0f, 000.0f);
-            
-            mPaint.setShader(mRadialGradient);
             canvas.drawRect(0.0f, 0.0f, 200.0f, 200.0f, mPaint);
 
             canvas.translate(400.0f, 000.0f);
             
             mSweepGradient.setLocalMatrix(mMatrix);
             mPaint.setShader(mSweepGradient);
-            canvas.drawRect(0.0f, 0.0f, 200.0f, 200.0f, mPaint);
+            canvas.drawRect(0.0f, 0.0f, 200.0f, 200.0f, mPaint);            
 
-            canvas.translate(-800.0f, 300.0f);
+            canvas.translate(400.0f, 000.0f);
             
             mSweepGradient.setLocalMatrix(mMatrix2);
             mPaint.setShader(mSweepGradient);
+            canvas.drawRect(0.0f, 0.0f, 200.0f, 200.0f, mPaint);
+
+            canvas.translate(-800.0f, 300.0f);
+
+            mRadialGradient.setLocalMatrix(null);
+            mPaint.setShader(mRadialGradient);
+            canvas.drawRect(0.0f, 0.0f, 200.0f, 200.0f, mPaint);
+            
+            canvas.translate(400.0f, 000.0f);
+            
+            mRadialGradient.setLocalMatrix(mMatrix);
+            mPaint.setShader(mRadialGradient);
+            canvas.drawRect(0.0f, 0.0f, 200.0f, 200.0f, mPaint);
+
+            canvas.translate(400.0f, 000.0f);
+            
+            mRadialGradient.setLocalMatrix(mMatrix2);
+            mPaint.setShader(mRadialGradient);
             canvas.drawRect(0.0f, 0.0f, 200.0f, 200.0f, mPaint);
             
             

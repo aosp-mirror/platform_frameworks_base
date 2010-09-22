@@ -84,5 +84,5 @@ public interface LinkSocketNotifier {
      * Get notified of every capability change
      * check for LinkSockets on that Link that are interested in that Capability - call them
      */
-    public void onCapabilityChanged(LinkSocket socket, LinkCapabilities changedCapabilities);
+    public void onCapabilitiesChanged(LinkSocket socket, LinkCapabilities changedCapabilities);
 }

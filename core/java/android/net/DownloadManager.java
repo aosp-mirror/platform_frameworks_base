@@ -365,7 +365,6 @@ public class DownloadManager {
          *
          * @param show whether the download manager should show a notification for this download.
          * @return this object
-         * @hide
          */
         public Request setShowRunningNotification(boolean show) {
             mShowNotification = show;
