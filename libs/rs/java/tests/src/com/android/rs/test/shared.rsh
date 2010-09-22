@@ -25,11 +25,14 @@ static float end(uint32_t idx) {
 
 #define _RS_ASSERT(b) \
 do { \
-    rsDebug("Checking " #b, ((int) (b))); \
     if (!(b)) { \
         failed = true; \
         rsDebug(#b " FAILED", 0); \
     } \
 \
 } while (0)
+
+/* These constants must match those in UnitTest.java */
+static const int RS_MSG_TEST_PASSED = 100;
+static const int RS_MSG_TEST_FAILED = 101;
 

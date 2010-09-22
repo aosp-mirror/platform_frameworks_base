@@ -3,8 +3,7 @@
 const int TEST_COUNT = 1;
 
 #pragma rs export_var(g_results)
-#pragma rs export_func(doTest)
-
+#pragma rs export_func(fp_mad_test)
 
 static float data_f1[1025];
 static float4 data_f4[1025];
@@ -143,7 +142,7 @@ static void test_clamp4(uint32_t index) {
     rsDebug("fp_clamp4 M ops", 100.f / time);
 }
 
-void doTest(uint32_t index, int test_num) {
+void fp_mad_test(uint32_t index, int test_num) {
     for (int x=0; x < 1025; x++) {
         data_f1[x] = (x & 0xf) * 0.1f;
         data_f4[x].x = (x & 0xf) * 0.1f;
@@ -168,6 +167,10 @@ void doTest(uint32_t index, int test_num) {
     test_sincos(index);
     test_clamp4(index);
     test_clamp(index);
+
+    // TODO Actually verify test result accuracy
+    rsDebug("fp_mad_test PASSED", 0);
+    rsSendToClient(RS_MSG_TEST_PASSED);
 }
 
 
