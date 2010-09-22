@@ -75,7 +75,7 @@ public final class Mtp
             return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID + "/storage");
         }
 
-        public static Uri getContentUri(int deviceID, int storageID) {
+        public static Uri getContentUri(int deviceID, long storageID) {
             return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID + "/storage/" + storageID);
         }
 
@@ -97,17 +97,17 @@ public final class Mtp
      */
     public static final class Object implements BaseColumns {
 
-        public static Uri getContentUri(int deviceID, int objectID) {
+        public static Uri getContentUri(int deviceID, long objectID) {
             return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID
                     + "/object/" + objectID);
         }
 
-        public static Uri getContentUriForObjectChildren(int deviceID, int objectID) {
+        public static Uri getContentUriForObjectChildren(int deviceID, long objectID) {
             return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID
                     + "/object/" + objectID + "/child");
         }
 
-        public static Uri getContentUriForStorageChildren(int deviceID, int storageID) {
+        public static Uri getContentUriForStorageChildren(int deviceID, long storageID) {
             return Uri.parse(CONTENT_AUTHORITY_DEVICE_SLASH + deviceID
                     + "/storage/" + storageID + "/child");
         }
