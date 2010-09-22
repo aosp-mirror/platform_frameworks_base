@@ -43,9 +43,10 @@ import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
+import android.webkit.WebStorage.QuotaUpdater;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.WebStorage.QuotaUpdater;
 
 import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -393,6 +394,9 @@ public class LayoutTestsExecutor extends Activity {
 
         // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
         mCurrentWebView.useMockDeviceOrientation();
+
+        // Must do this after setting the AppCache path.
+        WebStorage.getInstance().deleteAllData();
     }
 
     private void startTests() {
