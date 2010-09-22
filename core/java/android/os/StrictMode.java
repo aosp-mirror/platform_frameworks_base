@@ -30,8 +30,59 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * <p>StrictMode lets you impose stricter rules under which your
- * application runs.</p>
+ * <p>StrictMode is a developer tool which lets you impose stricter
+ * rules under which your application runs.
+ *
+ * <p>StrictMode is most commonly used to catch accidental disk or
+ * network access on the application's main thread, where UI
+ * operations are received and animations take place.  Keeping disk
+ * and network operations off the main thread makes for much smoother,
+ * more responsive applications.
+ *
+ * <p class="note">Note that even though an Android device's disk is
+ * often on flash memory, many devices run a filesystem on top of that
+ * memory with very limited concurrency.  It's often the case that
+ * almost all disk accesses are fast, but may in individual cases be
+ * dramatically slower when certain I/O is happening in the background
+ * from other processes.  If possible, it's best to assume that such
+ * things are not fast.</p>
+ *
+ * <p>Example code to enable from early in your
+ * {@link android.app.Application}, {@link android.app.Activity}, or
+ * other application component's
+ * {@link android.app.Application#onCreate} method:
+ *
+ * <pre>
+ * public void onCreate() {
+ *     if (DEVELOPER_MODE) {
+ *         StrictMode.setThreadPolicy(StrictMode.DISALLOW_DISK_WRITE |
+ *                 StrictMode.DISALLOW_DISK_READ |
+ *                 StrictMode.DISALLOW_NETWORK |
+ *                 StrictMode.PENALTY_LOG);
+ *     }
+ *     super.onCreate();
+ * }
+ * </pre>
+ *
+ * <p>Then you can watch the output of <code>adb logcat</code> while you
+ * use your application.
+ *
+ * <p>If you find violations that you feel are problematic, there are
+ * a variety of tools to help solve them: threads, {@link android.os.Handler},
+ * {@link android.os.AsyncTask}, {@link android.app.IntentService}, etc.
+ * But don't feel compelled to fix everything that StrictMode finds.  In particular,
+ * a lot of disk accesses are often necessary during the normal activity lifecycle.  Use
+ * StrictMode to find things you did on accident.  Network requests on the UI thread
+ * are almost always a problem, though.
+ *
+ * <p class="note">StrictMode is not a security mechanism and is not
+ * guaranteed to find all disk or network accesses.  While it does
+ * propagate its state across process boundaries when doing
+ * {@link android.os.Binder} calls, it's still ultimately a best
+ * effort mechanism.  Notably, disk or network access from JNI calls
+ * won't necessarily trigger it.  Future versions of Android may catch
+ * more (or fewer) operations, so you should never leave StrictMode
+ * enabled in shipping applications on the Android Market.
  */
 public final class StrictMode {
     private static final String TAG = "StrictMode";
@@ -45,8 +96,22 @@ public final class StrictMode {
 
     private StrictMode() {}
 
+    /**
+     * Flag for {@link #setThreadPolicy} to signal that you don't intend for this
+     * thread to write to disk.
+     */
     public static final int DISALLOW_DISK_WRITE = 0x01;
+
+    /**
+     * Flag for {@link #setThreadPolicy} to signal that you don't intend for this
+     * thread to read from disk.
+     */
     public static final int DISALLOW_DISK_READ = 0x02;
+
+    /**
+     * Flag for {@link #setThreadPolicy} to signal that you don't intend for this
+     * thread to access the network.
+     */
     public static final int DISALLOW_NETWORK = 0x04;
 
     /** @hide */
@@ -54,23 +119,30 @@ public final class StrictMode {
             DISALLOW_DISK_WRITE | DISALLOW_DISK_READ | DISALLOW_NETWORK;
 
     /**
-     * Flag to log to the system log.
+     * Penalty flag for {@link #setThreadPolicy} to log violations to
+     * the system log, visible with <code>adb logcat</code>.
      */
     public static final int PENALTY_LOG = 0x10;  // normal android.util.Log
 
     /**
-     * Show an annoying dialog to the user.  Will be rate-limited to be only
-     * a little annoying.
+     * Penalty flag for {@link #setThreadPolicy} to show an annoying
+     * dialog to the developer, rate-limited to be only a little
+     * annoying.
      */
     public static final int PENALTY_DIALOG = 0x20;
 
     /**
-     * Crash hard if policy is violated.
+     * Penalty flag for {@link #setThreadPolicy} to crash hard if
+     * policy is violated.
      */
     public static final int PENALTY_DEATH = 0x40;
 
     /**
-     * Log a stacktrace to the DropBox on policy violation.
+     * Penalty flag for {@link #setThreadPolicy} to log a stacktrace
+     * and timing data to the
+     * {@link android.os.DropBoxManager DropBox} on policy violation.
+     * Intended mostly for platform integrators doing beta user field
+     * data collection.
      */
     public static final int PENALTY_DROPBOX = 0x80;
 
@@ -109,10 +181,17 @@ public final class StrictMode {
     };
 
     /**
-     * Sets the policy for what actions the current thread is denied,
-     * as well as the penalty for violating the policy.
+     * Sets the policy for what actions the current thread isn't
+     * expected to do, as well as the penalty if it does.
      *
-     * @param policyMask a bitmask of DISALLOW_* and PENALTY_* values.
+     * <p>Internally this sets a thread-local integer which is
+     * propagated across cross-process IPC calls, meaning you can
+     * catch violations when a system service or another process
+     * accesses the disk or network on your behalf.
+     *
+     * @param policyMask a bitmask of DISALLOW_* and PENALTY_* values,
+     *     e.g. {@link #DISALLOW_DISK_READ}, {@link #DISALLOW_DISK_WRITE},
+     *     {@link #DISALLOW_NETWORK}, {@link #PENALTY_LOG}.
      */
     public static void setThreadPolicy(final int policyMask) {
         // In addition to the Java-level thread-local in Dalvik's
@@ -160,7 +239,7 @@ public final class StrictMode {
     }
 
     /**
-     * Returns the bitmask of the current thread's blocking policy.
+     * Returns the bitmask of the current thread's policy.
      *
      * @return the bitmask of all the DISALLOW_* and PENALTY_* bits currently enabled
      */
@@ -169,8 +248,10 @@ public final class StrictMode {
     }
 
     /**
-     * Updates the current thread's policy mask to allow reading &amp;
-     * writing to disk.
+     * A convenience wrapper around {@link #getThreadPolicy} and
+     * {@link #setThreadPolicy}.  Updates the current thread's policy
+     * mask to allow both reading &amp; writing to disk, returning the
+     * old policy so you can restore it at the end of a block.
      *
      * @return the old policy mask, to be passed to setThreadPolicy to
      *         restore the policy.
@@ -185,8 +266,10 @@ public final class StrictMode {
     }
 
     /**
-     * Updates the current thread's policy mask to allow reading from
-     * disk.
+     * A convenience wrapper around {@link #getThreadPolicy} and
+     * {@link #setThreadPolicy}.  Updates the current thread's policy
+     * mask to allow reading from disk, returning the old
+     * policy so you can restore it at the end of a block.
      *
      * @return the old policy mask, to be passed to setThreadPolicy to
      *         restore the policy.
