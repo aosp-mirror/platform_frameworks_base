@@ -20,19 +20,24 @@ import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
 import android.net.DhcpInfo;
+import android.net.ProxyProperties;
 import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.wifi.WifiConfiguration.Status;
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.BufferedWriter;
-import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -46,8 +51,31 @@ import java.util.List;
  * It deals with the following
  * - Add/update/remove a WifiConfiguration
  *   The configuration contains two types of information.
- *     = IP configuration that is handled by WifiConfigStore and
+ *     = IP and proxy configuration that is handled by WifiConfigStore and
  *       is saved to disk on any change.
+ *
+ *       The format of configuration file is as follows:
+ *       <version>
+ *       <netA_key1><netA_value1><netA_key2><netA_value2>...<EOS>
+ *       <netB_key1><netB_value1><netB_key2><netB_value2>...<EOS>
+ *       ..
+ *
+ *       (key, value) pairs for a given network are grouped together and can
+ *       be in any order. A "EOS" at the end of a set of (key, value) pairs
+ *       indicates that the next set of (key, value) pairs are for a new
+ *       network. A network is identified by a unique "id". If there is no
+ *       "id" key in the (key, value) pairs, the data is discarded. An IP
+ *       configuration includes the keys - "ipAssignment", "ipAddress", "gateway",
+ *       "netmask", "dns1" and "dns2". A proxy configuration includes "proxySettings",
+ *       "proxyHost", "proxyPort" and "exclusionList"
+ *
+ *       An invalid version on read would result in discarding the contents of
+ *       the file. On the next write, the latest version is written to file.
+ *
+ *       Any failures during read or write to the configuration file are ignored
+ *       without reporting to the user since the likelihood of these errors are
+ *       low and the impact on connectivity is low.
+ *
  *     = SSID & security details that is pushed to the supplicant.
  *       supplicant saves these details to the disk on calling
  *       saveConfigCommand().
@@ -59,10 +87,9 @@ import java.util.List;
  *          to the disk. (TODO: deprecate these calls in WifiManager)
  *        > The new API calls - selectNetwork(), saveNetwork() & forgetNetwork().
  *          These calls persist the supplicant config to disk.
+ *
  * - Maintain a list of configured networks for quick access
  *
- * TODO:
- * - handle proxy per configuration
  */
 class WifiConfigStore {
 
@@ -110,7 +137,7 @@ class WifiConfigStore {
         List<WifiConfiguration> networks = new ArrayList<WifiConfiguration>();
         synchronized (sConfiguredNetworks) {
             for(WifiConfiguration config : sConfiguredNetworks.values()) {
-                networks.add(config.clone());
+                networks.add(new WifiConfiguration(config));
             }
         }
         return networks;
@@ -229,6 +256,7 @@ class WifiConfigStore {
             synchronized (sConfiguredNetworks) {
                 sConfiguredNetworks.remove(netId);
             }
+            writeIpAndProxyConfigurations();
             sendConfigChangeBroadcast();
         } else {
             Log.e(TAG, "Failed to remove network " + netId);
@@ -353,6 +381,19 @@ class WifiConfigStore {
     }
 
     /**
+     * Fetch the proxy properties for a given network id
+     */
+    static ProxyProperties getProxyProperties(int netId) {
+        synchronized (sConfiguredNetworks) {
+            WifiConfiguration config = sConfiguredNetworks.get(netId);
+            if (config != null && config.proxySettings == ProxySettings.STATIC) {
+                return new ProxyProperties(config.proxyProperties);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Return if the specified network is using static IP
      */
     static boolean isUsingStaticIp(int netId) {
@@ -411,7 +452,7 @@ class WifiConfigStore {
                 sNetworkIds.put(configKey(config), config.networkId);
             }
         }
-        readIpConfigurations();
+        readIpAndProxyConfigurations();
         sendConfigChangeBroadcast();
     }
 
@@ -430,38 +471,89 @@ class WifiConfigStore {
         markAllNetworksDisabledExcept(INVALID_NETWORK_ID);
     }
 
-    private static void writeIpConfigurations() {
-        StringBuilder builder = new StringBuilder();
-        BufferedWriter out = null;
+    private static void writeIpAndProxyConfigurations() {
 
-        builder.append(IPCONFIG_FILE_VERSION);
-        builder.append("\n");
+        DataOutputStream out = null;
+        try {
+            out = new DataOutputStream(new BufferedOutputStream(
+                    new FileOutputStream(ipConfigFile)));
 
-        synchronized (sConfiguredNetworks) {
-            for(WifiConfiguration config : sConfiguredNetworks.values()) {
-                if (config.ipAssignment == WifiConfiguration.IpAssignment.STATIC) {
-                    builder.append("id=" + configKey(config));
-                    builder.append(":");
-                    builder.append("ip=" + config.ipConfig.ipAddress);
-                    builder.append(":");
-                    builder.append("gateway=" + config.ipConfig.gateway);
-                    builder.append(":");
-                    builder.append("netmask=" + config.ipConfig.netmask);
-                    builder.append(":");
-                    builder.append("dns1=" + config.ipConfig.dns1);
-                    builder.append(":");
-                    builder.append("dns2=" + config.ipConfig.dns2);
-                    builder.append("\n");
+            out.writeInt(IPCONFIG_FILE_VERSION);
+
+            synchronized (sConfiguredNetworks) {
+                for(WifiConfiguration config : sConfiguredNetworks.values()) {
+                    boolean writeToFile = false;
+
+                    switch (config.ipAssignment) {
+                        case STATIC:
+                            out.writeUTF("ipAssignment");
+                            out.writeUTF(config.ipAssignment.toString());
+                            out.writeUTF("ipAddress");
+                            out.writeInt(config.ipConfig.ipAddress);
+                            out.writeUTF("gateway");
+                            out.writeInt(config.ipConfig.gateway);
+                            out.writeUTF("netmask");
+                            out.writeInt(config.ipConfig.netmask);
+                            out.writeUTF("dns1");
+                            out.writeInt(config.ipConfig.dns1);
+                            out.writeUTF("dns2");
+                            out.writeInt(config.ipConfig.dns2);
+                            writeToFile = true;
+                            break;
+                        case DHCP:
+                            out.writeUTF("ipAssignment");
+                            out.writeUTF(config.ipAssignment.toString());
+                            writeToFile = true;
+                            break;
+                        case UNASSIGNED:
+                            /* Ignore */
+                            break;
+                        default:
+                            Log.e(TAG, "Ignore invalid ip assignment while writing");
+                            break;
+                    }
+
+                    switch (config.proxySettings) {
+                        case STATIC:
+                            out.writeUTF("proxySettings");
+                            out.writeUTF(config.proxySettings.toString());
+                            InetSocketAddress proxy = config.proxyProperties.getSocketAddress();
+                            if (proxy != null) {
+                                out.writeUTF("proxyHost");
+                                out.writeUTF(proxy.getHostName());
+                                out.writeUTF("proxyPort");
+                                out.writeInt(proxy.getPort());
+                                String exclusionList = config.proxyProperties.getExclusionList();
+                                if (exclusionList != null && exclusionList.length() > 0) {
+                                    out.writeUTF("exclusionList");
+                                    out.writeUTF(exclusionList);
+                                }
+                            }
+                            writeToFile = true;
+                            break;
+                        case NONE:
+                            out.writeUTF("proxySettings");
+                            out.writeUTF(config.proxySettings.toString());
+                            writeToFile = true;
+                            break;
+                        case UNASSIGNED:
+                            /* Ignore */
+                            break;
+                        default:
+                            Log.e(TAG, "Ignore invalid proxy settings while writing");
+                            break;
+                    }
+
+                    if (writeToFile) {
+                        out.writeUTF("id");
+                        out.writeInt(configKey(config));
+                        out.writeUTF("EOS");
+                    }
                 }
             }
-        }
 
-        try {
-            out = new BufferedWriter(new FileWriter(ipConfigFile), builder.length());
-            out.write(builder.toString());
         } catch (IOException e) {
             Log.e(TAG, "Error writing data file");
-            return;
         } finally {
             if (out != null) {
                 try {
@@ -471,80 +563,116 @@ class WifiConfigStore {
         }
     }
 
-    private static void readIpConfigurations() {
-        File f = new File(ipConfigFile);
-        byte[] buffer;
-        FileInputStream s = null;
-        try {
-            buffer = new byte[(int)f.length()];
-            s = new FileInputStream(f);
-            s.read(buffer);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading data file");
-            return;
-        } finally {
-            if (s != null) {
-                try {
-                    s.close();
-                } catch (Exception e) {}
-            }
-        }
+    private static void readIpAndProxyConfigurations() {
 
-        String data = new String(buffer);
-        if (data == null || data.length() == 0) {
-            Log.d(TAG, "IP configuration file empty");
-            return;
-        }
-
-        String[] parsed = data.split("\n");
+        DataInputStream in = null;
         try {
-            if (Integer.parseInt(parsed[0]) != IPCONFIG_FILE_VERSION) {
+            in = new DataInputStream(new BufferedInputStream(new FileInputStream(
+                    ipConfigFile)));
+
+            if (in.readInt() != IPCONFIG_FILE_VERSION) {
                 Log.e(TAG, "Bad version on IP configuration file, ignore read");
                 return;
             }
 
-            for (String line : parsed) {
-                int hashKey = -1;
+            while (true) {
+                int id = -1;
+                IpAssignment ipAssignment = IpAssignment.UNASSIGNED;
                 DhcpInfo ipConfig = new DhcpInfo();
-                String[] keyVals = line.split(":");
+                ProxySettings proxySettings = ProxySettings.UNASSIGNED;
+                String proxyHost = null;
+                int proxyPort = -1;
+                String exclusionList = null;
+                String key;
 
-                for (String keyVal : keyVals) {
-                    String[] keyValPair = keyVal.split("=");
-                    if (keyValPair[0].equals("id")) {
-                        hashKey = Integer.parseInt(keyValPair[1]);
-                    } else if (keyValPair[0].equals("ip")) {
-                        ipConfig.ipAddress = Integer.parseInt(keyValPair[1]);
-                    } else if (keyValPair[0].equals("gateway")) {
-                        ipConfig.gateway = Integer.parseInt(keyValPair[1]);
-                    } else if (keyValPair[0].equals("netmask")) {
-                        ipConfig.netmask = Integer.parseInt(keyValPair[1]);
-                    } else if (keyValPair[0].equals("dns1")) {
-                        ipConfig.dns1 = Integer.parseInt(keyValPair[1]);
-                    } else if (keyValPair[0].equals("dns2")) {
-                        ipConfig.dns2 = Integer.parseInt(keyValPair[1]);
+                do {
+                    key = in.readUTF();
+                    if (key.equals("id")) {
+                        id = in.readInt();
+                    } else if (key.equals("ipAssignment")) {
+                        ipAssignment = IpAssignment.valueOf(in.readUTF());
+                    } else if (key.equals("ipAddress")) {
+                        ipConfig.ipAddress = in.readInt();
+                    } else if (key.equals("gateway")) {
+                        ipConfig.gateway = in.readInt();
+                    } else if (key.equals("netmask")) {
+                        ipConfig.netmask = in.readInt();
+                    } else if (key.equals("dns1")) {
+                        ipConfig.dns1 = in.readInt();
+                    } else if (key.equals("dns2")) {
+                        ipConfig.dns2 = in.readInt();
+                    } else if (key.equals("proxySettings")) {
+                        proxySettings = ProxySettings.valueOf(in.readUTF());
+                    } else if (key.equals("proxyHost")) {
+                        proxyHost = in.readUTF();
+                    } else if (key.equals("proxyPort")) {
+                        proxyPort = in.readInt();
+                    } else if (key.equals("exclusionList")) {
+                        exclusionList = in.readUTF();
+                    } else if (key.equals("EOS")) {
+                        break;
                     } else {
-                        Log.w(TAG, "Ignoring " + keyVal);
+                        Log.e(TAG, "Ignore unknown key " + key + "while reading");
                     }
-                }
+                } while (true);
 
-                if (hashKey != -1) {
+                if (id != -1) {
                     synchronized (sConfiguredNetworks) {
                         WifiConfiguration config = sConfiguredNetworks.get(
-                                sNetworkIds.get(hashKey));
+                                sNetworkIds.get(id));
 
                         if (config == null) {
-                            Log.e(TAG, "IP configuration found for missing network, ignored");
+                            Log.e(TAG, "configuration found for missing network, ignored");
                         } else {
-                            config.ipAssignment = WifiConfiguration.IpAssignment.STATIC;
-                            config.ipConfig = ipConfig;
+                            switch (ipAssignment) {
+                                case STATIC:
+                                    config.ipAssignment = ipAssignment;
+                                    config.ipConfig = ipConfig;
+                                    break;
+                                case DHCP:
+                                    config.ipAssignment = ipAssignment;
+                                    break;
+                                case UNASSIGNED:
+                                    //Ignore
+                                    break;
+                                default:
+                                    Log.e(TAG, "Ignore invalid ip assignment while reading");
+                                    break;
+                            }
+
+                            switch (proxySettings) {
+                                case STATIC:
+                                    config.proxySettings = proxySettings;
+                                    ProxyProperties proxyProperties = new ProxyProperties();
+                                    proxyProperties.setSocketAddress(
+                                            new InetSocketAddress(proxyHost, proxyPort));
+                                    proxyProperties.setExclusionList(exclusionList);
+                                    config.proxyProperties = proxyProperties;
+                                    break;
+                                case NONE:
+                                    config.proxySettings = proxySettings;
+                                    break;
+                                case UNASSIGNED:
+                                    //Ignore
+                                    break;
+                                default:
+                                    Log.e(TAG, "Ignore invalid proxy settings while reading");
+                                    break;
+                            }
                         }
                     }
                 } else {
-                    Log.e(TAG,"Missing id while parsing configuration" + line);
+                    Log.e(TAG,"Missing id while parsing configuration");
                 }
             }
-        } catch (NumberFormatException e) {
+        } catch (IOException e) {
             Log.e(TAG, "Error parsing configuration");
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (Exception e) {}
+            }
         }
     }
 
@@ -759,21 +887,68 @@ class WifiConfigStore {
             }
         }
         readNetworkVariables(sConfig);
+        writeIpAndProxyConfigurationsOnChange(sConfig, config);
+        return netId;
+    }
 
-        if (config.ipAssignment != IpAssignment.UNASSIGNED) {
+    /* Compare current and new configuration and write to file on change */
+    private static void writeIpAndProxyConfigurationsOnChange(WifiConfiguration currentConfig,
+            WifiConfiguration newConfig) {
+        boolean newNetwork = (newConfig.networkId == INVALID_NETWORK_ID);
+        boolean writeConfigToFile = false;
+
+        if (newConfig.ipAssignment != IpAssignment.UNASSIGNED) {
             if (newNetwork ||
-                    (sConfig.ipAssignment != config.ipAssignment) ||
-                    (sConfig.ipConfig.ipAddress != config.ipConfig.ipAddress) ||
-                    (sConfig.ipConfig.gateway != config.ipConfig.gateway) ||
-                    (sConfig.ipConfig.netmask != config.ipConfig.netmask) ||
-                    (sConfig.ipConfig.dns1 != config.ipConfig.dns1) ||
-                    (sConfig.ipConfig.dns2 != config.ipConfig.dns2)) {
-                sConfig.ipAssignment = config.ipAssignment;
-                sConfig.ipConfig = config.ipConfig;
-                writeIpConfigurations();
+                    (currentConfig.ipAssignment != newConfig.ipAssignment) ||
+                    (currentConfig.ipConfig.ipAddress != newConfig.ipConfig.ipAddress) ||
+                    (currentConfig.ipConfig.gateway != newConfig.ipConfig.gateway) ||
+                    (currentConfig.ipConfig.netmask != newConfig.ipConfig.netmask) ||
+                    (currentConfig.ipConfig.dns1 != newConfig.ipConfig.dns1) ||
+                    (currentConfig.ipConfig.dns2 != newConfig.ipConfig.dns2)) {
+                currentConfig.ipAssignment = newConfig.ipAssignment;
+                currentConfig.ipConfig = newConfig.ipConfig;
+                writeConfigToFile = true;
             }
         }
-        return netId;
+
+        if (newConfig.proxySettings != ProxySettings.UNASSIGNED) {
+            InetSocketAddress newSockAddr = newConfig.proxyProperties.getSocketAddress();
+            String newExclusionList = newConfig.proxyProperties.getExclusionList();
+
+            InetSocketAddress currentSockAddr = currentConfig.proxyProperties.getSocketAddress();
+            String currentExclusionList = currentConfig.proxyProperties.getExclusionList();
+
+            boolean socketAddressDiffers = false;
+            boolean exclusionListDiffers = false;
+
+            if (newSockAddr != null && currentSockAddr != null ) {
+                socketAddressDiffers = !currentSockAddr.equals(newSockAddr);
+            } else if (newSockAddr != null || currentSockAddr != null) {
+                socketAddressDiffers = true;
+            }
+
+            if (newExclusionList != null && currentExclusionList != null) {
+                exclusionListDiffers = currentExclusionList.equals(newExclusionList);
+            } else if (newExclusionList != null || currentExclusionList != null) {
+                exclusionListDiffers = true;
+            }
+
+            if (newNetwork ||
+                    (currentConfig.proxySettings != newConfig.proxySettings) ||
+                    socketAddressDiffers ||
+                    exclusionListDiffers) {
+                currentConfig.proxySettings = newConfig.proxySettings;
+                currentConfig.proxyProperties = newConfig.proxyProperties;
+                Log.d(TAG, "proxy change SSID = " + currentConfig.SSID + " proxyProperties: " +
+                        currentConfig.proxyProperties.toString());
+                writeConfigToFile = true;
+            }
+        }
+
+        if (writeConfigToFile) {
+            writeIpAndProxyConfigurations();
+            sendConfigChangeBroadcast();
+        }
     }
 
     /**

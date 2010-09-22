@@ -44,6 +44,7 @@ import android.net.NetworkUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.LinkProperties;
+import android.net.ProxyProperties;
 import android.net.wifi.WifiConfiguration.Status;
 import android.os.Binder;
 import android.os.Message;
@@ -1268,7 +1269,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
             mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
         }
-        // TODO - add proxy info
+
+        ProxyProperties proxyProperties = WifiConfigStore.getProxyProperties(mLastNetworkId);
+        if (proxyProperties != null) {
+            mLinkProperties.setHttpProxy(proxyProperties);
+            Log.d(TAG, "netId=" + mLastNetworkId  + " proxy configured: "
+                    + proxyProperties.toString());
+        }
     }
 
     private int getMaxDhcpRetries() {
