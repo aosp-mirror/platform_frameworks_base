@@ -48,6 +48,7 @@ public class MediaEqualizerTest extends ActivityInstrumentationTestCase2<MediaFr
     private final static int MAX_BAND_LEVEL = 1500;
     private final static int TEST_FREQUENCY_MILLIHERTZ = 1000000;
     private final static int MIN_NUMBER_OF_PRESETS = 4;
+    private final static int TEST_VOLUME = 4;
     private Equalizer mEqualizer = null;
     private int mSession = -1;
 
@@ -259,7 +260,7 @@ public class MediaEqualizerTest extends ActivityInstrumentationTestCase2<MediaFr
         AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
         int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         am.setStreamVolume(AudioManager.STREAM_MUSIC,
-                           am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                           TEST_VOLUME,
                            0);
         try {
             probe = new EnergyProbe(0);
