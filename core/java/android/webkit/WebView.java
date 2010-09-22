@@ -6969,6 +6969,7 @@ public class WebView extends AbsoluteLayout
                 case UPDATE_TEXT_ENTRY_MSG_ID:
                     // this is sent after finishing resize in WebViewCore. Make
                     // sure the text edit box is still on the  screen.
+                    selectionDone();
                     if (inEditingMode() && nativeCursorIsTextInput()) {
                         mWebTextView.bringIntoView();
                         rebuildWebTextView();
