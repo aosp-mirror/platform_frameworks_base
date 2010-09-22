@@ -124,8 +124,6 @@ void Mesh::uploadAll(Context *rsc)
             mPrimitives[ct]->mIndexBuffer->deferedUploadToBufferObject(rsc);
         }
     }
-
-    rsc->checkError("Mesh::uploadAll");
 }
 
 void Mesh::updateGLPrimitives()
