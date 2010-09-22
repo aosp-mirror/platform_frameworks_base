@@ -74,6 +74,10 @@
         <item name="wallpaperIntraOpenExitAnimation">@anim/wallpaper_intra_open_exit</item>
         <item name="wallpaperIntraCloseEnterAnimation">@anim/wallpaper_intra_close_enter</item>
         <item name="wallpaperIntraCloseExitAnimation">@anim/wallpaper_intra_close_exit</item>
+        <item name="fragmentOpenEnterAnimation">@anim/fragment_open_enter</item>
+        <item name="fragmentOpenExitAnimation">@anim/fragment_open_exit</item>
+        <item name="fragmentCloseEnterAnimation">@anim/fragment_close_enter</item>
+        <item name="fragmentCloseExitAnimation">@anim/fragment_close_exit</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->
@@ -86,6 +90,13 @@
     <style name="Animation.StatusBar">
         <item name="windowEnterAnimation">@anim/status_bar_enter</item>
         <item name="windowExitAnimation">@anim/status_bar_exit</item>
+    </style>
+
+    <!-- {@hide} -->
+    <style name="Animation.StatusBar.IntruderAlert"
+        parent="@android:style/Animation.StatusBar">
+        <item name="android:windowEnterAnimation">@anim/priority_alert_enter</item>
+        <item name="android:windowExitAnimation">@anim/priority_alert_exit</item>
     </style>
 
     <!-- Standard animations for a translucent window or activity.  This
@@ -188,8 +199,7 @@
     <!-- Status Bar Styles -->
 
     <style name="TextAppearance.StatusBar">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textStyle">normal</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
     <style name="TextAppearance.StatusBar.Ticker">
@@ -202,9 +212,10 @@
         <item name="android:textStyle">bold</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent">
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Title">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -269,12 +280,12 @@
 
     <style name="Widget.CompoundButton.CheckBox">
         <item name="android:background">@android:drawable/btn_check_label_background</item>
-        <item name="android:button">@android:drawable/btn_check</item>
+        <item name="android:button">?android:attr/listChoiceIndicatorMultiple</item>
     </style>
 
     <style name="Widget.CompoundButton.RadioButton">
         <item name="android:background">@android:drawable/btn_radio_label_background</item>
-        <item name="android:button">@android:drawable/btn_radio</item>
+        <item name="android:button">?android:attr/listChoiceIndicatorSingle</item>
     </style>
 
     <style name="Widget.CompoundButton.Star">
@@ -407,9 +418,9 @@
         <item name="android:focusable">true</item>
         <item name="android:focusableInTouchMode">true</item>
         <item name="android:clickable">true</item>
-        <item name="android:background">@android:drawable/edit_text</item>
+        <item name="android:background">?android:attr/editTextBackground</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
-        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:textColor">?android:attr/editTextColor</item>
         <item name="android:gravity">center_vertical</item>
     </style>
     
@@ -435,14 +446,8 @@
         <item name="android:background">@android:drawable/btn_default</item>
     </style>
 
-    <style name="Widget.AutoCompleteTextView">
-        <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:background">@android:drawable/edit_text</item>
+    <style name="Widget.AutoCompleteTextView" parent="Widget.EditText">
         <item name="android:completionHintView">@android:layout/simple_dropdown_hint</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
-        <item name="android:gravity">center_vertical</item>
         <item name="android:completionThreshold">2</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
         <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
@@ -454,6 +459,18 @@
     <style name="Widget.Spinner">
         <item name="android:background">@android:drawable/btn_dropdown</item>
         <item name="android:clickable">true</item>
+        <item name="android:spinnerMode">dialog</item>
+
+        <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
+        <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
+        <item name="android:dropDownVerticalOffset">-10dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+        <item name="android:popupPromptView">@android:layout/simple_dropdown_hint</item>
+    </style>
+
+    <style name="Widget.Spinner.DropDown">
+        <item name="android:spinnerMode">dropdown</item>
     </style>
 
     <style name="Widget.TextView.PopupMenu">
@@ -473,7 +490,7 @@
     </style>
     
     <style name="Widget.DropDownItem.Spinner">
-        <item name="android:checkMark">@android:drawable/btn_radio</item>
+        <item name="android:checkMark">?android:attr/listChoiceIndicatorSingle</item>
     </style>
 
     <style name="Widget.ScrollView">
@@ -493,7 +510,7 @@
     </style>
     
     <style name="Widget.ListView.White" parent="Widget.AbsListView">
-        <item name="android:listSelector">@android:drawable/list_selector_background</item>
+        <item name="android:listSelector">@android:drawable/list_selector_background_light</item>
         <item name="android:cacheColorHint">?android:attr/colorBackgroundCacheHint</item>
         <item name="android:divider">@android:drawable/divider_horizontal_bright_opaque</item>
     </style>    
@@ -549,6 +566,11 @@
         <item name="android:popupBackground">@android:drawable/editbox_dropdown_background_dark</item>
     </style>
 
+    <!-- Default style for {@link android.app.FragmentBreadCrumbs} view. -->
+    <style name="Widget.FragmentBreadCrumbs">
+        <item name="android:padding">4dp</item>
+    </style>
+
     <style name="Widget.KeyboardView" parent="android:Widget">
         <item name="android:background">@android:drawable/keyboard_background</item>
         <item name="android:keyBackground">@android:drawable/btn_keyboard_key</item>
@@ -570,6 +592,7 @@
         <item name="android:background">@android:drawable/quickcontact_badge</item>
         <item name="android:clickable">true</item>
         <item name="android:scaleType">fitCenter</item>
+        <item name="android:src">@android:drawable/ic_contact_picture</item>
     </style>
     
     <style name="Widget.QuickContactBadgeSmall">
@@ -609,9 +632,9 @@
 
     <style name="TextAppearance">
         <item name="android:textColor">?textColorPrimary</item>
-        <item name="android:textColorHighlight">#FFFF9200</item>
+        <item name="android:textColorHighlight">?textColorHighlight</item>
         <item name="android:textColorHint">?textColorHint</item>
-        <item name="android:textColorLink">#5C5CFF</item>
+        <item name="android:textColorLink">?textColorLink</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">normal</item>
     </style>
@@ -619,7 +642,8 @@
     <style name="TextAppearance.Inverse">
         <item name="textColor">?textColorPrimaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
-        <item name="android:textColorLink">#0000EE</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Theme">
@@ -627,41 +651,40 @@
 
     <style name="TextAppearance.DialogWindowTitle">
         <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Large">
         <item name="android:textSize">22sp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Large.Inverse">
         <item name="android:textColor">?textColorPrimaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Medium">
         <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Medium.Inverse">
         <item name="android:textColor">?textColorPrimaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Small">
         <item name="android:textSize">14sp</item>
-        <item name="android:textStyle">normal</item>
         <item name="android:textColor">?textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.Small.Inverse">
         <item name="android:textColor">?textColorSecondaryInverse</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme">
@@ -868,4 +891,97 @@
         <item name="windowEnterAnimation">@android:anim/fade_in</item>
         <item name="windowExitAnimation">@android:anim/fade_out</item>
     </style>
+
+    <style name="Widget.ActionBar">
+        <item name="android:background">@android:drawable/action_bar_background</item>
+        <item name="android:displayOptions">useLogo</item>
+        <item name="android:divider">@android:drawable/action_bar_divider</item>
+        <item name="android:height">?android:attr/actionBarSize</item>
+        <item name="android:paddingLeft">3dip</item>
+        <item name="android:paddingTop">0dip</item>
+        <item name="android:paddingRight">3dip</item>
+        <item name="android:paddingBottom">0dip</item>
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Subtitle</item>
+    </style>
+
+    <style name="Widget.ActionMode">
+        <item name="android:background">?android:attr/actionModeBackground</item>
+        <item name="android:height">?android:attr/actionBarSize</item>
+        <item name="android:itemPadding">?android:attr/actionButtonPadding</item>
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Subtitle</item>
+    </style>
+
+    <style name="TextAppearance.Widget.ActionBar.Title"
+           parent="@android:style/TextAppearance.Medium.Inverse">
+    </style>
+
+    <style name="TextAppearance.Widget.ActionBar.Subtitle"
+           parent="@android:style/TextAppearance.Small.Inverse">
+    </style>
+
+    <style name="TextAppearance.Widget.ActionMode.Title"
+           parent="@android:style/TextAppearance.Medium.Inverse">
+    </style>
+
+    <style name="TextAppearance.Widget.ActionMode.Subtitle"
+           parent="@android:style/TextAppearance.Small.Inverse">
+    </style>
+
+    <style name="Widget.ActionButton">
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="Widget.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_menu_more</item>
+        <item name="android:contentDescription">@string/more_item_label</item>
+    </style>
+
+    <style name="Widget.ActionButton.CloseMode">
+        <item name="android:src">?android:attr/actionModeCloseDrawable</item>
+    </style>
+
+    <style name="Widget.ActionBarView_TabView">
+        <item name="android:background">@drawable/minitab_lt</item>
+        <item name="android:paddingLeft">4dip</item>
+        <item name="android:paddingRight">4dip</item>
+    </style>
+
+    <style name="Widget.ActionBarView_TabBar">
+    </style>
+
+    <style name="Widget.ActionBarView_TabText">
+        <item name="android:textAppearance">@style/TextAppearance.Widget.TextView.PopupMenu</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="Widget.ListPopupWindow">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
+        <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
+        <item name="android:dropDownVerticalOffset">-10dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+        <item name="android:dropDownWidth">wrap_content</item>        
+    </style>
+
+    <style name="Widget.PopupMenu" parent="Widget.ListPopupWindow">
+    </style>
+
+    <style name="TextAppearance.Widget.PopupMenu">
+        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:textColorHint">@android:color/hint_foreground_light</item>
+        <item name="android:textColorHighlight">@android:color/highlighted_text_light</item>
+        <item name="android:textColorLink">@android:color/link_text_light</item>
+    </style>
+
+    <style name="TextAppearance.Widget.PopupMenu.Large">
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="TextAppearance.Widget.PopupMenu.Small">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/secondary_text_light</item>
+    </style>
+
 </resources>

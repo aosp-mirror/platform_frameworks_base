@@ -16,13 +16,16 @@
 
 package com.android.internal.telephony;
 
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.util.Log;
 
 import com.android.internal.telephony.GsmAlphabet;
-
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * Various methods, useful for dealing with SIM data.
@@ -150,6 +153,9 @@ public class IccUtils {
      */
     public static String
     adnStringFieldToString(byte[] data, int offset, int length) {
+        if (length == 0) {
+            return "";
+        }
         if (length >= 1) {
             if (data[offset] == (byte) 0x80) {
                 int ucslen = (length - 1) / 2;
@@ -225,7 +231,15 @@ public class IccUtils {
             return ret.toString();
         }
 
-        return GsmAlphabet.gsm8BitUnpackedToString(data, offset, length);
+        Resources resource = Resources.getSystem();
+        String defaultCharset = "";
+        try {
+            defaultCharset =
+                    resource.getString(com.android.internal.R.string.gsm_alphabet_default_charset);
+        } catch (NotFoundException e) {
+            // Ignore Exception and defaultCharset is set to a empty string.
+        }
+        return GsmAlphabet.gsm8BitUnpackedToString(data, offset, length, defaultCharset.trim());
     }
 
     static int
@@ -267,9 +281,11 @@ public class IccUtils {
 
 
     /**
-     * Converts a byte array into a String hexidecimal characters
+     * Converts a byte array into a String of hexadecimal characters.
      *
-     * null returns null
+     * @param bytes an array of bytes
+     *
+     * @return hex string representation of bytes array
      */
     public static String
     bytesToHexString(byte[] bytes) {

@@ -116,10 +116,10 @@ public final class BridgeInflater extends LayoutInflater {
     }
     
     @Override
-    public View createViewFromTag(String name, AttributeSet attrs) {
+    public View createViewFromTag(View parent, String name, AttributeSet attrs) {
         View view = null;
         try {
-            view = super.createViewFromTag(name, attrs);
+            view = super.createViewFromTag(parent, name, attrs);
         } catch (InflateException e) {
             // try to load the class from using the custom view loader
             try {

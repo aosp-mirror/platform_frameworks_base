@@ -2429,6 +2429,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             
             if (proc.thread != null) {
+                if (proc.pid == Process.myPid()) {
+                    Log.w(TAG, "crashApplication: trying to crash self!");
+                    return;
+                }
                 long ident = Binder.clearCallingIdentity();
                 try {
                     proc.thread.scheduleCrash(message);
@@ -5832,6 +5836,35 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    public void setImmersive(IBinder token, boolean immersive) {
+        synchronized(this) {
+            int index = (token != null) ? mMainStack.indexOfTokenLocked(token) : -1;
+            if (index < 0) {
+                throw new IllegalArgumentException();
+            }
+            ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(index);
+            r.immersive = immersive;
+        }
+    }
+
+    public boolean isImmersive(IBinder token) {
+        synchronized (this) {
+            int index = (token != null) ? mMainStack.indexOfTokenLocked(token) : -1;
+            if (index < 0) {
+                throw new IllegalArgumentException();
+            }
+            ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(index);
+            return r.immersive;
+        }
+    }
+
+    public boolean isTopActivityImmersive() {
+        synchronized (this) {
+            ActivityRecord r = mMainStack.topRunningActivityLocked(null);
+            return (r != null) ? r.immersive : false;
+        }
+    }
+
     public final void enterSafeMode() {
         synchronized(this) {
             // It only makes sense to do this before the system is ready
@@ -7072,6 +7105,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     dumpServicesLocked(fd, pw, args, opti, true);
                 }
                 return;
+            } else {
+                // Dumping a single activity?
+                if (dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
+                    return;
+                }
+                pw.println("Bad activity command: " + cmd);
             }
         }
         
@@ -7421,6 +7460,82 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.flush();
             } catch (RemoteException e) {
                 pw.println("got a RemoteException while dumping the service");
+            }
+        }
+    }
+
+    /**
+     * There are three things that cmd can be:
+     *  - a flattened component name that matched an existing activity
+     *  - the cmd arg isn't the flattened component name of an existing activity:
+     *    dump all activity whose component contains the cmd as a substring
+     *  - A hex number of the ActivityRecord object instance.
+     */
+    protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
+            int opti, boolean dumpAll) {
+        String[] newArgs;
+        ComponentName componentName = ComponentName.unflattenFromString(name);
+        int objectId = 0;
+        try {
+            objectId = Integer.parseInt(name, 16);
+            name = null;
+            componentName = null;
+        } catch (RuntimeException e) {
+        }
+        newArgs = new String[args.length - opti];
+        if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
+
+        ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
+        synchronized (this) {
+            for (ActivityRecord r1 : (ArrayList<ActivityRecord>)mMainStack.mHistory) {
+                if (componentName != null) {
+                    if (r1.intent.getComponent().equals(componentName)) {
+                        activities.add(r1);
+                    }
+                } else if (name != null) {
+                    if (r1.intent.getComponent().flattenToString().contains(name)) {
+                        activities.add(r1);
+                    }
+                } else if (System.identityHashCode(this) == objectId) {
+                    activities.add(r1);
+                }
+            }
+        }
+
+        if (activities.size() <= 0) {
+            return false;
+        }
+
+        for (int i=0; i<activities.size(); i++) {
+            dumpActivity(fd, pw, activities.get(i), newArgs, dumpAll);
+        }
+        return true;
+    }
+
+    /**
+     * Invokes IApplicationThread.dumpActivity() on the thread of the specified activity if
+     * there is a thread associated with the activity.
+     */
+    private void dumpActivity(FileDescriptor fd, PrintWriter pw, ActivityRecord r, String[] args,
+            boolean dumpAll) {
+        pw.println("  Activity " + r.intent.getComponent().flattenToString());
+        if (dumpAll) {
+            synchronized (this) {
+                pw.print("  * "); pw.println(r);
+                r.dump(pw, "    ");
+            }
+            pw.println("");
+        }
+        if (r.app != null && r.app.thread != null) {
+            try {
+                // flush anything that is already in the PrintWriter since the thread is going
+                // to write to the file descriptor directly
+                pw.flush();
+                r.app.thread.dumpActivity(fd, r, args);
+                pw.print("\n");
+                pw.flush();
+            } catch (RemoteException e) {
+                pw.println("got a RemoteException while dumping the activity");
             }
         }
     }
@@ -12131,7 +12246,69 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
-    
+
+    public boolean dumpHeap(String process, boolean managed,
+            String path, ParcelFileDescriptor fd) throws RemoteException {
+
+        try {
+            synchronized (this) {
+                // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
+                // its own permission (same as profileControl).
+                if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Requires permission "
+                            + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+                }
+
+                if (fd == null) {
+                    throw new IllegalArgumentException("null fd");
+                }
+
+                ProcessRecord proc = null;
+                try {
+                    int pid = Integer.parseInt(process);
+                    synchronized (mPidsSelfLocked) {
+                        proc = mPidsSelfLocked.get(pid);
+                    }
+                } catch (NumberFormatException e) {
+                }
+
+                if (proc == null) {
+                    HashMap<String, SparseArray<ProcessRecord>> all
+                            = mProcessNames.getMap();
+                    SparseArray<ProcessRecord> procs = all.get(process);
+                    if (procs != null && procs.size() > 0) {
+                        proc = procs.valueAt(0);
+                    }
+                }
+
+                if (proc == null || proc.thread == null) {
+                    throw new IllegalArgumentException("Unknown process: " + process);
+                }
+
+                boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
+                if (isSecure) {
+                    if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                        throw new SecurityException("Process not debuggable: " + proc);
+                    }
+                }
+
+                proc.thread.dumpHeap(managed, path, fd);
+                fd = null;
+                return true;
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Process disappeared");
+        } finally {
+            if (fd != null) {
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+
     /** In this method we try to acquire our lock to make sure that we have not deadlocked */
     public void monitor() {
         synchronized (this) { }

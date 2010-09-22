@@ -269,7 +269,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * increased in size for extra large screens.  Corresponds to
      * {@link android.R.styleable#AndroidManifestSupportsScreens_xlargeScreens
      * android:xlargeScreens}.
-     * @hide
      */
     public static final int FLAG_SUPPORTS_XLARGE_SCREENS = 1<<19;
     
@@ -312,7 +311,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_ALLOW_CLEAR_USER_DATA}, {@link #FLAG_UPDATED_SYSTEM_APP},
      * {@link #FLAG_TEST_ONLY}, {@link #FLAG_SUPPORTS_SMALL_SCREENS},
      * {@link #FLAG_SUPPORTS_NORMAL_SCREENS},
-     * {@link #FLAG_SUPPORTS_LARGE_SCREENS},
+     * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_SUPPORTS_XLARGE_SCREENS},
      * {@link #FLAG_RESIZEABLE_FOR_SCREENS},
      * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}, {@link #FLAG_VM_SAFE_MODE}
      */

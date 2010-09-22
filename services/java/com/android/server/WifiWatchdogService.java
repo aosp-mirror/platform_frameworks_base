@@ -27,7 +27,6 @@ import android.net.DhcpInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiStateTracker;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -77,7 +76,6 @@ public class WifiWatchdogService {
     
     private Context mContext;
     private ContentResolver mContentResolver;
-    private WifiStateTracker mWifiStateTracker;
     private WifiManager mWifiManager;
     
     /**
@@ -108,10 +106,9 @@ public class WifiWatchdogService {
     /** Whether the current AP check should be canceled. */
     private boolean mShouldCancel;
     
-    WifiWatchdogService(Context context, WifiStateTracker wifiStateTracker) {
+    WifiWatchdogService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-        mWifiStateTracker = wifiStateTracker;
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         
         createThread();
@@ -275,12 +272,13 @@ public class WifiWatchdogService {
     /**
      * Unregister broadcasts and quit the watchdog thread
      */
-    private void quit() {
-        unregisterForWifiBroadcasts();
-        mContext.getContentResolver().unregisterContentObserver(mContentObserver);
-        mHandler.removeAllActions();
-        mHandler.getLooper().quit();
-    }
+    //TODO: Change back to running WWS when needed
+//    private void quit() {
+//        unregisterForWifiBroadcasts();
+//        mContext.getContentResolver().unregisterContentObserver(mContentObserver);
+//        mHandler.removeAllActions();
+//        mHandler.getLooper().quit();
+//    }
 
     /**
      * Waits for the main watchdog thread to create the handler.
@@ -751,7 +749,7 @@ public class WifiWatchdogService {
         // Black list this "bad" AP, this will cause an attempt to connect to another
         blacklistAp(ap.bssid);
         // Initiate an association to an alternate AP
-        mWifiStateTracker.reassociate();
+        mWifiManager.reassociate();
     }
 
     private void blacklistAp(String bssid) {
@@ -762,10 +760,7 @@ public class WifiWatchdogService {
         // Before taking action, make sure we should not cancel our processing
         if (shouldCancel()) return;
         
-        if (!mWifiStateTracker.addToBlacklist(bssid)) {
-            // There's a known bug where this method returns failure on success
-            //Slog.e(TAG, "Blacklisting " + bssid + " failed");
-        }
+        mWifiManager.addToBlacklist(bssid);
 
         if (D) {
             myLogD("Blacklisting " + bssid);
@@ -860,10 +855,7 @@ public class WifiWatchdogService {
              * (and blacklisted them). Clear the blacklist so the AP with best
              * signal is chosen.
              */
-            if (!mWifiStateTracker.clearBlacklist()) {
-                // There's a known bug where this method returns failure on success
-                //Slog.e(TAG, "Clearing blacklist failed");
-            }
+            mWifiManager.clearBlacklist();
             
             if (V) {
                 myLogV("handleSleep: Set state to SLEEP and cleared blacklist");
@@ -934,7 +926,7 @@ public class WifiWatchdogService {
      * should revert anything done by the watchdog monitoring.
      */
     private void handleReset() {
-        mWifiStateTracker.clearBlacklist();
+        mWifiManager.clearBlacklist();
         setIdleState(true);
     }
     
@@ -1151,7 +1143,7 @@ public class WifiWatchdogService {
 
         private void handleWifiStateChanged(int wifiState) {
             if (wifiState == WifiManager.WIFI_STATE_DISABLED) {
-                quit();
+                onDisconnected();
             } else if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
                 onEnabled();
             }

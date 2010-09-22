@@ -1,0 +1,28 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.camerabrowser">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application android:label="@string/app_label">
+        <activity android:name="CameraBrowser" android:label="Camera Browser">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="StorageBrowser" />
+        <activity android:name="ObjectBrowser" />
+        <activity android:name="ObjectViewer" />
+
+        <receiver android:name="UsbReceiver">
+            <intent-filter>
+                <action android:name="android.hardware.action.USB_CAMERA_ATTACHED" />
+                <data android:scheme="content"/>
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+
+</manifest>

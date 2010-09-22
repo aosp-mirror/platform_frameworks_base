@@ -90,6 +90,7 @@ public final class BluetoothHeadset {
      * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD}, and
      * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS}.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VENDOR_SPECIFIC_HEADSET_EVENT =
@@ -98,6 +99,7 @@ public final class BluetoothHeadset {
     /**
      * A String extra field in {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT}
      * intents that contains the name of the vendor-specific command.
+     * @hide
      */
     public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD =
             "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_CMD";
@@ -108,6 +110,7 @@ public final class BluetoothHeadset {
      * command.
      * @see <a href="https://www.bluetooth.org/Technical/AssignedNumbers/identifiers.htm">
      * Bluetooth SIG Assigned Numbers - Company Identifiers</a>
+     * @hide
      */
     public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID =
             "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID";
@@ -116,6 +119,7 @@ public final class BluetoothHeadset {
      * A Parcelable String array extra field in
      * {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT} intents that contains
      * the arguments to the vendor-specific command.
+     * @hide
      */
     public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS =
             "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_ARGS";

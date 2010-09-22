@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.content.pm.PackageInfo;
 import android.util.Log;
 import android.os.*;
 
@@ -37,15 +39,27 @@ public class SamplingProfilerIntegration {
 
     private static final String TAG = "SamplingProfilerIntegration";
 
+    public static final String SNAPSHOT_DIR = "/data/snapshots";
+
     private static final boolean enabled;
     private static final Executor snapshotWriter;
+    private static final int samplingProfilerHz;
+
+    /** Whether or not we've created the snapshots dir. */
+    private static boolean dirMade = false;
+
+    /** Whether or not a snapshot is being persisted. */
+    private static final AtomicBoolean pending = new AtomicBoolean(false);
+
     static {
-        enabled = "1".equals(SystemProperties.get("persist.sampling_profiler"));
-        if (enabled) {
+        samplingProfilerHz = SystemProperties.getInt("persist.sys.profiler_hz", 0);
+        if (samplingProfilerHz > 0) {
             snapshotWriter = Executors.newSingleThreadExecutor();
-            Log.i(TAG, "Profiler is enabled.");
+            enabled = true;
+            Log.i(TAG, "Profiler is enabled. Sampling Profiler Hz: " + samplingProfilerHz);
         } else {
             snapshotWriter = null;
+            enabled = false;
             Log.i(TAG, "Profiler is disabled.");
         }
     }
@@ -69,48 +83,47 @@ public class SamplingProfilerIntegration {
         ThreadGroup group = Thread.currentThread().getThreadGroup();
         SamplingProfiler.ThreadSet threadSet = SamplingProfiler.newThreadGroupTheadSet(group);
         INSTANCE = new SamplingProfiler(4, threadSet);
-        INSTANCE.start(10);
+        INSTANCE.start(samplingProfilerHz);
     }
 
-    /** Whether or not we've created the snapshots dir. */
-    static boolean dirMade = false;
-
-    /** Whether or not a snapshot is being persisted. */
-    static volatile boolean pending;
-
     /**
-     * Writes a snapshot to the SD card if profiling is enabled.
+     * Writes a snapshot if profiling is enabled.
      */
-    public static void writeSnapshot(final String name) {
+    public static void writeSnapshot(final String processName, final PackageInfo packageInfo) {
         if (!enabled) {
             return;
         }
 
         /*
-         * If we're already writing a snapshot, don't bother enqueing another
+         * If we're already writing a snapshot, don't bother enqueueing another
          * request right now. This will reduce the number of individual
          * snapshots and in turn the total amount of memory consumed (one big
          * snapshot is smaller than N subset snapshots).
          */
-        if (!pending) {
-            pending = true;
+        if (pending.compareAndSet(false, true)) {
             snapshotWriter.execute(new Runnable() {
                 public void run() {
-                    String dir =
-                        Environment.getExternalStorageDirectory().getPath() + "/snapshots";
                     if (!dirMade) {
-                        new File(dir).mkdirs();
-                        if (new File(dir).isDirectory()) {
+                        File dir = new File(SNAPSHOT_DIR);
+                        dir.mkdirs();
+                        // the directory needs to be writable to anybody
+                        dir.setWritable(true, false);
+                        // the directory needs to be executable to anybody
+                        // don't know why yet, but mode 723 would work, while
+                        // mode 722 throws FileNotFoundExecption at line 151
+                        dir.setExecutable(true, false);
+                        if (new File(SNAPSHOT_DIR).isDirectory()) {
                             dirMade = true;
                         } else {
-                            Log.w(TAG, "Creation of " + dir + " failed.");
+                            Log.w(TAG, "Creation of " + SNAPSHOT_DIR + " failed.");
+                            pending.set(false);
                             return;
                         }
                     }
                     try {
-                        writeSnapshot(dir, name);
+                        writeSnapshot(SNAPSHOT_DIR, processName, packageInfo);
                     } finally {
-                        pending = false;
+                        pending.set(false);
                     }
                 }
             });
@@ -124,15 +137,15 @@ public class SamplingProfilerIntegration {
         if (!enabled) {
             return;
         }
-
-        String dir = "/data/zygote/snapshots";
-        new File(dir).mkdirs();
-        writeSnapshot(dir, "zygote");
+        writeSnapshot("zygote", null);
         INSTANCE.shutdown();
         INSTANCE = null;
     }
 
-    private static void writeSnapshot(String dir, String name) {
+    /**
+     * pass in PackageInfo to retrieve various values for snapshot header
+     */
+    private static void writeSnapshot(String dir, String processName, PackageInfo packageInfo) {
         if (!enabled) {
             return;
         }
@@ -144,40 +157,55 @@ public class SamplingProfilerIntegration {
          * we capture two snapshots in rapid succession.
          */
         long start = System.currentTimeMillis();
-        String path = dir + "/" + name.replace(':', '.') + "-"
-                + System.currentTimeMillis() + ".snapshot";
-
-        // Try to open the file a few times. The SD card may not be mounted.
-        PrintStream out;
-        int count = 0;
-        while (true) {
-            try {
-                out = new PrintStream(new BufferedOutputStream(new FileOutputStream(path)));
-                break;
-            } catch (FileNotFoundException e) {
-                if (++count > 3) {
-                    Log.e(TAG, "Could not open " + path + ".");
-                    return;
-                }
-
-                // Sleep for a bit and then try again.
-                try {
-                    Thread.sleep(2500);
-                } catch (InterruptedException e1) { /* ignore */ }
-            }
-        }
-
+        String name = processName.replaceAll(":", ".");
+        String path = dir + "/" + name + "-" +System.currentTimeMillis() + ".snapshot";
+        PrintStream out = null;
         try {
+            out = new PrintStream(new BufferedOutputStream(new FileOutputStream(path)));
+        } catch (IOException e) {
+            Log.e(TAG, "Could not open " + path + ":" + e);
+            return;
+        }
+        try {
+            generateSnapshotHeader(name, packageInfo, out);
             INSTANCE.writeHprofData(out);
         } finally {
             out.close();
         }
         if (out.checkError()) {
             Log.e(TAG, "Error writing snapshot.");
-        } else {
-            long elapsed = System.currentTimeMillis() - start;
-            Log.i(TAG, "Wrote snapshot for " + name
-                  + " in " + elapsed + "ms.");
+            return;
         }
+        // set file readable to the world so that SamplingProfilerService
+        // can put it to dropbox
+        new File(path).setReadable(true, false);
+
+        long elapsed = System.currentTimeMillis() - start;
+        Log.i(TAG, "Wrote snapshot for " + name + " in " + elapsed + "ms.");
+    }
+
+    /**
+     * generate header for snapshots, with the following format (like http header):
+     *
+     * Version: <version number of profiler>\n
+     * Process: <process name>\n
+     * Package: <package name, if exists>\n
+     * Package-Version: <version number of the package, if exists>\n
+     * Build: <fingerprint>\n
+     * \n
+     * <the actual snapshot content begins here...>
+     */
+    private static void generateSnapshotHeader(String processName, PackageInfo packageInfo,
+            PrintStream out) {
+        // profiler version
+        out.println("Version: 2");
+        out.println("Process: " + processName);
+        if (packageInfo != null) {
+            out.println("Package: " + packageInfo.packageName);
+            out.println("Package-Version: " + packageInfo.versionCode);
+        }
+        out.println("Build: " + Build.FINGERPRINT);
+        // single blank line means the end of snapshot header.
+        out.println();
     }
 }

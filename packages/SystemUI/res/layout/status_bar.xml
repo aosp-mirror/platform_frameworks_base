@@ -21,6 +21,7 @@
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
 <com.android.systemui.statusbar.StatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:background="@drawable/status_bar_background"
     android:orientation="vertical"
     android:focusable="true"
@@ -55,6 +56,8 @@
             android:layout_height="match_parent"
             android:singleLine="true"
             android:paddingRight="6dip"
+            android:textSize="16sp"
+            android:textStyle="bold"
             android:gravity="center_vertical|left"
             />
     </LinearLayout>

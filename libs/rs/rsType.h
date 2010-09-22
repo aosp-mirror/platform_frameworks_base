@@ -71,9 +71,11 @@ public:
     void compute();
 
     void enableGLVertexBuffer(class VertexArray *) const;
-    void enableGLVertexBuffer2(class VertexArray *) const;
 
     void dumpLOGV(const char *prefix) const;
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_TYPE; }
+    static Type *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     struct LOD {
@@ -112,15 +114,7 @@ protected:
     LOD *mLODs;
     uint32_t mLODCount;
 
-    struct GLState_t {
-        VertexArray::Attrib mUser[RS_MAX_ATTRIBS];
-        VertexArray::Attrib mVtx;
-        VertexArray::Attrib mNorm;
-        VertexArray::Attrib mColor;
-        VertexArray::Attrib mTex;
-        VertexArray::Attrib mPointSize;
-    };
-    GLState_t mGL;
+    VertexArray::Attrib mAttribs[RS_MAX_ATTRIBS];
     void makeGLComponents();
 
 private:

@@ -472,18 +472,25 @@ public class NotificationTest extends Activity {
             progressDialog = new ProgressDialog(NotificationTest.this);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setMessage("Loading...");
-            progressThread = new ProgressThread(handler);
-            progressThread.start();
             return progressDialog;
         default:
             return null;
         }
     }
 
+    &#64;Override
+    protected void onPrepareDialog(int id, Dialog dialog) {
+        switch(id) {
+        case PROGRESS_DIALOG:
+            progressDialog.setProgress(0);
+            progressThread = new ProgressThread(handler);
+            progressThread.start();
+    }
+
     // Define the Handler that receives messages from the thread and update the progress
     final Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            int total = msg.getData().getInt("total");
+            int total = msg.arg1;
             progressDialog.setProgress(total);
             if (total >= 100){
                 dismissDialog(PROGRESS_DIALOG);
@@ -514,9 +521,7 @@ public class NotificationTest extends Activity {
                     Log.e("ERROR", "Thread Interrupted");
                 }
                 Message msg = mHandler.obtainMessage();
-                Bundle b = new Bundle();
-                b.putInt("total", total);
-                msg.setData(b);
+                msg.arg1 = total;
                 mHandler.sendMessage(msg);
                 total++;
             }

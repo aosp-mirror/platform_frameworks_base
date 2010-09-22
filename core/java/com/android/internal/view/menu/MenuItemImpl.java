@@ -74,6 +74,11 @@ public final class MenuItemImpl implements MenuItem {
     private static final int EXCLUSIVE      = 0x00000004;
     private static final int HIDDEN         = 0x00000008;
     private static final int ENABLED        = 0x00000010;
+    private static final int IS_ACTION      = 0x00000020;
+
+    private int mShowAsAction = SHOW_AS_ACTION_NEVER;
+
+    private View mActionView;
 
     /** Used for the icon resource ID if this item does not have an icon */
     static final int NO_ICON = 0;
@@ -105,7 +110,7 @@ public final class MenuItemImpl implements MenuItem {
      * @param title The text to display for the item.
      */
     MenuItemImpl(MenuBuilder menu, int group, int id, int categoryOrder, int ordering,
-            CharSequence title) {
+            CharSequence title, int showAsAction) {
 
         if (sPrependShortcutLabel == null) {
             // This is instantiated from the UI thread, so no chance of sync issues 
@@ -126,6 +131,7 @@ public final class MenuItemImpl implements MenuItem {
         mCategoryOrder = categoryOrder;
         mOrdering = ordering;
         mTitle = title;
+        mShowAsAction = showAsAction;
     }
     
     /**
@@ -580,6 +586,10 @@ public final class MenuItemImpl implements MenuItem {
         return (View) mItemViews[menuType].get();
     }
 
+    void setItemView(int menuType, ItemView view) {
+        mItemViews[menuType] = new WeakReference<ItemView>(view);
+    }
+
     /**
      * Create and initializes a menu item view that implements {@link MenuView.ItemView}.
      * @param menuType The type of menu to get a View for (must be one of
@@ -628,6 +638,43 @@ public final class MenuItemImpl implements MenuItem {
      * @return Whether the given menu type should show icons for menu items.
      */
     public boolean shouldShowIcon(int menuType) {
-        return menuType == MenuBuilder.TYPE_ICON || mMenu.getOptionalIconsVisible();
+        return menuType == MenuBuilder.TYPE_ICON ||
+                menuType == MenuBuilder.TYPE_ACTION_BUTTON ||
+                menuType == MenuBuilder.TYPE_POPUP ||
+                mMenu.getOptionalIconsVisible();
+    }
+    
+    public boolean isActionButton() {
+        return (mFlags & IS_ACTION) == IS_ACTION || requiresActionButton();
+    }
+    
+    public boolean requestsActionButton() {
+        return mShowAsAction == SHOW_AS_ACTION_IF_ROOM;
+    }
+    
+    public boolean requiresActionButton() {
+        return mShowAsAction == SHOW_AS_ACTION_ALWAYS;
+    }
+
+    public void setIsActionButton(boolean isActionButton) {
+        if (isActionButton) {
+            mFlags |= IS_ACTION;
+        } else {
+            mFlags &= ~IS_ACTION;
+        }
+    }
+
+    public void setShowAsAction(int actionEnum) {
+        mShowAsAction = actionEnum;
+        mMenu.onItemActionRequestChanged(this);
+    }
+
+    public MenuItem setActionView(View view) {
+        mActionView = view;
+        return this;
+    }
+
+    public View getActionView() {
+        return mActionView;
     }
 }

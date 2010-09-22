@@ -272,6 +272,11 @@ public class MatrixCursor extends AbstractCursor {
     }
 
     @Override
+    public int getType(int column) {
+        return DatabaseUtils.getTypeOfObject(get(column));
+    }
+
+    @Override
     public boolean isNull(int column) {
         return get(column) == null;
     }

@@ -296,6 +296,7 @@ private:
             void        handlePageFlip();
             bool        lockPageFlip(const LayerVector& currentLayers);
             void        unlockPageFlip(const LayerVector& currentLayers);
+            void        handleWorkList();
             void        handleRepaint();
             void        postFramebuffer();
             void        composeSurfaces(const Region& dirty);
@@ -370,6 +371,7 @@ private:
                 Region                      mInvalidRegion;
                 Region                      mWormholeRegion;
                 bool                        mVisibleRegionsDirty;
+                bool                        mHwWorkListDirty;
                 bool                        mDeferReleaseConsole;
                 bool                        mFreezeDisplay;
                 int32_t                     mFreezeCount;

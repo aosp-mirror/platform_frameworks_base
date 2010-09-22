@@ -65,6 +65,11 @@ void CameraSourceListener::notify(int32_t msgType, int32_t ext1, int32_t ext2) {
 void CameraSourceListener::postData(int32_t msgType, const sp<IMemory> &dataPtr) {
     LOGV("postData(%d, ptr:%p, size:%d)",
          msgType, dataPtr->pointer(), dataPtr->size());
+
+    sp<CameraSource> source = mSource.promote();
+    if (source.get() != NULL) {
+        source->dataCallback(msgType, dataPtr);
+    }
 }
 
 void CameraSourceListener::postDataTimestamp(
@@ -77,6 +82,10 @@ void CameraSourceListener::postDataTimestamp(
 }
 
 static int32_t getColorFormat(const char* colorFormat) {
+    if (!strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_YUV420P)) {
+       return OMX_COLOR_FormatYUV420Planar;
+    }
+
     if (!strcmp(colorFormat, CameraParameters::PIXEL_FORMAT_YUV422SP)) {
        return OMX_COLOR_FormatYUV422SemiPlanar;
     }
@@ -121,15 +130,15 @@ CameraSource *CameraSource::CreateFromCamera(const sp<Camera> &camera) {
 
 CameraSource::CameraSource(const sp<Camera> &camera)
     : mCamera(camera),
-      mFirstFrameTimeUs(0),
-      mLastFrameTimestampUs(0),
       mNumFramesReceived(0),
+      mLastFrameTimestampUs(0),
+      mStarted(false),
+      mFirstFrameTimeUs(0),
       mNumFramesEncoded(0),
       mNumFramesDropped(0),
       mNumGlitches(0),
       mGlitchDurationThresholdUs(200000),
-      mCollectStats(false),
-      mStarted(false) {
+      mCollectStats(false) {
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     String8 s = mCamera->getParameters();
@@ -164,13 +173,16 @@ CameraSource::CameraSource(const sp<Camera> &camera)
     mMeta->setInt32(kKeyHeight, height);
     mMeta->setInt32(kKeyStride, stride);
     mMeta->setInt32(kKeySliceHeight, sliceHeight);
-
 }
 
 CameraSource::~CameraSource() {
     if (mStarted) {
         stop();
     }
+}
+
+void CameraSource::startCameraRecording() {
+    CHECK_EQ(OK, mCamera->startRecording());
 }
 
 status_t CameraSource::start(MetaData *meta) {
@@ -190,11 +202,16 @@ status_t CameraSource::start(MetaData *meta) {
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     mCamera->setListener(new CameraSourceListener(this));
-    CHECK_EQ(OK, mCamera->startRecording());
+    startCameraRecording();
     IPCThreadState::self()->restoreCallingIdentity(token);
 
     mStarted = true;
     return OK;
+}
+
+void CameraSource::stopCameraRecording() {
+    mCamera->setListener(NULL);
+    mCamera->stopRecording();
 }
 
 status_t CameraSource::stop() {
@@ -204,8 +221,7 @@ status_t CameraSource::stop() {
     mFrameAvailableCondition.signal();
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    mCamera->setListener(NULL);
-    mCamera->stopRecording();
+    stopCameraRecording();
     releaseQueuedFrames();
     while (!mFramesBeingEncoded.empty()) {
         LOGI("Waiting for outstanding frames being encoded: %d",
@@ -225,11 +241,15 @@ status_t CameraSource::stop() {
     return OK;
 }
 
+void CameraSource::releaseRecordingFrame(const sp<IMemory>& frame) {
+    mCamera->releaseRecordingFrame(frame);
+}
+
 void CameraSource::releaseQueuedFrames() {
     List<sp<IMemory> >::iterator it;
     while (!mFramesReceived.empty()) {
         it = mFramesReceived.begin();
-        mCamera->releaseRecordingFrame(*it);
+        releaseRecordingFrame(*it);
         mFramesReceived.erase(it);
         ++mNumFramesDropped;
     }
@@ -241,7 +261,7 @@ sp<MetaData> CameraSource::getFormat() {
 
 void CameraSource::releaseOneRecordingFrame(const sp<IMemory>& frame) {
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    mCamera->releaseRecordingFrame(frame);
+    releaseRecordingFrame(frame);
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
@@ -251,7 +271,6 @@ void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
     for (List<sp<IMemory> >::iterator it = mFramesBeingEncoded.begin();
          it != mFramesBeingEncoded.end(); ++it) {
         if ((*it)->pointer() ==  buffer->data()) {
-
             releaseOneRecordingFrame((*it));
             mFramesBeingEncoded.erase(it);
             ++mNumFramesEncoded;
@@ -341,6 +360,13 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
             LOGW("Long delay detected in video recording");
         }
         ++mNumGlitches;
+    }
+
+    // May need to skip frame or modify timestamp. Currently implemented
+    // by the subclass CameraSourceTimeLapse.
+    if(skipCurrentFrame(timestampUs)) {
+        releaseOneRecordingFrame(data);
+        return;
     }
 
     mLastFrameTimestampUs = timestampUs;

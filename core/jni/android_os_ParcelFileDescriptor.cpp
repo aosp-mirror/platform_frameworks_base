@@ -66,6 +66,26 @@ static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromSocket(JNIEn
     return fileDescriptorClone;
 }
 
+static int android_os_ParcelFileDescriptor_createPipeNative(JNIEnv* env,
+    jobject clazz, jobjectArray outFds)
+{
+    int fds[2];
+    if (pipe(fds) < 0) {
+        return -errno;
+    }
+
+    for (int i=0; i<2; i++) {
+        jobject fdObj = env->NewObject(gFileDescriptorOffsets.mClass,
+                gFileDescriptorOffsets.mConstructor);
+        if (fdObj != NULL) {
+            env->SetIntField(fdObj, gFileDescriptorOffsets.mDescriptor, fds[i]);
+        }
+        env->SetObjectArrayElement(outFds, i, fdObj);
+    }
+
+    return 0;
+}
+
 static jint getFd(JNIEnv* env, jobject clazz)
 {
     jobject descriptor = env->GetObjectField(clazz, gParcelFileDescriptorOffsets.mFileDescriptor);
@@ -109,6 +129,8 @@ static jlong android_os_ParcelFileDescriptor_seekTo(JNIEnv* env,
 static const JNINativeMethod gParcelFileDescriptorMethods[] = {
     {"getFileDescriptorFromSocket", "(Ljava/net/Socket;)Ljava/io/FileDescriptor;",
         (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromSocket},
+    {"createPipeNative", "([Ljava/io/FileDescriptor;)I",
+        (void*)android_os_ParcelFileDescriptor_createPipeNative},
     {"getStatSize", "()J",
         (void*)android_os_ParcelFileDescriptor_getStatSize},
     {"seekTo", "(J)J",

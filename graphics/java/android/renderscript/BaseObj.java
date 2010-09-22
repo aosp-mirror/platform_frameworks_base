@@ -24,14 +24,17 @@ import android.util.Log;
  **/
 class BaseObj {
 
-    BaseObj(RenderScript rs) {
+    BaseObj(int id, RenderScript rs) {
         rs.validate();
         mRS = rs;
-        mID = 0;
+        mID = id;
         mDestroyed = false;
     }
 
     public int getID() {
+        if (mDestroyed) {
+            throw new IllegalStateException("using a destroyed object.");
+        }
         return mID;
     }
 
@@ -62,7 +65,7 @@ class BaseObj {
     {
         if (!mDestroyed) {
             if(mID != 0 && mRS.isAlive()) {
-                mRS.nObjDestroyOOB(mID);
+                mRS.nObjDestroy(mID);
             }
             mRS = null;
             mID = 0;
@@ -79,6 +82,11 @@ class BaseObj {
         }
         mDestroyed = true;
         mRS.nObjDestroy(mID);
+    }
+
+    // If an object came from an a3d file, java fields need to be
+    // created with objects from the native layer
+    void updateFromNative() {
     }
 
 }

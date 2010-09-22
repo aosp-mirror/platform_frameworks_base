@@ -58,18 +58,19 @@
             android:ellipsize="marquee"
             android:gravity="right|bottom"
             />
+
         <com.android.internal.widget.DigitalClock android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_marginTop="8dip"
+            android:layout_marginBottom="8dip"
             >
 
             <TextView android:id="@+id/timeDisplay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="bottom"
                 android:singleLine="true"
                 android:ellipsize="none"
                 android:textSize="72sp"
@@ -84,8 +85,9 @@
 
             <TextView android:id="@+id/am_pm"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="bottom"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/timeDisplay"
+                android:layout_alignBaseline="@id/timeDisplay"
                 android:singleLine="true"
                 android:ellipsize="none"
                 android:textSize="22sp"

@@ -146,7 +146,7 @@ static bool ExceptionCheck(void* env)
 }
 
 static void
-android_media_MediaScanner_processDirectory(JNIEnv *env, jobject thiz, jstring path, jstring extensions, jobject client)
+android_media_MediaScanner_processDirectory(JNIEnv *env, jobject thiz, jstring path, jobject client)
 {
     MediaScanner *mp = (MediaScanner *)env->GetIntField(thiz, fields.context);
 
@@ -154,27 +154,16 @@ android_media_MediaScanner_processDirectory(JNIEnv *env, jobject thiz, jstring p
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
-    if (extensions == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
-    
+
     const char *pathStr = env->GetStringUTFChars(path, NULL);
     if (pathStr == NULL) {  // Out of memory
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
     }
-    const char *extensionsStr = env->GetStringUTFChars(extensions, NULL);
-    if (extensionsStr == NULL) {  // Out of memory
-        env->ReleaseStringUTFChars(path, pathStr);
-        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
-        return;
-    }
 
     MyMediaScannerClient myClient(env, client);
-    mp->processDirectory(pathStr, extensionsStr, myClient, ExceptionCheck, env);
+    mp->processDirectory(pathStr, myClient, ExceptionCheck, env);
     env->ReleaseStringUTFChars(path, pathStr);
-    env->ReleaseStringUTFChars(extensions, extensionsStr);
 }
 
 static void
@@ -309,9 +298,9 @@ android_media_MediaScanner_native_finalize(JNIEnv *env, jobject thiz)
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"processDirectory",  "(Ljava/lang/String;Ljava/lang/String;Landroid/media/MediaScannerClient;)V",    
+    {"processDirectory",  "(Ljava/lang/String;Landroid/media/MediaScannerClient;)V",
                                                         (void *)android_media_MediaScanner_processDirectory},
-    {"processFile",       "(Ljava/lang/String;Ljava/lang/String;Landroid/media/MediaScannerClient;)V",    
+    {"processFile",       "(Ljava/lang/String;Ljava/lang/String;Landroid/media/MediaScannerClient;)V",
                                                         (void *)android_media_MediaScanner_processFile},
     {"setLocale",         "(Ljava/lang/String;)V",      (void *)android_media_MediaScanner_setLocale},
     {"extractAlbumArt",   "(Ljava/io/FileDescriptor;)[B",     (void *)android_media_MediaScanner_extractAlbumArt},

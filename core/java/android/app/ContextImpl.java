@@ -56,11 +56,14 @@ import android.content.pm.ServiceInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
+import android.location.CountryDetector;
+import android.location.ICountryDetector;
 import android.location.ILocationManager;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -89,7 +92,7 @@ import android.os.Vibrator;
 import android.os.FileUtils.FileStatus;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
-import android.text.ClipboardManager;
+import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -169,6 +172,7 @@ class ContextImpl extends Context {
     private static ThrottleManager sThrottleManager;
     private static WifiManager sWifiManager;
     private static LocationManager sLocationManager;
+    private static CountryDetector sCountryDetector;
     private static final HashMap<String, SharedPreferencesImpl> sSharedPrefs =
             new HashMap<String, SharedPreferencesImpl>();
 
@@ -210,22 +214,7 @@ class ContextImpl extends Context {
     private File mExternalFilesDir;
     private File mExternalCacheDir;
 
-    private static long sInstanceCount = 0;
-
     private static final String[] EMPTY_FILE_LIST = {};
-
-    // For debug only
-    /*
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        --sInstanceCount;
-    }
-    */
-
-    public static long getInstanceCount() {
-        return sInstanceCount;
-    }
 
     @Override
     public AssetManager getAssets() {
@@ -543,6 +532,15 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory,
+            DatabaseErrorHandler errorHandler) {
+        File f = validateFilePath(name, true);
+        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(f.getPath(), factory, errorHandler);
+        setFilePermissionsFromMode(f.getPath(), mode, 0);
+        return db;
+    }
+
+    @Override
     public boolean deleteDatabase(String name) {
         try {
             File f = validateFilePath(name, false);
@@ -620,7 +618,8 @@ class ContextImpl extends Context {
                     + " Is this really what you want?");
         }
         mMainThread.getInstrumentation().execStartActivity(
-            getOuterContext(), mMainThread.getApplicationThread(), null, null, intent, -1);
+            getOuterContext(), mMainThread.getApplicationThread(), null,
+            (Activity)null, intent, -1);
     }
 
     @Override
@@ -944,6 +943,8 @@ class ContextImpl extends Context {
             return AccessibilityManager.getInstance(this);
         } else if (LOCATION_SERVICE.equals(name)) {
             return getLocationManager();
+        } else if (COUNTRY_DETECTOR.equals(name)) {
+            return getCountryDetector();
         } else if (SEARCH_SERVICE.equals(name)) {
             return getSearchManager();
         } else if (SENSOR_SERVICE.equals(name)) {
@@ -1108,6 +1109,17 @@ class ContextImpl extends Context {
             }
         }
         return sLocationManager;
+    }
+
+    private CountryDetector getCountryDetector() {
+        synchronized (sSync) {
+            if (sCountryDetector == null) {
+                IBinder b = ServiceManager.getService(COUNTRY_DETECTOR);
+                ICountryDetector service = ICountryDetector.Stub.asInterface(b);
+                sCountryDetector = new CountryDetector(service);
+            }
+        }
+        return sCountryDetector;
     }
 
     private SearchManager getSearchManager() {
@@ -1483,8 +1495,6 @@ class ContextImpl extends Context {
     }
 
     ContextImpl() {
-        // For debug only
-        //++sInstanceCount;
         mOuterContext = this;
     }
 
@@ -1495,7 +1505,6 @@ class ContextImpl extends Context {
      * @param context Existing application context.
      */
     public ContextImpl(ContextImpl context) {
-        ++sInstanceCount;
         mPackageInfo = context.mPackageInfo;
         mResources = context.mResources;
         mMainThread = context.mMainThread;
@@ -2800,6 +2809,13 @@ class ContextImpl extends Context {
                 return v != null ? v : defValue;
             }
         }
+        
+        public Set<String> getStringSet(String key, Set<String> defValues) {
+            synchronized (this) {
+                Set<String> v = (Set<String>) mMap.get(key);
+                return v != null ? v : defValues;
+            }
+        }
 
         public int getInt(String key, int defValue) {
             synchronized (this) {
@@ -2858,6 +2874,12 @@ class ContextImpl extends Context {
             public Editor putString(String key, String value) {
                 synchronized (this) {
                     mModified.put(key, value);
+                    return this;
+                }
+            }
+            public Editor putStringSet(String key, Set<String> values) {
+                synchronized (this) {
+                    mModified.put(key, values);
                     return this;
                 }
             }

@@ -170,6 +170,7 @@ public:
     status_t    setAudioEncoder(int ae);
     status_t    setOutputFile(const char* path);
     status_t    setOutputFile(int fd, int64_t offset, int64_t length);
+    status_t    setOutputFileAuxiliary(int fd);
     status_t    setVideoSize(int width, int height);
     status_t    setVideoFrameRate(int frames_per_second);
     status_t    setParameters(const String8& params);
@@ -196,6 +197,7 @@ private:
     bool                        mIsAudioEncoderSet;
     bool                        mIsVideoEncoderSet;
     bool                        mIsOutputFileSet;
+    bool                        mIsAuxiliaryOutputFileSet;
     Mutex                       mLock;
     Mutex                       mNotifyLock;
 };

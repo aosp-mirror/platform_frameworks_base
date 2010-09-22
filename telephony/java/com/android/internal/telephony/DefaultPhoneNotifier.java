@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import android.net.LinkCapabilities;
+import android.net.LinkProperties;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -92,26 +94,45 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
         }
     }
 
-    public void notifyDataConnection(Phone sender, String reason) {
+    public void notifyDataConnection(Phone sender, String reason, String apnType) {
+        doNotifyDataConnection(sender, reason, apnType, sender.getDataConnectionState(apnType));
+    }
+
+    public void notifyDataConnection(Phone sender, String reason, String apnType,
+            Phone.DataState state) {
+        doNotifyDataConnection(sender, reason, apnType, state);
+    }
+
+    private void doNotifyDataConnection(Phone sender, String reason, String apnType,
+            Phone.DataState state) {
+        // TODO
+        // use apnType as the key to which connection we're talking about.
+        // pass apnType back up to fetch particular for this one.
         TelephonyManager telephony = TelephonyManager.getDefault();
+        LinkProperties linkProperties = null;
+        LinkCapabilities linkCapabilities = null;
+        if (state == Phone.DataState.CONNECTED) {
+            linkProperties = sender.getLinkProperties(apnType);
+            linkCapabilities = sender.getLinkCapabilities(apnType);
+        }
         try {
             mRegistry.notifyDataConnection(
-                    convertDataState(sender.getDataConnectionState()),
+                    convertDataState(state),
                     sender.isDataConnectivityPossible(), reason,
                     sender.getActiveApn(),
-                    sender.getActiveApnTypes(),
-                    sender.getInterfaceName(null),
+                    apnType,
+                    linkProperties,
+                    linkCapabilities,
                     ((telephony!=null) ? telephony.getNetworkType() :
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN),
-                    sender.getGateway(null));
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN));
         } catch (RemoteException ex) {
             // system process is dead
         }
     }
 
-    public void notifyDataConnectionFailed(Phone sender, String reason) {
+    public void notifyDataConnectionFailed(Phone sender, String reason, String apnType) {
         try {
-            mRegistry.notifyDataConnectionFailed(reason);
+            mRegistry.notifyDataConnectionFailed(reason, apnType);
         } catch (RemoteException ex) {
             // system process is dead
         }

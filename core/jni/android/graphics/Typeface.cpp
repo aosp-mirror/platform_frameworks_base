@@ -130,7 +130,13 @@ static SkTypeface* Typeface_createFromAsset(JNIEnv* env, jobject,
         return NULL;
     }
     
-    return SkTypeface::CreateFromStream(new AssetStream(asset, true));
+    SkStream* stream = new AssetStream(asset, true);
+    SkTypeface* face = SkTypeface::CreateFromStream(stream);
+    // SkTypeFace::CreateFromStream calls ref() on the stream, so we
+    // need to unref it here or it won't be freed later on
+    stream->unref();
+
+    return face;
 }
 
 static SkTypeface* Typeface_createFromFile(JNIEnv* env, jobject, jstring jpath) {

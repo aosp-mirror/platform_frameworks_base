@@ -16,6 +16,11 @@
 
 package android.telephony;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -617,7 +622,7 @@ public class PhoneNumberUtils
             }
         } else {
             // In the US, 1-650-555-1234 must be equal to 650-555-1234,
-            // while 090-1234-1234 must not be equalt to 90-1234-1234 in Japan.
+            // while 090-1234-1234 must not be equal to 90-1234-1234 in Japan.
             // This request exists just in US (with 1 trunk (NDD) prefix).
             // In addition, "011 11 7005554141" must not equal to "+17005554141",
             // while "011 1 7005554141" must equal to "+17005554141"
@@ -779,10 +784,10 @@ public class PhoneNumberUtils
         if (prependPlus) {
             // This is an "international number" and should have
             // a plus prepended to the dialing number. But there
-            // can also be Gsm MMI codes as defined in TS 22.030 6.5.2
+            // can also be GSM MMI codes as defined in TS 22.030 6.5.2
             // so we need to handle those also.
             //
-            // http://web.telia.com/~u47904776/gsmkode.htm is a
+            // http://web.telia.com/~u47904776/gsmkode.htm
             // has a nice list of some of these GSM codes.
             //
             // Examples are:
@@ -870,10 +875,10 @@ public class PhoneNumberUtils
 
             // FIXME(mkf) TS 23.040 9.1.2.3 says
             // "if a mobile receives 1111 in a position prior to
-            // the last semi-octet then processing shall commense with
+            // the last semi-octet then processing shall commence with
             // the next semi-octet and the intervening
             // semi-octet shall be ignored"
-            // How does this jive with 24,008 10.5.4.7
+            // How does this jive with 24.008 10.5.4.7
 
             b = (byte)((bytes[i] >> 4) & 0xf);
 
@@ -1004,7 +1009,7 @@ public class PhoneNumberUtils
      * Convert a dialing number to BCD byte array
      *
      * @param number dialing number string
-     *        if the dialing number starts with '+', set to internationl TOA
+     *        if the dialing number starts with '+', set to international TOA
      * @return BCD byte array
      */
     public static byte[]
@@ -1108,10 +1113,10 @@ public class PhoneNumberUtils
      *
      * @param source the phone number to format
      * @param defaultFormattingType The default formatting rules to apply if the number does
-     * not begin with +<country_code>
+     * not begin with +[country_code]
      * @return The phone number formatted with the given formatting type.
      *
-     * @hide TODO:Shuold be unhidden.
+     * @hide TODO: Should be unhidden.
      */
     public static String formatNumber(String source, int defaultFormattingType) {
         SpannableStringBuilder text = new SpannableStringBuilder(source);
@@ -1138,7 +1143,7 @@ public class PhoneNumberUtils
      *
      * @param text The number to be formatted, will be modified with the formatting
      * @param defaultFormattingType The default formatting rules to apply if the number does
-     * not begin with +<country_code>
+     * not begin with +[country_code]
      */
     public static void formatNumber(Editable text, int defaultFormattingType) {
         int formatType = defaultFormattingType;
@@ -1317,6 +1322,132 @@ public class PhoneNumberUtils
                 p++;
            }
         }
+    }
+
+    /**
+     * Format the given phoneNumber to the E.164 representation.
+     * <p>
+     * The given phone number must have an area code and could have a country
+     * code.
+     * <p>
+     * The defaultCountryIso is used to validate the given number and generate
+     * the E.164 phone number if the given number doesn't have a country code.
+     *
+     * @param phoneNumber
+     *            the phone number to format
+     * @param defaultCountryIso
+     *            the ISO 3166-1 two letters country code
+     * @return the E.164 representation, or null if the given phone number is
+     *         not valid.
+     *
+     * @hide
+     */
+    public static String formatNumberToE164(String phoneNumber, String defaultCountryIso) {
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+        String result = null;
+        try {
+            PhoneNumber pn = util.parse(phoneNumber, defaultCountryIso);
+            if (util.isValidNumber(pn)) {
+                result = util.format(pn, PhoneNumberFormat.E164);
+            }
+        } catch (NumberParseException e) {
+        }
+        return result;
+    }
+
+    /**
+     * Format a phone number.
+     * <p>
+     * If the given number doesn't have the country code, the phone will be
+     * formatted to the default country's convention.
+     *
+     * @param phoneNumber
+     *            the number to be formatted.
+     * @param defaultCountryIso
+     *            the ISO 3166-1 two letters country code whose convention will
+     *            be used if the given number doesn't have the country code.
+     * @return the formatted number, or null if the given number is not valid.
+     *
+     * @hide
+     */
+    public static String formatNumber(String phoneNumber, String defaultCountryIso) {
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+        String result = null;
+        try {
+            PhoneNumber pn = util.parseAndKeepRawInput(phoneNumber, defaultCountryIso);
+            result = util.formatInOriginalFormat(pn, defaultCountryIso);
+        } catch (NumberParseException e) {
+        }
+        return result;
+    }
+
+    /**
+     * Format the phone number only if the given number hasn't been formatted.
+     * <p>
+     * The number which has only dailable character is treated as not being
+     * formatted.
+     *
+     * @param phoneNumber
+     *            the number to be formatted.
+     * @param phoneNumberE164
+     *            the E164 format number whose country code is used if the given
+     *            phoneNumber doesn't have the country code.
+     * @param defaultCountryIso
+     *            the ISO 3166-1 two letters country code whose convention will
+     *            be used if the phoneNumberE164 is null or invalid.
+     * @return the formatted number if the given number has been formatted,
+     *            otherwise, return the given number.
+     *
+     * @hide
+     */
+    public static String formatNumber(
+            String phoneNumber, String phoneNumberE164, String defaultCountryIso) {
+        int len = phoneNumber.length();
+        for (int i = 0; i < len; i++) {
+            if (!isDialable(phoneNumber.charAt(i))) {
+                return phoneNumber;
+            }
+        }
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+        // Get the country code from phoneNumberE164
+        if (phoneNumberE164 != null && phoneNumberE164.length() >= 2
+                && phoneNumberE164.charAt(0) == '+') {
+            try {
+                PhoneNumber pn = util.parse(phoneNumberE164, defaultCountryIso);
+                String regionCode = util.getRegionCodeForNumber(pn);
+                if (!TextUtils.isEmpty(regionCode)) {
+                    defaultCountryIso = regionCode;
+                }
+            } catch (NumberParseException e) {
+            }
+        }
+        String result = formatNumber(phoneNumber, defaultCountryIso);
+        return result != null ? result : phoneNumber;
+    }
+
+    /**
+     * Normalize a phone number by removing the characters other than digits. If
+     * the given number has keypad letters, the letters will be converted to
+     * digits first.
+     *
+     * @param phoneNumber
+     *            the number to be normalized.
+     * @return the normalized number.
+     *
+     * @hide
+     */
+    public static String normalizeNumber(String phoneNumber) {
+        StringBuilder sb = new StringBuilder();
+        int len = phoneNumber.length();
+        for (int i = 0; i < len; i++) {
+            char c = phoneNumber.charAt(i);
+            if ((i == 0 && c == '+') || PhoneNumberUtils.isISODigit(c)) {
+                sb.append(c);
+            } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                return normalizeNumber(PhoneNumberUtils.convertKeypadLettersToDigits(phoneNumber));
+            }
+        }
+        return sb.toString();
     }
 
     // Three and four digit phone numbers for either special services,
@@ -1546,7 +1677,7 @@ public class PhoneNumberUtils
      * @hide
      */
     public static String
-    cdmaCheckAndProcessPlusCodeByNumberFormat(String dialStr,int currFormat,int defaultFormt) {
+    cdmaCheckAndProcessPlusCodeByNumberFormat(String dialStr,int currFormat,int defaultFormat) {
         String retStr = dialStr;
 
         // Checks if the plus sign character is in the passed-in dial string
@@ -1554,7 +1685,7 @@ public class PhoneNumberUtils
             dialStr.lastIndexOf(PLUS_SIGN_STRING) != -1) {
             // Format the string based on the rules for the country the number is from,
             // and the current country the phone is camped on.
-            if ((currFormat == defaultFormt) && (currFormat == FORMAT_NANP)) {
+            if ((currFormat == defaultFormat) && (currFormat == FORMAT_NANP)) {
                 // Handle case where default and current telephone numbering plans are NANP.
                 String postDialStr = null;
                 String tempDialStr = dialStr;
@@ -1741,7 +1872,7 @@ public class PhoneNumberUtils
         return -1;
     }
 
-    // This function appends the non-diablable P/W character to the original
+    // This function appends the non-dialable P/W character to the original
     // dial string based on the dialable index passed in
     private static String
     appendPwCharBackToOrigDialStr(int dialableIndex,String origStr, String dialStr) {
@@ -1761,7 +1892,7 @@ public class PhoneNumberUtils
         return retStr;
     }
 
-    //===== Begining of utility methods used in compareLoosely() =====
+    //===== Beginning of utility methods used in compareLoosely() =====
 
     /**
      * Phone numbers are stored in "lookup" form in the database
@@ -1883,12 +2014,12 @@ public class PhoneNumberUtils
 
     //===== End of utility methods used only in compareLoosely() =====
 
-    //===== Beggining of utility methods used only in compareStrictly() ====
+    //===== Beginning of utility methods used only in compareStrictly() ====
 
     /*
      * If true, the number is country calling code.
      */
-    private static final boolean COUNTLY_CALLING_CALL[] = {
+    private static final boolean COUNTRY_CALLING_CALL[] = {
         true, true, false, false, false, false, false, true, false, false,
         false, false, false, false, false, false, false, false, false, false,
         true, false, false, false, false, false, false, true, true, false,
@@ -1900,18 +2031,18 @@ public class PhoneNumberUtils
         false, true, true, true, true, false, true, false, false, true,
         true, true, true, true, true, true, false, false, true, false,
     };
-    private static final int CCC_LENGTH = COUNTLY_CALLING_CALL.length;
+    private static final int CCC_LENGTH = COUNTRY_CALLING_CALL.length;
 
     /**
      * @return true when input is valid Country Calling Code.
      */
     private static boolean isCountryCallingCode(int countryCallingCodeCandidate) {
         return countryCallingCodeCandidate > 0 && countryCallingCodeCandidate < CCC_LENGTH &&
-                COUNTLY_CALLING_CALL[countryCallingCodeCandidate];
+                COUNTRY_CALLING_CALL[countryCallingCodeCandidate];
     }
 
     /**
-     * Returns interger corresponding to the input if input "ch" is
+     * Returns integer corresponding to the input if input "ch" is
      * ISO-LATIN characters 0-9.
      * Returns -1 otherwise
      */
@@ -2046,7 +2177,7 @@ public class PhoneNumberUtils
 
     /**
      * Return true if the prefix of "str" is "ignorable". Here, "ignorable" means
-     * that "str" has only one digit and separater characters. The one digit is
+     * that "str" has only one digit and separator characters. The one digit is
      * assumed to be trunk prefix.
      */
     private static boolean checkPrefixIsIgnorable(final String str,

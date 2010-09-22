@@ -264,6 +264,24 @@ public class ConnectivityManager
         }
     }
 
+    /** @hide */
+    public LinkProperties getActiveLinkProperties() {
+        try {
+            return mService.getActiveLinkProperties();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /** @hide */
+    public LinkProperties getLinkProperties(int networkType) {
+        try {
+            return mService.getLinkProperties(networkType);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /** {@hide} */
     public boolean setRadios(boolean turnOn) {
         try {
@@ -367,14 +385,14 @@ public class ConnectivityManager
      * <p>
      * All applications that have background services that use the network
      * should listen to {@link #ACTION_BACKGROUND_DATA_SETTING_CHANGED}.
-     * 
+     *
      * @return Whether background data usage is allowed.
      */
     public boolean getBackgroundDataSetting() {
         try {
             return mService.getBackgroundDataSetting();
         } catch (RemoteException e) {
-            // Err on the side of safety 
+            // Err on the side of safety
             return false;
         }
     }
@@ -532,6 +550,17 @@ public class ConnectivityManager
         }
     }
 
+    /**
+     * {@hide}
+     */
+    public String[] getTetherableBluetoothRegexs() {
+        try {
+            return mService.getTetherableBluetoothRegexs();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
     /** {@hide} */
     public static final int TETHER_ERROR_NO_ERROR           = 0;
     /** {@hide} */
@@ -566,6 +595,21 @@ public class ConnectivityManager
             return mService.getLastTetherError(iface);
         } catch (RemoteException e) {
             return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
+    }
+
+    /**
+     * Ensure the device stays awake until we connect with the next network
+     * @param forWhome The name of the network going down for logging purposes
+     * @return {@code true} on success, {@code false} on failure
+     * {@hide}
+     */
+    public boolean requestNetworkTransitionWakelock(String forWhom) {
+        try {
+            mService.requestNetworkTransitionWakelock(forWhom);
+            return true;
+        } catch (RemoteException e) {
+            return false;
         }
     }
 

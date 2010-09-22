@@ -35,7 +35,6 @@ public:
     ProgramVertex(Context *, bool texMat);
     virtual ~ProgramVertex();
 
-    virtual void setupGL(const Context *rsc, ProgramVertexState *state);
     virtual void setupGL2(const Context *rsc, ProgramVertexState *state, ShaderCache *sc);
 
 
@@ -43,6 +42,7 @@ public:
     void addLight(const Light *);
 
     void setProjectionMatrix(const rsc_Matrix *) const;
+    void getProjectionMatrix(rsc_Matrix *) const;
     void setModelviewMatrix(const rsc_Matrix *) const;
     void setTextureMatrix(const rsc_Matrix *) const;
 
@@ -52,6 +52,9 @@ public:
     virtual void loadShader(Context *);
     virtual void init(Context *);
 
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_VERTEX; }
+    static ProgramVertex *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     uint32_t mLightCount;
@@ -59,9 +62,6 @@ protected:
 
     // Hacks to create a program for now
     bool mTextureMatrixEnable;
-
-private:
-    void initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix);
 };
 
 
@@ -71,18 +71,13 @@ public:
     ProgramVertexState();
     ~ProgramVertexState();
 
-    void init(Context *rsc, int32_t w, int32_t h);
+    void init(Context *rsc);
     void deinit(Context *rsc);
-    void updateSize(Context *rsc, int32_t w, int32_t h);
+    void updateSize(Context *rsc);
 
     ObjectBaseRef<ProgramVertex> mDefault;
     ObjectBaseRef<ProgramVertex> mLast;
     ObjectBaseRef<Allocation> mDefaultAlloc;
-
-    ObjectBaseRef<Type> mAllocType;
-
-
-    float color[4];
 };
 
 

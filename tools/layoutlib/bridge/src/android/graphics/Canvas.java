@@ -69,11 +69,6 @@ public class Canvas extends _Original_Canvas {
         throw new UnsupportedOperationException("Can't create Canvas(int)");
     }
 
-    public Canvas(javax.microedition.khronos.opengles.GL gl) {
-        mLogger = null;
-        throw new UnsupportedOperationException("Can't create Canvas(javax.microedition.khronos.opengles.GL)");
-    }
-
     // custom constructors for our use.
     public Canvas(int width, int height, ILayoutLog logger) {
         mLogger = logger;
@@ -1174,15 +1169,6 @@ public class Canvas extends _Original_Canvas {
     }
 
     /* (non-Javadoc)
-     * @see android.graphics.Canvas#getGL()
-     */
-    @Override
-    public GL getGL() {
-        // TODO Auto-generated method stub
-        return super.getGL();
-    }
-
-    /* (non-Javadoc)
      * @see android.graphics.Canvas#getMatrix()
      */
     @Override
@@ -1254,15 +1240,6 @@ public class Canvas extends _Original_Canvas {
     public void setDrawFilter(DrawFilter filter) {
         // TODO Auto-generated method stub
         super.setDrawFilter(filter);
-    }
-
-    /* (non-Javadoc)
-     * @see android.graphics.Canvas#setViewport(int, int)
-     */
-    @Override
-    public void setViewport(int width, int height) {
-        // TODO Auto-generated method stub
-        super.setViewport(width, height);
     }
 
     /* (non-Javadoc)

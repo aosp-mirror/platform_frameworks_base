@@ -2527,7 +2527,8 @@ class PowerManagerService extends IPowerManager.Stub
             }
             mKeylightDelay = LONG_KEYLIGHT_DELAY;
             if (totalDelay < 0) {
-                mScreenOffDelay = Integer.MAX_VALUE;
+                // negative number means stay on as long as possible.
+                mScreenOffDelay = mMaximumScreenOffTimeout;
             } else if (mKeylightDelay < totalDelay) {
                 // subtract the time that the keylight delay. This will give us the
                 // remainder of the time that we need to sleep to get the accurate

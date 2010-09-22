@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.net.LocalServerSocket;
 import android.os.Debug;
+import android.os.FileUtils;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Config;
@@ -506,6 +507,9 @@ public class ZygoteInit {
 
         closeServerSocket();
 
+        // set umask to 0077 so new files and directories will default to owner-only permissions.
+        FileUtils.setUMask(FileUtils.S_IRWXG | FileUtils.S_IRWXO);
+
         /*
          * Pass the remaining arguments to SystemServer.
          * "--nice-name=system_server com.android.server.SystemServer"
@@ -523,7 +527,7 @@ public class ZygoteInit {
         String args[] = {
             "--setuid=1000",
             "--setgid=1000",
-            "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,3001,3002,3003",
+            "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,3001,3002,3003",
             "--capabilities=130104352,130104352",
             "--runtime-init",
             "--nice-name=system_server",

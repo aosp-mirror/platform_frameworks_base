@@ -101,9 +101,9 @@ CameraHardwareStub::~CameraHardwareStub()
     mFakeCamera = 0; // paranoia
 }
 
-sp<IMemoryHeap> CameraHardwareStub::getPreviewHeap() const
+status_t CameraHardwareStub::setPreviewWindow(const sp<ANativeWindow>& buf)
 {
-    return mPreviewHeap;
+    return NO_ERROR;
 }
 
 sp<IMemoryHeap> CameraHardwareStub::getRawHeap() const

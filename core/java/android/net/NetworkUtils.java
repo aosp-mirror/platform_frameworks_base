@@ -52,7 +52,11 @@ public class NetworkUtils {
           int prefixLength, String gw);
 
     /** Return the gateway address for the default route for the named interface. */
-    public native static int getDefaultRoute(String interfaceName);
+    public static InetAddress getDefaultRoute(String interfaceName) {
+        int addr = getDefaultRouteNative(interfaceName);
+        return intToInetAddress(addr);
+    }
+    private native static int getDefaultRouteNative(String interfaceName);
 
     /** Remove host routes that uses the named interface. */
     public native static int removeHostRoutes(String interfaceName);
@@ -193,20 +197,5 @@ public class NetworkUtils {
             return false;
         }
         return addRoute(interfaceName, dstStr, prefixLength, gwStr) == 0;
-    }
-
-    public static int v4StringToInt(String str) {
-        int result = 0;
-        String[] array = str.split("\\.");
-        if (array.length != 4) return 0;
-        try {
-            result = Integer.parseInt(array[3]);
-            result = (result << 8) + Integer.parseInt(array[2]);
-            result = (result << 8) + Integer.parseInt(array[1]);
-            result = (result << 8) + Integer.parseInt(array[0]);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-        return result;
     }
 }

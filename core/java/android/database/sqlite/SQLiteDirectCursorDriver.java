@@ -39,18 +39,16 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
 
     public Cursor query(CursorFactory factory, String[] selectionArgs) {
         // Compile the query
-        SQLiteQuery query = new SQLiteQuery(mDatabase, mSql, 0, selectionArgs);
+        SQLiteQuery query = null;
 
         try {
-            // Arg binding
-            int numArgs = selectionArgs == null ? 0 : selectionArgs.length;
-            for (int i = 0; i < numArgs; i++) {
-                query.bindString(i + 1, selectionArgs[i]);
-            }
+            mDatabase.lock();
+            mDatabase.closePendingStatements();
+            query = new SQLiteQuery(mDatabase, mSql, 0, selectionArgs);
 
             // Create the cursor
             if (factory == null) {
-                mCursor = new SQLiteCursor(mDatabase, this, mEditTable, query);
+                mCursor = new SQLiteCursor(this, mEditTable, query);
             } else {
                 mCursor = factory.newCursor(mDatabase, this, mEditTable, query);
             }
@@ -61,6 +59,7 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
         } finally {
             // Make sure this object is cleaned up if something happens
             if (query != null) query.close();
+            mDatabase.unlock();
         }
     }
 
@@ -69,10 +68,7 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
     }
 
     public void setBindArguments(String[] bindArgs) {
-        final int numArgs = bindArgs.length;
-        for (int i = 0; i < numArgs; i++) {
-            mQuery.bindString(i + 1, bindArgs[i]);
-        }
+        mQuery.bindAllArgsAsStrings(bindArgs);
     }
 
     public void cursorDeactivated() {

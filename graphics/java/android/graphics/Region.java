@@ -20,6 +20,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Region implements Parcelable {
+    /**
+     * @hide
+     */
+    public final int mNativeRegion;
 
     // the native values for these must match up with the enum in SkRegion.h
     public enum Op {
@@ -33,7 +37,11 @@ public class Region implements Parcelable {
         Op(int nativeInt) {
             this.nativeInt = nativeInt;
         }
-        final int nativeInt;
+
+        /**
+         * @hide
+         */
+        public final int nativeInt;
     }
 
     /** Create an empty region
@@ -325,10 +333,14 @@ public class Region implements Parcelable {
     }
 
     protected void finalize() throws Throwable {
-        nativeDestructor(mNativeRegion);
+        try {
+            nativeDestructor(mNativeRegion);
+        } finally {
+            super.finalize();
+        }
     }
     
-    /*package*/ Region(int ni) {
+    Region(int ni) {
         if (ni == 0) {
             throw new RuntimeException();
         }
@@ -341,7 +353,7 @@ public class Region implements Parcelable {
         this(ni);
     }
 
-    /*package*/ final int ni() {
+    final int ni() {
         return mNativeRegion;
     }
 
@@ -370,6 +382,4 @@ public class Region implements Parcelable {
                                                       Parcel p);
 
     private static native boolean nativeEquals(int native_r1, int native_r2);
-
-    private final int mNativeRegion;
 }

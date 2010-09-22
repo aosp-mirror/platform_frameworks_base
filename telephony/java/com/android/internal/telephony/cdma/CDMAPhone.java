@@ -515,14 +515,6 @@ public class CDMAPhone extends PhoneBase {
         return false;
     }
 
-    public boolean isDataConnectivityPossible() {
-        boolean noData = mDataConnection.getDataEnabled() &&
-                getDataConnectionState() == DataState.DISCONNECTED;
-        return !noData && getIccCard().getState() == IccCard.State.READY &&
-                getServiceState().getState() == ServiceState.STATE_IN_SERVICE &&
-                (mDataConnection.getDataOnRoamingEnabled() || !getServiceState().getRoaming());
-    }
-
     /**
      * Removes the given MMI from the pending list and notifies registrants that
      * it is complete.
@@ -613,7 +605,7 @@ public class CDMAPhone extends PhoneBase {
         }
     }
 
-    public DataState getDataConnectionState() {
+    public DataState getDataConnectionState(String apnType) {
         DataState ret = DataState.DISCONNECTED;
 
         if (mSST == null) {
@@ -624,6 +616,8 @@ public class CDMAPhone extends PhoneBase {
         } else if (mSST.getCurrentCdmaDataConnectionState() != ServiceState.STATE_IN_SERVICE) {
             // If we're out of service, open TCP sockets may still work
             // but no data will flow
+            ret = DataState.DISCONNECTED;
+        } else if (mDataConnection.isApnTypeEnabled(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else {
             switch (mDataConnection.getState()) {
@@ -876,26 +870,6 @@ public class CDMAPhone extends PhoneBase {
     /*package*/ void
     updateMessageWaitingIndicator(int mwi) {
         mRuimRecords.setVoiceMessageWaiting(1, mwi);
-    }
-
-    /**
-     * Returns true if CDMA OTA Service Provisioning needs to be performed.
-     */
-    /* package */ boolean
-    needsOtaServiceProvisioning() {
-        String cdmaMin = getCdmaMin();
-        boolean needsProvisioning;
-        if (cdmaMin == null || (cdmaMin.length() < 6)) {
-            if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: illegal cdmaMin='"
-                                    + cdmaMin + "' assume provisioning needed.");
-            needsProvisioning = true;
-        } else {
-            needsProvisioning = (cdmaMin.equals(UNACTIVATED_MIN_VALUE)
-                    || cdmaMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
-                    || SystemProperties.getBoolean("test_cdma_setup", false);
-        }
-        if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: ret=" + needsProvisioning);
-        return needsProvisioning;
     }
 
     @Override
@@ -1189,6 +1163,26 @@ public class CDMAPhone extends PhoneBase {
      */
     public void setCellBroadcastSmsConfig(int[] configValuesArray, Message response) {
         mSMS.setCellBroadcastConfig(configValuesArray, response);
+    }
+
+    /**
+     * Returns true if OTA Service Provisioning needs to be performed.
+     */
+    @Override
+    public boolean needsOtaServiceProvisioning() {
+        String cdmaMin = getCdmaMin();
+        boolean needsProvisioning;
+        if (cdmaMin == null || (cdmaMin.length() < 6)) {
+            if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: illegal cdmaMin='"
+                                    + cdmaMin + "' assume provisioning needed.");
+            needsProvisioning = true;
+        } else {
+            needsProvisioning = (cdmaMin.equals(UNACTIVATED_MIN_VALUE)
+                    || cdmaMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
+                    || SystemProperties.getBoolean("test_cdma_setup", false);
+        }
+        if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: ret=" + needsProvisioning);
+        return needsProvisioning;
     }
 
     private static final String IS683A_FEATURE_CODE = "*228";

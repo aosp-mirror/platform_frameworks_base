@@ -17,10 +17,8 @@
 package com.android.internal.widget;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
@@ -38,6 +36,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
+
 import com.android.internal.R;
 
 /**
@@ -69,21 +68,21 @@ public class SlidingTab extends ViewGroup {
     private int mGrabbedState = OnTriggerListener.NO_HANDLE;
     private boolean mTriggered = false;
     private Vibrator mVibrator;
-    private float mDensity; // used to scale dimensions for bitmaps.
+    private final float mDensity; // used to scale dimensions for bitmaps.
 
     /**
      * Either {@link #HORIZONTAL} or {@link #VERTICAL}.
      */
-    private int mOrientation;
+    private final int mOrientation;
 
-    private Slider mLeftSlider;
-    private Slider mRightSlider;
+    private final Slider mLeftSlider;
+    private final Slider mRightSlider;
     private Slider mCurrentSlider;
     private boolean mTracking;
     private float mThreshold;
     private Slider mOtherSlider;
     private boolean mAnimating;
-    private Rect mTmpRect;
+    private final Rect mTmpRect;
 
     /**
      * Listener used to reset the view when the current animation completes.
@@ -417,7 +416,7 @@ public class SlidingTab extends ViewGroup {
         }
 
         /**
-         * Start animating the slider. Note we need two animations since an Animator
+         * Start animating the slider. Note we need two animations since an ValueAnimator
          * keeps internal state of the invalidation region which is just the view being animated.
          *
          * @param anim1
@@ -475,10 +474,13 @@ public class SlidingTab extends ViewGroup {
         int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSpecSize =  MeasureSpec.getSize(heightMeasureSpec);
 
-        if (widthSpecMode == MeasureSpec.UNSPECIFIED || heightSpecMode == MeasureSpec.UNSPECIFIED) {
-            Log.e("SlidingTab", "SlidingTab cannot have UNSPECIFIED MeasureSpec"
-                    +"(wspec=" + widthSpecMode + ", hspec=" + heightSpecMode + ")",
-                    new RuntimeException(LOG_TAG + "stack:"));
+        if (DBG) {
+            if (widthSpecMode == MeasureSpec.UNSPECIFIED 
+                    || heightSpecMode == MeasureSpec.UNSPECIFIED) {
+                Log.e("SlidingTab", "SlidingTab cannot have UNSPECIFIED MeasureSpec"
+                        +"(wspec=" + widthSpecMode + ", hspec=" + heightSpecMode + ")",
+                        new RuntimeException(LOG_TAG + "stack:"));
+            }
         }
 
         mLeftSlider.measure();
@@ -608,19 +610,23 @@ public class SlidingTab extends ViewGroup {
 
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    mTracking = false;
-                    mTriggered = false;
-                    mOtherSlider.show(true);
-                    mCurrentSlider.reset(false);
-                    mCurrentSlider.hideTarget();
-                    mCurrentSlider = null;
-                    mOtherSlider = null;
-                    setGrabbedState(OnTriggerListener.NO_HANDLE);
+                    cancelGrab();
                     break;
             }
         }
 
         return mTracking || super.onTouchEvent(event);
+    }
+
+    private void cancelGrab() {
+        mTracking = false;
+        mTriggered = false;
+        mOtherSlider.show(true);
+        mCurrentSlider.reset(false);
+        mCurrentSlider.hideTarget();
+        mCurrentSlider = null;
+        mOtherSlider = null;
+        setGrabbedState(OnTriggerListener.NO_HANDLE);
     }
 
     void startAnimating(final boolean holdAfter) {
@@ -829,6 +835,17 @@ public class SlidingTab extends ViewGroup {
         vibrate(VIBRATE_LONG);
         if (mOnTriggerListener != null) {
             mOnTriggerListener.onTrigger(this, whichHandle);
+        }
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        // When visibility changes and the user has a tab selected, unselect it and
+        // make sure their callback gets called.
+        if (changedView == this && visibility != VISIBLE
+                && mGrabbedState != OnTriggerListener.NO_HANDLE) {
+            cancelGrab();
         }
     }
 

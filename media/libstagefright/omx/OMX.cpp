@@ -289,11 +289,23 @@ status_t OMX::setConfig(
             index, params, size);
 }
 
+status_t OMX::enableGraphicBuffers(
+        node_id node, OMX_U32 port_index, OMX_BOOL enable) {
+    return findInstance(node)->enableGraphicBuffers(port_index, enable);
+}
+
 status_t OMX::useBuffer(
         node_id node, OMX_U32 port_index, const sp<IMemory> &params,
         buffer_id *buffer) {
     return findInstance(node)->useBuffer(
             port_index, params, buffer);
+}
+
+status_t OMX::useGraphicBuffer(
+        node_id node, OMX_U32 port_index,
+        const sp<GraphicBuffer> &graphicBuffer, buffer_id *buffer) {
+    return findInstance(node)->useGraphicBuffer(
+            port_index, graphicBuffer, buffer);
 }
 
 status_t OMX::allocateBuffer(
@@ -497,12 +509,17 @@ sp<IOMXRenderer> OMX::createRenderer(
     }
 
     if (!impl) {
+#if 0
         LOGW("Using software renderer.");
         impl = new SoftwareRenderer(
                 colorFormat,
                 surface,
                 displayWidth, displayHeight,
                 encodedWidth, encodedHeight);
+#else
+        CHECK(!"Should not be here.");
+        return NULL;
+#endif
     }
 
     return new OMXRenderer(impl);
@@ -527,4 +544,3 @@ void OMXRenderer::render(IOMX::buffer_id buffer) {
 }
 
 }  // namespace android
-

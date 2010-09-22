@@ -35,6 +35,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
 import android.webkit.JsPromptResult;
@@ -55,6 +57,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
@@ -99,6 +102,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         Log.v(LOGTAG, "message sent to WebView to dump text.");
         switch (mDumpDataType) {
             case DUMP_AS_TEXT:
+                callback.arg1 = mDumpTopFrameAsText ? 1 : 0;
+                callback.arg2 = mDumpChildFramesAsText ? 1 : 0;
                 mWebView.documentAsText(callback);
                 break;
             case EXT_REPR:
@@ -117,6 +122,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        requestWindowFeature(Window.FEATURE_PROGRESS);
 
         LinearLayout contentView = new LinearLayout(this);
         contentView.setOrientation(LinearLayout.VERTICAL);
@@ -145,6 +151,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         if (intent != null) {
             executeIntent(intent);
         }
+
+        // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
+        mWebView.useMockDeviceOrientation();
     }
 
     @Override
@@ -159,6 +168,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             return;
         }
 
+        mTotalTestCount = intent.getIntExtra(TOTAL_TEST_COUNT, mTotalTestCount);
+        mCurrentTestNumber = intent.getIntExtra(CURRENT_TEST_NUMBER, mCurrentTestNumber);
+
         mTestUrl = intent.getStringExtra(TEST_URL);
         if (mTestUrl == null) {
             mUiAutoTestPath = intent.getStringExtra(UI_AUTO_TEST);
@@ -172,6 +184,11 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mTimeoutInMillis = intent.getIntExtra(TIMEOUT_IN_MILLIS, 0);
         mGetDrawtime = intent.getBooleanExtra(GET_DRAW_TIME, false);
         mSaveImagePath = intent.getStringExtra(SAVE_IMAGE);
+        mStopOnRefError = intent.getBooleanExtra(STOP_ON_REF_ERROR, false);
+        setTitle("Test " + mCurrentTestNumber + " of " + mTotalTestCount);
+        float ratio = (float)mCurrentTestNumber / mTotalTestCount;
+        int progress = (int)(ratio * Window.PROGRESS_END);
+        getWindow().setFeatureInt(Window.FEATURE_PROGRESS, progress);
 
         Log.v(LOGTAG, "  Loading " + mTestUrl);
         mWebView.loadUrl(mTestUrl);
@@ -237,6 +254,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(TestShellActivity.TEST_URL, FsUtils.getTestUrl(url));
+        intent.putExtra(TestShellActivity.CURRENT_TEST_NUMBER, ++mCurrentTestNumber);
         intent.putExtra(TIMEOUT_IN_MILLIS, 10000);
         executeIntent(intent);
     }
@@ -329,11 +347,26 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     // .......................................
     // LayoutTestController Functions
-    public void dumpAsText() {
+    public void dumpAsText(boolean enablePixelTests) {
+        // Added after webkit update to r63859. See trac.webkit.org/changeset/63730.
+        if (enablePixelTests) {
+            Log.v(LOGTAG, "dumpAsText(enablePixelTests == true) not implemented on Android!");
+        }
+
         mDumpDataType = DumpDataType.DUMP_AS_TEXT;
+        mDumpTopFrameAsText = true;
         if (mWebView != null) {
             String url = mWebView.getUrl();
             Log.v(LOGTAG, "dumpAsText called: "+url);
+        }
+    }
+
+    public void dumpChildFramesAsText() {
+        mDumpDataType = DumpDataType.DUMP_AS_TEXT;
+        mDumpChildFramesAsText = true;
+        if (mWebView != null) {
+            String url = mWebView.getUrl();
+            Log.v(LOGTAG, "dumpChildFramesAsText called: "+url);
         }
     }
 
@@ -348,7 +381,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         Log.v(LOGTAG, "notifyDone called: " + url);
         if (mWaitUntilDone) {
             mWaitUntilDone = false;
-            mChromeClient.onProgressChanged(mWebView, 101);
+            if (!mRequestedWebKitData && !mTimedOut && !finished()) {
+                requestWebKitData();
+            }
         }
     }
 
@@ -459,8 +494,25 @@ public class TestShellActivity extends Activity implements LayoutTestController 
      * Sets the Geolocation permission state to be used for all future requests.
      */
     public void setGeolocationPermission(boolean allow) {
-        mGeolocationPermissionSet = true;
+        mIsGeolocationPermissionSet = true;
         mGeolocationPermission = allow;
+
+        if (mPendingGeolocationPermissionCallbacks != null) {
+            Iterator iter = mPendingGeolocationPermissionCallbacks.keySet().iterator();
+            while (iter.hasNext()) {
+                GeolocationPermissions.Callback callback =
+                        (GeolocationPermissions.Callback) iter.next();
+                String origin = (String) mPendingGeolocationPermissionCallbacks.get(callback);
+                callback.invoke(origin, mGeolocationPermission, false);
+            }
+            mPendingGeolocationPermissionCallbacks = null;
+        }
+    }
+
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        mWebView.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
+                canProvideGamma, gamma);
     }
 
     public void overridePreference(String key, boolean value) {
@@ -471,6 +523,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         if (key.equals(WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED)) {
             mWebView.getSettings().setAppCacheEnabled(value);
         }
+    }
+
+    public void setXSSAuditorEnabled (boolean flag) {
+        mWebView.getSettings().setXSSAuditorEnabled(flag);
     }
 
     private final WebViewClient mViewClient = new WebViewClient(){
@@ -490,11 +546,30 @@ public class TestShellActivity extends Activity implements LayoutTestController 
                     drawPageToFile(mSaveImagePath + "/" + name + ".png", mWebView);
                 }
             }
+
             // Calling finished() will check if we've met all the conditions for completing
-            // this test and move to the next one if we are ready.
+            // this test and move to the next one if we are ready. Otherwise we ask WebCore to
+            // dump the page.
             if (finished()) {
                 return;
             }
+
+            if (!mWaitUntilDone && !mRequestedWebKitData && !mTimedOut) {
+                requestWebKitData();
+            } else {
+                if (mWaitUntilDone) {
+                    Log.v(LOGTAG, "page finished loading but waiting for notifyDone to be called: " + url);
+                }
+
+                if (mRequestedWebKitData) {
+                    Log.v(LOGTAG, "page finished loading but webkit data has already been requested: " + url);
+                }
+
+                if (mTimedOut) {
+                    Log.v(LOGTAG, "page finished loading but already timed out: " + url);
+                }
+            }
+
             super.onPageFinished(view, url);
         }
 
@@ -536,44 +611,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     private final WebChromeClient mChromeClient = new WebChromeClient() {
         @Override
-        public void onProgressChanged(WebView view, int newProgress) {
-
-            // notifyDone calls this with 101%. We only want to update this flag if this
-            // is the real call from WebCore.
-            if (newProgress == 100) {
-                mOneHundredPercentComplete = true;
-            }
-
-            // With the flag updated, we can now proceed as normal whether the progress update came from
-            // WebCore or notifyDone.
-            if (newProgress >= 100) {
-                // finished() will check if we are ready to move to the next test and do so if we are.
-                if (finished()) {
-                    return;
-                }
-
-                if (!mTimedOut && !mWaitUntilDone && !mRequestedWebKitData) {
-                    String url = mWebView.getUrl();
-                    Log.v(LOGTAG, "Finished: "+ url);
-                    requestWebKitData();
-                } else {
-                    String url = mWebView.getUrl();
-                    if (mTimedOut) {
-                        Log.v(LOGTAG, "Timed out before finishing: " + url);
-                    } else if (mWaitUntilDone) {
-                        Log.v(LOGTAG, "Waiting for notifyDone: " + url);
-                    } else if (mRequestedWebKitData) {
-                        Log.v(LOGTAG, "Requested webkit data ready: " + url);
-                    }
-                }
-            }
-        }
-
-        @Override
         public void onReceivedTitle(WebView view, String title) {
-            if (title.length() > 30)
-                title = "..."+title.substring(title.length()-30);
-            setTitle(title);
+            setTitle("Test " + mCurrentTestNumber + " of " + mTotalTestCount + ": "+ title);
             if (mDumpTitleChanges) {
                 mTitleChanges.append("TITLE CHANGED: ");
                 mTitleChanges.append(title);
@@ -670,21 +709,40 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         @Override
         public void onGeolocationPermissionsShowPrompt(String origin,
                 GeolocationPermissions.Callback callback) {
-            if (mGeolocationPermissionSet) {
+            if (mIsGeolocationPermissionSet) {
                 callback.invoke(origin, mGeolocationPermission, false);
+                return;
             }
+            if (mPendingGeolocationPermissionCallbacks == null) {
+                mPendingGeolocationPermissionCallbacks =
+                        new HashMap<GeolocationPermissions.Callback, String>();
+            }
+            mPendingGeolocationPermissionCallbacks.put(callback, origin);
         }
 
         @Override
-        public void onConsoleMessage(String message, int lineNumber,
-                String sourceID) {
+        public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+            String msg = "CONSOLE MESSAGE: line " + consoleMessage.lineNumber() + ": "
+                    + consoleMessage.message() + "\n";
             if (mConsoleMessages == null) {
                 mConsoleMessages = new StringBuffer();
             }
-            String consoleMessage = "CONSOLE MESSAGE: line "
-                    + lineNumber +": "+ message +"\n";
-            mConsoleMessages.append(consoleMessage);
-            Log.v(LOGTAG, "LOG: "+consoleMessage);
+            mConsoleMessages.append(msg);
+            Log.v(LOGTAG, "LOG: " + msg);
+            // the rationale here is that if there's an error of either type, and the test was
+            // waiting for "notifyDone" signal to finish, then there's no point in waiting
+            // anymore because the JS execution is already terminated at this point and a
+            // "notifyDone" will never come out so it's just wasting time till timeout kicks in
+            if ((msg.contains("Uncaught ReferenceError:") || msg.contains("Uncaught TypeError:"))
+                    && mWaitUntilDone && mStopOnRefError) {
+                Log.w(LOGTAG, "Terminating test case on uncaught ReferenceError or TypeError.");
+                mHandler.postDelayed(new Runnable() {
+                    public void run() {
+                        notifyDone();
+                    }
+                }, 500);
+            }
+            return true;
         }
 
         @Override
@@ -723,13 +781,15 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     private static class NewWindowWebView extends WebView {
         public NewWindowWebView(Context context, Map<String, Object> jsIfaces) {
-            super(context, null, 0, jsIfaces);
+            super(context, null, 0, jsIfaces, false);
         }
     }
 
     private void resetTestStatus() {
         mWaitUntilDone = false;
         mDumpDataType = mDefaultDumpDataType;
+        mDumpTopFrameAsText = false;
+        mDumpChildFramesAsText = false;
         mTimedOut = false;
         mDumpTitleChanges = false;
         mRequestedWebKitData = false;
@@ -739,10 +799,12 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mEventSender.clearTouchPoints();
         mEventSender.clearTouchMetaState();
         mPageFinished = false;
-        mOneHundredPercentComplete = false;
         mDumpWebKitData = false;
         mGetDrawtime = false;
         mSaveImagePath = null;
+        setDefaultWebSettings(mWebView);
+        mIsGeolocationPermissionSet = false;
+        mPendingGeolocationPermissionCallbacks = null;
     }
 
     private long[] getDrawWebViewTime(WebView view, int count) {
@@ -779,7 +841,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     }
 
     private boolean canMoveToNextTest() {
-        return (mDumpWebKitData && mOneHundredPercentComplete && mPageFinished && !mWaitUntilDone) || mTimedOut;
+        return (mDumpWebKitData && mPageFinished && !mWaitUntilDone) || mTimedOut;
     }
 
     private void setupWebViewForLayoutTests(WebView webview, CallbackProxy callbackProxy) {
@@ -787,6 +849,19 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             return;
         }
 
+        setDefaultWebSettings(webview);
+
+        webview.setWebChromeClient(mChromeClient);
+        webview.setWebViewClient(mViewClient);
+        // Setting a touch interval of -1 effectively disables the optimisation in WebView
+        // that stops repeated touch events flooding WebCore. The Event Sender only sends a
+        // single event rather than a stream of events (like what would generally happen in
+        // a real use of touch events in a WebView)  and so if the WebView drops the event,
+        // the test will fail as the test expects one callback for every touch it synthesizes.
+        webview.setTouchInterval(-1);
+    }
+
+    public void setDefaultWebSettings(WebView webview) {
         WebSettings settings = webview.getSettings();
         settings.setAppCacheEnabled(true);
         settings.setAppCachePath(getApplicationContext().getCacheDir().getPath());
@@ -799,15 +874,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         settings.setDatabasePath(getDir("databases",0).getAbsolutePath());
         settings.setDomStorageEnabled(true);
         settings.setWorkersEnabled(false);
-
-        webview.setWebChromeClient(mChromeClient);
-        webview.setWebViewClient(mViewClient);
-        // Setting a touch interval of -1 effectively disables the optimisation in WebView
-        // that stops repeated touch events flooding WebCore. The Event Sender only sends a
-        // single event rather than a stream of events (like what would generally happen in
-        // a real use of touch events in a WebView)  and so if the WebView drops the event,
-        // the test will fail as the test expects one callback for every touch it synthesizes.
-        webview.setTouchInterval(-1);
+        settings.setXSSAuditorEnabled(false);
     }
 
     private WebView mWebView;
@@ -824,6 +891,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private String mSaveImagePath;
     private BufferedReader mTestListReader;
     private boolean mGetDrawtime;
+    private int mTotalTestCount;
+    private int mCurrentTestNumber;
+    private boolean mStopOnRefError;
 
     // States
     private boolean mTimedOut;
@@ -833,6 +903,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     // Layout test controller variables.
     private DumpDataType mDumpDataType;
     private DumpDataType mDefaultDumpDataType = DumpDataType.EXT_REPR;
+    private boolean mDumpTopFrameAsText;
+    private boolean mDumpChildFramesAsText;
     private boolean mWaitUntilDone;
     private boolean mDumpTitleChanges;
     private StringBuffer mTitleChanges;
@@ -846,7 +918,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
     private boolean mPageFinished = false;
     private boolean mDumpWebKitData = false;
-    private boolean mOneHundredPercentComplete = false;
 
     static final String TIMEOUT_STR = "**Test timeout";
 
@@ -861,11 +932,15 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static final String UI_AUTO_TEST = "UiAutoTest";
     static final String GET_DRAW_TIME = "GetDrawTime";
     static final String SAVE_IMAGE = "SaveImage";
+    static final String TOTAL_TEST_COUNT = "TestCount";
+    static final String CURRENT_TEST_NUMBER = "TestNumber";
+    static final String STOP_ON_REF_ERROR = "StopOnReferenceError";
 
     static final int DRAW_RUNS = 5;
     static final String DRAW_TIME_LOG = Environment.getExternalStorageDirectory() +
         "/android/page_draw_time.txt";
 
-    private boolean mGeolocationPermissionSet;
+    private boolean mIsGeolocationPermissionSet;
     private boolean mGeolocationPermission;
+    private Map mPendingGeolocationPermissionCallbacks;
 }

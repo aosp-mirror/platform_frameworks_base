@@ -166,7 +166,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_DISABLING = 0;
+    public static final int WIFI_AP_STATE_DISABLING = 10;
     /**
      * Wi-Fi AP is disabled.
      *
@@ -175,7 +175,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_DISABLED = 1;
+    public static final int WIFI_AP_STATE_DISABLED = 11;
     /**
      * Wi-Fi AP is currently being enabled. The state will change to
      * {@link #WIFI_AP_STATE_ENABLED} if it finishes successfully.
@@ -185,7 +185,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_ENABLING = 2;
+    public static final int WIFI_AP_STATE_ENABLING = 12;
     /**
      * Wi-Fi AP is enabled.
      *
@@ -194,7 +194,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_ENABLED = 3;
+    public static final int WIFI_AP_STATE_ENABLED = 13;
     /**
      * Wi-Fi AP is in a failed state. This state will occur when an error occurs during
      * enabling or disabling
@@ -204,7 +204,7 @@ public class WifiManager {
      *
      * @hide
      */
-    public static final int WIFI_AP_STATE_FAILED = 4;
+    public static final int WIFI_AP_STATE_FAILED = 14;
 
     /**
      * Broadcast intent action indicating that a connection to the supplicant has
@@ -275,7 +275,14 @@ public class WifiManager {
      * @see #ERROR_AUTHENTICATING
      */
     public static final String EXTRA_SUPPLICANT_ERROR = "supplicantError";
-
+    /**
+     * Broadcast intent action indicating that the supplicant configuration changed.
+     * This can be as a result of adding/updating/deleting a network
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String SUPPLICANT_CONFIG_CHANGED_ACTION =
+        "android.net.wifi.supplicant.CONFIG_CHANGE";
     /**
      * An access point scan has completed, and results are available from the supplicant.
      * Call {@link #getScanResults()} to obtain the results.
@@ -294,11 +301,35 @@ public class WifiManager {
     public static final String EXTRA_NEW_RSSI = "newRssi";
 
     /**
+     * Broadcast intent action indicating that the IP configuration
+     * changed on wifi.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String CONFIG_CHANGED_ACTION = "android.net.wifi.CONFIG_CHANGED";
+
+    /**
+     * The lookup key for a {@link android.net.LinkProperties} object associated with the
+     * Wi-Fi network. Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     * @hide
+     */
+    public static final String EXTRA_LINK_PROPERTIES = "linkProperties";
+
+    /**
+     * The lookup key for a {@link android.net.LinkCapabilities} object associated with the
+     * Wi-Fi network. Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     * @hide
+     */
+    public static final String EXTRA_LINK_CAPABILITIES = "linkCapabilities";
+
+    /**
      * The network IDs of the configured networks could have changed.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String NETWORK_IDS_CHANGED_ACTION = "android.net.wifi.NETWORK_IDS_CHANGED";
-    
+
     /**
      * Activity Action: Pick a Wi-Fi network to connect to.
      * <p>Input: Nothing.
@@ -306,16 +337,6 @@ public class WifiManager {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PICK_WIFI_NETWORK = "android.net.wifi.PICK_WIFI_NETWORK";
-
-    /**
-     * In this Wi-Fi lock mode, Wi-Fi will behave as in the mode
-     * {@link #WIFI_MODE_FULL} but it operates at high performance
-     * at the expense of power. This mode should be used
-     * only when the wifi connection needs to have minimum loss and low
-     * latency as it can impact the battery life.
-     * @hide
-     */
-    public static final int WIFI_MODE_FULL_HIGH_PERF = 3;
 
     /**
      * In this Wi-Fi lock mode, Wi-Fi will be kept active,
@@ -513,7 +534,8 @@ public class WifiManager {
      */
     public boolean disconnect() {
         try {
-            return mService.disconnect();
+            mService.disconnect();
+            return true;
         } catch (RemoteException e) {
             return false;
         }
@@ -527,7 +549,8 @@ public class WifiManager {
      */
     public boolean reconnect() {
         try {
-            return mService.reconnect();
+            mService.reconnect();
+            return true;
         } catch (RemoteException e) {
             return false;
         }
@@ -541,7 +564,8 @@ public class WifiManager {
      */
     public boolean reassociate() {
         try {
-            return mService.reassociate();
+            mService.reassociate();
+            return true;
         } catch (RemoteException e) {
             return false;
         }
@@ -756,8 +780,9 @@ public class WifiManager {
         } else if (rssi >= MAX_RSSI) {
             return numLevels - 1;
         } else {
-            int partitionSize = (MAX_RSSI - MIN_RSSI) / (numLevels - 1);
-            return (rssi - MIN_RSSI) / partitionSize;
+            float inputRange = (MAX_RSSI - MIN_RSSI);
+            float outputRange = (numLevels - 1);
+            return (int)((float)(rssi - MIN_RSSI) * outputRange / inputRange);
         }
     }
     
@@ -849,6 +874,166 @@ public class WifiManager {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+   /**
+     * Start the driver and connect to network.
+     *
+     * This function will over-ride WifiLock and device idle status. For example,
+     * even if the device is idle or there is only a scan-only lock held,
+     * a start wifi would mean that wifi connection is kept active until
+     * a stopWifi() is sent.
+     *
+     * This API is used by WifiStateTracker
+     *
+     * @return {@code true} if the operation succeeds else {@code false}
+     * @hide
+     */
+    public boolean startWifi() {
+        try {
+            mService.startWifi();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Disconnect from a network (if any) and stop the driver.
+     *
+     * This function will over-ride WifiLock and device idle status. Wi-Fi
+     * stays inactive until a startWifi() is issued.
+     *
+     * This API is used by WifiStateTracker
+     *
+     * @return {@code true} if the operation succeeds else {@code false}
+     * @hide
+     */
+    public boolean stopWifi() {
+        try {
+            mService.stopWifi();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Add a bssid to the supplicant blacklist
+     *
+     * This API is used by WifiWatchdogService
+     *
+     * @return {@code true} if the operation succeeds else {@code false}
+     * @hide
+     */
+    public boolean addToBlacklist(String bssid) {
+        try {
+            mService.addToBlacklist(bssid);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Clear the supplicant blacklist
+     *
+     * This API is used by WifiWatchdogService
+     *
+     * @return {@code true} if the operation succeeds else {@code false}
+     * @hide
+     */
+    public boolean clearBlacklist() {
+        try {
+            mService.clearBlacklist();
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /* TODO: deprecate synchronous API and open up the following API */
+    /**
+     * Connect to a network with the given configuration. The network also
+     * gets added to the supplicant configuration.
+     *
+     * For a new network, this function is used instead of a
+     * sequence of addNetwork(), enableNetwork(), saveConfiguration() and
+     * reconnect()
+     *
+     * @param config the set of variables that describe the configuration,
+     *            contained in a {@link WifiConfiguration} object.
+     * @hide
+     */
+    public void connectNetwork(WifiConfiguration config) {
+        if (config == null) {
+            return;
+        }
+        try {
+            mService.connectNetworkWithConfig(config);
+        } catch (RemoteException e) { }
+    }
+
+    /**
+     * Connect to a network with the given networkId.
+     *
+     * This function is used instead of a enableNetwork(), saveConfiguration() and
+     * reconnect()
+     *
+     * @param networkId the network id identifiying the network in the
+     *                supplicant configuration list
+     * @hide
+     */
+    public void connectNetwork(int networkId) {
+        if (networkId < 0) {
+            return;
+        }
+        try {
+            mService.connectNetworkWithId(networkId);
+        } catch (RemoteException e) { }
+    }
+
+    /**
+     * Save the given network in the supplicant config. If the network already
+     * exists, the configuration is updated. A new network is enabled
+     * by default.
+     *
+     * For a new network, this function is used instead of a
+     * sequence of addNetwork(), enableNetwork() and saveConfiguration().
+     *
+     * For an existing network, it accomplishes the task of updateNetwork()
+     * and saveConfiguration()
+     *
+     * @param config the set of variables that describe the configuration,
+     *            contained in a {@link WifiConfiguration} object.
+     * @hide
+     */
+    public void saveNetwork(WifiConfiguration config) {
+        if (config == null) {
+            return;
+        }
+        try {
+            mService.saveNetwork(config);
+        } catch (RemoteException e) { }
+    }
+
+    /**
+     * Delete the network in the supplicant config.
+     *
+     * This function is used instead of a sequence of removeNetwork()
+     * and saveConfiguration().
+     *
+     * @param config the set of variables that describe the configuration,
+     *            contained in a {@link WifiConfiguration} object.
+     * @hide
+     */
+    public void forgetNetwork(int netId) {
+        if (netId < 0) {
+            return;
+        }
+        try {
+            mService.forgetNetwork(netId);
+        } catch (RemoteException e) { }
     }
 
     /**
@@ -1033,9 +1218,8 @@ public class WifiManager {
     /**
      * Creates a new WifiLock.
      *
-     * @param lockType the type of lock to create. See {@link #WIFI_MODE_FULL},
-     * and {@link #WIFI_MODE_SCAN_ONLY} for descriptions of the types of Wi-Fi locks.
-     *
+     * @param lockType the type of lock to create. See {@link #WIFI_MODE_FULL} and
+     * {@link #WIFI_MODE_SCAN_ONLY} for descriptions of the types of Wi-Fi locks.
      * @param tag a tag for the WifiLock to identify it in debugging messages.  This string is 
      *            never shown to the user under normal conditions, but should be descriptive 
      *            enough to identify your application and the specific WifiLock within it, if it

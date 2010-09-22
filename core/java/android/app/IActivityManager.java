@@ -311,6 +311,10 @@ public interface IActivityManager extends IInterface {
     
     public void finishHeavyWeightApp() throws RemoteException;
 
+    public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
+    public boolean isImmersive(IBinder token) throws RemoteException;
+    public boolean isTopActivityImmersive() throws RemoteException;
+    
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) throws RemoteException;
     
@@ -319,6 +323,10 @@ public interface IActivityManager extends IInterface {
             Uri uri, int mode) throws RemoteException;
     public void revokeUriPermissionFromOwner(IBinder owner, Uri uri,
             int mode) throws RemoteException;
+
+    // Cause the specified process to dump the specified heap.
+    public boolean dumpHeap(String process, boolean managed, String path,
+        ParcelFileDescriptor fd) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -529,4 +537,5 @@ public interface IActivityManager extends IInterface {
     int NEW_URI_PERMISSION_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+114;
     int GRANT_URI_PERMISSION_FROM_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+115;
     int REVOKE_URI_PERMISSION_FROM_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+116;
+    int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+117;
 }

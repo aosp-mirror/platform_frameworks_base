@@ -16,18 +16,21 @@
 
 package android.app;
 
+import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.ActionMode;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -36,13 +39,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnCreateContextMenuListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.lang.ref.WeakReference;
@@ -76,6 +78,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     final WindowManager mWindowManager;
     Window mWindow;
     View mDecor;
+    private ActionBarImpl mActionBar;
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -177,6 +180,15 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
+     * Retrieve the {@link ActionBar} attached to this dialog, if present.
+     *
+     * @return The ActionBar attached to the dialog or null if no ActionBar is present.
+     */
+    public ActionBar getActionBar() {
+        return mActionBar;
+    }
+
+    /**
      * Sets the Activity that owns this dialog. An example use: This Dialog will
      * use the suggested volume control stream of the Activity.
      * 
@@ -216,6 +228,9 @@ public class Dialog implements DialogInterface, Window.Callback,
     public void show() {
         if (mShowing) {
             if (mDecor != null) {
+                if (mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) {
+                    mWindow.invalidatePanelMenu(Window.FEATURE_ACTION_BAR);
+                }
                 mDecor.setVisibility(View.VISIBLE);
             }
             return;
@@ -227,6 +242,11 @@ public class Dialog implements DialogInterface, Window.Callback,
 
         onStart();
         mDecor = mWindow.getDecorView();
+
+        if (mActionBar == null && mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) {
+            mActionBar = new ActionBarImpl(this);
+        }
+
         WindowManager.LayoutParams l = mWindow.getAttributes();
         if ((l.softInputMode
                 & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) == 0) {
@@ -310,7 +330,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
-     * Similar to {@link Activity#onCreate}, you should initialized your dialog
+     * Similar to {@link Activity#onCreate}, you should initialize your dialog
      * in this method, including calling {@link #setContentView}.
      * @param savedInstanceState If this dialog is being reinitalized after a
      *     the hosting activity was previously shut down, holds the result from
@@ -775,6 +795,13 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
+     * @see Activity#invalidateOptionsMenu()
+     */
+    public void invalidateOptionsMenu() {
+        mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
+    }
+
+    /**
      * @see Activity#onCreateContextMenu(ContextMenu, View, ContextMenuInfo)
      */
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -832,8 +859,15 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
     }
 
+    public ActionMode onStartActionMode(ActionMode.Callback callback) {
+        if (mActionBar != null) {
+            return mActionBar.startActionMode(callback);
+        }
+        return null;
+    }
+
     /**
-     * @return The activity associated with this dialog, or null if there is no assocaited activity.
+     * @return The activity associated with this dialog, or null if there is no associated activity.
      */
     private ComponentName getAssociatedActivity() {
         Activity activity = mOwnerActivity;

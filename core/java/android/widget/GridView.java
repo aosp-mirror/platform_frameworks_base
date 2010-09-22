@@ -17,15 +17,18 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.SoundEffectConstants;
+import android.view.View;
+import android.view.ViewDebug;
+import android.view.ViewGroup;
 import android.view.animation.GridLayoutAnimationController;
+import android.widget.RemoteViews.RemoteView;
 
 
 /**
@@ -35,6 +38,7 @@ import android.view.animation.GridLayoutAnimationController;
  * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-gridview.html">Grid
  * View tutorial</a>.</p>
  */
+@RemoteView
 public class GridView extends AbsListView {
     public static final int NO_STRETCH = 0;
     public static final int STRETCH_SPACING = 1;
@@ -103,9 +107,39 @@ public class GridView extends AbsListView {
         a.recycle();
     }
 
+    /**
+     * Set how the user may select items from the grid.
+     *
+     * <p>GridView only supports {@link AbsListView#CHOICE_MODE_NONE} and
+     * {@link AbsListView#CHOICE_MODE_MULTIPLE_MODAL}. Attempting to set an unsupported choice
+     * mode will throw an UnsupportedOperationException.
+     */
+    @Override
+    public void setChoiceMode(int choiceMode) {
+        switch (choiceMode) {
+        case CHOICE_MODE_NONE:
+        case CHOICE_MODE_MULTIPLE_MODAL:
+            super.setChoiceMode(choiceMode);
+            break;
+
+        default:
+            throw new UnsupportedOperationException("Unsupported choice mode " + choiceMode);
+        }
+    }
+
     @Override
     public ListAdapter getAdapter() {
         return mAdapter;
+    }
+
+    /**
+     * Sets up this AbsListView to use a remote views adapter which connects to a RemoteViewsService
+     * through the specified intent.
+     * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
+     */
+    @android.view.RemotableViewMethod
+    public void setRemoteViewsAdapter(Intent intent) {
+        super.setRemoteViewsAdapter(intent);
     }
 
     /**
@@ -115,7 +149,7 @@ public class GridView extends AbsListView {
      */
     @Override
     public void setAdapter(ListAdapter adapter) {
-        if (null != mAdapter) {
+        if (mAdapter != null && mDataSetObserver != null) {
             mAdapter.unregisterDataSetObserver(mDataSetObserver);
         }
 
@@ -125,7 +159,10 @@ public class GridView extends AbsListView {
 
         mOldSelectedPosition = INVALID_POSITION;
         mOldSelectedRowId = INVALID_ROW_ID;
-        
+
+        // AbsListView#setAdapter will update choice mode states.
+        super.setAdapter(adapter);
+
         if (mAdapter != null) {
             mOldItemCount = mItemCount;
             mItemCount = mAdapter.getCount();
@@ -742,6 +779,26 @@ public class GridView extends AbsListView {
     }
 
     /**
+     * Smoothly scroll to the specified adapter position. The view will
+     * scroll such that the indicated position is displayed.
+     * @param position Scroll to this adapter position.
+     */
+    @android.view.RemotableViewMethod
+    public void smoothScrollToPosition(int position) {
+        super.smoothScrollToPosition(position);
+    }
+
+    /**
+     * Smoothly scroll to the specified adapter position offset. The view will
+     * scroll such that the indicated position is displayed.
+     * @param offset The amount to offset from the adapter position to scroll to.
+     */
+    @android.view.RemotableViewMethod
+    public void smoothScrollByOffset(int offset) {
+        super.smoothScrollByOffset(offset);
+    }
+
+    /**
      * Fills the grid based on positioning the new selection relative to the old
      * selection. The new selection will be placed at, above, or below the
      * location of the new selection depending on how the selection is moving.
@@ -1281,6 +1338,15 @@ public class GridView extends AbsListView {
             child.setPressed(isPressed);
         }
 
+        if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
+            if (child instanceof Checkable) {
+                ((Checkable) child).setChecked(mCheckStates.get(position));
+            } else if (getContext().getApplicationInfo().targetSdkVersion
+                    >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                child.setActivated(mCheckStates.get(position));
+            }
+        }
+
         if (needToMeasure) {
             int childHeightSpec = ViewGroup.getChildMeasureSpec(
                     MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 0, p.height);
@@ -1491,9 +1557,9 @@ public class GridView extends AbsListView {
         int nextPage = -1;
 
         if (direction == FOCUS_UP) {
-            nextPage = Math.max(0, mSelectedPosition - getChildCount() - 1);
+            nextPage = Math.max(0, mSelectedPosition - getChildCount());
         } else if (direction == FOCUS_DOWN) {
-            nextPage = Math.min(mItemCount - 1, mSelectedPosition + getChildCount() - 1);
+            nextPage = Math.min(mItemCount - 1, mSelectedPosition + getChildCount());
         }
 
         if (nextPage >= 0) {
@@ -1777,6 +1843,19 @@ public class GridView extends AbsListView {
             requestLayoutIfNecessary();
         }
     }
+    
+    /**
+     * Get the number of columns in the grid. 
+     * Returns {@link #AUTO_FIT} if the Grid has never been laid out.
+     *
+     * @attr ref android.R.styleable#GridView_numColumns
+     * 
+     * @see #setNumColumns(int)
+     */
+    @ViewDebug.ExportedProperty
+    public int getNumColumns() {  
+        return mNumColumns;
+    }
 
     /**
      * Make sure views are touching the top or bottom edge, as appropriate for
@@ -1876,12 +1955,7 @@ public class GridView extends AbsListView {
         // TODO: Account for vertical spacing too
         final int numColumns = mNumColumns;
         final int rowCount = (mItemCount + numColumns - 1) / numColumns;
-        int result = Math.max(rowCount * 100, 0);
-        if (mScrollY != 0) {
-            // Compensate for overscroll
-            result += Math.abs((int) ((float) mScrollY / getHeight() * rowCount * 100));
-        }
-        return result;
+        return Math.max(rowCount * 100, 0);
     }
 }
 

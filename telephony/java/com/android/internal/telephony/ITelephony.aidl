@@ -239,9 +239,11 @@ interface ITelephony {
     String getCdmaEriText();
 
     /**
-     * Returns true if CDMA provisioning needs to run.
+     * Returns true if OTA service provisioning needs to run.
+     * Only relevant on some technologies, others will always
+     * return false.
      */
-    boolean getCdmaNeedsProvisioning();
+    boolean needsOtaServiceProvisioning();
 
     /**
       * Returns the unread count of voicemails

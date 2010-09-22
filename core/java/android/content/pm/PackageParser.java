@@ -16,9 +16,6 @@
 
 package android.content.pm;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -30,14 +27,14 @@ import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-
 import com.android.internal.util.XmlUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +45,6 @@ import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -1498,12 +1494,18 @@ public class PackageParser {
             ai.nonLocalizedLabel = v.coerceToString();
         }
 
+        int defaultTheme = 0;
+        if (owner.applicationInfo.targetSdkVersion >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+            // As of honeycomb, the default application theme is holographic.
+            defaultTheme = android.R.style.Theme_Holo;
+        }
+
         ai.icon = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_icon, 0);
         ai.logo = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_logo, 0);
         ai.theme = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestApplication_theme, 0);
+                com.android.internal.R.styleable.AndroidManifestApplication_theme, defaultTheme);
         ai.descriptionRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_description, 0);
 
@@ -1534,6 +1536,10 @@ public class PackageParser {
                 false)) {
             ai.flags |= ApplicationInfo.FLAG_VM_SAFE_MODE;
         }
+
+        boolean hardwareAccelerated = sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_hardwareAccelerated,
+                false);
 
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hasCode,
@@ -1634,7 +1640,8 @@ public class PackageParser {
 
             String tagName = parser.getName();
             if (tagName.equals("activity")) {
-                Activity a = parseActivity(owner, res, parser, attrs, flags, outError, false);
+                Activity a = parseActivity(owner, res, parser, attrs, flags, outError, false,
+                        hardwareAccelerated);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -1643,7 +1650,7 @@ public class PackageParser {
                 owner.activities.add(a);
 
             } else if (tagName.equals("receiver")) {
-                Activity a = parseActivity(owner, res, parser, attrs, flags, outError, true);
+                Activity a = parseActivity(owner, res, parser, attrs, flags, outError, true, false);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -1778,7 +1785,8 @@ public class PackageParser {
 
     private Activity parseActivity(Package owner, Resources res,
             XmlPullParser parser, AttributeSet attrs, int flags, String[] outError,
-            boolean receiver) throws XmlPullParserException, IOException {
+            boolean receiver, boolean hardwareAccelerated)
+            throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestActivity);
 
@@ -1883,7 +1891,19 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestActivity_immersive,
+                false)) {
+            a.info.flags |= ActivityInfo.FLAG_IMMERSIVE;
+        }
+        
         if (!receiver) {
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestActivity_hardwareAccelerated,
+                    hardwareAccelerated)) {
+                a.info.flags |= ActivityInfo.FLAG_HARDWARE_ACCELERATED;
+            }
+
             a.info.launchMode = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_launchMode,
                     ActivityInfo.LAUNCH_MULTIPLE);

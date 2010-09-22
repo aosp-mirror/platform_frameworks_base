@@ -1,6 +1,5 @@
 page.title=Testing Overview
 @jd:body
-
 <p>
     Android includes powerful tools for setting up and running test applications.
     Whether you are working in Eclipse with ADT or working from the command line, these tools
@@ -9,7 +8,7 @@ page.title=Testing Overview
 </p>
 <p>
     If you aren't yet familiar with the Android testing framework, please read the topic
-    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing and Instrumentation</a>
+    <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>
     before you get started.
     For a step-by-step introduction to Android testing, try the <a
     href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">Hello, Testing</a>

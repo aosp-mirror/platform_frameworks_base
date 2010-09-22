@@ -8,7 +8,11 @@ LOCAL_SRC_FILES:= \
     android_media_MediaMetadataRetriever.cpp \
     android_media_ResampleInputStream.cpp \
     android_media_MediaProfiles.cpp \
-    android_media_AmrInputStream.cpp
+    android_media_AmrInputStream.cpp \
+	android_media_MtpClient.cpp \
+	android_media_MtpCursor.cpp \
+	android_media_MtpDatabase.cpp \
+	android_media_MtpServer.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
@@ -21,9 +25,12 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libsurfaceflinger_client \
     libstagefright \
-    libcamera_client
+    libcamera_client \
+	libsqlite
 
-LOCAL_STATIC_LIBRARIES :=
+ifneq ($(TARGET_SIMULATOR),true)
+LOCAL_STATIC_LIBRARIES := libmtp libusbhost
+endif
 
 LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
@@ -32,6 +39,7 @@ LOCAL_C_INCLUDES += \
     frameworks/base/media/libstagefright/codecs/amrnb/enc/src \
     frameworks/base/media/libstagefright/codecs/amrnb/common \
     frameworks/base/media/libstagefright/codecs/amrnb/common/include \
+    frameworks/base/media/mtp \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, corecg graphics)

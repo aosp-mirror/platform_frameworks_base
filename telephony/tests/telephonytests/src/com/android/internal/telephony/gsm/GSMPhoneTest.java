@@ -18,27 +18,21 @@ package com.android.internal.telephony.gsm;
 
 import android.os.AsyncResult;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.telephony.ServiceState;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
-import android.util.Log;
 
 import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.MmiCode;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.TestPhoneNotifier;
 import com.android.internal.telephony.gsm.CallFailCause;
 import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.GSMTestHandler;
 import com.android.internal.telephony.gsm.GsmMmiCode;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
-import com.android.internal.telephony.test.SimulatedCommands;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;

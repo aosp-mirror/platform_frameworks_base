@@ -19,12 +19,16 @@ package android.graphics;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
+import android.util.Finalizers;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class Bitmap implements Parcelable {
     /**
@@ -35,9 +39,13 @@ public final class Bitmap implements Parcelable {
      */
     public static final int DENSITY_NONE = 0;
     
-    // Note:  mNativeBitmap is used by FaceDetector_jni.cpp
-    // Don't change/rename without updating FaceDetector_jni.cpp
-    private final int mNativeBitmap;
+    /**
+     * Note:  mNativeBitmap is used by FaceDetector_jni.cpp
+     * Don't change/rename without updating FaceDetector_jni.cpp
+     * 
+     * @hide
+     */
+    public final int mNativeBitmap;
 
     private final boolean mIsMutable;
     private byte[] mNinePatchChunk;   // may be null
@@ -51,7 +59,7 @@ public final class Bitmap implements Parcelable {
     private static volatile Matrix sScaleMatrix;
 
     private static volatile int sDefaultDensity = -1;
-    
+
     /**
      * For backwards compatibility, allows the app layer to change the default
      * density when running old apps.
@@ -77,8 +85,7 @@ public final class Bitmap implements Parcelable {
 
         This can be called from JNI code.
     */
-    private Bitmap(int nativeBitmap, boolean isMutable, byte[] ninePatchChunk,
-            int density) {
+    private Bitmap(int nativeBitmap, boolean isMutable, byte[] ninePatchChunk, int density) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
         }
@@ -89,6 +96,13 @@ public final class Bitmap implements Parcelable {
         mNinePatchChunk = ninePatchChunk;
         if (density >= 0) {
             mDensity = density;
+        }
+
+        // If the finalizers queue is null, we are running in zygote and the
+        // bitmap will never be reclaimed, so we don't need to run our native
+        // destructor
+        if (Finalizers.getQueue() != null) {
+            new BitmapFinalizer(this);
         }
     }
 
@@ -171,6 +185,19 @@ public final class Bitmap implements Parcelable {
         return mRecycled;
     }
 
+    /**
+     * Returns the generation ID of this bitmap. The generation ID changes
+     * whenever the bitmap is modified. This can be used as an efficient way to
+     * check if a bitmap has changed.
+     * 
+     * @return The current generation ID for this bitmap.
+     * 
+     * @hide
+     */
+    public int getGenerationId() {
+        return nativeGenerationId(mNativeBitmap);
+    }
+    
     /**
      * This is called by methods that want to throw an exception if the bitmap
      * has already been recycled.
@@ -419,28 +446,30 @@ public final class Bitmap implements Parcelable {
         Rect srcR = new Rect(x, y, x + width, y + height);
         RectF dstR = new RectF(0, 0, width, height);
 
+        final Config newConfig = source.getConfig() == Config.ARGB_8888 ?
+                Config.ARGB_8888 : Config.RGB_565;
+
         if (m == null || m.isIdentity()) {
-            bitmap = createBitmap(neww, newh,
-                    source.hasAlpha() ? Config.ARGB_8888 : Config.RGB_565);
+            bitmap = createBitmap(neww, newh, newConfig, source.hasAlpha());
             paint = null;   // not needed
         } else {
-            /*  the dst should have alpha if the src does, or if our matrix
-                doesn't preserve rectness
-            */
-            boolean hasAlpha = source.hasAlpha() || !m.rectStaysRect();
+            final boolean transformed = !m.rectStaysRect();
+
             RectF deviceR = new RectF();
             m.mapRect(deviceR, dstR);
+
             neww = Math.round(deviceR.width());
             newh = Math.round(deviceR.height());
-            bitmap = createBitmap(neww, newh, hasAlpha ? Config.ARGB_8888 : Config.RGB_565);
-            if (hasAlpha) {
-                bitmap.eraseColor(0);
-            }
+
+            bitmap = createBitmap(neww, newh, transformed ? Config.ARGB_8888 : newConfig,
+                    transformed || source.hasAlpha());
+
             canvas.translate(-deviceR.left, -deviceR.top);
             canvas.concat(m);
+
             paint = new Paint();
             paint.setFilterBitmap(filter);
-            if (!m.rectStaysRect()) {
+            if (transformed) {
                 paint.setAntiAlias(true);
             }
         }
@@ -465,8 +494,30 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalArgumentException if the width or height are <= 0
      */
     public static Bitmap createBitmap(int width, int height, Config config) {
+        return createBitmap(width, height, config, true);
+    }
+
+    /**
+     * Returns a mutable bitmap with the specified width and height.  Its
+     * initial density is as per {@link #getDensity}.
+     *
+     * @param width    The width of the bitmap
+     * @param height   The height of the bitmap
+     * @param config   The bitmap config to create.
+     * @param hasAlpha If the bitmap is ARGB_8888 this flag can be used to mark the
+     *                 bitmap as opaque. Doing so will clear the bitmap in black
+     *                 instead of transparent.  
+     * 
+     * @throws IllegalArgumentException if the width or height are <= 0
+     */
+    private static Bitmap createBitmap(int width, int height, Config config, boolean hasAlpha) {
         Bitmap bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true);
-        bm.eraseColor(0);    // start with black/transparent pixels
+        if (config == Config.ARGB_8888 && !hasAlpha) {
+            bm.eraseColor(0xff000000);
+            nativeSetHasAlpha(bm.mNativeBitmap, hasAlpha);
+        } else {
+            bm.eraseColor(0);
+        }
         return bm;
     }
 
@@ -999,12 +1050,22 @@ public final class Bitmap implements Parcelable {
         nativePrepareToDraw(mNativeBitmap);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
+    private static class BitmapFinalizer extends Finalizers.ReclaimableReference<Bitmap> {
+        private static final Set<BitmapFinalizer> sFinalizers = Collections.synchronizedSet(
+                new HashSet<BitmapFinalizer>());
+
+        private int mNativeBitmap;
+
+        BitmapFinalizer(Bitmap b) {
+            super(b, Finalizers.getQueue());
+            mNativeBitmap = b.mNativeBitmap;
+            sFinalizers.add(this);
+        }
+
+        @Override
+        public void reclaim() {
             nativeDestructor(mNativeBitmap);
-        } finally {
-            super.finalize();
+            sFinalizers.remove(this);
         }
     }
 
@@ -1041,6 +1102,7 @@ public final class Bitmap implements Parcelable {
     private static native void nativeCopyPixelsToBuffer(int nativeBitmap,
                                                         Buffer dst);
     private static native void nativeCopyPixelsFromBuffer(int nb, Buffer src);
+    private static native int nativeGenerationId(int nativeBitmap);
 
     private static native Bitmap nativeCreateFromParcel(Parcel p);
     // returns true on success
@@ -1056,7 +1118,7 @@ public final class Bitmap implements Parcelable {
     private static native void nativePrepareToDraw(int nativeBitmap);
     private static native void nativeSetHasAlpha(int nBitmap, boolean hasAlpha);
     private static native boolean nativeSameAs(int nb0, int nb1);
-
+    
     /* package */ final int ni() {
         return mNativeBitmap;
     }

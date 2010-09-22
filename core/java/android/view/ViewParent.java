@@ -162,6 +162,20 @@ public interface ViewParent {
     public void createContextMenu(ContextMenu menu);
 
     /**
+     * Start an action mode for the specified view.
+     * <p>
+     * In most cases, a subclass does not need to override this. However, if the
+     * subclass is added directly to the window manager (for example,
+     * {@link ViewManager#addView(View, android.view.ViewGroup.LayoutParams)})
+     * then it should override this and start the action mode.
+     *
+     * @param originalView The source view where the action mode was first invoked
+     * @param callback The callback that will handle lifecycle events for the action mode
+     * @return The new action mode if it was started, null otherwise
+     */
+    public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback);
+
+    /**
      * This method is called on the parent when a child's drawable state
      * has changed.
      *

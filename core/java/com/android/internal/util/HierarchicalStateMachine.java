@@ -1197,6 +1197,35 @@ public class HierarchicalStateMachine {
     }
 
     /**
+     * Get a message and set Message.target = this,
+     * what, arg1 and arg2
+     *
+     * @param what  is assigned to Message.what
+     * @param arg1  is assigned to Message.arg1
+     * @param arg2  is assigned to Message.arg2
+     * @return  A Message object from the global pool.
+     */
+    public final Message obtainMessage(int what, int arg1, int arg2)
+    {
+        return Message.obtain(mHsmHandler, what, arg1, arg2);
+    }
+
+    /**
+     * Get a message and set Message.target = this,
+     * what, arg1, arg2 and obj
+     *
+     * @param what  is assigned to Message.what
+     * @param arg1  is assigned to Message.arg1
+     * @param arg2  is assigned to Message.arg2
+     * @param obj is assigned to Message.obj
+     * @return  A Message object from the global pool.
+     */
+    public final Message obtainMessage(int what, int arg1, int arg2, Object obj)
+    {
+        return Message.obtain(mHsmHandler, what, arg1, arg2, obj);
+    }
+
+    /**
      * Enqueue a message to this state machine.
      */
     public final void sendMessage(int what) {

@@ -2366,7 +2366,7 @@ ResourceTable::validateLocalizations(void)
         if (configSet.count(defaultLocale) == 0) {
             fprintf(stdout, "aapt: warning: string '%s' has no default translation in %s; found:",
                     String8(nameIter->first).string(), mBundle->getResourceSourceDirs()[0]);
-            for (set<String8>::iterator locales = configSet.begin();
+            for (set<String8>::const_iterator locales = configSet.begin();
                  locales != configSet.end();
                  locales++) {
                 fprintf(stdout, " %s", (*locales).string());

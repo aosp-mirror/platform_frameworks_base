@@ -30,5 +30,6 @@ oneway interface IStatusBar
     void disable(int state);
     void animateExpand();
     void animateCollapse();
+    void setLightsOn(boolean on);
 }
 

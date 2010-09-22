@@ -30,20 +30,23 @@ extern "C" {
 typedef void * RsAdapter1D;
 typedef void * RsAdapter2D;
 typedef void * RsAllocation;
+typedef void * RsAnimation;
 typedef void * RsContext;
 typedef void * RsDevice;
 typedef void * RsElement;
 typedef void * RsFile;
+typedef void * RsFont;
 typedef void * RsSampler;
 typedef void * RsScript;
-typedef void * RsSimpleMesh;
+typedef void * RsMesh;
 typedef void * RsType;
 typedef void * RsLight;
+typedef void * RsObjectBase;
 
 typedef void * RsProgram;
 typedef void * RsProgramVertex;
 typedef void * RsProgramFragment;
-typedef void * RsProgramFragmentStore;
+typedef void * RsProgramStore;
 typedef void * RsProgramRaster;
 
 typedef void (* RsBitmapCallback_t)(void *);
@@ -60,7 +63,6 @@ void rsDeviceSetConfig(RsDevice, RsDeviceParam, int32_t value);
 RsContext rsContextCreate(RsDevice, uint32_t version);
 RsContext rsContextCreateGL(RsDevice, uint32_t version, bool useDepth);
 void rsContextDestroy(RsContext);
-void rsObjDestroyOOB(RsContext, void *);
 
 uint32_t rsContextGetMessage(RsContext, void *data, size_t *receiveLen, size_t bufferLen, bool wait);
 void rsContextInitToClient(RsContext);
@@ -83,11 +85,17 @@ enum RsDataType {
     RS_TYPE_UNSIGNED_32,
     RS_TYPE_UNSIGNED_64,
 
+    RS_TYPE_BOOLEAN,
+
     RS_TYPE_UNSIGNED_5_6_5,
     RS_TYPE_UNSIGNED_5_5_5_1,
     RS_TYPE_UNSIGNED_4_4_4_4,
 
-    RS_TYPE_ELEMENT,
+    RS_TYPE_MATRIX_4X4,
+    RS_TYPE_MATRIX_3X3,
+    RS_TYPE_MATRIX_2X2,
+
+    RS_TYPE_ELEMENT = 1000,
     RS_TYPE_TYPE,
     RS_TYPE_ALLOCATION,
     RS_TYPE_SAMPLER,
@@ -96,24 +104,17 @@ enum RsDataType {
     RS_TYPE_PROGRAM_FRAGMENT,
     RS_TYPE_PROGRAM_VERTEX,
     RS_TYPE_PROGRAM_RASTER,
-    RS_TYPE_PROGRAM_STORE
+    RS_TYPE_PROGRAM_STORE,
 };
 
 enum RsDataKind {
     RS_KIND_USER,
-    RS_KIND_COLOR,
-    RS_KIND_POSITION,
-    RS_KIND_TEXTURE,
-    RS_KIND_NORMAL,
-    RS_KIND_INDEX,
-    RS_KIND_POINT_SIZE,
 
-    RS_KIND_PIXEL_L,
+    RS_KIND_PIXEL_L = 7,
     RS_KIND_PIXEL_A,
     RS_KIND_PIXEL_LA,
     RS_KIND_PIXEL_RGB,
     RS_KIND_PIXEL_RGBA,
-
 };
 
 enum RsSamplerParam {
@@ -205,8 +206,70 @@ enum RsPrimitive {
 enum RsError {
     RS_ERROR_NONE,
     RS_ERROR_BAD_SHADER,
-    RS_ERROR_BAD_SCRIPT
+    RS_ERROR_BAD_SCRIPT,
+    RS_ERROR_BAD_VALUE,
+    RS_ERROR_OUT_OF_MEMORY
 };
+
+enum RsAnimationInterpolation {
+    RS_ANIMATION_INTERPOLATION_STEP,
+    RS_ANIMATION_INTERPOLATION_LINEAR,
+    RS_ANIMATION_INTERPOLATION_BEZIER,
+    RS_ANIMATION_INTERPOLATION_CARDINAL,
+    RS_ANIMATION_INTERPOLATION_HERMITE,
+    RS_ANIMATION_INTERPOLATION_BSPLINE
+};
+
+enum RsAnimationEdge {
+    RS_ANIMATION_EDGE_UNDEFINED,
+    RS_ANIMATION_EDGE_CONSTANT,
+    RS_ANIMATION_EDGE_GRADIENT,
+    RS_ANIMATION_EDGE_CYCLE,
+    RS_ANIMATION_EDGE_OSCILLATE,
+    RS_ANIMATION_EDGE_CYLE_RELATIVE
+};
+
+enum RsA3DClassID {
+    RS_A3D_CLASS_ID_UNKNOWN,
+    RS_A3D_CLASS_ID_MESH,
+    RS_A3D_CLASS_ID_TYPE,
+    RS_A3D_CLASS_ID_ELEMENT,
+    RS_A3D_CLASS_ID_ALLOCATION,
+    RS_A3D_CLASS_ID_PROGRAM_VERTEX,
+    RS_A3D_CLASS_ID_PROGRAM_RASTER,
+    RS_A3D_CLASS_ID_PROGRAM_FRAGMENT,
+    RS_A3D_CLASS_ID_PROGRAM_STORE,
+    RS_A3D_CLASS_ID_SAMPLER,
+    RS_A3D_CLASS_ID_ANIMATION,
+    RS_A3D_CLASS_ID_LIGHT,
+    RS_A3D_CLASS_ID_ADAPTER_1D,
+    RS_A3D_CLASS_ID_ADAPTER_2D,
+    RS_A3D_CLASS_ID_SCRIPT_C
+};
+
+enum RsCullMode {
+    RS_CULL_BACK,
+    RS_CULL_FRONT,
+    RS_CULL_NONE
+};
+
+typedef struct {
+    RsA3DClassID classID;
+    const char* objectName;
+} RsFileIndexEntry;
+
+// Script to Script
+typedef struct {
+    uint32_t xStart;
+    uint32_t xEnd;
+    uint32_t yStart;
+    uint32_t yEnd;
+    uint32_t zStart;
+    uint32_t zEnd;
+    uint32_t arrayStart;
+    uint32_t arrayEnd;
+
+} RsScriptCall;
 
 #ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"

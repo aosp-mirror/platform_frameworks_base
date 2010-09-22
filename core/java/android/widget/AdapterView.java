@@ -228,7 +228,6 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         super(context, attrs, defStyle);
     }
 
-
     /**
      * Interface definition for a callback to be invoked when an item in this
      * AdapterView has been clicked.
@@ -629,6 +628,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * Sets the view to show if the adapter is empty
      */
+    @android.view.RemotableViewMethod
     public void setEmptyView(View emptyView) {
         mEmptyView = emptyView;
 

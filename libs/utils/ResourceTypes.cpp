@@ -317,6 +317,12 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
             mStringPoolSize =
                 (mHeader->header.size-mHeader->stringsStart)/charSize;
         } else {
+            // check invariant: styles starts before end of data
+            if (mHeader->stylesStart >= (mHeader->header.size-sizeof(uint16_t))) {
+                LOGW("Bad style block: style block starts at %d past data size of %d\n",
+                    (int)mHeader->stylesStart, (int)mHeader->header.size);
+                return (mError=BAD_TYPE);
+            }
             // check invariant: styles follow the strings
             if (mHeader->stylesStart <= mHeader->stringsStart) {
                 LOGW("Bad style block: style block starts at %d, before strings at %d\n",
@@ -1878,6 +1884,12 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
         outName->type = grp->basePackage->typeStrings.stringAt(t, &outName->typeLen);
         outName->name = grp->basePackage->keyStrings.stringAt(
             dtohl(entry->key.index), &outName->nameLen);
+
+        // If we have a bad index for some reason, we should abort.
+        if (outName->type == NULL || outName->name == NULL) {
+            return false;
+        }
+
         return true;
     }
 
@@ -2609,6 +2621,24 @@ bool ResTable::expandResourceRef(const uint16_t* refStr, size_t refLen,
         *outType = *defType;
     }
     *outName = String16(p, end-p);
+    if(**outPackage == 0) {
+        if(outErrorMsg) {
+            *outErrorMsg = "Resource package cannot be an empty string";
+        }
+        return false;
+    }
+    if(**outType == 0) {
+        if(outErrorMsg) {
+            *outErrorMsg = "Resource type cannot be an empty string";
+        }
+        return false;
+    }
+    if(**outName == 0) {
+        if(outErrorMsg) {
+            *outErrorMsg = "Resource id cannot be an empty string";
+        }
+        return false;
+    }
     return true;
 }
 
@@ -4127,13 +4157,16 @@ void ResTable::print(bool inclValues) const
                                     | (0x00ff0000 & ((typeIndex+1)<<16))
                                     | (0x0000ffff & (entryIndex));
                         resource_name resName;
-                        this->getResourceName(resID, &resName);
-                        printf("      spec resource 0x%08x %s:%s/%s: flags=0x%08x\n",
-                            resID,
-                            CHAR16_TO_CSTR(resName.package, resName.packageLen),
-                            CHAR16_TO_CSTR(resName.type, resName.typeLen),
-                            CHAR16_TO_CSTR(resName.name, resName.nameLen),
-                            dtohl(typeConfigs->typeSpecFlags[entryIndex]));
+                        if (this->getResourceName(resID, &resName)) {
+                            printf("      spec resource 0x%08x %s:%s/%s: flags=0x%08x\n",
+                                resID,
+                                CHAR16_TO_CSTR(resName.package, resName.packageLen),
+                                CHAR16_TO_CSTR(resName.type, resName.typeLen),
+                                CHAR16_TO_CSTR(resName.name, resName.nameLen),
+                                dtohl(typeConfigs->typeSpecFlags[entryIndex]));
+                        } else {
+                            printf("      INVALID TYPE CONFIG FOR RESOURCE 0x%08x\n", resID);
+                        }
                     }
                 }
                 for (size_t configIndex=0; configIndex<NTC; configIndex++) {
@@ -4340,11 +4373,14 @@ void ResTable::print(bool inclValues) const
                                     | (0x00ff0000 & ((typeIndex+1)<<16))
                                     | (0x0000ffff & (entryIndex));
                         resource_name resName;
-                        this->getResourceName(resID, &resName);
-                        printf("        resource 0x%08x %s:%s/%s: ", resID,
-                                CHAR16_TO_CSTR(resName.package, resName.packageLen),
-                                CHAR16_TO_CSTR(resName.type, resName.typeLen),
-                                CHAR16_TO_CSTR(resName.name, resName.nameLen));
+                        if (this->getResourceName(resID, &resName)) {
+                            printf("        resource 0x%08x %s:%s/%s: ", resID,
+                                    CHAR16_TO_CSTR(resName.package, resName.packageLen),
+                                    CHAR16_TO_CSTR(resName.type, resName.typeLen),
+                                    CHAR16_TO_CSTR(resName.name, resName.nameLen));
+                        } else {
+                            printf("        INVALID RESOURCE 0x%08x: ", resID);
+                        }
                         if ((thisOffset&0x3) != 0) {
                             printf("NON-INTEGER OFFSET: %p\n", (void*)thisOffset);
                             continue;
@@ -4402,18 +4438,19 @@ void ResTable::print(bool inclValues) const
                                 print_value(pkg, value);
                             } else if (bagPtr != NULL) {
                                 const int N = dtohl(bagPtr->count);
-                                const ResTable_map* mapPtr = (const ResTable_map*)
-                                        (((const uint8_t*)ent) + esize);
+                                const uint8_t* baseMapPtr = (const uint8_t*)ent;
+                                size_t mapOffset = esize;
+                                const ResTable_map* mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
                                 printf("          Parent=0x%08x, Count=%d\n",
                                     dtohl(bagPtr->parent.ident), N);
-                                for (int i=0; i<N; i++) {
+                                for (int i=0; i<N && mapOffset < (typeSize-sizeof(ResTable_map)); i++) {
                                     printf("          #%i (Key=0x%08x): ",
                                         i, dtohl(mapPtr->name.ident));
                                     value.copyFrom_dtoh(mapPtr->value);
                                     print_value(pkg, value);
                                     const size_t size = dtohs(mapPtr->value.size);
-                                    mapPtr = (ResTable_map*)(((const uint8_t*)mapPtr)
-                                            + size + sizeof(*mapPtr)-sizeof(mapPtr->value));
+                                    mapOffset += size + sizeof(*mapPtr)-sizeof(mapPtr->value);
+                                    mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
                                 }
                             }
                         }

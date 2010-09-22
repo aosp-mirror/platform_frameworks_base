@@ -269,14 +269,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             });
     }
 
-    public void addClient(IAccessibilityManagerClient client) {
+    public boolean addClient(IAccessibilityManagerClient client) {
         synchronized (mLock) {
-            try {
-                client.setEnabled(mIsEnabled);
-                mClients.add(client);
-            } catch (RemoteException re) {
-                Slog.w(LOG_TAG, "Dead AccessibilityManagerClient: " + client, re);
-            }
+            mClients.add(client);
+            return mIsEnabled;
         }
     }
 

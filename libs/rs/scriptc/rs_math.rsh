@@ -1,287 +1,222 @@
-// Float ops
+#ifndef __RS_MATH_RSH__
+#define __RS_MATH_RSH__
 
-extern float __attribute__((overloadable)) abs(float);
-extern float2 __attribute__((overloadable)) abs(float2);
-extern float3 __attribute__((overloadable)) abs(float3);
-extern float4 __attribute__((overloadable)) abs(float4);
-extern float8 __attribute__((overloadable)) abs(float8);
-extern float16 __attribute__((overloadable)) abs(float16);
+// Debugging, print to the LOG a description string and a value.
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix4x4 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix3x3 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix2x2 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, int);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, uint);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const void *);
+#define RS_DEBUG(a) rsDebug(#a, a)
+#define RS_DEBUG_MARKER rsDebug(__FILE__, __LINE__)
 
-extern float __attribute__((overloadable)) acos(float);
-extern float2 __attribute__((overloadable)) acos(float2);
-extern float3 __attribute__((overloadable)) acos(float3);
-extern float4 __attribute__((overloadable)) acos(float4);
-extern float8 __attribute__((overloadable)) acos(float8);
-extern float16 __attribute__((overloadable)) acos(float16);
 
-extern float __attribute__((overloadable)) asin(float);
-extern float2 __attribute__((overloadable)) asin(float2);
-extern float3 __attribute__((overloadable)) asin(float3);
-extern float4 __attribute__((overloadable)) asin(float4);
-extern float8 __attribute__((overloadable)) asin(float8);
-extern float16 __attribute__((overloadable)) asin(float16);
+#include "rs_cl.rsh"
+#include "rs_core.rsh"
 
-extern float __attribute__((overloadable)) atan(float);
-extern float2 __attribute__((overloadable)) atan(float2);
-extern float3 __attribute__((overloadable)) atan(float3);
-extern float4 __attribute__((overloadable)) atan(float4);
-extern float8 __attribute__((overloadable)) atan(float8);
-extern float16 __attribute__((overloadable)) atan(float16);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_element *dst, rs_element src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_type *dst, rs_type src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_allocation *dst, rs_allocation src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_sampler *dst, rs_sampler src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_script *dst, rs_script src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_mesh *dst, rs_mesh src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_program_fragment *dst, rs_program_fragment src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_program_vertex *dst, rs_program_vertex src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_program_raster *dst, rs_program_raster src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_program_store *dst, rs_program_store src);
+extern void __attribute__((overloadable))
+    rsSetObject(rs_font *dst, rs_font src);
 
-extern float __attribute__((overloadable)) atan2(float, float);
-extern float2 __attribute__((overloadable)) atan2(float2, float2);
-extern float3 __attribute__((overloadable)) atan2(float3, float3);
-extern float4 __attribute__((overloadable)) atan2(float4, float4);
-extern float8 __attribute__((overloadable)) atan2(float8, float8);
-extern float16 __attribute__((overloadable)) atan2(float16, float16);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_element *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_type *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_allocation *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_sampler *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_script *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_mesh *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_program_fragment *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_program_vertex *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_program_raster *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_program_store *dst);
+extern void __attribute__((overloadable))
+    rsClearObject(rs_font *dst);
 
-extern float __attribute__((overloadable)) ceil(float);
-extern float2 __attribute__((overloadable)) ceil(float2);
-extern float3 __attribute__((overloadable)) ceil(float3);
-extern float4 __attribute__((overloadable)) ceil(float4);
-extern float8 __attribute__((overloadable)) ceil(float8);
-extern float16 __attribute__((overloadable)) ceil(float16);
-
-extern float __attribute__((overloadable)) clamp(float, float, float);
-extern float2 __attribute__((overloadable)) clamp(float2, float2, float2);
-extern float3 __attribute__((overloadable)) clamp(float3, float3, float3);
-extern float4 __attribute__((overloadable)) clamp(float4, float4, float4);
-extern float8 __attribute__((overloadable)) clamp(float8, float8, float8);
-extern float16 __attribute__((overloadable)) clamp(float16, float16, float16);
-extern float __attribute__((overloadable)) clamp(float, float, float);
-extern float2 __attribute__((overloadable)) clamp(float2, float, float);
-extern float3 __attribute__((overloadable)) clamp(float3, float, float);
-extern float4 __attribute__((overloadable)) clamp(float4, float, float);
-extern float8 __attribute__((overloadable)) clamp(float8, float, float);
-extern float16 __attribute__((overloadable)) clamp(float16, float, float);
-
-extern float __attribute__((overloadable)) copysign(float, float);
-extern float2 __attribute__((overloadable)) copysign(float2, float2);
-extern float3 __attribute__((overloadable)) copysign(float3, float3);
-extern float4 __attribute__((overloadable)) copysign(float4, float4);
-extern float8 __attribute__((overloadable)) copysign(float8, float8);
-extern float16 __attribute__((overloadable)) copysign(float16, float16);
-
-extern float __attribute__((overloadable)) cos(float);
-extern float2 __attribute__((overloadable)) cos(float2);
-extern float3 __attribute__((overloadable)) cos(float3);
-extern float4 __attribute__((overloadable)) cos(float4);
-extern float8 __attribute__((overloadable)) cos(float8);
-extern float16 __attribute__((overloadable)) cos(float16);
-
-extern float __attribute__((overloadable)) degrees(float);
-extern float2 __attribute__((overloadable)) degrees(float2);
-extern float3 __attribute__((overloadable)) degrees(float3);
-extern float4 __attribute__((overloadable)) degrees(float4);
-extern float8 __attribute__((overloadable)) degrees(float8);
-extern float16 __attribute__((overloadable)) degrees(float16);
-
-extern float __attribute__((overloadable)) exp(float);
-extern float2 __attribute__((overloadable)) exp(float2);
-extern float3 __attribute__((overloadable)) exp(float3);
-extern float4 __attribute__((overloadable)) exp(float4);
-extern float8 __attribute__((overloadable)) exp(float8);
-extern float16 __attribute__((overloadable)) exp(float16);
-
-extern float __attribute__((overloadable)) exp2(float);
-extern float2 __attribute__((overloadable)) exp2(float2);
-extern float3 __attribute__((overloadable)) exp2(float3);
-extern float4 __attribute__((overloadable)) exp2(float4);
-extern float8 __attribute__((overloadable)) exp2(float8);
-extern float16 __attribute__((overloadable)) exp2(float16);
-
-extern float __attribute__((overloadable)) exp10(float);
-extern float2 __attribute__((overloadable)) exp10(float2);
-extern float3 __attribute__((overloadable)) exp10(float3);
-extern float4 __attribute__((overloadable)) exp10(float4);
-extern float8 __attribute__((overloadable)) exp10(float8);
-extern float16 __attribute__((overloadable)) exp10(float16);
-
-extern float __attribute__((overloadable)) fabs(float);
-extern float2 __attribute__((overloadable)) fabs(float2);
-extern float3 __attribute__((overloadable)) fabs(float3);
-extern float4 __attribute__((overloadable)) fabs(float4);
-extern float8 __attribute__((overloadable)) fabs(float8);
-extern float16 __attribute__((overloadable)) fabs(float16);
-
-extern float __attribute__((overloadable)) floor(float);
-extern float2 __attribute__((overloadable)) floor(float2);
-extern float3 __attribute__((overloadable)) floor(float3);
-extern float4 __attribute__((overloadable)) floor(float4);
-extern float8 __attribute__((overloadable)) floor(float8);
-extern float16 __attribute__((overloadable)) floor(float16);
-
-extern float __attribute__((overloadable)) fmax(float, float);
-extern float2 __attribute__((overloadable)) fmax(float2, float2);
-extern float3 __attribute__((overloadable)) fmax(float3, float3);
-extern float4 __attribute__((overloadable)) fmax(float4, float4);
-extern float8 __attribute__((overloadable)) fmax(float8, float8);
-extern float16 __attribute__((overloadable)) fmax(float16, float16);
-extern float2 __attribute__((overloadable)) fmax(float2, float);
-extern float3 __attribute__((overloadable)) fmax(float3, float);
-extern float4 __attribute__((overloadable)) fmax(float4, float);
-extern float8 __attribute__((overloadable)) fmax(float8, float);
-extern float16 __attribute__((overloadable)) fmax(float16, float);
-
-extern float __attribute__((overloadable)) fmin(float, float);
-extern float2 __attribute__((overloadable)) fmin(float2, float2);
-extern float3 __attribute__((overloadable)) fmin(float3, float3);
-extern float4 __attribute__((overloadable)) fmin(float4, float4);
-extern float8 __attribute__((overloadable)) fmin(float8, float8);
-extern float16 __attribute__((overloadable)) fmin(float16, float16);
-extern float2 __attribute__((overloadable)) fmin(float2, float);
-extern float3 __attribute__((overloadable)) fmin(float3, float);
-extern float4 __attribute__((overloadable)) fmin(float4, float);
-extern float8 __attribute__((overloadable)) fmin(float8, float);
-extern float16 __attribute__((overloadable)) fmin(float16, float);
-
-extern float __attribute__((overloadable)) fmod(float, float);
-extern float2 __attribute__((overloadable)) fmod(float2, float2);
-extern float3 __attribute__((overloadable)) fmod(float3, float3);
-extern float4 __attribute__((overloadable)) fmod(float4, float4);
-extern float8 __attribute__((overloadable)) fmod(float8, float8);
-extern float16 __attribute__((overloadable)) fmod(float16, float16);
-
-extern float __attribute__((overloadable)) log(float);
-extern float2 __attribute__((overloadable)) log(float2);
-extern float3 __attribute__((overloadable)) log(float3);
-extern float4 __attribute__((overloadable)) log(float4);
-extern float8 __attribute__((overloadable)) log(float8);
-extern float16 __attribute__((overloadable)) log(float16);
-
-extern float __attribute__((overloadable)) log2(float);
-extern float2 __attribute__((overloadable)) log2(float2);
-extern float3 __attribute__((overloadable)) log2(float3);
-extern float4 __attribute__((overloadable)) log2(float4);
-extern float8 __attribute__((overloadable)) log2(float8);
-extern float16 __attribute__((overloadable)) log2(float16);
-
-extern float __attribute__((overloadable)) log10(float);
-extern float2 __attribute__((overloadable)) log10(float2);
-extern float3 __attribute__((overloadable)) log10(float3);
-extern float4 __attribute__((overloadable)) log10(float4);
-extern float8 __attribute__((overloadable)) log10(float8);
-extern float16 __attribute__((overloadable)) log10(float16);
-
-extern float __attribute__((overloadable)) max(float, float);
-extern float2 __attribute__((overloadable)) max(float2, float2);
-extern float3 __attribute__((overloadable)) max(float3, float3);
-extern float4 __attribute__((overloadable)) max(float4, float4);
-extern float8 __attribute__((overloadable)) max(float8, float8);
-extern float16 __attribute__((overloadable)) max(float16, float16);
-
-extern float __attribute__((overloadable)) min(float, float);
-extern float2 __attribute__((overloadable)) min(float2, float2);
-extern float3 __attribute__((overloadable)) min(float3, float3);
-extern float4 __attribute__((overloadable)) min(float4, float4);
-extern float8 __attribute__((overloadable)) min(float8, float8);
-extern float16 __attribute__((overloadable)) min(float16, float16);
-
-extern float __attribute__((overloadable)) mix(float, float, float);
-extern float2 __attribute__((overloadable)) mix(float2, float2, float2);
-extern float3 __attribute__((overloadable)) mix(float3, float3, float3);
-extern float4 __attribute__((overloadable)) mix(float4, float4, float4);
-extern float8 __attribute__((overloadable)) mix(float8, float8, float8);
-extern float16 __attribute__((overloadable)) mix(float16, float16, float16);
-extern float __attribute__((overloadable)) mix(float, float, float);
-extern float2 __attribute__((overloadable)) mix(float2, float2, float);
-extern float3 __attribute__((overloadable)) mix(float3, float3, float);
-extern float4 __attribute__((overloadable)) mix(float4, float4, float);
-extern float8 __attribute__((overloadable)) mix(float8, float8, float);
-extern float16 __attribute__((overloadable)) mix(float16, float16, float);
-
-extern float __attribute__((overloadable)) pow(float, float);
-extern float2 __attribute__((overloadable)) pow(float2, float2);
-extern float3 __attribute__((overloadable)) pow(float3, float3);
-extern float4 __attribute__((overloadable)) pow(float4, float4);
-extern float8 __attribute__((overloadable)) pow(float8, float8);
-extern float16 __attribute__((overloadable)) pow(float16, float16);
-
-extern float __attribute__((overloadable)) radians(float);
-extern float2 __attribute__((overloadable)) radians(float2);
-extern float3 __attribute__((overloadable)) radians(float3);
-extern float4 __attribute__((overloadable)) radians(float4);
-extern float8 __attribute__((overloadable)) radians(float8);
-extern float16 __attribute__((overloadable)) radians(float16);
-
-extern float __attribute__((overloadable)) rint(float);
-extern float2 __attribute__((overloadable)) rint(float2);
-extern float3 __attribute__((overloadable)) rint(float3);
-extern float4 __attribute__((overloadable)) rint(float4);
-extern float8 __attribute__((overloadable)) rint(float8);
-extern float16 __attribute__((overloadable)) rint(float16);
-
-extern float __attribute__((overloadable)) round(float);
-extern float2 __attribute__((overloadable)) round(float2);
-extern float3 __attribute__((overloadable)) round(float3);
-extern float4 __attribute__((overloadable)) round(float4);
-extern float8 __attribute__((overloadable)) round(float8);
-extern float16 __attribute__((overloadable)) round(float16);
-
-extern float __attribute__((overloadable)) rsqrt(float);
-extern float2 __attribute__((overloadable)) rsqrt(float2);
-extern float3 __attribute__((overloadable)) rsqrt(float3);
-extern float4 __attribute__((overloadable)) rsqrt(float4);
-extern float8 __attribute__((overloadable)) rsqrt(float8);
-extern float16 __attribute__((overloadable)) rsqrt(float16);
-
-extern float __attribute__((overloadable)) sign(float);
-extern float2 __attribute__((overloadable)) sign(float2);
-extern float3 __attribute__((overloadable)) sign(float3);
-extern float4 __attribute__((overloadable)) sign(float4);
-extern float8 __attribute__((overloadable)) sign(float8);
-extern float16 __attribute__((overloadable)) sign(float16);
-
-extern float __attribute__((overloadable)) sin(float);
-extern float2 __attribute__((overloadable)) sin(float2);
-extern float3 __attribute__((overloadable)) sin(float3);
-extern float4 __attribute__((overloadable)) sin(float4);
-extern float8 __attribute__((overloadable)) sin(float8);
-extern float16 __attribute__((overloadable)) sin(float16);
-
-extern float __attribute__((overloadable)) sqrt(float);
-extern float2 __attribute__((overloadable)) sqrt(float2);
-extern float3 __attribute__((overloadable)) sqrt(float3);
-extern float4 __attribute__((overloadable)) sqrt(float4);
-extern float8 __attribute__((overloadable)) sqrt(float8);
-extern float16 __attribute__((overloadable)) sqrt(float16);
-
-extern float __attribute__((overloadable)) tan(float);
-extern float2 __attribute__((overloadable)) tan(float2);
-extern float3 __attribute__((overloadable)) tan(float3);
-extern float4 __attribute__((overloadable)) tan(float4);
-extern float8 __attribute__((overloadable)) tan(float8);
-extern float16 __attribute__((overloadable)) tan(float16);
-
-extern float __attribute__((overloadable)) trunc(float);
-extern float2 __attribute__((overloadable)) trunc(float2);
-extern float3 __attribute__((overloadable)) trunc(float3);
-extern float4 __attribute__((overloadable)) trunc(float4);
-extern float8 __attribute__((overloadable)) trunc(float8);
-extern float16 __attribute__((overloadable)) trunc(float16);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_element);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_type);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_allocation);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_sampler);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_script);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_mesh);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_program_fragment);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_program_vertex);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_program_raster);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_program_store);
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_font);
 
 
 
+// Allocations
+
+// Return the rs_allocation associated with a bound data
+// pointer.
+extern rs_allocation __attribute__((overloadable))
+    rsGetAllocation(const void *);
+
+// Mark the allocation dirty and notify those using it
+extern void __attribute__((overloadable))
+    rsAllocationMarkDirty(rs_allocation);
+
+// Return the dimensions associated with an allocation.
+extern uint32_t __attribute__((overloadable))
+    rsAllocationGetDimX(rs_allocation);
+extern uint32_t __attribute__((overloadable))
+    rsAllocationGetDimY(rs_allocation);
+extern uint32_t __attribute__((overloadable))
+    rsAllocationGetDimZ(rs_allocation);
+extern uint32_t __attribute__((overloadable))
+    rsAllocationGetDimLOD(rs_allocation);
+extern uint32_t __attribute__((overloadable))
+    rsAllocationGetDimFaces(rs_allocation);
+
+// Extract a single element from an allocation.
+extern const void * __attribute__((overloadable))
+    rsGetElementAt(rs_allocation, uint32_t x);
+extern const void * __attribute__((overloadable))
+    rsGetElementAt(rs_allocation, uint32_t x, uint32_t y);
+extern const void * __attribute__((overloadable))
+    rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
+
+// Return a random value between 0 (or min_value) and max_malue.
+extern int __attribute__((overloadable))
+    rsRand(int max_value);
+extern int __attribute__((overloadable))
+    rsRand(int min_value, int max_value);
+extern float __attribute__((overloadable))
+    rsRand(float max_value);
+extern float __attribute__((overloadable))
+    rsRand(float min_value, float max_value);
+
+// return the fractional part of a float
+// min(v - ((int)floor(v)), 0x1.fffffep-1f);
+extern float __attribute__((overloadable))
+    rsFrac(float);
+
+// time
+extern int32_t __attribute__((overloadable))
+    rsSecond(void);
+extern int32_t __attribute__((overloadable))
+    rsMinute(void);
+extern int32_t __attribute__((overloadable))
+    rsHour(void);
+extern int32_t __attribute__((overloadable))
+    rsDay(void);
+extern int32_t __attribute__((overloadable))
+    rsMonth(void);
+extern int32_t __attribute__((overloadable))
+    rsYear(void);
+
+// Return the current system clock in milliseconds
+extern int64_t __attribute__((overloadable))
+    rsUptimeMillis(void);
+
+// Return the current system clock in nanoseconds
+extern int64_t __attribute__((overloadable))
+    rsUptimeNanos(void);
+
+// Return the time in seconds since function was last called in this script.
+extern float __attribute__((overloadable))
+    rsGetDt(void);
+
+// Send a message back to the client.  Will not block and returns true
+// if the message was sendable and false if the fifo was full.
+// A message ID is required.  Data payload is optional.
+extern bool __attribute__((overloadable))
+    rsSendToClient(int cmdID);
+extern bool __attribute__((overloadable))
+    rsSendToClient(int cmdID, const void *data, uint len);
+
+// Send a message back to the client, blocking until the message is queued.
+// A message ID is required.  Data payload is optional.
+extern void __attribute__((overloadable))
+    rsSendToClientBlocking(int cmdID);
+extern void __attribute__((overloadable))
+    rsSendToClientBlocking(int cmdID, const void *data, uint len);
 
 
+// Script to Script
+enum rs_for_each_strategy {
+    RS_FOR_EACH_STRATEGY_SERIAL,
+    RS_FOR_EACH_STRATEGY_DONT_CARE,
+    RS_FOR_EACH_STRATEGY_DST_LINEAR,
+    RS_FOR_EACH_STRATEGY_TILE_SMALL,
+    RS_FOR_EACH_STRATEGY_TILE_MEDIUM,
+    RS_FOR_EACH_STRATEGY_TILE_LARGE
+};
 
-// Int ops
+typedef struct rs_script_call {
+    enum rs_for_each_strategy strategy;
+    uint32_t xStart;
+    uint32_t xEnd;
+    uint32_t yStart;
+    uint32_t yEnd;
+    uint32_t zStart;
+    uint32_t zEnd;
+    uint32_t arrayStart;
+    uint32_t arrayEnd;
+} rs_script_call_t;
 
-extern int __attribute__((overloadable)) abs(int);
-extern int2 __attribute__((overloadable)) abs(int2);
-extern int3 __attribute__((overloadable)) abs(int3);
-extern int4 __attribute__((overloadable)) abs(int4);
-extern int8 __attribute__((overloadable)) abs(int8);
-extern int16 __attribute__((overloadable)) abs(int16);
+extern void __attribute__((overloadable))
+    rsForEach(rs_script script, rs_allocation input,
+              rs_allocation output, const void * usrData);
 
+extern void __attribute__((overloadable))
+    rsForEach(rs_script script, rs_allocation input,
+              rs_allocation output, const void * usrData,
+              const rs_script_call_t *);
 
-
-/*
-extern float modf(float, float);
-extern float randf(float);
-extern float randf2(float, float);
-extern float fracf(float);
-extern float lerpf(float, float, float);
-extern float mapf(float, float, float, float, float);
-*/
-
+#endif

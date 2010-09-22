@@ -131,7 +131,7 @@ public final class DrmStore
      * Utility function for inserting a file stream into the DRM content provider.
      *
      * @param cr The content resolver to use
-     * @param fileStream The FileInputStream to insert
+     * @param fis The FileInputStream to insert
      * @param title The title for the content (or null)
      * @return uri to the DRM record or null
      */
@@ -143,11 +143,11 @@ public final class DrmStore
             DrmRawContent content = new DrmRawContent(fis, (int) fis.available(),
                     DrmRawContent.DRM_MIMETYPE_MESSAGE_STRING);
             String mimeType = content.getContentType();
+            long size = fis.getChannel().size();
 
             DrmRightsManager manager = manager = DrmRightsManager.getInstance();
             DrmRights rights = manager.queryRights(content);
             InputStream stream = content.getContentInputStream(rights);
-            long size = stream.available();
 
             Uri contentUri = null;
             if (mimeType.startsWith("audio/")) {

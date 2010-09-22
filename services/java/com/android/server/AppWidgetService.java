@@ -426,6 +426,40 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
+    public void partiallyUpdateAppWidgetIds(int[] appWidgetIds, RemoteViews views) {
+        if (appWidgetIds == null) {
+            return;
+        }
+        if (appWidgetIds.length == 0) {
+            return;
+        }
+        final int N = appWidgetIds.length;
+
+        synchronized (mAppWidgetIds) {
+            for (int i=0; i<N; i++) {
+                AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
+                updateAppWidgetInstanceLocked(id, views, true);
+            }
+        }
+    }
+
+    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
+        if (appWidgetIds == null) {
+            return;
+        }
+        if (appWidgetIds.length == 0) {
+            return;
+        }
+        final int N = appWidgetIds.length;
+
+        synchronized (mAppWidgetIds) {
+            for (int i=0; i<N; i++) {
+                AppWidgetId id = lookupAppWidgetIdLocked(appWidgetIds[i]);
+                notifyAppWidgetViewDataChangedInstanceLocked(id, viewId);
+            }
+        }
+    }
+
     public void updateAppWidgetProvider(ComponentName provider, RemoteViews views) {
         synchronized (mAppWidgetIds) {
             Provider p = lookupProviderLocked(provider);
@@ -443,17 +477,42 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     void updateAppWidgetInstanceLocked(AppWidgetId id, RemoteViews views) {
+        updateAppWidgetInstanceLocked(id, views, false);
+    }
+
+    void updateAppWidgetInstanceLocked(AppWidgetId id, RemoteViews views, boolean isPartialUpdate) {
         // allow for stale appWidgetIds and other badness
         // lookup also checks that the calling process can access the appWidgetId
         // drop unbound appWidgetIds (shouldn't be possible under normal circumstances)
         if (id != null && id.provider != null && !id.provider.zombie && !id.host.zombie) {
-            id.views = views;
+
+            // We do not want to save this RemoteViews
+            if (!isPartialUpdate) id.views = views;
 
             // is anyone listening?
             if (id.host.callbacks != null) {
                 try {
                     // the lock is held, but this is a oneway call
                     id.host.callbacks.updateAppWidget(id.appWidgetId, views);
+                } catch (RemoteException e) {
+                    // It failed; remove the callback. No need to prune because
+                    // we know that this host is still referenced by this instance.
+                    id.host.callbacks = null;
+                }
+            }
+        }
+    }
+
+    void notifyAppWidgetViewDataChangedInstanceLocked(AppWidgetId id, int viewId) {
+        // allow for stale appWidgetIds and other badness
+        // lookup also checks that the calling process can access the appWidgetId
+        // drop unbound appWidgetIds (shouldn't be possible under normal circumstances)
+        if (id != null && id.provider != null && !id.provider.zombie && !id.host.zombie) {
+            // is anyone listening?
+            if (id.host.callbacks != null) {
+                try {
+                    // the lock is held, but this is a oneway call
+                    id.host.callbacks.viewDataChanged(id.appWidgetId, viewId);
                 } catch (RemoteException e) {
                     // It failed; remove the callback. No need to prune because
                     // we know that this host is still referenced by this instance.
@@ -742,6 +801,9 @@ class AppWidgetService extends IAppWidgetService.Stub
             }
             info.label = activityInfo.loadLabel(mPackageManager).toString();
             info.icon = ri.getIconResource();
+            info.previewImage = sa.getResourceId(
+            		com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
+
             sa.recycle();
         } catch (Exception e) {
             // Ok to catch Exception here, because anything going wrong because

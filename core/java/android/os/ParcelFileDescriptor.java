@@ -134,6 +134,45 @@ public class ParcelFileDescriptor implements Parcelable {
     private static native FileDescriptor getFileDescriptorFromSocket(Socket socket);
 
     /**
+     * Create two ParcelFileDescriptors structured as a data pipe.  The first
+     * ParcelFileDescriptor in the returned array is the read side; the second
+     * is the write side.
+     */
+    public static ParcelFileDescriptor[] createPipe() throws IOException {
+        FileDescriptor[] fds = new FileDescriptor[2];
+        int res = createPipeNative(fds);
+        if (res == 0) {
+            ParcelFileDescriptor[] pfds = new ParcelFileDescriptor[2];
+            pfds[0] = new ParcelFileDescriptor(fds[0]);
+            pfds[1] = new ParcelFileDescriptor(fds[1]);
+            return pfds;
+        }
+        throw new IOException("Unable to create pipe: errno=" + -res);
+    }
+
+    private static native int createPipeNative(FileDescriptor[] outFds);
+
+    /**
+     * Gets a file descriptor for a read-only copy of the given data.
+     *
+     * @param data Data to copy.
+     * @param name Name for the shared memory area that may back the file descriptor.
+     *        This is purely informative and may be {@code null}.
+     * @return A ParcelFileDescriptor.
+     * @throws IOException if there is an error while creating the shared memory area.
+     */
+    public static ParcelFileDescriptor fromData(byte[] data, String name) throws IOException {
+        if (data == null) return null;
+        MemoryFile file = new MemoryFile(name, data.length);
+        if (data.length > 0) {
+            file.writeBytes(data, 0, 0, data.length);
+        }
+        file.deactivate();
+        FileDescriptor fd = file.getFileDescriptor();
+        return fd != null ? new ParcelFileDescriptor(fd) : null;
+    }
+
+    /**
      * Retrieve the actual FileDescriptor associated with this object.
      * 
      * @return Returns the FileDescriptor associated with this object.

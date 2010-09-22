@@ -43,7 +43,8 @@ public:
             const char *url, const KeyedVector<String8, String8> *headers);
 
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length);
-    virtual status_t    setVideoSurface(const sp<ISurface>& surface);
+    virtual status_t    setVideoISurface(const sp<ISurface>& surface);
+    virtual status_t    setVideoSurface(const sp<Surface>& surface);
     virtual status_t    prepare();
     virtual status_t    prepareAsync();
     virtual status_t    start();

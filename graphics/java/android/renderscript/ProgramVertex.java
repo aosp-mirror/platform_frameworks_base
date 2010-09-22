@@ -17,6 +17,7 @@
 package android.renderscript;
 
 
+import android.graphics.Matrix;
 import android.util.Config;
 import android.util.Log;
 
@@ -36,25 +37,6 @@ public class ProgramVertex extends Program {
     public void bindAllocation(MatrixAllocation va) {
         mRS.validate();
         bindConstants(va.mAlloc, 0);
-    }
-
-
-    public static class Builder {
-        RenderScript mRS;
-        boolean mTextureMatrixEnable;
-
-        public Builder(RenderScript rs, Element in, Element out) {
-            mRS = rs;
-        }
-
-        public void setTextureMatrixEnable(boolean enable) {
-            mTextureMatrixEnable = enable;
-        }
-
-        public ProgramVertex create() {
-            int id = mRS.nProgramVertexCreate(mTextureMatrixEnable);
-            return new ProgramVertex(id, mRS);
-        }
     }
 
     public static class ShaderBuilder extends BaseProgramBuilder {
@@ -89,6 +71,68 @@ public class ProgramVertex extends Program {
         }
     }
 
+    public static class Builder extends ShaderBuilder {
+        boolean mTextureMatrixEnable;
+
+        public Builder(RenderScript rs, Element in, Element out) {
+            super(rs);
+        }
+        public Builder(RenderScript rs) {
+            super(rs);
+        }
+
+        public Builder setTextureMatrixEnable(boolean enable) {
+            mTextureMatrixEnable = enable;
+            return this;
+        }
+        static Type getConstantInputType(RenderScript rs) {
+            Element.Builder b = new Element.Builder(rs);
+            b.add(Element.MATRIX4X4(rs), "MV");
+            b.add(Element.MATRIX4X4(rs), "P");
+            b.add(Element.MATRIX4X4(rs), "TexMatrix");
+            b.add(Element.MATRIX4X4(rs), "MVP");
+
+            Type.Builder typeBuilder = new Type.Builder(rs, b.create());
+            typeBuilder.add(Dimension.X, 1);
+            return typeBuilder.create();
+        }
+
+        private void buildShaderString() {
+
+            mShader  = "//rs_shader_internal\n";
+            mShader += "varying vec4 varColor;\n";
+            mShader += "varying vec4 varTex0;\n";
+
+            mShader += "void main() {\n";
+            mShader += "  gl_Position = UNI_MVP * ATTRIB_position;\n";
+            mShader += "  gl_PointSize = 1.0;\n";
+
+            mShader += "  varColor = ATTRIB_color;\n";
+            if (mTextureMatrixEnable) {
+                mShader += "  varTex0 = UNI_TexMatrix * ATTRIB_texture0;\n";
+            } else {
+                mShader += "  varTex0 = ATTRIB_texture0;\n";
+            }
+            mShader += "}\n";
+        }
+
+        @Override
+        public ProgramVertex create() {
+            buildShaderString();
+
+            addConstant(getConstantInputType(mRS));
+
+            Element.Builder b = new Element.Builder(mRS);
+            b.add(Element.F32_4(mRS), "position");
+            b.add(Element.F32_4(mRS), "color");
+            b.add(Element.F32_3(mRS), "normal");
+            b.add(Element.F32_4(mRS), "texture0");
+            addInput(b.create());
+
+            return super.create();
+        }
+    }
+
 
 
     public static class MatrixAllocation {
@@ -101,16 +145,17 @@ public class ProgramVertex extends Program {
         Matrix4f mTexture;
 
         public Allocation mAlloc;
+        private FieldPacker mIOBuffer;
 
         public MatrixAllocation(RenderScript rs) {
-            mModel = new Matrix4f();
-            mProjection = new Matrix4f();
-            mTexture = new Matrix4f();
-
-            mAlloc = Allocation.createSized(rs, Element.createUser(rs, Element.DataType.FLOAT_32), 48);
-            mAlloc.subData1D(MODELVIEW_OFFSET, 16, mModel.mMat);
-            mAlloc.subData1D(PROJECTION_OFFSET, 16, mProjection.mMat);
-            mAlloc.subData1D(TEXTURE_OFFSET, 16, mTexture.mMat);
+            Type constInputType = ProgramVertex.Builder.getConstantInputType(rs);
+            mAlloc = Allocation.createTyped(rs, constInputType);
+            int bufferSize = constInputType.getElement().getSizeBytes()*
+                             constInputType.getElementCount();
+            mIOBuffer = new FieldPacker(bufferSize);
+            loadModelview(new Matrix4f());
+            loadProjection(new Matrix4f());
+            loadTexture(new Matrix4f());
         }
 
         public void destroy() {
@@ -118,24 +163,32 @@ public class ProgramVertex extends Program {
             mAlloc = null;
         }
 
+        private void addToBuffer(int offset, Matrix4f m) {
+            mIOBuffer.reset(offset);
+            for(int i = 0; i < 16; i ++) {
+                mIOBuffer.addF32(m.mMat[i]);
+            }
+            mAlloc.data(mIOBuffer.getData());
+        }
+
         public void loadModelview(Matrix4f m) {
             mModel = m;
-            mAlloc.subData1D(MODELVIEW_OFFSET, 16, m.mMat);
+            addToBuffer(MODELVIEW_OFFSET*4, m);
         }
 
         public void loadProjection(Matrix4f m) {
             mProjection = m;
-            mAlloc.subData1D(PROJECTION_OFFSET, 16, m.mMat);
+            addToBuffer(PROJECTION_OFFSET*4, m);
         }
 
         public void loadTexture(Matrix4f m) {
             mTexture = m;
-            mAlloc.subData1D(TEXTURE_OFFSET, 16, m.mMat);
+            addToBuffer(TEXTURE_OFFSET*4, m);
         }
 
         public void setupOrthoWindow(int w, int h) {
             mProjection.loadOrtho(0,w, h,0, -1,1);
-            mAlloc.subData1D(PROJECTION_OFFSET, 16, mProjection.mMat);
+            addToBuffer(PROJECTION_OFFSET*4, mProjection);
         }
 
         public void setupOrthoNormalized(int w, int h) {
@@ -147,7 +200,7 @@ public class ProgramVertex extends Program {
                 float aspect = ((float)h) / w;
                 mProjection.loadOrtho(-1,1, -aspect,aspect,  -1,1);
             }
-            mAlloc.subData1D(PROJECTION_OFFSET, 16, mProjection.mMat);
+            addToBuffer(PROJECTION_OFFSET*4, mProjection);
         }
 
         public void setupProjectionNormalized(int w, int h) {
@@ -173,7 +226,7 @@ public class ProgramVertex extends Program {
             m1.loadMultiply(m1, m2);
 
             mProjection = m1;
-            mAlloc.subData1D(PROJECTION_OFFSET, 16, mProjection.mMat);
+            addToBuffer(PROJECTION_OFFSET*4, mProjection);
         }
 
     }

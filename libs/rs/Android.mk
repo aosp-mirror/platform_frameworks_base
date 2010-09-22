@@ -76,34 +76,44 @@ ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SRC_FILES:= \
 	rsAdapter.cpp \
 	rsAllocation.cpp \
+	rsAnimation.cpp \
 	rsComponent.cpp \
 	rsContext.cpp \
 	rsDevice.cpp \
 	rsElement.cpp \
-        rsFileA3D.cpp \
+	rsFileA3D.cpp \
+	rsFont.cpp \
 	rsLight.cpp \
 	rsLocklessFifo.cpp \
 	rsObjectBase.cpp \
 	rsMatrix.cpp \
-        rsMesh.cpp \
-	rsNoise.cpp \
+	rsMesh.cpp \
+	rsMutex.cpp \
 	rsProgram.cpp \
 	rsProgramFragment.cpp \
-	rsProgramFragmentStore.cpp \
+	rsProgramStore.cpp \
 	rsProgramRaster.cpp \
 	rsProgramVertex.cpp \
 	rsSampler.cpp \
 	rsScript.cpp \
 	rsScriptC.cpp \
 	rsScriptC_Lib.cpp \
-        rsShaderCache.cpp \
-	rsSimpleMesh.cpp \
+	rsScriptC_LibCL.cpp \
+	rsScriptC_LibGL.cpp \
+	rsShaderCache.cpp \
+	rsSignal.cpp \
+	rsStream.cpp \
 	rsThreadIO.cpp \
 	rsType.cpp \
 	rsVertexArray.cpp
 
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libacc
+LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc
+
+LOCAL_STATIC_LIBRARIES := libft2
+
+LOCAL_C_INCLUDES += external/freetype/include
+
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libRS
 LOCAL_MODULE_TAGS := optional

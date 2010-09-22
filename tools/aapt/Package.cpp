@@ -441,7 +441,7 @@ ssize_t processJarFile(ZipFile* jar, ZipFile* out)
 
 ssize_t processJarFiles(Bundle* bundle, ZipFile* zip)
 {
-    ssize_t err;
+    status_t err;
     ssize_t count = 0;
     const android::Vector<const char*>& jars = bundle->getJarFiles();
 

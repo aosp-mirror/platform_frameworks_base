@@ -16,6 +16,7 @@
 sources := \
     Binder.cpp \
     BpBinder.cpp \
+    CursorWindow.cpp \
     IInterface.cpp \
     IMemory.cpp \
     IPCThreadState.cpp \

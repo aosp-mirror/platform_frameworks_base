@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
     clz.cpp.arm \
     DisplayHardware/DisplayHardware.cpp \
     DisplayHardware/DisplayHardwareBase.cpp \
+    DisplayHardware/HWComposer.cpp \
     BlurFilter.cpp.arm \
     GLExtensions.cpp \
     Layer.cpp \
@@ -21,7 +22,7 @@ LOCAL_CFLAGS:= -DLOG_TAG=\"SurfaceFlinger\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 ifeq ($(TARGET_BOARD_PLATFORM), omap3)
-	LOCAL_CFLAGS += -DNO_RGBX_8888
+	LOCAL_CFLAGS += -DNO_RGBX_8888 -DHAS_PUSH_BUFFERS
 endif
 
 # need "-lrt" on Linux simulator to pick up clock_gettime

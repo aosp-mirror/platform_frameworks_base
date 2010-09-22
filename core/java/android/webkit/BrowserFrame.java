@@ -38,6 +38,8 @@ import android.view.WindowManager;
 
 import junit.framework.Assert;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
@@ -71,6 +73,8 @@ class BrowserFrame extends Handler {
     // that if the UI thread posts any messages after the message
     // queue has been cleared,they are ignored.
     private boolean mBlockMessages = false;
+
+    private static String sDataDirectory = "";
 
     // Is this frame the main frame?
     private boolean mIsMainFrame;
@@ -224,6 +228,11 @@ class BrowserFrame extends Handler {
         AssetManager am = context.getAssets();
         nativeCreateFrame(w, am, proxy.getBackForwardList());
 
+        if (sDataDirectory.length() == 0) {
+            String dir = appContext.getFilesDir().getAbsolutePath();
+            sDataDirectory =  dir.substring(0, dir.lastIndexOf('/'));
+        }
+
         if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
         }
@@ -291,6 +300,18 @@ class BrowserFrame extends Handler {
         }
         nativeLoadData(baseUrl, data, mimeType, encoding, historyUrl);
         mLoadInitFromJava = false;
+    }
+
+    /**
+     * Saves the contents of the frame as a web archive.
+     *
+     * @param basename The filename where the archive should be placed.
+     * @param autoname If false, takes filename to be a file. If true, filename
+     *                 is assumed to be a directory in which a filename will be
+     *                 chosen according to the url of the current page.
+     */
+    /* package */ String saveWebArchive(String basename, boolean autoname) {
+        return nativeSaveWebArchive(basename, autoname);
     }
 
     /**
@@ -510,12 +531,21 @@ class BrowserFrame extends Handler {
     private native String externalRepresentation();
 
     /**
-     * Retrieves the visual text of the current frame, puts it as the object for
+     * Retrieves the visual text of the frames, puts it as the object for
      * the message and sends the message.
      * @param callback the message to use to send the visual text
      */
     public void documentAsText(Message callback) {
-        callback.obj = documentAsText();;
+        StringBuilder text = new StringBuilder();
+        if (callback.arg1 != 0) {
+            // Dump top frame as text.
+            text.append(documentAsText());
+        }
+        if (callback.arg2 != 0) {
+            // Dump child frames as text.
+            text.append(childFramesAsText());
+        }
+        callback.obj = text.toString();
         callback.sendToTarget();
     }
 
@@ -523,6 +553,11 @@ class BrowserFrame extends Handler {
      * Return the text drawn on the screen as a string
      */
     private native String documentAsText();
+
+    /**
+     * Return the text drawn on the child frames as a string
+     */
+    private native String childFramesAsText();
 
     /*
      * This method is called by WebCore to inform the frame that
@@ -614,6 +649,104 @@ class BrowserFrame extends Handler {
             size = 0;
         }
         return size;
+    }
+
+    /**
+     * Called by JNI. Gets the applications data directory
+     * @return String The applications data directory
+     */
+    private static String getDataDirectory() {
+        return sDataDirectory;
+    }
+
+    /**
+     * Called by JNI.
+     * Read from an InputStream into a supplied byte[]
+     * This method catches any exceptions so they don't crash the JVM.
+     * @param inputStream InputStream to read from.
+     * @param output Bytearray that gets the output.
+     * @return the number of bytes read, or -i if then end of stream has been reached
+     */
+    private static int readFromStream(InputStream inputStream, byte[] output) {
+        try {
+            return inputStream.read(output);
+        } catch(java.io.IOException e) {
+            // If we get an exception, return end of stream
+            return -1;
+        }
+    }
+
+    /**
+     * Get the InputStream for an Android resource
+     * There are three different kinds of android resources:
+     * - file:///android_res
+     * - file:///android_asset
+     * - content://
+     * @param url The url to load.
+     * @return An InputStream to the android resource
+     */
+    private InputStream inputStreamForAndroidResource(String url, int type) {
+        final int RESOURCE = 1;
+        final int ASSET = 2;
+        final int CONTENT = 3;
+
+        if (type == RESOURCE) {
+            // file:///android_res
+            if (url == null || url.length() == 0) {
+                Log.e(LOGTAG, "url has length 0 " + url);
+                return null;
+            }
+            int slash = url.indexOf('/');
+            int dot = url.indexOf('.', slash);
+            if (slash == -1 || dot == -1) {
+                Log.e(LOGTAG, "Incorrect res path: " + url);
+                return null;
+            }
+            String subClassName = url.substring(0, slash);
+            String fieldName = url.substring(slash + 1, dot);
+            String errorMsg = null;
+            try {
+                final Class<?> d = mContext.getApplicationContext()
+                        .getClassLoader().loadClass(
+                                mContext.getPackageName() + ".R$"
+                                        + subClassName);
+                final java.lang.reflect.Field field = d.getField(fieldName);
+                final int id = field.getInt(null);
+                TypedValue value = new TypedValue();
+                mContext.getResources().getValue(id, value, true);
+                if (value.type == TypedValue.TYPE_STRING) {
+                    return mContext.getAssets().openNonAsset(
+                            value.assetCookie, value.string.toString(),
+                            AssetManager.ACCESS_STREAMING);
+                } else {
+                    // Old stack only supports TYPE_STRING for res files
+                    Log.e(LOGTAG, "not of type string: " + url);
+                    return null;
+                }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Exception: " + url);
+                return null;
+            }
+
+        } else if (type == ASSET) {
+            // file:///android_asset
+            try {
+                AssetManager assets = mContext.getAssets();
+                return assets.open(url, AssetManager.ACCESS_STREAMING);
+            } catch (IOException e) {
+                return null;
+            }
+        } else if (type == CONTENT) {
+            try {
+                Uri uri = Uri.parse(url);
+                return mContext.getContentResolver().openInputStream(uri);
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Exception: " + url);
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -842,6 +975,7 @@ class BrowserFrame extends Handler {
     private static final int FILE_UPLOAD_LABEL = 4;
     private static final int RESET_LABEL = 5;
     private static final int SUBMIT_LABEL = 6;
+    private static final int FILE_UPLOAD_NO_FILE_CHOSEN = 7;
 
     String getRawResFilename(int id) {
         int resid;
@@ -871,6 +1005,10 @@ class BrowserFrame extends Handler {
                 return mContext.getResources().getString(
                         com.android.internal.R.string.submit);
 
+            case FILE_UPLOAD_NO_FILE_CHOSEN:
+                return mContext.getResources().getString(
+                        com.android.internal.R.string.no_file_chosen);
+
             default:
                 Log.e(LOGTAG, "getRawResFilename got incompatible resource ID");
                 return "";
@@ -891,6 +1029,57 @@ class BrowserFrame extends Handler {
 
     private float density() {
         return mContext.getResources().getDisplayMetrics().density;
+    }
+
+    /**
+     * Called by JNI when the native HTTP stack gets an authentication request.
+     *
+     * We delegate the request to CallbackProxy, and route its response to
+     * {@link #nativeAuthenticationProceed(int, String, String)} or
+     * {@link #nativeAuthenticationCancel(int)}.
+     */
+    private void didReceiveAuthenticationChallenge(
+            final int handle, String host, String realm, final boolean useCachedCredentials) {
+
+        HttpAuthHandler handler = new HttpAuthHandler() {
+
+            private static final int AUTH_PROCEED = 1;
+            private static final int AUTH_CANCEL = 2;
+
+            @Override
+            public boolean useHttpAuthUsernamePassword() {
+                return useCachedCredentials;
+            }
+
+            @Override
+            public void proceed(String username, String password) {
+                Message msg = obtainMessage(AUTH_PROCEED);
+                msg.getData().putString("username", username);
+                msg.getData().putString("password", password);
+                sendMessage(msg);
+            }
+
+            @Override
+            public void cancel() {
+                sendMessage(obtainMessage(AUTH_CANCEL));
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case AUTH_PROCEED:
+                        String username = msg.getData().getString("username");
+                        String password = msg.getData().getString("password");
+                        nativeAuthenticationProceed(handle, username, password);
+                        break;
+
+                    case AUTH_CANCEL:
+                        nativeAuthenticationCancel(handle);
+                        break;
+                }
+            }
+        };
+        mCallbackProxy.onReceivedHttpAuthRequest(handler, host, realm);
     }
 
     //==========================================================================
@@ -1006,5 +1195,10 @@ class BrowserFrame extends Handler {
      */
     private native HashMap getFormTextData();
 
+    private native String nativeSaveWebArchive(String basename, boolean autoname);
+
     private native void nativeOrientationChanged(int orientation);
+
+    private native void nativeAuthenticationProceed(int handle, String username, String password);
+    private native void nativeAuthenticationCancel(int handle);
 }

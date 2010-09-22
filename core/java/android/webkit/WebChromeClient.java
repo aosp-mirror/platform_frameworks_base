@@ -314,28 +314,20 @@ public class WebChromeClient {
     /**
      * Tell the client to open a file chooser.
      * @param uploadFile A ValueCallback to set the URI of the file to upload.
-     *      onReceiveValue must be called to wake up the thread.
+     *      onReceiveValue must be called to wake up the thread.a
+     * @param acceptType The value of the 'accept' attribute of the input tag
+     *         associated with this file picker.
      * @hide
      */
-    public void openFileChooser(ValueCallback<Uri> uploadFile) {
+    public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType) {
         uploadFile.onReceiveValue(null);
     }
 
     /**
-     * Tell the client that the selection has been initiated.
+     * Tell the client that the page being viewed is web app capable,
+     * i.e. has specified the fullscreen-web-app-capable meta tag.
      * @hide
      */
-    public void onSelectionStart(WebView view) {
-        // By default we cancel the selection again, thus disabling
-        // text selection unless the chrome client supports it.
-        view.notifySelectDialogDismissed();
-    }
-
-    /**
-     * Tell the client that the selection has been copied or canceled.
-     * @hide
-     */
-    public void onSelectionDone(WebView view) {
-    }
+    public void setInstallableWebApp() { }
 
 }

@@ -90,6 +90,16 @@ public class SparseArray<E> {
         delete(key);
     }
 
+    /**
+     * Removes the mapping at the specified index.
+     */
+    public void removeAt(int index) {
+        if (mValues[index] != DELETED) {
+            mValues[index] = DELETED;
+            mGarbage = true;
+        }
+    }
+    
     private void gc() {
         // Log.e("SparseArray", "gc start with " + mSize);
 

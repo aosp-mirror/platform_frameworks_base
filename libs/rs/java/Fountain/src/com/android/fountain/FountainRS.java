@@ -22,94 +22,50 @@ import android.util.Log;
 
 
 public class FountainRS {
-    public static final int PART_COUNT = 20000;
-
-    static class SomeData {
-        public int x;
-        public int y;
-        public int rate;
-        public int count;
-        public float r;
-        public float g;
-        public float b;
-    }
+    public static final int PART_COUNT = 50000;
 
     public FountainRS() {
     }
 
+    private Resources mRes;
+    private RenderScriptGL mRS;
+    private ScriptC_fountain mScript;
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
-        initRS();
+
+        ProgramFragment.Builder pfb = new ProgramFragment.Builder(rs);
+        pfb.setVaryingColor(true);
+        rs.contextBindProgramFragment(pfb.create());
+
+        ScriptField_Point points = new ScriptField_Point(mRS, PART_COUNT);
+
+        Mesh.AllocationBuilder smb = new Mesh.AllocationBuilder(mRS);
+        smb.addVertexAllocation(points.getAllocation());
+        smb.addIndexType(Primitive.POINT);
+        Mesh sm = smb.create();
+
+        mScript = new ScriptC_fountain(mRS, mRes, R.raw.fountain, true);
+        mScript.set_partMesh(sm);
+        mScript.bind_point(points);
+        mRS.contextBindRootScript(mScript);
     }
 
-    public void newTouchPosition(int x, int y, int rate) {
-        if (mSD.rate == 0) {
-            mSD.r = ((x & 0x1) != 0) ? 0.f : 1.f;
-            mSD.g = ((x & 0x2) != 0) ? 0.f : 1.f;
-            mSD.b = ((x & 0x4) != 0) ? 0.f : 1.f;
-            if ((mSD.r + mSD.g + mSD.b) < 0.9f) {
-                mSD.r = 0.8f;
-                mSD.g = 0.5f;
-                mSD.b = 1.f;
-            }
+    boolean holdingColor[] = new boolean[10];
+    public void newTouchPosition(float x, float y, float pressure, int id) {
+        if (id > holdingColor.length) {
+            return;
         }
-        mSD.rate = rate;
-        mSD.x = x;
-        mSD.y = y;
-        mIntAlloc.data(mSD);
+        int rate = (int)(pressure * pressure * 500.f);
+        if(rate > 500) {
+            rate = 500;
+        }
+        if (rate > 0) {
+            mScript.invoke_addParticles(rate, x, y, id, !holdingColor[id]);
+            holdingColor[id] = true;
+        } else {
+            holdingColor[id] = false;
+        }
+
     }
-
-
-    /////////////////////////////////////////
-
-    private Resources mRes;
-
-    private RenderScriptGL mRS;
-    private Allocation mIntAlloc;
-    private SimpleMesh mSM;
-    private SomeData mSD;
-    private Type mSDType;
-
-    private void initRS() {
-        mSD = new SomeData();
-        mSDType = Type.createFromClass(mRS, SomeData.class, 1, "SomeData");
-        mIntAlloc = Allocation.createTyped(mRS, mSDType);
-        mSD.count = PART_COUNT;
-        mIntAlloc.data(mSD);
-
-        Element.Builder eb = new Element.Builder(mRS);
-        eb.add(Element.createVector(mRS, Element.DataType.FLOAT_32, 2), "delta");
-        eb.add(Element.createAttrib(mRS, Element.DataType.FLOAT_32, Element.DataKind.POSITION, 2), "position");
-        eb.add(Element.createAttrib(mRS, Element.DataType.UNSIGNED_8, Element.DataKind.COLOR, 4), "color");
-        Element primElement = eb.create();
-
-
-        SimpleMesh.Builder smb = new SimpleMesh.Builder(mRS);
-        int vtxSlot = smb.addVertexType(primElement, PART_COUNT);
-        smb.setPrimitive(Primitive.POINT);
-        mSM = smb.create();
-        mSM.setName("PartMesh");
-
-        Allocation partAlloc = mSM.createVertexAllocation(vtxSlot);
-        partAlloc.setName("PartBuffer");
-        mSM.bindVertexAllocation(partAlloc, 0);
-
-        // All setup of named objects should be done by this point
-        // because we are about to compile the script.
-        ScriptC.Builder sb = new ScriptC.Builder(mRS);
-        sb.setScript(mRes, R.raw.fountain);
-        sb.setRoot(true);
-        sb.setType(mSDType, "Control", 0);
-        sb.setType(mSM.getVertexType(0), "point", 1);
-        Script script = sb.create();
-        script.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-        script.bindAllocation(mIntAlloc, 0);
-        script.bindAllocation(partAlloc, 1);
-        mRS.contextBindRootScript(script);
-    }
-
 }
-
-

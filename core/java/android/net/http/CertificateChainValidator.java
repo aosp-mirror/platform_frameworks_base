@@ -80,14 +80,10 @@ class CertificateChainValidator {
             throws IOException {
         X509Certificate[] serverCertificates = null;
 
-        // start handshake, close the socket if we fail
-        try {
-            sslSocket.setUseClientMode(true);
-            sslSocket.startHandshake();
-        } catch (IOException e) {
-            closeSocketThrowException(
-                sslSocket, e.getMessage(),
-                "failed to perform SSL handshake");
+        // get a valid SSLSession, close the socket if we fail
+        SSLSession sslSession = sslSession = sslSocket.getSession();
+        if (!sslSession.isValid()) {
+            closeSocketThrowException(sslSocket, "failed to perform SSL handshake");
         }
 
         // retrieve the chain of the server peer certificates

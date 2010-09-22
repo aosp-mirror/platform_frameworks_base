@@ -152,7 +152,11 @@ public class PackageManagerHostTestUtils extends Assert {
         }
 
         CollectingTestRunListener listener = new CollectingTestRunListener();
-        testRunner.run(listener);
+        try {
+            testRunner.run(listener);
+        } catch (IOException ioe) {
+            Log.w(LOG_TAG, "encountered IOException " + ioe);
+        }
         return listener;
     }
 

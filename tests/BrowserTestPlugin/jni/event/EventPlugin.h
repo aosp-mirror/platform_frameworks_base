@@ -32,7 +32,7 @@ class EventPlugin : public SubPlugin {
 public:
     EventPlugin(NPP inst);
     virtual ~EventPlugin();
-    virtual int16 handleEvent(const ANPEvent* evt);
+    virtual int16_t handleEvent(const ANPEvent* evt);
 
 private:
     void drawPlugin(const ANPBitmap& bitmap, const ANPRectI& clip);

@@ -20,6 +20,14 @@ package android.graphics;
     an {@link android.graphics.Xfermode} subclass.
 */
 public class ComposeShader extends Shader {
+    /**
+     * Hold onto the shaders to avoid GC.
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
+    private final Shader mShaderA;
+    @SuppressWarnings({"UnusedDeclaration"})
+    private final Shader mShaderB;
+
     /** Create a new compose shader, given shaders A, B, and a combining mode.
         When the mode is applied, it will be given the result from shader A as its
         "dst", and the result of from shader B as its "src".
@@ -29,8 +37,18 @@ public class ComposeShader extends Shader {
                         is null, then SRC_OVER is assumed.
     */
     public ComposeShader(Shader shaderA, Shader shaderB, Xfermode mode) {
+        mShaderA = shaderA;
+        mShaderB = shaderB;
         native_instance = nativeCreate1(shaderA.native_instance, shaderB.native_instance,
-                                        (mode != null) ? mode.native_instance : 0);
+                (mode != null) ? mode.native_instance : 0);
+        if (mode instanceof PorterDuffXfermode) {
+            PorterDuff.Mode pdMode = ((PorterDuffXfermode) mode).mode;
+            native_shader = nativePostCreate2(native_instance, shaderA.native_shader,
+                    shaderB.native_shader, pdMode != null ? pdMode.nativeInt : 0);
+        } else {
+            native_shader = nativePostCreate1(native_instance, shaderA.native_shader,
+                    shaderB.native_shader, mode != null ? mode.native_instance : 0);
+        }
     }
 
     /** Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
@@ -41,11 +59,20 @@ public class ComposeShader extends Shader {
         @param mode     The PorterDuff mode that combines the colors from the two shaders.
     */
     public ComposeShader(Shader shaderA, Shader shaderB, PorterDuff.Mode mode) {
+        mShaderA = shaderA;
+        mShaderB = shaderB;
         native_instance = nativeCreate2(shaderA.native_instance, shaderB.native_instance,
-                                        mode.nativeInt);
+                mode.nativeInt);
+        native_shader = nativePostCreate2(native_instance, shaderA.native_shader,
+                shaderB.native_shader, mode.nativeInt);
     }
 
-    private static native int nativeCreate1(int native_shaderA, int native_shaderB, int native_mode);
-    private static native int nativeCreate2(int native_shaderA, int native_shaderB, int porterDuffMode);
+    private static native int nativeCreate1(int native_shaderA, int native_shaderB,
+            int native_mode);
+    private static native int nativeCreate2(int native_shaderA, int native_shaderB,
+            int porterDuffMode);
+    private static native int nativePostCreate1(int native_shader, int native_skiaShaderA,
+            int native_skiaShaderB, int native_mode);
+    private static native int nativePostCreate2(int native_shader, int native_skiaShaderA,
+            int native_skiaShaderB, int porterDuffMode);
 }
-

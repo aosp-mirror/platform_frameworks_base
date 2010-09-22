@@ -23,13 +23,14 @@ import android.database.CursorWindow;
  */
 public abstract class SQLiteClosable {
     private int mReferenceCount = 1;
-    private Object mLock = new Object();
+    private Object mLock = new Object(); // STOPSHIP remove this line
 
     protected abstract void onAllReferencesReleased();
     protected void onAllReferencesReleasedFromContainer() {}
 
     public void acquireReference() {
-        synchronized(mLock) {
+        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
+            checkRefCount();
             if (mReferenceCount <= 0) {
                 throw new IllegalStateException(
                         "attempt to re-open an already-closed object: " + getObjInfo());
@@ -39,7 +40,8 @@ public abstract class SQLiteClosable {
     }
 
     public void releaseReference() {
-        synchronized(mLock) {
+        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
+            checkRefCount();
             mReferenceCount--;
             if (mReferenceCount == 0) {
                 onAllReferencesReleased();
@@ -48,7 +50,8 @@ public abstract class SQLiteClosable {
     }
 
     public void releaseReferenceFromContainer() {
-        synchronized(mLock) {
+        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
+            checkRefCount();
             mReferenceCount--;
             if (mReferenceCount == 0) {
                 onAllReferencesReleasedFromContainer();
@@ -63,8 +66,7 @@ public abstract class SQLiteClosable {
         if (this instanceof SQLiteDatabase) {
             buff.append("database = ");
             buff.append(((SQLiteDatabase)this).getPath());
-        } else if (this instanceof SQLiteProgram || this instanceof SQLiteStatement ||
-                this instanceof SQLiteQuery) {
+        } else if (this instanceof SQLiteProgram) {
             buff.append("mSql = ");
             buff.append(((SQLiteProgram)this).mSql);
         } else if (this instanceof CursorWindow) {
@@ -73,5 +75,13 @@ public abstract class SQLiteClosable {
         }
         buff.append(") ");
         return buff.toString();
+    }
+
+    // STOPSHIP remove this method before shipping
+    private void checkRefCount() {
+        if (mReferenceCount > 1000) {
+            throw new IllegalStateException("bad refcount: " + mReferenceCount +
+                    ". file bug against frameworks->database" + getObjInfo());
+        }
     }
 }

@@ -1,0 +1,36 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="65sp"
+    android:orientation="vertical"
+    android:background="@android:drawable/status_bar_item_background"
+    >
+
+    <ImageButton
+        android:id="@+id/veto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/status_bar_veto"
+        android:background="@null"
+        android:padding="2dip"
+        />
+
+    <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/veto"
+        android:layout_width="match_parent"
+        android:layout_height="64sp"
+        android:focusable="true"
+        android:clickable="true"
+        android:paddingRight="6sp"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1sp"
+        android:layout_alignParentBottom="true"
+        android:background="@android:drawable/divider_horizontal_dark"
+        />
+
+</RelativeLayout>

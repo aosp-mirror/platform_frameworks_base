@@ -21,7 +21,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
@@ -35,10 +34,7 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.util.Config;
 import android.util.Log;
-import android.util.Xml;
 
 import com.android.internal.content.PackageHelper;
 import com.android.internal.telephony.RILConstants;
@@ -64,7 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 57;
+    private static final int DATABASE_VERSION = 58;
 
     private Context mContext;
 
@@ -734,6 +730,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 57;
         }
+
+        if (upgradeVersion == 57) {
+            /*
+             * New settings to:
+             *  1. Enable injection of accessibility scripts in WebViews.
+             *  2. Define the key bindings for traversing web content in WebViews.
+             */
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION,
+                        R.bool.def_accessibility_script_injection);
+                stmt.close();
+                stmt = db.compileStatement("INSERT INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadStringSetting(stmt, Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
+                        R.string.def_accessibility_web_content_key_bindings);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 58;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -876,7 +899,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String cls = parser.getAttributeValue(null, "class");
                 String shortcutStr = parser.getAttributeValue(null, "shortcut");
 
-                int shortcutValue = (int) shortcutStr.charAt(0);
+                int shortcutValue = shortcutStr.charAt(0);
                 if (TextUtils.isEmpty(shortcutStr)) {
                     Log.w(TAG, "Unable to get shortcut for: " + pkg + "/" + cls);
                 }
@@ -1068,6 +1091,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
             loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
                     R.bool.def_vibrate_in_silent);
+
+            loadBooleanSetting(stmt, Settings.System.USE_PTP_INTERFACE,
+                    R.bool.def_use_ptp_interface);
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -1184,6 +1210,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
             loadBooleanSetting(stmt, Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
                     R.bool.def_mount_ums_notify_enabled);
+
+            loadBooleanSetting(stmt, Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION,
+                    R.bool.def_accessibility_script_injection);
+
+            loadStringSetting(stmt, Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
+                    R.string.def_accessibility_web_content_key_bindings);
         } finally {
             if (stmt != null) stmt.close();
         }

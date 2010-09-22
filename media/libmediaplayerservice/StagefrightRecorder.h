@@ -24,8 +24,12 @@
 namespace android {
 
 class Camera;
+class CameraSource;
+class CameraSourceTimeLapse;
+class MediaSourceSplitter;
 struct MediaSource;
 struct MediaWriter;
+class MetaData;
 struct AudioSource;
 class MediaProfiles;
 
@@ -42,9 +46,10 @@ struct StagefrightRecorder : public MediaRecorderBase {
     virtual status_t setVideoSize(int width, int height);
     virtual status_t setVideoFrameRate(int frames_per_second);
     virtual status_t setCamera(const sp<ICamera>& camera);
-    virtual status_t setPreviewSurface(const sp<ISurface>& surface);
+    virtual status_t setPreviewSurface(const sp<Surface>& surface);
     virtual status_t setOutputFile(const char *path);
     virtual status_t setOutputFile(int fd, int64_t offset, int64_t length);
+    virtual status_t setOutputFileAuxiliary(int fd);
     virtual status_t setParameters(const String8& params);
     virtual status_t setListener(const sp<IMediaRecorderClient>& listener);
     virtual status_t prepare();
@@ -63,9 +68,9 @@ private:
     };
 
     sp<Camera> mCamera;
-    sp<ISurface> mPreviewSurface;
+    sp<Surface> mPreviewSurface;
     sp<IMediaRecorderClient> mListener;
-    sp<MediaWriter> mWriter;
+    sp<MediaWriter> mWriter, mWriterAux;
     sp<AudioSource> mAudioSourceNode;
 
     audio_source mAudioSource;
@@ -75,8 +80,9 @@ private:
     video_encoder mVideoEncoder;
     bool mUse64BitFileOffset;
     int32_t mVideoWidth, mVideoHeight;
+    int32_t mAuxVideoWidth, mAuxVideoHeight;
     int32_t mFrameRate;
-    int32_t mVideoBitRate;
+    int32_t mVideoBitRate, mAuxVideoBitRate;
     int32_t mAudioBitRate;
     int32_t mAudioChannels;
     int32_t mSampleRate;
@@ -92,20 +98,39 @@ private:
     int64_t mMaxFileDurationUs;
     int64_t mTrackEveryTimeDurationUs;
 
+    bool mCaptureTimeLapse;
+    int64_t mTimeBetweenTimeLapseFrameCaptureUs;
+    bool mCaptureAuxVideo;
+    sp<MediaSourceSplitter> mCameraSourceSplitter;
+    sp<CameraSourceTimeLapse> mCameraSourceTimeLapse;
+
     String8 mParams;
-    int mOutputFd;
+    int mOutputFd, mOutputFdAux;
     int32_t mFlags;
 
     MediaProfiles *mEncoderProfiles;
 
+    status_t setupMPEG4Recording(
+        bool useSplitCameraSource,
+        int outputFd,
+        int32_t videoWidth, int32_t videoHeight,
+        int32_t videoBitRate,
+        int32_t *totalBitRate,
+        sp<MediaWriter> *mediaWriter);
+    void setupMPEG4MetaData(int64_t startTimeUs, int32_t totalBitRate,
+        sp<MetaData> *meta);
     status_t startMPEG4Recording();
     status_t startAMRRecording();
     status_t startAACRecording();
     status_t startRTPRecording();
     sp<MediaSource> createAudioSource();
-    status_t setupCameraSource();
+    status_t setupCamera();
+    status_t setupCameraSource(sp<CameraSource> *cameraSource);
     status_t setupAudioEncoder(const sp<MediaWriter>& writer);
-    status_t setupVideoEncoder(sp<MediaSource> *source);
+    status_t setupVideoEncoder(
+            sp<MediaSource> cameraSource,
+            int32_t videoBitRate,
+            sp<MediaSource> *source);
 
     // Encoding parameter handling utilities
     status_t setParameter(const String8 &key, const String8 &value);
@@ -113,6 +138,11 @@ private:
     status_t setParamAudioNumberOfChannels(int32_t channles);
     status_t setParamAudioSamplingRate(int32_t sampleRate);
     status_t setParamAudioTimeScale(int32_t timeScale);
+    status_t setParamTimeLapseEnable(int32_t timeLapseEnable);
+    status_t setParamTimeBetweenTimeLapseFrameCapture(int64_t timeUs);
+    status_t setParamAuxVideoHeight(int32_t height);
+    status_t setParamAuxVideoWidth(int32_t width);
+    status_t setParamAuxVideoEncodingBitRate(int32_t bitRate);
     status_t setParamVideoEncodingBitRate(int32_t bitRate);
     status_t setParamVideoIFramesInterval(int32_t seconds);
     status_t setParamVideoEncoderProfile(int32_t profile);
@@ -137,4 +167,3 @@ private:
 }  // namespace android
 
 #endif  // STAGEFRIGHT_RECORDER_H_
-

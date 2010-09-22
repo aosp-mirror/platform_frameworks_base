@@ -19,22 +19,24 @@ package android.widget;
 import com.android.internal.R;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.view.Gravity;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnScrollChangedListener;
-import android.view.View.OnTouchListener;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.IBinder;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnScrollChangedListener;
+import android.view.WindowManager;
 
 import java.lang.ref.WeakReference;
 
@@ -121,7 +123,7 @@ public class PopupWindow {
     private OnScrollChangedListener mOnScrollChangedListener =
         new OnScrollChangedListener() {
             public void onScrollChanged() {
-                View anchor = mAnchor.get();
+                View anchor = mAnchor != null ? mAnchor.get() : null;
                 if (anchor != null && mPopupView != null) {
                     WindowManager.LayoutParams p = (WindowManager.LayoutParams)
                             mPopupView.getLayoutParams();
@@ -157,12 +159,21 @@ public class PopupWindow {
      * <p>The popup does provide a background.</p>
      */
     public PopupWindow(Context context, AttributeSet attrs, int defStyle) {
+        this(context, attrs, defStyle, 0);
+    }
+    
+    /**
+     * <p>Create a new, empty, non focusable popup window of dimension (0,0).</p>
+     * 
+     * <p>The popup does not provide a background.</p>
+     */
+    public PopupWindow(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         mContext = context;
         mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 
         TypedArray a =
             context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.PopupWindow, defStyle, 0);
+                attrs, com.android.internal.R.styleable.PopupWindow, defStyleAttr, defStyleRes);
 
         mBackground = a.getDrawable(R.styleable.PopupWindow_popupBackground);
         mAnimationStyle = a.getResourceId(R.styleable.PopupWindow_windowAnimationStyle, -1);
@@ -1023,7 +1034,9 @@ public class PopupWindow {
         
         int bottomEdge = displayFrame.bottom;
         if (ignoreBottomDecorations) {
-            bottomEdge = anchor.getContext().getResources().getDisplayMetrics().heightPixels;
+            Resources res = anchor.getContext().getResources();
+            bottomEdge = res.getDisplayMetrics().heightPixels -
+                    (int) res.getDimension(com.android.internal.R.dimen.screen_margin_bottom);
         }
         final int distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
         final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
@@ -1316,6 +1329,7 @@ public class PopupWindow {
     }
 
     private class PopupViewContainer extends FrameLayout {
+        private static final String TAG = "PopupWindow.PopupViewContainer";
 
         public PopupViewContainer(Context context) {
             super(context);

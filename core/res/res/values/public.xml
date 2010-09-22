@@ -1183,7 +1183,7 @@
   <public type="attr" name="colorBackgroundCacheHint" id="0x010102ab" />
   <public type="attr" name="dropDownHorizontalOffset" id="0x010102ac" />
   <public type="attr" name="dropDownVerticalOffset" id="0x010102ad" />
-  
+
   <public type="style" name="Theme.Wallpaper" id="0x0103005e" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" id="0x0103005f" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" id="0x01030060" />
@@ -1191,7 +1191,7 @@
   <public type="style" name="Theme.Light.WallpaperSettings" id="0x01030062" />
   <public type="style" name="TextAppearance.SearchResult.Title" id="0x01030063" />
   <public type="style" name="TextAppearance.SearchResult.Subtitle" id="0x01030064" />
-  
+
   <!-- Semi-transparent background that can be used when placing a dark
        themed UI on top of some arbitrary background (such as the
        wallpaper).  This darkens the background sufficiently that the UI
@@ -1199,7 +1199,7 @@
   <public type="drawable" name="screen_background_dark_transparent" id="0x010800a9" />
   <public type="drawable" name="screen_background_light_transparent" id="0x010800aa" />
   <public type="drawable" name="stat_notify_sdcard_prepare" id="0x010800ab" />
-  
+
 <!-- ===============================================================
      Resources added in version 6 of the platform (Eclair 2.0.1).
      =============================================================== -->
@@ -1211,7 +1211,7 @@
   <public type="attr" name="quickContactBadgeStyleSmallWindowSmall" id="0x010102b1" />
   <public type="attr" name="quickContactBadgeStyleSmallWindowMedium" id="0x010102b2" />
   <public type="attr" name="quickContactBadgeStyleSmallWindowLarge" id="0x010102b3" />
-  
+
 <!-- ===============================================================
      Resources added in version 7 of the platform (Eclair MR1).
      =============================================================== -->
@@ -1220,7 +1220,7 @@
   <public type="attr" name="author" id="0x010102b4" />
   <public type="attr" name="autoStart" id="0x010102b5" />
 
-    
+
 <!-- ===============================================================
      Resources added in version 8 of the platform (Eclair MR2).
      =============================================================== -->
@@ -1241,19 +1241,16 @@
   <public type="attr" name="tabStripEnabled" id="0x010102bd" />
 
   <public type="id" name="custom" id="0x0102002b" />
-    
+
   <public type="anim" name="cycle_interpolator" id="0x010a000c" />
 
 <!-- ===============================================================
      Resources introduced in Gingerbread.
      =============================================================== -->
-     
+  <eat-comment />
   <public type="attr" name="logo" id="0x010102be" />
   <public type="attr" name="xlargeScreens" id="0x010102bf" />
   <public type="attr" name="immersive" id="0x010102c0" />
-  <public type="attr" name="overscrollMode" id="0x010102c1" />
-  <public type="attr" name="overscrollHeader" id="0x010102c2" />
-  <public type="attr" name="overscrollFooter" id="0x010102c3" />
   <public type="attr" name="filterTouchesWhenObscured" id="0x010102c4" />
   <public type="attr" name="textSelectHandleLeft" id="0x010102c5" />
   <public type="attr" name="textSelectHandleRight" id="0x010102c6" />
@@ -1261,7 +1258,7 @@
   <public type="attr" name="textSelectHandleWindowStyle" id="0x010102c8" />
 
   <public-padding type="attr" name="kraken_resource_pad" end="0x01010300" />
-  
+
   <public-padding type="id" name="kraken_resource_pad" end="0x01020040" />
   <public-padding type="anim" name="kraken_resource_pad" end="0x010a0020" />
 
@@ -1272,9 +1269,8 @@
   <public type="drawable" name="presence_audio_away" id="0x010800af" />
   <public type="drawable" name="presence_audio_busy" id="0x010800b0" />
   <public type="drawable" name="presence_audio_online" id="0x010800b1" />
-
   <public-padding type="drawable" name="kraken_resource_pad" end="0x01080100" />
-  
+
   <public type="style" name="TextAppearance.StatusBar.Title" id="0x01030065" />
   <public type="style" name="TextAppearance.StatusBar.Icon" id="0x01030066" />
   <public type="style" name="TextAppearance.StatusBar.EventContent" id="0x01030067" />
@@ -1288,4 +1284,130 @@
   <public-padding type="dimen" name="kraken_resource_pad" end="0x01050010" />
   <public-padding type="color" name="kraken_resource_pad" end="0x01060020" />
   <public-padding type="array" name="kraken_resource_pad" end="0x01070010" />
+
+<!-- ===============================================================
+     Resources proposed for Honeycomb.
+     =============================================================== -->
+  <eat-comment />
+  <public type="attr" name="adapter" />
+  <public type="attr" name="selection" />
+  <public type="attr" name="sortOrder" />
+  <public type="attr" name="uri" />
+  <public type="attr" name="from" />
+  <public type="attr" name="to" />
+  <public type="attr" name="as" />
+  <public type="attr" name="fromValue" />
+  <public type="attr" name="toValue" />
+  <public type="attr" name="column" />
+  <public type="attr" name="withExpression" />
+  <public type="attr" name="withClass" />
+  <public type="attr" name="allContactsName" />
+  <public type="attr" name="windowActionBar" />
+  <public type="attr" name="actionBarStyle" />
+  <public type="attr" name="navigationMode" />
+  <public type="attr" name="displayOptions" />
+  <public type="attr" name="subtitle" />
+  <public type="attr" name="customNavigationLayout" />
+  <public type="attr" name="hardwareAccelerated" />
+  <public type="attr" name="measureWithLargestChild" />
+  <public type="attr" name="animateFirstView" />
+  <public type="attr" name="dropDownSpinnerStyle" />
+  <public type="attr" name="actionDropDownStyle" />
+  <public type="attr" name="actionButtonStyle" />
+  <public type="attr" name="showAsAction" />
+  <public type="attr" name="actionButtonPadding" />
+  <public type="attr" name="previewImage" />
+  <public type="attr" name="actionModeBackground" />
+  <public type="attr" name="actionModeCloseDrawable" />
+  <public type="attr" name="windowActionModeOverlay" />
+  <public type="attr" name="valueFrom" />
+  <public type="attr" name="valueTo" />
+  <public type="attr" name="valueType" />
+  <public type="attr" name="propertyName" />
+  <public type="attr" name="ordering" />
+  <public type="attr" name="fragment" />
+  <public type="attr" name="windowActionBarOverlay" />
+  <public type="attr" name="fragmentOpenEnterAnimation" />
+  <public type="attr" name="fragmentOpenExitAnimation" />
+  <public type="attr" name="fragmentCloseEnterAnimation" />
+  <public type="attr" name="fragmentCloseExitAnimation" />
+  <public type="attr" name="actionBarSize" />
+  <public type="attr" name="imeSubtypeLocale" />
+  <public type="attr" name="imeSubtypeMode" />
+  <public type="attr" name="imeSubtypeExtraValue" />
+  <public type="attr" name="splitMotionEvents" />
+  <public type="attr" name="listChoiceBackgroundIndicator" />
+  <public type="attr" name="spinnerMode" />
+  <public type="attr" name="animateLayoutChanges" />
+  <public type="attr" name="actionBarTabStyle" />
+  <public type="attr" name="actionBarTabBarStyle" />
+  <public type="attr" name="actionBarTabTextStyle" />
+  <public type="attr" name="actionOverflowButtonStyle" />
+  <public type="attr" name="itemPadding" />
+  <public type="attr" name="actionModeCloseButtonStyle" />
+  <public type="attr" name="titleTextStyle" />
+  <public type="attr" name="subtitleTextStyle" />
+  <public type="attr" name="iconifiedByDefault" />
+  <public type="attr" name="actionLayout" />
+  <public type="attr" name="actionViewClass" />
+  <public type="attr" name="activatedBackgroundIndicator" />
+  <public type="attr" name="state_activated" />
+  <public type="attr" name="listPopupWindowStyle" />
+  <public type="attr" name="popupMenuStyle" />
+  <public type="attr" name="textAppearanceLargePopupMenu" />
+  <public type="attr" name="textAppearanceSmallPopupMenu" />
+  <public type="attr" name="breadCrumbTitle" />
+  <public type="attr" name="breadCrumbShortTitle" />
+
+  <public type="anim" name="animator_fade_in" />
+  <public type="anim" name="animator_fade_out" />
+
+  <public type="id" name="home" />
+  <!-- Context menu ID for the "Select text..." menu item to switch to text
+       selection context mode in text views. -->
+  <public type="id" name="selectTextMode" />
+
+  <!-- Standard content view for a {@link android.app.ListFragment}.
+       If you are implementing a subclass of ListFragment with your
+       own customized content, you can include this layout in that
+       content to still retain all of the standard functionality of
+       the base class. -->
+  <public type="layout" name="list_content" />
+
+  <!-- A simple ListView item layout which can contain text and support (single or multiple) item selection. -->
+  <public type="layout" name="simple_selectable_list_item" />
+
+  <!-- A version of {@link #simple_list_item_1} that is able to change its
+       background state to indicate when it is activated (that is checked by
+       a ListView). -->
+  <public type="layout" name="simple_list_item_activated_1" />
+
+  <!-- A version of {@link #simple_list_item_2} that is able to change its
+       background state to indicate when it is activated (that is checked by
+       a ListView). -->
+  <public type="layout" name="simple_list_item_activated_2" />
+
+  <public type="style" name="Theme.WithActionBar" />
+  <public type="style" name="Widget.Spinner.DropDown" />
+  <public type="style" name="Widget.ActionButton" />
+  <public type="style" name="Theme.Dialog.NoFrame" />
+  <public type="style" name="Theme.NoTitleBar.OverlayActionModes" />
+
+  <public type="style" name="Theme.Holo" />
+  <public type="style" name="Theme.Light.Holo" />
+  <public type="style" name="Theme.Holo.NoActionBar" />
+  <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" />
+  <public type="style" name="Theme.Light.Holo.NoActionBar" />
+  <public type="style" name="Theme.Light.Holo.NoActionBar.Fullscreen" />
+
+  <public type="style" name="Widget.ListPopupWindow" />
+  <public type="style" name="Widget.PopupMenu" />
+  <public type="style" name="Widget.ActionButton.Overflow" />
+  <public type="style" name="Widget.ActionButton.CloseMode" />
+  <public type="style" name="TextAppearance.Widget.PopupMenu.Large" />
+  <public type="style" name="TextAppearance.Widget.PopupMenu.Small" />
+  <public type="style" name="Widget.FragmentBreadCrumbs" />
+
+  <public type="string" name="selectTextMode" />
+
 </resources>

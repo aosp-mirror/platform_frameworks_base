@@ -23,6 +23,19 @@
     
     <application>
         <uses-library android:name="android.test.runner" />
+
+        <service android:name="com.android.server.AccessibilityManagerServiceTest$MyFirstMockAccessibilityService">
+          <intent-filter>
+            <action android:name="android.accessibilityservice.AccessibilityService"/>
+          </intent-filter>
+        </service>
+
+        <service android:name="com.android.server.AccessibilityManagerServiceTest$MySecondMockAccessibilityService">
+          <intent-filter>
+            <action android:name="android.accessibilityservice.AccessibilityService"/>
+          </intent-filter>
+        </service>
+
     </application>
 
     <instrumentation

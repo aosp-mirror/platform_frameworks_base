@@ -16,16 +16,11 @@
 
 package android.content;
 
-import android.content.ContentProvider;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.UriMatcher;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -134,64 +129,34 @@ public class MemoryFileProvider extends ContentProvider {
     }
 
     @Override
-    public AssetFileDescriptor openAssetFile(Uri url, String mode) throws FileNotFoundException {
+    public ParcelFileDescriptor openFile(Uri url, String mode) throws FileNotFoundException {
         int match = sURLMatcher.match(url);
         switch (match) {
             case DATA_ID_BLOB:
                 String sql = "SELECT _blob FROM data WHERE _id=" + url.getPathSegments().get(1);
-                return getBlobColumnAsAssetFile(url, mode, sql);
+                return getBlobColumnAsFile(url, mode, sql);
             case HUGE:
                 try {
-                    MemoryFile memoryFile = new MemoryFile(null, 5000000);
-                    memoryFile.writeBytes(TEST_BLOB, 0, 1000000, TEST_BLOB.length);
-                    memoryFile.deactivate();
-                    return AssetFileDescriptor.fromMemoryFile(memoryFile);
+                    return ParcelFileDescriptor.fromData(TEST_BLOB, null);
                 } catch (IOException ex) {
                     throw new FileNotFoundException("Error reading " + url + ":" + ex.toString());
                 }
             case FILE:
                 File file = getContext().getFileStreamPath(DATA_FILE);
-                ParcelFileDescriptor fd =
-                        ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-                return new AssetFileDescriptor(fd, 0, AssetFileDescriptor.UNKNOWN_LENGTH);
+                return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
             default:
                 throw new FileNotFoundException("No files supported by provider at " + url);
         }
     }
 
-    private AssetFileDescriptor getBlobColumnAsAssetFile(Uri url, String mode, String sql)
+    private ParcelFileDescriptor getBlobColumnAsFile(Uri url, String mode, String sql)
             throws FileNotFoundException {
         if (!"r".equals(mode)) {
             throw new FileNotFoundException("Mode " + mode + " not supported for " + url);
         }
-        try {
-            SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-            MemoryFile file = simpleQueryForBlobMemoryFile(db, sql);
-            if (file == null) throw new FileNotFoundException("No such entry: " + url);
-            AssetFileDescriptor afd = AssetFileDescriptor.fromMemoryFile(file);
-            file.deactivate();
-            // need to dup and then close? openFileHelper() doesn't do that though
-            return afd;
-        } catch (IOException ex) {
-            throw new FileNotFoundException("Error reading " + url + ":" + ex.toString());
-        }
-    }
 
-    private MemoryFile simpleQueryForBlobMemoryFile(SQLiteDatabase db, String sql) throws IOException {
-        Cursor cursor = db.rawQuery(sql, null);
-        try {
-            if (!cursor.moveToFirst()) {
-                return null;
-            }
-            byte[] bytes = cursor.getBlob(0);
-            MemoryFile file = new MemoryFile(null, bytes.length);
-            file.writeBytes(bytes, 0, 0, bytes.length);
-            return file;
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        return DatabaseUtils.blobFileDescriptorForQuery(db, sql, null);
     }
 
     @Override

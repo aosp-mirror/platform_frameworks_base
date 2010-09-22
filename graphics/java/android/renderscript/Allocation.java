@@ -35,9 +35,23 @@ public class Allocation extends BaseObj {
     Bitmap mBitmap;
 
     Allocation(int id, RenderScript rs, Type t) {
-        super(rs);
-        mID = id;
+        super(id, rs);
         mType = t;
+    }
+
+    Allocation(int id, RenderScript rs) {
+        super(id, rs);
+    }
+
+    @Override
+    void updateFromNative() {
+        mRS.validate();
+        mName = mRS.nGetName(mID);
+        int typeID = mRS.nAllocationGetType(mID);
+        if(typeID != 0) {
+            mType = new Type(typeID, mRS);
+            mType.updateFromNative();
+        }
     }
 
     public Type getType() {
@@ -76,10 +90,50 @@ public class Allocation extends BaseObj {
         subData1D(0, mType.getElementCount(), d);
     }
 
+    public void subData(int xoff, FieldPacker fp) {
+        int eSize = mType.mElement.getSizeBytes();
+        final byte[] data = fp.getData();
+
+        int count = data.length / eSize;
+        if ((eSize * count) != data.length) {
+            throw new IllegalArgumentException("Field packer length " + data.length +
+                                               " not divisible by element size " + eSize + ".");
+        }
+        data1DChecks(xoff, count, data.length, data.length);
+        mRS.nAllocationSubData1D(mID, xoff, count, data, data.length);
+    }
+
+
+    public void subElementData(int xoff, int component_number, FieldPacker fp) {
+        if (component_number >= mType.mElement.mElements.length) {
+            throw new IllegalArgumentException("Component_number " + component_number + " out of range.");
+        }
+        if(xoff < 0) {
+            throw new IllegalArgumentException("Offset must be >= 0.");
+        }
+
+        final byte[] data = fp.getData();
+        int eSize = mType.mElement.mElements[component_number].getSizeBytes();
+
+        if (data.length != eSize) {
+            throw new IllegalArgumentException("Field packer sizelength " + data.length +
+                                               " does not match component size " + eSize + ".");
+        }
+
+        mRS.nAllocationSubElementData1D(mID, xoff, component_number, data, data.length);
+    }
+
     private void data1DChecks(int off, int count, int len, int dataSize) {
         mRS.validate();
-        if((off < 0) || (count < 1) || ((off + count) > mType.getElementCount())) {
-            throw new IllegalArgumentException("Offset or Count out of bounds.");
+        if(off < 0) {
+            throw new IllegalArgumentException("Offset must be >= 0.");
+        }
+        if(count < 1) {
+            throw new IllegalArgumentException("Count must be >= 1.");
+        }
+        if((off + count) > mType.getElementCount()) {
+            throw new IllegalArgumentException("Overflow, Available count " + mType.getElementCount() +
+                                               ", got " + count + " at offset " + off + ".");
         }
         if((len) < dataSize) {
             throw new IllegalArgumentException("Array too small for allocation type.");
@@ -108,7 +162,6 @@ public class Allocation extends BaseObj {
     }
 
 
-
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
         mRS.validate();
         mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
@@ -129,25 +182,10 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(mID, d);
     }
 
-    public void data(Object o) {
-        mRS.validate();
-        mRS.nAllocationSubDataFromObject(mID, mType, 0, o);
-    }
-
-    public void read(Object o) {
-        mRS.validate();
-        mRS.nAllocationSubReadFromObject(mID, mType, 0, o);
-    }
-
-    public void subData(int offset, Object o) {
-        mRS.validate();
-        mRS.nAllocationSubDataFromObject(mID, mType, offset, o);
-    }
 
     public class Adapter1D extends BaseObj {
         Adapter1D(int id, RenderScript rs) {
-            super(rs);
-            mID = id;
+            super(id, rs);
         }
 
         public void setConstraint(Dimension dim, int value) {
@@ -189,8 +227,7 @@ public class Allocation extends BaseObj {
 
     public class Adapter2D extends BaseObj {
         Adapter2D(int id, RenderScript rs) {
-            super(rs);
-            mID = id;
+            super(id, rs);
         }
 
         public void setConstraint(Dimension dim, int value) {
@@ -376,6 +413,21 @@ public class Allocation extends BaseObj {
 
         Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
         return createFromBitmapBoxed(rs, b, dstFmt, genMips);
+    }
+
+    static public Allocation createFromString(RenderScript rs, String str)
+        throws IllegalArgumentException {
+        byte[] allocArray = null;
+        try {
+            allocArray = str.getBytes("UTF-8");
+            Allocation alloc = Allocation.createSized(rs, Element.U8(rs), allocArray.length);
+            alloc.data(allocArray);
+            return alloc;
+        }
+        catch (Exception e) {
+            Log.e("rs", "could not convert string to utf-8");
+        }
+        return null;
     }
 }
 

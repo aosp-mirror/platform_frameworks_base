@@ -63,4 +63,9 @@ public interface BluetoothDevicePicker {
     public static final int FILTER_TYPE_AUDIO = 1;
     /** Ask device picker to show BT devices that support Object Transfer */
     public static final int FILTER_TYPE_TRANSFER = 2;
+    /** Ask device picker to show BT devices that support
+     * Personal Area Networking User (PANU) profile*/
+    public static final int FILTER_TYPE_PANU = 3;
+    /** Ask device picker to show BT devices that support Network Access Point (NAP) profile */
+    public static final int FILTER_TYPE_NAP = 4;
 }

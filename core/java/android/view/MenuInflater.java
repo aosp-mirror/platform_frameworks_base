@@ -18,8 +18,6 @@ package android.view;
 
 import com.android.internal.view.menu.MenuItemImpl;
 
-import java.io.IOException;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -29,6 +27,10 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
 import android.util.Xml;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * This class is used to instantiate menu XML files into Menu objects.
@@ -51,6 +53,8 @@ public class MenuInflater {
 
     private static final int NO_ID = 0;
     
+    private static final Class<?>[] ACTION_VIEW_CONSTRUCTOR_SIGNATURE = new Class[]{Context.class};
+
     private Context mContext;
     
     /**
@@ -166,6 +170,41 @@ public class MenuInflater {
         }
     }
     
+    private static class InflatedOnMenuItemClickListener
+            implements MenuItem.OnMenuItemClickListener {
+        private static final Class[] PARAM_TYPES = new Class[] { MenuItem.class };
+        
+        private Context mContext;
+        private Method mMethod;
+        
+        public InflatedOnMenuItemClickListener(Context context, String methodName) {
+            mContext = context;
+            Class c = context.getClass();
+            try {
+                mMethod = c.getMethod(methodName, PARAM_TYPES);
+            } catch (Exception e) {
+                InflateException ex = new InflateException(
+                        "Couldn't resolve menu item onClick handler " + methodName +
+                        " in class " + c.getName());
+                ex.initCause(e);
+                throw ex;
+            }
+        }
+        
+        public boolean onMenuItemClick(MenuItem item) {
+            try {
+                if (mMethod.getReturnType() == Boolean.TYPE) {
+                    return (Boolean) mMethod.invoke(mContext, item);
+                } else {
+                    mMethod.invoke(mContext, item);
+                    return true;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    
     /**
      * State for the current menu.
      * <p>
@@ -204,6 +243,20 @@ public class MenuInflater {
         private boolean itemChecked;
         private boolean itemVisible;
         private boolean itemEnabled;
+        
+        /**
+         * Sync to attrs.xml enum, values in MenuItem:
+         * - 0: never
+         * - 1: ifRoom
+         * - 2: always
+         * - -1: Safe sentinel for "no value".
+         */
+        private int itemShowAsAction;
+
+        private int itemActionViewLayout;
+        private String itemActionViewClassName;
+        
+        private String itemListenerMethodName;
         
         private static final int defaultGroupId = NO_ID;
         private static final int defaultItemId = NO_ID;
@@ -276,6 +329,10 @@ public class MenuInflater {
             itemChecked = a.getBoolean(com.android.internal.R.styleable.MenuItem_checked, defaultItemChecked);
             itemVisible = a.getBoolean(com.android.internal.R.styleable.MenuItem_visible, groupVisible);
             itemEnabled = a.getBoolean(com.android.internal.R.styleable.MenuItem_enabled, groupEnabled);
+            itemShowAsAction = a.getInt(com.android.internal.R.styleable.MenuItem_showAsAction, -1);
+            itemListenerMethodName = a.getString(com.android.internal.R.styleable.MenuItem_onClick);
+            itemActionViewLayout = a.getResourceId(com.android.internal.R.styleable.MenuItem_actionLayout, 0);
+            itemActionViewClassName = a.getString(com.android.internal.R.styleable.MenuItem_actionViewClass);
             
             a.recycle();
             
@@ -299,9 +356,38 @@ public class MenuInflater {
                 .setIcon(itemIconResId)
                 .setAlphabeticShortcut(itemAlphabeticShortcut)
                 .setNumericShortcut(itemNumericShortcut);
+            
+            if (itemShowAsAction >= 0) {
+                item.setShowAsAction(itemShowAsAction);
+            }
+            
+            if (itemListenerMethodName != null) {
+                if (mContext.isRestricted()) {
+                    throw new IllegalStateException("The android:onClick attribute cannot "
+                            + "be used within a restricted context");
+                }
+                item.setOnMenuItemClickListener(
+                        new InflatedOnMenuItemClickListener(mContext, itemListenerMethodName));
+            }
 
-            if (itemCheckable >= 2) {
-                ((MenuItemImpl) item).setExclusiveCheckable(true);
+            if (item instanceof MenuItemImpl) {
+                MenuItemImpl impl = (MenuItemImpl) item;
+                if (itemCheckable >= 2) {
+                    impl.setExclusiveCheckable(true);
+                }
+            }
+
+            if (itemActionViewClassName != null) {
+                try {
+                    final Class<?> clazz = Class.forName(itemActionViewClassName);
+                    Constructor<?> c = clazz.getConstructor(ACTION_VIEW_CONSTRUCTOR_SIGNATURE);
+                    item.setActionView((View) c.newInstance(mContext));
+                } catch (Exception e) {
+                    throw new InflateException(e);
+                }
+            } else if (itemActionViewLayout > 0) {
+                final LayoutInflater inflater = LayoutInflater.from(mContext);
+                item.setActionView(inflater.inflate(itemActionViewLayout, null));
             }
         }
         

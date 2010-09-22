@@ -12,6 +12,8 @@
 
 #include <jni.h>
 
+#include <Caches.h>
+
 #if 0
     #define TRACE_BITMAP(code)  code
 #else
@@ -251,6 +253,11 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, const SkBitmap* src,
 }
 
 static void Bitmap_destructor(JNIEnv* env, jobject, SkBitmap* bitmap) {
+#ifdef USE_OPENGL_RENDERER
+    if (android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().textureCache.remove(bitmap);
+    }
+#endif
     delete bitmap;
 }
 
@@ -311,6 +318,10 @@ static int Bitmap_rowBytes(JNIEnv* env, jobject, SkBitmap* bitmap) {
 
 static int Bitmap_config(JNIEnv* env, jobject, SkBitmap* bitmap) {
     return bitmap->config();
+}
+
+static int Bitmap_getGenerationId(JNIEnv* env, jobject, SkBitmap* bitmap) {
+    return bitmap->getGenerationID();
 }
 
 static jboolean Bitmap_hasAlpha(JNIEnv* env, jobject, SkBitmap* bitmap) {
@@ -606,6 +617,7 @@ static JNINativeMethod gBitmapMethods[] = {
         (void*)Bitmap_writeToParcel },
     {   "nativeExtractAlpha",       "(II[I)Landroid/graphics/Bitmap;",
         (void*)Bitmap_extractAlpha },
+    {   "nativeGenerationId",       "(I)I", (void*)Bitmap_getGenerationId },
     {   "nativeGetPixel",           "(III)I", (void*)Bitmap_getPixel },
     {   "nativeGetPixels",          "(I[IIIIIII)V", (void*)Bitmap_getPixels },
     {   "nativeSetPixel",           "(IIII)V", (void*)Bitmap_setPixel },

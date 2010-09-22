@@ -57,13 +57,11 @@ public class RoundRectShape extends RectShape {
      */
     public RoundRectShape(float[] outerRadii, RectF inset,
                           float[] innerRadii) {
-        if (outerRadii.length < 8) {
-            throw new ArrayIndexOutOfBoundsException(
-                                        "outer radii must have >= 8 values");
+        if (outerRadii != null && outerRadii.length < 8) {
+            throw new ArrayIndexOutOfBoundsException("outer radii must have >= 8 values");
         }
         if (innerRadii != null && innerRadii.length < 8) {
-            throw new ArrayIndexOutOfBoundsException(
-                                        "inner radii must have >= 8 values");
+            throw new ArrayIndexOutOfBoundsException("inner radii must have >= 8 values");
         }
         mOuterRadii = outerRadii;
         mInset = inset;
@@ -97,8 +95,7 @@ public class RoundRectShape extends RectShape {
                            r.right - mInset.right, r.bottom - mInset.bottom);
             if (mInnerRect.width() < w && mInnerRect.height() < h) {
                 if (mInnerRadii != null) {
-                    mPath.addRoundRect(mInnerRect, mInnerRadii,
-                                       Path.Direction.CCW);
+                    mPath.addRoundRect(mInnerRect, mInnerRadii, Path.Direction.CCW);
                 } else {
                     mPath.addRect(mInnerRect, Path.Direction.CCW);
                 }
@@ -109,8 +106,8 @@ public class RoundRectShape extends RectShape {
     @Override
     public RoundRectShape clone() throws CloneNotSupportedException {
         RoundRectShape shape = (RoundRectShape) super.clone();
-        shape.mOuterRadii = mOuterRadii.clone();
-        shape.mInnerRadii = mInnerRadii.clone();
+        shape.mOuterRadii = mOuterRadii != null ? mOuterRadii.clone() : null;
+        shape.mInnerRadii = mInnerRadii != null ? mInnerRadii.clone() : null;
         shape.mInset = new RectF(mInset);
         shape.mInnerRect = new RectF(mInnerRect);
         shape.mPath = new Path(mPath);

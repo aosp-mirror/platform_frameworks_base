@@ -432,6 +432,10 @@
     <string name="policydesc_forceLock" msgid="2819868664946089740">"Cihaz kilitlendiğinde, şifresini yeniden girmenizi gerektiren denetim."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri sil"</string>
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Tüm verilerinizi onay olmadan silmek için fabrika ayarlarına sıfırlayın."</string>
+    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
+    <skip />
+    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ev"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -525,10 +529,9 @@
     <string name="orgTypeWork" msgid="29268870505363872">"İş"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Diğer"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Özel"</string>
-    <string name="contact_status_update_attribution" msgid="5112589886094402795">"<xliff:g id="SOURCE">%1$s</xliff:g> aracılığıyla"</string>
-    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="SOURCE">%2$s</xliff:g> ile <xliff:g id="DATE">%1$s</xliff:g> tarihinde"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN kodunu gir"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Kilidi açmak için şifreyi girin"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Kilidi açmak için PIN\'i girin"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Yanlış PIN kodu!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Kilidi açmak için önce Menü\'ye, sonra 0\'a basın."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Acil durum numarası"</string>
@@ -541,6 +544,7 @@
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Çağrıya dön"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Üzgünüz, lütfen yeniden deneyin"</string>
+    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Maalesef, tekrar deneyin"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Şarj oluyor (<xliff:g id="PERCENT">%%</xliff:g><xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Şarj oldu."</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -555,6 +559,8 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM kart kilitli."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM kart kilidi açılıyor…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde yeniden deneyin."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Şifrenizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış girdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde yeniden deneyin."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"PIN\'inizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış girdiniz. "\n\n"Lütfen <xliff:g id="NUMBER_1">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%d</xliff:g> başarısız denemeden sonra telefonunuzu Google oturum açma bilgilerinizi kullanarak açmanız istenir."\n\n" Lütfen <xliff:g id="NUMBER_2">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde yeniden deneyin."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Deseni unuttunuz mu?"</string>
@@ -699,14 +705,14 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Tümünü seç"</string>
-    <!-- outdated translation 3889149123626888637 -->     <string name="selectText" msgid="4862359311088898878">"Metin seç"</string>
     <string name="cut" msgid="3092569408438626261">"Kes"</string>
     <string name="copy" msgid="2681946229533511987">"Kopyala"</string>
     <string name="paste" msgid="5629880836805036433">"Yapıştır"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL\'yi kopyala"</string>
+    <string name="selectTextMode" msgid="6738556348861347240">"Metin seç..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Metin seçimi"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Giriş yöntemi"</string>
-    <string name="addToDictionary" msgid="8793624991686948709">"\"<xliff:g id="WORD">%s</xliff:g>\" kelimesini sözlüğe ekle"</string>
-    <string name="editTextMenuTitle" msgid="1672989176958581452">"Metin düzenle"</string>
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Metin eylemleri"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Yer az"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Telefonun depolama alanı azalıyor."</string>
     <string name="ok" msgid="5970060430562524910">"Tamam"</string>
@@ -714,6 +720,7 @@
     <string name="yes" msgid="5362982303337969312">"Tamam"</string>
     <string name="no" msgid="5141531044935541497">"İptal"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Dikkat"</string>
+    <string name="loading" msgid="1760724998928255250">"Yükleniyor..."</string>
     <string name="capital_on" msgid="1544682755514494298">"AÇIK"</string>
     <string name="capital_off" msgid="6815870386972805832">"KAPALI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"İşlemi şunu kullanarak tamamla"</string>
@@ -854,15 +861,24 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN temelli önceden paylaşılmış anahtar"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN temelli sertifika"</string>
     <string name="upload_file" msgid="2897957172366730416">"Dosya seç"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"Seçili dosya yok"</string>
     <string name="reset" msgid="2448168080964209908">"Sıfırla"</string>
     <string name="submit" msgid="1602335572089911941">"Gönder"</string>
-    <string name="description_star" msgid="2654319874908576133">"favori"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Araba modu etkin"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Araba modundan çıkmak için seçin."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Doğrudan bağlantı veya ortak erişim noktası etkin"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Yapılandırmak için dokunun"</string>
+    <string name="back_button_label" msgid="2300470004503343439">"Geri"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"İleri"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Atla"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Yüksek düzeyde mobil veri kullanımı"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Mobil veri kullanımı hakkında daha fazla bilgi edinmek için dokunun"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobil veri limiti aşıldı"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Mobil veri kullanımı hakkında daha fazla bilgi edinmek için dokunun"</string>
+    <!-- no translation found for no_matches (8129421908915840737) -->
+    <skip />
+    <!-- no translation found for find_on_page (1946799233822820384) -->
+    <skip />
+    <!-- no translation found for matches_found:one (8167147081136579439) -->
+    <!-- no translation found for matches_found:other (4641872797067609177) -->
 </resources>

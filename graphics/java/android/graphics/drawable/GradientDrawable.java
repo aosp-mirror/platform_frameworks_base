@@ -313,18 +313,16 @@ public class GradientDrawable extends Drawable {
             case RECTANGLE:
                 if (st.mRadiusArray != null) {
                     mPath.reset();
-                    mPath.addRoundRect(mRect, st.mRadiusArray,
-                                       Path.Direction.CW);
+                    mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
                     canvas.drawPath(mPath, mFillPaint);
                     if (haveStroke) {
                         canvas.drawPath(mPath, mStrokePaint);
                     }
-                }
-                else {
+                } else if (st.mRadius > 0.0f) {
                     // since the caller is only giving us 1 value, we will force
                     // it to be square if the rect is too small in one dimension
                     // to show it. If we did nothing, Skia would clamp the rad
-                    // independently along each axis, giving us a thin ellips
+                    // independently along each axis, giving us a thin ellipse
                     // if the rect were very wide but not very tall
                     float rad = st.mRadius;
                     float r = Math.min(mRect.width(), mRect.height()) * 0.5f;
@@ -334,6 +332,11 @@ public class GradientDrawable extends Drawable {
                     canvas.drawRoundRect(mRect, rad, rad, mFillPaint);
                     if (haveStroke) {
                         canvas.drawRoundRect(mRect, rad, rad, mStrokePaint);
+                    }
+                } else {
+                    canvas.drawRect(mRect, mFillPaint);
+                    if (haveStroke) {
+                        canvas.drawRect(mRect, mStrokePaint);
                     }
                 }
                 break;

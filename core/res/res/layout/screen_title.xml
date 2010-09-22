@@ -22,6 +22,12 @@ enabled.
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:fitsSystemWindows="true">
+    <!-- Popout bar for action modes -->
+    <ViewStub android:id="@+id/action_mode_bar_stub"
+              android:inflatedId="@+id/action_mode_bar"
+              android:layout="@layout/action_mode_bar"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" />
     <FrameLayout
         android:layout_width="match_parent" 
         android:layout_height="?android:attr/windowTitleSize"

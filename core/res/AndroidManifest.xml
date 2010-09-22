@@ -85,6 +85,8 @@
     <protected-broadcast android:name="android.hardware.action.USB_CONNECTED" />
     <protected-broadcast android:name="android.hardware.action.USB_DISCONNECTED" />
     <protected-broadcast android:name="android.hardware.action.USB_STATE" />
+    <protected-broadcast android:name="android.hardware.action.USB_CAMERA_ATTACHED" />
+    <protected-broadcast android:name="android.hardware.action.USB_CAMERA_DETACHED" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
@@ -335,6 +337,13 @@
         android:protectionLevel="signature"
         android:description="@string/permdesc_accountManagerService"
         android:label="@string/permlab_accountManagerService" />
+
+    <!-- Allows an internal user to use privaledged ConnectivityManager
+    APIs.
+        @hide -->
+    <permission android:name="android.permission.CONNECTIVITY_INTERNAL"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
@@ -1266,7 +1275,7 @@
                 android:excludeFromRecents="true">
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
-                android:theme="@style/Theme.NoTitleBar.Fullscreen">
+                android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen">
         </activity>
         <activity android:name="com.android.internal.app.DisableCarModeActivity"
                 android:theme="@style/Theme.NoDisplay"
@@ -1301,6 +1310,10 @@
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_REQUEST_SHUTDOWN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.REBOOT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

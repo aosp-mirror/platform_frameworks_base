@@ -17,8 +17,7 @@
 <!-- Layout used as the dialog's content View for EditTextPreference. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:overscrollMode="ifContentScrolls">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+android:id/edittext_container"

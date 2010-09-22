@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2010 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- Center of status bar: System info display, system info panel trigger -->
+<RelativeLayout android:id="@+id/systemInfo"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerInParent="true"
+    android:clickable="true"
+    android:onClick="systemInfoClicked"
+    >
+    <com.android.systemui.statusbar.Clock
+        style="@*android:style/TextAppearance.StatusBar.Icon"
+        android:id="@+id/clock"
+        android:layout_width="64dip"
+        android:layout_height="48dip"
+        android:layout_centerInParent="true"
+        android:singleLine="true"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="2dip"
+        />
+    <ImageView
+        android:id="@+id/battery"
+        android:layout_width="64dip"
+        android:layout_height="16dip"
+        android:layout_toLeftOf="@id/clock"
+        android:layout_centerInParent="true"
+        android:background="@drawable/sysbar_minimeter_bg" 
+        />
+    <ImageView
+        android:id="@+id/signal"
+        android:layout_width="64dip"
+        android:layout_height="16dip"
+        android:layout_toRightOf="@id/clock"
+        android:layout_centerInParent="true"
+        android:background="@drawable/sysbar_minimeter_bg" 
+        />
+    <ImageView
+        android:id="@+id/battery_icon"
+        android:layout_height="30dip"
+        android:layout_width="30dip"
+        android:layout_toLeftOf="@id/battery"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_sysbar_battery_mini"
+        />
+    <ImageView
+        android:id="@+id/signal_icon"
+        android:layout_height="30dip"
+        android:layout_width="30dip"
+        android:layout_toRightOf="@id/signal"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_sysbar_wifi_mini"
+        />
+</RelativeLayout>
+
+

@@ -30,9 +30,9 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteException;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.net.Uri.Builder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -41,6 +41,7 @@ import android.view.View;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -130,6 +131,20 @@ public final class ContactsContract {
     public static final String REQUESTING_PACKAGE_PARAM_KEY = "requesting_package";
 
     /**
+     * Query parameter that should be used by the client to access a specific
+     * {@link Directory}. The parameter value should be the _ID of the corresponding
+     * directory, e.g.
+     * {@code content://com.android.contacts/data/emails/filter/acme?directory=3}
+     */
+    public static final String DIRECTORY_PARAM_KEY = "directory";
+
+    /**
+     * A query parameter that limits the number of results returned. The
+     * parameter value should be an integer.
+     */
+    public static final String LIMIT_PARAM_KEY = "limit";
+
+    /**
      * @hide
      */
     public static final class Preferences {
@@ -178,6 +193,295 @@ public final class ContactsContract {
          * @hide
          */
         public static final int DISPLAY_ORDER_ALTERNATIVE = 2;
+    }
+
+    /**
+     * A Directory represents a contacts corpus, e.g. Local contacts,
+     * Google Apps Global Address List or Corporate Global Address List.
+     * <p>
+     * A Directory is implemented as a content provider with its unique authority and
+     * the same API as the main Contacts Provider.  However, there is no expectation that
+     * every directory provider will implement this Contract in its entirety.  If a
+     * directory provider does not have an implementation for a specific request, it
+     * should throw an UnsupportedOperationException.
+     * </p>
+     * <p>
+     * The most important use case for Directories is search.  A Directory provider is
+     * expected to support at least {@link ContactsContract.Contacts#CONTENT_FILTER_URI
+     * Contacts.CONTENT_FILTER_URI}.  If a Directory provider wants to participate
+     * in email and phone lookup functionalities, it should also implement
+     * {@link CommonDataKinds.Email#CONTENT_FILTER_URI CommonDataKinds.Email.CONTENT_FILTER_URI}
+     * and
+     * {@link CommonDataKinds.Phone#CONTENT_FILTER_URI CommonDataKinds.Phone.CONTENT_FILTER_URI}.
+     * </p>
+     * <p>
+     * A directory provider should return NULL for every projection field it does not
+     * recognize, rather than throwing an exception.  This way it will not be broken
+     * if ContactsContract is extended with new fields in the future.
+     * </p>
+     * <p>
+     * The client interacts with a directory via Contacts Provider by supplying an
+     * optional {@code directory=} query parameter.
+     * <p>
+     * <p>
+     * When the Contacts Provider receives the request, it transforms the URI and forwards
+     * the request to the corresponding directory content provider.
+     * The URI is transformed in the following fashion:
+     * <ul>
+     * <li>The URI authority is replaced with the corresponding {@link #DIRECTORY_AUTHORITY}.</li>
+     * <li>The {@code accountName=} and {@code accountType=} parameters are added or
+     * replaced using the corresponding {@link #ACCOUNT_TYPE} and {@link #ACCOUNT_NAME} values.</li>
+     * <li>If the URI is missing a ContactsContract.REQUESTING_PACKAGE_PARAM_KEY
+     * parameter, this parameter is added.</li>
+     * </ul>
+     * </p>
+     * <p>
+     * Clients should send directory requests to Contacts Provider and let it
+     * forward them to the respective providers rather than constructing
+     * directory provider URIs by themselves. This level of indirection allows
+     * Contacts Provider to implement additional system-level features and
+     * optimizations. Access to Contacts Provider is protected by the
+     * READ_CONTACTS permission, but access to the directory provider is not.
+     * Therefore directory providers must reject requests coming from clients
+     * other than the Contacts Provider itself. An easy way to prevent such
+     * unauthorized access is to check the name of the calling package:
+     * <pre>
+     * private boolean isCallerAllowed() {
+     *   PackageManager pm = getContext().getPackageManager();
+     *   for (String packageName: pm.getPackagesForUid(Binder.getCallingUid())) {
+     *     if (packageName.equals("com.android.providers.contacts")) {
+     *       return true;
+     *     }
+     *   }
+     *   return false;
+     * }
+     * </pre>
+     * </p>
+     * <p>
+     * The Directory table is read-only and is maintained by the Contacts Provider
+     * automatically.
+     * </p>
+     * <p>It always has at least these two rows:
+     * <ul>
+     * <li>
+     * The local directory. It has {@link Directory#_ID Directory._ID} =
+     * {@link Directory#DEFAULT Directory.DEFAULT}. This directory can be used to access locally
+     * stored contacts. The same can be achieved by omitting the {@code directory=}
+     * parameter altogether.
+     * </li>
+     * <li>
+     * The local invisible contacts. The corresponding directory ID is
+     * {@link Directory#LOCAL_INVISIBLE Directory.LOCAL_INVISIBLE}.
+     * </li>
+     * </ul>
+     * </p>
+     * <p>Custom Directories are discovered by the Contacts Provider following this procedure:
+     * <ul>
+     * <li>It finds all installed content providers with meta data identifying them
+     * as directory providers in AndroidManifest.xml:
+     * <code>
+     * &lt;meta-data android:name="android.content.ContactDirectory"
+     *               android:value="true" /&gt;
+     * </code>
+     * <p>
+     * This tag should be placed inside the corresponding content provider declaration.
+     * </p>
+     * </li>
+     * <li>
+     * Then Contacts Provider sends a {@link Directory#CONTENT_URI Directory.CONTENT_URI}
+     * query to each of the directory authorities.  A directory provider must implement
+     * this query and return a list of directories.  Each directory returned by
+     * the provider must have a unique combination for the {@link #ACCOUNT_NAME} and
+     * {@link #ACCOUNT_TYPE} columns (nulls are allowed).  Since directory IDs are assigned
+     * automatically, the _ID field will not be part of the query projection.
+     * </li>
+     * <li>Contacts Provider compiles directory lists received from all directory
+     * providers into one, assigns each individual directory a globally unique ID and
+     * stores all directory records in the Directory table.
+     * </li>
+     * </ul>
+     * </p>
+     * <p>Contacts Provider automatically interrogates newly installed or replaced packages.
+     * Thus simply installing a package containing a directory provider is sufficient
+     * to have that provider registered.  A package supplying a directory provider does
+     * not have to contain launchable activities.
+     * </p>
+     * <p>
+     * Every row in the Directory table is automatically associated with the corresponding package
+     * (apk).  If the package is later uninstalled, all corresponding directory rows
+     * are automatically removed from the Contacts Provider.
+     * </p>
+     * <p>
+     * When the list of directories handled by a directory provider changes
+     * (for instance when the user adds a new Directory account), the directory provider
+     * should call {@link #notifyDirectoryChange} to notify the Contacts Provider of the change.
+     * In response, the Contacts Provider will requery the directory provider to obtain the
+     * new list of directories.
+     * </p>
+     * <p>
+     * A directory row can be optionally associated with an existing account
+     * (see {@link android.accounts.AccountManager}). If the account is later removed,
+     * the corresponding directory rows are automatically removed from the Contacts Provider.
+     * </p>
+     */
+    public static final class Directory implements BaseColumns {
+
+        /**
+         * Not instantiable.
+         */
+        private Directory() {
+        }
+
+        /**
+         * The content:// style URI for this table.  Requests to this URI can be
+         * performed on the UI thread because they are always unblocking.
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "directories");
+
+        /**
+         * The MIME-type of {@link #CONTENT_URI} providing a directory of
+         * contact directories.
+         */
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/contact_directories";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} item.
+         */
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/contact_directory";
+
+        /**
+         * _ID of the default directory, which represents locally stored contacts.
+         */
+        public static final long DEFAULT = 0;
+
+        /**
+         * _ID of the directory that represents locally stored invisible contacts.
+         */
+        public static final long LOCAL_INVISIBLE = 1;
+
+        /**
+         * The name of the package that owns this directory. Contacts Provider
+         * fill it in with the name of the package containing the directory provider.
+         * If the package is later uninstalled, the directories it owns are
+         * automatically removed from this table.
+         *
+         * <p>TYPE: TEXT</p>
+         */
+        public static final String PACKAGE_NAME = "packageName";
+
+        /**
+         * The type of directory captured as a resource ID in the context of the
+         * package {@link #PACKAGE_NAME}, e.g. "Corporate Directory"
+         *
+         * <p>TYPE: INTEGER</p>
+         */
+        public static final String TYPE_RESOURCE_ID = "typeResourceId";
+
+        /**
+         * An optional name that can be used in the UI to represent this directory,
+         * e.g. "Acme Corp"
+         * <p>TYPE: text</p>
+         */
+        public static final String DISPLAY_NAME = "displayName";
+
+        /**
+         * <p>
+         * The authority of the Directory Provider. Contacts Provider will
+         * use this authority to forward requests to the directory provider.
+         * A directory provider can leave this column empty - Contacts Provider will fill it in.
+         * </p>
+         * <p>
+         * Clients of this API should not send requests directly to this authority.
+         * All directory requests must be routed through Contacts Provider.
+         * </p>
+         *
+         * <p>TYPE: text</p>
+         */
+        public static final String DIRECTORY_AUTHORITY = "authority";
+
+        /**
+         * The account type which this directory is associated.
+         *
+         * <p>TYPE: text</p>
+         */
+        public static final String ACCOUNT_TYPE = "accountType";
+
+        /**
+         * The account with which this directory is associated. If the account is later
+         * removed, the directories it owns are automatically removed from this table.
+         *
+         * <p>TYPE: text</p>
+         */
+        public static final String ACCOUNT_NAME = "accountName";
+
+        /**
+         * One of {@link #EXPORT_SUPPORT_NONE}, {@link #EXPORT_SUPPORT_ANY_ACCOUNT},
+         * {@link #EXPORT_SUPPORT_SAME_ACCOUNT_ONLY}. This is the expectation the
+         * directory has for data exported from it.  Clients must obey this setting.
+         */
+        public static final String EXPORT_SUPPORT = "exportSupport";
+
+        /**
+         * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
+         * does not allow any data to be copied out of it.
+         */
+        public static final int EXPORT_SUPPORT_NONE = 0;
+
+        /**
+         * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
+         * allow its data copied only to the account specified by
+         * {@link #ACCOUNT_TYPE}/{@link #ACCOUNT_NAME}.
+         */
+        public static final int EXPORT_SUPPORT_SAME_ACCOUNT_ONLY = 1;
+
+        /**
+         * An {@link #EXPORT_SUPPORT} setting that indicates that the directory
+         * allow its data copied to any contacts account.
+         */
+        public static final int EXPORT_SUPPORT_ANY_ACCOUNT = 2;
+
+        /**
+         * One of {@link #SHORTCUT_SUPPORT_NONE}, {@link #SHORTCUT_SUPPORT_DATA_ITEMS_ONLY},
+         * {@link #SHORTCUT_SUPPORT_FULL}, This is the expectation the directory
+         * has for shortcuts created for its elements. Clients must obey this setting.
+         */
+        public static final String SHORTCUT_SUPPORT = "shortcutSupport";
+
+        /**
+         * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
+         * does not allow any shortcuts created for its contacts.
+         */
+        public static final int SHORTCUT_SUPPORT_NONE = 0;
+
+        /**
+         * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
+         * allow creation of shortcuts for data items like email, phone or postal address,
+         * but not the entire contact.
+         */
+        public static final int SHORTCUT_SUPPORT_DATA_ITEMS_ONLY = 1;
+
+        /**
+         * An {@link #SHORTCUT_SUPPORT} setting that indicates that the directory
+         * allow creation of shortcuts for contact as well as their constituent elements.
+         */
+        public static final int SHORTCUT_SUPPORT_FULL = 2;
+
+        /**
+         * Notifies the system of a change in the list of directories handled by
+         * a particular directory provider. The Contacts provider will turn around
+         * and send a query to the directory provider for the full list of directories,
+         * which will replace the previous list.
+         */
+        public static void notifyDirectoryChange(ContentResolver resolver) {
+            // This is done to trigger a query by Contacts Provider back to the directory provider.
+            // No data needs to be sent back, because the provider can infer the calling
+            // package from binder.
+            ContentValues contentValues = new ContentValues();
+            resolver.update(Directory.CONTENT_URI, contentValues, null, null);
+        }
     }
 
     /**
@@ -412,6 +716,7 @@ public final class ContactsContract {
          * Contact Chat Capabilities. See {@link StatusUpdates} for individual
          * definitions.
          * <p>Type: NUMBER</p>
+         * @hide
          */
         public static final String CONTACT_CHAT_CAPABILITY = "contact_chat_capability";
 
@@ -457,7 +762,6 @@ public final class ContactsContract {
      * 'family name', 'given name' 'middle name'.  The CJK tradition is
      * 'family name' 'middle name' 'given name', with Japanese favoring a space between
      * the names and Chinese omitting the space.
-     * @hide
      */
     public interface FullNameStyle {
         public static final int UNDEFINED = 0;
@@ -476,7 +780,6 @@ public final class ContactsContract {
 
     /**
      * Constants for various styles of capturing the pronunciation of a person's name.
-     * @hide
      */
     public interface PhoneticNameStyle {
         public static final int UNDEFINED = 0;
@@ -502,8 +805,6 @@ public final class ContactsContract {
     /**
      * Types of data used to produce the display name for a contact. Listed in the order
      * of increasing priority.
-     *
-     * @hide
      */
     public interface DisplayNameSources {
         public static final int UNDEFINED = 0;
@@ -519,15 +820,12 @@ public final class ContactsContract {
      *
      * @see Contacts
      * @see RawContacts
-     * @hide
      */
     protected interface ContactNameColumns {
 
         /**
          * The kind of data that is used as the display name for the contact, such as
-         * structured name or email address.  See DisplayNameSources.
-         *
-         * TODO: convert DisplayNameSources to a link after it is un-hidden
+         * structured name or email address.  See {@link DisplayNameSources}.
          */
         public static final String DISPLAY_NAME_SOURCE = "display_name_source";
 
@@ -575,9 +873,7 @@ public final class ContactsContract {
 
         /**
          * The phonetic alphabet used to represent the {@link #PHONETIC_NAME}.  See
-         * PhoneticNameStyle.
-         *
-         * TODO: convert PhoneticNameStyle to a link after it is un-hidden
+         * {@link PhoneticNameStyle}.
          */
         public static final String PHONETIC_NAME_STYLE = "phonetic_name_style";
 
@@ -587,13 +883,10 @@ public final class ContactsContract {
          * {@link #PHONETIC_NAME_STYLE}.
          * </p>
          * <p>
-         * The value may be set manually by the user.
-         * This capability is is of interest only in countries
-         * with commonly used phonetic
-         * alphabets, such as Japan and Korea.  See PhoneticNameStyle.
+         * The value may be set manually by the user. This capability is of
+         * interest only in countries with commonly used phonetic alphabets,
+         * such as Japan and Korea. See {@link PhoneticNameStyle}.
          * </p>
-         *
-         * TODO: convert PhoneticNameStyle to a link after it is un-hidden
          */
         public static final String PHONETIC_NAME = "phonetic_name";
 
@@ -975,10 +1268,10 @@ public final class ContactsContract {
         }
 
         /**
-         * Mark a contact as having been contacted.  This updates the
-         * {@link #TIMES_CONTACTED} and {@link #LAST_TIME_CONTACTED} for the
-         * contact, plus the corresponding values of any associated raw
-         * contacts.
+         * Mark a contact as having been contacted. Updates two fields:
+         * {@link #TIMES_CONTACTED} and {@link #LAST_TIME_CONTACTED}. The
+         * TIMES_CONTACTED field is incremented by 1 and the LAST_TIME_CONTACTED
+         * field is populated with the current system time.
          *
          * @param resolver the ContentResolver to use
          * @param contactId the person who was contacted
@@ -1040,7 +1333,8 @@ public final class ContactsContract {
 
         /**
          * A sub-directory of a single contact that contains all of the constituent raw contact
-         * {@link ContactsContract.Data} rows.
+         * {@link ContactsContract.Data} rows.  This directory can be used either
+         * with a {@link #CONTENT_URI} or {@link #CONTENT_LOOKUP_URI}.
          */
         public static final class Data implements BaseColumns, DataColumns {
             /**
@@ -1052,6 +1346,57 @@ public final class ContactsContract {
              * The directory twig for this sub-table
              */
             public static final String CONTENT_DIRECTORY = "data";
+        }
+
+        /**
+         * <p>
+         * A sub-directory of a contact that contains all of its
+         * {@link ContactsContract.RawContacts} as well as
+         * {@link ContactsContract.Data} rows. To access this directory append
+         * {@link #CONTENT_DIRECTORY} to the contact URI.
+         * </p>
+         * <p>
+         * Entity has three ID fields: {@link #CONTACT_ID} for the contact,
+         * {@link #RAW_CONTACT_ID} for the raw contact and {@link #DATA_ID} for
+         * the data rows. Entity always contains at least one row per
+         * constituent raw contact, even if there are no actual data rows. In
+         * this case the {@link #DATA_ID} field will be null.
+         * </p>
+         * <p>
+         * Entity reads all data for the entire contact in one transaction, to
+         * guarantee consistency.  There is significant data duplication
+         * in the Entity (each row repeats all Contact columns and all RawContact
+         * columns), so the benefits of transactional consistency should be weighed
+         * against the cost of transferring large amounts of denormalized data
+         * from the Provider.
+         * </p>
+         */
+        public static final class Entity implements BaseColumns, ContactsColumns,
+                ContactNameColumns, RawContactsColumns, BaseSyncColumns, SyncColumns, DataColumns,
+                StatusColumns, ContactOptionsColumns, ContactStatusColumns {
+            /**
+             * no public constructor since this is a utility class
+             */
+            private Entity() {
+            }
+
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "entities";
+
+            /**
+             * The ID of the raw contact row.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String RAW_CONTACT_ID = "raw_contact_id";
+
+            /**
+             * The ID of the data row. The value will be null if this raw contact has no
+             * data rows.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String DATA_ID = "data_id";
         }
 
         /**
@@ -1080,9 +1425,13 @@ public final class ContactsContract {
          * </pre>
          *
          * </p>
+         * <p>
+         * This directory can be used either with a {@link #CONTENT_URI} or
+         * {@link #CONTENT_LOOKUP_URI}.
+         * </p>
          */
-        // TODO: add ContactOptionsColumns, ContactStatusColumns
-        public static final class AggregationSuggestions implements BaseColumns, ContactsColumns {
+        public static final class AggregationSuggestions implements BaseColumns, ContactsColumns,
+                ContactOptionsColumns, ContactStatusColumns {
             /**
              * No public constructor since this is a utility class
              */
@@ -1094,6 +1443,106 @@ public final class ContactsContract {
              * {@link android.provider.ContactsContract.Contacts#CONTENT_FILTER_URI}.
              */
             public static final String CONTENT_DIRECTORY = "suggestions";
+
+            /**
+             * Used with {@link Builder#addParameter} to specify what kind of data is
+             * supplied for the suggestion query.
+             *
+             * @hide
+             */
+            public static final String PARAMETER_MATCH_NAME = "name";
+
+            /**
+             * Used with {@link Builder#addParameter} to specify what kind of data is
+             * supplied for the suggestion query.
+             *
+             * @hide
+             */
+            public static final String PARAMETER_MATCH_EMAIL = "email";
+
+            /**
+             * Used with {@link Builder#addParameter} to specify what kind of data is
+             * supplied for the suggestion query.
+             *
+             * @hide
+             */
+            public static final String PARAMETER_MATCH_PHONE = "phone";
+
+            /**
+             * Used with {@link Builder#addParameter} to specify what kind of data is
+             * supplied for the suggestion query.
+             *
+             * @hide
+             */
+            public static final String PARAMETER_MATCH_NICKNAME = "nickname";
+
+            /**
+             * A convenience builder for aggregation suggestion content URIs.
+             *
+             * TODO: change documentation for this class to use the builder.
+             * @hide
+             */
+            public static final class Builder {
+                private long mContactId;
+                private ArrayList<String> mKinds = new ArrayList<String>();
+                private ArrayList<String> mValues = new ArrayList<String>();
+                private int mLimit;
+
+                /**
+                 * Optional existing contact ID.  If it is not provided, the search
+                 * will be based exclusively on the values supplied with {@link #addParameter}.
+                 */
+                public Builder setContactId(long contactId) {
+                    this.mContactId = contactId;
+                    return this;
+                }
+
+                /**
+                 * A value that can be used when searching for an aggregation
+                 * suggestion.
+                 *
+                 * @param kind can be one of
+                 *            {@link AggregationSuggestions#PARAMETER_MATCH_NAME},
+                 *            {@link AggregationSuggestions#PARAMETER_MATCH_EMAIL},
+                 *            {@link AggregationSuggestions#PARAMETER_MATCH_NICKNAME},
+                 *            {@link AggregationSuggestions#PARAMETER_MATCH_PHONE}
+                 */
+                public Builder addParameter(String kind, String value) {
+                    if (!TextUtils.isEmpty(value)) {
+                        mKinds.add(kind);
+                        mValues.add(value);
+                    }
+                    return this;
+                }
+
+                public Builder setLimit(int limit) {
+                    mLimit = limit;
+                    return this;
+                }
+
+                public Uri build() {
+                    android.net.Uri.Builder builder = Contacts.CONTENT_URI.buildUpon();
+                    builder.appendEncodedPath(String.valueOf(mContactId));
+                    builder.appendPath(Contacts.AggregationSuggestions.CONTENT_DIRECTORY);
+                    if (mLimit != 0) {
+                        builder.appendQueryParameter("limit", String.valueOf(mLimit));
+                    }
+
+                    int count = mKinds.size();
+                    for (int i = 0; i < count; i++) {
+                        builder.appendQueryParameter("query", mKinds.get(i) + ":" + mValues.get(i));
+                    }
+
+                    return builder.build();
+                }
+            }
+
+            /**
+             * @hide
+             */
+            public static final Builder builder() {
+                return new Builder();
+            }
         }
 
         /**
@@ -1129,9 +1578,12 @@ public final class ContactsContract {
          * <p>You should also consider using the convenience method
          * {@link ContactsContract.Contacts#openContactPhotoInputStream(ContentResolver, Uri)}
          * </p>
+         * <p>
+         * This directory can be used either with a {@link #CONTENT_URI} or
+         * {@link #CONTENT_LOOKUP_URI}.
+         * </p>
          */
-        // TODO: change DataColumns to DataColumnsWithJoins
-        public static final class Photo implements BaseColumns, DataColumns {
+        public static final class Photo implements BaseColumns, DataColumnsWithJoins {
             /**
              * no public constructor since this is a utility class
              */
@@ -1147,7 +1599,6 @@ public final class ContactsContract {
              * that could be inflated using {@link android.graphics.BitmapFactory}.
              * <p>
              * Type: BLOB
-             * @hide TODO: Unhide in a separate CL
              */
             public static final String PHOTO = DATA15;
         }
@@ -1156,7 +1607,10 @@ public final class ContactsContract {
          * Opens an InputStream for the contacts's default photo and returns the
          * photo as a byte stream. If there is not photo null will be returned.
          *
-         * @param contactUri the contact whose photo should be used
+         * @param contactUri the contact whose photo should be used. This can be used with
+         * either a {@link #CONTENT_URI} or a {@link #CONTENT_LOOKUP_URI} URI.
+         * </p>
+
          * @return an InputStream of the photo, or null if no photo is present
          */
         public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
@@ -1244,6 +1698,13 @@ public final class ContactsContract {
          * @hide
          */
         public static final String NAME_VERIFIED = "name_verified";
+
+        /**
+         * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
+         * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
     }
 
     /**
@@ -1629,10 +2090,10 @@ public final class ContactsContract {
         public static final int AGGREGATION_MODE_DEFAULT = 0;
 
         /**
-         * Do not use.
-         *
-         * TODO: deprecate in favor of {@link #AGGREGATION_MODE_DEFAULT}
+         * Aggregation mode: aggregate at the time the raw contact is inserted/updated.
+         * @deprecated Aggregation is synchronous, this historic value is a no-op
          */
+        @Deprecated
         public static final int AGGREGATION_MODE_IMMEDIATE = 1;
 
         /**
@@ -1700,9 +2161,7 @@ public final class ContactsContract {
         /**
          * A sub-directory of a single raw contact that contains all of its
          * {@link ContactsContract.Data} rows. To access this directory
-         * append {@link Data#CONTENT_DIRECTORY} to the contact URI.
-         *
-         * TODO: deprecate in favor of {@link RawContacts.Entity}.
+         * append {@link Data#CONTENT_DIRECTORY} to the raw contact URI.
          */
         public static final class Data implements BaseColumns, DataColumns {
             /**
@@ -1721,7 +2180,7 @@ public final class ContactsContract {
          * <p>
          * A sub-directory of a single raw contact that contains all of its
          * {@link ContactsContract.Data} rows. To access this directory append
-         * {@link #CONTENT_DIRECTORY} to the contact URI. See
+         * {@link RawContacts.Entity#CONTENT_DIRECTORY} to the raw contact URI. See
          * {@link RawContactsEntity} for a stand-alone table containing the same
          * data.
          * </p>
@@ -1733,10 +2192,10 @@ public final class ContactsContract {
          * null.
          * </p>
          * <p>
-         * Entity reads all
-         * data for a raw contact in one transaction, to guarantee
-         * consistency.
-         * </p>
+         * Using Entity should be preferred to using two separate queries:
+         * RawContacts followed by Data. The reason is that Entity reads all
+         * data for a raw contact in one transaction, so there is no possibility
+         * of the data changing between the two queries.
          */
         public static final class Entity implements BaseColumns, DataColumns {
             /**
@@ -1751,7 +2210,7 @@ public final class ContactsContract {
             public static final String CONTENT_DIRECTORY = "entity";
 
             /**
-             * The ID of the data column. The value will be null if this raw contact has no
+             * The ID of the data row. The value will be null if this raw contact has no
              * data rows.
              * <P>Type: INTEGER</P>
              */
@@ -1839,28 +2298,21 @@ public final class ContactsContract {
                             Data.DATA_VERSION);
                     for (String key : DATA_KEYS) {
                         final int columnIndex = cursor.getColumnIndexOrThrow(key);
-                        if (cursor.isNull(columnIndex)) {
-                            // don't put anything
-                        } else {
-                            try {
+                        switch (cursor.getType(columnIndex)) {
+                            case Cursor.FIELD_TYPE_NULL:
+                                // don't put anything
+                                break;
+                            case Cursor.FIELD_TYPE_INTEGER:
+                            case Cursor.FIELD_TYPE_FLOAT:
+                            case Cursor.FIELD_TYPE_STRING:
                                 cv.put(key, cursor.getString(columnIndex));
-                            } catch (SQLiteException e) {
+                                break;
+                            case Cursor.FIELD_TYPE_BLOB:
                                 cv.put(key, cursor.getBlob(columnIndex));
-                            }
+                                break;
+                            default:
+                                throw new IllegalStateException("Invalid or unhandled data type");
                         }
-                        // TODO: go back to this version of the code when bug
-                        // http://b/issue?id=2306370 is fixed.
-//                        if (cursor.isNull(columnIndex)) {
-//                            // don't put anything
-//                        } else if (cursor.isLong(columnIndex)) {
-//                            values.put(key, cursor.getLong(columnIndex));
-//                        } else if (cursor.isFloat(columnIndex)) {
-//                            values.put(key, cursor.getFloat(columnIndex));
-//                        } else if (cursor.isString(columnIndex)) {
-//                            values.put(key, cursor.getString(columnIndex));
-//                        } else if (cursor.isBlob(columnIndex)) {
-//                            values.put(key, cursor.getBlob(columnIndex));
-//                        }
                     }
                     contact.addSubValue(ContactsContract.Data.CONTENT_URI, cv);
                 } while (cursor.moveToNext());
@@ -1961,23 +2413,28 @@ public final class ContactsContract {
         /**
          * Contact's audio/video chat capability level.
          * <P>Type: INTEGER (one of the values below)</P>
+         * @hide
          */
         public static final String CHAT_CAPABILITY = "chat_capability";
 
         /**
-         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates that the contact's device can
+         * An allowed flag of {@link #CHAT_CAPABILITY}. Indicates audio-chat capability (microphone
+         * and speaker)
+         * @hide
+         */
+        public static final int CAPABILITY_HAS_VOICE = 1;
+
+        /**
+         * An allowed flag of {@link #CHAT_CAPABILITY}. Indicates that the contact's device can
          * display a video feed.
+         * @hide
          */
-        public static final int CAPABILITY_HAS_VIDEO_PLAYBACK_ONLY = 1;
+        public static final int CAPABILITY_HAS_VIDEO = 2;
 
         /**
-         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates audio-chat capability.
-         */
-        public static final int CAPABILITY_HAS_VOICE = 2;
-
-        /**
-         * An allowed value of {@link #CHAT_CAPABILITY}. Indicates that the contact's device has a
+         * An allowed flag of {@link #CHAT_CAPABILITY}. Indicates that the contact's device has a
          * camera that can be used for video chat (e.g. a front-facing camera on a phone).
+         * @hide
          */
         public static final int CAPABILITY_HAS_CAMERA = 4;
     }
@@ -2021,6 +2478,13 @@ public final class ContactsContract {
          * <P>Type: INTEGER (if set, non-0 means true)</P>
          */
         public static final String IS_SUPER_PRIMARY = "is_super_primary";
+
+        /**
+         * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
+         * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String IS_READ_ONLY = "is_read_only";
 
         /**
          * The version of this data record. This is a read-only value. The data column is
@@ -2857,6 +3321,14 @@ public final class ContactsContract {
          * <P>Type: TEXT</P>
          */
         public static final String LABEL = "label";
+
+        /**
+         * The phone number's E164 representation.
+         * <P>Type: TEXT</P>
+         *
+         * @hide
+         */
+        public static final String NORMALIZED_NUMBER = "normalized_number";
     }
 
     /**
@@ -3122,25 +3594,6 @@ public final class ContactsContract {
      * <p>
      * Since presence status is inherently volatile, the content provider
      * may choose not to store this field in long-term storage.
-     * </p>
-     * </td>
-     * </tr>
-     * <tr>
-     * <td>int</td>
-     * <td>{@link #CHAT_CAPABILITY}</td>
-     * <td>read/write</td>
-     * <td>Contact IM chat compatibility value. The allowed values are:
-     * <p>
-     * <ul>
-     * <li>{@link #CAPABILITY_HAS_VIDEO_PLAYBACK_ONLY}</li>
-     * <li>{@link #CAPABILITY_HAS_VOICE}</li>
-     * <li>{@link #CAPABILITY_HAS_CAMERA}</li>
-     * </ul>
-     * </p>
-     * <p>
-     * Since chat compatibility is inherently volatile as the contact's availability moves from
-     * one device to another, the content provider may choose not to store this field in long-term
-     * storage.
      * </p>
      * </td>
      * </tr>
@@ -3711,6 +4164,14 @@ public final class ContactsContract {
             public static final String NUMBER = DATA;
 
             /**
+             * The phone number's E164 representation.
+             * <P>Type: TEXT</P>
+             *
+             * @hide
+             */
+            public static final String NORMALIZED_NUMBER = DATA4;
+
+            /**
              * @deprecated use {@link #getTypeLabel(Resources, int, CharSequence)} instead.
              * @hide
              */
@@ -3792,7 +4253,7 @@ public final class ContactsContract {
          * </tr>
          * <tr>
          * <td>String</td>
-         * <td>{@link #DATA}</td>
+         * <td>{@link #ADDRESS}</td>
          * <td>{@link #DATA1}</td>
          * <td>Email address itself.</td>
          * </tr>
@@ -3883,7 +4344,6 @@ public final class ContactsContract {
             /**
              * The email address.
              * <P>Type: TEXT</P>
-             * @hide TODO: Unhide in a separate CL
              */
             public static final String ADDRESS = DATA1;
 
@@ -5047,6 +5507,23 @@ public final class ContactsContract {
          * Type: INTEGER (boolean)
          */
         public static final String SHOULD_SYNC = "should_sync";
+
+        /**
+         * Any newly created contacts will automatically be added to groups that have this
+         * flag set to true.
+         * <p>
+         * Type: INTEGER (boolean)
+         */
+        public static final String AUTO_ADD = "auto_add";
+
+        /**
+         * When a contacts is marked as a favorites it will be automatically added
+         * to the groups that have this flag set, and when it is removed from favorites
+         * it will be removed from these groups.
+         * <p>
+         * Type: INTEGER (boolean)
+         */
+        public static final String FAVORITES = "favorites";
     }
 
     /**
@@ -5187,6 +5664,8 @@ public final class ContactsContract {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, values, DELETED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, NOTES);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SHOULD_SYNC);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, FAVORITES);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, AUTO_ADD);
                 cursor.moveToNext();
                 return new Entity(values);
             }
@@ -5703,6 +6182,28 @@ public final class ContactsContract {
                 "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
 
         /**
+         * Starts an Activity that lets the user select the multiple phones from a
+         * list of phone numbers which come from the contacts or
+         * {@link #EXTRA_PHONE_URIS}.
+         * <p>
+         * The phone numbers being passed in through {@link #EXTRA_PHONE_URIS}
+         * could belong to the contacts or not, and will be selected by default.
+         * <p>
+         * The user's selection will be returned from
+         * {@link android.app.Activity#onActivityResult(int, int, android.content.Intent)}
+         * if the resultCode is
+         * {@link android.app.Activity#RESULT_OK}, the array of picked phone
+         * numbers are in the Intent's
+         * {@link #EXTRA_PHONE_URIS}; otherwise, the
+         * {@link android.app.Activity#RESULT_CANCELED} is returned if the user
+         * left the Activity without changing the selection.
+         *
+         * @hide
+         */
+        public static final String ACTION_GET_MULTIPLE_PHONES =
+                "com.android.contacts.action.GET_MULTIPLE_PHONES";
+
+        /**
          * Used with {@link #SHOW_OR_CREATE_CONTACT} to force creating a new
          * contact if no matching contact found. Otherwise, default behavior is
          * to prompt user with dialog before creating.
@@ -5721,6 +6222,23 @@ public final class ContactsContract {
          */
         public static final String EXTRA_CREATE_DESCRIPTION =
             "com.android.contacts.action.CREATE_DESCRIPTION";
+
+        /**
+         * Used with {@link #ACTION_GET_MULTIPLE_PHONES} as the input or output value.
+         * <p>
+         * The phone numbers want to be picked by default should be passed in as
+         * input value. These phone numbers could belong to the contacts or not.
+         * <p>
+         * The phone numbers which were picked by the user are returned as output
+         * value.
+         * <p>
+         * Type: array of URIs, the tel URI is used for the phone numbers which don't
+         * belong to any contact, the content URI is used for phone id in contacts.
+         *
+         * @hide
+         */
+        public static final String EXTRA_PHONE_URIS =
+            "com.android.contacts.extra.PHONE_URIS";
 
         /**
          * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to specify a

@@ -28,7 +28,7 @@ public class MccTableTest extends AndroidTestCase {
 
     @SmallTest
     public void testTimeZone() throws Exception {
-        assertEquals(MccTable.defaultTimeZoneForMcc(208), "Europe/Paris");
+        assertEquals(MccTable.defaultTimeZoneForMcc(208), "ECT");
         assertEquals(MccTable.defaultTimeZoneForMcc(232), "Europe/Vienna");
         assertEquals(MccTable.defaultTimeZoneForMcc(655), "Africa/Johannesburg");
         assertEquals(MccTable.defaultTimeZoneForMcc(440), "Asia/Tokyo");

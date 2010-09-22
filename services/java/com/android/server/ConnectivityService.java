@@ -26,14 +26,18 @@ import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkInfo;
+import android.net.LinkProperties;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.wifi.WifiStateTracker;
+import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -47,8 +51,13 @@ import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
 
 import java.io.FileDescriptor;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.net.InetAddress;
@@ -68,7 +77,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final String NETWORK_RESTORE_DELAY_PROP_NAME =
             "android.telephony.apn-restore";
 
-
     private Tethering mTethering;
     private boolean mTetheringConfigValid = false;
 
@@ -84,6 +92,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * used both as a refcount and for per-PID DNS selection
      */
     private List mNetRequestersPids[];
+
+    private WifiWatchdogService mWifiWatchdogService;
 
     // priority order of the nettrackers
     // (excluding dynamically set mNetworkPreference)
@@ -112,6 +122,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean mSystemReady;
     private Intent mInitialBroadcast;
+
+    private PowerManager.WakeLock mNetTransitionWakeLock;
+    private String mNetTransitionWakeLockCausedBy = "";
+    private int mNetTransitionWakeLockSerialNumber;
+    private int mNetTransitionWakeLockTimeout;
+
+    private InetAddress mDefaultDns;
 
     // used in DBG mode to track inet condition reports
     private static final int INET_CONDITION_LOG_MAX_SIZE = 15;
@@ -152,51 +169,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
     RadioAttributes[] mRadioAttributes;
 
-    private static class ConnectivityThread extends Thread {
-        private Context mContext;
-
-        private ConnectivityThread(Context context) {
-            super("ConnectivityThread");
-            mContext = context;
+    public static synchronized ConnectivityService getInstance(Context context) {
+        if (sServiceInstance == null) {
+            sServiceInstance = new ConnectivityService(context);
         }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            synchronized (this) {
-                sServiceInstance = new ConnectivityService(mContext);
-                notifyAll();
-            }
-            Looper.loop();
-        }
-
-        public static ConnectivityService getServiceInstance(Context context) {
-            ConnectivityThread thread = new ConnectivityThread(context);
-            thread.start();
-
-            synchronized (thread) {
-                while (sServiceInstance == null) {
-                    try {
-                        // Wait until sServiceInstance has been initialized.
-                        thread.wait();
-                    } catch (InterruptedException ignore) {
-                        Slog.e(TAG,
-                            "Unexpected InterruptedException while waiting"+
-                            " for ConnectivityService thread");
-                    }
-                }
-            }
-
-            return sServiceInstance;
-        }
-    }
-
-    public static ConnectivityService getInstance(Context context) {
-        return ConnectivityThread.getServiceInstance(context);
+        return sServiceInstance;
     }
 
     private ConnectivityService(Context context) {
         if (DBG) Slog.v(TAG, "ConnectivityService starting up");
+
+        HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
+        handlerThread.start();
+        mHandler = new MyHandler(handlerThread.getLooper());
 
         // setup our unique device name
         String id = Settings.Secure.getString(context.getContentResolver(),
@@ -206,10 +191,28 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             SystemProperties.set("net.hostname", name);
         }
 
+        // read our default dns server ip
+        String dns = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.DEFAULT_DNS_SERVER);
+        if (dns == null || dns.length() == 0) {
+            dns = context.getResources().getString(
+                    com.android.internal.R.string.config_default_dns_server);
+        }
+        try {
+            mDefaultDns = InetAddress.getByName(dns);
+        } catch (UnknownHostException e) {
+            Slog.e(TAG, "Error setting defaultDns using " + dns);
+        }
+
         mContext = context;
+
+        PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mNetTransitionWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mNetTransitionWakeLockTimeout = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_networkTransitionTimeout);
+
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
-        mHandler = new MyHandler();
 
         mNetworkPreference = getPersistedNetworkPreference();
 
@@ -306,18 +309,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             switch (mNetAttributes[netType].mRadio) {
             case ConnectivityManager.TYPE_WIFI:
                 if (DBG) Slog.v(TAG, "Starting Wifi Service.");
-                WifiStateTracker wst = new WifiStateTracker(context, mHandler);
-                WifiService wifiService = new WifiService(context, wst);
+                WifiStateTracker wst = new WifiStateTracker();
+                WifiService wifiService = new WifiService(context);
                 ServiceManager.addService(Context.WIFI_SERVICE, wifiService);
-                wifiService.startWifi();
+                wifiService.checkAndStartWifi();
                 mNetTrackers[ConnectivityManager.TYPE_WIFI] = wst;
-                wst.startMonitoring();
+                wst.startMonitoring(context, mHandler);
+
+                //TODO: as part of WWS refactor, create only when needed
+                mWifiWatchdogService = new WifiWatchdogService(context);
 
                 break;
             case ConnectivityManager.TYPE_MOBILE:
-                mNetTrackers[netType] = new MobileDataStateTracker(context, mHandler,
-                    netType, mNetAttributes[netType].mName);
-                mNetTrackers[netType].startMonitoring();
+                mNetTrackers[netType] = new MobileDataStateTracker(netType,
+                        mNetAttributes[netType].mName);
+                mNetTrackers[netType].startMonitoring(context, mHandler);
                 if (noMobileData) {
                     if (DBG) Slog.d(TAG, "tearing down Mobile networks due to setting");
                     mNetTrackers[netType].teardown();
@@ -334,7 +340,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mTetheringConfigValid = (((mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null) ||
                                   !mTethering.isDunRequired()) &&
                                  (mTethering.getTetherableUsbRegexs().length != 0 ||
-                                  mTethering.getTetherableWifiRegexs().length != 0) &&
+                                  mTethering.getTetherableWifiRegexs().length != 0 ||
+                                  mTethering.getTetherableBluetoothRegexs().length != 0) &&
                                  mTethering.getUpstreamIfaceRegexs().length != 0);
 
         if (DBG) {
@@ -462,6 +469,38 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if(t != null) result[i++] = t.getNetworkInfo();
         }
         return result;
+    }
+
+    /**
+     * Return LinkProperties for the active (i.e., connected) default
+     * network interface.  It is assumed that at most one default network
+     * is active at a time. If more than one is active, it is indeterminate
+     * which will be returned.
+     * @return the ip properties for the active network, or {@code null} if
+     * none is active
+     */
+    public LinkProperties getActiveLinkProperties() {
+        enforceAccessPermission();
+        for (int type=0; type <= ConnectivityManager.MAX_NETWORK_TYPE; type++) {
+            if (mNetAttributes[type] == null || !mNetAttributes[type].isDefault()) {
+                continue;
+            }
+            NetworkStateTracker t = mNetTrackers[type];
+            NetworkInfo info = t.getNetworkInfo();
+            if (info.isConnected()) {
+                return t.getLinkProperties();
+            }
+        }
+        return null;
+    }
+
+    public LinkProperties getLinkProperties(int networkType) {
+        enforceAccessPermission();
+        if (ConnectivityManager.isNetworkTypeValid(networkType)) {
+            NetworkStateTracker t = mNetTrackers[networkType];
+            if (t != null) return t.getLinkProperties();
+        }
+        return null;
     }
 
     public boolean setRadios(boolean turnOn) {
@@ -613,15 +652,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 network.reconnect();
                 return Phone.APN_REQUEST_STARTED;
             } else {
-                synchronized(this) {
-                    mFeatureUsers.add(f);
-                }
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                        NetworkStateTracker.EVENT_RESTORE_DEFAULT_NETWORK,
-                        f), getRestoreDefaultNetworkDelay());
-
-                return network.startUsingNetworkFeature(feature,
-                        getCallingPid(), getCallingUid());
+                return -1;
             }
         }
         return Phone.APN_TYPE_NOT_AVAILABLE;
@@ -740,8 +771,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             tracker.teardown();
             return 1;
         } else {
-            // do it the old fashioned way
-            return tracker.stopUsingNetworkFeature(feature, pid, uid);
+            return -1;
         }
     }
 
@@ -790,11 +820,37 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             return false;
         }
-
         try {
-            InetAddress inetAddress = InetAddress.getByAddress(hostAddress);
-            return tracker.requestRouteToHost(inetAddress);
-        } catch (UnknownHostException e) {
+            InetAddress addr = InetAddress.getByAddress(hostAddress);
+            return addHostRoute(tracker, addr);
+        } catch (UnknownHostException e) {}
+        return false;
+    }
+
+    /**
+     * Ensure that a network route exists to deliver traffic to the specified
+     * host via the mobile data network.
+     * @param hostAddress the IP address of the host to which the route is desired,
+     * in network byte order.
+     * TODO - deprecate
+     * @return {@code true} on success, {@code false} on failure
+     */
+    private boolean addHostRoute(NetworkStateTracker nt, InetAddress hostAddress) {
+        if (nt.getNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI) {
+            return false;
+        }
+
+        LinkProperties p = nt.getLinkProperties();
+        if (p == null) return false;
+        String interfaceName = p.getInterfaceName();
+
+        if (DBG) {
+            Slog.d(TAG, "Requested host route to " + hostAddress + "(" + interfaceName + ")");
+        }
+        if (interfaceName != null) {
+            return NetworkUtils.addHostRoute(interfaceName, hostAddress, null);
+        } else {
+            if (DBG) Slog.e(TAG, "addHostRoute failed due to null interface name");
             return false;
         }
     }
@@ -900,6 +956,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void enforceTetherAccessPermission() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE,
+                "ConnectivityService");
+    }
+
+    private void enforceConnectivityInternalPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CONNECTIVITY_INTERNAL,
                 "ConnectivityService");
     }
 
@@ -1197,9 +1259,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         Slog.e(TAG, "Network declined teardown request");
                         return;
                     }
-                    if (isFailover) {
-                        otherNet.releaseWakeLock();
-                    }
+                }
+            }
+            synchronized (ConnectivityService.this) {
+                // have a new default network, release the transition wakelock in a second
+                // if it's held.  The second pause is to allow apps to reconnect over the
+                // new network
+                if (mNetTransitionWakeLock.isHeld()) {
+                    mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                            NetworkStateTracker.EVENT_CLEAR_NET_TRANSITION_WAKELOCK,
+                            mNetTransitionWakeLockSerialNumber, 0),
+                            1000);
                 }
             }
             mActiveDefaultNetwork = type;
@@ -1213,36 +1283,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             //reportNetworkCondition(mActiveDefaultNetwork, 100);
         }
         thisNet.setTeardownRequested(false);
-        thisNet.updateNetworkSettings();
+        updateNetworkSettings(thisNet);
         handleConnectivityChange(type);
         sendConnectedBroadcast(info);
     }
 
-    private void handleScanResultsAvailable(NetworkInfo info) {
-        int networkType = info.getType();
-        if (networkType != ConnectivityManager.TYPE_WIFI) {
-            if (DBG) Slog.v(TAG, "Got ScanResultsAvailable for " +
-                    info.getTypeName() + " network. Don't know how to handle.");
-        }
-
-        mNetTrackers[networkType].interpretScanResultsAvailable();
-    }
-
-    private void handleNotificationChange(boolean visible, int id,
-            Notification notification) {
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (visible) {
-            notificationManager.notify(id, notification);
-        } else {
-            notificationManager.cancel(id);
-        }
-    }
-
     /**
-     * After a change in the connectivity state of any network, We're mainly
-     * concerned with making sure that the list of DNS servers is setupup
+     * After a change in the connectivity state of a network. We're mainly
+     * concerned with making sure that the list of DNS servers is set up
      * according to which networks are connected, and ensuring that the
      * right routing table entries exist.
      */
@@ -1255,18 +1303,157 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
             if (mNetAttributes[netType].isDefault()) {
-                mNetTrackers[netType].addDefaultRoute();
+                addDefaultRoute(mNetTrackers[netType]);
             } else {
-                mNetTrackers[netType].addPrivateDnsRoutes();
+                addPrivateDnsRoutes(mNetTrackers[netType]);
             }
         } else {
             if (mNetAttributes[netType].isDefault()) {
-                mNetTrackers[netType].removeDefaultRoute();
+                removeDefaultRoute(mNetTrackers[netType]);
             } else {
-                mNetTrackers[netType].removePrivateDnsRoutes();
+                removePrivateDnsRoutes(mNetTrackers[netType]);
             }
         }
     }
+
+    private void addPrivateDnsRoutes(NetworkStateTracker nt) {
+        boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
+        LinkProperties p = nt.getLinkProperties();
+        if (p == null) return;
+        String interfaceName = p.getInterfaceName();
+
+        if (DBG) {
+            Slog.d(TAG, "addPrivateDnsRoutes for " + nt +
+                    "(" + interfaceName + ") - mPrivateDnsRouteSet = " + privateDnsRouteSet);
+        }
+        if (interfaceName != null && !privateDnsRouteSet) {
+            Collection<InetAddress> dnsList = p.getDnses();
+            for (InetAddress dns : dnsList) {
+                if (DBG) Slog.d(TAG, "  adding " + dns);
+                NetworkUtils.addHostRoute(interfaceName, dns, null);
+            }
+            nt.privateDnsRouteSet(true);
+        }
+    }
+
+    private void removePrivateDnsRoutes(NetworkStateTracker nt) {
+        // TODO - we should do this explicitly but the NetUtils api doesnt
+        // support this yet - must remove all.  No worse than before
+        LinkProperties p = nt.getLinkProperties();
+        if (p == null) return;
+        String interfaceName = p.getInterfaceName();
+        boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
+        if (interfaceName != null && privateDnsRouteSet) {
+            if (DBG) {
+                Slog.d(TAG, "removePrivateDnsRoutes for " + nt.getNetworkInfo().getTypeName() +
+                        " (" + interfaceName + ")");
+            }
+            NetworkUtils.removeHostRoutes(interfaceName);
+            nt.privateDnsRouteSet(false);
+        }
+    }
+
+
+    private void addDefaultRoute(NetworkStateTracker nt) {
+        LinkProperties p = nt.getLinkProperties();
+        if (p == null) return;
+        String interfaceName = p.getInterfaceName();
+        InetAddress defaultGatewayAddr = p.getGateway();
+
+        if ((interfaceName != null) && (defaultGatewayAddr != null )) {
+            if (!NetworkUtils.addDefaultRoute(interfaceName, defaultGatewayAddr) && DBG) {
+                NetworkInfo networkInfo = nt.getNetworkInfo();
+                Slog.d(TAG, "addDefaultRoute for " + networkInfo.getTypeName() +
+                        " (" + interfaceName + "), GatewayAddr=" + defaultGatewayAddr);
+            }
+        }
+    }
+
+
+    public void removeDefaultRoute(NetworkStateTracker nt) {
+        LinkProperties p = nt.getLinkProperties();
+        if (p == null) return;
+        String interfaceName = p.getInterfaceName();
+
+        if (interfaceName != null) {
+            if ((NetworkUtils.removeDefaultRoute(interfaceName) >= 0) && DBG) {
+                NetworkInfo networkInfo = nt.getNetworkInfo();
+                Slog.d(TAG, "removeDefaultRoute for " + networkInfo.getTypeName() + " (" +
+                        interfaceName + ")");
+            }
+        }
+    }
+
+   /**
+     * Reads the network specific TCP buffer sizes from SystemProperties
+     * net.tcp.buffersize.[default|wifi|umts|edge|gprs] and set them for system
+     * wide use
+     */
+   public void updateNetworkSettings(NetworkStateTracker nt) {
+        String key = nt.getTcpBufferSizesPropName();
+        String bufferSizes = SystemProperties.get(key);
+
+        if (bufferSizes.length() == 0) {
+            Slog.e(TAG, key + " not found in system properties. Using defaults");
+
+            // Setting to default values so we won't be stuck to previous values
+            key = "net.tcp.buffersize.default";
+            bufferSizes = SystemProperties.get(key);
+        }
+
+        // Set values in kernel
+        if (bufferSizes.length() != 0) {
+            if (DBG) {
+                Slog.v(TAG, "Setting TCP values: [" + bufferSizes
+                        + "] which comes from [" + key + "]");
+            }
+            setBufferSize(bufferSizes);
+        }
+    }
+
+   /**
+     * Writes TCP buffer sizes to /sys/kernel/ipv4/tcp_[r/w]mem_[min/def/max]
+     * which maps to /proc/sys/net/ipv4/tcp_rmem and tcpwmem
+     *
+     * @param bufferSizes in the format of "readMin, readInitial, readMax,
+     *        writeMin, writeInitial, writeMax"
+     */
+    private void setBufferSize(String bufferSizes) {
+        try {
+            String[] values = bufferSizes.split(",");
+
+            if (values.length == 6) {
+              final String prefix = "/sys/kernel/ipv4/tcp_";
+                stringToFile(prefix + "rmem_min", values[0]);
+                stringToFile(prefix + "rmem_def", values[1]);
+                stringToFile(prefix + "rmem_max", values[2]);
+                stringToFile(prefix + "wmem_min", values[3]);
+                stringToFile(prefix + "wmem_def", values[4]);
+                stringToFile(prefix + "wmem_max", values[5]);
+            } else {
+                Slog.e(TAG, "Invalid buffersize string: " + bufferSizes);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Can't set tcp buffer sizes:" + e);
+        }
+    }
+
+   /**
+     * Writes string to file. Basically same as "echo -n $string > $filename"
+     *
+     * @param filename
+     * @param string
+     * @throws IOException
+     */
+    private void stringToFile(String filename, String string) throws IOException {
+        FileWriter out = new FileWriter(filename);
+        try {
+            out.write(string);
+        } finally {
+            out.close();
+        }
+    }
+
 
     /**
      * Adjust the per-process dns entries (net.dns<x>.<pid>) based
@@ -1283,12 +1470,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkStateTracker nt = mNetTrackers[i];
             if (nt.getNetworkInfo().isConnected() &&
                     !nt.isTeardownRequested()) {
+                LinkProperties p = nt.getLinkProperties();
+                if (p == null) continue;
                 List pids = mNetRequestersPids[i];
                 for (int j=0; j<pids.size(); j++) {
                     Integer pid = (Integer)pids.get(j);
                     if (pid.intValue() == myPid) {
-                        String[] dnsList = nt.getNameServers();
-                        writePidDns(dnsList, myPid);
+                        Collection<InetAddress> dnses = p.getDnses();
+                        writePidDns(dnses, myPid);
                         if (doBump) {
                             bumpDns();
                         }
@@ -1310,12 +1499,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void writePidDns(String[] dnsList, int pid) {
+    private void writePidDns(Collection <InetAddress> dnses, int pid) {
         int j = 1;
-        for (String dns : dnsList) {
-            if (dns != null && !TextUtils.equals(dns, "0.0.0.0")) {
-                SystemProperties.set("net.dns" + j++ + "." + pid, dns);
-            }
+        for (InetAddress dns : dnses) {
+            SystemProperties.set("net.dns" + j++ + "." + pid, dns.getHostAddress());
         }
     }
 
@@ -1338,16 +1525,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // add default net's dns entries
         NetworkStateTracker nt = mNetTrackers[netType];
         if (nt != null && nt.getNetworkInfo().isConnected() && !nt.isTeardownRequested()) {
-            String[] dnsList = nt.getNameServers();
+            LinkProperties p = nt.getLinkProperties();
+            if (p == null) return;
+            Collection<InetAddress> dnses = p.getDnses();
             if (mNetAttributes[netType].isDefault()) {
                 int j = 1;
-                for (String dns : dnsList) {
-                    if (dns != null && !TextUtils.equals(dns, "0.0.0.0")) {
+                if (dnses.size() == 0 && mDefaultDns != null) {
+                    if (DBG) {
+                        Slog.d(TAG, "no dns provided - using " + mDefaultDns.getHostAddress());
+                    }
+                    SystemProperties.set("net.dns1", mDefaultDns.getHostAddress());
+                    j++;
+                } else {
+                    for (InetAddress dns : dnses) {
                         if (DBG) {
                             Slog.d(TAG, "adding dns " + dns + " for " +
                                     nt.getNetworkInfo().getTypeName());
                         }
-                        SystemProperties.set("net.dns" + j++, dns);
+                        SystemProperties.set("net.dns" + j++, dns.getHostAddress());
                     }
                 }
                 for (int k=j ; k<mNumDnsEntries; k++) {
@@ -1360,11 +1555,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 List pids = mNetRequestersPids[netType];
                 for (int y=0; y< pids.size(); y++) {
                     Integer pid = (Integer)pids.get(y);
-                    writePidDns(dnsList, pid.intValue());
+                    writePidDns(dnses, pid.intValue());
                 }
             }
+            bumpDns();
         }
-        bumpDns();
     }
 
     private int getRestoreDefaultNetworkDelay() {
@@ -1419,6 +1614,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         pw.println();
 
+        synchronized (this) {
+            pw.println("NetworkTranstionWakeLock is currently " +
+                    (mNetTransitionWakeLock.isHeld() ? "" : "not ") + "held.");
+            pw.println("It was last requested for "+mNetTransitionWakeLockCausedBy);
+        }
+        pw.println();
+
         mTethering.dump(fd, pw, args);
 
         if (mInetLog != null) {
@@ -1432,6 +1634,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // must be stateless - things change under us.
     private class MyHandler extends Handler {
+        public MyHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             NetworkInfo info;
@@ -1493,33 +1699,29 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         handleConnect(info);
                     }
                     break;
-
-                case NetworkStateTracker.EVENT_SCAN_RESULTS_AVAILABLE:
-                    info = (NetworkInfo) msg.obj;
-                    handleScanResultsAvailable(info);
-                    break;
-
-                case NetworkStateTracker.EVENT_NOTIFICATION_CHANGED:
-                    handleNotificationChange(msg.arg1 == 1, msg.arg2,
-                            (Notification) msg.obj);
-                    break;
-
                 case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
+                    // TODO - make this handle ip/proxy/gateway/dns changes
                     info = (NetworkInfo) msg.obj;
                     type = info.getType();
                     handleDnsConfigurationChange(type);
                     break;
-
-                case NetworkStateTracker.EVENT_ROAMING_CHANGED:
-                    // fill me in
-                    break;
-
-                case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED:
-                    // fill me in
-                    break;
                 case NetworkStateTracker.EVENT_RESTORE_DEFAULT_NETWORK:
                     FeatureUser u = (FeatureUser)msg.obj;
                     u.expire();
+                    break;
+                case NetworkStateTracker.EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
+                    String causedBy = null;
+                    synchronized (ConnectivityService.this) {
+                        if (msg.arg1 == mNetTransitionWakeLockSerialNumber &&
+                                mNetTransitionWakeLock.isHeld()) {
+                            mNetTransitionWakeLock.release();
+                            causedBy = mNetTransitionWakeLockCausedBy;
+                        }
+                    }
+                    if (causedBy != null) {
+                        Slog.d(TAG, "NetTransition Wakelock for " +
+                                causedBy + " released by timeout");
+                    }
                     break;
                 case NetworkStateTracker.EVENT_INET_CONDITION_CHANGE:
                     if (DBG) {
@@ -1641,6 +1843,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    public String[] getTetherableBluetoothRegexs() {
+        enforceTetherAccessPermission();
+        if (isTetheringSupported()) {
+            return mTethering.getTetherableBluetoothRegexs();
+        } else {
+            return new String[0];
+        }
+    }
+
     // TODO - move iface listing, queries, etc to new module
     // javadoc from interface
     public String[] getTetherableIfaces() {
@@ -1667,6 +1878,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean tetherEnabledInSettings = (Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.TETHER_SUPPORTED, defaultVal) != 0);
         return tetherEnabledInSettings && mTetheringConfigValid;
+    }
+
+    // An API NetworkStateTrackers can call when they lose their network.
+    // This will automatically be cleared after X seconds or a network becomes CONNECTED,
+    // whichever happens first.  The timer is started by the first caller and not
+    // restarted by subsequent callers.
+    public void requestNetworkTransitionWakelock(String forWhom) {
+        enforceConnectivityInternalPermission();
+        synchronized (this) {
+            if (mNetTransitionWakeLock.isHeld()) return;
+            mNetTransitionWakeLockSerialNumber++;
+            mNetTransitionWakeLock.acquire();
+            mNetTransitionWakeLockCausedBy = forWhom;
+        }
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                NetworkStateTracker.EVENT_CLEAR_NET_TRANSITION_WAKELOCK,
+                mNetTransitionWakeLockSerialNumber, 0),
+                mNetTransitionWakeLockTimeout);
+        return;
     }
 
     // 100 percent is full good, 0 is full bad.

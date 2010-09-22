@@ -24,26 +24,28 @@ import com.android.internal.os.SamplingProfilerIntegration;
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
 
+import android.accounts.AccountManagerService;
 import android.app.ActivityManagerNative;
 import android.bluetooth.BluetoothAdapter;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentService;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.media.AudioService;
-import android.os.*;
-import android.provider.Contacts.People;
+import android.os.Build;
+import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.StrictMode;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.server.BluetoothA2dpService;
 import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Slog;
-import android.accounts.AccountManagerService;
 
 import java.io.File;
 import java.util.Timer;
@@ -51,11 +53,8 @@ import java.util.TimerTask;
 
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
-    private final static boolean INCLUDE_DEMO = false;
 
-    private static final int LOG_BOOT_PROGRESS_SYSTEM_RUN = 3010;
-
-    private ContentResolver mContentResolver;
+    ContentResolver mContentResolver;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -102,6 +101,7 @@ class ServerThread extends Thread {
         UiModeManagerService uiMode = null;
         RecognitionManagerService recognition = null;
         ThrottleService throttle = null;
+        NetworkTimeUpdateService networkTimeUpdater = null;
 
         // Critical services...
         try {
@@ -210,6 +210,7 @@ class ServerThread extends Thread {
         NotificationManagerService notification = null;
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
+        CountryDetectorService countryDetector = null;
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
@@ -320,16 +321,19 @@ class ServerThread extends Thread {
             }
 
             try {
+                Slog.i(TAG, "Country Detector");
+                countryDetector = new CountryDetectorService(context);
+                ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Country Detector", e);
+            }
+
+            try {
                 Slog.i(TAG, "Search Service");
                 ServiceManager.addService(Context.SEARCH_SERVICE,
                         new SearchManagerService(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Search Service", e);
-            }
-
-            if (INCLUDE_DEMO) {
-                Slog.i(TAG, "Installing demo data...");
-                (new DemoThread(context)).start();
             }
 
             try {
@@ -418,6 +422,18 @@ class ServerThread extends Thread {
             }
 
             try {
+                // need to add this service even if SamplingProfilerIntegration.isEnabled()
+                // is false, because it is this service that detects system property change and
+                // turns on SamplingProfilerIntegration. Plus, when sampling profiler doesn't work,
+                // there is little overhead for running this service.
+                Slog.i(TAG, "SamplingProfiler Service");
+                ServiceManager.addService("samplingprofiler",
+                            new SamplingProfilerService(context));
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting SamplingProfiler Service", e);
+            }
+
+            try {
                 SipService sipService = SipService.create(context);
                 if (sipService != null) {
                     Slog.i(TAG, "Sip Service");
@@ -425,6 +441,13 @@ class ServerThread extends Thread {
                 }
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting SIP Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "NetworkTimeUpdateService");
+                networkTimeUpdater = new NetworkTimeUpdateService(context);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting NetworkTimeUpdate service");
             }
         }
 
@@ -486,6 +509,8 @@ class ServerThread extends Thread {
         final InputMethodManagerService immF = imm;
         final RecognitionManagerService recognitionF = recognition;
         final LocationManagerService locationF = location;
+        final CountryDetectorService countryDetectorF = countryDetector;
+        final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -513,7 +538,9 @@ class ServerThread extends Thread {
                 if (wallpaperF != null) wallpaperF.systemReady();
                 if (immF != null) immF.systemReady();
                 if (locationF != null) locationF.systemReady();
+                if (countryDetectorF != null) countryDetectorF.systemReady();
                 if (throttleF != null) throttleF.systemReady();
+                if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
             }
         });
 
@@ -527,37 +554,7 @@ class ServerThread extends Thread {
     }
 }
 
-class DemoThread extends Thread
-{
-    DemoThread(Context context)
-    {
-        mContext = context;
-    }
-
-    @Override
-    public void run()
-    {
-        try {
-            Cursor c = mContext.getContentResolver().query(People.CONTENT_URI, null, null, null, null);
-            boolean hasData = c != null && c.moveToFirst();
-            if (c != null) {
-                c.deactivate();
-            }
-            if (!hasData) {
-                DemoDataSet dataset = new DemoDataSet();
-                dataset.add(mContext);
-            }
-        } catch (Throwable e) {
-            Slog.e("SystemServer", "Failure installing demo data", e);
-        }
-
-    }
-
-    Context mContext;
-}
-
-public class SystemServer
-{
+public class SystemServer {
     private static final String TAG = "SystemServer";
 
     public static final int FACTORY_TEST_OFF = 0;
@@ -581,7 +578,7 @@ public class SystemServer
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    SamplingProfilerIntegration.writeSnapshot("system_server");
+                    SamplingProfilerIntegration.writeSnapshot("system_server", null);
                 }
             }, SNAPSHOT_INTERVAL, SNAPSHOT_INTERVAL);
         }
@@ -589,7 +586,7 @@ public class SystemServer
         // The system server has to run all of the time, so it needs to be
         // as efficient as possible with its memory usage.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
-        
+
         System.loadLibrary("android_servers");
         init1(args);
     }

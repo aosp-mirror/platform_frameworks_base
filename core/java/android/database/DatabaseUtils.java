@@ -31,6 +31,7 @@ import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
@@ -49,6 +50,29 @@ public class DatabaseUtils {
 
     private static final boolean DEBUG = false;
     private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
+
+    private static final String[] countProjection = new String[]{"count(*)"};
+
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_SELECT = 1;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_UPDATE = 2;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_ATTACH = 3;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_BEGIN = 4;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_COMMIT = 5;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_ABORT = 6;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_PRAGMA = 7;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_DDL = 8;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_UNPREPARED = 9;
+    /** One of the values returned by {@link #getSqlStatementType(String)}. */
+    public static final int STATEMENT_OTHER = 99;
 
     /**
      * Special function for writing an exception result at the header of
@@ -187,6 +211,37 @@ public class DatabaseUtils {
             prog.bindBlob(index, (byte[]) value);
         } else {
             prog.bindString(index, value.toString());
+        }
+    }
+
+    /**
+     * Returns data type of the given object's value.
+     *<p>
+     * Returned values are
+     * <ul>
+     *   <li>{@link Cursor#FIELD_TYPE_NULL}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_INTEGER}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_FLOAT}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_STRING}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_BLOB}</li>
+     *</ul>
+     *</p>
+     *
+     * @param obj the object whose value type is to be returned
+     * @return object value type
+     * @hide
+     */
+    public static int getTypeOfObject(Object obj) {
+        if (obj == null) {
+            return Cursor.FIELD_TYPE_NULL;
+        } else if (obj instanceof byte[]) {
+            return Cursor.FIELD_TYPE_BLOB;
+        } else if (obj instanceof Float || obj instanceof Double) {
+            return Cursor.FIELD_TYPE_FLOAT;
+        } else if (obj instanceof Long || obj instanceof Integer) {
+            return Cursor.FIELD_TYPE_INTEGER;
+        } else {
+            return Cursor.FIELD_TYPE_STRING;
         }
     }
 
@@ -656,14 +711,8 @@ public class DatabaseUtils {
      * first column of the first row.
      */
     public static long longForQuery(SQLiteStatement prog, String[] selectionArgs) {
-        if (selectionArgs != null) {
-            int size = selectionArgs.length;
-            for (int i = 0; i < size; i++) {
-                bindObjectToProgram(prog, i + 1, selectionArgs[i]);
-            }
-        }
-        long value = prog.simpleQueryForLong();
-        return value;
+        prog.bindAllArgsAsStrings(selectionArgs);
+        return prog.simpleQueryForLong();
     }
 
     /**
@@ -684,14 +733,36 @@ public class DatabaseUtils {
      * first column of the first row.
      */
     public static String stringForQuery(SQLiteStatement prog, String[] selectionArgs) {
-        if (selectionArgs != null) {
-            int size = selectionArgs.length;
-            for (int i = 0; i < size; i++) {
-                bindObjectToProgram(prog, i + 1, selectionArgs[i]);
-            }
+        prog.bindAllArgsAsStrings(selectionArgs);
+        return prog.simpleQueryForString();
+    }
+
+    /**
+     * Utility method to run the query on the db and return the blob value in the
+     * first column of the first row.
+     *
+     * @return A read-only file descriptor for a copy of the blob value.
+     */
+    public static ParcelFileDescriptor blobFileDescriptorForQuery(SQLiteDatabase db,
+            String query, String[] selectionArgs) {
+        SQLiteStatement prog = db.compileStatement(query);
+        try {
+            return blobFileDescriptorForQuery(prog, selectionArgs);
+        } finally {
+            prog.close();
         }
-        String value = prog.simpleQueryForString();
-        return value;
+    }
+
+    /**
+     * Utility method to run the pre-compiled query and return the blob value in the
+     * first column of the first row.
+     *
+     * @return A read-only file descriptor for a copy of the blob value.
+     */
+    public static ParcelFileDescriptor blobFileDescriptorForQuery(SQLiteStatement prog,
+            String[] selectionArgs) {
+        prog.bindAllArgsAsStrings(selectionArgs);
+        return prog.simpleQueryForBlobFileDescriptor();
     }
 
     /**
@@ -704,8 +775,8 @@ public class DatabaseUtils {
      */
     public static void cursorStringToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getString(index));
         }
     }
@@ -720,8 +791,8 @@ public class DatabaseUtils {
      */
     public static void cursorLongToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getLong(index));
         }
     }
@@ -736,8 +807,8 @@ public class DatabaseUtils {
      */
     public static void cursorShortToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getShort(index));
         }
     }
@@ -752,8 +823,8 @@ public class DatabaseUtils {
      */
     public static void cursorIntToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getInt(index));
         }
     }
@@ -768,8 +839,8 @@ public class DatabaseUtils {
      */
     public static void cursorFloatToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getFloat(index));
         }
     }
@@ -784,8 +855,8 @@ public class DatabaseUtils {
      */
     public static void cursorDoubleToContentValuesIfPresent(Cursor cursor, ContentValues values,
             String column) {
-        final int index = cursor.getColumnIndexOrThrow(column);
-        if (!cursor.isNull(index)) {
+        final int index = cursor.getColumnIndex(column);
+        if (index != -1 && !cursor.isNull(index)) {
             values.put(column, cursor.getDouble(index));
         }
     }
@@ -1151,5 +1222,67 @@ public class DatabaseUtils {
         }
         db.setVersion(dbVersion);
         db.close();
+    }
+
+    /**
+     * Returns one of the following which represent the type of the given SQL statement.
+     * <ol>
+     *   <li>{@link #STATEMENT_SELECT}</li>
+     *   <li>{@link #STATEMENT_UPDATE}</li>
+     *   <li>{@link #STATEMENT_ATTACH}</li>
+     *   <li>{@link #STATEMENT_BEGIN}</li>
+     *   <li>{@link #STATEMENT_COMMIT}</li>
+     *   <li>{@link #STATEMENT_ABORT}</li>
+     *   <li>{@link #STATEMENT_OTHER}</li>
+     * </ol>
+     * @param sql the SQL statement whose type is returned by this method
+     * @return one of the values listed above
+     */
+    public static int getSqlStatementType(String sql) {
+        sql = sql.trim();
+        if (sql.length() < 3) {
+            return STATEMENT_OTHER;
+        }
+        String prefixSql = sql.substring(0, 3).toUpperCase();
+        if (prefixSql.equals("SEL")) {
+            return STATEMENT_SELECT;
+        } else if (prefixSql.equals("INS") ||
+                prefixSql.equals("UPD") ||
+                prefixSql.equals("REP") ||
+                prefixSql.equals("DEL")) {
+            return STATEMENT_UPDATE;
+        } else if (prefixSql.equals("ATT")) {
+            return STATEMENT_ATTACH;
+        } else if (prefixSql.equals("COM")) {
+            return STATEMENT_COMMIT;
+        } else if (prefixSql.equals("END")) {
+            return STATEMENT_COMMIT;
+        } else if (prefixSql.equals("ROL")) {
+            return STATEMENT_ABORT;
+        } else if (prefixSql.equals("BEG")) {
+            return STATEMENT_BEGIN;
+        } else if (prefixSql.equals("PRA")) {
+            return STATEMENT_PRAGMA;
+        } else if (prefixSql.equals("CRE") || prefixSql.equals("DRO") ||
+                prefixSql.equals("ALT")) {
+            return STATEMENT_DDL;
+        } else if (prefixSql.equals("ANA") || prefixSql.equals("DET")) {
+            return STATEMENT_UNPREPARED;
+        }
+        return STATEMENT_OTHER;
+    }
+
+    /**
+     * Appends one set of selection args to another. This is useful when adding a selection
+     * argument to a user provided set.
+     */
+    public static String[] appendSelectionArgs(String[] originalValues, String[] newValues) {
+        if (originalValues == null || originalValues.length == 0) {
+            return newValues;
+        }
+        String[] result = new String[originalValues.length + newValues.length ];
+        System.arraycopy(originalValues, 0, result, 0, originalValues.length);
+        System.arraycopy(newValues, 0, result, originalValues.length, newValues.length);
+        return result;
     }
 }

@@ -23,15 +23,18 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.SystemClock;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -258,6 +261,22 @@ public class AppWidgetHostView extends FrameLayout {
     }
 
     /**
+     * Process data-changed notifications for the specified view in the specified
+     * set of {@link RemoteViews} views.
+     */
+    void viewDataChanged(int viewId) {
+        View v = findViewById(viewId);
+        if ((v != null) && (v instanceof AdapterView<?>)) {
+            AdapterView<?> adapterView = (AdapterView<?>) v;
+            Adapter adapter = adapterView.getAdapter();
+            if (adapter instanceof BaseAdapter) {
+                BaseAdapter baseAdapter = (BaseAdapter) adapter;
+                baseAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    /**
      * Build a {@link Context} cloned into another package name, usually for the
      * purposes of reading remote resources.
      */
@@ -275,6 +294,7 @@ public class AppWidgetHostView extends FrameLayout {
         }
     }
 
+    @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (CROSSFADE) {
             int alpha;

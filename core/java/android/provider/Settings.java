@@ -16,14 +16,11 @@
 
 package android.provider;
 
-import com.google.android.collect.Maps;
 
-import org.apache.commons.codec.binary.Base64;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
-import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -37,20 +34,18 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
-import android.os.*;
-import android.telephony.TelephonyManager;
+import android.os.BatteryManager;
+import android.os.Bundle;
+import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Config;
 import android.util.Log;
 
 import java.net.URISyntaxException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 
 /**
@@ -1009,7 +1004,7 @@ public final class Settings {
         public static boolean hasInterestingConfigurationChanges(int changes) {
             return (changes&ActivityInfo.CONFIG_FONT_SCALE) != 0;
         }
-        
+
         public static boolean getShowGTalkServiceStatus(ContentResolver cr) {
             return getInt(cr, SHOW_GTALK_SERVICE_STATUS, 0) != 0;
         }
@@ -1133,6 +1128,7 @@ public final class Settings {
          */
         public static final int WIFI_SLEEP_POLICY_NEVER = 2;
 
+        //TODO: deprecate static IP constants
         /**
          * Whether to use static IP and other static network attributes.
          * <p>
@@ -1216,7 +1212,7 @@ public final class Settings {
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
 
         /**
-         * @deprecated Use 
+         * @deprecated Use
          * {@link android.provider.Settings.Secure#LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED}
          * instead
          */
@@ -1694,6 +1690,12 @@ public final class Settings {
         public static final String UNLOCK_SOUND = "unlock_sound";
 
         /**
+         * True if we should appear as a PTP device instead of MTP.
+         * @hide
+         */
+        public static final String USE_PTP_INTERFACE = "use_ptp_interface";
+
+        /**
          * Receive incoming SIP calls?
          * 0 = no
          * 1 = yes
@@ -1789,6 +1791,7 @@ public final class Settings {
             LOCKSCREEN_SOUNDS_ENABLED,
             SHOW_WEB_SUGGESTIONS,
             NOTIFICATION_LIGHT_PULSE,
+            USE_PTP_INTERFACE,
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS
         };
@@ -2327,6 +2330,14 @@ public final class Settings {
         }
 
         /**
+         * Get the key that retrieves a bluetooth Input Device's priority.
+         * @hide
+         */
+        public static final String getBluetoothInputDevicePriorityKey(String address) {
+            return ("bluetooth_input_device_priority_" + address.toUpperCase());
+        }
+
+        /**
          * Whether or not data roaming is enabled. (0 = false, 1 = true)
          */
         public static final String DATA_ROAMING = "data_roaming";
@@ -2358,9 +2369,30 @@ public final class Settings {
         public static final String DISABLED_SYSTEM_INPUT_METHODS = "disabled_system_input_methods";
 
         /**
-         * Host name and port for a user-selected proxy.
+         * Host name and port for global proxy.
          */
         public static final String HTTP_PROXY = "http_proxy";
+
+        /**
+         * Exclusion list for global proxy. This string contains a list of comma-separated
+         * domains where the global proxy does not apply. Domains should be listed in a comma-
+         * separated list. Example of acceptable formats: ".domain1.com,my.domain2.com"
+         * @hide
+         */
+        public static final String HTTP_PROXY_EXCLUSION_LIST = "http_proxy_exclusion_list";
+
+        /**
+         * Enables the UI setting to allow the user to specify the global HTTP proxy
+         * and associated exclusion list.
+         * @hide
+         */
+        public static final String SET_GLOBAL_HTTP_PROXY = "set_global_http_proxy";
+
+        /**
+         * Setting for default DNS in case nobody suggests one
+         * @hide
+         */
+        public static final String DEFAULT_DNS_SERVER = "default_dns_server";
 
         /**
          * Whether the package installer should allow installation of apps downloaded from
@@ -2391,6 +2423,14 @@ public final class Settings {
          */
         public static final String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED =
             "lock_pattern_tactile_feedback_enabled";
+
+        /**
+         * This preference allows the device to be locked given time after screen goes off,
+         * subject to current DeviceAdmin policy limits.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_LOCK_AFTER_TIMEOUT = "lock_screen_lock_after_timeout";
+
 
         /**
          * Whether assisted GPS should be enabled or not.
@@ -2453,6 +2493,14 @@ public final class Settings {
         public static final String PARENTAL_CONTROL_REDIRECT_URL = "parental_control_redirect_url";
 
         /**
+         * A positive value indicates the frequency of SamplingProfiler
+         * taking snapshots in hertz. Zero value means SamplingProfiler is disabled.
+         *
+         * @hide
+         */
+        public static final String SAMPLING_PROFILER_HZ = "sampling_profiler_hz";
+
+        /**
          * Settings classname to launch when Settings is clicked from All
          * Applications.  Needed because of user testing between the old
          * and new Settings apps.
@@ -2481,6 +2529,60 @@ public final class Settings {
          */
         public static final String ENABLED_ACCESSIBILITY_SERVICES =
             "enabled_accessibility_services";
+
+        /**
+         * If injection of accessibility enhancing JavaScript scripts
+         * is enabled.
+         * <p>
+         *   Note: Accessibility injecting scripts are served by the
+         *   Google infrastructure and enable users with disabilities to
+         *   efficiantly navigate in and explore web content.
+         * </p>
+         * <p>
+         *   This property represents a boolean value.
+         * </p>
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SCRIPT_INJECTION =
+            "accessibility_script_injection";
+
+        /**
+         * Key bindings for navigation in built-in accessibility support for web content.
+         * <p>
+         *   Note: These key bindings are for the built-in accessibility navigation for
+         *   web content which is used as a fall back solution if JavaScript in a WebView
+         *   is not enabled or the user has not opted-in script injection from Google.
+         * </p>
+         * <p>
+         *   The bindings are separated by semi-colon. A binding is a mapping from
+         *   a key to a sequence of actions (for more details look at
+         *   android.webkit.AccessibilityInjector). A key is represented as the hexademical
+         *   string representation of an integer obtained from a meta state (optional) shifted
+         *   sixteen times left and bitwise ored with a key code. An action is represented
+         *   as a hexademical string representation of an integer where the first two digits
+         *   are navigation action index, the second, the third, and the fourth digit pairs
+         *   represent the action arguments. The separate actions in a binding are colon
+         *   separated. The key and the action sequence it maps to are separated by equals.
+         * </p>
+         * <p>
+         *   For example, the binding below maps the DPAD right button to traverse the
+         *   current navigation axis once without firing an accessibility event and to
+         *   perform the same traversal again but to fire an event:
+         *   <code>
+         *     0x16=0x01000100:0x01000101;
+         *   </code>
+         * </p>
+         * <p>
+         *   The goal of this binding is to enable dynamic rebinding of keys to
+         *   navigation actions for web content without requiring a framework change.
+         * </p>
+         * <p>
+         *   This property represents a string value.
+         * </p>
+         * @hide
+         */
+        public static final String ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS =
+            "accessibility_web_content_key_bindings";
 
         /**
          * Setting to always use the default text-to-speech settings regardless
@@ -3462,6 +3564,7 @@ public final class Settings {
             PARENTAL_CONTROL_REDIRECT_URL,
             USB_MASS_STORAGE_ENABLED,
             ACCESSIBILITY_ENABLED,
+            ACCESSIBILITY_SCRIPT_INJECTION,
             BACKUP_AUTO_RESTORE,
             ENABLED_ACCESSIBILITY_SERVICES,
             TTS_USE_DEFAULTS,
@@ -3645,20 +3748,8 @@ public final class Settings {
             // If a shortcut is supplied, and it is already defined for
             // another bookmark, then remove the old definition.
             if (shortcut != 0) {
-                Cursor c = cr.query(CONTENT_URI,
-                        sShortcutProjection, sShortcutSelection,
-                        new String[] { String.valueOf((int) shortcut) }, null);
-                try {
-                    if (c.moveToFirst()) {
-                        while (c.getCount() > 0) {
-                            if (!c.deleteRow()) {
-                                Log.w(TAG, "Could not delete existing shortcut row");
-                            }
-                        }
-                    }
-                } finally {
-                    if (c != null) c.close();
-                }
+                cr.delete(CONTENT_URI, sShortcutSelection,
+                        new String[] { String.valueOf((int) shortcut) });
             }
 
             ContentValues values = new ContentValues();

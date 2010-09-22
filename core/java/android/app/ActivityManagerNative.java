@@ -1261,6 +1261,32 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case IS_IMMERSIVE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            boolean isit = isImmersive(token);
+            reply.writeNoException();
+            reply.writeInt(isit ? 1 : 0);
+            return true;
+        }
+
+        case SET_IMMERSIVE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            boolean imm = data.readInt() == 1;
+            setImmersive(token, imm);
+            reply.writeNoException();
+            return true;
+        }
+        
+        case IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            boolean isit = isTopActivityImmersive();
+            reply.writeNoException();
+            reply.writeInt(isit ? 1 : 0);
+            return true;
+        }
+
         case CRASH_APPLICATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int uid = data.readInt();
@@ -1271,7 +1297,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-
+        
         case NEW_URI_PERMISSION_OWNER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String name = data.readString();
@@ -1303,6 +1329,19 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int mode = data.readInt();
             revokeUriPermissionFromOwner(owner, uri, mode);
             reply.writeNoException();
+            return true;
+        }
+
+        case DUMP_HEAP_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String process = data.readString();
+            boolean managed = data.readInt() != 0;
+            String path = data.readString();
+            ParcelFileDescriptor fd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            boolean res = dumpHeap(process, managed, path, fd);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
             return true;
         }
 
@@ -2832,6 +2871,46 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     
+    public void setImmersive(IBinder token, boolean immersive)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        data.writeInt(immersive ? 1 : 0);
+        mRemote.transact(SET_IMMERSIVE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public boolean isImmersive(IBinder token)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(IS_IMMERSIVE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() == 1;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
+    public boolean isTopActivityImmersive()
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(IS_TOP_ACTIVITY_IMMERSIVE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() == 1;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
     public void crashApplication(int uid, int initialPid, String packageName,
             String message) throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -2894,6 +2973,28 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public boolean dumpHeap(String process, boolean managed,
+            String path, ParcelFileDescriptor fd) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(process);
+        data.writeInt(managed ? 1 : 0);
+        data.writeString(path);
+        if (fd != null) {
+            data.writeInt(1);
+            fd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
+        mRemote.transact(DUMP_HEAP_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return res;
     }
     
     private IBinder mRemote;

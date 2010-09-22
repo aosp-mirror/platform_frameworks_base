@@ -233,6 +233,10 @@ public class AppWidgetManager {
     /**
      * Set the RemoteViews to use for the specified appWidgetIds.
      *
+     * Note that the RemoteViews parameter will be cached by the AppWidgetService, and hence should
+     * contain a complete representation of the widget. For performing partial widget updates, see
+     * {@link #partiallyUpdateAppWidget(int[], RemoteViews)}.
+     *
      * <p>
      * It is okay to call this method both inside an {@link #ACTION_APPWIDGET_UPDATE} broadcast,
      * and outside of the handler.
@@ -253,6 +257,10 @@ public class AppWidgetManager {
     /**
      * Set the RemoteViews to use for the specified appWidgetId.
      *
+     * Note that the RemoteViews parameter will be cached by the AppWidgetService, and hence should
+     * contain a complete representation of the widget. For performing partial widget updates, see
+     * {@link #partiallyUpdateAppWidget(int, RemoteViews)}.
+     *
      * <p>
      * It is okay to call this method both inside an {@link #ACTION_APPWIDGET_UPDATE} broadcast,
      * and outside of the handler.
@@ -263,6 +271,59 @@ public class AppWidgetManager {
      */
     public void updateAppWidget(int appWidgetId, RemoteViews views) {
         updateAppWidget(new int[] { appWidgetId }, views);
+    }
+
+    /**
+     * Perform an incremental update or command on the widget(s) specified by appWidgetIds.
+     *
+     * This update  differs from {@link #updateAppWidget(int[], RemoteViews)} in that the
+     * RemoteViews object which is passed is understood to be an incomplete representation of the 
+     * widget, and hence is not cached by the AppWidgetService. Note that because these updates are 
+     * not cached, any state that they modify that is not restored by restoreInstanceState will not
+     * persist in the case that the widgets are restored using the cached version in
+     * AppWidgetService.
+     *
+     * Use with {@link RemoteViews#showNext(int)}, {@link RemoteViews#showPrevious(int)},
+     * {@link RemoteViews#setScrollPosition(int, int)} and similar commands.
+     *
+     * <p>
+     * It is okay to call this method both inside an {@link #ACTION_APPWIDGET_UPDATE} broadcast,
+     * and outside of the handler.
+     * This method will only work when called from the uid that owns the AppWidget provider.
+     *
+     * @param appWidgetIds     The AppWidget instances for which to set the RemoteViews.
+     * @param views            The RemoteViews object containing the incremental update / command.
+     */
+    public void partiallyUpdateAppWidget(int[] appWidgetIds, RemoteViews views) {
+        try {
+            sService.partiallyUpdateAppWidgetIds(appWidgetIds, views);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Perform an incremental update or command on the widget specified by appWidgetId.
+     *
+     * This update  differs from {@link #updateAppWidget(int, RemoteViews)} in that the RemoteViews
+     * object which is passed is understood to be an incomplete representation of the widget, and
+     * hence is not cached by the AppWidgetService. Note that because these updates are not cached,
+     * any state that they modify that is not restored by restoreInstanceState will not persist in
+     * the case that the widgets are restored using the cached version in AppWidgetService.
+     *
+     * Use with {@link RemoteViews#showNext(int)}, {@link RemoteViews#showPrevious(int)},
+     * {@link RemoteViews#setScrollPosition(int, int)} and similar commands.
+     *
+     * <p>
+     * It is okay to call this method both inside an {@link #ACTION_APPWIDGET_UPDATE} broadcast,
+     * and outside of the handler.
+     * This method will only work when called from the uid that owns the AppWidget provider.
+     *
+     * @param appWidgetId      The AppWidget instance for which to set the RemoteViews.
+     * @param views            The RemoteViews object containing the incremental update / command.
+     */
+    public void partiallyUpdateAppWidget(int appWidgetId, RemoteViews views) {
+        partiallyUpdateAppWidget(new int[] { appWidgetId }, views);
     }
 
     /**
@@ -288,11 +349,46 @@ public class AppWidgetManager {
     }
 
     /**
+     * Notifies the specified collection view in all the specified AppWidget instances
+     * to invalidate their currently data.
+     *
+     * @param appWidgetIds  The AppWidget instances for which to notify of view data changes.
+     * @param viewId        The collection view id.
+     */
+    public void notifyAppWidgetViewDataChanged(int[] appWidgetIds, int viewId) {
+        try {
+            sService.notifyAppWidgetViewDataChanged(appWidgetIds, viewId);
+        }
+        catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+    }
+
+    /**
+     * Notifies the specified collection view in all the specified AppWidget instance
+     * to invalidate it's currently data.
+     *
+     * @param appWidgetId  The AppWidget instance for which to notify of view data changes.
+     * @param viewId        The collection view id.
+     */
+    public void notifyAppWidgetViewDataChanged(int appWidgetId, int viewId) {
+        notifyAppWidgetViewDataChanged(new int[] { appWidgetId }, viewId);
+    }
+
+    /**
      * Return a list of the AppWidget providers that are currently installed.
      */
     public List<AppWidgetProviderInfo> getInstalledProviders() {
         try {
-            return sService.getInstalledProviders();
+            List<AppWidgetProviderInfo> providers = sService.getInstalledProviders();
+            for (AppWidgetProviderInfo info : providers) {
+                // Converting complex to dp.
+                info.minWidth =
+                        TypedValue.complexToDimensionPixelSize(info.minWidth, mDisplayMetrics);
+                info.minHeight =
+                        TypedValue.complexToDimensionPixelSize(info.minHeight, mDisplayMetrics);
+            }
+            return providers;
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);

@@ -22,6 +22,7 @@
     <item android:state_selected="true" android:state_enabled="false" android:color="@android:color/dim_foreground_light_disabled"/>
     <item android:state_pressed="true" android:color="@android:color/dim_foreground_light"/>
     <item android:state_selected="true" android:color="@android:color/dim_foreground_light"/>
+    <item android:state_activated="true" android:color="@android:color/bright_foreground_light"/>
     <item android:state_enabled="false" android:color="@android:color/dim_foreground_light_disabled"/>
     <item android:color="@android:color/dim_foreground_light"/> <!-- not selected -->
 </selector>

@@ -25,6 +25,7 @@ namespace android {
 
 class Parcel;
 class ISurface;
+class Surface;
 
 class IMediaPlayer: public IInterface
 {
@@ -33,7 +34,8 @@ public:
 
     virtual void            disconnect() = 0;
 
-    virtual status_t        setVideoSurface(const sp<ISurface>& surface) = 0;
+    virtual status_t        setVideoISurface(const sp<ISurface>& surface) = 0;
+    virtual status_t        setVideoSurface(const sp<Surface>& surface) = 0;
     virtual status_t        prepareAsync() = 0;
     virtual status_t        start() = 0;
     virtual status_t        stop() = 0;

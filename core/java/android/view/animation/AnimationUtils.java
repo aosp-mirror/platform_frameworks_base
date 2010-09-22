@@ -33,6 +33,14 @@ import java.io.IOException;
  *
  */
 public class AnimationUtils {
+
+    /**
+     * These flags are used when parsing AnimatorSet objects
+     */
+    private static final int TOGETHER = 0;
+    private static final int SEQUENTIALLY = 1;
+
+
     /**
      * Returns the current animation time in milliseconds. This time should be used when invoking
      * {@link Animation#setStartTime(long)}. Refer to {@link android.os.SystemClock} for more
@@ -49,7 +57,7 @@ public class AnimationUtils {
 
     /**
      * Loads an {@link Animation} object from a resource
-     * 
+     *
      * @param context Application context used to access resources
      * @param id The resource id of the animation to load
      * @return The animation object reference by the specified id
@@ -82,12 +90,12 @@ public class AnimationUtils {
 
         return createAnimationFromXml(c, parser, null, Xml.asAttributeSet(parser));
     }
-    
+
     private static Animation createAnimationFromXml(Context c, XmlPullParser parser,
             AnimationSet parent, AttributeSet attrs) throws XmlPullParserException, IOException {
-        
+
         Animation anim = null;
- 
+
         // Make sure we are on a start tag.
         int type;
         int depth = parser.getDepth();
@@ -100,7 +108,7 @@ public class AnimationUtils {
             }
 
             String  name = parser.getName();
-    
+
             if (name.equals("set")) {
                 anim = new AnimationSet(c, attrs);
                 createAnimationFromXml(c, parser, (AnimationSet)anim, attrs);
@@ -120,7 +128,7 @@ public class AnimationUtils {
                 parent.addAnimation(anim);
             }
         }
-    
+
         return anim;
 
     }

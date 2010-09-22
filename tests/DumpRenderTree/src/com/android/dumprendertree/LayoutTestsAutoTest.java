@@ -20,9 +20,7 @@ import com.android.dumprendertree.TestShellActivity.DumpDataType;
 import com.android.dumprendertree.forwarder.AdbUtils;
 import com.android.dumprendertree.forwarder.ForwardService;
 
-import android.app.Instrumentation;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
@@ -158,18 +156,11 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     private String mJsEngine;
     private String mTestPathPrefix;
     private boolean mFinished;
+    private int mTestCount;
+    private int mResumeIndex;
 
     public LayoutTestsAutoTest() {
-      super("com.android.dumprendertree", TestShellActivity.class);
-    }
-
-    // This function writes the result of the layout test to
-    // Am status so that it can be picked up from a script.
-    private void passOrFailCallback(String file, boolean result) {
-      Instrumentation inst = getInstrumentation();
-      Bundle bundle = new Bundle();
-      bundle.putBoolean(file, result);
-      inst.sendStatus(0, bundle);
+      super(TestShellActivity.class);
     }
 
     private void getTestList() {
@@ -190,6 +181,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         } catch (Exception e) {
             Log.e(LOGTAG, "Error while reading test list : " + e.getMessage());
         }
+        mTestCount = mTestList.size();
     }
 
     private void resumeTestList() {
@@ -200,6 +192,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                 if (mTestList.elementAt(i).equals(line)) {
                     mTestList = new Vector<String>(mTestList.subList(i+1, mTestList.size()));
                     mTestListIgnoreResult = new Vector<Boolean>(mTestListIgnoreResult.subList(i+1, mTestListIgnoreResult.size()));
+                    mResumeIndex = i + 1;
                     break;
                 }
             }
@@ -232,14 +225,22 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         // The generic result is at <path>/<name>-expected.txt
         // First try the Android-specific result at
         // platform/android-<js-engine>/<path>/<name>-expected.txt
+        // then
+        // platform/android/<path>/<name>-expected.txt
         int pos = test.lastIndexOf('.');
         if (pos == -1)
             return null;
         String genericExpectedResult = test.substring(0, pos) + "-expected.txt";
         String androidExpectedResultsDir = "platform/android-" + mJsEngine + "/";
-        String androidExpectedResult =
-            genericExpectedResult.replaceFirst(LAYOUT_TESTS_ROOT, LAYOUT_TESTS_ROOT + androidExpectedResultsDir);
+        String androidExpectedResult = genericExpectedResult.replaceFirst(LAYOUT_TESTS_ROOT,
+                LAYOUT_TESTS_ROOT + androidExpectedResultsDir);
         File f = new File(androidExpectedResult);
+        if (f.exists())
+            return androidExpectedResult;
+        androidExpectedResultsDir = "platform/android/";
+        androidExpectedResult = genericExpectedResult.replaceFirst(LAYOUT_TESTS_ROOT,
+                LAYOUT_TESTS_ROOT + androidExpectedResultsDir);
+        f = new File(androidExpectedResult);
         return f.exists() ? androidExpectedResult : genericExpectedResult;
     }
 
@@ -300,7 +301,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
     }
 
-    private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout, boolean ignoreResult) {
+    private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout, boolean ignoreResult, int testNumber) {
         activity.setCallback(new TestShellCallback() {
             public void finished() {
                 synchronized (LayoutTestsAutoTest.this) {
@@ -336,6 +337,9 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         intent.putExtra(TestShellActivity.TEST_URL, FsUtils.getTestUrl(test));
         intent.putExtra(TestShellActivity.RESULT_FILE, resultFile);
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
+        intent.putExtra(TestShellActivity.TOTAL_TEST_COUNT, mTestCount);
+        intent.putExtra(TestShellActivity.CURRENT_TEST_NUMBER, testNumber);
+        intent.putExtra(TestShellActivity.STOP_ON_REF_ERROR, true);
         activity.startActivity(intent);
 
         // Wait until done.
@@ -375,8 +379,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         // Read settings
         mTestPathPrefix = (new File(LAYOUT_TESTS_ROOT + runner.mTestPath)).getAbsolutePath();
         mRebaselineResults = runner.mRebaseline;
-        // JSC is the default JavaScript engine.
-        mJsEngine = runner.mJsEngine == null ? "jsc" : runner.mJsEngine;
+        // V8 is the default JavaScript engine.
+        mJsEngine = runner.mJsEngine == null ? "v8" : runner.mJsEngine;
 
         int timeout = runner.mTimeoutInMillis;
         if (timeout <= 0) {
@@ -393,7 +397,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             resumeTestList();
 
         TestShellActivity activity = getActivity();
-        activity.setDefaultDumpDataType(DumpDataType.DUMP_AS_TEXT);
+        activity.setDefaultDumpDataType(DumpDataType.EXT_REPR);
 
         // Run tests.
         int addr = -1;
@@ -410,7 +414,9 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             boolean ignoreResult = mTestListIgnoreResult.elementAt(i);
             FsUtils.updateTestStatus(TEST_STATUS_FILE, s);
             // Run tests
-            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult);
+            // i is 0 based, but test count is 1 based so add 1 to i here.
+            runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis, ignoreResult,
+                    i + 1 + mResumeIndex);
         }
 
         FsUtils.updateTestStatus(TEST_STATUS_FILE, "#DONE");
@@ -435,7 +441,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         try {
             File tests_list = new File(LAYOUT_TESTS_LIST_FILE);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tests_list, false));
-            FsUtils.findLayoutTestsRecursively(bos, getTestPath(), false); // Don't ignore results
+            FsUtils.writeLayoutTestListRecursively(bos, getTestPath(), false); // Don't ignore results
             bos.flush();
             bos.close();
        } catch (Exception e) {

@@ -30,6 +30,7 @@ import java.util.ArrayList;
  * Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(java.lang.String)} with an argument
  * of {@link android.content.Context#STORAGE_SERVICE}.
+ *
  */
 
 public class StorageManager
@@ -203,7 +204,6 @@ public class StorageManager
      *
      * @param listener A {@link android.os.storage.StorageEventListener StorageEventListener} object.
      *
-     * @hide
      */
     public void registerListener(StorageEventListener listener) {
         if (listener == null) {
@@ -220,7 +220,6 @@ public class StorageManager
      *
      * @param listener A {@link android.os.storage.StorageEventListener StorageEventListener} object.
      *
-     * @hide
      */
     public void unregisterListener(StorageEventListener listener) {
         if (listener == null) {
@@ -241,8 +240,6 @@ public class StorageManager
 
     /**
      * Enables USB Mass Storage (UMS) on the device.
-     *
-     * @hide
      */
     public void enableUsbMassStorage() {
         try {
@@ -254,8 +251,6 @@ public class StorageManager
 
     /**
      * Disables USB Mass Storage (UMS) on the device.
-     *
-     * @hide
      */
     public void disableUsbMassStorage() {
         try {
@@ -268,8 +263,6 @@ public class StorageManager
     /**
      * Query if a USB Mass Storage (UMS) host is connected.
      * @return true if UMS host is connected.
-     *
-     * @hide
      */
     public boolean isUsbMassStorageConnected() {
         try {
@@ -283,8 +276,6 @@ public class StorageManager
     /**
      * Query if a USB Mass Storage (UMS) is enabled on the device.
      * @return true if UMS host is enabled.
-     *
-     * @hide
      */
     public boolean isUsbMassStorageEnabled() {
         try {

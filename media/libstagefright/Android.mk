@@ -10,6 +10,8 @@ LOCAL_SRC_FILES:=                         \
         AudioSource.cpp                   \
         AwesomePlayer.cpp                 \
         CameraSource.cpp                  \
+        CameraSourceTimeLapse.cpp         \
+        VideoSourceDownSampler.cpp        \
         DataSource.cpp                    \
         ESDS.cpp                          \
         FileSource.cpp                    \
@@ -23,6 +25,7 @@ LOCAL_SRC_FILES:=                         \
         MediaDefs.cpp                     \
         MediaExtractor.cpp                \
         MediaSource.cpp                   \
+        MediaSourceSplitter.cpp           \
         MetaData.cpp                      \
         NuCachedSource2.cpp               \
         NuHTTPDataSource.cpp              \
@@ -59,6 +62,7 @@ LOCAL_SHARED_LIBRARIES := \
         libsonivox        \
         libvorbisidec     \
         libsurfaceflinger_client \
+        libstagefright_yuv \
         libcamera_client
 
 LOCAL_STATIC_LIBRARIES := \

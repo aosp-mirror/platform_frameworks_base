@@ -72,6 +72,9 @@ public class MediaRecorder
 
     private String mPath;
     private FileDescriptor mFd;
+    private boolean mPrepareAuxiliaryFile = false;
+    private String mPathAux;
+    private FileDescriptor mFdAux;
     private EventHandler mEventHandler;
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
@@ -274,11 +277,37 @@ public class MediaRecorder
         setVideoFrameRate(profile.videoFrameRate);
         setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
         setVideoEncodingBitRate(profile.videoBitRate);
-        setAudioEncodingBitRate(profile.audioBitRate);
-        setAudioChannels(profile.audioChannels);
-        setAudioSamplingRate(profile.audioSampleRate);
         setVideoEncoder(profile.videoCodec);
-        setAudioEncoder(profile.audioCodec);
+        if (profile.quality >= CamcorderProfile.QUALITY_TIME_LAPSE_LOW &&
+             profile.quality <= CamcorderProfile.QUALITY_TIME_LAPSE_1080P) {
+            // Enable time lapse. Also don't set audio for time lapse.
+            setParameter(String.format("time-lapse-enable=1"));
+        } else {
+            setAudioEncodingBitRate(profile.audioBitRate);
+            setAudioChannels(profile.audioChannels);
+            setAudioSamplingRate(profile.audioSampleRate);
+            setAudioEncoder(profile.audioCodec);
+        }
+    }
+
+    /**
+     * Set video frame capture rate. This can be used to set a different video frame capture
+     * rate than the recorded video's playback rate. Currently this works only for time lapse mode.
+     *
+     * @param fps Rate at which frames should be captured in frames per second.
+     * The fps can go as low as desired. However the fastest fps will be limited by the hardware.
+     * For resolutions that can be captured by the video camera, the fastest fps can be computed using
+     * {@link android.hardware.Camera.Parameters#getPreviewFpsRange(int[])}. For higher
+     * resolutions the fastest fps may be more restrictive.
+     * Note that the recorder cannot guarantee that frames will be captured at the
+     * given rate due to camera/encoder limitations. However it tries to be as close as
+     * possible.
+     */
+    public void setCaptureRate(double fps) {
+        double timeBetweenFrameCapture = 1 / fps;
+        int timeBetweenFrameCaptureMs = (int) (1000 * timeBetweenFrameCapture);
+        setParameter(String.format("time-between-time-lapse-frame-capture=%d",
+                    timeBetweenFrameCaptureMs));
     }
 
     /**
@@ -448,6 +477,97 @@ public class MediaRecorder
     }
 
     /**
+     * Sets the level of the encoder. Call this before prepare().
+     *
+     * @param encoderLevel the video encoder level.
+     * @hide
+     */
+    public void setVideoEncoderLevel(int encoderLevel) {
+        setParameter(String.format("video-param-encoder-level=%d", encoderLevel));
+    }
+
+    /**
+     * Sets the auxiliary time lapse video's resolution and bitrate.
+     *
+     * The auxiliary video's resolution and bitrate are determined by the CamcorderProfile
+     * quality level {@link android.media.CamcorderProfile#QUALITY_HIGH}.
+     */
+    private void setAuxVideoParameters() {
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        setParameter(String.format("video-aux-param-width=%d", profile.videoFrameWidth));
+        setParameter(String.format("video-aux-param-height=%d", profile.videoFrameHeight));
+        setParameter(String.format("video-aux-param-encoding-bitrate=%d", profile.videoBitRate));
+    }
+
+    /**
+     * Pass in the file descriptor for the auxiliary time lapse video. Call this before
+     * prepare().
+     *
+     * Sets file descriptor and parameters for auxiliary time lapse video. Time lapse mode
+     * can capture video (using the still camera) at resolutions higher than that can be
+     * played back on the device. This function or
+     * {@link #setAuxiliaryOutputFile(String)} enable capture of a smaller video in
+     * parallel with the main time lapse video, which can be used to play back on the
+     * device. The smaller video is created by downsampling the main video. This call is
+     * optional and does not have to be called if parallel capture of a downsampled video
+     * is not desired.
+     *
+     * Note that while the main video resolution and bitrate is determined from the
+     * CamcorderProfile in {@link #setProfile(CamcorderProfile)}, the auxiliary video's
+     * resolution and bitrate are determined by the CamcorderProfile quality level
+     * {@link android.media.CamcorderProfile#QUALITY_HIGH}. All other encoding parameters
+     * remain the same for the main video and the auxiliary video.
+     *
+     * E.g. if the device supports the time lapse profile quality level
+     * {@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_1080P} but can playback at
+     * most 480p, the application might want to capture an auxiliary video of resolution
+     * 480p using this call.
+     *
+     * @param fd an open file descriptor to be written into.
+     */
+    public void setAuxiliaryOutputFile(FileDescriptor fd)
+    {
+        mPrepareAuxiliaryFile = true;
+        mPathAux = null;
+        mFdAux = fd;
+        setAuxVideoParameters();
+    }
+
+    /**
+     * Pass in the file path for the auxiliary time lapse video. Call this before
+     * prepare().
+     *
+     * Sets file path and parameters for auxiliary time lapse video. Time lapse mode can
+     * capture video (using the still camera) at resolutions higher than that can be
+     * played back on the device. This function or
+     * {@link #setAuxiliaryOutputFile(FileDescriptor)} enable capture of a smaller
+     * video in parallel with the main time lapse video, which can be used to play back on
+     * the device. The smaller video is created by downsampling the main video. This call
+     * is optional and does not have to be called if parallel capture of a downsampled
+     * video is not desired.
+     *
+     * Note that while the main video resolution and bitrate is determined from the
+     * CamcorderProfile in {@link #setProfile(CamcorderProfile)}, the auxiliary video's
+     * resolution and bitrate are determined by the CamcorderProfile quality level
+     * {@link android.media.CamcorderProfile#QUALITY_HIGH}. All other encoding parameters
+     * remain the same for the main video and the auxiliary video.
+     *
+     * E.g. if the device supports the time lapse profile quality level
+     * {@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_1080P} but can playback at
+     * most 480p, the application might want to capture an auxiliary video of resolution
+     * 480p using this call.
+     *
+     * @param path The pathname to use.
+     */
+    public void setAuxiliaryOutputFile(String path)
+    {
+        mPrepareAuxiliaryFile = true;
+        mFdAux = null;
+        mPathAux = path;
+        setAuxVideoParameters();
+    }
+
+    /**
      * Pass in the file descriptor of the file to be written. Call this after
      * setOutputFormat() but before prepare().
      *
@@ -478,6 +598,8 @@ public class MediaRecorder
     // native implementation
     private native void _setOutputFile(FileDescriptor fd, long offset, long length)
         throws IllegalStateException, IOException;
+    private native void _setOutputFileAux(FileDescriptor fd)
+        throws IllegalStateException, IOException;
     private native void _prepare() throws IllegalStateException, IOException;
 
     /**
@@ -503,6 +625,22 @@ public class MediaRecorder
         } else {
             throw new IOException("No valid output file");
         }
+
+        if (mPrepareAuxiliaryFile) {
+            if (mPathAux != null) {
+                FileOutputStream fos = new FileOutputStream(mPathAux);
+                try {
+                    _setOutputFileAux(fos.getFD());
+                } finally {
+                    fos.close();
+                }
+            } else if (mFdAux != null) {
+                _setOutputFileAux(mFdAux);
+            } else {
+                throw new IOException("No valid output file");
+            }
+        }
+
         _prepare();
     }
 

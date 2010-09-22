@@ -100,9 +100,11 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
 	core/java/android/bluetooth/IBluetoothPbap.aidl \
+	core/java/android/content/IClipboard.aidl \
 	core/java/android/content/IContentService.aidl \
 	core/java/android/content/IIntentReceiver.aidl \
 	core/java/android/content/IIntentSender.aidl \
+	core/java/android/content/IOnPrimaryClipChangedListener.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
 	core/java/android/content/ISyncStatusObserver.aidl \
@@ -129,7 +131,6 @@ LOCAL_SRC_FILES += \
     core/java/android/service/wallpaper/IWallpaperConnection.aidl \
     core/java/android/service/wallpaper/IWallpaperEngine.aidl \
     core/java/android/service/wallpaper/IWallpaperService.aidl \
-	core/java/android/text/IClipboard.aidl \
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
@@ -159,6 +160,9 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodClient.aidl \
 	core/java/com/android/internal/view/IInputMethodManager.aidl \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
+	core/java/com/android/internal/widget/IRemoteViewsFactory.aidl \
+	location/java/android/location/ICountryDetector.aidl \
+	location/java/android/location/ICountryListener.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \
@@ -348,7 +352,7 @@ framework_docs_LOCAL_JAVA_LIBRARIES := \
 			framework \
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
-framework_docs_LOCAL_DROIDDOC_HTML_DIR := $(LOCAL_PATH)/docs/html $(OUT_DOCS)/gen
+framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
 # The since flag (-since N.xml API_LEVEL) is used to add API Level information
 # to the reference documentation. Must be in order of oldest to newest.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
@@ -361,8 +365,9 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/6.xml 6 \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
-    -werror -hide 13 \
-    -overview $(LOCAL_PATH)/core/java/overview.html
+    -since ./frameworks/base/api/current.xml HC \
+		-werror -hide 113 \
+		-overview $(LOCAL_PATH)/core/java/overview.html
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= $(call intermediates-dir-for,JAVA_LIBRARIES,framework)
 
@@ -420,7 +425,9 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/WiktionarySimple \
 		            resources/samples/WiktionarySimple "Wiktionary (Simplified)" \
 		-samplecode $(sample_dir)/VoiceRecognitionService \
-		            resources/samples/VoiceRecognitionService "Voice Recognition Service"
+		            resources/samples/VoiceRecognitionService "Voice Recognition Service" \
+		-samplecode $(sample_dir)/XmlAdapters \
+		            resources/samples/XmlAdapters "XML Adapters"
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
@@ -455,11 +462,13 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-nodocs
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
-LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
+
+LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-$(full_target): $(framework_built)
+# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
+$(full_target): $(framework_built) $(gen)
 $(INTERNAL_PLATFORM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
@@ -482,7 +491,8 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-parsecomments
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
-LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
+
+LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
@@ -513,14 +523,13 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-todo $(OUT_DOCS)/$(LOCAL_MODULE)-docs-todo.html \
 		-sdkvalues $(OUT_DOCS) \
-		-hdf android.whichdoc offline 
+		-hdf android.whichdoc offline
 
 ifeq ($(framework_docs_SDK_PREVIEW),true)
   LOCAL_DROIDDOC_OPTIONS += -hdf sdk.preview true
 endif
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
-LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
@@ -532,7 +541,6 @@ $(static_doc_index_redirect): \
 
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
-
 
 # ==== docs for the web (on the google app engine server) =======================
 include $(CLEAR_VARS)
@@ -557,12 +565,11 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-hdf template.showLanguageMenu true
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
-LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
 # explicitly specify that online-sdk depends on framework-res and any generated docs
-$(full_target): framework-res-package-target $(ALL_GENERATED_DOCS)
+$(full_target): framework-res-package-target
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)
@@ -579,11 +586,10 @@ LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
 LOCAL_MODULE := hidden
 LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-        -title "Android SDK - Including hidden APIs."
-#        -hidden
+		-title "Android SDK - Including hidden APIs."
+#		-hidden
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
-LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
@@ -593,9 +599,13 @@ include $(BUILD_DROIDDOC)
 ext_dirs := \
 	../../external/nist-sip/java \
 	../../external/apache-http/src \
-	../../external/tagsoup/src
+	../../external/tagsoup/src \
+	../../external/libphonenumber/java/src
 
 ext_src_files := $(call all-java-files-under,$(ext_dirs))
+
+ext_res_dirs := \
+	../../external/libphonenumber/java/src
 
 # ====  the library  =========================================
 include $(CLEAR_VARS)
@@ -604,6 +614,7 @@ LOCAL_SRC_FILES := $(ext_src_files)
 
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core
+LOCAL_JAVA_RESOURCE_DIRS := $(ext_res_dirs)
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := ext
 

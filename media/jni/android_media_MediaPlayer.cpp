@@ -788,6 +788,10 @@ extern int register_android_media_MediaRecorder(JNIEnv *env);
 extern int register_android_media_MediaScanner(JNIEnv *env);
 extern int register_android_media_ResampleInputStream(JNIEnv *env);
 extern int register_android_media_MediaProfiles(JNIEnv *env);
+extern int register_android_media_MtpClient(JNIEnv *env);
+extern int register_android_media_MtpCursor(JNIEnv *env);
+extern int register_android_media_MtpDatabase(JNIEnv *env);
+extern int register_android_media_MtpServer(JNIEnv *env);
 extern int register_android_media_AmrInputStream(JNIEnv *env);
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -833,6 +837,26 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_media_MediaProfiles(env) < 0) {
         LOGE("ERROR: MediaProfiles native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MtpClient(env) < 0) {
+        LOGE("ERROR: MtpClient native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MtpCursor(env) < 0) {
+        LOGE("ERROR: MtpCursor native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MtpDatabase(env) < 0) {
+        LOGE("ERROR: MtpDatabase native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MtpServer(env) < 0) {
+        LOGE("ERROR: MtpServer native registration failed");
         goto bail;
     }
 

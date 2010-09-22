@@ -1023,7 +1023,13 @@
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
         </service>
-        
+
+        <service android:name="android.webkit.AccessibilityInjectorTest$MockAccessibilityService">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+        </service>
+
         <activity android:name="android.widget.RadioGroupActivity" android:label="RadioGroupActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

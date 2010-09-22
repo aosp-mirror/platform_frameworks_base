@@ -18,20 +18,23 @@
 #define ANDROID_RS_FILE_A3D_H
 
 #include "RenderScript.h"
-#include "rsFileA3DDecls.h"
 #include "rsMesh.h"
 
 #include <utils/String8.h>
+#include "rsStream.h"
 #include <stdio.h>
+
+#define A3D_MAGIC_KEY "Android3D_ff"
 
 // ---------------------------------------------------------------------------
 namespace android {
+
 namespace renderscript {
 
-class FileA3D
+class FileA3D : public ObjectBase
 {
 public:
-    FileA3D();
+    FileA3D(Context *rsc);
     ~FileA3D();
 
     uint32_t mMajorVersion;
@@ -40,78 +43,53 @@ public:
     uint64_t mStringTableOffset;
     bool mUse64BitOffsets;
 
-    struct A3DIndexEntry {
-        String8 mID;
-        A3DChunkType mType;
+    class A3DIndexEntry {
+        String8 mObjectName;
+        RsA3DClassID mType;
         uint64_t mOffset;
-        void * mRsObj;
+        uint64_t mLength;
+        ObjectBase *mRsObj;
+    public:
+        friend class FileA3D;
+        const String8 &getObjectName() const {
+            return mObjectName;
+        }
+        RsA3DClassID getType() const {
+            return mType;
+        }
     };
 
-    bool load(Context *rsc, FILE *f);
+    bool load(FILE *f);
+    bool load(const void *data, size_t length);
+
+    size_t getNumIndexEntries() const;
+    const A3DIndexEntry* getIndexEntry(size_t index) const;
+    ObjectBase *initializeFromEntry(size_t index);
+
+    void appendToFile(ObjectBase *obj);
+    bool writeFile(const char *filename);
+
+    // Currently files do not get serialized,
+    // but we need to inherit from ObjectBase for ref tracking
+    virtual void serialize(OStream *stream) const {
+    }
+    virtual RsA3DClassID getClassId() const {
+        return RS_A3D_CLASS_ID_UNKNOWN;
+    }
 
 protected:
-    class IO
-    {
-    public:
-        IO(const uint8_t *, bool use64);
-    
-        float loadF() {
-            mPos = (mPos + 3) & (~3);
-            float tmp = reinterpret_cast<const float *>(&mData[mPos])[0];
-            mPos += sizeof(float);
-            return tmp;
-        }
-        int32_t loadI32() {
-            mPos = (mPos + 3) & (~3);
-            int32_t tmp = reinterpret_cast<const int32_t *>(&mData[mPos])[0];
-            mPos += sizeof(int32_t);
-            return tmp;
-        }
-        uint32_t loadU32() {
-            mPos = (mPos + 3) & (~3);
-            uint32_t tmp = reinterpret_cast<const uint32_t *>(&mData[mPos])[0];
-            mPos += sizeof(uint32_t);
-            return tmp;
-        }
-        uint16_t loadU16() {
-            mPos = (mPos + 1) & (~1);
-            uint16_t tmp = reinterpret_cast<const uint16_t *>(&mData[mPos])[0];
-            mPos += sizeof(uint16_t);
-            return tmp;
-        }
-        uint8_t loadU8() {
-            uint8_t tmp = reinterpret_cast<const uint8_t *>(&mData[mPos])[0];
-            mPos += sizeof(uint8_t);
-            return tmp;
-        }
-        uint64_t loadOffset();
-        void loadString(String8 *s);
-        uint64_t getPos() const {return mPos;}
-        const uint8_t * getPtr() const;
-    protected:
-        const uint8_t * mData;
-        uint64_t mPos;
-        bool mUse64;
-    };
 
-
-    bool process(Context *rsc);
-    bool processIndex(Context *rsc, A3DIndexEntry *);
-    void processChunk_Mesh(Context *rsc, IO *io, A3DIndexEntry *ie);
-    void processChunk_Primitive(Context *rsc, IO *io, A3DIndexEntry *ie);
-    void processChunk_Verticies(Context *rsc, IO *io, A3DIndexEntry *ie);
-    void processChunk_Element(Context *rsc, IO *io, A3DIndexEntry *ie);
-    void processChunk_ElementSource(Context *rsc, IO *io, A3DIndexEntry *ie);
+    void parseHeader(IStream *headerStream);
 
     const uint8_t * mData;
     void * mAlloc;
     uint64_t mDataSize;
-    Context * mRsc;
 
-    Vector<A3DIndexEntry> mIndex;
-    Vector<String8> mStrings;
-    Vector<uint32_t> mStringIndexValues;
+    OStream *mWriteStream;
+    Vector<A3DIndexEntry*> mWriteIndex;
 
+    IStream *mReadStream;
+    Vector<A3DIndexEntry*> mIndex;
 };
 
 

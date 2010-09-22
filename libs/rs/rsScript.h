@@ -27,9 +27,9 @@ namespace renderscript {
 class ProgramVertex;
 class ProgramFragment;
 class ProgramRaster;
-class ProgramFragmentStore;
+class ProgramStore;
 
-#define MAX_SCRIPT_BANKS 16
+#define MAX_SCRIPT_BANKS 32
 
 class Script : public ObjectBase
 {
@@ -39,38 +39,43 @@ public:
     Script(Context *);
     virtual ~Script();
 
-
     struct Enviroment_t {
-        bool mIsRoot;
-        float mClearColor[4];
-        float mClearDepth;
-        uint32_t mClearStencil;
-
-        uint32_t mStartTimeMillis;
+        int64_t mStartTimeMillis;
+        int64_t mLastDtTime;
         const char* mTimeZone;
 
         ObjectBaseRef<ProgramVertex> mVertex;
         ObjectBaseRef<ProgramFragment> mFragment;
         ObjectBaseRef<ProgramRaster> mRaster;
-        ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
-        InvokeFunc_t mInvokables[MAX_SCRIPT_BANKS];
+        ObjectBaseRef<ProgramStore> mFragmentStore;
+
+        uint32_t mInvokeFunctionCount;
+        InvokeFunc_t *mInvokeFunctions;
+        uint32_t mFieldCount;
+        void ** mFieldAddress;
+
         char * mScriptText;
         uint32_t mScriptTextLength;
+
+        bool mIsThreadable;
     };
     Enviroment_t mEnviroment;
 
-    uint32_t mCounstantBufferCount;
-
-
     ObjectBaseRef<Allocation> mSlots[MAX_SCRIPT_BANKS];
     ObjectBaseRef<const Type> mTypes[MAX_SCRIPT_BANKS];
-    String8 mSlotNames[MAX_SCRIPT_BANKS];
     bool mSlotWritable[MAX_SCRIPT_BANKS];
 
+    void setVar(uint32_t slot, const void *val, uint32_t len);
 
+    virtual void runForEach(Context *rsc,
+                            const Allocation * ain,
+                            Allocation * aout,
+                            const void * usr,
+                            const RsScriptCall *sc = NULL) = 0;
 
-    virtual void setupScript() = 0;
-    virtual uint32_t run(Context *, uint32_t launchID) = 0;
+    virtual void Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) = 0;
+    virtual void setupScript(Context *rsc) = 0;
+    virtual uint32_t run(Context *) = 0;
 };
 
 

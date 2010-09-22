@@ -21,6 +21,8 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.SharedPreferences;
+import android.net.LinkCapabilities;
+import android.net.LinkProperties;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Handler;
@@ -35,10 +37,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
-import com.android.internal.telephony.gsm.GsmDataConnection;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
-import java.util.List;
 import java.util.Locale;
 
 
@@ -737,8 +737,13 @@ public abstract class PhoneBase extends Handler implements Phone {
         mNotifier.notifyMessageWaitingChanged(this);
     }
 
-    public void notifyDataConnection(String reason) {
-        mNotifier.notifyDataConnection(this, reason);
+    public void notifyDataConnection(String reason, String apnType,
+            Phone.DataState state) {
+        mNotifier.notifyDataConnection(this, reason, apnType, state);
+    }
+
+    public void notifyDataConnection(String reason, String apnType) {
+        mNotifier.notifyDataConnection(this, reason, apnType);
     }
 
     public abstract String getPhoneName();
@@ -824,9 +829,19 @@ public abstract class PhoneBase extends Handler implements Phone {
         logUnexpectedCdmaMethodCall("unregisterForSubscriptionInfoReady");
     }
 
+    /**
+     * Returns true if OTA Service Provisioning needs to be performed.
+     * If not overridden return false.
+     */
+    public boolean needsOtaServiceProvisioning() {
+        return false;
+    }
+
+    /**
+     * Return true if number is an OTASP number.
+     * If not overridden return false.
+     */
     public  boolean isOtaSpNumber(String dialStr) {
-        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
-        logUnexpectedCdmaMethodCall("isOtaSpNumber");
         return false;
     }
 
@@ -916,28 +931,20 @@ public abstract class PhoneBase extends Handler implements Phone {
          logUnexpectedCdmaMethodCall("unsetOnEcbModeExitResponse");
      }
 
-    public String getInterfaceName(String apnType) {
-        return mDataConnection.getInterfaceName(apnType);
-    }
-
-    public String getIpAddress(String apnType) {
-        return mDataConnection.getIpAddress(apnType);
-    }
-
     public boolean isDataConnectivityEnabled() {
         return mDataConnection.getDataEnabled();
     }
 
-    public String getGateway(String apnType) {
-        return mDataConnection.getGateway(apnType);
-    }
-
-    public String[] getDnsServers(String apnType) {
-        return mDataConnection.getDnsServers(apnType);
-    }
-
     public String[] getActiveApnTypes() {
         return mDataConnection.getActiveApnTypes();
+    }
+
+    public LinkProperties getLinkProperties(String apnType) {
+        return mDataConnection.getLinkProperties(apnType);
+    }
+
+    public LinkCapabilities getLinkCapabilities(String apnType) {
+        return mDataConnection.getLinkCapabilities(apnType);
     }
 
     public String getActiveApn() {
@@ -950,6 +957,10 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     public int disableApnType(String type) {
         return mDataConnection.disableApnType(type);
+    }
+
+    public boolean isDataConnectivityPossible() {
+        return ((mDataConnection != null) && (mDataConnection.isDataPossible()));
     }
 
     /**
@@ -980,7 +991,7 @@ public abstract class PhoneBase extends Handler implements Phone {
         }
 
         mDataConnection.setState(dcState);
-        notifyDataConnection(null);
+        notifyDataConnection(null, Phone.APN_TYPE_DEFAULT);
     }
 
     /**
@@ -1032,6 +1043,10 @@ public abstract class PhoneBase extends Handler implements Phone {
     {
         Log.e(LOG_TAG, "Error! " + name + "() in PhoneBase should not be " +
                 "called, CDMAPhone inactive.");
+    }
+
+    public DataState getDataConnectionState() {
+        return getDataConnectionState(APN_TYPE_DEFAULT);
     }
 
     /**

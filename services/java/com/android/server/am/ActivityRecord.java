@@ -105,6 +105,7 @@ class ActivityRecord extends IApplicationToken.Stub {
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
+    boolean immersive;      // immersive mode (don't interrupt if possible)
 
     String stringName;      // for caching of toString().
     
@@ -161,6 +162,7 @@ class ActivityRecord extends IApplicationToken.Stub {
         pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
                 pw.print(" inHistory="); pw.print(inHistory);
                 pw.print(" persistent="); pw.print(persistent);
+                pw.print(" immersive="); pw.print(immersive);
                 pw.print(" launchMode="); pw.println(launchMode);
         pw.print(prefix); pw.print("fullscreen="); pw.print(fullscreen);
                 pw.print(" visible="); pw.print(visible);
@@ -292,6 +294,8 @@ class ActivityRecord extends IApplicationToken.Stub {
             } else {
                 isHomeActivity = false;
             }
+
+            immersive = (aInfo.flags & ActivityInfo.FLAG_IMMERSIVE) != 0;
         } else {
             realActivity = null;
             taskAffinity = null;
@@ -303,6 +307,7 @@ class ActivityRecord extends IApplicationToken.Stub {
             packageName = null;
             fullscreen = true;
             isHomeActivity = false;
+            immersive = false;
         }
     }
 

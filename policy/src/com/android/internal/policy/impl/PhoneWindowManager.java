@@ -46,6 +46,7 @@ import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 
+import com.android.internal.R;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
@@ -176,6 +177,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Context mContext;
     IWindowManager mWindowManager;
     LocalPowerManager mPowerManager;
+    IStatusBarService mStatusBarService;
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
 
     // Vibrator pattern for haptic feedback of a long press.
@@ -198,6 +200,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     boolean mSafeMode;
     WindowState mStatusBar = null;
+    boolean mStatusBarCanHide;
     final ArrayList<WindowState> mStatusBarPanels = new ArrayList<WindowState>();
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
@@ -261,6 +264,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpVisibleFrame = new Rect();
     
     WindowState mTopFullscreenOpaqueWindowState;
+    boolean mTopIsFullscreen;
     boolean mForceStatusBar;
     boolean mHideLockScreen;
     boolean mDismissKeyguard;
@@ -288,6 +292,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Nothing to see here, move along...
     int mFancyRotationAnimation;
+    
+    // Enable 3D recents based on config settings.
+    private Boolean mUse3dRecents;
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
@@ -490,6 +497,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Create (if necessary) and launch the recent apps dialog
      */
     void showRecentAppsDialog() {
+        // We can't initialize this in init() since the configuration hasn't been loaded yet.
+        if (mUse3dRecents == null) {
+            mUse3dRecents = mContext.getResources().getBoolean(R.bool.config_enableRecentApps3D);
+        }
+        
+        // Use 3d Recents dialog
+        if (mUse3dRecents) {
+            try {
+                Intent intent = new Intent();
+                intent.setClassName("com.android.systemui", 
+                        "com.android.systemui.statusbar.RecentApplicationsActivity");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK 
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                mContext.startActivity(intent);
+                return;
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "Failed to launch RecentAppsIntent", e);
+            }
+        }
+
+        // Fallback to dialog if we fail to launch the above.
         if (mRecentAppsDialog == null) {
             mRecentAppsDialog = new RecentApplicationsDialog(mContext);
         }
@@ -521,6 +549,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDeskDockIntent.addCategory(Intent.CATEGORY_DESK_DOCK);
         mDeskDockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
@@ -563,6 +592,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.array.config_safeModeDisabledVibePattern);
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
+
+        // Note: the Configuration is not stable here, so we cannot load mStatusBarCanHide from
+        // config_statusBarCanHide because the latter depends on the screen size
     }
 
     public void updateSettings() {
@@ -975,6 +1007,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
                 }
                 mStatusBar = win;
+
+                // The Configuration will be stable by now, so we can load this
+                mStatusBarCanHide = mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_statusBarCanHide);
+
                 break;
             case TYPE_STATUS_BAR_PANEL:
                 mContext.enforceCallingOrSelfPermission(
@@ -1233,7 +1270,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset) {
         final int fl = attrs.flags;
         
-        if ((fl &
+        if (mStatusBarCanHide && (fl &
                 (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
                 == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
             contentInset.set(mCurLeft, mCurTop, mW - mCurRight, mH - mCurBottom);
@@ -1266,10 +1303,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mStatusBar.isVisibleLw()) {
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
-                mDockTop = mContentTop = mCurTop = mStatusBar.getFrameLw().bottom;
-                if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mDockBottom="
-                        + mDockBottom + " mContentBottom="
-                        + mContentBottom + " mCurBottom=" + mCurBottom);
+                final Rect r = mStatusBar.getFrameLw();
+                if (mDockTop == r.top) mDockTop = r.bottom;
+                else if (mDockBottom == r.bottom) mDockBottom = r.top;
+                mContentTop = mCurTop = mDockTop;
+                mContentBottom = mCurBottom = mDockBottom;
+                if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mDockTop=" + mDockTop
+                        + " mContentTop=" + mContentTop
+                        + " mCurTop=" + mCurTop
+                        + " mDockBottom=" + mDockBottom
+                        + " mContentBottom=" + mContentBottom
+                        + " mCurBottom=" + mCurBottom);
             }
         }
     }
@@ -1354,7 +1398,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();
         } else {
-            if ((fl &
+            if (mStatusBarCanHide && (fl &
                     (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
                     == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
                 // This is the case for a normal activity window: we want it
@@ -1386,7 +1430,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     vf.right = mCurRight;
                     vf.bottom = mCurBottom;
                 }
-            } else if ((fl & FLAG_LAYOUT_IN_SCREEN) != 0) {
+            } else if (mStatusBarCanHide && (fl & FLAG_LAYOUT_IN_SCREEN) != 0) {
                 // A window that has requested to fill the entire screen just
                 // gets everything, period.
                 pf.left = df.left = cf.left = 0;
@@ -1513,8 +1557,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public int finishAnimationLw() {
         int changes = 0;
-        
-        boolean hiding = false;
+
+        boolean topIsFullscreen = false;
         if (mStatusBar != null) {
             if (localLOGV) Log.i(TAG, "force=" + mForceStatusBar
                     + " top=" + mTopFullscreenOpaqueWindowState);
@@ -1522,17 +1566,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                 if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
             } else if (mTopFullscreenOpaqueWindowState != null) {
-                //Log.i(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
-                //        + " shown frame: " + mTopFullscreenOpaqueWindowState.getShownFrameLw());
-                //Log.i(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs());
-                WindowManager.LayoutParams lp =
-                    mTopFullscreenOpaqueWindowState.getAttrs();
-                boolean hideStatusBar =
-                    (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
-                if (hideStatusBar) {
-                    if (DEBUG_LAYOUT) Log.v(TAG, "Hiding status bar");
-                    if (mStatusBar.hideLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
-                    hiding = true;
+                final WindowManager.LayoutParams lp = mTopFullscreenOpaqueWindowState.getAttrs();
+                if (localLOGV) {
+                    Log.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
+                            + " shown frame: " + mTopFullscreenOpaqueWindowState.getShownFrameLw());
+                    Log.d(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs()
+                            + " lp.flags=0x" + Integer.toHexString(lp.flags));
+                }
+                topIsFullscreen = (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
+                // The subtle difference between the window for mTopFullscreenOpaqueWindowState
+                // and mTopIsFullscreen is that that mTopIsFullscreen is set only if the window
+                // has the FLAG_FULLSCREEN set.  Not sure if there is another way that to be the
+                // case though.
+                if (topIsFullscreen) {
+                    if (mStatusBarCanHide) {
+                        if (DEBUG_LAYOUT) Log.v(TAG, "Hiding status bar");
+                        if (mStatusBar.hideLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                    } else if (localLOGV) {
+                        Log.v(TAG, "Preventing status bar from hiding by policy");
+                    }
                 } else {
                     if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                     if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
@@ -1540,21 +1592,36 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         
-        if (changes != 0 && hiding) {
-            IStatusBarService sbs = IStatusBarService.Stub.asInterface(ServiceManager.getService("statusbar"));
-            if (sbs != null) {
-                try {
-                    // Make sure the window shade is hidden.
-                    sbs.collapse();
-                } catch (RemoteException e) {
-                }
-            }
+        if (topIsFullscreen != mTopIsFullscreen) {
+            final boolean topIsFullscreenF = topIsFullscreen;
+            mTopIsFullscreen = topIsFullscreen;
+            mHandler.post(new Runnable() {
+                    public void run() {
+                        if (mStatusBarService == null) {
+                            // This is the one that can not go away, but it doesn't come up
+                            // before the window manager does, so don't fail if it doesn't
+                            // exist. This works as long as no fullscreen windows come up
+                            // before the status bar service does.
+                            mStatusBarService = IStatusBarService.Stub.asInterface(
+                                    ServiceManager.getService("statusbar"));
+                        }
+                        final IStatusBarService sbs = mStatusBarService;
+                        if (mStatusBarService != null) {
+                            try {
+                                sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
+                            } catch (RemoteException e) {
+                                // This should be impossible because we're in the same process.
+                                mStatusBarService = null;
+                            }
+                        }
+                    }
+                });
         }
 
         // Hide the key guard if a visible window explicitly specifies that it wants to be displayed
         // when the screen is locked
         if (mKeyguard != null) {
-            if (localLOGV) Log.v(TAG, "finishLayoutLw::mHideKeyguard="+mHideLockScreen);
+            if (localLOGV) Log.v(TAG, "finishAnimationLw::mHideKeyguard="+mHideLockScreen);
             if (mDismissKeyguard && !mKeyguardMediator.isSecure()) {
                 if (mKeyguard.hideLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT

@@ -17,6 +17,7 @@
 package android.renderscript;
 
 import java.lang.reflect.Field;
+import android.util.Log;
 
 /**
  * @hide
@@ -26,6 +27,7 @@ public class Element extends BaseObj {
     int mSize;
     Element[] mElements;
     String[] mElementNames;
+    int[] mArraySizes;
 
     DataType mType;
     DataKind mKind;
@@ -47,20 +49,26 @@ public class Element extends BaseObj {
         UNSIGNED_32 (10, 4),
         //UNSIGNED_64 (11, 8),
 
-        UNSIGNED_5_6_5 (12, 2),
-        UNSIGNED_5_5_5_1 (13, 2),
-        UNSIGNED_4_4_4_4 (14, 2),
+        BOOLEAN(12, 1),
 
-        RS_ELEMENT (15, 4),
-        RS_TYPE (16, 4),
-        RS_ALLOCATION (17, 4),
-        RS_SAMPLER (18, 4),
-        RS_SCRIPT (19, 4),
-        RS_MESH (20, 4),
-        RS_PROGRAM_FRAGMENT (21, 4),
-        RS_PROGRAM_VERTEX (22, 4),
-        RS_PROGRAM_RASTER (23, 4),
-        RS_PROGRAM_STORE (24, 4);
+        UNSIGNED_5_6_5 (13, 2),
+        UNSIGNED_5_5_5_1 (14, 2),
+        UNSIGNED_4_4_4_4 (15, 2),
+
+        MATRIX_4X4 (16, 64),
+        MATRIX_3X3 (17, 36),
+        MATRIX_2X2 (18, 16),
+
+        RS_ELEMENT (1000, 4),
+        RS_TYPE (1001, 4),
+        RS_ALLOCATION (1002, 4),
+        RS_SAMPLER (1003, 4),
+        RS_SCRIPT (1004, 4),
+        RS_MESH (1005, 4),
+        RS_PROGRAM_FRAGMENT (1006, 4),
+        RS_PROGRAM_VERTEX (1007, 4),
+        RS_PROGRAM_RASTER (1008, 4),
+        RS_PROGRAM_STORE (1009, 4);
 
         int mID;
         int mSize;
@@ -72,12 +80,6 @@ public class Element extends BaseObj {
 
     public enum DataKind {
         USER (0),
-        COLOR (1),
-        POSITION (2),
-        TEXTURE (3),
-        NORMAL (4),
-        INDEX (5),
-        POINT_SIZE(6),
 
         PIXEL_L (7),
         PIXEL_A (8),
@@ -91,40 +93,132 @@ public class Element extends BaseObj {
         }
     }
 
-    public static Element USER_U8(RenderScript rs) {
-        if(rs.mElement_USER_U8 == null) {
-            rs.mElement_USER_U8 = createUser(rs, DataType.UNSIGNED_8);
+    public static Element BOOLEAN(RenderScript rs) {
+        if(rs.mElement_BOOLEAN == null) {
+            rs.mElement_BOOLEAN = createUser(rs, DataType.BOOLEAN);
         }
-        return rs.mElement_USER_U8;
+        return rs.mElement_BOOLEAN;
     }
 
-    public static Element USER_I8(RenderScript rs) {
-        if(rs.mElement_USER_I8 == null) {
-            rs.mElement_USER_I8 = createUser(rs, DataType.SIGNED_8);
+    public static Element U8(RenderScript rs) {
+        if(rs.mElement_U8 == null) {
+            rs.mElement_U8 = createUser(rs, DataType.UNSIGNED_8);
         }
-        return rs.mElement_USER_I8;
+        return rs.mElement_U8;
     }
 
-    public static Element USER_U32(RenderScript rs) {
-        if(rs.mElement_USER_U32 == null) {
-            rs.mElement_USER_U32 = createUser(rs, DataType.UNSIGNED_32);
+    public static Element I8(RenderScript rs) {
+        if(rs.mElement_I8 == null) {
+            rs.mElement_I8 = createUser(rs, DataType.SIGNED_8);
         }
-        return rs.mElement_USER_U32;
+        return rs.mElement_I8;
     }
 
-    public static Element USER_I32(RenderScript rs) {
-        if(rs.mElement_USER_I32 == null) {
-            rs.mElement_USER_I32 = createUser(rs, DataType.SIGNED_32);
+    public static Element U16(RenderScript rs) {
+        if(rs.mElement_U16 == null) {
+            rs.mElement_U16 = createUser(rs, DataType.UNSIGNED_16);
         }
-        return rs.mElement_USER_I32;
+        return rs.mElement_U16;
     }
 
-    public static Element USER_F32(RenderScript rs) {
-        if(rs.mElement_USER_F32 == null) {
-            rs.mElement_USER_F32 = createUser(rs, DataType.FLOAT_32);
+    public static Element I16(RenderScript rs) {
+        if(rs.mElement_I16 == null) {
+            rs.mElement_I16 = createUser(rs, DataType.SIGNED_16);
         }
-        return rs.mElement_USER_F32;
+        return rs.mElement_I16;
     }
+
+    public static Element U32(RenderScript rs) {
+        if(rs.mElement_U32 == null) {
+            rs.mElement_U32 = createUser(rs, DataType.UNSIGNED_32);
+        }
+        return rs.mElement_U32;
+    }
+
+    public static Element I32(RenderScript rs) {
+        if(rs.mElement_I32 == null) {
+            rs.mElement_I32 = createUser(rs, DataType.SIGNED_32);
+        }
+        return rs.mElement_I32;
+    }
+
+    public static Element F32(RenderScript rs) {
+        if(rs.mElement_F32 == null) {
+            rs.mElement_F32 = createUser(rs, DataType.FLOAT_32);
+        }
+        return rs.mElement_F32;
+    }
+
+    public static Element ELEMENT(RenderScript rs) {
+        if(rs.mElement_ELEMENT == null) {
+            rs.mElement_ELEMENT = createUser(rs, DataType.RS_ELEMENT);
+        }
+        return rs.mElement_ELEMENT;
+    }
+
+    public static Element TYPE(RenderScript rs) {
+        if(rs.mElement_TYPE == null) {
+            rs.mElement_TYPE = createUser(rs, DataType.RS_TYPE);
+        }
+        return rs.mElement_TYPE;
+    }
+
+    public static Element ALLOCATION(RenderScript rs) {
+        if(rs.mElement_ALLOCATION == null) {
+            rs.mElement_ALLOCATION = createUser(rs, DataType.RS_ALLOCATION);
+        }
+        return rs.mElement_ALLOCATION;
+    }
+
+    public static Element SAMPLER(RenderScript rs) {
+        if(rs.mElement_SAMPLER == null) {
+            rs.mElement_SAMPLER = createUser(rs, DataType.RS_SAMPLER);
+        }
+        return rs.mElement_SAMPLER;
+    }
+
+    public static Element SCRIPT(RenderScript rs) {
+        if(rs.mElement_SCRIPT == null) {
+            rs.mElement_SCRIPT = createUser(rs, DataType.RS_SCRIPT);
+        }
+        return rs.mElement_SCRIPT;
+    }
+
+    public static Element MESH(RenderScript rs) {
+        if(rs.mElement_MESH == null) {
+            rs.mElement_MESH = createUser(rs, DataType.RS_MESH);
+        }
+        return rs.mElement_MESH;
+    }
+
+    public static Element PROGRAM_FRAGMENT(RenderScript rs) {
+        if(rs.mElement_PROGRAM_FRAGMENT == null) {
+            rs.mElement_PROGRAM_FRAGMENT = createUser(rs, DataType.RS_PROGRAM_FRAGMENT);
+        }
+        return rs.mElement_PROGRAM_FRAGMENT;
+    }
+
+    public static Element PROGRAM_VERTEX(RenderScript rs) {
+        if(rs.mElement_PROGRAM_VERTEX == null) {
+            rs.mElement_PROGRAM_VERTEX = createUser(rs, DataType.RS_PROGRAM_VERTEX);
+        }
+        return rs.mElement_PROGRAM_VERTEX;
+    }
+
+    public static Element PROGRAM_RASTER(RenderScript rs) {
+        if(rs.mElement_PROGRAM_RASTER == null) {
+            rs.mElement_PROGRAM_RASTER = createUser(rs, DataType.RS_PROGRAM_RASTER);
+        }
+        return rs.mElement_PROGRAM_RASTER;
+    }
+
+    public static Element PROGRAM_STORE(RenderScript rs) {
+        if(rs.mElement_PROGRAM_STORE == null) {
+            rs.mElement_PROGRAM_STORE = createUser(rs, DataType.RS_PROGRAM_STORE);
+        }
+        return rs.mElement_PROGRAM_STORE;
+    }
+
 
     public static Element A_8(RenderScript rs) {
         if(rs.mElement_A_8 == null) {
@@ -168,168 +262,141 @@ public class Element extends BaseObj {
         return rs.mElement_RGBA_8888;
     }
 
-    public static Element INDEX_16(RenderScript rs) {
-        if(rs.mElement_INDEX_16 == null) {
-            rs.mElement_INDEX_16 = createIndex(rs);
+    public static Element F32_2(RenderScript rs) {
+        if(rs.mElement_FLOAT_2 == null) {
+            rs.mElement_FLOAT_2 = createVector(rs, DataType.FLOAT_32, 2);
         }
-        return rs.mElement_INDEX_16;
+        return rs.mElement_FLOAT_2;
     }
 
-    public static Element ATTRIB_POSITION_2(RenderScript rs) {
-        if(rs.mElement_POSITION_2 == null) {
-            rs.mElement_POSITION_2 = createAttrib(rs, DataType.FLOAT_32, DataKind.POSITION, 2);
+    public static Element F32_3(RenderScript rs) {
+        if(rs.mElement_FLOAT_3 == null) {
+            rs.mElement_FLOAT_3 = createVector(rs, DataType.FLOAT_32, 3);
         }
-        return rs.mElement_POSITION_2;
+        return rs.mElement_FLOAT_3;
     }
 
-    public static Element ATTRIB_POSITION_3(RenderScript rs) {
-        if(rs.mElement_POSITION_3 == null) {
-            rs.mElement_POSITION_3 = createAttrib(rs, DataType.FLOAT_32, DataKind.POSITION, 3);
+    public static Element F32_4(RenderScript rs) {
+        if(rs.mElement_FLOAT_4 == null) {
+            rs.mElement_FLOAT_4 = createVector(rs, DataType.FLOAT_32, 4);
         }
-        return rs.mElement_POSITION_3;
+        return rs.mElement_FLOAT_4;
     }
 
-    public static Element ATTRIB_TEXTURE_2(RenderScript rs) {
-        if(rs.mElement_TEXTURE_2 == null) {
-            rs.mElement_TEXTURE_2 = createAttrib(rs, DataType.FLOAT_32, DataKind.TEXTURE, 2);
+    public static Element U8_4(RenderScript rs) {
+        if(rs.mElement_UCHAR_4 == null) {
+            rs.mElement_UCHAR_4 = createVector(rs, DataType.UNSIGNED_8, 4);
         }
-        return rs.mElement_TEXTURE_2;
+        return rs.mElement_UCHAR_4;
     }
 
-    public static Element ATTRIB_NORMAL_3(RenderScript rs) {
-        if(rs.mElement_NORMAL_3 == null) {
-            rs.mElement_NORMAL_3 = createAttrib(rs, DataType.FLOAT_32, DataKind.NORMAL, 3);
+    public static Element MATRIX_4X4(RenderScript rs) {
+        if(rs.mElement_MATRIX_4X4 == null) {
+            rs.mElement_MATRIX_4X4 = createUser(rs, DataType.MATRIX_4X4);
         }
-        return rs.mElement_NORMAL_3;
+        return rs.mElement_MATRIX_4X4;
+    }
+    public static Element MATRIX4X4(RenderScript rs) {
+        return MATRIX_4X4(rs);
     }
 
-    public static Element ATTRIB_COLOR_U8_4(RenderScript rs) {
-        if(rs.mElement_COLOR_U8_4 == null) {
-            rs.mElement_COLOR_U8_4 = createAttrib(rs, DataType.UNSIGNED_8, DataKind.COLOR, 4);
+    public static Element MATRIX_3X3(RenderScript rs) {
+        if(rs.mElement_MATRIX_3X3 == null) {
+            rs.mElement_MATRIX_3X3 = createUser(rs, DataType.MATRIX_3X3);
         }
-        return rs.mElement_COLOR_U8_4;
+        return rs.mElement_MATRIX_4X4;
     }
 
-    public static Element ATTRIB_COLOR_F32_4(RenderScript rs) {
-        if(rs.mElement_COLOR_F32_4 == null) {
-            rs.mElement_COLOR_F32_4 = createAttrib(rs, DataType.FLOAT_32, DataKind.COLOR, 4);
+    public static Element MATRIX_2X2(RenderScript rs) {
+        if(rs.mElement_MATRIX_2X2 == null) {
+            rs.mElement_MATRIX_2X2 = createUser(rs, DataType.MATRIX_2X2);
         }
-        return rs.mElement_COLOR_F32_4;
+        return rs.mElement_MATRIX_2X2;
     }
 
-    Element(RenderScript rs, Element[] e, String[] n) {
-        super(rs);
+    Element(int id, RenderScript rs, Element[] e, String[] n, int[] as) {
+        super(id, rs);
         mSize = 0;
         mElements = e;
         mElementNames = n;
-        int[] ids = new int[mElements.length];
+        mArraySizes = as;
         for (int ct = 0; ct < mElements.length; ct++ ) {
             mSize += mElements[ct].mSize;
-            ids[ct] = mElements[ct].mID;
         }
-        mID = rs.nElementCreate2(ids, mElementNames);
     }
 
-    Element(RenderScript rs, DataType dt, DataKind dk, boolean norm, int size) {
-        super(rs);
+    Element(int id, RenderScript rs, DataType dt, DataKind dk, boolean norm, int size) {
+        super(id, rs);
         mSize = dt.mSize * size;
         mType = dt;
         mKind = dk;
         mNormalized = norm;
         mVectorSize = size;
-        mID = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+    }
+
+    Element(int id, RenderScript rs) {
+        super(id, rs);
+    }
+
+    @Override
+    void updateFromNative() {
+
+        // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
+        int[] dataBuffer = new int[5];
+        mRS.nElementGetNativeData(mID, dataBuffer);
+
+        mNormalized = dataBuffer[2] == 1 ? true : false;
+        mVectorSize = dataBuffer[3];
+        mSize = 0;
+        for (DataType dt: DataType.values()) {
+            if(dt.mID == dataBuffer[0]){
+                mType = dt;
+                mSize = mType.mSize * mVectorSize;
+            }
+        }
+        for (DataKind dk: DataKind.values()) {
+            if(dk.mID == dataBuffer[1]){
+                mKind = dk;
+            }
+        }
+
+        int numSubElements = dataBuffer[4];
+        if(numSubElements > 0) {
+            mElements = new Element[numSubElements];
+            mElementNames = new String[numSubElements];
+
+            int[] subElementIds = new int[numSubElements];
+            mRS.nElementGetSubElements(mID, subElementIds, mElementNames);
+            for(int i = 0; i < numSubElements; i ++) {
+                mElements[i] = new Element(subElementIds[i], mRS);
+                mElements[i].updateFromNative();
+                mSize += mElements[i].mSize;
+            }
+        }
+
     }
 
     public void destroy() throws IllegalStateException {
         super.destroy();
     }
 
-    public static Element createFromClass(RenderScript rs, Class c) {
-        rs.validate();
-        Field[] fields = c.getFields();
-        Builder b = new Builder(rs);
-
-        for(Field f: fields) {
-            Class fc = f.getType();
-            if(fc == int.class) {
-                b.add(createUser(rs, DataType.SIGNED_32), f.getName());
-            } else if(fc == short.class) {
-                b.add(createUser(rs, DataType.SIGNED_16), f.getName());
-            } else if(fc == byte.class) {
-                b.add(createUser(rs, DataType.SIGNED_8), f.getName());
-            } else if(fc == float.class) {
-                b.add(createUser(rs, DataType.FLOAT_32), f.getName());
-            } else {
-                throw new IllegalArgumentException("Unkown field type");
-            }
-        }
-        return b.create();
-    }
-
-
     /////////////////////////////////////////
     public static Element createUser(RenderScript rs, DataType dt) {
-        return new Element(rs, dt, DataKind.USER, false, 1);
+        DataKind dk = DataKind.USER;
+        boolean norm = false;
+        int vecSize = 1;
+        int id = rs.nElementCreate(dt.mID, dk.mID, norm, vecSize);
+        return new Element(id, rs, dt, dk, norm, vecSize);
     }
 
     public static Element createVector(RenderScript rs, DataType dt, int size) {
         if (size < 2 || size > 4) {
             throw new IllegalArgumentException("Bad size");
         }
-        return new Element(rs, dt, DataKind.USER, false, size);
-    }
-
-    public static Element createIndex(RenderScript rs) {
-        return new Element(rs, DataType.UNSIGNED_16, DataKind.INDEX, false, 1);
-    }
-
-    public static Element createAttrib(RenderScript rs, DataType dt, DataKind dk, int size) {
-        if (!(dt == DataType.FLOAT_32 ||
-              dt == DataType.UNSIGNED_8 ||
-              dt == DataType.UNSIGNED_16 ||
-              dt == DataType.UNSIGNED_32 ||
-              dt == DataType.SIGNED_8 ||
-              dt == DataType.SIGNED_16 ||
-              dt == DataType.SIGNED_32)) {
-            throw new IllegalArgumentException("Unsupported DataType");
-        }
-
-        if (!(dk == DataKind.COLOR ||
-              dk == DataKind.POSITION ||
-              dk == DataKind.TEXTURE ||
-              dk == DataKind.NORMAL ||
-              dk == DataKind.POINT_SIZE ||
-              dk == DataKind.USER)) {
-            throw new IllegalArgumentException("Unsupported DataKind");
-        }
-
-        if (dk == DataKind.COLOR &&
-            ((dt != DataType.FLOAT_32 && dt != DataType.UNSIGNED_8) ||
-             size < 3 || size > 4)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-        if (dk == DataKind.POSITION && (size < 1 || size > 4)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-        if (dk == DataKind.TEXTURE &&
-            (dt != DataType.FLOAT_32 || size < 1 || size > 4)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-        if (dk == DataKind.NORMAL &&
-            (dt != DataType.FLOAT_32 || size != 3)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-        if (dk == DataKind.POINT_SIZE &&
-            (dt != DataType.FLOAT_32 || size != 1)) {
-            throw new IllegalArgumentException("Bad combo");
-        }
-
+        DataKind dk = DataKind.USER;
         boolean norm = false;
-        if (dk == DataKind.COLOR && dt == DataType.UNSIGNED_8) {
-            norm = true;
-        }
-
-        return new Element(rs, dt, dk, norm, size);
+        int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+        return new Element(id, rs, dt, dk, norm, size);
     }
 
     public static Element createPixel(RenderScript rs, DataType dt, DataKind dk) {
@@ -367,13 +434,16 @@ public class Element extends BaseObj {
             size = 4;
         }
 
-        return new Element(rs, dt, dk, true, size);
+        boolean norm = true;
+        int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
+        return new Element(id, rs, dt, dk, norm, size);
     }
 
     public static class Builder {
         RenderScript mRS;
         Element[] mElements;
         String[] mElementNames;
+        int[] mArraySizes;
         int mCount;
 
         public Builder(RenderScript rs) {
@@ -381,29 +451,49 @@ public class Element extends BaseObj {
             mCount = 0;
             mElements = new Element[8];
             mElementNames = new String[8];
+            mArraySizes = new int[8];
         }
 
-        public void add(Element element, String name) {
+        public void add(Element element, String name, int arraySize) {
+            if (arraySize < 1) {
+                throw new IllegalArgumentException("Array size cannot be less than 1.");
+            }
             if(mCount == mElements.length) {
                 Element[] e = new Element[mCount + 8];
                 String[] s = new String[mCount + 8];
+                int[] as = new int[mCount + 8];
                 System.arraycopy(mElements, 0, e, 0, mCount);
                 System.arraycopy(mElementNames, 0, s, 0, mCount);
+                System.arraycopy(mArraySizes, 0, as, 0, mCount);
                 mElements = e;
                 mElementNames = s;
+                mArraySizes = as;
             }
             mElements[mCount] = element;
             mElementNames[mCount] = name;
+            mArraySizes[mCount] = arraySize;
             mCount++;
+        }
+
+        public void add(Element element, String name) {
+            add(element, name, 1);
         }
 
         public Element create() {
             mRS.validate();
             Element[] ein = new Element[mCount];
             String[] sin = new String[mCount];
+            int[] asin = new int[mCount];
             java.lang.System.arraycopy(mElements, 0, ein, 0, mCount);
             java.lang.System.arraycopy(mElementNames, 0, sin, 0, mCount);
-            return new Element(mRS, ein, sin);
+            java.lang.System.arraycopy(mArraySizes, 0, asin, 0, mCount);
+
+            int[] ids = new int[ein.length];
+            for (int ct = 0; ct < ein.length; ct++ ) {
+                ids[ct] = ein[ct].mID;
+            }
+            int id = mRS.nElementCreate2(ids, sin, asin);
+            return new Element(id, mRS, ein, sin, asin);
         }
     }
 

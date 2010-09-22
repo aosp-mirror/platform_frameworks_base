@@ -24,14 +24,14 @@
 
 namespace android {
 
-class ISurface;
+class Surface;
 class MemoryHeapBase;
 
 class SoftwareRenderer : public VideoRenderer {
 public:
     SoftwareRenderer(
             OMX_COLOR_FORMATTYPE colorFormat,
-            const sp<ISurface> &surface,
+            const sp<Surface> &surface,
             size_t displayWidth, size_t displayHeight,
             size_t decodedWidth, size_t decodedHeight);
 
@@ -41,14 +41,18 @@ public:
             const void *data, size_t size, void *platformPrivate);
 
 private:
+    enum YUVMode {
+        None,
+        YUV420ToYUV420sp,
+        YUV420spToYUV420sp,
+    };
+
     OMX_COLOR_FORMATTYPE mColorFormat;
-    ColorConverter mConverter;
-    sp<ISurface> mISurface;
+    ColorConverter *mConverter;
+    YUVMode mYUVMode;
+    sp<Surface> mSurface;
     size_t mDisplayWidth, mDisplayHeight;
     size_t mDecodedWidth, mDecodedHeight;
-    size_t mFrameSize;
-    sp<MemoryHeapBase> mMemoryHeap;
-    int mIndex;
 
     SoftwareRenderer(const SoftwareRenderer &);
     SoftwareRenderer &operator=(const SoftwareRenderer &);

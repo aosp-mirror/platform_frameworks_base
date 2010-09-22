@@ -16,42 +16,84 @@
 
 package com.android.server;
 
-import android.text.IClipboard;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.IClipboard;
+import android.content.IOnPrimaryClipChangedListener;
 import android.content.Context;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 
 /**
  * Implementation of the clipboard for copy and paste.
  */
 public class ClipboardService extends IClipboard.Stub {
-    private CharSequence mClipboard = "";
+    private ClipData mPrimaryClip;
+    private final RemoteCallbackList<IOnPrimaryClipChangedListener> mPrimaryClipListeners
+            = new RemoteCallbackList<IOnPrimaryClipChangedListener>();
 
     /**
      * Instantiates the clipboard.
      */
     public ClipboardService(Context context) { }
 
-    // javadoc from interface
-    public void setClipboardText(CharSequence text) {
+    public void setPrimaryClip(ClipData clip) {
         synchronized (this) {
-            if (text == null) {
-                text = "";
+            if (clip != null && clip.getItemCount() <= 0) {
+                throw new IllegalArgumentException("No items");
             }
+            mPrimaryClip = clip;
+            final int n = mPrimaryClipListeners.beginBroadcast();
+            for (int i = 0; i < n; i++) {
+                try {
+                    mPrimaryClipListeners.getBroadcastItem(i).dispatchPrimaryClipChanged();
+                } catch (RemoteException e) {
+
+                    // The RemoteCallbackList will take care of removing
+                    // the dead object for us.
+                }
+            }
+            mPrimaryClipListeners.finishBroadcast();
+        }
+    }
     
-            mClipboard = text;
-        }
-    }
-
-    // javadoc from interface
-    public CharSequence getClipboardText() {
+    public ClipData getPrimaryClip() {
         synchronized (this) {
-            return mClipboard;
+            return mPrimaryClip;
         }
     }
 
-    // javadoc from interface
+    public ClipDescription getPrimaryClipDescription() {
+        synchronized (this) {
+            return new ClipDescription(mPrimaryClip);
+        }
+    }
+
+    public boolean hasPrimaryClip() {
+        synchronized (this) {
+            return mPrimaryClip != null;
+        }
+    }
+
+    public void addPrimaryClipChangedListener(IOnPrimaryClipChangedListener listener) {
+        synchronized (this) {
+            mPrimaryClipListeners.register(listener);
+        }
+    }
+
+    public void removePrimaryClipChangedListener(IOnPrimaryClipChangedListener listener) {
+        synchronized (this) {
+            mPrimaryClipListeners.unregister(listener);
+        }
+    }
+
     public boolean hasClipboardText() {
         synchronized (this) {
-            return mClipboard.length() > 0;
+            if (mPrimaryClip != null) {
+                CharSequence text = mPrimaryClip.getItem(0).getText();
+                return text != null && text.length() > 0;
+            }
+            return false;
         }
     }
 }

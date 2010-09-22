@@ -39,6 +39,7 @@ public class AppWidgetHost {
 
     static final int HANDLE_UPDATE = 1;
     static final int HANDLE_PROVIDER_CHANGED = 2;
+    static final int HANDLE_VIEW_DATA_CHANGED = 3;
 
     final static Object sServiceLock = new Object();
     static IAppWidgetService sService;
@@ -60,6 +61,13 @@ public class AppWidgetHost {
             msg.obj = info;
             msg.sendToTarget();
         }
+
+        public void viewDataChanged(int appWidgetId, int viewId) {
+            Message msg = mHandler.obtainMessage(HANDLE_VIEW_DATA_CHANGED);
+            msg.arg1 = appWidgetId;
+            msg.arg2 = viewId;
+            msg.sendToTarget();
+        }
     }
 
     class UpdateHandler extends Handler {
@@ -75,6 +83,10 @@ public class AppWidgetHost {
                 }
                 case HANDLE_PROVIDER_CHANGED: {
                     onProviderChanged(msg.arg1, (AppWidgetProviderInfo)msg.obj);
+                    break;
+                }
+                case HANDLE_VIEW_DATA_CHANGED: {
+                    viewDataChanged(msg.arg1, msg.arg2);
                     break;
                 }
             }
@@ -248,6 +260,16 @@ public class AppWidgetHost {
         }
         if (v != null) {
             v.updateAppWidget(views);
+        }
+    }
+
+    void viewDataChanged(int appWidgetId, int viewId) {
+        AppWidgetHostView v;
+        synchronized (mViews) {
+            v = mViews.get(appWidgetId);
+        }
+        if (v != null) {
+            v.viewDataChanged(viewId);
         }
     }
 }

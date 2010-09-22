@@ -16,7 +16,9 @@
 */
 
 #undef LOG_TAG
-#define LOG_TAG "Cursor"
+#define LOG_TAG "SQLiteStatementCpp"
+
+#include "android_util_Binder.h"
 
 #include <jni.h>
 #include <JNIHelp.h>
@@ -24,11 +26,16 @@
 
 #include <sqlite3.h>
 
+#include <cutils/ashmem.h>
 #include <utils/Log.h>
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "sqlite3_exception.h"
 
@@ -48,22 +55,40 @@ static jfieldID gStatementField;
         (sqlite3 *)env->GetIntField(object, gHandleField)
 
 
-static void native_execute(JNIEnv* env, jobject object)
+static jint native_execute(JNIEnv* env, jobject object)
 {
     int err;
     sqlite3 * handle = GET_HANDLE(env, object);
     sqlite3_stmt * statement = GET_STATEMENT(env, object);
+    int numChanges = -1;
 
     // Execute the statement
     err = sqlite3_step(statement);
 
-    // Throw an exception if an error occured
-    if (err != SQLITE_DONE) {
+    // Throw an exception if an error occurred
+    if (err == SQLITE_ROW) {
+        throw_sqlite3_exception(env,
+                "Queries can be performed using SQLiteDatabase query or rawQuery methods only.");
+    } else if (err != SQLITE_DONE) {
         throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(handle));
+    } else {
+        numChanges = sqlite3_changes(handle);
     }
 
-    // Reset the statment so it's ready to use again
+    // Reset the statement so it's ready to use again
     sqlite3_reset(statement);
+    return numChanges;
+}
+
+static jlong native_executeInsert(JNIEnv* env, jobject object)
+{
+    sqlite3 * handle = GET_HANDLE(env, object);
+    jint numChanges = native_execute(env, object);
+    if (numChanges > 0) {
+        return sqlite3_last_insert_rowid(handle);
+    } else {
+        return -1;
+    }
 }
 
 static jlong native_1x1_long(JNIEnv* env, jobject object)
@@ -115,13 +140,125 @@ static jstring native_1x1_string(JNIEnv* env, jobject object)
     return value;
 }
 
+static jobject createParcelFileDescriptor(JNIEnv * env, int fd)
+{
+    // Create FileDescriptor object
+    jobject fileDesc = newFileDescriptor(env, fd);
+    if (fileDesc == NULL) {
+        // FileDescriptor constructor has thrown an exception
+        close(fd);
+        return NULL;
+    }
+
+    // Wrap it in a ParcelFileDescriptor
+    jobject parcelFileDesc = newParcelFileDescriptor(env, fileDesc);
+    if (parcelFileDesc == NULL) {
+        // ParcelFileDescriptor constructor has thrown an exception
+        close(fd);
+        return NULL;
+    }
+
+    return parcelFileDesc;
+}
+
+// Creates an ashmem area, copies some data into it, and returns
+// a ParcelFileDescriptor for the ashmem area.
+static jobject create_ashmem_region_with_data(JNIEnv * env,
+                                              const void * data, int length)
+{
+    // Create ashmem area
+    int fd = ashmem_create_region(NULL, length);
+    if (fd < 0) {
+        LOGE("ashmem_create_region failed: %s", strerror(errno));
+        jniThrowIOException(env, errno);
+        return NULL;
+    }
+
+    if (length > 0) {
+        // mmap the ashmem area
+        void * ashmem_ptr =
+                mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (ashmem_ptr == MAP_FAILED) {
+            LOGE("mmap failed: %s", strerror(errno));
+            jniThrowIOException(env, errno);
+            close(fd);
+            return NULL;
+        }
+
+        // Copy data to ashmem area
+        memcpy(ashmem_ptr, data, length);
+
+        // munmap ashmem area
+        if (munmap(ashmem_ptr, length) < 0) {
+            LOGE("munmap failed: %s", strerror(errno));
+            jniThrowIOException(env, errno);
+            close(fd);
+            return NULL;
+        }
+    }
+
+    // Make ashmem area read-only
+    if (ashmem_set_prot_region(fd, PROT_READ) < 0) {
+        LOGE("ashmem_set_prot_region failed: %s", strerror(errno));
+        jniThrowIOException(env, errno);
+        close(fd);
+        return NULL;
+    }
+
+    // Wrap it in a ParcelFileDescriptor
+    return createParcelFileDescriptor(env, fd);
+}
+
+static jobject native_1x1_blob_ashmem(JNIEnv* env, jobject object)
+{
+    int err;
+    sqlite3 * handle = GET_HANDLE(env, object);
+    sqlite3_stmt * statement = GET_STATEMENT(env, object);
+    jobject value = NULL;
+
+    // Execute the statement
+    err = sqlite3_step(statement);
+
+    // Handle the result
+    if (err == SQLITE_ROW) {
+        // No errors, read the data and return it
+        const void * blob = sqlite3_column_blob(statement, 0);
+        if (blob != NULL) {
+            int len = sqlite3_column_bytes(statement, 0);
+            if (len >= 0) {
+                value = create_ashmem_region_with_data(env, blob, len);
+            }
+        }
+    } else {
+        throw_sqlite3_exception_errcode(env, err, sqlite3_errmsg(handle));
+    }
+
+    // Reset the statment so it's ready to use again
+    sqlite3_reset(statement);
+
+    return value;
+}
+
+static void native_executeSql(JNIEnv* env, jobject object, jstring sql)
+{
+    char const* sqlString = env->GetStringUTFChars(sql, NULL);
+    sqlite3 * handle = GET_HANDLE(env, object);
+    int err = sqlite3_exec(handle, sqlString, NULL, NULL, NULL);
+    if (err != SQLITE_OK) {
+        throw_sqlite3_exception(env, handle);
+    }
+    env->ReleaseStringUTFChars(sql, sqlString);
+}
 
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
-    {"native_execute", "()V", (void *)native_execute},
+    {"native_execute", "()I", (void *)native_execute},
+    {"native_executeInsert", "()J", (void *)native_executeInsert},
     {"native_1x1_long", "()J", (void *)native_1x1_long},
     {"native_1x1_string", "()Ljava/lang/String;", (void *)native_1x1_string},
+    {"native_1x1_blob_ashmem", "()Landroid/os/ParcelFileDescriptor;", (void *)native_1x1_blob_ashmem},
+    {"native_executeSql", "(Ljava/lang/String;)V", (void *)native_executeSql},
 };
 
 int register_android_database_SQLiteStatement(JNIEnv * env)

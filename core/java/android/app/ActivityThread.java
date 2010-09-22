@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.AssetManager;
@@ -62,6 +63,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
+import android.view.HardwareRenderer;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
@@ -74,6 +76,7 @@ import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
 
+import dalvik.system.VMDebug;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 
 import java.io.File;
@@ -197,8 +200,7 @@ public final class ActivityThread {
         Window window;
         Activity parent;
         String embeddedID;
-        Object lastNonConfigurationInstance;
-        HashMap<String,Object> lastNonConfigurationChildInstances;
+        Activity.NonConfigurationInstances lastNonConfigurationInstances;
         boolean paused;
         boolean stopped;
         boolean hideForNow;
@@ -333,9 +335,9 @@ public final class ActivityThread {
         }
     }
 
-    private static final class DumpServiceInfo {
+    private static final class DumpComponentInfo {
         FileDescriptor fd;
-        IBinder service;
+        IBinder token;
         String[] args;
         boolean dumped;
     }
@@ -359,12 +361,17 @@ public final class ActivityThread {
         ParcelFileDescriptor fd;
     }
 
+    private static final class DumpHeapData {
+        String path;
+        ParcelFileDescriptor fd;
+    }
+
     private final class ApplicationThread extends ApplicationThreadNative {
         private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%17s %8d";
         private static final String TWO_COUNT_COLUMNS = "%17s %8d %17s %8d";
         private static final String TWO_COUNT_COLUMNS_DB = "%20s %8d %20s %8d";
-        private static final String DB_INFO_FORMAT = "  %8d %8d %14d  %s";
+        private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
         // Formatting for checkin service - update version if row format changes
         private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 1;
@@ -585,9 +592,9 @@ public final class ActivityThread {
         }
 
         public void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args) {
-            DumpServiceInfo data = new DumpServiceInfo();
+            DumpComponentInfo data = new DumpComponentInfo();
             data.fd = fd;
-            data.service = servicetoken;
+            data.token = servicetoken;
             data.args = args;
             data.dumped = false;
             queueOrSendMessage(H.DUMP_SERVICE, data);
@@ -627,6 +634,13 @@ public final class ActivityThread {
             queueOrSendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0);
         }
 
+        public void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd) {
+            DumpHeapData dhd = new DumpHeapData();
+            dhd.path = path;
+            dhd.fd = fd;
+            queueOrSendMessage(H.DUMP_HEAP, dhd, managed ? 1 : 0);
+        }
+
         public void setSchedulingGroup(int group) {
             // Note: do this immediately, since going into the foreground
             // should happen regardless of what pending work we have to do
@@ -649,6 +663,25 @@ public final class ActivityThread {
 
         public void scheduleCrash(String msg) {
             queueOrSendMessage(H.SCHEDULE_CRASH, msg);
+        }
+
+        public void dumpActivity(FileDescriptor fd, IBinder activitytoken, String[] args) {
+            DumpComponentInfo data = new DumpComponentInfo();
+            data.fd = fd;
+            data.token = activitytoken;
+            data.args = args;
+            data.dumped = false;
+            queueOrSendMessage(H.DUMP_ACTIVITY, data);
+            synchronized (data) {
+                while (!data.dumped) {
+                    try {
+                        data.wait();
+                    } catch (InterruptedException e) {
+                        // no need to do anything here, we will keep waiting until
+                        // dumped is set
+                    }
+                }
+            }
         }
         
         @Override
@@ -675,8 +708,8 @@ public final class ActivityThread {
             long dalvikAllocated = dalvikMax - dalvikFree;
             long viewInstanceCount = ViewDebug.getViewInstanceCount();
             long viewRootInstanceCount = ViewDebug.getViewRootInstanceCount();
-            long appContextInstanceCount = ContextImpl.getInstanceCount();
-            long activityInstanceCount = Activity.getInstanceCount();
+            long appContextInstanceCount = VMDebug.countInstancesOfClass(ContextImpl.class);
+            long activityInstanceCount = VMDebug.countInstancesOfClass(Activity.class);
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
             int binderLocalObjectCount = Debug.getBinderLocalObjectCount();
@@ -764,7 +797,7 @@ public final class ActivityThread {
                 for (int i = 0; i < stats.dbStats.size(); i++) {
                     DbStats dbStats = stats.dbStats.get(i);
                     printRow(pw, DB_INFO_FORMAT, dbStats.pageSize, dbStats.dbSize,
-                            dbStats.lookaside, dbStats.dbName);
+                            dbStats.lookaside, dbStats.cache, dbStats.dbName);
                     pw.print(',');
                 }
 
@@ -815,11 +848,15 @@ public final class ActivityThread {
             int N = stats.dbStats.size();
             if (N > 0) {
                 pw.println(" DATABASES");
-                printRow(pw, "  %8s %8s %14s  %s", "pgsz", "dbsz", "Lookaside(b)", "Dbname");
+                printRow(pw, "  %8s %8s %14s %14s  %s", "pgsz", "dbsz", "Lookaside(b)", "cache",
+                        "Dbname");
                 for (int i = 0; i < N; i++) {
                     DbStats dbStats = stats.dbStats.get(i);
-                    printRow(pw, DB_INFO_FORMAT, dbStats.pageSize, dbStats.dbSize,
-                            dbStats.lookaside, dbStats.dbName);
+                    printRow(pw, DB_INFO_FORMAT,
+                            (dbStats.pageSize > 0) ? String.valueOf(dbStats.pageSize) : " ",
+                            (dbStats.dbSize > 0) ? String.valueOf(dbStats.dbSize) : " ",
+                            (dbStats.lookaside > 0) ? String.valueOf(dbStats.lookaside) : " ",
+                            dbStats.cache, dbStats.dbName);
                 }
             }
 
@@ -873,6 +910,8 @@ public final class ActivityThread {
         public static final int ENABLE_JIT              = 132;
         public static final int DISPATCH_PACKAGE_BROADCAST = 133;
         public static final int SCHEDULE_CRASH          = 134;
+        public static final int DUMP_HEAP               = 135;
+        public static final int DUMP_ACTIVITY           = 136;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -911,6 +950,8 @@ public final class ActivityThread {
                     case ENABLE_JIT: return "ENABLE_JIT";
                     case DISPATCH_PACKAGE_BROADCAST: return "DISPATCH_PACKAGE_BROADCAST";
                     case SCHEDULE_CRASH: return "SCHEDULE_CRASH";
+                    case DUMP_HEAP: return "DUMP_HEAP";
+                    case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                 }
             }
             return "(unknown)";
@@ -1005,7 +1046,7 @@ public final class ActivityThread {
                     scheduleGcIdler();
                     break;
                 case DUMP_SERVICE:
-                    handleDumpService((DumpServiceInfo)msg.obj);
+                    handleDumpService((DumpComponentInfo)msg.obj);
                     break;
                 case LOW_MEMORY:
                     handleLowMemory();
@@ -1036,13 +1077,38 @@ public final class ActivityThread {
                     break;
                 case SCHEDULE_CRASH:
                     throw new RemoteServiceException((String)msg.obj);
+                case DUMP_HEAP:
+                    handleDumpHeap(msg.arg1 != 0, (DumpHeapData)msg.obj);
+                    break;
+                case DUMP_ACTIVITY:
+                    handleDumpActivity((DumpComponentInfo)msg.obj);
+                    break;
             }
         }
 
         void maybeSnapshot() {
             if (mBoundApplication != null) {
-                SamplingProfilerIntegration.writeSnapshot(
-                        mBoundApplication.processName);
+                // convert the *private* ActivityThread.PackageInfo to *public* known
+                // android.content.pm.PackageInfo
+                String packageName = mBoundApplication.info.mPackageName;
+                android.content.pm.PackageInfo packageInfo = null;
+                try {
+                    Context context = getSystemContext();
+                    if(context == null) {
+                        Log.e(TAG, "cannot get a valid context");
+                        return;
+                    }
+                    PackageManager pm = context.getPackageManager();
+                    if(pm == null) {
+                        Log.e(TAG, "cannot get a valid PackageManager");
+                        return;
+                    }
+                    packageInfo = pm.getPackageInfo(
+                            packageName, PackageManager.GET_ACTIVITIES);
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, "cannot get package info for " + packageName, e);
+                }
+                SamplingProfilerIntegration.writeSnapshot(mBoundApplication.processName, packageInfo);
             }
         }
     }
@@ -1433,7 +1499,7 @@ public final class ActivityThread {
 
     public final Activity startActivityNow(Activity parent, String id,
         Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
-        Object lastNonConfigurationInstance) {
+        Activity.NonConfigurationInstances lastNonConfigurationInstances) {
         ActivityClientRecord r = new ActivityClientRecord();
             r.token = token;
             r.ident = 0;
@@ -1442,7 +1508,7 @@ public final class ActivityThread {
             r.parent = parent;
             r.embeddedID = id;
             r.activityInfo = activityInfo;
-            r.lastNonConfigurationInstance = lastNonConfigurationInstance;
+            r.lastNonConfigurationInstances = lastNonConfigurationInstances;
         if (localLOGV) {
             ComponentName compname = intent.getComponent();
             String name;
@@ -1564,14 +1630,12 @@ public final class ActivityThread {
                         + r.activityInfo.name + " with config " + config);
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
-                        r.embeddedID, r.lastNonConfigurationInstance,
-                        r.lastNonConfigurationChildInstances, config);
+                        r.embeddedID, r.lastNonConfigurationInstances, config);
 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;
                 }
-                r.lastNonConfigurationInstance = null;
-                r.lastNonConfigurationChildInstances = null;
+                r.lastNonConfigurationInstances = null;
                 activity.mStartedActivity = false;
                 int theme = r.activityInfo.getThemeResource();
                 if (theme != 0) {
@@ -1984,12 +2048,28 @@ public final class ActivityThread {
         }
     }
 
-    private void handleDumpService(DumpServiceInfo info) {
+    private void handleDumpService(DumpComponentInfo info) {
         try {
-            Service s = mServices.get(info.service);
+            Service s = mServices.get(info.token);
             if (s != null) {
                 PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
                 s.dump(info.fd, pw, info.args);
+                pw.close();
+            }
+        } finally {
+            synchronized (info) {
+                info.dumped = true;
+                info.notifyAll();
+            }
+        }
+    }
+
+    private void handleDumpActivity(DumpComponentInfo info) {
+        try {
+            ActivityClientRecord r = mActivities.get(info.token);
+            if (r != null && r.activity != null) {
+                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
+                r.activity.dump(info.fd, pw, info.args);
                 pw.close();
             }
         } finally {
@@ -2548,6 +2628,9 @@ public final class ActivityThread {
             if (finishing) {
                 r.activity.mFinished = true;
             }
+            if (getNonConfigInstance) {
+                r.activity.mChangingConfigurations = true;
+            }
             if (!r.paused) {
                 try {
                     r.activity.mCalled = false;
@@ -2588,8 +2671,8 @@ public final class ActivityThread {
             }
             if (getNonConfigInstance) {
                 try {
-                    r.lastNonConfigurationInstance
-                            = r.activity.onRetainNonConfigurationInstance();
+                    r.lastNonConfigurationInstances
+                            = r.activity.retainNonConfigurationInstances();
                 } catch (Exception e) {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
@@ -2598,22 +2681,10 @@ public final class ActivityThread {
                                 + ": " + e.toString(), e);
                     }
                 }
-                try {
-                    r.lastNonConfigurationChildInstances
-                            = r.activity.onRetainNonConfigurationChildInstances();
-                } catch (Exception e) {
-                    if (!mInstrumentation.onException(r.activity, e)) {
-                        throw new RuntimeException(
-                                "Unable to retain child activities "
-                                + safeToComponentShortString(r.intent)
-                                + ": " + e.toString(), e);
-                    }
-                }
-
             }
             try {
                 r.activity.mCalled = false;
-                r.activity.onDestroy();
+                mInstrumentation.callActivityOnDestroy(r.activity);
                 if (!r.activity.mCalled) {
                     throw new SuperNotCalledException(
                         "Activity " + safeToComponentShortString(r.intent) +
@@ -3022,6 +3093,25 @@ public final class ActivityThread {
             }
         } else {
             Debug.stopMethodTracing();
+        }
+    }
+
+    final void handleDumpHeap(boolean managed, DumpHeapData dhd) {
+        if (managed) {
+            try {
+                Debug.dumpHprofData(dhd.path, dhd.fd.getFileDescriptor());
+            } catch (IOException e) {
+                Slog.w(TAG, "Managed heap dump failed on path " + dhd.path
+                        + " -- can the process access this path?");
+            } finally {
+                try {
+                    dhd.fd.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failure closing profile fd", e);
+                }
+            }
+        } else {
+            Debug.dumpNativeHeap(dhd.fd.getFileDescriptor());
         }
     }
 
@@ -3583,6 +3673,7 @@ public final class ActivityThread {
     }
 
     public static final ActivityThread systemMain() {
+        HardwareRenderer.disable();
         ActivityThread thread = new ActivityThread();
         thread.attach(true);
         return thread;

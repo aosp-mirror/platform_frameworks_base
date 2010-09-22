@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.google.android.collect.Lists;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -27,10 +28,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.LongSparseArray;
 import android.util.SparseBooleanArray;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
@@ -41,6 +39,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.RemoteViews.RemoteView;
 
 import java.util.ArrayList;
 
@@ -64,30 +63,15 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ListView_entries
  * @attr ref android.R.styleable#ListView_divider
  * @attr ref android.R.styleable#ListView_dividerHeight
- * @attr ref android.R.styleable#ListView_choiceMode
  * @attr ref android.R.styleable#ListView_headerDividersEnabled
  * @attr ref android.R.styleable#ListView_footerDividersEnabled
  */
+@RemoteView
 public class ListView extends AbsListView {
     /**
      * Used to indicate a no preference for a position type.
      */
     static final int NO_POSITION = -1;
-
-    /**
-     * Normal list that does not indicate choices
-     */
-    public static final int CHOICE_MODE_NONE = 0;
-
-    /**
-     * The list allows up to one choice
-     */
-    public static final int CHOICE_MODE_SINGLE = 1;
-
-    /**
-     * The list allows multiple choices
-     */
-    public static final int CHOICE_MODE_MULTIPLE = 2;
 
     /**
      * When arrow scrolling, ListView will never scroll more than this factor
@@ -121,9 +105,6 @@ public class ListView extends AbsListView {
     Drawable mDivider;
     int mDividerHeight;
     
-    Drawable mOverscrollHeader;
-    Drawable mOverscrollFooter;
-
     private boolean mIsCacheColorOpaque;
     private boolean mDividerIsOpaque;
     private boolean mClipDivider;
@@ -135,11 +116,6 @@ public class ListView extends AbsListView {
 
     private boolean mItemsCanFocus = false;
 
-    private int mChoiceMode = CHOICE_MODE_NONE;
-
-    private SparseBooleanArray mCheckStates;
-    private LongSparseArray<Boolean> mCheckedIdStates;
-
     // used for temporary calculations.
     private final Rect mTempRect = new Rect();
     private Paint mDividerPaint;
@@ -150,7 +126,7 @@ public class ListView extends AbsListView {
 
     // Keeps focused children visible through resizes
     private FocusSelector mFocusSelector;
-    
+
     public ListView(Context context) {
         this(context, null);
     }
@@ -178,16 +154,6 @@ public class ListView extends AbsListView {
             setDivider(d);
         }
         
-        final Drawable osHeader = a.getDrawable(com.android.internal.R.styleable.ListView_overscrollHeader);
-        if (osHeader != null) {
-            setOverscrollHeader(osHeader);
-        }
-
-        final Drawable osFooter = a.getDrawable(com.android.internal.R.styleable.ListView_overscrollFooter);
-        if (osFooter != null) {
-            setOverscrollFooter(osFooter);
-        }
-
         // Use the height specified, zero being the default
         final int dividerHeight = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.ListView_dividerHeight, 0);
@@ -195,8 +161,6 @@ public class ListView extends AbsListView {
             setDividerHeight(dividerHeight);
         }
 
-        setChoiceMode(a.getInt(R.styleable.ListView_choiceMode, CHOICE_MODE_NONE));
-        
         mHeaderDividersEnabled = a.getBoolean(R.styleable.ListView_headerDividersEnabled, true);
         mFooterDividersEnabled = a.getBoolean(R.styleable.ListView_footerDividersEnabled, true);
 
@@ -417,6 +381,16 @@ public class ListView extends AbsListView {
     }
 
     /**
+     * Sets up this AbsListView to use a remote views adapter which connects to a RemoteViewsService
+     * through the specified intent.
+     * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
+     */
+    @android.view.RemotableViewMethod
+    public void setRemoteViewsAdapter(Intent intent) {
+        super.setRemoteViewsAdapter(intent);
+    }
+
+    /**
      * Sets the data behind this ListView.
      *
      * The adapter passed to this method may be wrapped by a {@link WrapperListAdapter},
@@ -431,7 +405,7 @@ public class ListView extends AbsListView {
      */
     @Override
     public void setAdapter(ListAdapter adapter) {
-        if (null != mAdapter) {
+        if (mAdapter != null && mDataSetObserver != null) {
             mAdapter.unregisterDataSetObserver(mDataSetObserver);
         }
 
@@ -446,6 +420,10 @@ public class ListView extends AbsListView {
 
         mOldSelectedPosition = INVALID_POSITION;
         mOldSelectedRowId = INVALID_ROW_ID;
+
+        // AbsListView#setAdapter will update choice mode states.
+        super.setAdapter(adapter);
+
         if (mAdapter != null) {
             mAreAllItemsSelectable = mAdapter.areAllItemsEnabled();
             mOldItemCount = mItemCount;
@@ -470,26 +448,11 @@ public class ListView extends AbsListView {
                 // Nothing selected
                 checkSelectionChanged();
             }
-
-            if (mChoiceMode != CHOICE_MODE_NONE &&
-                    mAdapter.hasStableIds() &&
-                    mCheckedIdStates == null) {
-                mCheckedIdStates = new LongSparseArray<Boolean>();
-            }
-
         } else {
             mAreAllItemsSelectable = true;
             checkFocus();
             // Nothing selected
             checkSelectionChanged();
-        }
-
-        if (mCheckStates != null) {
-            mCheckStates.clear();
-        }
-        
-        if (mCheckedIdStates != null) {
-            mCheckedIdStates.clear();
         }
 
         requestLayout();
@@ -879,6 +842,25 @@ public class ListView extends AbsListView {
         return topSelectionPixel;
     }
 
+    /**
+     * Smoothly scroll to the specified adapter position. The view will
+     * scroll such that the indicated position is displayed.
+     * @param position Scroll to this adapter position.
+     */
+    @android.view.RemotableViewMethod
+    public void smoothScrollToPosition(int position) {
+        super.smoothScrollToPosition(position);
+    }
+
+    /**
+     * Smoothly scroll to the specified adapter position offset. The view will
+     * scroll such that the indicated position is displayed.
+     * @param offset The amount to offset from the adapter position to scroll to.
+     */
+    @android.view.RemotableViewMethod
+    public void smoothScrollByOffset(int offset) {
+        super.smoothScrollByOffset(offset);
+    }
 
     /**
      * Fills the list based on positioning the new selection relative to the old
@@ -1803,6 +1785,9 @@ public class ListView extends AbsListView {
         if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
             if (child instanceof Checkable) {
                 ((Checkable) child).setChecked(mCheckStates.get(position));
+            } else if (getContext().getApplicationInfo().targetSdkVersion
+                    >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                child.setActivated(mCheckStates.get(position));
             }
         }
 
@@ -2958,52 +2943,14 @@ public class ListView extends AbsListView {
         }
         super.setCacheColorHint(color);
     }
-
-    void drawOverscrollHeader(Canvas canvas, Drawable drawable, Rect bounds) {
-        final int height = drawable.getMinimumHeight();
-
-        canvas.save();
-        canvas.clipRect(bounds);
-
-        final int span = bounds.bottom - bounds.top;
-        if (span < height) {
-            bounds.top = bounds.bottom - height;
-        }
-
-        drawable.setBounds(bounds);
-        drawable.draw(canvas);
-
-        canvas.restore();
-    }
-
-    void drawOverscrollFooter(Canvas canvas, Drawable drawable, Rect bounds) {
-        final int height = drawable.getMinimumHeight();
-
-        canvas.save();
-        canvas.clipRect(bounds);
-
-        final int span = bounds.bottom - bounds.top;
-        if (span < height) {
-            bounds.bottom = bounds.top + height;
-        }
-
-        drawable.setBounds(bounds);
-        drawable.draw(canvas);
-
-        canvas.restore();
-    }
-
+    
     @Override
     protected void dispatchDraw(Canvas canvas) {
         // Draw the dividers
         final int dividerHeight = mDividerHeight;
-        final Drawable overscrollHeader = mOverscrollHeader;
-        final Drawable overscrollFooter = mOverscrollFooter;
-        final boolean drawOverscrollHeader = overscrollHeader != null;
-        final boolean drawOverscrollFooter = overscrollFooter != null;
         final boolean drawDividers = dividerHeight > 0 && mDivider != null;
 
-        if (drawDividers || drawOverscrollHeader || drawOverscrollFooter) {
+        if (drawDividers) {
             // Only modify the top and bottom in the loop, we set the left and right here
             final Rect bounds = mTempRect;
             bounds.left = mPaddingLeft;
@@ -3022,7 +2969,7 @@ public class ListView extends AbsListView {
             // fill a rect where the dividers would be for non-selectable items
             // If the list is opaque and the background is also opaque, we don't
             // need to draw anything since the background will do it for us
-            final boolean fillForMissingDividers = drawDividers && isOpaque() && !super.isOpaque();
+            final boolean fillForMissingDividers = isOpaque() && !super.isOpaque();
 
             if (fillForMissingDividers && mDividerPaint == null && mIsCacheColorOpaque) {
                 mDividerPaint = new Paint();
@@ -3032,51 +2979,27 @@ public class ListView extends AbsListView {
 
             final int listBottom = mBottom - mTop - mListPadding.bottom + mScrollY;
             if (!mStackFromBottom) {
-                int bottom = 0;
+                int bottom;
                 
-                // Draw top divider or header for overscroll
                 final int scrollY = mScrollY;
-                if (count > 0 && scrollY < 0) {
-                    if (drawOverscrollHeader) {
-                        bounds.bottom = 0;
-                        bounds.top = scrollY;
-                        drawOverscrollHeader(canvas, overscrollHeader, bounds);
-                    } else if (drawDividers) {
-                        bounds.bottom = 0;
-                        bounds.top = -dividerHeight;
-                        drawDivider(canvas, bounds, -1);
-                    }
-                }
-
                 for (int i = 0; i < count; i++) {
                     if ((headerDividers || first + i >= headerCount) &&
                             (footerDividers || first + i < footerLimit)) {
                         View child = getChildAt(i);
                         bottom = child.getBottom();
                         // Don't draw dividers next to items that are not enabled
-                        if (drawDividers &&
-                                (bottom < listBottom && !(drawOverscrollFooter && i == count - 1))) {
-                            if ((areAllItemsSelectable ||
-                                    (adapter.isEnabled(first + i) && (i == count - 1 ||
-                                            adapter.isEnabled(first + i + 1))))) {
-                                bounds.top = bottom;
-                                bounds.bottom = bottom + dividerHeight;
-                                drawDivider(canvas, bounds, i);
-                            } else if (fillForMissingDividers) {
-                                bounds.top = bottom;
-                                bounds.bottom = bottom + dividerHeight;
-                                canvas.drawRect(bounds, paint);
-                            }
+                        if ((areAllItemsSelectable ||
+                                (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                        adapter.isEnabled(first + i + 1))))) {
+                            bounds.top = bottom;
+                            bounds.bottom = bottom + dividerHeight;
+                            drawDivider(canvas, bounds, i);
+                        } else if (fillForMissingDividers) {
+                            bounds.top = bottom;
+                            bounds.bottom = bottom + dividerHeight;
+                            canvas.drawRect(bounds, paint);
                         }
                     }
-                }
-
-                final int overFooterBottom = mBottom + mScrollY;
-                if (drawOverscrollFooter && first + count == itemCount &&
-                        overFooterBottom > bottom) {
-                    bounds.top = bottom;
-                    bounds.bottom = overFooterBottom;
-                    drawOverscrollFooter(canvas, overscrollFooter, bounds);
                 }
             } else {
                 int top;
@@ -3084,20 +3007,13 @@ public class ListView extends AbsListView {
 
                 final int scrollY = mScrollY;
 
-                if (count > 0 && drawOverscrollHeader) {
-                    bounds.top = scrollY;
-                    bounds.bottom = getChildAt(0).getTop();
-                    drawOverscrollHeader(canvas, overscrollHeader, bounds);
-                }
-
-                final int start = drawOverscrollHeader ? 1 : 0;
-                for (int i = start; i < count; i++) {
+                for (int i = 0; i < count; i++) {
                     if ((headerDividers || first + i >= headerCount) &&
                             (footerDividers || first + i < footerLimit)) {
                         View child = getChildAt(i);
                         top = child.getTop();
                         // Don't draw dividers next to items that are not enabled
-                        if (drawDividers && top > listTop) {
+                        if (top > listTop) {
                             if ((areAllItemsSelectable ||
                                     (adapter.isEnabled(first + i) && (i == count - 1 ||
                                             adapter.isEnabled(first + i + 1))))) {
@@ -3118,16 +3034,9 @@ public class ListView extends AbsListView {
                 }
                 
                 if (count > 0 && scrollY > 0) {
-                    if (drawOverscrollFooter) {
-                        final int absListBottom = mBottom;
-                        bounds.top = absListBottom;
-                        bounds.bottom = absListBottom + scrollY;
-                        drawOverscrollFooter(canvas, overscrollFooter, bounds);
-                    } else if (drawDividers) {
-                        bounds.top = listBottom;
-                        bounds.bottom = listBottom + dividerHeight;
-                        drawDivider(canvas, bounds, -1);
-                    }
+                    bounds.top = listBottom;
+                    bounds.bottom = listBottom + dividerHeight;
+                    drawDivider(canvas, bounds, -1);
                 }
             }
         }
@@ -3236,45 +3145,6 @@ public class ListView extends AbsListView {
         invalidate();
     }
     
-    /**
-     * Sets the drawable that will be drawn above all other list content.
-     * This area can become visible when the user overscrolls the list.
-     *
-     * @param header The drawable to use
-     */
-    public void setOverscrollHeader(Drawable header) {
-        mOverscrollHeader = header;
-        if (mScrollY < 0) {
-            invalidate();
-        }
-    }
-
-    /**
-     * @return The drawable that will be drawn above all other list content
-     */
-    public Drawable getOverscrollHeader() {
-        return mOverscrollHeader;
-    }
-
-    /**
-     * Sets the drawable that will be drawn below all other list content.
-     * This area can become visible when the user overscrolls the list,
-     * or when the list's content does not fully fill the container area.
-     *
-     * @param footer The drawable to use
-     */
-    public void setOverscrollFooter(Drawable footer) {
-        mOverscrollFooter = footer;
-        invalidate();
-    }
-
-    /**
-     * @return The drawable that will be drawn below all other list content
-     */
-    public Drawable getOverscrollFooter() {
-        return mOverscrollFooter;
-    }
-
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
@@ -3445,177 +3315,6 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * @see #setChoiceMode(int)
-     *
-     * @return The current choice mode
-     */
-    public int getChoiceMode() {
-        return mChoiceMode;
-    }
-
-    /**
-     * Defines the choice behavior for the List. By default, Lists do not have any choice behavior
-     * ({@link #CHOICE_MODE_NONE}). By setting the choiceMode to {@link #CHOICE_MODE_SINGLE}, the
-     * List allows up to one item to  be in a chosen state. By setting the choiceMode to
-     * {@link #CHOICE_MODE_MULTIPLE}, the list allows any number of items to be chosen.
-     *
-     * @param choiceMode One of {@link #CHOICE_MODE_NONE}, {@link #CHOICE_MODE_SINGLE}, or
-     * {@link #CHOICE_MODE_MULTIPLE}
-     */
-    public void setChoiceMode(int choiceMode) {
-        mChoiceMode = choiceMode;
-        if (mChoiceMode != CHOICE_MODE_NONE) {
-            if (mCheckStates == null) {
-                mCheckStates = new SparseBooleanArray();
-            }
-            if (mCheckedIdStates == null && mAdapter != null && mAdapter.hasStableIds()) {
-                mCheckedIdStates = new LongSparseArray<Boolean>();
-            }
-        }
-    }
-
-    @Override
-    public boolean performItemClick(View view, int position, long id) {
-        boolean handled = false;
-
-        if (mChoiceMode != CHOICE_MODE_NONE) {
-            handled = true;
-
-            if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
-                boolean newValue = !mCheckStates.get(position, false);
-                mCheckStates.put(position, newValue);
-                if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
-                    if (newValue) {
-                        mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
-                    } else {
-                        mCheckedIdStates.delete(mAdapter.getItemId(position));
-                    }
-                }
-            } else {
-                boolean newValue = !mCheckStates.get(position, false);
-                if (newValue) {
-                    mCheckStates.clear();
-                    mCheckStates.put(position, true);
-                    if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
-                        mCheckedIdStates.clear();
-                        mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
-                    }
-                } 
-            }
-
-            mDataChanged = true;
-            rememberSyncState();
-            requestLayout();
-        }
-
-        handled |= super.performItemClick(view, position, id);
-
-        return handled;
-    }
-
-    /**
-     * Sets the checked state of the specified position. The is only valid if
-     * the choice mode has been set to {@link #CHOICE_MODE_SINGLE} or
-     * {@link #CHOICE_MODE_MULTIPLE}.
-     * 
-     * @param position The item whose checked state is to be checked
-     * @param value The new checked state for the item
-     */
-    public void setItemChecked(int position, boolean value) {
-        if (mChoiceMode == CHOICE_MODE_NONE) {
-            return;
-        }
-
-        if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
-            mCheckStates.put(position, value);
-            if (mCheckedIdStates != null && mAdapter.hasStableIds()) {
-                if (value) {
-                    mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
-                } else {
-                    mCheckedIdStates.delete(mAdapter.getItemId(position));
-                }
-            }
-        } else {
-            boolean updateIds = mCheckedIdStates != null && mAdapter.hasStableIds();
-            // Clear all values if we're checking something, or unchecking the currently
-            // selected item
-            if (value || isItemChecked(position)) {
-                mCheckStates.clear();
-                if (updateIds) {
-                    mCheckedIdStates.clear();
-                }
-            }
-            // this may end up selecting the value we just cleared but this way
-            // we ensure length of mCheckStates is 1, a fact getCheckedItemPosition relies on
-            if (value) {
-                mCheckStates.put(position, true);
-                if (updateIds) {
-                    mCheckedIdStates.put(mAdapter.getItemId(position), Boolean.TRUE);
-                }
-            }
-        }
-
-        // Do not generate a data change while we are in the layout phase
-        if (!mInLayout && !mBlockLayoutRequests) {
-            mDataChanged = true;
-            rememberSyncState();
-            requestLayout();
-        }
-    }
-
-    /**
-     * Returns the checked state of the specified position. The result is only
-     * valid if the choice mode has been set to {@link #CHOICE_MODE_SINGLE}
-     * or {@link #CHOICE_MODE_MULTIPLE}.
-     *
-     * @param position The item whose checked state to return
-     * @return The item's checked state or <code>false</code> if choice mode
-     *         is invalid
-     *
-     * @see #setChoiceMode(int)
-     */
-    public boolean isItemChecked(int position) {
-        if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
-            return mCheckStates.get(position);
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns the currently checked item. The result is only valid if the choice
-     * mode has been set to {@link #CHOICE_MODE_SINGLE}.
-     *
-     * @return The position of the currently checked item or
-     *         {@link #INVALID_POSITION} if nothing is selected
-     *
-     * @see #setChoiceMode(int)
-     */
-    public int getCheckedItemPosition() {
-        if (mChoiceMode == CHOICE_MODE_SINGLE && mCheckStates != null && mCheckStates.size() == 1) {
-            return mCheckStates.keyAt(0);
-        }
-
-        return INVALID_POSITION;
-    }
-
-    /**
-     * Returns the set of checked items in the list. The result is only valid if
-     * the choice mode has not been set to {@link #CHOICE_MODE_NONE}.
-     *
-     * @return  A SparseBooleanArray which will return true for each call to
-     *          get(int position) where position is a position in the list,
-     *          or <code>null</code> if the choice mode is set to
-     *          {@link #CHOICE_MODE_NONE}.
-     */
-    public SparseBooleanArray getCheckedItemPositions() {
-        if (mChoiceMode != CHOICE_MODE_NONE) {
-            return mCheckStates;
-        }
-        return null;
-    }
-
-    /**
      * Returns the set of checked items ids. The result is only valid if the
      * choice mode has not been set to {@link #CHOICE_MODE_NONE}.
      * 
@@ -3624,6 +3323,7 @@ public class ListView extends AbsListView {
      *         
      * @deprecated Use {@link #getCheckedItemIds()} instead.
      */
+    @Deprecated
     public long[] getCheckItemIds() {
         // Use new behavior that correctly handles stable ID mapping.
         if (mAdapter != null && mAdapter.hasStableIds()) {
@@ -3657,116 +3357,5 @@ public class ListView extends AbsListView {
             }
         }
         return new long[0];
-    }
-    
-    /**
-     * Returns the set of checked items ids. The result is only valid if the
-     * choice mode has not been set to {@link #CHOICE_MODE_NONE} and the adapter
-     * has stable IDs. ({@link ListAdapter#hasStableIds()} == {@code true})
-     * 
-     * @return A new array which contains the id of each checked item in the
-     *         list.
-     */
-    public long[] getCheckedItemIds() {
-        if (mChoiceMode == CHOICE_MODE_NONE || mCheckedIdStates == null || mAdapter == null) {
-            return new long[0];
-        }
-        
-        final LongSparseArray<Boolean> idStates = mCheckedIdStates;
-        final int count = idStates.size();
-        final long[] ids = new long[count];
-        
-        for (int i = 0; i < count; i++) {
-            ids[i] = idStates.keyAt(i);
-        }
-        
-        return ids;
-    }
-
-    /**
-     * Clear any choices previously set
-     */
-    public void clearChoices() {
-        if (mCheckStates != null) {
-            mCheckStates.clear();
-        }
-        if (mCheckedIdStates != null) {
-            mCheckedIdStates.clear();
-        }
-    }
-
-    static class SavedState extends BaseSavedState {
-        SparseBooleanArray checkState;
-        LongSparseArray<Boolean> checkIdState;
-
-        /**
-         * Constructor called from {@link ListView#onSaveInstanceState()}
-         */
-        SavedState(Parcelable superState, SparseBooleanArray checkState,
-                LongSparseArray<Boolean> checkIdState) {
-            super(superState);
-            this.checkState = checkState;
-            this.checkIdState = checkIdState;
-        }
-
-        /**
-         * Constructor called from {@link #CREATOR}
-         */
-        private SavedState(Parcel in) {
-            super(in);
-            checkState = in.readSparseBooleanArray();
-            long[] idState = in.createLongArray();
-
-            if (idState.length > 0) {
-                checkIdState = new LongSparseArray<Boolean>();
-                checkIdState.setValues(idState, Boolean.TRUE);
-            }
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeSparseBooleanArray(checkState);
-            out.writeLongArray(checkIdState != null ? checkIdState.getKeys() : new long[0]);
-        }
-
-        @Override
-        public String toString() {
-            return "ListView.SavedState{"
-                    + Integer.toHexString(System.identityHashCode(this))
-                    + " checkState=" + checkState + "}";
-        }
-
-        public static final Parcelable.Creator<SavedState> CREATOR
-                = new Parcelable.Creator<SavedState>() {
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
-
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
-    }
-
-    @Override
-    public Parcelable onSaveInstanceState() {
-        Parcelable superState = super.onSaveInstanceState();
-        return new SavedState(superState, mCheckStates, mCheckedIdStates);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
-
-        super.onRestoreInstanceState(ss.getSuperState());
-
-        if (ss.checkState != null) {
-           mCheckStates = ss.checkState;
-        }
-
-        if (ss.checkIdState != null) {
-            mCheckedIdStates = ss.checkIdState;
-        }
     }
 }

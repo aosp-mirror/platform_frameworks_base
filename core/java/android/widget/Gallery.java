@@ -1210,7 +1210,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
         // We unfocus the old child down here so the above hasFocus check
         // returns true
-        if (oldSelectedChild != null) {
+        if (oldSelectedChild != null && oldSelectedChild != child) {
 
             // Make sure its drawable state doesn't contain 'selected'
             oldSelectedChild.setSelected(false);
@@ -1266,6 +1266,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
          */
         if (gainFocus && mSelectedChild != null) {
             mSelectedChild.requestFocus(direction);
+            mSelectedChild.setSelected(true);
         }
 
     }

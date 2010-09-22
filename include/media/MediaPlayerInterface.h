@@ -33,6 +33,7 @@ namespace android {
 
 class Parcel;
 class ISurface;
+class Surface;
 
 template<typename T> class SortedVector;
 
@@ -104,7 +105,8 @@ public:
             const KeyedVector<String8, String8> *headers = NULL) = 0;
 
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) = 0;
-    virtual status_t    setVideoSurface(const sp<ISurface>& surface) = 0;
+    virtual status_t    setVideoISurface(const sp<ISurface>& surface) = 0;
+    virtual status_t    setVideoSurface(const sp<Surface>& surface) = 0;
     virtual status_t    prepare() = 0;
     virtual status_t    prepareAsync() = 0;
     virtual status_t    start() = 0;

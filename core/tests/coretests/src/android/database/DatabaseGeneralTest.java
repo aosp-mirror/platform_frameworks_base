@@ -21,18 +21,21 @@ import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_DEFA
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
+import android.database.sqlite.SQLiteException;
 import android.os.Handler;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+import android.util.Pair;
 
 import junit.framework.Assert;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -382,54 +385,28 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
 
     @MediumTest
     public void testSchemaChange2() throws Exception {
-        SQLiteDatabase db1 = mDatabase;
-        SQLiteDatabase db2 = SQLiteDatabase.openOrCreateDatabase(mDatabaseFile, null);
-        Cursor cursor;
-
-        db1.execSQL("CREATE TABLE db1 (_id INTEGER PRIMARY KEY, data TEXT);");
-
-        cursor = db1.query("db1", null, null, null, null, null, null);
-        assertNotNull("Cursor is null", cursor);
+        mDatabase.execSQL("CREATE TABLE db1 (_id INTEGER PRIMARY KEY, data TEXT);");
+        Cursor cursor = mDatabase.query("db1", null, null, null, null, null, null);
+        assertNotNull(cursor);
         assertEquals(0, cursor.getCount());
-        cursor.deactivate();
-        // this cause exception because we're still using sqlite_prepate16 and not
-        // sqlite_prepare16_v2. The v2 variant added the ability to check the
-        // schema version and handle the case when the schema has changed
-        // Marco Nelissen claim it was 2x slower to compile SQL statements so
-        // I reverted back to the v1 variant.
-        /* db2.execSQL("CREATE TABLE db2 (_id INTEGER PRIMARY KEY, data TEXT);");
-
-        cursor = db1.query("db1", null, null, null, null, null, null);
-        assertNotNull("Cursor is null", cursor);
-        assertEquals(0, cursor.count());
-        cursor.deactivate();
-        */
+        cursor.close();
     }
 
     @MediumTest
     public void testSchemaChange3() throws Exception {
-        SQLiteDatabase db1 = mDatabase;
-        SQLiteDatabase db2 = SQLiteDatabase.openOrCreateDatabase(mDatabaseFile, null);
-        Cursor cursor;
-
-
-        db1.execSQL("CREATE TABLE db1 (_id INTEGER PRIMARY KEY, data TEXT);");
-        db1.execSQL("INSERT INTO db1 (data) VALUES ('test');");
-
-        cursor = db1.query("db1", null, null, null, null, null, null);
-        // this cause exception because we're still using sqlite_prepate16 and not
-        // sqlite_prepare16_v2. The v2 variant added the ability to check the
-        // schema version and handle the case when the schema has changed
-        // Marco Nelissen claim it was 2x slower to compile SQL statements so
-        // I reverted back to the v1 variant.
-        /* db2.execSQL("CREATE TABLE db2 (_id INTEGER PRIMARY KEY, data TEXT);");
-
-        assertNotNull("Cursor is null", cursor);
-        assertEquals(1, cursor.count());
-        assertTrue(cursor.first());
-        assertEquals("test", cursor.getString(cursor.getColumnIndexOrThrow("data")));
-        cursor.deactivate();
-        */
+        mDatabase.execSQL("CREATE TABLE db1 (_id INTEGER PRIMARY KEY, data TEXT);");
+        mDatabase.execSQL("INSERT INTO db1 (data) VALUES ('test');");
+        mDatabase.execSQL("ALTER TABLE db1 ADD COLUMN blah int;");
+        Cursor c = null;
+        try {
+            c = mDatabase.rawQuery("select blah from db1", null);
+        } catch (SQLiteException e) {
+            fail("unexpected exception: " + e.getMessage());
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
     }
 
     private class ChangeObserver extends ContentObserver {
@@ -464,45 +441,6 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         }
 
         boolean mCursor;
-    }
-
-    @MediumTest
-    public void testNotificationTest1() throws Exception {
-        /*
-        Cursor c = mContentResolver.query(Notes.CONTENT_URI,
-                new String[] {Notes._ID, Notes.NOTE},
-                null, null);
-        c.registerContentObserver(new MyContentObserver(true));
-        int count = c.count();
-
-        MyContentObserver observer = new MyContentObserver(false);
-        mContentResolver.registerContentObserver(Notes.CONTENT_URI, true, observer);
-
-        Uri uri;
-
-        HashMap<String, String> values = new HashMap<String, String>();
-        values.put(Notes.NOTE, "test note1");
-        uri = mContentResolver.insert(Notes.CONTENT_URI, values);
-        assertEquals(1, mCursorNotificationCount);
-        assertEquals(1, mNotificationCount);
-
-        c.requery();
-        assertEquals(count + 1, c.count());
-        c.first();
-        assertEquals("test note1", c.getString(c.getColumnIndex(Notes.NOTE)));
-        c.updateString(c.getColumnIndex(Notes.NOTE), "test note2");
-        c.commitUpdates();
-
-        assertEquals(2, mCursorNotificationCount);
-        assertEquals(2, mNotificationCount);
-
-        mContentResolver.delete(uri, null);
-
-        assertEquals(3, mCursorNotificationCount);
-        assertEquals(3, mNotificationCount);
-
-        mContentResolver.unregisterContentObserver(observer);
-        */
     }
 
     @MediumTest
@@ -989,21 +927,6 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
     }
 
     @MediumTest
-    public void testDbCloseReleasingAllCachedSql() {
-        mDatabase.execSQL("CREATE TABLE test (_id INTEGER PRIMARY KEY, text1 TEXT, text2 TEXT, " +
-                "num1 INTEGER, num2 INTEGER, image BLOB);");
-        final String statement = "DELETE FROM test WHERE _id=?;";
-        SQLiteStatement statementDoNotClose = mDatabase.compileStatement(statement);
-        assertTrue(statementDoNotClose.getUniqueId() > 0);
-        int nStatement = statementDoNotClose.getUniqueId();
-        assertTrue(statementDoNotClose.getUniqueId() == nStatement);
-        /* do not close statementDoNotClose object. 
-         * That should leave it in SQLiteDatabase.mPrograms.
-         * mDatabase.close() in tearDown() should release it.
-         */
-    }
-
-    @MediumTest
     public void testSemicolonsInStatements() throws Exception {
         mDatabase.execSQL("CREATE TABLE pragma_test (" +
                 "i INTEGER DEFAULT 1234, " +
@@ -1021,6 +944,34 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         } catch (Throwable t) {
             fail("unexpected, of course");
         }
+    }
+
+    @MediumTest
+    public void testUnionsWithBindArgs() {
+        /* make sure unions with bindargs work http://b/issue?id=1061291 */
+        mDatabase.execSQL("CREATE TABLE A (i int);");
+        mDatabase.execSQL("create table B (k int);");
+        mDatabase.execSQL("create table C (n int);");
+        mDatabase.execSQL("insert into A values(1);");
+        mDatabase.execSQL("insert into A values(2);");
+        mDatabase.execSQL("insert into A values(3);");
+        mDatabase.execSQL("insert into B values(201);");
+        mDatabase.execSQL("insert into B values(202);");
+        mDatabase.execSQL("insert into B values(203);");
+        mDatabase.execSQL("insert into C values(901);");
+        mDatabase.execSQL("insert into C values(902);");
+        String s = "select i from A where i > 2 " +
+                "UNION select k from B where k > 201 " +
+                "UNION select n from C where n !=900;";
+        Cursor c = mDatabase.rawQuery(s, null);
+        int n = c.getCount();
+        c.close();
+        String s1 = "select i from A where i > ? " +
+                "UNION select k from B where k > ? " +
+                "UNION select n from C where n != ?;";
+        Cursor c1 = mDatabase.rawQuery(s1, new String[]{"2", "201", "900"});
+        assertEquals(n, c1.getCount());
+        c1.close();
     }
 
     /**
@@ -1108,5 +1059,113 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
                 }
             }
         }
-    }    
+    }
+
+    @SmallTest
+    public void testSetMaxCahesize() {
+        mDatabase.execSQL("CREATE TABLE test (i int, j int);");
+        mDatabase.execSQL("insert into test values(1,1);");
+        // set cache size
+        int N = SQLiteDatabase.MAX_SQL_CACHE_SIZE;
+        mDatabase.setMaxSqlCacheSize(N);
+
+        // try reduce cachesize
+        try {
+            mDatabase.setMaxSqlCacheSize(1);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("cannot set cacheSize to a value less than"));
+        }
+    }
+
+    @LargeTest
+    public void testDefaultDatabaseErrorHandler() {
+        DefaultDatabaseErrorHandler errorHandler = new DefaultDatabaseErrorHandler();
+
+        // close the database. and call corruption handler.
+        // it should delete the database file.
+        File dbfile = new File(mDatabase.getPath());
+        mDatabase.close();
+        assertFalse(mDatabase.isOpen());
+        assertTrue(dbfile.exists());
+        try {
+            errorHandler.onCorruption(mDatabase);
+            assertFalse(dbfile.exists());
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+
+        // create an in-memory database. and corruption handler shouldn't try to delete it
+        SQLiteDatabase memoryDb = SQLiteDatabase.openOrCreateDatabase(":memory:", null);
+        assertNotNull(memoryDb);
+        memoryDb.close();
+        assertFalse(memoryDb.isOpen());
+        try {
+            errorHandler.onCorruption(memoryDb);
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+
+        // create a database, keep it open, call corruption handler. database file should be deleted
+        SQLiteDatabase dbObj = SQLiteDatabase.openOrCreateDatabase(mDatabase.getPath(), null);
+        assertTrue(dbfile.exists());
+        assertNotNull(dbObj);
+        assertTrue(dbObj.isOpen());
+        try {
+            errorHandler.onCorruption(dbObj);
+            assertFalse(dbfile.exists());
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+
+        // create a database, attach 2 more databases to it
+        //    attached database # 1: ":memory:"
+        //    attached database # 2: mDatabase.getPath() + "1";
+        // call corruption handler. database files including the one for attached database # 2
+        // should be deleted
+        String attachedDb1File = mDatabase.getPath() + "1";
+        dbObj = SQLiteDatabase.openOrCreateDatabase(mDatabase.getPath(), null);
+        dbObj.execSQL("ATTACH DATABASE ':memory:' as memoryDb");
+        dbObj.execSQL("ATTACH DATABASE '" +  attachedDb1File + "' as attachedDb1");
+        assertTrue(dbfile.exists());
+        assertTrue(new File(attachedDb1File).exists());
+        assertNotNull(dbObj);
+        assertTrue(dbObj.isOpen());
+        ArrayList<Pair<String, String>> attachedDbs = dbObj.getAttachedDbs();
+        try {
+            errorHandler.onCorruption(dbObj);
+            assertFalse(dbfile.exists());
+            assertFalse(new File(attachedDb1File).exists());
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+
+        // same as above, except this is a bit of stress testing. attach 5 database files
+        // and make sure they are all removed.
+        int N = 5;
+        ArrayList<String> attachedDbFiles = new ArrayList<String>(N);
+        for (int i = 0; i < N; i++) {
+            attachedDbFiles.add(mDatabase.getPath() + i);
+        }
+        dbObj = SQLiteDatabase.openOrCreateDatabase(mDatabase.getPath(), null);
+        dbObj.execSQL("ATTACH DATABASE ':memory:' as memoryDb");
+        for (int i = 0; i < N; i++) {
+            dbObj.execSQL("ATTACH DATABASE '" +  attachedDbFiles.get(i) + "' as attachedDb" + i);
+        }
+        assertTrue(dbfile.exists());
+        for (int i = 0; i < N; i++) {
+            assertTrue(new File(attachedDbFiles.get(i)).exists());
+        }
+        assertNotNull(dbObj);
+        assertTrue(dbObj.isOpen());
+        attachedDbs = dbObj.getAttachedDbs();
+        try {
+            errorHandler.onCorruption(dbObj);
+            assertFalse(dbfile.exists());
+            for (int i = 0; i < N; i++) {
+                assertFalse(new File(attachedDbFiles.get(i)).exists());
+            }
+        } catch (Exception e) {
+            fail("unexpected");
+        }
+    }
 }
