@@ -16,7 +16,9 @@
 
 package android.renderscript;
 
+
 import java.lang.reflect.Field;
+import android.util.Log;
 
 /**
  * @hide
@@ -31,7 +33,6 @@ public class Type extends BaseObj {
     int mElementCount;
     Element mElement;
 
-    private int mNativeCache;
     Class mJavaClass;
 
     public Element getElement() {
@@ -95,61 +96,37 @@ public class Type extends BaseObj {
 
 
     Type(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
-        mNativeCache = 0;
+        super(id, rs);
     }
 
     protected void finalize() throws Throwable {
-        if(mNativeCache != 0) {
-            mRS.nTypeFinalDestroy(this);
-            mNativeCache = 0;
-        }
         super.finalize();
     }
 
-    public static Type createFromClass(RenderScript rs, Class c, int size) {
-        Element e = Element.createFromClass(rs, c);
-        Builder b = new Builder(rs, e);
-        b.add(Dimension.X, size);
-        Type t = b.create();
-        e.destroy();
+    @Override
+    void updateFromNative() {
+        // We have 6 integer to obtain mDimX; mDimY; mDimZ;
+        // mDimLOD; mDimFaces; mElement;
+        int[] dataBuffer = new int[6];
+        mRS.nTypeGetNativeData(mID, dataBuffer);
 
-        // native fields
-        {
-            Field[] fields = c.getFields();
-            int[] arTypes = new int[fields.length];
-            int[] arBits = new int[fields.length];
+        mDimX = dataBuffer[0];
+        mDimY = dataBuffer[1];
+        mDimZ = dataBuffer[2];
+        mDimLOD = dataBuffer[3] == 1 ? true : false;
+        mDimFaces = dataBuffer[4] == 1 ? true : false;
 
-            for(int ct=0; ct < fields.length; ct++) {
-                Field f = fields[ct];
-                Class fc = f.getType();
-                if(fc == int.class) {
-                    arTypes[ct] = Element.DataType.SIGNED_32.mID;
-                    arBits[ct] = 32;
-                } else if(fc == short.class) {
-                    arTypes[ct] = Element.DataType.SIGNED_16.mID;
-                    arBits[ct] = 16;
-                } else if(fc == byte.class) {
-                    arTypes[ct] = Element.DataType.SIGNED_8.mID;
-                    arBits[ct] = 8;
-                } else if(fc == float.class) {
-                    arTypes[ct] = Element.DataType.FLOAT_32.mID;
-                    arBits[ct] = 32;
-                } else {
-                    throw new IllegalArgumentException("Unkown field type");
-                }
-            }
-            rs.nTypeSetupFields(t, arTypes, arBits, fields);
+        int elementID = dataBuffer[5];
+        if(elementID != 0) {
+            mElement = new Element(elementID, mRS);
+            mElement.updateFromNative();
         }
-        t.mJavaClass = c;
-        return t;
+        calcElementCount();
     }
 
     public static Type createFromClass(RenderScript rs, Class c, int size, String scriptName) {
-        Type t = createFromClass(rs, c, size);
-        t.setName(scriptName);
-        return t;
+        android.util.Log.e("RenderScript", "Calling depricated createFromClass");
+        return null;
     }
 
 

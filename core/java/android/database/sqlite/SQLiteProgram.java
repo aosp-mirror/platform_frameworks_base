@@ -16,11 +16,15 @@
 
 package android.database.sqlite;
 
+import android.database.DatabaseUtils;
+import android.database.Cursor;
 import android.util.Log;
+
+import java.util.HashMap;
 
 /**
  * A base class for compiled SQLite programs.
- *
+ *<p>
  * SQLiteProgram is not internally synchronized so code using a SQLiteProgram from multiple
  * threads should perform its own synchronization when using the SQLiteProgram.
  */
@@ -43,12 +47,12 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @deprecated do not use this
      */
     @Deprecated
-    protected int nHandle = 0;
+    protected int nHandle;
 
     /**
      * the SQLiteCompiledSql object for the given sql statement.
      */
-    private SQLiteCompiledSql mCompiledSql;
+    /* package */ SQLiteCompiledSql mCompiledSql;
 
     /**
      * SQLiteCompiledSql statement id is populated with the corresponding object from the above
@@ -56,41 +60,97 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @deprecated do not use this
      */
     @Deprecated
-    protected int nStatement = 0;
+    protected int nStatement;
+
+    /**
+     * In the case of {@link SQLiteStatement}, this member stores the bindargs passed
+     * to the following methods, instead of actually doing the binding.
+     * <ul>
+     *   <li>{@link #bindBlob(int, byte[])}</li>
+     *   <li>{@link #bindDouble(int, double)}</li>
+     *   <li>{@link #bindLong(int, long)}</li>
+     *   <li>{@link #bindNull(int)}</li>
+     *   <li>{@link #bindString(int, String)}</li>
+     * </ul>
+     * <p>
+     * Each entry in the array is a Pair of
+     * <ol>
+     *   <li>bind arg position number</li>
+     *   <li>the value to be bound to the bindarg</li>
+     * </ol>
+     * <p>
+     * It is lazily initialized in the above bind methods
+     * and it is cleared in {@link #clearBindings()} method.
+     * <p>
+     * It is protected (in multi-threaded environment) by {@link SQLiteProgram}.this
+     */
+    /* package */ HashMap<Integer, Object> mBindArgs = null;
+    /* package */ final int mStatementType;
+    /* package */ static final int STATEMENT_CACHEABLE = 16;
+    /* package */ static final int STATEMENT_DONT_PREPARE = 32;
+    /* package */ static final int STATEMENT_USE_POOLED_CONN = 64;
+    /* package */ static final int STATEMENT_TYPE_MASK = 0x0f;
 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
-        mDatabase = db;
+        this(db, sql, null, true);
+    }
+
+    /* package */ SQLiteProgram(SQLiteDatabase db, String sql, Object[] bindArgs,
+            boolean compileFlag) {
         mSql = sql.trim();
+        int n = DatabaseUtils.getSqlStatementType(mSql);
+        switch (n) {
+            case DatabaseUtils.STATEMENT_UPDATE:
+                mStatementType = n | STATEMENT_CACHEABLE;
+                break;
+            case DatabaseUtils.STATEMENT_SELECT:
+                mStatementType = n | STATEMENT_CACHEABLE | STATEMENT_USE_POOLED_CONN;
+                break;
+            case DatabaseUtils.STATEMENT_ATTACH:
+            case DatabaseUtils.STATEMENT_BEGIN:
+            case DatabaseUtils.STATEMENT_COMMIT:
+            case DatabaseUtils.STATEMENT_ABORT:
+            case DatabaseUtils.STATEMENT_DDL:
+            case DatabaseUtils.STATEMENT_UNPREPARED:
+                mStatementType = n | STATEMENT_DONT_PREPARE;
+                break;
+            default:
+                mStatementType = n;
+        }
         db.acquireReference();
         db.addSQLiteClosable(this);
-        this.nHandle = db.mNativeHandle;
+        mDatabase = db;
+        nHandle = db.mNativeHandle;
+        if (bindArgs != null) {
+            int size = bindArgs.length;
+            for (int i = 0; i < size; i++) {
+                this.addToBindArgs(i + 1, bindArgs[i]);
+            }
+        }
+        if (compileFlag) {
+            compileAndbindAllArgs();
+        }
+    }
 
+    private void compileSql() {
         // only cache CRUD statements
-        String prefixSql = mSql.substring(0, 6);
-        if (!prefixSql.equalsIgnoreCase("INSERT") && !prefixSql.equalsIgnoreCase("UPDATE") &&
-                !prefixSql.equalsIgnoreCase("REPLAC") &&
-                !prefixSql.equalsIgnoreCase("DELETE") && !prefixSql.equalsIgnoreCase("SELECT")) {
-            mCompiledSql = new SQLiteCompiledSql(db, sql);
+        if ((mStatementType & STATEMENT_CACHEABLE) == 0) {
+            mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
             nStatement = mCompiledSql.nStatement;
             // since it is not in the cache, no need to acquire() it.
             return;
         }
 
-        // it is not pragma
-        mCompiledSql = db.getCompiledStatementForSql(sql);
+        mCompiledSql = mDatabase.getCompiledStatementForSql(mSql);
         if (mCompiledSql == null) {
             // create a new compiled-sql obj
-            mCompiledSql = new SQLiteCompiledSql(db, sql);
+            mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
 
             // add it to the cache of compiled-sqls
             // but before adding it and thus making it available for anyone else to use it,
             // make sure it is acquired by me.
             mCompiledSql.acquire();
-            db.addToCompiledQueries(sql, mCompiledSql);
-            if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-                Log.v(TAG, "Created DbObj (id#" + mCompiledSql.nStatement +
-                        ") for sql: " + sql);
-            }
+            mDatabase.addToCompiledQueries(mSql, mCompiledSql);
         } else {
             // it is already in compiled-sql cache.
             // try to acquire the object.
@@ -100,13 +160,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
                 // we can't have two different SQLiteProgam objects can't share the same
                 // CompiledSql object. create a new one.
                 // finalize it when I am done with it in "this" object.
-                mCompiledSql = new SQLiteCompiledSql(db, sql);
-                if (SQLiteDebug.DEBUG_ACTIVE_CURSOR_FINALIZATION) {
-                    Log.v(TAG, "** possible bug ** Created NEW DbObj (id#" +
-                            mCompiledSql.nStatement +
-                            ") because the previously created DbObj (id#" + last +
-                            ") was not released for sql:" + sql);
-                }
+                mCompiledSql = new SQLiteCompiledSql(mDatabase, mSql);
                 // since it is not in the cache, no need to acquire() it.
             }
         }
@@ -115,42 +169,59 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     @Override
     protected void onAllReferencesReleased() {
-        releaseCompiledSqlIfNotInCache();
-        mDatabase.releaseReference();
+        release();
         mDatabase.removeSQLiteClosable(this);
+        mDatabase.releaseReference();
     }
 
     @Override
     protected void onAllReferencesReleasedFromContainer() {
-        releaseCompiledSqlIfNotInCache();
+        release();
         mDatabase.releaseReference();
     }
 
-    private void releaseCompiledSqlIfNotInCache() {
+    /* package */ synchronized void release() {
         if (mCompiledSql == null) {
             return;
         }
-        synchronized(mDatabase.mCompiledQueries) {
-            if (!mDatabase.mCompiledQueries.containsValue(mCompiledSql)) {
-                // it is NOT in compiled-sql cache. i.e., responsibility of
-                // releasing this statement is on me.
-                mCompiledSql.releaseSqlStatement();
-                mCompiledSql = null;
-                nStatement = 0;
-            } else {
-                // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
-                mCompiledSql.release();
+        if ((mStatementType & STATEMENT_CACHEABLE) == 0) {
+            // this SQL statement was never in cache
+            mCompiledSql.releaseSqlStatement();
+        } else {
+            synchronized(mDatabase.mCompiledQueries) {
+                if (!mDatabase.mCompiledQueries.containsValue(mCompiledSql)) {
+                    // it is NOT in compiled-sql cache. i.e., responsibility of
+                    // releasing this statement is on me.
+                    mCompiledSql.releaseSqlStatement();
+                } else {
+                    // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
+                    mCompiledSql.release();
+                }
             }
-        } 
+        }
+        mCompiledSql = null;
+        nStatement = 0;
     }
 
     /**
      * Returns a unique identifier for this program.
      *
      * @return a unique identifier for this program
+     * @deprecated do not use this method. it is not guaranteed to be the same across executions of
+     * the SQL statement contained in this object.
      */
+    @Deprecated
     public final int getUniqueId() {
-        return nStatement;
+      return -1;
+    }
+
+    /**
+     * used only for testing purposes
+     */
+    /* package */ int getSqlStatementId() {
+      synchronized(this) {
+        return (mCompiledSql == null) ? 0 : nStatement;
+      }
     }
 
     /* package */ String getSqlString() {
@@ -169,6 +240,39 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         // TODO is there a need for this?
     }
 
+    private void bind(int type, int index, Object value) {
+        synchronized (this) {
+            mDatabase.verifyDbIsOpen();
+            addToBindArgs(index, (type == Cursor.FIELD_TYPE_NULL) ? null : value);
+            if (nStatement > 0) {
+                // bind only if the SQL statement is compiled
+                acquireReference();
+                try {
+                    switch (type) {
+                        case Cursor.FIELD_TYPE_NULL:
+                            native_bind_null(index);
+                            break;
+                        case Cursor.FIELD_TYPE_BLOB:
+                            native_bind_blob(index, (byte[]) value);
+                            break;
+                        case Cursor.FIELD_TYPE_FLOAT:
+                            native_bind_double(index, (Double) value);
+                            break;
+                        case Cursor.FIELD_TYPE_INTEGER:
+                            native_bind_long(index, (Long) value);
+                            break;
+                        case Cursor.FIELD_TYPE_STRING:
+                        default:
+                            native_bind_string(index, (String) value);
+                            break;
+                    }
+                } finally {
+                    releaseReference();
+                }
+            }
+        }
+    }
+
     /**
      * Bind a NULL value to this statement. The value remains bound until
      * {@link #clearBindings} is called.
@@ -176,34 +280,18 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param index The 1-based index to the parameter to bind null to
      */
     public void bindNull(int index) {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
-        acquireReference();
-        try {
-            native_bind_null(index);
-        } finally {
-            releaseReference();
-        }
+        bind(Cursor.FIELD_TYPE_NULL, index, null);
     }
 
     /**
      * Bind a long value to this statement. The value remains bound until
      * {@link #clearBindings} is called.
-     *
+     *addToBindArgs
      * @param index The 1-based index to the parameter to bind
      * @param value The value to bind
      */
     public void bindLong(int index, long value) {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
-        acquireReference();
-        try {
-            native_bind_long(index, value);
-        } finally {
-            releaseReference();
-        }
+        bind(Cursor.FIELD_TYPE_INTEGER, index, value);
     }
 
     /**
@@ -214,15 +302,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * @param value The value to bind
      */
     public void bindDouble(int index, double value) {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
-        acquireReference();
-        try {
-            native_bind_double(index, value);
-        } finally {
-            releaseReference();
-        }
+        bind(Cursor.FIELD_TYPE_FLOAT, index, value);
     }
 
     /**
@@ -236,15 +316,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
-        acquireReference();
-        try {
-            native_bind_string(index, value);
-        } finally {
-            releaseReference();
-        }
+        bind(Cursor.FIELD_TYPE_STRING, index, value);
     }
 
     /**
@@ -258,29 +330,25 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (value == null) {
             throw new IllegalArgumentException("the bind value at index " + index + " is null");
         }
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
-        acquireReference();
-        try {
-            native_bind_blob(index, value);
-        } finally {
-            releaseReference();
-        }
+        bind(Cursor.FIELD_TYPE_BLOB, index, value);
     }
 
     /**
      * Clears all existing bindings. Unset bindings are treated as NULL.
      */
     public void clearBindings() {
-        if (!mDatabase.isOpen()) {
-            throw new IllegalStateException("database " + mDatabase.getPath() + " already closed");
-        }
-        acquireReference();
-        try {
-            native_clear_bindings();
-        } finally {
-            releaseReference();
+        synchronized (this) {
+            mBindArgs = null;
+            if (this.nStatement == 0) {
+                return;
+            }
+            mDatabase.verifyDbIsOpen();
+            acquireReference();
+            try {
+                native_clear_bindings();
+            } finally {
+                releaseReference();
+            }
         }
     }
 
@@ -288,15 +356,83 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * Release this program's resources, making it invalid.
      */
     public void close() {
-        if (!mDatabase.isOpen()) {
+        synchronized (this) {
+            mBindArgs = null;
+            if (nHandle == 0 || !mDatabase.isOpen()) {
+                return;
+            }
+            releaseReference();
+        }
+    }
+
+    private synchronized void addToBindArgs(int index, Object value) {
+        if (mBindArgs == null) {
+            mBindArgs = new HashMap<Integer, Object>();
+        }
+        mBindArgs.put(index, value);
+    }
+
+    /* package */ synchronized void compileAndbindAllArgs() {
+        if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
+            // no need to prepare this SQL statement
+            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
+                if (mBindArgs != null) {
+                    throw new IllegalArgumentException("no need to pass bindargs for this sql :" +
+                            mSql);
+                }
+            }
             return;
         }
-        mDatabase.lock();
-        try {
-            releaseReference();
-        } finally {
-            mDatabase.unlock();
+        if (nStatement == 0) {
+            // SQL statement is not compiled yet. compile it now.
+            compileSql();
         }
+        if (mBindArgs == null) {
+            return;
+        }
+        for (int index : mBindArgs.keySet()) {
+            Object value = mBindArgs.get(index);
+            if (value == null) {
+                native_bind_null(index);
+            } else if (value instanceof Double || value instanceof Float) {
+                native_bind_double(index, ((Number) value).doubleValue());
+            } else if (value instanceof Number) {
+                native_bind_long(index, ((Number) value).longValue());
+            } else if (value instanceof Boolean) {
+                Boolean bool = (Boolean)value;
+                native_bind_long(index, (bool) ? 1 : 0);
+                if (bool) {
+                    native_bind_long(index, 1);
+                } else {
+                    native_bind_long(index, 0);
+                }
+            } else if (value instanceof byte[]){
+                native_bind_blob(index, (byte[]) value);
+            } else {
+                native_bind_string(index, value.toString());
+            }
+        }
+    }
+
+    /**
+     * Given an array of String bindArgs, this method binds all of them in one single call.
+     *
+     * @param bindArgs the String array of bind args.
+     */
+    public void bindAllArgsAsStrings(String[] bindArgs) {
+        if (bindArgs == null) {
+            return;
+        }
+        int size = bindArgs.length;
+        synchronized(this) {
+            for (int i = 0; i < size; i++) {
+                bindString(i + 1, bindArgs[i]);
+            }
+        }
+    }
+
+    /* package */ synchronized final void setNativeHandle(int nHandle) {
+        this.nHandle = nHandle;
     }
 
     /**

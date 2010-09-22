@@ -53,11 +53,18 @@ public class PorterDuff {
         /** [Sa * Da, Sc * Dc] */
         MULTIPLY    (14),
         /** [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] */
-        SCREEN      (15);
+        SCREEN      (15),
+        /** Saturate(S + D) */
+        ADD         (16),
+        OVERLAY     (17);
 
         Mode(int nativeInt) {
             this.nativeInt = nativeInt;
         }
-        final int nativeInt;
+
+        /**
+         * @hide
+         */
+        public final int nativeInt;
     }
 }

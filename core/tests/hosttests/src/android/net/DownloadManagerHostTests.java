@@ -17,20 +17,12 @@
 package android.net;
 
 import android.content.pm.PackageManagerHostTestUtils;
-import android.content.pm.PackageManagerHostTestUtils.CollectingTestRunListener;
 
-import com.android.ddmlib.IDevice;
-import com.android.ddmlib.IShellOutputReceiver;
 import com.android.ddmlib.Log;
-import com.android.ddmlib.MultiLineReceiver;
-import com.android.ddmlib.SyncService;
-import com.android.ddmlib.SyncService.ISyncProgressMonitor;
-import com.android.ddmlib.SyncService.SyncResult;
 import com.android.hosttest.DeviceTestCase;
 import com.android.hosttest.DeviceTestSuite;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Hashtable;
 
 import junit.framework.Test;

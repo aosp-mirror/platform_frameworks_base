@@ -1128,7 +1128,9 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private boolean onModifiedTouchEvent(MotionEvent me, boolean possiblePoly) {
         int touchX = (int) me.getX() - mPaddingLeft;
-        int touchY = (int) me.getY() + mVerticalCorrection - mPaddingTop;
+        int touchY = (int) me.getY() - mPaddingTop;
+        if (touchY >= -mVerticalCorrection)
+            touchY += mVerticalCorrection;
         final int action = me.getAction();
         final long eventTime = me.getEventTime();
         mOldEventTime = eventTime;

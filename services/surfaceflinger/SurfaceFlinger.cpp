@@ -53,6 +53,7 @@
 #include "SurfaceFlinger.h"
 
 #include "DisplayHardware/DisplayHardware.h"
+#include "DisplayHardware/HWComposer.h"
 
 /* ideally AID_GRAPHICS would be in a semi-public header
  * or there would be a way to map a user/group name to its id
@@ -77,6 +78,7 @@ SurfaceFlinger::SurfaceFlinger()
         mAccessSurfaceFlinger("android.permission.ACCESS_SURFACE_FLINGER"),
         mDump("android.permission.DUMP"),
         mVisibleRegionsDirty(false),
+        mHwWorkListDirty(false),
         mDeferReleaseConsole(false),
         mFreezeDisplay(false),
         mFreezeCount(0),
@@ -164,7 +166,7 @@ void SurfaceFlinger::bootFinished()
 {
     const nsecs_t now = systemTime();
     const nsecs_t duration = now - mBootTime;
-    LOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );  
+    LOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );
     mBootFinished = true;
     property_set("ctl.stop", "bootanim");
 }
@@ -200,10 +202,10 @@ status_t SurfaceFlinger::readyToRun()
     mServerHeap = new MemoryHeapBase(4096,
             MemoryHeapBase::READ_ONLY, "SurfaceFlinger read-only heap");
     LOGE_IF(mServerHeap==0, "can't create shared memory dealer");
-    
+
     mServerCblk = static_cast<surface_flinger_cblk_t*>(mServerHeap->getBase());
     LOGE_IF(mServerCblk==0, "can't get to shared control block's address");
-    
+
     new(mServerCblk) surface_flinger_cblk_t;
 
     // initialize primary screen
@@ -232,7 +234,7 @@ status_t SurfaceFlinger::readyToRun()
 
     // Initialize OpenGL|ES
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    glPixelStorei(GL_PACK_ALIGNMENT, 4); 
+    glPixelStorei(GL_PACK_ALIGNMENT, 4);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnable(GL_SCISSOR_TEST);
     glShadeModel(GL_FLAT);
@@ -266,7 +268,7 @@ status_t SurfaceFlinger::readyToRun()
 
     // start boot animation
     property_set("ctl.start", "bootanim");
-    
+
     return NO_ERROR;
 }
 
@@ -369,6 +371,11 @@ bool SurfaceFlinger::threadLoop()
     // post surfaces (if needed)
     handlePageFlip();
 
+    if (UNLIKELY(mHwWorkListDirty)) {
+        // build the h/w work list
+        handleWorkList();
+    }
+
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     if (LIKELY(hw.canDraw() && !isFrozen())) {
         // repaint the framebuffer (if needed)
@@ -383,12 +390,11 @@ bool SurfaceFlinger::threadLoop()
         logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
         hw.compositionComplete();
 
-        // release the clients before we flip ('cause flip might block)
-        logger.log(GraphicLog::SF_UNLOCK_CLIENTS, index);
-        unlockClients();
-
         logger.log(GraphicLog::SF_SWAP_BUFFERS, index);
         postFramebuffer();
+
+        logger.log(GraphicLog::SF_UNLOCK_CLIENTS, index);
+        unlockClients();
 
         logger.log(GraphicLog::SF_REPAINT_DONE, index);
     } else {
@@ -454,6 +460,7 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
         handleTransactionLocked(transactionFlags, ditchedLayers);
         mLastTransactionTime = systemTime() - now;
         mDebugInTransaction = 0;
+        mHwWorkListDirty = true;
         // here the transaction has been committed
     }
 
@@ -461,6 +468,7 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
      * Clean-up all layers that went away
      * (do this without the lock held)
      */
+
     const size_t count = ditchedLayers.size();
     for (size_t i=0 ; i<count ; i++) {
         if (ditchedLayers[i] != 0) {
@@ -664,7 +672,7 @@ void SurfaceFlinger::computeVisibleRegions(
 
         // Update aboveOpaqueLayers for next (lower) layer
         aboveOpaqueLayers.orSelf(opaqueRegion);
-        
+
         // Store the visible region is screen space
         layer->setVisibleRegion(visibleRegion);
         layer->setCoveredRegion(coveredRegion);
@@ -694,8 +702,8 @@ void SurfaceFlinger::commitTransaction()
 void SurfaceFlinger::handlePageFlip()
 {
     bool visibleRegions = mVisibleRegionsDirty;
-    LayerVector& currentLayers = const_cast<LayerVector&>(
-            mDrawingState.layersSortedByZ);
+    LayerVector& currentLayers(
+            const_cast<LayerVector&>(mDrawingState.layersSortedByZ));
     visibleRegions |= lockPageFlip(currentLayers);
 
         const DisplayHardware& hw = graphicPlane(0).displayHardware();
@@ -718,6 +726,7 @@ void SurfaceFlinger::handlePageFlip()
 
             mWormholeRegion = screenRegion.subtract(opaqueRegion);
             mVisibleRegionsDirty = false;
+            mHwWorkListDirty = true;
         }
 
     unlockPageFlip(currentLayers);
@@ -748,6 +757,20 @@ void SurfaceFlinger::unlockPageFlip(const LayerVector& currentLayers)
     }
 }
 
+void SurfaceFlinger::handleWorkList()
+{
+    mHwWorkListDirty = false;
+    HWComposer& hwc(graphicPlane(0).displayHardware().getHwComposer());
+    if (hwc.initCheck() == NO_ERROR) {
+        const Vector< sp<LayerBase> >& currentLayers(mVisibleLayersSortedByZ);
+        const size_t count = currentLayers.size();
+        hwc.createWorkList(count);
+        hwc_layer_t* const cur(hwc.getLayers());
+        for (size_t i=0 ; cur && i<count ; i++) {
+            currentLayers[i]->setGeometry(&cur[i]);
+        }
+    }
+}
 
 void SurfaceFlinger::handleRepaint()
 {
@@ -768,8 +791,8 @@ void SurfaceFlinger::handleRepaint()
     glLoadIdentity();
 
     uint32_t flags = hw.getFlags();
-    if ((flags & DisplayHardware::SWAP_RECTANGLE) || 
-        (flags & DisplayHardware::BUFFER_PRESERVED)) 
+    if ((flags & DisplayHardware::SWAP_RECTANGLE) ||
+        (flags & DisplayHardware::BUFFER_PRESERVED))
     {
         // we can redraw only what's dirty, but since SWAP_RECTANGLE only
         // takes a rectangle, we must make sure to update that whole
@@ -812,9 +835,72 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
         // draw something...
         drawWormhole();
     }
+
+    status_t err = NO_ERROR;
     const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
-    const size_t count = layers.size();
-    for (size_t i=0 ; i<count ; ++i) {
+    size_t count = layers.size();
+
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    HWComposer& hwc(hw.getHwComposer());
+    hwc_layer_t* const cur(hwc.getLayers());
+
+    LOGE_IF(cur && hwc.getNumLayers() != count,
+            "HAL number of layers (%d) doesn't match surfaceflinger (%d)",
+            hwc.getNumLayers(), count);
+
+    // just to be extra-safe, use the smallest count
+    if (hwc.initCheck() == NO_ERROR) {
+        count = count < hwc.getNumLayers() ? count : hwc.getNumLayers();
+    }
+
+    /*
+     *  update the per-frame h/w composer data for each layer
+     *  and build the transparent region of the FB
+     */
+    Region transparent;
+    if (cur) {
+        for (size_t i=0 ; i<count ; i++) {
+            const sp<LayerBase>& layer(layers[i]);
+            layer->setPerFrameData(&cur[i]);
+            if (cur[i].hints & HWC_HINT_CLEAR_FB) {
+                if (!(layer->needsBlending())) {
+                    transparent.orSelf(layer->visibleRegionScreen);
+                }
+            }
+        }
+        err = hwc.prepare();
+        LOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
+    }
+
+    /*
+     *  clear the area of the FB that need to be transparent
+     */
+    transparent.andSelf(dirty);
+    if (!transparent.isEmpty()) {
+        glClearColor(0,0,0,0);
+        Region::const_iterator it = transparent.begin();
+        Region::const_iterator const end = transparent.end();
+        const int32_t height = hw.getHeight();
+        while (it != end) {
+            const Rect& r(*it++);
+            const GLint sy = height - (r.top + r.height());
+            glScissor(r.left, sy, r.width(), r.height());
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+    }
+
+
+    /*
+     * and then, render the layers targeted at the framebuffer
+     */
+    for (size_t i=0 ; i<count ; i++) {
+        if (cur) {
+            if ((cur[i].compositionType != HWC_FRAMEBUFFER) &&
+                !(cur[i].flags & HWC_SKIP_LAYER)) {
+                // skip layers handled by the HAL
+                continue;
+            }
+        }
         const sp<LayerBase>& layer(layers[i]);
         const Region clip(dirty.intersect(layer->visibleRegionScreen));
         if (!clip.isEmpty()) {
@@ -1053,7 +1139,7 @@ void SurfaceFlinger::closeGlobalTransaction()
     if (android_atomic_dec(&mTransactionCount) == 1) {
         signalEvent();
 
-        // if there is a transaction with a resize, wait for it to 
+        // if there is a transaction with a resize, wait for it to
         // take effect before returning.
         Mutex::Autolock _l(mStateLock);
         while (mResizeTransationPending) {
@@ -1097,7 +1183,7 @@ status_t SurfaceFlinger::unfreezeDisplay(DisplayID dpy, uint32_t flags)
     return NO_ERROR;
 }
 
-int SurfaceFlinger::setOrientation(DisplayID dpy, 
+int SurfaceFlinger::setOrientation(DisplayID dpy,
         int orientation, uint32_t flags)
 {
     if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
@@ -1130,14 +1216,17 @@ sp<ISurface> SurfaceFlinger::createSurface(const sp<Client>& client, int pid,
                 int(w), int(h));
         return surfaceHandle;
     }
-    
+
     //LOGD("createSurface for pid %d (%d x %d)", pid, w, h);
     sp<Layer> normalLayer;
     switch (flags & eFXSurfaceMask) {
         case eFXSurfaceNormal:
+#if HAS_PUSH_BUFFERS
             if (UNLIKELY(flags & ePushBuffers)) {
                 layer = createPushBuffersSurface(client, d, w, h, flags);
-            } else {
+            } else
+#endif
+            {
                 normalLayer = createNormalSurface(client, d, w, h, flags, format);
                 layer = normalLayer;
             }
@@ -1156,7 +1245,7 @@ sp<ISurface> SurfaceFlinger::createSurface(const sp<Client>& client, int pid,
         ssize_t token = addClientLayer(client, layer);
 
         surfaceHandle = layer->getSurface();
-        if (surfaceHandle != 0) { 
+        if (surfaceHandle != 0) {
             params->token = token;
             params->identity = surfaceHandle->getIdentity();
             params->width = w;
@@ -1240,7 +1329,7 @@ status_t SurfaceFlinger::removeSurface(const sp<Client>& client, SurfaceID sid)
     /*
      * called by the window manager, when a surface should be marked for
      * destruction.
-     * 
+     *
      * The surface is removed from the current and drawing lists, but placed
      * in the purgatory queue, so it's not destroyed right-away (we need
      * to wait for all client's references to go away first).
@@ -1261,7 +1350,7 @@ status_t SurfaceFlinger::removeSurface(const sp<Client>& client, SurfaceID sid)
 status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
 {
     // called by ~ISurface() when all references are gone
-    
+
     class MessageDestroySurface : public MessageBase {
         SurfaceFlinger* flinger;
         sp<LayerBaseClient> layer;
@@ -1274,9 +1363,9 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
             layer.clear(); // clear it outside of the lock;
             Mutex::Autolock _l(flinger->mStateLock);
             /*
-             * remove the layer from the current list -- chances are that it's 
-             * not in the list anyway, because it should have been removed 
-             * already upon request of the client (eg: window manager). 
+             * remove the layer from the current list -- chances are that it's
+             * not in the list anyway, because it should have been removed
+             * already upon request of the client (eg: window manager).
              * However, a buggy client could have not done that.
              * Since we know we don't have any more clients, we don't need
              * to use the purgatory.
@@ -1391,7 +1480,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
         }
         const bool locked(retry >= 0);
         if (!locked) {
-            snprintf(buffer, SIZE, 
+            snprintf(buffer, SIZE,
                     "SurfaceFlinger appears to be unresponsive, "
                     "dumping anyways (no locks held)\n");
             result.append(buffer);
@@ -1670,12 +1759,15 @@ ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
 {
     int32_t name = NAME_NOT_FOUND;
     sp<Layer> layer(mFlinger->getLayer(sur));
-    if (layer == 0) return name;
+    if (layer == 0) {
+        return name;
+    }
 
     // if this layer already has a token, just return it
     name = layer->getToken();
-    if ((name >= 0) && (layer->getClient() == this))
+    if ((name >= 0) && (layer->getClient() == this)) {
         return name;
+    }
 
     name = 0;
     do {

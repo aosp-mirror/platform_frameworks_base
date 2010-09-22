@@ -16,39 +16,41 @@
 
 package android.webkit;
 
-import com.android.internal.R;
-
 import android.annotation.Widget;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
+import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.CornerPathEffect;
+import android.graphics.DrawFilter;
 import android.graphics.Interpolator;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.http.SslCertificate;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.text.IClipboard;
+import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.text.Selection;
 import android.text.Spannable;
 import android.util.AttributeSet;
@@ -66,40 +68,42 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.AlphaAnimation;
+import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
 import android.webkit.WebViewCore.TouchEventData;
+import android.webkit.WebViewCore.TouchHighlightData;
 import android.widget.AbsoluteLayout;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
-import android.widget.EdgeGlow;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.OverScroller;
+import android.widget.Scroller;
 import android.widget.Toast;
-import android.widget.ZoomButtonsController;
-import android.widget.ZoomControls;
+
+import junit.framework.Assert;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import junit.framework.Assert;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>A View that displays web pages. This class is the basis upon which you
@@ -116,7 +120,7 @@ import junit.framework.Assert;
  * <pre>&lt;uses-permission android:name="android.permission.INTERNET" /></pre>
  *
  * <p>This must be a child of the <a
- * href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code &lt;manifest&gt;}</a>
+ * href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code <manifest>}</a>
  * element.</p>
  *
  * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-webview.html">Web View
@@ -139,7 +143,7 @@ import junit.framework.Assert;
  * </pre>
  * <p>See {@link android.content.Intent} for more information.</p>
  *
- * <p>To provide a WebView in your own Activity, include a {@code &lt;WebView&gt;} in your layout,
+ * <p>To provide a WebView in your own Activity, include a {@code <WebView>} in your layout,
  * or set the entire Activity window as a WebView during {@link
  * android.app.Activity#onCreate(Bundle) onCreate()}:</p>
  * <pre class="prettyprint">
@@ -286,7 +290,7 @@ import junit.framework.Assert;
  * low density screens scale down. This is also the default behavior.</li>
  * <li>{@code low-dpi} - Use ldpi as the target dpi. Medium and high density screens scale up
  * as appropriate.</li>
- * <li><em>{@code &lt;value&gt;}</em> - Specify a dpi value to use as the target dpi (accepted
+ * <li><em>{@code <value>}</em> - Specify a dpi value to use as the target dpi (accepted
  * values are 70-400).</li>
  * </ul>
  * <p>Here's an example meta tag to specify the target density:</p>
@@ -298,7 +302,7 @@ import junit.framework.Assert;
  * property to {@code device-dpi}. This stops Android from performing scaling in your web page and
  * allows you to make the necessary adjustments for each density via CSS and JavaScript.</p>
  *
- * 
+ *
  */
 @Widget
 public class WebView extends AbsoluteLayout
@@ -315,49 +319,7 @@ public class WebView extends AbsoluteLayout
 
     static final String LOGTAG = "webview";
 
-    private static class ExtendedZoomControls extends FrameLayout {
-        public ExtendedZoomControls(Context context, AttributeSet attrs) {
-            super(context, attrs);
-            LayoutInflater inflater = (LayoutInflater)
-                    context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            inflater.inflate(com.android.internal.R.layout.zoom_magnify, this, true);
-            mPlusMinusZoomControls = (ZoomControls) findViewById(
-                    com.android.internal.R.id.zoomControls);
-            findViewById(com.android.internal.R.id.zoomMagnify).setVisibility(
-                    View.GONE);
-        }
-
-        public void show(boolean showZoom, boolean canZoomOut) {
-            mPlusMinusZoomControls.setVisibility(
-                    showZoom ? View.VISIBLE : View.GONE);
-            fade(View.VISIBLE, 0.0f, 1.0f);
-        }
-
-        public void hide() {
-            fade(View.GONE, 1.0f, 0.0f);
-        }
-
-        private void fade(int visibility, float startAlpha, float endAlpha) {
-            AlphaAnimation anim = new AlphaAnimation(startAlpha, endAlpha);
-            anim.setDuration(500);
-            startAnimation(anim);
-            setVisibility(visibility);
-        }
-
-        public boolean hasFocus() {
-            return mPlusMinusZoomControls.hasFocus();
-        }
-
-        public void setOnZoomInClickListener(OnClickListener listener) {
-            mPlusMinusZoomControls.setOnZoomInClickListener(listener);
-        }
-
-        public void setOnZoomOutClickListener(OnClickListener listener) {
-            mPlusMinusZoomControls.setOnZoomOutClickListener(listener);
-        }
-
-        ZoomControls    mPlusMinusZoomControls;
-    }
+    private ZoomManager mZoomManager;
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -402,6 +364,8 @@ public class WebView extends AbsoluteLayout
     // Used to ignore changes to webkit text that arrives to the UI side after
     // more key events.
     private int mTextGeneration;
+
+    /* package */ void incrementTextGeneration() { mTextGeneration++; }
 
     // Used by WebViewCore to create child views.
     /* package */ final ViewManager mViewManager;
@@ -450,6 +414,14 @@ public class WebView extends AbsoluteLayout
     private float mLastVelX;
     private float mLastVelY;
 
+    // A pointer to the native scrollable layer when dragging layers.  Only
+    // valid when mTouchMode is TOUCH_DRAG_LAYER_MODE.
+    private int mScrollingLayer;
+
+    // only trigger accelerated fling if the new velocity is at least
+    // MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION times of the previous velocity
+    private static final float MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION = 0.2f;
+
     /**
      * Touch mode
      */
@@ -462,11 +434,7 @@ public class WebView extends AbsoluteLayout
     private static final int TOUCH_DOUBLE_TAP_MODE = 6;
     private static final int TOUCH_DONE_MODE = 7;
     private static final int TOUCH_PINCH_DRAG = 8;
-
-    /**
-     * True if we have a touch panel capable of detecting smooth pan/scale at the same time
-     */
-    private boolean mAllowPanAndScale;
+    private static final int TOUCH_DRAG_LAYER_MODE = 9;
 
     // Whether to forward the touch events to WebCore
     private boolean mForwardTouchEvents = false;
@@ -505,10 +473,6 @@ public class WebView extends AbsoluteLayout
     // true if onPause has been called (and not onResume)
     private boolean mIsPaused;
 
-    // true if, during a transition to a new page, we're delaying
-    // deleting a root layer until there's something to draw of the new page.
-    private boolean mDelayedDeleteRootLayer;
-
     /**
      * Customizable constant
      */
@@ -530,9 +494,6 @@ public class WebView extends AbsoluteLayout
     private static final int MIN_FLING_TIME = 250;
     // draw unfiltered after drag is held without movement
     private static final int MOTIONLESS_TIME = 100;
-    // The time that the Zoom Controls are visible before fading away
-    private static final long ZOOM_CONTROLS_TIMEOUT =
-            ViewConfiguration.getZoomControlsTimeout();
     // The amount of content to overlap between two screens when going through
     // pages with the space bar, in pixels.
     private static final int PAGE_SCROLL_OVERLAP = 24;
@@ -564,10 +525,7 @@ public class WebView extends AbsoluteLayout
     // time for the longest scroll animation
     private static final int MAX_DURATION = 750;   // milliseconds
     private static final int SLIDE_TITLE_DURATION = 500;   // milliseconds
-    private OverScroller mScroller;
-    private boolean mInOverScrollMode = false;
-    private static Paint mOverScrollBackground;
-    private static Paint mOverScrollBorder;
+    private Scroller mScroller;
 
     private boolean mWrapContent;
     private static final int MOTIONLESS_FALSE           = 0;
@@ -576,15 +534,28 @@ public class WebView extends AbsoluteLayout
     private static final int MOTIONLESS_IGNORE          = 3;
     private int mHeldMotionless;
 
-    // whether support multi-touch
-    private boolean mSupportMultiTouch;
-    // use the framework's ScaleGestureDetector to handle multi-touch
-    private ScaleGestureDetector mScaleDetector;
+    // An instance for injecting accessibility in WebViews with disabled
+    // JavaScript or ones for which no accessibility script exists
+    private AccessibilityInjector mAccessibilityInjector;
 
-    // the anchor point in the document space where VIEW_SIZE_CHANGED should
-    // apply to
-    private int mAnchorX;
-    private int mAnchorY;
+    // flag indicating if accessibility script is injected so we
+    // know to handle Shift and arrows natively first
+    private boolean mAccessibilityScriptInjected;
+
+    // the color used to highlight the touch rectangles
+    private static final int mHightlightColor = 0x33000000;
+    // the round corner for the highlight path
+    private static final float TOUCH_HIGHLIGHT_ARC = 5.0f;
+    // the region indicating where the user touched on the screen
+    private Region mTouchHighlightRegion = new Region();
+    // the paint for the touch highlight
+    private Paint mTouchHightlightPaint;
+    // debug only
+    private static final boolean DEBUG_TOUCH_HIGHLIGHT = true;
+    private static final int TOUCH_HIGHLIGHT_ELAPSE_TIME = 2000;
+    private Paint mTouchCrossHairColor;
+    private int mTouchHighlightX;
+    private int mTouchHighlightY;
 
     /*
      * Private message ids
@@ -618,7 +589,7 @@ public class WebView extends AbsoluteLayout
     static final int WEBCORE_INITIALIZED_MSG_ID         = 107;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 108;
     static final int UPDATE_ZOOM_RANGE                  = 109;
-    static final int MOVE_OUT_OF_PLUGIN                 = 110;
+    static final int UNHANDLED_NAV_KEY                  = 110;
     static final int CLEAR_TEXT_ENTRY                   = 111;
     static final int UPDATE_TEXT_SELECTION_MSG_ID       = 112;
     static final int SHOW_RECT_MSG_ID                   = 113;
@@ -632,16 +603,19 @@ public class WebView extends AbsoluteLayout
     static final int SHOW_FULLSCREEN                    = 120;
     static final int HIDE_FULLSCREEN                    = 121;
     static final int DOM_FOCUS_CHANGED                  = 122;
-    static final int IMMEDIATE_REPAINT_MSG_ID           = 123;
-    static final int SET_ROOT_LAYER_MSG_ID              = 124;
+    static final int REPLACE_BASE_CONTENT               = 123;
+    // 124;
     static final int RETURN_LABEL                       = 125;
     static final int FIND_AGAIN                         = 126;
     static final int CENTER_FIT_RECT                    = 127;
     static final int REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID = 128;
     static final int SET_SCROLLBAR_MODES                = 129;
+    static final int SELECTION_STRING_CHANGED           = 130;
+    static final int SET_TOUCH_HIGHLIGHT_RECTS          = 131;
+    static final int SAVE_WEBARCHIVE_FINISHED           = 132;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
-    private static final int LAST_PACKAGE_MSG_ID = SET_SCROLLBAR_MODES;
+    private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
 
     static final String[] HandlerPrivateDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -666,7 +640,7 @@ public class WebView extends AbsoluteLayout
         "WEBCORE_INITIALIZED_MSG_ID", //     = 107;
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 108;
         "UPDATE_ZOOM_RANGE", //              = 109;
-        "MOVE_OUT_OF_PLUGIN", //             = 110;
+        "UNHANDLED_NAV_KEY", //              = 110;
         "CLEAR_TEXT_ENTRY", //               = 111;
         "UPDATE_TEXT_SELECTION_MSG_ID", //   = 112;
         "SHOW_RECT_MSG_ID", //               = 113;
@@ -679,18 +653,21 @@ public class WebView extends AbsoluteLayout
         "SHOW_FULLSCREEN", //                = 120;
         "HIDE_FULLSCREEN", //                = 121;
         "DOM_FOCUS_CHANGED", //              = 122;
-        "IMMEDIATE_REPAINT_MSG_ID", //       = 123;
-        "SET_ROOT_LAYER_MSG_ID", //          = 124;
+        "REPLACE_BASE_CONTENT", //           = 123;
+        "124", //                            = 124;
         "RETURN_LABEL", //                   = 125;
         "FIND_AGAIN", //                     = 126;
         "CENTER_FIT_RECT", //                = 127;
         "REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID", // = 128;
-        "SET_SCROLLBAR_MODES" //             = 129;
+        "SET_SCROLLBAR_MODES", //            = 129;
+        "SELECTION_STRING_CHANGED", //       = 130;
+        "SET_TOUCH_HIGHLIGHT_RECTS", //      = 131;
+        "SAVE_WEBARCHIVE_FINISHED" //        = 132;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
     // use DEFAULT_VIEWPORT_WIDTH as the default viewport width
-    static final int DEFAULT_VIEWPORT_WIDTH = 800;
+    static final int DEFAULT_VIEWPORT_WIDTH = 980;
 
     // normally we try to fit the content to the minimum preferred width
     // calculated by the Webkit. To avoid the bad behavior when some site's
@@ -698,48 +675,8 @@ public class WebView extends AbsoluteLayout
     // the minimum preferred width is huge, an upper limit is needed.
     static int sMaxViewportWidth = DEFAULT_VIEWPORT_WIDTH;
 
-    // default scale limit. Depending on the display density
-    private static float DEFAULT_MAX_ZOOM_SCALE;
-    private static float DEFAULT_MIN_ZOOM_SCALE;
-    // scale limit, which can be set through viewport meta tag in the web page
-    private float mMaxZoomScale;
-    private float mMinZoomScale;
-    private boolean mMinZoomScaleFixed = true;
-
     // initial scale in percent. 0 means using default.
     private int mInitialScaleInPercent = 0;
-
-    // while in the zoom overview mode, the page's width is fully fit to the
-    // current window. The page is alive, in another words, you can click to
-    // follow the links. Double tap will toggle between zoom overview mode and
-    // the last zoom scale.
-    boolean mInZoomOverview = false;
-
-    // ideally mZoomOverviewWidth should be mContentWidth. But sites like espn,
-    // engadget always have wider mContentWidth no matter what viewport size is.
-    int mZoomOverviewWidth = DEFAULT_VIEWPORT_WIDTH;
-    float mTextWrapScale;
-
-    // default scale. Depending on the display density.
-    static int DEFAULT_SCALE_PERCENT;
-    private float mDefaultScale;
-
-    private static float MINIMUM_SCALE_INCREMENT = 0.01f;
-
-    // set to true temporarily during ScaleGesture triggered zoom
-    private boolean mPreviewZoomOnly = false;
-
-    // computed scale and inverse, from mZoomWidth.
-    private float mActualScale;
-    private float mInvActualScale;
-    // if this is non-zero, it is used on drawing rather than mActualScale
-    private float mZoomScale;
-    private float mInvInitialZoomScale;
-    private float mInvFinalZoomScale;
-    private int mInitialScrollX;
-    private int mInitialScrollY;
-    private long mZoomStart;
-    private static final int ZOOM_ANIMATION_LENGTH = 500;
 
     private boolean mUserScroll = false;
 
@@ -764,26 +701,31 @@ public class WebView extends AbsoluteLayout
     private int mHorizontalScrollBarMode = SCROLLBAR_AUTO;
     private int mVerticalScrollBarMode = SCROLLBAR_AUTO;
 
-    /**
-     * Max distance to overscroll by in pixels.
-     * This how far content can be pulled beyond its normal bounds by the user.
-     */
-    private int mOverscrollDistance;
+    // constants for determining script injection strategy
+    private static final int ACCESSIBILITY_SCRIPT_INJECTION_UNDEFINED = -1;
+    private static final int ACCESSIBILITY_SCRIPT_INJECTION_OPTED_OUT = 0;
+    private static final int ACCESSIBILITY_SCRIPT_INJECTION_PROVIDED = 1;
 
-    /**
-     * Max distance to overfling by in pixels.
-     * This is how far flinged content can move beyond the end of its normal bounds.
-     */
-    private int mOverflingDistance;
+    // the alias via which accessibility JavaScript interface is exposed
+    private static final String ALIAS_ACCESSIBILITY_JS_INTERFACE = "accessibility";
 
-    /*
-     * These manage the edge glow effect when flung or pulled beyond the edges.
-     * If one is not null, all are not null. Checking one for null is as good as checking each.
-     */
-    private EdgeGlow mEdgeGlowTop;
-    private EdgeGlow mEdgeGlowBottom;
-    private EdgeGlow mEdgeGlowLeft;
-    private EdgeGlow mEdgeGlowRight;
+    // JavaScript to inject the script chooser which will
+    // pick the right script for the current URL
+    private static final String ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT =
+        "javascript:(function() {" +
+        "    var chooser = document.createElement('script');" +
+        "    chooser.type = 'text/javascript';" +
+        "    chooser.src = 'https://ssl.gstatic.com/accessibility/javascript/android/AndroidScriptChooser.user.js';" +
+        "    document.getElementsByTagName('head')[0].appendChild(chooser);" +
+        "  })();";
+
+    // Regular expression that matches the "axs" URL parameter.
+    // The value of 0 means the accessibility script is opted out
+    // The value of 1 means the accessibility script is already injected
+    private static final String PATTERN_MATCH_AXS_URL_PARAMETER = "(\\?axs=(0|1))|(&axs=(0|1))";
+
+    // variable to cache the above pattern in case accessibility is enabled.
+    private Pattern mMatchAxsUrlParameterPattern;
 
     // Used to match key downs and key ups
     private boolean mGotKeyDown;
@@ -889,43 +831,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    // The View containing the zoom controls
-    private ExtendedZoomControls mZoomControls;
-    private Runnable mZoomControlRunnable;
-
-    // mZoomButtonsController will be lazy initialized in
-    // getZoomButtonsController() to get better performance.
-    private ZoomButtonsController mZoomButtonsController;
-
-    // These keep track of the center point of the zoom.  They are used to
-    // determine the point around which we should zoom.
-    private float mZoomCenterX;
-    private float mZoomCenterY;
-
-    private ZoomButtonsController.OnZoomListener mZoomListener =
-            new ZoomButtonsController.OnZoomListener() {
-
-        public void onVisibilityChanged(boolean visible) {
-            if (visible) {
-                switchOutDrawHistory();
-                // Bring back the hidden zoom controls.
-                mZoomButtonsController.getZoomControls().setVisibility(
-                        View.VISIBLE);
-                updateZoomButtonsEnabled();
-            }
-        }
-
-        public void onZoom(boolean zoomIn) {
-            if (zoomIn) {
-                zoomIn();
-            } else {
-                zoomOut();
-            }
-
-            updateZoomButtonsEnabled();
-        }
-    };
-
     /**
      * Construct a new WebView with a Context object.
      * @param context A Context object used to access application assets.
@@ -950,7 +855,18 @@ public class WebView extends AbsoluteLayout
      * @param defStyle The default style resource ID.
      */
     public WebView(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, null);
+        this(context, attrs, defStyle, false);
+    }
+
+    /**
+     * Construct a new WebView with layout parameters and a default style.
+     * @param context A Context object used to access application assets.
+     * @param attrs An AttributeSet passed to our parent.
+     * @param defStyle The default style resource ID.
+     */
+    public WebView(Context context, AttributeSet attrs, int defStyle,
+            boolean privateBrowsing) {
+        this(context, attrs, defStyle, null, privateBrowsing);
     }
 
     /**
@@ -961,53 +877,134 @@ public class WebView extends AbsoluteLayout
      * @param context A Context object used to access application assets.
      * @param attrs An AttributeSet passed to our parent.
      * @param defStyle The default style resource ID.
-     * @param javascriptInterfaces is a Map of intareface names, as keys, and
+     * @param javascriptInterfaces is a Map of interface names, as keys, and
      * object implementing those interfaces, as values.
      * @hide pending API council approval.
      */
     protected WebView(Context context, AttributeSet attrs, int defStyle,
-            Map<String, Object> javascriptInterfaces) {
+            Map<String, Object> javascriptInterfaces, boolean privateBrowsing) {
         super(context, attrs, defStyle);
-        init();
+
+        if (AccessibilityManager.getInstance(context).isEnabled()) {
+            if (javascriptInterfaces == null) {
+                javascriptInterfaces = new HashMap<String, Object>();
+            }
+            exposeAccessibilityJavaScriptApi(javascriptInterfaces);
+        }
 
         mCallbackProxy = new CallbackProxy(context, this);
         mViewManager = new ViewManager(this);
         mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javascriptInterfaces);
         mDatabase = WebViewDatabase.getInstance(context);
-        mScroller = new OverScroller(context);
+        mScroller = new Scroller(context);
+        mZoomManager = new ZoomManager(this, mCallbackProxy);
 
+        /* The init method must follow the creation of certain member variables,
+         * such as the mZoomManager.
+         */
+        init();
+        setupPackageListener(context);
         updateMultiTouchSupport(context);
+
+        if (privateBrowsing) {
+            startPrivateBrowsing();
+        }
+    }
+
+    /*
+     * The intent receiver that monitors for changes to relevant packages (e.g.,
+     * sGoogleApps) and notifies WebViewCore of their existence.
+     */
+    private static BroadcastReceiver sPackageInstallationReceiver = null;
+
+    /*
+     * A set of Google packages we monitor for the
+     * navigator.isApplicationInstalled() API. Add additional packages as
+     * needed.
+     */
+    private static Set<String> sGoogleApps;
+    static {
+        sGoogleApps = new HashSet<String>();
+        sGoogleApps.add("com.google.android.youtube");
+    }
+
+    private void setupPackageListener(Context context) {
+
+        /*
+         * we must synchronize the instance check and the creation of the
+         * receiver to ensure that only ONE receiver exists for all WebView
+         * instances.
+         */
+        synchronized (WebView.class) {
+
+            // if the receiver already exists then we do not need to register it
+            // again
+            if (sPackageInstallationReceiver != null) {
+                return;
+            }
+
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addDataScheme("package");
+            sPackageInstallationReceiver = new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    final String action = intent.getAction();
+                    final String packageName = intent.getData().getSchemeSpecificPart();
+                    final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                    if (Intent.ACTION_PACKAGE_REMOVED.equals(action) && replacing) {
+                        // if it is replacing, refreshPlugins() when adding
+                        return;
+                    }
+
+                    if (sGoogleApps.contains(packageName) && mWebViewCore != null) {
+                        if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                            mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAME, packageName);
+                        } else {
+                            mWebViewCore.sendMessage(EventHub.REMOVE_PACKAGE_NAME, packageName);
+                        }
+                    }
+
+                    PluginManager pm = PluginManager.getInstance(context);
+                    if (pm.containsPluginPermissionAndSignatures(packageName)) {
+                        pm.refreshPlugins(Intent.ACTION_PACKAGE_ADDED.equals(action));
+                    }
+                }
+            };
+
+            context.getApplicationContext().registerReceiver(sPackageInstallationReceiver, filter);
+        }
+
+        // check if any of the monitored apps are already installed
+        AsyncTask<Void, Void, Set<String>> task = new AsyncTask<Void, Void, Set<String>>() {
+
+            @Override
+            protected Set<String> doInBackground(Void... unused) {
+                Set<String> installedPackages = new HashSet<String>();
+                PackageManager pm = mContext.getPackageManager();
+                List<PackageInfo> packages = pm.getInstalledPackages(0);
+                for (PackageInfo p : packages) {
+                    if (sGoogleApps.contains(p.packageName)) {
+                        installedPackages.add(p.packageName);
+                    }
+                }
+                return installedPackages;
+            }
+
+            // Executes on the UI thread
+            @Override
+            protected void onPostExecute(Set<String> installedPackages) {
+                if (mWebViewCore != null) {
+                    mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, installedPackages);
+                }
+            }
+        };
+        task.execute();
     }
 
     void updateMultiTouchSupport(Context context) {
-        WebSettings settings = getSettings();
-        final PackageManager pm = context.getPackageManager();
-        mSupportMultiTouch = pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
-                && settings.supportZoom() && settings.getBuiltInZoomControls();
-        mAllowPanAndScale = pm.hasSystemFeature(
-                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT);
-        if (mSupportMultiTouch && (mScaleDetector == null)) {
-            mScaleDetector = new ScaleGestureDetector(context,
-                    new ScaleDetectorListener());
-        } else if (!mSupportMultiTouch && (mScaleDetector != null)) {
-            mScaleDetector = null;
-        }
-    }
-
-    private void updateZoomButtonsEnabled() {
-        if (mZoomButtonsController == null) return;
-        boolean canZoomIn = mActualScale < mMaxZoomScale;
-        boolean canZoomOut = mActualScale > mMinZoomScale && !mInZoomOverview;
-        if (!canZoomIn && !canZoomOut) {
-            // Hide the zoom in and out buttons, as well as the fit to page
-            // button, if the page cannot zoom
-            mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
-        } else {
-            // Set each one individually, as a page may be able to zoom in
-            // or out.
-            mZoomButtonsController.setZoomInEnabled(canZoomIn);
-            mZoomButtonsController.setZoomOutEnabled(canZoomOut);
-        }
+        mZoomManager.updateMultiTouchSupport(context);
     }
 
     private void init() {
@@ -1027,57 +1024,38 @@ public class WebView extends AbsoluteLayout
         // use one line height, 16 based on our current default font, for how
         // far we allow a touch be away from the edge of a link
         mNavSlop = (int) (16 * density);
-        // density adjusted scale factors
-        DEFAULT_SCALE_PERCENT = (int) (100 * density);
-        mDefaultScale = density;
-        mActualScale = density;
-        mInvActualScale = 1 / density;
-        mTextWrapScale = density;
-        DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
-        DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
-        mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
-        mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+        mZoomManager.init(density);
         mMaximumFling = configuration.getScaledMaximumFlingVelocity();
-        mOverscrollDistance = configuration.getScaledOverscrollDistance();
-        mOverflingDistance = configuration.getScaledOverflingDistance();
+
+        // Compute the inverse of the density squared.
+        DRAG_LAYER_INVERSE_DENSITY_SQUARED = 1 / (density * density);
     }
 
-    @Override
-    public void setOverscrollMode(int mode) {
-        super.setOverscrollMode(mode);
-        if (mode != OVERSCROLL_NEVER) {
-            if (mEdgeGlowTop == null) {
-                final Resources res = getContext().getResources();
-                final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
-                final Drawable glow = res.getDrawable(R.drawable.overscroll_glow);
-                mEdgeGlowTop = new EdgeGlow(edge, glow);
-                mEdgeGlowBottom = new EdgeGlow(edge, glow);
-                mEdgeGlowLeft = new EdgeGlow(edge, glow);
-                mEdgeGlowRight = new EdgeGlow(edge, glow);
-            }
-        } else {
-            mEdgeGlowTop = null;
-            mEdgeGlowBottom = null;
-            mEdgeGlowLeft = null;
-            mEdgeGlowRight = null;
+    /**
+     * Exposes accessibility APIs to JavaScript by appending them to the JavaScript
+     * interfaces map provided by the WebView client. In case of conflicting
+     * alias with the one of the accessibility API the user specified one wins.
+     *
+     * @param javascriptInterfaces A map with interfaces to be exposed to JavaScript.
+     */
+    private void exposeAccessibilityJavaScriptApi(Map<String, Object> javascriptInterfaces) {
+        if (javascriptInterfaces.containsKey(ALIAS_ACCESSIBILITY_JS_INTERFACE)) {
+            Log.w(LOGTAG, "JavaScript interface mapped to \"" + ALIAS_ACCESSIBILITY_JS_INTERFACE
+                    + "\" overrides the accessibility API JavaScript interface. No accessibility"
+                    + "API will be exposed to JavaScript!");
+            return;
         }
+
+        // expose the TTS for now ...
+        javascriptInterfaces.put(ALIAS_ACCESSIBILITY_JS_INTERFACE,
+                new TextToSpeech(getContext(), null));
     }
 
     /* package */void updateDefaultZoomDensity(int zoomDensity) {
-        final float density = getContext().getResources().getDisplayMetrics().density
+        final float density = mContext.getResources().getDisplayMetrics().density
                 * 100 / zoomDensity;
-        if (Math.abs(density - mDefaultScale) > 0.01) {
-            float scaleFactor = density / mDefaultScale;
-            // adjust the limits
-            mNavSlop = (int) (16 * density);
-            DEFAULT_SCALE_PERCENT = (int) (100 * density);
-            DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
-            DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
-            mDefaultScale = density;
-            mMaxZoomScale *= scaleFactor;
-            mMinZoomScale *= scaleFactor;
-            setNewZoomScale(mActualScale * scaleFactor, true, false);
-        }
+        mNavSlop = (int) (16 * density);
+        mZoomManager.updateDefaultZoomDensity(density);
     }
 
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
@@ -1194,16 +1172,17 @@ public class WebView extends AbsoluteLayout
      * returns the height of the titlebarview (if any). Does not care about
      * scrolling
      */
-    private int getTitleHeight() {
+    int getTitleHeight() {
         return mTitleBar != null ? mTitleBar.getHeight() : 0;
     }
 
     /*
      * Return the amount of the titlebarview (if any) that is visible
+     *
+     * @hide
      */
-    private int getVisibleTitleHeight() {
-        // need to restrict mScrollY due to over scroll
-        return Math.max(getTitleHeight() - Math.max(0, mScrollY), 0);
+    public int getVisibleTitleHeight() {
+        return Math.max(getTitleHeight() - mScrollY, 0);
     }
 
     /*
@@ -1284,9 +1263,26 @@ public class WebView extends AbsoluteLayout
         return mDatabase.getHttpAuthUsernamePassword(host, realm);
     }
 
+    /**
+     * Remove Find or Select ActionModes, if active.
+     */
+    private void clearActionModes() {
+        if (mSelectCallback != null) {
+            mSelectCallback.finish();
+        }
+        if (mFindCallback != null) {
+            mFindCallback.finish();
+        }
+    }
+
+    /**
+     * Called to clear state when moving from one page to another, or changing
+     * in some other way that makes elements associated with the current page
+     * (such as WebTextView or ActionModes) no longer relevant.
+     */
     private void clearHelpers() {
-        clearTextEntry(false);
-        selectionDone();
+        clearTextEntry();
+        clearActionModes();
     }
 
     /**
@@ -1296,6 +1292,7 @@ public class WebView extends AbsoluteLayout
      */
     public void destroy() {
         clearHelpers();
+
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
             // more messages will be posted.
@@ -1423,6 +1420,8 @@ public class WebView extends AbsoluteLayout
             outState.putBundle("certificate",
                                SslCertificate.saveState(mCertificate));
         }
+        outState.putBoolean("privateBrowsingEnabled", isPrivateBrowsingEnabled());
+        mZoomManager.saveZoomState(outState);
         return list;
     }
 
@@ -1468,29 +1467,23 @@ public class WebView extends AbsoluteLayout
         // now update the bundle
         b.putInt("scrollX", mScrollX);
         b.putInt("scrollY", mScrollY);
-        b.putFloat("scale", mActualScale);
-        b.putFloat("textwrapScale", mTextWrapScale);
-        b.putBoolean("overview", mInZoomOverview);
+        mZoomManager.saveZoomState(b);
         return true;
     }
 
     private void restoreHistoryPictureFields(Picture p, Bundle b) {
         int sx = b.getInt("scrollX", 0);
         int sy = b.getInt("scrollY", 0);
-        float scale = b.getFloat("scale", 1.0f);
+
         mDrawHistory = true;
         mHistoryPicture = p;
         mScrollX = sx;
         mScrollY = sy;
+        mZoomManager.restoreZoomState(b);
+        final float scale = mZoomManager.getScale();
         mHistoryWidth = Math.round(p.getWidth() * scale);
         mHistoryHeight = Math.round(p.getHeight() * scale);
-        // as getWidth() / getHeight() of the view are not available yet, set up
-        // mActualScale, so that when onSizeChanged() is called, the rest will
-        // be set correctly
-        mActualScale = scale;
-        mInvActualScale = 1 / scale;
-        mTextWrapScale = b.getFloat("textwrapScale", scale);
-        mInZoomOverview = b.getBoolean("overview");
+
         invalidate();
     }
 
@@ -1591,6 +1584,11 @@ public class WebView extends AbsoluteLayout
                 // Update the copy to have the correct index.
                 returnList.setCurrentIndex(index);
             }
+            // Restore private browsing setting.
+            if (inState.getBoolean("privateBrowsingEnabled")) {
+                getSettings().setPrivateBrowsingEnabled(true);
+            }
+            mZoomManager.restoreZoomState(inState);
             // Remove all pending messages because we are restoring previous
             // state.
             mWebViewCore.removeMessages();
@@ -1702,6 +1700,45 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Saves the current view as a web archive.
+     *
+     * @param filename The filename where the archive should be placed.
+     */
+    public void saveWebArchive(String filename) {
+        saveWebArchive(filename, false, null);
+    }
+
+    /* package */ static class SaveWebArchiveMessage {
+        SaveWebArchiveMessage (String basename, boolean autoname, ValueCallback<String> callback) {
+            mBasename = basename;
+            mAutoname = autoname;
+            mCallback = callback;
+        }
+
+        /* package */ final String mBasename;
+        /* package */ final boolean mAutoname;
+        /* package */ final ValueCallback<String> mCallback;
+        /* package */ String mResultFile;
+    }
+
+    /**
+     * Saves the current view as a web archive.
+     *
+     * @param basename The filename where the archive should be placed.
+     * @param autoname If false, takes basename to be a file. If true, basename
+     *                 is assumed to be a directory in which a filename will be
+     *                 chosen according to the url of the current page.
+     * @param callback Called after the web archive has been saved. The
+     *                 parameter for onReceiveValue will either be the filename
+     *                 under which the file was saved, or null if saving the
+     *                 file failed.
+     */
+    public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback) {
+        mWebViewCore.sendMessage(EventHub.SAVE_WEBARCHIVE,
+            new SaveWebArchiveMessage(basename, autoname, callback));
+    }
+
+    /**
      * Stop the current load.
      */
     public void stopLoading() {
@@ -1801,6 +1838,40 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * Returns true if private browsing is enabled in this WebView.
+     */
+    public boolean isPrivateBrowsingEnabled() {
+        return getSettings().isPrivateBrowsingEnabled();
+    }
+
+    private void startPrivateBrowsing() {
+        boolean wasPrivateBrowsingEnabled = isPrivateBrowsingEnabled();
+
+        getSettings().setPrivateBrowsingEnabled(true);
+
+        if (!wasPrivateBrowsingEnabled) {
+            loadUrl("browser:incognito");
+        }
+    }
+
+    /**
+     * Deletes any files that were created as a part of the last private
+     * browsing session and clears any internal state associated with that
+     * session. The consequences of calling this method while a private
+     * browsing session is active are unspecified.
+     * @param context The same context which was used to create the private
+     *                browsing WebView.
+     * @return True if the private browsing files were successfully deleted,
+     *         false otherwise.
+     * @hide pending API council approval.
+     */
+    public static boolean cleanupPrivateBrowsingFiles(Context context) {
+        return nativeCleanupPrivateBrowsingFiles(context.getFilesDir().getParent());
+    }
+
+    private static native boolean nativeCleanupPrivateBrowsingFiles(String dataDirectory);
+
     private boolean extendScroll(int y) {
         int finalY = mScroller.getFinalY();
         int newY = pinLocY(finalY + y);
@@ -1848,7 +1919,7 @@ public class WebView extends AbsoluteLayout
         }
         nativeClearCursor(); // start next trackball movement from page edge
         if (bottom) {
-            return pinScrollTo(mScrollX, computeRealVerticalScrollRange(), true, 0);
+            return pinScrollTo(mScrollX, computeVerticalScrollRange(), true, 0);
         }
         // Page down.
         int h = getHeight();
@@ -1870,6 +1941,7 @@ public class WebView extends AbsoluteLayout
     public void clearView() {
         mContentWidth = 0;
         mContentHeight = 0;
+        if (mNativeClass != 0) nativeSetBaseLayer(0);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
@@ -1883,8 +1955,9 @@ public class WebView extends AbsoluteLayout
      *         bounds of the view.
      */
     public Picture capturePicture() {
-        if (null == mWebViewCore) return null; // check for out of memory tab
-        return mWebViewCore.copyContentPicture();
+        Picture result = new Picture();
+        nativeCopyBaseContentToPicture(result);
+        return result;
     }
 
     /**
@@ -1896,15 +1969,13 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Remove the WebTextView.
-     * @param disableFocusController If true, send a message to webkit
-     *     disabling the focus controller, so the caret stops blinking.
      */
-    private void clearTextEntry(boolean disableFocusController) {
+    private void clearTextEntry() {
         if (inEditingMode()) {
             mWebTextView.remove();
-            if (disableFocusController) {
-                setFocusControllerInactive();
-            }
+        } else {
+            // The keyboard may be open with the WebView as the served view
+            hideSoftKeyboard();
         }
     }
 
@@ -1913,7 +1984,7 @@ public class WebView extends AbsoluteLayout
      * @return The current scale.
      */
     public float getScale() {
-        return mActualScale;
+        return mZoomManager.getScale();
     }
 
     /**
@@ -1925,7 +1996,7 @@ public class WebView extends AbsoluteLayout
      * @param scaleInPercent The initial scale in percent.
      */
     public void setInitialScale(int scaleInPercent) {
-        mInitialScaleInPercent = scaleInPercent;
+        mZoomManager.setInitialScaleInPercent(scaleInPercent);
     }
 
     /**
@@ -1938,14 +2009,8 @@ public class WebView extends AbsoluteLayout
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return;
         }
-        clearTextEntry(false);
-        if (getSettings().getBuiltInZoomControls()) {
-            getZoomButtonsController().setVisible(true);
-        } else {
-            mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-            mPrivateHandler.postDelayed(mZoomControlRunnable,
-                    ZOOM_CONTROLS_TIMEOUT);
-        }
+        clearHelpers();
+        mZoomManager.invokeZoomPicker();
     }
 
     /**
@@ -2060,7 +2125,7 @@ public class WebView extends AbsoluteLayout
         msg.sendToTarget();
     }
 
-    private static int pinLoc(int x, int viewMax, int docMax) {
+    static int pinLoc(int x, int viewMax, int docMax) {
 //        Log.d(LOGTAG, "-- pinLoc " + x + " " + viewMax + " " + docMax);
         if (docMax < viewMax) {   // the doc has room on the sides for "blank"
             // pin the short document to the top/left of the screen
@@ -2077,16 +2142,14 @@ public class WebView extends AbsoluteLayout
     }
 
     // Expects x in view coordinates
-    private int pinLocX(int x) {
-        if (mInOverScrollMode) return x;
-        return pinLoc(x, getViewWidth(), computeRealHorizontalScrollRange());
+    int pinLocX(int x) {
+        return pinLoc(x, getViewWidth(), computeHorizontalScrollRange());
     }
 
     // Expects y in view coordinates
-    private int pinLocY(int y) {
-        if (mInOverScrollMode) return y;
+    int pinLocY(int y) {
         return pinLoc(y, getViewHeightWithTitle(),
-                      computeRealVerticalScrollRange() + getTitleHeight());
+                      computeVerticalScrollRange() + getTitleHeight());
     }
 
     /**
@@ -2111,6 +2174,16 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public void setEmbeddedTitleBar(View v) {
+        if (null == v) {
+            // If one of our callbacks is holding onto the titlebar to replace
+            // it when its ActionMode ends, remove it.
+            if (mSelectCallback != null) {
+                mSelectCallback.setTitleBar(null);
+            }
+            if (mFindCallback != null) {
+                mFindCallback.setTitleBar(null);
+            }
+        }
         if (mTitleBar == v) return;
         if (mTitleBar != null) {
             removeView(mTitleBar);
@@ -2134,7 +2207,7 @@ public class WebView extends AbsoluteLayout
      * height.
      */
     private int viewToContentDimension(int d) {
-        return Math.round(d * mInvActualScale);
+        return Math.round(d * mZoomManager.getInvScale());
     }
 
     /**
@@ -2160,7 +2233,7 @@ public class WebView extends AbsoluteLayout
      * Returns the result as a float.
      */
     private float viewToContentXf(int x) {
-        return x * mInvActualScale;
+        return x * mZoomManager.getInvScale();
     }
 
     /**
@@ -2169,7 +2242,7 @@ public class WebView extends AbsoluteLayout
      * embedded into the WebView. Returns the result as a float.
      */
     private float viewToContentYf(int y) {
-        return (y - getTitleHeight()) * mInvActualScale;
+        return (y - getTitleHeight()) * mZoomManager.getInvScale();
     }
 
     /**
@@ -2179,7 +2252,7 @@ public class WebView extends AbsoluteLayout
      * height.
      */
     /*package*/ int contentToViewDimension(int d) {
-        return Math.round(d * mActualScale);
+        return Math.round(d * mZoomManager.getScale());
     }
 
     /**
@@ -2220,7 +2293,7 @@ public class WebView extends AbsoluteLayout
     // Called by JNI to invalidate the View, given rectangle coordinates in
     // content space
     private void viewInvalidate(int l, int t, int r, int b) {
-        final float scale = mActualScale;
+        final float scale = mZoomManager.getScale();
         final int dy = getTitleHeight();
         invalidate((int)Math.floor(l * scale),
                    (int)Math.floor(t * scale) + dy,
@@ -2231,7 +2304,7 @@ public class WebView extends AbsoluteLayout
     // Called by JNI to invalidate the View after a delay, given rectangle
     // coordinates in content space
     private void viewInvalidateDelayed(long delay, int l, int t, int r, int b) {
-        final float scale = mActualScale;
+        final float scale = mZoomManager.getScale();
         final int dy = getTitleHeight();
         postInvalidateDelayed(delay,
                               (int)Math.floor(l * scale),
@@ -2269,13 +2342,7 @@ public class WebView extends AbsoluteLayout
             // updated when we get out of that mode.
             if (!mDrawHistory) {
                 // repin our scroll, taking into account the new content size
-                int oldX = mScrollX;
-                int oldY = mScrollY;
-                mScrollX = pinLocX(mScrollX);
-                mScrollY = pinLocY(mScrollY);
-                if (oldX != mScrollX || oldY != mScrollY) {
-                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
-                }
+                updateScrollCoordinates(pinLocX(mScrollX), pinLocY(mScrollY));
                 if (!mScroller.isFinished()) {
                     // We are in the middle of a scroll.  Repin the final scroll
                     // position.
@@ -2287,77 +2354,12 @@ public class WebView extends AbsoluteLayout
         contentSizeChanged(updateLayout);
     }
 
-    private void setNewZoomScale(float scale, boolean updateTextWrapScale,
-            boolean force) {
-        if (scale < mMinZoomScale) {
-            scale = mMinZoomScale;
-            // set mInZoomOverview for non mobile sites
-            if (scale < mDefaultScale) mInZoomOverview = true;
-        } else if (scale > mMaxZoomScale) {
-            scale = mMaxZoomScale;
-        }
-        if (updateTextWrapScale) {
-            mTextWrapScale = scale;
-            // reset mLastHeightSent to force VIEW_SIZE_CHANGED sent to WebKit
-            mLastHeightSent = 0;
-        }
-        if (scale != mActualScale || force) {
-            if (mDrawHistory) {
-                // If history Picture is drawn, don't update scroll. They will
-                // be updated when we get out of that mode.
-                if (scale != mActualScale && !mPreviewZoomOnly) {
-                    mCallbackProxy.onScaleChanged(mActualScale, scale);
-                }
-                mActualScale = scale;
-                mInvActualScale = 1 / scale;
-                sendViewSizeZoom();
-            } else {
-                // update our scroll so we don't appear to jump
-                // i.e. keep the center of the doc in the center of the view
-
-                int oldX = mScrollX;
-                int oldY = mScrollY;
-                float ratio = scale * mInvActualScale;   // old inverse
-                float sx = ratio * oldX + (ratio - 1) * mZoomCenterX;
-                float sy = ratio * oldY + (ratio - 1)
-                        * (mZoomCenterY - getTitleHeight());
-
-                // now update our new scale and inverse
-                if (scale != mActualScale && !mPreviewZoomOnly) {
-                    mCallbackProxy.onScaleChanged(mActualScale, scale);
-                }
-                mActualScale = scale;
-                mInvActualScale = 1 / scale;
-
-                // Scale all the child views
-                mViewManager.scaleAll();
-
-                // as we don't have animation for scaling, don't do animation
-                // for scrolling, as it causes weird intermediate state
-                //        pinScrollTo(Math.round(sx), Math.round(sy));
-                mScrollX = pinLocX(Math.round(sx));
-                mScrollY = pinLocY(Math.round(sy));
-
-                // update webkit
-                if (oldX != mScrollX || oldY != mScrollY) {
-                    onScrollChanged(mScrollX, mScrollY, oldX, oldY);
-                } else {
-                    // the scroll position is adjusted at the beginning of the
-                    // zoom animation. But we want to update the WebKit at the
-                    // end of the zoom animation. See comments in onScaleEnd().
-                    sendOurVisibleRect();
-                }
-                sendViewSizeZoom();
-            }
-        }
-    }
-
     // Used to avoid sending many visible rect messages.
     private Rect mLastVisibleRectSent;
     private Rect mLastGlobalRect;
 
-    private Rect sendOurVisibleRect() {
-        if (mPreviewZoomOnly) return mLastVisibleRectSent;
+    Rect sendOurVisibleRect() {
+        if (mZoomManager.isPreventingWebkitUpdates()) return mLastVisibleRectSent;
 
         Rect rect = new Rect();
         calcOurContentVisibleRect(rect);
@@ -2390,15 +2392,12 @@ public class WebView extends AbsoluteLayout
         Point p = new Point();
         getGlobalVisibleRect(r, p);
         r.offset(-p.x, -p.y);
-        if (mFindIsUp) {
-            r.bottom -= mFindHeight;
-        }
     }
 
     // Sets r to be our visible rectangle in content coordinates
     private void calcOurContentVisibleRect(Rect r) {
         calcOurVisibleRect(r);
-        // since we might overscroll, pin the rect to the bounds of the content
+        // pin the rect to the bounds of the content
         r.left = Math.max(viewToContentX(r.left), 0);
         // viewToContentY will remove the total height of the title bar.  Add
         // the visible height back in to account for the fact that if the title
@@ -2439,16 +2438,19 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Compute unzoomed width and height, and if they differ from the last
-     * values we sent, send them to webkit (to be used has new viewport)
+     * values we sent, send them to webkit (to be used as new viewport)
+     *
+     * @param force ensures that the message is sent to webkit even if the width
+     * or height has not changed since the last message
      *
      * @return true if new values were sent
      */
-    private boolean sendViewSizeZoom() {
-        if (mPreviewZoomOnly) return false;
+    boolean sendViewSizeZoom(boolean force) {
+        if (mZoomManager.isPreventingWebkitUpdates()) return false;
 
         int viewWidth = getViewWidth();
-        int newWidth = Math.round(viewWidth * mInvActualScale);
-        int newHeight = Math.round(getViewHeight() * mInvActualScale);
+        int newWidth = Math.round(viewWidth * mZoomManager.getInvScale());
+        int newHeight = Math.round(getViewHeight() * mZoomManager.getInvScale());
         /*
          * Because the native side may have already done a layout before the
          * View system was able to measure us, we have to send a height of 0 to
@@ -2461,85 +2463,51 @@ public class WebView extends AbsoluteLayout
             newHeight = 0;
         }
         // Avoid sending another message if the dimensions have not changed.
-        if (newWidth != mLastWidthSent || newHeight != mLastHeightSent) {
+        if (newWidth != mLastWidthSent || newHeight != mLastHeightSent || force) {
             ViewSizeData data = new ViewSizeData();
             data.mWidth = newWidth;
             data.mHeight = newHeight;
-            data.mTextWrapWidth = Math.round(viewWidth / mTextWrapScale);;
-            data.mScale = mActualScale;
-            data.mIgnoreHeight = mZoomScale != 0 && !mHeightCanMeasure;
-            data.mAnchorX = mAnchorX;
-            data.mAnchorY = mAnchorY;
+            data.mTextWrapWidth = Math.round(viewWidth / mZoomManager.getTextWrapScale());
+            data.mScale = mZoomManager.getScale();
+            data.mIgnoreHeight = mZoomManager.isFixedLengthAnimationInProgress()
+                    && !mHeightCanMeasure;
+            data.mAnchorX = mZoomManager.getDocumentAnchorX();
+            data.mAnchorY = mZoomManager.getDocumentAnchorY();
             mWebViewCore.sendMessage(EventHub.VIEW_SIZE_CHANGED, data);
             mLastWidthSent = newWidth;
             mLastHeightSent = newHeight;
-            mAnchorX = mAnchorY = 0;
+            mZoomManager.clearDocumentAnchor();
             return true;
         }
         return false;
     }
 
-    private int computeRealHorizontalScrollRange() {
+    @Override
+    protected int computeHorizontalScrollRange() {
         if (mDrawHistory) {
             return mHistoryWidth;
         } else if (mHorizontalScrollBarMode == SCROLLBAR_ALWAYSOFF
-                && (mActualScale - mMinZoomScale <= MINIMUM_SCALE_INCREMENT)) {
+                && !mZoomManager.canZoomOut()) {
             // only honor the scrollbar mode when it is at minimum zoom level
             return computeHorizontalScrollExtent();
         } else {
             // to avoid rounding error caused unnecessary scrollbar, use floor
-            return (int) Math.floor(mContentWidth * mActualScale);
-        }
-    }
-
-    @Override
-    protected int computeHorizontalScrollRange() {
-        int range = computeRealHorizontalScrollRange();
-
-        // Adjust reported range if overscrolled to compress the scroll bars
-        final int scrollX = mScrollX;
-        final int overscrollRight = computeMaxScrollX();
-        if (scrollX < 0) {
-            range -= scrollX;
-        } else if (scrollX > overscrollRight) {
-            range += scrollX - overscrollRight;
-        }
-
-        return range;
-    }
-
-    @Override
-    protected int computeHorizontalScrollOffset() {
-        return Math.max(mScrollX, 0);
-    }
-
-    private int computeRealVerticalScrollRange() {
-        if (mDrawHistory) {
-            return mHistoryHeight;
-        } else if (mVerticalScrollBarMode == SCROLLBAR_ALWAYSOFF
-                && (mActualScale - mMinZoomScale <= MINIMUM_SCALE_INCREMENT)) {
-            // only honor the scrollbar mode when it is at minimum zoom level
-            return computeVerticalScrollExtent();
-        } else {
-            // to avoid rounding error caused unnecessary scrollbar, use floor
-            return (int) Math.floor(mContentHeight * mActualScale);
+            return (int) Math.floor(mContentWidth * mZoomManager.getScale());
         }
     }
 
     @Override
     protected int computeVerticalScrollRange() {
-        int range = computeRealVerticalScrollRange();
-
-        // Adjust reported range if overscrolled to compress the scroll bars
-        final int scrollY = mScrollY;
-        final int overscrollBottom = computeMaxScrollY();
-        if (scrollY < 0) {
-            range -= scrollY;
-        } else if (scrollY > overscrollBottom) {
-            range += scrollY - overscrollBottom;
+        if (mDrawHistory) {
+            return mHistoryHeight;
+        } else if (mVerticalScrollBarMode == SCROLLBAR_ALWAYSOFF
+                && !mZoomManager.canZoomOut()) {
+            // only honor the scrollbar mode when it is at minimum zoom level
+            return computeVerticalScrollExtent();
+        } else {
+            // to avoid rounding error caused unnecessary scrollbar, use floor
+            return (int) Math.floor(mContentHeight * mZoomManager.getScale());
         }
-
-        return range;
     }
 
     @Override
@@ -2557,29 +2525,8 @@ public class WebView extends AbsoluteLayout
     protected void onDrawVerticalScrollBar(Canvas canvas,
                                            Drawable scrollBar,
                                            int l, int t, int r, int b) {
-        if (mScrollY < 0) {
-            t -= mScrollY;
-        }
         scrollBar.setBounds(l, t + getVisibleTitleHeight(), r, b);
         scrollBar.draw(canvas);
-    }
-
-    @Override
-    protected void onOverscrolled(int scrollX, int scrollY, boolean clampedX,
-            boolean clampedY) {
-        mInOverScrollMode = false;
-        int maxX = computeMaxScrollX();
-        if (maxX == 0) {
-            // do not over scroll x if the page just fits the screen
-            scrollX = pinLocX(scrollX);
-        } else if (scrollX < 0 || scrollX > maxX) {
-            mInOverScrollMode = true;
-        }
-        if (scrollY < 0 || scrollY > computeMaxScrollY()) {
-            mInOverScrollMode = true;
-        }
-
-        super.scrollTo(scrollX, scrollY);
     }
 
     /**
@@ -2627,7 +2574,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Get the touch icon url for the apple-touch-icon <link> element.
+     * Get the touch icon url for the apple-touch-icon <link> element, or
+     * a URL on this site's server pointing to the standard location of a
+     * touch icon.
      * @hide
      */
     public String getTouchIconUrl() {
@@ -2800,22 +2749,49 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide
+     * Start an ActionMode for finding text in this WebView.
+     * @param text If non-null, will be the initial text to search for.
+     *             Otherwise, the last String searched for in this WebView will
+     *             be used to start.
      */
-    public void setFindIsUp(boolean isUp) {
-        mFindIsUp = isUp;
-        if (isUp) {
-            recordNewContentSize(mContentWidth, mContentHeight + mFindHeight,
-                    false);
+    public void showFindDialog(String text) {
+        mFindCallback = new FindActionModeCallback(mContext);
+        setFindIsUp(true);
+        mFindCallback.setWebView(this);
+        View titleBar = mTitleBar;
+        // We do not want to show the embedded title bar during find or
+        // select, but keep track of it so that it can be replaced when the
+        // mode is exited.
+        setEmbeddedTitleBar(null);
+        mFindCallback.setTitleBar(titleBar);
+        startActionMode(mFindCallback);
+        if (text == null) {
+            text = mLastFind;
         }
+        if (text != null) {
+            mFindCallback.setText(text);
+        }
+    }
+
+    /**
+     * Keep track of the find callback so that we can remove its titlebar if
+     * necessary.
+     */
+    private FindActionModeCallback mFindCallback;
+
+    /**
+     * Toggle whether the find dialog is showing, for both native and Java.
+     */
+    private void setFindIsUp(boolean isUp) {
+        mFindIsUp = isUp;
         if (0 == mNativeClass) return; // client isn't initialized
         nativeSetFindIsUp(isUp);
     }
 
     /**
-     * @hide
+     * Return the index of the currently highlighted match.
      */
-    public int findIndex() {
+    int findIndex() {
         if (0 == mNativeClass) return -1;
         return nativeFindIndex();
     }
@@ -2824,9 +2800,8 @@ public class WebView extends AbsoluteLayout
     // or not we draw the highlights for matches.
     private boolean mFindIsUp;
 
-    private int mFindHeight;
-    // Keep track of the last string sent, so we can search again after an
-    // orientation change or the dismissal of the soft keyboard.
+    // Keep track of the last string sent, so we can search again when find is
+    // reopened.
     private String mLastFind;
 
     /**
@@ -2883,7 +2858,6 @@ public class WebView extends AbsoluteLayout
      * Clear the highlighting surrounding text matches created by findAll.
      */
     public void clearMatches() {
-        mLastFind = "";
         if (mNativeClass == 0)
             return;
         nativeSetFindIsEmpty();
@@ -2891,30 +2865,19 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide
+     * Called when the find ActionMode ends.
      */
-    public void notifyFindDialogDismissed() {
+    void notifyFindDialogDismissed() {
+        mFindCallback = null;
         if (mWebViewCore == null) {
             return;
         }
         clearMatches();
         setFindIsUp(false);
-        recordNewContentSize(mContentWidth, mContentHeight - mFindHeight,
-                false);
         // Now that the dialog has been removed, ensure that we scroll to a
         // location that is not beyond the end of the page.
         pinScrollTo(mScrollX, mScrollY, false, 0);
         invalidate();
-    }
-
-    /**
-     * @hide
-     */
-    public void setFindDialogHeight(int height) {
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "setFindDialogHeight height=" + height);
-        }
-        mFindHeight = height;
     }
 
     /**
@@ -2930,42 +2893,31 @@ public class WebView extends AbsoluteLayout
         mWebViewCore.sendMessage(EventHub.DOC_HAS_IMAGES, response);
     }
 
+    /**
+     * Request the scroller to abort any ongoing animation
+     *
+     * @hide
+     */
+    public void stopScroll() {
+        mScroller.forceFinished(true);
+        mLastVelocity = 0;
+    }
+
     @Override
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
             int oldX = mScrollX;
             int oldY = mScrollY;
-            int x = mScroller.getCurrX();
-            int y = mScroller.getCurrY();
-            invalidate();  // So we draw again
-
-            if (oldX != x || oldY != y) {
-                final int rangeX = computeMaxScrollX();
-                final int rangeY = computeMaxScrollY();
-                overscrollBy(x - oldX, y - oldY, oldX, oldY,
-                        rangeX, rangeY,
-                        mOverflingDistance, mOverflingDistance, false);
-
-                if (mEdgeGlowTop != null) {
-                    if (rangeY > 0 || getOverscrollMode() == OVERSCROLL_ALWAYS) {
-                        if (y < 0 && oldY >= 0) {
-                            mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
-                        } else if (y > rangeY && oldY <= rangeY) {
-                            mEdgeGlowBottom.onAbsorb((int) mScroller.getCurrVelocity());
-                        }
-                    }
-
-                    if (rangeX > 0) {
-                        if (x < 0 && oldX >= 0) {
-                            mEdgeGlowLeft.onAbsorb((int) mScroller.getCurrVelocity());
-                        } else if (x > rangeX && oldX <= rangeX) {
-                            mEdgeGlowRight.onAbsorb((int) mScroller.getCurrVelocity());
-                        }
-                    }
-                }
-            }
-            if (mScroller.isFinished()) {
-                mPrivateHandler.sendEmptyMessage(RESUME_WEBCORE_PRIORITY);
+            mScrollX = mScroller.getCurrX();
+            mScrollY = mScroller.getCurrY();
+            postInvalidate();  // So we draw again
+            if (oldX != mScrollX || oldY != mScrollY) {
+                onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+            } else {
+                abortAnimation();
+                mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
+                WebViewCore.resumePriority();
+                WebViewCore.resumeUpdatePicture(mWebViewCore);
             }
         } else {
             super.computeScroll();
@@ -3039,6 +2991,23 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Called by CallbackProxy when the page starts loading.
+     * @param url The URL of the page which has started loading.
+     */
+    /* package */ void onPageStarted(String url) {
+        // every time we start a new page, we want to reset the
+        // WebView certificate:  if the new site is secure, we
+        // will reload it and get a new certificate set;
+        // if the new site is not secure, the certificate must be
+        // null, and that will be the case
+        setCertificate(null);
+
+        // reset the flag since we set to true in if need after
+        // loading is see onPageFinished(Url)
+        mAccessibilityScriptInjected = false;
+    }
+
+    /**
      * Called by CallbackProxy when the page finishes loading.
      * @param url The URL of the page which has finished loading.
      */
@@ -3054,6 +3023,99 @@ public class WebView extends AbsoluteLayout
             }
             mPageThatNeedsToSlideTitleBarOffScreen = null;
         }
+
+        injectAccessibilityForUrl(url);
+    }
+
+    /**
+     * This method injects accessibility in the loaded document if accessibility
+     * is enabled. If JavaScript is enabled we try to inject a URL specific script.
+     * If no URL specific script is found or JavaScript is disabled we fallback to
+     * the default {@link AccessibilityInjector} implementation.
+     * </p>
+     * If the URL has the "axs" paramter set to 1 it has already done the
+     * script injection so we do nothing. If the parameter is set to 0
+     * the URL opts out accessibility script injection so we fall back to
+     * the default {@link AccessibilityInjector}.
+     * </p>
+     * Note: If the user has not opted-in the accessibility script injection no scripts
+     * are injected rather the default {@link AccessibilityInjector} implementation
+     * is used.
+     *
+     * @param url The URL loaded by this {@link WebView}.
+     */
+    private void injectAccessibilityForUrl(String url) {
+        AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
+
+        if (!accessibilityManager.isEnabled()) {
+            // it is possible that accessibility was turned off between reloads
+            ensureAccessibilityScriptInjectorInstance(false);
+            return;
+        }
+
+        if (!getSettings().getJavaScriptEnabled()) {
+            // no JS so we fallback to the basic buil-in support
+            ensureAccessibilityScriptInjectorInstance(true);
+            return;
+        }
+
+        // check the URL "axs" parameter to choose appropriate action
+        int axsParameterValue = getAxsUrlParameterValue(url);
+        if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_UNDEFINED) {
+            boolean onDeviceScriptInjectionEnabled = (Settings.Secure.getInt(mContext
+                    .getContentResolver(), Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, 0) == 1);
+            if (onDeviceScriptInjectionEnabled) {
+                ensureAccessibilityScriptInjectorInstance(false);
+                // neither script injected nor script injection opted out => we inject
+                loadUrl(ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT);
+                // TODO: Set this flag after successfull script injection. Maybe upon injection
+                // the chooser should update the meta tag and we check it to declare success
+                mAccessibilityScriptInjected = true;
+            } else {
+                // injection disabled so we fallback to the basic built-in support
+                ensureAccessibilityScriptInjectorInstance(true);
+            }
+        } else if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_OPTED_OUT) {
+            // injection opted out so we fallback to the basic buil-in support
+            ensureAccessibilityScriptInjectorInstance(true);
+        } else if (axsParameterValue == ACCESSIBILITY_SCRIPT_INJECTION_PROVIDED) {
+            ensureAccessibilityScriptInjectorInstance(false);
+            // the URL provides accessibility but we still need to add our generic script
+            loadUrl(ACCESSIBILITY_SCRIPT_CHOOSER_JAVASCRIPT);
+        } else {
+            Log.e(LOGTAG, "Unknown URL value for the \"axs\" URL parameter: " + axsParameterValue);
+        }
+    }
+
+    /**
+     * Ensures the instance of the {@link AccessibilityInjector} to be present ot not.
+     *
+     * @param present True to ensure an insance, false to ensure no instance.
+     */
+    private void ensureAccessibilityScriptInjectorInstance(boolean present) {
+        if (present && mAccessibilityInjector == null) {
+            mAccessibilityInjector = new AccessibilityInjector(this);
+        } else {
+            mAccessibilityInjector = null;
+        }
+    }
+
+    /**
+     * Gets the "axs" URL parameter value.
+     *
+     * @param url A url to fetch the paramter from.
+     * @return The parameter value if such, -1 otherwise.
+     */
+    private int getAxsUrlParameterValue(String url) {
+        if (mMatchAxsUrlParameterPattern == null) {
+            mMatchAxsUrlParameterPattern = Pattern.compile(PATTERN_MATCH_AXS_URL_PARAMETER);
+        }
+        Matcher matcher = mMatchAxsUrlParameterPattern.matcher(url);
+        if (matcher.find()) {
+            String keyValuePair = url.substring(matcher.start(), matcher.end());
+            return Integer.parseInt(keyValuePair.split("=")[1]);
+        }
+        return -1;
     }
 
     /**
@@ -3170,7 +3232,7 @@ public class WebView extends AbsoluteLayout
         } else {
             // If we don't request a layout, try to send our view size to the
             // native side to ensure that WebCore has the correct dimensions.
-            sendViewSizeZoom();
+            sendViewSizeZoom(false);
         }
     }
 
@@ -3300,46 +3362,7 @@ public class WebView extends AbsoluteLayout
      *         settings.
      */
     public WebSettings getSettings() {
-        return mWebViewCore.getSettings();
-    }
-
-    /**
-     * Use this method to inform the webview about packages that are installed
-     * in the system. This information will be used by the
-     * navigator.isApplicationInstalled() API.
-     * @param packageNames is a set of package names that are known to be
-     * installed in the system.
-     *
-     * @hide not a public API
-     */
-    public void addPackageNames(Set<String> packageNames) {
-        mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAMES, packageNames);
-    }
-
-    /**
-     * Use this method to inform the webview about single packages that are
-     * installed in the system. This information will be used by the
-     * navigator.isApplicationInstalled() API.
-     * @param packageName is the name of a package that is known to be
-     * installed in the system.
-     *
-     * @hide not a public API
-     */
-    public void addPackageName(String packageName) {
-        mWebViewCore.sendMessage(EventHub.ADD_PACKAGE_NAME, packageName);
-    }
-
-    /**
-     * Use this method to inform the webview about packages that are uninstalled
-     * in the system. This information will be used by the
-     * navigator.isApplicationInstalled() API.
-     * @param packageName is the name of a package that has been uninstalled in
-     * the system.
-     *
-     * @hide not a public API
-     */
-    public void removePackageName(String packageName) {
-        mWebViewCore.sendMessage(EventHub.REMOVE_PACKAGE_NAME, packageName);
+        return (mWebViewCore != null) ? mWebViewCore.getSettings() : null;
     }
 
    /**
@@ -3413,36 +3436,6 @@ public class WebView extends AbsoluteLayout
         }
 
         int saveCount = canvas.save();
-        if (mInOverScrollMode && !getSettings()
-                .getUseWebViewBackgroundForOverscrollBackground()) {
-            if (mOverScrollBackground == null) {
-                mOverScrollBackground = new Paint();
-                Bitmap bm = BitmapFactory.decodeResource(
-                        mContext.getResources(),
-                        com.android.internal.R.drawable.status_bar_background);
-                mOverScrollBackground.setShader(new BitmapShader(bm,
-                        Shader.TileMode.REPEAT, Shader.TileMode.REPEAT));
-                mOverScrollBorder = new Paint();
-                mOverScrollBorder.setStyle(Paint.Style.STROKE);
-                mOverScrollBorder.setStrokeWidth(0);
-                mOverScrollBorder.setColor(0xffbbbbbb);
-            }
-
-            int top = 0;
-            int right = computeRealHorizontalScrollRange();
-            int bottom = top + computeRealVerticalScrollRange();
-            // first draw the background and anchor to the top of the view
-            canvas.save();
-            canvas.translate(mScrollX, mScrollY);
-            canvas.clipRect(-mScrollX, top - mScrollY, right - mScrollX, bottom
-                    - mScrollY, Region.Op.DIFFERENCE);
-            canvas.drawPaint(mOverScrollBackground);
-            canvas.restore();
-            // then draw the border
-            canvas.drawRect(-1, top - 1, right, bottom, mOverScrollBorder);
-            // next clip the region for the content
-            canvas.clipRect(0, top, right, bottom);
-        }
         if (mTitleBar != null) {
             canvas.translate(0, (int) mTitleBar.getHeight());
         }
@@ -3468,71 +3461,50 @@ public class WebView extends AbsoluteLayout
                     mScrollY + height);
             mTitleShadow.draw(canvas);
         }
-
         if (AUTO_REDRAW_HACK && mAutoRedraw) {
             invalidate();
         }
+        if (inEditingMode()) mWebTextView.onDrawSubstitute();
         mWebViewCore.signalRepaintDone();
-    }
 
-    @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-        if (mEdgeGlowTop != null && drawEdgeGlows(canvas)) {
-            invalidate();
+        // paint the highlight in the end
+        if (!mTouchHighlightRegion.isEmpty()) {
+            if (mTouchHightlightPaint == null) {
+                mTouchHightlightPaint = new Paint();
+                mTouchHightlightPaint.setColor(mHightlightColor);
+                mTouchHightlightPaint.setAntiAlias(true);
+                mTouchHightlightPaint.setPathEffect(new CornerPathEffect(
+                        TOUCH_HIGHLIGHT_ARC));
+            }
+            canvas.drawPath(mTouchHighlightRegion.getBoundaryPath(),
+                    mTouchHightlightPaint);
+        }
+        if (DEBUG_TOUCH_HIGHLIGHT) {
+            if (getSettings().getNavDump()) {
+                if ((mTouchHighlightX | mTouchHighlightY) != 0) {
+                    if (mTouchCrossHairColor == null) {
+                        mTouchCrossHairColor = new Paint();
+                        mTouchCrossHairColor.setColor(Color.RED);
+                    }
+                    canvas.drawLine(mTouchHighlightX - mNavSlop,
+                            mTouchHighlightY - mNavSlop, mTouchHighlightX
+                                    + mNavSlop + 1, mTouchHighlightY + mNavSlop
+                                    + 1, mTouchCrossHairColor);
+                    canvas.drawLine(mTouchHighlightX + mNavSlop + 1,
+                            mTouchHighlightY - mNavSlop, mTouchHighlightX
+                                    - mNavSlop,
+                            mTouchHighlightY + mNavSlop + 1,
+                            mTouchCrossHairColor);
+                }
+            }
         }
     }
 
-    /**
-     * Draw the glow effect along the sides of the widget. mEdgeGlow* must be non-null.
-     *
-     * @param canvas Canvas to draw into, transformed into view coordinates.
-     * @return true if glow effects are still animating and the view should invalidate again.
-     */
-    private boolean drawEdgeGlows(Canvas canvas) {
-        final int scrollX = mScrollX;
-        final int scrollY = mScrollY;
-        final int width = getWidth();
-        int height = getHeight();
-
-        boolean invalidateForGlow = false;
-        if (!mEdgeGlowTop.isFinished()) {
-            final int restoreCount = canvas.save();
-
-            canvas.translate(-width / 2 + scrollX, Math.min(0, scrollY));
-            mEdgeGlowTop.setSize(width * 2, height);
-            invalidateForGlow |= mEdgeGlowTop.draw(canvas);
-            canvas.restoreToCount(restoreCount);
+    private void removeTouchHighlight(boolean removePendingMessage) {
+        if (removePendingMessage) {
+            mWebViewCore.removeMessages(EventHub.GET_TOUCH_HIGHLIGHT_RECTS);
         }
-        if (!mEdgeGlowBottom.isFinished()) {
-            final int restoreCount = canvas.save();
-
-            canvas.translate(-width / 2 + scrollX, Math.max(computeMaxScrollY(), scrollY) + height);
-            canvas.rotate(180, width, 0);
-            mEdgeGlowBottom.setSize(width * 2, height);
-            invalidateForGlow |= mEdgeGlowBottom.draw(canvas);
-            canvas.restoreToCount(restoreCount);
-        }
-        if (!mEdgeGlowLeft.isFinished()) {
-            final int restoreCount = canvas.save();
-
-            canvas.rotate(270);
-            canvas.translate(-height * 1.5f - scrollY, Math.min(0, scrollX));
-            mEdgeGlowLeft.setSize(height * 2, width);
-            invalidateForGlow |= mEdgeGlowLeft.draw(canvas);
-            canvas.restoreToCount(restoreCount);
-        }
-        if (!mEdgeGlowRight.isFinished()) {
-            final int restoreCount = canvas.save();
-
-            canvas.rotate(90);
-            canvas.translate(-height / 2 + scrollY,
-                    -(Math.max(computeMaxScrollX(), scrollX) + width));
-            mEdgeGlowRight.setSize(height * 2, width);
-            invalidateForGlow |= mEdgeGlowRight.draw(canvas);
-            canvas.restoreToCount(restoreCount);
-        }
-        return invalidateForGlow;
+        mWebViewCore.sendMessage(EventHub.REMOVE_TOUCH_HIGHLIGHT_RECTS);
     }
 
     @Override
@@ -3549,12 +3521,20 @@ public class WebView extends AbsoluteLayout
         // to windows overview, the WebView will be temporarily removed from the
         // view system. In that case, do nothing.
         if (getParent() == null) return false;
+
+        // A multi-finger gesture can look like a long press; make sure we don't take
+        // long press actions if we're scaling.
+        final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
+        if (detector != null && detector.isInProgress()) {
+            return false;
+        }
+        
         if (mNativeClass != 0 && nativeCursorIsTextInput()) {
             // Send the click so that the textfield is in focus
             centerKeyPressOnTextField();
             rebuildWebTextView();
         } else {
-            clearTextEntry(true);
+            clearTextEntry();
         }
         if (inEditingMode()) {
             return mWebTextView.performLongClick();
@@ -3575,26 +3555,17 @@ public class WebView extends AbsoluteLayout
         setUpSelect();
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
-            WebChromeClient client = getWebChromeClient();
-            if (client != null) client.onSelectionStart(this);
             return true;
         }
-        notifySelectDialogDismissed();
+        selectionDone();
         return false;
     }
 
-    boolean inAnimateZoom() {
-        return mZoomScale != 0;
-    }
-
     /**
-     * Need to adjust the WebTextView after a change in zoom, since mActualScale
-     * has changed.  This is especially important for password fields, which are
-     * drawn by the WebTextView, since it conveys more information than what
-     * webkit draws.  Thus we need to reposition it to show in the correct
-     * place.
+     * Keep track of the Callback so we can end its ActionMode or remove its
+     * titlebar.
      */
-    private boolean mNeedToAdjustWebTextView;
+    private SelectActionModeCallback mSelectCallback;
 
     private boolean didUpdateTextViewBounds(boolean allowIntersect) {
         Rect contentBounds = nativeFocusCandidateNodeBounds();
@@ -3623,25 +3594,54 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private void drawExtras(Canvas canvas, int extras, boolean animationsRunning) {
-        // If mNativeClass is 0, we should not reach here, so we do not
-        // need to check it again.
-        if (animationsRunning) {
-            canvas.setDrawFilter(mWebViewCore.mZoomFilter);
+    private void onZoomAnimationStart() {
+        // If it is in password mode, turn it off so it does not draw misplaced.
+        if (inEditingMode() && nativeFocusCandidateIsPassword()) {
+            mWebTextView.setInPassword(false);
         }
-        nativeDrawExtras(canvas, extras);
-        canvas.setDrawFilter(null);
     }
+
+    private void onZoomAnimationEnd() {
+        // adjust the edit text view if needed
+        if (inEditingMode() && didUpdateTextViewBounds(false) && nativeFocusCandidateIsPassword()) {
+            // If it is a password field, start drawing the WebTextView once
+            // again.
+            mWebTextView.setInPassword(true);
+        }
+    }
+
+    void onFixedLengthZoomAnimationStart() {
+        WebViewCore.pauseUpdatePicture(getWebViewCore());
+        onZoomAnimationStart();
+    }
+
+    void onFixedLengthZoomAnimationEnd() {
+        WebViewCore.resumeUpdatePicture(mWebViewCore);
+        onZoomAnimationEnd();
+    }
+
+    private static final int ZOOM_BITS = Paint.FILTER_BITMAP_FLAG |
+                                         Paint.DITHER_FLAG |
+                                         Paint.SUBPIXEL_TEXT_FLAG;
+    private static final int SCROLL_BITS = Paint.FILTER_BITMAP_FLAG |
+                                           Paint.DITHER_FLAG;
+
+    private final DrawFilter mZoomFilter =
+            new PaintFlagsDrawFilter(ZOOM_BITS, Paint.LINEAR_TEXT_FLAG);
+    // If we need to trade better quality for speed, set mScrollFilter to null
+    private final DrawFilter mScrollFilter =
+            new PaintFlagsDrawFilter(SCROLL_BITS, 0);
 
     private void drawCoreAndCursorRing(Canvas canvas, int color,
         boolean drawCursorRing) {
         if (mDrawHistory) {
-            canvas.scale(mActualScale, mActualScale);
+            canvas.scale(mZoomManager.getScale(), mZoomManager.getScale());
             canvas.drawPicture(mHistoryPicture);
             return;
         }
+        if (mNativeClass == 0) return;
 
-        boolean animateZoom = mZoomScale != 0;
+        boolean animateZoom = mZoomManager.isFixedLengthAnimationInProgress();
         boolean animateScroll = ((!mScroller.isFinished()
                 || mVelocityTracker != null)
                 && (mTouchMode != TOUCH_DRAG_MODE ||
@@ -3660,59 +3660,9 @@ public class WebView extends AbsoluteLayout
             }
         }
         if (animateZoom) {
-            float zoomScale;
-            int interval = (int) (SystemClock.uptimeMillis() - mZoomStart);
-            if (interval < ZOOM_ANIMATION_LENGTH) {
-                float ratio = (float) interval / ZOOM_ANIMATION_LENGTH;
-                zoomScale = 1.0f / (mInvInitialZoomScale
-                        + (mInvFinalZoomScale - mInvInitialZoomScale) * ratio);
-                invalidate();
-            } else {
-                zoomScale = mZoomScale;
-                // set mZoomScale to be 0 as we have done animation
-                mZoomScale = 0;
-                WebViewCore.resumeUpdatePicture(mWebViewCore);
-                // call invalidate() again to draw with the final filters
-                invalidate();
-                if (mNeedToAdjustWebTextView) {
-                    mNeedToAdjustWebTextView = false;
-                    if (didUpdateTextViewBounds(false)
-                            && nativeFocusCandidateIsPassword()) {
-                        // If it is a password field, start drawing the
-                        // WebTextView once again.
-                        mWebTextView.setInPassword(true);
-                    }
-                }
-            }
-            // calculate the intermediate scroll position. As we need to use
-            // zoomScale, we can't use pinLocX/Y directly. Copy the logic here.
-            float scale = zoomScale * mInvInitialZoomScale;
-            int tx = Math.round(scale * (mInitialScrollX + mZoomCenterX)
-                    - mZoomCenterX);
-            tx = -pinLoc(tx, getViewWidth(), Math.round(mContentWidth
-                    * zoomScale)) + mScrollX;
-            int titleHeight = getTitleHeight();
-            int ty = Math.round(scale
-                    * (mInitialScrollY + mZoomCenterY - titleHeight)
-                    - (mZoomCenterY - titleHeight));
-            ty = -(ty <= titleHeight ? Math.max(ty, 0) : pinLoc(ty
-                    - titleHeight, getViewHeight(), Math.round(mContentHeight
-                    * zoomScale)) + titleHeight) + mScrollY;
-            canvas.translate(tx, ty);
-            canvas.scale(zoomScale, zoomScale);
-            if (inEditingMode() && !mNeedToAdjustWebTextView
-                    && mZoomScale != 0) {
-                // The WebTextView is up.  Keep track of this so we can adjust
-                // its size and placement when we finish zooming
-                mNeedToAdjustWebTextView = true;
-                // If it is in password mode, turn it off so it does not draw
-                // misplaced.
-                if (nativeFocusCandidateIsPassword()) {
-                    mWebTextView.setInPassword(false);
-                }
-            }
+            mZoomManager.animateZoom(canvas);
         } else {
-            canvas.scale(mActualScale, mActualScale);
+            canvas.scale(mZoomManager.getScale(), mZoomManager.getScale());
         }
 
         boolean UIAnimationsRunning = false;
@@ -3724,23 +3674,38 @@ public class WebView extends AbsoluteLayout
             // we ask for a repaint.
             invalidate();
         }
-        mWebViewCore.drawContentPicture(canvas, color,
-                (animateZoom || mPreviewZoomOnly || UIAnimationsRunning),
-                animateScroll);
-        if (mNativeClass == 0) return;
+
         // decide which adornments to draw
         int extras = DRAW_EXTRAS_NONE;
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "mFindIsUp=" + mFindIsUp
+                    + " mSelectingText=" + mSelectingText
+                    + " nativePageShouldHandleShiftAndArrows()="
+                    + nativePageShouldHandleShiftAndArrows()
+                    + " animateZoom=" + animateZoom);
+        }
         if (mFindIsUp) {
-                extras = DRAW_EXTRAS_FIND;
+            extras = DRAW_EXTRAS_FIND;
         } else if (mSelectingText) {
             extras = DRAW_EXTRAS_SELECTION;
             nativeSetSelectionPointer(mDrawSelectionPointer,
-                    mInvActualScale,
+                    mZoomManager.getInvScale(),
                     mSelectX, mSelectY - getTitleHeight());
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
         }
-        drawExtras(canvas, extras, UIAnimationsRunning);
+        DrawFilter df = null;
+        if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
+            df = mZoomFilter;
+        } else if (animateScroll) {
+            df = mScrollFilter;
+        }
+        canvas.setDrawFilter(df);
+        int content = nativeDraw(canvas, color, extras, true);
+        canvas.setDrawFilter(null);
+        if (content != 0) {
+            mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
+        }
 
         if (extras == DRAW_EXTRAS_CURSOR_RING) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
@@ -3769,10 +3734,14 @@ public class WebView extends AbsoluteLayout
         return mDrawHistory;
     }
 
+    int getHistoryPictureWidth() {
+        return (mHistoryPicture != null) ? mHistoryPicture.getWidth() : 0;
+    }
+
     // Should only be called in UI thread
     void switchOutDrawHistory() {
         if (null == mWebViewCore) return; // CallbackProxy may trigger this
-        if (mDrawHistory && mWebViewCore.pictureReady()) {
+        if (mDrawHistory && (getProgress() == 100 || nativeHasContent())) {
             mDrawHistory = false;
             mHistoryPicture = null;
             invalidate();
@@ -3823,7 +3792,9 @@ public class WebView extends AbsoluteLayout
      *  @param  end     End of selection.
      */
     /* package */ void setSelection(int start, int end) {
-        mWebViewCore.sendMessage(EventHub.SET_SELECTION, start, end);
+        if (mWebViewCore != null) {
+            mWebViewCore.sendMessage(EventHub.SET_SELECTION, start, end);
+        }
     }
 
     @Override
@@ -3841,14 +3812,11 @@ public class WebView extends AbsoluteLayout
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        // bring it back to the default scale so that user can enter text
-        boolean zoom = mActualScale < mDefaultScale;
+        // bring it back to the default level scale so that user can enter text
+        boolean zoom = mZoomManager.getScale() < mZoomManager.getDefaultScale();
         if (zoom) {
-            mInZoomOverview = false;
-            mZoomCenterX = mLastTouchX;
-            mZoomCenterY = mLastTouchY;
-            // do not change text wrap scale so that there is no reflow
-            setNewZoomScale(mDefaultScale, false, false);
+            mZoomManager.setZoomCenter(mLastTouchX, mLastTouchY);
+            mZoomManager.setZoomScale(mZoomManager.getDefaultScale(), false);
         }
         if (isTextView) {
             rebuildWebTextView();
@@ -3860,7 +3828,7 @@ public class WebView extends AbsoluteLayout
                 return;
             }
         }
-        // Used by plugins.
+        // Used by plugins and contentEditable.
         // Also used if the navigation cache is out of date, and
         // does not recognize that a textfield is in focus.  In that
         // case, use WebView as the targeted view.
@@ -3872,8 +3840,10 @@ public class WebView extends AbsoluteLayout
     private void hideSoftKeyboard() {
         InputMethodManager imm = (InputMethodManager)
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
+        if (imm.isActive(this)
+                || (inEditingMode() && imm.isActive(mWebTextView))) {
+            imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
+        }
     }
 
     /*
@@ -3948,6 +3918,15 @@ public class WebView extends AbsoluteLayout
             }
         }
         mWebTextView.requestFocus();
+    }
+
+    /**
+     * Tell webkit to put the cursor on screen.
+     */
+    /* package */ void revealSelection() {
+        if (mWebViewCore != null) {
+            mWebViewCore.sendMessage(EventHub.REVEAL_SELECTION);
+        }
     }
 
     /**
@@ -4037,6 +4016,26 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Called by DRT on UI thread, need to proxy to WebCore thread.
+     *
+     * @hide debug only
+     */
+    public void useMockDeviceOrientation() {
+        mWebViewCore.sendMessage(EventHub.USE_MOCK_DEVICE_ORIENTATION);
+    }
+
+    /**
+     * Called by DRT on WebCore thread.
+     *
+     * @hide debug only
+     */
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        mWebViewCore.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
+                canProvideGamma, gamma);
+    }
+
+    /**
      * Dump the V8 counters to standard output.
      * Note that you need a build with V8 and WEBCORE_INSTRUMENTATION set to
      * true. Otherwise, this will do nothing.
@@ -4087,25 +4086,37 @@ public class WebView extends AbsoluteLayout
         // Bubble up the key event if
         // 1. it is a system key; or
         // 2. the host application wants to handle it;
+        // 3. the accessibility injector is present and wants to handle it;
         if (event.isSystem()
-                || mCallbackProxy.uiOverrideKeyEvent(event)) {
+                || mCallbackProxy.uiOverrideKeyEvent(event)
+                || (mAccessibilityInjector != null && mAccessibilityInjector.onKeyEvent(event))) {
             return false;
         }
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (nativeFocusIsPlugin()) {
+            if (pageShouldHandleShiftAndArrows()) {
                 mShiftIsPressed = true;
             } else if (!nativeCursorWantsKeyEvents() && !mSelectingText) {
                 setUpSelect();
             }
         }
 
+        if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
+            pageUp(false);
+            return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
+            pageDown(false);
+            return true;
+        }
+
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             switchOutDrawHistory();
-            if (nativeFocusIsPlugin()) {
-                letPluginHandleNavKey(keyCode, event.getEventTime(), true);
+            if (pageShouldHandleShiftAndArrows()) {
+                letPageHandleNavKey(keyCode, event.getEventTime(), true);
                 return true;
             }
             if (mSelectingText) {
@@ -4229,13 +4240,16 @@ public class WebView extends AbsoluteLayout
         // Bubble up the key event if
         // 1. it is a system key; or
         // 2. the host application wants to handle it;
-        if (event.isSystem() || mCallbackProxy.uiOverrideKeyEvent(event)) {
+        // 3. the accessibility injector is present and wants to handle it;
+        if (event.isSystem()
+                || mCallbackProxy.uiOverrideKeyEvent(event)
+                || (mAccessibilityInjector != null && mAccessibilityInjector.onKeyEvent(event))) {
             return false;
         }
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (nativeFocusIsPlugin()) {
+            if (pageShouldHandleShiftAndArrows()) {
                 mShiftIsPressed = false;
             } else if (copySelection()) {
                 selectionDone();
@@ -4245,8 +4259,8 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
-            if (nativeFocusIsPlugin()) {
-                letPluginHandleNavKey(keyCode, event.getEventTime(), false);
+            if (pageShouldHandleShiftAndArrows()) {
+                letPageHandleNavKey(keyCode, event.getEventTime(), false);
                 return true;
             }
             // always handle the navigation keys in the UI thread
@@ -4289,8 +4303,8 @@ public class WebView extends AbsoluteLayout
                 }
                 return true;
             }
-            clearTextEntry(true);
-            nativeSetFollowedLink(true);
+            clearTextEntry();
+            nativeShowCursorTimed();
             if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
                 mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
                         nativeCursorNodePointer());
@@ -4310,10 +4324,7 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
-    /**
-     * @hide pending API council approval.
-     */
-    public void setUpSelect() {
+    private void setUpSelect() {
         if (0 == mNativeClass) return; // client isn't initialized
         if (inFullScreenMode()) return;
         if (mSelectingText) return;
@@ -4334,6 +4345,15 @@ public class WebView extends AbsoluteLayout
             mSelectY = mScrollY + getViewHeightWithTitle() / 2;
         }
         nativeHideCursor();
+        mSelectCallback = new SelectActionModeCallback();
+        mSelectCallback.setWebView(this);
+        View titleBar = mTitleBar;
+        // We do not want to show the embedded title bar during find or
+        // select, but keep track of it so that it can be replaced when the
+        // mode is exited.
+        setEmbeddedTitleBar(null);
+        mSelectCallback.setTitleBar(titleBar);
+        startActionMode(mSelectCallback);
     }
 
     /**
@@ -4345,9 +4365,9 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide pending API council approval.
+     * Select all of the text in this WebView.
      */
-    public void selectAll() {
+    void selectAll() {
         if (0 == mNativeClass) return; // client isn't initialized
         if (inFullScreenMode()) return;
         if (!mSelectingText) setUpSelect();
@@ -4358,36 +4378,24 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * @hide pending API council approval.
+     * Called when the selection has been removed.
      */
-    public boolean selectDialogIsUp() {
-        return mSelectingText;
-    }
-
-    /**
-     * @hide pending API council approval.
-     */
-    public void notifySelectDialogDismissed() {
-        mSelectingText = false;
-        WebViewCore.resumeUpdatePicture(mWebViewCore);
-    }
-
-    /**
-     * @hide pending API council approval.
-     */
-    public void selectionDone() {
+    void selectionDone() {
         if (mSelectingText) {
-            WebChromeClient client = getWebChromeClient();
-            if (client != null) client.onSelectionDone(this);
+            mSelectingText = false;
+            // finish is idempotent, so this is fine even if selectionDone was
+            // called by mSelectCallback.onDestroyActionMode
+            mSelectCallback.finish();
+            mSelectCallback = null;
+            WebViewCore.resumeUpdatePicture(mWebViewCore);
             invalidate(); // redraw without selection
-            notifySelectDialogDismissed();
         }
     }
 
     /**
-     * @hide pending API council approval.
+     * Copy the selection to the clipboard
      */
-    public boolean copySelection() {
+    boolean copySelection() {
         boolean copiedSomething = false;
         String selection = getSelection();
         if (selection != "") {
@@ -4398,22 +4406,18 @@ public class WebView extends AbsoluteLayout
                     , com.android.internal.R.string.text_copied
                     , Toast.LENGTH_SHORT).show();
             copiedSomething = true;
-            try {
-                IClipboard clip = IClipboard.Stub.asInterface(
-                        ServiceManager.getService("clipboard"));
-                clip.setClipboardText(selection);
-            } catch (android.os.RemoteException e) {
-                Log.e(LOGTAG, "Clipboard failed", e);
-            }
+            ClipboardManager cm = (ClipboardManager)getContext()
+                    .getSystemService(Context.CLIPBOARD_SERVICE);
+            cm.setText(selection);
         }
         invalidate(); // remove selection region and pointer
         return copiedSomething;
     }
 
     /**
-     * @hide pending API council approval.
+     * Returns the currently highlighted text as a string.
      */
-    public String getSelection() {
+    String getSelection() {
         if (mNativeClass == 0) return "";
         return nativeGetSelection();
     }
@@ -4427,9 +4431,19 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void onDetachedFromWindow() {
         clearHelpers();
-        dismissZoomControl();
+        mZoomManager.dismissZoomPicker();
         if (hasWindowFocus()) setActive(false);
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        // The zoomManager may be null if the webview is created from XML that
+        // specifies the view's visibility param as not visible (see http://b/2794841)
+        if (visibility != View.VISIBLE && mZoomManager != null) {
+            mZoomManager.dismissZoomPicker();
+        }
     }
 
     /**
@@ -4461,32 +4475,30 @@ public class WebView extends AbsoluteLayout
                 // If our window regained focus, and we have focus, then begin
                 // drawing the cursor ring
                 mDrawCursorRing = true;
+                setFocusControllerActive(true);
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
-                    if (inEditingMode()) {
-                        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 1, 0);
-                    }
                 }
             } else {
-                // If our window gained focus, but we do not have it, do not
-                // draw the cursor ring.
-                mDrawCursorRing = false;
+                if (!inEditingMode()) {
+                    // If our window gained focus, but we do not have it, do not
+                    // draw the cursor ring.
+                    mDrawCursorRing = false;
+                    setFocusControllerActive(false);
+                }
                 // We do not call nativeRecordButtons here because we assume
                 // that when we lost focus, or window focus, it got called with
                 // false for the first parameter
             }
         } else {
-            if (mWebViewCore != null && getSettings().getBuiltInZoomControls()
-                    && (mZoomButtonsController == null ||
-                            !mZoomButtonsController.isVisible())) {
+            if (!mZoomManager.isZoomPickerVisible()) {
                 /*
-                 * The zoom controls come in their own window, so our window
-                 * loses focus. Our policy is to not draw the cursor ring if
-                 * our window is not focused, but this is an exception since
+                 * The external zoom controls come in their own window, so our
+                 * window loses focus. Our policy is to not draw the cursor ring
+                 * if our window is not focused, but this is an exception since
                  * the user can still navigate the web page with the zoom
                  * controls showing.
                  */
-                // If our window has lost focus, stop drawing the cursor ring
                 mDrawCursorRing = false;
             }
             mGotKeyDown = false;
@@ -4496,7 +4508,7 @@ public class WebView extends AbsoluteLayout
             if (mNativeClass != 0) {
                 nativeRecordButtons(false, false, true);
             }
-            setFocusControllerInactive();
+            setFocusControllerActive(false);
         }
         invalidate();
     }
@@ -4520,11 +4532,9 @@ public class WebView extends AbsoluteLayout
      * not draw the blinking cursor.  It gets set to "active" to draw the cursor
      * in WebViewCore.cpp, when the WebCore thread receives key events/clicks.
      */
-    /* package */ void setFocusControllerInactive() {
-        // Do not need to also check whether mWebViewCore is null, because
-        // mNativeClass is only set if mWebViewCore is non null
-        if (mNativeClass == 0) return;
-        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, 0, 0);
+    /* package */ void setFocusControllerActive(boolean active) {
+        if (mWebViewCore == null) return;
+        mWebViewCore.sendMessage(EventHub.SET_ACTIVE, active ? 1 : 0, 0);
     }
 
     @Override
@@ -4541,6 +4551,7 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(true, false, true);
                 }
+                setFocusControllerActive(true);
             //} else {
                 // The WebView has gained focus while we do not have
                 // windowfocus.  When our window lost focus, we should have
@@ -4554,7 +4565,7 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(false, false, true);
                 }
-                setFocusControllerInactive();
+                setFocusControllerActive(false);
             }
             mGotKeyDown = false;
         }
@@ -4575,94 +4586,35 @@ public class WebView extends AbsoluteLayout
             // system won't call onSizeChanged if the dimension is not changed.
             // In this case, we need to call sendViewSizeZoom() explicitly to
             // notify the WebKit about the new dimensions.
-            sendViewSizeZoom();
+            sendViewSizeZoom(false);
         }
         return changed;
-    }
-
-    private static class PostScale implements Runnable {
-        final WebView mWebView;
-        final boolean mUpdateTextWrap;
-
-        public PostScale(WebView webView, boolean updateTextWrap) {
-            mWebView = webView;
-            mUpdateTextWrap = updateTextWrap;
-        }
-
-        public void run() {
-            if (mWebView.mWebViewCore != null) {
-                // we always force, in case our height changed, in which case we
-                // still want to send the notification over to webkit.
-                mWebView.setNewZoomScale(mWebView.mActualScale,
-                        mUpdateTextWrap, true);
-                // update the zoom buttons as the scale can be changed
-                if (mWebView.getSettings().getBuiltInZoomControls()) {
-                    mWebView.updateZoomButtonsEnabled();
-                }
-            }
-        }
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int ow, int oh) {
         super.onSizeChanged(w, h, ow, oh);
-        // Center zooming to the center of the screen.
-        if (mZoomScale == 0) { // unless we're already zooming
-            // To anchor at top left corner.
-            mZoomCenterX = 0;
-            mZoomCenterY = getVisibleTitleHeight();
-            mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-            mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-        }
 
         // adjust the max viewport width depending on the view dimensions. This
         // is to ensure the scaling is not going insane. So do not shrink it if
         // the view size is temporarily smaller, e.g. when soft keyboard is up.
-        int newMaxViewportWidth = (int) (Math.max(w, h) / DEFAULT_MIN_ZOOM_SCALE);
+        int newMaxViewportWidth = (int) (Math.max(w, h) / mZoomManager.getDefaultMinZoomScale());
         if (newMaxViewportWidth > sMaxViewportWidth) {
             sMaxViewportWidth = newMaxViewportWidth;
         }
 
-        // update mMinZoomScale if the minimum zoom scale is not fixed
-        if (!mMinZoomScaleFixed) {
-            // when change from narrow screen to wide screen, the new viewWidth
-            // can be wider than the old content width. We limit the minimum
-            // scale to 1.0f. The proper minimum scale will be calculated when
-            // the new picture shows up.
-            mMinZoomScale = Math.min(1.0f, (float) getViewWidth()
-                    / (mDrawHistory ? mHistoryPicture.getWidth()
-                            : mZoomOverviewWidth));
-            if (mInitialScaleInPercent > 0) {
-                // limit the minZoomScale to the initialScale if it is set
-                float initialScale = mInitialScaleInPercent / 100.0f;
-                if (mMinZoomScale > initialScale) {
-                    mMinZoomScale = initialScale;
-                }
-            }
-        }
-
-        dismissZoomControl();
-
-        // onSizeChanged() is called during WebView layout. And any
-        // requestLayout() is blocked during layout. As setNewZoomScale() will
-        // call its child View to reposition itself through ViewManager's
-        // scaleAll(), we need to post a Runnable to ensure requestLayout().
-        // <b/>
-        // only update the text wrap scale if width changed.
-        post(new PostScale(this, w != ow));
+        mZoomManager.onSizeChanged(w, h, ow, oh);
     }
 
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
-        if (!mInOverScrollMode) {
-            sendOurVisibleRect();
-            // update WebKit if visible title bar height changed. The logic is same
-            // as getVisibleTitleHeight.
-            int titleHeight = getTitleHeight();
-            if (Math.max(titleHeight - t, 0) != Math.max(titleHeight - oldt, 0)) {
-                sendViewSizeZoom();
-            }
+        sendOurVisibleRect();
+        // update WebKit if visible title bar height changed. The logic is same
+        // as getVisibleTitleHeight.
+        int titleHeight = getTitleHeight();
+        if (Math.max(titleHeight - t, 0) != Math.max(titleHeight - oldt, 0)) {
+            sendViewSizeZoom(false);
         }
     }
 
@@ -4670,9 +4622,11 @@ public class WebView extends AbsoluteLayout
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean dispatch = true;
 
-        // Textfields and plugins need to receive the shift up key even if
-        // another key was released while the shift key was held down.
-        if (!inEditingMode() && (mNativeClass == 0 || !nativeFocusIsPlugin())) {
+        // Textfields, plugins, and contentEditable nodes need to receive the
+        // shift up key even if another key was released while the shift key
+        // was held down.
+        if (!inEditingMode() && (mNativeClass == 0
+                || !nativePageShouldHandleShiftAndArrows())) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 mGotKeyDown = true;
             } else {
@@ -4732,7 +4686,7 @@ public class WebView extends AbsoluteLayout
         public DragTrackerHandler(float x, float y, DragTracker proxy) {
             mProxy = proxy;
 
-            int docBottom = computeRealVerticalScrollRange() + getTitleHeight();
+            int docBottom = computeVerticalScrollRange() + getTitleHeight();
             int viewTop = getScrollY();
             int viewBottom = viewTop + getHeight();
 
@@ -4745,7 +4699,7 @@ public class WebView extends AbsoluteLayout
                       " up/down= " + mMinDY + " " + mMaxDY);
             }
 
-            int docRight = computeRealHorizontalScrollRange();
+            int docRight = computeHorizontalScrollRange();
             int viewLeft = getScrollX();
             int viewRight = viewLeft + getWidth();
             mStartX = x;
@@ -4906,81 +4860,6 @@ public class WebView extends AbsoluteLayout
     private DragTracker mDragTracker;
     private DragTrackerHandler mDragTrackerHandler;
 
-    private class ScaleDetectorListener implements
-            ScaleGestureDetector.OnScaleGestureListener {
-
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            // cancel the single touch handling
-            cancelTouch();
-            dismissZoomControl();
-            // reset the zoom overview mode so that the page won't auto grow
-            mInZoomOverview = false;
-            // If it is in password mode, turn it off so it does not draw
-            // misplaced.
-            if (inEditingMode() && nativeFocusCandidateIsPassword()) {
-                mWebTextView.setInPassword(false);
-            }
-
-            mViewManager.startZoom();
-
-            return true;
-        }
-
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            if (mPreviewZoomOnly) {
-                mPreviewZoomOnly = false;
-                mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-                mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-                // don't reflow when zoom in; when zoom out, do reflow if the
-                // new scale is almost minimum scale;
-                boolean reflowNow = (mActualScale - mMinZoomScale
-                        <= MINIMUM_SCALE_INCREMENT)
-                        || ((mActualScale <= 0.8 * mTextWrapScale));
-                // force zoom after mPreviewZoomOnly is set to false so that the
-                // new view size will be passed to the WebKit
-                setNewZoomScale(mActualScale, reflowNow, true);
-                // call invalidate() to draw without zoom filter
-                invalidate();
-            }
-            // adjust the edit text view if needed
-            if (inEditingMode() && didUpdateTextViewBounds(false)
-                    && nativeFocusCandidateIsPassword()) {
-                // If it is a password field, start drawing the
-                // WebTextView once again.
-                mWebTextView.setInPassword(true);
-            }
-            // start a drag, TOUCH_PINCH_DRAG, can't use TOUCH_INIT_MODE as it
-            // may trigger the unwanted click, can't use TOUCH_DRAG_MODE as it
-            // may trigger the unwanted fling.
-            mTouchMode = TOUCH_PINCH_DRAG;
-            mConfirmMove = true;
-            startTouch(detector.getFocusX(), detector.getFocusY(),
-                    mLastTouchTime);
-
-            mViewManager.endZoom();
-        }
-
-        public boolean onScale(ScaleGestureDetector detector) {
-            float scale = (float) (Math.round(detector.getScaleFactor()
-                    * mActualScale * 100) / 100.0);
-            if (Math.abs(scale - mActualScale) >= MINIMUM_SCALE_INCREMENT) {
-                mPreviewZoomOnly = true;
-                // limit the scale change per step
-                if (scale > mActualScale) {
-                    scale = Math.min(scale, mActualScale * 1.25f);
-                } else {
-                    scale = Math.max(scale, mActualScale * 0.8f);
-                }
-                mZoomCenterX = detector.getFocusX();
-                mZoomCenterY = detector.getFocusY();
-                setNewZoomScale(scale, false, false);
-                invalidate();
-                return true;
-            }
-            return false;
-        }
-    }
-
     private boolean hitFocusedPlugin(int contentX, int contentY) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "nativeFocusIsPlugin()=" + nativeFocusIsPlugin());
@@ -5002,6 +4881,41 @@ public class WebView extends AbsoluteLayout
         return mFullScreenHolder != null;
     }
 
+    void onPinchToZoomAnimationStart() {
+        // cancel the single touch handling
+        cancelTouch();
+        onZoomAnimationStart();
+    }
+
+    void onPinchToZoomAnimationEnd(ScaleGestureDetector detector) {
+        onZoomAnimationEnd();
+        // start a drag, TOUCH_PINCH_DRAG, can't use TOUCH_INIT_MODE as
+        // it may trigger the unwanted click, can't use TOUCH_DRAG_MODE
+        // as it may trigger the unwanted fling.
+        mTouchMode = TOUCH_PINCH_DRAG;
+        mConfirmMove = true;
+        startTouch(detector.getFocusX(), detector.getFocusY(), mLastTouchTime);
+    }
+
+    private void startScrollingLayer(float gestureX, float gestureY) {
+        if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+            int contentX = viewToContentX((int) gestureX + mScrollX);
+            int contentY = viewToContentY((int) gestureY + mScrollY);
+            mScrollingLayer = nativeScrollableLayer(contentX, contentY);
+            if (mScrollingLayer != 0) {
+                mTouchMode = TOUCH_DRAG_LAYER_MODE;
+            }
+        }
+    }
+
+    // 1/(density * density) used to compute the distance between points.
+    // Computed in init().
+    private float DRAG_LAYER_INVERSE_DENSITY_SQUARED;
+
+    // The distance between two points reported in onTouchEvent scaled by the
+    // density of the screen.
+    private static final int DRAG_LAYER_FINGER_DISTANCE = 20000;
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (mNativeClass == 0 || !isClickable() || !isLongClickable()) {
@@ -5013,57 +4927,116 @@ public class WebView extends AbsoluteLayout
                     + mTouchMode);
         }
 
-        int action;
-        float x, y;
+        int action = ev.getAction();
+        float x = ev.getX();
+        float y = ev.getY();
         long eventTime = ev.getEventTime();
+
+        final ScaleGestureDetector detector =
+                mZoomManager.getMultiTouchGestureDetector();
+        boolean skipScaleGesture = false;
+        // Set to the mid-point of a two-finger gesture used to detect if the
+        // user has touched a layer.
+        float gestureX = x;
+        float gestureY = y;
+        if (detector == null || !detector.isInProgress()) {
+            // The gesture for scrolling a layer is two fingers close together.
+            // FIXME: we may consider giving WebKit an option to handle
+            // multi-touch events later.
+            if (ev.getPointerCount() > 1) {
+                float dx = ev.getX(1) - ev.getX(0);
+                float dy = ev.getY(1) - ev.getY(0);
+                float dist = (dx * dx + dy * dy) *
+                        DRAG_LAYER_INVERSE_DENSITY_SQUARED;
+                // Use the approximate center to determine if the gesture is in
+                // a layer.
+                gestureX = ev.getX(0) + (dx * .5f);
+                gestureY = ev.getY(0) + (dy * .5f);
+                // Now use a consistent point for tracking movement.
+                if (ev.getX(0) < ev.getX(1)) {
+                    x = ev.getX(0);
+                    y = ev.getY(0);
+                } else {
+                    x = ev.getX(1);
+                    y = ev.getY(1);
+                }
+                action = ev.getActionMasked();
+                if (dist < DRAG_LAYER_FINGER_DISTANCE) {
+                    skipScaleGesture = true;
+                } else if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+                    // Fingers moved too far apart while dragging, the user
+                    // might be trying to zoom.
+                    mTouchMode = TOUCH_INIT_MODE;
+                }
+            }
+        }
 
         // FIXME: we may consider to give WebKit an option to handle multi-touch
         // events later.
-        if (mSupportMultiTouch && ev.getPointerCount() > 1) {
-            if (mAllowPanAndScale || mMinZoomScale < mMaxZoomScale) {
-                mScaleDetector.onTouchEvent(ev);
-                if (mScaleDetector.isInProgress()) {
-                    mLastTouchTime = eventTime;
-                    if (!mAllowPanAndScale) {
-                        return true;
-                    }
-                }
-                x = mScaleDetector.getFocusX();
-                y = mScaleDetector.getFocusY();
-                action = ev.getAction() & MotionEvent.ACTION_MASK;
-                if (action == MotionEvent.ACTION_POINTER_DOWN) {
-                    cancelTouch();
-                    action = MotionEvent.ACTION_DOWN;
-                } else if (action == MotionEvent.ACTION_POINTER_UP) {
-                    // set mLastTouchX/Y to the remaining point
-                    mLastTouchX = x;
-                    mLastTouchY = y;
-                } else if (action == MotionEvent.ACTION_MOVE) {
-                    // negative x or y indicate it is on the edge, skip it.
-                    if (x < 0 || y < 0) {
-                        return true;
-                    }
-                }
-            } else {
-                // if the page disallow zoom, skip multi-pointer action
+        if (mZoomManager.supportsMultiTouchZoom() && ev.getPointerCount() > 1 &&
+                mTouchMode != TOUCH_DRAG_LAYER_MODE && !skipScaleGesture) {
+
+            // if the page disallows zoom, skip multi-pointer action
+            if (!mZoomManager.supportsPanDuringZoom() && mZoomManager.isZoomScaleFixed()) {
                 return true;
             }
-        } else {
-            action = ev.getAction();
-            x = ev.getX();
-            y = ev.getY();
+
+            if (!detector.isInProgress() &&
+                    ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
+                // Insert a fake pointer down event in order to start
+                // the zoom scale detector.
+                MotionEvent temp = MotionEvent.obtain(ev);
+                // Clear the original event and set it to
+                // ACTION_POINTER_DOWN.
+                try {
+                    temp.setAction(temp.getAction() &
+                            ~MotionEvent.ACTION_MASK |
+                            MotionEvent.ACTION_POINTER_DOWN);
+                    detector.onTouchEvent(temp);
+                } finally {
+                    temp.recycle();
+                }
+            }
+
+            detector.onTouchEvent(ev);
+
+            if (detector.isInProgress()) {
+                mLastTouchTime = eventTime;
+                cancelLongPress();
+                mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                if (!mZoomManager.supportsPanDuringZoom()) {
+                    return true;
+                }
+                mTouchMode = TOUCH_DRAG_MODE;
+                if (mVelocityTracker == null) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                }
+            }
+
+            x = detector.getFocusX();
+            y = detector.getFocusY();
+            action = ev.getAction() & MotionEvent.ACTION_MASK;
+            if (action == MotionEvent.ACTION_POINTER_DOWN) {
+                cancelTouch();
+                action = MotionEvent.ACTION_DOWN;
+            } else if (action == MotionEvent.ACTION_POINTER_UP) {
+                // set mLastTouchX/Y to the remaining point
+                mLastTouchX = x;
+                mLastTouchY = y;
+            } else if (action == MotionEvent.ACTION_MOVE) {
+                // negative x or y indicate it is on the edge, skip it.
+                if (x < 0 || y < 0) {
+                    return true;
+                }
+            }
         }
 
         // Due to the touch screen edge effect, a touch closer to the edge
         // always snapped to the edge. As getViewWidth() can be different from
         // getWidth() due to the scrollbar, adjusting the point to match
         // getViewWidth(). Same applied to the height.
-        if (x > getViewWidth() - 1) {
-            x = getViewWidth() - 1;
-        }
-        if (y > getViewHeightWithTitle() - 1) {
-            y = getViewHeightWithTitle() - 1;
-        }
+        x = Math.min(x, getViewWidth() - 1);
+        y = Math.min(y, getViewHeightWithTitle() - 1);
 
         float fDeltaX = mLastTouchX - x;
         float fDeltaY = mLastTouchY - y;
@@ -5086,6 +5059,9 @@ public class WebView extends AbsoluteLayout
                     mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
+                    if (getSettings().supportTouchOnly()) {
+                        removeTouchHighlight(true);
+                    }
                     if (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare) {
                         mTouchMode = TOUCH_DOUBLE_TAP_MODE;
                     } else {
@@ -5097,13 +5073,33 @@ public class WebView extends AbsoluteLayout
                                 contentX, contentY) : false;
                     }
                 } else { // the normal case
-                    mPreviewZoomOnly = false;
                     mTouchMode = TOUCH_INIT_MODE;
                     mDeferTouchProcess = (!inFullScreenMode()
                             && mForwardTouchEvents) ? hitFocusedPlugin(
                             contentX, contentY) : false;
                     mWebViewCore.sendMessage(
                             EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
+                    if (getSettings().supportTouchOnly()) {
+                        TouchHighlightData data = new TouchHighlightData();
+                        data.mX = contentX;
+                        data.mY = contentY;
+                        data.mSlop = viewToContentDimension(mNavSlop);
+                        mWebViewCore.sendMessageDelayed(
+                                EventHub.GET_TOUCH_HIGHLIGHT_RECTS, data,
+                                ViewConfiguration.getTapTimeout());
+                        if (DEBUG_TOUCH_HIGHLIGHT) {
+                            if (getSettings().getNavDump()) {
+                                mTouchHighlightX = (int) x + mScrollX;
+                                mTouchHighlightY = (int) y + mScrollY;
+                                mPrivateHandler.postDelayed(new Runnable() {
+                                    public void run() {
+                                        mTouchHighlightX = mTouchHighlightY = 0;
+                                        invalidate();
+                                    }
+                                }, TOUCH_HIGHLIGHT_ELAPSE_TIME);
+                            }
+                        }
+                    }
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
                         EventLog.writeEvent(EventLogTags.BROWSER_DOUBLE_TAP_DURATION,
                                 (eventTime - mLastTouchUpTime), eventTime);
@@ -5139,17 +5135,15 @@ public class WebView extends AbsoluteLayout
                         ted.mY = contentY;
                         ted.mMetaState = ev.getMetaState();
                         ted.mReprocess = mDeferTouchProcess;
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         if (mDeferTouchProcess) {
                             // still needs to set them for compute deltaX/Y
                             mLastTouchX = x;
                             mLastTouchY = y;
-                            ted.mViewX = x;
-                            ted.mViewY = y;
-                            mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                             break;
                         }
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         if (!inFullScreenMode()) {
+                            mPrivateHandler.removeMessages(PREVENT_DEFAULT_TIMEOUT);
                             mPrivateHandler.sendMessageDelayed(mPrivateHandler
                                     .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
                                             action, 0), TAP_TIMEOUT);
@@ -5170,24 +5164,24 @@ public class WebView extends AbsoluteLayout
                     if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
                         mTouchMode = TOUCH_INIT_MODE;
                     }
+                    if (getSettings().supportTouchOnly()) {
+                        removeTouchHighlight(true);
+                    }
                 }
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent() && mConfirmMove && (firstMove
                         || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
-                    mLastSentTouchTime = eventTime;
                     TouchEventData ted = new TouchEventData();
                     ted.mAction = action;
                     ted.mX = contentX;
                     ted.mY = contentY;
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
+                    mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                    mLastSentTouchTime = eventTime;
                     if (mDeferTouchProcess) {
-                        ted.mViewX = x;
-                        ted.mViewY = y;
-                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         break;
                     }
-                    mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     if (firstMove && !inFullScreenMode()) {
                         mPrivateHandler.sendMessageDelayed(mPrivateHandler
                                 .obtainMessage(PREVENT_DEFAULT_TIMEOUT,
@@ -5216,11 +5210,13 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
 
-                if (mTouchMode != TOUCH_DRAG_MODE) {
+                if (mTouchMode != TOUCH_DRAG_MODE &&
+                        mTouchMode != TOUCH_DRAG_LAYER_MODE) {
 
                     if (!mConfirmMove) {
                         break;
                     }
+
                     if (mPreventDefault == PREVENT_DEFAULT_MAYBE_YES
                             || mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN) {
                         // track mLastTouchTime as we may need to do fling at
@@ -5230,9 +5226,9 @@ public class WebView extends AbsoluteLayout
                     }
 
                     // Only lock dragging to one axis if we don't have a scale in progress.
-                    // Scaling implies free-roaming movement. Note we'll only ever get here
-                    // if mAllowPanAndScale is true.
-                    if (mScaleDetector != null && !mScaleDetector.isInProgress()) {
+                    // Scaling implies free-roaming movement. Note this is only ever a question
+                    // if mZoomManager.supportsPanDuringZoom() is true.
+                    if (detector != null && !detector.isInProgress()) {
                         // if it starts nearly horizontal or vertical, enforce it
                         int ax = Math.abs(deltaX);
                         int ay = Math.abs(deltaY);
@@ -5253,6 +5249,9 @@ public class WebView extends AbsoluteLayout
                     deltaX = 0;
                     deltaY = 0;
 
+                    if (skipScaleGesture) {
+                        startScrollingLayer(gestureX, gestureY);
+                    }
                     startDrag();
                 }
 
@@ -5261,6 +5260,20 @@ public class WebView extends AbsoluteLayout
                 }
 
                 // do pan
+                if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
+                    int newScrollX = pinLocX(mScrollX + deltaX);
+                    int newDeltaX = newScrollX - mScrollX;
+                    if (deltaX != newDeltaX) {
+                        deltaX = newDeltaX;
+                        fDeltaX = (float) newDeltaX;
+                    }
+                    int newScrollY = pinLocY(mScrollY + deltaY);
+                    int newDeltaY = newScrollY - mScrollY;
+                    if (deltaY != newDeltaY) {
+                        deltaY = newDeltaY;
+                        fDeltaY = (float) newDeltaY;
+                    }
+                }
                 boolean done = false;
                 boolean keepScrollBarsVisible = false;
                 if (Math.abs(fDeltaX) < 1.0f && Math.abs(fDeltaY) < 1.0f) {
@@ -5327,7 +5340,9 @@ public class WebView extends AbsoluteLayout
 
                 doDrag(deltaX, deltaY);
 
-                if (keepScrollBarsVisible) {
+                // Turn off scrollbars when dragging a layer.
+                if (keepScrollBarsVisible &&
+                        mTouchMode != TOUCH_DRAG_LAYER_MODE) {
                     if (mHeldMotionless != MOTIONLESS_TRUE) {
                         mHeldMotionless = MOTIONLESS_TRUE;
                         invalidate();
@@ -5342,6 +5357,7 @@ public class WebView extends AbsoluteLayout
                 break;
             }
             case MotionEvent.ACTION_UP: {
+                if (!isFocused()) requestFocus();
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent()) {
                     TouchEventData ted = new TouchEventData();
@@ -5350,10 +5366,6 @@ public class WebView extends AbsoluteLayout
                     ted.mY = contentY;
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
-                    if (mDeferTouchProcess) {
-                        ted.mViewX = x;
-                        ted.mViewY = y;
-                    }
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                 }
                 mLastTouchUpTime = eventTime;
@@ -5368,13 +5380,9 @@ public class WebView extends AbsoluteLayout
                             ted.mY = contentY;
                             ted.mMetaState = ev.getMetaState();
                             ted.mReprocess = mDeferTouchProcess;
-                            if (mDeferTouchProcess) {
-                                ted.mViewX = x;
-                                ted.mViewY = y;
-                            }
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         } else if (mPreventDefault != PREVENT_DEFAULT_YES){
-                            doDoubleTap();
+                            mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
                             mTouchMode = TOUCH_DONE_MODE;
                         }
                         break;
@@ -5389,9 +5397,17 @@ public class WebView extends AbsoluteLayout
                             if (mPreventDefault != PREVENT_DEFAULT_YES
                                     && (computeMaxScrollX() > 0
                                             || computeMaxScrollY() > 0)) {
-                                // UI takes control back, cancel WebCore touch
-                                cancelWebCoreTouchEvent(contentX, contentY,
-                                        true);
+                                // If the user has performed a very quick touch
+                                // sequence it is possible that we may get here
+                                // before WebCore has had a chance to process the events.
+                                // In this case, any call to preventDefault in the
+                                // JS touch handler will not have been executed yet.
+                                // Hence we will see both the UI (now) and WebCore
+                                // (when context switches) handling the event,
+                                // regardless of whether the web developer actually
+                                // doeses preventDefault in their touch handler. This
+                                // is the nature of our asynchronous touch model.
+
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
                                 WebViewCore.reducePriority();
@@ -5409,13 +5425,16 @@ public class WebView extends AbsoluteLayout
                             }
                         } else {
                             if (mSelectingText) {
-                                if (nativeHitSelection(contentX, contentY)) {
-                                    copySelection();
+                                // tapping on selection or controls does nothing
+                                if (!nativeHitSelection(contentX, contentY)) {
+                                    selectionDone();
                                 }
-                                selectionDone();
                                 break;
                             }
-                            if (mTouchMode == TOUCH_INIT_MODE) {
+                            // only trigger double tap if the WebView is
+                            // scalable
+                            if (mTouchMode == TOUCH_INIT_MODE
+                                    && (canZoomIn() || canZoomOut())) {
                                 mPrivateHandler.sendEmptyMessageDelayed(
                                         RELEASE_SINGLE_TAP, ViewConfiguration
                                                 .getDoubleTapTimeout());
@@ -5444,18 +5463,13 @@ public class WebView extends AbsoluteLayout
                             mHeldMotionless = MOTIONLESS_IGNORE;
                             doFling();
                             break;
-                        } else {
-                            if (mScroller.springback(mScrollX, mScrollY, 0,
-                                    computeMaxScrollX(), 0,
-                                    computeMaxScrollY())) {
-                                invalidate();
-                            }
                         }
                         // redraw in high-quality, as we're done dragging
                         mHeldMotionless = MOTIONLESS_TRUE;
                         invalidate();
                         // fall through
                     case TOUCH_DRAG_START_MODE:
+                    case TOUCH_DRAG_LAYER_MODE:
                         // TOUCH_DRAG_START_MODE should not happen for the real
                         // device as we almost certain will get a MOVE. But this
                         // is possible on emulator.
@@ -5469,8 +5483,6 @@ public class WebView extends AbsoluteLayout
             }
             case MotionEvent.ACTION_CANCEL: {
                 if (mTouchMode == TOUCH_DRAG_MODE) {
-                    mScroller.springback(mScrollX, mScrollY, 0,
-                            computeMaxScrollX(), 0, computeMaxScrollY());
                     invalidate();
                 }
                 cancelWebCoreTouchEvent(contentX, contentY, false);
@@ -5514,67 +5526,26 @@ public class WebView extends AbsoluteLayout
         if (!mDragFromTextInput) {
             nativeHideCursor();
         }
-        WebSettings settings = getSettings();
-        if (settings.supportZoom()
-                && settings.getBuiltInZoomControls()
-                && !getZoomButtonsController().isVisible()
-                && mMinZoomScale < mMaxZoomScale
-                && (mHorizontalScrollBarMode != SCROLLBAR_ALWAYSOFF
-                        || mVerticalScrollBarMode != SCROLLBAR_ALWAYSOFF)) {
-            mZoomButtonsController.setVisible(true);
-            int count = settings.getDoubleTapToastCount();
-            if (mInZoomOverview && count > 0) {
-                settings.setDoubleTapToastCount(--count);
-                Toast.makeText(mContext,
-                        com.android.internal.R.string.double_tap_toast,
-                        Toast.LENGTH_LONG).show();
-            }
+
+        if (mHorizontalScrollBarMode != SCROLLBAR_ALWAYSOFF
+                || mVerticalScrollBarMode != SCROLLBAR_ALWAYSOFF) {
+            mZoomManager.invokeZoomPicker();
         }
     }
 
     private void doDrag(int deltaX, int deltaY) {
         if ((deltaX | deltaY) != 0) {
-            final int oldX = mScrollX;
-            final int oldY = mScrollY;
-            final int rangeX = computeMaxScrollX();
-            final int rangeY = computeMaxScrollY();
-            overscrollBy(deltaX, deltaY, oldX, oldY,
-                    rangeX, rangeY,
-                    mOverscrollDistance, mOverscrollDistance, true);
-
-            if (mEdgeGlowTop != null) {
-                // Don't show left/right glows if we fit the whole content.
-                if (rangeX > 0) {
-                    final int pulledToX = oldX + deltaX;
-                    if (pulledToX < 0) {
-                        mEdgeGlowLeft.onPull((float) deltaX / getWidth());
-                    } else if (pulledToX > rangeX) {
-                        mEdgeGlowRight.onPull((float) deltaX / getWidth());
-                    }
+            if (mTouchMode == TOUCH_DRAG_LAYER_MODE) {
+                deltaX = viewToContentDimension(deltaX);
+                deltaY = viewToContentDimension(deltaY);
+                if (nativeScrollLayer(mScrollingLayer, deltaX, deltaY)) {
+                    invalidate();
                 }
-
-                if (rangeY > 0 || getOverscrollMode() == OVERSCROLL_ALWAYS) {
-                    final int pulledToY = oldY + deltaY;
-                    if (pulledToY < 0) {
-                        mEdgeGlowTop.onPull((float) deltaY / getHeight());
-                    } else if (pulledToY > rangeY) {
-                        mEdgeGlowBottom.onPull((float) deltaY / getHeight());
-                    }
-                }
+                return;
             }
+            scrollBy(deltaX, deltaY);
         }
-        if (!getSettings().getBuiltInZoomControls()) {
-            boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
-            if (mZoomControls != null && showPlusMinus) {
-                if (mZoomControls.getVisibility() == View.VISIBLE) {
-                    mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                } else {
-                    mZoomControls.show(showPlusMinus, false);
-                }
-                mPrivateHandler.postDelayed(mZoomControlRunnable,
-                        ZOOM_CONTROLS_TIMEOUT);
-            }
-        }
+        mZoomManager.keepZoomPickerVisible();
     }
 
     private void stopTouch() {
@@ -5587,14 +5558,6 @@ public class WebView extends AbsoluteLayout
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
-        }
-
-        // Release any pulled glows
-        if (mEdgeGlowTop != null) {
-            mEdgeGlowTop.onRelease();
-            mEdgeGlowBottom.onRelease();
-            mEdgeGlowLeft.onRelease();
-            mEdgeGlowRight.onRelease();
         }
     }
 
@@ -5609,16 +5572,8 @@ public class WebView extends AbsoluteLayout
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
-
-        // Release any pulled glows
-        if (mEdgeGlowTop != null) {
-            mEdgeGlowTop.onRelease();
-            mEdgeGlowBottom.onRelease();
-            mEdgeGlowLeft.onRelease();
-            mEdgeGlowRight.onRelease();
-        }
-
-        if (mTouchMode == TOUCH_DRAG_MODE) {
+        if (mTouchMode == TOUCH_DRAG_MODE ||
+                mTouchMode == TOUCH_DRAG_LAYER_MODE) {
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
         }
@@ -5626,6 +5581,9 @@ public class WebView extends AbsoluteLayout
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
         mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
+        if (getSettings().supportTouchOnly()) {
+            removeTouchHighlight(true);
+        }
         mHeldMotionless = MOTIONLESS_TRUE;
         mTouchMode = TOUCH_DONE_MODE;
         nativeHideCursor();
@@ -5723,7 +5681,8 @@ public class WebView extends AbsoluteLayout
             }
             return false; // let common code in onKeyUp at it
         }
-        if (mMapTrackballToArrowKeys && mShiftIsPressed == false) {
+        if ((mMapTrackballToArrowKeys && mShiftIsPressed == false) ||
+                (mAccessibilityInjector != null || mAccessibilityScriptInjected)) {
             if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent gmail quit");
             return false;
         }
@@ -5891,11 +5850,11 @@ public class WebView extends AbsoluteLayout
                         + " mTrackballRemainsX=" + mTrackballRemainsX
                         + " mTrackballRemainsY=" + mTrackballRemainsY);
             }
-            if (mNativeClass != 0 && nativeFocusIsPlugin()) {
+            if (mNativeClass != 0 && nativePageShouldHandleShiftAndArrows()) {
                 for (int i = 0; i < count; i++) {
-                    letPluginHandleNavKey(selectKeyCode, time, true);
+                    letPageHandleNavKey(selectKeyCode, time, true);
                 }
-                letPluginHandleNavKey(selectKeyCode, time, false);
+                letPageHandleNavKey(selectKeyCode, time, false);
             } else if (navHandledKey(selectKeyCode, count, false, time)) {
                 playSoundEffect(keyCodeToSoundsEffect(selectKeyCode));
             }
@@ -5926,17 +5885,30 @@ public class WebView extends AbsoluteLayout
     }
 
     private int computeMaxScrollX() {
-        return Math.max(computeRealHorizontalScrollRange() - getViewWidth(), 0);
+        return Math.max(computeHorizontalScrollRange() - getViewWidth(), 0);
     }
 
     private int computeMaxScrollY() {
-        return Math.max(computeRealVerticalScrollRange() + getTitleHeight()
+        return Math.max(computeVerticalScrollRange() + getTitleHeight()
                 - getViewHeightWithTitle(), 0);
+    }
+
+    boolean updateScrollCoordinates(int x, int y) {
+        int oldX = mScrollX;
+        int oldY = mScrollY;
+        mScrollX = x;
+        mScrollY = y;
+        if (oldX != mScrollX || oldY != mScrollY) {
+            onScrollChanged(mScrollX, mScrollY, oldX, oldY);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void flingScroll(int vx, int vy) {
         mScroller.fling(mScrollX, mScrollY, vx, vy, 0, computeMaxScrollX(), 0,
-                computeMaxScrollY(), mOverflingDistance, mOverflingDistance);
+                computeMaxScrollY());
         invalidate();
     }
 
@@ -5966,20 +5938,19 @@ public class WebView extends AbsoluteLayout
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
-            if (mScroller.springback(mScrollX, mScrollY, 0, computeMaxScrollX(),
-                    0, computeMaxScrollY())) {
-                invalidate();
-            }
             return;
         }
         float currentVelocity = mScroller.getCurrVelocity();
-        if (mLastVelocity > 0 && currentVelocity > 0) {
+        float velocity = (float) Math.hypot(vx, vy);
+        if (mLastVelocity > 0 && currentVelocity > 0 && velocity
+                > mLastVelocity * MINIMUM_VELOCITY_RATIO_FOR_ACCELERATION) {
             float deltaR = (float) (Math.abs(Math.atan2(mLastVelY, mLastVelX)
                     - Math.atan2(vy, vx)));
             final float circle = (float) (Math.PI) * 2.0f;
             if (deltaR > circle * 0.9f || deltaR < circle * 0.1f) {
                 vx += currentVelocity * mLastVelX / mLastVelocity;
                 vy += currentVelocity * mLastVelY / mLastVelocity;
+                velocity = (float) Math.hypot(vx, vy);
                 if (DebugFlags.WEB_VIEW) {
                     Log.v(LOGTAG, "doFling vx= " + vx + " vy=" + vy);
                 }
@@ -5993,65 +5964,15 @@ public class WebView extends AbsoluteLayout
                     + " maxX=" + maxX + " maxY=" + maxY
                     + " mScrollX=" + mScrollX + " mScrollY=" + mScrollY);
         }
-
-        // Allow sloppy flings without overscrolling at the edges.
-        if ((mScrollX == 0 || mScrollX == maxX) && Math.abs(vx) < Math.abs(vy)) {
-            vx = 0;
-        }
-        if ((mScrollY == 0 || mScrollY == maxY) && Math.abs(vy) < Math.abs(vx)) {
-            vy = 0;
-        }
-
-        if (mOverscrollDistance < mOverflingDistance) {
-            if (mScrollX == -mOverscrollDistance || mScrollX == maxX + mOverscrollDistance) {
-                vx = 0;
-            }
-            if (mScrollY == -mOverscrollDistance || mScrollY == maxY + mOverscrollDistance) {
-                vy = 0;
-            }
-        }
-
         mLastVelX = vx;
         mLastVelY = vy;
-        mLastVelocity = (float) Math.hypot(vx, vy);
+        mLastVelocity = velocity;
 
-        // no horizontal overscroll if the content just fits
-        mScroller.fling(mScrollX, mScrollY, -vx, -vy, 0, maxX, 0, maxY,
-                maxX == 0 ? 0 : mOverflingDistance, mOverflingDistance);
-        // Duration is calculated based on velocity. With range boundaries and overscroll
-        // we may not know how long the final animation will take. (Hence the deprecation
-        // warning on the call below.) It's not a big deal for scroll bars but if webcore
-        // resumes during this effect we will take a performance hit. See computeScroll;
-        // we resume webcore there when the animation is finished.
+        mScroller.fling(mScrollX, mScrollY, -vx, -vy, 0, maxX, 0, maxY);
         final int time = mScroller.getDuration();
+        mPrivateHandler.sendEmptyMessageDelayed(RESUME_WEBCORE_PRIORITY, time);
         awakenScrollBars(time);
         invalidate();
-    }
-
-    private boolean zoomWithPreview(float scale, boolean updateTextWrapScale) {
-        float oldScale = mActualScale;
-        mInitialScrollX = mScrollX;
-        mInitialScrollY = mScrollY;
-
-        // snap to DEFAULT_SCALE if it is close
-        if (Math.abs(scale - mDefaultScale) < MINIMUM_SCALE_INCREMENT) {
-            scale = mDefaultScale;
-        }
-
-        setNewZoomScale(scale, updateTextWrapScale, false);
-
-        if (oldScale != mActualScale) {
-            // use mZoomPickerScale to see zoom preview first
-            mZoomStart = SystemClock.uptimeMillis();
-            mInvInitialZoomScale = 1.0f / oldScale;
-            mInvFinalZoomScale = 1.0f / mActualScale;
-            mZoomScale = mActualScale;
-            WebViewCore.pauseUpdatePicture(mWebViewCore);
-            invalidate();
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -6073,81 +5994,29 @@ public class WebView extends AbsoluteLayout
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return null;
         }
-        if (mZoomControls == null) {
-            mZoomControls = createZoomControls();
-
-            /*
-             * need to be set to VISIBLE first so that getMeasuredHeight() in
-             * {@link #onSizeChanged()} can return the measured value for proper
-             * layout.
-             */
-            mZoomControls.setVisibility(View.VISIBLE);
-            mZoomControlRunnable = new Runnable() {
-                public void run() {
-
-                    /* Don't dismiss the controls if the user has
-                     * focus on them. Wait and check again later.
-                     */
-                    if (!mZoomControls.hasFocus()) {
-                        mZoomControls.hide();
-                    } else {
-                        mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                        mPrivateHandler.postDelayed(mZoomControlRunnable,
-                                ZOOM_CONTROLS_TIMEOUT);
-                    }
-                }
-            };
-        }
-        return mZoomControls;
+        return mZoomManager.getExternalZoomPicker();
     }
 
-    private ExtendedZoomControls createZoomControls() {
-        ExtendedZoomControls zoomControls = new ExtendedZoomControls(mContext
-            , null);
-        zoomControls.setOnZoomInClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                // reset time out
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                mPrivateHandler.postDelayed(mZoomControlRunnable,
-                        ZOOM_CONTROLS_TIMEOUT);
-                zoomIn();
-            }
-        });
-        zoomControls.setOnZoomOutClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                // reset time out
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                mPrivateHandler.postDelayed(mZoomControlRunnable,
-                        ZOOM_CONTROLS_TIMEOUT);
-                zoomOut();
-            }
-        });
-        return zoomControls;
+    void dismissZoomControl() {
+        mZoomManager.dismissZoomPicker();
+    }
+
+    float getDefaultZoomScale() {
+        return mZoomManager.getDefaultScale();
     }
 
     /**
-     * Gets the {@link ZoomButtonsController} which can be used to add
-     * additional buttons to the zoom controls window.
-     *
-     * @return The instance of {@link ZoomButtonsController} used by this class,
-     *         or null if it is unavailable.
-     * @hide
+     * @return TRUE if the WebView can be zoomed in.
      */
-    public ZoomButtonsController getZoomButtonsController() {
-        if (mZoomButtonsController == null) {
-            mZoomButtonsController = new ZoomButtonsController(this);
-            mZoomButtonsController.setOnZoomListener(mZoomListener);
-            // ZoomButtonsController positions the buttons at the bottom, but in
-            // the middle. Change their layout parameters so they appear on the
-            // right.
-            View controls = mZoomButtonsController.getZoomControls();
-            ViewGroup.LayoutParams params = controls.getLayoutParams();
-            if (params instanceof FrameLayout.LayoutParams) {
-                FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams) params;
-                frameParams.gravity = Gravity.RIGHT;
-            }
-        }
-        return mZoomButtonsController;
+    public boolean canZoomIn() {
+        return mZoomManager.canZoomIn();
+    }
+
+    /**
+     * @return TRUE if the WebView can be zoomed out.
+     */
+    public boolean canZoomOut() {
+        return mZoomManager.canZoomOut();
     }
 
     /**
@@ -6155,15 +6024,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if zoom in succeeds. FALSE if no zoom changes.
      */
     public boolean zoomIn() {
-        // TODO: alternatively we can disallow this during draw history mode
-        switchOutDrawHistory();
-        mInZoomOverview = false;
-        // Center zooming to the center of the screen.
-        mZoomCenterX = getViewWidth() * .5f;
-        mZoomCenterY = getViewHeight() * .5f;
-        mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-        mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-        return zoomWithPreview(mActualScale * 1.25f, true);
+        return mZoomManager.zoomIn();
     }
 
     /**
@@ -6171,14 +6032,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if zoom out succeeds. FALSE if no zoom changes.
      */
     public boolean zoomOut() {
-        // TODO: alternatively we can disallow this during draw history mode
-        switchOutDrawHistory();
-        // Center zooming to the center of the screen.
-        mZoomCenterX = getViewWidth() * .5f;
-        mZoomCenterY = getViewHeight() * .5f;
-        mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-        mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-        return zoomWithPreview(mActualScale * 0.8f, true);
+        return mZoomManager.zoomOut();
     }
 
     private void updateSelection() {
@@ -6279,7 +6133,14 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContentX((int) mLastTouchX + mScrollX);
         int contentY = viewToContentY((int) mLastTouchY + mScrollY);
-        if (nativePointInNavCache(contentX, contentY, mNavSlop)) {
+        if (getSettings().supportTouchOnly()) {
+            removeTouchHighlight(false);
+            WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
+            // use "0" as generation id to inform WebKit to use the same x/y as
+            // it used when processing GET_TOUCH_HIGHLIGHT_RECTS
+            touchUpData.mMoveGeneration = 0;
+            mWebViewCore.sendMessage(EventHub.TOUCH_UP, touchUpData);
+        } else if (nativePointInNavCache(contentX, contentY, mNavSlop)) {
             WebViewCore.MotionUpData motionUpData = new WebViewCore
                     .MotionUpData();
             motionUpData.mFrame = nativeCacheHitFramePointer();
@@ -6307,27 +6168,16 @@ public class WebView extends AbsoluteLayout
      * Return true if the view (Plugin) is fully visible and maximized inside
      * the WebView.
      */
-    private boolean isPluginFitOnScreen(ViewManager.ChildView view) {
-        int viewWidth = getViewWidth();
-        int viewHeight = getViewHeightWithTitle();
-        float scale = Math.min((float) viewWidth / view.width,
-                (float) viewHeight / view.height);
-        if (scale < mMinZoomScale) {
-            scale = mMinZoomScale;
-        } else if (scale > mMaxZoomScale) {
-            scale = mMaxZoomScale;
-        }
-        if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_INCREMENT) {
-            if (contentToViewX(view.x) >= mScrollX
-                    && contentToViewX(view.x + view.width) <= mScrollX
-                            + viewWidth
-                    && contentToViewY(view.y) >= mScrollY
-                    && contentToViewY(view.y + view.height) <= mScrollY
-                            + viewHeight) {
-                return true;
-            }
-        }
-        return false;
+    boolean isPluginFitOnScreen(ViewManager.ChildView view) {
+        final int viewWidth = getViewWidth();
+        final int viewHeight = getViewHeightWithTitle();
+        float scale = Math.min((float) viewWidth / view.width, (float) viewHeight / view.height);
+        scale = mZoomManager.computeScaleWithLimits(scale);
+        return !mZoomManager.willScaleTriggerZoom(scale)
+                && contentToViewX(view.x) >= mScrollX
+                && contentToViewX(view.x + view.width) <= mScrollX + viewWidth
+                && contentToViewY(view.y) >= mScrollY
+                && contentToViewY(view.y + view.height) <= mScrollY + viewHeight;
     }
 
     /*
@@ -6336,22 +6186,19 @@ public class WebView extends AbsoluteLayout
      * animated scroll to center it. If the zoom needs to be changed, find the
      * zoom center and do a smooth zoom transition.
      */
-    private void centerFitRect(int docX, int docY, int docWidth, int docHeight) {
+    void centerFitRect(int docX, int docY, int docWidth, int docHeight) {
         int viewWidth = getViewWidth();
         int viewHeight = getViewHeightWithTitle();
         float scale = Math.min((float) viewWidth / docWidth, (float) viewHeight
                 / docHeight);
-        if (scale < mMinZoomScale) {
-            scale = mMinZoomScale;
-        } else if (scale > mMaxZoomScale) {
-            scale = mMaxZoomScale;
-        }
-        if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_INCREMENT) {
+        scale = mZoomManager.computeScaleWithLimits(scale);
+        if (!mZoomManager.willScaleTriggerZoom(scale)) {
             pinScrollTo(contentToViewX(docX + docWidth / 2) - viewWidth / 2,
                     contentToViewY(docY + docHeight / 2) - viewHeight / 2,
                     true, 0);
         } else {
-            float oldScreenX = docX * mActualScale - mScrollX;
+            float actualScale = mZoomManager.getScale();
+            float oldScreenX = docX * actualScale - mScrollX;
             float rectViewX = docX * scale;
             float rectViewWidth = docWidth * scale;
             float newMaxWidth = mContentWidth * scale;
@@ -6362,9 +6209,9 @@ public class WebView extends AbsoluteLayout
             } else if (newScreenX > (newMaxWidth - rectViewX - rectViewWidth)) {
                 newScreenX = viewWidth - (newMaxWidth - rectViewX);
             }
-            mZoomCenterX = (oldScreenX * scale - newScreenX * mActualScale)
-                    / (scale - mActualScale);
-            float oldScreenY = docY * mActualScale + getTitleHeight()
+            float zoomCenterX = (oldScreenX * scale - newScreenX * actualScale)
+                    / (scale - actualScale);
+            float oldScreenY = docY * actualScale + getTitleHeight()
                     - mScrollY;
             float rectViewY = docY * scale + getTitleHeight();
             float rectViewHeight = docHeight * scale;
@@ -6376,109 +6223,10 @@ public class WebView extends AbsoluteLayout
             } else if (newScreenY > (newMaxHeight - rectViewY - rectViewHeight)) {
                 newScreenY = viewHeight - (newMaxHeight - rectViewY);
             }
-            mZoomCenterY = (oldScreenY * scale - newScreenY * mActualScale)
-                    / (scale - mActualScale);
-            zoomWithPreview(scale, false);
-        }
-    }
-
-    void dismissZoomControl() {
-        if (mWebViewCore == null) {
-            // maybe called after WebView's destroy(). As we can't get settings,
-            // just hide zoom control for both styles.
-            if (mZoomButtonsController != null) {
-                mZoomButtonsController.setVisible(false);
-            }
-            if (mZoomControls != null) {
-                mZoomControls.hide();
-            }
-            return;
-        }
-        WebSettings settings = getSettings();
-        if (settings.getBuiltInZoomControls()) {
-            if (mZoomButtonsController != null) {
-                mZoomButtonsController.setVisible(false);
-            }
-        } else {
-            if (mZoomControlRunnable != null) {
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-            }
-            if (mZoomControls != null) {
-                mZoomControls.hide();
-            }
-        }
-    }
-
-    // Rule for double tap:
-    // 1. if the current scale is not same as the text wrap scale and layout
-    //    algorithm is NARROW_COLUMNS, fit to column;
-    // 2. if the current state is not overview mode, change to overview mode;
-    // 3. if the current state is overview mode, change to default scale.
-    private void doDoubleTap() {
-        if (mWebViewCore.getSettings().getUseWideViewPort() == false) {
-            return;
-        }
-        mZoomCenterX = mLastTouchX;
-        mZoomCenterY = mLastTouchY;
-        mAnchorX = viewToContentX((int) mZoomCenterX + mScrollX);
-        mAnchorY = viewToContentY((int) mZoomCenterY + mScrollY);
-        WebSettings settings = getSettings();
-        settings.setDoubleTapToastCount(0);
-        // remove the zoom control after double tap
-        dismissZoomControl();
-        ViewManager.ChildView plugin = mViewManager.hitTest(mAnchorX, mAnchorY);
-        if (plugin != null) {
-            if (isPluginFitOnScreen(plugin)) {
-                mInZoomOverview = true;
-                // Force the titlebar fully reveal in overview mode
-                if (mScrollY < getTitleHeight()) mScrollY = 0;
-                zoomWithPreview((float) getViewWidth() / mZoomOverviewWidth,
-                        true);
-            } else {
-                mInZoomOverview = false;
-                centerFitRect(plugin.x, plugin.y, plugin.width, plugin.height);
-            }
-            return;
-        }
-        boolean zoomToDefault = false;
-        if ((settings.getLayoutAlgorithm() == WebSettings.LayoutAlgorithm.NARROW_COLUMNS)
-                && (Math.abs(mActualScale - mTextWrapScale) >= MINIMUM_SCALE_INCREMENT)) {
-            setNewZoomScale(mActualScale, true, true);
-            float overviewScale = (float) getViewWidth() / mZoomOverviewWidth;
-            if (Math.abs(mActualScale - overviewScale) < MINIMUM_SCALE_INCREMENT) {
-                mInZoomOverview = true;
-            }
-        } else if (!mInZoomOverview) {
-            float newScale = (float) getViewWidth() / mZoomOverviewWidth;
-            if (Math.abs(mActualScale - newScale) >= MINIMUM_SCALE_INCREMENT) {
-                mInZoomOverview = true;
-                // Force the titlebar fully reveal in overview mode
-                if (mScrollY < getTitleHeight()) mScrollY = 0;
-                zoomWithPreview(newScale, true);
-            } else if (Math.abs(mActualScale - mDefaultScale) >= MINIMUM_SCALE_INCREMENT) {
-                zoomToDefault = true;
-            }
-        } else {
-            zoomToDefault = true;
-        }
-        if (zoomToDefault) {
-            mInZoomOverview = false;
-            int left = nativeGetBlockLeftEdge(mAnchorX, mAnchorY, mActualScale);
-            if (left != NO_LEFTEDGE) {
-                // add a 5pt padding to the left edge.
-                int viewLeft = contentToViewX(left < 5 ? 0 : (left - 5))
-                        - mScrollX;
-                // Re-calculate the zoom center so that the new scroll x will be
-                // on the left edge.
-                if (viewLeft > 0) {
-                    mZoomCenterX = viewLeft * mDefaultScale
-                            / (mDefaultScale - mActualScale);
-                } else {
-                    scrollBy(viewLeft, 0);
-                    mZoomCenterX = 0;
-                }
-            }
-            zoomWithPreview(mDefaultScale, true);
+            float zoomCenterY = (oldScreenY * scale - newScreenY * actualScale)
+                    / (scale - actualScale);
+            mZoomManager.setZoomCenter(zoomCenterX, zoomCenterY);
+            mZoomManager.startZoomAnimation(scale, false);
         }
     }
 
@@ -6490,6 +6238,9 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
+        // FIXME: If a subwindow is showing find, and the user touches the
+        // background window, it can steal focus.
+        if (mFindIsUp) return false;
         boolean result = false;
         if (inEditingMode()) {
             result = mWebTextView.requestFocus(direction,
@@ -6577,6 +6328,12 @@ public class WebView extends AbsoluteLayout
     public boolean requestChildRectangleOnScreen(View child,
                                                  Rect rect,
                                                  boolean immediate) {
+        // don't scroll while in zoom animation. When it is done, we will adjust
+        // the necessary components (e.g., WebTextView if it is in editing mode)
+        if (mZoomManager.isFixedLengthAnimationInProgress()) {
+            return false;
+        }
+
         rect.offset(child.getLeft() - child.getScrollX(),
                 child.getTop() - child.getScrollY());
 
@@ -6719,7 +6476,8 @@ public class WebView extends AbsoluteLayout
                 }
                 case SWITCH_TO_SHORTPRESS: {
                     if (mTouchMode == TOUCH_INIT_MODE) {
-                        if (mPreventDefault != PREVENT_DEFAULT_YES) {
+                        if (!getSettings().supportTouchOnly()
+                                && mPreventDefault != PREVENT_DEFAULT_YES) {
                             mTouchMode = TOUCH_SHORTPRESS_START_MODE;
                             updateSelection();
                         } else {
@@ -6733,6 +6491,9 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
+                    if (getSettings().supportTouchOnly()) {
+                        removeTouchHighlight(false);
+                    }
                     if (inFullScreenMode() || mDeferTouchProcess) {
                         TouchEventData ted = new TouchEventData();
                         ted.mAction = WebViewCore.ACTION_LONGPRESS;
@@ -6744,15 +6505,10 @@ public class WebView extends AbsoluteLayout
                         // simplicity for now, we don't set it.
                         ted.mMetaState = 0;
                         ted.mReprocess = mDeferTouchProcess;
-                        if (mDeferTouchProcess) {
-                            ted.mViewX = mLastTouchX;
-                            ted.mViewY = mLastTouchY;
-                        }
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDefault != PREVENT_DEFAULT_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
                         performLongClick();
-                        rebuildWebTextView();
                     }
                     break;
                 }
@@ -6785,70 +6541,36 @@ public class WebView extends AbsoluteLayout
                     spawnContentScrollTo(msg.arg1, msg.arg2);
                     break;
                 case UPDATE_ZOOM_RANGE: {
-                    WebViewCore.RestoreState restoreState
-                            = (WebViewCore.RestoreState) msg.obj;
+                    WebViewCore.ViewState viewState = (WebViewCore.ViewState) msg.obj;
                     // mScrollX contains the new minPrefWidth
-                    updateZoomRange(restoreState, getViewWidth(),
-                            restoreState.mScrollX, false);
+                    mZoomManager.updateZoomRange(viewState, getViewWidth(), viewState.mScrollX);
+                    break;
+                }
+                case REPLACE_BASE_CONTENT: {
+                    nativeReplaceBaseContent(msg.arg1);
                     break;
                 }
                 case NEW_PICTURE_MSG_ID: {
-                    // If we've previously delayed deleting a root
-                    // layer, do it now.
-                    if (mDelayedDeleteRootLayer) {
-                        mDelayedDeleteRootLayer = false;
-                        nativeSetRootLayer(0);
-                    }
-                    WebSettings settings = mWebViewCore.getSettings();
                     // called for new content
-                    final int viewWidth = getViewWidth();
-                    final WebViewCore.DrawData draw =
-                            (WebViewCore.DrawData) msg.obj;
+                    final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
+                    nativeSetBaseLayer(draw.mBaseLayer);
                     final Point viewSize = draw.mViewPoint;
-                    boolean useWideViewport = settings.getUseWideViewPort();
-                    WebViewCore.RestoreState restoreState = draw.mRestoreState;
-                    boolean hasRestoreState = restoreState != null;
-                    if (hasRestoreState) {
-                        updateZoomRange(restoreState, viewSize.x,
-                                draw.mMinPrefWidth, true);
+                    WebViewCore.ViewState viewState = draw.mViewState;
+                    boolean isPictureAfterFirstLayout = viewState != null;
+                    if (isPictureAfterFirstLayout) {
+                        // Reset the last sent data here since dealing with new page.
+                        mLastWidthSent = 0;
+                        mZoomManager.onFirstLayout(draw);
                         if (!mDrawHistory) {
-                            mInZoomOverview = false;
-
-                            if (mInitialScaleInPercent > 0) {
-                                setNewZoomScale(mInitialScaleInPercent / 100.0f,
-                                    mInitialScaleInPercent != mTextWrapScale * 100,
-                                    false);
-                            } else if (restoreState.mViewScale > 0) {
-                                mTextWrapScale = restoreState.mTextWrapScale;
-                                setNewZoomScale(restoreState.mViewScale, false,
-                                    false);
-                            } else {
-                                mInZoomOverview = useWideViewport
-                                    && settings.getLoadWithOverviewMode();
-                                float scale;
-                                if (mInZoomOverview) {
-                                    scale = (float) viewWidth
-                                        / DEFAULT_VIEWPORT_WIDTH;
-                                } else {
-                                    scale = restoreState.mTextWrapScale;
-                                }
-                                setNewZoomScale(scale, Math.abs(scale
-                                    - mTextWrapScale) >= MINIMUM_SCALE_INCREMENT,
-                                    false);
-                            }
-                            setContentScrollTo(restoreState.mScrollX,
-                                restoreState.mScrollY);
+                            setContentScrollTo(viewState.mScrollX, viewState.mScrollY);
                             // As we are on a new page, remove the WebTextView. This
                             // is necessary for page loads driven by webkit, and in
                             // particular when the user was on a password field, so
                             // the WebTextView was visible.
-                            clearTextEntry(false);
-                            // update the zoom buttons as the scale can be changed
-                            if (getSettings().getBuiltInZoomControls()) {
-                                updateZoomButtonsEnabled();
-                            }
+                            clearTextEntry();
                         }
                     }
+
                     // We update the layout (i.e. request a layout from the
                     // view system) if the last view size that we sent to
                     // WebCore matches the view size of the picture we just
@@ -6856,45 +6578,25 @@ public class WebView extends AbsoluteLayout
                     final boolean updateLayout = viewSize.x == mLastWidthSent
                             && viewSize.y == mLastHeightSent;
                     recordNewContentSize(draw.mWidthHeight.x,
-                            draw.mWidthHeight.y
-                            + (mFindIsUp ? mFindHeight : 0), updateLayout);
+                            draw.mWidthHeight.y, updateLayout);
                     if (DebugFlags.WEB_VIEW) {
                         Rect b = draw.mInvalRegion.getBounds();
                         Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
                                 b.left+","+b.top+","+b.right+","+b.bottom+"}");
                     }
                     invalidateContentRect(draw.mInvalRegion.getBounds());
+
                     if (mPictureListener != null) {
                         mPictureListener.onNewPicture(WebView.this, capturePicture());
                     }
-                    if (useWideViewport) {
-                        // limit mZoomOverviewWidth upper bound to
-                        // sMaxViewportWidth so that if the page doesn't behave
-                        // well, the WebView won't go insane. limit the lower
-                        // bound to match the default scale for mobile sites.
-                        mZoomOverviewWidth = Math.min(sMaxViewportWidth, Math
-                                .max((int) (viewWidth / mDefaultScale), Math
-                                        .max(draw.mMinPrefWidth,
-                                                draw.mViewPoint.x)));
-                    }
-                    if (!mMinZoomScaleFixed) {
-                        mMinZoomScale = (float) viewWidth / mZoomOverviewWidth;
-                    }
-                    if (!mDrawHistory && mInZoomOverview) {
-                        // fit the content width to the current view. Ignore
-                        // the rounding error case.
-                        if (Math.abs((viewWidth * mInvActualScale)
-                                - mZoomOverviewWidth) > 1) {
-                            setNewZoomScale((float) viewWidth
-                                    / mZoomOverviewWidth, Math.abs(mActualScale
-                                    - mTextWrapScale) < MINIMUM_SCALE_INCREMENT,
-                                    false);
-                        }
-                    }
+
+                    // update the zoom information based on the new picture
+                    mZoomManager.onNewPicture(draw);
+
                     if (draw.mFocusSizeChanged && inEditingMode()) {
                         mFocusSizeChanged = true;
                     }
-                    if (hasRestoreState) {
+                    if (isPictureAfterFirstLayout) {
                         mViewManager.postReadyToDrawAll();
                     }
                     break;
@@ -6928,14 +6630,8 @@ public class WebView extends AbsoluteLayout
                     break;
                 case REQUEST_KEYBOARD_WITH_SELECTION_MSG_ID:
                     displaySoftKeyboard(true);
-                    updateTextSelectionFromMessage(msg.arg1, msg.arg2,
-                            (WebViewCore.TextSelectionData) msg.obj);
-                    break;
+                    // fall through to UPDATE_TEXT_SELECTION_MSG_ID
                 case UPDATE_TEXT_SELECTION_MSG_ID:
-                    // If no textfield was in focus, and the user touched one,
-                    // causing it to send this message, then WebTextView has not
-                    // been set up yet.  Rebuild it so it can set its selection.
-                    rebuildWebTextView();
                     updateTextSelectionFromMessage(msg.arg1, msg.arg2,
                             (WebViewCore.TextSelectionData) msg.obj);
                     break;
@@ -6953,20 +6649,19 @@ public class WebView extends AbsoluteLayout
                         }
                     }
                     break;
-                case MOVE_OUT_OF_PLUGIN:
+                case UNHANDLED_NAV_KEY:
                     navHandledKey(msg.arg1, 1, false, 0);
                     break;
                 case UPDATE_TEXT_ENTRY_MSG_ID:
                     // this is sent after finishing resize in WebViewCore. Make
                     // sure the text edit box is still on the  screen.
-                    selectionDone();
                     if (inEditingMode() && nativeCursorIsTextInput()) {
                         mWebTextView.bringIntoView();
                         rebuildWebTextView();
                     }
                     break;
                 case CLEAR_TEXT_ENTRY:
-                    clearTextEntry(false);
+                    clearTextEntry();
                     break;
                 case INVAL_RECT_MSG_ID: {
                     Rect r = (Rect)msg.obj;
@@ -6976,23 +6671,6 @@ public class WebView extends AbsoluteLayout
                         // we need to scale r from content into view coords,
                         // which viewInvalidate() does for us
                         viewInvalidate(r.left, r.top, r.right, r.bottom);
-                    }
-                    break;
-                }
-                case IMMEDIATE_REPAINT_MSG_ID: {
-                    invalidate();
-                    break;
-                }
-                case SET_ROOT_LAYER_MSG_ID: {
-                    if (0 == msg.arg1) {
-                        // Null indicates deleting the old layer, but
-                        // don't actually do so until we've got the
-                        // new page to display.
-                        mDelayedDeleteRootLayer = true;
-                    } else {
-                        mDelayedDeleteRootLayer = false;
-                        nativeSetRootLayer(msg.arg1);
-                        invalidate();
                     }
                     break;
                 }
@@ -7039,43 +6717,46 @@ public class WebView extends AbsoluteLayout
                             mPreventDefault = msg.arg2 == 1 ? PREVENT_DEFAULT_YES
                                     : PREVENT_DEFAULT_NO;
                         }
+                        if (mPreventDefault == PREVENT_DEFAULT_YES) {
+                            mTouchHighlightRegion.setEmpty();
+                        }
                     } else if (msg.arg2 == 0) {
                         // prevent default is not called in WebCore, so the
                         // message needs to be reprocessed in UI
                         TouchEventData ted = (TouchEventData) msg.obj;
                         switch (ted.mAction) {
                             case MotionEvent.ACTION_DOWN:
-                                mLastDeferTouchX = ted.mViewX;
-                                mLastDeferTouchY = ted.mViewY;
+                                mLastDeferTouchX = contentToViewX(ted.mX)
+                                        - mScrollX;
+                                mLastDeferTouchY = contentToViewY(ted.mY)
+                                        - mScrollY;
                                 mDeferTouchMode = TOUCH_INIT_MODE;
                                 break;
                             case MotionEvent.ACTION_MOVE: {
                                 // no snapping in defer process
+                                int x = contentToViewX(ted.mX) - mScrollX;
+                                int y = contentToViewY(ted.mY) - mScrollY;
                                 if (mDeferTouchMode != TOUCH_DRAG_MODE) {
                                     mDeferTouchMode = TOUCH_DRAG_MODE;
-                                    mLastDeferTouchX = ted.mViewX;
-                                    mLastDeferTouchY = ted.mViewY;
+                                    mLastDeferTouchX = x;
+                                    mLastDeferTouchY = y;
                                     startDrag();
                                 }
                                 int deltaX = pinLocX((int) (mScrollX
-                                        + mLastDeferTouchX - ted.mViewX))
+                                        + mLastDeferTouchX - x))
                                         - mScrollX;
                                 int deltaY = pinLocY((int) (mScrollY
-                                        + mLastDeferTouchY - ted.mViewY))
+                                        + mLastDeferTouchY - y))
                                         - mScrollY;
                                 doDrag(deltaX, deltaY);
-                                if (deltaX != 0) mLastDeferTouchX = ted.mViewX;
-                                if (deltaY != 0) mLastDeferTouchY = ted.mViewY;
+                                if (deltaX != 0) mLastDeferTouchX = x;
+                                if (deltaY != 0) mLastDeferTouchY = y;
                                 break;
                             }
                             case MotionEvent.ACTION_UP:
                             case MotionEvent.ACTION_CANCEL:
                                 if (mDeferTouchMode == TOUCH_DRAG_MODE) {
                                     // no fling in defer process
-                                    mScroller.springback(mScrollX, mScrollY, 0,
-                                            computeMaxScrollX(), 0,
-                                            computeMaxScrollY());
-                                    invalidate();
                                     WebViewCore.resumePriority();
                                     WebViewCore.resumeUpdatePicture(mWebViewCore);
                                 }
@@ -7083,9 +6764,9 @@ public class WebView extends AbsoluteLayout
                                 break;
                             case WebViewCore.ACTION_DOUBLETAP:
                                 // doDoubleTap() needs mLastTouchX/Y as anchor
-                                mLastTouchX = ted.mViewX;
-                                mLastTouchY = ted.mViewY;
-                                doDoubleTap();
+                                mLastTouchX = contentToViewX(ted.mX) - mScrollX;
+                                mLastTouchY = contentToViewY(ted.mY) - mScrollY;
+                                mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
                                 mDeferTouchMode = TOUCH_DONE_MODE;
                                 break;
                             case WebViewCore.ACTION_LONGPRESS:
@@ -7093,7 +6774,6 @@ public class WebView extends AbsoluteLayout
                                 if (hitTest != null && hitTest.mType
                                         != HitTestResult.UNKNOWN_TYPE) {
                                     performLongClick();
-                                    rebuildWebTextView();
                                 }
                                 mDeferTouchMode = TOUCH_DONE_MODE;
                                 break;
@@ -7111,8 +6791,8 @@ public class WebView extends AbsoluteLayout
 
                 case FIND_AGAIN:
                     // Ignore if find has been dismissed.
-                    if (mFindIsUp) {
-                        findAll(mLastFind);
+                    if (mFindIsUp && mFindCallback != null) {
+                        mFindCallback.findAll();
                     }
                     break;
 
@@ -7217,13 +6897,49 @@ public class WebView extends AbsoluteLayout
 
                 case CENTER_FIT_RECT:
                     Rect r = (Rect)msg.obj;
-                    mInZoomOverview = false;
                     centerFitRect(r.left, r.top, r.width(), r.height());
                     break;
 
                 case SET_SCROLLBAR_MODES:
                     mHorizontalScrollBarMode = msg.arg1;
                     mVerticalScrollBarMode = msg.arg2;
+                    break;
+
+                case SELECTION_STRING_CHANGED:
+                    if (mAccessibilityInjector != null) {
+                        String selectionString = (String) msg.obj;
+                        mAccessibilityInjector.onSelectionStringChange(selectionString);
+                    }
+                    break;
+
+                case SET_TOUCH_HIGHLIGHT_RECTS:
+                    invalidate(mTouchHighlightRegion.getBounds());
+                    mTouchHighlightRegion.setEmpty();
+                    if (msg.obj != null) {
+                        ArrayList<Rect> rects = (ArrayList<Rect>) msg.obj;
+                        for (Rect rect : rects) {
+                            Rect viewRect = contentToViewRect(rect);
+                            // some sites, like stories in nytimes.com, set
+                            // mouse event handler in the top div. It is not
+                            // user friendly to highlight the div if it covers
+                            // more than half of the screen.
+                            if (viewRect.width() < getWidth() >> 1
+                                    || viewRect.height() < getHeight() >> 1) {
+                                mTouchHighlightRegion.union(viewRect);
+                                invalidate(viewRect);
+                            } else {
+                                Log.w(LOGTAG, "Skip the huge selection rect:"
+                                        + viewRect);
+                            }
+                        }
+                    }
+                    break;
+
+                case SAVE_WEBARCHIVE_FINISHED:
+                    SaveWebArchiveMessage saveMessage = (SaveWebArchiveMessage)msg.obj;
+                    if (saveMessage.mCallback != null) {
+                        saveMessage.mCallback.onReceiveValue(saveMessage.mResultFile);
+                    }
                     break;
 
                 default:
@@ -7533,37 +7249,6 @@ public class WebView extends AbsoluteLayout
                 new InvokeListBox(array, enabledArray, selectedArray));
     }
 
-    private void updateZoomRange(WebViewCore.RestoreState restoreState,
-            int viewWidth, int minPrefWidth, boolean updateZoomOverview) {
-        if (restoreState.mMinScale == 0) {
-            if (restoreState.mMobileSite) {
-                if (minPrefWidth > Math.max(0, viewWidth)) {
-                    mMinZoomScale = (float) viewWidth / minPrefWidth;
-                    mMinZoomScaleFixed = false;
-                    if (updateZoomOverview) {
-                        WebSettings settings = getSettings();
-                        mInZoomOverview = settings.getUseWideViewPort() &&
-                                settings.getLoadWithOverviewMode();
-                    }
-                } else {
-                    mMinZoomScale = restoreState.mDefaultScale;
-                    mMinZoomScaleFixed = true;
-                }
-            } else {
-                mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
-                mMinZoomScaleFixed = false;
-            }
-        } else {
-            mMinZoomScale = restoreState.mMinScale;
-            mMinZoomScaleFixed = true;
-        }
-        if (restoreState.mMaxScale == 0) {
-            mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
-        } else {
-            mMaxZoomScale = restoreState.mMaxScale;
-        }
-    }
-
     /*
      * Request a dropdown menu for a listbox with single selection or a single
      * <select> element.
@@ -7602,7 +7287,7 @@ public class WebView extends AbsoluteLayout
      */
     private void sendMoveMouseIfLatest(boolean removeFocus) {
         if (removeFocus) {
-            clearTextEntry(true);
+            clearTextEntry();
         }
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST,
                 cursorData());
@@ -7646,7 +7331,7 @@ public class WebView extends AbsoluteLayout
         // FIXME the divisor should be retrieved from somewhere
         // the closest thing today is hard-coded into ScrollView.java
         // (from ScrollView.java, line 363)   int maxJump = height/2;
-        return Math.round(height * mInvActualScale);
+        return Math.round(height * mZoomManager.getInvScale());
     }
 
     /**
@@ -7657,10 +7342,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Pass the key to the plugin.  This assumes that nativeFocusIsPlugin()
-     * returned true.
+     * Pass the key directly to the page.  This assumes that
+     * nativePageShouldHandleShiftAndArrows() returned true.
      */
-    private void letPluginHandleNavKey(int keyCode, long time, boolean down) {
+    private void letPageHandleNavKey(int keyCode, long time, boolean down) {
         int keyEventAction;
         int eventHubAction;
         if (down) {
@@ -7735,6 +7420,16 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * @return If the page should receive Shift and arrows.
+     */
+    private boolean pageShouldHandleShiftAndArrows() {
+        // TODO: Maybe the injected script should announce its presence in
+        // the page meta-tag so the nativePageShouldHandleShiftAndArrows
+        // will check that as one of the conditions it looks for
+        return (nativePageShouldHandleShiftAndArrows() || mAccessibilityScriptInjected);
+    }
+
+    /**
      * Set the background color. It's white by default. Pass
      * zero to make the view transparent.
      * @param color   the ARGB color described by Color.java
@@ -7757,7 +7452,7 @@ public class WebView extends AbsoluteLayout
      * @hide only needs to be accessible to Browser and testing
      */
     public void drawPage(Canvas canvas) {
-        mWebViewCore.drawContentPicture(canvas, 0, false, false);
+        nativeDraw(canvas, 0, 0, false);
     }
 
     /**
@@ -7801,10 +7496,18 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeCursorWantsKeyEvents();
     private native void     nativeDebugDump();
     private native void     nativeDestroy();
+
+    /**
+     * Draw the picture set with a background color and extra. If
+     * "splitIfNeeded" is true and the return value is not 0, the return value
+     * MUST be passed to WebViewCore with SPLIT_PICTURE_SET message so that the
+     * native allocation can be freed.
+     */
+    private native int nativeDraw(Canvas canvas, int color, int extra,
+            boolean splitIfNeeded);
+    private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations();
     private native void     nativeExtendSelection(int x, int y);
-    private native void     nativeDrawExtras(Canvas canvas, int extra);
-    private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);
     private native void     nativeFindNext(boolean forward);
     /* package */ native int      nativeFocusCandidateFramePointer();
@@ -7842,6 +7545,14 @@ public class WebView extends AbsoluteLayout
             boolean noScroll);
     private native int      nativeMoveGeneration();
     private native void     nativeMoveSelection(int x, int y);
+    /**
+     * @return true if the page should get the shift and arrow keys, rather
+     * than select text/navigation.
+     *
+     * If the focus is a plugin, or if the focus and cursor match and are
+     * a contentEditable element, then the page should handle these keys.
+     */
+    private native boolean  nativePageShouldHandleShiftAndArrows();
     private native boolean  nativePointInNavCache(int x, int y, int slop);
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
@@ -7856,13 +7567,15 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetExtendSelection();
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
-    private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    private native void     nativeSetRootLayer(int layer);
+    private native void     nativeSetBaseLayer(int layer);
+    private native void     nativeShowCursorTimed();
+    private native void     nativeReplaceBaseContent(int content);
+    private native void     nativeCopyBaseContentToPicture(Picture pict);
+    private native boolean  nativeHasContent();
     private native void     nativeSetSelectionPointer(boolean set,
             float scale, int x, int y);
     private native boolean  nativeStartSelection(int x, int y);
-    private native void     nativeSetSelectionRegion(boolean set);
     private native Rect     nativeSubtractLayers(Rect content);
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
@@ -7871,6 +7584,10 @@ public class WebView extends AbsoluteLayout
             int generation);
     private native boolean  nativeWordSelection(int x, int y);
     // return NO_LEFTEDGE means failure.
-    private static final int NO_LEFTEDGE = -1;
-    private native int      nativeGetBlockLeftEdge(int x, int y, float scale);
+    static final int NO_LEFTEDGE = -1;
+    native int nativeGetBlockLeftEdge(int x, int y, float scale);
+
+    // Returns a pointer to the scrollable LayerAndroid at the given point.
+    private native int      nativeScrollableLayer(int x, int y);
+    private native boolean  nativeScrollLayer(int layer, int dx, int dy);
 }

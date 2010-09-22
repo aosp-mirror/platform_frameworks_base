@@ -73,7 +73,7 @@ public abstract class AtCommandHandler {
      *             least one element in this array.
      * @return     The result of this command.
      */
-    // Typically used to set this paramter
+    // Typically used to set this parameter
     public AtCommandResult handleSetCommand(Object[] args) {
         return new AtCommandResult(AtCommandResult.ERROR);
     }
@@ -83,11 +83,12 @@ public abstract class AtCommandHandler {
      * Test commands are part of the Extended command syntax, and are typically
      * used to request an indication of the range of legal values that "FOO"
      * can take.<p>
-     * By defualt we return an OK result, to indicate that this command is at
+     * By default we return an OK result, to indicate that this command is at
      * least recognized.<p>
      * @return The result of this command.
      */
     public AtCommandResult handleTestCommand() {
         return new AtCommandResult(AtCommandResult.OK);
     }
+
 }

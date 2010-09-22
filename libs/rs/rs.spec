@@ -1,11 +1,14 @@
 
+ContextFinish {
+	handcodeApi
+	}
 
 ContextBindRootScript {
 	param RsScript sampler
 	}
 
-ContextBindProgramFragmentStore {
-	param RsProgramFragmentStore pgm
+ContextBindProgramStore {
+	param RsProgramStore pgm
 	}
 
 ContextBindProgramFragment {
@@ -18,6 +21,10 @@ ContextBindProgramVertex {
 
 ContextBindProgramRaster {
 	param RsProgramRaster pgm
+	}
+
+ContextBindFont {
+	param RsFont pgm
 	}
 
 ContextPause {
@@ -51,6 +58,11 @@ AssignName {
 	param size_t len
 	}
 
+GetName {
+	param void *obj
+	param const char **name
+	}
+
 ObjDestroy {
 	param void *obj
 	}
@@ -68,7 +80,21 @@ ElementCreate2 {
 	param const RsElement * elements
 	param const char ** names
 	param const size_t * nameLengths
+	param const uint32_t * arraySize
 	ret RsElement
+	}
+
+ElementGetNativeData {
+	param RsElement elem
+	param uint32_t *elemData
+	param uint32_t elemDataSize
+	}
+
+ElementGetSubElements {
+	param RsElement elem
+	param uint32_t *ids
+	param const char **names
+	param uint32_t dataSize
 	}
 
 TypeBegin {
@@ -82,6 +108,12 @@ TypeAdd {
 
 TypeCreate {
 	ret RsType
+	}
+
+TypeGetNativeData {
+	param RsType type
+	param uint32_t * typeData
+	param uint32_t typeDataSize
 	}
 
 AllocationCreateTyped {
@@ -153,6 +185,16 @@ Allocation1DSubData {
 	togglePlay
 	}
 
+Allocation1DSubElementData {
+	param RsAllocation va
+	param uint32_t x
+	param const void *data
+	param uint32_t comp_offset
+	param uint32_t bytes
+	handcodeApi
+	togglePlay
+	}
+
 Allocation2DSubData {
 	param RsAllocation va
 	param uint32_t xoff
@@ -160,6 +202,15 @@ Allocation2DSubData {
 	param uint32_t w
 	param uint32_t h
 	param const void *data
+	param uint32_t bytes
+	}
+
+Allocation2DSubElementData {
+	param RsAllocation va
+	param uint32_t x
+	param uint32_t y
+	param const void *data
+	param uint32_t element_offset
 	param uint32_t bytes
 	}
 
@@ -224,6 +275,11 @@ Adapter2DSubData {
 	param const void *data
 	}
 
+AllocationGetType {
+	param RsAllocation va
+	ret const void*
+	}
+
 SamplerBegin {
 	}
 
@@ -248,13 +304,6 @@ ScriptBindAllocation {
 ScriptCBegin {
 	}
 
-ScriptSetClearColor {
-	param RsScript s
-	param float r
-	param float g
-	param float b
-	param float a
-	}
 
 ScriptSetTimeZone {
 	param RsScript s
@@ -262,37 +311,47 @@ ScriptSetTimeZone {
 	param uint32_t length
 	}
 
-ScriptSetClearDepth {
-	param RsScript s
-	param float depth
-	}
-
-ScriptSetClearStencil {
-	param RsScript s
-	param uint32_t stencil
-	}
-
-ScriptSetType {
-	param RsType type
-	param uint32_t slot
-	param bool isWritable
-	param const char * name
-	}
-
-ScriptSetInvoke {
-	param const char * name
-	param uint32_t slot
-	}
 
 ScriptInvoke {
 	param RsScript s
 	param uint32_t slot
 	}
 
-ScriptSetRoot {
-	param bool isRoot
+ScriptInvokeV {
+	param RsScript s
+	param uint32_t slot
+	param const void * data
+	param uint32_t dataLen
+	handcodeApi
+	togglePlay
 	}
 
+ScriptSetVarI {
+	param RsScript s
+	param uint32_t slot
+	param int value
+	}
+
+ScriptSetVarF {
+	param RsScript s
+	param uint32_t slot
+	param float value
+	}
+
+ScriptSetVarD {
+	param RsScript s
+	param uint32_t slot
+	param double value
+	}
+
+ScriptSetVarV {
+	param RsScript s
+	param uint32_t slot
+	param const void * data
+	param uint32_t dataLen
+	handcodeApi
+	togglePlay
+	}
 
 
 ScriptCSetScript {
@@ -308,52 +367,41 @@ ScriptCCreate {
 	ret RsScript
 	}
 
-ScriptCSetDefineF {
-    param const char* name
-    param float value
-    }
 
-ScriptCSetDefineI32 {
-    param const char* name
-    param int32_t value
-    }
-
-ProgramFragmentStoreBegin {
+ProgramStoreBegin {
 	param RsElement in
 	param RsElement out
 	}
 
-ProgramFragmentStoreColorMask {
+ProgramStoreColorMask {
 	param bool r
 	param bool g
 	param bool b
 	param bool a
 	}
 
-ProgramFragmentStoreBlendFunc {
+ProgramStoreBlendFunc {
 	param RsBlendSrcFunc srcFunc
 	param RsBlendDstFunc destFunc
 	}
 
-ProgramFragmentStoreDepthMask {
+ProgramStoreDepthMask {
 	param bool enable
 }
 
-ProgramFragmentStoreDither {
+ProgramStoreDither {
 	param bool enable
 }
 
-ProgramFragmentStoreDepthFunc {
+ProgramStoreDepthFunc {
 	param RsDepthFunc func
 }
 
-ProgramFragmentStoreCreate {
-	ret RsProgramFragmentStore
+ProgramStoreCreate {
+	ret RsProgramStore
 	}
 
 ProgramRasterCreate {
-	param RsElement in
-	param RsElement out
 	param bool pointSmooth
 	param bool lineSmooth
 	param bool pointSprite
@@ -365,11 +413,10 @@ ProgramRasterSetLineWidth {
 	param float lw
 }
 
-ProgramRasterSetPointSize{
+ProgramRasterSetCullMode {
 	param RsProgramRaster pr
-	param float ps
+	param RsCullMode mode
 }
-
 
 ProgramBindConstants {
 	param RsProgram vp
@@ -417,34 +464,10 @@ ProgramVertexCreate2 {
 	ret RsProgramVertex
 	}
 
-LightBegin {
-	}
-
-LightSetLocal {
-	param bool isLocal
-	}
-
-LightSetMonochromatic {
-	param bool isMono
-	}
-
-LightCreate {
-	ret RsLight light
-	}
-
-
-LightSetPosition {
-	param RsLight light
-	param float x
-	param float y
-	param float z
-	}
-
-LightSetColor {
-	param RsLight light
-	param float r
-	param float g
-	param float b
+FileA3DCreateFromAssetStream {
+	param const void * data
+	param size_t len
+	ret RsFile
 	}
 
 FileOpen {
@@ -453,30 +476,79 @@ FileOpen {
 	param size_t len
 	}
 
+FileA3DGetNumIndexEntries {
+	param int32_t * numEntries
+	param RsFile file
+	}
 
-SimpleMeshCreate {
-	ret RsSimpleMesh
-	param RsAllocation prim
-	param RsAllocation index
-	param RsAllocation *vtx
+FileA3DGetIndexEntries {
+	param RsFileIndexEntry * fileEntries
+	param uint32_t numEntries
+	param RsFile fileA3D
+	}
+
+FileA3DGetEntryByIndex {
+	param uint32_t index
+	param RsFile file
+	ret RsObjectBase
+	}
+
+FontCreateFromFile {
+	param const char *name
+	param uint32_t fontSize
+	param uint32_t dpi
+	ret RsFont
+	}
+
+MeshCreate {
+	ret RsMesh
 	param uint32_t vtxCount
-	param uint32_t primType
+	param uint32_t idxCount
 	}
 
-
-SimpleMeshBindIndex {
-	param RsSimpleMesh mesh
+MeshBindIndex {
+	param RsMesh mesh
 	param RsAllocation idx
+	param uint32_t primType
+	param uint32_t slot
 	}
 
-SimpleMeshBindPrimitive {
-	param RsSimpleMesh mesh
-	param RsAllocation prim
-	}
-
-SimpleMeshBindVertex {
-	param RsSimpleMesh mesh
+MeshBindVertex {
+	param RsMesh mesh
 	param RsAllocation vtx
 	param uint32_t slot
+	}
+
+MeshGetVertexBufferCount {
+	param RsMesh mesh
+	param int32_t *numVtx
+	}
+
+MeshGetIndexCount {
+	param RsMesh mesh
+	param int32_t *numIdx
+	}
+
+MeshGetVertices {
+	param RsMesh mv
+	param RsAllocation *vtxData
+	param uint32_t vtxDataCount
+	}
+
+MeshGetIndices {
+	param RsMesh mv
+	param RsAllocation *va
+	param uint32_t *primType
+	param uint32_t idxDataCount
+	}
+
+AnimationCreate {
+	param const float *inValues
+	param const float *outValues
+	param uint32_t valueCount
+	param RsAnimationInterpolation interp
+	param RsAnimationEdge pre
+	param RsAnimationEdge post
+	ret RsAnimation
 	}
 

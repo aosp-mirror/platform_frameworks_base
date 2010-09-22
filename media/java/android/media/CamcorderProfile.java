@@ -39,20 +39,78 @@ package android.media;
  */
 public class CamcorderProfile
 {
+    // Do not change these values/ordinals without updating their counterpart
+    // in include/media/MediaProfiles.h!
+
     /**
-     * The output from camcorder recording sessions can have different quality levels.
-     *
-     * Currently, we define two quality levels: high quality and low quality.
-     * A camcorder recording session with high quality level usually has higher output bit
-     * rate, better video and/or audio recording quality, larger video frame
-     * resolution and higher audio sampling rate, etc, than those with low quality
-     * level.
-     *
-     * Do not change these values/ordinals without updating their counterpart
-     * in include/media/MediaProfiles.h!
+     * Quality level corresponding to the lowest available resolution.
      */
     public static final int QUALITY_LOW  = 0;
+
+    /**
+     * Quality level corresponding to the highest available resolution.
+     */
     public static final int QUALITY_HIGH = 1;
+
+    /**
+     * Quality level corresponding to the qcif (176 x 144) resolution.
+     */
+    public static final int QUALITY_QCIF = 2;
+
+    /**
+     * Quality level corresponding to the cif (352 x 288) resolution.
+     */
+    public static final int QUALITY_CIF = 3;
+
+    /**
+     * Quality level corresponding to the 480p (720 x 480) resolution.
+     */
+    public static final int QUALITY_480P = 4;
+
+    /**
+     * Quality level corresponding to the 720p (1280 x 720) resolution.
+     */
+    public static final int QUALITY_720P = 5;
+
+    /**
+     * Quality level corresponding to the 1080p (1920 x 1088) resolution.
+     */
+    public static final int QUALITY_1080P = 6;
+
+    /**
+     * Time lapse quality level corresponding to the lowest available resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_LOW  = 1000;
+
+    /**
+     * Time lapse quality level corresponding to the highest available resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_HIGH = 1001;
+
+    /**
+     * Time lapse quality level corresponding to the qcif (176 x 144) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_QCIF = 1002;
+
+    /**
+     * Time lapse quality level corresponding to the cif (352 x 288) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_CIF = 1003;
+
+    /**
+     * Time lapse quality level corresponding to the 480p (720 x 480) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_480P = 1004;
+
+    /**
+     * Time lapse quality level corresponding to the 720p (1280 x 720) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_720P = 1005;
+
+    /**
+     * Time lapse quality level corresponding to the 1080p (1920 x 1088) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_1080P = 1006;
 
     /**
      * Default recording duration in seconds before the session is terminated.
@@ -122,23 +180,77 @@ public class CamcorderProfile
      * Returns the camcorder profile for the default camera at the given
      * quality level.
      * @param quality the target quality level for the camcorder profile
+     * @see #get(int, int)
      */
     public static CamcorderProfile get(int quality) {
-        return get(0, quality);
+        return get(android.hardware.Camera.CAMERA_ID_DEFAULT, quality);
     }
 
     /**
      * Returns the camcorder profile for the given camera at the given
      * quality level.
+     *
+     * Quality levels QUALITY_LOW, QUALITY_HIGH are guaranteed to be supported, while
+     * other levels may or may not be supported. The supported levels can be checked using
+     * {@link #hasProfile(int, int)}.
+     * QUALITY_LOW refers to the lowest quality available, while QUALITY_HIGH refers to
+     * the highest quality available.
+     * QUALITY_LOW/QUALITY_HIGH have to match one of qcif, cif, 480p, 720p, or 1080p.
+     * E.g. if the device supports 480p, 720p, and 1080p, then low is 480p and high is
+     * 1080p.
+     *
+     * The same is true for time lapse quality levels, i.e. QUALITY_TIME_LAPSE_LOW,
+     * QUALITY_TIME_LAPSE_HIGH are guaranteed to be supported and have to match one of
+     * qcif, cif, 480p, 720p, or 1080p.
+     *
+     * A camcorder recording session with higher quality level usually has higher output
+     * bit rate, better video and/or audio recording quality, larger video frame
+     * resolution and higher audio sampling rate, etc, than those with lower quality
+     * level.
+     *
      * @param cameraId the id for the camera
-     * @param quality the target quality level for the camcorder profile
+     * @param quality the target quality level for the camcorder profile.
+     * @see #QUALITY_LOW
+     * @see #QUALITY_HIGH
+     * @see #QUALITY_QCIF
+     * @see #QUALITY_CIF
+     * @see #QUALITY_480P
+     * @see #QUALITY_720P
+     * @see #QUALITY_1080P
+     * @see #QUALITY_TIME_LAPSE_LOW
+     * @see #QUALITY_TIME_LAPSE_HIGH
+     * @see #QUALITY_TIME_LAPSE_QCIF
+     * @see #QUALITY_TIME_LAPSE_CIF
+     * @see #QUALITY_TIME_LAPSE_480P
+     * @see #QUALITY_TIME_LAPSE_720P
+     * @see #QUALITY_TIME_LAPSE_1080P
      */
     public static CamcorderProfile get(int cameraId, int quality) {
-        if (quality < QUALITY_LOW || quality > QUALITY_HIGH) {
+        if (!((quality >= QUALITY_LOW && quality <= QUALITY_1080P) ||
+                (quality >= QUALITY_TIME_LAPSE_LOW && quality <= QUALITY_TIME_LAPSE_1080P))) {
             String errMessage = "Unsupported quality level: " + quality;
             throw new IllegalArgumentException(errMessage);
         }
         return native_get_camcorder_profile(cameraId, quality);
+    }
+
+    /**
+     * Returns true if camcorder profile exists for the default camera at
+     * the given quality level.
+     * @param quality the target quality level for the camcorder profile
+     */
+    public static boolean hasProfile(int quality) {
+        return hasProfile(android.hardware.Camera.CAMERA_ID_DEFAULT, quality);
+    }
+
+    /**
+     * Returns true if camcorder profile exists for the given camera at
+     * the given quality level.
+     * @param cameraId the id for the camera
+     * @param quality the target quality level for the camcorder profile
+     */
+    public static boolean hasProfile(int cameraId, int quality) {
+        return native_has_camcorder_profile(cameraId, quality);
     }
 
     static {
@@ -177,5 +289,7 @@ public class CamcorderProfile
     // Methods implemented by JNI
     private static native final void native_init();
     private static native final CamcorderProfile native_get_camcorder_profile(
+            int cameraId, int quality);
+    private static native final boolean native_has_camcorder_profile(
             int cameraId, int quality);
 }

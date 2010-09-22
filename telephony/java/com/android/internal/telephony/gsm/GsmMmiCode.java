@@ -44,6 +44,13 @@ public final class GsmMmiCode extends Handler implements MmiCode {
 
     //***** Constants
 
+    // Max Size of the Short Code (aka Short String from TS 22.030 6.5.2)
+    static final int MAX_LENGTH_SHORT_CODE = 2;
+
+    // TS 22.030 6.5.2 Every Short String USSD command will end with #-key
+    // (known as #-String)
+    static final char END_OF_USSD_COMMAND = '#';
+
     // From TS 22.030 6.5.2
     static final String ACTION_ACTIVATE = "*";
     static final String ACTION_DEACTIVATE = "#";
@@ -446,22 +453,69 @@ public final class GsmMmiCode extends Handler implements MmiCode {
     }
 
     /**
-     * Helper function for newFromDialString.  Returns true if dialString appears to be a short code
-     * AND conditions are correct for it to be treated as such.
+     * Helper function for newFromDialString. Returns true if dialString appears
+     * to be a short code AND conditions are correct for it to be treated as
+     * such.
      */
     static private boolean isShortCode(String dialString, GSMPhone phone) {
         // Refer to TS 22.030 Figure 3.5.3.2:
-        // A 1 or 2 digit "short code" is treated as USSD if it is entered while on a call or
-        // does not satisfy the condition (exactly 2 digits && starts with '1').
-        return ((dialString != null && dialString.length() <= 2)
-                && !PhoneNumberUtils.isEmergencyNumber(dialString)
-                && (phone.isInCall()
-                    || !((dialString.length() == 2 && dialString.charAt(0) == '1')
-                         /* While contrary to TS 22.030, there is strong precedence
-                          * for treating "0" and "00" as call setup strings.
-                          */
-                         || dialString.equals("0")
-                         || dialString.equals("00"))));
+        if (dialString == null) {
+            return false;
+        }
+
+        // Illegal dial string characters will give a ZERO length.
+        // At this point we do not want to crash as any application with
+        // call privileges may send a non dial string.
+        // It return false as when the dialString is equal to NULL.
+        if (dialString.length() == 0) {
+            return false;
+        }
+
+        if (PhoneNumberUtils.isEmergencyNumber(dialString)) {
+            return false;
+        } else {
+            return isShortCodeUSSD(dialString, phone);
+        }
+    }
+
+    /**
+     * Helper function for isShortCode. Returns true if dialString appears to be
+     * a short code and it is a USSD structure
+     *
+     * According to the 3PGG TS 22.030 specification Figure 3.5.3.2: A 1 or 2
+     * digit "short code" is treated as USSD if it is entered while on a call or
+     * does not satisfy the condition (exactly 2 digits && starts with '1'), there
+     * are however exceptions to this rule (see below)
+     *
+     * Exception (1) to Call initiation is: If the user of the device is already in a call
+     * and enters a Short String without any #-key at the end and the length of the Short String is
+     * equal or less then the MAX_LENGTH_SHORT_CODE [constant that is equal to 2]
+     *
+     * The phone shall initiate a USSD/SS commands.
+     *
+     * Exception (2) to Call initiation is: If the user of the device enters one
+     * Digit followed by the #-key. This rule defines this String as the
+     * #-String which is a USSD/SS command.
+     *
+     * The phone shall initiate a USSD/SS command.
+     */
+    static private boolean isShortCodeUSSD(String dialString, GSMPhone phone) {
+        if (dialString != null) {
+            if (phone.isInCall()) {
+                // The maximum length of a Short Code (aka Short String) is 2
+                if (dialString.length() <= MAX_LENGTH_SHORT_CODE) {
+                    return true;
+                }
+            }
+
+            // The maximum length of a Short Code (aka Short String) is 2
+            if (dialString.length() <= MAX_LENGTH_SHORT_CODE) {
+                if (dialString.charAt(dialString.length() - 1) == END_OF_USSD_COMMAND) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

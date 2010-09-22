@@ -293,8 +293,8 @@ public class DownloadManager {
                 throw new NullPointerException();
             }
             String scheme = uri.getScheme();
-            if (scheme == null || !scheme.equals("http")) {
-                throw new IllegalArgumentException("Can only download HTTP URIs: " + uri);
+            if (scheme == null || (!scheme.equals("http") && !scheme.equals("https"))) {
+                throw new IllegalArgumentException("Can only download HTTP/HTTPS URIs: " + uri);
             }
             mUri = uri;
         }

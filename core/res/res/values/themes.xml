@@ -53,6 +53,10 @@
         <item name="textColorHint">@android:color/hint_foreground_dark</item>
         <item name="textColorHintInverse">@android:color/hint_foreground_light</item>
         <item name="textColorSearchUrl">@android:color/search_url_text</item>
+        <item name="textColorHighlight">@android:color/highlighted_text_dark</item>
+        <item name="textColorHighlightInverse">@android:color/highlighted_text_light</item>
+        <item name="textColorLink">@android:color/link_text_dark</item>
+        <item name="textColorLinkInverse">@android:color/link_text_light</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Large</item>
         <item name="textAppearanceMedium">@android:style/TextAppearance.Medium</item>
@@ -65,10 +69,16 @@
         
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
         
+        <item name="editTextColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="editTextBackground">@android:drawable/edit_text</item>
+        
         <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
         
         <item name="textCheckMark">@android:drawable/indicator_check_mark_dark</item>
         <item name="textCheckMarkInverse">@android:drawable/indicator_check_mark_light</item>
+
+        <item name="textAppearanceLargePopupMenu">@android:style/TextAppearance.Widget.PopupMenu.Large</item>
+        <item name="textAppearanceSmallPopupMenu">@android:style/TextAppearance.Widget.PopupMenu.Small</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@android:style/Widget.Button</item>
@@ -84,9 +94,13 @@
         <item name="searchResultListItemHeight">58dip</item>
         <item name="listDivider">@drawable/divider_horizontal_dark</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator</item>   
-        
-		<item name="listChoiceIndicatorSingle">@android:drawable/btn_radio</item>
-    	<item name="listChoiceIndicatorMultiple">@android:drawable/btn_check</item>    
+
+        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio</item>
+        <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check</item>
+
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background</item>
+
+        <item name="activatedBackgroundIndicator">@android:drawable/activated_background</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">
@@ -115,6 +129,8 @@
         <item name="windowTitleBackgroundStyle">@android:style/WindowTitleBackground</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Activity</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">false</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
@@ -164,8 +180,8 @@
         <item name="progressBarStyleSmallTitle">@android:style/Widget.ProgressBar.Small.Title</item>
         <item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large</item>
         <item name="progressBarStyleInverse">@android:style/Widget.ProgressBar.Inverse</item>
-		<item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small.Inverse</item>
-	    <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large.Inverse</item> 
+        <item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small.Inverse</item>
+        <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large.Inverse</item>
         <item name="seekBarStyle">@android:style/Widget.SeekBar</item>
         <item name="ratingBarStyle">@android:style/Widget.RatingBar</item>
         <item name="ratingBarStyleIndicator">@android:style/Widget.RatingBar.Indicator</item>
@@ -174,6 +190,7 @@
         <item name="scrollViewStyle">@android:style/Widget.ScrollView</item>
         <item name="horizontalScrollViewStyle">@android:style/Widget.HorizontalScrollView</item>
         <item name="spinnerStyle">@android:style/Widget.Spinner</item>
+        <item name="dropDownSpinnerStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="starStyle">@android:style/Widget.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.TextView</item>
@@ -190,6 +207,8 @@
         <item name="quickContactBadgeStyleSmallWindowSmall">@android:style/Widget.QuickContactBadgeSmall.WindowSmall</item>
         <item name="quickContactBadgeStyleSmallWindowMedium">@android:style/Widget.QuickContactBadgeSmall.WindowMedium</item>
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.QuickContactBadgeSmall.WindowLarge</item>
+        <item name="listPopupWindowStyle">@android:style/Widget.ListPopupWindow</item>
+        <item name="popupMenuStyle">@android:style/Widget.PopupMenu</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
@@ -205,6 +224,21 @@
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
+
+        <!-- Action bar styles -->
+        <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
+        <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
+        <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
+        <item name="actionButtonPadding">12dip</item>
+        <item name="actionModeBackground">@android:drawable/action_bar_context_background</item>
+        <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
+        <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
+        <item name="actionBarTabBarStyle">@style/Widget.ActionBarView_TabBar</item>
+        <item name="actionBarTabTextStyle">@style/Widget.ActionBarView_TabText</item>
+        <item name="actionModeStyle">@style/Widget.ActionMode</item>
+        <item name="actionModeCloseButtonStyle">@style/Widget.ActionButton.CloseMode</item>
+        <item name="actionBarStyle">@android:style/Widget.ActionBar</item>
+        <item name="actionBarSize">50dip</item>
     </style>
     
     <!-- Variant of the default (dark) theme with no title bar -->
@@ -228,7 +262,7 @@
         <item name="colorBackground">@android:color/background_light</item>
         <item name="colorForeground">@color/bright_foreground_light</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_light_inverse</item>
-
+        
         <item name="textColorPrimary">@android:color/primary_text_light</item>
         <item name="textColorSecondary">@android:color/secondary_text_light</item>
         <item name="textColorTertiary">@android:color/tertiary_text_light</item>
@@ -242,8 +276,17 @@
         <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_dark_nodisable</item>
         <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_dark_nodisable</item>
         <item name="textColorHint">@android:color/hint_foreground_light</item>
-        <item name="textColorHintInverse">@android:color/hint_foreground_dark</item>
+        <item name="textColorHintInverse">@android:color/hint_foreground_dark</item>        
+        <item name="textColorHighlight">@android:color/highlighted_text_light</item>
+        <item name="textColorHighlightInverse">@android:color/highlighted_text_dark</item>
+        <item name="textColorLink">@android:color/link_text_light</item>
+        <item name="textColorLinkInverse">@android:color/link_text_dark</item>
         
+        <item name="editTextColor">?android:attr/textColorPrimary</item>
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background_light</item>
+
+        <item name="activatedBackgroundIndicator">@android:drawable/activated_background_light</item>
+
         <item name="popupWindowStyle">@android:style/Widget.PopupWindow</item>
         
         <item name="textCheckMark">@android:drawable/indicator_check_mark_light</item>
@@ -254,13 +297,13 @@
         <item name="listViewStyle">@android:style/Widget.ListView.White</item>
         <item name="listDivider">@drawable/divider_horizontal_bright</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator.White</item>
-        
+
         <item name="progressBarStyle">@android:style/Widget.ProgressBar.Inverse</item>
-		<item name="progressBarStyleSmall">@android:style/Widget.ProgressBar.Small.Inverse</item>
-		<item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large.Inverse</item>
-		<item name="progressBarStyleInverse">@android:style/Widget.ProgressBar</item>
-		<item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small</item>
-		<item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large</item> 
+        <item name="progressBarStyleSmall">@android:style/Widget.ProgressBar.Small.Inverse</item>
+        <item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large.Inverse</item>
+        <item name="progressBarStyleInverse">@android:style/Widget.ProgressBar</item>
+        <item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small</item>
+        <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large</item>
     </style>
     
     <!-- Variant of the light theme with no title bar -->
@@ -423,13 +466,25 @@
         <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
     </style>
 
+    <!-- Variation of Theme.Dialog that does not include a frame (or background).
+         The view hierarchy of the dialog is responsible for drawing all of
+         its pixels. -->
+    <style name="Theme.Dialog.NoFrame">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- Default theme for alert dialog windows, which is used by the
          {@link android.app.AlertDialog} class.  This is basically a dialog
          but sets the background to empty so it can do two-tone backgrounds. -->
     <style name="Theme.Dialog.Alert">
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
-        <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
     </style>
     
@@ -535,5 +590,69 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Toast</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
+
+    <!-- Default theme with an Action Bar. -->
+    <style name="Theme.WithActionBar">
+        <item name="android:windowActionBar">true</item>
+    </style>
+
+    <!-- No title bar, but Action Mode bars will overlay application content
+         instead of pushing it down to make room. -->
+    <style name="Theme.NoTitleBar.OverlayActionModes">
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
     
+    <!-- New Honeycomb holographic theme. Dark version.  The widgets in the
+         holographic theme are translucent on their brackground, so applications
+         must ensure that any background they use with this theme is itself
+         dark; otherwise, it will be difficult to see the widgets.  The new
+         UI style also includes a full action bar by default. -->
+    <style name="Theme.Holo">
+        <item name="editTextBackground">@android:drawable/edit_text_holo_dark</item>
+        <item name="editTextColor">?android:attr/textColorPrimary</item>
+        <item name="android:windowActionBar">true</item>
+        <item name="android:spinnerStyle">?android:attr/dropDownSpinnerStyle</item>
+        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_dark</item>
+        <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_dark</item>
+    </style>
+
+    <!-- New Honeycomb holographic theme. Light version.  The widgets in the
+         holographic theme are translucent on their brackground, so applications
+         must ensure that any background they use with this theme is itself
+         light; otherwise, it will be difficult to see the widgets.  The new
+         UI style also includes a full action bar by default. -->
+    <style name="Theme.Light.Holo">
+        <item name="editTextBackground">@android:drawable/edit_text_holo_light</item>
+        <item name="android:windowActionBar">true</item>
+        <item name="android:spinnerStyle">?android:attr/dropDownSpinnerStyle</item>
+        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_light</item>
+        <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_light</item>
+    </style>
+        
+    <!-- Variant of the holographic (dark) theme with no action bar. -->
+    <style name="Theme.Holo.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+    
+    <!-- Variant of the holographic (dark) theme that has no title bar and fills
+         the entire screen -->
+    <style name="Theme.Holo.NoActionBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Variant of the holographic light theme with no action bar -->
+    <style name="Theme.Light.Holo.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Variant of the holographic light theme that has no title bar and fills
+         the entire screen -->
+    <style name="Theme.Light.Holo.NoActionBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+ 
 </resources>

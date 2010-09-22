@@ -184,11 +184,11 @@ public class ApplicationErrorReport implements Parcelable {
         candidate = SystemProperties.get(DEFAULT_ERROR_RECEIVER_PROPERTY);
         return getErrorReportReceiver(pm, packageName, candidate);
     }
-    
+
     /**
      * Return activity in receiverPackage that handles ACTION_APP_ERROR.
      *
-     * @param pm PackageManager isntance
+     * @param pm PackageManager instance
      * @param errorPackage package which caused the error
      * @param receiverPackage candidate package to receive the error
      * @return activity component within receiverPackage which handles
@@ -580,6 +580,9 @@ public class ApplicationErrorReport implements Parcelable {
                 break;
             case TYPE_BATTERY:
                 batteryInfo.dump(pw, prefix);
+                break;
+            case TYPE_RUNNING_SERVICE:
+                runningServiceInfo.dump(pw, prefix);
                 break;
         }
     }

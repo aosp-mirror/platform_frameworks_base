@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -158,7 +159,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_REORDER = false;
     static final boolean DEBUG_WALLPAPER = false;
-    static final boolean DEBUG_FREEZE = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean HIDE_STACK_CRAWLS = true;
 
@@ -1482,6 +1482,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState wb = localmWindows.get(foundI-1);
                 if (wb.mBaseLayer < maxLayer &&
                         wb.mAttachedWindow != foundW &&
+                        wb.mAttachedWindow != foundW.mAttachedWindow &&
                         (wb.mAttrs.type != TYPE_APPLICATION_STARTING ||
                                 wb.mToken != foundW.mToken)) {
                     // This window is not related to the previous one in any
@@ -1788,18 +1789,11 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean reportNewConfig = false;
         WindowState attachedWindow = null;
         WindowState win = null;
+        long origId;
 
         synchronized(mWindowMap) {
-            // Instantiating a Display requires talking with the simulator,
-            // so don't do it until we know the system is mostly up and
-            // running.
             if (mDisplay == null) {
-                WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-                mDisplay = wm.getDefaultDisplay();
-                mInitialDisplayWidth = mDisplay.getWidth();
-                mInitialDisplayHeight = mDisplay.getHeight();
-                mInputManager.setDisplaySize(0, mInitialDisplayWidth, mInitialDisplayHeight);
-                reportNewConfig = true;
+                throw new IllegalStateException("Display has not been initialialized");
             }
 
             if (mWindowMap.containsKey(client.asBinder())) {
@@ -1905,7 +1899,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             res = WindowManagerImpl.ADD_OKAY;
 
-            final long origId = Binder.clearCallingIdentity();
+            origId = Binder.clearCallingIdentity();
 
             if (addToken) {
                 mTokenMap.put(attrs.token, token);
@@ -1982,14 +1976,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        // sendNewConfiguration() checks caller permissions so we must call it with
-        // privilege.  updateOrientationFromAppTokens() clears and resets the caller
-        // identity anyway, so it's safe to just clear & restore around this whole
-        // block.
-        final long origId = Binder.clearCallingIdentity();
         if (reportNewConfig) {
             sendNewConfiguration();
         }
+
         Binder.restoreCallingIdentity(origId);
 
         return res;
@@ -3102,8 +3092,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 
             } else if (currentConfig != null) {
                 // No obvious action we need to take, but if our current
-                // state mismatches the activity maanager's, update it
+                // state mismatches the activity manager's, update it,
+                // disregarding font scale, which should remain set to
+                // the value of the previous configuration.
                 mTempConfiguration.setToDefaults();
+                mTempConfiguration.fontScale = currentConfig.fontScale;
                 if (computeNewConfigurationLocked(mTempConfiguration)) {
                     if (currentConfig.diff(mTempConfiguration) != 0) {
                         mWaitingForConfig = true;
@@ -4435,8 +4428,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int N = mWindows.size();
             for (int i=0; i<N; i++) {
                 WindowState w = mWindows.get(i);
-                if (w.isVisibleLw() && !w.mObscured
-                        && (w.mOrientationChanging || !w.isDrawnLw())) {
+                if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
                     return;
                 }
             }
@@ -5568,6 +5560,22 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void systemReady() {
+        synchronized(mWindowMap) {
+            if (mDisplay != null) {
+                throw new IllegalStateException("Display already initialized");
+            }
+            WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+            mDisplay = wm.getDefaultDisplay();
+            mInitialDisplayWidth = mDisplay.getWidth();
+            mInitialDisplayHeight = mDisplay.getHeight();
+            mInputManager.setDisplaySize(0, mInitialDisplayWidth, mInitialDisplayHeight);
+        }
+
+        try {
+            mActivityManager.updateConfiguration(null);
+        } catch (RemoteException e) {
+        }
+        
         mPolicy.systemReady();
     }
 
@@ -6845,7 +6853,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken atoken = mAppToken;
             return mSurface != null && !mAttachedHidden
                     && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
-                    && (mOrientationChanging || (!mDrawPending && !mCommitDrawPending))
+                    && !mDrawPending && !mCommitDrawPending
                     && !mExiting && !mDestroying;
         }
 
@@ -6949,14 +6957,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         /**
          * Returns true if the window has a surface that it has drawn a
-         * complete UI in to.  Note that this returns true if the orientation
-         * is changing even if the window hasn't redrawn because we don't want
-         * to stop things from executing during that time.
+         * complete UI in to.
          */
         public boolean isDrawnLw() {
             final AppWindowToken atoken = mAppToken;
             return mSurface != null && !mDestroying
-                && (mOrientationChanging || (!mDrawPending && !mCommitDrawPending));
+                && !mDrawPending && !mCommitDrawPending;
         }
 
         public boolean fillsScreenLw(int screenWidth, int screenHeight,
@@ -6978,6 +6984,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         frame.right >= mCompatibleScreenFrame.right &&
                         frame.bottom >= mCompatibleScreenFrame.bottom;
             } else {
+                if ((mAttrs.flags & FLAG_FULLSCREEN) != 0) {
+                    return true;
+                }
                 return frame.left <= 0 && frame.top <= 0
                         && frame.right >= screenWidth
                         && frame.bottom >= screenHeight;
@@ -8482,6 +8491,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final void performLayoutAndPlaceSurfacesLockedInner(
             boolean recoveringMemory) {
+        if (mDisplay == null) {
+            Slog.i(TAG, "skipping performLayoutAndPlaceSurfacesLockedInner with no mDisplay");
+            return;
+        }
+
         final long currentTime = SystemClock.uptimeMillis();
         final int dw = mDisplay.getWidth();
         final int dh = mDisplay.getHeight();
@@ -9270,12 +9284,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (w.mAttachedHidden || !w.isReadyForDisplay()) {
                         if (!w.mLastHidden) {
                             //dump();
-                            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Window hiding: waitingToShow="
-                                    + w.mRootToken.waitingToShow + " polvis="
-                                    + w.mPolicyVisibility + " atthid="
-                                    + w.mAttachedHidden + " tokhid="
-                                    + w.mRootToken.hidden + " vis="
-                                    + w.mViewVisibility);
                             w.mLastHidden = true;
                             if (SHOW_TRANSACTIONS) logSurface(w,
                                     "HIDE (performLayout)", null);
@@ -9676,30 +9684,26 @@ public class WindowManagerService extends IWindowManager.Stub
         } else if (animating) {
             requestAnimationLocked(currentTime+(1000/60)-SystemClock.uptimeMillis());
         }
-        
+
         mInputMonitor.updateInputWindowsLw();
-        
-        if (DEBUG_FREEZE) Slog.v(TAG, "Layout: mDisplayFrozen=" + mDisplayFrozen
-                + " holdScreen=" + holdScreen);
-        if (!mDisplayFrozen) {
-            setHoldScreenLocked(holdScreen != null);
-            if (screenBrightness < 0 || screenBrightness > 1.0f) {
-                mPowerManager.setScreenBrightnessOverride(-1);
-            } else {
-                mPowerManager.setScreenBrightnessOverride((int)
-                        (screenBrightness * Power.BRIGHTNESS_ON));
-            }
-            if (buttonBrightness < 0 || buttonBrightness > 1.0f) {
-                mPowerManager.setButtonBrightnessOverride(-1);
-            } else {
-                mPowerManager.setButtonBrightnessOverride((int)
-                        (buttonBrightness * Power.BRIGHTNESS_ON));
-            }
-            if (holdScreen != mHoldingScreenOn) {
-                mHoldingScreenOn = holdScreen;
-                Message m = mH.obtainMessage(H.HOLD_SCREEN_CHANGED, holdScreen);
-                mH.sendMessage(m);
-            }
+
+        setHoldScreenLocked(holdScreen != null);
+        if (screenBrightness < 0 || screenBrightness > 1.0f) {
+            mPowerManager.setScreenBrightnessOverride(-1);
+        } else {
+            mPowerManager.setScreenBrightnessOverride((int)
+                    (screenBrightness * Power.BRIGHTNESS_ON));
+        }
+        if (buttonBrightness < 0 || buttonBrightness > 1.0f) {
+            mPowerManager.setButtonBrightnessOverride(-1);
+        } else {
+            mPowerManager.setButtonBrightnessOverride((int)
+                    (buttonBrightness * Power.BRIGHTNESS_ON));
+        }
+        if (holdScreen != mHoldingScreenOn) {
+            mHoldingScreenOn = holdScreen;
+            Message m = mH.obtainMessage(H.HOLD_SCREEN_CHANGED, holdScreen);
+            mH.sendMessage(m);
         }
 
         if (mTurnOnScreen) {
@@ -9988,8 +9992,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mFreezeGcPending = now;
         }
 
-        if (DEBUG_FREEZE) Slog.v(TAG, "*** FREEZING DISPLAY", new RuntimeException());
-        
         mDisplayFrozen = true;
         
         mInputMonitor.freezeInputDispatchingLw();
@@ -10015,8 +10017,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mWaitingForConfig || mAppsFreezingScreen > 0 || mWindowsFreezingScreen) {
             return;
         }
-        
-        if (DEBUG_FREEZE) Slog.v(TAG, "*** UNFREEZING DISPLAY", new RuntimeException());
         
         mDisplayFrozen = false;
         mH.removeMessages(H.APP_FREEZE_TIMEOUT);

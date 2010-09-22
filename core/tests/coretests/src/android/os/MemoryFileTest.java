@@ -237,51 +237,6 @@ public class MemoryFileTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
-    public void testIsMemoryFile() throws Exception {
-        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
-        FileDescriptor fd = file.getFileDescriptor();
-        assertNotNull(fd);
-        assertTrue(fd.valid());
-        assertTrue(MemoryFile.isMemoryFile(fd));
-        file.close();
-
-        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.in));
-        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.out));
-        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.err));
-
-        File tempFile = File.createTempFile("MemoryFileTest",".tmp", getContext().getFilesDir());
-        assertNotNull(file);
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(tempFile);
-            FileDescriptor fileFd = out.getFD();
-            assertNotNull(fileFd);
-            assertFalse(MemoryFile.isMemoryFile(fileFd));
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-            tempFile.delete();
-        }
-    }
-
-    @SmallTest
-    public void testFileDescriptor() throws Exception {
-        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
-        MemoryFile ref = new MemoryFile(file.getFileDescriptor(), file.length(), "r");
-        byte[] buffer;
-
-        // write to original, read from reference
-        file.writeBytes(testString, 0, 2000, testString.length);
-        buffer = new byte[testString.length];
-        ref.readBytes(buffer, 2000, 0, testString.length);
-        compareBuffers(testString, buffer, testString.length);
-
-        file.close();
-        ref.close();  // Doesn't actually do anything, since the file descriptor is not dup(2):ed
-    }
-
     private static final byte[] testString = new byte[] {
         3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9, 3, 2, 3, 8, 4, 6, 2, 6, 4, 3, 3, 8, 3, 2, 7, 9, 5, 0, 2, 8, 8, 4, 1, 9, 7, 1, 6, 9, 3, 9, 9, 3, 7, 5, 1, 0, 5, 8, 2, 0, 9, 7, 4, 9, 4, 4, 5, 9, 2, 3, 0, 7, 8, 1, 6, 4,
         0, 6, 2, 8, 6, 2, 0, 8, 9, 9, 8, 6, 2, 8, 0, 3, 4, 8, 2, 5, 3, 4, 2, 1, 1, 7, 0, 6, 7, 9, 8, 2, 1, 4, 8, 0, 8, 6, 5, 1, 3, 2, 8, 2, 3, 0, 6, 6, 4, 7, 0, 9, 3, 8, 4, 4, 6, 0, 9, 5, 5, 0, 5, 8, 2, 2, 3, 1, 7, 2,

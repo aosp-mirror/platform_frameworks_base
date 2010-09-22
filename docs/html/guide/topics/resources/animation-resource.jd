@@ -65,10 +65,10 @@ In XML: <code>@[<em>package</em>:]anim/<em>filename</em></code>
         android:pivotX="<em>float</em>"
         android:pivotY="<em>float</em>" /&gt;
     &lt;<a href="#translate-element">translate</a>
-        android:fromX="<em>float</em>"
-        android:toX="<em>float</em>"
-        android:fromY="<em>float</em>"
-        android:toY="<em>float</em>" /&gt;
+        android:fromXDelta="<em>float</em>"
+        android:toXDelta="<em>float</em>"
+        android:fromYDelta="<em>float</em>"
+        android:toYDelta="<em>float</em>" /&gt;
     &lt;<a href="#rotate-element">rotate</a>
         android:fromDegrees="<em>float</em>"
         android:toDegrees="<em>float</em>"
@@ -212,10 +212,10 @@ inherrited by this element).</p>
     android:shareInterpolator="false">
     &lt;scale
         android:interpolator="@android:anim/accelerate_decelerate_interpolator"
-        android:fromXScale="1.0" 
-        android:toXScale="1.4" 
-        android:fromYScale="1.0" 
-        android:toYScale="0.6" 
+        android:fromXScale="1.0"
+        android:toXScale="1.4"
+        android:fromYScale="1.0"
+        android:toYScale="0.6"
         android:pivotX="50%"
         android:pivotY="50%"
         android:fillAfter="false"
@@ -224,18 +224,18 @@ inherrited by this element).</p>
         android:interpolator="@android:anim/accelerate_interpolator"
         android:startOffset="700">
         &lt;scale
-            android:fromXScale="1.4" 
+            android:fromXScale="1.4"
             android:toXScale="0.0"
             android:fromYScale="0.6"
-            android:toYScale="0.0" 
-            android:pivotX="50%" 
-            android:pivotY="50%" 
+            android:toYScale="0.0"
+            android:pivotX="50%"
+            android:pivotY="50%"
             android:duration="400" />
         &lt;rotate
-            android:fromDegrees="0" 
+            android:fromDegrees="0"
             android:toDegrees="-45"
-            android:toYScale="0.0" 
-            android:pivotX="50%" 
+            android:toYScale="0.0"
+            android:pivotX="50%"
             android:pivotY="50%"
             android:duration="400" />
     &lt;/set>

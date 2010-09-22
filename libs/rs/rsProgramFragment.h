@@ -34,12 +34,16 @@ public:
                              uint32_t paramLength);
     virtual ~ProgramFragment();
 
-    virtual void setupGL(const Context *, ProgramFragmentState *);
     virtual void setupGL2(const Context *, ProgramFragmentState *, ShaderCache *sc);
 
     virtual void createShader();
     virtual void loadShader(Context *rsc);
     virtual void init(Context *rsc);
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_FRAGMENT; }
+    static ProgramFragment *createFromStream(Context *rsc, IStream *stream);
+
+    void setConstantColor(float, float, float, float);
 
 protected:
     // Hacks to create a program for now
@@ -48,6 +52,11 @@ protected:
     RsTexEnvMode mEnvModes[MAX_TEXTURE];
     uint32_t mTextureEnableMask;
     bool mPointSpriteEnable;
+    bool mVaryingColor;
+
+    float mConstantColor[4];
+    int32_t mConstantColorUniformIndex;
+    int32_t mTextureUniformIndexStart;
 };
 
 class ProgramFragmentState
@@ -57,7 +66,7 @@ public:
     ~ProgramFragmentState();
 
     ProgramFragment *mPF;
-    void init(Context *rsc, int32_t w, int32_t h);
+    void init(Context *rsc);
     void deinit(Context *rsc);
 
     ObjectBaseRef<Type> mTextureTypes[ProgramFragment::MAX_TEXTURE];

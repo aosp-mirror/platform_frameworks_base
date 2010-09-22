@@ -25,4 +25,18 @@
     <style name="TextAppearance.StatusBar.IntruderAlert"
         parent="@android:style/TextAppearance.StatusBar">
     </style>
+
+    <style name="TextAppearance.StatusBar.SystemPanel"
+        parent="@android:style/TextAppearance.StatusBar">
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#50FFFFFF</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.TextButton"
+        parent="@android:style/TextAppearance.StatusBar">
+        <item name="android:textAppearance">?android:attr/textAppearance</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#FFFFFFFF</item>
+    </style>
 </resources>

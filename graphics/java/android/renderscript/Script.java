@@ -42,29 +42,50 @@ public class Script extends BaseObj {
         }
     }
 
+    protected void invoke(int slot) {
+        mRS.nScriptInvoke(mID, slot);
+    }
+
+    protected void invoke(int slot, FieldPacker v) {
+        if (v != null) {
+            mRS.nScriptInvokeV(mID, slot, v.getData());
+        } else {
+            mRS.nScriptInvoke(mID, slot);
+        }
+    }
+
+
     Script(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     public void bindAllocation(Allocation va, int slot) {
         mRS.validate();
-        mRS.nScriptBindAllocation(mID, va.mID, slot);
+        if (va != null) {
+            mRS.nScriptBindAllocation(mID, va.mID, slot);
+        } else {
+            mRS.nScriptBindAllocation(mID, 0, slot);
+        }
     }
 
-    public void setClearColor(float r, float g, float b, float a) {
-        mRS.validate();
-        mRS.nScriptSetClearColor(mID, r, g, b, a);
+    public void setVar(int index, float v) {
+        mRS.nScriptSetVarF(mID, index, v);
     }
 
-    public void setClearDepth(float d) {
-        mRS.validate();
-        mRS.nScriptSetClearDepth(mID, d);
+    public void setVar(int index, double v) {
+        mRS.nScriptSetVarD(mID, index, v);
     }
 
-    public void setClearStencil(int stencil) {
-        mRS.validate();
-        mRS.nScriptSetClearStencil(mID, stencil);
+    public void setVar(int index, int v) {
+        mRS.nScriptSetVarI(mID, index, v);
+    }
+
+    public void setVar(int index, boolean v) {
+        mRS.nScriptSetVarI(mID, index, v ? 1 : 0);
+    }
+
+    public void setVar(int index, FieldPacker v) {
+        mRS.nScriptSetVarV(mID, index, v.getData());
     }
 
     public void setTimeZone(String timeZone) {
@@ -78,72 +99,54 @@ public class Script extends BaseObj {
 
     public static class Builder {
         RenderScript mRS;
-        boolean mIsRoot = false;
-        Type[] mTypes;
-        String[] mNames;
-        boolean[] mWritable;
-        int mInvokableCount = 0;
-        Invokable[] mInvokables;
 
         Builder(RenderScript rs) {
             mRS = rs;
-            mTypes = new Type[MAX_SLOT];
-            mNames = new String[MAX_SLOT];
-            mWritable = new boolean[MAX_SLOT];
-            mInvokables = new Invokable[MAX_SLOT];
         }
-
-        public void setType(Type t, int slot) {
-            mTypes[slot] = t;
-            mNames[slot] = null;
-        }
-
-        public void setType(Type t, String name, int slot) {
-            mTypes[slot] = t;
-            mNames[slot] = name;
-        }
-
-        public Invokable addInvokable(String func) {
-            Invokable i = new Invokable();
-            i.mName = func;
-            i.mRS = mRS;
-            i.mSlot = mInvokableCount;
-            mInvokables[mInvokableCount++] = i;
-            return i;
-        }
-
-        public void setType(boolean writable, int slot) {
-            mWritable[slot] = writable;
-        }
-
-        void transferCreate() {
-            mRS.nScriptSetRoot(mIsRoot);
-            for(int ct=0; ct < mTypes.length; ct++) {
-                if(mTypes[ct] != null) {
-                    mRS.nScriptSetType(mTypes[ct].mID, mWritable[ct], mNames[ct], ct);
-                }
-            }
-            for(int ct=0; ct < mInvokableCount; ct++) {
-                mRS.nScriptSetInvokable(mInvokables[ct].mName, ct);
-            }
-        }
-
-        void transferObject(Script s) {
-            s.mIsRoot = mIsRoot;
-            s.mTypes = mTypes;
-            s.mInvokables = new Invokable[mInvokableCount];
-            for(int ct=0; ct < mInvokableCount; ct++) {
-                s.mInvokables[ct] = mInvokables[ct];
-                s.mInvokables[ct].mScript = s;
-            }
-            s.mInvokables = null;
-        }
-
-        public void setRoot(boolean r) {
-            mIsRoot = r;
-        }
-
     }
 
+
+    public static class FieldBase {
+        protected Element mElement;
+        protected Type mType;
+        protected Allocation mAllocation;
+
+        protected void init(RenderScript rs, int dimx) {
+            mAllocation = Allocation.createSized(rs, mElement, dimx);
+            mType = mAllocation.getType();
+        }
+
+        protected FieldBase() {
+        }
+
+        public Element getElement() {
+            return mElement;
+        }
+
+        public Type getType() {
+            return mType;
+        }
+
+        public Allocation getAllocation() {
+            return mAllocation;
+        }
+
+        //@Override
+        public void updateAllocation() {
+        }
+
+
+        //
+        /*
+        public class ScriptField_UserField
+            extends android.renderscript.Script.FieldBase {
+
+            protected
+
+        }
+
+        */
+
+    }
 }
 

@@ -62,8 +62,8 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
                             logd("GET_RECORD_SIZE Size " + recordSize[0] +
                                     " total " + recordSize[1] +
                                     " #record " + recordSize[2]);
-                            mLock.notifyAll();
                         }
+                        mLock.notifyAll();
                     }
                     break;
                 case EVENT_UPDATE_DONE:
@@ -144,6 +144,9 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
         if (DBG) logd("updateAdnRecordsInEfBySearch: efid=" + efid +
                 " ("+ oldTag + "," + oldPhoneNumber + ")"+ "==>" +
                 " ("+ newTag + "," + newPhoneNumber + ")"+ " pin2=" + pin2);
+
+        efid = updateEfForIccType(efid);
+
         synchronized(mLock) {
             checkThread();
             success = false;

@@ -32,7 +32,7 @@ import com.android.internal.statusbar.StatusBarNotification;
  * coalescing these calls so they don't stack up.  For the calls
  * are coalesced, note that they are all idempotent.
  */
-class CommandQueue extends IStatusBar.Stub {
+public class CommandQueue extends IStatusBar.Stub {
     private static final String TAG = "StatusBar.CommandQueue";
 
     private static final int MSG_MASK = 0xffff0000;
@@ -51,6 +51,8 @@ class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SET_VISIBILITY = 0x00060000;
     private static final int OP_EXPAND = 1;
     private static final int OP_COLLAPSE = 2;
+
+    private static final int MSG_SET_LIGHTS_ON = 0x00070000;
 
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
@@ -75,6 +77,7 @@ class CommandQueue extends IStatusBar.Stub {
         public void disable(int state);
         public void animateExpand();
         public void animateCollapse();
+        public void setLightsOn(boolean on);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -143,6 +146,13 @@ class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void setLightsOn(boolean on) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_SET_LIGHTS_ON);
+            mHandler.obtainMessage(MSG_SET_LIGHTS_ON, on ? 1 : 0, 0, null).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -194,6 +204,10 @@ class CommandQueue extends IStatusBar.Stub {
                     } else {
                         mCallbacks.animateCollapse();
                     }
+                    break;
+                case MSG_SET_LIGHTS_ON:
+                    mCallbacks.setLightsOn(msg.arg1 != 0);
+                    break;
             }
         }
     }

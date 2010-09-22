@@ -111,8 +111,7 @@ public class ScrollBarDrawable extends Drawable {
         }
 
         Rect r = getBounds();
-        if (canvas.quickReject(r.left, r.top, r.right, r.bottom, 
-                Canvas.EdgeType.AA)) {
+        if (canvas.quickReject(r.left, r.top, r.right, r.bottom, Canvas.EdgeType.AA)) {
             return;
         }
         if (drawTrack) {

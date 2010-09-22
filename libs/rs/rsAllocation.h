@@ -56,12 +56,17 @@ public:
     uint32_t getBufferObjectID() const {return mBufferID;}
 
 
-    void data(const void *data, uint32_t sizeBytes);
-    void subData(uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes);
-    void subData(uint32_t xoff, uint32_t yoff,
+    void data(Context *rsc, const void *data, uint32_t sizeBytes);
+    void subData(Context *rsc, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes);
+    void subData(Context *rsc, uint32_t xoff, uint32_t yoff,
                  uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes);
-    void subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
+    void subData(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
                  uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes);
+
+    void subElementData(Context *rsc, uint32_t x,
+                        const void *data, uint32_t elementOff, uint32_t sizeBytes);
+    void subElementData(Context *rsc, uint32_t x, uint32_t y,
+                        const void *data, uint32_t elementOff, uint32_t sizeBytes);
 
     void read(void *data);
 
@@ -72,12 +77,22 @@ public:
     void removeProgramToDirty(const Program *);
 
     virtual void dumpLOGV(const char *prefix) const;
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_ALLOCATION; }
+    static Allocation *createFromStream(Context *rsc, IStream *stream);
 
     virtual void uploadCheck(const Context *rsc);
 
-protected:
-    void sendDirty() const;
+    bool getIsTexture() const {return mIsTexture;}
+    bool getIsBufferObject() const {return mIsVertexBuffer;}
 
+    void incRefs(const void *ptr, size_t ct) const;
+    void decRefs(const void *ptr, size_t ct) const;
+
+    void sendDirty() const;
+    bool getHasGraphicsMipmaps() const {return mTextureGenMipmap;}
+
+protected:
     ObjectBaseRef<const Type> mType;
     void * mPtr;
 

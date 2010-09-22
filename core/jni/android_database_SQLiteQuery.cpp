@@ -15,7 +15,7 @@
  */
 
 #undef LOG_TAG
-#define LOG_TAG "Cursor"
+#define LOG_TAG "SqliteCursor.cpp"
 
 #include <jni.h>
 #include <JNIHelp.h>
@@ -29,7 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "CursorWindow.h"
+#include "binder/CursorWindow.h"
 #include "sqlite3_exception.h"
 
 
@@ -73,7 +73,7 @@ static int skip_rows(sqlite3_stmt *statement, int maxRows) {
             return -1;
         }
     }
-    LOGD("skip_rows row %d", maxRows);
+    LOG_WINDOW("skip_rows row %d", maxRows);
     return maxRows;
 }
 
@@ -101,7 +101,7 @@ static int finish_program_and_get_row_count(sqlite3_stmt *statement) {
         }
     }
     sqlite3_reset(statement);
-    LOGD("finish_program_and_get_row_count row %d", numRows);
+    LOG_WINDOW("finish_program_and_get_row_count row %d", numRows);
     return numRows;
 }
 
@@ -116,6 +116,8 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
     int retryCount;
     int boundParams;
     CursorWindow * window;
+    bool gotAllRows = true;
+    bool gotException = false;
     
     if (statement == NULL) {
         LOGE("Invalid statement in fillWindow()");
@@ -131,8 +133,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
         err = sqlite3_bind_int(statement, offsetParam, startPos);
         if (err != SQLITE_OK) {
             LOGE("Unable to bind offset position, offsetParam = %d", offsetParam);
-            jniThrowException(env, "java/lang/IllegalArgumentException",
-                              sqlite3_errmsg(GET_HANDLE(env, object)));
+            throw_sqlite3_exception(env, GET_HANDLE(env, object));
             return 0;
         }
         LOG_WINDOW("Bound to startPos %d", startPos);
@@ -167,7 +168,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
             LOGE("startPos %d > actual rows %d", startPos, num);
             return num;
         }
-    } 
+    }
     
     while(startPos != 0 || numRows < maxRead) {
         err = sqlite3_step(statement);
@@ -181,8 +182,9 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
             {
                 field_slot_t * fieldDir = window->allocRow();
                 if (!fieldDir) {
-                    LOGE("Failed allocating fieldDir at startPos %d row %d", startPos, numRows);
-                    return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
+                    LOG_WINDOW("Failed allocating fieldDir at startPos %d row %d", startPos, numRows);
+                    gotAllRows = false;
+                    goto return_count;
                 }
             }
 
@@ -205,9 +207,10 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     int offset = window->alloc(size);
                     if (!offset) {
                         window->freeLastRow();
-                        LOGE("Failed allocating %u bytes for text/blob at %d,%d", size,
+                        LOG_WINDOW("Failed allocating %u bytes for text/blob at %d,%d", size,
                                    startPos + numRows, i);
-                        return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
+                        gotAllRows = false;
+                        goto return_count;
                     }
 
                     window->copyIn(offset, text, size);
@@ -225,8 +228,9 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     int64_t value = sqlite3_column_int64(statement, i);
                     if (!window->putLong(numRows, i, value)) {
                         window->freeLastRow();
-                        LOGE("Failed allocating space for a long in column %d", i);
-                        return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
+                        LOG_WINDOW("Failed allocating space for a long in column %d", i);
+                        gotAllRows = false;
+                        goto return_count;
                     }
                     LOG_WINDOW("%d,%d is INTEGER 0x%016llx", startPos + numRows, i, value);
                 } else if (type == SQLITE_FLOAT) {
@@ -234,8 +238,9 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     double value = sqlite3_column_double(statement, i);
                     if (!window->putDouble(numRows, i, value)) {
                         window->freeLastRow();
-                        LOGE("Failed allocating space for a double in column %d", i);
-                        return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
+                        LOG_WINDOW("Failed allocating space for a double in column %d", i);
+                        gotAllRows = false;
+                        goto return_count;
                     }
                     LOG_WINDOW("%d,%d is FLOAT %lf", startPos + numRows, i, value);
                 } else if (type == SQLITE_BLOB) {
@@ -245,9 +250,10 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     int offset = window->alloc(size);
                     if (!offset) {
                         window->freeLastRow();
-                        LOGE("Failed allocating %u bytes for blob at %d,%d", size,
+                        LOG_WINDOW("Failed allocating %u bytes for blob at %d,%d", size,
                                    startPos + numRows, i);
-                        return startPos + numRows + finish_program_and_get_row_count(statement) + 1;
+                        gotAllRows = false;
+                        goto return_count;
                     }
 
                     window->copyIn(offset, blob, size);
@@ -269,6 +275,7 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
                     // Unknown data
                     LOGE("Unknown column type when filling database window");
                     throw_sqlite3_exception(env, "Unknown column type when filling window");
+                    gotException = true;
                     break;
                 }
             }
@@ -290,6 +297,8 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
             LOG_WINDOW("Database locked, retrying");
             if (retryCount > 50) {
                 LOGE("Bailing on database busy rety");
+                throw_sqlite3_exception(env, GET_HANDLE(env, object), "retrycount exceeded");
+                gotException = true;
                 break;
             }
 
@@ -300,18 +309,33 @@ static jint native_fill_window(JNIEnv* env, jobject object, jobject javaWindow,
             continue;
         } else {
             throw_sqlite3_exception(env, GET_HANDLE(env, object));
+            gotException = true;
             break;
         }
     }
 
     LOG_WINDOW("Resetting statement %p after fetching %d rows in %d bytes\n\n\n\n", statement,
             numRows, window->size() - window->freeSpace());
-//    LOGI("Filled window with %d rows in %d bytes", numRows, window->size() - window->freeSpace());
+    LOG_WINDOW("Filled window with %d rows in %d bytes", numRows,
+            window->size() - window->freeSpace());
     if (err == SQLITE_ROW) {
+        // there is more data to be returned. let the caller know by returning -1
         return -1;
-    } else {
+    }
+  return_count:
+    if (startPos) {
         sqlite3_reset(statement);
-        return startPos + numRows;
+        LOG_WINDOW("Not doing count(*) because startPos %d is non-zero", startPos);
+        return 0;
+    } else if (gotAllRows) {
+        sqlite3_reset(statement);
+        LOG_WINDOW("Not doing count(*) because we already know the count(*)");
+        return numRows;
+    } else if (gotException) {
+        return 0;
+    } else {
+        // since startPos == 0, we need to get the count(*) of the result set
+        return numRows + 1 + finish_program_and_get_row_count(statement);
     }
 }
 
@@ -336,7 +360,8 @@ static jstring native_column_name(JNIEnv* env, jobject object, jint columnIndex)
 static JNINativeMethod sMethods[] =
 {
      /* name, signature, funcPtr */
-    {"native_fill_window", "(Landroid/database/CursorWindow;IIII)I", (void *)native_fill_window},
+    {"native_fill_window", "(Landroid/database/CursorWindow;IIII)I",
+            (void *)native_fill_window},
     {"native_column_count", "()I", (void*)native_column_count},
     {"native_column_name", "(I)Ljava/lang/String;", (void *)native_column_name},
 };

@@ -23,9 +23,9 @@
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
-
-
 class ShaderCache;
+
+#define RS_SHADER_INTERNAL "//rs_shader_internal\n"
 
 class Program : public ObjectBase
 {
@@ -42,7 +42,7 @@ public:
     void bindAllocation(Allocation *, uint32_t slot);
     virtual void createShader();
 
-    bool isUserProgram() const {return mUserShader.size() > 0;}
+    bool isUserProgram() const {return !mIsInternal;}
 
     void bindTexture(uint32_t slot, Allocation *);
     void bindSampler(uint32_t slot, Sampler *);
@@ -71,6 +71,12 @@ protected:
     uint32_t mOutputCount;
     uint32_t mConstantCount;
     bool mIsValid;
+    bool mIsInternal;
+
+    // Applies to vertex and fragment shaders only
+    void appendUserConstants();
+    void setupUserConstants(ShaderCache *sc, bool isFragment);
+    void initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix);
 
     ObjectBaseRef<Allocation> mConstants[MAX_UNIFORMS];
 

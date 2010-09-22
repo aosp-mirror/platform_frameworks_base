@@ -50,6 +50,8 @@ static jmethodID method_onDeviceDisappeared;
 static jmethodID method_onDeviceCreated;
 static jmethodID method_onDeviceRemoved;
 static jmethodID method_onDeviceDisconnectRequested;
+static jmethodID method_onNetworkDeviceDisconnected;
+static jmethodID method_onNetworkDeviceConnected;
 
 static jmethodID method_onCreatePairedDeviceResult;
 static jmethodID method_onCreateDeviceResult;
@@ -65,6 +67,11 @@ static jmethodID method_onRequestOobData;
 static jmethodID method_onAgentOutOfBandDataAvailable;
 static jmethodID method_onAgentAuthorize;
 static jmethodID method_onAgentCancel;
+
+static jmethodID method_onInputDevicePropertyChanged;
+static jmethodID method_onInputDeviceConnectionResult;
+static jmethodID method_onPanDevicePropertyChanged;
+static jmethodID method_onPanDeviceConnectionResult;
 
 typedef event_loop_native_data_t native_data_t;
 
@@ -97,6 +104,10 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onDeviceRemoved = env->GetMethodID(clazz, "onDeviceRemoved", "(Ljava/lang/String;)V");
     method_onDeviceDisconnectRequested = env->GetMethodID(clazz, "onDeviceDisconnectRequested",
                                                         "(Ljava/lang/String;)V");
+    method_onNetworkDeviceConnected = env->GetMethodID(clazz, "onNetworkDeviceConnected",
+                                                     "(Ljava/lang/String;Ljava/lang/String;I)V");
+    method_onNetworkDeviceDisconnected = env->GetMethodID(clazz, "onNetworkDeviceDisconnected",
+                                                              "(Ljava/lang/String;)V");
 
     method_onCreatePairedDeviceResult = env->GetMethodID(clazz, "onCreatePairedDeviceResult",
                                                          "(Ljava/lang/String;I)V");
@@ -120,6 +131,14 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
                                                "(Ljava/lang/String;I)V");
     method_onDisplayPasskey = env->GetMethodID(clazz, "onDisplayPasskey",
                                                "(Ljava/lang/String;II)V");
+    method_onInputDevicePropertyChanged = env->GetMethodID(clazz, "onInputDevicePropertyChanged",
+                                               "(Ljava/lang/String;[Ljava/lang/String;)V");
+    method_onInputDeviceConnectionResult = env->GetMethodID(clazz, "onInputDeviceConnectionResult",
+                                               "(Ljava/lang/String;Z)V");
+    method_onPanDevicePropertyChanged = env->GetMethodID(clazz, "onPanDevicePropertyChanged",
+                                               "(Ljava/lang/String;[Ljava/lang/String;)V");
+    method_onPanDeviceConnectionResult = env->GetMethodID(clazz, "onPanDeviceConnectionResult",
+                                               "(Ljava/lang/String;Z)V");
     method_onRequestOobData = env->GetMethodID(clazz, "onRequestOobData",
                                                "(Ljava/lang/String;I)V");
 
@@ -226,6 +245,27 @@ static jboolean setUpEventLoop(native_data_t *nat) {
         }
         dbus_bus_add_match(nat->conn,
                 "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Device'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Input'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Network'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".NetworkServer'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
@@ -390,13 +430,31 @@ static void tearDownEventLoop(native_data_t *nat) {
         dbus_connection_unregister_object_path(nat->conn, agent_path);
 
         dbus_bus_remove_match(nat->conn,
-                "type='signal',interface='org.bluez.AudioSink'",
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".AudioSink'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
         }
         dbus_bus_remove_match(nat->conn,
-                "type='signal',interface='org.bluez.Device'",
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Device'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Input'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".Network'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".NetworkServer'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
@@ -861,6 +919,73 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                             method_onDeviceDisconnectRequested,
                             env->NewStringUTF(remote_device_path));
         goto success;
+    } else if (dbus_message_is_signal(msg,
+                                      "org.bluez.Input",
+                                      "PropertyChanged")) {
+
+        jobjectArray str_array =
+                    parse_input_property_change(env, msg);
+        if (str_array != NULL) {
+            const char *c_path = dbus_message_get_path(msg);
+            env->CallVoidMethod(nat->me,
+                                method_onInputDevicePropertyChanged,
+                                env->NewStringUTF(c_path),
+                                str_array);
+        } else {
+            LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+        }
+        goto success;
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.Network",
+                                     "PropertyChanged")) {
+
+       jobjectArray str_array =
+                   parse_pan_property_change(env, msg);
+       if (str_array != NULL) {
+           const char *c_path = dbus_message_get_path(msg);
+           env->CallVoidMethod(nat->me,
+                               method_onPanDevicePropertyChanged,
+                               env->NewStringUTF(c_path),
+                               str_array);
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.NetworkServer",
+                                     "DeviceDisconnected")) {
+       char *c_address;
+       if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_STRING, &c_address,
+                                  DBUS_TYPE_INVALID)) {
+           env->CallVoidMethod(nat->me,
+                               method_onNetworkDeviceDisconnected,
+                               env->NewStringUTF(c_address));
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.NetworkServer",
+                                     "DeviceConnected")) {
+       char *c_address;
+       char *c_iface;
+       uint16_t uuid;
+
+       if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_STRING, &c_address,
+                                  DBUS_TYPE_STRING, &c_iface,
+                                  DBUS_TYPE_UINT16, &uuid,
+                                  DBUS_TYPE_INVALID)) {
+           env->CallVoidMethod(nat->me,
+                               method_onNetworkDeviceConnected,
+                               env->NewStringUTF(c_address),
+                               env->NewStringUTF(c_iface),
+                               uuid);
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
     }
 
     ret = a2dp_event_filter(msg, env);
@@ -1270,6 +1395,57 @@ done:
     env->DeleteLocalRef(addr);
     free(user);
 }
+
+void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
+    LOGV(__FUNCTION__);
+
+    native_data_t *nat = (native_data_t *)n;
+    const char *path = (const char *)user;
+    DBusError err;
+    dbus_error_init(&err);
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
+
+    bool result = JNI_TRUE;
+    if (dbus_set_error_from_message(&err, msg)) {
+        LOG_AND_FREE_DBUS_ERROR(&err);
+        result = JNI_FALSE;
+    }
+    LOGV("... Device Path = %s, result = %d", path, result);
+    jstring jPath = env->NewStringUTF(path);
+    env->CallVoidMethod(nat->me,
+                        method_onInputDeviceConnectionResult,
+                        jPath,
+                        result);
+    env->DeleteLocalRef(jPath);
+    free(user);
+}
+
+void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
+    LOGV(__FUNCTION__);
+
+    native_data_t *nat = (native_data_t *)n;
+    const char *path = (const char *)user;
+    DBusError err;
+    dbus_error_init(&err);
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
+
+    bool result = JNI_TRUE;
+    if (dbus_set_error_from_message(&err, msg)) {
+        LOG_AND_FREE_DBUS_ERROR(&err);
+        result = JNI_FALSE;
+    }
+    LOGV("... Pan Device Path = %s, result = %d", path, result);
+    jstring jPath = env->NewStringUTF(path);
+    env->CallVoidMethod(nat->me,
+                        method_onPanDeviceConnectionResult,
+                        jPath,
+                        result);
+    env->DeleteLocalRef(jPath);
+    free(user);
+}
+
 #endif
 
 static JNINativeMethod sMethods[] = {

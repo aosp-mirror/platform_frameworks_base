@@ -34,21 +34,20 @@ public:
                   bool pointSprite);
     virtual ~ProgramRaster();
 
-    virtual void setupGL(const Context *, ProgramRasterState *);
     virtual void setupGL2(const Context *, ProgramRasterState *);
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_RASTER; }
+    static ProgramRaster *createFromStream(Context *rsc, IStream *stream);
 
     void setLineWidth(float w);
-    void setPointSize(float s);
+    void setCullMode(RsCullMode mode);
 
 protected:
     bool mPointSmooth;
     bool mLineSmooth;
     bool mPointSprite;
-
-    float mPointSize;
     float mLineWidth;
-
-
+    RsCullMode mCull;
 };
 
 class ProgramRasterState
@@ -56,7 +55,7 @@ class ProgramRasterState
 public:
     ProgramRasterState();
     ~ProgramRasterState();
-    void init(Context *rsc, int32_t w, int32_t h);
+    void init(Context *rsc);
     void deinit(Context *rsc);
 
     ObjectBaseRef<ProgramRaster> mDefault;

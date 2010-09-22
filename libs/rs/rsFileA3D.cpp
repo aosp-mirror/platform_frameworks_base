@@ -15,29 +15,156 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
+#else
+#include "rsContextHostStub.h"
+#endif
 
-
-#include <utils/String8.h>
 #include "rsFileA3D.h"
 
 #include "rsMesh.h"
+#include "rsAnimation.h"
+
 
 using namespace android;
 using namespace android::renderscript;
 
-
-
-FileA3D::FileA3D()
+FileA3D::FileA3D(Context *rsc) : ObjectBase(rsc)
 {
-    mRsc = NULL;
+    mAlloc = NULL;
+    mData = NULL;
+    mWriteStream = NULL;
+    mReadStream = NULL;
+
+    mMajorVersion = 0;
+    mMinorVersion = 1;
+    mDataSize = 0;
 }
 
 FileA3D::~FileA3D()
 {
+    for(size_t i = 0; i < mIndex.size(); i ++) {
+        delete mIndex[i];
+    }
+    for(size_t i = 0; i < mWriteIndex.size(); i ++) {
+        delete mWriteIndex[i];
+    }
+    if(mWriteStream) {
+        delete mWriteStream;
+    }
+    if(mReadStream) {
+        delete mWriteStream;
+    }
+    if(mAlloc) {
+        free(mAlloc);
+    }
 }
 
-bool FileA3D::load(Context *rsc, FILE *f)
+void FileA3D::parseHeader(IStream *headerStream)
+{
+    mMajorVersion = headerStream->loadU32();
+    mMinorVersion = headerStream->loadU32();
+    uint32_t flags = headerStream->loadU32();
+    mUse64BitOffsets = (flags & 1) != 0;
+
+    LOGE("file open 64bit = %i", mUse64BitOffsets);
+
+    uint32_t numIndexEntries = headerStream->loadU32();
+    for(uint32_t i = 0; i < numIndexEntries; i ++) {
+        A3DIndexEntry *entry = new A3DIndexEntry();
+        headerStream->loadString(&entry->mObjectName);
+        LOGE("Header data, entry name = %s", entry->mObjectName.string());
+        entry->mType = (RsA3DClassID)headerStream->loadU32();
+        if(mUse64BitOffsets){
+            entry->mOffset = headerStream->loadOffset();
+            entry->mLength = headerStream->loadOffset();
+        }
+        else {
+            entry->mOffset = headerStream->loadU32();
+            entry->mLength = headerStream->loadU32();
+        }
+        entry->mRsObj = NULL;
+        mIndex.push(entry);
+    }
+}
+
+bool FileA3D::load(const void *data, size_t length)
+{
+    LOGE("Loading data. Size: %u", length);
+    const uint8_t *localData = (const uint8_t *)data;
+
+    size_t lengthRemaining = length;
+    size_t magicStrLen = 12;
+    if ((length < magicStrLen) ||
+        memcmp(data, "Android3D_ff", magicStrLen)) {
+        return false;
+    }
+
+    localData += magicStrLen;
+    lengthRemaining -= magicStrLen;
+
+    // Next we get our header size
+    uint64_t headerSize = 0;
+    if(lengthRemaining < sizeof(headerSize)) {
+        return false;
+    }
+
+    memcpy(&headerSize, localData, sizeof(headerSize));
+    localData += sizeof(headerSize);
+    lengthRemaining -= sizeof(headerSize);
+
+    LOGE("Loading data, headerSize = %lli", headerSize);
+
+    if(lengthRemaining < headerSize) {
+        return false;
+    }
+
+    uint8_t *headerData = (uint8_t *)malloc(headerSize);
+    if(!headerData) {
+        return false;
+    }
+
+    memcpy(headerData, localData, headerSize);
+
+    // Now open the stream to parse the header
+    IStream headerStream(headerData, false);
+    parseHeader(&headerStream);
+
+    free(headerData);
+
+    localData += headerSize;
+    lengthRemaining -= headerSize;
+
+    if(lengthRemaining < sizeof(mDataSize)) {
+        return false;
+    }
+
+    // Read the size of the data
+    memcpy(&mDataSize, localData, sizeof(mDataSize));
+    localData += sizeof(mDataSize);
+    lengthRemaining -= sizeof(mDataSize);
+
+    LOGE("Loading data, mDataSize = %lli", mDataSize);
+
+    if(lengthRemaining < mDataSize) {
+        return false;
+    }
+
+    // We should know enough to read the file in at this point.
+    mAlloc = malloc(mDataSize);
+    if (!mAlloc) {
+        return false;
+    }
+    mData = (uint8_t *)mAlloc;
+    memcpy(mAlloc, localData, mDataSize);
+
+    mReadStream = new IStream(mData, mUse64BitOffsets);
+
+    return true;
+}
+
+bool FileA3D::load(FILE *f)
 {
     char magicString[12];
     size_t len;
@@ -49,47 +176,39 @@ bool FileA3D::load(Context *rsc, FILE *f)
         return false;
     }
 
-    LOGE("file open 2");
-    len = fread(&mMajorVersion, 1, sizeof(mMajorVersion), f);
-    if (len != sizeof(mMajorVersion)) {
+    // Next thing is the size of the header
+    uint64_t headerSize = 0;
+    len = fread(&headerSize, 1, sizeof(headerSize), f);
+    if (len != sizeof(headerSize) || headerSize == 0) {
         return false;
     }
 
-    LOGE("file open 3");
-    len = fread(&mMinorVersion, 1, sizeof(mMinorVersion), f);
-    if (len != sizeof(mMinorVersion)) {
+    uint8_t *headerData = (uint8_t *)malloc(headerSize);
+    if(!headerData) {
         return false;
     }
 
-    LOGE("file open 4");
-    uint32_t flags;
-    len = fread(&flags, 1, sizeof(flags), f);
-    if (len != sizeof(flags)) {
+    len = fread(headerData, 1, headerSize, f);
+    if (len != headerSize) {
         return false;
     }
-    mUse64BitOffsets = (flags & 1) != 0;
 
-    LOGE("file open 64bit = %i", mUse64BitOffsets);
+    // Now open the stream to parse the header
+    IStream headerStream(headerData, false);
+    parseHeader(&headerStream);
 
-    if (mUse64BitOffsets) {
-        len = fread(&mDataSize, 1, sizeof(mDataSize), f);
-        if (len != sizeof(mDataSize)) {
-            return false;
-        }
-    } else {
-        uint32_t tmp;
-        len = fread(&tmp, 1, sizeof(tmp), f);
-        if (len != sizeof(tmp)) {
-            return false;
-        }
-        mDataSize = tmp;
+    free(headerData);
+
+    // Next thing is the size of the header
+    len = fread(&mDataSize, 1, sizeof(mDataSize), f);
+    if (len != sizeof(mDataSize) || mDataSize == 0) {
+        return false;
     }
 
     LOGE("file open size = %lli", mDataSize);
 
     // We should know enough to read the file in at this point.
-    fseek(f, SEEK_SET, 0);
-    mAlloc= malloc(mDataSize);
+    mAlloc = malloc(mDataSize);
     if (!mAlloc) {
         return false;
     }
@@ -99,282 +218,255 @@ bool FileA3D::load(Context *rsc, FILE *f)
         return false;
     }
 
-    LOGE("file start processing");
-    return process(rsc);
+    mReadStream = new IStream(mData, mUse64BitOffsets);
+
+    LOGE("Header is read an stream initialized");
+    return true;
 }
 
-bool FileA3D::processIndex(Context *rsc, A3DIndexEntry *ie)
-{
-    bool ret = false;
-    IO io(mData + ie->mOffset, mUse64BitOffsets);
+size_t FileA3D::getNumIndexEntries() const {
+    return mIndex.size();
+}
 
-    LOGE("process index, type %i", ie->mType);
-
-    switch(ie->mType) {
-    case CHUNK_ELEMENT:
-        processChunk_Element(rsc, &io, ie);
-        break;
-    case CHUNK_ELEMENT_SOURCE:
-        processChunk_ElementSource(rsc, &io, ie);
-        break;
-    case CHUNK_VERTICIES:
-        processChunk_Verticies(rsc, &io, ie);
-        break;
-    case CHUNK_MESH:
-        processChunk_Mesh(rsc, &io, ie);
-        break;
-    case CHUNK_PRIMITIVE:
-        processChunk_Primitive(rsc, &io, ie);
-        break;
-    default:
-        LOGE("FileA3D Unknown chunk type");
-        break;
+const FileA3D::A3DIndexEntry *FileA3D::getIndexEntry(size_t index) const {
+    if(index < mIndex.size()) {
+        return mIndex[index];
     }
-    return (ie->mRsObj != NULL);
+    return NULL;
 }
 
-bool FileA3D::process(Context *rsc)
-{
-    LOGE("process");
-    IO io(mData + 12, mUse64BitOffsets);
-    bool ret = true;
-
-    // Build the index first
-    LOGE("process 1");
-    io.loadU32(); // major version, already loaded
-    io.loadU32(); // minor version, already loaded
-    LOGE("process 2");
-
-    io.loadU32();  // flags
-    io.loadOffset(); // filesize, already loaded.
-    LOGE("process 4");
-    uint64_t mIndexOffset = io.loadOffset();
-    uint64_t mStringOffset = io.loadOffset();
-
-    LOGE("process mIndexOffset= 0x%016llx", mIndexOffset);
-    LOGE("process mStringOffset= 0x%016llx", mStringOffset);
-
-    IO index(mData + mIndexOffset, mUse64BitOffsets);
-    IO stringTable(mData + mStringOffset, mUse64BitOffsets);
-
-    uint32_t stringEntryCount = stringTable.loadU32();
-    LOGE("stringEntryCount %i", stringEntryCount);
-    mStrings.setCapacity(stringEntryCount);
-    mStringIndexValues.setCapacity(stringEntryCount);
-    if (stringEntryCount) {
-        uint32_t stringType = stringTable.loadU32();
-        LOGE("stringType %i", stringType);
-        rsAssert(stringType==0);
-        for (uint32_t ct = 0; ct < stringEntryCount; ct++) {
-            uint64_t offset = stringTable.loadOffset();
-            LOGE("string offset 0x%016llx", offset);
-            IO tmp(mData + offset, mUse64BitOffsets);
-            String8 s;
-            tmp.loadString(&s);
-            LOGE("string %s", s.string());
-            mStrings.push(s);
-        }
+ObjectBase *FileA3D::initializeFromEntry(size_t index) {
+    if(index >= mIndex.size()) {
+        return NULL;
     }
 
-    LOGE("strings done");
-    uint32_t indexEntryCount = index.loadU32();
-    LOGE("index count %i", indexEntryCount);
-    mIndex.setCapacity(indexEntryCount);
-    for (uint32_t ct = 0; ct < indexEntryCount; ct++) {
-        A3DIndexEntry e;
-        uint32_t stringIndex = index.loadU32();
-        LOGE("index %i", ct);
-        LOGE("  string index %i", stringIndex);
-        e.mType = (A3DChunkType)index.loadU32();
-        LOGE("  type %i", e.mType);
-        e.mOffset = index.loadOffset();
-        LOGE("  offset 0x%016llx", e.mOffset);
-
-        if (stringIndex && (stringIndex < mStrings.size())) {
-            e.mID = mStrings[stringIndex];
-            mStringIndexValues.editItemAt(stringIndex) = ct;
-            LOGE("  id %s", e.mID.string());
-        }
-
-        mIndex.push(e);
-    }
-    LOGE("index done");
-
-    // At this point the index should be fully populated.
-    // We can now walk though it and load all the objects.
-    for (uint32_t ct = 0; ct < indexEntryCount; ct++) {
-        LOGE("processing index entry %i", ct);
-        processIndex(rsc, &mIndex.editItemAt(ct));
+    FileA3D::A3DIndexEntry *entry = mIndex[index];
+    if(!entry) {
+        return NULL;
     }
 
-    return ret;
-}
-
-
-FileA3D::IO::IO(const uint8_t *buf, bool use64)
-{
-    mData = buf;
-    mPos = 0;
-    mUse64 = use64;
-}
-
-uint64_t FileA3D::IO::loadOffset()
-{
-    uint64_t tmp;
-    if (mUse64) {
-        mPos = (mPos + 7) & (~7);
-        tmp = reinterpret_cast<const uint64_t *>(&mData[mPos])[0];
-        mPos += sizeof(uint64_t);
-        return tmp;
+    if(entry->mRsObj) {
+        entry->mRsObj->incUserRef();
+        return entry->mRsObj;
     }
-    return loadU32();
-}
 
-void FileA3D::IO::loadString(String8 *s)
-{
-    LOGE("loadString");
-    uint32_t len = loadU32();
-    LOGE("loadString len %i", len);
-    s->setTo((const char *)&mData[mPos], len);
-    mPos += len;
-}
-
-
-void FileA3D::processChunk_Mesh(Context *rsc, IO *io, A3DIndexEntry *ie)
-{
-    Mesh * m = new Mesh(rsc);
-
-    m->mPrimitivesCount = io->loadU32();
-    m->mPrimitives = new Mesh::Primitive_t *[m->mPrimitivesCount];
-
-    for (uint32_t ct = 0; ct < m->mPrimitivesCount; ct++) {
-        uint32_t index = io->loadU32();
-
-        m->mPrimitives[ct] = (Mesh::Primitive_t *)mIndex[index].mRsObj;
-    }
-    ie->mRsObj = m;
-}
-
-void FileA3D::processChunk_Primitive(Context *rsc, IO *io, A3DIndexEntry *ie)
-{
-    Mesh::Primitive_t * p = new Mesh::Primitive_t;
-
-    p->mIndexCount = io->loadU32();
-    uint32_t vertIdx = io->loadU32();
-    p->mRestartCounts = io->loadU16();
-    uint32_t bits = io->loadU8();
-    p->mType = (RsPrimitive)io->loadU8();
-
-    LOGE("processChunk_Primitive count %i, bits %i", p->mIndexCount, bits);
-
-    p->mVerticies = (Mesh::Verticies_t *)mIndex[vertIdx].mRsObj;
-
-    p->mIndicies = new uint16_t[p->mIndexCount];
-    for (uint32_t ct = 0; ct < p->mIndexCount; ct++) {
-        switch(bits) {
-        case 8:
-            p->mIndicies[ct] = io->loadU8();
+    // Seek to the beginning of object
+    mReadStream->reset(entry->mOffset);
+    switch (entry->mType) {
+        case RS_A3D_CLASS_ID_UNKNOWN:
+            return NULL;
+        case RS_A3D_CLASS_ID_MESH:
+            entry->mRsObj = Mesh::createFromStream(mRSC, mReadStream);
             break;
-        case 16:
-            p->mIndicies[ct] = io->loadU16();
+        case RS_A3D_CLASS_ID_TYPE:
+            entry->mRsObj = Type::createFromStream(mRSC, mReadStream);
             break;
-        case 32:
-            p->mIndicies[ct] = io->loadU32();
+        case RS_A3D_CLASS_ID_ELEMENT:
+            entry->mRsObj = Element::createFromStream(mRSC, mReadStream);
             break;
+        case RS_A3D_CLASS_ID_ALLOCATION:
+            entry->mRsObj = Allocation::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_PROGRAM_VERTEX:
+            entry->mRsObj = ProgramVertex::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_PROGRAM_RASTER:
+            entry->mRsObj = ProgramRaster::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_PROGRAM_FRAGMENT:
+            entry->mRsObj = ProgramFragment::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_PROGRAM_STORE:
+            entry->mRsObj = ProgramStore::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_SAMPLER:
+            entry->mRsObj = Sampler::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_ANIMATION:
+            entry->mRsObj = Animation::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_LIGHT:
+            entry->mRsObj = Light::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_ADAPTER_1D:
+            entry->mRsObj = Adapter1D::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_ADAPTER_2D:
+            entry->mRsObj = Adapter2D::createFromStream(mRSC, mReadStream);
+            break;
+        case RS_A3D_CLASS_ID_SCRIPT_C:
+            return NULL;
+    }
+    if(entry->mRsObj) {
+        entry->mRsObj->incUserRef();
+    }
+    return entry->mRsObj;
+}
+
+bool FileA3D::writeFile(const char *filename)
+{
+    if(!mWriteStream) {
+        LOGE("No objects to write\n");
+        return false;
+    }
+    if(mWriteStream->getPos() == 0) {
+        LOGE("No objects to write\n");
+        return false;
+    }
+
+    FILE *writeHandle = fopen(filename, "wb");
+    if(!writeHandle) {
+        LOGE("Couldn't open the file for writing\n");
+        return false;
+    }
+
+    // Open a new stream to make writing the header easier
+    OStream headerStream(5*1024, false);
+    headerStream.addU32(mMajorVersion);
+    headerStream.addU32(mMinorVersion);
+    uint32_t is64Bit = 0;
+    headerStream.addU32(is64Bit);
+
+    uint32_t writeIndexSize = mWriteIndex.size();
+    headerStream.addU32(writeIndexSize);
+    for(uint32_t i = 0; i < writeIndexSize; i ++) {
+        headerStream.addString(&mWriteIndex[i]->mObjectName);
+        headerStream.addU32((uint32_t)mWriteIndex[i]->mType);
+        if(mUse64BitOffsets){
+            headerStream.addOffset(mWriteIndex[i]->mOffset);
+            headerStream.addOffset(mWriteIndex[i]->mLength);
         }
-        LOGE("  idx %i", p->mIndicies[ct]);
-    }
-
-    if (p->mRestartCounts) {
-        p->mRestarts = new uint16_t[p->mRestartCounts];
-        for (uint32_t ct = 0; ct < p->mRestartCounts; ct++) {
-            switch(bits) {
-            case 8:
-                p->mRestarts[ct] = io->loadU8();
-                break;
-            case 16:
-                p->mRestarts[ct] = io->loadU16();
-                break;
-            case 32:
-                p->mRestarts[ct] = io->loadU32();
-                break;
-            }
-            LOGE("  idx %i", p->mRestarts[ct]);
+        else {
+            uint32_t offset = (uint32_t)mWriteIndex[i]->mOffset;
+            headerStream.addU32(offset);
+            offset = (uint32_t)mWriteIndex[i]->mLength;
+            headerStream.addU32(offset);
         }
-    } else {
-        p->mRestarts = NULL;
     }
 
-    ie->mRsObj = p;
+    // Write our magic string so we know we are reading the right file
+    String8 magicString(A3D_MAGIC_KEY);
+    fwrite(magicString.string(), sizeof(char), magicString.size(), writeHandle);
+
+    // Store the size of the header to make it easier to parse when we read it
+    uint64_t headerSize = headerStream.getPos();
+    fwrite(&headerSize, sizeof(headerSize), 1, writeHandle);
+
+    // Now write our header
+    fwrite(headerStream.getPtr(), sizeof(uint8_t), headerStream.getPos(), writeHandle);
+
+    // Now write the size of the data part of the file for easier parsing later
+    uint64_t fileDataSize = mWriteStream->getPos();
+    fwrite(&fileDataSize, sizeof(fileDataSize), 1, writeHandle);
+
+    fwrite(mWriteStream->getPtr(), sizeof(uint8_t), mWriteStream->getPos(), writeHandle);
+
+    int status = fclose(writeHandle);
+
+    if(status != 0) {
+        LOGE("Couldn't close file\n");
+        return false;
+    }
+
+    return true;
 }
 
-void FileA3D::processChunk_Verticies(Context *rsc, IO *io, A3DIndexEntry *ie)
-{
-    Mesh::Verticies_t *cv = new Mesh::Verticies_t;
-    cv->mAllocationCount = io->loadU32();
-    cv->mAllocations = new Allocation *[cv->mAllocationCount];
-    LOGE("processChunk_Verticies count %i", cv->mAllocationCount);
-    for (uint32_t ct = 0; ct < cv->mAllocationCount; ct++) {
-        uint32_t i = io->loadU32();
-        cv->mAllocations[ct] = (Allocation *)mIndex[i].mRsObj;
-        LOGE("  idx %i", i);
+void FileA3D::appendToFile(ObjectBase *obj) {
+    if(!obj) {
+        return;
     }
-    ie->mRsObj = cv;
-}
-
-void FileA3D::processChunk_Element(Context *rsc, IO *io, A3DIndexEntry *ie)
-{
-    /*
-    rsi_ElementBegin(rsc);
-
-    uint32_t count = io->loadU32();
-    LOGE("processChunk_Element count %i", count);
-    while (count--) {
-        RsDataKind dk = (RsDataKind)io->loadU8();
-        RsDataType dt = (RsDataType)io->loadU8();
-        uint32_t bits = io->loadU8();
-        bool isNorm = io->loadU8() != 0;
-        LOGE("  %i %i %i %i", dk, dt, bits, isNorm);
-        rsi_ElementAdd(rsc, dk, dt, isNorm, bits, 0);
+    if(!mWriteStream) {
+        const uint64_t initialStreamSize = 256*1024;
+        mWriteStream = new OStream(initialStreamSize, false);
     }
-    LOGE("processChunk_Element create");
-    ie->mRsObj = rsi_ElementCreate(rsc);
-    */
-}
-
-void FileA3D::processChunk_ElementSource(Context *rsc, IO *io, A3DIndexEntry *ie)
-{
-    uint32_t index = io->loadU32();
-    uint32_t count = io->loadU32();
-
-    LOGE("processChunk_ElementSource count %i, index %i", count, index);
-
-    RsElement e = (RsElement)mIndex[index].mRsObj;
-
-    RsAllocation a = rsi_AllocationCreateSized(rsc, e, count);
-    Allocation * alloc = static_cast<Allocation *>(a);
-
-    float * data = (float *)alloc->getPtr();
-    while(count--) {
-        *data = io->loadF();
-        LOGE("  %f", *data);
-        data++;
-    }
-    ie->mRsObj = alloc;
+    A3DIndexEntry *indexEntry = new A3DIndexEntry();
+    indexEntry->mObjectName.setTo(obj->getName());
+    indexEntry->mType = obj->getClassId();
+    indexEntry->mOffset = mWriteStream->getPos();
+    indexEntry->mRsObj = obj;
+    mWriteIndex.push(indexEntry);
+    obj->serialize(mWriteStream);
+    indexEntry->mLength = mWriteStream->getPos() - indexEntry->mOffset;
+    mWriteStream->align(4);
 }
 
 namespace android {
 namespace renderscript {
 
+void rsi_FileA3DGetNumIndexEntries(Context *rsc, int32_t *numEntries, RsFile file)
+{
+    FileA3D *fa3d = static_cast<FileA3D *>(file);
+
+    if(fa3d) {
+        *numEntries = fa3d->getNumIndexEntries();
+    }
+    else {
+        *numEntries = 0;
+    }
+}
+
+void rsi_FileA3DGetIndexEntries(Context *rsc, RsFileIndexEntry *fileEntries, uint32_t numEntries, RsFile file)
+{
+    FileA3D *fa3d = static_cast<FileA3D *>(file);
+
+    if(!fa3d) {
+        LOGE("Can't load index entries. No valid file");
+        return;
+    }
+
+    uint32_t numFileEntries = fa3d->getNumIndexEntries();
+    if(numFileEntries != numEntries || numEntries == 0 || fileEntries == NULL) {
+        LOGE("Can't load index entries. Invalid number requested");
+        return;
+    }
+
+    for(uint32_t i = 0; i < numFileEntries; i ++) {
+        const FileA3D::A3DIndexEntry *entry = fa3d->getIndexEntry(i);
+        fileEntries[i].classID = entry->getType();
+        fileEntries[i].objectName = entry->getObjectName().string();
+    }
+
+}
+
+RsObjectBase rsi_FileA3DGetEntryByIndex(Context *rsc, uint32_t index, RsFile file)
+{
+    FileA3D *fa3d = static_cast<FileA3D *>(file);
+    if(!fa3d) {
+        LOGE("Can't load entry. No valid file");
+        return NULL;
+    }
+
+    ObjectBase *obj = fa3d->initializeFromEntry(index);
+    LOGE("Returning object with name %s", obj->getName());
+
+    return obj;
+}
+
+RsFile rsi_FileA3DCreateFromAssetStream(Context *rsc, const void *data, uint32_t len)
+{
+    if (data == NULL) {
+        LOGE("File load failed. Asset stream is NULL");
+        return NULL;
+    }
+
+    FileA3D *fa3d = new FileA3D(rsc);
+
+    fa3d->load(data, len);
+    fa3d->incUserRef();
+
+    return fa3d;
+}
+
 
 RsFile rsi_FileOpen(Context *rsc, char const *path, unsigned int len)
 {
-    FileA3D *fa3d = new FileA3D;
+    FileA3D *fa3d = new FileA3D(rsc);
 
     FILE *f = fopen("/sdcard/test.a3d", "rb");
     if (f) {
-        fa3d->load(rsc, f);
+        fa3d->load(f);
         fclose(f);
+        fa3d->incUserRef();
         return fa3d;
     }
     delete fa3d;

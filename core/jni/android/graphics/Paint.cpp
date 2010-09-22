@@ -31,6 +31,11 @@
 #include "SkShader.h"
 #include "SkTypeface.h"
 #include "SkXfermode.h"
+#include "unicode/ushape.h"
+#include "TextLayout.h"
+
+// temporary for debugging
+#include <utils/Log.h>
 
 namespace android {
 
@@ -57,6 +62,9 @@ static void defaultSettingsForAndroid(SkPaint* paint) {
 
 class SkPaintGlue {
 public:
+    enum MoveOpt {
+        AFTER, AT_OR_AFTER, BEFORE, AT_OR_BEFORE, AT
+    };
 
     static void finalizer(JNIEnv* env, jobject clazz, SkPaint* obj) {
         delete obj;
@@ -395,20 +403,161 @@ public:
         env->ReleaseStringChars(text, textArray);
         return count;
     }
-    
-    static void getTextPath___CIIFFPath(JNIEnv* env, jobject clazz, SkPaint* paint, jcharArray text, int index, int count, jfloat x, jfloat y, SkPath* path) {
-        const jchar* textArray = env->GetCharArrayElements(text, NULL);
-        paint->getTextPath(textArray + index, count << 1, SkFloatToScalar(x), SkFloatToScalar(y), path);
-        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
-                                      JNI_ABORT);
+
+    static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, const jchar *text,
+                                    jint start, jint count, jint contextCount, jint flags,
+                                    jfloatArray advances, jint advancesIndex) {
+        jfloat advancesArray[count];
+        jfloat totalAdvance;
+
+        TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, flags,
+                                       advancesArray, totalAdvance);
+
+        if (advances != NULL) {
+            env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
+        }
+        return totalAdvance;
     }
- 
-    static void getTextPath__StringIIFFPath(JNIEnv* env, jobject clazz, SkPaint* paint, jstring text, int start, int end, jfloat x, jfloat y, SkPath* path) {
+
+    static float getTextRunAdvances___CIIIII_FI(JNIEnv* env, jobject clazz, SkPaint* paint,
+            jcharArray text, jint index, jint count, jint contextIndex, jint contextCount,
+            jint flags, jfloatArray advances, jint advancesIndex) {
+        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        jfloat result = doTextRunAdvances(env, paint, textArray + contextIndex,
+            index - contextIndex, count, contextCount, flags, advances, advancesIndex);
+        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+        return result;
+    }
+
+    static float getTextRunAdvances__StringIIIII_FI(JNIEnv* env, jobject clazz, SkPaint* paint,
+            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
+            jfloatArray advances, jint advancesIndex) {
         const jchar* textArray = env->GetStringChars(text, NULL);
-        paint->getTextPath(textArray + start, (end - start) << 1, SkFloatToScalar(x), SkFloatToScalar(y), path);
+        jfloat result = doTextRunAdvances(env, paint, textArray + contextStart,
+            start - contextStart, end - start, contextEnd - contextStart, flags, advances,
+            advancesIndex);
+        env->ReleaseStringChars(text, textArray);
+        return result;
+    }
+
+    static jint doTextRunCursor(JNIEnv *env, SkPaint* paint, const jchar *text, jint start,
+            jint count, jint flags, jint offset, jint opt) {
+        SkScalar scalarArray[count];
+        jchar buffer[count];
+
+        // this is where we'd call harfbuzz
+        // for now we just use ushape.c and widths returned from skia
+
+        int widths;
+        if (flags & 0x1) { // rtl, call arabic shaping in case
+            UErrorCode status = U_ZERO_ERROR;
+            // Use fixed length since we need to keep start and count valid
+            u_shapeArabic(text + start, count, buffer, count,
+                    U_SHAPE_LENGTH_FIXED_SPACES_NEAR | U_SHAPE_TEXT_DIRECTION_LOGICAL |
+                    U_SHAPE_LETTERS_SHAPE | U_SHAPE_X_LAMALEF_SUB_ALTERNATE, &status);
+            // we shouldn't fail unless there's an out of memory condition,
+            // in which case we're hosed anyway
+            for (int i = 0; i < count; ++i) {
+              if (buffer[i] == 0xffff) {
+                buffer[i] = 0x200b; // zero-width-space for skia
+              }
+            }
+            widths = paint->getTextWidths(buffer, count << 1, scalarArray);
+        } else {
+            widths = paint->getTextWidths(text + start, count << 1, scalarArray);
+        }
+
+        if (widths < count) {
+            // Skia operates on code points, not code units, so surrogate pairs return only one
+            // value. Expand the result so we have one value per UTF-16 code unit.
+
+            // Note, skia's getTextWidth gets confused if it encounters a surrogate pair,
+            // leaving the remaining widths zero.  Not nice.
+            const jchar *chars = text + start;
+            for (int i = count, p = widths - 1; --i > p;) {
+                if (chars[i] >= 0xdc00 && chars[i] < 0xe000 &&
+                        chars[i-1] >= 0xd800 && chars[i-1] < 0xdc00) {
+                    scalarArray[i] = 0;
+                } else {
+                  scalarArray[i] = scalarArray[--p];
+                }
+            }
+        }
+
+        jint pos = offset - start;
+        switch (opt) {
+        case AFTER:
+          if (pos < count) {
+            pos += 1;
+          }
+          // fall through
+        case AT_OR_AFTER:
+          while (pos < count && scalarArray[pos] == 0) {
+            ++pos;
+          }
+          break;
+        case BEFORE:
+          if (pos > 0) {
+            --pos;
+          }
+          // fall through
+        case AT_OR_BEFORE:
+          while (pos > 0 && scalarArray[pos] == 0) {
+            --pos;
+          }
+          break;
+        case AT:
+        default:
+          if (scalarArray[pos] == 0) {
+            pos = -1;
+          }
+          break;
+        }
+
+        if (pos != -1) {
+          pos += start;
+        }
+
+        return pos;
+    }
+
+    static jint getTextRunCursor___C(JNIEnv* env, jobject clazz, SkPaint* paint, jcharArray text,
+            jint contextStart, jint contextCount, jint flags, jint offset, jint cursorOpt) {
+        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        jint result = doTextRunCursor(env, paint, textArray, contextStart, contextCount, flags,
+                offset, cursorOpt);
+        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+        return result;
+    }
+
+    static jint getTextRunCursor__String(JNIEnv* env, jobject clazz, SkPaint* paint, jstring text,
+            jint contextStart, jint contextEnd, jint flags, jint offset, jint cursorOpt) {
+        const jchar* textArray = env->GetStringChars(text, NULL);
+        jint result = doTextRunCursor(env, paint, textArray, contextStart,
+                contextEnd - contextStart, flags, offset, cursorOpt);
+        env->ReleaseStringChars(text, textArray);
+        return result;
+    }
+
+    static void getTextPath(JNIEnv* env, SkPaint* paint, const jchar* text, jint count,
+                            jint bidiFlags, jfloat x, jfloat y, SkPath *path) {
+        TextLayout::getTextPath(paint, text, count, bidiFlags, x, y, path);
+    }
+
+    static void getTextPath___C(JNIEnv* env, jobject clazz, SkPaint* paint, jint bidiFlags,
+            jcharArray text, int index, int count, jfloat x, jfloat y, SkPath* path) {
+        const jchar* textArray = env->GetCharArrayElements(text, NULL);
+        getTextPath(env, paint, textArray + index, count, bidiFlags, x, y, path);
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
+    }
+
+    static void getTextPath__String(JNIEnv* env, jobject clazz, SkPaint* paint, jint bidiFlags,
+            jstring text, int start, int end, jfloat x, jfloat y, SkPath* path) {
+        const jchar* textArray = env->GetStringChars(text, NULL);
+        getTextPath(env, paint, textArray + start, end - start, bidiFlags, x, y, path);
         env->ReleaseStringChars(text, textArray);
     }
- 
+
     static void setShadowLayer(JNIEnv* env, jobject jpaint, jfloat radius,
                                jfloat dx, jfloat dy, int color) {
         NPE_CHECK_RETURN_VOID(env, jpaint);
@@ -576,13 +725,20 @@ static JNINativeMethod methods[] = {
     {"native_breakText","(Ljava/lang/String;ZF[F)I", (void*) SkPaintGlue::breakTextS},
     {"native_getTextWidths","(I[CII[F)I", (void*) SkPaintGlue::getTextWidths___CII_F},
     {"native_getTextWidths","(ILjava/lang/String;II[F)I", (void*) SkPaintGlue::getTextWidths__StringII_F},
-    {"native_getTextPath","(I[CIIFFI)V", (void*) SkPaintGlue::getTextPath___CIIFFPath},
-    {"native_getTextPath","(ILjava/lang/String;IIFFI)V", (void*) SkPaintGlue::getTextPath__StringIIFFPath},
+    {"native_getTextRunAdvances","(I[CIIIII[FI)F", (void*)
+        SkPaintGlue::getTextRunAdvances___CIIIII_FI},
+    {"native_getTextRunAdvances","(ILjava/lang/String;IIIII[FI)F",
+        (void*) SkPaintGlue::getTextRunAdvances__StringIIIII_FI},
+    {"native_getTextRunCursor", "(I[CIIIII)I", (void*) SkPaintGlue::getTextRunCursor___C},
+    {"native_getTextRunCursor", "(ILjava/lang/String;IIIII)I",
+        (void*) SkPaintGlue::getTextRunCursor__String},
+    {"native_getTextPath","(II[CIIFFI)V", (void*) SkPaintGlue::getTextPath___C},
+    {"native_getTextPath","(IILjava/lang/String;IIFFI)V", (void*) SkPaintGlue::getTextPath__String},
     {"nativeGetStringBounds", "(ILjava/lang/String;IILandroid/graphics/Rect;)V",
                                         (void*) SkPaintGlue::getStringBounds },
     {"nativeGetCharArrayBounds", "(I[CIILandroid/graphics/Rect;)V",
                                     (void*) SkPaintGlue::getCharArrayBounds },
-    {"setShadowLayer", "(FFFI)V", (void*)SkPaintGlue::setShadowLayer}
+    {"nSetShadowLayer", "(FFFI)V", (void*)SkPaintGlue::setShadowLayer}
 };
 
 static jfieldID req_fieldID(jfieldID id) {

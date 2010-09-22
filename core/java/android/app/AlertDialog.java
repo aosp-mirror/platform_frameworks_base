@@ -265,12 +265,22 @@ public class AlertDialog extends Dialog implements DialogInterface {
     
     public static class Builder {
         private final AlertController.AlertParams P;
+        private int mTheme;
         
         /**
          * Constructor using a context for this builder and the {@link AlertDialog} it creates.
          */
         public Builder(Context context) {
+            this(context, com.android.internal.R.style.Theme_Dialog_Alert);
+        }
+
+        /**
+         * Constructor using a context and theme for this builder and
+         * the {@link AlertDialog} it creates.
+         */
+        public Builder(Context context, int theme) {
             P = new AlertController.AlertParams(context);
+            mTheme = theme;
         }
         
         /**
@@ -783,7 +793,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * to do and want this to be created and displayed.
          */
         public AlertDialog create() {
-            final AlertDialog dialog = new AlertDialog(P.mContext);
+            final AlertDialog dialog = new AlertDialog(P.mContext, mTheme);
             P.apply(dialog.mAlert);
             dialog.setCancelable(P.mCancelable);
             dialog.setOnCancelListener(P.mOnCancelListener);

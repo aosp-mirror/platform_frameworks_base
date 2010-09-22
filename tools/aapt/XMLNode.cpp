@@ -203,9 +203,13 @@ status_t parseStyledString(Bundle* bundle,
                 }
             }
             if (xliffDepth == 0 && pseudolocalize) {
+#ifdef ENABLE_PSEUDOLOCALIZE
                 std::string orig(String8(text).string());
                 std::string pseudo = pseudolocalize_string(orig);
                 curString.append(String16(String8(pseudo.c_str())));
+#else
+                assert(false);
+#endif
             } else {
                 if (isFormatted && hasSubstitutionErrors(fileName, inXml, text) != NO_ERROR) {
                     return UNKNOWN_ERROR;

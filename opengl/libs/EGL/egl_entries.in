@@ -51,6 +51,13 @@ EGL_ENTRY(EGLBoolean,  eglUnlockSurfaceKHR, EGLDisplay, EGLSurface)
 EGL_ENTRY(EGLImageKHR, eglCreateImageKHR,   EGLDisplay, EGLContext, EGLenum, EGLClientBuffer, const EGLint *)
 EGL_ENTRY(EGLBoolean,  eglDestroyImageKHR,  EGLDisplay, EGLImageKHR)
 
+/* EGL_EGLEXT_VERSION 5 */
+
+EGL_ENTRY(EGLSyncKHR,   eglCreateSyncKHR,       EGLDisplay, EGLenum, const EGLint *)
+EGL_ENTRY(EGLBoolean,   eglDestroySyncKHR,      EGLDisplay, EGLSyncKHR)
+EGL_ENTRY(EGLint,       eglClientWaitSyncKHR,   EGLDisplay, EGLSyncKHR, EGLint, EGLTimeKHR)
+EGL_ENTRY(EGLBoolean,   eglGetSyncAttribKHR,    EGLDisplay, EGLSyncKHR, EGLint, EGLint *)
+
 /* ANDROID extensions */
 
 EGL_ENTRY(EGLBoolean, eglSetSwapRectangleANDROID, EGLDisplay, EGLSurface, EGLint, EGLint, EGLint, EGLint)

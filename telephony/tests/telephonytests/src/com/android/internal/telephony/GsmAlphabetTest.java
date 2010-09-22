@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.GsmAlphabet;
+
 import junit.framework.TestCase;
 
 import android.test.suitebuilder.annotation.LargeTest;
@@ -51,7 +53,7 @@ public class GsmAlphabetTest extends TestCase {
         // '@' maps to char 0
         assertEquals(0, GsmAlphabet.charToGsm('@'));
 
-        // `a (a with grave accent) maps to last GSM charater
+        // `a (a with grave accent) maps to last GSM character
         assertEquals(0x7f, GsmAlphabet.charToGsm('\u00e0'));
 
         //
@@ -306,5 +308,27 @@ public class GsmAlphabetTest extends TestCase {
 
         assertEquals("a",
                 GsmAlphabet.gsm8BitUnpackedToString(unpacked, 1, unpacked.length - 1));
+    }
+
+    @SmallTest
+    public void testGsm8BitUpackedWithEuckr() throws Exception {
+        // Some feature phones in Korea store contacts as euc-kr.
+        // Test this situations.
+        byte unpacked[];
+
+        // Test general alphabet strings.
+        unpacked = IccUtils.hexStringToBytes("61626320646566FF");
+        assertEquals("abc def",
+                GsmAlphabet.gsm8BitUnpackedToString(unpacked, 0, unpacked.length, "euc-kr"));
+
+        // Test korean strings.
+        unpacked = IccUtils.hexStringToBytes("C5D7BDBAC6AEFF");
+        assertEquals("\uD14C\uC2A4\uD2B8",
+                GsmAlphabet.gsm8BitUnpackedToString(unpacked, 0, unpacked.length, "euc-kr"));
+
+        // Test gsm Extented Characters.
+        unpacked = GsmAlphabet.stringToGsm8BitPacked(sGsmExtendedChars);
+        assertEquals(sGsmExtendedChars,
+                GsmAlphabet.gsm8BitUnpackedToString(unpacked, 0, unpacked.length, "euc-kr"));
     }
 }

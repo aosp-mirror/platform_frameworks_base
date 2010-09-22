@@ -16,15 +16,11 @@
 
 package android.database;
 
-import android.database.sqlite.SQLiteMisuseException;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Config;
 import android.util.Log;
-
-import java.util.Map;
 
 
 /**
@@ -38,7 +34,6 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
     private final CrossProcessCursor mCursor;
     private CursorWindow mWindow;
     private final String mProviderName;
-    private final boolean mReadOnly;
     private ContentObserverProxy mObserver;
 
     private static final class ContentObserverProxy extends ContentObserver 
@@ -98,7 +93,6 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
                     "Only CrossProcessCursor cursors are supported across process for now", e);
         }
         mProviderName = providerName;
-        mReadOnly = !allowWrite;
 
         createAndRegisterObserverProxy(observer);
     }
@@ -195,31 +189,6 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
             mObserver.unlinkToDeath(this);
             mObserver = null;
         }
-    }
-
-    public boolean updateRows(Map<? extends Long, ? extends Map<String, Object>> values) {
-        if (mReadOnly) {
-            Log.w("ContentProvider", "Permission Denial: modifying "
-                    + mProviderName
-                    + " from pid=" + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return false;
-        }
-        return mCursor.commitUpdates(values);
-    }
-
-    public boolean deleteRow(int position) {
-        if (mReadOnly) {
-            Log.w("ContentProvider", "Permission Denial: modifying "
-                    + mProviderName
-                    + " from pid=" + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return false;
-        }
-        if (mCursor.moveToPosition(position) == false) {
-            return false;
-        }
-        return mCursor.deleteRow();
     }
 
     public Bundle getExtras() {

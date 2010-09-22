@@ -31,53 +31,56 @@ import android.view.SurfaceView;
 import android.view.SurfaceHolder;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
+import android.view.View;
 import java.lang.Math;
 
-public class ImageProcessingActivity extends Activity implements SurfaceHolder.Callback {
-    private Bitmap mBitmap;
-    private Params mParams;
-    private Script.Invokable mInvokable;
-    private int[] mInData;
-    private int[] mOutData;
+public class ImageProcessingActivity extends Activity
+                                       implements SurfaceHolder.Callback,
+                                       SeekBar.OnSeekBarChangeListener {
+    private Bitmap mBitmapIn;
+    private Bitmap mBitmapOut;
+    private Bitmap mBitmapScratch;
+    private ScriptC_threshold mScript;
+    private ScriptC_vertical_blur mScriptVBlur;
+    private ScriptC_horizontal_blur mScriptHBlur;
+    private int mRadius = 0;
+    private SeekBar mRadiusSeekBar;
+
+    private float mInBlack = 0.0f;
+    private SeekBar mInBlackSeekBar;
+    private float mOutBlack = 0.0f;
+    private SeekBar mOutBlackSeekBar;
+    private float mInWhite = 255.0f;
+    private SeekBar mInWhiteSeekBar;
+    private float mOutWhite = 255.0f;
+    private SeekBar mOutWhiteSeekBar;
+    private float mGamma = 1.0f;
+    private SeekBar mGammaSeekBar;
+
+    private float mSaturation = 1.0f;
+    private SeekBar mSaturationSeekBar;
+
+    private TextView mBenchmarkResult;
 
     @SuppressWarnings({"FieldCanBeLocal"})
     private RenderScript mRS;
-    @SuppressWarnings({"FieldCanBeLocal"})
-    private Type mParamsType;
-    @SuppressWarnings({"FieldCanBeLocal"})
-    private Allocation mParamsAllocation;
     @SuppressWarnings({"FieldCanBeLocal"})
     private Type mPixelType;
     @SuppressWarnings({"FieldCanBeLocal"})
     private Allocation mInPixelsAllocation;
     @SuppressWarnings({"FieldCanBeLocal"})
     private Allocation mOutPixelsAllocation;
+    @SuppressWarnings({"FieldCanBeLocal"})
+    private Allocation mScratchPixelsAllocation1;
+    private Allocation mScratchPixelsAllocation2;
 
     private SurfaceView mSurfaceView;
     private ImageView mDisplayView;
 
-    static class Params {
-        public int inWidth;
-        public int outWidth;
-        public int inHeight;
-        public int outHeight;
-
-        public float threshold;
-    }
-
-    static class Pixel {
-        public byte a;
-        public byte r;
-        public byte g;
-        public byte b;
-    }
-
     class FilterCallback extends RenderScript.RSMessage {
         private Runnable mAction = new Runnable() {
             public void run() {
-                mOutPixelsAllocation.readData(mOutData);
-                mBitmap.setPixels(mOutData, 0, mParams.outWidth, 0, 0,
-                        mParams.outWidth, mParams.outHeight);
                 mDisplayView.invalidate();
             }
         };
@@ -89,29 +92,218 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
         }
     }
 
-    private void javaFilter() {
+    int in[];
+    int interm[];
+    int out[];
+    int MAX_RADIUS = 25;
+    // Store our coefficients here
+    float gaussian[];
+
+    private long javaFilter() {
+        final int width = mBitmapIn.getWidth();
+        final int height = mBitmapIn.getHeight();
+        final int count = width * height;
+
+        if (in == null) {
+            in = new int[count];
+            interm = new int[count];
+            out = new int[count];
+            gaussian = new float[MAX_RADIUS * 2 + 1];
+            mBitmapIn.getPixels(in, 0, width, 0, 0, width, height);
+        }
+
         long t = java.lang.System.currentTimeMillis();
-        int count = mParams.inWidth * mParams.inHeight;
-        float threshold = mParams.threshold * 255.f;
 
-        for (int i = 0; i < count; i++) {
-            final float r = (float)((mInData[i] >> 0) & 0xff);
-            final float g = (float)((mInData[i] >> 8) & 0xff);
-            final float b = (float)((mInData[i] >> 16) & 0xff);
+        int w, h, r;
 
-            final float luminance = 0.2125f * r +
-                              0.7154f * g +
-                              0.0721f * b;
-            if (luminance > threshold) {
-                mOutData[i] = mInData[i];
-            } else {
-                mOutData[i] = mInData[i] & 0xff000000;
+        float fRadius = (float)mRadius;
+        int radius = (int)mRadius;
+
+        // Compute gaussian weights for the blur
+        // e is the euler's number
+        float e = 2.718281828459045f;
+        float pi = 3.1415926535897932f;
+        // g(x) = ( 1 / sqrt( 2 * pi ) * sigma) * e ^ ( -x^2 / 2 * sigma^2 )
+        // x is of the form [-radius .. 0 .. radius]
+        // and sigma varies with radius.
+        // Based on some experimental radius values and sigma's
+        // we approximately fit sigma = f(radius) as
+        // sigma = radius * 0.4  + 0.6
+        // The larger the radius gets, the more our gaussian blur
+        // will resemble a box blur since with large sigma
+        // the gaussian curve begins to lose its shape
+        float sigma = 0.4f * fRadius + 0.6f;
+        // Now compute the coefficints
+        // We will store some redundant values to save some math during
+        // the blur calculations
+        // precompute some values
+        float coeff1 = 1.0f / (float)(Math.sqrt( 2.0f * pi ) * sigma);
+        float coeff2 = - 1.0f / (2.0f * sigma * sigma);
+        float normalizeFactor = 0.0f;
+        float floatR = 0.0f;
+        for(r = -radius; r <= radius; r ++) {
+            floatR = (float)r;
+            gaussian[r + radius] = coeff1 * (float)Math.pow(e, floatR * floatR * coeff2);
+            normalizeFactor += gaussian[r + radius];
+        }
+
+        //Now we need to normalize the weights because all our coefficients need to add up to one
+        normalizeFactor = 1.0f / normalizeFactor;
+        for(r = -radius; r <= radius; r ++) {
+            floatR = (float)r;
+            gaussian[r + radius] *= normalizeFactor;
+        }
+
+        float blurredPixelR = 0.0f;
+        float blurredPixelG = 0.0f;
+        float blurredPixelB = 0.0f;
+        float blurredPixelA = 0.0f;
+
+        for(h = 0; h < height; h ++) {
+            for(w = 0; w < width; w ++) {
+
+                blurredPixelR = 0.0f;
+                blurredPixelG = 0.0f;
+                blurredPixelB = 0.0f;
+                blurredPixelA = 0.0f;
+
+                for(r = -radius; r <= radius; r ++) {
+                    // Stepping left and right away from the pixel
+                    int validW = w + r;
+                    // Clamp to zero and width max() isn't exposed for ints yet
+                    if(validW < 0) {
+                        validW = 0;
+                    }
+                    if(validW > width - 1) {
+                        validW = width - 1;
+                    }
+
+                    int input = in[h*width + validW];
+
+                    int R = ((input >> 24) & 0xff);
+                    int G = ((input >> 16) & 0xff);
+                    int B = ((input >> 8) & 0xff);
+                    int A = (input & 0xff);
+
+                    float weight = gaussian[r + radius];
+
+                    blurredPixelR += (float)(R)*weight;
+                    blurredPixelG += (float)(G)*weight;
+                    blurredPixelB += (float)(B)*weight;
+                    blurredPixelA += (float)(A)*weight;
+                }
+
+                int R = (int)blurredPixelR;
+                int G = (int)blurredPixelG;
+                int B = (int)blurredPixelB;
+                int A = (int)blurredPixelA;
+
+                interm[h*width + w] = (R << 24) | (G << 16) | (B << 8) | (A);
+            }
+        }
+
+        for(h = 0; h < height; h ++) {
+            for(w = 0; w < width; w ++) {
+
+                blurredPixelR = 0.0f;
+                blurredPixelG = 0.0f;
+                blurredPixelB = 0.0f;
+                blurredPixelA = 0.0f;
+                for(r = -radius; r <= radius; r ++) {
+                    int validH = h + r;
+                    // Clamp to zero and width
+                    if(validH < 0) {
+                        validH = 0;
+                    }
+                    if(validH > height - 1) {
+                        validH = height - 1;
+                    }
+
+                    int input = interm[validH*width + w];
+
+                    int R = ((input >> 24) & 0xff);
+                    int G = ((input >> 16) & 0xff);
+                    int B = ((input >> 8) & 0xff);
+                    int A = (input & 0xff);
+
+                    float weight = gaussian[r + radius];
+
+                    blurredPixelR += (float)(R)*weight;
+                    blurredPixelG += (float)(G)*weight;
+                    blurredPixelB += (float)(B)*weight;
+                    blurredPixelA += (float)(A)*weight;
+                }
+
+                int R = (int)blurredPixelR;
+                int G = (int)blurredPixelG;
+                int B = (int)blurredPixelB;
+                int A = (int)blurredPixelA;
+
+                out[h*width + w] = (R << 24) | (G << 16) | (B << 8) | (A);
             }
         }
 
         t = java.lang.System.currentTimeMillis() - t;
+        android.util.Log.v("Img", "Java frame time ms " + t);
+        mBitmapOut.setPixels(out, 0, width, 0, 0, width, height);
+        return t;
+    }
 
-        android.util.Log.v("Img", "frame time ms " + t);
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (fromUser) {
+
+            if(seekBar == mRadiusSeekBar) {
+                float fRadius = progress / 100.0f;
+                fRadius *= (float)(MAX_RADIUS);
+                mRadius = (int)fRadius;
+
+                mScript.set_radius(mRadius);
+            }
+            else if(seekBar == mInBlackSeekBar) {
+                mInBlack = (float)progress;
+                mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+            }
+            else if(seekBar == mOutBlackSeekBar) {
+                mOutBlack = (float)progress;
+                mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+            }
+            else if(seekBar == mInWhiteSeekBar) {
+                mInWhite = (float)progress + 127.0f;
+                mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+            }
+            else if(seekBar == mOutWhiteSeekBar) {
+                mOutWhite = (float)progress + 127.0f;
+                mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+            }
+            else if(seekBar == mGammaSeekBar) {
+                mGamma = (float)progress/100.0f;
+                mGamma = Math.max(mGamma, 0.1f);
+                mGamma = 1.0f / mGamma;
+                mScriptVBlur.invoke_setGamma(mGamma);
+            }
+            else if(seekBar == mSaturationSeekBar) {
+                mSaturation = (float)progress / 50.0f;
+                mScriptVBlur.invoke_setSaturation(mSaturation);
+            }
+
+            long t = java.lang.System.currentTimeMillis();
+            if (true) {
+                mScript.invoke_filter();
+                mRS.finish();
+            } else {
+                javaFilter();
+                mDisplayView.invalidate();
+            }
+
+            t = java.lang.System.currentTimeMillis() - t;
+            android.util.Log.v("Img", "Renderscript frame time core ms " + t);
+        }
+    }
+
+    public void onStartTrackingTouch(SeekBar seekBar) {
+    }
+
+    public void onStopTrackingTouch(SeekBar seekBar) {
     }
 
     @Override
@@ -119,45 +311,54 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        mBitmap = loadBitmap(R.drawable.data);
+        mBitmapIn = loadBitmap(R.drawable.data);
+        mBitmapOut = loadBitmap(R.drawable.data);
+        mBitmapScratch = loadBitmap(R.drawable.data);
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
         mSurfaceView.getHolder().addCallback(this);
 
         mDisplayView = (ImageView) findViewById(R.id.display);
-        mDisplayView.setImageBitmap(mBitmap);
+        mDisplayView.setImageBitmap(mBitmapOut);
 
-        ((SeekBar) findViewById(R.id.threshold)).setOnSeekBarChangeListener(
-                new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
-                    mParams.threshold = progress / 100.0f;
-                    mParamsAllocation.data(mParams);
+        mRadiusSeekBar = (SeekBar) findViewById(R.id.radius);
+        mRadiusSeekBar.setOnSeekBarChangeListener(this);
 
-                    if (true) {
-                        mInvokable.execute();
-                    } else {
-                        javaFilter();
-                        mBitmap.setPixels(mOutData, 0, mParams.outWidth, 0, 0,
-                                mParams.outWidth, mParams.outHeight);
-                        mDisplayView.invalidate();
-                    }
-                }
-            }
+        mInBlackSeekBar = (SeekBar)findViewById(R.id.inBlack);
+        mInBlackSeekBar.setOnSeekBarChangeListener(this);
+        mInBlackSeekBar.setMax(128);
+        mInBlackSeekBar.setProgress(0);
+        mOutBlackSeekBar = (SeekBar)findViewById(R.id.outBlack);
+        mOutBlackSeekBar.setOnSeekBarChangeListener(this);
+        mOutBlackSeekBar.setMax(128);
+        mOutBlackSeekBar.setProgress(0);
 
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+        mInWhiteSeekBar = (SeekBar)findViewById(R.id.inWhite);
+        mInWhiteSeekBar.setOnSeekBarChangeListener(this);
+        mInWhiteSeekBar.setMax(128);
+        mInWhiteSeekBar.setProgress(128);
+        mOutWhiteSeekBar = (SeekBar)findViewById(R.id.outWhite);
+        mOutWhiteSeekBar.setOnSeekBarChangeListener(this);
+        mOutWhiteSeekBar.setMax(128);
+        mOutWhiteSeekBar.setProgress(128);
 
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
+        mGammaSeekBar = (SeekBar)findViewById(R.id.inGamma);
+        mGammaSeekBar.setOnSeekBarChangeListener(this);
+        mGammaSeekBar.setMax(150);
+        mGammaSeekBar.setProgress(100);
+
+        mSaturationSeekBar = (SeekBar)findViewById(R.id.inSaturation);
+        mSaturationSeekBar.setOnSeekBarChangeListener(this);
+        mSaturationSeekBar.setProgress(50);
+
+        mBenchmarkResult = (TextView) findViewById(R.id.benchmarkText);
+        mBenchmarkResult.setText("Benchmark not yet run");
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
-        mParams = createParams();
-        mInvokable = createScript();
-
-        mInvokable.execute();
+        createScript();
+        mScript.invoke_filter();
+        mRS.finish();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -166,54 +367,38 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
 
-    private Script.Invokable createScript() {
+    private void createScript() {
         mRS = RenderScript.create();
         mRS.mMessageCallback = new FilterCallback();
 
-        mParamsType = Type.createFromClass(mRS, Params.class, 1, "Parameters");
-        mParamsAllocation = Allocation.createTyped(mRS, mParamsType);
-        mParamsAllocation.data(mParams);
+        mInPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapIn);
+        mOutPixelsAllocation = Allocation.createBitmapRef(mRS, mBitmapOut);
 
-        final int pixelCount = mParams.inWidth * mParams.inHeight;
+        Type.Builder tb = new Type.Builder(mRS, Element.F32_4(mRS));
+        tb.add(android.renderscript.Dimension.X, mBitmapIn.getWidth());
+        tb.add(android.renderscript.Dimension.Y, mBitmapIn.getHeight());
+        mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
+        mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
 
-        mPixelType = Type.createFromClass(mRS, Pixel.class, 1, "Pixel");
-        mInPixelsAllocation = Allocation.createSized(mRS,
-                Element.createUser(mRS, Element.DataType.SIGNED_32),
-                pixelCount);
-        mOutPixelsAllocation = Allocation.createSized(mRS,
-                Element.createUser(mRS, Element.DataType.SIGNED_32),
-                pixelCount);
+        mScriptVBlur = new ScriptC_vertical_blur(mRS, getResources(), R.raw.vertical_blur, false);
+        mScriptHBlur = new ScriptC_horizontal_blur(mRS, getResources(), R.raw.horizontal_blur, false);
 
-        mInData = new int[pixelCount];
-        mBitmap.getPixels(mInData, 0, mParams.inWidth, 0, 0, mParams.inWidth, mParams.inHeight);
-        mInPixelsAllocation.data(mInData);
+        mScript = new ScriptC_threshold(mRS, getResources(), R.raw.threshold, false);
+        mScript.set_width(mBitmapIn.getWidth());
+        mScript.set_height(mBitmapIn.getHeight());
+        mScript.set_radius(mRadius);
 
-        mOutData = new int[pixelCount];
-        mOutPixelsAllocation.data(mOutData);
+        mScriptVBlur.invoke_setLevels(mInBlack, mOutBlack, mInWhite, mOutWhite);
+        mScriptVBlur.invoke_setGamma(mGamma);
+        mScriptVBlur.invoke_setSaturation(mSaturation);
 
-        ScriptC.Builder sb = new ScriptC.Builder(mRS);
-        sb.setType(mParamsType, "Params", 0);
-        sb.setType(mPixelType, "InPixel", 1);
-        sb.setType(mPixelType, "OutPixel", 2);
-        sb.setType(true, 2);
-        Script.Invokable invokable = sb.addInvokable("main");
-        sb.setScript(getResources(), R.raw.threshold);
-        //sb.setRoot(true);
+        mScript.bind_InPixel(mInPixelsAllocation);
+        mScript.bind_OutPixel(mOutPixelsAllocation);
+        mScript.bind_ScratchPixel1(mScratchPixelsAllocation1);
+        mScript.bind_ScratchPixel2(mScratchPixelsAllocation2);
 
-        ScriptC script = sb.create();
-        script.bindAllocation(mParamsAllocation, 0);
-        script.bindAllocation(mInPixelsAllocation, 1);
-        script.bindAllocation(mOutPixelsAllocation, 2);
-
-        return invokable;
-    }
-
-    private Params createParams() {
-        final Params params = new Params();
-        params.inWidth = params.outWidth = mBitmap.getWidth();
-        params.inHeight = params.outHeight = mBitmap.getHeight();
-        params.threshold = 0.5f;
-        return params;
+        mScript.set_vBlurScript(mScriptVBlur);
+        mScript.set_hBlurScript(mScriptHBlur);
     }
 
     private Bitmap loadBitmap(int resource) {
@@ -228,5 +413,31 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
         c.drawBitmap(source, 0, 0, null);
         source.recycle();
         return b;
+    }
+
+    // button hook
+    public void benchmark(View v) {
+        android.util.Log.v("Img", "Benchmarking");
+        int oldRadius = mRadius;
+        mRadius = MAX_RADIUS;
+        mScript.set_radius(mRadius);
+
+        long t = java.lang.System.currentTimeMillis();
+
+        mScript.invoke_filter();
+        mRS.finish();
+
+        t = java.lang.System.currentTimeMillis() - t;
+        android.util.Log.v("Img", "Renderscript frame time core ms " + t);
+
+        //long javaTime = javaFilter();
+        //mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
+        mBenchmarkResult.setText("RS: " + t + " ms");
+
+        mRadius = oldRadius;
+        mScript.set_radius(mRadius);
+
+        mScript.invoke_filter();
+        mRS.finish();
     }
 }

@@ -255,6 +255,7 @@ public abstract class SMSDispatcher extends Handler {
         mCm.unregisterForOn(this);
     }
 
+    @Override
     protected void finalize() {
         Log.d(TAG, "SMSDispatcher finalized");
     }
@@ -927,14 +928,14 @@ public abstract class SMSDispatcher extends Handler {
      */
     static protected class SmsTracker {
         // fields need to be public for derived SmsDispatchers
-        public HashMap mData;
+        public HashMap<String, Object> mData;
         public int mRetryCount;
         public int mMessageRef;
 
         public PendingIntent mSentIntent;
         public PendingIntent mDeliveryIntent;
 
-        SmsTracker(HashMap data, PendingIntent sentIntent,
+        SmsTracker(HashMap<String, Object> data, PendingIntent sentIntent,
                 PendingIntent deliveryIntent) {
             mData = data;
             mSentIntent = sentIntent;
@@ -943,7 +944,7 @@ public abstract class SMSDispatcher extends Handler {
         }
     }
 
-    protected SmsTracker SmsTrackerFactory(HashMap data, PendingIntent sentIntent,
+    protected SmsTracker SmsTrackerFactory(HashMap<String, Object> data, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
         return new SmsTracker(data, sentIntent, deliveryIntent);
     }

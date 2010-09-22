@@ -26,11 +26,6 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
     public static int sEnableIterations = 100;
     public static int sDiscoverableIterations = 1000;
     public static int sScanIterations = 1000;
-    public static int sConnectHeadsetIterations = 100;
-    public static int sConnectA2dpIterations = 100;
-
-    public static String sHeadsetAddress = "";
-    public static String sA2dpAddress = "";
 
     @Override
     public TestSuite getAllTests() {
@@ -73,34 +68,6 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
             } catch (NumberFormatException e) {
                 // Invalid argument, fall back to default value
             }
-        }
-
-        val = arguments.getString("connect_a2dp_iterations");
-        if (val != null) {
-            try {
-                sConnectA2dpIterations = Integer.parseInt(val);
-            } catch (NumberFormatException e) {
-                // Invalid argument, fall back to default value
-            }
-        }
-
-        val = arguments.getString("connect_headset_iterations");
-        if (val != null) {
-            try {
-                sConnectHeadsetIterations = Integer.parseInt(val);
-            } catch (NumberFormatException e) {
-                // Invalid argument, fall back to default value
-            }
-        }
-
-        val = arguments.getString("headset_address");
-        if (val != null) {
-            sHeadsetAddress = val;
-        }
-
-        val = arguments.getString("a2dp_address");
-        if (val != null) {
-            sA2dpAddress = val;
         }
     }
 }

@@ -31,5 +31,4 @@
     android:layout_marginTop="5px"
     android:cacheColorHint="@null"
     android:divider="@android:drawable/divider_horizontal_bright"
-    android:scrollbars="vertical"
-    android:overscrollMode="ifContentScrolls" />
+    android:scrollbars="vertical" />

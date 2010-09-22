@@ -68,6 +68,13 @@ public class PatternsTest extends TestCase {
         t = Patterns.WEB_URL.matcher("xn--fsqu00a.xn--0zwm56d").matches();
         assertTrue("Valid URL", t);
 
+        // Url for testing top level Arabic country code domain in Punycode:
+        //   http://xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx
+        t = Patterns.WEB_URL.matcher("http://xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx").matches();
+        assertTrue("Valid URL", t);
+        t = Patterns.WEB_URL.matcher("xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx").matches();
+        assertTrue("Valid URL", t);
+
         // Internationalized URL.
         t = Patterns.WEB_URL.matcher("http://\uD604\uAE08\uC601\uC218\uC99D.kr").matches();
         assertTrue("Valid URL", t);
@@ -109,7 +116,7 @@ public class PatternsTest extends TestCase {
         t = Patterns.DOMAIN_NAME.matcher("mail.example.com").matches();
         assertTrue("Valid domain", t);
 
-        t = Patterns.WEB_URL.matcher("google.me").matches();
+        t = Patterns.DOMAIN_NAME.matcher("google.me").matches();
         assertTrue("Valid domain", t);
 
         // Internationalized domains.
@@ -118,6 +125,14 @@ public class PatternsTest extends TestCase {
 
         t = Patterns.DOMAIN_NAME.matcher("__+&42.xer").matches();
         assertFalse("Invalid domain", t);
+
+        // Obsolete domain .yu
+        t = Patterns.DOMAIN_NAME.matcher("test.yu").matches();
+        assertFalse("Obsolete country code top level domain", t);
+
+        // Testing top level Arabic country code domain in Punycode:
+        t = Patterns.DOMAIN_NAME.matcher("xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c").matches();
+        assertTrue("Valid domain", t);
     }
 
     @SmallTest

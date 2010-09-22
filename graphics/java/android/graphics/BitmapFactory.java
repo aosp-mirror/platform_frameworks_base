@@ -18,7 +18,6 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.os.MemoryFile;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
@@ -84,7 +83,7 @@ public class BitmapFactory {
         /**
          * The pixel density to use for the bitmap.  This will always result
          * in the returned bitmap having a density set for it (see
-         * {@link Bitmap#setDensity(int) Bitmap.setDensity(int)).  In addition,
+         * {@link Bitmap#setDensity(int) Bitmap.setDensity(int)}).  In addition,
          * if {@link #inScaled} is set (which it is by default} and this
          * density does not match {@link #inTargetDensity}, then the bitmap
          * will be scaled to the target density before being returned.
@@ -507,9 +506,7 @@ public class BitmapFactory {
      *
      * @param is The input stream that holds the raw data to be decoded into a
      *           bitmap.
-     * @return The decoded bitmap, or null if the image data could not be
-     *         decoded, or, if opts is non-null, if opts requested only the
-     *         size be returned (in opts.outWidth and opts.outHeight)
+     * @return The decoded bitmap, or null if the image data could not be decoded.
      */
     public static Bitmap decodeStream(InputStream is) {
         return decodeStream(is, null, null);
@@ -530,18 +527,6 @@ public class BitmapFactory {
      * @return the decoded bitmap, or null
      */
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
-        try {
-            if (MemoryFile.isMemoryFile(fd)) {
-                int mappedlength = MemoryFile.getSize(fd);
-                MemoryFile file = new MemoryFile(fd, mappedlength, "r");
-                InputStream is = file.getInputStream();
-                Bitmap bm = decodeStream(is, outPadding, opts);
-                return finishDecode(bm, outPadding, opts);
-            }
-        } catch (IOException ex) {
-            // invalid filedescriptor, no need to call nativeDecodeFileDescriptor()
-            return null;
-        }
         Bitmap bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
         return finishDecode(bm, outPadding, opts);
     }

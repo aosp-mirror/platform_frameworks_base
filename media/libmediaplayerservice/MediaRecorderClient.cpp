@@ -70,7 +70,7 @@ status_t MediaRecorderClient::setCamera(const sp<ICamera>& camera)
     return mRecorder->setCamera(camera);
 }
 
-status_t MediaRecorderClient::setPreviewSurface(const sp<ISurface>& surface)
+status_t MediaRecorderClient::setPreviewSurface(const sp<Surface>& surface)
 {
     LOGV("setPreviewSurface");
     Mutex::Autolock lock(mLock);
@@ -162,6 +162,17 @@ status_t MediaRecorderClient::setOutputFile(int fd, int64_t offset, int64_t leng
         return NO_INIT;
     }
     return mRecorder->setOutputFile(fd, offset, length);
+}
+
+status_t MediaRecorderClient::setOutputFileAuxiliary(int fd)
+{
+    LOGV("setOutputFileAuxiliary(%d)", fd);
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NO_INIT;
+    }
+    return mRecorder->setOutputFileAuxiliary(fd);
 }
 
 status_t MediaRecorderClient::setVideoSize(int width, int height)
@@ -337,4 +348,3 @@ status_t MediaRecorderClient::dump(int fd, const Vector<String16>& args) const {
 }
 
 }; // namespace android
-

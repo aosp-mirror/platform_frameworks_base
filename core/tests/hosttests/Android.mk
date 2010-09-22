@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_MODULE := FrameworkCoreHostTests
 
-LOCAL_JAVA_LIBRARIES := hosttestlib ddmlib junit
+LOCAL_JAVA_LIBRARIES := hosttestlib ddmlib-prebuilt junit
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 

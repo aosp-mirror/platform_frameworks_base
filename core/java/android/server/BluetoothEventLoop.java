@@ -20,6 +20,8 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothInputDevice;
+import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +32,8 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Set;
+import android.os.PowerManager;
+
 
 /**
  * TODO: Move this to
@@ -51,6 +55,9 @@ class BluetoothEventLoop {
     private final BluetoothService mBluetoothService;
     private final BluetoothAdapter mAdapter;
     private final Context mContext;
+    // The WakeLock is used for bringing up the LCD during a pairing request
+    // from remote device when Android is in Suspend state.
+    private PowerManager.WakeLock mWakeLock;
 
     private static final int EVENT_RESTART_BLUETOOTH = 1;
     private static final int EVENT_PAIRING_CONSENT_DELAYED_ACCEPT = 2;
@@ -105,6 +112,11 @@ class BluetoothEventLoop {
         mContext = context;
         mPasskeyAgentRequestData = new HashMap();
         mAdapter = adapter;
+        //WakeLock instantiation in BluetoothEventLoop class
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP
+                | PowerManager.ON_AFTER_RELEASE, TAG);
+        mWakeLock.setReferenceCounted(false);
         initializeNativeDataNative();
     }
 
@@ -290,7 +302,8 @@ class BluetoothEventLoop {
             return;
         }
         if (DBG) {
-            log("Device property changed:" + address + "property:" + name);
+            log("Device property changed: " + address + " property: "
+                    + name + " value: " + propValues[1]);
         }
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         if (name.equals("Name")) {
@@ -357,6 +370,44 @@ class BluetoothEventLoop {
         }
     }
 
+    private void onInputDevicePropertyChanged(String path, String[] propValues) {
+        String address = mBluetoothService.getAddressFromObjectPath(path);
+        if (address == null) {
+            Log.e(TAG, "onInputDevicePropertyChanged: Address of the remote device in null");
+            return;
+        }
+        log(" Input Device : Name of Property is:" + propValues[0]);
+        boolean state = false;
+        if (propValues[1].equals("true")) {
+            state = true;
+        }
+        mBluetoothService.handleInputDevicePropertyChange(address, state);
+    }
+
+    private void onPanDevicePropertyChanged(String deviceObjectPath, String[] propValues) {
+        String name = propValues[0];
+        String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
+        if (address == null) {
+            Log.e(TAG, "onPanDevicePropertyChanged: Address of the remote device in null");
+            return;
+        }
+        if (DBG) {
+            log("Pan Device property changed: " + address + "  property: "
+                    + name + " value: "+ propValues[1]);
+        }
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        if (name.equals("Connected")) {
+            if (propValues[1].equals("false")) {
+                mBluetoothService.handlePanDeviceStateChange(device,
+                                          BluetoothInputDevice.STATE_DISCONNECTED);
+            }
+        } else if (name.equals("Interface")) {
+            String iface = propValues[1];
+            mBluetoothService.handlePanDeviceStateChange(device, iface,
+                                            BluetoothInputDevice.STATE_CONNECTED);
+        }
+    }
+
     private String checkPairingRequestAndGetAddress(String objectPath, int nativeData) {
         String address = mBluetoothService.getAddressFromObjectPath(objectPath);
         if (address == null) {
@@ -398,37 +449,46 @@ class BluetoothEventLoop {
             mHandler.sendMessageDelayed(message, 1500);
             return;
         }
-
+        // Acquire wakelock during PIN code request to bring up LCD display
+        mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                         BluetoothDevice.PAIRING_VARIANT_CONSENT);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        // Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        mWakeLock.release();
         return;
     }
 
     private void onRequestPasskeyConfirmation(String objectPath, int passkey, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
-
+        // Acquire wakelock during PIN code request to bring up LCD display
+        mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_PASSKEY, passkey);
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                 BluetoothDevice.PAIRING_VARIANT_PASSKEY_CONFIRMATION);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        // Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        mWakeLock.release();
         return;
     }
 
     private void onRequestPasskey(String objectPath, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
-
+        // Acquire wakelock during PIN code request to bring up LCD display
+        mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                 BluetoothDevice.PAIRING_VARIANT_PASSKEY);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        // Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        mWakeLock.release();
         return;
     }
 
@@ -461,10 +521,14 @@ class BluetoothEventLoop {
                 if (mBluetoothService.attemptAutoPair(address)) return;
            }
         }
+        // Acquire wakelock during PIN code request to bring up LCD display
+        mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, BluetoothDevice.PAIRING_VARIANT_PIN);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        // Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        mWakeLock.release();
         return;
     }
 
@@ -472,12 +536,16 @@ class BluetoothEventLoop {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
 
+        // Acquire wakelock during PIN code request to bring up LCD display
+        mWakeLock.acquire();
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_PASSKEY, passkey);
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                         BluetoothDevice.PAIRING_VARIANT_DISPLAY_PASSKEY);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        //Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        mWakeLock.release();
     }
 
     private void onRequestOobData(String objectPath , int nativeData) {
@@ -492,6 +560,8 @@ class BluetoothEventLoop {
     }
 
     private boolean onAgentAuthorize(String objectPath, String deviceUuid) {
+        if (!mBluetoothService.isEnabled()) return false;
+
         String address = mBluetoothService.getAddressFromObjectPath(objectPath);
         if (address == null) {
             Log.e(TAG, "Unable to get device address in onAuthAgentAuthorize");
@@ -500,15 +570,15 @@ class BluetoothEventLoop {
 
         boolean authorized = false;
         ParcelUuid uuid = ParcelUuid.fromString(deviceUuid);
-        BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
 
         // Bluez sends the UUID of the local service being accessed, _not_ the
         // remote service
-        if (mBluetoothService.isEnabled() &&
-                (BluetoothUuid.isAudioSource(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
-                        || BluetoothUuid.isAdvAudioDist(uuid)) &&
-                        !isOtherSinkInNonDisconnectingState(address)) {
-            BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        if ((BluetoothUuid.isAudioSource(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
+              || BluetoothUuid.isAdvAudioDist(uuid)) &&
+              !isOtherSinkInNonDisconnectingState(address)) {
+            BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+
             authorized = a2dp.getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
                 Log.i(TAG, "Allowing incoming A2DP / AVRCP connection from " + address);
@@ -516,11 +586,35 @@ class BluetoothEventLoop {
             } else {
                 Log.i(TAG, "Rejecting incoming A2DP / AVRCP connection from " + address);
             }
+        } else if (BluetoothUuid.isInputDevice(uuid) && !isOtherInputDeviceConnected(address)) {
+            BluetoothInputDevice inputDevice = new BluetoothInputDevice(mContext);
+            authorized = inputDevice.getInputDevicePriority(device) >
+                         BluetoothInputDevice.PRIORITY_OFF;
+             if (authorized) {
+                 Log.i(TAG, "Allowing incoming HID connection from " + address);
+             } else {
+                 Log.i(TAG, "Rejecting incoming HID connection from " + address);
+             }
+        } else if (BluetoothUuid.isBnep(uuid) || BluetoothUuid.isNap(uuid) &&
+                mBluetoothService.allowIncomingTethering()){
+            authorized = true;
         } else {
             Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);
         }
         log("onAgentAuthorize(" + objectPath + ", " + deviceUuid + ") = " + authorized);
         return authorized;
+    }
+
+    private boolean isOtherInputDeviceConnected(String address) {
+        Set<BluetoothDevice> devices =
+            mBluetoothService.lookupInputDevicesMatchingStates(new int[] {
+                                                BluetoothInputDevice.STATE_CONNECTING,
+                                                BluetoothInputDevice.STATE_CONNECTED});
+
+        for (BluetoothDevice device : devices) {
+            if (!device.getAddress().equals(address)) return true;
+        }
+        return false;
     }
 
     private boolean onAgentOutOfBandDataAvailable(String objectPath) {
@@ -534,7 +628,6 @@ class BluetoothEventLoop {
             return true;
         }
         return false;
-
     }
 
     private boolean isOtherSinkInNonDisconnectingState(String address) {
@@ -586,6 +679,60 @@ class BluetoothEventLoop {
         case CREATE_DEVICE_SUCCESS:
             // nothing to do, UUID intent's will be sent via property changed
         }
+    }
+
+    private void onInputDeviceConnectionResult(String path, boolean result) {
+        // Success case gets handled by Property Change signal
+        if (!result) {
+            String address = mBluetoothService.getAddressFromObjectPath(path);
+            if (address == null) return;
+
+            boolean connected = false;
+            BluetoothDevice device = mAdapter.getRemoteDevice(address);
+            int state = mBluetoothService.getInputDeviceState(device);
+            if (state == BluetoothInputDevice.STATE_CONNECTING) {
+                connected = false;
+            } else if (state == BluetoothInputDevice.STATE_DISCONNECTING) {
+                connected = true;
+            } else {
+                Log.e(TAG, "Error onInputDeviceConnectionResult. State is:" + state);
+            }
+            mBluetoothService.handleInputDevicePropertyChange(address, connected);
+        }
+    }
+
+    private void onPanDeviceConnectionResult(String path, boolean result) {
+        log ("onPanDeviceConnectionResult " + path + " " + result);
+        // Success case gets handled by Property Change signal
+        if (!result) {
+            String address = mBluetoothService.getAddressFromObjectPath(path);
+            if (address == null) return;
+
+            boolean connected = false;
+            BluetoothDevice device = mAdapter.getRemoteDevice(address);
+            int state = mBluetoothService.getPanDeviceState(device);
+            if (state == BluetoothPan.STATE_CONNECTING) {
+                connected = false;
+            } else if (state == BluetoothPan.STATE_DISCONNECTING) {
+                connected = true;
+            } else {
+                Log.e(TAG, "Error onPanDeviceConnectionResult. State is: "
+                        + state + " result: "+ result);
+            }
+            int newState = connected? BluetoothPan.STATE_CONNECTED :
+                BluetoothPan.STATE_DISCONNECTED;
+            mBluetoothService.handlePanDeviceStateChange(device, newState);
+        }
+    }
+
+    private void onNetworkDeviceDisconnected(String address) {
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED);
+    }
+
+    private void onNetworkDeviceConnected(String address, String iface, int destUuid) {
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        mBluetoothService.handlePanDeviceStateChange(device, iface, BluetoothPan.STATE_CONNECTED);
     }
 
     private void onRestartRequired() {

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:focusable="true"
+    android:descendantFocusability="afterDescendants">
+
+    <!-- This is actually used for the badge icon *or* the badge label (or neither) -->
+    <TextView
+        android:id="@+id/search_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dip"
+        android:drawablePadding="0dip"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:visibility="gone"
+    />
+
+    <ImageView
+        android:id="@+id/search_button"
+        android:layout_height="36dip"
+        android:layout_width="36dip"
+        android:layout_marginRight="7dip"
+        android:layout_gravity="center_vertical"
+        android:src="@android:drawable/ic_btn_search"
+    />
+
+    <!-- Inner layout contains the app icon, button(s) and EditText -->
+    <LinearLayout
+        android:id="@+id/search_edit_frame"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="horizontal"
+        android:background="?android:attr/editTextBackground">
+
+        <ImageView
+            android:id="@+id/search_app_icon"
+            android:layout_height="24dip"
+            android:layout_width="24dip"
+            android:layout_marginRight="7dip"
+            android:layout_gravity="bottom"
+            android:src="@android:drawable/ic_btn_search"
+        />
+
+        <AutoCompleteTextView
+            android:id="@+id/search_src_text"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:paddingLeft="8dip"
+            android:paddingRight="6dip"
+            android:drawablePadding="2dip"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:background="@null"
+            android:inputType="text|textAutoComplete"
+            android:imeOptions="actionSearch"
+            android:dropDownWidth="300dp"
+            android:dropDownHeight="wrap_content"
+            android:dropDownAnchor="@id/search_edit_frame"
+            android:dropDownVerticalOffset="0dip"
+            android:dropDownHorizontalOffset="0dip"
+            android:popupBackground="@android:drawable/search_dropdown_background"
+        />
+
+        <ImageView
+            android:id="@+id/search_close_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="bottom"
+            android:src="@android:drawable/btn_close"
+        />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/search_go_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="4dip"
+        android:layout_marginRight="4dip"
+        android:src="@android:drawable/ic_btn_find_next"
+    />
+
+    <ImageButton
+        android:id="@+id/search_voice_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="0dip"
+        android:layout_marginTop="-6.5dip"
+        android:layout_marginBottom="-7dip"
+        android:layout_marginRight="-5dip"
+        android:background="@drawable/btn_search_dialog_voice"
+        android:src="@android:drawable/ic_btn_speak_now"
+        android:visibility="gone"
+    />
+</LinearLayout>

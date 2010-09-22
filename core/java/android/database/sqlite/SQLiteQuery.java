@@ -28,28 +28,38 @@ import android.util.Log;
  * threads should perform its own synchronization when using the SQLiteQuery.
  */
 public class SQLiteQuery extends SQLiteProgram {
-    private static final String TAG = "Cursor";
+    private static final String TAG = "SQLiteQuery";
 
     /** The index of the unbound OFFSET parameter */
-    private int mOffsetIndex;
-    
-    /** Args to bind on requery */
-    private String[] mBindArgs;
+    private int mOffsetIndex = 0;
 
     private boolean mClosed = false;
 
     /**
      * Create a persistent query object.
-     * 
+     *
      * @param db The database that this query object is associated with
      * @param query The SQL string for this query. 
      * @param offsetIndex The 1-based index to the OFFSET parameter, 
      */
     /* package */ SQLiteQuery(SQLiteDatabase db, String query, int offsetIndex, String[] bindArgs) {
         super(db, query);
-
         mOffsetIndex = offsetIndex;
-        mBindArgs = bindArgs;
+        bindAllArgsAsStrings(bindArgs);
+    }
+
+    /**
+     * Constructor used to create new instance to replace a given instance of this class.
+     * This constructor is used when the current Query object is now associated with a different
+     * {@link SQLiteDatabase} object.
+     *
+     * @param db The database that this query object is associated with
+     * @param query the instance of {@link SQLiteQuery} to be replaced
+     */
+    /* package */ SQLiteQuery(SQLiteDatabase db, SQLiteQuery query) {
+        super(db, query.mSql);
+        this.mBindArgs = query.mBindArgs;
+        this.mOffsetIndex = query.mOffsetIndex;
     }
 
     /**
@@ -70,13 +80,8 @@ public class SQLiteQuery extends SQLiteProgram {
                 // if the start pos is not equal to 0, then most likely window is
                 // too small for the data set, loading by another thread
                 // is not safe in this situation. the native code will ignore maxRead
-                int numRows = native_fill_window(window, window.getStartPosition(), mOffsetIndex,
-                        maxRead, lastPos);
-
-                // Logging
-                if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                    Log.d(TAG, "fillWindow(): " + mSql);
-                }
+                int numRows = native_fill_window(window, window.getStartPosition(),
+                        mOffsetIndex, maxRead, lastPos);
                 mDatabase.logTimeStat(mSql, timeStart);
                 return numRows;
             } catch (IllegalStateException e){
@@ -84,6 +89,9 @@ public class SQLiteQuery extends SQLiteProgram {
                 return 0;
             } catch (SQLiteDatabaseCorruptException e) {
                 mDatabase.onCorruption();
+                throw e;
+            } catch (SQLiteException e) {
+                Log.e(TAG, "exception: " + e.getMessage() + "; query: " + mSql);
                 throw e;
             } finally {
                 window.releaseReference();
@@ -141,51 +149,13 @@ public class SQLiteQuery extends SQLiteProgram {
      * Called by SQLiteCursor when it is requeried.
      */
     /* package */ void requery() {
-        if (mBindArgs != null) {
-            int len = mBindArgs.length;
-            try {
-                for (int i = 0; i < len; i++) {
-                    super.bindString(i + 1, mBindArgs[i]);
-                }
-            } catch (SQLiteMisuseException e) {
-                StringBuilder errMsg = new StringBuilder("mSql " + mSql);
-                for (int i = 0; i < len; i++) {
-                    errMsg.append(" ");
-                    errMsg.append(mBindArgs[i]);
-                }
-                errMsg.append(" ");
-                IllegalStateException leakProgram = new IllegalStateException(
-                        errMsg.toString(), e);
-                throw leakProgram;                
-            }
+        if (mClosed) {
+            throw new IllegalStateException("requerying a closed cursor");
         }
+        compileAndbindAllArgs();
     }
 
-    @Override
-    public void bindNull(int index) {
-        mBindArgs[index - 1] = null;
-        if (!mClosed) super.bindNull(index);
-    }
-
-    @Override
-    public void bindLong(int index, long value) {
-        mBindArgs[index - 1] = Long.toString(value);
-        if (!mClosed) super.bindLong(index, value);
-    }
-
-    @Override
-    public void bindDouble(int index, double value) {
-        mBindArgs[index - 1] = Double.toString(value);
-        if (!mClosed) super.bindDouble(index, value);
-    }
-
-    @Override
-    public void bindString(int index, String value) {
-        mBindArgs[index - 1] = value;
-        if (!mClosed) super.bindString(index, value);
-    }
-
-    private final native int native_fill_window(CursorWindow window, 
+    private final native int native_fill_window(CursorWindow window,
             int startPos, int offsetParam, int maxRead, int lastPos);
 
     private final native int native_column_count();

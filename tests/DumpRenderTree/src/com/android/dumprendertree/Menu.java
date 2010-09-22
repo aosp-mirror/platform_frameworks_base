@@ -18,6 +18,7 @@ package com.android.dumprendertree;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedOutputStream;
@@ -28,7 +29,8 @@ public class Menu extends FileList {
 
     private static final int MENU_START = 0x01;
     private static String LOGTAG = "MenuActivity";
-    static final String LAYOUT_TESTS_LIST_FILE = "/sdcard/android/layout_tests_list.txt";
+    static final String LAYOUT_TESTS_LIST_FILE =
+        Environment.getExternalStorageDirectory() + "/android/layout_tests_list.txt";
 
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -51,29 +53,38 @@ public class Menu extends FileList {
         intent.setClass(this, TestShellActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(TestShellActivity.TEST_URL, "file://" + filename);
+        intent.putExtra(TestShellActivity.TOTAL_TEST_COUNT, 1);
+        intent.putExtra(TestShellActivity.CURRENT_TEST_NUMBER, 1);
         startActivity(intent);
     }
 
     @Override
     void processDirectory(String path, boolean selection) {
-        generateTestList(path);
+        int testCount = generateTestList(path);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setClass(this, TestShellActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(TestShellActivity.UI_AUTO_TEST, LAYOUT_TESTS_LIST_FILE);
+        intent.putExtra(TestShellActivity.TOTAL_TEST_COUNT, testCount);
+        // TestShellActivity will process this intent once and increment the test index
+        // before running the first test, so pass 0 here to allow for that.
+        intent.putExtra(TestShellActivity.CURRENT_TEST_NUMBER, 0);
         startActivity(intent);
     }
 
-    private void generateTestList(String path) {
+    private int generateTestList(String path) {
+        int testCount = 0;
         try {
             File tests_list = new File(LAYOUT_TESTS_LIST_FILE);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tests_list, false));
-            FsUtils.findLayoutTestsRecursively(bos, path, false); // Don't ignore results
+            testCount = FsUtils.writeLayoutTestListRecursively(
+                    bos, path, false); // Don't ignore results
             bos.flush();
             bos.close();
        } catch (Exception e) {
            Log.e(LOGTAG, "Error when creating test list: " + e.getMessage());
        }
+       return testCount;
     }
 
 }

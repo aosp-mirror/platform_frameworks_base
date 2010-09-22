@@ -16,10 +16,10 @@
 
 package android.graphics;
 
-import android.text.TextUtils;
+import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
-import android.text.GraphicsOperations;
+import android.text.TextUtils;
 
 /**
  * The Paint class holds the style and color information about how to draw
@@ -27,7 +27,11 @@ import android.text.GraphicsOperations;
  */
 public class Paint {
 
-    /*package*/ int     mNativePaint;
+    /**
+     * @hide
+     */
+    public int mNativePaint;
+
     private ColorFilter mColorFilter;
     private MaskFilter  mMaskFilter;
     private PathEffect  mPathEffect;
@@ -39,6 +43,32 @@ public class Paint {
     private boolean     mHasCompatScaling;
     private float       mCompatScaling;
     private float       mInvCompatScaling;
+
+    /**
+     * @hide
+     */
+    public boolean hasShadow;
+    /**
+     * @hide
+     */
+    public float shadowDx;
+    /**
+     * @hide
+     */
+    public float shadowDy;
+    /**
+     * @hide
+     */
+    public float shadowRadius;
+    /**
+     * @hide
+     */
+    public int shadowColor;
+
+    /**
+     * @hide
+     */
+    public  int         mBidiFlags = BIDI_DEFAULT_LTR;
     
     private static final Style[] sStyleArray = {
         Style.FILL, Style.STROKE, Style.FILL_AND_STROKE
@@ -76,8 +106,116 @@ public class Paint {
     private static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG;
 
     /**
-     * The Style specifies if the primitive being drawn is filled,
-     * stroked, or both (in the same color). The default is FILL.
+     * Bidi flag to set LTR paragraph direction.
+     * 
+     * @hide
+     */
+    public static final int BIDI_LTR = 0x0;
+
+    /**
+     * Bidi flag to set RTL paragraph direction.
+     * 
+     * @hide
+     */
+    public static final int BIDI_RTL = 0x1;
+
+    /**
+     * Bidi flag to detect paragraph direction via heuristics, defaulting to
+     * LTR.
+     * 
+     * @hide
+     */
+    public static final int BIDI_DEFAULT_LTR = 0x2;
+
+    /**
+     * Bidi flag to detect paragraph direction via heuristics, defaulting to
+     * RTL.
+     * 
+     * @hide
+     */
+    public static final int BIDI_DEFAULT_RTL = 0x3;
+
+    /**
+     * Bidi flag to override direction to all LTR (ignore bidi).
+     * 
+     * @hide
+     */
+    public static final int BIDI_FORCE_LTR = 0x4;
+
+    /**
+     * Bidi flag to override direction to all RTL (ignore bidi).
+     * 
+     * @hide
+     */
+    public static final int BIDI_FORCE_RTL = 0x5;
+
+    /**
+     * Maximum Bidi flag value.
+     * @hide
+     */
+    private static final int BIDI_MAX_FLAG_VALUE = BIDI_FORCE_RTL;
+
+    /**
+     * Mask for bidi flags.
+     * @hide
+     */
+    private static final int BIDI_FLAG_MASK = 0x7;
+
+    /**
+     * Flag for getTextRunAdvances indicating left-to-right run direction.
+     * @hide
+     */
+    public static final int DIRECTION_LTR = 0;
+
+    /**
+     * Flag for getTextRunAdvances indicating right-to-left run direction.
+     * @hide
+     */
+    public static final int DIRECTION_RTL = 1;
+
+    /**
+     * Option for getTextRunCursor to compute the valid cursor after
+     * offset or the limit of the context, whichever is less.
+     * @hide
+     */
+    public static final int CURSOR_AFTER = 0;
+
+    /**
+     * Option for getTextRunCursor to compute the valid cursor at or after
+     * the offset or the limit of the context, whichever is less.
+     * @hide
+     */
+    public static final int CURSOR_AT_OR_AFTER = 1;
+
+     /**
+     * Option for getTextRunCursor to compute the valid cursor before
+     * offset or the start of the context, whichever is greater.
+     * @hide
+     */
+    public static final int CURSOR_BEFORE = 2;
+
+   /**
+     * Option for getTextRunCursor to compute the valid cursor at or before
+     * offset or the start of the context, whichever is greater.
+     * @hide
+     */
+    public static final int CURSOR_AT_OR_BEFORE = 3;
+
+    /**
+     * Option for getTextRunCursor to return offset if the cursor at offset
+     * is valid, or -1 if it isn't.
+     * @hide
+     */
+    public static final int CURSOR_AT = 4;
+
+    /**
+     * Maximum cursor option value.
+     */
+    private static final int CURSOR_OPT_MAX_VALUE = CURSOR_AT;
+
+    /**
+     * The Style specifies if the primitive being drawn is filled, stroked, or
+     * both (in the same color). The default is FILL.
      */
     public enum Style {
         /**
@@ -93,7 +231,9 @@ public class Paint {
         /**
          * Geometry and text drawn with this style will be both filled and
          * stroked at the same time, respecting the stroke-related fields on
-         * the paint.
+         * the paint. This mode can give unexpected results if the geometry
+         * is oriented counter-clockwise. This restriction does not apply to
+         * either FILL or STROKE.
          */
         FILL_AND_STROKE (2);
         
@@ -208,6 +348,7 @@ public class Paint {
         mHasCompatScaling = paint.mHasCompatScaling;
         mCompatScaling = paint.mCompatScaling;
         mInvCompatScaling = paint.mInvCompatScaling;
+        mBidiFlags = paint.mBidiFlags;
     }
 
     /** Restores the paint to its default settings. */
@@ -216,6 +357,7 @@ public class Paint {
         setFlags(DEFAULT_PAINT_FLAGS);
         mHasCompatScaling = false;
         mCompatScaling = mInvCompatScaling = 1;
+        mBidiFlags = BIDI_DEFAULT_LTR;
     }
     
     /**
@@ -238,6 +380,7 @@ public class Paint {
             mHasCompatScaling = src.mHasCompatScaling;
             mCompatScaling    = src.mCompatScaling;
             mInvCompatScaling = src.mInvCompatScaling;
+            mBidiFlags      = src.mBidiFlags;
         }
     }
 
@@ -252,10 +395,33 @@ public class Paint {
             mInvCompatScaling = 1.0f/factor;
         }
     }
-    
+
+    /**
+     * Return the bidi flags on the paint.
+     * 
+     * @return the bidi flags on the paint
+     * @hide
+     */
+    public int getBidiFlags() {
+        return mBidiFlags;
+    }
+
+    /**
+     * Set the bidi flags on the paint.
+     * @hide
+     */
+    public void setBidiFlags(int flags) {
+        // only flag value is the 3-bit BIDI control setting
+        flags &= BIDI_FLAG_MASK;
+        if (flags > BIDI_MAX_FLAG_VALUE) {
+            throw new IllegalArgumentException("unknown bidi flag: " + flags);
+        }
+        mBidiFlags = flags;
+    }
+
     /**
      * Return the paint's flags. Use the Flag enum to test flag values.
-     *
+     * 
      * @return the paint's flags (see enums ending in _Flag for bit masks)
      */
     public native int getFlags();
@@ -787,18 +953,27 @@ public class Paint {
     }
     
     /**
-     * Temporary API to expose layer drawing. This draws a shadow layer below
-     * the main layer, with the specified offset and color, and blur radius.
-     * If radius is 0, then the shadow layer is removed.
+     * This draws a shadow layer below the main layer, with the specified
+     * offset and color, and blur radius. If radius is 0, then the shadow
+     * layer is removed.
      */
-    public native void setShadowLayer(float radius, float dx, float dy,
-                                      int color);
+    public void setShadowLayer(float radius, float dx, float dy, int color) {
+        hasShadow = radius > 0.0f;
+        shadowRadius = radius;
+        shadowDx = dx;
+        shadowDy = dy;
+        shadowColor = color;
+        nSetShadowLayer(radius, dx, dy, color);
+    }
+    
+    private native void nSetShadowLayer(float radius, float dx, float dy, int color);
 
     /**
-     * Temporary API to clear the shadow layer.
+     * Clear the shadow layer.
      */
     public void clearShadowLayer() {
-        setShadowLayer(0, 0, 0, 0);
+        hasShadow = false;
+        nSetShadowLayer(0, 0, 0, 0);
     }
 
     /**
@@ -1232,10 +1407,10 @@ public class Paint {
         }
 
         char[] buf = TemporaryBuffer.obtain(end - start);
-    	TextUtils.getChars(text, start, end, buf, 0);
-    	int result = getTextWidths(buf, 0, end - start, widths);
+        TextUtils.getChars(text, start, end, buf, 0);
+        int result = getTextWidths(buf, 0, end - start, widths);
         TemporaryBuffer.recycle(buf);
-    	return result;
+        return result;
     }
 
     /**
@@ -1282,6 +1457,284 @@ public class Paint {
     }
 
     /**
+     * Convenience overload that takes a char array instead of a
+     * String.
+     *
+     * @see #getTextRunAdvances(String, int, int, int, int, int, float[], int)
+     * @hide
+     */
+    public float getTextRunAdvances(char[] chars, int index, int count,
+            int contextIndex, int contextCount, int flags, float[] advances,
+            int advancesIndex) {
+
+        if ((index | count | contextIndex | contextCount | advancesIndex
+                | (index - contextIndex)
+                | ((contextIndex + contextCount) - (index + count))
+                | (chars.length - (contextIndex + contextCount))
+                | (advances == null ? 0 :
+                    (advances.length - (advancesIndex + count)))) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown flags value: " + flags);
+        }
+
+        if (!mHasCompatScaling) {
+            return native_getTextRunAdvances(mNativePaint, chars, index, count,
+                    contextIndex, contextCount, flags, advances, advancesIndex);
+        }
+
+        final float oldSize = getTextSize();
+        setTextSize(oldSize * mCompatScaling);
+        float res = native_getTextRunAdvances(mNativePaint, chars, index, count,
+                contextIndex, contextCount, flags, advances, advancesIndex);
+        setTextSize(oldSize);
+
+        if (advances != null) {
+            for (int i = advancesIndex, e = i + count; i < e; i++) {
+                advances[i] *= mInvCompatScaling;
+            }
+        }
+        return res * mInvCompatScaling; // assume errors are not significant
+    }
+
+    /**
+     * Convenience overload that takes a CharSequence instead of a
+     * String.
+     *
+     * @see #getTextRunAdvances(String, int, int, int, int, int, float[], int)
+     * @hide
+     */
+    public float getTextRunAdvances(CharSequence text, int start, int end,
+            int contextStart, int contextEnd, int flags, float[] advances,
+            int advancesIndex) {
+
+        if (text instanceof String) {
+            return getTextRunAdvances((String) text, start, end,
+                    contextStart, contextEnd, flags, advances, advancesIndex);
+        }
+        if (text instanceof SpannedString ||
+            text instanceof SpannableString) {
+            return getTextRunAdvances(text.toString(), start, end,
+                    contextStart, contextEnd, flags, advances, advancesIndex);
+        }
+        if (text instanceof GraphicsOperations) {
+            return ((GraphicsOperations) text).getTextRunAdvances(start, end,
+                    contextStart, contextEnd, flags, advances, advancesIndex, this);
+        }
+
+        int contextLen = contextEnd - contextStart;
+        int len = end - start;
+        char[] buf = TemporaryBuffer.obtain(contextLen);
+        TextUtils.getChars(text, start, end, buf, 0);
+        float result = getTextRunAdvances(buf, start - contextStart, len,
+                0, contextLen, flags, advances, advancesIndex);
+        TemporaryBuffer.recycle(buf);
+        return result;
+    }
+
+    /**
+     * Returns the total advance width for the characters in the run
+     * between start and end, and if advances is not null, the advance
+     * assigned to each of these characters (java chars).
+     *
+     * <p>The trailing surrogate in a valid surrogate pair is assigned
+     * an advance of 0.  Thus the number of returned advances is
+     * always equal to count, not to the number of unicode codepoints
+     * represented by the run.
+     *
+     * <p>In the case of conjuncts or combining marks, the total
+     * advance is assigned to the first logical character, and the
+     * following characters are assigned an advance of 0.
+     *
+     * <p>This generates the sum of the advances of glyphs for
+     * characters in a reordered cluster as the width of the first
+     * logical character in the cluster, and 0 for the widths of all
+     * other characters in the cluster.  In effect, such clusters are
+     * treated like conjuncts.
+     *
+     * <p>The shaping bounds limit the amount of context available
+     * outside start and end that can be used for shaping analysis.
+     * These bounds typically reflect changes in bidi level or font
+     * metrics across which shaping does not occur.
+     *
+     * @param text the text to measure
+     * @param start the index of the first character to measure
+     * @param end the index past the last character to measure
+     * @param contextStart the index of the first character to use for shaping context,
+     * must be <= start
+     * @param contextEnd the index past the last character to use for shaping context,
+     * must be >= end
+     * @param flags the flags to control the advances, either {@link #DIRECTION_LTR}
+     * or {@link #DIRECTION_RTL}
+     * @param advances array to receive the advances, must have room for all advances,
+     * can be null if only total advance is needed
+     * @param advancesIndex the position in advances at which to put the
+     * advance corresponding to the character at start
+     * @return the total advance
+     *
+     * @hide
+     */
+    public float getTextRunAdvances(String text, int start, int end, int contextStart,
+            int contextEnd, int flags, float[] advances, int advancesIndex) {
+
+        if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
+                | (start - contextStart) | (contextEnd - end)
+                | (text.length() - contextEnd)
+                | (advances == null ? 0 :
+                    (advances.length - advancesIndex - (end - start)))) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown flags value: " + flags);
+        }
+
+        if (!mHasCompatScaling) {
+            return native_getTextRunAdvances(mNativePaint, text, start, end,
+                    contextStart, contextEnd, flags, advances, advancesIndex);
+        }
+
+        final float oldSize = getTextSize();
+        setTextSize(oldSize * mCompatScaling);
+        float totalAdvance = native_getTextRunAdvances(mNativePaint, text, start, end,
+                contextStart, contextEnd, flags, advances, advancesIndex);
+        setTextSize(oldSize);
+
+        if (advances != null) {
+            for (int i = advancesIndex, e = i + (end - start); i < e; i++) {
+                advances[i] *= mInvCompatScaling;
+            }
+        }
+        return totalAdvance * mInvCompatScaling; // assume errors are insignificant
+    }
+
+    /**
+     * Returns the next cursor position in the run.  This avoids placing the
+     * cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering
+     * cluster.
+     *
+     * <p>ContextStart and offset are relative to the start of text.
+     * The context is the shaping context for cursor movement, generally
+     * the bounds of the metric span enclosing the cursor in the direction of
+     * movement.
+     *
+     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
+     * cursor position, this returns -1.  Otherwise this will never return a
+     * value before contextStart or after contextStart + contextLength.
+     *
+     * @param text the text
+     * @param contextStart the start of the context
+     * @param contextLength the length of the context
+     * @param flags either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param offset the cursor position to move from
+     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
+     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
+     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @return the offset of the next position, or -1
+     * @hide
+     */
+    public int getTextRunCursor(char[] text, int contextStart, int contextLength,
+            int flags, int offset, int cursorOpt) {
+        int contextEnd = contextStart + contextLength;
+        if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
+                | (offset - contextStart) | (contextEnd - offset)
+                | (text.length - contextEnd) | cursorOpt) < 0)
+                || cursorOpt > CURSOR_OPT_MAX_VALUE) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        return native_getTextRunCursor(mNativePaint, text,
+                contextStart, contextLength, flags, offset, cursorOpt);
+    }
+
+    /**
+     * Returns the next cursor position in the run.  This avoids placing the
+     * cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering
+     * cluster.
+     *
+     * <p>ContextStart, contextEnd, and offset are relative to the start of
+     * text.  The context is the shaping context for cursor movement, generally
+     * the bounds of the metric span enclosing the cursor in the direction of
+     * movement.
+     *
+     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
+     * cursor position, this returns -1.  Otherwise this will never return a
+     * value before contextStart or after contextEnd.
+     *
+     * @param text the text
+     * @param contextStart the start of the context
+     * @param contextEnd the end of the context
+     * @param flags either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param offset the cursor position to move from
+     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
+     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
+     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @return the offset of the next position, or -1
+     * @hide
+     */
+    public int getTextRunCursor(CharSequence text, int contextStart,
+           int contextEnd, int flags, int offset, int cursorOpt) {
+
+        if (text instanceof String || text instanceof SpannedString ||
+                text instanceof SpannableString) {
+            return getTextRunCursor(text.toString(), contextStart, contextEnd,
+                    flags, offset, cursorOpt);
+        }
+        if (text instanceof GraphicsOperations) {
+            return ((GraphicsOperations) text).getTextRunCursor(
+                    contextStart, contextEnd, flags, offset, cursorOpt, this);
+        }
+
+        int contextLen = contextEnd - contextStart;
+        char[] buf = TemporaryBuffer.obtain(contextLen);
+        TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+        int result = getTextRunCursor(buf, 0, contextLen, flags, offset, cursorOpt);
+        TemporaryBuffer.recycle(buf);
+        return result;
+    }
+
+    /**
+     * Returns the next cursor position in the run.  This avoids placing the
+     * cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering
+     * cluster.
+     *
+     * <p>ContextStart, contextEnd, and offset are relative to the start of
+     * text.  The context is the shaping context for cursor movement, generally
+     * the bounds of the metric span enclosing the cursor in the direction of
+     * movement.
+     *
+     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
+     * cursor position, this returns -1.  Otherwise this will never return a
+     * value before contextStart or after contextEnd.
+     *
+     * @param text the text
+     * @param contextStart the start of the context
+     * @param contextEnd the end of the context
+     * @param flags either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param offset the cursor position to move from
+     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
+     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
+     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @return the offset of the next position, or -1
+     * @hide
+     */
+    public int getTextRunCursor(String text, int contextStart, int contextEnd,
+            int flags, int offset, int cursorOpt) {
+        if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
+                | (offset - contextStart) | (contextEnd - offset)
+                | (text.length() - contextEnd) | cursorOpt) < 0)
+                || cursorOpt > CURSOR_OPT_MAX_VALUE) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        return native_getTextRunCursor(mNativePaint, text,
+                contextStart, contextEnd, flags, offset, cursorOpt);
+    }
+
+    /**
      * Return the path (outline) for the specified text.
      * Note: just like Canvas.drawText, this will respect the Align setting in
      * the paint.
@@ -1299,7 +1752,8 @@ public class Paint {
         if ((index | count) < 0 || index + count > text.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        native_getTextPath(mNativePaint, text, index, count, x, y, path.ni());
+        native_getTextPath(mNativePaint, mBidiFlags, text, index, count, x, y, 
+                path.ni());
     }
 
     /**
@@ -1320,7 +1774,8 @@ public class Paint {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_getTextPath(mNativePaint, text, start, end, x, y, path.ni());
+        native_getTextPath(mNativePaint, mBidiFlags, text, start, end, x, y, 
+                path.ni());
     }
     
     /**
@@ -1404,9 +1859,22 @@ public class Paint {
                             char[] text, int index, int count, float[] widths);
     private static native int native_getTextWidths(int native_object,
                             String text, int start, int end, float[] widths);
-    private static native void native_getTextPath(int native_object,
+
+    private static native float native_getTextRunAdvances(int native_object,
+            char[] text, int index, int count, int contextIndex, int contextCount,
+            int flags, float[] advances, int advancesIndex);
+    private static native float native_getTextRunAdvances(int native_object,
+            String text, int start, int end, int contextStart, int contextEnd,
+            int flags, float[] advances, int advancesIndex);
+
+    private native int native_getTextRunCursor(int native_object, char[] text,
+            int contextStart, int contextLength, int flags, int offset, int cursorOpt);
+    private native int native_getTextRunCursor(int native_object, String text,
+            int contextStart, int contextEnd, int flags, int offset, int cursorOpt);
+
+    private static native void native_getTextPath(int native_object, int bidiFlags,
                 char[] text, int index, int count, float x, float y, int path);
-    private static native void native_getTextPath(int native_object,
+    private static native void native_getTextPath(int native_object, int bidiFlags,
                 String text, int start, int end, float x, float y, int path);
     private static native void nativeGetStringBounds(int nativePaint,
                                 String text, int start, int end, Rect bounds);
@@ -1414,4 +1882,3 @@ public class Paint {
                                 char[] text, int index, int count, Rect bounds);
     private static native void finalizer(int nativePaint);
 }
-

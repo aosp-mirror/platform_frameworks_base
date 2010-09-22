@@ -16,7 +16,15 @@
 
 package android.widget;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -38,13 +46,6 @@ import android.view.ViewGroup;
 import android.view.LayoutInflater.Filter;
 import android.view.View.OnClickListener;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
 
 /**
  * A class that describes a view hierarchy that can be displayed in
@@ -60,12 +61,12 @@ public class RemoteViews implements Parcelable, Filter {
      * The package name of the package containing the layout 
      * resource. (Added to the parcel)
      */
-    private String mPackage;
+    private final String mPackage;
     
     /**
      * The resource ID of the layout file. (Added to the parcel)
      */
-    private int mLayoutId;
+    private final int mLayoutId;
 
     /**
      * An array of actions to perform on the view tree once it has been
@@ -74,6 +75,15 @@ public class RemoteViews implements Parcelable, Filter {
     private ArrayList<Action> mActions;
     
     
+    /**
+     * This flag indicates whether this RemoteViews object is being created from a
+     * RemoteViewsService for use as a child of a widget collection. This flag is used
+     * to determine whether or not certain features are available, in particular,
+     * setting on click extras and setting on click pending intents. The former is enabled,
+     * and the latter disabled when this flag is true.
+     */
+     private boolean mIsWidgetCollectionChild = false;
+
     /**
      * This annotation indicates that a subclass of View is alllowed to be used
      * with the {@link RemoteViews} mechanism.
@@ -110,6 +120,257 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private class SetEmptyView extends Action {
+        int viewId;
+        int emptyViewId;
+
+        public final static int TAG = 6;
+
+        SetEmptyView(int viewId, int emptyViewId) {
+            this.viewId = viewId;
+            this.emptyViewId = emptyViewId;
+        }
+
+        SetEmptyView(Parcel in) {
+            this.viewId = in.readInt();
+            this.emptyViewId = in.readInt();
+        }
+
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(TAG);
+            out.writeInt(this.viewId);
+            out.writeInt(this.emptyViewId);
+        }
+
+        @Override
+        public void apply(View root) {
+            final View view = root.findViewById(viewId);
+            if (!(view instanceof AdapterView<?>)) return;
+
+            AdapterView<?> adapterView = (AdapterView<?>) view;
+
+            final View emptyView = root.findViewById(emptyViewId);
+            if (emptyView == null) return;
+
+            adapterView.setEmptyView(emptyView);
+        }
+    }
+
+    private class SetOnClickFillInIntent extends Action {
+        public SetOnClickFillInIntent(int id, Intent fillInIntent) {
+            this.viewId = id;
+            this.fillInIntent = fillInIntent;
+        }
+
+        public SetOnClickFillInIntent(Parcel parcel) {
+            viewId = parcel.readInt();
+            fillInIntent = Intent.CREATOR.createFromParcel(parcel);
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            fillInIntent.writeToParcel(dest, 0 /* no flags */);
+        }
+
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+
+            if (!mIsWidgetCollectionChild) {
+                Log.e("RemoteViews", "The method setOnClickFillInIntent is available " +
+                        "only from RemoteViewsFactory (ie. on collection items).");
+                return;
+            }
+
+            if (target != null && fillInIntent != null) {
+                OnClickListener listener = new OnClickListener() {
+                    public void onClick(View v) {
+                        // Insure that this view is a child of an AdapterView
+                        View parent = (View) v.getParent();
+                        while (!(parent instanceof AdapterView<?>)
+                                && !(parent instanceof AppWidgetHostView)) {
+                            parent = (View) parent.getParent();
+                        }
+
+                        if (parent instanceof AppWidgetHostView) {
+                            // Somehow they've managed to get this far without having
+                            // and AdapterView as a parent.
+                            Log.e("RemoteViews", "Collection item doesn't have AdapterView parent");
+                            return;
+                        }
+
+                        // Insure that a template pending intent has been set on an ancestor
+                        if (!(parent.getTag() instanceof PendingIntent)) {
+                            Log.e("RemoteViews", "Attempting setOnClickFillInIntent without" +
+					" calling setPendingIntentTemplate on parent.");
+                            return;
+                        }
+
+                        PendingIntent pendingIntent = (PendingIntent) parent.getTag();
+
+                        final float appScale = v.getContext().getResources()
+                        .getCompatibilityInfo().applicationScale;
+                        final int[] pos = new int[2];
+                        v.getLocationOnScreen(pos);
+
+                        final Rect rect = new Rect();
+                        rect.left = (int) (pos[0] * appScale + 0.5f);
+                        rect.top = (int) (pos[1] * appScale + 0.5f);
+                        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
+                        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
+
+                        fillInIntent.setSourceBounds(rect);
+                        try {
+                            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+                            v.getContext().startIntentSender(
+                                    pendingIntent.getIntentSender(), fillInIntent,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK, 0);
+                        } catch (IntentSender.SendIntentException e) {
+                            android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
+                        }
+                    }
+
+                };
+                target.setOnClickListener(listener);
+            }
+        }
+
+        int viewId;
+        Intent fillInIntent;
+
+        public final static int TAG = 9;
+    }
+
+    private class SetOnClickExtras extends Action {
+        public SetOnClickExtras(int id, Bundle extras) {
+            this.viewId = id;
+            this.extras = extras;
+        }
+
+        public SetOnClickExtras(Parcel parcel) {
+            viewId = parcel.readInt();
+            extras = Bundle.CREATOR.createFromParcel(parcel);
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            extras.writeToParcel(dest, 0 /* no flags */);
+        }
+
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+
+            if (!mIsWidgetCollectionChild) {
+                Log.e("RemoteViews", "The method setOnClickExtras is available " +
+                        "only from RemoteViewsFactory (ie. on collection items).");
+                return;
+            }
+
+            if (target != null && extras != null) {
+                OnClickListener listener = new OnClickListener() {
+                    public void onClick(View v) {
+                        // Insure that this view is a child of an AdapterView
+                        View parent = (View) v.getParent();
+                        while (!(parent instanceof AdapterView<?>)
+                                && !(parent instanceof AppWidgetHostView)) {
+                            parent = (View) parent.getParent();
+                        }
+
+                        if (parent instanceof AppWidgetHostView) {
+                            // Somehow they've managed to get this far without having
+                            // and AdapterView as a parent.
+                            Log.e("RemoteViews", "Collection item doesn't have AdapterView parent");
+                            return;
+                        }
+
+                        // Insure that a template pending intent has been set on an ancestor
+                        if (!(parent.getTag() instanceof PendingIntent)) {
+                            Log.e("RemoteViews", "Attempting setOnClickExtras without calling " +
+                                "setPendingIntentTemplate on parent.");
+                            return;
+                        }
+
+                        PendingIntent pendingIntent = (PendingIntent) parent.getTag();
+
+                        final float appScale = v.getContext().getResources()
+                        .getCompatibilityInfo().applicationScale;
+                        final int[] pos = new int[2];
+                        v.getLocationOnScreen(pos);
+
+                        final Rect rect = new Rect();
+                        rect.left = (int) (pos[0] * appScale + 0.5f);
+                        rect.top = (int) (pos[1] * appScale + 0.5f);
+                        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
+                        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
+
+                        final Intent intent = new Intent();
+                        intent.setSourceBounds(rect);
+                        intent.putExtras(extras);
+
+                        try {
+                            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+                            v.getContext().startIntentSender(
+                                    pendingIntent.getIntentSender(), intent,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK, 0);
+                        } catch (IntentSender.SendIntentException e) {
+                            android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
+                        }
+                    }
+
+                };
+                target.setOnClickListener(listener);
+            }
+        }
+
+        int viewId;
+        Bundle extras;
+
+        public final static int TAG = 7;
+    }
+
+    private class SetPendingIntentTemplate extends Action {
+        public SetPendingIntentTemplate(int id, PendingIntent pendingIntentTemplate) {
+            this.viewId = id;
+            this.pendingIntentTemplate = pendingIntentTemplate;
+        }
+
+        public SetPendingIntentTemplate(Parcel parcel) {
+            viewId = parcel.readInt();
+            pendingIntentTemplate = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            pendingIntentTemplate.writeToParcel(dest, 0 /* no flags */);
+        }
+
+        @Override
+        public void apply(View root) {
+            final View target = root.findViewById(viewId);
+
+            // If the view isn't an AdapterView, setting a PendingIntent template doesn't make sense
+            if (target instanceof AdapterView<?>) {
+                // The PendingIntent template is stored in the view's tag.
+                target.setTag(pendingIntentTemplate);
+            } else {
+                Log.e("RemoteViews", "Cannot setPendingIntentTemplate on a view which is not" +
+                        "an AdapterView (id: " + viewId + ")");
+                return;
+            }
+        }
+
+        int viewId;
+        PendingIntent pendingIntentTemplate;
+
+        public final static int TAG = 8;
+    }
+
     /**
      * Equivalent to calling
      * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
@@ -120,21 +381,30 @@ public class RemoteViews implements Parcelable, Filter {
             this.viewId = id;
             this.pendingIntent = pendingIntent;
         }
-        
+
         public SetOnClickPendingIntent(Parcel parcel) {
             viewId = parcel.readInt();
             pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
         }
-        
+
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(TAG);
             dest.writeInt(viewId);
             pendingIntent.writeToParcel(dest, 0 /* no flags */);
         }
-        
+
         @Override
         public void apply(View root) {
             final View target = root.findViewById(viewId);
+
+            // If the view is an AdapterView, setting a PendingIntent on click doesn't make much
+            // sense, do they mean to set a PendingIntent template for the AdapterView's children?
+            if (mIsWidgetCollectionChild) {
+                Log.e("RemoteViews", "Cannot setOnClickPendingIntent for collection item " +
+				"(id: " + viewId + ")");
+                // TODO: return; We'll let this slide until apps are up to date.
+            }
+
             if (target != null && pendingIntent != null) {
                 OnClickListener listener = new OnClickListener() {
                     public void onClick(View v) {
@@ -266,6 +536,63 @@ public class RemoteViews implements Parcelable, Filter {
         public final static int TAG = 3;
     }
     
+    private class ReflectionActionWithoutParams extends Action {
+        int viewId;
+        String methodName;
+
+        public final static int TAG = 5;
+
+        ReflectionActionWithoutParams(int viewId, String methodName) {
+            this.viewId = viewId;
+            this.methodName = methodName;
+        }
+
+        ReflectionActionWithoutParams(Parcel in) {
+            this.viewId = in.readInt();
+            this.methodName = in.readString();
+        }
+
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(TAG);
+            out.writeInt(this.viewId);
+            out.writeString(this.methodName);
+        }
+
+        @Override
+        public void apply(View root) {
+            final View view = root.findViewById(viewId);
+            if (view == null) {
+                throw new ActionException("can't find view: 0x" + Integer.toHexString(viewId));
+            }
+
+            Class klass = view.getClass();
+            Method method;
+            try {
+                method = klass.getMethod(this.methodName);
+            } catch (NoSuchMethodException ex) {
+                throw new ActionException("view: " + klass.getName() + " doesn't have method: "
+                        + this.methodName + "()");
+            }
+
+            if (!method.isAnnotationPresent(RemotableViewMethod.class)) {
+                throw new ActionException("view: " + klass.getName()
+                        + " can't use method with RemoteViews: "
+                        + this.methodName + "()");
+            }
+
+            try {
+                //noinspection ConstantIfStatement
+                if (false) {
+                    Log.d("RemoteViews", "view: " + klass.getName() + " calling method: "
+                        + this.methodName + "()");
+                }
+                method.invoke(view);
+            } catch (Exception ex) {
+                throw new ActionException(ex);
+            }
+        }
+    }
+
     /**
      * Base class for the reflection actions.
      */
@@ -285,6 +612,7 @@ public class RemoteViews implements Parcelable, Filter {
         static final int URI = 11;
         static final int BITMAP = 12;
         static final int BUNDLE = 13;
+        static final int INTENT = 14;
 
         int viewId;
         String methodName;
@@ -347,6 +675,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case BUNDLE:
                     this.value = in.readBundle();
                     break;
+                case INTENT:
+                    this.value = Intent.CREATOR.createFromParcel(in);
+                    break;
                 default:
                     break;
             }
@@ -402,6 +733,9 @@ public class RemoteViews implements Parcelable, Filter {
                 case BUNDLE:
                     out.writeBundle((Bundle) this.value);
                     break;
+                case INTENT:
+                    ((Intent)this.value).writeToParcel(out, flags);
+                    break;
                 default:
                     break;
             }
@@ -435,6 +769,8 @@ public class RemoteViews implements Parcelable, Filter {
                     return Bitmap.class;
                 case BUNDLE:
                     return Bundle.class;
+                case INTENT:
+                    return Intent.class;
                 default:
                     return null;
             }
@@ -544,6 +880,8 @@ public class RemoteViews implements Parcelable, Filter {
     public RemoteViews(Parcel parcel) {
         mPackage = parcel.readString();
         mLayoutId = parcel.readInt();
+        mIsWidgetCollectionChild = parcel.readInt() == 1 ? true : false;
+
         int count = parcel.readInt();
         if (count > 0) {
             mActions = new ArrayList<Action>(count);
@@ -562,6 +900,21 @@ public class RemoteViews implements Parcelable, Filter {
                 case ViewGroupAction.TAG:
                     mActions.add(new ViewGroupAction(parcel));
                     break;
+                case ReflectionActionWithoutParams.TAG:
+                    mActions.add(new ReflectionActionWithoutParams(parcel));
+                    break;
+                case SetEmptyView.TAG:
+                    mActions.add(new SetEmptyView(parcel));
+                    break;
+                case SetOnClickExtras.TAG:
+                    mActions.add(new SetOnClickExtras(parcel));
+                    break;
+                case SetPendingIntentTemplate.TAG:
+                    mActions.add(new SetPendingIntentTemplate(parcel));
+                    break;
+                case SetOnClickFillInIntent.TAG:
+                    mActions.add(new SetOnClickFillInIntent(parcel));
+                    break;
                 default:
                     throw new ActionException("Tag " + tag + " not found");
                 }
@@ -569,6 +922,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    @Override
     public RemoteViews clone() {
         final RemoteViews that = new RemoteViews(mPackage, mLayoutId);
         if (mActions != null) {
@@ -583,6 +937,17 @@ public class RemoteViews implements Parcelable, Filter {
 
     public int getLayoutId() {
         return mLayoutId;
+    }
+
+    /**
+     * This flag indicates whether this RemoteViews object is being created from a
+     * RemoteViewsService for use as a child of a widget collection. This flag is used
+     * to determine whether or not certain features are available, in particular,
+     * setting on click extras and setting on click pending intents. The former is enabled,
+     * and the latter disabled when this flag is true.
+     */
+    void setIsWidgetCollectionChild(boolean isWidgetCollectionChild) {
+        mIsWidgetCollectionChild = isWidgetCollectionChild;
     }
 
     /**
@@ -622,6 +987,24 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Equivalent to calling {@link AdapterViewFlipper#showNext()}
+     *
+     * @param viewId The id of the view on which to call {@link AdapterViewFlipper#showNext()}
+     */
+    public void showNext(int viewId) {
+        addAction(new ReflectionActionWithoutParams(viewId, "showNext"));
+    }
+
+    /**
+     * Equivalent to calling {@link AdapterViewFlipper#showPrevious()}
+     *
+     * @param viewId The id of the view on which to call {@link AdapterViewFlipper#showPrevious()}
+     */
+    public void showPrevious(int viewId) {
+        addAction(new ReflectionActionWithoutParams(viewId, "showPrevious"));
+    }
+
+    /**
      * Equivalent to calling View.setVisibility
      * 
      * @param viewId The id of the view whose visibility should change
@@ -630,7 +1013,7 @@ public class RemoteViews implements Parcelable, Filter {
     public void setViewVisibility(int viewId, int visibility) {
         setInt(viewId, "setVisibility", visibility);
     }
-    
+
     /**
      * Equivalent to calling TextView.setText
      * 
@@ -669,6 +1052,16 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setImageViewBitmap(int viewId, Bitmap bitmap) {
         setBitmap(viewId, "setImageBitmap", bitmap);
+    }
+
+    /**
+     * Equivalent to calling AdapterView.setEmptyView
+     *
+     * @param viewId The id of the view on which to set the empty view
+     * @param emptyViewId The view id of the empty view
+     */
+    public void setEmptyView(int viewId, int emptyViewId) {
+        addAction(new SetEmptyView(viewId, emptyViewId));
     }
 
     /**
@@ -718,11 +1111,65 @@ public class RemoteViews implements Parcelable, Filter {
      * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
      * to launch the provided {@link PendingIntent}.
      * 
+     * When setting the on-click action of items within collections (eg. {@link ListView},
+     * {@link StackView} etc.), this method will not work. Instead, use {@link
+     * RemoteViews#setPendingIntentTemplate(int, PendingIntent) in conjunction with
+     * RemoteViews#setOnClickFillInIntent(int, Intent).
+     *
      * @param viewId The id of the view that will trigger the {@link PendingIntent} when clicked
      * @param pendingIntent The {@link PendingIntent} to send when user clicks
      */
     public void setOnClickPendingIntent(int viewId, PendingIntent pendingIntent) {
         addAction(new SetOnClickPendingIntent(viewId, pendingIntent));
+    }
+
+    /**
+     * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
+     * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+     * this method should be used to set a single PendingIntent template on the collection, and
+     * individual items can differentiate their on-click behavior using
+     * {@link RemoteViews#setOnClickFillInIntent(int, Intent)}.
+     *
+     * @param viewId The id of the collection who's children will use this PendingIntent template
+     *          when clicked
+     * @param pendingIntentTemplate The {@link PendingIntent} to be combined with extras specified
+     *          by a child of viewId and executed when that child is clicked
+     */
+    public void setPendingIntentTemplate(int viewId, PendingIntent pendingIntentTemplate) {
+        addAction(new SetPendingIntentTemplate(viewId, pendingIntentTemplate));
+    }
+
+    /**
+     * Being deprecated. See {@link RemoteViews#setOnClickFillInIntent(int, Intent)}.
+     *
+     * @param viewId
+     * @param extras
+     */
+    public void setOnClickExtras(int viewId, Bundle extras) {
+        addAction(new SetOnClickExtras(viewId, extras));
+    }
+
+    /**
+     * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
+     * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+     * a single PendingIntent template can be set on the collection, see {@link
+     * RemoteViews#setPendingIntentTemplate(int, PendingIntent)}, and the individual on-click
+     * action of a given item can be distinguished by setting a fillInIntent on that item. The
+     * fillInIntent is then combined with the PendingIntent template in order to determine the final
+     * intent which will be executed when the item is clicked. This works as follows: any fields
+     * which are left blank in the PendingIntent template, but are provided by the fillInIntent
+     * will be overwritten, and the resulting PendingIntent will be used.
+     *
+     *
+     * of the PendingIntent template will then be filled in with the associated fields that are
+     * set in fillInIntent. See {@link Intent#fillIn(Intent, int)} for more details.
+     *
+     * @param viewId The id of the view on which to set the fillInIntent
+     * @param fillInIntent The intent which will be combined with the parent's PendingIntent
+     *        in order to determine the on-click behavior of the view specified by viewId
+     */
+    public void setOnClickFillInIntent(int viewId, Intent fillInIntent) {
+        addAction(new SetOnClickFillInIntent(viewId, fillInIntent));
     }
 
     /**
@@ -766,6 +1213,37 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setTextColor(int viewId, int color) {
         setInt(viewId, "setTextColor", color);
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param intent The intent of the service which will be
+     *            providing data to the RemoteViewsAdapter
+     */
+    public void setRemoteAdapter(int viewId, Intent intent) {
+        setIntent(viewId, "setRemoteViewsAdapter", intent);
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param position Scroll to this adapter position
+     */
+    public void setScrollPosition(int viewId, int position) {
+        setInt(viewId, "smoothScrollToPosition", position);
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param offset Scroll by this adapter position offset
+     */
+    public void setRelativeScrollPosition(int viewId, int offset) {
+        setInt(viewId, "smoothScrollByOffset", offset);
     }
 
     /**
@@ -915,6 +1393,16 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     *
+     * @param viewId
+     * @param methodName
+     * @param value
+     */
+    public void setIntent(int viewId, String methodName, Intent value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.INTENT, value));
+    }
+
+    /**
      * Inflates the view hierarchy represented by this object and applies
      * all of the actions.
      * 
@@ -1000,6 +1488,7 @@ public class RemoteViews implements Parcelable, Filter {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mPackage);
         dest.writeInt(mLayoutId);
+        dest.writeInt(mIsWidgetCollectionChild ? 1 : 0);
         int count;
         if (mActions != null) {
             count = mActions.size();

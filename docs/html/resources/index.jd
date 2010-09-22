@@ -1,38 +1,90 @@
 page.title=Developer Resources
 @jd:body
 
+<style type="text/css">
+  #resource-list-table td {
+    border: 0;
+    padding: 0 24px;
+    width: 33%;
+    max-width: 250px;
+    border-right: 1px solid #ddd;
+  }
+
+  #resource-list-table td.last {
+    border-right: 0;
+    padding-right: 0;
+  }
+</style>
+
 <p>
-This section provides technical articles, tutorials, sample code, and other
+This section provides articles, tutorials, sample code, and other
 information to help you quickly implement the features you want in your
-application.
+application. To return to this page later, just click the "Resources"
+tab while any Resources page is loaded.
 </p>
 
+<h2>Technical Resources</h2>
+
+<table id="resource-list-table">
+<tr>
+  <td>
+    <a href="{@docRoot}resources/browser.html?tag=sample">
+      <img src="{@docRoot}assets/images/resource-big-sample.png"/>
+    </a>
+    <h3><a href="{@docRoot}resources/browser.html?tag=sample">
+      Sample Code
+    </a></h3>
+    <p>Fully-functioning sample applications that you can build and run
+    to learn about how Android works. Feel free to reuse any of the code or
+    techniques in the samples.</p>
+  </td>
+  <td>
+    <a href="{@docRoot}resources/browser.html?tag=article">
+      <img src="{@docRoot}assets/images/resource-big-article.png"/>
+    </a>
+    <h3><a href="{@docRoot}resources/browser.html?tag=article">
+      Articles
+    </a></h3>
+    <p>Focused discussions about Android development subjects, including
+    optimizations, tips, interesting implementations, "how-tos",
+    and so on.</p>
+  </td>
+  <td>
+    <a href="{@docRoot}resources/browser.html?tag=tutorial">
+      <img src="{@docRoot}assets/images/resource-big-tutorial.png"/>
+    </a>
+    <h3><a href="{@docRoot}resources/browser.html?tag=tutorial">
+      Tutorials
+    </a></h3>
+    <p>Step-by-step instructions demonstrating how to build an Android application
+    that has the specific features you want.</p>
+  </td>
+  <!-- <td class="last">
+    <a href="{@docRoot}resources/browser.html?tag=video">
+      <img src="{@docRoot}assets/images/resource-big-video.png"/>
+    </a>
+    <h3><a href="{@docRoot}resources/browser.html?tag=video">
+      Videos &amp; Screencasts
+    </a></h3>
+    <p>Videos and presentation slides from developer events, along with
+    screencasts to walk you through common Android development
+    workflows.</p>
+  </td> -->
+</tr>
+</table>
+
+<h2>Other Resources</h2>
+
 <dl>
-<dt><b>Technical Articles</b></dt>
-<dd>Focused discussions about Android development subjects, including
-optimizations, tips, interesting implementations,
-and so on. Most of the articles provide "how-to" instructions for adding
-features or functionality to your app. The articles are drawn from posts to the
-Android Developers Blog.
-</dd>
-
-<dt><b>Tutorials</b></dt>
-<dd>Step-by-step instructions demonstrating how to build an Android application
-that has the specific features you want. </dd>
-
-<dt><b>Sample Code</b></dt>
-<dd>Fully-functioning sample applications that you can look at or build and run,
-to learn about how Android works. Feel free to reuse any of the code or
-techniques that you find in the samples!</dd>
-
 <dt><b>Community</b></dt>
 <dd>Links to the Android discussion groups and information about other ways to
 collaborate with other developers. </dd>
+
+<dt><b>Device Dashboard</b></dt>
+<dd>Device distribution data, grouped by various dimensions such as screen size
+and Android platform version. </dd>
 
 <dt><b>More</b></dt>
 <dd>Quick development tips, troubleshooting information, and frequently asked
 questions (FAQs). </dd>
 </dl>
-
-<p>To return to this page later, just click the "Resources" tab while any
-Resources page is loaded. </p>

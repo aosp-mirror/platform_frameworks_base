@@ -645,7 +645,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             // Show LockScreen first for any screen other than Pattern unlock.
             final boolean usingLockPattern = mLockPatternUtils.getKeyguardStoredPasswordQuality()
                     == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
-            if (isSecure() && usingLockPattern) {
+
+            boolean showSlidingTab = getResources().getBoolean(R.bool.config_enableSlidingTabFirst);
+            if (isSecure() && (usingLockPattern || !showSlidingTab)) {
                 return Mode.UnlockScreen;
             } else {
                 return Mode.LockScreen;
@@ -667,6 +669,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
                 case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+                case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
                     currentMode = UnlockMode.Password;
                     break;
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
@@ -687,8 +690,17 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private void showTimeoutDialog() {
         int timeoutInSeconds = (int) LockPatternUtils.FAILED_ATTEMPT_TIMEOUT_MS / 1000;
+        int messageId = R.string.lockscreen_too_many_failed_attempts_dialog_message;
+        if(getUnlockMode() == UnlockMode.Password) {
+            if(mLockPatternUtils.getKeyguardStoredPasswordQuality() ==
+                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC) {
+                messageId = R.string.lockscreen_too_many_failed_pin_attempts_dialog_message;
+            } else {
+                messageId = R.string.lockscreen_too_many_failed_password_attempts_dialog_message;
+            }
+        }
         String message = mContext.getString(
-                R.string.lockscreen_too_many_failed_attempts_dialog_message,
+                messageId,
                 mUpdateMonitor.getFailedAttempts(),
                 timeoutInSeconds);
         final AlertDialog dialog = new AlertDialog.Builder(mContext)

@@ -97,7 +97,7 @@ public class NetworkInfo implements Parcelable {
         stateMap.put(DetailedState.DISCONNECTED, State.DISCONNECTED);
         stateMap.put(DetailedState.FAILED, State.DISCONNECTED);
     }
-    
+
     private int mNetworkType;
     private int mSubtype;
     private String mTypeName;
@@ -121,7 +121,10 @@ public class NetworkInfo implements Parcelable {
      */
     public NetworkInfo(int type) {}
 
-    NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
+    /**
+     * @hide
+     */
+    public NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
         if (!ConnectivityManager.isNetworkTypeValid(type)) {
             throw new IllegalArgumentException("Invalid network type: " + type);
         }
@@ -141,7 +144,9 @@ public class NetworkInfo implements Parcelable {
      * @return the network type
      */
     public int getType() {
-        return mNetworkType;
+        synchronized (this) {
+            return mNetworkType;
+        }
     }
 
     /**
@@ -150,12 +155,16 @@ public class NetworkInfo implements Parcelable {
      * @return the network subtype
      */
     public int getSubtype() {
-        return mSubtype;
+        synchronized (this) {
+            return mSubtype;
+        }
     }
 
     void setSubtype(int subtype, String subtypeName) {
-        mSubtype = subtype;
-        mSubtypeName = subtypeName;
+        synchronized (this) {
+            mSubtype = subtype;
+            mSubtypeName = subtypeName;
+        }
     }
 
     /**
@@ -164,7 +173,9 @@ public class NetworkInfo implements Parcelable {
      * @return the name of the network type
      */
     public String getTypeName() {
-        return mTypeName;
+        synchronized (this) {
+            return mTypeName;
+        }
     }
 
     /**
@@ -172,7 +183,9 @@ public class NetworkInfo implements Parcelable {
      * @return the name of the network subtype
      */
     public String getSubtypeName() {
-        return mSubtypeName;
+        synchronized (this) {
+            return mSubtypeName;
+        }
     }
 
     /**
@@ -185,7 +198,9 @@ public class NetworkInfo implements Parcelable {
      * of being established, {@code false} otherwise.
      */
     public boolean isConnectedOrConnecting() {
-        return mState == State.CONNECTED || mState == State.CONNECTING;
+        synchronized (this) {
+            return mState == State.CONNECTED || mState == State.CONNECTING;
+        }
     }
 
     /**
@@ -194,7 +209,9 @@ public class NetworkInfo implements Parcelable {
      * @return {@code true} if network connectivity exists, {@code false} otherwise.
      */
     public boolean isConnected() {
-        return mState == State.CONNECTED;
+        synchronized (this) {
+            return mState == State.CONNECTED;
+        }
     }
 
     /**
@@ -210,7 +227,9 @@ public class NetworkInfo implements Parcelable {
      * @return {@code true} if the network is available, {@code false} otherwise
      */
     public boolean isAvailable() {
-        return mIsAvailable;
+        synchronized (this) {
+            return mIsAvailable;
+        }
     }
 
     /**
@@ -220,7 +239,9 @@ public class NetworkInfo implements Parcelable {
      * @hide
      */
     public void setIsAvailable(boolean isAvailable) {
-        mIsAvailable = isAvailable;
+        synchronized (this) {
+            mIsAvailable = isAvailable;
+        }
     }
 
     /**
@@ -231,7 +252,9 @@ public class NetworkInfo implements Parcelable {
      * otherwise.
      */
     public boolean isFailover() {
-        return mIsFailover;
+        synchronized (this) {
+            return mIsFailover;
+        }
     }
 
     /**
@@ -241,7 +264,9 @@ public class NetworkInfo implements Parcelable {
      * @hide
      */
     public void setFailover(boolean isFailover) {
-        mIsFailover = isFailover;
+        synchronized (this) {
+            mIsFailover = isFailover;
+        }
     }
 
     /**
@@ -251,11 +276,15 @@ public class NetworkInfo implements Parcelable {
      * @return {@code true} if roaming is in effect, {@code false} otherwise.
      */
     public boolean isRoaming() {
-        return mIsRoaming;
+        synchronized (this) {
+            return mIsRoaming;
+        }
     }
 
     void setRoaming(boolean isRoaming) {
-        mIsRoaming = isRoaming;
+        synchronized (this) {
+            mIsRoaming = isRoaming;
+        }
     }
 
     /**
@@ -263,7 +292,9 @@ public class NetworkInfo implements Parcelable {
      * @return the coarse-grained state
      */
     public State getState() {
-        return mState;
+        synchronized (this) {
+            return mState;
+        }
     }
 
     /**
@@ -271,7 +302,9 @@ public class NetworkInfo implements Parcelable {
      * @return the fine-grained state
      */
     public DetailedState getDetailedState() {
-        return mDetailedState;
+        synchronized (this) {
+            return mDetailedState;
+        }
     }
 
     /**
@@ -281,12 +314,15 @@ public class NetworkInfo implements Parcelable {
      * if one was supplied. May be {@code null}.
      * @param extraInfo an optional {@code String} providing addditional network state
      * information passed up from the lower networking layers.
+     * @hide
      */
-    void setDetailedState(DetailedState detailedState, String reason, String extraInfo) {
-        this.mDetailedState = detailedState;
-        this.mState = stateMap.get(detailedState);
-        this.mReason = reason;
-        this.mExtraInfo = extraInfo;
+    public void setDetailedState(DetailedState detailedState, String reason, String extraInfo) {
+        synchronized (this) {
+            this.mDetailedState = detailedState;
+            this.mState = stateMap.get(detailedState);
+            this.mReason = reason;
+            this.mExtraInfo = extraInfo;
+        }
     }
 
     /**
@@ -295,7 +331,9 @@ public class NetworkInfo implements Parcelable {
      * @return the reason for failure, or null if not available
      */
     public String getReason() {
-        return mReason;
+        synchronized (this) {
+            return mReason;
+        }
     }
 
     /**
@@ -305,20 +343,24 @@ public class NetworkInfo implements Parcelable {
      * @return the extra information, or null if not available
      */
     public String getExtraInfo() {
-        return mExtraInfo;
+        synchronized (this) {
+            return mExtraInfo;
+        }
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("NetworkInfo: ");
-        builder.append("type: ").append(getTypeName()).append("[").append(getSubtypeName()).
-                append("], state: ").append(mState).append("/").append(mDetailedState).
-                append(", reason: ").append(mReason == null ? "(unspecified)" : mReason).
-                append(", extra: ").append(mExtraInfo == null ? "(none)" : mExtraInfo).
-                append(", roaming: ").append(mIsRoaming).
-                append(", failover: ").append(mIsFailover).
-                append(", isAvailable: ").append(mIsAvailable);
-        return builder.toString();
+        synchronized (this) {
+            StringBuilder builder = new StringBuilder("NetworkInfo: ");
+            builder.append("type: ").append(getTypeName()).append("[").append(getSubtypeName()).
+            append("], state: ").append(mState).append("/").append(mDetailedState).
+            append(", reason: ").append(mReason == null ? "(unspecified)" : mReason).
+            append(", extra: ").append(mExtraInfo == null ? "(none)" : mExtraInfo).
+            append(", roaming: ").append(mIsRoaming).
+            append(", failover: ").append(mIsFailover).
+            append(", isAvailable: ").append(mIsAvailable);
+            return builder.toString();
+        }
     }
 
     /**
@@ -334,17 +376,19 @@ public class NetworkInfo implements Parcelable {
      * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mNetworkType);
-        dest.writeInt(mSubtype);
-        dest.writeString(mTypeName);
-        dest.writeString(mSubtypeName);
-        dest.writeString(mState.name());
-        dest.writeString(mDetailedState.name());
-        dest.writeInt(mIsFailover ? 1 : 0);
-        dest.writeInt(mIsAvailable ? 1 : 0);
-        dest.writeInt(mIsRoaming ? 1 : 0);
-        dest.writeString(mReason);
-        dest.writeString(mExtraInfo);
+        synchronized (this) {
+            dest.writeInt(mNetworkType);
+            dest.writeInt(mSubtype);
+            dest.writeString(mTypeName);
+            dest.writeString(mSubtypeName);
+            dest.writeString(mState.name());
+            dest.writeString(mDetailedState.name());
+            dest.writeInt(mIsFailover ? 1 : 0);
+            dest.writeInt(mIsAvailable ? 1 : 0);
+            dest.writeInt(mIsRoaming ? 1 : 0);
+            dest.writeString(mReason);
+            dest.writeString(mExtraInfo);
+        }
     }
 
     /**

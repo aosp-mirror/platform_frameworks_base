@@ -19,12 +19,15 @@ ifneq ($(USE_CUSTOM_RUNTIME_HEAP_MAX),)
   LOCAL_CFLAGS += -DCUSTOM_RUNTIME_HEAP_MAX=$(USE_CUSTOM_RUNTIME_HEAP_MAX)
 endif
 
+ifeq ($(USE_OPENGL_RENDERER),true)
+	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER
+endif
+
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 LOCAL_SRC_FILES:= \
 	ActivityManager.cpp \
 	AndroidRuntime.cpp \
-	CursorWindow.cpp \
 	Time.cpp \
 	com_google_android_gles_jni_EGLImpl.cpp \
 	com_google_android_gles_jni_GLImpl.cpp.arm \
@@ -48,6 +51,7 @@ LOCAL_SRC_FILES:= \
 	android_view_InputChannel.cpp \
 	android_view_InputQueue.cpp \
 	android_view_KeyEvent.cpp \
+	android_view_GLES20Canvas.cpp \
 	android_view_MotionEvent.cpp \
 	android_text_AndroidCharacter.cpp \
 	android_text_AndroidBidi.cpp \
@@ -105,6 +109,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Rasterizer.cpp \
 	android/graphics/Region.cpp \
 	android/graphics/Shader.cpp \
+	android/graphics/TextLayout.cpp \
 	android/graphics/Typeface.cpp \
 	android/graphics/Xfermode.cpp \
 	android/graphics/YuvToJpegEncoder.cpp \
@@ -123,7 +128,6 @@ LOCAL_SRC_FILES:= \
 	android_bluetooth_common.cpp \
 	android_bluetooth_BluetoothAudioGateway.cpp \
 	android_bluetooth_BluetoothSocket.cpp \
-	android_bluetooth_ScoSocket.cpp \
 	android_server_BluetoothService.cpp \
 	android_server_BluetoothEventLoop.cpp \
 	android_server_BluetoothA2dpService.cpp \
@@ -142,6 +146,7 @@ LOCAL_SRC_FILES:= \
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
 	$(LOCAL_PATH)/android/graphics \
+	$(LOCAL_PATH)/../../libs/hwui \
 	$(call include-path-for, bluedroid) \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
@@ -191,6 +196,10 @@ LOCAL_SHARED_LIBRARIES := \
 	libmedia \
 	libwpa_client \
 	libjpeg
+
+ifeq ($(USE_OPENGL_RENDERER),true)
+	LOCAL_SHARED_LIBRARIES += libhwui
+endif
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \

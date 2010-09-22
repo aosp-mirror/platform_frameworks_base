@@ -534,6 +534,7 @@ import java.util.Set;
  *     <li> {@link #CATEGORY_CAR_DOCK}
  *     <li> {@link #CATEGORY_DESK_DOCK}
  *     <li> {@link #CATEGORY_CAR_MODE}
+ *     <li> {@link #CATEGORY_APP_MARKET}
  * </ul>
  *
  * <h3>Standard Extra Data</h3>
@@ -984,6 +985,15 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_INSERT = "android.intent.action.INSERT";
+    /**
+     * Activity Action: Create a new item in the given container, initializing it
+     * from the current contents of the clipboard.
+     * <p>Input: {@link #getData} is URI of the directory (vnd.android.cursor.dir/*)
+     * in which to place the data.
+     * <p>Output: URI of the new data that was created.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PASTE = "android.intent.action.PASTE";
     /**
      * Activity Action: Delete the given data from its container.
      * <p>Input: {@link #getData} is URI of data to be deleted.
@@ -2000,6 +2010,11 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_EMBED = "android.intent.category.EMBED";
+    /**
+     * This activity allows the user to browse and download new applications.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_MARKET = "android.intent.category.APP_MARKET";
     /**
      * This activity may be exercised by the monkey or other automated test tools.
      */

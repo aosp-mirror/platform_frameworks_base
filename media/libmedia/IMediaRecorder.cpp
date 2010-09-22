@@ -19,7 +19,7 @@
 #define LOG_TAG "IMediaRecorder"
 #include <utils/Log.h>
 #include <binder/Parcel.h>
-#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/Surface.h>
 #include <camera/ICamera.h>
 #include <media/IMediaRecorderClient.h>
 #include <media/IMediaRecorder.h>
@@ -43,6 +43,7 @@ enum {
     SET_AUDIO_ENCODER,
     SET_OUTPUT_FILE_PATH,
     SET_OUTPUT_FILE_FD,
+    SET_OUTPUT_FILE_AUXILIARY_FD,
     SET_VIDEO_SIZE,
     SET_VIDEO_FRAMERATE,
     SET_PARAMETERS,
@@ -69,12 +70,12 @@ public:
         return reply.readInt32();
     }
 
-    status_t setPreviewSurface(const sp<ISurface>& surface)
+    status_t setPreviewSurface(const sp<Surface>& surface)
     {
         LOGV("setPreviewSurface(%p)", surface.get());
         Parcel data, reply;
         data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
-        data.writeStrongBinder(surface->asBinder());
+        Surface::writeToParcel(surface, &data);
         remote()->transact(SET_PREVIEW_SURFACE, data, &reply);
         return reply.readInt32();
     }
@@ -156,6 +157,15 @@ public:
         data.writeInt64(offset);
         data.writeInt64(length);
         remote()->transact(SET_OUTPUT_FILE_FD, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t setOutputFileAuxiliary(int fd) {
+        LOGV("setOutputFileAuxiliary(%d)", fd);
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        data.writeFileDescriptor(fd);
+        remote()->transact(SET_OUTPUT_FILE_AUXILIARY_FD, data, &reply);
         return reply.readInt32();
     }
 
@@ -377,6 +387,13 @@ status_t BnMediaRecorder::onTransact(
             ::close(fd);
             return NO_ERROR;
         } break;
+        case SET_OUTPUT_FILE_AUXILIARY_FD: {
+            LOGV("SET_OUTPUT_FILE_AUXILIARY_FD");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            int fd = dup(data.readFileDescriptor());
+            reply->writeInt32(setOutputFileAuxiliary(fd));
+            return NO_ERROR;
+        } break;
         case SET_VIDEO_SIZE: {
             LOGV("SET_VIDEO_SIZE");
             CHECK_INTERFACE(IMediaRecorder, data, reply);
@@ -409,7 +426,7 @@ status_t BnMediaRecorder::onTransact(
         case SET_PREVIEW_SURFACE: {
             LOGV("SET_PREVIEW_SURFACE");
             CHECK_INTERFACE(IMediaRecorder, data, reply);
-            sp<ISurface> surface = interface_cast<ISurface>(data.readStrongBinder());
+            sp<Surface> surface = Surface::readFromParcel(data);
             reply->writeInt32(setPreviewSurface(surface));
             return NO_ERROR;
         } break;

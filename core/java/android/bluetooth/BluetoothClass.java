@@ -259,6 +259,12 @@ public final class BluetoothClass implements Parcelable {
     public static final int PROFILE_A2DP = 1;
     /** @hide */
     public static final int PROFILE_OPP = 2;
+    /** @hide */
+    public static final int PROFILE_HID = 3;
+    /** @hide */
+    public static final int PROFILE_PANU = 4;
+    /** @hide */
+    public static final int PROFILE_NAP = 5;
 
     /**
      * Check class bits for possible bluetooth profile support.
@@ -324,6 +330,14 @@ public final class BluetoothClass implements Parcelable {
                 default:
                     return false;
             }
+        } else if (profile == PROFILE_HID) {
+            return (getDeviceClass() & Device.Major.PERIPHERAL) == Device.Major.PERIPHERAL;
+        } else if (profile == PROFILE_PANU || profile == PROFILE_NAP){
+            // No good way to distinguish between the two, based on class bits.
+            if (hasService(Service.NETWORKING)) {
+                return true;
+            }
+            return (getDeviceClass() & Device.Major.NETWORKING) == Device.Major.NETWORKING;
         } else {
             return false;
         }

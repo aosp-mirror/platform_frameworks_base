@@ -16,20 +16,19 @@
 
 package android.database.sqlite;
 
+import android.app.ActivityThread;
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
 import android.database.DataSetObserver;
-import android.database.SQLException;
-
+import android.database.RequeryOnUiThreadException;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -41,32 +40,29 @@ import java.util.concurrent.locks.ReentrantLock;
  * threads should perform its own synchronization when using the SQLiteCursor.
  */
 public class SQLiteCursor extends AbstractWindowedCursor {
-    static final String TAG = "Cursor";
+    static final String TAG = "SQLiteCursor";
     static final int NO_COUNT = -1;
 
     /** The name of the table to edit */
-    private String mEditTable;
+    private final String mEditTable;
 
     /** The names of the columns in the rows */
-    private String[] mColumns;
+    private final String[] mColumns;
 
     /** The query object for the cursor */
     private SQLiteQuery mQuery;
 
-    /** The database the cursor was created from */
-    private SQLiteDatabase mDatabase;
-
     /** The compiled query this cursor came from */
-    private SQLiteCursorDriver mDriver;
+    private final SQLiteCursorDriver mDriver;
 
     /** The number of rows in the cursor */
-    private int mCount = NO_COUNT;
+    private volatile int mCount = NO_COUNT;
 
     /** A mapping of column names to column indices, to speed up lookups */
     private Map<String, Integer> mColumnNameMap;
 
     /** Used to find out where a cursor was allocated in case it never got released. */
-    private Throwable mStackTrace;
+    private final Throwable mStackTrace;
     
     /** 
      *  mMaxRead is the max items that each cursor window reads 
@@ -77,6 +73,11 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private int mCursorState = 0;
     private ReentrantLock mLock = null;
     private boolean mPendingData = false;
+
+    /**
+     * Used by {@link #requery()} to remember for which database we've already shown the warning.
+     */
+    private static final HashMap<String, Boolean> sAlreadyWarned = new HashMap<String, Boolean>();
     
     /**
      *  support for a cursor variant that doesn't always read all results
@@ -136,14 +137,22 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                     break;
                 }
                 try {
-                    int count = mQuery.fillWindow(cw, mMaxRead, mCount);
-                    // return -1 means not finished
+                    int count = getQuery().fillWindow(cw, mMaxRead, mCount);
+                    // return -1 means there is still more data to be retrieved from the resultset
                     if (count != 0) {
                         if (count == NO_COUNT){
                             mCount += mMaxRead;
+                            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                                Log.d(TAG, "received -1 from native_fill_window. read " +
+                                        mCount + " rows so far");
+                            }
                             sendMessage();
                         } else {                                
-                            mCount = count;
+                            mCount += count;
+                            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                                Log.d(TAG, "received all data from native_fill_window. read " +
+                                        mCount + " rows.");
+                            }
                             sendMessage();
                             break;
                         }
@@ -201,24 +210,46 @@ public class SQLiteCursor extends AbstractWindowedCursor {
      * has package scope.
      *
      * @param db a reference to a Database object that is already constructed
-     *     and opened
+     *     and opened. This param is not used any longer
      * @param editTable the name of the table used for this query
      * @param query the rest of the query terms
      *     cursor is finalized
+     * @deprecated use {@link #SQLiteCursor(SQLiteCursorDriver, String, SQLiteQuery)} instead
      */
+    @Deprecated
     public SQLiteCursor(SQLiteDatabase db, SQLiteCursorDriver driver,
             String editTable, SQLiteQuery query) {
+        this(driver, editTable, query);
+    }
+
+    /**
+     * Execute a query and provide access to its result set through a Cursor
+     * interface. For a query such as: {@code SELECT name, birth, phone FROM
+     * myTable WHERE ... LIMIT 1,20 ORDER BY...} the column names (name, birth,
+     * phone) would be in the projection argument and everything from
+     * {@code FROM} onward would be in the params argument. This constructor
+     * has package scope.
+     *
+     * @param editTable the name of the table used for this query
+     * @param query the {@link SQLiteQuery} object associated with this cursor object.
+     */
+    public SQLiteCursor(SQLiteCursorDriver driver, String editTable, SQLiteQuery query) {
         // The AbstractCursor constructor needs to do some setup.
         super();
+        if (query == null) {
+            throw new IllegalArgumentException("query object cannot be null");
+        }
+        if (query.mDatabase == null) {
+            throw new IllegalArgumentException("query.mDatabase cannot be null");
+        }
         mStackTrace = new DatabaseObjectNotClosedException().fillInStackTrace();
-        mDatabase = db;
         mDriver = driver;
         mEditTable = editTable;
         mColumnNameMap = null;
         mQuery = query;
 
         try {
-            db.lock();
+            query.mDatabase.lock();
 
             // Setup the list of columns
             int columnCount = mQuery.columnCountLocked();
@@ -239,7 +270,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 }
             }
         } finally {
-            db.unlock();
+            query.mDatabase.unlock();
         }
     }
 
@@ -247,7 +278,9 @@ public class SQLiteCursor extends AbstractWindowedCursor {
      * @return the SQLiteDatabase that this cursor is associated with.
      */
     public SQLiteDatabase getDatabase() {
-        return mDatabase;
+        synchronized (this) {
+            return mQuery.mDatabase;
+        }
     }
 
     @Override
@@ -283,13 +316,27 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 }
         }
         mWindow.setStartPosition(startPos);
-        mCount = mQuery.fillWindow(mWindow, mInitialRead, 0);
-        // return -1 means not finished
-        if (mCount == NO_COUNT){
+        int count = getQuery().fillWindow(mWindow, mInitialRead, 0);
+        // return -1 means there is still more data to be retrieved from the resultset
+        if (count == NO_COUNT){
             mCount = startPos + mInitialRead;
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "received -1 from native_fill_window. read " + mCount + " rows so far");
+            }
             Thread t = new Thread(new QueryThread(mCursorState), "query thread");
             t.start();
-        } 
+        } else if (startPos == 0) { // native_fill_window returns count(*) only for startPos = 0
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "received count(*) from native_fill_window: " + count);
+            }
+            mCount = count;
+        } else if (mCount <= 0) {
+            throw new IllegalStateException("count should never be non-zero negative number");
+        }
+    }
+
+    private synchronized SQLiteQuery getQuery() {
+        return mQuery;
     }
 
     @Override
@@ -321,164 +368,9 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         }
     }
 
-    /**
-     * @hide
-     * @deprecated
-     */
-    @Override
-    public boolean deleteRow() {
-        checkPosition();
-
-        // Only allow deletes if there is an ID column, and the ID has been read from it
-        if (mRowIdColumnIndex == -1 || mCurrentRowID == null) {
-            Log.e(TAG,
-                    "Could not delete row because either the row ID column is not available or it" +
-                    "has not been read.");
-            return false;
-        }
-
-        boolean success;
-
-        /*
-         * Ensure we don't change the state of the database when another
-         * thread is holding the database lock. requery() and moveTo() are also
-         * synchronized here to make sure they get the state of the database
-         * immediately following the DELETE.
-         */
-        mDatabase.lock();
-        try {
-            try {
-                mDatabase.delete(mEditTable, mColumns[mRowIdColumnIndex] + "=?",
-                        new String[] {mCurrentRowID.toString()});
-                success = true;
-            } catch (SQLException e) {
-                success = false;
-            }
-
-            int pos = mPos;
-            requery();
-
-            /*
-             * Ensure proper cursor state. Note that mCurrentRowID changes
-             * in this call.
-             */
-            moveToPosition(pos);
-        } finally {
-            mDatabase.unlock();
-        }
-
-        if (success) {
-            onChange(true);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @Override
     public String[] getColumnNames() {
         return mColumns;
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    @Override
-    public boolean supportsUpdates() {
-        return super.supportsUpdates() && !TextUtils.isEmpty(mEditTable);
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    @Override
-    public boolean commitUpdates(Map<? extends Long,
-            ? extends Map<String, Object>> additionalValues) {
-        if (!supportsUpdates()) {
-            Log.e(TAG, "commitUpdates not supported on this cursor, did you "
-                    + "include the _id column?");
-            return false;
-        }
-
-        /*
-         * Prevent other threads from changing the updated rows while they're
-         * being processed here.
-         */
-        synchronized (mUpdatedRows) {
-            if (additionalValues != null) {
-                mUpdatedRows.putAll(additionalValues);
-            }
-
-            if (mUpdatedRows.size() == 0) {
-                return true;
-            }
-
-            /*
-             * Prevent other threads from changing the database state while
-             * we process the updated rows, and prevents us from changing the
-             * database behind the back of another thread.
-             */
-            mDatabase.beginTransaction();
-            try {
-                StringBuilder sql = new StringBuilder(128);
-
-                // For each row that has been updated
-                for (Map.Entry<Long, Map<String, Object>> rowEntry :
-                        mUpdatedRows.entrySet()) {
-                    Map<String, Object> values = rowEntry.getValue();
-                    Long rowIdObj = rowEntry.getKey();
-
-                    if (rowIdObj == null || values == null) {
-                        throw new IllegalStateException("null rowId or values found! rowId = "
-                                + rowIdObj + ", values = " + values);
-                    }
-
-                    if (values.size() == 0) {
-                        continue;
-                    }
-
-                    long rowId = rowIdObj.longValue();
-
-                    Iterator<Map.Entry<String, Object>> valuesIter =
-                            values.entrySet().iterator();
-
-                    sql.setLength(0);
-                    sql.append("UPDATE " + mEditTable + " SET ");
-
-                    // For each column value that has been updated
-                    Object[] bindings = new Object[values.size()];
-                    int i = 0;
-                    while (valuesIter.hasNext()) {
-                        Map.Entry<String, Object> entry = valuesIter.next();
-                        sql.append(entry.getKey());
-                        sql.append("=?");
-                        bindings[i] = entry.getValue();
-                        if (valuesIter.hasNext()) {
-                            sql.append(", ");
-                        }
-                        i++;
-                    }
-
-                    sql.append(" WHERE " + mColumns[mRowIdColumnIndex]
-                            + '=' + rowId);
-                    sql.append(';');
-                    mDatabase.execSQL(sql.toString(), bindings);
-                    mDatabase.rowUpdated(mEditTable, rowId);
-                }
-                mDatabase.setTransactionSuccessful();
-            } finally {
-                mDatabase.endTransaction();
-            }
-
-            mUpdatedRows.clear();
-        }
-
-        // Let any change observers know about the update
-        onChange(true);
-
-        return true;
     }
 
     private void deactivateCommon() {
@@ -501,9 +393,32 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     @Override
     public void close() {
         super.close();
-        deactivateCommon();
-        mQuery.close();
-        mDriver.cursorClosed();
+        synchronized (this) {
+            deactivateCommon();
+            mQuery.close();
+            mDriver.cursorClosed();
+        }
+    }
+
+    /**
+     * Show a warning against the use of requery() if called on the main thread.
+     * This warning is shown per database per process.
+     */
+    private void warnIfUiThread() {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            String databasePath = getQuery().mDatabase.getPath();
+            // We show the warning once per database in order not to spam logcat.
+            if (!sAlreadyWarned.containsKey(databasePath)) {
+                sAlreadyWarned.put(databasePath, true);
+                String packageName = ActivityThread.currentPackageName();
+                Throwable t = null;
+                // BEGIN STOPSHIP remove the following line
+                t = new RequeryOnUiThreadException(packageName);
+                // END STOPSHIP
+                Log.w(TAG, "should not attempt requery on main (UI) thread: app = " +
+                        packageName == null ? "'unknown'" : packageName, t);
+            }
+        }
     }
 
     @Override
@@ -511,20 +426,30 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         if (isClosed()) {
             return false;
         }
+        warnIfUiThread();
         long timeStart = 0;
         if (Config.LOGV) {
             timeStart = System.currentTimeMillis();
         }
-        /*
-         * Synchronize on the database lock to ensure that mCount matches the
-         * results of mQuery.requery().
-         */
-        mDatabase.lock();
-        try {
+
+        synchronized (this) {
             if (mWindow != null) {
                 mWindow.clear();
             }
             mPos = -1;
+            SQLiteDatabase db = mQuery.mDatabase.getDatabaseHandle(mQuery.mSql);
+            if (!db.equals(mQuery.mDatabase)) {
+                // since we need to use a different database connection handle,
+                // re-compile the query
+                db.lock();
+                try {
+                    // close the old mQuery object and open a new one
+                    mQuery.close();
+                    mQuery = new SQLiteQuery(db, mQuery);
+                } finally {
+                    db.unlock();
+                }
+            }
             // This one will recreate the temp table, and get its count
             mDriver.cursorRequeried(this);
             mCount = NO_COUNT;
@@ -535,8 +460,6 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             } finally {
                 queryThreadUnlock();
             }
-        } finally {
-            mDatabase.unlock();
         }
 
         if (Config.LOGV) {
@@ -584,19 +507,26 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             if (mWindow != null) {
                 int len = mQuery.mSql.length();
                 Log.e(TAG, "Finalizing a Cursor that has not been deactivated or closed. " +
-                        "database = " + mDatabase.getPath() + ", table = " + mEditTable +
+                        "database = " + mQuery.mDatabase.getPath() + ", table = " + mEditTable +
                         ", query = " + mQuery.mSql.substring(0, (len > 100) ? 100 : len),
                         mStackTrace);
                 close();
                 SQLiteDebug.notifyActiveCursorFinalized();
             } else {
                 if (Config.LOGV) {
-                    Log.v(TAG, "Finalizing cursor on database = " + mDatabase.getPath() +
+                    Log.v(TAG, "Finalizing cursor on database = " + mQuery.mDatabase.getPath() +
                             ", table = " + mEditTable + ", query = " + mQuery.mSql);
                 }
             }
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * this is only for testing purposes.
+     */
+    /* package */ int getMCount() {
+        return mCount;
     }
 }

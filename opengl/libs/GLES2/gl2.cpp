@@ -39,6 +39,8 @@ using namespace android;
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
 
+#define DEBUG_CALL_GL_API 0
+
 #if USE_FAST_TLS_KEY
 
     #ifdef HAVE_ARM_TLS_REGISTER
@@ -73,10 +75,24 @@ using namespace android;
 
     #define API_ENTRY(_api) _api
 
+#if DEBUG_CALL_GL_API
+
     #define CALL_GL_API(_api, ...)                                       \
         gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl;  \
-        _c->_api(__VA_ARGS__)
-    
+        _c->_api(__VA_ARGS__); \
+        GLenum status = GL_NO_ERROR; \
+        while ((status = glGetError()) != GL_NO_ERROR) { \
+            LOGD("[" #_api "] 0x%x", status); \
+        }
+
+#else
+
+    #define CALL_GL_API(_api, ...)                                       \
+        gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl;  \
+        _c->_api(__VA_ARGS__);
+
+#endif
+
     #define CALL_GL_API_RETURN(_api, ...)                                \
         gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl;  \
         return _c->_api(__VA_ARGS__)

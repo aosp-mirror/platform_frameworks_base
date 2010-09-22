@@ -18,6 +18,7 @@ package com.android.dumprendertree;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.test.ActivityInstrumentationTestCase2;
@@ -37,10 +38,16 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
 
     private static final String LOGTAG = "ReliabilityTest";
     private static final String PKG_NAME = "com.android.dumprendertree";
-    private static final String TEST_LIST_FILE = "/sdcard/android/reliability_tests_list.txt";
-    private static final String TEST_STATUS_FILE = "/sdcard/android/reliability_running_test.txt";
-    private static final String TEST_TIMEOUT_FILE = "/sdcard/android/reliability_timeout_test.txt";
-    private static final String TEST_LOAD_TIME_FILE = "/sdcard/android/reliability_load_time.txt";
+    private static final String EXTERNAL_DIR =
+        Environment.getExternalStorageDirectory().toString();
+    private static final String TEST_LIST_FILE = EXTERNAL_DIR +
+        "/android/reliability_tests_list.txt";
+    private static final String TEST_STATUS_FILE = EXTERNAL_DIR +
+        "/android/reliability_running_test.txt";
+    private static final String TEST_TIMEOUT_FILE = EXTERNAL_DIR +
+        "/android/reliability_timeout_test.txt";
+    private static final String TEST_LOAD_TIME_FILE = EXTERNAL_DIR +
+        "/android/reliability_load_time.txt";
     private static final String TEST_DONE = "#DONE";
     static final String RELIABILITY_TEST_RUNNER_FILES[] = {
         "run_reliability_tests.py"

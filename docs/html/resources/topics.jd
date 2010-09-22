@@ -1,0 +1,72 @@
+page.title=Technical Resource Topics
+@jd:body
+
+<style type="text/css">
+  #resource-topic-table td {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    padding-left: 1em;
+    width: 18em;
+  }
+
+  #resource-topic-table ul {
+    padding: 0;
+    margin: 0;
+  }
+
+  #resource-topic-table li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+</style>
+
+<p>
+You can browse the list of technical resources by topic by clicking on the
+links below. Over time, as more topics are added, they will be added to the
+list below.
+</p>
+
+<noscript>
+  <p class="note"><strong>Error:</strong>
+    You must have JavaScript enabled to view this page. Resources are also
+    available offline in the SDK.
+  </p>
+</noscript>
+
+<table id="resource-topic-table">
+  <tr></tr>
+</table>
+
+<script type="text/javascript">
+<!-- 
+(function() {
+  var topics = [];
+  for (var topic in ANDROID_TAGS['topic']) {
+    topics.push({name:topic,title:ANDROID_TAGS['topic'][topic]});
+  }
+  topics.sort(function(x,y){ return (x.title < y.title) ? -1 : 1; });
+  var topicParent = null;
+  for (var i = 0; i < topics.length; i++) {
+    if (topicParent == null || i % 10 == 0) {
+      // create a new column
+      topicParent = $('ul', $('<td><ul>').appendTo('#resource-topic-table tr'));
+    }
+
+    topicParent.append(
+        $('<li>').append(
+          $('<h3>').append(
+            $('<a>')
+              .attr('href', toRoot + "resources/browser.html?tag=" + topics[i].name)
+              .append($('<span>')
+                .addClass('en')
+                .html(topics[i].title)
+              )
+            )
+          )
+        );
+  }
+})();
+//-->
+</script>

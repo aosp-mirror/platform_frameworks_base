@@ -73,7 +73,7 @@ void Matrix::loadRotate(float rot, float x, float y, float z)
     s = sinf(rot);
 
     const float len = sqrtf(x*x + y*y + z*z);
-    if (!(len != 1)) {
+    if (len != 1) {
         const float recipLen = 1.f / len;
         x *= recipLen;
         y *= recipLen;

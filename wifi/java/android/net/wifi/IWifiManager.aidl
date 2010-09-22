@@ -46,11 +46,11 @@ interface IWifiManager
 
     List<ScanResult> getScanResults();
 
-    boolean disconnect();
+    void disconnect();
 
-    boolean reconnect();
+    void reconnect();
 
-    boolean reassociate();
+    void reassociate();
 
     WifiInfo getConnectionInfo();
 
@@ -89,5 +89,21 @@ interface IWifiManager
     WifiConfiguration getWifiApConfiguration();
 
     void setWifiApConfiguration(in WifiConfiguration wifiConfig);
+
+    void startWifi();
+
+    void stopWifi();
+
+    void addToBlacklist(String bssid);
+
+    void clearBlacklist();
+
+    void connectNetworkWithConfig(in WifiConfiguration wifiConfig);
+
+    void connectNetworkWithId(int networkId);
+
+    void saveNetwork(in WifiConfiguration wifiConfig);
+
+    void forgetNetwork(int networkId);
 }
 

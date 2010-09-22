@@ -208,11 +208,11 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
              * width because the width that was passed in was for the
              * full text, not the ellipsized form.
              */
-            synchronized (sTemp) {
-                mMax = (int) (FloatMath.ceil(Styled.measureText(paint, sTemp,
-                                                source, 0, source.length(),
-                                                null)));
-            }
+            TextLine line = TextLine.obtain();
+            line.set(paint, source, 0, source.length(), Layout.DIR_LEFT_TO_RIGHT,
+                    Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
+            mMax = (int) FloatMath.ceil(line.metrics(null));
+            TextLine.recycle(line);
         }
 
         if (includepad) {
@@ -276,14 +276,13 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             if (fm == null) {
                 fm = new Metrics();
             }
-    
-            int wid;
 
-            synchronized (sTemp) {
-                wid = (int) (FloatMath.ceil(Styled.measureText(paint, sTemp,
-                                                text, 0, text.length(), fm)));
-            }
-            fm.width = wid;
+            TextLine line = TextLine.obtain();
+            line.set(paint, text, 0, text.length(), Layout.DIR_LEFT_TO_RIGHT,
+                    Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
+            fm.width = (int) FloatMath.ceil(line.metrics(fm));
+            TextLine.recycle(line);
+
             return fm;
         } else {
             return null;
@@ -389,7 +388,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
 
     public static class Metrics extends Paint.FontMetricsInt {
         public int width;
-        
+
         @Override public String toString() {
             return super.toString() + " width=" + width;
         }

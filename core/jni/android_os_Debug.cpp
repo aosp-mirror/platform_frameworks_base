@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "android.os.Debug"
 #include "JNIHelp.h"
 #include "jni.h"
 #include "utils/misc.h"
@@ -24,6 +25,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <errno.h>
+#include <assert.h>
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -274,6 +277,176 @@ jint android_os_Debug_getLocalObjectCount(JNIEnv* env, jobject clazz);
 jint android_os_Debug_getProxyObjectCount(JNIEnv* env, jobject clazz);
 jint android_os_Debug_getDeathObjectCount(JNIEnv* env, jobject clazz);
 
+
+#ifdef HAVE_ANDROID_OS
+/* pulled out of bionic */
+extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
+    size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
+extern "C" void free_malloc_leak_info(uint8_t* info);
+#define SIZE_FLAG_ZYGOTE_CHILD  (1<<31)
+#define BACKTRACE_SIZE          32
+
+/*
+ * This is a qsort() callback.
+ *
+ * See dumpNativeHeap() for comments about the data format and sort order.
+ */
+static int compareHeapRecords(const void* vrec1, const void* vrec2)
+{
+    const size_t* rec1 = (const size_t*) vrec1;
+    const size_t* rec2 = (const size_t*) vrec2;
+    size_t size1 = *rec1;
+    size_t size2 = *rec2;
+
+    if (size1 < size2) {
+        return 1;
+    } else if (size1 > size2) {
+        return -1;
+    }
+
+    intptr_t* bt1 = (intptr_t*)(rec1 + 2);
+    intptr_t* bt2 = (intptr_t*)(rec2 + 2);
+    for (size_t idx = 0; idx < BACKTRACE_SIZE; idx++) {
+        intptr_t addr1 = bt1[idx];
+        intptr_t addr2 = bt2[idx];
+        if (addr1 == addr2) {
+            if (addr1 == 0)
+                break;
+            continue;
+        }
+        if (addr1 < addr2) {
+            return -1;
+        } else if (addr1 > addr2) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/*
+ * The get_malloc_leak_info() call returns an array of structs that
+ * look like this:
+ *
+ *   size_t size
+ *   size_t allocations
+ *   intptr_t backtrace[32]
+ *
+ * "size" is the size of the allocation, "backtrace" is a fixed-size
+ * array of function pointers, and "allocations" is the number of
+ * allocations with the exact same size and backtrace.
+ *
+ * The entries are sorted by descending total size (i.e. size*allocations)
+ * then allocation count.  For best results with "diff" we'd like to sort
+ * primarily by individual size then stack trace.  Since the entries are
+ * fixed-size, and we're allowed (by the current implementation) to mangle
+ * them, we can do this in place.
+ */
+static void dumpNativeHeap(FILE* fp)
+{
+    uint8_t* info = NULL;
+    size_t overallSize, infoSize, totalMemory, backtraceSize;
+
+    get_malloc_leak_info(&info, &overallSize, &infoSize, &totalMemory,
+        &backtraceSize);
+    if (info == NULL) {
+        fprintf(fp, "Native heap dump not available. To enable, run these"
+                    " commands (requires root):\n");
+        fprintf(fp, "$ adb shell setprop libc.debug.malloc 1\n");
+        fprintf(fp, "$ adb shell stop\n");
+        fprintf(fp, "$ adb shell start\n");
+        return;
+    }
+    assert(infoSize != 0);
+    assert(overallSize % infoSize == 0);
+
+    fprintf(fp, "Android Native Heap Dump v1.0\n\n");
+
+    size_t recordCount = overallSize / infoSize;
+    fprintf(fp, "Total memory: %zu\n", totalMemory);
+    fprintf(fp, "Allocation records: %zd\n", recordCount);
+    if (backtraceSize != BACKTRACE_SIZE) {
+        fprintf(fp, "WARNING: mismatched backtrace sizes (%d vs. %d)\n",
+            backtraceSize, BACKTRACE_SIZE);
+    }
+    fprintf(fp, "\n");
+
+    /* re-sort the entries */
+    qsort(info, recordCount, infoSize, compareHeapRecords);
+
+    /* dump the entries to the file */
+    const uint8_t* ptr = info;
+    for (size_t idx = 0; idx < recordCount; idx++) {
+        size_t size = *(size_t*) ptr;
+        size_t allocations = *(size_t*) (ptr + sizeof(size_t));
+        intptr_t* backtrace = (intptr_t*) (ptr + sizeof(size_t) * 2);
+
+        fprintf(fp, "z %d  sz %8zu  num %4zu  bt",
+                (size & SIZE_FLAG_ZYGOTE_CHILD) != 0,
+                size & ~SIZE_FLAG_ZYGOTE_CHILD,
+                allocations);
+        for (size_t bt = 0; bt < backtraceSize; bt++) {
+            if (backtrace[bt] == 0) {
+                break;
+            } else {
+                fprintf(fp, " %08x", backtrace[bt]);
+            }
+        }
+        fprintf(fp, "\n");
+
+        ptr += infoSize;
+    }
+
+    fprintf(fp, "END\n");
+    free_malloc_leak_info(info);
+}
+#endif /*HAVE_ANDROID_OS*/
+
+/*
+ * Dump the native heap, writing human-readable output to the specified
+ * file descriptor.
+ */
+static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
+    jobject fileDescriptor)
+{
+    if (fileDescriptor == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return;
+    }
+    int origFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+    if (origFd < 0) {
+        jniThrowRuntimeException(env, "Invalid file descriptor");
+        return;
+    }
+
+    /* dup() the descriptor so we don't close the original with fclose() */
+    int fd = dup(origFd);
+    if (fd < 0) {
+        LOGW("dup(%d) failed: %s\n", origFd, strerror(errno));
+        jniThrowRuntimeException(env, "dup() failed");
+        return;
+    }
+
+    FILE* fp = fdopen(fd, "w");
+    if (fp == NULL) {
+        LOGW("fdopen(%d) failed: %s\n", fd, strerror(errno));
+        close(fd);
+        jniThrowRuntimeException(env, "fdopen() failed");
+        return;
+    }
+
+#ifdef HAVE_ANDROID_OS
+    LOGD("Native heap dump starting...\n");
+    dumpNativeHeap(fp);
+    LOGD("Native heap dump complete.\n");
+#else
+    fprintf(fp, "Native heap dump not available on this platform\n");
+#endif
+
+    fclose(fp);
+}
+
+
 /*
  * JNI registration.
  */
@@ -289,6 +462,8 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getDirtyPages },
     { "getMemoryInfo",          "(ILandroid/os/Debug$MemoryInfo;)V",
             (void*) android_os_Debug_getDirtyPagesPid },
+    { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
+            (void*) android_os_Debug_dumpNativeHeap },
     { "getBinderSentTransactions", "()I",
             (void*) android_os_Debug_getBinderSentTransactions },
     { "getBinderReceivedTransactions", "()I",
@@ -320,4 +495,4 @@ int register_android_os_Debug(JNIEnv *env)
     return jniRegisterNativeMethods(env, "android/os/Debug", gMethods, NELEM(gMethods));
 }
 
-};
+}; // namespace android

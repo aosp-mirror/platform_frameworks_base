@@ -18,24 +18,171 @@ package android.net;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
+import android.os.Handler;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.provider.Settings;
 import android.util.Log;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ProxySelector;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import junit.framework.Assert;
+
+import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.conn.routing.HttpRoutePlanner;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.impl.conn.ProxySelectorRoutePlanner;
+import org.apache.http.protocol.HttpContext;
 
 /**
  * A convenience class for accessing the user and default proxy
  * settings.
  */
-final public class Proxy {
+public final class Proxy {
 
     // Set to true to enable extra debugging.
-    static final private boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
-    static final public String PROXY_CHANGE_ACTION =
+    // Used to notify an app that's caching the default connection proxy
+    // that either the default connection or its proxy has changed
+    public static final String PROXY_CHANGE_ACTION =
         "android.intent.action.PROXY_CHANGE";
 
+    private static ReadWriteLock sProxyInfoLock = new ReentrantReadWriteLock();
+
+    private static SettingsObserver sGlobalProxyChangedObserver = null;
+
+    private static ProxySpec sGlobalProxySpec = null;
+
+    private static ConnectivityManager sConnectivityManager = null;
+
+    // Hostname / IP REGEX validation
+    // Matches blank input, ips, and domain names
+    private static final String NAME_IP_REGEX =
+        "[a-zA-Z0-9]+(\\-[a-zA-Z0-9]+)*(\\.[a-zA-Z0-9]+(\\-[a-zA-Z0-9]+)*)*";
+
+    private static final String HOSTNAME_REGEXP = "^$|^" + NAME_IP_REGEX + "$";
+
+    private static final Pattern HOSTNAME_PATTERN;
+
+    private static final String EXCLLIST_REGEXP = "$|^(.?" + NAME_IP_REGEX
+        + ")+(,(.?" + NAME_IP_REGEX + "))*$";
+
+    private static final Pattern EXCLLIST_PATTERN;
+
+    static {
+        HOSTNAME_PATTERN = Pattern.compile(HOSTNAME_REGEXP);
+        EXCLLIST_PATTERN = Pattern.compile(EXCLLIST_REGEXP);
+    }
+
+    // useful because it holds the processed exclusion list - don't want to reparse it each time
+    private static class ProxySpec {
+        String[] exclusionList;
+        InetSocketAddress address = null;
+        public ProxySpec() {
+            exclusionList = new String[0];
+        };
+    }
+
+    private static boolean isURLInExclusionList(String url, String[] exclusionList) {
+        if (url == null) {
+            return false;
+        }
+        Uri u = Uri.parse(url);
+        String urlDomain = u.getHost();
+        // If the domain is defined as ".android.com" or "android.com", we wish to match
+        // http://android.com as well as http://xxx.android.com , but not
+        // http://myandroid.com . This code works out the logic.
+        for (String excludedDomain : exclusionList) {
+            String dotDomain = "." + excludedDomain;
+            if (urlDomain.equals(excludedDomain)) {
+                return true;
+            }
+            if (urlDomain.endsWith(dotDomain)) {
+                return true;
+            }
+        }
+        // No match
+        return false;
+    }
+
+    private static String parseHost(String proxySpec) {
+        int i = proxySpec.indexOf(':');
+        if (i == -1) {
+            if (DEBUG) {
+                Assert.assertTrue(proxySpec.length() == 0);
+            }
+            return null;
+        }
+        return proxySpec.substring(0, i);
+    }
+
+    private static int parsePort(String proxySpec) {
+        int i = proxySpec.indexOf(':');
+        if (i == -1) {
+            if (DEBUG) {
+                Assert.assertTrue(proxySpec.length() == 0);
+            }
+            return -1;
+        }
+        if (DEBUG) {
+            Assert.assertTrue(i < proxySpec.length());
+        }
+        return Integer.parseInt(proxySpec.substring(i+1));
+    }
+
+    /**
+     * Return the proxy object to be used for the URL given as parameter.
+     * @param ctx A Context used to get the settings for the proxy host.
+     * @param url A URL to be accessed. Used to evaluate exclusion list.
+     * @return Proxy (java.net) object containing the host name. If the
+     *         user did not set a hostname it returns the default host.
+     *         A null value means that no host is to be used.
+     * {@hide}
+     */
+    public static final java.net.Proxy getProxy(Context ctx, String url) {
+        sProxyInfoLock.readLock().lock();
+        java.net.Proxy retval;
+        try {
+            if (sGlobalProxyChangedObserver == null) {
+                registerContentObserversReadLocked(ctx);
+                parseGlobalProxyInfoReadLocked(ctx);
+            }
+            if (sGlobalProxySpec != null) {
+                // Proxy defined - Apply exclusion rules
+                if (isURLInExclusionList(url, sGlobalProxySpec.exclusionList)) {
+                    // Return no proxy
+                    retval = java.net.Proxy.NO_PROXY;
+                } else {
+                    retval =
+                        new java.net.Proxy(java.net.Proxy.Type.HTTP, sGlobalProxySpec.address);
+                }
+            } else {
+                retval = getDefaultProxy(ctx, url);
+            }
+        } finally {
+            sProxyInfoLock.readLock().unlock();
+        }
+        if ((retval != java.net.Proxy.NO_PROXY) && (isLocalHost(url))) {
+            retval = java.net.Proxy.NO_PROXY;
+        }
+        return retval;
+    }
+
+    // TODO: deprecate this function
     /**
      * Return the proxy host set by the user.
      * @param ctx A Context used to get the settings for the proxy host.
@@ -43,81 +190,291 @@ final public class Proxy {
      *         name it returns the default host. A null value means that no
      *         host is to be used.
      */
-    static final public String getHost(Context ctx) {
-        ContentResolver contentResolver = ctx.getContentResolver();
-        Assert.assertNotNull(contentResolver);
-        String host = Settings.Secure.getString(
-                contentResolver,
-                Settings.Secure.HTTP_PROXY);
-        if (host != null) {
-            int i = host.indexOf(':');
-            if (i == -1) {
-                if (DEBUG) {
-                    Assert.assertTrue(host.length() == 0);
-                }
-                return null;
-            }
-            return host.substring(0, i);
+    public static final String getHost(Context ctx) {
+        java.net.Proxy proxy = getProxy(ctx, null);
+        if (proxy == java.net.Proxy.NO_PROXY) return null;
+        try {
+            return ((InetSocketAddress)(proxy.address())).getHostName();
+        } catch (Exception e) {
+            return null;
         }
-        return getDefaultHost();
     }
 
+    // TODO: deprecate this function
     /**
      * Return the proxy port set by the user.
      * @param ctx A Context used to get the settings for the proxy port.
      * @return The port number to use or -1 if no proxy is to be used.
      */
-    static final public int getPort(Context ctx) {
-        ContentResolver contentResolver = ctx.getContentResolver();
-        Assert.assertNotNull(contentResolver);
-        String host = Settings.Secure.getString(
-                contentResolver,
-                Settings.Secure.HTTP_PROXY);
-        if (host != null) {
-            int i = host.indexOf(':');
-            if (i == -1) {
-                if (DEBUG) {
-                    Assert.assertTrue(host.length() == 0);
-                }
-                return -1;
-            }
-            if (DEBUG) {
-                Assert.assertTrue(i < host.length());
-            }
-            return Integer.parseInt(host.substring(i+1));
+    public static final int getPort(Context ctx) {
+        java.net.Proxy proxy = getProxy(ctx, null);
+        if (proxy == java.net.Proxy.NO_PROXY) return -1;
+        try {
+            return ((InetSocketAddress)(proxy.address())).getPort();
+        } catch (Exception e) {
+            return -1;
         }
-        return getDefaultPort();
     }
 
+    // TODO: deprecate this function
     /**
      * Return the default proxy host specified by the carrier.
      * @return String containing the host name or null if there is no proxy for
      * this carrier.
      */
-    static final public String getDefaultHost() {
-        String host = SystemProperties.get("net.gprs.http-proxy");
-        if (host != null) {
-            Uri u = Uri.parse(host);
-            host = u.getHost();
-            return host;
-        } else {
-            return null;
-        }
+    public static final String getDefaultHost() {
+        return null;
     }
 
+    // TODO: deprecate this function
     /**
      * Return the default proxy port specified by the carrier.
      * @return The port number to be used with the proxy host or -1 if there is
      * no proxy for this carrier.
      */
-    static final public int getDefaultPort() {
-        String host = SystemProperties.get("net.gprs.http-proxy");
-        if (host != null) {
-            Uri u = Uri.parse(host);
-            return u.getPort();
+    public static final int getDefaultPort() {
+        return -1;
+    }
+
+    // TODO - cache the details for each network so we don't have to fetch and parse
+    // on each request
+    private static final java.net.Proxy getDefaultProxy(Context context, String url) {
+        if (sConnectivityManager == null) {
+            sConnectivityManager = (ConnectivityManager)context.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+        }
+        if (sConnectivityManager == null) return java.net.Proxy.NO_PROXY;
+
+        LinkProperties linkProperties = sConnectivityManager.getActiveLinkProperties();
+
+        if (linkProperties != null) {
+            ProxyProperties proxyProperties = linkProperties.getHttpProxy();
+
+            if (proxyProperties != null) {
+                String exclusionList = proxyProperties.getExclusionList();
+                SocketAddress socketAddr = proxyProperties.getSocketAddress();
+                if (socketAddr != null) {
+                    String[] parsedExclusionArray =
+                            parsedExclusionArray = parseExclusionList(exclusionList);
+                    if (!isURLInExclusionList(url, parsedExclusionArray)) {
+                        return new java.net.Proxy(java.net.Proxy.Type.HTTP, socketAddr);
+                    }
+                }
+            }
+        }
+        return java.net.Proxy.NO_PROXY;
+    }
+
+    // TODO: remove this function / deprecate
+    /**
+     * Returns the preferred proxy to be used by clients. This is a wrapper
+     * around {@link android.net.Proxy#getHost()}. Currently no proxy will
+     * be returned for localhost or if the active network is Wi-Fi.
+     *
+     * @param context the context which will be passed to
+     * {@link android.net.Proxy#getHost()}
+     * @param url the target URL for the request
+     * @note Calling this method requires permission
+     * android.permission.ACCESS_NETWORK_STATE
+     * @return The preferred proxy to be used by clients, or null if there
+     * is no proxy.
+     * {@hide}
+     */
+    public static final HttpHost getPreferredHttpHost(Context context,
+            String url) {
+        java.net.Proxy prefProxy = getProxy(context, url);
+        if (prefProxy.equals(java.net.Proxy.NO_PROXY)) {
+            return null;
         } else {
-            return -1;
+            InetSocketAddress sa = (InetSocketAddress)prefProxy.address();
+            return new HttpHost(sa.getHostName(), sa.getPort(), "http");
         }
     }
 
-};
+    private static final boolean isLocalHost(String url) {
+        if (url == null) {
+            return false;
+        }
+        try {
+            final URI uri = URI.create(url);
+            final String host = uri.getHost();
+            if (host != null) {
+                if (host.equalsIgnoreCase("localhost")) {
+                    return true;
+                }
+                if (InetAddress.getByName(host).isLoopbackAddress()) {
+                    return true;
+                }
+            }
+        } catch (UnknownHostException uex) {
+            // Ignore (INetworkSystem.ipStringToByteArray)
+        } catch (IllegalArgumentException iex) {
+            // Ignore (URI.create)
+        }
+        return false;
+    }
+
+    private static class SettingsObserver extends ContentObserver {
+
+        private Context mContext;
+
+        SettingsObserver(Context ctx) {
+            super(new Handler(ctx.getMainLooper()));
+            mContext = ctx;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            sProxyInfoLock.readLock().lock();
+            parseGlobalProxyInfoReadLocked(mContext);
+            sProxyInfoLock.readLock().unlock();
+        }
+    }
+
+    private static final void registerContentObserversReadLocked(Context ctx) {
+        Uri uriGlobalProxy = Settings.Secure.getUriFor(Settings.Secure.HTTP_PROXY);
+        Uri uriGlobalExclList =
+            Settings.Secure.getUriFor(Settings.Secure.HTTP_PROXY_EXCLUSION_LIST);
+
+        // No lock upgrading (from read to write) allowed
+        sProxyInfoLock.readLock().unlock();
+        sProxyInfoLock.writeLock().lock();
+        try {
+            sGlobalProxyChangedObserver = new SettingsObserver(ctx);
+        } finally {
+            // Downgrading locks (from write to read) is allowed
+            sProxyInfoLock.readLock().lock();
+            sProxyInfoLock.writeLock().unlock();
+        }
+        ctx.getContentResolver().registerContentObserver(uriGlobalProxy, false,
+                sGlobalProxyChangedObserver);
+        ctx.getContentResolver().registerContentObserver(uriGlobalExclList, false,
+                sGlobalProxyChangedObserver);
+    }
+
+    private static final void parseGlobalProxyInfoReadLocked(Context ctx) {
+        ContentResolver contentResolver = ctx.getContentResolver();
+        String proxyHost =  Settings.Secure.getString(
+                contentResolver,
+                Settings.Secure.HTTP_PROXY);
+        if (TextUtils.isEmpty(proxyHost)) {
+            // Clear signal
+            sProxyInfoLock.readLock().unlock();
+            sProxyInfoLock.writeLock().lock();
+            sGlobalProxySpec = null;
+            sProxyInfoLock.readLock().lock();
+            sProxyInfoLock.writeLock().unlock();
+            return;
+        }
+        String exclusionListSpec = Settings.Secure.getString(
+                contentResolver,
+                Settings.Secure.HTTP_PROXY_EXCLUSION_LIST);
+        String host = parseHost(proxyHost);
+        int port = parsePort(proxyHost);
+        ProxySpec tmpProxySpec = null;
+        if (proxyHost != null) {
+            tmpProxySpec = new ProxySpec();
+            tmpProxySpec.address = new InetSocketAddress(host, port);
+            tmpProxySpec.exclusionList = parseExclusionList(exclusionListSpec);
+        }
+        sProxyInfoLock.readLock().unlock();
+        sProxyInfoLock.writeLock().lock();
+        sGlobalProxySpec = tmpProxySpec;
+        sProxyInfoLock.readLock().lock();
+        sProxyInfoLock.writeLock().unlock();
+    }
+
+    private static String[] parseExclusionList(String exclusionList) {
+        String[] processedArray = new String[0];
+        if (!TextUtils.isEmpty(exclusionList)) {
+            String[] exclusionListArray = exclusionList.toLowerCase().split(",");
+            processedArray = new String[exclusionListArray.length];
+            for (int i = 0; i < exclusionListArray.length; i++) {
+                String entry = exclusionListArray[i].trim();
+                if (entry.startsWith(".")) {
+                    entry = entry.substring(1);
+                }
+                processedArray[i] = entry;
+            }
+        }
+        return processedArray;
+    }
+
+    /**
+     * Validate syntax of hostname, port and exclusion list entries
+     * {@hide}
+     */
+    public static void validate(String hostname, String port, String exclList) {
+        Matcher match = HOSTNAME_PATTERN.matcher(hostname);
+        Matcher listMatch = EXCLLIST_PATTERN.matcher(exclList);
+
+        if (!match.matches()) {
+            throw new IllegalArgumentException();
+        }
+
+        if (!listMatch.matches()) {
+            throw new IllegalArgumentException();
+        }
+
+        if (hostname.length() > 0 && port.length() == 0) {
+            throw new IllegalArgumentException();
+        }
+
+        if (port.length() > 0) {
+            if (hostname.length() == 0) {
+                throw new IllegalArgumentException();
+            }
+            int portVal = -1;
+            try {
+                portVal = Integer.parseInt(port);
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException();
+            }
+            if (portVal <= 0 || portVal > 0xFFFF) {
+                throw new IllegalArgumentException();
+            }
+        }
+    }
+
+    static class AndroidProxySelectorRoutePlanner
+            extends org.apache.http.impl.conn.ProxySelectorRoutePlanner {
+
+        private Context mContext;
+
+        public AndroidProxySelectorRoutePlanner(SchemeRegistry schreg, ProxySelector prosel,
+                Context context) {
+            super(schreg, prosel);
+            mContext = context;
+        }
+
+        @Override
+        protected java.net.Proxy chooseProxy(List<java.net.Proxy> proxies, HttpHost target,
+                HttpRequest request, HttpContext context) {
+            return getProxy(mContext, target.getHostName());
+        }
+
+        @Override
+        protected HttpHost determineProxy(HttpHost target, HttpRequest request,
+                HttpContext context) {
+            return getPreferredHttpHost(mContext, target.getHostName());
+        }
+
+        @Override
+        public HttpRoute determineRoute(HttpHost target, HttpRequest request,
+                HttpContext context) {
+            HttpHost proxy = getPreferredHttpHost(mContext, target.getHostName());
+            if (proxy == null) {
+                return new HttpRoute(target);
+            } else {
+                return new HttpRoute(target, null, proxy, false);
+            }
+        }
+    }
+
+    /** @hide */
+    public static final HttpRoutePlanner getAndroidProxySelectorRoutePlanner(Context context) {
+        AndroidProxySelectorRoutePlanner ret = new AndroidProxySelectorRoutePlanner(
+                new SchemeRegistry(), ProxySelector.getDefault(), context);
+        return ret;
+    }
+}

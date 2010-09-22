@@ -1,0 +1,782 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.animation;
+
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * This class enables automatic animations on layout changes in ViewGroup objects. To enable
+ * transitions for a layout container, create a LayoutTransition object and set it on any
+ * ViewGroup by calling {@link ViewGroup#setLayoutTransition(LayoutTransition)}. This will cause
+ * default animations to run whenever items are added to or removed from that container. To specify
+ * custom animations, use the {@link LayoutTransition#setAnimator(int, Animator)
+ * setAnimator()} method.
+ *
+ * <p>One of the core concepts of these transition animations is that there are two core
+ * changes that cause the transition and four different animations that run because of
+ * those changes. The changes that trigger the transition are items being added to a container
+ * (referred to as an "appearing" transition) or removed from a container (also known as
+ * "disappearing"). The animations that run due to those events are one that animates
+ * items being added, one that animates items being removed, and two that animate the other
+ * items in the container that change due to the add/remove occurrence. Users of
+ * the transition may want different animations for the changing items depending on whether
+ * they are changing due to anappearing or disappearing event, so there is one animation for
+ * each of these variations of the changing event. Most of the API of this class is concerned
+ * with setting up the basic properties of the animations used in these four situations,
+ * or with setting up custom animations for any or all of the four.</p>
+ *
+ * <p>The animations specified for the transition, both the defaults and any custom animations
+ * set on the transition object, are templates only. That is, these animations exist to hold the
+ * basic animation properties, such as the duration, start delay, and properties being animated.
+ * But the actual target object, as well as the start and end values for those properties, are
+ * set automatically in the process of setting up the transition each time it runs. Each of the
+ * animations is cloned from the original copy and the clone is then populated with the dynamic
+ * values of the target being animated (such as one of the items in a layout container that is
+ * moving as a result of the layout event) as well as the values that are changing (such as the
+ * position and size of that object). The actual values that are pushed to each animation
+ * depends on what properties are specified for the animation. For example, the default
+ * CHANGE_APPEARING animation animates <code>left</code>, <code>top</code>, <code>right</code>,
+ * and <code>bottom</code>. Values for these properties are updated with the pre- and post-layout
+ * values when the transition begins. Custom animations will be similarly populated with
+ * the target and values being animated, assuming they use ObjectAnimator objects with
+ * property names that are known on the target object.</p>
+ */
+public class LayoutTransition {
+
+    /**
+     * A flag indicating the animation that runs on those items that are changing
+     * due to a new item appearing in the container.
+     */
+    public static final int CHANGE_APPEARING = 0;
+
+    /**
+     * A flag indicating the animation that runs on those items that are changing
+     * due to a new item disappearing from the container.
+     */
+    public static final int CHANGE_DISAPPEARING = 1;
+
+    /**
+     * A flag indicating the animation that runs on those items that are changing
+     * due to a new item appearing in the container.
+     */
+    public static final int APPEARING = 2;
+
+    /**
+     * A flag indicating the animation that runs on those items that are changing
+     * due to a new item appearing in the container.
+     */
+    public static final int DISAPPEARING = 3;
+
+    /**
+     * These variables hold the animations that are currently used to run the transition effects.
+     * These animations are set to defaults, but can be changed to custom animations by
+     * calls to setAnimator().
+     */
+    private Animator mDisappearingAnim = null;
+    private Animator mAppearingAnim = null;
+    private Animator mChangingAppearingAnim = null;
+    private Animator mChangingDisappearingAnim = null;
+
+    /**
+     * These are the default animations, defined in the constructor, that will be used
+     * unless the user specifies custom animations.
+     */
+    private static ObjectAnimator defaultChangeIn;
+    private static ObjectAnimator defaultChangeOut;
+    private static ObjectAnimator defaultFadeIn;
+    private static ObjectAnimator defaultFadeOut;
+
+    /**
+     * The default duration used by all animations.
+     */
+    private static long DEFAULT_DURATION = 300;
+
+    /**
+     * The durations of the four different animations
+     */
+    private long mChangingAppearingDuration = DEFAULT_DURATION;
+    private long mChangingDisappearingDuration = DEFAULT_DURATION;
+    private long mAppearingDuration = DEFAULT_DURATION;
+    private long mDisappearingDuration = DEFAULT_DURATION;
+
+    /**
+     * The start delays of the four different animations. Note that the default behavior of
+     * the appearing item is the default duration, since it should wait for the items to move
+     * before fading it. Same for the changing animation when disappearing; it waits for the item
+     * to fade out before moving the other items.
+     */
+    private long mAppearingDelay = DEFAULT_DURATION;
+    private long mDisappearingDelay = 0;
+    private long mChangingAppearingDelay = 0;
+    private long mChangingDisappearingDelay = DEFAULT_DURATION;
+
+    /**
+     * The inter-animation delays used on the two changing animations
+     */
+    private long mChangingAppearingStagger = 0;
+    private long mChangingDisappearingStagger = 0;
+
+    /**
+     * The default interpolators used for the animations
+     */
+    private Interpolator mAppearingInterpolator = new AccelerateDecelerateInterpolator();
+    private Interpolator mDisappearingInterpolator = new AccelerateDecelerateInterpolator();
+    private Interpolator mChangingAppearingInterpolator = new DecelerateInterpolator();
+    private Interpolator mChangingDisappearingInterpolator = new DecelerateInterpolator();
+
+    /**
+     * This hashmap is used to store the animations that are currently running as part of
+     * the transition. The reason for this is that a further layout event should cause
+     * existing animations to stop where they are prior to starting new animations. So
+     * we cache all of the current animations in this map for possible cancellation on
+     * another layout event.
+     */
+    private HashMap<View, Animator> currentAnimations = new HashMap<View, Animator>();
+
+    /**
+     * This hashmap is used to track the listeners that have been added to the children of
+     * a container. When a layout change occurs, an animation is created for each View, so that
+     * the pre-layout values can be cached in that animation. Then a listener is added to the
+     * view to see whether the layout changes the bounds of that view. If so, the animation
+     * is set with the final values and then run. If not, the animation is not started. When
+     * the process of setting up and running all appropriate animations is done, we need to
+     * remove these listeners and clear out the map.
+     */
+    private HashMap<View, View.OnLayoutChangeListener> layoutChangeListenerMap =
+            new HashMap<View, View.OnLayoutChangeListener>();
+
+    /**
+     * Used to track the current delay being assigned to successive animations as they are
+     * started. This value is incremented for each new animation, then zeroed before the next
+     * transition begins.
+     */
+    private long staggerDelay;
+
+    /**
+     * The set of listeners that should be notified when APPEARING/DISAPPEARING transitions
+     * start and end.
+     */
+    private ArrayList<TransitionListener> mListeners;
+
+
+    /**
+     * Constructs a LayoutTransition object. By default, the object will listen to layout
+     * events on any ViewGroup that it is set on and will run default animations for each
+     * type of layout event.
+     */
+    public LayoutTransition() {
+        if (defaultChangeIn == null) {
+            // "left" is just a placeholder; we'll put real properties/values in when needed
+            PropertyValuesHolder<Integer> pvhLeft = new PropertyValuesHolder<Integer>("left", 0, 1);
+            PropertyValuesHolder<Integer> pvhTop = new PropertyValuesHolder<Integer>("top", 0, 1);
+            PropertyValuesHolder<Integer> pvhRight = new PropertyValuesHolder<Integer>("right", 0, 1);
+            PropertyValuesHolder<Integer> pvhBottom = new PropertyValuesHolder<Integer>("bottom", 0, 1);
+            defaultChangeIn = new ObjectAnimator<PropertyValuesHolder>(DEFAULT_DURATION, this,
+                    pvhLeft, pvhTop, pvhRight, pvhBottom);
+            defaultChangeIn.setStartDelay(mChangingAppearingDelay);
+            defaultChangeIn.setInterpolator(mChangingAppearingInterpolator);
+            defaultChangeOut = defaultChangeIn.clone();
+            defaultChangeOut.setStartDelay(mChangingDisappearingDelay);
+            defaultChangeOut.setInterpolator(mChangingDisappearingInterpolator);
+            defaultFadeIn =
+                    new ObjectAnimator<Float>(DEFAULT_DURATION, this, "alpha", 0f, 1f);
+            defaultFadeIn.setStartDelay(mAppearingDelay);
+            defaultFadeIn.setInterpolator(mAppearingInterpolator);
+            defaultFadeOut =
+                    new ObjectAnimator<Float>(DEFAULT_DURATION, this, "alpha", 1f, 0f);
+            defaultFadeOut.setStartDelay(mDisappearingDelay);
+            defaultFadeOut.setInterpolator(mDisappearingInterpolator);
+        }
+        mChangingAppearingAnim = defaultChangeIn;
+        mChangingDisappearingAnim = defaultChangeOut;
+        mAppearingAnim = defaultFadeIn;
+        mDisappearingAnim = defaultFadeOut;
+    }
+
+    /**
+     * Sets the duration to be used by all animations of this transition object. If you want to
+     * set the duration of just one of the animations in particular, use the
+     * {@link #setDuration(int, long)} method.
+     *
+     * @param duration The length of time, in milliseconds, that the transition animations
+     * should last.
+     */
+    public void setDuration(long duration) {
+        mChangingAppearingDuration = duration;
+        mChangingDisappearingDuration = duration;
+        mAppearingDuration = duration;
+        mDisappearingDuration = duration;
+    }
+
+    /**
+     * Sets the start delay on one of the animation objects used by this transition. The
+     * <code>transitionType</code> parameter determines the animation whose start delay
+     * is being set.
+     *
+     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose start
+     * delay is being set.
+     * @param delay The length of time, in milliseconds, to delay before starting the animation.
+     * @see Animator#setStartDelay(long)
+     */
+    public void setStartDelay(int transitionType, long delay) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                mChangingAppearingDelay = delay;
+                break;
+            case CHANGE_DISAPPEARING:
+                mChangingDisappearingDelay = delay;
+                break;
+            case APPEARING:
+                mAppearingDelay = delay;
+                break;
+            case DISAPPEARING:
+                mDisappearingDelay = delay;
+                break;
+        }
+    }
+
+    /**
+     * Gets the start delay on one of the animation objects used by this transition. The
+     * <code>transitionType</code> parameter determines the animation whose start delay
+     * is returned.
+     *
+     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose start
+     * delay is returned.
+     * @return long The start delay of the specified animation.
+     * @see Animator#getStartDelay()
+     */
+    public long getStartDelay(int transitionType) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                return mChangingAppearingDuration;
+            case CHANGE_DISAPPEARING:
+                return mChangingDisappearingDuration;
+            case APPEARING:
+                return mAppearingDuration;
+            case DISAPPEARING:
+                return mDisappearingDuration;
+        }
+        // shouldn't reach here
+        return 0;
+    }
+
+    /**
+     * Sets the duration on one of the animation objects used by this transition. The
+     * <code>transitionType</code> parameter determines the animation whose duration
+     * is being set.
+     *
+     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
+     * duration is being set.
+     * @param duration The length of time, in milliseconds, that the specified animation should run.
+     * @see Animator#setDuration(long)
+     */
+    public void setDuration(int transitionType, long duration) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                mChangingAppearingDuration = duration;
+                break;
+            case CHANGE_DISAPPEARING:
+                mChangingDisappearingDuration = duration;
+                break;
+            case APPEARING:
+                mAppearingDuration = duration;
+                break;
+            case DISAPPEARING:
+                mDisappearingDuration = duration;
+                break;
+        }
+    }
+
+    /**
+     * Gets the duration on one of the animation objects used by this transition. The
+     * <code>transitionType</code> parameter determines the animation whose duration
+     * is returned.
+     *
+     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
+     * duration is returned.
+     * @return long The duration of the specified animation.
+     * @see Animator#getDuration()
+     */
+    public long getDuration(int transitionType) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                return mChangingAppearingDuration;
+            case CHANGE_DISAPPEARING:
+                return mChangingDisappearingDuration;
+            case APPEARING:
+                return mAppearingDuration;
+            case DISAPPEARING:
+                return mDisappearingDuration;
+        }
+        // shouldn't reach here
+        return 0;
+    }
+
+    /**
+     * Sets the length of time to delay between starting each animation during one of the
+     * CHANGE animations.
+     *
+     * @param transitionType A value of {@link #CHANGE_APPEARING} or @link #CHANGE_DISAPPEARING}.
+     * @param duration The length of time, in milliseconds, to delay before launching the next
+     * animation in the sequence.
+     */
+    public void setStagger(int transitionType, long duration) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                mChangingAppearingStagger = duration;
+                break;
+            case CHANGE_DISAPPEARING:
+                mChangingDisappearingStagger = duration;
+                break;
+            // noop other cases
+        }
+    }
+
+    /**
+     * Tets the length of time to delay between starting each animation during one of the
+     * CHANGE animations.
+     *
+     * @param transitionType A value of {@link #CHANGE_APPEARING} or @link #CHANGE_DISAPPEARING}.
+     * @return long The length of time, in milliseconds, to delay before launching the next
+     * animation in the sequence.
+     */
+    public long getStagger(int transitionType) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                return mChangingAppearingStagger;
+            case CHANGE_DISAPPEARING:
+                return mChangingDisappearingStagger;
+        }
+        // shouldn't reach here
+        return 0;
+    }
+
+    /**
+     * Sets the interpolator on one of the animation objects used by this transition. The
+     * <code>transitionType</code> parameter determines the animation whose interpolator
+     * is being set.
+     *
+     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
+     * duration is being set.
+     * @param interpolator The interpolator that the specified animation should use.
+     * @see Animator#setInterpolator(android.view.animation.Interpolator)
+     */
+    public void setInterpolator(int transitionType, Interpolator interpolator) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                mChangingAppearingInterpolator = interpolator;
+                break;
+            case CHANGE_DISAPPEARING:
+                mChangingDisappearingInterpolator = interpolator;
+                break;
+            case APPEARING:
+                mAppearingInterpolator = interpolator;
+                break;
+            case DISAPPEARING:
+                mDisappearingInterpolator = interpolator;
+                break;
+        }
+    }
+
+    /**
+     * Gets the interpolator on one of the animation objects used by this transition. The
+     * <code>transitionType</code> parameter determines the animation whose interpolator
+     * is returned.
+     *
+     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
+     * duration is being set.
+     * @return Interpolator The interpolator that the specified animation uses.
+     * @see Animator#setInterpolator(android.view.animation.Interpolator)
+     */
+    public Interpolator getInterpolator(int transitionType) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                return mChangingAppearingInterpolator;
+            case CHANGE_DISAPPEARING:
+                return mChangingDisappearingInterpolator;
+            case APPEARING:
+                return mAppearingInterpolator;
+            case DISAPPEARING:
+                return mDisappearingInterpolator;
+        }
+        // shouldn't reach here
+        return null;
+    }
+
+    /**
+     * Sets the animation used during one of the transition types that may run. Any
+     * Animator object can be used, but to be most useful in the context of layout
+     * transitions, the animation should either be a ObjectAnimator or a AnimatorSet
+     * of animations including PropertyAnimators. Also, these ObjectAnimator objects
+     * should be able to get and set values on their target objects automatically. For
+     * example, a ObjectAnimator that animates the property "left" is able to set and get the
+     * <code>left</code> property from the View objects being animated by the layout
+     * transition. The transition works by setting target objects and properties
+     * dynamically, according to the pre- and post-layoout values of those objects, so
+     * having animations that can handle those properties appropriately will work best
+     * for custom animation. The dynamic setting of values is only the case for the
+     * CHANGE animations; the APPEARING and DISAPPEARING animations are simply run with
+     * the values they have.
+     *
+     * <p>It is also worth noting that any and all animations (and their underlying
+     * PropertyValuesHolder objects) will have their start and end values set according
+     * to the pre- and post-layout values. So, for example, a custom animation on "alpha"
+     * as the CHANGE_APPEARING animation will inherit the real value of alpha on the target
+     * object (presumably 1) as its starting and ending value when the animation begins.
+     * Animations which need to use values at the beginning and end that may not match the
+     * values queried when the transition begins may need to use a different mechanism
+     * than a standard ObjectAnimator object.</p>
+     *
+     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
+     * duration is being set.
+     * @param animator The animation being assigned.
+     */
+    public void setAnimator(int transitionType, Animator animator) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                mChangingAppearingAnim = (animator != null) ? animator : defaultChangeIn;
+                break;
+            case CHANGE_DISAPPEARING:
+                mChangingDisappearingAnim = (animator != null) ? animator : defaultChangeOut;
+                break;
+            case APPEARING:
+                mAppearingAnim = (animator != null) ? animator : defaultFadeIn;
+                break;
+            case DISAPPEARING:
+                mDisappearingAnim = (animator != null) ? animator : defaultFadeOut;
+                break;
+        }
+    }
+
+    /**
+     * Gets the animation used during one of the transition types that may run.
+     *
+     * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
+     * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
+     * duration is being set.
+     * @return Animator The animation being used for the given transition type.
+     * @see #setAnimator(int, Animator)
+     */
+    public Animator getAnimator(int transitionType) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+                return mChangingAppearingAnim;
+            case CHANGE_DISAPPEARING:
+                return mChangingDisappearingAnim;
+            case APPEARING:
+                return mAppearingAnim;
+            case DISAPPEARING:
+                return mDisappearingAnim;
+        }
+        // shouldn't reach here
+        return null;
+    }
+
+    /**
+     * This function sets up runs animations on all of the views that change during layout.
+     * For every child in the parent, we create a change animation of the appropriate
+     * type (appearing or disappearing) and ask it to populate its start values from its
+     * target view. We add layout listeners to all child views and listen for changes. For
+     * those views that change, we populate the end values for those animations and start them.
+     * Animations are not run on unchanging views.
+     *
+     * @param parent The container which is undergoing an appearing or disappearing change.
+     * @param newView The view being added to or removed from the parent.
+     * @param changeReason A value of APPEARING or DISAPPEARING, indicating whether the
+     * transition is occuring because an item is being added to or removed from the parent.
+     */
+    private void runChangeTransition(final ViewGroup parent, View newView, final int changeReason) {
+        // reset the inter-animation delay, in case we use it later
+        staggerDelay = 0;
+
+        final ViewTreeObserver observer = parent.getViewTreeObserver(); // used for later cleanup
+        if (!observer.isAlive()) {
+            // If the observer's not in a good state, skip the transition
+            return;
+        }
+        int numChildren = parent.getChildCount();
+
+        for (int i = 0; i < numChildren; ++i) {
+            final View child = parent.getChildAt(i);
+
+            // only animate the views not being added or removed
+            if (child != newView) {
+
+                // If there's an animation running on this view already, cancel it
+                Animator currentAnimation = currentAnimations.get(child);
+                if (currentAnimation != null) {
+                    currentAnimation.cancel();
+                    currentAnimations.remove(child);
+                }
+
+                // Make a copy of the appropriate animation
+                final Animator anim = (changeReason == APPEARING) ?
+                        mChangingAppearingAnim.clone() :
+                        mChangingDisappearingAnim.clone();
+
+                // Set the target object for the animation
+                anim.setTarget(child);
+
+                // A ObjectAnimator (or AnimatorSet of them) can extract start values from
+                // its target object
+                anim.setupStartValues();
+
+                // Add a listener to track layout changes on this view. If we don't get a callback,
+                // then there's nothing to animate.
+                View.OnLayoutChangeListener listener = new View.OnLayoutChangeListener() {
+                    public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                            int oldLeft, int oldTop, int oldRight, int oldBottom) {
+
+                        // Cache the animation in case we need to cancel it later
+                        currentAnimations.put(child, anim);
+
+                        // Tell the animation to extract end values from the changed object
+                        anim.setupEndValues();
+
+                        long startDelay;
+                        long duration;
+                        if (changeReason == APPEARING) {
+                            startDelay = mChangingAppearingDelay + staggerDelay;
+                            staggerDelay += mChangingAppearingStagger;
+                            duration = mChangingAppearingDuration;
+                        } else {
+                            startDelay = mChangingDisappearingDelay + staggerDelay;
+                            staggerDelay += mChangingDisappearingStagger;
+                            duration = mChangingDisappearingDuration;
+                        }
+                        anim.setStartDelay(startDelay);
+                        anim.setDuration(duration);
+
+                        // Remove the animation from the cache when it ends
+                        anim.addListener(new AnimatorListenerAdapter() {
+                            private boolean canceled = false;
+                            public void onAnimationCancel(Animator animator) {
+                                // we remove canceled animations immediately, not here
+                                canceled = true;
+                            }
+                            public void onAnimationEnd(Animator animator) {
+                                if (!canceled) {
+                                    currentAnimations.remove(child);
+                                }
+                            }
+                        });
+                        if (anim instanceof ObjectAnimator) {
+                            ((ObjectAnimator) anim).setCurrentPlayTime(0);
+                        }
+                        anim.start();
+
+                        // this only removes listeners whose views changed - must clear the
+                        // other listeners later
+                        child.removeOnLayoutChangeListener(this);
+                        layoutChangeListenerMap.remove(child);
+                    }
+                };
+                child.addOnLayoutChangeListener(listener);
+                // cache the listener for later removal
+                layoutChangeListenerMap.put(child, listener);
+            }
+        }
+        // This is the cleanup step. When we get this rendering event, we know that all of
+        // the appropriate animations have been set up and run. Now we can clear out the
+        // layout listeners.
+        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            public boolean onPreDraw() {
+                parent.getViewTreeObserver().removeOnPreDrawListener(this);
+                int numChildren = parent.getChildCount();
+                for (int i = 0; i < numChildren; ++i) {
+                    final View child = parent.getChildAt(i);
+                    child.removeOnLayoutChangeListener(layoutChangeListenerMap.get(child));
+                }
+                layoutChangeListenerMap.clear();
+                return true;
+            }
+        });
+    }
+
+    /**
+     * This method runs the animation that makes an added item appear.
+     *
+     * @param parent The ViewGroup to which the View is being added.
+     * @param child The View being added to the ViewGroup.
+     */
+    private void runAppearingTransition(final ViewGroup parent, final View child) {
+        Animator anim = mAppearingAnim.clone();
+        anim.setTarget(child);
+        anim.setStartDelay(mAppearingDelay);
+        anim.setDuration(mAppearingDuration);
+        if (anim instanceof ObjectAnimator) {
+            ((ObjectAnimator) anim).setCurrentPlayTime(0);
+        }
+        if (mListeners != null) {
+            anim.addListener(new AnimatorListenerAdapter() {
+                public void onAnimationEnd() {
+                    for (TransitionListener listener : mListeners) {
+                        listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
+                    }
+                }
+            });
+        }
+        anim.start();
+    }
+
+    /**
+     * This method runs the animation that makes a removed item disappear.
+     *
+     * @param parent The ViewGroup from which the View is being removed.
+     * @param child The View being removed from the ViewGroup.
+     */
+    private void runDisappearingTransition(final ViewGroup parent, final View child) {
+        Animator anim = mDisappearingAnim.clone();
+        anim.setStartDelay(mDisappearingDelay);
+        anim.setDuration(mDisappearingDuration);
+        anim.setTarget(child);
+        if (mListeners != null) {
+            anim.addListener(new AnimatorListenerAdapter() {
+                public void onAnimationEnd() {
+                    for (TransitionListener listener : mListeners) {
+                        listener.endTransition(LayoutTransition.this, parent, child, DISAPPEARING);
+                    }
+                }
+            });
+        }
+        if (anim instanceof ObjectAnimator) {
+            ((ObjectAnimator) anim).setCurrentPlayTime(0);
+        }
+        anim.start();
+    }
+
+    /**
+     * This method is called by ViewGroup when a child view is about to be added to the
+     * container. This callback starts the process of a transition; we grab the starting
+     * values, listen for changes to all of the children of the container, and start appropriate
+     * animations.
+     *
+     * @param parent The ViewGroup to which the View is being added.
+     * @param child The View being added to the ViewGroup.
+     */
+    public void childAdd(ViewGroup parent, View child) {
+        if (mListeners != null) {
+            for (TransitionListener listener : mListeners) {
+                listener.startTransition(this, parent, child, APPEARING);
+            }
+        }
+        runChangeTransition(parent, child, APPEARING);
+        runAppearingTransition(parent, child);
+    }
+
+    /**
+     * This method is called by ViewGroup when a child view is about to be removed from the
+     * container. This callback starts the process of a transition; we grab the starting
+     * values, listen for changes to all of the children of the container, and start appropriate
+     * animations.
+     *
+     * @param parent The ViewGroup from which the View is being removed.
+     * @param child The View being removed from the ViewGroup.
+     */
+    public void childRemove(ViewGroup parent, View child) {
+        if (mListeners != null) {
+            for (TransitionListener listener : mListeners) {
+                listener.startTransition(this, parent, child, DISAPPEARING);
+            }
+        }
+        runChangeTransition(parent, child, DISAPPEARING);
+        runDisappearingTransition(parent, child);
+    }
+
+    /**
+     * Add a listener that will be called when the bounds of the view change due to
+     * layout processing.
+     *
+     * @param listener The listener that will be called when layout bounds change.
+     */
+    public void addTransitionListener(TransitionListener listener) {
+        if (mListeners == null) {
+            mListeners = new ArrayList<TransitionListener>();
+        }
+        mListeners.add(listener);
+    }
+
+    /**
+     * Remove a listener for layout changes.
+     *
+     * @param listener The listener for layout bounds change.
+     */
+    public void removeTransitionListener(TransitionListener listener) {
+        if (mListeners == null) {
+            return;
+        }
+        mListeners.remove(listener);
+    }
+
+    /**
+     * Gets the current list of listeners for layout changes.
+     * @return
+     */
+    public List<TransitionListener> getTransitionListeners() {
+        return mListeners;
+    }
+
+    /**
+     * This interface is used for listening to starting and ending events for transitions.
+     */
+    public interface TransitionListener {
+
+        /**
+         * This event is sent to listeners when an APPEARING or DISAPPEARING transition
+         * begins.
+         *
+         * @param transition The LayoutTransition sending out the event.
+         * @param container The ViewGroup on which the transition is playing.
+         * @param view The View object being added or removed from its parent.
+         * @param transitionType The type of transition that is beginning, either
+         * {@link android.animation.LayoutTransition#APPEARING} or
+         * {@link android.animation.LayoutTransition#DISAPPEARING}.
+         */
+        public void startTransition(LayoutTransition transition, ViewGroup container,
+                View view, int transitionType);
+
+        /**
+         * This event is sent to listeners when an APPEARING or DISAPPEARING transition ends.
+         *
+         * @param transition The LayoutTransition sending out the event.
+         * @param container The ViewGroup on which the transition is playing.
+         * @param view The View object being added or removed from its parent.
+         * @param transitionType The type of transition that is ending, either
+         * {@link android.animation.LayoutTransition#APPEARING} or
+         * {@link android.animation.LayoutTransition#DISAPPEARING}.
+         */
+        public void endTransition(LayoutTransition transition, ViewGroup container,
+                View view, int transitionType);
+    }
+
+}

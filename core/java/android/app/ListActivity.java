@@ -309,7 +309,7 @@ public class ListActivity extends Activity {
         if (mList != null) {
             return;
         }
-        setContentView(com.android.internal.R.layout.list_content);
+        setContentView(com.android.internal.R.layout.list_content_simple);
 
     }
 

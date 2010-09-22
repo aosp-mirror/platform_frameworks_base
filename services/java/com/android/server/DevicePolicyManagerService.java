@@ -33,6 +33,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -46,6 +47,8 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.net.Proxy;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -58,46 +61,66 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Implementation of the device policy APIs.
  */
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     static final String TAG = "DevicePolicyManagerService";
-    
+
     final Context mContext;
     final MyPackageMonitor mMonitor;
 
     IPowerManager mIPowerManager;
-    
+
     int mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     int mActivePasswordLength = 0;
+    int mActivePasswordUpperCase = 0;
+    int mActivePasswordLowerCase = 0;
+    int mActivePasswordLetters = 0;
+    int mActivePasswordNumeric = 0;
+    int mActivePasswordSymbols = 0;
+    int mActivePasswordNonLetter = 0;
     int mFailedPasswordAttempts = 0;
-    
+
     int mPasswordOwner = -1;
-    
+
     final HashMap<ComponentName, ActiveAdmin> mAdminMap
             = new HashMap<ComponentName, ActiveAdmin>();
     final ArrayList<ActiveAdmin> mAdminList
             = new ArrayList<ActiveAdmin>();
-    
+
     static class ActiveAdmin {
         final DeviceAdminInfo info;
-        
+
         int passwordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         int minimumPasswordLength = 0;
+        int passwordHistoryLength = 0;
+        int minimumPasswordUpperCase = 0;
+        int minimumPasswordLowerCase = 0;
+        int minimumPasswordLetters = 1;
+        int minimumPasswordNumeric = 1;
+        int minimumPasswordSymbols = 1;
+        int minimumPasswordNonLetter = 0;
         long maximumTimeToUnlock = 0;
         int maximumFailedPasswordsForWipe = 0;
-        
+
+        // TODO: review implementation decisions with frameworks team
+        boolean specifiesGlobalProxy = false;
+        String globalProxySpec = null;
+        String globalProxyExclusionList = null;
+
         ActiveAdmin(DeviceAdminInfo _info) {
             info = _info;
         }
-        
+
         int getUid() { return info.getActivityInfo().applicationInfo.uid; }
-        
+
         void writeToXml(XmlSerializer out)
                 throws IllegalArgumentException, IllegalStateException, IOException {
             out.startTag(null, "policies");
@@ -110,7 +133,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (minimumPasswordLength > 0) {
                     out.startTag(null, "min-password-length");
                     out.attribute(null, "value", Integer.toString(minimumPasswordLength));
-                    out.endTag(null, "mn-password-length");
+                    out.endTag(null, "min-password-length");
+                }
+                if(passwordHistoryLength > 0) {
+                    out.startTag(null, "password-history-length");
+                    out.attribute(null, "value", Integer.toString(passwordHistoryLength));
+                    out.endTag(null, "password-history-length");
+                }
+                if (minimumPasswordUpperCase > 0) {
+                    out.startTag(null, "min-password-uppercase");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordUpperCase));
+                    out.endTag(null, "min-password-uppercase");
+                }
+                if (minimumPasswordLowerCase > 0) {
+                    out.startTag(null, "min-password-lowercase");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordLowerCase));
+                    out.endTag(null, "min-password-lowercase");
+                }
+                if (minimumPasswordLetters > 0) {
+                    out.startTag(null, "min-password-letters");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordLetters));
+                    out.endTag(null, "min-password-letters");
+                }
+                if (minimumPasswordNumeric > 0) {
+                    out.startTag(null, "min-password-numeric");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordNumeric));
+                    out.endTag(null, "min-password-numeric");
+                }
+                if (minimumPasswordSymbols > 0) {
+                    out.startTag(null, "min-password-symbols");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordSymbols));
+                    out.endTag(null, "min-password-symbols");
+                }
+                if (minimumPasswordNonLetter > 0) {
+                    out.startTag(null, "min-password-nonletter");
+                    out.attribute(null, "value", Integer.toString(minimumPasswordNonLetter));
+                    out.endTag(null, "min-password-nonletter");
                 }
             }
             if (maximumTimeToUnlock != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
@@ -123,8 +181,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, "value", Integer.toString(maximumFailedPasswordsForWipe));
                 out.endTag(null, "max-failed-password-wipe");
             }
+            if (specifiesGlobalProxy) {
+                out.startTag(null, "specifies-global-proxy");
+                out.attribute(null, "value", Boolean.toString(specifiesGlobalProxy));
+                out.endTag(null, "specifies_global_proxy");
+                if (globalProxySpec != null) {
+                    out.startTag(null, "global-proxy-spec");
+                    out.attribute(null, "value", globalProxySpec);
+                    out.endTag(null, "global-proxy-spec");
+                }
+                if (globalProxyExclusionList != null) {
+                    out.startTag(null, "global-proxy-exclusion-list");
+                    out.attribute(null, "value", globalProxyExclusionList);
+                    out.endTag(null, "global-proxy-exclusion-list");
+                }
+            }
         }
-        
+
         void readFromXml(XmlPullParser parser)
                 throws XmlPullParserException, IOException {
             int outerDepth = parser.getDepth();
@@ -143,19 +216,49 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("min-password-length".equals(tag)) {
                     minimumPasswordLength = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
+                } else if ("password-history-length".equals(tag)) {
+                    passwordHistoryLength = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-uppercase".equals(tag)) {
+                    minimumPasswordUpperCase = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-lowercase".equals(tag)) {
+                    minimumPasswordLowerCase = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-letters".equals(tag)) {
+                    minimumPasswordLetters = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-numeric".equals(tag)) {
+                    minimumPasswordNumeric = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-symbols".equals(tag)) {
+                    minimumPasswordSymbols = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("min-password-nonletter".equals(tag)) {
+                    minimumPasswordNonLetter = Integer.parseInt(
+                            parser.getAttributeValue(null, "value"));
                 } else if ("max-time-to-unlock".equals(tag)) {
                     maximumTimeToUnlock = Long.parseLong(
                             parser.getAttributeValue(null, "value"));
                 } else if ("max-failed-password-wipe".equals(tag)) {
                     maximumFailedPasswordsForWipe = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
+                } else if ("specifies-global-proxy".equals(tag)) {
+                    specifiesGlobalProxy = Boolean.getBoolean(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("global-proxy-spec".equals(tag)) {
+                    globalProxySpec =
+                        parser.getAttributeValue(null, "value");
+                } else if ("global-proxy-exclusion-list".equals(tag)) {
+                    globalProxyExclusionList =
+                        parser.getAttributeValue(null, "value");
                 } else {
                     Slog.w(TAG, "Unknown admin tag: " + tag);
                 }
                 XmlUtils.skipCurrentTag(parser);
             }
         }
-        
+
         void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("uid="); pw.println(getUid());
             pw.print(prefix); pw.println("policies:");
@@ -166,23 +269,47 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             pw.print(prefix); pw.print("passwordQuality=0x");
-                    pw.print(Integer.toHexString(passwordQuality));
-                    pw.print(" minimumPasswordLength=");
+                    pw.println(Integer.toHexString(passwordQuality));
+            pw.print(prefix); pw.print("minimumPasswordLength=");
                     pw.println(minimumPasswordLength);
+            pw.print(prefix); pw.print("passwordHistoryLength=");
+                    pw.println(passwordHistoryLength);
+            pw.print(prefix); pw.print("minimumPasswordUpperCase=");
+                    pw.println(minimumPasswordUpperCase);
+            pw.print(prefix); pw.print("minimumPasswordLowerCase=");
+                    pw.println(minimumPasswordLowerCase);
+            pw.print(prefix); pw.print("minimumPasswordLetters=");
+                    pw.println(minimumPasswordLetters);
+            pw.print(prefix); pw.print("minimumPasswordNumeric=");
+                    pw.println(minimumPasswordNumeric);
+            pw.print(prefix); pw.print("minimumPasswordSymbols=");
+                    pw.println(minimumPasswordSymbols);
+            pw.print(prefix); pw.print("minimumPasswordNonLetter=");
+                    pw.println(minimumPasswordNonLetter);
             pw.print(prefix); pw.print("maximumTimeToUnlock=");
                     pw.println(maximumTimeToUnlock);
             pw.print(prefix); pw.print("maximumFailedPasswordsForWipe=");
                     pw.println(maximumFailedPasswordsForWipe);
+            pw.print(prefix); pw.print("specifiesGlobalProxy=");
+                    pw.println(specifiesGlobalProxy);
+            if (globalProxySpec != null) {
+                pw.print(prefix); pw.print("globalProxySpec=");
+                        pw.println(globalProxySpec);
+            }
+            if (globalProxyExclusionList != null) {
+                pw.print(prefix); pw.print("globalProxyEclusionList=");
+                        pw.println(globalProxyExclusionList);
+            }
         }
     }
-    
+
     class MyPackageMonitor extends PackageMonitor {
         public void onSomePackagesChanged() {
             synchronized (DevicePolicyManagerService.this) {
                 boolean removed = false;
                 for (int i=mAdminList.size()-1; i>=0; i--) {
                     ActiveAdmin aa = mAdminList.get(i);
-                    int change = isPackageDisappearing(aa.info.getPackageName()); 
+                    int change = isPackageDisappearing(aa.info.getPackageName());
                     if (change == PACKAGE_PERMANENT_CHANGE
                             || change == PACKAGE_TEMPORARY_CHANGE) {
                         Slog.w(TAG, "Admin unexpectedly uninstalled: "
@@ -207,7 +334,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     /**
      * Instantiates the service.
      */
@@ -224,7 +351,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         return mIPowerManager;
     }
-    
+
     ActiveAdmin getActiveAdminUncheckedLocked(ComponentName who) {
         ActiveAdmin admin = mAdminMap.get(who);
         if (admin != null
@@ -234,7 +361,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         return null;
     }
-    
+
     ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy)
             throws SecurityException {
         final int callingUid = Binder.getCallingUid();
@@ -265,13 +392,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + Binder.getCallingUid() + " for policy #" + reqPolicy);
         }
     }
-    
+
     void sendAdminCommandLocked(ActiveAdmin admin, String action) {
         Intent intent = new Intent(action);
         intent.setComponent(admin.info.getComponent());
         mContext.sendBroadcast(intent);
     }
-    
+
     void sendAdminCommandLocked(String action, int reqPolicy) {
         final int N = mAdminList.size();
         if (N > 0) {
@@ -283,19 +410,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     void removeActiveAdminLocked(ComponentName adminReceiver) {
         ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver);
         if (admin != null) {
+            boolean doProxyCleanup =
+                admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
             sendAdminCommandLocked(admin,
                     DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED);
             // XXX need to wait for it to complete.
             mAdminList.remove(admin);
             mAdminMap.remove(adminReceiver);
             validatePasswordOwnerLocked();
+            if (doProxyCleanup) {
+                resetGlobalProxy();
+            }
         }
     }
-    
+
     public DeviceAdminInfo findAdmin(ComponentName adminName) {
         Intent resolveIntent = new Intent();
         resolveIntent.setComponent(adminName);
@@ -304,7 +436,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (infos == null || infos.size() <= 0) {
             throw new IllegalArgumentException("Unknown admin: " + adminName);
         }
-        
+
         try {
             return new DeviceAdminInfo(mContext, infos.get(0));
         } catch (XmlPullParserException e) {
@@ -315,7 +447,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
     }
-    
+
     private static JournaledFile makeJournaledFile() {
         final String base = "/data/system/device_policies.xml";
         return new JournaledFile(new File(base), new File(base + ".tmp"));
@@ -331,7 +463,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, "policies");
-            
+
             final int N = mAdminList.size();
             for (int i=0; i<N; i++) {
                 ActiveAdmin ap = mAdminList.get(i);
@@ -342,26 +474,36 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     out.endTag(null, "admin");
                 }
             }
-            
+
             if (mPasswordOwner >= 0) {
                 out.startTag(null, "password-owner");
                 out.attribute(null, "value", Integer.toString(mPasswordOwner));
                 out.endTag(null, "password-owner");
             }
-            
+
             if (mFailedPasswordAttempts != 0) {
                 out.startTag(null, "failed-password-attempts");
                 out.attribute(null, "value", Integer.toString(mFailedPasswordAttempts));
                 out.endTag(null, "failed-password-attempts");
             }
-            
-            if (mActivePasswordQuality != 0 || mActivePasswordLength != 0) {
+
+            if (mActivePasswordQuality != 0 || mActivePasswordLength != 0
+                    || mActivePasswordUpperCase != 0 || mActivePasswordLowerCase != 0
+                    || mActivePasswordLetters != 0 || mActivePasswordNumeric != 0
+                    || mActivePasswordSymbols != 0 || mActivePasswordNonLetter != 0) {
                 out.startTag(null, "active-password");
                 out.attribute(null, "quality", Integer.toString(mActivePasswordQuality));
                 out.attribute(null, "length", Integer.toString(mActivePasswordLength));
+                out.attribute(null, "uppercase", Integer.toString(mActivePasswordUpperCase));
+                out.attribute(null, "lowercase", Integer.toString(mActivePasswordLowerCase));
+                out.attribute(null, "letters", Integer.toString(mActivePasswordLetters));
+                out.attribute(null, "numeric", Integer
+                        .toString(mActivePasswordNumeric));
+                out.attribute(null, "symbols", Integer.toString(mActivePasswordSymbols));
+                out.attribute(null, "nonletter", Integer.toString(mActivePasswordNonLetter));
                 out.endTag(null, "active-password");
             }
-            
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -439,6 +581,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, "quality"));
                     mActivePasswordLength = Integer.parseInt(
                             parser.getAttributeValue(null, "length"));
+                    mActivePasswordUpperCase = Integer.parseInt(
+                            parser.getAttributeValue(null, "uppercase"));
+                    mActivePasswordLowerCase = Integer.parseInt(
+                            parser.getAttributeValue(null, "lowercase"));
+                    mActivePasswordLetters = Integer.parseInt(
+                            parser.getAttributeValue(null, "letters"));
+                    mActivePasswordNumeric = Integer.parseInt(
+                            parser.getAttributeValue(null, "numeric"));
+                    mActivePasswordSymbols = Integer.parseInt(
+                            parser.getAttributeValue(null, "symbols"));
+                    mActivePasswordNonLetter = Integer.parseInt(
+                            parser.getAttributeValue(null, "nonletter"));
                     XmlUtils.skipCurrentTag(parser);
                 } else {
                     Slog.w(TAG, "Unknown tag: " + tag);
@@ -476,10 +630,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + Integer.toHexString(utils.getActivePasswordQuality()));
             mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
             mActivePasswordLength = 0;
+            mActivePasswordUpperCase = 0;
+            mActivePasswordLowerCase = 0;
+            mActivePasswordLetters = 0;
+            mActivePasswordNumeric = 0;
+            mActivePasswordSymbols = 0;
+            mActivePasswordNonLetter = 0;
         }
-        
+
         validatePasswordOwnerLocked();
-        
+
         long timeMs = getMaximumTimeToLock(null);
         if (timeMs <= 0) {
             timeMs = Integer.MAX_VALUE;
@@ -498,12 +658,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
                 return;
         }
         throw new IllegalArgumentException("Invalid quality constant: 0x"
                 + Integer.toHexString(quality));
     }
-    
+
     void validatePasswordOwnerLocked() {
         if (mPasswordOwner >= 0) {
             boolean haveOwner = false;
@@ -520,17 +681,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public void systemReady() {
         synchronized (this) {
             loadSettingsLocked();
         }
     }
-    
+
     public void setActiveAdmin(ComponentName adminReceiver) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        
+
         DeviceAdminInfo info = findAdmin(adminReceiver);
         if (info == null) {
             throw new IllegalArgumentException("Bad admin: " + adminReceiver);
@@ -552,13 +713,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public boolean isAdminActive(ComponentName adminReceiver) {
         synchronized (this) {
             return getActiveAdminUncheckedLocked(adminReceiver) != null;
         }
     }
-    
+
     public List<ComponentName> getActiveAdmins() {
         synchronized (this) {
             final int N = mAdminList.size();
@@ -572,7 +733,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return res;
         }
     }
-    
+
     public boolean packageHasActiveAdmins(String packageName) {
         synchronized (this) {
             final int N = mAdminList.size();
@@ -584,7 +745,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
     }
-    
+
     public void removeActiveAdmin(ComponentName adminReceiver) {
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver);
@@ -603,10 +764,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public void setPasswordQuality(ComponentName who, int quality) {
         validateQualityConstant(quality);
-        
+
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
@@ -619,16 +780,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public int getPasswordQuality(ComponentName who) {
         synchronized (this) {
             int mode = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-            
+
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
                 return admin != null ? admin.passwordQuality : mode;
             }
-            
+
             final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
@@ -639,7 +800,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return mode;
         }
     }
-    
+
     public void setPasswordMinimumLength(ComponentName who, int length) {
         synchronized (this) {
             if (who == null) {
@@ -653,16 +814,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public int getPasswordMinimumLength(ComponentName who) {
         synchronized (this) {
             int length = 0;
-            
+
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
                 return admin != null ? admin.minimumPasswordLength : length;
             }
-            
+
             final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
@@ -673,18 +834,267 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return length;
         }
     }
-    
+
+    public void setPasswordHistoryLength(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.passwordHistoryLength != length) {
+                ap.passwordHistoryLength = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordHistoryLength(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.passwordHistoryLength : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.passwordHistoryLength) {
+                    length = admin.passwordHistoryLength;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumUpperCase(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordUpperCase != length) {
+                ap.minimumPasswordUpperCase = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumUpperCase(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordUpperCase : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordUpperCase) {
+                    length = admin.minimumPasswordUpperCase;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumLowerCase(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordLowerCase != length) {
+                ap.minimumPasswordLowerCase = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumLowerCase(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordLowerCase : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordLowerCase) {
+                    length = admin.minimumPasswordLowerCase;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumLetters(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordLetters != length) {
+                ap.minimumPasswordLetters = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumLetters(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordLetters : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordLetters) {
+                    length = admin.minimumPasswordLetters;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumNumeric(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordNumeric != length) {
+                ap.minimumPasswordNumeric = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumNumeric(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordNumeric : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordNumeric) {
+                    length = admin.minimumPasswordNumeric;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumSymbols(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordSymbols != length) {
+                ap.minimumPasswordSymbols = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumSymbols(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordSymbols : length;
+            }
+
+            final int N = mAdminList.size();
+            for  (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordSymbols) {
+                    length = admin.minimumPasswordSymbols;
+                }
+            }
+            return length;
+        }
+    }
+
+    public void setPasswordMinimumNonLetter(ComponentName who, int length) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+            if (ap.minimumPasswordNonLetter != length) {
+                ap.minimumPasswordNonLetter = length;
+                saveSettingsLocked();
+            }
+        }
+    }
+
+    public int getPasswordMinimumNonLetter(ComponentName who) {
+        synchronized (this) {
+            int length = 0;
+
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return admin != null ? admin.minimumPasswordNonLetter : length;
+            }
+
+            final int N = mAdminList.size();
+            for (int i=0; i<N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (length < admin.minimumPasswordNonLetter) {
+                    length = admin.minimumPasswordNonLetter;
+                }
+            }
+            return length;
+        }
+    }
+
     public boolean isActivePasswordSufficient() {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
-            return mActivePasswordQuality >= getPasswordQuality(null)
-                    && mActivePasswordLength >= getPasswordMinimumLength(null);
+            if (mActivePasswordQuality < getPasswordQuality(null)
+                    || mActivePasswordLength < getPasswordMinimumLength(null)) {
+                return false;
+            }
+            if(mActivePasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+                return true;
+            }
+            return mActivePasswordUpperCase >= getPasswordMinimumUpperCase(null)
+                    && mActivePasswordLowerCase >= getPasswordMinimumLowerCase(null)
+                    && mActivePasswordLetters >= getPasswordMinimumLetters(null)
+                    && mActivePasswordNumeric >= getPasswordMinimumNumeric(null)
+                    && mActivePasswordSymbols >= getPasswordMinimumSymbols(null)
+                    && mActivePasswordNonLetter >= getPasswordMinimumNonLetter(null);
         }
     }
-    
+
     public int getCurrentFailedPasswordAttempts() {
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -694,7 +1104,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return mFailedPasswordAttempts;
         }
     }
-    
+
     public void setMaximumFailedPasswordsForWipe(ComponentName who, int num) {
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -709,16 +1119,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public int getMaximumFailedPasswordsForWipe(ComponentName who) {
         synchronized (this) {
             int count = 0;
-            
+
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
                 return admin != null ? admin.maximumFailedPasswordsForWipe : count;
             }
-            
+
             final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
@@ -732,7 +1142,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return count;
         }
     }
-    
+
     public boolean resetPassword(String password, int flags) {
         int quality;
         synchronized (this) {
@@ -743,14 +1153,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             quality = getPasswordQuality(null);
             if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                 int realQuality = LockPatternUtils.computePasswordQuality(password);
-                if (realQuality < quality) {
+                if (realQuality < quality
+                        && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
                     Slog.w(TAG, "resetPassword: password quality 0x"
                             + Integer.toHexString(quality)
                             + " does not meet required quality 0x"
                             + Integer.toHexString(quality));
                     return false;
                 }
-                quality = realQuality;
+                quality = Math.max(realQuality, quality);
             }
             int length = getPasswordMinimumLength(null);
             if (password.length() < length) {
@@ -758,14 +1169,86 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         + " does not meet required length " + length);
                 return false;
             }
+            if (quality == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+                int letters = 0;
+                int uppercase = 0;
+                int lowercase = 0;
+                int numbers = 0;
+                int symbols = 0;
+                int nonletter = 0;
+                for (int i = 0; i < password.length(); i++) {
+                    char c = password.charAt(i);
+                    if (c >= 'A' && c <= 'Z') {
+                        letters++;
+                        uppercase++;
+                    } else if (c >= 'a' && c <= 'z') {
+                        letters++;
+                        lowercase++;
+                    } else if (c >= '0' && c <= '9') {
+                        numbers++;
+                        nonletter++;
+                    } else {
+                        symbols++;
+                        nonletter++;
+                    }
+                }
+                int neededLetters = getPasswordMinimumLetters(null);
+                if(letters < neededLetters) {
+                    Slog.w(TAG, "resetPassword: number of letters " + letters
+                            + " does not meet required number of letters " + neededLetters);
+                    return false;
+                }
+                int neededNumbers = getPasswordMinimumNumeric(null);
+                if (numbers < neededNumbers) {
+                    Slog
+                            .w(TAG, "resetPassword: number of numerical digits " + numbers
+                                    + " does not meet required number of numerical digits "
+                                    + neededNumbers);
+                    return false;
+                }
+                int neededLowerCase = getPasswordMinimumLowerCase(null);
+                if (lowercase < neededLowerCase) {
+                    Slog.w(TAG, "resetPassword: number of lowercase letters " + lowercase
+                            + " does not meet required number of lowercase letters "
+                            + neededLowerCase);
+                    return false;
+                }
+                int neededUpperCase = getPasswordMinimumUpperCase(null);
+                if (uppercase < neededUpperCase) {
+                    Slog.w(TAG, "resetPassword: number of uppercase letters " + uppercase
+                            + " does not meet required number of uppercase letters "
+                            + neededUpperCase);
+                    return false;
+                }
+                int neededSymbols = getPasswordMinimumSymbols(null);
+                if (symbols < neededSymbols) {
+                    Slog.w(TAG, "resetPassword: number of special symbols " + symbols
+                            + " does not meet required number of special symbols " + neededSymbols);
+                    return false;
+                }
+                int neededNonLetter = getPasswordMinimumNonLetter(null);
+                if (nonletter < neededNonLetter) {
+                    Slog.w(TAG, "resetPassword: number of non-letter characters " + nonletter
+                            + " does not meet required number of non-letter characters "
+                            + neededNonLetter);
+                    return false;
+                }
+            }
+
+            LockPatternUtils utils = new LockPatternUtils(mContext);
+            if(utils.checkPasswordHistory(password)) {
+                Slog.w(TAG, "resetPassword: password is the same as one of the last "
+                        + getPasswordHistoryLength(null) + " passwords");
+                return false;
+            }
         }
-        
+
         int callingUid = Binder.getCallingUid();
         if (mPasswordOwner >= 0 && mPasswordOwner != callingUid) {
             Slog.w(TAG, "resetPassword: already set by another uid and not entered by user");
             return false;
         }
-        
+
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
         long ident = Binder.clearCallingIdentity();
@@ -783,10 +1266,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        
+
         return true;
     }
-    
+
     public void setMaximumTimeToLock(ComponentName who, long timeMs) {
         synchronized (this) {
             if (who == null) {
@@ -796,16 +1279,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     DeviceAdminInfo.USES_POLICY_FORCE_LOCK);
             if (ap.maximumTimeToUnlock != timeMs) {
                 ap.maximumTimeToUnlock = timeMs;
-                
+
                 long ident = Binder.clearCallingIdentity();
                 try {
                     saveSettingsLocked();
-                    
+
                     timeMs = getMaximumTimeToLock(null);
                     if (timeMs <= 0) {
                         timeMs = Integer.MAX_VALUE;
                     }
-                    
+
                     try {
                         getIPowerManager().setMaximumScreenOffTimeount((int)timeMs);
                     } catch (RemoteException e) {
@@ -817,16 +1300,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public long getMaximumTimeToLock(ComponentName who) {
         synchronized (this) {
             long time = 0;
-            
+
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
                 return admin != null ? admin.maximumTimeToUnlock : time;
             }
-            
+
             final int N = mAdminList.size();
             for  (int i=0; i<N; i++) {
                 ActiveAdmin admin = mAdminList.get(i);
@@ -840,7 +1323,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return time;
         }
     }
-    
+
     public void lockNow() {
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -857,7 +1340,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     void wipeDataLocked(int flags) {
         try {
             RecoverySystem.rebootWipeUserData(mContext);
@@ -865,7 +1348,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Slog.w(TAG, "Failed requesting data wipe", e);
         }
     }
-    
+
     public void wipeData(int flags) {
         synchronized (this) {
             // This API can only be called by an active device admin,
@@ -880,11 +1363,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public void getRemoveWarning(ComponentName comp, final RemoteCallback result) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        
+
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(comp);
             if (admin == null) {
@@ -907,20 +1390,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }, null, Activity.RESULT_OK, null, null);
         }
     }
-    
-    public void setActivePasswordState(int quality, int length) {
+
+    public void setActivePasswordState(int quality, int length, int letters, int uppercase,
+            int lowercase, int numbers, int symbols, int nonletter) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        
+
         validateQualityConstant(quality);
-        
+
         synchronized (this) {
             if (mActivePasswordQuality != quality || mActivePasswordLength != length
-                    || mFailedPasswordAttempts != 0) {
+                    || mFailedPasswordAttempts != 0 || mActivePasswordLetters != letters
+                    || mActivePasswordUpperCase != uppercase
+                    || mActivePasswordLowerCase != lowercase || mActivePasswordNumeric != numbers
+                    || mActivePasswordSymbols != symbols || mActivePasswordNonLetter != nonletter) {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     mActivePasswordQuality = quality;
                     mActivePasswordLength = length;
+                    mActivePasswordLetters = letters;
+                    mActivePasswordLowerCase = lowercase;
+                    mActivePasswordUpperCase = uppercase;
+                    mActivePasswordNumeric = numbers;
+                    mActivePasswordSymbols = symbols;
+                    mActivePasswordNonLetter = nonletter;
                     mFailedPasswordAttempts = 0;
                     saveSettingsLocked();
                     sendAdminCommandLocked(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED,
@@ -931,11 +1424,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public void reportFailedPasswordAttempt() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        
+
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
@@ -952,11 +1445,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
     public void reportSuccessfulPasswordAttempt() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        
+
         synchronized (this) {
             if (mFailedPasswordAttempts != 0 || mPasswordOwner >= 0) {
                 long ident = Binder.clearCallingIdentity();
@@ -972,7 +1465,95 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
     }
-    
+
+    public ComponentName setGlobalProxy(ComponentName who, String proxySpec,
+            String exclusionList) {
+        synchronized(this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
+
+            // Scan through active admins and find if anyone has already
+            // set the global proxy.
+            final int N = mAdminList.size();
+            Set<ComponentName> compSet = mAdminMap.keySet();
+            for  (ComponentName component : compSet) {
+                ActiveAdmin ap = mAdminMap.get(component);
+                if ((ap.specifiesGlobalProxy) && (!component.equals(who))) {
+                    // Another admin already sets the global proxy
+                    // Return it to the caller.
+                    return component;
+                }
+            }
+            if (proxySpec == null) {
+                admin.specifiesGlobalProxy = false;
+                admin.globalProxySpec = null;
+                admin.globalProxyExclusionList = null;
+            } else {
+
+                admin.specifiesGlobalProxy = true;
+                admin.globalProxySpec = proxySpec;
+                admin.globalProxyExclusionList = exclusionList;
+            }
+
+            // Reset the global proxy accordingly
+            // Do this using system permissions, as apps cannot write to secure settings
+            long origId = Binder.clearCallingIdentity();
+            resetGlobalProxy();
+            Binder.restoreCallingIdentity(origId);
+            return null;
+        }
+    }
+
+    public ComponentName getGlobalProxyAdmin() {
+        synchronized(this) {
+            // Scan through active admins and find if anyone has already
+            // set the global proxy.
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin ap = mAdminList.get(i);
+                if (ap.specifiesGlobalProxy) {
+                    // Device admin sets the global proxy
+                    // Return it to the caller.
+                    return ap.info.getComponent();
+                }
+            }
+        }
+        // No device admin sets the global proxy.
+        return null;
+    }
+
+    private void resetGlobalProxy() {
+        final int N = mAdminList.size();
+        for (int i = 0; i < N; i++) {
+            ActiveAdmin ap = mAdminList.get(i);
+            if (ap.specifiesGlobalProxy) {
+                saveGlobalProxy(ap.globalProxySpec, ap.globalProxyExclusionList);
+                return;
+            }
+        }
+        // No device admins defining global proxies - reset global proxy settings to none
+        saveGlobalProxy(null, null);
+    }
+
+    private void saveGlobalProxy(String proxySpec, String exclusionList) {
+        if (exclusionList == null) {
+            exclusionList = "";
+        }
+        if (proxySpec == null) {
+            proxySpec = "";
+        }
+        // Remove white spaces
+        proxySpec = proxySpec.trim();
+        exclusionList = exclusionList.trim();
+        ContentResolver res = mContext.getContentResolver();
+        Settings.Secure.putString(res, Settings.Secure.HTTP_PROXY, proxySpec);
+        Settings.Secure.putString(res, Settings.Secure.HTTP_PROXY_EXCLUSION_LIST, exclusionList);
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -983,12 +1564,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + ", uid=" + Binder.getCallingUid());
             return;
         }
-        
+
         final Printer p = new PrintWriterPrinter(pw);
-        
+
         synchronized (this) {
             p.println("Current Device Policy Manager state:");
-            
+
             p.println("  Enabled Device Admins:");
             final int N = mAdminList.size();
             for (int i=0; i<N; i++) {
@@ -999,11 +1580,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     ap.dump("    ", pw);
                 }
             }
-            
+
             pw.println(" ");
             pw.print("  mActivePasswordQuality=0x");
                     pw.println(Integer.toHexString(mActivePasswordQuality));
             pw.print("  mActivePasswordLength="); pw.println(mActivePasswordLength);
+            pw.print("  mActivePasswordUpperCase="); pw.println(mActivePasswordUpperCase);
+            pw.print("  mActivePasswordLowerCase="); pw.println(mActivePasswordLowerCase);
+            pw.print("  mActivePasswordLetters="); pw.println(mActivePasswordLetters);
+            pw.print("  mActivePasswordNumeric="); pw.println(mActivePasswordNumeric);
+            pw.print("  mActivePasswordSymbols="); pw.println(mActivePasswordSymbols);
+            pw.print("  mActivePasswordNonLetter="); pw.println(mActivePasswordNonLetter);
             pw.print("  mFailedPasswordAttempts="); pw.println(mFailedPasswordAttempts);
             pw.print("  mPasswordOwner="); pw.println(mPasswordOwner);
         }

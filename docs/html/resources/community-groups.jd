@@ -22,7 +22,7 @@ page.title=Developer Forums
 
 <p>Welcome to the Android developers community! We're glad you're here and invite you to participate in discussions with other Android application developers on topics that interest you.</p>
 
-<p>The lists on this page are primarily for discussion about Android application development. If you are seeking discussion about Android source code (not application development), then please refer to the <a href="http://source.android.com/discuss">Open Source Project Mailing lists</a>.</p>
+<p>The lists on this page are primarily for discussion about Android application development. If you are seeking discussion about Android source code (not application development), then please refer to the <a href="http://source.android.com/community">Open Source Project Mailing lists</a>.</p>
 
 <h2 id="StackOverflow">Stack Overflow</h2>
 
@@ -56,7 +56,7 @@ page.title=Developer Forums
 As you write your post, please do the following:
 <ol>
 <li><strong>Read
-the <a href="http://source.android.com/discuss/android-discussion-groups-charter">mailing list charter</a></strong> that covers the community guidelines.
+the <a href="http://source.android.com/community/groups-charter.html">mailing list charter</a></strong> that covers the community guidelines.
 </li>
 <li><strong>Select the most appropriate mailing list for your question</strong>. There are several different lists for
 developers, described below.</li>

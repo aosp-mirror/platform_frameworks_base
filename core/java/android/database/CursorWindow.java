@@ -217,17 +217,12 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param row the row to read from, row - getStartPosition() being the actual row in the window
      * @param col the column to read from
      * @return {@code true} if given field is {@code NULL}
+     * @deprecated use {@link #getType(int, int)} instead
      */
+    @Deprecated
     public boolean isNull(int row, int col) {
-        acquireReference();
-        try {
-            return isNull_native(row - mStartPos, col);
-        } finally {
-            releaseReference();
-        }
+        return getType(row, col) == Cursor.FIELD_TYPE_NULL;
     }
-    
-    private native boolean isNull_native(int row, int col);
     
     /**
      * Returns a byte array for the given field.
@@ -248,19 +243,43 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private native byte[] getBlob_native(int row, int col);
 
     /**
+     * Returns data type of the given column's value.
+     *<p>
+     * Returned column types are
+     * <ul>
+     *   <li>{@link Cursor#FIELD_TYPE_NULL}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_INTEGER}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_FLOAT}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_STRING}</li>
+     *   <li>{@link Cursor#FIELD_TYPE_BLOB}</li>
+     *</ul>
+     *</p>
+     *
+     * @param row the row to read from, row - getStartPosition() being the actual row in the window
+     * @param col the column to read from
+     * @return the value type
+     */
+    public int getType(int row, int col) {
+        acquireReference();
+        try {
+            return getType_native(row - mStartPos, col);
+        } finally {
+            releaseReference();
+        }
+    }
+
+    /**
      * Checks if a field contains either a blob or is null.
      *
      * @param row the row to read from, row - getStartPosition() being the actual row in the window
      * @param col the column to read from
      * @return {@code true} if given field is {@code NULL} or a blob
+     * @deprecated use {@link #getType(int, int)} instead
      */
+    @Deprecated
     public boolean isBlob(int row, int col) {
-        acquireReference();
-        try {
-            return isBlob_native(row - mStartPos, col);
-        } finally {
-            releaseReference();
-        }
+        int type = getType(row, col);
+        return type == Cursor.FIELD_TYPE_BLOB || type == Cursor.FIELD_TYPE_NULL;
     }
 
     /**
@@ -269,14 +288,11 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param row the row to read from, row - getStartPosition() being the actual row in the window
      * @param col the column to read from
      * @return {@code true} if given field is a long
+     * @deprecated use {@link #getType(int, int)} instead
      */
+    @Deprecated
     public boolean isLong(int row, int col) {
-        acquireReference();
-        try {
-            return isInteger_native(row - mStartPos, col);
-        } finally {
-            releaseReference();
-        }
+        return getType(row, col) == Cursor.FIELD_TYPE_INTEGER;
     }
 
     /**
@@ -285,14 +301,11 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param row the row to read from, row - getStartPosition() being the actual row in the window
      * @param col the column to read from
      * @return {@code true} if given field is a float
+     * @deprecated use {@link #getType(int, int)} instead
      */
+    @Deprecated
     public boolean isFloat(int row, int col) {
-        acquireReference();
-        try {
-            return isFloat_native(row - mStartPos, col);
-        } finally {
-            releaseReference();
-        }
+        return getType(row, col) == Cursor.FIELD_TYPE_FLOAT;
     }
 
     /**
@@ -301,20 +314,15 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param row the row to read from, row - getStartPosition() being the actual row in the window
      * @param col the column to read from
      * @return {@code true} if given field is {@code NULL} or a String
+     * @deprecated use {@link #getType(int, int)} instead
      */
+    @Deprecated
     public boolean isString(int row, int col) {
-        acquireReference();
-        try {
-            return isString_native(row - mStartPos, col);
-        } finally {
-            releaseReference();
-        }
+        int type = getType(row, col);
+        return type == Cursor.FIELD_TYPE_STRING || type == Cursor.FIELD_TYPE_NULL;
     }
 
-    private native boolean isBlob_native(int row, int col);
-    private native boolean isString_native(int row, int col);
-    private native boolean isInteger_native(int row, int col);
-    private native boolean isFloat_native(int row, int col);
+    private native int getType_native(int row, int col);
 
     /**
      * Returns a String for the given field.

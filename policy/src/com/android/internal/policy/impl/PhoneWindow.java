@@ -24,11 +24,15 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
+import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
+import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
+import com.android.internal.widget.ActionBarContextView;
+import com.android.internal.widget.ActionBarView;
 
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -53,6 +57,7 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.InputQueue;
@@ -66,6 +71,7 @@ import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewManager;
+import android.view.ViewStub;
 import android.view.VolumePanel;
 import android.view.Window;
 import android.view.WindowManager;
@@ -95,7 +101,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * Simple callback used by the context menu and its submenus. The options
      * menu submenus do not use this (their behavior is more complex).
      */
-    ContextMenuCallback mContextMenuCallback = new ContextMenuCallback(FEATURE_CONTEXT_MENU);
+    DialogMenuCallback mContextMenuCallback = new DialogMenuCallback(FEATURE_CONTEXT_MENU);
 
     // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
@@ -114,6 +120,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private LayoutInflater mLayoutInflater;
 
     private TextView mTitleView;
+    
+    private ActionBarView mActionBar;
 
     private DrawableFeatureState[] mDrawables;
 
@@ -191,8 +199,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             /* Custom title feature is enabled and the user is trying to enable another feature */
             throw new AndroidRuntimeException("You cannot combine custom titles with other title features");
         }
-        if (featureId == FEATURE_OPENGL) {
-            getAttributes().memoryType = WindowManager.LayoutParams.MEMORY_TYPE_GPU;
+        if ((features & (1 << FEATURE_NO_TITLE)) != 0 && featureId == FEATURE_ACTION_BAR) {
+            return false; // Ignore. No title dominates.
+        }
+        if ((features & (1 << FEATURE_ACTION_BAR)) != 0 && featureId == FEATURE_NO_TITLE) {
+            // Remove the action bar feature if we have no title. No title dominates.
+            removeFeature(FEATURE_ACTION_BAR);
         }
         return super.requestFeature(featureId);
     }
@@ -276,6 +288,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void setTitle(CharSequence title) {
         if (mTitleView != null) {
             mTitleView.setText(title);
+        } else if (mActionBar != null) {
+            mActionBar.setWindowTitle(title);
         }
         mTitle = title;
     }
@@ -301,7 +315,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // Already prepared (isPrepared will be reset to false later)
         if (st.isPrepared)
             return true;
-
+        
         if ((mPreparedPanel != null) && (mPreparedPanel != st)) {
             // Another Panel is prepared and possibly open, so close it
             closePanel(mPreparedPanel, false);
@@ -315,9 +329,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         if (st.createdPanelView == null) {
             // Init the panel state's menu--return false if init failed
-            if (st.menu == null) {
-                if (!initializePanelMenu(st) || (st.menu == null)) {
-                    return false;
+            if (st.menu == null || st.refreshMenuContent) {
+                if (st.menu == null) {
+                    if (!initializePanelMenu(st) || (st.menu == null)) {
+                        return false;
+                    }
                 }
                 // Call callback, and return if it doesn't want to display menu
                 if ((cb == null) || !cb.onCreatePanelMenu(st.featureId, st.menu)) {
@@ -325,6 +341,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     st.menu = null;
 
                     return false;
+                }
+                
+                st.refreshMenuContent = false;
+
+                if (mActionBar != null) {
+                    mActionBar.setMenu(st.menu);
                 }
             }
 
@@ -349,36 +371,37 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
-        if ((st != null) && (st.menu != null)) {
-            final MenuBuilder menuBuilder = (MenuBuilder) st.menu;
+        // Action bars handle their own menu state
+        if (mActionBar == null) {
+            PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+            if ((st != null) && (st.menu != null)) {
+                final MenuBuilder menuBuilder = (MenuBuilder) st.menu;
 
-            if (st.isOpen) {
-                // Freeze state
-                final Bundle state = new Bundle();
-                menuBuilder.saveHierarchyState(state);
+                if (st.isOpen) {
+                    // Freeze state
+                    final Bundle state = new Bundle();
+                    menuBuilder.saveHierarchyState(state);
 
-                // Remove the menu views since they need to be recreated
-                // according to the new configuration
-                clearMenuViews(st);
+                    // Remove the menu views since they need to be recreated
+                    // according to the new configuration
+                    clearMenuViews(st);
 
-                // Re-open the same menu
-                reopenMenu(false);
+                    // Re-open the same menu
+                    reopenMenu(false);
 
-                // Restore state
-                menuBuilder.restoreHierarchyState(state);
+                    // Restore state
+                    menuBuilder.restoreHierarchyState(state);
 
-            } else {
-                // Clear menu views so on next menu opening, it will use
-                // the proper layout
-                clearMenuViews(st);
+                } else {
+                    // Clear menu views so on next menu opening, it will use
+                    // the proper layout
+                    clearMenuViews(st);
+                }
             }
         }
-
     }
 
     private static void clearMenuViews(PanelFeatureState st) {
-
         // This can be called on config changes, so we should make sure
         // the views will be reconstructed based on the new orientation, etc.
 
@@ -393,7 +416,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final void openPanel(int featureId, KeyEvent event) {
-        openPanel(getPanelState(featureId, true), event);
+        if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
+                mActionBar.isOverflowReserved()) {
+            mActionBar.showOverflowMenu();
+        } else {
+            openPanel(getPanelState(featureId, true), event);
+        }
     }
 
     private void openPanel(PanelFeatureState st, KeyEvent event) {
@@ -484,7 +512,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public final void closePanel(int featureId) {
-        if (featureId == FEATURE_CONTEXT_MENU) {
+        if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
+                mActionBar.isOverflowReserved()) {
+            mActionBar.hideOverflowMenu();
+        } else if (featureId == FEATURE_CONTEXT_MENU) {
             closeContextMenu();
         } else {
             closePanel(getPanelState(featureId, true), true);
@@ -545,6 +576,26 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
+    @Override
+    public void invalidatePanelMenu(int featureId) {
+        PanelFeatureState st = getPanelState(featureId, true);
+        if (st.menu != null) {
+            st.menu.clear();
+        }
+        st.refreshMenuContent = true;
+        st.refreshDecorView = true;
+        
+        // Prepare the options panel if we have an action bar
+        if ((featureId == FEATURE_ACTION_BAR || featureId == FEATURE_OPTIONS_PANEL)
+                && mActionBar != null) {
+            st = getPanelState(Window.FEATURE_OPTIONS_PANEL, false);
+            if (st != null) {
+                st.isPrepared = false;
+                preparePanel(st, null);
+            }
+        }
+    }
+    
     /**
      * Called when the panel key is pushed down.
      * @param featureId The feature ID of the relevant panel (defaults to FEATURE_OPTIONS_PANEL}.
@@ -558,7 +609,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // The panel key was pushed, so set the chording key
             mPanelChordingKey = keyCode;
             mPanelMayLongPress = false;
-            
+
             PanelFeatureState st = getPanelState(featureId, true);
             if (!st.isOpen) {
                 if (getContext().getResources().getConfiguration().keyboard
@@ -567,7 +618,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
                 return preparePanel(st, event);
             }
-            
         } else if (mPanelMayLongPress && mPanelChordingKey == keyCode
                 && (event.getFlags()&KeyEvent.FLAG_LONG_PRESS) != 0) {
             // We have had a long press while in a state where this
@@ -602,25 +652,38 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             
             boolean playSoundEffect = false;
-            PanelFeatureState st = getPanelState(featureId, true);
-            if (st.isOpen || st.isHandled) {
+            final PanelFeatureState st = getPanelState(featureId, true);
+            if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
+                    mActionBar.isOverflowReserved()) {
+                if (!mActionBar.isOverflowMenuShowing()) {
+                    final Callback cb = getCallback();
+                    if (cb != null &&
+                            cb.onPreparePanel(featureId, st.createdPanelView, st.menu)) {
+                        playSoundEffect = mActionBar.showOverflowMenu();
+                    }
+                } else {
+                    playSoundEffect = mActionBar.hideOverflowMenu();
+                }
+            } else {
+                if (st.isOpen || st.isHandled) {
 
-                // Play the sound effect if the user closed an open menu (and not if
-                // they just released a menu shortcut)
-                playSoundEffect = st.isOpen;
+                    // Play the sound effect if the user closed an open menu (and not if
+                    // they just released a menu shortcut)
+                    playSoundEffect = st.isOpen;
 
-                // Close menu
-                closePanel(st, true);
+                    // Close menu
+                    closePanel(st, true);
 
-            } else if (st.isPrepared) {
+                } else if (st.isPrepared) {
 
-                // Write 'menu opened' to event log
-                EventLog.writeEvent(50001, 0);
+                    // Write 'menu opened' to event log
+                    EventLog.writeEvent(50001, 0);
 
-                // Show menu
-                openPanel(st, event);
+                    // Show menu
+                    openPanel(st, event);
 
-                playSoundEffect = true;
+                    playSoundEffect = true;
+                }
             }
 
             if (playSoundEffect) {
@@ -777,8 +840,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return true;
         }
 
-        // The window manager will give us a valid window token
-        new MenuDialogHelper(subMenu).show(null);
+        final Menu parentMenu = subMenu.getRootMenu();
+        final PanelFeatureState panel = findMenuPanel(parentMenu);
+
+        /*
+         * Use the panel open state to determine whether this is coming from an open panel
+         * or an action button. If it's an open panel we want to use MenuDialogHelper.
+         * If it's closed we want to grab the relevant view and create a popup anchored to it.
+         */
+        if (panel.isOpen) {
+            // The window manager will give us a valid window token
+            new MenuDialogHelper(subMenu).show(null);
+        } else {
+            new MenuPopupHelper(getContext(), subMenu).show();
+        }
 
         return true;
     }
@@ -788,6 +863,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private void reopenMenu(boolean toggleMenuMode) {
+        if (mActionBar != null) {
+            if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
+                final Callback cb = getCallback();
+                if (cb != null) {
+                    final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
+                    if (cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
+                        mActionBar.showOverflowMenu();
+                    }
+                }
+            } else {
+                mActionBar.hideOverflowMenu();
+            }
+            return;
+        }
+
         PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
 
         // Save the future expanded mode state since closePanel will reset it
@@ -1437,6 +1527,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     static private final String FOCUSED_ID_TAG = "android:focusedViewId";
     static private final String VIEWS_TAG = "android:views";
     static private final String PANELS_TAG = "android:Panels";
+    static private final String ACTION_BAR_TAG = "android:ActionBar";
 
     /** {@inheritDoc} */
     @Override
@@ -1468,6 +1559,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         savePanelState(panelStates);
         if (panelStates.size() > 0) {
             outState.putSparseParcelableArray(PANELS_TAG, panelStates);
+        }
+
+        if (mActionBar != null) {
+            outState.putBoolean(ACTION_BAR_TAG, mActionBar.isOverflowMenuShowing());
         }
 
         return outState;
@@ -1503,6 +1598,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         SparseArray<Parcelable> panelStates = savedInstanceState.getSparseParcelableArray(PANELS_TAG);
         if (panelStates != null) {
             restorePanelState(panelStates);
+        }
+
+        if (mActionBar != null && savedInstanceState.getBoolean(ACTION_BAR_TAG)) {
+            mActionBar.postShowOverflowMenu();
         }
     }
 
@@ -1594,6 +1693,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private boolean mWatchingForMenu;
         private int mDownY;
 
+        private ActionMode mActionMode;
+        private ActionBarContextView mActionModeView;
+
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
@@ -1602,7 +1704,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
             final int keyCode = event.getKeyCode();
-            final boolean isDown = event.getAction() == KeyEvent.ACTION_DOWN;
+            final int action = event.getAction();
+            final boolean isDown = action == KeyEvent.ACTION_DOWN;
 
             /*
              * If the user hits another key within the play sound delay, then
@@ -1657,6 +1760,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         return true;
                     }
                 }
+            }
+
+            // Back cancels action modes first.
+            if (mActionMode != null && keyCode == KeyEvent.KEYCODE_BACK) {
+                if (action == KeyEvent.ACTION_UP) {
+                    mActionMode.finish();
+                }
+                return true;
             }
 
             final Callback cb = getCallback();
@@ -1881,6 +1992,55 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return mContextMenuHelper != null;
         }
 
+        @Override
+        public ActionMode startActionModeForChild(View originalView,
+                ActionMode.Callback callback) {
+            // originalView can be used here to be sure that we don't obscure
+            // relevant content with the context mode UI.
+            return startActionMode(callback);
+        }
+
+        @Override
+        public ActionMode startActionMode(ActionMode.Callback callback) {
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
+            final ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
+            ActionMode mode = getCallback().onStartActionMode(wrappedCallback);
+            if (mode != null) {
+                mActionMode = mode;
+            } else {
+                if (mActionModeView == null) {
+                    if (hasFeature(FEATURE_ACTION_MODE_OVERLAY)) {
+                        mActionModeView = new ActionBarContextView(mContext);
+                        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                                MATCH_PARENT, WRAP_CONTENT);
+                        addView(mActionModeView, params);
+                    } else {
+                        ViewStub stub = (ViewStub) findViewById(
+                                com.android.internal.R.id.action_mode_bar_stub);
+                        if (stub != null) {
+                            mActionModeView = (ActionBarContextView) stub.inflate();
+                        }
+                    }
+                }
+
+                if (mActionModeView != null) {
+                    mode = new StandaloneActionMode(getContext(), mActionModeView, wrappedCallback);
+                    if (callback.onCreateActionMode(mode, mode.getMenu())) {
+                        mode.invalidate();
+                        mActionModeView.initForMode(mode);
+                        mActionModeView.setVisibility(View.VISIBLE);
+                        mActionMode = mode;
+                    } else {
+                        mActionMode = null;
+                    }
+                }
+            }
+            return mActionMode;
+        }
+
         public void startChanging() {
             mChanging = true;
         }
@@ -2060,6 +2220,37 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (keepOn) PhoneWindow.this.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             else PhoneWindow.this.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+
+        /**
+         * Clears out internal reference when the action mode is destroyed.
+         */
+        private class ActionModeCallbackWrapper implements ActionMode.Callback {
+            private ActionMode.Callback mWrapped;
+
+            public ActionModeCallbackWrapper(ActionMode.Callback wrapped) {
+                mWrapped = wrapped;
+            }
+
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return mWrapped.onCreateActionMode(mode, menu);
+            }
+
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return mWrapped.onPrepareActionMode(mode, menu);
+            }
+
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return mWrapped.onActionItemClicked(mode, item);
+            }
+
+            public void onDestroyActionMode(ActionMode mode) {
+                mWrapped.onDestroyActionMode(mode);
+                if (mActionModeView != null) {
+                    mActionModeView.removeAllViews();
+                }
+                mActionMode = null;
+            }
+        }
     }
 
     protected DecorView generateDecor() {
@@ -2108,6 +2299,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowNoTitle, false)) {
             requestFeature(FEATURE_NO_TITLE);
+        } else if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionBar, false)) {
+            // Don't allow an action bar if there is no title.
+            requestFeature(FEATURE_ACTION_BAR);
+        }
+
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionBarOverlay, false)) {
+            requestFeature(FEATURE_ACTION_BAR_OVERLAY);
+        }
+
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowActionModeOverlay, false)) {
+            requestFeature(FEATURE_ACTION_MODE_OVERLAY);
         }
 
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowFullscreen, false)) {
@@ -2172,11 +2374,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title_icons;
             }
+            // XXX Remove this once action bar supports these features.
+            removeFeature(FEATURE_ACTION_BAR);
             // System.out.println("Title Icons!");
         } else if ((features & ((1 << FEATURE_PROGRESS) | (1 << FEATURE_INDETERMINATE_PROGRESS))) != 0) {
             // Special case for a window with only a progress bar (and title).
             // XXX Need to have a no-title version of embedded windows.
             layoutResource = com.android.internal.R.layout.screen_progress;
+            // XXX Remove this once action bar supports these features.
+            removeFeature(FEATURE_ACTION_BAR);
             // System.out.println("Progress!");
         } else if ((features & (1 << FEATURE_CUSTOM_TITLE)) != 0) {
             // Special case for a window with a custom title.
@@ -2186,11 +2392,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             } else {
                 layoutResource = com.android.internal.R.layout.screen_custom_title;
             }
+            // XXX Remove this once action bar supports these features.
+            removeFeature(FEATURE_ACTION_BAR);
         } else if ((features & (1 << FEATURE_NO_TITLE)) == 0) {
             // If no other features and not embedded, only need a title.
             // If the window is floating, we need a dialog layout
             if (mIsFloating) {
                 layoutResource = com.android.internal.R.layout.dialog_title;
+            } else if ((features & (1 << FEATURE_ACTION_BAR)) != 0) {
+                if ((features & (1 << FEATURE_ACTION_BAR_OVERLAY)) != 0) {
+                    layoutResource = com.android.internal.R.layout.screen_action_bar_overlay;
+                } else {
+                    layoutResource = com.android.internal.R.layout.screen_action_bar;
+                }
             } else {
                 layoutResource = com.android.internal.R.layout.screen_title;
             }
@@ -2274,6 +2488,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 } else {
                     mTitleView.setText(mTitle);
+                }
+            } else {
+                mActionBar = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
+                if (mActionBar != null) {
+                    if (mActionBar.getTitle() == null) {
+                        mActionBar.setWindowTitle(mTitle);
+                    }
+                    // Post the panel invalidate for later; avoid application onCreateOptionsMenu
+                    // being called in the middle of onCreate or similar.
+                    mDecor.post(new Runnable() {
+                        public void run() {
+                            if (!isDestroyed()) {
+                                invalidatePanelMenu(FEATURE_ACTION_BAR);
+                            }
+                        }
+                    });
                 }
             }
         }
@@ -2628,6 +2858,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         boolean refreshDecorView;
 
+        boolean refreshMenuContent;
+        
         boolean wasLastOpen;
         
         boolean wasLastExpanded;
@@ -2750,11 +2982,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * <li> Calls back to the callback's onMenuItemSelected when an item is
      * selected.
      */
-    private final class ContextMenuCallback implements MenuBuilder.Callback {
+    private final class DialogMenuCallback implements MenuBuilder.Callback {
         private int mFeatureId;
         private MenuDialogHelper mSubMenuHelper;
 
-        public ContextMenuCallback(int featureId) {
+        public DialogMenuCallback(int featureId) {
             mFeatureId = featureId;
         }
 

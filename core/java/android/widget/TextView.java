@@ -21,8 +21,9 @@ import com.android.internal.widget.EditableInputConnection;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -36,6 +37,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -44,7 +46,6 @@ import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.text.BoringLayout;
-import android.text.ClipboardManager;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.GetChars;
@@ -85,14 +86,16 @@ import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewRoot;
@@ -192,7 +195,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static final String LOG_TAG = "TextView";
     static final boolean DEBUG_EXTRACT = false;
     
-    private static int PRIORITY = 100;
+    private static final int PRIORITY = 100;
+
+    private int mCurrentAlpha = 255;    
 
     private final int[] mTempCoords = new int[2];
 
@@ -2815,12 +2820,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             c.drawText(mChars, start + mStart, end - start, x, y, p);
         }
 
+        public void drawTextRun(Canvas c, int start, int end,
+                int contextStart, int contextEnd, float x, float y, int flags, Paint p) {
+            int count = end - start;
+            int contextCount = contextEnd - contextStart;
+            c.drawTextRun(mChars, start + mStart, count, contextStart + mStart,
+                    contextCount, x, y, flags, p);
+        }
+
         public float measureText(int start, int end, Paint p) {
             return p.measureText(mChars, start + mStart, end - start);
         }
 
         public int getTextWidths(int start, int end, float[] widths, Paint p) {
             return p.getTextWidths(mChars, start + mStart, end - start, widths);
+        }
+
+        public float getTextRunAdvances(int start, int end, int contextStart,
+                int contextEnd, int flags, float[] advances, int advancesIndex,
+                Paint p) {
+            int count = end - start;
+            int contextCount = contextEnd - contextStart;
+            return p.getTextRunAdvances(mChars, start + mStart, count,
+                    contextStart + mStart, contextCount, flags, advances,
+                    advancesIndex);
+        }
+
+        public int getTextRunCursor(int contextStart, int contextEnd, int flags,
+                int offset, int cursorOpt, Paint p) {
+            int contextCount = contextEnd - contextStart;
+            return p.getTextRunCursor(mChars, contextStart + mStart,
+                    contextCount, flags, offset + mStart, cursorOpt);
         }
     }
 
@@ -3734,7 +3764,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         //   allow to test for hasSelection in onFocusChanged, which would trigger a
         //   startTextSelectionMode here. TODO
         if (selectionController != null && hasSelection()) {
-            startTextSelectionMode();
+            startSelectionActionMode();
         }
 
         mPreDrawState = PREDRAW_DONE;
@@ -3856,6 +3886,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    protected boolean onSetAlpha(int alpha) {
+        if (mMovement == null && getBackground() == null) {
+            mCurrentAlpha = alpha;
+            final Drawables dr = mDrawables;
+            if (dr != null) {
+                if (dr.mDrawableLeft != null) dr.mDrawableLeft.mutate().setAlpha(alpha);
+                if (dr.mDrawableTop != null) dr.mDrawableTop.mutate().setAlpha(alpha);
+                if (dr.mDrawableRight != null) dr.mDrawableRight.mutate().setAlpha(alpha);
+                if (dr.mDrawableBottom != null) dr.mDrawableBottom.mutate().setAlpha(alpha);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         restartMarqueeIfNeeded();
 
@@ -3952,6 +3998,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         mTextPaint.setColor(color);
+        mTextPaint.setAlpha(mCurrentAlpha);
         mTextPaint.drawableState = getDrawableState();
 
         canvas.save();
@@ -4328,8 +4375,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 // Has to be done on key down (and not on key up) to correctly be intercepted.
             case KeyEvent.KEYCODE_BACK:
-                if (mIsInTextSelectionMode) {
-                    stopTextSelectionMode();
+                if (mSelectionActionMode != null) {
+                    stopSelectionActionMode();
                     return -1;
                 }
                 break;
@@ -4579,6 +4626,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     partialStartOffset = 0;
                     partialEndOffset = N;
                 } else {
+                    // Now use the delta to determine the actual amount of text
+                    // we need.
+                    partialEndOffset += delta;
                     // Adjust offsets to ensure we contain full spans.
                     if (content instanceof Spanned) {
                         Spanned spanned = (Spanned)content;
@@ -4594,10 +4644,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         }
                     }
                     outText.partialStartOffset = partialStartOffset;
-                    outText.partialEndOffset = partialEndOffset;
-                    // Now use the delta to determine the actual amount of text
-                    // we need.
-                    partialEndOffset += delta;
+                    outText.partialEndOffset = partialEndOffset - delta;
+
                     if (partialStartOffset > N) {
                         partialStartOffset = N;
                     } else if (partialStartOffset < 0) {
@@ -4661,6 +4709,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                     + ": " + ims.mTmpExtracted.text);
                             imm.updateExtractedText(this, req.token,
                                     mInputMethodState.mTmpExtracted);
+                            ims.mChangedStart = EXTRACT_UNKNOWN;
+                            ims.mChangedEnd = EXTRACT_UNKNOWN;
+                            ims.mChangedDelta = 0;
+                            ims.mContentChanged = false;
                             return true;
                         }
                     }
@@ -4820,7 +4872,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 makeBlink();
             }
         }
-        
+
         checkForResize();
     }
     
@@ -4911,6 +4963,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
 
             case Gravity.RIGHT:
+                // Note, Layout resolves ALIGN_OPPOSITE to left or
+                // right based on the paragraph direction.
                 alignment = Layout.Alignment.ALIGN_OPPOSITE;
                 break;
 
@@ -5075,6 +5129,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean compressText(float width) {
+        if (isHardwareAccelerated()) return false;
+        
         // Only compress the text if it hasn't been compressed by the previous pass
         if (width > 0.0f && mLayout != null && getLineCount() == 1 && !mUserSetTextScaleX &&
                 mTextPaint.getTextScaleX() == 1.0f) {
@@ -5735,11 +5791,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int leftChar = mLayout.getOffsetForHorizontal(line, hs);
         final int rightChar = mLayout.getOffsetForHorizontal(line, hspace+hs);
         
+        // line might contain bidirectional text
+        final int lowChar = leftChar < rightChar ? leftChar : rightChar;
+        final int highChar = leftChar > rightChar ? leftChar : rightChar;
+
         int newStart = start;
-        if (newStart < leftChar) {
-            newStart = leftChar;
-        } else if (newStart > rightChar) {
-            newStart = rightChar;
+        if (newStart < lowChar) {
+            newStart = lowChar;
+        } else if (newStart > highChar) {
+            newStart = highChar;
         }
         
         if (newStart != start) {
@@ -6258,8 +6318,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 ims.mChangedStart = start;
                 ims.mChangedEnd = start+before;
             } else {
-                if (ims.mChangedStart > start) ims.mChangedStart = start;
-                if (ims.mChangedEnd < (start+before)) ims.mChangedEnd = start+before;
+                ims.mChangedStart = Math.min(ims.mChangedStart, start);
+                ims.mChangedEnd = Math.max(ims.mChangedEnd, start + before - ims.mChangedDelta);
             }
             ims.mChangedDelta += after-before;
         }
@@ -6566,11 +6626,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             hideInsertionPointCursorController();
             if (this instanceof ExtractEditText) {
-                // terminateTextSelectionMode would remove selection, which we want to keep when
+                // terminateTextSelectionMode removes selection, which we want to keep when
                 // ExtractEditText goes out of focus.
-                mIsInTextSelectionMode = false;
+                final int selStart = getSelectionStart();
+                final int selEnd = getSelectionEnd();
+                terminateSelectionActionMode();
+                Selection.setSelection((Spannable) mText, selStart, selEnd);
             } else {
-                terminateTextSelectionMode();
+                terminateSelectionActionMode();
             }
         }
 
@@ -6649,7 +6712,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             } else {
                 // Tapping outside stops selection mode, if any
-                stopTextSelectionMode();
+                stopSelectionActionMode();
 
                 if (mInsertionPointCursorController != null) {
                     mInsertionPointCursorController.show();
@@ -6660,13 +6723,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     class CommitSelectionReceiver extends ResultReceiver {
         private final int mPrevStart, mPrevEnd;
-        
+
         public CommitSelectionReceiver(int prevStart, int prevEnd) {
             super(getHandler());
             mPrevStart = prevStart;
             mPrevEnd = prevEnd;
         }
-        
+
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
             // If this tap was actually used to show the IMM, leave cursor or selection unchanged
@@ -6678,14 +6741,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 Selection.setSelection((Spannable)mText, start, end);
 
                 if (hasSelection()) {
-                    startTextSelectionMode();
+                    startSelectionActionMode();
                 } else if (mInsertionPointCursorController != null) {
                     mInsertionPointCursorController.show();
                 }
             }
         }
     }
-    
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
@@ -6787,7 +6850,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         } else {
             // Stop selection mode if the controller becomes unavailable.
-            stopTextSelectionMode();
+            stopSelectionActionMode();
             mSelectionModifierCursorController = null;
         }
     }
@@ -6927,8 +6990,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected int computeHorizontalScrollRange() {
-        if (mLayout != null)
-            return mLayout.getWidth();
+        if (mLayout != null) {
+            return mSingleLine && (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.LEFT ?
+                    (int) mLayout.getLineWidth(0) : mLayout.getWidth();
+        }
 
         return super.computeHorizontalScrollRange();
     }
@@ -7075,7 +7140,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 getSelectionStart() >= 0 &&
                 getSelectionEnd() >= 0 &&
                 ((ClipboardManager)getContext().getSystemService(Context.CLIPBOARD_SERVICE)).
-                hasText());
+                hasPrimaryClip());
     }
 
     /**
@@ -7167,7 +7232,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Two ints packed in a long
         return (((long) start) << 32) | end;
     }
-    
+
     private void selectCurrentWord() {
         // In case selection mode is started after an orientation change or after a select all,
         // use the current selection instead of creating one
@@ -7242,22 +7307,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
     }
-    
-    private String getWordForDictionary() {
-        if (mLastTouchOffset < 0) {
-            return null;
-        }
 
-        long wordLimits = getWordLimitsAt(mLastTouchOffset);
-        if (wordLimits >= 0) {
-            int start = (int) (wordLimits >>> 32);
-            int end = (int) (wordLimits & 0x00000000FFFFFFFFL);
-            return mTransformed.subSequence(start, end).toString();
-        } else {
-            return null;
-        }
-    }
-    
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         if (!isShown()) {
@@ -7299,113 +7349,39 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         super.onCreateContextMenu(menu);
         boolean added = false;
 
-        if (mIsInTextSelectionMode) {
-            MenuHandler handler = new MenuHandler();
-            
-            if (canCut()) {
-                menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
-                     setOnMenuItemClickListener(handler).
-                     setAlphabeticShortcut('x');
+        MenuHandler handler = new MenuHandler();
+
+        if (mText instanceof Spanned) {
+            int selStart = getSelectionStart();
+            int selEnd = getSelectionEnd();
+
+            int min = Math.min(selStart, selEnd);
+            int max = Math.max(selStart, selEnd);
+
+            URLSpan[] urls = ((Spanned) mText).getSpans(min, max,
+                                                        URLSpan.class);
+            if (urls.length == 1) {
+                menu.add(0, ID_COPY_URL, 0,
+                         com.android.internal.R.string.copyUrl).
+                            setOnMenuItemClickListener(handler);
+
                 added = true;
             }
-
-            if (canCopy()) {
-                menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
-                     setOnMenuItemClickListener(handler).
-                     setAlphabeticShortcut('c');
-                added = true;
-            }
-
-            if (canPaste()) {
-                menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
-                     setOnMenuItemClickListener(handler).
-                     setAlphabeticShortcut('v');
-                added = true;
-            }
-        } else {
-            /*
-            if (!isFocused()) {
-                if (isFocusable() && mInput != null) {
-                    if (canCopy()) {
-                        MenuHandler handler = new MenuHandler();
-                        menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
-                             setOnMenuItemClickListener(handler).
-                             setAlphabeticShortcut('c');
-                        menu.setHeaderTitle(com.android.internal.R.string.editTextMenuTitle);
-                    }
-                }
-
-                //return;
-            }
-             */
-            MenuHandler handler = new MenuHandler();
-
-            if (canSelectText()) {
-                menu.add(0, ID_START_SELECTING_TEXT, 0, com.android.internal.R.string.selectText).
-                setOnMenuItemClickListener(handler);
-                added = true;
-            }
-            
-            if (canSelectAll()) {
-                menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
-                     setOnMenuItemClickListener(handler).
-                     setAlphabeticShortcut('a');
-                added = true;
-            }
-
-            if (mText instanceof Spanned) {
-                int selStart = getSelectionStart();
-                int selEnd = getSelectionEnd();
-
-                int min = Math.min(selStart, selEnd);
-                int max = Math.max(selStart, selEnd);
-
-                URLSpan[] urls = ((Spanned) mText).getSpans(min, max,
-                        URLSpan.class);
-                if (urls.length == 1) {
-                    menu.add(0, ID_COPY_URL, 0, com.android.internal.R.string.copyUrl).
-                         setOnMenuItemClickListener(handler);
-                    added = true;
-                }
-            }
-            
-            // Paste location is too imprecise. Only allow on empty text fields.
-            if (canPaste() && textIsOnlySpaces()) {
-                menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
-                     setOnMenuItemClickListener(handler).
-                     setAlphabeticShortcut('v');
-                added = true;
-            }
-
-            if (isInputMethodTarget()) {
-                menu.add(1, ID_SWITCH_INPUT_METHOD, 0, com.android.internal.R.string.inputMethod).
-                     setOnMenuItemClickListener(handler);
-                added = true;
-            }
-
-            String word = getWordForDictionary();
-            if (word != null) {
-                menu.add(1, ID_ADD_TO_DICTIONARY, 0,
-                     getContext().getString(com.android.internal.R.string.addToDictionary, word)).
-                     setOnMenuItemClickListener(handler);
-                added = true;
-
-            }
+        }
+        
+        // The context menu is not empty, which will prevent the selection mode from starting.
+        // Add a entry to start it in the context menu.
+        // TODO Does not handle the case where a subclass does not call super.thisMethod or
+        // populates the menu AFTER this call.
+        if (menu.size() > 0) {
+            menu.add(0, ID_SELECTION_MODE, 0, com.android.internal.R.string.selectTextMode).
+            setOnMenuItemClickListener(handler);
+            added = true;
         }
 
         if (added) {
             menu.setHeaderTitle(com.android.internal.R.string.editTextMenuTitle);
         }
-    }
-
-    private boolean textIsOnlySpaces() {
-        final int length = mTransformed.length();
-        for (int i = 0; i < length; i++) {
-            if (!Character.isSpaceChar(mTransformed.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -7417,15 +7393,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return imm != null && imm.isActive(this);
     }
     
-    // Context menu entries
+    // Selection context mode
     private static final int ID_SELECT_ALL = android.R.id.selectAll;
-    private static final int ID_START_SELECTING_TEXT = android.R.id.startSelectingText;
     private static final int ID_CUT = android.R.id.cut;
     private static final int ID_COPY = android.R.id.copy;
     private static final int ID_PASTE = android.R.id.paste;
+    // Context menu entries
     private static final int ID_COPY_URL = android.R.id.copyUrl;
-    private static final int ID_SWITCH_INPUT_METHOD = android.R.id.switchInputMethod;
-    private static final int ID_ADD_TO_DICTIONARY = android.R.id.addToDictionary;
+    private static final int ID_SELECTION_MODE = android.R.id.selectTextMode;
 
     private class MenuHandler implements MenuItem.OnMenuItemClickListener {
         public boolean onMenuItemClick(MenuItem item) {
@@ -7435,11 +7410,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Called when a context menu option for the text view is selected.  Currently
-     * this will be one of: {@link android.R.id#selectAll},
-     * {@link android.R.id#startSelectingText},
-     * {@link android.R.id#cut}, {@link android.R.id#copy},
-     * {@link android.R.id#paste}, {@link android.R.id#copyUrl},
-     * or {@link android.R.id#switchInputMethod}.
+     * this will be {@link android.R.id#copyUrl} or {@link android.R.id#selectTextMode}.
      */
     public boolean onTextContextMenuItem(int id) {
         int min = 0;
@@ -7453,93 +7424,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             max = Math.max(0, Math.max(selStart, selEnd));
         }
 
-        ClipboardManager clip = (ClipboardManager)getContext()
+        ClipboardManager clipboard = (ClipboardManager)getContext()
                 .getSystemService(Context.CLIPBOARD_SERVICE);
 
         switch (id) {
-            case ID_SELECT_ALL:
-                Selection.setSelection((Spannable) mText, 0, mText.length());
-                startTextSelectionMode();
-                return true;
-
-            case ID_START_SELECTING_TEXT:
-                startTextSelectionMode();
-                return true;
-
-            case ID_CUT:                
-                clip.setText(mTransformed.subSequence(min, max));
-                ((Editable) mText).delete(min, max);
-                stopTextSelectionMode();
-                return true;
-
-            case ID_COPY:
-                clip.setText(mTransformed.subSequence(min, max));
-                stopTextSelectionMode();
-                return true;
-
-            case ID_PASTE:
-                CharSequence paste = clip.getText();
-
-                if (paste != null && paste.length() > 0) {
-                    // Paste adds/removes spaces before or after insertion as needed.
-
-                    if (Character.isSpaceChar(paste.charAt(0))) {
-                        if (min > 0 && Character.isSpaceChar(mTransformed.charAt(min - 1))) {
-                            // Two spaces at beginning of paste: remove one
-                            ((Editable) mText).replace(min - 1, min, "");
-                            min = min - 1;
-                            max = max - 1;
-                        }
-                    } else {
-                        if (min > 0 && !Character.isSpaceChar(mTransformed.charAt(min - 1))) {
-                            // No space at beginning of paste: add one
-                            ((Editable) mText).replace(min, min, " ");
-                            min = min + 1;
-                            max = max + 1;
-                        }
-                    }
-
-                    if (Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
-                        if (max < mText.length() && Character.isSpaceChar(mTransformed.charAt(max))) {
-                            // Two spaces at end of paste: remove one
-                            ((Editable) mText).replace(max, max + 1, "");
-                        }
-                    } else {
-                        if (max < mText.length() && !Character.isSpaceChar(mTransformed.charAt(max))) {
-                            // No space at end of paste: add one
-                            ((Editable) mText).replace(max, max, " ");
-                        }
-                    }
-
-                    Selection.setSelection((Spannable) mText, max);
-                    ((Editable) mText).replace(min, max, paste);
-                    stopTextSelectionMode();
-                }
-                return true;
-
             case ID_COPY_URL:
+
                 URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
-                if (urls.length == 1) {
-                    clip.setText(urls[0].getURL());
+                if (urls.length >= 1) {
+                    ClipData clip = null;
+                    for (int i=0; i<urls.length; i++) {
+                        Uri uri = Uri.parse(urls[0].getURL());
+                        if (clip == null) {
+                            clip = ClipData.newRawUri(null, null, uri);
+                        } else {
+                            clip.addItem(new ClipData.Item(uri));
+                        }
+                    }
+                    if (clip != null) {
+                        clipboard.setPrimaryClip(clip);
+                    }
                 }
                 return true;
 
-            case ID_SWITCH_INPUT_METHOD:
-                InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
-                    imm.showInputMethodPicker();
-                }
-                return true;
-
-            case ID_ADD_TO_DICTIONARY:
-                String word = getWordForDictionary();
-
-                if (word != null) {
-                    Intent i = new Intent("com.android.settings.USER_DICTIONARY_INSERT");
-                    i.putExtra("word", word);
-                    i.setFlags(i.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getContext().startActivity(i);
-                }
+            case ID_SELECTION_MODE:
+                startSelectionActionMode();
                 return true;
             }
 
@@ -7552,35 +7461,81 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEatTouchRelease = true;
             return true;
         }
+        
+        if (startSelectionActionMode()) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            mEatTouchRelease = true;
+            return true;
+        }
 
         return false;
     }
 
-    private void startTextSelectionMode() {
-        if (!mIsInTextSelectionMode) {
-            if (mSelectionModifierCursorController == null) {
-                Log.w(LOG_TAG, "TextView has no selection controller. Action mode cancelled.");
-                return;
-            }
+    private boolean touchPositionIsInSelection() {
+        int selectionStart = getSelectionStart();
+        int selectionEnd = getSelectionEnd();
 
-            if (!requestFocus()) {
-                return;
-            }
-
-            selectCurrentWord();
-            mSelectionModifierCursorController.show();
-            mIsInTextSelectionMode = true;
+        if (selectionStart == selectionEnd) {
+            return false;
         }
+
+        if (selectionStart > selectionEnd) {
+            int tmp = selectionStart;
+            selectionStart = selectionEnd;
+            selectionEnd = tmp;
+            Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+        }
+
+        SelectionModifierCursorController selectionModifierCursorController =
+            ((SelectionModifierCursorController) mSelectionModifierCursorController);
+        int minOffset = selectionModifierCursorController.getMinTouchOffset();
+        int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
+
+        return ((minOffset >= selectionStart) && (maxOffset < selectionEnd));
     }
-    
+
     /**
-     * Same as {@link #stopTextSelectionMode()}, except that there is no cursor controller
+     * Provides the callback used to start a selection action mode.
+     *
+     * @return A callback instance that will be used to start selection mode, or null if selection
+     * mode is not available.
+     */
+    private ActionMode.Callback getActionModeCallback() {
+        // Long press in the current selection.
+        // Should initiate a drag. Return false, to rely on context menu for now.
+        if (canSelectText() && !touchPositionIsInSelection()) {
+            return new SelectionActionModeCallback();
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @return true if the selection mode was actually started.
+     */
+    private boolean startSelectionActionMode() {
+        if (mSelectionActionMode != null) {
+            // Selection action mode is already started
+            return false;
+        }
+
+        ActionMode.Callback actionModeCallback = getActionModeCallback();
+        if (actionModeCallback != null) {
+            mSelectionActionMode = startActionMode(actionModeCallback);
+            return mSelectionActionMode != null;
+        }
+
+        return false;
+    }
+
+    /**
+     * Same as {@link #stopSelectionActionMode()}, except that there is no cursor controller
      * fade out animation. Needed since the drawable and their alpha values are shared by all
      * TextViews. Switching from one TextView to another would fade the cursor controllers in the
      * new one otherwise.
      */
-    private void terminateTextSelectionMode() {
-        stopTextSelectionMode();
+    private void terminateSelectionActionMode() {
+        stopSelectionActionMode();
         if (mSelectionModifierCursorController != null) {
             SelectionModifierCursorController selectionModifierCursorController =
                 (SelectionModifierCursorController) mSelectionModifierCursorController;
@@ -7588,14 +7543,146 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void stopTextSelectionMode() {
-        if (mIsInTextSelectionMode) {
-            Selection.setSelection((Spannable) mText, getSelectionEnd());
+    private void stopSelectionActionMode() {
+        if (mSelectionActionMode != null) {
+            mSelectionActionMode.finish();
+        }
+    }
+
+    private class SelectionActionModeCallback implements ActionMode.Callback {
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            if (mSelectionModifierCursorController == null) {
+                Log.w(LOG_TAG, "TextView has no selection controller. Action mode cancelled.");
+                return false;
+            }
+
+            if (!requestFocus()) {
+                return false;
+            }
+
+            mode.setTitle(mContext.getString(com.android.internal.R.string.textSelectionCABTitle));
+            mode.setSubtitle(null);
+
+            selectCurrentWord();
+
+            boolean atLeastOne = false;
+
+            if (canSelectAll()) {
+                menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
+                    setIcon(com.android.internal.R.drawable.ic_menu_chat_dashboard).
+                    setAlphabeticShortcut('a');
+                atLeastOne = true;
+            }
+
+            if (canCut()) {
+                menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
+                    setIcon(com.android.internal.R.drawable.ic_menu_compose).
+                    setAlphabeticShortcut('x');
+                atLeastOne = true;
+            }
+
+            if (canCopy()) {
+                menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
+                    setIcon(com.android.internal.R.drawable.ic_menu_attachment).
+                    setAlphabeticShortcut('c');
+                atLeastOne = true;
+            }
+
+            if (canPaste()) {
+                menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
+                        setIcon(com.android.internal.R.drawable.ic_menu_camera).
+                        setAlphabeticShortcut('v');
+                atLeastOne = true;
+            }
+
+            if (atLeastOne) {
+                mSelectionModifierCursorController.show();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            final int itemId = item.getItemId();
+
+            if (itemId == ID_SELECT_ALL) {
+                Selection.setSelection((Spannable) mText, 0, mText.length());
+                // Update controller positions after selection change.
+                if (mSelectionModifierCursorController != null) {
+                    mSelectionModifierCursorController.show();
+                }
+                return true;
+            }
+
+            ClipboardManager clipboard = (ClipboardManager) getContext().
+                    getSystemService(Context.CLIPBOARD_SERVICE);
+
+            int min = 0;
+            int max = mText.length();
+
+            if (isFocused()) {
+                final int selStart = getSelectionStart();
+                final int selEnd = getSelectionEnd();
+
+                min = Math.max(0, Math.min(selStart, selEnd));
+                max = Math.max(0, Math.max(selStart, selEnd));
+            }
+
+            switch (item.getItemId()) {
+                case ID_PASTE:
+                    ClipData clip = clipboard.getPrimaryClip();
+                    if (clip != null) {
+                        boolean didfirst = false;
+                        for (int i=0; i<clip.getItemCount(); i++) {
+                            CharSequence paste = clip.getItem(i).coerceToText(getContext());
+                            if (paste != null) {
+                                if (!didfirst) {
+                                    Selection.setSelection((Spannable) mText, max);
+                                    ((Editable) mText).replace(min, max, paste);
+                                } else {
+                                    ((Editable) mText).insert(getSelectionEnd(), "\n");
+                                    ((Editable) mText).insert(getSelectionEnd(), paste);
+                                }
+                            }
+                        }
+                        stopSelectionActionMode();
+                    }
+
+                    return true;
+
+                case ID_CUT:
+                    clipboard.setPrimaryClip(ClipData.newPlainText(null, null,
+                            mTransformed.subSequence(min, max)));
+                    ((Editable) mText).delete(min, max);
+                    stopSelectionActionMode();
+                    return true;
+
+                case ID_COPY:
+                    clipboard.setPrimaryClip(ClipData.newPlainText(null, null,
+                            mTransformed.subSequence(min, max)));
+                    stopSelectionActionMode();
+                    return true;
+            }
+
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            Selection.setSelection((Spannable) mText, getSelectionStart());
             if (mSelectionModifierCursorController != null) {
                 mSelectionModifierCursorController.hide();
             }
-
-            mIsInTextSelectionMode = false;
+            mSelectionActionMode = null;
         }
     }
 
@@ -8045,7 +8132,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void hideControllers() {
         hideInsertionPointCursorController();
-        stopTextSelectionMode();
+        stopSelectionActionMode();
     }
 
     private int getOffsetForHorizontal(int line, int x) {
@@ -8108,7 +8195,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getOffsetForHorizontal(line, x);
     }
 
-    @ViewDebug.ExportedProperty
+
+    @ViewDebug.ExportedProperty(category = "text")
     private CharSequence            mText;
     private CharSequence            mTransformed;
     private BufferType              mBufferType = BufferType.NORMAL;
@@ -8139,7 +8227,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Cursor Controllers. Null when disabled.
     private CursorController        mInsertionPointCursorController;
     private CursorController        mSelectionModifierCursorController;
-    private boolean                 mIsInTextSelectionMode = false;
+    private ActionMode              mSelectionActionMode;
     private int                     mLastTouchOffset = -1;
     // Created once and shared by different CursorController helper methods.
     // Only one cursor controller is active at any time which prevent race conditions.

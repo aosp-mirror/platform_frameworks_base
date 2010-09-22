@@ -16,19 +16,22 @@
 
 package android.app;
 
+import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
 import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
+import android.content.CursorLoader;
 import android.content.IIntentSender;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -39,6 +42,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -49,7 +53,9 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ActionMode;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -58,18 +64,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnCreateContextMenuListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -110,6 +116,7 @@ import java.util.HashMap;
  * 
  * <p>Topics covered here:
  * <ol>
+ * <li><a href="#Fragments">Fragments</a>
  * <li><a href="#ActivityLifecycle">Activity Lifecycle</a>
  * <li><a href="#ConfigurationChanges">Configuration Changes</a>
  * <li><a href="#StartingActivities">Starting Activities and Getting Results</a>
@@ -118,6 +125,14 @@ import java.util.HashMap;
  * <li><a href="#ProcessLifecycle">Process Lifecycle</a>
  * </ol>
  * 
+ * <a name="Fragments"></a>
+ * <h3>Fragments</h3>
+ *
+ * <p>Starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB}, Activity
+ * implementations can make use of the {@link Fragment} class to better
+ * modularize their code, build more sophisticated user interfaces for larger
+ * screens, and help scale their application between small and large screens.
+ *
  * <a name="ActivityLifecycle"></a>
  * <h3>Activity Lifecycle</h3>
  *
@@ -592,7 +607,7 @@ import java.util.HashMap;
  * or finished.
  */
 public class Activity extends ContextThemeWrapper
-        implements LayoutInflater.Factory,
+        implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks {
     private static final String TAG = "Activity";
@@ -604,9 +619,8 @@ public class Activity extends ContextThemeWrapper
     /** Start of user-defined activity results. */
     public static final int RESULT_FIRST_USER   = 1;
 
-    private static long sInstanceCount = 0;
-
     private static final String WINDOW_HIERARCHY_TAG = "android:viewHierarchyState";
+    private static final String FRAGMENTS_TAG = "android:fragments";
     private static final String SAVED_DIALOG_IDS_KEY = "android:savedDialogIds";
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
@@ -628,18 +642,28 @@ public class Activity extends ContextThemeWrapper
     private ComponentName mComponent;
     /*package*/ ActivityInfo mActivityInfo;
     /*package*/ ActivityThread mMainThread;
-    /*package*/ Object mLastNonConfigurationInstance;
-    /*package*/ HashMap<String,Object> mLastNonConfigurationChildInstances;
     Activity mParent;
     boolean mCalled;
+    boolean mCheckedForLoaderManager;
+    boolean mStarted;
     private boolean mResumed;
     private boolean mStopped;
     boolean mFinished;
     boolean mStartedActivity;
+    /** true if the activity is being destroyed in order to recreate it with a new configuration */
+    /*package*/ boolean mChangingConfigurations = false;
     /*package*/ int mConfigChangeFlags;
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
 
+    static final class NonConfigurationInstances {
+        Object activity;
+        HashMap<String, Object> children;
+        ArrayList<Fragment> fragments;
+        SparseArray<LoaderManagerImpl> loaders;
+    }
+    /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
+    
     private Window mWindow;
 
     private WindowManager mWindowManager;
@@ -647,10 +671,16 @@ public class Activity extends ContextThemeWrapper
     /*package*/ boolean mWindowAdded = false;
     /*package*/ boolean mVisibleFromServer = false;
     /*package*/ boolean mVisibleFromClient = true;
+    /*package*/ ActionBarImpl mActionBar = null;
 
     private CharSequence mTitle;
     private int mTitleColor = 0;
 
+    final FragmentManagerImpl mFragments = new FragmentManagerImpl();
+    
+    SparseArray<LoaderManagerImpl> mAllLoaderManagers;
+    LoaderManagerImpl mLoaderManager;
+    
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
             mCursor = cursor;
@@ -677,24 +707,7 @@ public class Activity extends ContextThemeWrapper
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
     private Thread mUiThread;
-    private final Handler mHandler = new Handler();
-
-    // Used for debug only
-    /*
-    public Activity() {
-        ++sInstanceCount;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        --sInstanceCount;
-    }
-    */
-
-    public static long getInstanceCount() {
-        return sInstanceCount;
-    }
+    final Handler mHandler = new Handler();
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -747,6 +760,30 @@ public class Activity extends ContextThemeWrapper
         return mWindow;
     }
 
+    /**
+     * Return the LoaderManager for this fragment, creating it if needed.
+     */
+    public LoaderManager getLoaderManager() {
+        if (mLoaderManager != null) {
+            return mLoaderManager;
+        }
+        mCheckedForLoaderManager = true;
+        mLoaderManager = getLoaderManager(-1, mStarted, true);
+        return mLoaderManager;
+    }
+    
+    LoaderManagerImpl getLoaderManager(int index, boolean started, boolean create) {
+        if (mAllLoaderManagers == null) {
+            mAllLoaderManagers = new SparseArray<LoaderManagerImpl>();
+        }
+        LoaderManagerImpl lm = mAllLoaderManagers.get(index);
+        if (lm == null && create) {
+            lm = new LoaderManagerImpl(started);
+            mAllLoaderManagers.put(index, lm);
+        }
+        return lm;
+    }
+    
     /**
      * Calls {@link android.view.Window#getCurrentFocus} on the
      * Window of this Activity to return the currently focused view.
@@ -801,6 +838,15 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(Bundle savedInstanceState) {
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
+        if (mLastNonConfigurationInstances != null) {
+            mAllLoaderManagers = mLastNonConfigurationInstances.loaders;
+        }
+        if (savedInstanceState != null) {
+            Parcelable p = savedInstanceState.getParcelable(FRAGMENTS_TAG);
+            mFragments.restoreAllState(p, mLastNonConfigurationInstances != null
+                    ? mLastNonConfigurationInstances.fragments : null);
+        }
+        mFragments.dispatchCreate();
         mCalled = true;
     }
 
@@ -933,6 +979,13 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onStart() {
         mCalled = true;
+        mStarted = true;
+        if (mLoaderManager != null) {
+            mLoaderManager.doStart();
+        } else if (!mCheckedForLoaderManager) {
+            mLoaderManager = getLoaderManager(-1, mStarted, false);
+        }
+        mCheckedForLoaderManager = true;
     }
 
     /**
@@ -1085,6 +1138,10 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBundle(WINDOW_HIERARCHY_TAG, mWindow.saveHierarchyState());
+        Parcelable p = mFragments.saveAllState();
+        if (p != null) {
+            outState.putParcelable(FRAGMENTS_TAG, p);
+        }
     }
 
     /**
@@ -1408,7 +1465,8 @@ public class Activity extends ContextThemeWrapper
      * {@link #onRetainNonConfigurationInstance()}.
      */
     public Object getLastNonConfigurationInstance() {
-        return mLastNonConfigurationInstance;
+        return mLastNonConfigurationInstances != null
+                ? mLastNonConfigurationInstances.activity : null;
     }
     
     /**
@@ -1420,6 +1478,11 @@ public class Activity extends ContextThemeWrapper
      * {@link #getLastNonConfigurationInstance()} in the new activity
      * instance.
      * 
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using a {@link Fragment} with
+     * {@link Fragment#setRetainInstance(boolean)
+     * Fragment.setRetainInstance(boolean}.</em>
+     *
      * <p>This function is called purely as an optimization, and you must
      * not rely on it being called.  When it is called, a number of guarantees
      * will be made to help optimize configuration switching:
@@ -1475,8 +1538,9 @@ public class Activity extends ContextThemeWrapper
      * @return Returns the object previously returned by
      * {@link #onRetainNonConfigurationChildInstances()}
      */
-    HashMap<String,Object> getLastNonConfigurationChildInstances() {
-        return mLastNonConfigurationChildInstances;
+    HashMap<String, Object> getLastNonConfigurationChildInstances() {
+        return mLastNonConfigurationInstances != null
+                ? mLastNonConfigurationInstances.children : null;
     }
     
     /**
@@ -1490,8 +1554,75 @@ public class Activity extends ContextThemeWrapper
         return null;
     }
     
+    NonConfigurationInstances retainNonConfigurationInstances() {
+        Object activity = onRetainNonConfigurationInstance();
+        HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
+        ArrayList<Fragment> fragments = mFragments.retainNonConfig();
+        boolean retainLoaders = false;
+        if (mAllLoaderManagers != null) {
+            // prune out any loader managers that were already stopped and so
+            // have nothing useful to retain.
+            for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
+                LoaderManagerImpl lm = mAllLoaderManagers.valueAt(i);
+                if (lm.mRetaining) {
+                    retainLoaders = true;
+                } else {
+                    lm.doDestroy();
+                    mAllLoaderManagers.removeAt(i);
+                }
+            }
+        }
+        if (activity == null && children == null && fragments == null && !retainLoaders) {
+            return null;
+        }
+        
+        NonConfigurationInstances nci = new NonConfigurationInstances();
+        nci.activity = activity;
+        nci.children = children;
+        nci.fragments = fragments;
+        nci.loaders = mAllLoaderManagers;
+        return nci;
+    }
+    
     public void onLowMemory() {
         mCalled = true;
+    }
+    
+    /**
+     * Return the FragmentManager for interacting with fragments associated
+     * with this activity.
+     */
+    public FragmentManager getFragmentManager() {
+        return mFragments;
+    }
+
+    /**
+     * Start a series of edit operations on the Fragments associated with
+     * this activity.
+     * @deprecated use {@link #getFragmentManager}.
+     */
+    @Deprecated
+    public FragmentTransaction openFragmentTransaction() {
+        return mFragments.openTransaction();
+    }
+    
+    void invalidateFragmentIndex(int index) {
+        //Log.v(TAG, "invalidateFragmentIndex: index=" + index);
+        if (mAllLoaderManagers != null) {
+            LoaderManagerImpl lm = mAllLoaderManagers.get(index);
+            if (lm != null) {
+                lm.doDestroy();
+            }
+            mAllLoaderManagers.remove(index);
+        }
+    }
+    
+    /**
+     * Called when a Fragment is being attached to this activity, immediately
+     * after the call to its {@link Fragment#onAttach Fragment.onAttach()}
+     * method and before {@link Fragment#onCreate Fragment.onCreate()}.
+     */
+    public void onAttachFragment(Fragment fragment) {
     }
     
     /**
@@ -1501,6 +1632,10 @@ public class Activity extends ContextThemeWrapper
      * {@link #startManagingCursor} so that the activity will manage its
      * lifecycle for you.
      * 
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using {@link LoaderManager} instead, available
+     * via {@link #getLoaderManager()}.</em>
+     *
      * @param uri The URI of the content provider to query.
      * @param projection List of columns to return.
      * @param selection SQL WHERE clause.
@@ -1511,12 +1646,12 @@ public class Activity extends ContextThemeWrapper
      * @see ContentResolver#query(android.net.Uri , String[], String, String[], String)
      * @see #startManagingCursor
      * @hide
+     *
+     * @deprecated Use {@link CursorLoader} instead.
      */
-    public final Cursor managedQuery(Uri uri,
-                                     String[] projection,
-                                     String selection,
-                                     String sortOrder)
-    {
+    @Deprecated
+    public final Cursor managedQuery(Uri uri, String[] projection, String selection,
+            String sortOrder) {
         Cursor c = getContentResolver().query(uri, projection, selection, null, sortOrder);
         if (c != null) {
             startManagingCursor(c);
@@ -1531,6 +1666,10 @@ public class Activity extends ContextThemeWrapper
      * {@link #startManagingCursor} so that the activity will manage its
      * lifecycle for you.
      * 
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using {@link LoaderManager} instead, available
+     * via {@link #getLoaderManager()}.</em>
+     *
      * @param uri The URI of the content provider to query.
      * @param projection List of columns to return.
      * @param selection SQL WHERE clause.
@@ -1541,52 +1680,17 @@ public class Activity extends ContextThemeWrapper
      * 
      * @see ContentResolver#query(android.net.Uri , String[], String, String[], String)
      * @see #startManagingCursor
+     *
+     * @deprecated Use {@link CursorLoader} instead.
      */
-    public final Cursor managedQuery(Uri uri,
-                                     String[] projection,
-                                     String selection,
-                                     String[] selectionArgs,
-                                     String sortOrder)
-    {
+    @Deprecated
+    public final Cursor managedQuery(Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sortOrder) {
         Cursor c = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
         if (c != null) {
             startManagingCursor(c);
         }
         return c;
-    }
-
-    /**
-     * Wrapper around {@link Cursor#commitUpdates()} that takes care of noting
-     * that the Cursor needs to be requeried.  You can call this method in
-     * {@link #onPause} or {@link #onStop} to have the system call
-     * {@link Cursor#requery} for you if the activity is later resumed.  This
-     * allows you to avoid determing when to do the requery yourself (which is
-     * required for the Cursor to see any data changes that were committed with
-     * it).
-     * 
-     * @param c The Cursor whose changes are to be committed.
-     * 
-     * @see #managedQuery(android.net.Uri , String[], String, String[], String)
-     * @see #startManagingCursor
-     * @see Cursor#commitUpdates()
-     * @see Cursor#requery
-     * @hide
-     */
-    @Deprecated
-    public void managedCommitUpdates(Cursor c) {
-        synchronized (mManagedCursors) {
-            final int N = mManagedCursors.size();
-            for (int i=0; i<N; i++) {
-                ManagedCursor mc = mManagedCursors.get(i);
-                if (mc.mCursor == c) {
-                    c.commitUpdates();
-                    mc.mUpdated = true;
-                    return;
-                }
-            }
-            throw new RuntimeException(
-                "Cursor " + c + " is not currently managed");
-        }
     }
 
     /**
@@ -1597,11 +1701,18 @@ public class Activity extends ContextThemeWrapper
      * it will call {@link Cursor#requery} for you.  When the activity is
      * destroyed, all managed Cursors will be closed automatically.
      * 
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using {@link LoaderManager} instead, available
+     * via {@link #getLoaderManager()}.</em>
+     *
      * @param c The Cursor to be managed.
      * 
      * @see #managedQuery(android.net.Uri , String[], String, String[], String)
      * @see #stopManagingCursor
+     *
+     * @deprecated Use {@link CursorLoader} instead.
      */
+    @Deprecated
     public void startManagingCursor(Cursor c) {
         synchronized (mManagedCursors) {
             mManagedCursors.add(new ManagedCursor(c));
@@ -1616,7 +1727,10 @@ public class Activity extends ContextThemeWrapper
      * @param c The Cursor that was being managed.
      * 
      * @see #startManagingCursor
+     *
+     * @deprecated Use {@link CursorLoader} instead.
      */
+    @Deprecated
     public void stopManagingCursor(Cursor c) {
         synchronized (mManagedCursors) {
             final int N = mManagedCursors.size();
@@ -1671,7 +1785,54 @@ public class Activity extends ContextThemeWrapper
     public View findViewById(int id) {
         return getWindow().findViewById(id);
     }
-
+    
+    /**
+     * Retrieve a reference to this activity's ActionBar.
+     *
+     * @return The Activity's ActionBar, or null if it does not have one.
+     */
+    public ActionBar getActionBar() {
+        initActionBar();
+        return mActionBar;
+    }
+    
+    /**
+     * Creates a new ActionBar, locates the inflated ActionBarView,
+     * initializes the ActionBar with the view, and sets mActionBar.
+     */
+    private void initActionBar() {
+        Window window = getWindow();
+        if (isChild() || !window.hasFeature(Window.FEATURE_ACTION_BAR) || mActionBar != null) {
+            return;
+        }
+        
+        mActionBar = new ActionBarImpl(this);
+    }
+    
+    /**
+     * Finds a fragment that was identified by the given id either when inflated
+     * from XML or as the container ID when added in a transaction.  This only
+     * returns fragments that are currently added to the activity's content.
+     * @return The fragment if found or null otherwise.
+     * @deprecated use {@link #getFragmentManager}.
+     */
+    @Deprecated
+    public Fragment findFragmentById(int id) {
+        return mFragments.findFragmentById(id);
+    }
+    
+    /**
+     * Finds a fragment that was identified by the given tag either when inflated
+     * from XML or as supplied when added in a transaction.  This only
+     * returns fragments that are currently added to the activity's content.
+     * @return The fragment if found or null otherwise.
+     * @deprecated use {@link #getFragmentManager}.
+     */
+    @Deprecated
+    public Fragment findFragmentByTag(String tag) {
+        return mFragments.findFragmentByTag(tag);
+    }
+    
     /**
      * Set the activity content from a layout resource.  The resource will be
      * inflated, adding all top-level views to the activity.
@@ -1680,6 +1841,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void setContentView(int layoutResID) {
         getWindow().setContentView(layoutResID);
+        initActionBar();
     }
 
     /**
@@ -1691,6 +1853,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void setContentView(View view) {
         getWindow().setContentView(view);
+        initActionBar();
     }
 
     /**
@@ -1703,6 +1866,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         getWindow().setContentView(view, params);
+        initActionBar();
     }
 
     /**
@@ -1714,6 +1878,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void addContentView(View view, ViewGroup.LayoutParams params) {
         getWindow().addContentView(view, params);
+        initActionBar();
     }
 
     /**
@@ -1937,12 +2102,65 @@ public class Activity extends ContextThemeWrapper
     }
     
     /**
+     * Flag for {@link #popBackStack(String, int)}
+     * and {@link #popBackStack(int, int)}: If set, and the name or ID of
+     * a back stack entry has been supplied, then all matching entries will
+     * be consumed until one that doesn't match is found or the bottom of
+     * the stack is reached.  Otherwise, all entries up to but not including that entry
+     * will be removed.
+     */
+    public static final int POP_BACK_STACK_INCLUSIVE = 1<<0;
+
+    /**
+     * Pop the top state off the back stack.  Returns true if there was one
+     * to pop, else false.
+     * @deprecated use {@link #getFragmentManager}.
+     */
+    @Deprecated
+    public boolean popBackStack() {
+        return mFragments.popBackStack();
+    }
+
+    /**
+     * Pop the last fragment transition from the local activity's fragment
+     * back stack.  If there is nothing to pop, false is returned.
+     * @param name If non-null, this is the name of a previous back state
+     * to look for; if found, all states up to that state will be popped.  The
+     * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
+     * the named state itself is popped. If null, only the top state is popped.
+     * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+     * @deprecated use {@link #getFragmentManager}.
+     */
+    @Deprecated
+    public boolean popBackStack(String name, int flags) {
+        return mFragments.popBackStack(name, flags);
+    }
+
+    /**
+     * Pop all back stack states up to the one with the given identifier.
+     * @param id Identifier of the stated to be popped. If no identifier exists,
+     * false is returned.
+     * The identifier is the number returned by
+     * {@link FragmentTransaction#commit() FragmentTransaction.commit()}.  The
+     * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
+     * the named state itself is popped.
+     * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
+     * @deprecated use {@link #getFragmentManager}.
+     */
+    @Deprecated
+    public boolean popBackStack(int id, int flags) {
+        return mFragments.popBackStack(id, flags);
+    }
+    
+    /**
      * Called when the activity has detected the user's press of the back
      * key.  The default implementation simply finishes the current activity,
      * but you can override this to do whatever you want.
      */
     public void onBackPressed() {
-        finish();
+        if (!mFragments.popBackStack()) {
+            finish();
+        }
     }
     
     /**
@@ -2180,7 +2398,9 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onCreatePanelMenu(int featureId, Menu menu) {
         if (featureId == Window.FEATURE_OPTIONS_PANEL) {
-            return onCreateOptionsMenu(menu);
+            boolean show = onCreateOptionsMenu(menu);
+            show |= mFragments.dispatchCreateOptionsMenu(menu, getMenuInflater());
+            return show;
         }
         return false;
     }
@@ -2197,6 +2417,7 @@ public class Activity extends ContextThemeWrapper
     public boolean onPreparePanel(int featureId, View view, Menu menu) {
         if (featureId == Window.FEATURE_OPTIONS_PANEL && menu != null) {
             boolean goforit = onPrepareOptionsMenu(menu);
+            goforit |= mFragments.dispatchPrepareOptionsMenu(menu);
             return goforit && menu.hasVisibleItems();
         }
         return true;
@@ -2227,11 +2448,17 @@ public class Activity extends ContextThemeWrapper
                 // doesn't call through to superclass's implmeentation of each
                 // of these methods below
                 EventLog.writeEvent(50000, 0, item.getTitleCondensed());
-                return onOptionsItemSelected(item);
+                if (onOptionsItemSelected(item)) {
+                    return true;
+                }
+                return mFragments.dispatchOptionsItemSelected(item);
                 
             case Window.FEATURE_CONTEXT_MENU:
                 EventLog.writeEvent(50000, 1, item.getTitleCondensed());
-                return onContextItemSelected(item);
+                if (onContextItemSelected(item)) {
+                    return true;
+                }
+                return mFragments.dispatchContextItemSelected(item);
                 
             default:
                 return false;
@@ -2250,6 +2477,7 @@ public class Activity extends ContextThemeWrapper
     public void onPanelClosed(int featureId, Menu menu) {
         switch (featureId) {
             case Window.FEATURE_OPTIONS_PANEL:
+                mFragments.dispatchOptionsMenuClosed(menu);
                 onOptionsMenuClosed(menu);
                 break;
                 
@@ -2259,6 +2487,15 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /**
+     * Declare that the options menu has changed, so should be recreated.
+     * The {@link #onCreateOptionsMenu(Menu)} method will be called the next
+     * time it needs to be displayed.
+     */
+    public void invalidateOptionsMenu() {
+        mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
+    }
+    
     /**
      * Initialize the contents of the Activity's standard options menu.  You
      * should place your menu items in to <var>menu</var>.
@@ -2482,6 +2719,9 @@ public class Activity extends ContextThemeWrapper
      * by the activity.  The default implementation calls through to
      * {@link #onCreateDialog(int)} for compatibility.
      *
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using a {@link DialogFragment} instead.</em>
+     *
      * <p>If you use {@link #showDialog(int)}, the activity will call through to
      * this method the first time, and hang onto it thereafter.  Any dialog
      * that is created by this method will automatically be saved and restored
@@ -2553,6 +2793,9 @@ public class Activity extends ContextThemeWrapper
      * Show a dialog managed by this activity.  A call to {@link #onCreateDialog(int, Bundle)}
      * will be made with the same id the first time this is called for a given
      * id.  From thereafter, the dialog will be automatically saved and restored.
+     *
+     * <em>If you are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+     * or later, consider instead using a {@link DialogFragment} instead.</em>
      *
      * <p>Each time a dialog is shown, {@link #onPrepareDialog(int, Dialog, Bundle)} will
      * be made to provide an opportunity to do any timely preparation.
@@ -3101,6 +3344,36 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * This is called when a Fragment in this activity calls its 
+     * {@link Fragment#startActivity} or {@link Fragment#startActivityForResult}
+     * method.
+     * 
+     * <p>This method throws {@link android.content.ActivityNotFoundException}
+     * if there was no Activity found to run the given Intent.
+     * 
+     * @param fragment The fragment making the call.
+     * @param intent The intent to start.
+     * @param requestCode Reply request code.  < 0 if reply is not requested. 
+     * 
+     * @throws android.content.ActivityNotFoundException
+     * 
+     * @see Fragment#startActivity 
+     * @see Fragment#startActivityForResult 
+     */
+    public void startActivityFromFragment(Fragment fragment, Intent intent, 
+            int requestCode) {
+        Instrumentation.ActivityResult ar =
+            mInstrumentation.execStartActivity(
+                this, mMainThread.getApplicationThread(), mToken, fragment,
+                intent, requestCode);
+        if (ar != null) {
+            mMainThread.sendActivityResult(
+                mToken, fragment.mWho, requestCode,
+                ar.getResultCode(), ar.getResultData());
+        }
+    }
+
+    /**
      * Like {@link #startActivityFromChild(Activity, Intent, int)}, but
      * taking a IntentSender; see
      * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
@@ -3259,6 +3532,19 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Check to see whether this activity is in the process of being destroyed in order to be
+     * recreated with a new configuration. This is often used in
+     * {@link #onStop} to determine whether the state needs to be cleaned up or will be passed
+     * on to the next instance of the activity via {@link #onRetainNonConfigurationInstance()}.
+     * 
+     * @return If the activity is being torn down in order to be recreated with a new configuration,
+     * returns true; else returns false.
+     */
+    public boolean isChangingConfigurations() {
+        return mChangingConfigurations;
+    }
+
+    /**
      * Call this when your activity is done and should be closed.  The
      * ActivityResult is propagated back to whoever launched you via
      * onActivityResult().
@@ -3359,8 +3645,7 @@ public class Activity extends ContextThemeWrapper
      * @see #createPendingResult
      * @see #setResult(int)
      */
-    protected void onActivityResult(int requestCode, int resultCode,
-            Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     }
 
     /**
@@ -3744,14 +4029,183 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Stub implementation of {@link android.view.LayoutInflater.Factory#onCreateView} used when
-     * inflating with the LayoutInflater returned by {@link #getSystemService}.  This
-     * implementation simply returns null for all view names.
+     * Standard implementation of
+     * {@link android.view.LayoutInflater.Factory#onCreateView} used when
+     * inflating with the LayoutInflater returned by {@link #getSystemService}.
+     * This implementation does nothing and is for
+     * pre-{@link android.os.Build.VERSION_CODES#HONEYCOMB} apps.  Newer apps
+     * should use {@link #onCreateView(View, String, Context, AttributeSet)}.
      *
      * @see android.view.LayoutInflater#createView
      * @see android.view.Window#getLayoutInflater
      */
     public View onCreateView(String name, Context context, AttributeSet attrs) {
+        return null;
+    }
+
+    /**
+     * Standard implementation of
+     * {@link android.view.LayoutInflater.Factory2#onCreateView(View, String, Context, AttributeSet)}
+     * used when inflating with the LayoutInflater returned by {@link #getSystemService}.
+     * This implementation handles <fragment> tags to embed fragments inside
+     * of the activity.
+     *
+     * @see android.view.LayoutInflater#createView
+     * @see android.view.Window#getLayoutInflater
+     */
+    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+        if (!"fragment".equals(name)) {
+            return onCreateView(name, context, attrs);
+        }
+        
+        String fname = attrs.getAttributeValue(null, "class");
+        TypedArray a = 
+            context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Fragment);
+        if (fname == null) {
+            fname = a.getString(com.android.internal.R.styleable.Fragment_name);
+        }
+        int id = a.getResourceId(com.android.internal.R.styleable.Fragment_id, View.NO_ID);
+        String tag = a.getString(com.android.internal.R.styleable.Fragment_tag);
+        a.recycle();
+        
+        int containerId = parent != null ? parent.getId() : 0;
+        if (containerId == View.NO_ID && id == View.NO_ID && tag == null) {
+            throw new IllegalArgumentException(attrs.getPositionDescription()
+                    + ": Must specify unique android:id, android:tag, or have a parent with an id for " + fname);
+        }
+
+        // If we restored from a previous state, we may already have
+        // instantiated this fragment from the state and should use
+        // that instance instead of making a new one.
+        Fragment fragment = id != View.NO_ID ? mFragments.findFragmentById(id) : null;
+        if (fragment == null && tag != null) {
+            fragment = mFragments.findFragmentByTag(tag);
+        }
+        if (fragment == null && containerId != View.NO_ID) {
+            fragment = mFragments.findFragmentById(containerId);
+        }
+
+        if (FragmentManagerImpl.DEBUG) Log.v(TAG, "onCreateView: id=0x"
+                + Integer.toHexString(id) + " fname=" + fname
+                + " existing=" + fragment);
+        if (fragment == null) {
+            fragment = Fragment.instantiate(this, fname);
+            fragment.mFromLayout = true;
+            fragment.mFragmentId = id != 0 ? id : containerId;
+            fragment.mContainerId = containerId;
+            fragment.mTag = tag;
+            fragment.mInLayout = true;
+            fragment.mImmediateActivity = this;
+            fragment.mFragmentManager = mFragments;
+            fragment.onInflate(attrs, fragment.mSavedFragmentState);
+            mFragments.addFragment(fragment, true);
+
+        } else if (fragment.mInLayout) {
+            // A fragment already exists and it is not one we restored from
+            // previous state.
+            throw new IllegalArgumentException(attrs.getPositionDescription()
+                    + ": Duplicate id 0x" + Integer.toHexString(id)
+                    + ", tag " + tag + ", or parent id 0x" + Integer.toHexString(containerId)
+                    + " with another fragment for " + fname);
+        } else {
+            // This fragment was retained from a previous instance; get it
+            // going now.
+            fragment.mInLayout = true;
+            fragment.mImmediateActivity = this;
+            // If this fragment is newly instantiated (either right now, or
+            // from last saved state), then give it the attributes to
+            // initialize itself.
+            if (!fragment.mRetaining) {
+                fragment.onInflate(attrs, fragment.mSavedFragmentState);
+            }
+            mFragments.moveToState(fragment);
+        }
+
+        if (fragment.mView == null) {
+            throw new IllegalStateException("Fragment " + fname
+                    + " did not create a view.");
+        }
+        if (id != 0) {
+            fragment.mView.setId(id);
+        }
+        if (fragment.mView.getTag() == null) {
+            fragment.mView.setTag(tag);
+        }
+        return fragment.mView;
+    }
+
+    /**
+     * Print the Activity's state into the given stream.  This gets invoked if
+     * you run "adb shell dumpsys activity <youractivityname>".
+     *
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param writer The PrintWriter to which you should dump your state.  This will be
+     * closed for you after you return.
+     * @param args additional arguments to the dump request.
+     */
+    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        mFragments.dump("", fd, writer, args);
+    }
+
+    /**
+     * Bit indicating that this activity is "immersive" and should not be
+     * interrupted by notifications if possible.
+     *
+     * This value is initially set by the manifest property
+     * <code>android:immersive</code> but may be changed at runtime by
+     * {@link #setImmersive}.
+     *
+     * @see android.content.pm.ActivityInfo#FLAG_IMMERSIVE
+     * @hide
+     */
+    public boolean isImmersive() {
+        try {
+            return ActivityManagerNative.getDefault().isImmersive(mToken);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Adjust the current immersive mode setting.
+     * 
+     * Note that changing this value will have no effect on the activity's
+     * {@link android.content.pm.ActivityInfo} structure; that is, if
+     * <code>android:immersive</code> is set to <code>true</code>
+     * in the application's manifest entry for this activity, the {@link
+     * android.content.pm.ActivityInfo#flags ActivityInfo.flags} member will
+     * always have its {@link android.content.pm.ActivityInfo#FLAG_IMMERSIVE
+     * FLAG_IMMERSIVE} bit set.
+     *
+     * @see #isImmersive
+     * @see android.content.pm.ActivityInfo#FLAG_IMMERSIVE
+     * @hide
+     */
+    public void setImmersive(boolean i) {
+        try {
+            ActivityManagerNative.getDefault().setImmersive(mToken, i);
+        } catch (RemoteException e) {
+            // pass
+        }
+    }
+
+    /**
+     * Start a context mode.
+     *
+     * @param callback Callback that will manage lifecycle events for this context mode
+     * @return The ContextMode that was started, or null if it was canceled
+     *
+     * @see ActionMode
+     */
+    public ActionMode startActionMode(ActionMode.Callback callback) {
+        return mWindow.getDecorView().startActionMode(callback);
+    }
+
+    public ActionMode onStartActionMode(ActionMode.Callback callback) {
+        initActionBar();
+        if (mActionBar != null) {
+            return mActionBar.startActionMode(callback);
+        }
         return null;
     }
 
@@ -3763,28 +4217,30 @@ public class Activity extends ContextThemeWrapper
 
     final void attach(Context context, ActivityThread aThread, Instrumentation instr, IBinder token,
             Application application, Intent intent, ActivityInfo info, CharSequence title, 
-            Activity parent, String id, Object lastNonConfigurationInstance,
+            Activity parent, String id, NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config) {
         attach(context, aThread, instr, token, 0, application, intent, info, title, parent, id,
-            lastNonConfigurationInstance, null, config);
+            lastNonConfigurationInstances, config);
     }
     
     final void attach(Context context, ActivityThread aThread,
             Instrumentation instr, IBinder token, int ident,
             Application application, Intent intent, ActivityInfo info,
             CharSequence title, Activity parent, String id,
-            Object lastNonConfigurationInstance,
-            HashMap<String,Object> lastNonConfigurationChildInstances,
+            NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config) {
         attachBaseContext(context);
 
+        mFragments.attachActivity(this);
+        
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
+        mWindow.getLayoutInflater().setFactory2(this);
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
             mWindow.setSoftInputMode(info.softInputMode);
         }
         mUiThread = Thread.currentThread();
-
+        
         mMainThread = aThread;
         mInstrumentation = instr;
         mToken = token;
@@ -3796,10 +4252,10 @@ public class Activity extends ContextThemeWrapper
         mTitle = title;
         mParent = parent;
         mEmbeddedID = id;
-        mLastNonConfigurationInstance = lastNonConfigurationInstance;
-        mLastNonConfigurationChildInstances = lastNonConfigurationChildInstances;
+        mLastNonConfigurationInstances = lastNonConfigurationInstances;
 
-        mWindow.setWindowManager(null, mToken, mComponent.flattenToString());
+        mWindow.setWindowManager(null, mToken, mComponent.flattenToString(),
+                (info.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0);
         if (mParent != null) {
             mWindow.setContainer(mParent.getWindow());
         }
@@ -3811,23 +4267,41 @@ public class Activity extends ContextThemeWrapper
         return mParent != null ? mParent.getActivityToken() : mToken;
     }
 
+    final void performCreate(Bundle icicle) {
+        onCreate(icicle);
+        mFragments.dispatchActivityCreated();
+    }
+    
     final void performStart() {
+        mFragments.mStateSaved = false;
         mCalled = false;
+        mFragments.execPendingActions();
         mInstrumentation.callActivityOnStart(this);
         if (!mCalled) {
             throw new SuperNotCalledException(
                 "Activity " + mComponent.toShortString() +
                 " did not call through to super.onStart()");
         }
+        mFragments.dispatchStart();
+        if (mAllLoaderManagers != null) {
+            for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
+                mAllLoaderManagers.valueAt(i).finishRetain();
+            }
+        }
     }
     
     final void performRestart() {
+        mFragments.mStateSaved = false;
+
         synchronized (mManagedCursors) {
             final int N = mManagedCursors.size();
             for (int i=0; i<N; i++) {
                 ManagedCursor mc = mManagedCursors.get(i);
                 if (mc.mReleased || mc.mUpdated) {
-                    mc.mCursor.requery();
+                    if (!mc.mCursor.requery()) {
+                        throw new IllegalStateException(
+                                "trying to requery an already closed cursor");
+                    }
                     mc.mReleased = false;
                     mc.mUpdated = false;
                 }
@@ -3850,7 +4324,9 @@ public class Activity extends ContextThemeWrapper
     final void performResume() {
         performRestart();
         
-        mLastNonConfigurationInstance = null;
+        mFragments.execPendingActions();
+        
+        mLastNonConfigurationInstances = null;
         
         // First call onResume() -before- setting mResumed, so we don't
         // send out any status bar / menu notifications the client makes.
@@ -3865,6 +4341,10 @@ public class Activity extends ContextThemeWrapper
         // Now really resume, and install the current status bar and menu.
         mResumed = true;
         mCalled = false;
+        
+        mFragments.dispatchResume();
+        mFragments.execPendingActions();
+        
         onPostResume();
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -3874,6 +4354,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performPause() {
+        mFragments.dispatchPause();
         mCalled = false;
         onPause();
         if (!mCalled && getApplicationInfo().targetSdkVersion
@@ -3890,11 +4371,24 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performStop() {
+        if (mStarted) {
+            mStarted = false;
+            if (mLoaderManager != null) {
+                if (!mChangingConfigurations) {
+                    mLoaderManager.doStop();
+                } else {
+                    mLoaderManager.doRetain();
+                }
+            }
+        }
+        
         if (!mStopped) {
             if (mWindow != null) {
                 mWindow.closeAllPanels();
             }
 
+            mFragments.dispatchStop();
+            
             mCalled = false;
             mInstrumentation.callActivityOnStop(this);
             if (!mCalled) {
@@ -3919,6 +4413,15 @@ public class Activity extends ContextThemeWrapper
         mResumed = false;
     }
 
+    final void performDestroy() {
+        mWindow.destroy();
+        mFragments.dispatchDestroy();
+        onDestroy();
+        if (mLoaderManager != null) {
+            mLoaderManager.doDestroy();
+        }
+    }
+    
     final boolean isResumed() {
         return mResumed;
     }
@@ -3928,8 +4431,14 @@ public class Activity extends ContextThemeWrapper
         if (Config.LOGV) Log.v(
             TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode
             + ", resCode=" + resultCode + ", data=" + data);
+        mFragments.mStateSaved = false;
         if (who == null) {
             onActivityResult(requestCode, resultCode, data);
+        } else {
+            Fragment frag = mFragments.findFragmentByWho(who);
+            if (frag != null) {
+                frag.onActivityResult(requestCode, resultCode, data);
+            }
         }
     }
 }

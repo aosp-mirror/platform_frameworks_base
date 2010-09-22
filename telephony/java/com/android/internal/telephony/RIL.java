@@ -285,9 +285,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         }
 
 
-        //***** Handler implemementation
-
-        public void
+        //***** Handler implementation
+        @Override public void
         handleMessage(Message msg) {
             RILRequest rr = (RILRequest)(msg.obj);
             RILRequest req = null;
@@ -780,7 +779,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
-    public void
+    @Deprecated public void
     getPDPContextList(Message result) {
         getDataCallList(result);
     }
@@ -1299,10 +1298,18 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     public void
     setupDataCall(String radioTechnology, String profile, String apn,
             String user, String password, String authType, Message result) {
+        setupDataCallWithProtocol(radioTechnology, profile, apn, user, password,
+                              authType, "IP", result);
+    }
+
+    public void
+    setupDataCallWithProtocol(String radioTechnology, String profile,
+            String apn, String user, String password, String authType,
+            String protocolType, Message result) {
         RILRequest rr
                 = RILRequest.obtain(RIL_REQUEST_SETUP_DATA_CALL, result);
 
-        rr.mp.writeInt(6);
+        rr.mp.writeInt(7);
 
         rr.mp.writeString(radioTechnology);
         rr.mp.writeString(profile);
@@ -1310,11 +1317,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeString(user);
         rr.mp.writeString(password);
         rr.mp.writeString(authType);
+        rr.mp.writeString(protocolType);
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> "
                 + requestToString(rr.mRequest) + " " + radioTechnology + " "
                 + profile + " " + apn + " " + user + " "
-                + password + " " + authType);
+                + password + " " + authType + " " + protocolType);
 
         send(rr);
     }
@@ -2339,7 +2347,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_RESTRICTED_STATE_CHANGED: ret = responseInts(p); break;
             case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:  ret =  responseVoid(p); break;
             case RIL_UNSOL_RESPONSE_CDMA_NEW_SMS:  ret =  responseCdmaSms(p); break;
-            case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS:  ret =  responseString(p); break;
+            case RIL_UNSOL_RESPONSE_NEW_BROADCAST_SMS:  ret =  responseRaw(p); break;
             case RIL_UNSOL_CDMA_RUIM_SMS_STORAGE_FULL:  ret =  responseVoid(p); break;
             case RIL_UNSOL_ENTER_EMERGENCY_CALLBACK_MODE: ret = responseVoid(p); break;
             case RIL_UNSOL_CDMA_CALL_WAITING: ret = responseCdmaCallWaiting(p); break;
@@ -2481,8 +2489,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_STK_SESSION_END:
                 if (RILJ_LOGD) unsljLog(response);
 
-                if (mStkSessionEndRegistrant != null) {
-                    mStkSessionEndRegistrant.notifyRegistrant(
+                if (mCatSessionEndRegistrant != null) {
+                    mCatSessionEndRegistrant.notifyRegistrant(
                                         new AsyncResult (null, ret, null));
                 }
                 break;
@@ -2490,8 +2498,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_STK_PROACTIVE_COMMAND:
                 if (RILJ_LOGD) unsljLogRet(response, ret);
 
-                if (mStkProCmdRegistrant != null) {
-                    mStkProCmdRegistrant.notifyRegistrant(
+                if (mCatProCmdRegistrant != null) {
+                    mCatProCmdRegistrant.notifyRegistrant(
                                         new AsyncResult (null, ret, null));
                 }
                 break;
@@ -2499,8 +2507,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_STK_EVENT_NOTIFY:
                 if (RILJ_LOGD) unsljLogRet(response, ret);
 
-                if (mStkEventRegistrant != null) {
-                    mStkEventRegistrant.notifyRegistrant(
+                if (mCatEventRegistrant != null) {
+                    mCatEventRegistrant.notifyRegistrant(
                                         new AsyncResult (null, ret, null));
                 }
                 break;
@@ -2508,8 +2516,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_STK_CALL_SETUP:
                 if (RILJ_LOGD) unsljLogRet(response, ret);
 
-                if (mStkCallSetUpRegistrant != null) {
-                    mStkCallSetUpRegistrant.notifyRegistrant(
+                if (mCatCallSetUpRegistrant != null) {
+                    mCatCallSetUpRegistrant.notifyRegistrant(
                                         new AsyncResult (null, ret, null));
                 }
                 break;
@@ -2902,7 +2910,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             dataCall.active = p.readInt();
             dataCall.type = p.readString();
             dataCall.apn = p.readString();
-            dataCall.address = p.readString();
+            String address = p.readString();
+            if (address != null) {
+                address = address.split(" ")[0];
+            }
+            dataCall.address = address;
 
             response.add(dataCall);
         }
@@ -3406,6 +3418,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         RILRequest rr = RILRequest.obtain(
                 RILConstants.RIL_REQUEST_QUERY_TTY_MODE, response);
 
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
         send(rr);
     }
 
@@ -3418,6 +3432,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         rr.mp.writeInt(1);
         rr.mp.writeInt(ttyMode);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
+                + " : " + ttyMode);
 
         send(rr);
     }

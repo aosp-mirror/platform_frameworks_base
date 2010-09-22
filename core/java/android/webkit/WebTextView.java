@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextPaint;
@@ -109,6 +110,11 @@ import java.util.ArrayList;
     // FIXME: This can be replaced with TextView.NO_FILTERS if that
     // is made public/protected.
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
+    // For keeping track of the fact that the delete key was pressed, so
+    // we can simply pass a delete key instead of calling deleteSelection.
+    private boolean mGotDelete;
+    private int mDelSelStart;
+    private int mDelSelEnd;
 
     /**
      * Create a new WebTextView.
@@ -152,13 +158,22 @@ import java.util.ArrayList;
             return true;
         }
         Spannable text = (Spannable) getText();
-        int oldLength = text.length();
+        int oldStart = Selection.getSelectionStart(text);
+        int oldEnd = Selection.getSelectionEnd(text);
         // Normally the delete key's dom events are sent via onTextChanged.
-        // However, if the length is zero, the text did not change, so we
-        // go ahead and pass the key down immediately.
-        if (KeyEvent.KEYCODE_DEL == keyCode && 0 == oldLength) {
-            sendDomEvent(event);
-            return true;
+        // However, if the cursor is at the beginning of the field, which
+        // includes the case where it has zero length, then the text is not
+        // changed, so send the events immediately.
+        if (KeyEvent.KEYCODE_DEL == keyCode) {
+            if (oldStart == 0 && oldEnd == 0) {
+                sendDomEvent(event);
+                return true;
+            }
+            if (down) {
+                mGotDelete = true;
+                mDelSelStart = oldStart;
+                mDelSelEnd = oldEnd;
+            }
         }
 
         if ((mSingle && KeyEvent.KEYCODE_ENTER == keyCode)) {
@@ -196,9 +211,8 @@ import java.util.ArrayList;
         if (getLayout() == null) {
             measure(mWidthSpec, mHeightSpec);
         }
-        int oldStart = Selection.getSelectionStart(text);
-        int oldEnd = Selection.getSelectionEnd(text);
 
+        int oldLength = text.length();
         boolean maxedOut = mMaxLength != -1 && oldLength == mMaxLength;
         // If we are at max length, and there is a selection rather than a
         // cursor, we need to store the text to compare later, since the key
@@ -300,6 +314,33 @@ import java.util.ArrayList;
         return connection;
     }
 
+    /**
+     * In general, TextView makes a call to InputMethodManager.updateSelection
+     * in onDraw.  However, in the general case of WebTextView, we do not draw.
+     * This method is called by WebView.onDraw to take care of the part that
+     * needs to be called.
+     */
+    /* package */ void onDrawSubstitute() {
+        if (!willNotDraw()) {
+            // If the WebTextView is set to draw, such as in the case of a
+            // password, onDraw calls updateSelection(), so this code path is
+            // unnecessary.
+            return;
+        }
+        // This code is copied from TextView.onDraw().  That code does not get
+        // executed, however, because the WebTextView does not draw, allowing
+        // webkit's drawing to show through.
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null && imm.isActive(this)) {
+            Spannable sp = (Spannable) getText();
+            int selStart = Selection.getSelectionStart(sp);
+            int selEnd = Selection.getSelectionEnd(sp);
+            int candStart = EditableInputConnection.getComposingSpanStart(sp);
+            int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
+            imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
+        }
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         // onDraw should only be called for password fields.  If WebTextView is
@@ -322,9 +363,6 @@ import java.util.ArrayList;
         switch (actionCode) {
         case EditorInfo.IME_ACTION_NEXT:
             if (mWebView.nativeMoveCursorToNextTextInput()) {
-                // Since the cursor will no longer be in the same place as the
-                // focus, set the focus controller back to inactive
-                mWebView.setFocusControllerInactive();
                 // Preemptively rebuild the WebTextView, so that the action will
                 // be set properly.
                 mWebView.rebuildWebTextView();
@@ -360,19 +398,8 @@ import java.util.ArrayList;
 
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
-        if (mInSetTextAndKeepSelection) return;
-        // This code is copied from TextView.onDraw().  That code does not get
-        // executed, however, because the WebTextView does not draw, allowing
-        // webkit's drawing to show through.
-        InputMethodManager imm = InputMethodManager.peekInstance();
-        if (imm != null && imm.isActive(this)) {
-            Spannable sp = (Spannable) getText();
-            int candStart = EditableInputConnection.getComposingSpanStart(sp);
-            int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
-            imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
-        }
         if (!mFromWebKit && !mFromFocusChange && !mFromSetInputType
-                && mWebView != null) {
+                && mWebView != null && !mInSetTextAndKeepSelection) {
             if (DebugFlags.WEB_TEXT_VIEW) {
                 Log.v(LOGTAG, "onSelectionChanged selStart=" + selStart
                         + " selEnd=" + selEnd);
@@ -397,17 +424,38 @@ import java.util.ArrayList;
         mPreChange = postChange;
         if (0 == count) {
             if (before > 0) {
+                // For this and all changes to the text, update our cache
+                updateCachedTextfield();
+                if (mGotDelete) {
+                    mGotDelete = false;
+                    int oldEnd = start + before;
+                    if (mDelSelEnd == oldEnd
+                            && (mDelSelStart == start
+                            || (mDelSelStart == oldEnd && before == 1))) {
+                        // If the selection is set up properly before the
+                        // delete, send the DOM events.
+                        sendDomEvent(new KeyEvent(KeyEvent.ACTION_DOWN,
+                                KeyEvent.KEYCODE_DEL));
+                        sendDomEvent(new KeyEvent(KeyEvent.ACTION_UP,
+                                KeyEvent.KEYCODE_DEL));
+                        return;
+                    }
+                }
                 // This was simply a delete or a cut, so just delete the
                 // selection.
                 mWebView.deleteSelection(start, start + before);
-                // For this and all changes to the text, update our cache
-                updateCachedTextfield();
             }
+            mGotDelete = false;
             // before should never be negative, so whether it was a cut
             // (handled above), or before is 0, in which case nothing has
             // changed, we should return.
             return;
         }
+        // Ensure that this flag gets cleared, since with autocorrect on, a
+        // delete key press may have a more complex result than deleting one
+        // character or the existing selection, so it will not get cleared
+        // above.
+        mGotDelete = false;
         // Find the last character being replaced.  If it can be represented by
         // events, we will pass them to native (after replacing the beginning
         // of the changed text), so we can see javascript events.
@@ -481,9 +529,10 @@ import java.util.ArrayList;
             // to big for the case of a small textfield.
             int smallerSlop = slop/2;
             if (dx > smallerSlop || dy > smallerSlop) {
-                if (mWebView != null) {
-                    float maxScrollX = (float) Touch.getMaxScrollX(this,
-                                getLayout(), mScrollY);
+                Layout layout = getLayout();
+                if (mWebView != null && layout != null) {
+                    float maxScrollX = (float) Touch.getMaxScrollX(this, layout,
+                            mScrollY);
                     if (DebugFlags.WEB_TEXT_VIEW) {
                         Log.v(LOGTAG, "onTouchEvent x=" + mScrollX + " y="
                                 + mScrollY + " maxX=" + maxScrollX);
@@ -578,16 +627,31 @@ import java.util.ArrayList;
      */
     /* package */ void remove() {
         // hide the soft keyboard when the edit text is out of focus
-        InputMethodManager.getInstance(mContext).hideSoftInputFromWindow(
-                getWindowToken(), 0);
+        InputMethodManager imm = InputMethodManager.getInstance(mContext);
+        if (imm.isActive(this)) {
+            imm.hideSoftInputFromWindow(getWindowToken(), 0);
+        }
         mWebView.removeView(this);
         mWebView.requestFocus();
     }
 
+    /**
+     * Move the caret/selection into view.
+     */
     /* package */ void bringIntoView() {
-        if (getLayout() != null) {
-            bringPointIntoView(Selection.getSelectionEnd(getText()));
+        bringPointIntoView(Selection.getSelectionEnd(getText()));
+    }
+
+    @Override
+    public boolean bringPointIntoView(int offset) {
+        if (mWebView == null) return false;
+        if (mWebView.nativeFocusCandidateIsPassword()) {
+            return getLayout() != null && super.bringPointIntoView(offset);
         }
+        // For non password text input, tell webkit to move the caret/selection
+        // on screen, since webkit draws them.
+        mWebView.revealSelection();
+        return true;
     }
 
     /**
@@ -667,6 +731,7 @@ import java.util.ArrayList;
         } else {
             Selection.setSelection(text, selection, selection);
         }
+        if (mWebView != null) mWebView.incrementTextGeneration();
     }
 
     /**
@@ -918,15 +983,5 @@ import java.util.ArrayList;
      */
     /* package */ void updateCachedTextfield() {
         mWebView.updateCachedTextfield(getText().toString());
-    }
-
-    @Override
-    public boolean requestRectangleOnScreen(Rect rectangle) {
-        // don't scroll while in zoom animation. When it is done, we will adjust
-        // the WebTextView if it is in editing mode.
-        if (!mWebView.inAnimateZoom()) {
-            return super.requestRectangleOnScreen(rectangle);
-        }
-        return false;
     }
 }

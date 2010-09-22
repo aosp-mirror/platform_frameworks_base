@@ -75,7 +75,7 @@ public class ViewFlipper extends ViewAnimator {
                 updateRunning();
             } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 mUserPresent = true;
-                updateRunning();
+                updateRunning(false);
             }
         }
     };
@@ -109,7 +109,7 @@ public class ViewFlipper extends ViewAnimator {
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         mVisible = visibility == VISIBLE;
-        updateRunning();
+        updateRunning(false);
     }
 
     /**
@@ -144,10 +144,22 @@ public class ViewFlipper extends ViewAnimator {
      * on {@link #mRunning} and {@link #mVisible} state.
      */
     private void updateRunning() {
+        updateRunning(true);
+    }
+
+    /**
+     * Internal method to start or stop dispatching flip {@link Message} based
+     * on {@link #mRunning} and {@link #mVisible} state.
+     *
+     * @param flipNow Determines whether or not to execute the animation now, in
+     *            addition to queuing future flips. If omitted, defaults to
+     *            true.
+     */
+    private void updateRunning(boolean flipNow) {
         boolean running = mVisible && mStarted && mUserPresent;
         if (running != mRunning) {
             if (running) {
-                showOnly(mWhichChild);
+                showOnly(mWhichChild, flipNow);
                 Message msg = mHandler.obtainMessage(FLIP_MSG);
                 mHandler.sendMessageDelayed(msg, mFlipInterval);
             } else {

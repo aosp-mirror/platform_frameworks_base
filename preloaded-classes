@@ -138,7 +138,6 @@ android.database.CursorWrapper
 android.database.MatrixCursor
 android.database.sqlite.SQLiteClosable
 android.database.sqlite.SQLiteCompiledSql
-android.database.sqlite.SQLiteContentHelper
 android.database.sqlite.SQLiteCursor
 android.database.sqlite.SQLiteDatabase
 android.database.sqlite.SQLiteDebug
@@ -563,8 +562,6 @@ android.widget.AbsoluteLayout
 android.widget.AdapterView
 android.widget.ArrayAdapter
 android.widget.AutoCompleteTextView
-android.widget.AutoCompleteTextView$DropDownItemClickListener
-android.widget.AutoCompleteTextView$DropDownListView
 android.widget.BaseAdapter
 android.widget.BaseExpandableListAdapter
 android.widget.CheckBox
@@ -582,6 +579,7 @@ android.widget.HeaderViewListAdapter
 android.widget.ImageView
 android.widget.ImageView$ScaleType
 android.widget.LinearLayout
+android.widget.ListPopupWindow
 android.widget.ListView
 android.widget.ListView$SavedState
 android.widget.MediaController
@@ -685,7 +683,6 @@ com.android.internal.view.menu.ListMenuItemView
 com.android.internal.view.menu.MenuBuilder
 com.android.internal.view.menu.MenuItemImpl
 com.android.internal.view.menu.SubMenuBuilder
-com.android.internal.widget.ContactHeaderWidget
 com.android.internal.widget.DialogTitle
 com.android.internal.widget.EditableInputConnection
 com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
@@ -727,7 +724,6 @@ java.io.DataOutputStream
 java.io.File
 java.io.FileDescriptor
 java.io.FileInputStream
-java.io.FileInputStream$RepositioningLock
 java.io.FileNotFoundException
 java.io.FileOutputStream
 java.io.FilterInputStream
@@ -1131,7 +1127,6 @@ org.apache.harmony.luni.util.Util
 org.apache.harmony.nio.FileChannelFactory
 org.apache.harmony.nio.internal.DirectBuffer
 org.apache.harmony.nio.internal.FileChannelImpl
-org.apache.harmony.nio.internal.FileChannelImpl$RepositioningLock
 org.apache.harmony.nio.internal.FileLockImpl
 org.apache.harmony.nio.internal.LockManager
 org.apache.harmony.nio.internal.LockManager$1

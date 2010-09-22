@@ -72,4 +72,34 @@
 
     <!-- Default for Settings.System.VIBRATE_IN_SILENT -->
     <bool name="def_vibrate_in_silent">true</bool>
+
+    <bool name="def_use_ptp_interface">false</bool>
+
+    <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION -->
+    <bool name="def_accessibility_script_injection">false</bool>
+
+    <!-- Default for Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS -->
+    <string name="def_accessibility_web_content_key_bindings">
+            <!-- DPAD/Trackball UP maps to traverse previous on current axis and send an event. -->
+            0x13=0x01000100;
+            <!-- DPAD/Trackball DOWN maps to traverse next on current axis and send an event. -->
+            0x14=0x01010100;
+            <!-- DPAD/Trackball LEFT maps to action in non-android default navigation axis. -->
+            0x15=0x04000000;
+            <!-- DPAD/Trackball RIGHT maps to no action in non-android default navigation axis. -->
+            0x16=0x04000000;
+            <!-- Left Alt+DPAD/Trackball UP transitions from an axis to another and sends an event. -->
+            <!-- Axis transitions:  2 -> 7; 1 -> 2; 0 -> 1; 3 -> 0; 4 -> 0; 5 -> 0; 6 -> 0; -->
+            0x120013=0x03020701:0x03010201:0x03000101:0x03030001:0x03040001:0x03050001:0x03060001;
+            <!-- Left Alt+DPAD/Trackball DOWN transitions from an axis to another and sends an event. -->
+            <!-- Axis transitions: 1 -> 0; 2 -> 1; 7 -> 2; 3 -> 7; 4 -> 7; 5 -> 7; 6 -> 7; -->
+            0x120014=0x03010001:0x03020101:0x03070201:0x03030701:0x03040701:0x03050701:0x03060701;
+            <!-- Left Alt+DPAD/Trackball LEFT transitions from an axis to another and sends an event. -->
+            <!-- Axis transitions: 4 -> 3; 5 -> 4; 6 -> 5; 0 -> 6; 1 -> 6; 2 -> 6; 7 -> 6; -->
+            0x120015=0x03040301:0x03050401:0x03060501:0x03000601:0x03010601:0x03020601:0x03070601;
+            <!-- Left Alt+DPAD/Trackball RIGHT transitions from an axis to another and sends an event.  -->
+            <!-- Axis transitions: 5 -> 6; 4 -> 5; 3 -> 4; 2 -> 3; 7 -> 3; 1 -> 3; 0 -> 3; -->
+            0x120016=0x03050601:0x03040501:0x03030401:0x03020301:0x03070301:0x03010301:0x03000301;
+    </string>
+
 </resources>

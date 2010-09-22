@@ -144,4 +144,51 @@ public class SettingsProviderTest extends AndroidTestCase {
 
         assertEquals(null, Settings.Bookmarks.getIntentForShortcut(r, '*'));
     }
+
+    @MediumTest
+    public void testParseProviderList() {
+        ContentResolver r = getContext().getContentResolver();
+
+        // Make sure we get out what we put in.
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "test1,test2,test3");
+        assertEquals(Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED),
+                "test1,test2,test3");
+
+        // Test adding a value
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "");
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test1");
+        assertEquals("test1",
+                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+
+        // Test adding a second value
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test2");
+        assertEquals("test1,test2",
+                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+
+        // Test adding a third value
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+test3");
+        assertEquals("test1,test2,test3",
+                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+
+        // Test deleting the first value in a 3 item list
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test1");
+        assertEquals("test2,test3",
+                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+
+        // Test deleting the middle value in a 3 item list
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "test1,test2,test3");
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test2");
+        assertEquals("test1,test3",
+                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+
+        // Test deleting the last value in a 3 item list
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "test1,test2,test3");
+        Settings.Secure.putString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test3");
+        assertEquals("test1,test2",
+                Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+     }
 }

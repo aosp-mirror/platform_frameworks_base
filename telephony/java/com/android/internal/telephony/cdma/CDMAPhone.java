@@ -42,6 +42,7 @@ import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.telephony.cat.CatService;
 import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CommandException;
@@ -108,7 +109,7 @@ public class CDMAPhone extends PhoneBase {
     PhoneSubInfo mSubInfo;
     EriManager mEriManager;
     WakeLock mWakeLock;
-
+    CatService mCcatService;
 
     // mNvLoadedRegistrants are informed after the EVENT_NV_READY
     private RegistrantList mNvLoadedRegistrants = new RegistrantList();
@@ -160,6 +161,8 @@ public class CDMAPhone extends PhoneBase {
         mRuimSmsInterfaceManager = new RuimSmsInterfaceManager(this, mSMS);
         mSubInfo = new PhoneSubInfo(this);
         mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
+        mCcatService = CatService.getInstance(mCM, mRuimRecords, mContext,
+                mIccFileHandler, mRuimCard);
 
         mCM.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
         mRuimRecords.registerForRecordsLoaded(this, EVENT_RUIM_RECORDS_LOADED, null);
@@ -220,6 +223,7 @@ public class CDMAPhone extends PhoneBase {
             mCM.unregisterForNVReady(this); //EVENT_NV_READY
             mSST.unregisterForNetworkAttach(this); //EVENT_REGISTERED_TO_NETWORK
             mCM.unSetOnSuppServiceNotification(this);
+            removeCallbacks(mExitEcmRunnable);
 
             mPendingMmis.clear();
 
@@ -235,6 +239,7 @@ public class CDMAPhone extends PhoneBase {
             mRuimSmsInterfaceManager.dispose();
             mSubInfo.dispose();
             mEriManager.dispose();
+            mCcatService.dispose();
         }
     }
 
@@ -250,6 +255,8 @@ public class CDMAPhone extends PhoneBase {
             this.mCT = null;
             this.mSST = null;
             this.mEriManager = null;
+            this.mCcatService = null;
+            this.mExitEcmRunnable = null;
     }
 
     protected void finalize() {
@@ -508,14 +515,6 @@ public class CDMAPhone extends PhoneBase {
         return false;
     }
 
-    public boolean isDataConnectivityPossible() {
-        boolean noData = mDataConnection.getDataEnabled() &&
-                getDataConnectionState() == DataState.DISCONNECTED;
-        return !noData && getIccCard().getState() == IccCard.State.READY &&
-                getServiceState().getState() == ServiceState.STATE_IN_SERVICE &&
-                (mDataConnection.getDataOnRoamingEnabled() || !getServiceState().getRoaming());
-    }
-
     /**
      * Removes the given MMI from the pending list and notifies registrants that
      * it is complete.
@@ -606,7 +605,7 @@ public class CDMAPhone extends PhoneBase {
         }
     }
 
-    public DataState getDataConnectionState() {
+    public DataState getDataConnectionState(String apnType) {
         DataState ret = DataState.DISCONNECTED;
 
         if (mSST == null) {
@@ -617,6 +616,8 @@ public class CDMAPhone extends PhoneBase {
         } else if (mSST.getCurrentCdmaDataConnectionState() != ServiceState.STATE_IN_SERVICE) {
             // If we're out of service, open TCP sockets may still work
             // but no data will flow
+            ret = DataState.DISCONNECTED;
+        } else if (mDataConnection.isApnTypeEnabled(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else {
             switch (mDataConnection.getState()) {
@@ -869,26 +870,6 @@ public class CDMAPhone extends PhoneBase {
     /*package*/ void
     updateMessageWaitingIndicator(int mwi) {
         mRuimRecords.setVoiceMessageWaiting(1, mwi);
-    }
-
-    /**
-     * Returns true if CDMA OTA Service Provisioning needs to be performed.
-     */
-    /* package */ boolean
-    needsOtaServiceProvisioning() {
-        String cdmaMin = getCdmaMin();
-        boolean needsProvisioning;
-        if (cdmaMin == null || (cdmaMin.length() < 6)) {
-            if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: illegal cdmaMin='"
-                                    + cdmaMin + "' assume provisioning needed.");
-            needsProvisioning = true;
-        } else {
-            needsProvisioning = (cdmaMin.equals(UNACTIVATED_MIN_VALUE)
-                    || cdmaMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
-                    || SystemProperties.getBoolean("test_cdma_setup", false);
-        }
-        if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: ret=" + needsProvisioning);
-        return needsProvisioning;
     }
 
     @Override
@@ -1182,6 +1163,26 @@ public class CDMAPhone extends PhoneBase {
      */
     public void setCellBroadcastSmsConfig(int[] configValuesArray, Message response) {
         mSMS.setCellBroadcastConfig(configValuesArray, response);
+    }
+
+    /**
+     * Returns true if OTA Service Provisioning needs to be performed.
+     */
+    @Override
+    public boolean needsOtaServiceProvisioning() {
+        String cdmaMin = getCdmaMin();
+        boolean needsProvisioning;
+        if (cdmaMin == null || (cdmaMin.length() < 6)) {
+            if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: illegal cdmaMin='"
+                                    + cdmaMin + "' assume provisioning needed.");
+            needsProvisioning = true;
+        } else {
+            needsProvisioning = (cdmaMin.equals(UNACTIVATED_MIN_VALUE)
+                    || cdmaMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
+                    || SystemProperties.getBoolean("test_cdma_setup", false);
+        }
+        if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: ret=" + needsProvisioning);
+        return needsProvisioning;
     }
 
     private static final String IS683A_FEATURE_CODE = "*228";

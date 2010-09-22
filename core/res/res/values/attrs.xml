@@ -14,8 +14,8 @@
      limitations under the License.
 -->
 
-<!-- Formatting note: terminate all comments with a period, to avoid breaking 
-     the documentation output. To suppress comment lines from the documentation 
+<!-- Formatting note: terminate all comments with a period, to avoid breaking
+     the documentation output. To suppress comment lines from the documentation
      output, insert an eat-comment element after the comment lines.
 -->
 
@@ -46,6 +46,7 @@
              theme does not set this value, meaning it is based on whether the
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
+        
 
         <!-- =========== -->
         <!-- Text styles -->
@@ -95,6 +96,12 @@
 
         <!-- Text color for urls in search suggestions, used by things like global search and the browser. @hide -->
         <attr name="textColorSearchUrl" format="reference|color" />
+
+        <!-- Color of highlighted text, when used in a light theme. @hide -->
+        <attr name="textColorHighlightInverse" format="reference|color" />
+        <!-- Color of link text (URLs), when used in a light theme. @hide -->
+        <attr name="textColorLinkInverse" format="reference|color" />
+        
         <!-- Search widget more corpus result item background. -->
         <attr name="searchWidgetCorpusItemBackground" format="reference|color" />
 
@@ -117,9 +124,19 @@
         <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. -->
         <attr name="textAppearanceSearchResultSubtitle" format="reference" />
 
-
         <!-- Text color, typeface, size, and style for the text inside of a button. -->
         <attr name="textAppearanceButton" format="reference" />
+
+        <!-- Text color, typeface, size, and style for the text inside of a popup menu. -->
+        <attr name="textAppearanceLargePopupMenu" format="reference" />
+
+        <!-- Text color, typeface, size, and style for small text inside of a popup menu. -->
+        <attr name="textAppearanceSmallPopupMenu" format="reference" />
+
+        <!-- EditText text foreground color. -->
+        <attr name="editTextColor" format="reference|color" />
+        <!-- EditText background drawable. -->
+        <attr name="editTextBackground" format="reference" />
 
         <!-- A styled string, specifying the style to be used for showing
              inline candidate text when composing with an input method.  The
@@ -136,6 +153,12 @@
 
         <!-- Drawable to use for single choice indicators. -->
         <attr name="listChoiceIndicatorSingle" format="reference" />
+
+        <!-- Drawable used as a background for selected list items. -->
+        <attr name="listChoiceBackgroundIndicator" format="reference" />
+
+        <!-- Drawable used as a background for activated items. -->
+        <attr name="activatedBackgroundIndicator" format="reference" />
 
         <!-- ============= -->
         <!-- Button styles -->
@@ -243,6 +266,19 @@
              any of the attributes defined by
              {@link android.R.styleable#WindowAnimation}. -->
         <attr name="windowAnimationStyle" format="reference" />
+
+        <!-- Flag indicating whether this window should have an Action Bar
+             in place of the usual title bar. -->
+        <attr name="windowActionBar" format="boolean" />
+
+        <!-- Flag indicating whether this window's Action Bar should overlay
+             application content. Does nothing if the window would not
+             have an Action Bar. -->
+        <attr name="windowActionBarOverlay" format="boolean" />
+
+        <!-- Flag indicating whether action modes should overlay window content
+             when there is not reserved space for their UI (such as an Action Bar). -->
+        <attr name="windowActionModeOverlay" format="boolean" />
 
         <!-- Defines the default soft input state that this window would
              like when it is displayed. -->
@@ -390,6 +426,12 @@
         <attr name="horizontalScrollViewStyle" format="reference" />
         <!-- Default Spinner style. -->
         <attr name="spinnerStyle" format="reference" />
+        <!-- Default dropdown Spinner style. -->
+        <attr name="dropDownSpinnerStyle" format="reference" />
+        <!-- Default ActionBar dropdown style. -->
+        <attr name="actionDropDownStyle" format="reference" />
+        <!-- Default action button style. -->
+        <attr name="actionButtonStyle" format="reference" />
         <!-- Default Star style. -->
         <attr name="starStyle" format="reference" />
         <!-- Default TabWidget style. -->
@@ -427,6 +469,41 @@
         <!-- Reference to a style that will be used for the window containing a text
              selection anchor. -->
         <attr name="textSelectHandleWindowStyle" format="reference" />
+        <!-- Default ListPopupWindow style. -->
+        <attr name="listPopupWindowStyle" format="reference" />
+        <!-- Default PopupMenu style. -->
+        <attr name="popupMenuStyle" format="reference" />
+
+        <!-- =================== -->
+        <!-- Action bar styles   -->
+        <!-- =================== -->
+        <eat-comment />
+        <!-- Default amount of padding to use between action buttons. -->
+        <attr name="actionButtonPadding" format="dimension" />
+        <!-- Default style for tabs within an action bar -->
+        <attr name="actionBarTabStyle" format="reference" />
+        <attr name="actionBarTabBarStyle" format="reference" />
+        <attr name="actionBarTabTextStyle" format="reference" />
+        <attr name="actionOverflowButtonStyle" format="reference" />
+        <!-- Reference to a style for the Action Bar -->
+        <attr name="actionBarStyle" format="reference" />
+        <!-- Size of the Action Bar, including the contextual
+             bar used to present Action Modes. -->
+        <attr name="actionBarSize" format="dimension" >
+            <enum name="wrap_content" value="0" />
+        </attr>
+
+
+        <!-- =================== -->
+        <!-- Action mode styles  -->
+        <!-- =================== -->
+        <eat-comment />
+        <attr name="actionModeStyle" format="reference" />
+        <attr name="actionModeCloseButtonStyle" format="reference" />
+        <!-- Background drawable to use for action mode UI -->
+        <attr name="actionModeBackground" format="reference" />
+        <!-- Drawable to use for the close action mode button -->
+        <attr name="actionModeCloseDrawable" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -981,6 +1058,9 @@
         <attr name="textColor" />
         <attr name="backgroundDimEnabled" />
         <attr name="backgroundDimAmount" />
+        <attr name="windowActionBar" />
+        <attr name="windowActionModeOverlay" />
+        <attr name="windowActionBarOverlay" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -997,6 +1077,14 @@
         <attr name="centerMedium" format="reference|color" />
     </declare-styleable>
 
+    <!-- Fragment animation class attributes. -->
+    <declare-styleable name="FragmentAnimation">
+        <attr name="fragmentOpenEnterAnimation" format="reference" />
+        <attr name="fragmentOpenExitAnimation" format="reference" />
+        <attr name="fragmentCloseEnterAnimation" format="reference" />
+        <attr name="fragmentCloseExitAnimation" format="reference" />
+    </declare-styleable>
+
     <!-- Window animation class attributes. -->
     <declare-styleable name="WindowAnimation">
         <!-- The animation used when a window is being added. -->
@@ -1007,7 +1095,7 @@
         <attr name="windowShowAnimation" format="reference" />
         <!-- The animation used when a window is going from VISIBLE to INVISIBLE. -->
         <attr name="windowHideAnimation" format="reference" />
-        
+
         <!--  When opening a new activity, this is the animation that is
               run on the next activity (which is entering the screen). -->
         <attr name="activityOpenEnterAnimation" format="reference" />
@@ -1048,7 +1136,7 @@
               animation that is run on the top activity of the current task
               (which is exiting the screen). -->
         <attr name="taskToBackExitAnimation" format="reference" />
-        
+
         <!--  When opening a new activity that shows the wallpaper, while
               currently not showing the wallpaper, this is the animation that
               is run on the new wallpaper activity (which is entering the screen). -->
@@ -1065,7 +1153,7 @@
               currently showing the wallpaper, this is the animation that
               is run on the old wallpaper activity (which is exiting the screen). -->
         <attr name="wallpaperCloseExitAnimation" format="reference" />
-        
+
         <!--  When opening a new activity that is on top of the wallpaper
               when the current activity is also on top of the wallpaper,
               this is the animation that is run on the new activity
@@ -1350,25 +1438,17 @@
              <code>public void sayHello(View v)</code> method of your context
              (typically, your Activity). -->
         <attr name="onClick" format="string" />
-
-        <!-- Defines overscrolling behavior. This property is used only if the
-             View is scrollable. Overscrolling is the ability for the user to
-             scroll a View beyond its content boundaries into empty space. -->
-        <attr name="overscrollMode">
-            <!-- Always allow the user to overscroll the content. -->
-            <enum name="always" value="0" />
-            <!-- Only allow the user to overscroll content if the content is large
-                 enough to meaningfully scroll. -->
-            <enum name="ifContentScrolls" value="1" />
-            <!-- Never overscroll. -->
-            <enum name="never" value="2" />
-        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
          of its subclasses.  Also see {@link #ViewGroup_Layout} for
          attributes that this class processes in its children. -->
     <declare-styleable name="ViewGroup">
+        <!-- Defines whether changes in layout (caused by adding and removing items) should
+             cause a LayoutTransition to run. When this flag is set to true, a default
+             LayoutTransition object will be set on the ViewGroup container and default
+             animations will run when these layout changes occur.-->
+        <attr name="animateLayoutChanges" format="boolean" />
         <!-- Defines whether a child is limited to draw inside of its bounds or not.
              This is useful with animations that scale the size of the children to more
              than 100% for instance. In such a case, this property should be set to false
@@ -1422,6 +1502,17 @@
             <enum name="blocksDescendants" value="2" />
         </attr>
 
+        <!-- Sets whether this ViewGroup should split MotionEvents
+             to separate child views during touch event dispatch.
+             If false (default), touch events will be dispatched to
+             the child view where the first pointer went down until
+             the last pointer goes up.
+             If true, touch events may be dispatched to multiple children.
+             MotionEvents for each pointer will be dispatched to the child
+             view where the initial ACTION_DOWN event happened.
+             See {@link android.view.ViewGroup#setMotionEventSplittingEnabled(boolean)}
+             for more information. -->
+        <attr name="splitMotionEvents" format="boolean" />
     </declare-styleable>
 
     <!-- A {@link android.view.ViewStub} lets you lazily include other XML layouts
@@ -1523,6 +1614,28 @@
         <attr name="isDefault" format="boolean" />
     </declare-styleable>
 
+    <!-- This is the subtype of InputMethod. Subtype can describe locales (e.g. en_US, fr_FR...)
+         and modes (e.g. voice, keyboard...), and is used for IME switch. This subtype allows
+         the system to call the specified subtype of the IME directly. -->
+    <declare-styleable name="InputMethod_Subtype">
+        <!-- The name of the subtype. -->
+        <attr name="label" />
+        <!-- The icon of the subtype. -->
+        <attr name="icon" />
+        <!-- The locale of the subtype. This string should be a locale (e.g. en_US, fr_FR...)
+             and will be passed to the IME when the framework calls the IME
+             with the subtype. This is also used by the framework to know the supported locales
+             of the IME.  -->
+        <attr name="imeSubtypeLocale" format="string" />
+        <!-- The mode of the subtype. This string can be a mode (e.g. voice, keyboard...) and this
+             string will be passed to the IME when the framework calls the IME with the
+             subtype.  -->
+        <attr name="imeSubtypeMode" format="string" />
+        <!-- The extra value of the subtype. This string can be any string and will be passed to
+             the IME when the framework calls the IME with the subtype.  -->
+        <attr name="imeSubtypeExtraValue" format="string" />
+    </declare-styleable>
+
     <!-- =============================== -->
     <!-- Widget package class attributes -->
     <!-- =============================== -->
@@ -1572,6 +1685,28 @@
              will use only the number of items in the adapter and the number of items visible
              on screen to determine the scrollbar's properties. -->
         <attr name="smoothScrollbar" format="boolean" />
+        <!-- A reference to an XML description of the adapter to attach to the list. -->
+        <attr name="adapter" format="reference" />
+        <!-- Defines the choice behavior for the view. By default, lists do not have
+             any choice behavior. By setting the choiceMode to singleChoice, the list
+             allows up to one item to be in a chosen state. By setting the choiceMode to
+             multipleChoice, the list allows any number of items to be chosen.
+             Finally, by setting the choiceMode to multipleChoiceModal the list allows
+             any number of items to be chosen in a special selection mode.
+             The application will supply a
+             {@link android.widget.AbsListView.MultiChoiceModeListener} using
+             {@link android.widget.AbsListView#setMultiChoiceModeListener} to control the
+             selection mode. This uses the {@link android.view.ActionMode} API. -->
+        <attr name="choiceMode">
+            <!-- Normal list that does not indicate choices. -->
+            <enum name="none" value="0" />
+            <!-- The list allows up to one choice. -->
+            <enum name="singleChoice" value="1" />
+            <!-- The list allows multiple choices. -->
+            <enum name="multipleChoice" value="2" />
+            <!-- The list allows multiple choices in a custom selection mode. -->
+            <enum name="multipleChoiceModal" value="3" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
@@ -1767,7 +1902,7 @@
         <!-- When set to true, all children with a weight will be considered having
              the minimum size of the largest child. If false, all children are
              measured normally. -->
-        <attr name="useLargestChild" format="boolean" />
+        <attr name="measureWithLargestChild" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ListView">
         <!-- Reference to an array resource that will populate the ListView.  For static content,
@@ -1778,28 +1913,12 @@
         <!-- Height of the divider. Will use the intrinsic height of the divider if this
              is not specified. -->
         <attr name="dividerHeight" format="dimension" />
-        <!-- Defines the choice behavior for the ListView. By default, lists do not have
-             any choice behavior. By setting the choiceMode to singleChoice, the List
-             allows up to one item to be in a chosen state. By setting the choiceMode to
-             multipleChoice, the list allows any number of items to be chosen. -->
-        <attr name="choiceMode">
-            <!-- Normal list that does not indicate choices. -->
-            <enum name="none" value="0" />
-            <!-- The list allows up to one choice. -->
-            <enum name="singleChoice" value="1" />
-            <!-- The list allows multiple choices. -->
-            <enum name="multipleChoice" value="2" />
-        </attr>
         <!-- When set to false, the ListView will not draw the divider after each header view.
              The default value is true. -->
         <attr name="headerDividersEnabled" format="boolean" />
         <!-- When set to false, the ListView will not draw the divider before each footer view.
              The default value is true. -->
         <attr name="footerDividersEnabled" format="boolean" />
-        <!-- Drawable to draw above list content. -->
-        <attr name="overscrollHeader" format="reference|color" />
-        <!-- Drawable to draw below list content. -->
-        <attr name="overscrollFooter" format="reference|color" />
     </declare-styleable>
     <declare-styleable name="MenuView">
         <!-- Default appearance of menu item text. -->
@@ -2205,7 +2324,7 @@
         <attr name="dropDownAnchor" format="reference" />
         <!-- Specifies the basic width of the dropdown. Its value may
              be a dimension (such as "12dip") for a constant width,
-             fill_parent or match_parent to match the width of the 
+             fill_parent or match_parent to match the width of the
              screen, or wrap_content to match the width of
              the anchored view. -->
         <attr name="dropDownWidth" format="dimension">
@@ -2242,13 +2361,32 @@
         <attr name="windowAnimationStyle" />
     </declare-styleable>
     <declare-styleable name="ViewAnimator">
+        <!-- Identifier for the animation to use when a view is shown. -->
         <attr name="inAnimation" format="reference" />
+        <!-- Identifier for the animation to use when a view is hidden. -->
         <attr name="outAnimation" format="reference" />
+        <!-- Defines whether to animate the current View when the ViewAnimation
+             is first displayed. -->
+        <attr name="animateFirstView" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewFlipper">
         <attr name="flipInterval" format="integer" min="0" />
         <!-- When true, automatically start animating -->
         <attr name="autoStart" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="AdapterViewAnimator">
+        <!-- Identifier for the animation to use when a view is shown. -->
+        <attr name="inAnimation" />
+        <!-- Identifier for the animation to use when a view is hidden. -->
+        <attr name="outAnimation" />
+        <!-- Defines whether to animate the current View when the ViewAnimation
+             is first displayed. -->
+        <attr name="animateFirstView" />
+    </declare-styleable>
+    <declare-styleable name="AdapterViewFlipper">
+        <attr name="flipInterval" />
+        <!-- When true, automatically start animating -->
+        <attr name="autoStart" />
     </declare-styleable>
     <declare-styleable name="ViewSwitcher">
     </declare-styleable>
@@ -2263,6 +2401,30 @@
     <declare-styleable name="Spinner">
         <!-- The prompt to display when the spinner's dialog is shown. -->
         <attr name="prompt" format="reference" />
+        <!-- Display mode for spinner options. -->
+        <attr name="spinnerMode" format="enum">
+            <!-- Spinner options will be presented to the user as a dialog window. -->
+            <enum name="dialog" value="0" />
+            <!-- Spinner options will be presented to the user as an inline dropdown
+                 anchored to the spinner widget itself. -->
+            <enum name="dropdown" value="1" />
+        </attr>
+        <!-- List selector to use for spinnerMode="dropdown" display. -->
+        <attr name="dropDownSelector" />
+        <!-- Background drawable to use for the dropdown in spinnerMode="dropdown". -->
+        <attr name="popupBackground" />
+        <!-- Vertical offset from the spinner widget for positioning the dropdown in
+             spinnerMode="dropdown". -->
+        <attr name="dropDownVerticalOffset" />
+        <!-- Horizontal offset from the spinner widget for positioning the dropdown
+             in spinnerMode="dropdown". -->
+        <attr name="dropDownHorizontalOffset" />
+        <!-- Width of the dropdown in spinnerMode="dropdown". -->
+        <attr name="dropDownWidth" />
+        <!-- Reference to a layout to use for displaying a prompt in the dropdown for
+             spinnerMode="dropdown". This layout must contain a TextView with the id
+             @android:id/text1 to be populated with the prompt text. -->
+        <attr name="popupPromptView" format="reference" />
     </declare-styleable>
     <declare-styleable name="DatePicker">
         <!-- The first year (inclusive), for example "1940". -->
@@ -2570,6 +2732,10 @@
         <attr name="minLevel" format="integer" />
         <!-- The maximum level allowed for this item. -->
         <attr name="maxLevel" format="integer" />
+        <attr name="drawable" />
+    </declare-styleable>
+
+    <declare-styleable name="MipmapDrawableItem">
         <attr name="drawable" />
     </declare-styleable>
 
@@ -2896,6 +3062,69 @@
     </declare-styleable>
 
     <!-- ========================== -->
+    <!-- ValueAnimator class attributes -->
+    <!-- ========================== -->
+    <eat-comment />
+
+    <declare-styleable name="Animator">
+        <!-- Defines the interpolator used to smooth the animation movement in time. -->
+        <attr name="interpolator" />
+        <!-- When set to true, fillAfter is taken into account. -->
+        <!-- Amount of time (in milliseconds) for the animation to run. -->
+        <attr name="duration" />
+        <!-- Delay in milliseconds before the animation runs, once start time is reached. -->
+        <attr name="startOffset"/>
+        <!-- Defines how many times the animation should repeat. The default value is 0. -->
+        <attr name="repeatCount"/>
+        <!-- Defines the animation behavior when it reaches the end and the repeat count is
+             greater than 0 or infinite. The default value is restart. -->
+        <attr name="repeatMode"/>
+        <!-- Value the animation starts from. -->
+        <attr name="valueFrom" format="float|integer"/>
+        <!-- Value the animation animates to. -->
+        <attr name="valueTo" format="float|integer"/>
+        <!-- The type of valueFrom and valueTo. -->
+        <attr name="valueType">
+            <!-- valueFrom and valueTo are floats. -->
+            <enum name="floatType" value="0" />
+            <!-- valueFrom and valueTo are integers. -->
+            <enum name="intType"   value="1" />
+            <!-- valueFrom and valueTo are doubles. -->
+            <enum name="doubleType" value="2" />
+            <!-- valueFrom and valueTo are colors. -->
+            <enum name="colorType" value="3" />
+            <!-- valueFrom and valueTo are a custom type. -->
+            <enum name="customType" value="4" />
+        </attr>
+    </declare-styleable>
+
+    <!-- ========================== -->
+    <!-- ObjectAnimator class attributes -->
+    <!-- ========================== -->
+    <eat-comment />
+
+    <declare-styleable name="PropertyAnimator">
+        <!-- Name of the property being animated. -->
+        <attr name="propertyName" format="string"/>
+    </declare-styleable>
+
+
+    <!-- ========================== -->
+    <!-- AnimatorSet class attributes -->
+    <!-- ========================== -->
+    <eat-comment />
+
+    <declare-styleable name="AnimatorSet">
+        <!-- Name of the property being animated. -->
+        <attr name="ordering">
+            <!-- child animations should be played together. -->
+            <enum name="together" value="0" />
+            <!-- child animations should be played sequentially, in the same order as the xml. -->
+            <enum name="sequentially" value="1" />
+        </attr>
+    </declare-styleable>
+
+    <!-- ========================== -->
     <!-- State attributes           -->
     <!-- ========================== -->
     <eat-comment />
@@ -2917,6 +3146,7 @@
          <li>"state_last"
          <li>"state_only"
          <li>"state_pressed"
+         <li>"state_activated"
          <li>"state_error"
          <li>"state_circle"
          <li>"state_rect"
@@ -2924,23 +3154,35 @@
          <li>"state_move"
          </ul>  -->
     <declare-styleable name="DrawableStates">
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view has input focus. -->
         <attr name="state_focused" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view's window has input focus. -->
         <attr name="state_window_focused" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view is enabled. -->
         <attr name="state_enabled" format="boolean" />
-        <!--  State identifier indicating that the object <var>may</var> display a check mark.
-              See {@link R.attr#state_checked} for the identifier that indicates whether it is
-              actually checked. -->
+        <!-- State identifier indicating that the object <var>may</var> display a check mark.
+             See {@link R.attr#state_checked} for the identifier that indicates whether it is
+             actually checked. -->
         <attr name="state_checkable" format="boolean"/>
-        <!--  State identifier indicating that the object is currently checked.  See
-              {@link R.attr#state_checkable} for an additional identifier that can indicate if
-              any object may ever display a check, regardless of whether state_checked is
-              currently set. -->
+        <!-- State identifier indicating that the object is currently checked.  See
+             {@link R.attr#state_checkable} for an additional identifier that can indicate if
+             any object may ever display a check, regardless of whether state_checked is
+             currently set. -->
         <attr name="state_checked" format="boolean"/>
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view (or one of its parents) is currently selected. -->
         <attr name="state_selected" format="boolean" />
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when the user is pressing down in a view. -->
+        <attr name="state_pressed" format="boolean" />
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or its parent has been "activated" meaning the user has currently
+             marked it as being of interest.  This is an alternative representation of
+             state_checked for when the state should be propagated down the view hierarchy. -->
+        <attr name="state_activated" format="boolean" />
         <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_active" format="boolean" />
         <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
@@ -2951,8 +3193,6 @@
         <attr name="state_middle" format="boolean" />
         <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
         <attr name="state_last" format="boolean" />
-        <!--  State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
-        <attr name="state_pressed" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewDrawableStates">
         <attr name="state_pressed" />
@@ -2960,6 +3200,7 @@
         <attr name="state_selected" />
         <attr name="state_window_focused" />
         <attr name="state_enabled" />
+        <attr name="state_activated" />
     </declare-styleable>
     <!-- State array representing a menu item that is currently checked. -->
     <declare-styleable name="MenuItemCheckedState">
@@ -3304,6 +3545,27 @@
         <!-- Whether the item is enabled. -->
         <attr name="enabled" />
 
+        <!-- Name of a method on the Context used to inflate the menu that will be
+             called when the item is clicked. -->
+        <attr name="onClick" />
+
+        <!-- How this item should display in the Action Bar, if present. -->
+        <attr name="showAsAction" format="enum">
+            <enum name="never" value="0" />
+            <enum name="ifRoom" value="1" />
+            <enum name="always" value="2" />
+        </attr>
+
+        <!-- An optional layout to be used as an action view.
+             See {@link android.view.MenuItem#setActionView(android.view.View)}
+             for more info. -->
+        <attr name="actionLayout" format="reference" />
+
+        <!-- The name of an optional View class to instantiate and use as an
+             action view. See {@link android.view.MenuItem#setActionView(android.view.View)}
+             for more info. -->
+        <attr name="actionViewClass" format="string" />
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -3319,6 +3581,25 @@
         <attr name="orderingFromXml" format="boolean" />
     </declare-styleable>
 
+    <!-- Attribute for a header describing the item shown in the top-level list
+         from which the selects the set of preference to dig in to. -->
+    <declare-styleable name="PreferenceHeader">
+        <!-- Identifier value for the header. -->
+        <attr name="id" />
+        <!-- The title of the item that is shown to the user. -->
+        <attr name="title" />
+        <!-- The summary for the item. -->
+        <attr name="summary" format="string" />
+        <!-- The title for the bread crumb of this item. -->
+        <attr name="breadCrumbTitle" format="string" />
+        <!-- The short title for the bread crumb of this item. -->
+        <attr name="breadCrumbShortTitle" format="string" />
+        <!-- An icon for the item. -->
+        <attr name="icon" />
+        <!-- The fragment that is displayed when the user selects this item. -->
+        <attr name="fragment" format="string" />
+    </declare-styleable>
+
     <!-- WARNING:  If adding attributes to Preference, make sure it does not conflict
                    with a View's attributes.  Some subclasses (e.g., EditTextPreference)
                    proxy all attributes to its EditText widget. -->
@@ -3331,10 +3612,13 @@
         <!-- The title for the Preference in a PreferenceActivity screen. -->
         <attr name="title" />
         <!-- The summary for the Preference in a PreferenceActivity screen. -->
-        <attr name="summary" format="string" />
+        <attr name="summary" />
         <!-- The order for the Preference (lower values are to be ordered first). If this is not
              specified, the default orderin will be alphabetic. -->
         <attr name="order" format="integer" />
+        <!-- When used inside of a modern PreferenceActivity, this declares
+             a new PreferenceFragment to be shown when the user selects this item. -->
+        <attr name="fragment" />
         <!-- The layout for the Preference in a PreferenceActivity screen. This should
              rarely need to be changed, look at widgetLayout instead. -->
         <attr name="layout" />
@@ -3404,6 +3688,16 @@
              entries is selected. If a user clicks on the second item in entries, the
              second item in this array will be saved to the preference. -->
         <attr name="entryValues" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="MultiSelectListPreference">
+        <!-- The human-readable array to present as a list. Each entry must have a corresponding
+             index in entryValues. -->
+        <attr name="entries" />
+        <!-- The array to find the value to save for a preference when an entry from
+             entries is selected. If a user clicks the second item in entries, the
+             second item in this array will be saved to the preference. -->
+        <attr name="entryValues" />
     </declare-styleable>
 
     <!-- Base attributes available to RingtonePreference. -->
@@ -3557,7 +3851,7 @@
     <!-- AppWidget package class attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- Use <code>appwidget-provider</code> as the root tag of the XML resource that
          describes an AppWidget provider.  See {@link android.appwidget android.appwidget}
          package for more info.
@@ -3574,13 +3868,49 @@
         <!-- A class name in the AppWidget's package to be launched to configure.
              If not supplied, then no activity will be launched. -->
         <attr name="configure" format="string" />
+        <!-- A preview of what the AppWidget will look like after it's configured.
+       	     If not supplied, the AppWidget's icon will be used. -->
+        <attr name="previewImage" format="reference" />
     </declare-styleable>
 
     <!-- =============================== -->
     <!-- App package class attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
+    <!-- ============================= -->
+    <!-- View package class attributes -->
+    <!-- ============================= -->
+    <eat-comment />
+
+    <!-- Attributes that can be used with <code>&lt;fragment&gt;</code>
+         tags inside of the layout of an Activity.  This instantiates
+         the given {@link android.app.Fragment} and inserts its content
+         view into the current location in the layout. -->
+    <declare-styleable name="Fragment">
+        <!-- Supply the name of the fragment class to instantiate. -->
+        <attr name="name" />
+
+        <!-- Supply an identifier name for the top-level view, to later retrieve it
+             with {@link android.view.View#findViewById View.findViewById()} or
+             {@link android.app.Activity#findViewById Activity.findViewById()}.
+             This must be a
+             resource reference; typically you set this using the
+             <code>@+</code> syntax to create a new ID resources.
+             For example: <code>android:id="@+id/my_id"</code> which
+             allows you to later retrieve the view
+             with <code>findViewById(R.id.my_id)</code>. -->
+        <attr name="id" />
+
+        <!-- Supply a tag for the top-level view containing a String, to be retrieved
+             later with {@link android.view.View#getTag View.getTag()} or
+             searched for with {@link android.view.View#findViewWithTag
+             View.findViewWithTag()}.  It is generally preferable to use
+             IDs (through the android:id attribute) instead of tags because
+             they are faster and allow for compile-time type checking. -->
+        <attr name="tag" />
+    </declare-styleable>
+
     <!-- Use <code>device-admin</code> as the root tag of the XML resource that
          describes a
          {@link android.app.admin.DeviceAdminReceiver}, which is
@@ -3620,7 +3950,7 @@
     <!-- Accounts package class attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- Use <code>account-authenticator</code> as the root tag of the XML resource that
          describes an account authenticator.
      -->
@@ -3641,7 +3971,7 @@
     <!-- Accounts package class attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- Use <code>account-authenticator</code> as the root tag of the XML resource that
          describes an account authenticator.
      -->
@@ -3657,7 +3987,7 @@
     <!-- Contacts meta-data attributes -->
     <!-- =============================== -->
     <eat-comment />
-    
+
     <!-- TODO: remove this deprecated styleable. -->
     <eat-comment />
     <declare-styleable name="Icon">
@@ -3683,6 +4013,9 @@
         <attr name="detailColumn" format="string" />
         <!-- Flag indicating that detail should be built from SocialProvider. -->
         <attr name="detailSocialSummary" format="boolean" />
+        <!-- Resource representing the term "All Contacts" (e.g. "All Friends" or
+        "All connections"). Optional (Default is "All Contacts"). -->
+        <attr name="allContactsName" format="string" />
     </declare-styleable>
 
     <!-- =============================== -->
@@ -3714,4 +4047,125 @@
         <attr name="settingsActivity" />
     </declare-styleable>
 
+    <!-- =============================== -->
+    <!-- Adapters attributes             -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Adapter used to bind cursors. -->
+    <declare-styleable name="CursorAdapter">
+        <!-- URI to get the cursor from. Optional. -->
+        <attr name="uri" format="string" />
+        <!-- Selection statement for the query. Optional. -->
+        <attr name="selection" format="string" />
+        <!-- Sort order statement for the query. Optional. -->
+        <attr name="sortOrder" format="string" />
+        <!-- Layout resource used to display each row from the cursor. Mandatory. -->
+        <attr name="layout" />
+    </declare-styleable>
+
+    <!-- Attributes used in bind items for XML cursor adapters. -->
+    <declare-styleable name="CursorAdapter_BindItem">
+        <!-- The name of the column to bind from. Mandatory. -->
+        <attr name="from" format="string" />
+        <!-- The resource id of the view to bind to. Mandatory. -->
+        <attr name="to" format="reference" />
+        <!-- The type of binding. If this value is not specified, the type will be
+             inferred from the type of the "to" target view. Mandatory.
+
+             The type can be one of:
+             <ul>
+             <li>string, The content of the column is interpreted as a string.</li>
+             <li>image, The content of the column is interpreted as a blob describing an image.</li>
+             <li>image-uri, The content of the column is interpreted as a URI to an image.</li>
+             <li>drawable, The content of the column is interpreted as a resource id to a drawable.</li>
+             <li>A fully qualified class name, corresponding to an implementation of
+                 android.widget.Adapters.CursorBinder.</li>
+             </ul>
+         -->
+        <attr name="as" format="string" />
+    </declare-styleable>
+
+    <!-- Attributes used in select items for XML cursor adapters. -->
+    <declare-styleable name="CursorAdapter_SelectItem">
+        <!-- The name of the column to select. Mandatory. -->
+        <attr name="column" format="string" />
+    </declare-styleable>
+
+    <!-- Attributes used to map values to new values in XML cursor adapters' bind items. -->
+    <declare-styleable name="CursorAdapter_MapItem">
+        <!-- The original value from the column. Mandatory. -->
+        <attr name="fromValue" format="string" />
+        <!-- The new value from the column. Mandatory. -->
+        <attr name="toValue" format="string" />
+    </declare-styleable>
+
+    <!-- Attributes used to map values to new values in XML cursor adapters' bind items. -->
+    <declare-styleable name="CursorAdapter_TransformItem">
+        <!-- The transformation expression. Mandatory if "withClass" is not specified. -->
+        <attr name="withExpression" format="string" />
+        <!-- The transformation class, an implementation of
+             android.widget.Adapters.CursorTransformation. Mandatory if "withExpression"
+             is not specified. -->
+        <attr name="withClass" format="string" />
+    </declare-styleable>
+
+    <!-- Attributes used to style the Action Bar. -->
+    <declare-styleable name="ActionBar">
+        <!-- The type of navigation to use. -->
+        <attr name="navigationMode">
+            <!-- Normal static title text -->
+            <enum name="normal" value="0" />
+            <!-- The action bar will use a drop-down selection in place of title text. -->
+            <enum name="dropdownList" value="1" />
+            <!-- The action bar will use a series of horizontal tabs in place of title text. -->
+            <enum name="tabBar" value="2" />
+        </attr>
+        <!-- Options affecting how the action bar is displayed. -->
+        <attr name="displayOptions">
+            <flag name="useLogo" value="1" />
+            <flag name="hideHome" value="2" />
+        </attr>
+        <!-- Specifies the color used to style the action bar. -->
+        <attr name="colorFilter" format="color" />
+        <!-- Specifies title text used for navigationMode="normal" -->
+        <attr name="title" />
+        <!-- Specifies subtitle text used for navigationMode="normal" -->
+        <attr name="subtitle" format="string" />
+        <!-- Specifies a style to use for title text. -->
+        <attr name="titleTextStyle" format="reference" />
+        <!-- Specifies a style to use for subtitle text. -->
+        <attr name="subtitleTextStyle" format="reference" />
+        <!-- Specifies the drawable used for the application icon. -->
+        <attr name="icon" />
+        <!-- Specifies the drawable used for the application logo. -->
+        <attr name="logo" />
+        <!-- Specifies the drawable used for item dividers. -->
+        <attr name="divider" />
+        <!-- Specifies a background drawable for the action bar. -->
+        <attr name="background" />
+        <!-- Specifies a layout for custom navigation. Overrides navigationMode. -->
+        <attr name="customNavigationLayout" format="reference" />
+        <!-- Specifies a fixed height. -->
+        <attr name="height" />
+    </declare-styleable>
+
+    <declare-styleable name="ActionMode">
+        <!-- Specifies a style to use for title text. -->
+        <attr name="titleTextStyle" />
+        <!-- Specifies a style to use for subtitle text. -->
+        <attr name="subtitleTextStyle" />
+        <!-- Specifies a background for the action mode bar. -->
+        <attr name="background" />
+        <!-- Specifies a fixed height for the action mode bar. -->
+        <attr name="height" />
+        <!-- Specifies a padding to use between elements on the bar. -->
+        <attr name="itemPadding" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="SearchView">
+        <!-- The default state of the SearchView. If true, it will be iconified when not in
+             use and expanded when clicked. -->
+        <attr name="iconifiedByDefault" format="boolean"/>
+    </declare-styleable>
 </resources>

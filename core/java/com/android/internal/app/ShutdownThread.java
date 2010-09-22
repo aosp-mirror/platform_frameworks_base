@@ -134,7 +134,7 @@ public final class ShutdownThread extends Thread {
     private static void beginShutdownSequence(Context context) {
         synchronized (sIsStartedGuard) {
             if (sIsStarted) {
-                Log.d(TAG, "Request to shutdown already running, returning.");
+                Log.d(TAG, "Shutdown sequence already running, returning.");
                 return;
             }
             sIsStarted = true;

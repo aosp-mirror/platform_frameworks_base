@@ -25,6 +25,9 @@
     <!-- The standard size (both width and height) of an application icon that
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
+    <!-- The standard size (both width and height) of an action icon that will
+         be displayed in application action bars. -->
+    <dimen name="action_icon_size">48dip</dimen>
     <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">25dip</dimen>
@@ -32,14 +35,20 @@
     <dimen name="status_bar_icon_size">25dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
+    <!-- Margin for permanent screen decorations at the bottom. -->
+    <dimen name="screen_margin_bottom">0dip</dimen>
     <!-- Size of the fastscroll hint letter -->
     <dimen name="fastscroll_overlay_size">104dp</dimen>
     <!-- Width of the fastscroll thumb -->
     <dimen name="fastscroll_thumb_width">64dp</dimen>
     <!-- Height of the fastscroll thumb -->
     <dimen name="fastscroll_thumb_height">52dp</dimen>
-    <!-- Default height of a key in the password keyboard -->
-    <dimen name="password_keyboard_key_height">56dip</dimen>
+    <!-- Min width for a tablet device -->
+    <dimen name="min_xlarge_screen_width">800dp</dimen>
+    <!-- Default height of a key in the password keyboard for alpha -->
+    <dimen name="password_keyboard_key_height_alpha">56dip</dimen>
+    <!-- Default height of a key in the password keyboard for numeric -->
+    <dimen name="password_keyboard_key_height_numeric">56dip</dimen>
     <!-- Default correction for the space key in the password keyboard -->
     <dimen name="password_keyboard_spacebar_vertical_correction">4dip</dimen>
 </resources>

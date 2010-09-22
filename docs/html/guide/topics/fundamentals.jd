@@ -292,8 +292,8 @@ onActivityResult()}</code> method.
 <li><p>A service is started (or new instructions are given to an ongoing 
 service) by passing an Intent object to <code>{@link 
 android.content.Context#startService Context.startService()}</code>.  
-Android calls the service's <code>{@link android.app.Service#onStart 
-onStart()}</code> method and passes it the Intent object.</p>
+Android calls the service's <code>{@link android.app.Service#onStartCommand
+onStartCommand()}</code> method and passes it the Intent object.</p>
 
 <p>
 Similarly, an intent can be passed to <code>{@link 
@@ -1508,9 +1508,9 @@ a music playback service could create the thread where the music will be played
 in {@code onCreate()}, and then stop the thread in {@code onDestroy()}.</li>
 
 <li><p>The <b>active lifetime</b> of a service begins with a call to 
-<code>{@link android.app.Service#onStart onStart()}</code>.  This method 
+<code>{@link android.app.Service#onStartCommand onStartCommand()}</code>.  This method
 is handed the Intent object that was passed to {@code startService()}.
-The music service would open the Intent to discover which music to 
+The music service would open the Intent to discover which music to
 play, and begin the playback.</p>
 
 <p>
@@ -1525,7 +1525,7 @@ services, whether they're started by
 <code>{@link android.content.Context#startService Context.startService()}</code>
 or 
 <code>{@link android.content.Context#bindService Context.bindService()}</code>.
-However, {@code onStart()} is called only for services started by {@code
+However, {@code onStartCommand()} is called only for services started by {@code
 startService()}.
 </p>
 
@@ -1629,7 +1629,7 @@ to the activity that the user is interacting with.</p></li>
 
 <li><p>It has a {@link android.app.Service} object that's executing
 one of its lifecycle callbacks (<code>{@link android.app.Service#onCreate 
-onCreate()}</code>, <code>{@link android.app.Service#onStart onStart()}</code>, 
+onCreate()}</code>, <code>{@link android.app.Service#onStartCommand onStartCommand()}</code>,
 or <code>{@link android.app.Service#onDestroy onDestroy()}</code>).</p></li>
 
 <li><p>It has a {@link android.content.BroadcastReceiver} object that's 

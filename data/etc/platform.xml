@@ -58,6 +58,10 @@
         <group gid="sdcard_rw" />
     </permission>
 
+    <permission name="android.permission.ACCESS_USB" >
+        <group gid="usb" />
+    </permission>
+
     <!-- The group that /cache belongs to, linked to the permission
          set on the applications that can access /cache -->
     <permission name="android.permission.ACCESS_CACHE_FILESYSTEM" >

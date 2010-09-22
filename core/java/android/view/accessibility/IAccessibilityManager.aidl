@@ -29,7 +29,7 @@ import android.content.pm.ServiceInfo;
  */
 interface IAccessibilityManager {
 
-    void addClient(IAccessibilityManagerClient client);
+    boolean addClient(IAccessibilityManagerClient client);
 
     boolean sendAccessibilityEvent(in AccessibilityEvent uiEvent);
 

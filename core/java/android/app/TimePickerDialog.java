@@ -36,7 +36,7 @@ import java.util.Calendar;
  * <p>See the <a href="{@docRoot}resources/tutorials/views/hello-timepicker.html">Time Picker
  * tutorial</a>.</p>
  */
-public class TimePickerDialog extends AlertDialog implements OnClickListener, 
+public class TimePickerDialog extends AlertDialog implements OnClickListener,
         OnTimeChangedListener {
 
     /**
@@ -56,12 +56,12 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
     private static final String HOUR = "hour";
     private static final String MINUTE = "minute";
     private static final String IS_24_HOUR = "is24hour";
-    
+
     private final TimePicker mTimePicker;
     private final OnTimeSetListener mCallback;
     private final Calendar mCalendar;
     private final java.text.DateFormat mDateFormat;
-    
+
     int mInitialHourOfDay;
     int mInitialMinute;
     boolean mIs24HourView;
@@ -101,12 +101,13 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
         mDateFormat = DateFormat.getTimeFormat(context);
         mCalendar = Calendar.getInstance();
         updateTitle(mInitialHourOfDay, mInitialMinute);
-        
-        setButton(context.getText(R.string.date_time_set), this);
-        setButton2(context.getText(R.string.cancel), (OnClickListener) null);
+
+        setButton(BUTTON_POSITIVE, context.getText(R.string.date_time_set), this);
+        setButton(BUTTON_NEGATIVE, context.getText(R.string.cancel),
+                (OnClickListener) null);
         setIcon(R.drawable.ic_dialog_time);
-        
-        LayoutInflater inflater = 
+
+        LayoutInflater inflater =
                 (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.time_picker_dialog, null);
         setView(view);
@@ -118,11 +119,11 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
         mTimePicker.setIs24HourView(mIs24HourView);
         mTimePicker.setOnTimeChangedListener(this);
     }
-    
+
     public void onClick(DialogInterface dialog, int which) {
         if (mCallback != null) {
             mTimePicker.clearFocus();
-            mCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(), 
+            mCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(),
                     mTimePicker.getCurrentMinute());
         }
     }
@@ -130,7 +131,7 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
     public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
         updateTitle(hourOfDay, minute);
     }
-    
+
     public void updateTime(int hourOfDay, int minutOfHour) {
         mTimePicker.setCurrentHour(hourOfDay);
         mTimePicker.setCurrentMinute(minutOfHour);
@@ -141,7 +142,7 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
         mCalendar.set(Calendar.MINUTE, minute);
         setTitle(mDateFormat.format(mCalendar.getTime()));
     }
-    
+
     @Override
     public Bundle onSaveInstanceState() {
         Bundle state = super.onSaveInstanceState();
@@ -150,7 +151,7 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
         state.putBoolean(IS_24_HOUR, mTimePicker.is24HourView());
         return state;
     }
-    
+
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);

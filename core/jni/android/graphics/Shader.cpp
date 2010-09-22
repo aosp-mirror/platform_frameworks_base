@@ -8,6 +8,16 @@
 #include "SkTemplates.h"
 #include "SkXfermode.h"
 
+#include <SkiaShader.h>
+#include <Caches.h>
+
+using namespace android::uirenderer;
+
+static struct {
+    jclass clazz;
+    jfieldID shader;
+} gShaderClassInfo;
+
 static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {
     if (NULL == ptr) {
         doThrowIAE(env);
@@ -41,8 +51,14 @@ static int Color_HSVToColor(JNIEnv* env, jobject, int alpha, jfloatArray hsvArra
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static void Shader_destructor(JNIEnv* env, jobject, SkShader* shader)
+static void Shader_destructor(JNIEnv* env, jobject o, SkShader* shader, SkiaShader* skiaShader)
 {
+#ifdef USE_OPENGL_RENDERER
+    if (android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().gradientCache.remove(shader);
+    }
+#endif
+    delete skiaShader;
     shader->safeUnref();
 }
 
@@ -51,7 +67,8 @@ static bool Shader_getLocalMatrix(JNIEnv* env, jobject, const SkShader* shader, 
     return shader ? shader->getLocalMatrix(matrix) : false;
 }
  
-static void Shader_setLocalMatrix(JNIEnv* env, jobject, SkShader* shader, const SkMatrix* matrix)
+static void Shader_setLocalMatrix(JNIEnv* env, jobject o, SkShader* shader, SkiaShader* skiaShader,
+        const SkMatrix* matrix)
 {
     if (shader) {
         if (NULL == matrix) {
@@ -60,24 +77,40 @@ static void Shader_setLocalMatrix(JNIEnv* env, jobject, SkShader* shader, const 
         else {
             shader->setLocalMatrix(*matrix);
         }
+#ifdef USE_OPENGL_RENDERER
+        skiaShader->setMatrix(const_cast<SkMatrix*>(matrix));
+#endif
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static SkShader* BitmapShader_constructor(JNIEnv* env, jobject, const SkBitmap* bitmap,
+static SkShader* BitmapShader_constructor(JNIEnv* env, jobject o, const SkBitmap* bitmap,
                                           int tileModeX, int tileModeY)
 {
     SkShader* s = SkShader::CreateBitmapShader(*bitmap,
                                         (SkShader::TileMode)tileModeX,
                                         (SkShader::TileMode)tileModeY);
+
     ThrowIAE_IfNull(env, s);
     return s;
+}
+
+static SkiaShader* BitmapShader_postConstructor(JNIEnv* env, jobject o, SkShader* shader,
+        SkBitmap* bitmap, int tileModeX, int tileModeY) {
+#ifdef USE_OPENGL_RENDERER
+    SkiaShader* skiaShader = new SkiaBitmapShader(bitmap, shader,
+            static_cast<SkShader::TileMode>(tileModeX), static_cast<SkShader::TileMode>(tileModeY),
+            NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+    return skiaShader;
+#else
+    return NULL;
+#endif
 }
     
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static SkShader* LinearGradient_create1(JNIEnv* env, jobject,
+static SkShader* LinearGradient_create1(JNIEnv* env, jobject o,
                                         float x0, float y0, float x1, float y1,
                                         jintArray colorArray, jfloatArray posArray, int tileMode)
 {
@@ -85,31 +118,95 @@ static SkShader* LinearGradient_create1(JNIEnv* env, jobject,
     pts[0].set(SkFloatToScalar(x0), SkFloatToScalar(y0));
     pts[1].set(SkFloatToScalar(x1), SkFloatToScalar(y1));
 
-    size_t      count = env->GetArrayLength(colorArray);
+    size_t count = env->GetArrayLength(colorArray);
     const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
 
     SkAutoSTMalloc<8, SkScalar> storage(posArray ? count : 0);
     SkScalar*                   pos = NULL;
-    
+
     if (posArray) {
         AutoJavaFloatArray autoPos(env, posArray, count);
         const float* posValues = autoPos.ptr();
         pos = (SkScalar*)storage.get();
-        for (size_t i = 0; i < count; i++)
+        for (size_t i = 0; i < count; i++) {
             pos[i] = SkFloatToScalar(posValues[i]);
+        }
     }
-
+    
     SkShader* shader = SkGradientShader::CreateLinear(pts,
                                 reinterpret_cast<const SkColor*>(colorValues),
                                 pos, count,
                                 static_cast<SkShader::TileMode>(tileMode));
-    env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues),
-                                 JNI_ABORT);
+
+    env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
     ThrowIAE_IfNull(env, shader);
     return shader;
 }
 
-static SkShader* LinearGradient_create2(JNIEnv* env, jobject,
+static SkiaShader* LinearGradient_postCreate1(JNIEnv* env, jobject o, SkShader* shader,
+        float x0, float y0, float x1, float y1, jintArray colorArray,
+        jfloatArray posArray, int tileMode) {
+#ifdef USE_OPENGL_RENDERER
+    size_t count = env->GetArrayLength(colorArray);
+    const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
+
+    jfloat* storedBounds = new jfloat[4];
+    storedBounds[0] = x0; storedBounds[1] = y0;
+    storedBounds[2] = x1; storedBounds[3] = y1;
+    jfloat* storedPositions = new jfloat[count];
+    uint32_t* storedColors = new uint32_t[count];
+    for (size_t i = 0; i < count; i++) {
+        storedColors[i] = static_cast<uint32_t>(colorValues[i]);
+    }
+
+    if (posArray) {
+        AutoJavaFloatArray autoPos(env, posArray, count);
+        const float* posValues = autoPos.ptr();
+        for (size_t i = 0; i < count; i++) {
+            storedPositions[i] = posValues[i];
+        }
+    } else {
+        storedPositions[0] = 0.0f;
+        storedPositions[1] = 1.0f;
+    }
+
+    SkiaShader* skiaShader = new SkiaLinearGradientShader(storedBounds, storedColors,
+            storedPositions, count, shader, static_cast<SkShader::TileMode>(tileMode), NULL,
+            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+
+    env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
+    return skiaShader;
+#else
+    return NULL;
+#endif
+}
+
+static SkiaShader* LinearGradient_postCreate2(JNIEnv* env, jobject o, SkShader* shader,
+        float x0, float y0, float x1, float y1, int color0, int color1, int tileMode) {
+#ifdef USE_OPENGL_RENDERER
+    float* storedBounds = new float[4];
+    storedBounds[0] = x0; storedBounds[1] = y0;
+    storedBounds[2] = x1; storedBounds[3] = y1;
+
+    float* storedPositions = new float[2];
+    storedPositions[0] = 0.0f;
+    storedPositions[1] = 1.0f;
+
+    uint32_t* storedColors = new uint32_t[2];
+    storedColors[0] = static_cast<uint32_t>(color0);
+    storedColors[1] = static_cast<uint32_t>(color1);
+
+    SkiaShader* skiaShader = new SkiaLinearGradientShader(storedBounds, storedColors,
+            storedPositions, 2, shader, static_cast<SkShader::TileMode>(tileMode), NULL,
+            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+
+    return skiaShader;
+#else
+    return NULL;
+#endif
+}
+
+static SkShader* LinearGradient_create2(JNIEnv* env, jobject o,
                                         float x0, float y0, float x1, float y1,
                                         int color0, int color1, int tileMode)
 {
@@ -120,18 +217,17 @@ static SkShader* LinearGradient_create2(JNIEnv* env, jobject,
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
-
+    
     SkShader* s = SkGradientShader::CreateLinear(pts, colors, NULL, 2, (SkShader::TileMode)tileMode);
+
     ThrowIAE_IfNull(env, s);
     return s;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static SkShader* RadialGradient_create1(JNIEnv* env, jobject,
-                                        float x, float y, float radius,
-                                        jintArray colorArray, jfloatArray posArray, int tileMode)
-{
+static SkShader* RadialGradient_create1(JNIEnv* env, jobject, float x, float y, float radius,
+        jintArray colorArray, jfloatArray posArray, int tileMode) {
     SkPoint center;
     center.set(SkFloatToScalar(x), SkFloatToScalar(y));
 
@@ -161,10 +257,8 @@ static SkShader* RadialGradient_create1(JNIEnv* env, jobject,
     return shader;
 }
 
-static SkShader* RadialGradient_create2(JNIEnv* env, jobject,
-                                        float x, float y, float radius,
-                                        int color0, int color1, int tileMode)
-{
+static SkShader* RadialGradient_create2(JNIEnv* env, jobject, float x, float y, float radius,
+        int color0, int color1, int tileMode) {
     SkPoint center;
     center.set(SkFloatToScalar(x), SkFloatToScalar(y));
 
@@ -178,11 +272,65 @@ static SkShader* RadialGradient_create2(JNIEnv* env, jobject,
     return s;
 }
 
+static SkiaShader* RadialGradient_postCreate1(JNIEnv* env, jobject o, SkShader* shader,
+        float x, float y, float radius, jintArray colorArray, jfloatArray posArray, int tileMode) {
+#ifdef USE_OPENGL_RENDERER
+    size_t count = env->GetArrayLength(colorArray);
+    const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
+
+    jfloat* storedPositions = new jfloat[count];
+    uint32_t* storedColors = new uint32_t[count];
+    for (size_t i = 0; i < count; i++) {
+        storedColors[i] = static_cast<uint32_t>(colorValues[i]);
+    }
+
+    if (posArray) {
+        AutoJavaFloatArray autoPos(env, posArray, count);
+        const float* posValues = autoPos.ptr();
+        for (size_t i = 0; i < count; i++) {
+            storedPositions[i] = posValues[i];
+        }
+    } else {
+        storedPositions[0] = 0.0f;
+        storedPositions[1] = 1.0f;
+    }
+
+    SkiaShader* skiaShader = new SkiaCircularGradientShader(x, y, radius, storedColors,
+            storedPositions, count, shader, (SkShader::TileMode) tileMode, NULL,
+            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+
+    env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
+    return skiaShader;
+#else
+    return NULL;
+#endif
+}
+
+static SkiaShader* RadialGradient_postCreate2(JNIEnv* env, jobject o, SkShader* shader,
+        float x, float y, float radius, int color0, int color1, int tileMode) {
+#ifdef USE_OPENGL_RENDERER
+    float* storedPositions = new float[2];
+    storedPositions[0] = 0.0f;
+    storedPositions[1] = 1.0f;
+
+    uint32_t* storedColors = new uint32_t[2];
+    storedColors[0] = static_cast<uint32_t>(color0);
+    storedColors[1] = static_cast<uint32_t>(color1);
+
+    SkiaShader* skiaShader = new SkiaCircularGradientShader(x, y, radius, storedColors,
+            storedPositions, 2, shader, (SkShader::TileMode) tileMode, NULL,
+            (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+
+    return skiaShader;
+#else
+    return NULL;
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static SkShader* SweepGradient_create1(JNIEnv* env, jobject, float x, float y,
-                                    jintArray jcolors, jfloatArray jpositions)
-{
+        jintArray jcolors, jfloatArray jpositions) {
     size_t      count = env->GetArrayLength(jcolors);
     const jint* colors = env->GetIntArrayElements(jcolors, NULL);
     
@@ -209,8 +357,7 @@ static SkShader* SweepGradient_create1(JNIEnv* env, jobject, float x, float y,
 }
 
 static SkShader* SweepGradient_create2(JNIEnv* env, jobject, float x, float y,
-                                        int color0, int color1)
-{
+        int color0, int color1) {
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
@@ -220,20 +367,97 @@ static SkShader* SweepGradient_create2(JNIEnv* env, jobject, float x, float y,
     return s;
 }
 
+static SkiaShader* SweepGradient_postCreate1(JNIEnv* env, jobject o, SkShader* shader,
+        float x, float y, jintArray colorArray, jfloatArray posArray) {
+#ifdef USE_OPENGL_RENDERER
+    size_t count = env->GetArrayLength(colorArray);
+    const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
+
+    jfloat* storedPositions = new jfloat[count];
+    uint32_t* storedColors = new uint32_t[count];
+    for (size_t i = 0; i < count; i++) {
+        storedColors[i] = static_cast<uint32_t>(colorValues[i]);
+    }
+
+    if (posArray) {
+        AutoJavaFloatArray autoPos(env, posArray, count);
+        const float* posValues = autoPos.ptr();
+        for (size_t i = 0; i < count; i++) {
+            storedPositions[i] = posValues[i];
+        }
+    } else {
+        storedPositions[0] = 0.0f;
+        storedPositions[1] = 1.0f;
+    }
+
+    SkiaShader* skiaShader = new SkiaSweepGradientShader(x, y, storedColors, storedPositions, count,
+            shader, NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+
+    env->ReleaseIntArrayElements(colorArray, const_cast<jint*>(colorValues), JNI_ABORT);
+    return skiaShader;
+#else
+    return NULL;
+#endif
+}
+
+static SkiaShader* SweepGradient_postCreate2(JNIEnv* env, jobject o, SkShader* shader,
+        float x, float y, int color0, int color1) {
+#ifdef USE_OPENGL_RENDERER
+    float* storedPositions = new float[2];
+    storedPositions[0] = 0.0f;
+    storedPositions[1] = 1.0f;
+
+    uint32_t* storedColors = new uint32_t[2];
+    storedColors[0] = static_cast<uint32_t>(color0);
+    storedColors[1] = static_cast<uint32_t>(color1);
+
+    SkiaShader* skiaShader = new SkiaSweepGradientShader(x, y, storedColors, storedPositions, 2,
+            shader, NULL, (shader->getFlags() & SkShader::kOpaqueAlpha_Flag) == 0);
+
+    return skiaShader;
+#else
+    return NULL;
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static SkShader* ComposeShader_create1(JNIEnv* env, jobject,
-                                       SkShader* shaderA, SkShader* shaderB, SkXfermode* mode)
+static SkShader* ComposeShader_create1(JNIEnv* env, jobject o,
+        SkShader* shaderA, SkShader* shaderB, SkXfermode* mode)
 {
     return new SkComposeShader(shaderA, shaderB, mode);
 }
 
-static SkShader* ComposeShader_create2(JNIEnv* env, jobject,
-                                       SkShader* shaderA, SkShader* shaderB, SkPorterDuff::Mode mode)
+static SkShader* ComposeShader_create2(JNIEnv* env, jobject o,
+        SkShader* shaderA, SkShader* shaderB, SkPorterDuff::Mode porterDuffMode)
 {
-    SkAutoUnref au(SkPorterDuff::CreateXfermode(mode));
+    SkAutoUnref au(SkPorterDuff::CreateXfermode(porterDuffMode));
+    SkXfermode* mode = (SkXfermode*) au.get();
+    return new SkComposeShader(shaderA, shaderB, mode);
+}
 
-    return new SkComposeShader(shaderA, shaderB, (SkXfermode*)au.get());
+static SkiaShader* ComposeShader_postCreate2(JNIEnv* env, jobject o, SkShader* shader,
+        SkiaShader* shaderA, SkiaShader* shaderB, SkPorterDuff::Mode porterDuffMode) {
+#ifdef USE_OPENGL_RENDERER
+    SkXfermode::Mode mode = SkPorterDuff::ToXfermodeMode(porterDuffMode);
+    return new SkiaComposeShader(shaderA, shaderB, mode, shader);
+#else
+    return NULL;
+#endif
+}
+
+static SkiaShader* ComposeShader_postCreate1(JNIEnv* env, jobject o, SkShader* shader,
+        SkiaShader* shaderA, SkiaShader* shaderB, SkXfermode* mode) {
+#ifdef USE_OPENGL_RENDERER
+    SkXfermode::Mode skiaMode;
+    if (!SkXfermode::IsMode(mode, &skiaMode)) {
+        // TODO: Support other modes
+        skiaMode = SkXfermode::kSrcOver_Mode;
+    }
+    return new SkiaComposeShader(shaderA, shaderB, skiaMode, shader);
+#else
+    return NULL;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -244,33 +468,42 @@ static JNINativeMethod gColorMethods[] = {
 };
 
 static JNINativeMethod gShaderMethods[] = {
-    { "nativeDestructor",        "(I)V",     (void*)Shader_destructor        },
+    { "nativeDestructor",        "(II)V",    (void*)Shader_destructor        },
     { "nativeGetLocalMatrix",    "(II)Z",    (void*)Shader_getLocalMatrix    },
-    { "nativeSetLocalMatrix",    "(II)V",    (void*)Shader_setLocalMatrix    }
+    { "nativeSetLocalMatrix",    "(III)V",   (void*)Shader_setLocalMatrix    }
 };
 
 static JNINativeMethod gBitmapShaderMethods[] = {
-    { "nativeCreate",   "(III)I",  (void*)BitmapShader_constructor }
+    { "nativeCreate",     "(III)I",  (void*)BitmapShader_constructor },
+    { "nativePostCreate", "(IIII)I", (void*)BitmapShader_postConstructor }
 };
 
 static JNINativeMethod gLinearGradientMethods[] = {
-    { "nativeCreate1",  "(FFFF[I[FI)I", (void*)LinearGradient_create1   },
-    { "nativeCreate2",  "(FFFFIII)I",   (void*)LinearGradient_create2   }
+    { "nativeCreate1",     "(FFFF[I[FI)I",  (void*)LinearGradient_create1     },
+    { "nativeCreate2",     "(FFFFIII)I",    (void*)LinearGradient_create2     },
+    { "nativePostCreate1", "(IFFFF[I[FI)I", (void*)LinearGradient_postCreate1 },
+    { "nativePostCreate2", "(IFFFFIII)I",   (void*)LinearGradient_postCreate2 }
 };
 
 static JNINativeMethod gRadialGradientMethods[] = {
-    {"nativeCreate1",   "(FFF[I[FI)I",  (void*)RadialGradient_create1   },
-    {"nativeCreate2",   "(FFFIII)I",    (void*)RadialGradient_create2   }
+    { "nativeCreate1",     "(FFF[I[FI)I",  (void*)RadialGradient_create1     },
+    { "nativeCreate2",     "(FFFIII)I",    (void*)RadialGradient_create2     },
+    { "nativePostCreate1", "(IFFF[I[FI)I", (void*)RadialGradient_postCreate1 },
+    { "nativePostCreate2", "(IFFFIII)I",   (void*)RadialGradient_postCreate2 }
 };
 
 static JNINativeMethod gSweepGradientMethods[] = {
-    {"nativeCreate1",   "(FF[I[F)I",  (void*)SweepGradient_create1   },
-    {"nativeCreate2",   "(FFII)I",    (void*)SweepGradient_create2   }
+    { "nativeCreate1",     "(FF[I[F)I",  (void*)SweepGradient_create1     },
+    { "nativeCreate2",     "(FFII)I",    (void*)SweepGradient_create2     },
+    { "nativePostCreate1", "(IFF[I[F)I", (void*)SweepGradient_postCreate1 },
+    { "nativePostCreate2", "(IFFII)I",   (void*)SweepGradient_postCreate2 }
 };
 
 static JNINativeMethod gComposeShaderMethods[] = {
-    {"nativeCreate1",  "(III)I",    (void*)ComposeShader_create1 },
-    {"nativeCreate2",  "(III)I",    (void*)ComposeShader_create2 }
+    { "nativeCreate1",      "(III)I",   (void*)ComposeShader_create1     },
+    { "nativeCreate2",      "(III)I",   (void*)ComposeShader_create2     },
+    { "nativePostCreate1",  "(IIII)I",  (void*)ComposeShader_postCreate1 },
+    { "nativePostCreate2",  "(IIII)I",  (void*)ComposeShader_postCreate2 }
 };
 
 #include <android_runtime/AndroidRuntime.h>

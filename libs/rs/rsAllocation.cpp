@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
 
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES/glext.h>
+#else
+#include "rsContextHostStub.h"
+
+#include <OpenGL/gl.h>
+#include <OpenGl/glext.h>
+#endif
 
 using namespace android;
 using namespace android::renderscript;
@@ -28,6 +34,9 @@ Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
     init(rsc, type);
 
     mPtr = malloc(mType->getSizeBytes());
+    if (mType->getElement()->getHasReferences()) {
+        memset(mPtr, 0, mType->getSizeBytes());
+    }
     if (!mPtr) {
         LOGE("Allocation::Allocation, alloc failure");
     }
@@ -167,9 +176,12 @@ void Allocation::uploadToTexture(const Context *rsc)
                      0, format, type, ptr);
     }
     if (mTextureGenMipmap) {
+#ifndef ANDROID_RS_BUILD_FOR_HOST
         glGenerateMipmap(GL_TEXTURE_2D);
+#endif //ANDROID_RS_BUILD_FOR_HOST
     }
 
+    rsc->checkError("Allocation::uploadToTexture");
 }
 
 void Allocation::deferedUploadToBufferObject(const Context *rsc)
@@ -201,6 +213,7 @@ void Allocation::uploadToBufferObject(const Context *rsc)
     glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
     glBufferData(GL_ARRAY_BUFFER, mType->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    rsc->checkError("Allocation::uploadToBufferObject");
 }
 
 void Allocation::uploadCheck(const Context *rsc)
@@ -217,13 +230,19 @@ void Allocation::uploadCheck(const Context *rsc)
 }
 
 
-void Allocation::data(const void *data, uint32_t sizeBytes)
+void Allocation::data(Context *rsc, const void *data, uint32_t sizeBytes)
 {
     uint32_t size = mType->getSizeBytes();
     if (size != sizeBytes) {
         LOGE("Allocation::data called with mismatched size expected %i, got %i", size, sizeBytes);
         return;
     }
+
+    if (mType->getElement()->getHasReferences()) {
+        incRefs(data, sizeBytes / mType->getElement()->getSizeBytes());
+        decRefs(mPtr, sizeBytes / mType->getElement()->getSizeBytes());
+    }
+
     memcpy(mPtr, data, size);
     sendDirty();
     mUploadDefered = true;
@@ -234,7 +253,7 @@ void Allocation::read(void *data)
     memcpy(data, mPtr, mType->getSizeBytes());
 }
 
-void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
+void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
 {
     uint32_t eSize = mType->getElementSizeBytes();
     uint8_t * ptr = static_cast<uint8_t *>(mPtr);
@@ -246,12 +265,18 @@ void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32
         mType->dumpLOGV("type info");
         return;
     }
+
+    if (mType->getElement()->getHasReferences()) {
+        incRefs(data, count);
+        decRefs(ptr, count);
+    }
+
     memcpy(ptr, data, size);
     sendDirty();
     mUploadDefered = true;
 }
 
-void Allocation::subData(uint32_t xoff, uint32_t yoff,
+void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t yoff,
              uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes)
 {
     uint32_t eSize = mType->getElementSizeBytes();
@@ -269,6 +294,10 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff,
 
     for (uint32_t line=yoff; line < (yoff+h); line++) {
         uint8_t * ptr = static_cast<uint8_t *>(mPtr);
+        if (mType->getElement()->getHasReferences()) {
+            incRefs(src, w);
+            decRefs(dst, w);
+        }
         memcpy(dst, src, lineSize);
         src += lineSize;
         dst += destW * eSize;
@@ -277,14 +306,96 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff,
     mUploadDefered = true;
 }
 
-void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
+void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
              uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes)
 {
 }
 
+void Allocation::subElementData(Context *rsc, uint32_t x, const void *data,
+                                uint32_t cIdx, uint32_t sizeBytes)
+{
+    uint32_t eSize = mType->getElementSizeBytes();
+    uint8_t * ptr = static_cast<uint8_t *>(mPtr);
+    ptr += eSize * x;
+
+    if (cIdx >= mType->getElement()->getFieldCount()) {
+        LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData component out of range.");
+        return;
+    }
+
+    if (x >= mType->getDimX()) {
+        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
+        return;
+    }
+
+    const Element * e = mType->getElement()->getField(cIdx);
+    ptr += mType->getElement()->getFieldOffsetBytes(cIdx);
+
+    if (sizeBytes != e->getSizeBytes()) {
+        LOGE("Error Allocation::subElementData data size %i does not match field size %i.", sizeBytes, e->getSizeBytes());
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
+        return;
+    }
+
+    if (e->getHasReferences()) {
+        e->incRefs(data);
+        e->decRefs(ptr);
+    }
+
+    memcpy(ptr, data, sizeBytes);
+    sendDirty();
+    mUploadDefered = true;
+}
+
+void Allocation::subElementData(Context *rsc, uint32_t x, uint32_t y,
+                                const void *data, uint32_t cIdx, uint32_t sizeBytes)
+{
+    uint32_t eSize = mType->getElementSizeBytes();
+    uint8_t * ptr = static_cast<uint8_t *>(mPtr);
+    ptr += eSize * (x + y * mType->getDimX());
+
+    if (x >= mType->getDimX()) {
+        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
+        return;
+    }
+
+    if (y >= mType->getDimY()) {
+        LOGE("Error Allocation::subElementData X offset %i out of range.", x);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
+        return;
+    }
+
+    if (cIdx >= mType->getElement()->getFieldCount()) {
+        LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData component out of range.");
+        return;
+    }
+
+    const Element * e = mType->getElement()->getField(cIdx);
+    ptr += mType->getElement()->getFieldOffsetBytes(cIdx);
+
+    if (sizeBytes != e->getSizeBytes()) {
+        LOGE("Error Allocation::subElementData data size %i does not match field size %i.", sizeBytes, e->getSizeBytes());
+        rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
+        return;
+    }
+
+    if (e->getHasReferences()) {
+        e->incRefs(data);
+        e->decRefs(ptr);
+    }
+
+    memcpy(ptr, data, sizeBytes);
+    sendDirty();
+    mUploadDefered = true;
+}
+
 void Allocation::addProgramToDirty(const Program *p)
 {
-    mToDirtyList.add(p);
+    mToDirtyList.push(p);
 }
 
 void Allocation::removeProgramToDirty(const Program *p)
@@ -316,10 +427,91 @@ void Allocation::dumpLOGV(const char *prefix) const
 
 }
 
+void Allocation::serialize(OStream *stream) const
+{
+    // Need to identify ourselves
+    stream->addU32((uint32_t)getClassId());
+
+    String8 name(getName());
+    stream->addString(&name);
+
+    // First thing we need to serialize is the type object since it will be needed
+    // to initialize the class
+    mType->serialize(stream);
+
+    uint32_t dataSize = mType->getSizeBytes();
+    // Write how much data we are storing
+    stream->addU32(dataSize);
+    // Now write the data
+    stream->addByteArray(mPtr, dataSize);
+}
+
+Allocation *Allocation::createFromStream(Context *rsc, IStream *stream)
+{
+    // First make sure we are reading the correct object
+    RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
+    if(classID != RS_A3D_CLASS_ID_ALLOCATION) {
+        LOGE("allocation loading skipped due to invalid class id\n");
+        return NULL;
+    }
+
+    String8 name;
+    stream->loadString(&name);
+
+    Type *type = Type::createFromStream(rsc, stream);
+    if(!type) {
+        return NULL;
+    }
+    type->compute();
+
+    // Number of bytes we wrote out for this allocation
+    uint32_t dataSize = stream->loadU32();
+    if(dataSize != type->getSizeBytes()) {
+        LOGE("failed to read allocation because numbytes written is not the same loaded type wants\n");
+        delete type;
+        return NULL;
+    }
+
+    Allocation *alloc = new Allocation(rsc, type);
+    alloc->setName(name.string(), name.size());
+
+    // Read in all of our allocation data
+    alloc->data(rsc, stream->getPtr() + stream->getPos(), dataSize);
+    stream->reset(stream->getPos() + dataSize);
+
+    return alloc;
+}
+
 void Allocation::sendDirty() const
 {
     for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
         mToDirtyList[ct]->forceDirty();
+    }
+}
+
+void Allocation::incRefs(const void *ptr, size_t ct) const
+{
+    const uint8_t *p = static_cast<const uint8_t *>(ptr);
+    const Element *e = mType->getElement();
+    uint32_t stride = e->getSizeBytes();
+
+    while (ct > 0) {
+        e->incRefs(p);
+        ct --;
+        p += stride;
+    }
+}
+
+void Allocation::decRefs(const void *ptr, size_t ct) const
+{
+    const uint8_t *p = static_cast<const uint8_t *>(ptr);
+    const Element *e = mType->getElement();
+    uint32_t stride = e->getSizeBytes();
+
+    while (ct > 0) {
+        e->decRefs(p);
+        ct --;
+        p += stride;
     }
 }
 
@@ -495,7 +687,7 @@ static ElementConverter_t pickConverter(const Element *dst, const Element *src)
     if (srcGLType == GL_UNSIGNED_BYTE &&
         srcGLFmt == GL_RGB &&
         dstGLType == GL_UNSIGNED_SHORT_5_6_5 &&
-        dstGLType == GL_RGB) {
+        dstGLFmt == GL_RGB) {
 
         return elementConverter_888_to_565;
     }
@@ -503,14 +695,20 @@ static ElementConverter_t pickConverter(const Element *dst, const Element *src)
     if (srcGLType == GL_UNSIGNED_BYTE &&
         srcGLFmt == GL_RGBA &&
         dstGLType == GL_UNSIGNED_SHORT_5_6_5 &&
-        dstGLType == GL_RGB) {
+        dstGLFmt == GL_RGB) {
 
         return elementConverter_8888_to_565;
     }
 
     LOGE("pickConverter, unsuported combo, src %p,  dst %p", src, dst);
+    LOGE("pickConverter, srcGLType = %x,  srcGLFmt = %x", srcGLType, srcGLFmt);
+    LOGE("pickConverter, dstGLType = %x,  dstGLFmt = %x", dstGLType, dstGLFmt);
+    src->dumpLOGV("SRC ");
+    dst->dumpLOGV("DST ");
     return 0;
 }
+
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 
 RsAllocation rsi_AllocationCreateBitmapRef(Context *rsc, RsType vtype,
                                            void *bmp, void *callbackData, RsBitmapCallback_t callback)
@@ -526,10 +724,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     const Element *src = static_cast<const Element *>(_src);
     const Element *dst = static_cast<const Element *>(_dst);
 
-    // Check for pow2 on pre es 2.0 versions.
-    rsAssert(rsc->checkVersion2_0() || (!(w & (w-1)) && !(h & (h-1))));
-
-    //LOGE("rsi_AllocationCreateFromBitmap %i %i %i %i %i", w, h, dstFmt, srcFmt, genMips);
+    //LOGE("%p rsi_AllocationCreateFromBitmap %i %i %i", rsc, w, h, genMips);
     rsi_TypeBegin(rsc, _dst);
     rsi_TypeAdd(rsc, RS_DIMENSION_X, w);
     rsi_TypeAdd(rsc, RS_DIMENSION_Y, h);
@@ -546,16 +741,19 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     }
 
     ElementConverter_t cvt = pickConverter(dst, src);
-    cvt(texAlloc->getPtr(), data, w * h);
-
-    if (genMips) {
-        Adapter2D adapt(rsc, texAlloc);
-        Adapter2D adapt2(rsc, texAlloc);
-        for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-            adapt.setLOD(lod);
-            adapt2.setLOD(lod + 1);
-            mip(adapt2, adapt);
+    if (cvt) {
+        cvt(texAlloc->getPtr(), data, w * h);
+        if (genMips) {
+            Adapter2D adapt(rsc, texAlloc);
+            Adapter2D adapt2(rsc, texAlloc);
+            for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+                adapt.setLOD(lod);
+                adapt2.setLOD(lod + 1);
+                mip(adapt2, adapt);
+            }
         }
+    } else {
+        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
     }
 
     return texAlloc;
@@ -592,19 +790,31 @@ RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint3
 void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->data(data, sizeBytes);
+    a->data(rsc, data, sizeBytes);
 }
 
 void rsi_Allocation1DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subData(xoff, count, data, sizeBytes);
+    a->subData(rsc, xoff, count, data, sizeBytes);
+}
+
+void rsi_Allocation2DSubElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t y, const void *data, uint32_t eoff, uint32_t sizeBytes)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->subElementData(rsc, x, y, data, eoff, sizeBytes);
+}
+
+void rsi_Allocation1DSubElementData(Context *rsc, RsAllocation va, uint32_t x, const void *data, uint32_t eoff, uint32_t sizeBytes)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->subElementData(rsc, x, data, eoff, sizeBytes);
 }
 
 void rsi_Allocation2DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subData(xoff, yoff, w, h, data, sizeBytes);
+    a->subData(rsc, xoff, yoff, w, h, data, sizeBytes);
 }
 
 void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data)
@@ -613,6 +823,15 @@ void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data)
     a->read(data);
 }
 
+const void* rsi_AllocationGetType(Context *rsc, RsAllocation va)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->getType()->incUserRef();
+
+    return a->getType();
+}
+
+#endif //ANDROID_RS_BUILD_FOR_HOST
 
 }
 }

@@ -21,6 +21,9 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.os.Binder;
 import android.os.RemoteException;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 /**
  * Class that answers queries about the state of network connectivity. It also
  * notifies applications when network connectivity changes. Get an instance
@@ -261,6 +264,24 @@ public class ConnectivityManager
         }
     }
 
+    /** @hide */
+    public LinkProperties getActiveLinkProperties() {
+        try {
+            return mService.getActiveLinkProperties();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /** @hide */
+    public LinkProperties getLinkProperties(int networkType) {
+        try {
+            return mService.getLinkProperties(networkType);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /** {@hide} */
     public boolean setRadios(boolean turnOn) {
         try {
@@ -328,8 +349,29 @@ public class ConnectivityManager
      * @return {@code true} on success, {@code false} on failure
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
+        InetAddress inetAddress = NetworkUtils.intToInetAddress(hostAddress);
+
+        if (inetAddress == null) {
+            return false;
+        }
+
+        return requestRouteToHostAddress(networkType, inetAddress);
+    }
+
+    /**
+     * Ensure that a network route exists to deliver traffic to the specified
+     * host via the specified network interface. An attempt to add a route that
+     * already exists is ignored, but treated as successful.
+     * @param networkType the type of the network over which traffic to the specified
+     * host is to be routed
+     * @param hostAddress the IP address of the host to which the route is desired
+     * @return {@code true} on success, {@code false} on failure
+     * @hide
+     */
+    public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
+        byte[] address = hostAddress.getAddress();
         try {
-            return mService.requestRouteToHost(networkType, hostAddress);
+            return mService.requestRouteToHostAddress(networkType, address);
         } catch (RemoteException e) {
             return false;
         }
@@ -343,14 +385,14 @@ public class ConnectivityManager
      * <p>
      * All applications that have background services that use the network
      * should listen to {@link #ACTION_BACKGROUND_DATA_SETTING_CHANGED}.
-     * 
+     *
      * @return Whether background data usage is allowed.
      */
     public boolean getBackgroundDataSetting() {
         try {
             return mService.getBackgroundDataSetting();
         } catch (RemoteException e) {
-            // Err on the side of safety 
+            // Err on the side of safety
             return false;
         }
     }
@@ -508,6 +550,17 @@ public class ConnectivityManager
         }
     }
 
+    /**
+     * {@hide}
+     */
+    public String[] getTetherableBluetoothRegexs() {
+        try {
+            return mService.getTetherableBluetoothRegexs();
+        } catch (RemoteException e) {
+            return new String[0];
+        }
+    }
+
     /** {@hide} */
     public static final int TETHER_ERROR_NO_ERROR           = 0;
     /** {@hide} */
@@ -542,6 +595,21 @@ public class ConnectivityManager
             return mService.getLastTetherError(iface);
         } catch (RemoteException e) {
             return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
+    }
+
+    /**
+     * Ensure the device stays awake until we connect with the next network
+     * @param forWhome The name of the network going down for logging purposes
+     * @return {@code true} on success, {@code false} on failure
+     * {@hide}
+     */
+    public boolean requestNetworkTransitionWakelock(String forWhom) {
+        try {
+            mService.requestNetworkTransitionWakelock(forWhom);
+            return true;
+        } catch (RemoteException e) {
+            return false;
         }
     }
 

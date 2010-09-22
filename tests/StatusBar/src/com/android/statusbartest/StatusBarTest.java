@@ -60,23 +60,32 @@ public class StatusBarTest extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
-        new Test("Hide") {
+        new Test("Hide (FLAG_FULLSCREEN)") {
             public void run() {
                 Window win = getWindow();
-                WindowManager.LayoutParams winParams = win.getAttributes();
-                winParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                win.setAttributes(winParams);
+                win.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                        WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                Log.d(TAG, "flags=" + Integer.toHexString(win.getAttributes().flags));
             }
         },
-        new Test("Show") {
+        new Test("Show (~FLAG_FULLSCREEN)") {
             public void run() {
                 Window win = getWindow();
-                WindowManager.LayoutParams winParams = win.getAttributes();
-                winParams.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                win.setAttributes(winParams);
+                win.setFlags(0, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                Log.d(TAG, "flags=" + Integer.toHexString(win.getAttributes().flags));
             }
         },
-        new Test("fullScreenIntent") {
+        new Test("Immersive: Enter") {
+            public void run() {
+                setImmersive(true);
+            }
+        },
+        new Test("Immersive: Exit") {
+            public void run() {
+                setImmersive(false);
+            }
+        },
+        new Test("Priority notification") {
             public void run() {
                 Notification not = new Notification(StatusBarTest.this,
                                 R.drawable.stat_sys_phone,
@@ -86,8 +95,9 @@ public class StatusBarTest extends TestActivity
                                 "(888) 555-5038",
                                 null
                                 );
+                not.flags |= Notification.FLAG_HIGH_PRIORITY;
                 Intent fullScreenIntent = new Intent(StatusBarTest.this, TestAlertActivity.class);
-                int id = (int)System.currentTimeMillis();
+                int id = (int)System.currentTimeMillis(); // XXX HAX
                 fullScreenIntent.putExtra("id", id);
                 not.fullScreenIntent = PendingIntent.getActivity(
                     StatusBarTest.this,

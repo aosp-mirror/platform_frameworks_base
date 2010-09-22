@@ -129,7 +129,9 @@ public class ContentQueryMap extends Observable {
     /** Requeries the cursor and reads the contents into the cache */
     public void requery() {
         mDirty = false;
-        mCursor.requery();
+        if (!mCursor.requery()) {
+            throw new IllegalStateException("trying to requery an already closed cursor");
+        }
         readCursorIntoCache();
         setChanged();
         notifyObservers();

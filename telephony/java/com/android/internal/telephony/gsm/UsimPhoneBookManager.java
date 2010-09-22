@@ -27,8 +27,6 @@ import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.PhoneBase;
 
-import org.apache.harmony.luni.lang.reflect.ListOfTypes;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +51,7 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
     private ArrayList<byte[]> mIapFileRecord;
     private ArrayList<byte[]> mEmailFileRecord;
     private Map<Integer, ArrayList<String>> mEmailsForAdnRec;
+    private boolean mRefreshCache = false;
 
     private static final int EVENT_PBR_LOAD_DONE = 1;
     private static final int EVENT_USIM_ADN_LOAD_DONE = 2;
@@ -91,11 +90,19 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
         mEmailFileRecord = null;
         mPbrFile = null;
         mIsPbrPresent = true;
+        mRefreshCache = false;
     }
 
     public ArrayList<AdnRecord> loadEfFilesFromUsim() {
         synchronized (mLock) {
-            if (!mPhoneBookRecords.isEmpty()) return mPhoneBookRecords;
+            if (!mPhoneBookRecords.isEmpty()) {
+                if (mRefreshCache) {
+                    mRefreshCache = false;
+                    refreshCache();
+                }
+                return mPhoneBookRecords;
+            }
+
             if (!mIsPbrPresent) return null;
 
             // Check if the PBR file is present in the cache, if not read it
@@ -114,6 +121,20 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
             // All EF files are loaded, post the response.
         }
         return mPhoneBookRecords;
+    }
+
+    private void refreshCache() {
+        if (mPbrFile == null) return;
+        mPhoneBookRecords.clear();
+
+        int numRecs = mPbrFile.mFileIds.size();
+        for (int i = 0; i < numRecs; i++) {
+            readAdnFileAndWait(i);
+        }
+    }
+
+    public void invalidateCache() {
+        mRefreshCache = true;
     }
 
     private void readPbrFileAndWait() {

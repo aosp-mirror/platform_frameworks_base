@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony.test;
 
-
 import android.os.AsyncResult;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -27,7 +26,6 @@ import com.android.internal.telephony.BaseCommands;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataCallState;
-import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.UUSInfo;
 import com.android.internal.telephony.gsm.CallFailCause;
@@ -335,7 +333,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      * (AsyncResult)response.obj).result will be an Integer representing
-     * the sum of enabled serivice classes (sum of SERVICE_CLASS_*)
+     * the sum of enabled service classes (sum of SERVICE_CLASS_*)
      *
      * @param facility one of CB_FACILTY_*
      * @param pin password or "" if not required
@@ -441,7 +439,7 @@ public final class SimulatedCommands extends BaseCommands
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result contains a List of DriverCall
      *      The ar.result List is sorted by DriverCall.index
      */
@@ -468,7 +466,7 @@ public final class SimulatedCommands extends BaseCommands
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result contains a List of DataCallState
      */
     public void getDataCallList(Message result) {
@@ -479,7 +477,7 @@ public final class SimulatedCommands extends BaseCommands
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      *
      * CLIR_DEFAULT     == on "use subscription default value"
@@ -496,7 +494,7 @@ public final class SimulatedCommands extends BaseCommands
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      *
      * CLIR_DEFAULT     == on "use subscription default value"
@@ -513,7 +511,7 @@ public final class SimulatedCommands extends BaseCommands
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is String containing IMSI on success
      */
     public void getIMSI(Message result) {
@@ -524,7 +522,7 @@ public final class SimulatedCommands extends BaseCommands
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is String containing IMEI on success
      */
     public void getIMEI(Message result) {
@@ -535,7 +533,7 @@ public final class SimulatedCommands extends BaseCommands
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is String containing IMEISV on success
      */
     public void getIMEISV(Message result) {
@@ -547,7 +545,7 @@ public final class SimulatedCommands extends BaseCommands
      *  returned message
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      *
      *  3GPP 22.030 6.5.5
@@ -572,7 +570,7 @@ public final class SimulatedCommands extends BaseCommands
      *  "Releases all held calls or sets User Determined User Busy (UDUB)
      *   for a waiting call."
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void hangupWaitingOrBackground (Message result) {
@@ -593,7 +591,7 @@ public final class SimulatedCommands extends BaseCommands
      *  the other (held or waiting) call."
      *
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void hangupForegroundResumeBackground (Message result) {
@@ -614,7 +612,7 @@ public final class SimulatedCommands extends BaseCommands
      *  the other (held or waiting) call."
      *
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void switchWaitingOrHoldingAndActive (Message result) {
@@ -634,7 +632,7 @@ public final class SimulatedCommands extends BaseCommands
      * "Adds a held call to the conversation"
      *
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void conference (Message result) {
@@ -654,7 +652,7 @@ public final class SimulatedCommands extends BaseCommands
      * "Connects the two calls and disconnects the subscriber from both calls"
      *
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void explicitCallTransfer (Message result) {
@@ -690,7 +688,7 @@ public final class SimulatedCommands extends BaseCommands
     /**
      *
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void acceptCall (Message result) {
@@ -708,7 +706,7 @@ public final class SimulatedCommands extends BaseCommands
     /**
      *  also known as UDUB
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void rejectCall (Message result) {
@@ -785,7 +783,7 @@ public final class SimulatedCommands extends BaseCommands
      *
      * @param result is callback message
      *        ((AsyncResult)response.obj).result  is an int[] with every
-     *        element representing one avialable BM_*_BAND
+     *        element representing one available BM_*_BAND
      */
     public void queryAvailableBandMode (Message result) {
         int ret[] = new int [4];
@@ -894,7 +892,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void sendDtmf(char c, Message result) {
@@ -903,7 +901,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void startDtmf(char c, Message result) {
@@ -912,7 +910,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void stopDtmf(Message result) {
@@ -921,7 +919,7 @@ public final class SimulatedCommands extends BaseCommands
 
     /**
      *  ar.exception carries exception on failure
-     *  ar.userObject contains the orignal value of result.obj
+     *  ar.userObject contains the original value of result.obj
      *  ar.result is null on success and failure
      */
     public void sendBurstDtmf(String dtmfString, int on, int off, Message result) {
@@ -956,6 +954,7 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(response);
     }
 
+    @Deprecated
     public void setupDefaultPDP(String apn, String user, String password, Message result) {
         unimplemented(result);
     }
@@ -967,9 +966,7 @@ public final class SimulatedCommands extends BaseCommands
 
     public void deactivateDataCall(int cid, Message result) {unimplemented(result);}
 
-    /**
-     * @deprecated
-     */
+    @Deprecated
     public void deactivateDefaultPDP(int cid, Message result) {unimplemented(result);}
 
     public void setPreferredNetworkType(int networkType , Message result) {
@@ -1046,7 +1043,7 @@ public final class SimulatedCommands extends BaseCommands
     }
 
     /**
-     * parameters equivilient to 27.007 AT+CRSM command
+     * parameters equivalent to 27.007 AT+CRSM command
      * response.obj will be an AsyncResult
      * response.obj.userObj will be a SimIoResult on success
      */

@@ -20,13 +20,12 @@ package com.android.internal.telephony;
 import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.net.LinkCapabilities;
+import android.net.LinkProperties;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
-import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.util.Log;
@@ -34,7 +33,6 @@ import android.util.Log;
 import com.android.internal.telephony.cdma.CDMAPhone;
 import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.gsm.NetworkInfo;
-import com.android.internal.telephony.gsm.GsmDataConnection;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -172,7 +170,11 @@ public class PhoneProxy extends Handler implements Phone {
     }
 
     public DataState getDataConnectionState() {
-        return mActivePhone.getDataConnectionState();
+        return mActivePhone.getDataConnectionState(Phone.APN_TYPE_DEFAULT);
+    }
+
+    public DataState getDataConnectionState(String apnType) {
+        return mActivePhone.getDataConnectionState(apnType);
     }
 
     public DataActivityState getDataActivityState() {
@@ -205,6 +207,14 @@ public class PhoneProxy extends Handler implements Phone {
 
     public String[] getActiveApnTypes() {
         return mActivePhone.getActiveApnTypes();
+    }
+
+    public LinkProperties getLinkProperties(String apnType) {
+        return mActivePhone.getLinkProperties(apnType);
+    }
+
+    public LinkCapabilities getLinkCapabilities(String apnType) {
+        return mActivePhone.getLinkCapabilities(apnType);
     }
 
     public String getActiveApn() {
@@ -660,22 +670,6 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.isDataConnectivityPossible();
     }
 
-    public String getInterfaceName(String apnType) {
-        return mActivePhone.getInterfaceName(apnType);
-    }
-
-    public String getIpAddress(String apnType) {
-        return mActivePhone.getIpAddress(apnType);
-    }
-
-    public String getGateway(String apnType) {
-        return mActivePhone.getGateway(apnType);
-    }
-
-    public String[] getDnsServers(String apnType) {
-        return mActivePhone.getDnsServers(apnType);
-    }
-
     public String getDeviceId() {
         return mActivePhone.getDeviceId();
     }
@@ -764,6 +758,10 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.exitEmergencyCallbackMode();
     }
 
+    public boolean needsOtaServiceProvisioning(){
+        return mActivePhone.needsOtaServiceProvisioning();
+    }
+
     public boolean isOtaSpNumber(String dialStr){
         return mActivePhone.isOtaSpNumber(dialStr);
     }
@@ -838,5 +836,9 @@ public class PhoneProxy extends Handler implements Phone {
 
     public void unsetOnEcbModeExitResponse(Handler h){
         mActivePhone.unsetOnEcbModeExitResponse(h);
+    }
+
+    public boolean isCspPlmnEnabled() {
+        return mActivePhone.isCspPlmnEnabled();
     }
 }

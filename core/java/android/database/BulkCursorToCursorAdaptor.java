@@ -16,11 +16,9 @@
 
 package android.database;
 
-import android.os.RemoteException;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.Log;
-
-import java.util.Map;
 
 /**
  * Adapts an {@link IBulkCursor} to a {@link Cursor} for use in the local
@@ -174,38 +172,6 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
         }
     }
 
-    /**
-     * @hide
-     * @deprecated
-     */
-    @Override
-    public boolean deleteRow() {
-        try {
-            boolean result = mBulkCursor.deleteRow(mPos);
-            if (result != false) {
-                // The window contains the old value, discard it
-                mWindow = null;
-    
-                // Fix up the position
-                mCount = mBulkCursor.count();
-                if (mPos < mCount) {
-                    int oldPos = mPos;
-                    mPos = -1;
-                    moveToPosition(oldPos);
-                } else {
-                    mPos = mCount;
-                }
-
-                // Send the change notification
-                onChange(true);
-            }
-            return result;
-        } catch (RemoteException ex) {
-            Log.e(TAG, "Unable to delete row because the remote process is dead");
-            return false;
-        }
-    }
-
     @Override
     public String[] getColumnNames() {
         if (mColumns == null) {
@@ -217,44 +183,6 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
             }
         }
         return mColumns;
-    }
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    @Override
-    public boolean commitUpdates(Map<? extends Long,
-            ? extends Map<String,Object>> additionalValues) {
-        if (!supportsUpdates()) {
-            Log.e(TAG, "commitUpdates not supported on this cursor, did you include the _id column?");
-            return false;
-        }
-
-        synchronized(mUpdatedRows) {
-            if (additionalValues != null) {
-                mUpdatedRows.putAll(additionalValues);
-            }
-
-            if (mUpdatedRows.size() <= 0) {
-                return false;
-            }
-
-            try {
-                boolean result = mBulkCursor.updateRows(mUpdatedRows);
-    
-                if (result == true) {
-                    mUpdatedRows.clear();
-
-                    // Send the change notification
-                    onChange(true);
-                }
-                return result;
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to commit updates because the remote process is dead");
-                return false;
-            }
-        }
     }
 
     @Override

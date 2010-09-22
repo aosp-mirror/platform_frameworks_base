@@ -94,7 +94,8 @@ public final class Debug
     /**
      * Default trace file path and file
      */
-    private static final String DEFAULT_TRACE_PATH_PREFIX = "/sdcard/";
+    private static final String DEFAULT_TRACE_PATH_PREFIX =
+        Environment.getExternalStorageDirectory().getPath() + "/";
     private static final String DEFAULT_TRACE_BODY = "dmtrace";
     private static final String DEFAULT_TRACE_EXTENSION = ".trace";
     private static final String DEFAULT_TRACE_FILE_PATH =
@@ -127,7 +128,7 @@ public final class Debug
         public int otherPrivateDirty;
         /** The shared dirty pages used by everything else. */
         public int otherSharedDirty;
-        
+
         public MemoryInfo() {
         }
 
@@ -137,21 +138,21 @@ public final class Debug
         public int getTotalPss() {
             return dalvikPss + nativePss + otherPss;
         }
-        
+
         /**
          * Return total private dirty memory usage in kB.
          */
         public int getTotalPrivateDirty() {
             return dalvikPrivateDirty + nativePrivateDirty + otherPrivateDirty;
         }
-        
+
         /**
          * Return total shared dirty memory usage in kB.
          */
         public int getTotalSharedDirty() {
             return dalvikSharedDirty + nativeSharedDirty + otherSharedDirty;
         }
-        
+
         public int describeContents() {
             return 0;
         }
@@ -179,7 +180,7 @@ public final class Debug
             otherPrivateDirty = source.readInt();
             otherSharedDirty = source.readInt();
         }
-        
+
         public static final Creator<MemoryInfo> CREATOR = new Creator<MemoryInfo>() {
             public MemoryInfo createFromParcel(Parcel source) {
                 return new MemoryInfo(source);
@@ -460,7 +461,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Like startMethodTracing(String, int, int), but taking an already-opened
      * FileDescriptor in which the trace is written.  The file name is also
      * supplied simply for logging.  Makes a dup of the file descriptor.
-     * 
+     *
      * Not exposed in the SDK unless we are really comfortable with supporting
      * this and find it would be useful.
      * @hide
@@ -730,7 +731,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Dump "hprof" data to the specified file.  This will cause a GC.
+     * Dump "hprof" data to the specified file.  This may cause a GC.
      *
      * @param fileName Full pathname of output file (e.g. "/sdcard/dump.hprof").
      * @throws UnsupportedOperationException if the VM was built without
@@ -742,16 +743,36 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Collect "hprof" and send it to DDMS.  This will cause a GC.
+     * Like dumpHprofData(String), but takes an already-opened
+     * FileDescriptor to which the trace is written.  The file name is also
+     * supplied simply for logging.  Makes a dup of the file descriptor.
+     *
+     * Primarily for use by the "am" shell command.
+     *
+     * @hide
+     */
+    public static void dumpHprofData(String fileName, FileDescriptor fd)
+            throws IOException {
+        VMDebug.dumpHprofData(fileName, fd);
+    }
+
+    /**
+     * Collect "hprof" and send it to DDMS.  This may cause a GC.
      *
      * @throws UnsupportedOperationException if the VM was built without
      *         HPROF support.
-     *
      * @hide
      */
     public static void dumpHprofDataDdms() {
         VMDebug.dumpHprofDataDdms();
     }
+
+    /**
+     * Writes native heap data to the specified file descriptor.
+     *
+     * @hide
+     */
+    public static native void dumpNativeHeap(FileDescriptor fd);
 
     /**
      * Returns the number of sent transactions from this process.
@@ -1070,7 +1091,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *    static {
      *        // Sets all the fields
      *        Debug.setFieldsOn(MyDebugVars.class);
-     * 
+     *
      *        // Sets only the fields annotated with @Debug.DebugProperty
      *        // Debug.setFieldsOn(MyDebugVars.class, true);
      *    }

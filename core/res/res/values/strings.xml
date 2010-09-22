@@ -283,9 +283,15 @@
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm">Your phone will shut down.</string>
 
-    <!-- Recent Tasks dialog: title -->
+    <!-- Recent Tasks dialog: title
+     TODO: this should move to SystemUI.apk, but the code for the old 
+            recent dialog is still in the framework
+     -->
     <string name="recent_tasks_title">Recent</string>
-    <!-- Recent Tasks dialog: message when there are no recent applications -->
+    <!-- Recent Tasks dialog: message when there are no recent applications
+     TODO: this should move to SystemUI.apk, but the code for the old 
+            recent dialog is still in the framework
+     -->
     <string name="no_recent_tasks">No recent applications.</string>
 
     <!-- Title of the Global Actions Dialog -->
@@ -793,8 +799,8 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeCalendar">add or modify calendar events and send email to guests</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeCalendar">Allows an application to add or change the 
-        events on your calendar, which may send email to guests. Malicious applications can use this 
+    <string name="permdesc_writeCalendar">Allows an application to add or change the
+        events on your calendar, which may send email to guests. Malicious applications can use this
         to erase or modify your calendar events or to send email to guests.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1238,6 +1244,11 @@
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData">Perform a factory reset, deleting
         all of your data without any confirmation.</string>
+    <string name="policylab_setGlobalProxy">Set the device global proxy</string>
+    <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_setGlobalProxy">Set the device global proxy
+        to be used while policy is enabled. Only the first device admin
+        sets the effective global proxy.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->
@@ -1416,19 +1427,17 @@
     <!-- Other SIP address type -->
     <string name="sipAddressTypeOther">Other</string>
 
-    <!-- Attbution of a contact status update, when the time of update is unknown -->
-    <string name="contact_status_update_attribution">via <xliff:g id="source" example="Google Talk">%1$s</xliff:g></string>
-
-    <!-- Attbution of a contact status update, when the time of update is known -->
-    <string name="contact_status_update_attribution_with_date"><xliff:g id="date" example="3 hours ago">%1$s</xliff:g> via <xliff:g id="source" example="Google Talk">%2$s</xliff:g></string>
-
     <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_code">Enter PIN code</string>
 
-    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard.
+    <!-- Instructions telling the user to enter their text password to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_password_code">Enter password to unlock</string>
+
+    <!-- Instructions telling the user to enter their PIN password to unlock the keyguard.
+         Displayed in one line in a large font.  -->
+    <string name="keyguard_password_enter_pin_password_code">Enter PIN to unlock</string>
 
     <!-- Instructions telling the user that they entered the wrong pin while trying
          to unlock the keyguard.  Displayed in one line in a large font.  -->
@@ -1466,6 +1475,8 @@
     <string name="lockscreen_pattern_correct">Correct!</string>
     <!-- On the unlock pattern screen, shown when the user enters the wrong lock pattern and must try again. -->
     <string name="lockscreen_pattern_wrong">Sorry, try again</string>
+    <!-- On the unlock password screen, shown when the user enters the wrong lock password and must try again. -->
+    <string name="lockscreen_password_wrong">Sorry, try again</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, show the current charge %.  -->
@@ -1509,9 +1520,24 @@
          progress dialog in the meantime.  this is the emssage. -->
     <string name="lockscreen_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
 
-    <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts -->
+    <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
+         drawing the unlock pattern -->
     <string name="lockscreen_too_many_failed_attempts_dialog_message">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
+        \n\nPlease try again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+
+    <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
+         entering the password -->
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message">
+        You have incorrectly entered your password <xliff:g id="number">%d</xliff:g> times.
+        \n\nPlease try again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+
+    <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
+         entering the PIN -->
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message">
+        You have incorrectly entered your PIN <xliff:g id="number">%d</xliff:g> times.
         \n\nPlease try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
 
@@ -1584,8 +1610,10 @@
     <string name="factorytest_reboot">Reboot</string>
 
     <!-- Do not translate.  WebView User Agent string -->
-    <string name="web_user_agent" translatable="false"><xliff:g id="x">Mozilla/5.0 (Linux; U; Android %s)
-        AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1</xliff:g></string>
+    <string name="web_user_agent" translatable="false">Mozilla/5.0 (Linux; U; <xliff:g id="x">Android %s</xliff:g>)
+        AppleWebKit/534.8 (KHTML, like Gecko) Version/4.0 <xliff:g id="mobile">%s</xliff:g>Safari/534.8</string>
+    <!-- Do not translate.  WebView User Agent targeted content -->
+    <string name="web_user_agent_target_content" translatable="false">"Mobile "</string>
 
     <!-- Title for a JavaScript dialog. "The page at <url of current page> says:" -->
     <string name="js_dialog_title">The page at \'<xliff:g id="title">%s</xliff:g>\' says:</string>
@@ -1848,9 +1876,6 @@
     <!-- Item on EditText context menu. This action is used to select all text in the edit field. -->
     <string name="selectAll">Select all</string>
 
-    <!-- Item on EditText context menu. This action is used to start selecting text in the edit field. [CHAR LIMIT=20] -->
-    <string name="selectText">Select word</string>
-
     <!-- Item on EditText context menu.  This action is used to cut selected the text into the clipboard.  -->
     <string name="cut">Cut</string>
 
@@ -1863,15 +1888,17 @@
     <!-- Item on EditText context menu. This action is used to copy a URL from the edit field into the clipboard. -->
     <string name="copyUrl">Copy URL</string>
 
+    <!-- Item on EditText context menu. Added only when the context menu is not empty, it enable selection context mode. [CHAR LIMIT=20] -->
+    <string name="selectTextMode">Select text...</string>
+
+    <!-- Text selection contextual mode title, displayed in the CAB. [CHAR LIMIT=20] -->
+    <string name="textSelectionCABTitle">Text selection</string>
+
     <!-- EditText context menu -->
     <string name="inputMethod">Input method</string>
 
-    <!-- Item on EditText context menu, used to add a word to the
-         input method dictionary. -->
-    <string name="addToDictionary">"Add \"<xliff:g id="word" example="rickroll">%s</xliff:g>\" to dictionary</string>
-
-    <!-- Title for EditText context menu -->
-    <string name="editTextMenuTitle">Edit text</string>
+    <!-- Title for EditText context menu [CHAR LIMIT=20] -->
+    <string name="editTextMenuTitle">Text actions</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Low on space</string>
@@ -1889,6 +1916,9 @@
     <!-- This is the generic "attention" string to be used in attention dialogs.  Typically
          combined with setIcon(android.R.drawable.ic_dialog_alert) -->
     <string name="dialog_alert_title">Attention</string>
+
+    <!-- Text shown by list fragment when waiting for data to display. -->
+    <string name="loading">Loading...</string>
 
     <!-- Default text for a button that can be toggled on and off. -->
     <string name="capital_on">ON</string>
@@ -1946,23 +1976,23 @@
 
     <!-- Notification text to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>
-    
+
     <!-- Notification details to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification_detail">Select to switch to application</string>
-    
+
     <!-- Title of dialog prompting whether user wants to switch between heavy-weight apps. -->
     <string name="heavy_weight_switcher_title">Switch applications?</string>
-    
+
     <!-- Descriptive text for switching to a new heavy-weight application. -->
     <string name="heavy_weight_switcher_text">Another application is already running
     that must be stopped before you can start a new one.</string>
-    
+
     <string name="old_app_action">Return to <xliff:g id="old_app">%1$s</xliff:g></string>
     <string name="old_app_description">Don\'t start the new application.</string>
-    
+
     <string name="new_app_action">Start <xliff:g id="old_app">%1$s</xliff:g></string>
     <string name="new_app_description">Stop the old application without saving.</string>
-    
+
     <!-- Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send
          text through SMS or IM.  A dialog with those choices would be shown,
@@ -2234,16 +2264,12 @@
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
     <string name="upload_file">Choose file</string>
+    <!-- Label for the file upload control when no file has been chosen yet -->
+    <string name="no_file_chosen">No file chosen</string>
     <!-- Label for <input type="reset"> button in html -->
     <string name="reset">Reset</string>
     <!-- Label for <input type="submit"> button in html -->
     <string name="submit">Submit</string>
-
-    <!-- String describing the Star/Favorite checkbox
-
-         Used by AccessibilityService to announce the purpose of the view.
-    -->
-    <string name="description_star">favorite</string>
 
     <!-- Strings for car mode notification -->
     <!-- Shown when car mode is enabled -->
@@ -2255,6 +2281,13 @@
     <string name="tethered_notification_title">Tethering or hotspot active</string>
     <string name="tethered_notification_message">Touch to configure</string>
 
+    <!--  Strings for possible PreferenceActivity Back/Next buttons -->
+    <string name="back_button_label">Back</string>
+    <string name="next_button_label">Next</string>
+
+    <!-- Optional button to Skip a PreferenceActivity [CHAR LIMIT=20] -->
+    <string name="skip_button_label">Skip</string>
+
     <!-- Strings for throttling notification -->
     <!-- Shown when the user is in danger of being throttled -->
     <string name="throttle_warning_notification_title">High mobile data use</string>
@@ -2264,4 +2297,21 @@
     <!-- Shown when the users bandwidth is reduced because of excessive data use -->
     <string name="throttled_notification_title">Mobile data limit exceeded</string>
     <string name="throttled_notification_message">Touch to learn more about mobile data use</string>
+
+    <!-- Displayed on the Find dialog when there are no matches [CHAR LIMIT=NONE]-->
+    <string name="no_matches">No matches</string>
+
+    <!-- Find dialog hint text.  Also used in the menu item to open find on page [CHAR LIMIT=NONE] -->
+    <string name="find_on_page">Find on page</string>
+
+    <!-- Displayed on the Find dialog to display the index of the highlighted
+         match and total number of matches found in the current page. [CHAR LIMIT=NONE] -->
+    <plurals name="matches_found">
+        <!-- Case of one match -->
+        <item quantity="one">1 match</item>
+        <!-- Case of multiple total matches -->
+        <item quantity="other"><xliff:g id="index" example="2">%d</xliff:g> of <xliff:g id="total" example="137">%d</xliff:g></item>
+    </plurals>
+
+
 </resources>

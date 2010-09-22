@@ -44,6 +44,7 @@ public class Touch {
         int left = Integer.MAX_VALUE;
         int right = 0;
         Alignment a = null;
+        boolean ltr = true;
 
         for (int i = top; i <= bottom; i++) {
             left = (int) Math.min(left, layout.getLineLeft(i));
@@ -51,6 +52,7 @@ public class Touch {
 
             if (a == null) {
                 a = layout.getParagraphAlignment(i);
+                ltr = layout.getParagraphDirection(i) > 0;
             }
         }
 
@@ -58,10 +60,12 @@ public class Touch {
         int width = widget.getWidth();
         int diff = 0;
 
+        // align_opposite does NOT mean align_right, we need the paragraph
+        // direction to resolve it to left or right
         if (right - left < width - padding) {
             if (a == Alignment.ALIGN_CENTER) {
                 diff = (width - padding - (right - left)) / 2;
-            } else if (a == Alignment.ALIGN_OPPOSITE) {
+            } else if (ltr == (a == Alignment.ALIGN_OPPOSITE)) {
                 diff = width - padding - (right - left);
             }
         }

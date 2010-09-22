@@ -22,7 +22,7 @@ import android.util.Log;
 import junit.framework.TestCase;
 
 /**
- * Tests StaticLayout bidi implementation.
+ * Quick check of native bidi implementation.
  */
 public class StaticLayoutBidiTest extends TestCase {
     
@@ -41,73 +41,47 @@ public class StaticLayoutBidiTest extends TestCase {
     
     //@SmallTest
     public void testAllLtr() {
-        expectBidi(REQ_DL, "a test", "000000", L);
+        expectNativeBidi(REQ_DL, "a test", "000000", L);
     }
     
     //@SmallTest
     public void testLtrRtl() {
-        expectBidi(REQ_DL, "abc " + ALEF + BET + GIMEL, "0000111", L);
+        expectNativeBidi(REQ_DL, "abc " + ALEF + BET + GIMEL, "0000111", L);
     }
     
     //@SmallTest
     public void testAllRtl() {
-        expectBidi(REQ_DL, ALEF + SP + ALEF + BET + GIMEL + DALET, "111111", R);
+        expectNativeBidi(REQ_DL, ALEF + SP + ALEF + BET + GIMEL + DALET, "111111", R);
     }
     
     //@SmallTest
     public void testRtlLtr() {
-        expectBidi(REQ_DL,  ALEF + BET + GIMEL + " abc", "1111000", R);
+        expectNativeBidi(REQ_DL,  ALEF + BET + GIMEL + " abc", "1111222", R);
     }
     
     //@SmallTest
     public void testRAllLtr() {
-        expectBidi(REQ_R, "a test", "000000", R);
+        expectNativeBidi(REQ_R, "a test", "222222", R);
     }
     
     //@SmallTest
     public void testRLtrRtl() {
-        expectBidi(REQ_R, "abc " + ALEF + BET + GIMEL, "0001111", R);
+        expectNativeBidi(REQ_R, "abc " + ALEF + BET + GIMEL, "2221111", R);
     }
     
     //@SmallTest
     public void testLAllRtl() {
-        expectBidi(REQ_L, ALEF + SP + ALEF + BET + GIMEL + DALET, "111111", L);
+        expectNativeBidi(REQ_L, ALEF + SP + ALEF + BET + GIMEL + DALET, "111111", L);
     }
     
     //@SmallTest
     public void testLRtlLtr() {
-        expectBidi(REQ_L,  ALEF + BET + GIMEL + " abc", "1110000", L);
-    }
-    
-    private void expectBidi(int dir, String text, 
-            String expectedLevels, int expectedDir) {
-        char[] chs = text.toCharArray();
-        int n = chs.length;
-        byte[] chInfo = new byte[n];
-        
-        int resultDir = StaticLayout.bidi(dir, chs, chInfo, n, false);
-        
-        {
-            StringBuilder sb = new StringBuilder("info:");
-            for (int i = 0; i < n; ++i) {
-                sb.append(" ").append(String.valueOf(chInfo[i]));
-            }
-            Log.i("BIDI", sb.toString());
-        }
-        
-        char[] resultLevelChars = new char[n];
-        for (int i = 0; i < n; ++i) {
-            resultLevelChars[i] = (char)('0' + chInfo[i]);
-        }
-        String resultLevels = new String(resultLevelChars);
-        assertEquals("direction", expectedDir, resultDir);
-        assertEquals("levels", expectedLevels, resultLevels);
+        expectNativeBidi(REQ_DL,  ALEF + BET + GIMEL + " abc", "1111222", R);
     }
     
     //@SmallTest
     public void testNativeBidi() {
-        // native bidi returns levels, not simply directions
-        expectNativeBidi(REQ_DL,  ALEF + BET + GIMEL + " abc", "1111222", R);
+        expectNativeBidi(REQ_L,  ALEF + BET + GIMEL + " abc", "1110000", L);
     }
     
     private void expectNativeBidi(int dir, String text, 

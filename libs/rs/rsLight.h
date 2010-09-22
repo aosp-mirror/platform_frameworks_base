@@ -37,6 +37,9 @@ public:
     void setColor(float r, float g, float b);
 
     void setupGL(uint32_t num) const;
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_LIGHT; }
+    static Light *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     float mColor[4];

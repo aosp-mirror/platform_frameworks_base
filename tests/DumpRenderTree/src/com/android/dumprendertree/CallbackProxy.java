@@ -74,6 +74,8 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int LAYOUT_SET_CAN_OPEN_WINDOWS = 42;
     private static final int SET_GEOLOCATION_PERMISSION = 43;
     private static final int OVERRIDE_PREFERENCE = 44;
+    private static final int LAYOUT_DUMP_CHILD_FRAMES_TEXT = 45;
+    private static final int SET_XSS_AUDITOR_ENABLED = 46;
     
     CallbackProxy(EventSender eventSender, 
             LayoutTestController layoutTestController) {
@@ -175,7 +177,11 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
             break;
 
         case LAYOUT_DUMP_TEXT:
-            mLayoutTestController.dumpAsText();
+            mLayoutTestController.dumpAsText(msg.arg1 == 1);
+            break;
+
+        case LAYOUT_DUMP_CHILD_FRAMES_TEXT:
+            mLayoutTestController.dumpChildFramesAsText();
             break;
 
         case LAYOUT_DUMP_HISTORY:
@@ -272,6 +278,10 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
             String key = msg.getData().getString("key");
             boolean value = msg.getData().getBoolean("value");
             mLayoutTestController.overridePreference(key, value);
+            break;
+
+        case SET_XSS_AUDITOR_ENABLED:
+            mLayoutTestController.setXSSAuditorEnabled(msg.arg1 == 1);
             break;
         }
     }
@@ -377,7 +387,15 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     }
 
     public void dumpAsText() {
-        obtainMessage(LAYOUT_DUMP_TEXT).sendToTarget();
+        obtainMessage(LAYOUT_DUMP_TEXT, 0).sendToTarget();
+    }
+
+    public void dumpAsText(boolean enablePixelTests) {
+        obtainMessage(LAYOUT_DUMP_TEXT, enablePixelTests ? 1 : 0).sendToTarget();
+    }
+
+    public void dumpChildFramesAsText() {
+        obtainMessage(LAYOUT_DUMP_CHILD_FRAMES_TEXT).sendToTarget();
     }
 
     public void dumpBackForwardList() {
@@ -492,10 +510,22 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
         obtainMessage(SET_GEOLOCATION_PERMISSION, allow ? 1 : 0, 0).sendToTarget();
     }
 
+    public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
+            boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
+        // Configuration is in WebKit, so stay on WebCore thread, but go via the TestShellActivity
+        // as we need access to the Webview.
+        mLayoutTestController.setMockDeviceOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
+                canProvideGamma, gamma);
+    }
+
     public void overridePreference(String key, boolean value) {
         Message message = obtainMessage(OVERRIDE_PREFERENCE);
         message.getData().putString("key", key);
         message.getData().putBoolean("value", value);
         message.sendToTarget();
+    }
+
+    public void setXSSAuditorEnabled(boolean flag) {
+        obtainMessage(SET_XSS_AUDITOR_ENABLED, flag ? 1 : 0, 0).sendToTarget();
     }
 }

@@ -39,6 +39,8 @@
 static char cmdline_buf[16384] = "(unknown)";
 static const char *dump_traces_path = NULL;
 
+static char screenshot_path[PATH_MAX] = "";
+
 /* dumps the current system state to stdout */
 static void dumpstate() {
     time_t now = time(NULL);
@@ -76,6 +78,12 @@ static void dumpstate() {
     dump_file("SLAB INFO", "/proc/slabinfo");
     dump_file("ZONEINFO", "/proc/zoneinfo");
 
+    if (screenshot_path[0]) {
+        LOGI("taking screenshot\n");
+        run_command(NULL, 5, "su", "root", "screenshot", screenshot_path, NULL);
+        LOGI("wrote screenshot: %s\n", screenshot_path);
+    }
+
     run_command("SYSTEM LOG", 20, "logcat", "-v", "time", "-d", "*:v", NULL);
 
     /* show the traces we collected in main(), if that was done */
@@ -103,7 +111,12 @@ static void dumpstate() {
     dump_file("NETWORK ROUTES", "/proc/net/route");
     dump_file("ARP CACHE", "/proc/net/arp");
 
+    run_command("WIFI NETWORKS", 20,
+            "su", "root", "wpa_cli", "list_networks", NULL);
+
 #ifdef FWDUMP_bcm4329
+    run_command("DUMP WIFI STATUS", 20,
+            "su", "root", "dhdutil", "-i", "eth0", "dump", NULL);
     run_command("DUMP WIFI FIRMWARE LOG", 60,
             "su", "root", "dhdutil", "-i", "eth0", "upload", "/data/local/tmp/wlan_crash.dump", NULL);
 #endif
@@ -164,18 +177,25 @@ static void dumpstate() {
 }
 
 static void usage() {
-    fprintf(stderr, "usage: dumpstate [-d] [-o file] [-s] [-z]\n"
-            "  -d: append date to filename (requires -o)\n"
+    fprintf(stderr, "usage: dumpstate [-b soundfile] [-e soundfile] [-o file [-d] [-p] [-z]] [-s]\n"
             "  -o: write to file (instead of stdout)\n"
+            "  -d: append date to filename (requires -o)\n"
+            "  -z: gzip output (requires -o)\n"
+            "  -p: capture screenshot to filename.png (requires -o)\n"
             "  -s: write output to control socket (for init)\n"
-            "  -z: gzip output (requires -o)\n");
+            "  -b: play sound file instead of vibrate, at beginning of job\n"
+            "  -e: play sound file instead of vibrate, at end of job\n"
+		);
 }
 
 int main(int argc, char *argv[]) {
     int do_add_date = 0;
     int do_compress = 0;
     char* use_outfile = 0;
+    char* begin_sound = 0;
+    char* end_sound = 0;
     int use_socket = 0;
+    int do_fb = 0;
 
     LOGI("begin\n");
 
@@ -191,13 +211,16 @@ int main(int argc, char *argv[]) {
     dump_traces_path = dump_vm_traces();
 
     int c;
-    while ((c = getopt(argc, argv, "dho:svz")) != -1) {
+    while ((c = getopt(argc, argv, "b:de:ho:svzp")) != -1) {
         switch (c) {
+            case 'b': begin_sound = optarg;  break;
             case 'd': do_add_date = 1;       break;
+            case 'e': end_sound = optarg;    break;
             case 'o': use_outfile = optarg;  break;
             case 's': use_socket = 1;        break;
             case 'v': break;  // compatibility no-op
             case 'z': do_compress = 6;       break;
+            case 'p': do_fb = 1;             break;
             case '?': printf("\n");
             case 'h':
                 usage();
@@ -244,6 +267,10 @@ int main(int argc, char *argv[]) {
             strftime(date, sizeof(date), "-%Y-%m-%d-%H-%M-%S", localtime(&now));
             strlcat(path, date, sizeof(path));
         }
+        if (do_fb) {
+            strlcpy(screenshot_path, path, sizeof(screenshot_path));
+            strlcat(screenshot_path, ".png", sizeof(screenshot_path));
+        }
         strlcat(path, ".txt", sizeof(path));
         if (do_compress) strlcat(path, ".gz", sizeof(path));
         strlcpy(tmp_path, path, sizeof(tmp_path));
@@ -251,16 +278,18 @@ int main(int argc, char *argv[]) {
         gzip_pid = redirect_to_file(stdout, tmp_path, do_compress);
     }
 
-    /* bzzzzzz */
-    if (vibrator) {
+    if (begin_sound) {
+        play_sound(begin_sound);
+    } else if (vibrator) {
         fputs("150", vibrator);
         fflush(vibrator);
     }
 
     dumpstate();
 
-    /* bzzz bzzz bzzz */
-    if (vibrator) {
+    if (end_sound) {
+        play_sound(end_sound);
+    } else if (vibrator) {
         int i;
         for (i = 0; i < 3; i++) {
             fputs("75\n", vibrator);

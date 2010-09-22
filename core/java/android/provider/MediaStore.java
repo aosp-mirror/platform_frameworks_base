@@ -253,7 +253,105 @@ public final class MediaStore {
          * <P>Type: TEXT</P>
          */
         public static final String MIME_TYPE = "mime_type";
+
+        /**
+         * The row ID in the MTP object table corresponding to this media file.
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String MTP_OBJECT_ID = "object_id";
+
+        /**
+         * The MTP object handle of a newly transfered file.
+         * Used to pass the new file's object handle through the media scanner
+         * from MTP to the media provider
+         * For internal use only by MTP, media scanner and media provider.
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String MEDIA_SCANNER_NEW_OBJECT_ID = "media_scanner_new_object_id";
      }
+
+    /**
+     * Media provider table containing an index of all files in the storage.
+     * This can be used by applications to find all documents of a particular type
+     * and is also used internally by the device side MTP implementation.
+     * @hide
+     */
+    public static final class Files {
+
+        public static Uri getContentUri(String volumeName) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
+                    "/file");
+        }
+
+        public static final Uri getContentUri(String volumeName,
+                long fileId) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
+                    + "/file/" + fileId);
+        }
+
+        public static Uri getMtpObjectsUri(String volumeName) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
+                    "/object");
+        }
+
+        public static final Uri getMtpObjectsUri(String volumeName,
+                long fileId) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
+                    + "/object/" + fileId);
+        }
+
+        // Used to implement the MTP GetObjectReferences and SetObjectReferences commands.
+        public static final Uri getMtpReferencesUri(String volumeName,
+                long fileId) {
+            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
+                    + "/object/" + fileId + "/references");
+        }
+
+        /**
+         * Fields for master table for all media files.
+         * Table also contains MediaColumns._ID, DATA, SIZE and DATE_MODIFIED.
+         */
+        public interface FileColumns extends MediaColumns {
+            /**
+             * The MTP format code of the file
+             * <P>Type: INTEGER</P>
+             */
+            public static final String FORMAT = "format";
+
+            /**
+             * The index of the parent directory of the file
+             * <P>Type: INTEGER</P>
+             */
+            public static final String PARENT = "parent";
+
+            /**
+             * Identifier for the media table containing the file.
+             * Used internally by MediaProvider
+             * <P>Type: INTEGER</P>
+             */
+            public static final String MEDIA_TABLE = "media_table";
+
+            /**
+             * The ID of the file in its media table.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String MEDIA_ID = "media_id";
+        }
+
+        /**
+         * The MIME type of the file
+         * <P>Type: TEXT</P>
+         */
+        public static final String MIME_TYPE = "mime_type";
+
+        /**
+         * The title of the content
+         * <P>Type: TEXT</P>
+         */
+        public static final String TITLE = "title";
+    }
 
     /**
      * This class is used internally by Images.Thumbnails and Video.Thumbnails, it's not intended
@@ -335,26 +433,27 @@ public final class MediaStore {
             // Log.v(TAG, "getThumbnail: origId="+origId+", kind="+kind+", isVideo="+isVideo);
             // If the magic is non-zero, we simply return thumbnail if it does exist.
             // querying MediaProvider and simply return thumbnail.
-            MiniThumbFile thumbFile = MiniThumbFile.instance(baseUri);
-            long magic = thumbFile.getMagic(origId);
-            if (magic != 0) {
-                if (kind == MICRO_KIND) {
-                    synchronized (sThumbBufLock) {
-                        if (sThumbBuf == null) {
-                            sThumbBuf = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
-                        }
-                        if (thumbFile.getMiniThumbFromFile(origId, sThumbBuf) != null) {
-                            bitmap = BitmapFactory.decodeByteArray(sThumbBuf, 0, sThumbBuf.length);
-                            if (bitmap == null) {
-                                Log.w(TAG, "couldn't decode byte array.");
+            MiniThumbFile thumbFile = new MiniThumbFile(isVideo ? Video.Media.EXTERNAL_CONTENT_URI
+                    : Images.Media.EXTERNAL_CONTENT_URI);
+            Cursor c = null;
+            try {
+                long magic = thumbFile.getMagic(origId);
+                if (magic != 0) {
+                    if (kind == MICRO_KIND) {
+                        synchronized (sThumbBufLock) {
+                            if (sThumbBuf == null) {
+                                sThumbBuf = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
+                            }
+                            if (thumbFile.getMiniThumbFromFile(origId, sThumbBuf) != null) {
+                                bitmap = BitmapFactory.decodeByteArray(sThumbBuf, 0, sThumbBuf.length);
+                                if (bitmap == null) {
+                                    Log.w(TAG, "couldn't decode byte array.");
+                                }
                             }
                         }
-                    }
-                    return bitmap;
-                } else if (kind == MINI_KIND) {
-                    String column = isVideo ? "video_id=" : "image_id=";
-                    Cursor c = null;
-                    try {
+                        return bitmap;
+                    } else if (kind == MINI_KIND) {
+                        String column = isVideo ? "video_id=" : "image_id=";
                         c = cr.query(baseUri, PROJECTION, column + origId, null, null);
                         if (c != null && c.moveToFirst()) {
                             bitmap = getMiniThumbFromFile(c, baseUri, cr, options);
@@ -362,17 +461,13 @@ public final class MediaStore {
                                 return bitmap;
                             }
                         }
-                    } finally {
-                        if (c != null) c.close();
                     }
                 }
-            }
 
-            Cursor c = null;
-            try {
                 Uri blockingUri = baseUri.buildUpon().appendQueryParameter("blocking", "1")
                         .appendQueryParameter("orig_id", String.valueOf(origId))
                         .appendQueryParameter("group_id", String.valueOf(groupId)).build();
+                if (c != null) c.close();
                 c = cr.query(blockingUri, PROJECTION, null, null, null);
                 // This happens when original image/video doesn't exist.
                 if (c == null) return null;
@@ -423,6 +518,9 @@ public final class MediaStore {
                 Log.w(TAG, ex);
             } finally {
                 if (c != null) c.close();
+                // To avoid file descriptor leak in application process.
+                thumbFile.deactivate();
+                thumbFile = null;
             }
             return bitmap;
         }

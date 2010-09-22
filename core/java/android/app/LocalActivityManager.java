@@ -20,13 +20,11 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.util.Config;
 import android.util.Log;
 import android.view.Window;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -38,7 +36,7 @@ import java.util.Map;
  */
 public class LocalActivityManager {
     private static final String TAG = "LocalActivityManager";
-    private static final boolean localLOGV = false || Config.LOGV;
+    private static final boolean localLOGV = false;
 
     // Internal token for an Activity being managed by LocalActivityManager.
     private static class LocalActivityRecord extends Binder {
@@ -112,11 +110,16 @@ public class LocalActivityManager {
         
         if (r.curState == INITIALIZING) {
             // Get the lastNonConfigurationInstance for the activity
-            HashMap<String,Object> lastNonConfigurationInstances =
-                mParent.getLastNonConfigurationChildInstances();
-            Object instance = null;
+            HashMap<String, Object> lastNonConfigurationInstances =
+                    mParent.getLastNonConfigurationChildInstances();
+            Object instanceObj = null;
             if (lastNonConfigurationInstances != null) {
-                instance = lastNonConfigurationInstances.get(r.id);
+                instanceObj = lastNonConfigurationInstances.get(r.id);
+            }
+            Activity.NonConfigurationInstances instance = null;
+            if (instanceObj != null) {
+                instance = new Activity.NonConfigurationInstances();
+                instance.activity = instanceObj;
             }
             
             // We need to have always created the activity.
@@ -346,7 +349,7 @@ public class LocalActivityManager {
     }
 
     private Window performDestroy(LocalActivityRecord r, boolean finish) {
-        Window win = null;
+        Window win;
         win = r.window;
         if (r.curState == RESUMED && !finish) {
             performPause(r, finish);
@@ -380,7 +383,8 @@ public class LocalActivityManager {
         if (r != null) {
             win = performDestroy(r, finish);
             if (finish) {
-                mActivities.remove(r);
+                mActivities.remove(id);
+                mActivityArray.remove(r);
             }
         }
         return win;
@@ -441,10 +445,8 @@ public class LocalActivityManager {
      */
     public void dispatchCreate(Bundle state) {
         if (state != null) {
-            final Iterator<String> i = state.keySet().iterator();
-            while (i.hasNext()) {
+            for (String id : state.keySet()) {
                 try {
-                    final String id = i.next();
                     final Bundle astate = state.getBundle(id);
                     LocalActivityRecord r = mActivities.get(id);
                     if (r != null) {
@@ -457,9 +459,7 @@ public class LocalActivityManager {
                     }
                 } catch (Exception e) {
                     // Recover from -all- app errors.
-                    Log.e(TAG,
-                          "Exception thrown when restoring LocalActivityManager state",
-                          e);
+                    Log.e(TAG, "Exception thrown when restoring LocalActivityManager state", e);
                 }
             }
         }

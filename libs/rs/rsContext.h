@@ -18,12 +18,12 @@
 #define ANDROID_RS_CONTEXT_H
 
 #include "rsUtils.h"
+#include "rsMutex.h"
 
 #include "rsThreadIO.h"
 #include "rsType.h"
 #include "rsMatrix.h"
 #include "rsAllocation.h"
-#include "rsSimpleMesh.h"
 #include "rsMesh.h"
 #include "rsDevice.h"
 #include "rsScriptC.h"
@@ -31,8 +31,9 @@
 #include "rsAdapter.h"
 #include "rsSampler.h"
 #include "rsLight.h"
+#include "rsFont.h"
 #include "rsProgramFragment.h"
-#include "rsProgramFragmentStore.h"
+#include "rsProgramStore.h"
 #include "rsProgramRaster.h"
 #include "rsProgramVertex.h"
 #include "rsShaderCache.h"
@@ -64,17 +65,19 @@ public:
         Script * mScript;
     };
 
+    typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
 
     //StructuredAllocationContext mStateAllocation;
     ElementState mStateElement;
     TypeState mStateType;
     SamplerState mStateSampler;
     ProgramFragmentState mStateFragment;
-    ProgramFragmentStoreState mStateFragmentStore;
+    ProgramStoreState mStateFragmentStore;
     ProgramRasterState mStateRaster;
     ProgramVertexState mStateVertex;
     LightState mStateLight;
     VertexArrayState mStateVertexArray;
+    FontState mStateFont;
 
     ScriptCState mScriptC;
     ShaderCache mShaderCache;
@@ -84,14 +87,16 @@ public:
     void setRaster(ProgramRaster *);
     void setVertex(ProgramVertex *);
     void setFragment(ProgramFragment *);
-    void setFragmentStore(ProgramFragmentStore *);
+    void setFragmentStore(ProgramStore *);
+    void setFont(Font *);
 
     void updateSurface(void *sur);
 
     const ProgramFragment * getFragment() {return mFragment.get();}
-    const ProgramFragmentStore * getFragmentStore() {return mFragmentStore.get();}
+    const ProgramStore * getFragmentStore() {return mFragmentStore.get();}
     const ProgramRaster * getRaster() {return mRaster.get();}
     const ProgramVertex * getVertex() {return mVertex.get();}
+    Font * getFont() {return mFont.get();}
 
     bool setupCheck();
     bool checkDriver() const {return mEGL.mSurface != 0;}
@@ -103,12 +108,10 @@ public:
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
-    ObjectBase * lookupName(const char *name) const;
-    void appendNameDefines(String8 *str) const;
 
     uint32_t getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait);
     bool sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace);
-    uint32_t runScript(Script *s, uint32_t launchID);
+    uint32_t runScript(Script *s);
 
     void initToClient();
     void deinitToClient();
@@ -119,19 +122,21 @@ public:
     ProgramVertex * getDefaultProgramVertex() const {
         return mStateVertex.mDefault.get();
     }
-    ProgramFragmentStore * getDefaultProgramFragmentStore() const {
+    ProgramStore * getDefaultProgramStore() const {
         return mStateFragmentStore.mDefault.get();
     }
     ProgramRaster * getDefaultProgramRaster() const {
         return mStateRaster.mDefault.get();
     }
+    Font* getDefaultFont() const {
+        return mStateFont.mDefault.get();
+    }
 
-    uint32_t getWidth() const {return mEGL.mWidth;}
-    uint32_t getHeight() const {return mEGL.mHeight;}
+    uint32_t getWidth() const {return mWidth;}
+    uint32_t getHeight() const {return mHeight;}
 
 
     ThreadIO mIO;
-    void objDestroyAdd(ObjectBase *);
 
     // Timers
     enum Timers {
@@ -148,24 +153,25 @@ public:
     void timerPrint();
     void timerFrame();
 
-    bool checkVersion1_1() const {return (mGL.mMajorVersion > 1) || (mGL.mMinorVersion >= 1); }
-    bool checkVersion2_0() const {return mGL.mMajorVersion >= 2; }
-
     struct {
         bool mLogTimes;
         bool mLogScripts;
         bool mLogObjects;
         bool mLogShaders;
+        bool mLogVisual;
     } props;
 
     void dumpDebug() const;
     void checkError(const char *) const;
     const char * getError(RsError *);
-    void setError(RsError e, const char *msg);
+    void setError(RsError e, const char *msg = NULL);
 
     mutable const ObjectBase * mObjHead;
 
     bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
+
+    void launchThreads(WorkerCallback_t cbk, void *data);
+    uint32_t getWorkerPoolSize() const {return (uint32_t)mWorkers.mRunningCount;}
 
 protected:
     Device *mDev;
@@ -177,8 +183,6 @@ protected:
         EGLConfig mConfig;
         EGLContext mContext;
         EGLSurface mSurface;
-        EGLint mWidth;
-        EGLint mHeight;
         EGLDisplay mDisplay;
     } mEGL;
 
@@ -219,22 +223,28 @@ protected:
     pthread_t mThreadId;
     pid_t mNativeThreadId;
 
+    struct Workers {
+        volatile int mRunningCount;
+        volatile int mLaunchCount;
+        uint32_t mCount;
+        pthread_t *mThreadId;
+        pid_t *mNativeThreadId;
+        Signal mCompleteSignal;
+
+        Signal *mLaunchSignals;
+        WorkerCallback_t mLaunchCallback;
+        void *mLaunchData;
+    };
+    Workers mWorkers;
+
     ObjectBaseRef<Script> mRootScript;
     ObjectBaseRef<ProgramFragment> mFragment;
     ObjectBaseRef<ProgramVertex> mVertex;
-    ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
+    ObjectBaseRef<ProgramStore> mFragmentStore;
     ObjectBaseRef<ProgramRaster> mRaster;
+    ObjectBaseRef<Font> mFont;
 
-
-    struct ObjDestroyOOB {
-        pthread_mutex_t mMutex;
-        Vector<ObjectBase *> mDestroyList;
-        bool mNeedToEmpty;
-    };
-    ObjDestroyOOB mObjDestroy;
-    bool objDestroyOOBInit();
-    void objDestroyOOBRun();
-    void objDestroyOOBDestroy();
+    void displayDebugStats();
 
 private:
     Context();
@@ -245,6 +255,7 @@ private:
     uint32_t runRootScript();
 
     static void * threadProc(void *);
+    static void * helperThreadProc(void *);
 
     ANativeWindow *mWndSurface;
 

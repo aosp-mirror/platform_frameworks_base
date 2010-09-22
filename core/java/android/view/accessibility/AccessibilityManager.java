@@ -94,7 +94,9 @@ public final class AccessibilityManager {
     public static AccessibilityManager getInstance(Context context) {
         synchronized (sInstanceSync) {
             if (sInstance == null) {
-                sInstance = new AccessibilityManager(context);
+                IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
+                IAccessibilityManager service = IAccessibilityManager.Stub.asInterface(iBinder);
+                sInstance = new AccessibilityManager(context, service);
             }
         }
         return sInstance;
@@ -104,13 +106,16 @@ public final class AccessibilityManager {
      * Create an instance.
      *
      * @param context A {@link Context}.
+     * @param service An interface to the backing service.
+     *
+     * @hide
      */
-    private AccessibilityManager(Context context) {
+    public AccessibilityManager(Context context, IAccessibilityManager service) {
         mHandler = new MyHandler(context.getMainLooper());
-        IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
-        mService = IAccessibilityManager.Stub.asInterface(iBinder);
+        mService = service;
+
         try {
-            mService.addClient(mClient);
+            mIsEnabled = mService.addClient(mClient);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
         }
@@ -125,6 +130,18 @@ public final class AccessibilityManager {
         synchronized (mHandler) {
             return mIsEnabled;
         }
+    }
+
+    /**
+     * Returns the client interface this instance registers in
+     * the centralized accessibility manager service.
+     *
+     * @return The client.
+     *
+     * @hide
+     */
+    public IAccessibilityManagerClient getClient() {
+       return (IAccessibilityManagerClient) mClient.asBinder(); 
     }
 
     /**

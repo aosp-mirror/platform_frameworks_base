@@ -52,6 +52,7 @@ public interface IccConstants {
     static final int EF_SPN_CPHS = 0x6f14;
     static final int EF_SPN_SHORT_CPHS = 0x6f18;
     static final int EF_INFO_CPHS = 0x6f16;
+    static final int EF_CSP_CPHS = 0x6f15;
 
     // CDMA RUIM file ids from 3GPP2 C.S0023-0
     static final int EF_CST = 0x6f32;

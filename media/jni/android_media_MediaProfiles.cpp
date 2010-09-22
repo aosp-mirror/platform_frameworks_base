@@ -165,7 +165,9 @@ static jobject
 android_media_MediaProfiles_native_get_camcorder_profile(JNIEnv *env, jobject thiz, jint id, jint quality)
 {
     LOGV("native_get_camcorder_profile: %d %d", id, quality);
-    if (quality != CAMCORDER_QUALITY_HIGH && quality != CAMCORDER_QUALITY_LOW) {
+    if (!((quality >= CAMCORDER_QUALITY_LOW && quality <= CAMCORDER_QUALITY_1080P) ||
+                (quality >= CAMCORDER_QUALITY_TIME_LAPSE_LOW &&
+                quality <= CAMCORDER_QUALITY_TIME_LAPSE_1080P))) {
         jniThrowException(env, "java/lang/RuntimeException", "Unknown camcorder profile quality");
         return NULL;
     }
@@ -208,6 +210,20 @@ android_media_MediaProfiles_native_get_camcorder_profile(JNIEnv *env, jobject th
                           audioBitRate,
                           audioSampleRate,
                           audioChannels);
+}
+
+static jboolean
+android_media_MediaProfiles_native_has_camcorder_profile(JNIEnv *env, jobject thiz, jint id, jint quality)
+{
+    LOGV("native_has_camcorder_profile: %d %d", id, quality);
+    if (!((quality >= CAMCORDER_QUALITY_LOW && quality <= CAMCORDER_QUALITY_1080P) ||
+                (quality >= CAMCORDER_QUALITY_TIME_LAPSE_LOW &&
+                quality <= CAMCORDER_QUALITY_TIME_LAPSE_1080P))) {
+        return false;
+    }
+
+    camcorder_quality q = static_cast<camcorder_quality>(quality);
+    return sProfiles->hasCamcorderProfile(id, q);
 }
 
 static jint
@@ -289,6 +305,8 @@ static JNINativeMethod gMethodsForCamcorderProfileClass[] = {
     {"native_init",                            "()V",                    (void *)android_media_MediaProfiles_native_init},
     {"native_get_camcorder_profile",           "(II)Landroid/media/CamcorderProfile;",
                                                                          (void *)android_media_MediaProfiles_native_get_camcorder_profile},
+    {"native_has_camcorder_profile",           "(II)Z",
+                                                                         (void *)android_media_MediaProfiles_native_has_camcorder_profile},
 };
 
 static JNINativeMethod gMethodsForDecoderCapabilitiesClass[] = {

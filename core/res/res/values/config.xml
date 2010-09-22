@@ -22,7 +22,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Component to be used as the status bar service.  Must implement the IStatusBar
          interface.  This name is in the ComponentName flattened format (package/class)  -->
-    <string name="config_statusBarComponent">com.android.systemui/com.android.systemui.statusbar.StatusBarService</string>
+    <string name="config_statusBarComponent">com.android.systemui/com.android.systemui.statusbar.PhoneStatusBarService</string>
+    <bool name="config_statusBarCanHide">true</bool>
 
     <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
@@ -72,6 +73,17 @@
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
 
+    <!-- Set to true if the location returned Environment.getExternalStorageDirectory()
+         is actually a subdirectory of the internal storage.
+         If this is set then Environment.getExternalStorageState() will always return
+         MEDIA_MOUNTED and Intent.ACTION_MEDIA_MOUNTED will be broadcast at boot time
+         for backward compatibility with apps that require external storage. -->
+    <bool name="config_emulateExternalStorage">false</bool>
+
+    <!-- Set to true if external storage is case sensitive.
+         Typically external storage is FAT, which is case insensitive. -->
+    <bool name="config_caseSensitiveExternalStorage">false</bool>
+
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
 
@@ -98,6 +110,9 @@
         <item>"0,1"</item>
     </string-array>
 
+    <!-- The maximum duration (in milliseconds) we expect a network transition to take -->
+    <integer name="config_networkTransitionTimeout">60000</integer>
+
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          USB interfaces.  If the device doesn't want to support tething over USB this should
          be empty.  An example would be "usb.*" -->
@@ -109,6 +124,16 @@
          should be empty.  An example would be "softap.*" -->
     <string-array translatable="false" name="config_tether_wifi_regexs">
     </string-array>
+
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         bluetooth interfaces.  If the device doesn't want to support tethering over bluetooth this
+         should be empty. -->
+    <string-array translatable="false" name="config_tether_bluetooth_regexs">
+    </string-array>
+
+    <!-- Max number of Bluetooth tethering connections allowed. If this is
+         updated config_tether_dhcp_range has to be updated appropriately. -->
+    <integer translateable="false" name="config_max_pan_devices">5</integer>
 
     <!-- Dhcp range (min, max) to use for tethering purposes -->
     <string-array translatable="false" name="config_tether_dhcp_range">
@@ -191,6 +216,9 @@
     <!-- Indicate whether the SD card is accessible without removing the battery. -->
     <bool name="config_batterySdCardAccessibility">false</bool>
 
+    <!-- Indicate whether the device has USB host support. -->
+    <bool name="config_hasUsbHostSupport">false</bool>
+
     <!-- Vibrator pattern for feedback about a long screen/key press -->
     <integer-array name="config_longPressVibePattern">
         <item>0</item>
@@ -255,8 +283,32 @@
     <!-- Default LED off time for notification LED in milliseconds. -->
     <integer name="config_defaultNotificationLedOff">2000</integer>
 
+    <!-- Default value for led color when battery is low on charge -->
+    <integer name="config_notificationsBatteryLowARGB">0xFFFF0000</integer>
+
+    <!-- Default value for led color when battery is medium charged -->
+    <integer name="config_notificationsBatteryMediumARGB">0xFFFFFF00</integer>
+
+    <!-- Default value for led color when battery is fully charged -->
+    <integer name="config_notificationsBatteryFullARGB">0xFF00FF00</integer>
+
+    <!-- Default value for LED on time when the battery is low on charge in miliseconds -->
+    <integer name="config_notificationsBatteryLedOn">125</integer>
+
+    <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
+    <integer name="config_notificationsBatteryLedOff">2875</integer>
+
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
+
+    <!-- Show sliding tab before lockscreen -->
+    <bool name="config_enableSlidingTabFirst">true</bool>
+
+    <!-- Diable lockscreen rotation by default -->
+    <bool name="config_enableLockScreenRotation">false</bool>
+
+    <!-- Enable 3D RecentApplications view -->
+    <bool name="config_enableRecentApps3D">false</bool>
 
     <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 zones as follows:
@@ -342,6 +394,30 @@
     <!-- 2 means give warning -->
     <integer name="config_datause_notification_type">2</integer>
 
+    <!-- Flag indicating whether the current device is "voice capable".
+         If true, this means that the device supports circuit-switched
+         (i.e. voice) phone calls over the telephony network, and is
+         allowed to display the in-call UI while a cellular voice call is
+         active.  This can be overridden to false for "data only" devices
+         which can't make voice calls and don't support any in-call UI.
+
+         Note: this flag is subtly different from the
+         PackageManager.FEATURE_TELEPHONY system feature, which is
+         available on *any* device with a telephony radio, even if the
+         device is data-only. -->
+    <bool name="config_voice_capable">true</bool>
+
+    <!-- IP address of the dns server to use if nobody else suggests one -->
+    <string name="config_default_dns_server">8.8.8.8</string>
+
+    <!-- The default character set for GsmAlphabet -->
+    <!-- Empty string means MBCS is not considered -->
+    <string name="gsm_alphabet_default_charset"></string>
+
     <!-- Enables SIP on WIFI only -->
     <bool name="config_sip_wifi_only">false</bool>
+
+    <!-- Number of database connections opened and managed by framework layer
+         to handle queries on each database. -->
+    <integer name="db_connection_pool_size">1</integer>
 </resources>

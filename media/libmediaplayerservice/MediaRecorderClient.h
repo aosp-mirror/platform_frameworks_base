@@ -29,7 +29,7 @@ class MediaRecorderClient : public BnMediaRecorder
 {
 public:
     virtual     status_t        setCamera(const sp<ICamera>& camera);
-    virtual     status_t        setPreviewSurface(const sp<ISurface>& surface);
+    virtual     status_t        setPreviewSurface(const sp<Surface>& surface);
     virtual     status_t        setVideoSource(int vs);
     virtual     status_t        setAudioSource(int as);
     virtual     status_t        setOutputFormat(int of);
@@ -37,6 +37,7 @@ public:
     virtual     status_t        setAudioEncoder(int ae);
     virtual     status_t        setOutputFile(const char* path);
     virtual     status_t        setOutputFile(int fd, int64_t offset, int64_t length);
+    virtual     status_t        setOutputFileAuxiliary(int fd);
     virtual     status_t        setVideoSize(int width, int height);
     virtual     status_t        setVideoFrameRate(int frames_per_second);
     virtual     status_t        setParameters(const String8& params);
@@ -66,4 +67,3 @@ private:
 }; // namespace android
 
 #endif // ANDROID_MEDIARECORDERCLIENT_H
-

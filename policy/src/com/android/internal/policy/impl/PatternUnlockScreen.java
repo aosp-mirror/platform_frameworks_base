@@ -25,9 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.MotionEvent;
 import android.widget.Button;
-import android.widget.TextView;
-import android.text.format.DateFormat;
-import android.text.TextUtils;
 import android.util.Log;
 import com.android.internal.R;
 import com.android.internal.telephony.IccCard;
@@ -37,7 +34,6 @@ import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockPatternView.Cell;
 
 import java.util.List;
-import java.util.Date;
 
 /**
  * This is the screen that shows the 9 circle unlock widget and instructs
@@ -75,27 +71,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
      */
     private boolean mEnableFallback;
 
-    private String mDateFormatString;
-
-    private TextView mCarrier;
-    private TextView mDate;
-
-    // are we showing battery information?
-    private boolean mShowingBatteryInfo = false;
-
-    // last known plugged in state
-    private boolean mPluggedIn = false;
-
-    // last known battery level
-    private int mBatteryLevel = 100;
-
-    private String mNextAlarm = null;
-
-    private String mInstructions = null;
-    private TextView mStatus1;
-    private TextView mStatusSep;
-    private TextView mStatus2;
-
+    private StatusView mStatusView;
 
     private LockPatternView mLockPatternView;
 
@@ -133,15 +109,18 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     private void updateFooter(FooterMode mode) {
         switch (mode) {
             case Normal:
+                Log.d(TAG, "mode normal");
                 mFooterNormal.setVisibility(View.VISIBLE);
                 mFooterForgotPattern.setVisibility(View.GONE);
                 break;
             case ForgotLockPattern:
+                Log.d(TAG, "mode ForgotLockPattern");
                 mFooterNormal.setVisibility(View.GONE);
                 mFooterForgotPattern.setVisibility(View.VISIBLE);
                 mForgotPatternButton.setVisibility(View.VISIBLE);
                 break;
             case VerifyUnlocked:
+                Log.d(TAG, "mode VerifyUnlocked");
                 mFooterNormal.setVisibility(View.GONE);
                 mFooterForgotPattern.setVisibility(View.GONE);
         }
@@ -180,24 +159,16 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mCreationOrientation = configuration.orientation;
 
         LayoutInflater inflater = LayoutInflater.from(context);
+
         if (mCreationOrientation != Configuration.ORIENTATION_LANDSCAPE) {
+            Log.d(TAG, "portrait mode");
             inflater.inflate(R.layout.keyguard_screen_unlock_portrait, this, true);
         } else {
+            Log.d(TAG, "landscape mode");
             inflater.inflate(R.layout.keyguard_screen_unlock_landscape, this, true);
         }
 
-        mCarrier = (TextView) findViewById(R.id.carrier);
-        mDate = (TextView) findViewById(R.id.date);
-
-        mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
-        refreshTimeAndDateDisplay();
-
-        mStatus1 = (TextView) findViewById(R.id.status1);
-        mStatusSep = (TextView) findViewById(R.id.statusSep);
-        mStatus2 = (TextView) findViewById(R.id.status2);
-
-        resetStatusInfo();
-
+        mStatusView = new StatusView(this, mUpdateMonitor, mLockPatternUtils);
 
         mLockPatternView = (LockPatternView) findViewById(R.id.lockPattern);
 
@@ -249,15 +220,11 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         updateMonitor.registerSimStateCallback(this);
         setFocusableInTouchMode(true);
 
-        // Required to get Marquee to work.
-        mCarrier.setSelected(true);
-        mCarrier.setTextColor(0xffffffff);
-
         // until we get an update...
-        mCarrier.setText(
-                LockScreen.getCarrierString(
+        mStatusView.setCarrierText(LockScreen.getCarrierString(
                         mUpdateMonitor.getTelephonyPlmn(),
                         mUpdateMonitor.getTelephonySpn()));
+
     }
 
     private void refreshEmergencyButtonText() {
@@ -269,88 +236,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         if (DEBUG) Log.d(TAG, "setEnableFallback(" + state + ")");
         mEnableFallback = state;
     }
-
-    private void resetStatusInfo() {
-        mInstructions = null;
-        mShowingBatteryInfo = mUpdateMonitor.shouldShowBatteryInfo();
-        mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
-        mBatteryLevel = mUpdateMonitor.getBatteryLevel();
-        mNextAlarm = mLockPatternUtils.getNextAlarm();
-        updateStatusLines();
-    }
-
-    private void updateStatusLines() {
-        if (mInstructions != null) {
-            // instructions only
-            mStatus1.setText(mInstructions);
-            if (TextUtils.isEmpty(mInstructions)) {
-                mStatus1.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-            } else {
-                mStatus1.setCompoundDrawablesWithIntrinsicBounds(
-                        R.drawable.ic_lock_idle_lock, 0, 0, 0);
-            }
-
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatusSep.setVisibility(View.GONE);
-            mStatus2.setVisibility(View.GONE);
-        } else if (mShowingBatteryInfo && mNextAlarm == null) {
-            // battery only
-            if (mPluggedIn) {
-              if (mBatteryLevel >= 100) {
-                mStatus1.setText(getContext().getString(R.string.lockscreen_charged));
-              } else {
-                  mStatus1.setText(getContext().getString(R.string.lockscreen_plugged_in, mBatteryLevel));
-              }
-            } else {
-                mStatus1.setText(getContext().getString(R.string.lockscreen_low_battery));
-            }
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_charging, 0, 0, 0);
-
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatusSep.setVisibility(View.GONE);
-            mStatus2.setVisibility(View.GONE);
-
-        } else if (mNextAlarm != null && !mShowingBatteryInfo) {
-            // alarm only
-            mStatus1.setText(mNextAlarm);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_alarm, 0, 0, 0);
-
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatusSep.setVisibility(View.GONE);
-            mStatus2.setVisibility(View.GONE);
-        } else if (mNextAlarm != null && mShowingBatteryInfo) {
-            // both battery and next alarm
-            mStatus1.setText(mNextAlarm);
-            mStatusSep.setText("|");
-            mStatus2.setText(getContext().getString(
-                    R.string.lockscreen_battery_short,
-                    Math.min(100, mBatteryLevel)));
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_alarm, 0, 0, 0);
-            if (mPluggedIn) {
-                mStatus2.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_charging, 0, 0, 0);
-            } else {
-                mStatus2.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-            }
-
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatusSep.setVisibility(View.VISIBLE);
-            mStatus2.setVisibility(View.VISIBLE);
-        } else {
-            // nothing specific to show; show general instructions
-            mStatus1.setText(R.string.lockscreen_pattern_instructions);
-            mStatus1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_lock, 0, 0, 0);
-
-            mStatus1.setVisibility(View.VISIBLE);
-            mStatusSep.setVisibility(View.GONE);
-            mStatus2.setVisibility(View.GONE);
-        }
-    }
-
-
-    private void refreshTimeAndDateDisplay() {
-        mDate.setText(DateFormat.format(mDateFormatString, new Date()));
-    }
-
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -366,25 +251,21 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         return result;
     }
 
-
     // ---------- InfoCallback
 
     /** {@inheritDoc} */
     public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
-        mShowingBatteryInfo = showBatteryInfo;
-        mPluggedIn = pluggedIn;
-        mBatteryLevel = batteryLevel;
-        updateStatusLines();
+        mStatusView.onRefreshBatteryInfo(showBatteryInfo, pluggedIn, batteryLevel);
     }
 
     /** {@inheritDoc} */
     public void onTimeChanged() {
-        refreshTimeAndDateDisplay();
+        mStatusView.onTimeChanged();
     }
 
     /** {@inheritDoc} */
     public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-        mCarrier.setText(LockScreen.getCarrierString(plmn, spn));
+        mStatusView.onRefreshCarrierInfo(plmn, spn);
     }
 
     /** {@inheritDoc} */
@@ -444,8 +325,8 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
     /** {@inheritDoc} */
     public void onResume() {
-        // reset header
-        resetStatusInfo();
+        // reset status
+        mStatusView.resetStatusInfo(mUpdateMonitor, mLockPatternUtils);
 
         // reset lock pattern
         mLockPatternView.enableInput();
@@ -514,8 +395,8 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             if (mLockPatternUtils.checkPattern(pattern)) {
                 mLockPatternView
                         .setDisplayMode(LockPatternView.DisplayMode.Correct);
-                mInstructions = "";
-                updateStatusLines();
+                mStatusView.setInstructions("");
+                mStatusView.updateStatusLines();
                 mCallback.keyguardDone(true);
                 mCallback.reportSuccessfulUnlockAttempt();
             } else {
@@ -533,8 +414,9 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                     handleAttemptLockout(deadline);
                 } else {
                     // TODO mUnlockIcon.setVisibility(View.VISIBLE);
-                    mInstructions = getContext().getString(R.string.lockscreen_pattern_wrong);
-                    updateStatusLines();
+                    mStatusView.setInstructions(
+                            getContext().getString(R.string.lockscreen_pattern_wrong));
+                    mStatusView.updateStatusLines();
                     mLockPatternView.postDelayed(
                             mCancelPatternRunnable,
                             PATTERN_CLEAR_TIMEOUT_MS);
@@ -552,17 +434,18 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             @Override
             public void onTick(long millisUntilFinished) {
                 int secondsRemaining = (int) (millisUntilFinished / 1000);
-                mInstructions = getContext().getString(
+                mStatusView.setInstructions(getContext().getString(
                         R.string.lockscreen_too_many_failed_attempts_countdown,
-                        secondsRemaining);
-                updateStatusLines();
+                        secondsRemaining));
+                mStatusView.updateStatusLines();
             }
 
             @Override
             public void onFinish() {
                 mLockPatternView.setEnabled(true);
-                mInstructions = getContext().getString(R.string.lockscreen_pattern_instructions);
-                updateStatusLines();
+                mStatusView.setInstructions(getContext().getString(
+                        R.string.lockscreen_pattern_instructions));
+                mStatusView.updateStatusLines();
                 // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {

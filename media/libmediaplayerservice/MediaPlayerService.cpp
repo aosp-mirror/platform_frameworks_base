@@ -889,7 +889,15 @@ status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64
     return mStatus;
 }
 
-status_t MediaPlayerService::Client::setVideoSurface(const sp<ISurface>& surface)
+status_t MediaPlayerService::Client::setVideoISurface(const sp<ISurface>& surface)
+{
+    LOGV("[%d] setVideoISurface(%p)", mConnId, surface.get());
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    return p->setVideoISurface(surface);
+}
+
+status_t MediaPlayerService::Client::setVideoSurface(const sp<Surface>& surface)
 {
     LOGV("[%d] setVideoSurface(%p)", mConnId, surface.get());
     sp<MediaPlayerBase> p = getPlayer();

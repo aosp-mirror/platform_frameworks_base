@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.animation.LayoutTransition;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -30,8 +32,6 @@ import android.graphics.Region;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Config;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
@@ -63,8 +63,10 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#ViewGroup_alwaysDrawnWithCache
  * @attr ref android.R.styleable#ViewGroup_addStatesFromChildren
  * @attr ref android.R.styleable#ViewGroup_descendantFocusability
+ * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
  */
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
+
     private static final boolean DBG = false;
 
     /**
@@ -86,13 +88,28 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // The view contained within this ViewGroup that has or contains focus.
     private View mFocused;
 
-    // The current transformation to apply on the child being drawn
-    private Transformation mChildTransformation;
+    /**
+     * A Transformation used when drawing children, to
+     * apply on the child being drawn.
+     */
+    private final Transformation mChildTransformation = new Transformation();
+
+    /**
+     * Used to track the current invalidation region.
+     */
     private RectF mInvalidateRegion;
+
+    /**
+     * A Transformation used to calculate a correct
+     * invalidation area when the application is autoscaled.
+     */
+    private Transformation mInvalidationTransformation;
 
     // Target of Motion events
     private View mMotionTarget;
-    private final Rect mTempRect = new Rect();
+
+    // Targets of MotionEvents in split mode
+    private SplitMotionTargets mSplitMotionTargets;
 
     // Layout animation
     private LayoutAnimationController mLayoutAnimationController;
@@ -228,6 +245,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     protected static final int FLAG_DISALLOW_INTERCEPT = 0x80000;
 
     /**
+     * When set, this ViewGroup will split MotionEvents to multiple child Views when appropriate.
+     */
+    private static final int FLAG_SPLIT_MOTION_EVENTS = 0x200000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -276,6 +298,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     // Used to draw cached views
     private final Paint mCachePaint = new Paint();
+
+    // Used to animate add/remove changes in layout
+    private LayoutTransition mTransition;
+
+    // The set of views that are currently being transitioned. This list is used to track views
+    // being removed that should not actually be removed from the parent yet because they are
+    // being animated.
+    private ArrayList<View> mTransitioningViews;
 
     public ViewGroup(Context context) {
         super(context);
@@ -347,6 +377,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     break;
                 case R.styleable.ViewGroup_descendantFocusability:
                     setDescendantFocusability(DESCENDANT_FOCUSABILITY_FLAGS[a.getInt(attr, 0)]);
+                    break;
+                case R.styleable.ViewGroup_splitMotionEvents:
+                    setMotionEventSplittingEnabled(a.getBoolean(attr, false));
+                    break;
+                case R.styleable.ViewGroup_animateLayoutChanges:
+                    boolean animateLayoutChanges = a.getBoolean(attr, false);
+                    if (animateLayoutChanges) {
+                        setLayoutTransition(new LayoutTransition());
+                    }
                     break;
             }
         }
@@ -458,6 +497,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public boolean showContextMenuForChild(View originalView) {
         return mParent != null && mParent.showContextMenuForChild(originalView);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback) {
+        return mParent != null ? mParent.startActionModeForChild(originalView, callback) : null;
     }
 
     /**
@@ -826,12 +872,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return false;
         }
 
+        if ((mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS) {
+            if (mSplitMotionTargets == null) {
+                mSplitMotionTargets = new SplitMotionTargets();
+            }
+            return dispatchSplitTouchEvent(ev);
+        }
+
         final int action = ev.getAction();
         final float xf = ev.getX();
         final float yf = ev.getY();
         final float scrolledXFloat = xf + mScrollX;
         final float scrolledYFloat = yf + mScrollY;
-        final Rect frame = mTempRect;
 
         boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
 
@@ -850,8 +902,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 ev.setAction(MotionEvent.ACTION_DOWN);
                 // We know we want to dispatch the event down, find a child
                 // who can handle it, start with the front-most child.
-                final int scrolledXInt = (int) scrolledXFloat;
-                final int scrolledYInt = (int) scrolledYFloat;
                 final View[] children = mChildren;
                 final int count = mChildrenCount;
 
@@ -859,21 +909,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     final View child = children[i];
                     if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
                             || child.getAnimation() != null) {
-                        child.getHitRect(frame);
-                        if (frame.contains(scrolledXInt, scrolledYInt)) {
-                            // offset the event to the view's coordinate system
-                            final float xc = scrolledXFloat - child.mLeft;
-                            final float yc = scrolledYFloat - child.mTop;
-                            ev.setLocation(xc, yc);
-                            child.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
-                            if (child.dispatchTouchEvent(ev))  {
-                                // Event handled, we have a target now.
-                                mMotionTarget = child;
-                                return true;
-                            }
-                            // The event didn't get handled, try the next view.
-                            // Don't reset the event's location, it's not
-                            // necessary here.
+                        // Single dispatch always picks its target based on the initial down
+                        // event's position - index 0
+                        if (dispatchTouchEventIfInView(child, ev, 0)) {
+                            mMotionTarget = child;
+                            return true;
                         }
                     }
                 }
@@ -903,11 +943,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return super.dispatchTouchEvent(ev);
         }
 
+        // Calculate the offset point into the target's local coordinates
+        float xc = scrolledXFloat - (float) target.mLeft;
+        float yc = scrolledYFloat - (float) target.mTop;
+        if (!target.hasIdentityMatrix() && mAttachInfo != null) {
+            // non-identity matrix: transform the point into the view's coordinates
+            final float[] localXY = mAttachInfo.mTmpTransformLocation;
+            localXY[0] = xc;
+            localXY[1] = yc;
+            target.getInverseMatrix().mapPoints(localXY);
+            xc = localXY[0];
+            yc = localXY[1];
+        }
+
         // if have a target, see if we're allowed to and want to intercept its
         // events
         if (!disallowIntercept && onInterceptTouchEvent(ev)) {
-            final float xc = scrolledXFloat - (float) target.mLeft;
-            final float yc = scrolledYFloat - (float) target.mTop;
             mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
             ev.setAction(MotionEvent.ACTION_CANCEL);
             ev.setLocation(xc, yc);
@@ -929,8 +980,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // finally offset the event to the target's coordinate system and
         // dispatch the event.
-        final float xc = scrolledXFloat - (float) target.mLeft;
-        final float yc = scrolledYFloat - (float) target.mTop;
         ev.setLocation(xc, yc);
 
         if ((target.mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
@@ -939,7 +988,289 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mMotionTarget = null;
         }
 
-        return target.dispatchTouchEvent(ev);
+        if (target.dispatchTouchEvent(ev)) {
+            return true;
+        } else {
+            ev.setLocation(xf, yf);
+        }
+        return false;
+    }
+
+    /**
+     * This method detects whether the pointer location at <code>pointerIndex</code> within
+     * <code>ev</code> is inside the specified view. If so, the transformed event is dispatched to
+     * <code>child</code>.
+     *
+     * @param child View to hit test against
+     * @param ev MotionEvent to test
+     * @param pointerIndex Index of the pointer within <code>ev</code> to test
+     * @return <code>false</code> if the hit test failed, or the result of
+     *         <code>child.dispatchTouchEvent</code>
+     */
+    private boolean dispatchTouchEventIfInView(View child, MotionEvent ev, int pointerIndex) {
+        final float x = ev.getX(pointerIndex);
+        final float y = ev.getY(pointerIndex);
+        final float scrolledX = x + mScrollX;
+        final float scrolledY = y + mScrollY;
+        float localX = scrolledX - child.mLeft;
+        float localY = scrolledY - child.mTop;
+        if (!child.hasIdentityMatrix() && mAttachInfo != null) {
+            // non-identity matrix: transform the point into the view's coordinates
+            final float[] localXY = mAttachInfo.mTmpTransformLocation;
+            localXY[0] = localX;
+            localXY[1] = localY;
+            child.getInverseMatrix().mapPoints(localXY);
+            localX = localXY[0];
+            localY = localXY[1];
+        }
+        if (localX >= 0 && localY >= 0 && localX < (child.mRight - child.mLeft) &&
+                localY < (child.mBottom - child.mTop)) {
+            // It would be safer to clone the event here but we don't for performance.
+            // There are many subtle interactions in touch event dispatch; change at your own risk.
+            child.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+            ev.offsetLocation(localX - x, localY - y);
+            if (child.dispatchTouchEvent(ev)) {
+                return true;
+            } else {
+                ev.offsetLocation(x - localX, y - localY);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private boolean dispatchSplitTouchEvent(MotionEvent ev) {
+        final SplitMotionTargets targets = mSplitMotionTargets;
+        final int action = ev.getAction();
+        final int maskedAction = ev.getActionMasked();
+        float xf = ev.getX();
+        float yf = ev.getY();
+        float scrolledXFloat = xf + mScrollX;
+        float scrolledYFloat = yf + mScrollY;
+
+        boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
+
+        if (maskedAction == MotionEvent.ACTION_DOWN ||
+                maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
+            final int actionIndex = ev.getActionIndex();
+            final int actionId = ev.getPointerId(actionIndex);
+
+            // Clear out any current target for this ID.
+            // XXX: We should probably send an ACTION_UP to the current
+            // target if present.
+            targets.removeById(actionId);
+
+            // If we're disallowing intercept or if we're allowing and we didn't
+            // intercept
+            if (disallowIntercept || !onInterceptTouchEvent(ev)) {
+                // reset this event's action (just to protect ourselves)
+                ev.setAction(action);
+                // We know we want to dispatch the event down, try to find a child
+                // who can handle it, start with the front-most child.
+                final long downTime = ev.getEventTime();
+                final View[] children = mChildren;
+                final int count = mChildrenCount;
+                for (int i = count - 1; i >= 0; i--) {
+                    final View child = children[i];
+                    if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                            || child.getAnimation() != null) {
+                        final MotionEvent childEvent =
+                                targets.filterMotionEventForChild(ev, child, downTime);
+                        if (childEvent != null) {
+                            try {
+                                final int childActionIndex = childEvent.findPointerIndex(actionId);
+                                if (dispatchTouchEventIfInView(child, childEvent,
+                                        childActionIndex)) {
+                                    targets.add(actionId, child, downTime);
+
+                                    return true;
+                                }
+                            } finally {
+                                childEvent.recycle();
+                            }
+                        }
+                    }
+                }
+
+                // Didn't find a new target. Do we have a "primary" target to send to?
+                final SplitMotionTargets.TargetInfo primaryTargetInfo = targets.getPrimaryTarget();
+                if (primaryTargetInfo != null) {
+                    final View primaryTarget = primaryTargetInfo.view;
+                    final MotionEvent childEvent = targets.filterMotionEventForChild(ev,
+                            primaryTarget, primaryTargetInfo.downTime);
+                    if (childEvent != null) {
+                        try {
+                            // Calculate the offset point into the target's local coordinates
+                            float xc = scrolledXFloat - (float) primaryTarget.mLeft;
+                            float yc = scrolledYFloat - (float) primaryTarget.mTop;
+                            if (!primaryTarget.hasIdentityMatrix() && mAttachInfo != null) {
+                                // non-identity matrix: transform the point into the view's
+                                // coordinates
+                                final float[] localXY = mAttachInfo.mTmpTransformLocation;
+                                localXY[0] = xc;
+                                localXY[1] = yc;
+                                primaryTarget.getInverseMatrix().mapPoints(localXY);
+                                xc = localXY[0];
+                                yc = localXY[1];
+                            }
+                            childEvent.setLocation(xc, yc);
+                            if (primaryTarget.dispatchTouchEvent(childEvent)) {
+                                targets.add(actionId, primaryTarget, primaryTargetInfo.downTime);
+                                return true;
+                            }
+                        } finally {
+                            childEvent.recycle();
+                        }
+                    }
+                }
+            }
+        }
+
+        boolean isUpOrCancel = (action == MotionEvent.ACTION_UP) ||
+                (action == MotionEvent.ACTION_CANCEL);
+
+        if (isUpOrCancel) {
+            // Note, we've already copied the previous state to our local
+            // variable, so this takes effect on the next event
+            mGroupFlags &= ~FLAG_DISALLOW_INTERCEPT;
+        }
+
+        if (targets.isEmpty()) {
+            // We don't have any targets, this means we're handling the
+            // event as a regular view.
+            ev.setLocation(xf, yf);
+            if ((mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
+                ev.setAction(MotionEvent.ACTION_CANCEL);
+                mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+            }
+            return super.dispatchTouchEvent(ev);
+        }
+
+        // if we have targets, see if we're allowed to and want to intercept their
+        // events
+        int uniqueTargetCount = targets.getUniqueTargetCount();
+        if (!disallowIntercept && onInterceptTouchEvent(ev)) {
+            mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+
+            for (int uniqueIndex = 0; uniqueIndex < uniqueTargetCount; uniqueIndex++) {
+                final View target = targets.getUniqueTargetAt(uniqueIndex).view;
+
+                // Calculate the offset point into the target's local coordinates
+                float xc = scrolledXFloat - (float) target.mLeft;
+                float yc = scrolledYFloat - (float) target.mTop;
+                if (!target.hasIdentityMatrix() && mAttachInfo != null) {
+                    // non-identity matrix: transform the point into the view's coordinates
+                    final float[] localXY = mAttachInfo.mTmpTransformLocation;
+                    localXY[0] = xc;
+                    localXY[1] = yc;
+                    target.getInverseMatrix().mapPoints(localXY);
+                    xc = localXY[0];
+                    yc = localXY[1];
+                }
+
+                ev.setAction(MotionEvent.ACTION_CANCEL);
+                ev.setLocation(xc, yc);
+                if (!target.dispatchTouchEvent(ev)) {
+                    // target didn't handle ACTION_CANCEL. not much we can do
+                    // but they should have.
+                }
+            }
+            targets.clear();
+            // Don't dispatch this event to our own view, because we already
+            // saw it when intercepting; we just want to give the following
+            // event to the normal onTouchEvent().
+            return true;
+        }
+
+        boolean handled = false;
+        for (int uniqueIndex = 0; uniqueIndex < uniqueTargetCount; uniqueIndex++) {
+            final SplitMotionTargets.TargetInfo targetInfo = targets.getUniqueTargetAt(uniqueIndex);
+            final View target = targetInfo.view;
+
+            final MotionEvent targetEvent =
+                    targets.filterMotionEventForChild(ev, target, targetInfo.downTime);
+            if (targetEvent == null) {
+                continue;
+            }
+
+            try {
+                // Calculate the offset point into the target's local coordinates
+                xf = targetEvent.getX();
+                yf = targetEvent.getY();
+                scrolledXFloat = xf + mScrollX;
+                scrolledYFloat = yf + mScrollY;
+                float xc = scrolledXFloat - (float) target.mLeft;
+                float yc = scrolledYFloat - (float) target.mTop;
+                if (!target.hasIdentityMatrix() && mAttachInfo != null) {
+                    // non-identity matrix: transform the point into the view's coordinates
+                    final float[] localXY = mAttachInfo.mTmpTransformLocation;
+                    localXY[0] = xc;
+                    localXY[1] = yc;
+                    target.getInverseMatrix().mapPoints(localXY);
+                    xc = localXY[0];
+                    yc = localXY[1];
+                }
+
+                // finally offset the event to the target's coordinate system and
+                // dispatch the event.
+                targetEvent.setLocation(xc, yc);
+
+                if ((target.mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
+                    targetEvent.setAction(MotionEvent.ACTION_CANCEL);
+                    target.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
+                    targets.removeView(target);
+                    uniqueIndex--;
+                    uniqueTargetCount--;
+                }
+
+                handled |= target.dispatchTouchEvent(targetEvent);
+            } finally {
+                targetEvent.recycle();
+            }
+        }
+
+        if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
+            final int removeId = ev.getPointerId(ev.getActionIndex());
+            targets.removeById(removeId);
+        }
+
+        if (isUpOrCancel) {
+            targets.clear();
+        }
+
+        return handled;
+    }
+
+    /**
+     * Enable or disable the splitting of MotionEvents to multiple children during touch event
+     * dispatch. This behavior is disabled by default.
+     *
+     * <p>When this option is enabled MotionEvents may be split and dispatched to different child
+     * views depending on where each pointer initially went down. This allows for user interactions
+     * such as scrolling two panes of content independently, chording of buttons, and performing
+     * independent gestures on different pieces of content.
+     *
+     * @param split <code>true</code> to allow MotionEvents to be split and dispatched to multiple
+     *              child views. <code>false</code> to only allow one child view to be the target of
+     *              any MotionEvent received by this ViewGroup.
+     */
+    public void setMotionEventSplittingEnabled(boolean split) {
+        // TODO Applications really shouldn't change this setting mid-touch event,
+        // but perhaps this should handle that case and send ACTION_CANCELs to any child views
+        // with gestures in progress when this is changed.
+        if (split) {
+            mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
+        } else {
+            mGroupFlags &= ~FLAG_SPLIT_MOTION_EVENTS;
+            mSplitMotionTargets = null;
+        }
+    }
+
+    /**
+     * @return true if MotionEvents dispatched to this ViewGroup can be split to multiple children.
+     */
+    public boolean isMotionEventSplittingEnabled() {
+        return (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) == FLAG_SPLIT_MOTION_EVENTS;
     }
 
     /**
@@ -1187,7 +1518,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
-            children[i].dispatchSaveInstanceState(container);
+            View c = children[i];
+            if ((c.mViewFlags & PARENT_SAVE_DISABLED_MASK) != PARENT_SAVE_DISABLED) {
+                c.dispatchSaveInstanceState(container);
+            }
         }
     }
 
@@ -1212,7 +1546,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
-            children[i].dispatchRestoreInstanceState(container);
+            View c = children[i];
+            if ((c.mViewFlags & PARENT_SAVE_DISABLED_MASK) != PARENT_SAVE_DISABLED) {
+                c.dispatchRestoreInstanceState(container);
+            }
         }
     }
 
@@ -1482,22 +1819,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int flags = mGroupFlags;
 
         if ((flags & FLAG_CLEAR_TRANSFORMATION) == FLAG_CLEAR_TRANSFORMATION) {
-            if (mChildTransformation != null) {
-                mChildTransformation.clear();
-            }
+            mChildTransformation.clear();
             mGroupFlags &= ~FLAG_CLEAR_TRANSFORMATION;
         }
 
         Transformation transformToApply = null;
+        Transformation invalidationTransform;
         final Animation a = child.getAnimation();
         boolean concatMatrix = false;
 
-        if (a != null) {
-            if (mInvalidateRegion == null) {
-                mInvalidateRegion = new RectF();
-            }
-            final RectF region = mInvalidateRegion;
+        boolean scalingRequired = false;
+        boolean caching = false;
+        if (!canvas.isHardwareAccelerated() &&
+                (flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
+                (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
+            caching = true;
+            if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
+        }
 
+        if (a != null) {
             final boolean initialized = a.isInitialized();
             if (!initialized) {
                 a.initialize(cr - cl, cb - ct, getWidth(), getHeight());
@@ -1505,10 +1845,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 child.onAnimationStart();
             }
 
-            if (mChildTransformation == null) {
-                mChildTransformation = new Transformation();
+            more = a.getTransformation(drawingTime, mChildTransformation,
+                    scalingRequired ? mAttachInfo.mApplicationScale : 1f);
+            if (scalingRequired && mAttachInfo.mApplicationScale != 1f) {
+                if (mInvalidationTransformation == null) {
+                    mInvalidationTransformation = new Transformation();
+                }
+                invalidationTransform = mInvalidationTransformation;
+                a.getTransformation(drawingTime, invalidationTransform, 1f);
+            } else {
+                invalidationTransform = mChildTransformation;
             }
-            more = a.getTransformation(drawingTime, mChildTransformation);
             transformToApply = mChildTransformation;
 
             concatMatrix = a.willChangeTransformationMatrix();
@@ -1525,7 +1872,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         invalidate(cl, ct, cr, cb);
                     }
                 } else {
-                    a.getInvalidateRegion(0, 0, cr - cl, cb - ct, region, transformToApply);
+                    if (mInvalidateRegion == null) {
+                        mInvalidateRegion = new RectF();
+                    }
+                    final RectF region = mInvalidateRegion;
+                    a.getInvalidateRegion(0, 0, cr - cl, cb - ct, region, invalidationTransform);
 
                     // The child need to draw an animation, potentially offscreen, so
                     // make sure we do not cancel invalidate requests
@@ -1538,9 +1889,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         } else if ((flags & FLAG_SUPPORT_STATIC_TRANSFORMATIONS) ==
                 FLAG_SUPPORT_STATIC_TRANSFORMATIONS) {
-            if (mChildTransformation == null) {
-                mChildTransformation = new Transformation();
-            }
             final boolean hasTransform = getChildStaticTransformation(child, mChildTransformation);
             if (hasTransform) {
                 final int transformType = mChildTransformation.getTransformationType();
@@ -1549,6 +1897,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 concatMatrix = (transformType & Transformation.TYPE_MATRIX) != 0;
             }
         }
+
+        concatMatrix |= !child.hasIdentityMatrix();
 
         // Sets the flag as early as possible to allow draw() implementations
         // to call invalidate() successfully when doing animations
@@ -1564,12 +1914,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int sx = child.mScrollX;
         final int sy = child.mScrollY;
 
-        boolean scalingRequired = false;
         Bitmap cache = null;
-        if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
-                (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
+        if (caching) {
             cache = child.getDrawingCache(true);
-            if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         }
 
         final boolean hasNoCache = cache == null;
@@ -1586,40 +1933,56 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        float alpha = 1.0f;
+        float alpha = child.getAlpha();
 
-        if (transformToApply != null) {
-            if (concatMatrix) {
-                int transX = 0;
-                int transY = 0;
-                if (hasNoCache) {
-                    transX = -sx;
-                    transY = -sy;
-                }
-                // Undo the scroll translation, apply the transformation matrix,
-                // then redo the scroll translate to get the correct result.
-                canvas.translate(-transX, -transY);
-                canvas.concat(transformToApply.getMatrix());
-                canvas.translate(transX, transY);
-                mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
+        if (transformToApply != null || alpha < 1.0f || !child.hasIdentityMatrix()) {
+            int transX = 0;
+            int transY = 0;
+
+            if (hasNoCache) {
+                transX = -sx;
+                transY = -sy;
             }
 
-            alpha = transformToApply.getAlpha();
+            if (transformToApply != null) {
+                if (concatMatrix) {
+                    // Undo the scroll translation, apply the transformation matrix,
+                    // then redo the scroll translate to get the correct result.
+                    canvas.translate(-transX, -transY);
+                    canvas.concat(transformToApply.getMatrix());
+                    canvas.translate(transX, transY);
+                    mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
+                }
+
+                float transformAlpha = transformToApply.getAlpha();
+                if (transformAlpha < 1.0f) {
+                    alpha *= transformToApply.getAlpha();
+                    mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
+                }
+            }
+
+            if (!child.hasIdentityMatrix()) {
+                canvas.translate(-transX, -transY);
+                canvas.concat(child.getMatrix());
+                canvas.translate(transX, transY);
+            }
+
             if (alpha < 1.0f) {
                 mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
-            }
-
-            if (alpha < 1.0f && hasNoCache) {
-                final int multipliedAlpha = (int) (255 * alpha);
-                if (!child.onSetAlpha(multipliedAlpha)) {
-                    canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct, multipliedAlpha,
-                            Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-                } else {
-                    child.mPrivateFlags |= ALPHA_SET;
+            
+                if (hasNoCache) {
+                    final int multipliedAlpha = (int) (255 * alpha);
+                    if (!child.onSetAlpha(multipliedAlpha)) {
+                        canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct, multipliedAlpha,
+                                Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+                    } else {
+                        child.mPrivateFlags |= ALPHA_SET;
+                    }
                 }
             }
         } else if ((child.mPrivateFlags & ALPHA_SET) == ALPHA_SET) {
             child.onSetAlpha(255);
+            child.mPrivateFlags &= ~ALPHA_SET;
         }
 
         if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
@@ -1653,9 +2016,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             } else if  ((flags & FLAG_ALPHA_LOWER_THAN_ONE) == FLAG_ALPHA_LOWER_THAN_ONE) {
                 cachePaint.setAlpha(255);
                 mGroupFlags &= ~FLAG_ALPHA_LOWER_THAN_ONE;
-            }
-            if (Config.DEBUG && ViewDebug.profileDrawing) {
-                EventLog.writeEvent(60003, hashCode());
             }
             canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
         }
@@ -1702,7 +2062,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         final int count = mChildrenCount;
         for (int i = 0; i < count; i++) {
+            
             children[i].setSelected(selected);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void dispatchSetActivated(boolean activated) {
+        final View[] children = mChildren;
+        final int count = mChildrenCount;
+        for (int i = 0; i < count; i++) {
+
+            children[i].setActivated(activated);
         }
     }
 
@@ -1977,6 +2351,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     "You must call removeView() on the child's parent first.");
         }
 
+        if (mTransition != null) {
+            mTransition.childAdd(this, child);
+        }
+
         if (!checkLayoutParams(params)) {
             params = generateLayoutParams(params);
         }
@@ -2054,7 +2432,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // This method also sets the child's mParent to null
     private void removeFromArray(int index) {
         final View[] children = mChildren;
-        children[index].mParent = null;
+        if (!(mTransitioningViews != null && mTransitioningViews.contains(children[index]))) {
+            children[index].mParent = null;
+        }
         final int count = mChildrenCount;
         if (index == count - 1) {
             children[--mChildrenCount] = null;
@@ -2189,13 +2569,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void removeViewInternal(int index, View view) {
+
+        if (mTransition != null) {
+            mTransition.childRemove(this, view);
+        }
+
         boolean clearChildFocus = false;
         if (view == mFocused) {
             view.clearFocusForRemoval();
             clearChildFocus = true;
         }
 
-        if (view.getAnimation() != null) {
+        if (view.getAnimation() != null ||
+                (mTransitioningViews != null && mTransitioningViews.contains(view))) {
             addDisappearingView(view);
         } else if (view.mAttachInfo != null) {
            view.dispatchDetachedFromWindow();
@@ -2214,6 +2600,39 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * Sets the LayoutTransition object for this ViewGroup. If the LayoutTransition object is
+     * not null, changes in layout which occur because of children being added to or removed from
+     * the ViewGroup will be animated according to the animations defined in that LayoutTransition
+     * object. By default, the transition object is null (so layout changes are not animated).
+     *
+     * @param transition The LayoutTransition object that will animated changes in layout. A value
+     * of <code>null</code> means no transition will run on layout changes.
+     * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
+     */
+    public void setLayoutTransition(LayoutTransition transition) {
+        if (mTransition != null) {
+            mTransition.removeTransitionListener(mLayoutTransitionListener);
+        }
+        mTransition = transition;
+        if (mTransition != null) {
+            mTransition.addTransitionListener(mLayoutTransitionListener);
+        }
+    }
+
+    /**
+     * Gets the LayoutTransition object for this ViewGroup. If the LayoutTransition object is
+     * not null, changes in layout which occur because of children being added to or removed from
+     * the ViewGroup will be animated according to the animations defined in that LayoutTransition
+     * object. By default, the transition object is null (so layout changes are not animated).
+     *
+     * @return LayoutTranstion The LayoutTransition object that will animated changes in layout.
+     * A value of <code>null</code> means no transition will run on layout changes.
+     */
+    public LayoutTransition getLayoutTransition() {
+        return mTransition;
+    }
+
     private void removeViewsInternal(int start, int count) {
         final OnHierarchyChangeListener onHierarchyChangeListener = mOnHierarchyChangeListener;
         final boolean notifyListener = onHierarchyChangeListener != null;
@@ -2227,12 +2646,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = start; i < end; i++) {
             final View view = children[i];
 
+            if (mTransition != null) {
+                mTransition.childRemove(this, view);
+            }
+
             if (view == focused) {
                 view.clearFocusForRemoval();
                 clearChildFocus = view;
             }
 
-            if (view.getAnimation() != null) {
+            if (view.getAnimation() != null ||
+                (mTransitioningViews != null && mTransitioningViews.contains(view))) {
                 addDisappearingView(view);
             } else if (detach) {
                view.dispatchDetachedFromWindow();
@@ -2291,12 +2715,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = count - 1; i >= 0; i--) {
             final View view = children[i];
 
+            if (mTransition != null) {
+                mTransition.childRemove(this, view);
+            }
+
             if (view == focused) {
                 view.clearFocusForRemoval();
                 clearChildFocus = view;
             }
 
-            if (view.getAnimation() != null) {
+            if (view.getAnimation() != null ||
+                    (mTransitioningViews != null && mTransitioningViews.contains(view))) {
                 addDisappearingView(view);
             } else if (detach) {
                view.dispatchDetachedFromWindow();
@@ -2329,11 +2758,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #detachViewFromParent(int)
      */
     protected void removeDetachedView(View child, boolean animate) {
+        if (mTransition != null) {
+            mTransition.childRemove(this, child);
+        }
+
         if (child == mFocused) {
             child.clearFocus();
         }
 
-        if (animate && child.getAnimation() != null) {
+        if ((animate && child.getAnimation() != null) ||
+                (mTransitioningViews != null && mTransitioningViews.contains(child))) {
             addDisappearingView(child);
         } else if (child.mAttachInfo != null) {
             child.dispatchDetachedFromWindow();
@@ -2475,6 +2909,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int[] location = attachInfo.mInvalidateChildLocation;
             location[CHILD_LEFT_INDEX] = child.mLeft;
             location[CHILD_TOP_INDEX] = child.mTop;
+            Matrix childMatrix = child.getMatrix();
+            if (!childMatrix.isIdentity()) {
+                RectF boundingRect = attachInfo.mTmpTransformRect;
+                boundingRect.set(dirty);
+                childMatrix.mapRect(boundingRect);
+                dirty.set((int) boundingRect.left, (int) boundingRect.top,
+                        (int) (boundingRect.right + 0.5f),
+                        (int) (boundingRect.bottom + 0.5f));
+            }
 
             // If the child is drawing an animation, we want to copy this flag onto
             // ourselves and the parent to make sure the invalidate request goes
@@ -2509,6 +2952,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
 
                 parent = parent.invalidateChildInParent(location, dirty);
+                if (view != null) {
+                    // Account for transform on current parent
+                    Matrix m = view.getMatrix();
+                    if (!m.isIdentity()) {
+                        RectF boundingRect = attachInfo.mTmpTransformRect;
+                        boundingRect.set(dirty);
+                        m.mapRect(boundingRect);
+                        dirty.set((int) boundingRect.left, (int) boundingRect.top,
+                                (int) (boundingRect.right + 0.5f),
+                                (int) (boundingRect.bottom + 0.5f));
+                    }
+                }
             } while (parent != null);
         }
     }
@@ -2875,7 +3330,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @ViewDebug.ExportedProperty(category = "drawing", mapping = {
         @ViewDebug.IntToString(from = PERSISTENT_NO_CACHE,        to = "NONE"),
-        @ViewDebug.IntToString(from = PERSISTENT_ALL_CACHES,      to = "ANIMATION"),
+        @ViewDebug.IntToString(from = PERSISTENT_ANIMATION_CACHE, to = "ANIMATION"),
         @ViewDebug.IntToString(from = PERSISTENT_SCROLLING_CACHE, to = "SCROLLING"),
         @ViewDebug.IntToString(from = PERSISTENT_ALL_CACHES,      to = "ALL")
     })
@@ -3286,6 +3741,75 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
         }
     }
+
+    /**
+     * This method tells the ViewGroup that the given View object, which should have this
+     * ViewGroup as its parent,
+     * should be kept around  (re-displayed when the ViewGroup draws its children) even if it
+     * is removed from its parent. This allows animations, such as those used by
+     * {@link android.app.Fragment} and {@link android.animation.LayoutTransition} to animate
+     * the removal of views. A call to this method should always be accompanied by a later call
+     * to {@link #endViewTransition(View)}, such as after an animation on the View has finished,
+     * so that the View finally gets removed.
+     *
+     * @param view The View object to be kept visible even if it gets removed from its parent.
+     */
+    public void startViewTransition(View view) {
+        if (view.mParent == this) {
+            if (mTransitioningViews == null) {
+                mTransitioningViews = new ArrayList<View>();
+            }
+            mTransitioningViews.add(view);
+        }
+    }
+
+    /**
+     * This method should always be called following an earlier call to
+     * {@link #startViewTransition(View)}. The given View is finally removed from its parent
+     * and will no longer be displayed. Note that this method does not perform the functionality
+     * of removing a view from its parent; it just discontinues the display of a View that
+     * has previously been removed.
+     *
+     * @return view The View object that has been removed but is being kept around in the visible
+     * hierarchy by an earlier call to {@link #startViewTransition(View)}.
+     */
+    public void endViewTransition(View view) {
+        if (mTransitioningViews != null) {
+            mTransitioningViews.remove(view);
+            final ArrayList<View> disappearingChildren = mDisappearingChildren;
+            if (disappearingChildren != null && disappearingChildren.contains(view)) {
+                disappearingChildren.remove(view);
+                if (view.mAttachInfo != null) {
+                    view.dispatchDetachedFromWindow();
+                }
+                if (view.mParent != null) {
+                    view.mParent = null;
+                }
+                mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
+            }
+        }
+    }
+
+    private LayoutTransition.TransitionListener mLayoutTransitionListener =
+            new LayoutTransition.TransitionListener() {
+        @Override
+        public void startTransition(LayoutTransition transition, ViewGroup container,
+                View view, int transitionType) {
+            // We only care about disappearing items, since we need special logic to keep
+            // those items visible after they've been 'removed'
+            if (transitionType == LayoutTransition.DISAPPEARING) {
+                startViewTransition(view);
+            }
+        }
+
+        @Override
+        public void endTransition(LayoutTransition transition, ViewGroup container,
+                View view, int transitionType) {
+            if (transitionType == LayoutTransition.DISAPPEARING && mTransitioningViews != null) {
+                endViewTransition(view);
+            }
+        }
+    };
 
     /**
      * {@inheritDoc}
@@ -3747,6 +4271,294 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             rightMargin = right;
             bottomMargin = bottom;
+        }
+    }
+
+    private static class SplitMotionTargets {
+        private SparseArray<View> mTargets;
+        private TargetInfo[] mUniqueTargets;
+        private int mUniqueTargetCount;
+        private MotionEvent.PointerCoords[] mPointerCoords;
+        private int[] mPointerIds;
+
+        private static final int INITIAL_UNIQUE_MOTION_TARGETS_SIZE = 5;
+        private static final int INITIAL_BUCKET_SIZE = 5;
+
+        public SplitMotionTargets() {
+            mTargets = new SparseArray<View>();
+            mUniqueTargets = new TargetInfo[INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
+            mPointerIds = new int[INITIAL_BUCKET_SIZE];
+            mPointerCoords = new MotionEvent.PointerCoords[INITIAL_BUCKET_SIZE];
+            for (int i = 0; i < INITIAL_BUCKET_SIZE; i++) {
+                mPointerCoords[i] = new MotionEvent.PointerCoords();
+            }
+        }
+
+        public void clear() {
+            mTargets.clear();
+            final int count = mUniqueTargetCount;
+            for (int i = 0; i < count; i++) {
+                mUniqueTargets[i].recycle();
+                mUniqueTargets[i] = null;
+            }
+            mUniqueTargetCount = 0;
+        }
+
+        public void add(int pointerId, View target, long downTime) {
+            mTargets.put(pointerId, target);
+
+            final int uniqueCount = mUniqueTargetCount;
+            boolean addUnique = true;
+            for (int i = 0; i < uniqueCount; i++) {
+                if (mUniqueTargets[i].view == target) {
+                    addUnique = false;
+                }
+            }
+            if (addUnique) {
+                if (mUniqueTargets.length == uniqueCount) {
+                    TargetInfo[] newTargets =
+                        new TargetInfo[uniqueCount + INITIAL_UNIQUE_MOTION_TARGETS_SIZE];
+                    System.arraycopy(mUniqueTargets, 0, newTargets, 0, uniqueCount);
+                    mUniqueTargets = newTargets;
+                }
+                mUniqueTargets[uniqueCount] = TargetInfo.obtain(target, downTime);
+                mUniqueTargetCount++;
+            }
+        }
+
+        public int getIdCount() {
+            return mTargets.size();
+        }
+
+        public int getUniqueTargetCount() {
+            return mUniqueTargetCount;
+        }
+
+        public TargetInfo getUniqueTargetAt(int index) {
+            return mUniqueTargets[index];
+        }
+
+        public View get(int id) {
+            return mTargets.get(id);
+        }
+
+        public int indexOfTarget(View target) {
+            return mTargets.indexOfValue(target);
+        }
+
+        public View targetAt(int index) {
+            return mTargets.valueAt(index);
+        }
+
+        public TargetInfo getPrimaryTarget() {
+            if (!isEmpty()) {
+                // Find the longest-lived target
+                long firstTime = Long.MAX_VALUE;
+                int firstIndex = 0;
+                final int uniqueCount = mUniqueTargetCount;
+                for (int i = 0; i < uniqueCount; i++) {
+                    TargetInfo info = mUniqueTargets[i];
+                    if (info.downTime < firstTime) {
+                        firstTime = info.downTime;
+                        firstIndex = i;
+                    }
+                }
+                return mUniqueTargets[firstIndex];
+            }
+            return null;
+        }
+
+        public boolean isEmpty() {
+            return mUniqueTargetCount == 0;
+        }
+
+        public void removeById(int id) {
+            final int index = mTargets.indexOfKey(id);
+            removeAt(index);
+        }
+        
+        public void removeView(View view) {
+            int i = 0;
+            while (i < mTargets.size()) {
+                if (mTargets.valueAt(i) == view) {
+                    mTargets.removeAt(i);
+                } else {
+                    i++;
+                }
+            }
+            removeUnique(view);
+        }
+
+        public void removeAt(int index) {
+            if (index < 0 || index >= mTargets.size()) {
+                return;
+            }
+
+            final View removeView = mTargets.valueAt(index);
+            mTargets.removeAt(index);
+            if (mTargets.indexOfValue(removeView) < 0) {
+                removeUnique(removeView);
+            }
+        }
+
+        private void removeUnique(View removeView) {
+            TargetInfo[] unique = mUniqueTargets;
+            int uniqueCount = mUniqueTargetCount;
+            for (int i = 0; i < uniqueCount; i++) {
+                if (unique[i].view == removeView) {
+                    unique[i].recycle();
+                    unique[i] = unique[--uniqueCount];
+                    unique[uniqueCount] = null;
+                    break;
+                }
+            }
+
+            mUniqueTargetCount = uniqueCount;
+        }
+
+        /**
+         * Return a new (obtain()ed) MotionEvent containing only data for pointers that should
+         * be dispatched to child. Don't forget to recycle it!
+         */
+        public MotionEvent filterMotionEventForChild(MotionEvent ev, View child, long downTime) {
+            int action = ev.getAction();
+            final int maskedAction = action & MotionEvent.ACTION_MASK;
+
+            // Only send pointer up events if this child was the target. Drop it otherwise.
+            if (maskedAction == MotionEvent.ACTION_POINTER_UP &&
+                    get(ev.getPointerId(ev.getActionIndex())) != child) {
+                return null;
+            }
+
+            int pointerCount = 0;
+            final int idCount = getIdCount();
+            for (int i = 0; i < idCount; i++) {
+                if (targetAt(i) == child) {
+                    pointerCount++;
+                }
+            }
+
+            int actionId = -1;
+            boolean needsNewIndex = false; // True if we should fill in the action's masked index
+
+            // If we have a down event, it wasn't counted above.
+            if (maskedAction == MotionEvent.ACTION_DOWN) {
+                pointerCount++;
+                actionId = ev.getPointerId(0);
+            } else if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
+                pointerCount++;
+
+                actionId = ev.getPointerId(ev.getActionIndex());
+
+                if (indexOfTarget(child) < 0) {
+                    // The new action should be ACTION_DOWN if this child isn't currently getting
+                    // any events.
+                    action = MotionEvent.ACTION_DOWN;
+                } else {
+                    // Fill in the index portion of the action later.
+                    needsNewIndex = true;
+                }
+            } else if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
+                actionId = ev.getPointerId(ev.getActionIndex());
+                if (pointerCount == 1) {
+                    // The new action should be ACTION_UP if there's only one pointer left for
+                    // this target.
+                    action = MotionEvent.ACTION_UP;
+                } else {
+                    // Fill in the index portion of the action later.
+                    needsNewIndex = true;
+                }
+            }
+
+            if (pointerCount == 0) {
+                return null;
+            }
+
+            // Fill the buckets with pointer data!
+            final int eventPointerCount = ev.getPointerCount();
+            int bucketIndex = 0;
+            int newActionIndex = -1;
+            for (int evp = 0; evp < eventPointerCount; evp++) {
+                final int id = ev.getPointerId(evp);
+
+                // Add this pointer to the bucket if it is new or targeted at child
+                if (id == actionId || get(id) == child) {
+                    // Expand scratch arrays if needed
+                    if (mPointerCoords.length <= bucketIndex) {
+                        int[] pointerIds = new int[pointerCount];
+                        MotionEvent.PointerCoords[] pointerCoords =
+                                new MotionEvent.PointerCoords[pointerCount];
+                        for (int i = mPointerCoords.length; i < pointerCoords.length; i++) {
+                            pointerCoords[i] = new MotionEvent.PointerCoords();
+                        }
+
+                        System.arraycopy(mPointerCoords, 0,
+                                pointerCoords, 0, mPointerCoords.length);
+                        System.arraycopy(mPointerIds, 0, pointerIds, 0, mPointerIds.length);
+
+                        mPointerCoords = pointerCoords;
+                        mPointerIds = pointerIds;
+                    }
+
+                    mPointerIds[bucketIndex] = id;
+                    ev.getPointerCoords(evp, mPointerCoords[bucketIndex]);
+
+                    if (needsNewIndex && id == actionId) {
+                        newActionIndex = bucketIndex;
+                    }
+
+                    bucketIndex++;
+                }
+            }
+
+            // Encode the new action index if we have one
+            if (newActionIndex >= 0) {
+                action = (action & MotionEvent.ACTION_MASK) |
+                        (newActionIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
+            }
+
+            return MotionEvent.obtain(downTime, ev.getEventTime(),
+                    action, pointerCount, mPointerIds, mPointerCoords, ev.getMetaState(),
+                    ev.getXPrecision(), ev.getYPrecision(), ev.getDeviceId(), ev.getEdgeFlags(),
+                    ev.getSource(), ev.getFlags());
+        }
+
+        static class TargetInfo {
+            public View view;
+            public long downTime;
+
+            private TargetInfo mNextRecycled;
+
+            private static TargetInfo sRecycleBin;
+            private static int sRecycledCount;
+
+            private static int MAX_RECYCLED = 15;
+
+            private TargetInfo() {
+            }
+
+            public static TargetInfo obtain(View v, long time) {
+                TargetInfo info;
+                if (sRecycleBin == null) {
+                    info = new TargetInfo();
+                } else {
+                    info = sRecycleBin;
+                    sRecycleBin = info.mNextRecycled;
+                    sRecycledCount--;
+                }
+                info.view = v;
+                info.downTime = time;
+                return info;
+            }
+
+            public void recycle() {
+                if (sRecycledCount >= MAX_RECYCLED) {
+                    return;
+                }
+                mNextRecycled = sRecycleBin;
+                sRecycleBin = this;
+                sRecycledCount++;
+            }
         }
     }
 }

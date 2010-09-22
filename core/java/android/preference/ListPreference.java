@@ -39,6 +39,7 @@ public class ListPreference extends DialogPreference {
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
     private String mValue;
+    private String mSummary;
     private int mClickedDialogEntryIndex;
     
     public ListPreference(Context context, AttributeSet attrs) {
@@ -49,8 +50,16 @@ public class ListPreference extends DialogPreference {
         mEntries = a.getTextArray(com.android.internal.R.styleable.ListPreference_entries);
         mEntryValues = a.getTextArray(com.android.internal.R.styleable.ListPreference_entryValues);
         a.recycle();
+
+        /* Retrieve the Preference summary attribute since it's private
+         * in the Preference class.
+         */
+        a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.Preference, 0, 0);
+        mSummary = a.getString(com.android.internal.R.styleable.Preference_summary);
+        a.recycle();
     }
-    
+
     public ListPreference(Context context) {
         this(context, null);
     }
@@ -124,6 +133,43 @@ public class ListPreference extends DialogPreference {
         mValue = value;
         
         persistString(value);
+    }
+
+    /**
+     * Returns the summary of this ListPreference. If the summary
+     * has a {@linkplain java.lang.String#format String formatting}
+     * marker in it (i.e. "%s" or "%1$s"), then the current entry
+     * value will be substituted in its place.
+     *
+     * @return the summary with appropriate string substitution
+     */
+    @Override
+    public CharSequence getSummary() {
+        final CharSequence entry = getEntry();
+        if (mSummary == null || entry == null) {
+            return super.getSummary();
+        } else {
+            return String.format(mSummary, entry);
+        }
+    }
+
+    /**
+     * Sets the summary for this Preference with a CharSequence.
+     * If the summary has a
+     * {@linkplain java.lang.String#format String formatting}
+     * marker in it (i.e. "%s" or "%1$s"), then the current entry
+     * value will be substituted in its place when it's retrieved.
+     *
+     * @param summary The summary for the preference.
+     */
+    @Override
+    public void setSummary(CharSequence summary) {
+        super.setSummary(summary);
+        if (summary == null && mSummary != null) {
+            mSummary = null;
+        } else if (summary != null && !summary.equals(mSummary)) {
+            mSummary = summary.toString();
+        }
     }
 
     /**

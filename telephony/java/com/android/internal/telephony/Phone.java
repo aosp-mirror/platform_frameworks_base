@@ -17,10 +17,10 @@
 package com.android.internal.telephony;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.net.LinkCapabilities;
+import android.net.LinkProperties;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -28,7 +28,6 @@ import android.telephony.SignalStrength;
 
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.gsm.NetworkInfo;
-import com.android.internal.telephony.gsm.GsmDataConnection;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -99,11 +98,12 @@ public interface Phone {
     static final String PHONE_NAME_KEY = "phoneName";
     static final String FAILURE_REASON_KEY = "reason";
     static final String STATE_CHANGE_REASON_KEY = "reason";
-    static final String DATA_APN_TYPES_KEY = "apnType";
+    static final String DATA_APN_TYPE_KEY = "apnType";
     static final String DATA_APN_KEY = "apn";
+    static final String DATA_LINK_PROPERTIES_KEY = "linkProperties";
+    static final String DATA_LINK_CAPABILITIES_KEY = "linkCapabilities";
 
     static final String DATA_IFACE_NAME_KEY = "iface";
-    static final String DATA_GATEWAY_KEY = "gateway";
     static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
     static final String PHONE_IN_ECM_STATE = "phoneinECMState";
 
@@ -243,11 +243,19 @@ public interface Phone {
     CellLocation getCellLocation();
 
     /**
-     * Get the current DataState. No change notification exists at this
-     * interface -- use
+     * Get the current for the default apn DataState. No change notification
+     * exists at this interface -- use
      * {@link android.telephony.PhoneStateListener} instead.
      */
     DataState getDataConnectionState();
+
+    /**
+     * Get the current DataState. No change notification exists at this
+     * interface -- use
+     * {@link android.telephony.PhoneStateListener} instead.
+     * @param apnType specify for which apn to get connection state info.
+     */
+    DataState getDataConnectionState(String apnType);
 
     /**
      * Get the current DataActivityState. No change notification exists at this
@@ -311,6 +319,16 @@ public interface Phone {
      *  @return The string name.
      */
     String getActiveApn();
+
+    /**
+     * Return the LinkProperties for the named apn or null if not available
+     */
+    LinkProperties getLinkProperties(String apnType);
+
+    /**
+     * Return the LinkCapabilities
+     */
+    LinkCapabilities getLinkCapabilities(String apnType);
 
     /**
      * Get current signal strength. No change notification available on this
@@ -1368,29 +1386,6 @@ public interface Phone {
     boolean isDataConnectivityPossible();
 
     /**
-     * Returns the name of the network interface used by the specified APN type.
-     */
-    String getInterfaceName(String apnType);
-
-    /**
-     * Returns the IP address of the network interface used by the specified
-     * APN type.
-     */
-    String getIpAddress(String apnType);
-
-    /**
-     * Returns the gateway for the network interface used by the specified APN
-     * type.
-     */
-    String getGateway(String apnType);
-
-    /**
-     * Returns the DNS servers for the network interface used by the specified
-     * APN type.
-     */
-    public String[] getDnsServers(String apnType);
-
-    /**
      * Retrieves the unique device ID, e.g., IMEI for GSM phones and MEID for CDMA phones.
      */
     String getDeviceId();
@@ -1533,6 +1528,11 @@ public interface Phone {
      * @return  true means the dialStr is OTA number, and false means the dialStr is not OTA number
      */
     boolean isOtaSpNumber(String dialStr);
+
+    /**
+     * Returns true if OTA Service Provisioning needs to be performed.
+     */
+    boolean needsOtaServiceProvisioning();
 
     /**
      * Register for notifications when CDMA call waiting comes
@@ -1710,4 +1710,15 @@ public interface Phone {
     void unsetOnEcbModeExitResponse(Handler h);
 
 
+    /**
+     * TODO: Adding a function for each property is not good.
+     * A fucntion of type getPhoneProp(propType) where propType is an
+     * enum of GSM+CDMA+LTE props would be a better approach.
+     *
+     * Get "Restriction of menu options for manual PLMN selection" bit
+     * status from EF_CSP data, this belongs to "Value Added Services Group".
+     * @return true if this bit is set or EF_CSP data is unavailable,
+     * false otherwise
+     */
+    boolean isCspPlmnEnabled();
 }

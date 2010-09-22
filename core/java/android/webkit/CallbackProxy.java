@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -41,6 +42,7 @@ import com.android.internal.R;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is a proxy class for handling WebCore -> UI thread messaging. All
@@ -112,6 +114,7 @@ class CallbackProxy extends Handler {
     private static final int ADD_HISTORY_ITEM                    = 135;
     private static final int HISTORY_INDEX_CHANGED               = 136;
     private static final int AUTH_CREDENTIALS                    = 137;
+    private static final int SET_INSTALLABLE_WEBAPP              = 138;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -253,17 +256,10 @@ class CallbackProxy extends Handler {
         // 32-bit reads and writes.
         switch (msg.what) {
             case PAGE_STARTED:
-                // every time we start a new page, we want to reset the
-                // WebView certificate:
-                // if the new site is secure, we will reload it and get a
-                // new certificate set;
-                // if the new site is not secure, the certificate must be
-                // null, and that will be the case
-                mWebView.setCertificate(null);
+                String startedUrl = msg.getData().getString("url");
+                mWebView.onPageStarted(startedUrl);
                 if (mWebViewClient != null) {
-                    mWebViewClient.onPageStarted(mWebView,
-                            msg.getData().getString("url"),
-                            (Bitmap) msg.obj);
+                    mWebViewClient.onPageStarted(mWebView, startedUrl, (Bitmap) msg.obj);
                 }
                 break;
 
@@ -500,18 +496,32 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsAlert(mWebView, url, message,
                             res)) {
+                        // only display the alert dialog if the mContext is
+                        // Activity and its window has the focus.
+                        if (!(mContext instanceof Activity)
+                                || !((Activity) mContext).hasWindowFocus()) {
+                            res.cancel();
+                            res.setReady();
+                            break;
+                        }
                         new AlertDialog.Builder(mContext)
                                 .setTitle(getJsDialogTitle(url))
                                 .setMessage(message)
                                 .setPositiveButton(R.string.ok,
-                                        new AlertDialog.OnClickListener() {
+                                        new DialogInterface.OnClickListener() {
                                             public void onClick(
                                                     DialogInterface dialog,
                                                     int which) {
                                                 res.confirm();
                                             }
                                         })
-                                .setCancelable(false)
+                                .setOnCancelListener(
+                                        new DialogInterface.OnCancelListener() {
+                                            public void onCancel(
+                                                    DialogInterface dialog) {
+                                                res.cancel();
+                                            }
+                                        })
                                 .show();
                     }
                     res.setReady();
@@ -525,6 +535,14 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsConfirm(mWebView, url, message,
                             res)) {
+                        // only display the alert dialog if the mContext is
+                        // Activity and its window has the focus.
+                        if (!(mContext instanceof Activity)
+                                || !((Activity) mContext).hasWindowFocus()) {
+                            res.cancel();
+                            res.setReady();
+                            break;
+                        }
                         new AlertDialog.Builder(mContext)
                                 .setTitle(getJsDialogTitle(url))
                                 .setMessage(message)
@@ -565,6 +583,14 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsPrompt(mWebView, url, message,
                                 defaultVal, res)) {
+                        // only display the alert dialog if the mContext is
+                        // Activity and its window has the focus.
+                        if (!(mContext instanceof Activity)
+                                || !((Activity) mContext).hasWindowFocus()) {
+                            res.cancel();
+                            res.setReady();
+                            break;
+                        }
                         final LayoutInflater factory = LayoutInflater
                                 .from(mContext);
                         final View view = factory.inflate(R.layout.js_prompt,
@@ -616,6 +642,14 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsBeforeUnload(mWebView, url,
                             message, res)) {
+                        // only display the alert dialog if the mContext is
+                        // Activity and its window has the focus.
+                        if (!(mContext instanceof Activity)
+                                || !((Activity) mContext).hasWindowFocus()) {
+                            res.cancel();
+                            res.setReady();
+                            break;
+                        }
                         final String m = mContext.getString(
                                 R.string.js_dialog_before_unload, message);
                         new AlertDialog.Builder(mContext)
@@ -725,7 +759,8 @@ class CallbackProxy extends Handler {
 
             case OPEN_FILE_CHOOSER:
                 if (mWebChromeClient != null) {
-                    mWebChromeClient.openFileChooser((UploadFile) msg.obj);
+                    UploadFileMessageData data = (UploadFileMessageData)msg.obj;
+                    mWebChromeClient.openFileChooser(data.getUploadFile(), data.getAcceptType());
                 }
                 break;
 
@@ -749,6 +784,9 @@ class CallbackProxy extends Handler {
                 password = msg.getData().getString("password");
                 mWebView.setHttpAuthUsernamePassword(
                         host, realm, username, password);
+                break;
+            case SET_INSTALLABLE_WEBAPP:
+                mWebChromeClient.setInstallableWebApp();
                 break;
         }
     }
@@ -1087,10 +1125,15 @@ class CallbackProxy extends Handler {
     public void onProgressChanged(int newProgress) {
         // Synchronize so that mLatestProgress is up-to-date.
         synchronized (this) {
-            if (mWebChromeClient == null || mLatestProgress == newProgress) {
+            // update mLatestProgress even mWebChromeClient is null as
+            // WebView.getProgress() needs it
+            if (mLatestProgress == newProgress) {
                 return;
             }
             mLatestProgress = newProgress;
+            if (mWebChromeClient == null) {
+                return;
+            }
             if (!mProgressUpdatePending) {
                 sendEmptyMessage(PROGRESS);
                 mProgressUpdatePending = true;
@@ -1172,9 +1215,7 @@ class CallbackProxy extends Handler {
         // for null.
         WebHistoryItem i = mBackForwardList.getCurrentItem();
         if (i != null) {
-            if (precomposed || i.getTouchIconUrl() == null) {
-                i.setTouchIconUrl(url);
-            }
+            i.setTouchIconUrl(url, precomposed);
         }
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
@@ -1432,6 +1473,24 @@ class CallbackProxy extends Handler {
         sendMessage(msg);
     }
 
+    private static class UploadFileMessageData {
+        private UploadFile mCallback;
+        private String mAcceptType;
+
+        public UploadFileMessageData(UploadFile uploadFile, String acceptType) {
+            mCallback = uploadFile;
+            mAcceptType = acceptType;
+        }
+
+        public UploadFile getUploadFile() {
+            return mCallback;
+        }
+
+        public String getAcceptType() {
+            return mAcceptType;
+        }
+    }
+
     private class UploadFile implements ValueCallback<Uri> {
         private Uri mValue;
         public void onReceiveValue(Uri value) {
@@ -1448,13 +1507,14 @@ class CallbackProxy extends Handler {
     /**
      * Called by WebViewCore to open a file chooser.
      */
-    /* package */ Uri openFileChooser() {
+    /* package */ Uri openFileChooser(String acceptType) {
         if (mWebChromeClient == null) {
             return null;
         }
         Message myMessage = obtainMessage(OPEN_FILE_CHOOSER);
         UploadFile uploadFile = new UploadFile();
-        myMessage.obj = uploadFile;
+        UploadFileMessageData data = new UploadFileMessageData(uploadFile, acceptType);
+        myMessage.obj = data;
         synchronized (this) {
             sendMessage(myMessage);
             try {
@@ -1482,5 +1542,12 @@ class CallbackProxy extends Handler {
         }
         Message msg = obtainMessage(HISTORY_INDEX_CHANGED, index, 0, item);
         sendMessage(msg);
+    }
+
+    void setInstallableWebApp() {
+        if (mWebChromeClient == null) {
+            return;
+        }
+        sendMessage(obtainMessage(SET_INSTALLABLE_WEBAPP));
     }
 }

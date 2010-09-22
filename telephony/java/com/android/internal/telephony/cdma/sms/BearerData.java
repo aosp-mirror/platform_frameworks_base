@@ -21,7 +21,6 @@ import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
 import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
 
 import android.util.Log;
-import android.util.SparseIntArray;
 
 import android.telephony.SmsMessage;
 
@@ -30,10 +29,8 @@ import android.text.format.Time;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
-import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
-import com.android.internal.util.HexDump;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
 
@@ -45,13 +42,13 @@ public final class BearerData {
     private final static String LOG_TAG = "SMS";
 
     /**
-     * Bearer Data Subparameter Indentifiers
+     * Bearer Data Subparameter Identifiers
      * (See 3GPP2 C.S0015-B, v2.0, table 4.5-1)
      * NOTE: Commented subparameter types are not implemented.
      */
     private final static byte SUBPARAM_MESSAGE_IDENTIFIER               = 0x00;
     private final static byte SUBPARAM_USER_DATA                        = 0x01;
-    private final static byte SUBPARAM_USER_REPONSE_CODE                = 0x02;
+    private final static byte SUBPARAM_USER_RESPONSE_CODE               = 0x02;
     private final static byte SUBPARAM_MESSAGE_CENTER_TIME_STAMP        = 0x03;
     private final static byte SUBPARAM_VALIDITY_PERIOD_ABSOLUTE         = 0x04;
     private final static byte SUBPARAM_VALIDITY_PERIOD_RELATIVE         = 0x05;
@@ -697,7 +694,7 @@ public final class BearerData {
     /*
      * TODO(cleanup): CdmaSmsAddress encoding should make use of
      * CdmaSmsAddress.parse provided that DTMF encoding is unified,
-     * and the difference in 4bit vs 8bit is resolved.
+     * and the difference in 4-bit vs. 8-bit is resolved.
      */
 
     private static void encodeCdmaSmsAddress(CdmaSmsAddress addr) throws CodingException {
@@ -805,6 +802,7 @@ public final class BearerData {
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
      *
      * @param bData an instance of BearerData.
+     *
      * @return byte array of raw encoded SMS bearer data.
      */
     public static byte[] encode(BearerData bData) {
@@ -915,7 +913,7 @@ public final class BearerData {
     private static String decodeUtf16(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        // Start reading from the next 16-bit aligned boundry after offset.
+        // Start reading from the next 16-bit aligned boundary after offset.
         int padding = offset % 2;
         numFields -= (offset + padding) / 2;
         try {
@@ -961,7 +959,7 @@ public final class BearerData {
     private static String decode7bitGsm(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        // Start reading from the next 7-bit aligned boundry after offset.
+        // Start reading from the next 7-bit aligned boundary after offset.
         int offsetBits = offset * 8;
         int offsetSeptets = (offsetBits + 6) / 7;
         numFields -= offsetSeptets;
@@ -1554,7 +1552,7 @@ public final class BearerData {
                 case SUBPARAM_USER_DATA:
                     decodeSuccess = decodeUserData(bData, inStream);
                     break;
-                case SUBPARAM_USER_REPONSE_CODE:
+                case SUBPARAM_USER_RESPONSE_CODE:
                     decodeSuccess = decodeUserResponseCode(bData, inStream);
                     break;
                 case SUBPARAM_REPLY_OPTION:

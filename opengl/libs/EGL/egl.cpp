@@ -59,6 +59,8 @@ static char const * const gExtensionString  =
         "EGL_KHR_image "
         "EGL_KHR_image_base "
         "EGL_KHR_image_pixmap "
+        "EGL_KHR_gl_texture_2D_image "
+        "EGL_KHR_fence_sync "
         "EGL_ANDROID_image_native_buffer "
         "EGL_ANDROID_swap_rectangle "
         ;
@@ -243,9 +245,23 @@ struct egl_image_t : public egl_object_t
     EGLImageKHR images[IMPL_NUM_IMPLEMENTATIONS];
 };
 
+struct egl_sync_t : public egl_object_t
+{
+    typedef egl_object_t::LocalRef<egl_sync_t, EGLSyncKHR> Ref;
+
+    egl_sync_t(EGLDisplay dpy, EGLContext context, EGLSyncKHR sync)
+        : dpy(dpy), context(context), sync(sync)
+    {
+    }
+    EGLDisplay dpy;
+    EGLContext context;
+    EGLSyncKHR sync;
+};
+
 typedef egl_surface_t::Ref  SurfaceRef;
 typedef egl_context_t::Ref  ContextRef;
 typedef egl_image_t::Ref    ImageRef;
+typedef egl_sync_t::Ref     SyncRef;
 
 struct tls_t
 {
@@ -479,6 +495,11 @@ egl_context_t* get_context(EGLContext context) {
 static inline
 egl_image_t* get_image(EGLImageKHR image) {
     return egl_to_native_cast<egl_image_t>(image);
+}
+
+static inline
+egl_sync_t* get_sync(EGLSyncKHR sync) {
+    return egl_to_native_cast<egl_sync_t>(sync);
 }
 
 static egl_connection_t* validate_display_config(
@@ -1786,6 +1807,111 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
      return EGL_TRUE;
 }
 
+// ----------------------------------------------------------------------------
+// EGL_EGLEXT_VERSION 5
+// ----------------------------------------------------------------------------
+
+
+EGLSyncKHR eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list)
+{
+    EGLContext ctx = eglGetCurrentContext();
+    ContextRef _c(ctx);
+    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_NO_IMAGE_KHR);
+    if (!validate_display_context(dpy, ctx))
+        return EGL_NO_IMAGE_KHR;
+    egl_display_t const * const dp = get_display(dpy);
+    egl_context_t * const c = get_context(ctx);
+    EGLSyncKHR result = EGL_NO_IMAGE_KHR;
+    if (c->cnx->egl.eglCreateSyncKHR) {
+        EGLSyncKHR sync = c->cnx->egl.eglCreateSyncKHR(
+                dp->disp[c->impl].dpy, type, attrib_list);
+        if (sync == EGL_NO_IMAGE_KHR)
+            return sync;
+        result = (egl_sync_t*)new egl_sync_t(dpy, ctx, sync);
+    }
+    return (EGLSyncKHR)result;
+}
+
+EGLBoolean eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
+{
+    egl_display_t const * const dp = get_display(dpy);
+    if (dp == 0) {
+        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+    }
+
+    SyncRef _s(sync);
+    if (!_s.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    egl_sync_t* syncObject = get_sync(sync);
+
+    EGLContext ctx = syncObject->context;
+    ContextRef _c(ctx);
+    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
+    if (!validate_display_context(dpy, ctx))
+        return EGL_FALSE;
+
+    egl_context_t * const c = get_context(ctx);
+
+    if (c->cnx->egl.eglDestroySyncKHR) {
+        return c->cnx->egl.eglDestroySyncKHR(
+                dp->disp[c->impl].dpy, syncObject->sync);
+    }
+
+    return EGL_FALSE;
+}
+
+EGLint eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)
+{
+    egl_display_t const * const dp = get_display(dpy);
+    if (dp == 0) {
+        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+    }
+
+    SyncRef _s(sync);
+    if (!_s.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    egl_sync_t* syncObject = get_sync(sync);
+
+    EGLContext ctx = syncObject->context;
+    ContextRef _c(ctx);
+    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
+    if (!validate_display_context(dpy, ctx))
+        return EGL_FALSE;
+
+    egl_context_t * const c = get_context(ctx);
+
+    if (c->cnx->egl.eglClientWaitSyncKHR) {
+        return c->cnx->egl.eglClientWaitSyncKHR(
+                dp->disp[c->impl].dpy, syncObject->sync, flags, timeout);
+    }
+
+    return EGL_FALSE;
+}
+
+EGLBoolean eglGetSyncAttribKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint attribute, EGLint *value)
+{
+    egl_display_t const * const dp = get_display(dpy);
+    if (dp == 0) {
+        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+    }
+
+    SyncRef _s(sync);
+    if (!_s.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    egl_sync_t* syncObject = get_sync(sync);
+
+    EGLContext ctx = syncObject->context;
+    ContextRef _c(ctx);
+    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
+    if (!validate_display_context(dpy, ctx))
+        return EGL_FALSE;
+
+    egl_context_t * const c = get_context(ctx);
+
+    if (c->cnx->egl.eglGetSyncAttribKHR) {
+        return c->cnx->egl.eglGetSyncAttribKHR(
+                dp->disp[c->impl].dpy, syncObject->sync, attribute, value);
+    }
+
+    return EGL_FALSE;
+}
 
 // ----------------------------------------------------------------------------
 // ANDROID extensions

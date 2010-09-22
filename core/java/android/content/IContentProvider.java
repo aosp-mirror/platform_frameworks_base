@@ -59,6 +59,7 @@ public interface IContentProvider extends IInterface {
             throws RemoteException, FileNotFoundException;
     public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException;
+
     /**
      * @hide -- until interface has proven itself
      *
@@ -70,6 +71,11 @@ public interface IContentProvider extends IInterface {
      * @param args Nullable Bundle argument passed to method.
      */
     public Bundle call(String method, String request, Bundle args) throws RemoteException;
+
+    // Data interchange.
+    public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
+    public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType, Bundle opts)
+            throws RemoteException, FileNotFoundException;
 
     /* IPC constants */
     static final String descriptor = "android.content.IContentProvider";
@@ -84,4 +90,6 @@ public interface IContentProvider extends IInterface {
     static final int OPEN_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 14;
     static final int APPLY_BATCH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 19;
     static final int CALL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 20;
+    static final int GET_STREAM_TYPES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 21;
+    static final int OPEN_TYPED_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 22;
 }

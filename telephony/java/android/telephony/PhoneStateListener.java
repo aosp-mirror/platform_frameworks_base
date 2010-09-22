@@ -25,6 +25,7 @@ import android.telephony.CellLocation;
 import android.util.Log;
 
 import com.android.internal.telephony.IPhoneStateListener;
+import com.android.internal.telephony.Phone;
 
 /**
  * A listener class for monitoring changes in specific telephony states
@@ -284,7 +285,7 @@ public class PhoneStateListener {
         }
 
         public void onDataConnectionStateChanged(int state, int networkType) {
-            Message.obtain(mHandler, LISTEN_DATA_CONNECTION_STATE, state, networkType, null).
+            Message.obtain(mHandler, LISTEN_DATA_CONNECTION_STATE, state, networkType).
                     sendToTarget();
         }
 

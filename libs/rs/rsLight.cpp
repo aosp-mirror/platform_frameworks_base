@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-
 #include <GLES/gl.h>
+#else
+#include "rsContextHostStub.h"
+#include <OpenGL/gl.h>
+#endif //ANDROID_RS_BUILD_FOR_HOST
 
 using namespace android;
 using namespace android::renderscript;
@@ -63,6 +67,16 @@ void Light::setupGL(uint32_t num) const
     glLightfv(GL_LIGHT0 + num, GL_DIFFUSE, mColor);
     glLightfv(GL_LIGHT0 + num, GL_SPECULAR, mColor);
     glLightfv(GL_LIGHT0 + num, GL_POSITION, mPosition);
+}
+
+void Light::serialize(OStream *stream) const
+{
+    
+}
+
+Light *Light::createFromStream(Context *rsc, IStream *stream)
+{
+    return NULL;
 }
 
 ////////////////////////////////////////////

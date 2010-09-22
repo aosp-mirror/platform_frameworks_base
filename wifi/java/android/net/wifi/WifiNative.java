@@ -41,6 +41,8 @@ public class WifiNative {
     public native static String getErrorString(int errorCode);
 
     public native static boolean loadDriver();
+
+    public native static boolean isDriverLoaded();
     
     public native static boolean unloadDriver();
 
@@ -109,6 +111,10 @@ public class WifiNative {
 
     public native static boolean setPowerModeCommand(int mode);
 
+    public native static int getBandCommand();
+
+    public native static boolean setBandCommand(int band);
+
     public native static int getPowerModeCommand();
 
     public native static boolean setNumAllowedChannelsCommand(int numChannels);
@@ -148,8 +154,6 @@ public class WifiNative {
     public native static boolean doDhcpRequest(DhcpInfo results);
 
     public native static String getDhcpError();
-
-    public native static boolean setSuspendOptimizationsCommand(boolean enabled);
 
     /**
      * Wait for the supplicant to send an event, returning the event string.

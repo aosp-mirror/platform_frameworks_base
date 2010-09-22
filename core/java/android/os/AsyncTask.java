@@ -16,16 +16,16 @@
 
 package android.os;
 
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>An asynchronous task is defined by a computation that runs on a background thread and
  * whose result is published on the UI thread. An asynchronous task is defined by 3 generic
  * types, called <code>Params</code>, <code>Progress</code> and <code>Result</code>,
- * and 4 steps, called <code>begin</code>, <code>doInBackground</code>,
- * <code>processProgress</code> and <code>end</code>.</p>
+ * and 4 steps, called <code>onPreExecute</code>, <code>doInBackground</code>,
+ * <code>onProgressUpdate</code> and <code>onPostExecute</code>.</p>
  *
  * <h2>Usage</h2>
  * <p>AsyncTask must be subclassed to be used. The subclass will override at least
@@ -123,6 +123,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  *     <li>The task can be executed only once (an exception will be thrown if
  *     a second execution is attempted.)</li>
  * </ul>
+ *
+ * <h2>Memory observability</h2>
+ * <p>AsyncTask guarantees that all callback calls are synchronized in such a way that the following
+ * operations are safe without explicit synchronizations.</p>
+ * <ul>
+ *     <li>Set member fields in the constructor or {@link #onPreExecute}, and refer to them
+ *     in {@link #doInBackground}.
+ *     <li>Set member fields in {@link #doInBackground}, and refer to them in
+ *     {@link #onProgressUpdate} and {@link #onPostExecute}.
+ * </ul>
  */
 public abstract class AsyncTask<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTask";
@@ -175,6 +185,11 @@ public abstract class AsyncTask<Params, Progress, Result> {
         FINISHED,
     }
 
+    /** @hide Used to force static handler to be created. */
+    public static void init() {
+        sHandler.getLooper();
+    }
+
     /**
      * Creates a new asynchronous task. This constructor must be invoked on the UI thread.
      */
@@ -187,6 +202,17 @@ public abstract class AsyncTask<Params, Progress, Result> {
         };
 
         mFuture = new FutureTask<Result>(mWorker) {
+
+            @Override
+            protected void set(Result v) {
+                super.set(v);
+                if (isCancelled()) {
+                    Message message = sHandler.obtainMessage(MESSAGE_POST_CANCEL,
+                            new AsyncTaskResult<Result>(AsyncTask.this, (Result[]) null));
+                    message.sendToTarget();
+                }
+            }
+
             @Override
             protected void done() {
                 Message message;
@@ -402,14 +428,19 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * still running. Each call to this method will trigger the execution of
      * {@link #onProgressUpdate} on the UI thread.
      *
+     * {@link #onProgressUpdate} will note be called if the task has been
+     * canceled.
+     *
      * @param values The progress values to update the UI with.
      *
      * @see #onProgressUpdate
      * @see #doInBackground
      */
     protected final void publishProgress(Progress... values) {
-        sHandler.obtainMessage(MESSAGE_POST_PROGRESS,
-                new AsyncTaskResult<Progress>(this, values)).sendToTarget();
+        if (!isCancelled()) {
+            sHandler.obtainMessage(MESSAGE_POST_PROGRESS,
+                    new AsyncTaskResult<Progress>(this, values)).sendToTarget();
+        }
     }
 
     private void finish(Result result) {

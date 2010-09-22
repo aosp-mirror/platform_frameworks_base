@@ -16,11 +16,10 @@
 
 package android.graphics;
 
-import android.text.TextUtils;
-import android.text.SpannedString;
-import android.text.SpannableString;
 import android.text.GraphicsOperations;
-import android.util.DisplayMetrics;
+import android.text.SpannableString;
+import android.text.SpannedString;
+import android.text.TextUtils;
 
 import javax.microedition.khronos.opengles.GL;
 
@@ -43,21 +42,38 @@ public class Canvas {
         for both to be null.
     */
     private Bitmap  mBitmap;    // if not null, mGL must be null
-    private GL      mGL;        // if not null, mBitmap must be null
     
     // optional field set by the caller
-    private DrawFilter  mDrawFilter;
+    private DrawFilter mDrawFilter;
 
-    // Package-scoped for quick access.
-    /*package*/ int mDensity = Bitmap.DENSITY_NONE;
+    /**
+     * @hide
+     */
+    protected int mDensity = Bitmap.DENSITY_NONE;
 
-    // Used to determine when compatibility scaling is in effect.
-    private int mScreenDensity = Bitmap.DENSITY_NONE;
+    /**
+     * Used to determine when compatibility scaling is in effect.
+     * 
+     * @hide
+     */
+    protected int mScreenDensity = Bitmap.DENSITY_NONE;
     
     // Used by native code
     @SuppressWarnings({"UnusedDeclaration"})
     private int         mSurfaceFormat;
 
+    /**
+     * Flag for drawTextRun indicating left-to-right run direction.
+     * @hide
+     */
+    public static final int DIRECTION_LTR = 0;
+    
+    /**
+     * Flag for drawTextRun indicating right-to-left run direction.
+     * @hide
+     */
+    public static final int DIRECTION_RTL = 1;
+    
     /**
      * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
      * draw into.  The initial target density is {@link Bitmap#DENSITY_NONE};
@@ -89,47 +105,37 @@ public class Canvas {
         mDensity = bitmap.mDensity;
     }
     
-    /*package*/ Canvas(int nativeCanvas) {
+    Canvas(int nativeCanvas) {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();
         }
         mNativeCanvas = nativeCanvas;
         mDensity = Bitmap.getDefaultDensity();
     }
-    
+
     /**
-     * Construct a canvas with the specified gl context. All drawing through
-     * this canvas will be redirected to OpenGL. Note: some features may not
-     * be supported in this mode (e.g. some GL implementations may not support
-     * antialiasing or certain effects like ColorMatrix or certain Xfermodes).
-     * However, no exception will be thrown in those cases.
+     * Returns null.
      * 
-     * <p>The initial target density of the canvas is the same as the initial
-     * density of bitmaps as per {@link Bitmap#getDensity() Bitmap.getDensity()}.
+     * @deprecated This method is not supported and should not be invoked.
      */
-    public Canvas(GL gl) {
-        mNativeCanvas = initGL();
-        mGL = gl;
-        mDensity = Bitmap.getDefaultDensity();
+    @Deprecated
+    protected GL getGL() {
+        return null;
     }
-    
+
     /**
-     * Return the GL object associated with this canvas, or null if it is not
-     * backed by GL.
+     * Indicates whether this Canvas uses hardware acceleration.
+     * 
+     * Note that this method does not define what type of hardware acceleration
+     * may or may not be used.
+     * 
+     * @return True if drawing operations are hardware accelerated,
+     *         false otherwise.
      */
-    public GL getGL() {
-        return mGL;
+    public boolean isHardwareAccelerated() {
+        return false;
     }
-    
-    /**
-     * Call this to free up OpenGL resources that may be cached or allocated
-     * on behalf of the Canvas. Any subsequent drawing with a GL-backed Canvas
-     * will have to recreate those resources.
-     */
-    public static void freeGlCaches() {
-        freeCaches();
-    }
-        
+
     /**
      * Specify a bitmap for the canvas to draw into.  As a side-effect, also
      * updates the canvas's target density to match that of the bitmap.
@@ -143,7 +149,7 @@ public class Canvas {
         if (!bitmap.isMutable()) {
             throw new IllegalStateException();
         }
-        if (mGL != null) {
+        if (isHardwareAccelerated()) {
             throw new RuntimeException("Can't set a bitmap device on a GL canvas");
         }
         throwIfRecycled(bitmap);
@@ -157,13 +163,12 @@ public class Canvas {
      * Set the viewport dimensions if this canvas is GL based. If it is not,
      * this method is ignored and no exception is thrown.
      *
-     *  @param width    The width of the viewport
-     *  @param height   The height of the viewport
+     * @param width The width of the viewport
+     * @param height The height of the viewport
+     * 
+     * @hide
      */
     public void setViewport(int width, int height) {
-        if (mGL != null) {
-            nativeSetViewport(mNativeCanvas, width, height);
-        }
     }
 
     /**
@@ -377,8 +382,8 @@ public class Canvas {
      *
      * @param sx The amount to scale in X
      * @param sy The amount to scale in Y
-     * @param px The x-coord for the pivot point (unchanged by the rotation)
-     * @param py The y-coord for the pivot point (unchanged by the rotation)
+     * @param px The x-coord for the pivot point (unchanged by the scale)
+     * @param py The y-coord for the pivot point (unchanged by the scale)
      */
     public final void scale(float sx, float sy, float px, float py) {
         translate(px, py);
@@ -621,7 +626,11 @@ public class Canvas {
         EdgeType(int nativeInt) {
             this.nativeInt = nativeInt;
         }
-        final int nativeInt;
+
+        /**
+         * @hide
+         */
+        public final int nativeInt;
     }
 
     /**
@@ -958,6 +967,21 @@ public class Canvas {
     }
 
     /**
+     * Draws the specified bitmap as an N-patch (most often, a 9-patches.)
+     *
+     * Note: Only supported by hardware accelerated canvas at the moment.
+     *
+     * @param bitmap The bitmap to draw as an N-patch
+     * @param chunks The patches information (matches the native struct Res_png_9patch)
+     * @param dst The destination rectangle.
+     * @param paint The paint to draw the bitmap with. may be null
+     * 
+     * @hide
+     */
+    public void drawPatch(Bitmap bitmap, byte[] chunks, RectF dst, Paint paint) {
+    }    
+    
+    /**
      * Draw the specified bitmap, with its top/left corner at (x,y), using
      * the specified paint, transformed by the current matrix.
      * 
@@ -1221,7 +1245,7 @@ public class Canvas {
             checkRange(texs.length, texOffset, vertexCount);
         }
         if (colors != null) {
-            checkRange(colors.length, colorOffset, vertexCount);
+            checkRange(colors.length, colorOffset, vertexCount / 2);
         }
         if (indices != null) {
             checkRange(indices.length, indexOffset, indexCount);
@@ -1246,8 +1270,8 @@ public class Canvas {
             (text.length - index - count)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawText(mNativeCanvas, text, index, count, x, y,
-                        paint.mNativePaint);
+        native_drawText(mNativeCanvas, text, index, count, x, y, paint.mBidiFlags,
+                paint.mNativePaint);
     }
 
     /**
@@ -1259,7 +1283,10 @@ public class Canvas {
      * @param y     The y-coordinate of the origin of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
-    public native void drawText(String text, float x, float y, Paint paint);
+    public void drawText(String text, float x, float y, Paint paint) {
+        native_drawText(mNativeCanvas, text, 0, text.length(), x, y, paint.mBidiFlags,
+                paint.mNativePaint);
+    }
 
     /**
      * Draw the text, with origin at (x,y), using the specified paint.
@@ -1277,8 +1304,8 @@ public class Canvas {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        native_drawText(mNativeCanvas, text, start, end, x, y,
-                        paint.mNativePaint);
+        native_drawText(mNativeCanvas, text, start, end, x, y, paint.mBidiFlags,
+                paint.mNativePaint);
     }
 
     /**
@@ -1299,16 +1326,108 @@ public class Canvas {
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
             native_drawText(mNativeCanvas, text.toString(), start, end, x, y,
-                            paint.mNativePaint);
-        }
-        else if (text instanceof GraphicsOperations) {
+                            paint.mBidiFlags, paint.mNativePaint);
+        } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
                                                      paint);
-        }
-        else {
+        } else {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
-            drawText(buf, 0, end - start, x, y, paint);
+            native_drawText(mNativeCanvas, buf, 0, end - start, x, y, 
+                    paint.mBidiFlags, paint.mNativePaint);
+            TemporaryBuffer.recycle(buf);
+        }
+    }
+
+    /**
+     * Render a run of all LTR or all RTL text, with shaping. This does not run
+     * bidi on the provided text, but renders it as a uniform right-to-left or
+     * left-to-right run, as indicated by dir. Alignment of the text is as
+     * determined by the Paint's TextAlign value.
+     * 
+     * @param text the text to render
+     * @param index the start of the text to render
+     * @param count the count of chars to render
+     * @param contextIndex the start of the context for shaping.  Must be
+     *         no greater than index.
+     * @param contextCount the number of characters in the context for shaping.
+     *         ContexIndex + contextCount must be no less than index
+     *         + count.
+     * @param x the x position at which to draw the text
+     * @param y the y position at which to draw the text
+     * @param dir the run direction, either {@link #DIRECTION_LTR} or
+     *         {@link #DIRECTION_RTL}.
+     * @param paint the paint
+     * @hide
+     */
+    public void drawTextRun(char[] text, int index, int count,
+            int contextIndex, int contextCount, float x, float y, int dir,
+            Paint paint) {
+
+        if (text == null) {
+            throw new NullPointerException("text is null");
+        }
+        if (paint == null) {
+            throw new NullPointerException("paint is null");
+        }
+        if ((index | count | text.length - index - count) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (dir != DIRECTION_LTR && dir != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown dir: " + dir);
+        }
+
+        native_drawTextRun(mNativeCanvas, text, index, count,
+                contextIndex, contextCount, x, y, dir, paint.mNativePaint);
+    }
+
+    /**
+     * Render a run of all LTR or all RTL text, with shaping. This does not run
+     * bidi on the provided text, but renders it as a uniform right-to-left or
+     * left-to-right run, as indicated by dir. Alignment of the text is as
+     * determined by the Paint's TextAlign value.
+     *
+     * @param text the text to render
+     * @param start the start of the text to render. Data before this position
+     *            can be used for shaping context.
+     * @param end the end of the text to render. Data at or after this
+     *            position can be used for shaping context.
+     * @param x the x position at which to draw the text
+     * @param y the y position at which to draw the text
+     * @param dir the run direction, either 0 for LTR or 1 for RTL.
+     * @param paint the paint
+     * @hide
+     */
+    public void drawTextRun(CharSequence text, int start, int end,
+            int contextStart, int contextEnd, float x, float y, int dir,
+            Paint paint) {
+
+        if (text == null) {
+            throw new NullPointerException("text is null");
+        }
+        if (paint == null) {
+            throw new NullPointerException("paint is null");
+        }
+        if ((start | end | end - start | text.length() - end) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        int flags = dir == 0 ? 0 : 1;
+
+        if (text instanceof String || text instanceof SpannedString ||
+                text instanceof SpannableString) {
+            native_drawTextRun(mNativeCanvas, text.toString(), start, end,
+                    contextStart, contextEnd, x, y, flags, paint.mNativePaint);
+        } else if (text instanceof GraphicsOperations) {
+            ((GraphicsOperations) text).drawTextRun(this, start, end,
+                    contextStart, contextEnd, x, y, flags, paint);
+        } else {
+            int contextLen = contextEnd - contextStart;
+            int len = end - start;
+            char[] buf = TemporaryBuffer.obtain(contextLen);
+            TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+            native_drawTextRun(mNativeCanvas, buf, start - contextStart, len,
+                    0, contextLen, x, y, flags, paint.mNativePaint);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -1368,7 +1487,7 @@ public class Canvas {
         }
         native_drawTextOnPath(mNativeCanvas, text, index, count,
                               path.ni(), hOffset, vOffset,
-                              paint.mNativePaint);
+                              paint.mBidiFlags, paint.mNativePaint);
     }
 
     /**
@@ -1388,7 +1507,8 @@ public class Canvas {
                                float vOffset, Paint paint) {
         if (text.length() > 0) {
             native_drawTextOnPath(mNativeCanvas, text, path.ni(),
-                                  hOffset, vOffset, paint.mNativePaint);
+                                  hOffset, vOffset, paint.mBidiFlags,
+                                  paint.mNativePaint);
         }
     }
 
@@ -1431,28 +1551,74 @@ public class Canvas {
         drawPicture(picture);
         restore();
     }
-    
+
+    /**
+     * <p>Acquires the Canvas context. After invoking this method, the Canvas
+     * context  can be modified by the caller. For instance, if you acquire
+     * the context of an OpenGL Canvas you can reset the GL viewport, scissor,
+     * etc.</p>
+     * 
+     * <p>A call to {@link #acquireContext()} should aways be followed by
+     * a call to {@link #releaseContext()}, preferrably using a try block:</p>
+     * 
+     * <pre>
+     * try {
+     *     if (canvas.acquireContext()) {
+     *         // Use the canvas and/or its context
+     *     }
+     * } finally {
+     *     canvas.releaseContext();
+     * }
+     * </pre>
+     * 
+     * <p>Acquiring the context can be an expensive operation and should not
+     * be done unless absolutely necessary.</p>
+     * 
+     * <p>Applications should never invoke this method directly.</p>
+     * 
+     * @return True if the context could be acquired successfully, false
+     *         otherwise (if the context is already acquired for instance.)
+     * 
+     * @see #releaseContext() 
+     * 
+     * @hide
+     */
+    public boolean acquireContext() {
+        return false;
+    }
+
+    /**
+     * <p>Release the context acquired with {@link #acquireContext()}.</p>
+     * 
+     * @see #acquireContext() 
+     * 
+     * @hide
+     */
+    public void releaseContext() {
+    }
+
+    @Override
     protected void finalize() throws Throwable {
-        super.finalize();
-        // If the constructor threw an exception before setting mNativeCanvas, the native finalizer
-        // must not be invoked.
-        if (mNativeCanvas != 0) {
-            finalizer(mNativeCanvas);
+        try {
+            super.finalize();
+        } finally {
+            // If the constructor threw an exception before setting mNativeCanvas,
+            // the native finalizer must not be invoked.
+            if (mNativeCanvas != 0) {
+                finalizer(mNativeCanvas);
+            }
         }
     }
 
     /**
-     * Free up as much memory as possible from private caches (e.g. fonts,
-     * images)
+     * Free up as much memory as possible from private caches (e.g. fonts, images)
      *
-     * @hide - for now
+     * @hide
      */
     public static native void freeCaches();
 
     private static native int initRaster(int nativeBitmapOrZero);
-    private static native int initGL();
     private static native void native_setBitmap(int nativeCanvas, int bitmap);
-    private static native void nativeSetViewport(int nCanvas, int w, int h);
     private static native int native_saveLayer(int nativeCanvas, RectF bounds,
                                                int paint, int layerFlags);
     private static native int native_saveLayer(int nativeCanvas, float l,
@@ -1555,10 +1721,19 @@ public class Canvas {
     
     private static native void native_drawText(int nativeCanvas, char[] text,
                                                int index, int count, float x,
-                                               float y, int paint);
+                                               float y, int flags, int paint);
     private static native void native_drawText(int nativeCanvas, String text,
                                                int start, int end, float x,
-                                               float y, int paint);
+                                               float y, int flags, int paint);
+
+    private static native void native_drawTextRun(int nativeCanvas, String text,
+            int start, int end, int contextStart, int contextEnd,
+            float x, float y, int flags, int paint);
+
+    private static native void native_drawTextRun(int nativeCanvas, char[] text,
+            int start, int count, int contextStart, int contextCount,
+            float x, float y, int flags, int paint);
+
     private static native void native_drawPosText(int nativeCanvas,
                                                   char[] text, int index,
                                                   int count, float[] pos,
@@ -1570,11 +1745,13 @@ public class Canvas {
                                                      char[] text, int index,
                                                      int count, int path,
                                                      float hOffset,
-                                                     float vOffset, int paint);
+                                                     float vOffset, int bidiFlags,
+                                                     int paint);
     private static native void native_drawTextOnPath(int nativeCanvas,
                                                      String text, int path,
-                                                     float hOffset,
-                                                     float vOffset, int paint);
+                                                     float hOffset, 
+                                                     float vOffset, 
+                                                     int flags, int paint);
     private static native void native_drawPicture(int nativeCanvas,
                                                   int nativePicture);
     private static native void finalizer(int nativeCanvas);

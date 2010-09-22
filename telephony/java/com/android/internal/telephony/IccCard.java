@@ -672,12 +672,11 @@ public abstract class IccCard {
      * @return true if a ICC card is present
      */
     public boolean hasIccCard() {
-        boolean isIccPresent;
-        if (mPhone.getPhoneName().equals("GSM")) {
-            return mIccCardStatus.getCardState().isCardPresent();
-        } else {
-            // TODO: Make work with a CDMA device with a RUIM card.
+        if (mIccCardStatus == null) {
             return false;
+        } else {
+            // Returns ICC card status for both GSM and CDMA mode
+            return mIccCardStatus.getCardState().isCardPresent();
         }
     }
 

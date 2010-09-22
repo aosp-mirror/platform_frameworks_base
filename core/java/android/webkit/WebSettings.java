@@ -19,11 +19,13 @@ package android.webkit;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
-import java.lang.SecurityException;
+
 import java.util.Locale;
 
 /**
@@ -107,7 +109,7 @@ public class WebSettings {
      * Use with {@link #setCacheMode}.
      */
     public static final int LOAD_NO_CACHE = 2;
-    
+
     /**
      * Don't use the network, load from cache only.
      * Use with {@link #setCacheMode}.
@@ -176,14 +178,20 @@ public class WebSettings {
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
+    private boolean         mUseFixedViewport = false;
+    private int             mMaxFixedViewportWidth = WebView.DEFAULT_VIEWPORT_WIDTH;
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
+    private long            mMaximumDecodedImageSize = 0; // 0 means default
+    private boolean         mPrivateBrowsingEnabled = false;
+    private boolean         mSyntheticLinksEnabled = true;
     // HTML5 API flags
     private boolean         mAppCacheEnabled = false;
     private boolean         mDatabaseEnabled = false;
     private boolean         mDomStorageEnabled = false;
     private boolean         mWorkersEnabled = false;  // only affects V8.
     private boolean         mGeolocationEnabled = true;
+    private boolean         mXSSAuditorEnabled = false;
     // HTML5 configuration parameters
     private long            mAppCacheMaxSize = Long.MAX_VALUE;
     private String          mAppCachePath = "";
@@ -205,9 +213,10 @@ public class WebSettings {
     private boolean         mNavDump = false;
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
+    private boolean         mDisplayZoomControls = true;
     private boolean         mAllowFileAccess = true;
     private boolean         mLoadWithOverviewMode = false;
-    private boolean         mUseWebViewBackgroundOverscrollBackground = true;
+    private boolean         mEnableSmoothTransition = false;
 
     // private WebSettings, not accessible by the host activity
     static private int      mDoubleTapToastCount = 3;
@@ -297,13 +306,13 @@ public class WebSettings {
             "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; en-us)"
             + " AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0"
             + " Safari/530.17";
-    private static final String IPHONE_USERAGENT = 
+    private static final String IPHONE_USERAGENT =
             "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us)"
             + " AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0"
             + " Mobile/7A341 Safari/528.16";
     private static Locale sLocale;
     private static Object sLockForLocaleSettings;
-    
+
     /**
      * Package constructor to prevent clients from creating a new settings
      * instance.
@@ -314,6 +323,14 @@ public class WebSettings {
         mWebView = webview;
         mDefaultTextEncoding = context.getString(com.android.internal.
                                                  R.string.default_text_encoding);
+
+        // Detect tablet device for fixed viewport mode.
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final int landscapeWidth = Math.max(metrics.widthPixels, metrics.heightPixels);
+        final int minTabletWidth = context.getResources().getDimensionPixelSize(
+            com.android.internal.R.dimen.min_xlarge_screen_width);
+        mUseFixedViewport = (metrics.density == 1.0f && landscapeWidth >= minTabletWidth);
+        mMaxFixedViewportWidth = (int) (landscapeWidth * 1.25);
 
         if (sLockForLocaleSettings == null) {
             sLockForLocaleSettings = new Object();
@@ -328,6 +345,8 @@ public class WebSettings {
                 android.os.Process.myUid()) != PackageManager.PERMISSION_GRANTED;
     }
 
+    private static final String ACCEPT_LANG_FOR_US_LOCALE = "en-US";
+
     /**
      * Looks at sLocale and returns current AcceptLanguage String.
      * @return Current AcceptLanguage String.
@@ -337,32 +356,53 @@ public class WebSettings {
         synchronized(sLockForLocaleSettings) {
             locale = sLocale;
         }
-        StringBuffer buffer = new StringBuffer();
-        final String language = locale.getLanguage();
-        if (language != null) {
-            buffer.append(language);
-            final String country = locale.getCountry();
-            if (country != null) {
-                buffer.append("-");
-                buffer.append(country);
+        StringBuilder buffer = new StringBuilder();
+        addLocaleToHttpAcceptLanguage(buffer, locale);
+
+        if (!Locale.US.equals(locale)) {
+            if (buffer.length() > 0) {
+                buffer.append(", ");
             }
-        }
-        if (!locale.equals(Locale.US)) {
-            buffer.append(", ");
-            java.util.Locale us = Locale.US;
-            if (us.getLanguage() != null) {
-                buffer.append(us.getLanguage());
-                final String country = us.getCountry();
-                if (country != null) {
-                    buffer.append("-");
-                    buffer.append(country);
-                }
-            }
+            buffer.append(ACCEPT_LANG_FOR_US_LOCALE);
         }
 
         return buffer.toString();
     }
-    
+
+    /**
+     * Convert obsolete language codes, including Hebrew/Indonesian/Yiddish,
+     * to new standard.
+     */
+    private static String convertObsoleteLanguageCodeToNew(String langCode) {
+        if (langCode == null) {
+            return null;
+        }
+        if ("iw".equals(langCode)) {
+            // Hebrew
+            return "he";
+        } else if ("in".equals(langCode)) {
+            // Indonesian
+            return "id";
+        } else if ("ji".equals(langCode)) {
+            // Yiddish
+            return "yi";
+        }
+        return langCode;
+    }
+
+    private static void addLocaleToHttpAcceptLanguage(StringBuilder builder,
+                                                      Locale locale) {
+        String language = convertObsoleteLanguageCodeToNew(locale.getLanguage());
+        if (language != null) {
+            builder.append(language);
+            String country = locale.getCountry();
+            if (country != null) {
+                builder.append("-");
+                builder.append(country);
+            }
+        }
+    }
+
     /**
      * Looks at sLocale and mContext and returns current UserAgent String.
      * @return Current UserAgent String.
@@ -380,11 +420,11 @@ public class WebSettings {
         } else {
             // default to "1.0"
             buffer.append("1.0");
-        }  
+        }
         buffer.append("; ");
         final String language = locale.getLanguage();
         if (language != null) {
-            buffer.append(language.toLowerCase());
+            buffer.append(convertObsoleteLanguageCodeToNew(language));
             final String country = locale.getCountry();
             if (country != null) {
                 buffer.append("-");
@@ -407,11 +447,13 @@ public class WebSettings {
             buffer.append(" Build/");
             buffer.append(id);
         }
+        String mobile = mContext.getResources().getText(
+            com.android.internal.R.string.web_user_agent_target_content).toString();
         final String base = mContext.getResources().getText(
                 com.android.internal.R.string.web_user_agent).toString();
-        return String.format(base, buffer);
+        return String.format(base, buffer, mobile);
     }
-    
+
     /**
      * Enables dumping the pages navigation cache to a text file.
      */
@@ -424,6 +466,21 @@ public class WebSettings {
      */
     public boolean getNavDump() {
         return mNavDump;
+    }
+
+    /**
+     * If WebView only supports touch, a different navigation model will be
+     * applied. Otherwise, the navigation to support both touch and keyboard
+     * will be used.
+     * @hide
+    public void setSupportTouchOnly(boolean touchOnly) {
+        mSupportTounchOnly = touchOnly;
+    }
+     */
+
+    boolean supportTouchOnly() {
+        // for debug only, use mLightTouchEnabled for mSupportTounchOnly
+        return mLightTouchEnabled;
     }
 
     /**
@@ -448,14 +505,34 @@ public class WebSettings {
         mBuiltInZoomControls = enabled;
         mWebView.updateMultiTouchSupport(mContext);
     }
-    
+
     /**
      * Returns true if the zoom mechanism built into WebView is being used.
      */
     public boolean getBuiltInZoomControls() {
         return mBuiltInZoomControls;
     }
-    
+
+    /**
+     * Sets whether the on screen zoom buttons are used.
+     * A combination of built in zoom controls enabled
+     * and on screen zoom controls disabled allows for pinch to zoom
+     * to work without the on screen controls
+     * @hide
+     */
+    public void setDisplayZoomControls(boolean enabled) {
+        mDisplayZoomControls = enabled;
+        mWebView.updateMultiTouchSupport(mContext);
+    }
+
+    /**
+     * Returns true if the on screen zoom buttons are being used.
+     * @hide
+     */
+    public boolean getDisplayZoomControls() {
+        return mDisplayZoomControls;
+    }
+
     /**
      * Enable or disable file access within WebView. File access is enabled by
      * default.
@@ -486,20 +563,22 @@ public class WebSettings {
     }
 
     /**
-     * Set whether the WebView uses its background for over scroll background.
-     * If true, it will use the WebView's background. If false, it will use an
-     * internal pattern. Default is true.
+     * Set whether the WebView will enable smooth transition while panning or
+     * zooming. If it is true, WebView will choose a solution to maximize the
+     * performance. e.g. the WebView's content may not be updated during the
+     * transition. If it is false, WebView will keep its fidelity. The default
+     * value is false.
      */
-    public void setUseWebViewBackgroundForOverscrollBackground(boolean view) {
-        mUseWebViewBackgroundOverscrollBackground = view;
+    public void setEnableSmoothTransition(boolean enable) {
+        mEnableSmoothTransition = enable;
     }
 
     /**
-     * Returns true if this WebView uses WebView's background instead of
-     * internal pattern for over scroll background.
+     * Returns true if the WebView enables smooth transition while panning or
+     * zooming.
      */
-    public boolean getUseWebViewBackgroundForOverscrollBackground() {
-        return mUseWebViewBackgroundOverscrollBackground;
+    public boolean enableSmoothTransition() {
+        return mEnableSmoothTransition;
     }
 
     /**
@@ -1002,8 +1081,8 @@ public class WebSettings {
 
     private void verifyNetworkAccess() {
         if (!mBlockNetworkLoads) {
-            if (mContext.checkPermission("android.permission.INTERNET", 
-                    android.os.Process.myPid(), android.os.Process.myUid()) != 
+            if (mContext.checkPermission("android.permission.INTERNET",
+                    android.os.Process.myPid(), android.os.Process.myUid()) !=
                         PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException
                         ("Permission denied - " +
@@ -1029,6 +1108,7 @@ public class WebSettings {
      * @deprecated This method has been deprecated in favor of
      *             {@link #setPluginState}
      */
+    @Deprecated
     public synchronized void setPluginsEnabled(boolean flag) {
         setPluginState(PluginState.ON);
     }
@@ -1199,6 +1279,18 @@ public class WebSettings {
     }
 
     /**
+     * Sets whether XSS Auditor is enabled.
+     * @param flag Whether XSS Auditor should be enabled.
+     * @hide Only used by LayoutTestController.
+     */
+    public synchronized void setXSSAuditorEnabled(boolean flag) {
+        if (mXSSAuditorEnabled != flag) {
+            mXSSAuditorEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
      * Return true if javascript is enabled. <b>Note: The default is false.</b>
      * @return True if javascript is enabled.
      */
@@ -1211,6 +1303,7 @@ public class WebSettings {
      * @return True if plugins are enabled.
      * @deprecated This method has been replaced by {@link #getPluginState}
      */
+    @Deprecated
     public synchronized boolean getPluginsEnabled() {
         return mPluginState == PluginState.ON;
     }
@@ -1284,7 +1377,7 @@ public class WebSettings {
     public synchronized void setUserAgentString(String ua) {
         if (ua == null || ua.length() == 0) {
             synchronized(sLockForLocaleSettings) {
-                Locale currentLocale = Locale.getDefault(); 
+                Locale currentLocale = Locale.getDefault();
                 if (!sLocale.equals(currentLocale)) {
                     sLocale = currentLocale;
                     mAcceptLanguage = getCurrentAcceptLanguage();
@@ -1339,11 +1432,11 @@ public class WebSettings {
         }
         return mAcceptLanguage;
     }
-    
+
     /**
      * Tell the WebView whether it needs to set a node to have focus when
      * {@link WebView#requestFocus(int, android.graphics.Rect)} is called.
-     * 
+     *
      * @param flag
      */
     public void setNeedInitialFocus(boolean flag) {
@@ -1370,7 +1463,7 @@ public class WebSettings {
                     EventHandler.PRIORITY));
         }
     }
-    
+
     /**
      * Override the way the cache is used. The way the cache is used is based
      * on the navigation option. For a normal page load, the cache is checked
@@ -1384,7 +1477,7 @@ public class WebSettings {
             mOverrideCacheMode = mode;
         }
     }
-    
+
     /**
      * Return the current setting for overriding the cache mode. For a full
      * description, see the {@link #setCacheMode(int)} function.
@@ -1392,7 +1485,7 @@ public class WebSettings {
     public int getCacheMode() {
         return mOverrideCacheMode;
     }
-    
+
     /**
      * If set, webkit alternately shrinks and expands images viewed outside
      * of an HTML page to fit the screen. This conflicts with attempts by
@@ -1406,6 +1499,58 @@ public class WebSettings {
             postSync();
         }
      }
+
+    /**
+     * Specify the maximum decoded image size. The default is
+     * 2 megs for small memory devices and 8 megs for large memory devices.
+     * @param size The maximum decoded size, or zero to set to the default.
+     * @hide pending api council approval
+     */
+    public void setMaximumDecodedImageSize(long size) {
+        if (mMaximumDecodedImageSize != size) {
+            mMaximumDecodedImageSize = size;
+            postSync();
+        }
+    }
+
+    /**
+     * Returns whether to use fixed viewport.
+     */
+    /* package */ boolean getUseFixedViewport() {
+        return mUseFixedViewport;
+    }
+
+    /**
+     * Returns maximum fixed viewport width.
+     */
+    /* package */ int getMaxFixedViewportWidth() {
+        return mMaxFixedViewportWidth;
+    }
+
+    /**
+     * Returns whether private browsing is enabled.
+     */
+    /* package */ boolean isPrivateBrowsingEnabled() {
+        return mPrivateBrowsingEnabled;
+    }
+
+    /**
+     * Sets whether private browsing is enabled.
+     * @param flag Whether private browsing should be enabled.
+     */
+    /* package */ synchronized void setPrivateBrowsingEnabled(boolean flag) {
+        if (mPrivateBrowsingEnabled != flag) {
+            mPrivateBrowsingEnabled = flag;
+            postSync();
+        }
+    }
+
+    synchronized void setSyntheticLinksEnabled(boolean flag) {
+        if (mSyntheticLinksEnabled != flag) {
+            mSyntheticLinksEnabled = flag;
+            postSync();
+        }
+    }
 
     int getDoubleTapToastCount() {
         return mDoubleTapToastCount;

@@ -36,9 +36,8 @@ public abstract class ResourceCursorAdapter extends CursorAdapter {
     
     /**
      * Constructor.
-     * 
-     * @param context The context where the ListView associated with this
-     *            SimpleListItemFactory is running
+     *
+     * @param context The context where the ListView associated with this adapter is running
      * @param layout resource identifier of a layout file that defines the views
      *            for this list item.  Unless you override them later, this will
      *            define both the item views and the drop down views.
@@ -51,9 +50,8 @@ public abstract class ResourceCursorAdapter extends CursorAdapter {
     
     /**
      * Constructor.
-     * 
-     * @param context The context where the ListView associated with this
-     *            SimpleListItemFactory is running
+     *
+     * @param context The context where the ListView associated with this adapter is running
      * @param layout resource identifier of a layout file that defines the views
      *            for this list item.  Unless you override them later, this will
      *            define both the item views and the drop down views.
@@ -64,6 +62,22 @@ public abstract class ResourceCursorAdapter extends CursorAdapter {
      */
     public ResourceCursorAdapter(Context context, int layout, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);
+        mLayout = mDropDownLayout = layout;
+        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param context The context where the ListView associated with this adapter is running
+     * @param layout resource identifier of a layout file that defines the views
+     *            for this list item.  Unless you override them later, this will
+     *            define both the item views and the drop down views.
+     * @param c The cursor from which to get the data.
+     * @param flags flags used to determine the behavior of the adapter
+     */
+    public ResourceCursorAdapter(Context context, int layout, Cursor c, int flags) {
+        super(context, c, flags);
         mLayout = mDropDownLayout = layout;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }

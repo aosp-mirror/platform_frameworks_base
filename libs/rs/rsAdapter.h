@@ -50,6 +50,10 @@ public:
     void subData(uint32_t xoff, uint32_t count, const void *data);
     void data(const void *data);
 
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_ADAPTER_1D; }
+    static Adapter1D *createFromStream(Context *rsc, IStream *stream);
+
 protected:
     ObjectBaseRef<Allocation> mAllocation;
     uint32_t mY;
@@ -81,6 +85,10 @@ public:
 
     void data(const void *data);
     void subData(uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data);
+
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_ADAPTER_2D; }
+    static Adapter2D *createFromStream(Context *rsc, IStream *stream);
 
 protected:
     ObjectBaseRef<Allocation> mAllocation;

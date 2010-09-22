@@ -64,13 +64,13 @@ public:
         remote()->transact(DISCONNECT, data, &reply);
     }
 
-    // pass the buffered ISurface to the camera service
-    status_t setPreviewDisplay(const sp<ISurface>& surface)
+    // pass the buffered Surface to the camera service
+    status_t setPreviewDisplay(const sp<Surface>& surface)
     {
         LOGV("setPreviewDisplay");
         Parcel data, reply;
         data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
-        data.writeStrongBinder(surface->asBinder());
+        Surface::writeToParcel(surface, &data);
         remote()->transact(SET_PREVIEW_DISPLAY, data, &reply);
         return reply.readInt32();
     }
@@ -258,7 +258,7 @@ status_t BnCamera::onTransact(
         case SET_PREVIEW_DISPLAY: {
             LOGV("SET_PREVIEW_DISPLAY");
             CHECK_INTERFACE(ICamera, data, reply);
-            sp<ISurface> surface = interface_cast<ISurface>(data.readStrongBinder());
+            sp<Surface> surface = Surface::readFromParcel(data);
             reply->writeInt32(setPreviewDisplay(surface));
             return NO_ERROR;
         } break;
@@ -376,4 +376,3 @@ status_t BnCamera::onTransact(
 // ----------------------------------------------------------------------------
 
 }; // namespace android
-

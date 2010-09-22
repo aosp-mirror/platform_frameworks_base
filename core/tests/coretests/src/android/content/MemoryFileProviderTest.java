@@ -56,7 +56,6 @@ public class MemoryFileProviderTest extends AndroidTestCase {
             Uri uri = Uri.parse("content://android.content.MemoryFileProvider/huge");
             InputStream in = resolver.openInputStream(uri);
             assertNotNull("Failed to open stream number " + i, in);
-            assertEquals(1000000, in.skip(1000000));
             byte[] buf = new byte[MemoryFileProvider.TEST_BLOB.length];
             int count = in.read(buf);
             assertEquals(buf.length, count);

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -34,7 +35,7 @@ public class StatusBarView extends FrameLayout {
 
     static final int DIM_ANIM_TIME = 400;
     
-    StatusBarService mService;
+    PhoneStatusBarService mService;
     boolean mTracking;
     int mStartX, mStartY;
     ViewGroup mNotificationIcons;
@@ -45,6 +46,9 @@ public class StatusBarView extends FrameLayout {
     boolean mNightMode = false;
     int mStartAlpha = 0, mEndAlpha = 0;
     long mEndTime = 0;
+
+    Rect mButtonBounds = new Rect();
+    boolean mCapturingEvents = true;
 
     public StatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -94,7 +98,7 @@ public class StatusBarView extends FrameLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mService.updateExpandedViewPos(StatusBarService.EXPANDED_LEAVE_ALONE);
+        mService.updateExpandedViewPos(PhoneStatusBarService.EXPANDED_LEAVE_ALONE);
     }
 
     @Override
@@ -177,6 +181,9 @@ public class StatusBarView extends FrameLayout {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!mCapturingEvents) {
+            return false;
+        }
         if (event.getAction() != MotionEvent.ACTION_DOWN) {
             mService.interceptTouchEvent(event);
         }
@@ -185,6 +192,13 @@ public class StatusBarView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (mButtonBounds.contains((int)event.getX(), (int)event.getY())) {
+                mCapturingEvents = false;
+                return false;
+            }
+        }
+        mCapturingEvents = true;
         return mService.interceptTouchEvent(event)
                 ? true : super.onInterceptTouchEvent(event);
     }

@@ -62,7 +62,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREENLAYOUT_SIZE_SMALL = 0x01;
     public static final int SCREENLAYOUT_SIZE_NORMAL = 0x02;
     public static final int SCREENLAYOUT_SIZE_LARGE = 0x03;
-    /** @hide */
     public static final int SCREENLAYOUT_SIZE_XLARGE = 0x04;
     
     public static final int SCREENLAYOUT_LONG_MASK = 0x30;
@@ -84,7 +83,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * <p>The {@link #SCREENLAYOUT_SIZE_MASK} bits define the overall size
      * of the screen.  They may be one of
      * {@link #SCREENLAYOUT_SIZE_SMALL}, {@link #SCREENLAYOUT_SIZE_NORMAL},
-     * {@link #SCREENLAYOUT_SIZE_LARGE}.
+     * {@link #SCREENLAYOUT_SIZE_LARGE}, or {@link #SCREENLAYOUT_SIZE_XLARGE}.
      * 
      * <p>The {@link #SCREENLAYOUT_LONG_MASK} defines whether the screen
      * is wider/taller than normal.  They may be one of
@@ -267,11 +266,18 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         sb.append("/");
         sb.append(navigationHidden);
         sb.append(" orien=");
-        sb.append(orientation);
-        sb.append(" layout=");
-        sb.append(screenLayout);
-        sb.append(" uiMode=");
-        sb.append(uiMode);
+        switch(orientation) {
+            case ORIENTATION_LANDSCAPE:
+                sb.append("L"); break;
+            case ORIENTATION_PORTRAIT:
+                sb.append("P"); break;
+            default:
+                sb.append(orientation);
+        }
+        sb.append(" layout=0x");
+        sb.append(java.lang.Integer.toHexString(screenLayout));
+        sb.append(" uiMode=0x");
+        sb.append(java.lang.Integer.toHexString(uiMode));
         if (seq != 0) {
             sb.append(" seq=");
             sb.append(seq);

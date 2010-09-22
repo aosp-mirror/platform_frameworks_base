@@ -180,8 +180,8 @@ public class GsmDataConnection extends DataConnection {
 
     @Override
     protected boolean isDnsOk(String[] domainNameServers) {
-        if (NULL_IP.equals(dnsServers[0]) && NULL_IP.equals(dnsServers[1])
-                    && !((GSMPhone) phone).isDnsCheckDisabled()) {
+        if (NULL_IP.equals(domainNameServers[0]) && NULL_IP.equals(domainNameServers[1])
+                && !((GSMPhone) phone).isDnsCheckDisabled()) {
             // Work around a race condition where QMI does not fill in DNS:
             // Deactivate PDP and let DataConnectionTracker retry.
             // Do not apply the race condition workaround for MMS APN
@@ -189,6 +189,9 @@ public class GsmDataConnection extends DataConnection {
             // Otherwise, the default APN will not be restored anymore.
             if (!apn.types[0].equals(Phone.APN_TYPE_MMS)
                 || !isIpAddress(apn.mmsProxy)) {
+                log(String.format(
+                        "isDnsOk: return false apn.types[0]=%s APN_TYPE_MMS=%s isIpAddress(%s)=%s",
+                        apn.types[0], Phone.APN_TYPE_MMS, apn.mmsProxy, isIpAddress(apn.mmsProxy)));
                 return false;
             }
         }

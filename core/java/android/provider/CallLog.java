@@ -88,6 +88,17 @@ public class CallLog {
         public static final String NUMBER = "number";
 
         /**
+         * The ISO 3166-1 two letters country code of the country where the
+         * user received or made the call.
+         * <P>
+         * Type: TEXT
+         * </P>
+         *
+         * @hide
+         */
+        public static final String COUNTRY_ISO = "countryiso";
+
+        /**
          * The date the call occured, in milliseconds since the epoch
          * <P>Type: INTEGER (long)</P>
          */

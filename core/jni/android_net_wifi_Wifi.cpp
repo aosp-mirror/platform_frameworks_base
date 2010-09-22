@@ -98,6 +98,11 @@ static jstring doStringCommand(JNIEnv *env, const char *cmd)
     }
 }
 
+static jboolean android_net_wifi_isDriverLoaded(JNIEnv* env, jobject clazz)
+{
+    return (jboolean)(::is_wifi_driver_loaded() == 1);
+}
+
 static jboolean android_net_wifi_loadDriver(JNIEnv* env, jobject clazz)
 {
     return (jboolean)(::wifi_load_driver() == 0);
@@ -406,6 +411,30 @@ static jint android_net_wifi_getPowerModeCommand(JNIEnv* env, jobject clazz)
     return (jint)power;
 }
 
+static jboolean android_net_wifi_setBandCommand(JNIEnv* env, jobject clazz, jint band)
+{
+    char cmdstr[25];
+
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "DRIVER SETBAND %d", band);
+    int cmdTooLong = numWritten >= (int)sizeof(cmdstr);
+
+    return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
+}
+
+static jint android_net_wifi_getBandCommand(JNIEnv* env, jobject clazz)
+{
+    char reply[25];
+    int band;
+
+    if (doCommand("DRIVER GETBAND", reply, sizeof(reply)) != 0) {
+        return (jint)-1;
+    }
+    // reply comes back in the form "Band X" where X is the
+    // number we're interested in.
+    sscanf(reply, "%*s %u", &band);
+    return (jint)band;
+}
+
 static jboolean android_net_wifi_setNumAllowedChannelsCommand(JNIEnv* env, jobject clazz, jint numChannels)
 {
     char cmdstr[256];
@@ -493,15 +522,6 @@ static jboolean android_net_wifi_clearBlacklistCommand(JNIEnv* env, jobject claz
     return doBooleanCommand("BLACKLIST clear", "OK");
 }
 
-static jboolean android_net_wifi_setSuspendOptimizationsCommand(JNIEnv* env, jobject clazz, jboolean enabled)
-{
-    char cmdstr[25];
-
-    snprintf(cmdstr, sizeof(cmdstr), "DRIVER SETSUSPENDOPT %d", enabled ? 0 : 1);
-    return doBooleanCommand(cmdstr, "OK");
-}
-
-
 static jboolean android_net_wifi_doDhcpRequest(JNIEnv* env, jobject clazz, jobject info)
 {
     jint ipaddr, gateway, mask, dns1, dns2, server, lease;
@@ -533,6 +553,7 @@ static JNINativeMethod gWifiMethods[] = {
     /* name, signature, funcPtr */
 
     { "loadDriver", "()Z",  (void *)android_net_wifi_loadDriver },
+    { "isDriverLoaded", "()Z",  (void *)android_net_wifi_isDriverLoaded},
     { "unloadDriver", "()Z",  (void *)android_net_wifi_unloadDriver },
     { "startSupplicant", "()Z",  (void *)android_net_wifi_startSupplicant },
     { "stopSupplicant", "()Z",  (void *)android_net_wifi_stopSupplicant },
@@ -564,6 +585,8 @@ static JNINativeMethod gWifiMethods[] = {
     { "stopPacketFiltering", "()Z", (void*) android_net_wifi_stopPacketFiltering },
     { "setPowerModeCommand", "(I)Z", (void*) android_net_wifi_setPowerModeCommand },
     { "getPowerModeCommand", "()I", (void*) android_net_wifi_getPowerModeCommand },
+    { "setBandCommand", "(I)Z", (void*) android_net_wifi_setBandCommand},
+    { "getBandCommand", "()I", (void*) android_net_wifi_getBandCommand},
     { "setNumAllowedChannelsCommand", "(I)Z", (void*) android_net_wifi_setNumAllowedChannelsCommand },
     { "getNumAllowedChannelsCommand", "()I", (void*) android_net_wifi_getNumAllowedChannelsCommand },
     { "setBluetoothCoexistenceModeCommand", "(I)Z",
@@ -580,7 +603,6 @@ static JNINativeMethod gWifiMethods[] = {
     { "setScanResultHandlingCommand", "(I)Z", (void*) android_net_wifi_setScanResultHandlingCommand },
     { "addToBlacklistCommand", "(Ljava/lang/String;)Z", (void*) android_net_wifi_addToBlacklistCommand },
     { "clearBlacklistCommand", "()Z", (void*) android_net_wifi_clearBlacklistCommand },
-    { "setSuspendOptimizationsCommand", "(Z)Z", (void*) android_net_wifi_setSuspendOptimizationsCommand},
 
     { "doDhcpRequest", "(Landroid/net/DhcpInfo;)Z", (void*) android_net_wifi_doDhcpRequest },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_wifi_getDhcpError },
