@@ -414,13 +414,13 @@ public class MediaEnvReverbTest extends ActivityInstrumentationTestCase2<MediaFr
         EnergyProbe probe = null;
         AudioEffect vc = null;
         MediaPlayer mp = null;
+        AudioEffect rvb = null;
         AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
         int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         am.setStreamVolume(AudioManager.STREAM_MUSIC,
                            am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
                            0);
         try {
-            probe = new EnergyProbe(0);
             // creating a volume controller on output mix ensures that ro.audio.silent mutes
             // audio after the effects and not before
             vc = new AudioEffect(
@@ -433,11 +433,24 @@ public class MediaEnvReverbTest extends ActivityInstrumentationTestCase2<MediaFr
             mp = new MediaPlayer();
             mp.setDataSource(MediaNames.SINE_200_1000);
             mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            getReverb(mp.getAudioSessionId());
-            mReverb.setRoomLevel((short)0);
-            mReverb.setReverbLevel((short)0);
-            mReverb.setDecayTime(2000);
-            mReverb.setEnabled(true);
+
+            // create reverb with UUID instead of EnvironmentalReverb constructor otherwise an
+            // auxiliary reverb will be chosen by the effect framework as we are on session 0
+            rvb = new AudioEffect(
+                        AudioEffect.EFFECT_TYPE_NULL,
+                        UUID.fromString("c7a511a0-a3bb-11df-860e-0002a5d5c51b"),
+                        0,
+                        0);
+
+            rvb.setParameter(EnvironmentalReverb.PARAM_ROOM_LEVEL, (short)0);
+            rvb.setParameter(EnvironmentalReverb.PARAM_REVERB_LEVEL, (short)0);
+            rvb.setParameter(EnvironmentalReverb.PARAM_DECAY_TIME, 2000);
+            rvb.setEnabled(true);
+
+            // create probe after reverb so that it is chained behind the reverb in the
+            // effect chain
+            probe = new EnergyProbe(0);
+
             mp.prepare();
             mp.start();
             Thread.sleep(1000);
@@ -460,12 +473,14 @@ public class MediaEnvReverbTest extends ActivityInstrumentationTestCase2<MediaFr
             loge(msg, "sleep() interrupted");
         }
         finally {
-            releaseReverb();
             if (mp != null) {
                 mp.release();
             }
             if (vc != null) {
                 vc.release();
+            }
+            if (rvb != null) {
+                rvb.release();
             }
             if (probe != null) {
                 probe.release();
