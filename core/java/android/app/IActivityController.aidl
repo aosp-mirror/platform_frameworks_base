@@ -48,6 +48,11 @@ interface IActivityController
             long timeMillis, String stackTrace);
     
     /**
+     * Early call as soon as an ANR is detected.
+     */
+    int appEarlyNotResponding(String processName, int pid, String annotation);
+
+    /**
      * An application process is not responding.  Return 0 to show the "app
      * not responding" dialog, 1 to continue waiting, or -1 to kill it
      * immediately.

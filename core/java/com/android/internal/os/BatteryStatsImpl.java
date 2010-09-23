@@ -67,7 +67,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 51;
+    private static final int VERSION = 52;
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -85,7 +85,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     static final int MSG_UPDATE_WAKELOCKS = 1;
     static final int MSG_REPORT_POWER_CHANGE = 2;
-    static final long DELAY_UPDATE_WAKELOCKS = 15*1000;
+    static final long DELAY_UPDATE_WAKELOCKS = 5*1000;
 
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
@@ -1473,6 +1473,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         Uid u = mUidStats.get(uid);
         if (u != null) {
             u.reportExcessiveWakeLocked(proc, overTime, usedTime);
+        }
+    }
+
+    public void reportExcessiveCpuLocked(int uid, String proc, long overTime, long usedTime) {
+        Uid u = mUidStats.get(uid);
+        if (u != null) {
+            u.reportExcessiveCpuLocked(proc, overTime, usedTime);
         }
     }
 
@@ -2977,7 +2984,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             SamplingCounter[] mSpeedBins;
 
-            ArrayList<ExcessiveWake> mExcessiveWake;
+            ArrayList<ExcessivePower> mExcessivePower;
 
             Proc() {
                 mUnpluggables.add(this);
@@ -3005,55 +3012,69 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
             
-            public int countExcessiveWakes() {
-                return mExcessiveWake != null ? mExcessiveWake.size() : 0;
+            public int countExcessivePowers() {
+                return mExcessivePower != null ? mExcessivePower.size() : 0;
             }
 
-            public ExcessiveWake getExcessiveWake(int i) {
-                if (mExcessiveWake != null) {
-                    return mExcessiveWake.get(i);
+            public ExcessivePower getExcessivePower(int i) {
+                if (mExcessivePower != null) {
+                    return mExcessivePower.get(i);
                 }
                 return null;
             }
 
             public void addExcessiveWake(long overTime, long usedTime) {
-                if (mExcessiveWake == null) {
-                    mExcessiveWake = new ArrayList<ExcessiveWake>();
+                if (mExcessivePower == null) {
+                    mExcessivePower = new ArrayList<ExcessivePower>();
                 }
-                ExcessiveWake ew = new ExcessiveWake();
+                ExcessivePower ew = new ExcessivePower();
+                ew.type = ExcessivePower.TYPE_WAKE;
                 ew.overTime = overTime;
                 ew.usedTime = usedTime;
-                mExcessiveWake.add(ew);
+                mExcessivePower.add(ew);
             }
 
-            void writeExcessiveWakeToParcelLocked(Parcel out) {
-                if (mExcessiveWake == null) {
+            public void addExcessiveCpu(long overTime, long usedTime) {
+                if (mExcessivePower == null) {
+                    mExcessivePower = new ArrayList<ExcessivePower>();
+                }
+                ExcessivePower ew = new ExcessivePower();
+                ew.type = ExcessivePower.TYPE_CPU;
+                ew.overTime = overTime;
+                ew.usedTime = usedTime;
+                mExcessivePower.add(ew);
+            }
+
+            void writeExcessivePowerToParcelLocked(Parcel out) {
+                if (mExcessivePower == null) {
                     out.writeInt(0);
                     return;
                 }
 
-                final int N = mExcessiveWake.size();
+                final int N = mExcessivePower.size();
                 out.writeInt(N);
                 for (int i=0; i<N; i++) {
-                    ExcessiveWake ew = mExcessiveWake.get(i);
+                    ExcessivePower ew = mExcessivePower.get(i);
+                    out.writeInt(ew.type);
                     out.writeLong(ew.overTime);
                     out.writeLong(ew.usedTime);
                 }
             }
 
-            void readExcessiveWakeFromParcelLocked(Parcel in) {
+            void readExcessivePowerFromParcelLocked(Parcel in) {
                 final int N = in.readInt();
                 if (N == 0) {
-                    mExcessiveWake = null;
+                    mExcessivePower = null;
                     return;
                 }
 
-                mExcessiveWake = new ArrayList<ExcessiveWake>();
+                mExcessivePower = new ArrayList<ExcessivePower>();
                 for (int i=0; i<N; i++) {
-                    ExcessiveWake ew = new ExcessiveWake();
+                    ExcessivePower ew = new ExcessivePower();
+                    ew.type = in.readInt();
                     ew.overTime = in.readLong();
                     ew.usedTime = in.readLong();
-                    mExcessiveWake.add(ew);
+                    mExcessivePower.add(ew);
                 }
             }
 
@@ -3082,7 +3103,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     }
                 }
 
-                writeExcessiveWakeToParcelLocked(out);
+                writeExcessivePowerToParcelLocked(out);
             }
 
             void readFromParcelLocked(Parcel in) {
@@ -3112,7 +3133,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     }
                 }
 
-                readExcessiveWakeFromParcelLocked(in);
+                readExcessivePowerFromParcelLocked(in);
             }
 
             public BatteryStatsImpl getBatteryStats() {
@@ -3746,6 +3767,13 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
         
+        public void reportExcessiveCpuLocked(String proc, long overTime, long usedTime) {
+            Proc p = getProcessStatsLocked(proc);
+            if (p != null) {
+                p.addExcessiveCpu(overTime, usedTime);
+            }
+        }
+
         public void noteStartSensor(int sensor) {
             StopwatchTimer t = getSensorTimerLocked(sensor, true);
             if (t != null) {
@@ -4688,7 +4716,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                         p.mSpeedBins[i].readSummaryFromParcelLocked(in);
                     }
                 }
-                p.readExcessiveWakeFromParcelLocked(in);
+                p.readExcessivePowerFromParcelLocked(in);
             }
 
             NP = in.readInt();
@@ -4887,7 +4915,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                             out.writeInt(0);
                         }
                     }
-                    ps.writeExcessiveWakeToParcelLocked(out);
+                    ps.writeExcessivePowerToParcelLocked(out);
                 }
             }
 
