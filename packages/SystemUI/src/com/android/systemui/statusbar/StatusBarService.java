@@ -82,7 +82,8 @@ import com.android.systemui.statusbar.policy.StatusBarPolicy;
 
 public class StatusBarService extends Service implements CommandQueue.Callbacks {
     static final String TAG = "StatusBarService";
-    static final boolean SPEW = true;
+    static final boolean SPEW_ICONS = true;
+    static final boolean SPEW = false;
 
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
@@ -346,8 +347,10 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
     }
 
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
-        if (SPEW) Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
-                + " icon=" + icon);
+        if (SPEW_ICONS) {
+            Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
+                    + " icon=" + icon);
+        }
         StatusBarIconView view = new StatusBarIconView(this, slot);
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
@@ -355,14 +358,18 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
     public void updateIcon(String slot, int index, int viewIndex,
             StatusBarIcon old, StatusBarIcon icon) {
-        if (SPEW) Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
-                + " old=" + old + " icon=" + icon);
+        if (SPEW_ICONS) {
+            Slog.d(TAG, "updateIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
+                    + " old=" + old + " icon=" + icon);
+        }
         StatusBarIconView view = (StatusBarIconView)mStatusIcons.getChildAt(viewIndex);
         view.set(icon);
     }
 
     public void removeIcon(String slot, int index, int viewIndex) {
-        if (SPEW) Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
+        if (SPEW_ICONS) {
+            Slog.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
+        }
         mStatusIcons.removeViewAt(viewIndex);
     }
 
@@ -1175,50 +1182,17 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
             pw.println("mNotificationLinearLayout: " + viewInfo(mNotificationLinearLayout));
         }
-        /*
-        synchronized (mNotificationData) {
-            int N = mNotificationData.ongoingCount();
-            pw.println("  ongoingCount.size=" + N);
-            for (int i=0; i<N; i++) {
-                StatusBarNotification n = mNotificationData.getOngoing(i);
-                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("           data=" + n.data);
-            }
-            N = mNotificationData.latestCount();
-            pw.println("  ongoingCount.size=" + N);
-            for (int i=0; i<N; i++) {
-                StatusBarNotification n = mNotificationData.getLatest(i);
-                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("           data=" + n.data);
-            }
-        }
-        */
 
-        if (false) {
-            pw.println("see the logcat for a dump of the views we have created.");
+        if (true) {
             // must happen on ui thread
             mHandler.post(new Runnable() {
                     public void run() {
-                        mStatusBarView.getLocationOnScreen(mAbsPos);
-                        Slog.d(TAG, "mStatusBarView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
-                                + ") " + mStatusBarView.getWidth() + "x"
-                                + mStatusBarView.getHeight());
-                        mStatusBarView.debug();
-
-                        mExpandedView.getLocationOnScreen(mAbsPos);
-                        Slog.d(TAG, "mExpandedView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
-                                + ") " + mExpandedView.getWidth() + "x"
-                                + mExpandedView.getHeight());
-                        mExpandedView.debug();
-
-                        mTrackingView.getLocationOnScreen(mAbsPos);
-                        Slog.d(TAG, "mTrackingView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
-                                + ") " + mTrackingView.getWidth() + "x"
-                                + mTrackingView.getHeight());
-                        mTrackingView.debug();
+                        Slog.d(TAG, "mStatusIcons:");
+                        mStatusIcons.debug();
                     }
                 });
         }
+
     }
 
     void onBarViewAttached() {
