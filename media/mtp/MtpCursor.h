@@ -36,17 +36,18 @@ private:
         OBJECT_CHILDREN     = 8,
     };
 
-    MtpClient*  mClient;
-    int         mQueryType;
-    int         mDeviceID;
-    int         mStorageID;
-    int         mQbjectID;
-    int         mColumnCount;
-    int*        mColumns;
+    MtpClient*      mClient;
+    int             mQueryType;
+    int             mDeviceID;
+    MtpStorageID    mStorageID;
+    MtpObjectHandle mQbjectID;
+    int             mColumnCount;
+    int*            mColumns;
 
 public:
                 MtpCursor(MtpClient* client, int queryType, int deviceID,
-                        int storageID, int objectID, int columnCount, int* columns);
+                        MtpStorageID storageID, MtpObjectHandle objectID,
+                        int columnCount, int* columns);
     virtual     ~MtpCursor();
 
     int         fillWindow(CursorWindow* window, int startPos);
@@ -68,7 +69,8 @@ private:
     bool        prepareRow(CursorWindow* window);
     bool        putLong(CursorWindow* window, int value, int row, int column);
     bool        putString(CursorWindow* window, const char* text, int row, int column);
-    bool        putThumbnail(CursorWindow* window, int objectID, int format, int row, int column);
+    bool        putThumbnail(CursorWindow* window, MtpObjectHandle objectID,
+                            MtpObjectFormat format, int row, int column);
 };
 
 }; // namespace android
