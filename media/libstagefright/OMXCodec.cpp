@@ -999,7 +999,10 @@ status_t OMXCodec::setupErrorCorrectionParameters() {
     status_t err = mOMX->getParameter(
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
-    CHECK_EQ(err, OK);
+    if (err != OK) {
+        LOGW("Error correction param query is not supported");
+        return OK;  // Optional feature. Ignore this failure
+    }
 
     errorCorrectionType.bEnableHEC = OMX_FALSE;
     errorCorrectionType.bEnableResync = OMX_TRUE;
@@ -1010,7 +1013,11 @@ status_t OMXCodec::setupErrorCorrectionParameters() {
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
-    CHECK_EQ(err, OK);
+    if (err != OK) {
+        LOGW("Error correction param configuration is not supported");
+    }
+
+    // Optional feature. Ignore the failure.
     return OK;
 }
 
