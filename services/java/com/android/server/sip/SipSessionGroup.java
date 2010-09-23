@@ -84,7 +84,7 @@ class SipSessionGroup implements SipListener {
     private static final String ANONYMOUS = "anonymous";
     private static final String SERVER_ERROR_PREFIX = "Response: ";
     private static final int EXPIRY_TIME = 3600; // in seconds
-    private static final int CANCEL_CALL_TIMER = 5; // in seconds
+    private static final int CANCEL_CALL_TIMER = 3; // in seconds
 
     private static final EventObject DEREGISTER = new EventObject("Deregister");
     private static final EventObject END_CALL = new EventObject("End call");
