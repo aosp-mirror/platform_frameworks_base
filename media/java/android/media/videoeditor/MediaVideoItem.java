@@ -264,8 +264,19 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException("Invalid end time");
         }
 
-        mBeginBoundaryTimeMs = beginMs;
-        mEndBoundaryTimeMs = endMs;
+        if (beginMs != mBeginBoundaryTimeMs) {
+            mBeginBoundaryTimeMs = beginMs;
+            if (mBeginTransition != null) {
+                mBeginTransition.invalidate();
+            }
+        }
+
+        if (endMs == mEndBoundaryTimeMs) {
+            mEndBoundaryTimeMs = endMs;
+            if (mEndTransition != null) {
+                mEndTransition.invalidate();
+            }
+        }
         // TODO: Validate/modify the start and the end time of effects and overlays
     }
 

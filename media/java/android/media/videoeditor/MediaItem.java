@@ -64,8 +64,8 @@ public abstract class MediaItem {
     private int mRenderingMode;
 
     // Beginning and end transitions
-    private Transition mBeginTransition;
-    private Transition mEndTransition;
+    protected Transition mBeginTransition;
+    protected Transition mEndTransition;
 
     /**
      * Constructor
@@ -113,6 +113,13 @@ public abstract class MediaItem {
      */
     public void setRenderingMode(int renderingMode) {
         mRenderingMode = renderingMode;
+        if (mBeginTransition != null) {
+            mBeginTransition.invalidate();
+        }
+
+        if (mEndTransition != null) {
+            mEndTransition.invalidate();
+        }
     }
 
     /**
@@ -271,7 +278,9 @@ public abstract class MediaItem {
      *
      * @param overlay The overlay to add
      * @throws IllegalStateException if a preview or an export is in progress or
-     *             if the overlay id is not unique across all the overlays added.
+     *             if the overlay id is not unique across all the overlays
+     *             added or if the bitmap is not specified or if the dimensions of
+     *             the bitmap do not match the dimensions of the media item
      */
     public void addOverlay(Overlay overlay) {
         if (mOverlays.contains(overlay)) {
@@ -281,6 +290,23 @@ public abstract class MediaItem {
         if (overlay.getStartTime() + overlay.getDuration() > getDuration()) {
             throw new IllegalArgumentException(
                     "Overlay start time + overlay duration > media clip duration");
+        }
+
+        if (overlay instanceof OverlayFrame) {
+            final OverlayFrame frame = (OverlayFrame)overlay;
+            final Bitmap bitmap = frame.getBitmap();
+            if (bitmap == null) {
+                throw new IllegalArgumentException("Overlay bitmap not specified");
+            }
+
+            // The dimensions of the overlay bitmap must be the same as the
+            // media item dimensions
+            if (bitmap.getWidth() != getWidth() || bitmap.getHeight() != getHeight()) {
+                throw new IllegalArgumentException(
+                        "Bitmap dimensions must match media item dimensions");
+            }
+        } else {
+            throw new IllegalArgumentException("Overlay not supported");
         }
 
         mOverlays.add(overlay);
@@ -302,6 +328,9 @@ public abstract class MediaItem {
         for (Overlay overlay : mOverlays) {
             if (overlay.getId().equals(overlayId)) {
                 mOverlays.remove(overlay);
+                if (overlay instanceof OverlayFrame) {
+                    ((OverlayFrame)overlay).invalidate();
+                }
                 invalidateTransitions(overlay);
                 return overlay;
             }
