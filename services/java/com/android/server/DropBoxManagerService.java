@@ -36,6 +36,7 @@ import android.util.Slog;
 
 import com.android.internal.os.IDropBoxManagerService;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -179,7 +180,10 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             // the data in uncompressed form.
 
             temp = new File(mDropBoxDir, "drop" + Thread.currentThread().getId() + ".tmp");
-            output = new FileOutputStream(temp);
+            int bufferSize = mBlockSize;
+            if (bufferSize > 4096) bufferSize = 4096;
+            if (bufferSize < 512) bufferSize = 512;
+            output = new BufferedOutputStream(new FileOutputStream(temp), bufferSize);
             if (read == buffer.length && ((flags & DropBoxManager.IS_GZIPPED) == 0)) {
                 output = new GZIPOutputStream(output);
                 flags = flags | DropBoxManager.IS_GZIPPED;
