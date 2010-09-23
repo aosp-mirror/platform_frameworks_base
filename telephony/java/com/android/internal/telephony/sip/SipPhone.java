@@ -633,6 +633,18 @@ public class SipPhone extends SipPhoneBase {
             }
 
             @Override
+            public void onCallEstablished(SipAudioCall call) {
+                call.startAudio();
+                onChanged(call);
+            }
+
+            @Override
+            public void onCallHeld(SipAudioCall call) {
+                call.startAudio();
+                onChanged(call);
+            }
+
+            @Override
             public void onChanged(SipAudioCall call) {
                 synchronized (SipPhone.class) {
                     Call.State newState = getCallStateFrom(call);
@@ -652,7 +664,6 @@ public class SipPhone extends SipPhoneBase {
                             }
                             foregroundCall.switchWith(ringingCall);
                         }
-                        if (newState == Call.State.ACTIVE) call.startAudio();
                         setState(newState);
                     }
                     mOwner.onConnectionStateChanged(SipConnection.this);
