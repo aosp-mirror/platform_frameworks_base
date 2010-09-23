@@ -85,6 +85,7 @@ SurfaceFlinger::SurfaceFlinger()
         mFreezeDisplayTime(0),
         mDebugRegion(0),
         mDebugBackground(0),
+        mDebugDisableHWC(0),
         mDebugInSwapBuffers(0),
         mLastSwapBufferTime(0),
         mDebugInTransaction(0),
@@ -768,6 +769,10 @@ void SurfaceFlinger::handleWorkList()
         hwc_layer_t* const cur(hwc.getLayers());
         for (size_t i=0 ; cur && i<count ; i++) {
             currentLayers[i]->setGeometry(&cur[i]);
+            if (mDebugDisableHWC) {
+                cur[i].compositionType = HWC_FRAMEBUFFER;
+                cur[i].flags |= HWC_SKIP_LAYER;
+            }
         }
     }
 }
@@ -901,6 +906,7 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
                 continue;
             }
         }
+
         const sp<LayerBase>& layer(layers[i]);
         const Region clip(dirty.intersect(layer->visibleRegionScreen));
         if (!clip.isEmpty()) {
@@ -1522,6 +1528,12 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
         }
 
+        HWComposer& hwc(hw.getHwComposer());
+        snprintf(buffer, SIZE, "  h/w composer %s and %s\n",
+                hwc.initCheck()==NO_ERROR ? "present" : "not present",
+                mDebugDisableHWC ? "disabled" : "enabled");
+        result.append(buffer);
+
         const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
         alloc.dump(result);
 
@@ -1580,6 +1592,11 @@ status_t SurfaceFlinger::onTransact(
                 n = data.readInt32();
                 mDebugBackground = n ? 1 : 0;
                 return NO_ERROR;
+            case 1008:  // toggle use of hw composer
+                n = data.readInt32();
+                mDebugDisableHWC = n ? 1 : 0;
+                mHwWorkListDirty = true;
+                // fall-through...
             case 1004:{ // repaint everything
                 Mutex::Autolock _l(mStateLock);
                 const DisplayHardware& hw(graphicPlane(0).displayHardware());
