@@ -434,7 +434,7 @@ screen).</dd>
 <h2 id="LayerList">Layer List</h2>
 
 <p>A {@link android.graphics.drawable.LayerDrawable} is a drawable object
-that manages an array of other drawables. Each drawable in the list is drawn in the order of the 
+that manages an array of other drawables. Each drawable in the list is drawn in the order of the
 list&mdash;the last drawable in the list is drawn on top.</p>
 
 <p>Each drawable is represented by an {@code &lt;item&gt;} element inside a single {@code
@@ -641,7 +641,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:state_checkable=["true" | "false"]
         android:state_checked=["true" | "false"]
         android:state_enabled=["true" | "false"]
-        android:state_window_focused=["true" | "false"] /> 
+        android:state_window_focused=["true" | "false"] />
 &lt;/selector>
 </pre>
 </dd>
@@ -729,12 +729,12 @@ default value should always be last (as demonstrated in the following example).<
 &lt;/selector>
 </pre>
 
-<p>This layout XML applies the drawable to a View:</p>
+<p>This layout XML applies the state list drawable to a Button:</p>
 <pre>
-&lt;ImageView
+&lt;Button
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    android:src="@drawable/button" />
+    android:background="@drawable/button" />
 </pre>
 </dd> <!-- end example -->
 
@@ -1670,13 +1670,13 @@ android:dashGap} is set.</dd>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    &lt;gradient 
-        android:startColor="#FFFF0000" 
+    &lt;gradient
+        android:startColor="#FFFF0000"
         android:endColor="#80FF00FF"
         android:angle="45"/>
-    &lt;padding android:left="7dp" 
+    &lt;padding android:left="7dp"
         android:top="7dp"
-        android:right="7dp" 
+        android:right="7dp"
         android:bottom="7dp" />
     &lt;corners android:radius="8dp" />
 &lt;/shape>
