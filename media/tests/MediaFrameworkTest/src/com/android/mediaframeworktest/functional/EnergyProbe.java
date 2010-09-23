@@ -16,7 +16,7 @@
 
 package com.android.mediaframeworktest.functional;
 
-import android.media.Visualizer;
+import android.media.audiofx.Visualizer;
 import android.util.Log;
 
 /**
