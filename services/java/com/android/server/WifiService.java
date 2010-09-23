@@ -804,6 +804,16 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachine.forgetNetwork(netId);
     }
 
+    public void startWpsPbc(String bssid) {
+        enforceChangePermission();
+        mWifiStateMachine.startWpsPbc(bssid);
+    }
+
+    public void startWpsPin(String bssid, int apPin) {
+        enforceChangePermission();
+        mWifiStateMachine.startWpsPin(bssid, apPin);
+    }
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

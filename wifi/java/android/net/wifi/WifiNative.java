@@ -151,6 +151,10 @@ public class WifiNative {
 
     public native static boolean clearBlacklistCommand();
 
+    public native static boolean startWpsPbcCommand(String bssid);
+
+    public native static boolean startWpsPinCommand(String bssid, int apPin);
+
     public native static boolean doDhcpRequest(DhcpInfo results);
 
     public native static String getDhcpError();
