@@ -232,8 +232,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void handleMotion(MotionEvent event, Runnable finishedCallback) {
             finishedCallback.run();
+            
             synchronized (mLock) {
-                mPointerLocationView.addTouchEvent(event);
+                if (mPointerLocationView != null) {
+                    mPointerLocationView.addTouchEvent(event);
+                }
             }
         }
     };
