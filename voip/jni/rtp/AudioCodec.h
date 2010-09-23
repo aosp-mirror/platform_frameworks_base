@@ -22,9 +22,11 @@
 class AudioCodec
 {
 public:
+    const char *name;
+    // Needed by destruction through base class pointers.
     virtual ~AudioCodec() {}
-    // Returns true if initialization succeeds.
-    virtual bool set(int sampleRate, int sampleCount) = 0;
+    // Returns sampleCount or non-positive value if unsupported.
+    virtual int set(int sampleRate, const char *fmtp) = 0;
     // Returns the length of payload in bytes.
     virtual int encode(void *payload, int16_t *samples) = 0;
     // Returns the number of decoded samples.

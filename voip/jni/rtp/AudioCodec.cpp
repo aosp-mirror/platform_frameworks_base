@@ -36,9 +36,9 @@ int8_t gExponents[128] = {
 class UlawCodec : public AudioCodec
 {
 public:
-    bool set(int sampleRate, int sampleCount) {
-        mSampleCount = sampleCount;
-        return sampleCount > 0;
+    int set(int sampleRate, const char *fmtp) {
+        mSampleCount = sampleRate / 50;
+        return mSampleCount;
     }
     int encode(void *payload, int16_t *samples);
     int decode(int16_t *samples, void *payload, int length);
@@ -89,9 +89,9 @@ AudioCodec *newUlawCodec()
 class AlawCodec : public AudioCodec
 {
 public:
-    bool set(int sampleRate, int sampleCount) {
-        mSampleCount = sampleCount;
-        return sampleCount > 0;
+    int set(int sampleRate, const char *fmtp) {
+        mSampleCount = sampleRate / 50;
+        return mSampleCount;
     }
     int encode(void *payload, int16_t *samples);
     int decode(int16_t *samples, void *payload, int length);
@@ -152,8 +152,10 @@ AudioCodec *newAudioCodec(const char *codecName)
 {
     AudioCodecType *type = gAudioCodecTypes;
     while (type->name != NULL) {
-        if (strcmp(codecName, type->name) == 0) {
-            return type->create();
+        if (strcasecmp(codecName, type->name) == 0) {
+            AudioCodec *codec = type->create();
+            codec->name = type->name;
+            return codec;
         }
         ++type;
     }
