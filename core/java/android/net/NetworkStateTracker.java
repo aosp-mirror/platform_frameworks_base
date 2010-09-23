@@ -50,6 +50,12 @@ public abstract class NetworkStateTracker extends Handler {
     private static boolean DBG = true;
     private static final String TAG = "NetworkStateTracker";
 
+    // Share the event space with ConnectivityService (which we can't see, but
+    // must send events to).  If you change these, change ConnectivityService
+    // too.
+    private static final int MIN_NETWORK_STATE_TRACKER_EVENT = 1;
+    private static final int MAX_NETWORK_STATE_TRACKER_EVENT = 100;
+
     public static final int EVENT_STATE_CHANGED = 1;
     public static final int EVENT_SCAN_RESULTS_AVAILABLE = 2;
     /**
@@ -61,16 +67,6 @@ public abstract class NetworkStateTracker extends Handler {
     public static final int EVENT_CONFIGURATION_CHANGED = 4;
     public static final int EVENT_ROAMING_CHANGED = 5;
     public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 6;
-    public static final int EVENT_RESTORE_DEFAULT_NETWORK = 7;
-    /**
-     * arg1: network type
-     * arg2: condition (0 bad, 100 good)
-     */
-    public static final int EVENT_INET_CONDITION_CHANGE = 8;
-    /**
-     * arg1: network type
-     */
-    public static final int EVENT_INET_CONDITION_HOLD_END = 9;
 
     public NetworkStateTracker(Context context,
             Handler target,
