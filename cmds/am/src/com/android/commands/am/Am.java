@@ -19,6 +19,7 @@
 package com.android.commands.am;
 
 import android.app.ActivityManagerNative;
+import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
@@ -33,8 +34,13 @@ import android.os.ServiceManager;
 import android.util.AndroidException;
 import android.view.IWindowManager;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -98,6 +104,8 @@ public class Am {
             sendBroadcast();
         } else if (op.equals("profile")) {
             runProfile();
+        } else if (op.equals("monitor")) {
+            runMonitor();
         } else {
             throw new IllegalArgumentException("Unknown command: " + op);
         }
@@ -424,6 +432,210 @@ public class Am {
         }
     }
 
+    class MyActivityController extends IActivityController.Stub {
+        static final int STATE_NORMAL = 0;
+        static final int STATE_CRASHED = 1;
+        static final int STATE_EARLY_ANR = 2;
+        static final int STATE_ANR = 3;
+
+        int mState;
+
+        static final int RESULT_DEFAULT = 0;
+
+        static final int RESULT_CRASH_DIALOG = 0;
+        static final int RESULT_CRASH_KILL = 1;
+
+        static final int RESULT_EARLY_ANR_CONTINUE = 0;
+        static final int RESULT_EARLY_ANR_KILL = 1;
+
+        static final int RESULT_ANR_DIALOG = 0;
+        static final int RESULT_ANR_KILL = 1;
+        static final int RESULT_ANR_WAIT = 1;
+
+        int mResult;
+
+        @Override
+        public boolean activityResuming(String pkg) throws RemoteException {
+            synchronized (this) {
+                System.out.println("** Activity resuming: " + pkg);
+            }
+            return true;
+        }
+
+        @Override
+        public boolean activityStarting(Intent intent, String pkg) throws RemoteException {
+            synchronized (this) {
+                System.out.println("** Activity starting: " + pkg);
+            }
+            return true;
+        }
+
+        @Override
+        public boolean appCrashed(String processName, int pid, String shortMsg, String longMsg,
+                long timeMillis, String stackTrace) throws RemoteException {
+            synchronized (this) {
+                System.out.println("** ERROR: PROCESS CRASHED");
+                System.out.println("processName: " + processName);
+                System.out.println("processPid: " + pid);
+                System.out.println("shortMsg: " + shortMsg);
+                System.out.println("longMsg: " + longMsg);
+                System.out.println("timeMillis: " + timeMillis);
+                System.out.println("stack:");
+                System.out.print(stackTrace);
+                System.out.println("#");
+                int result = waitControllerLocked(STATE_CRASHED);
+                return result == RESULT_CRASH_KILL ? false : true;
+            }
+        }
+
+        @Override
+        public int appEarlyNotResponding(String processName, int pid, String annotation)
+                throws RemoteException {
+            synchronized (this) {
+                System.out.println("** ERROR: EARLY PROCESS NOT RESPONDING");
+                System.out.println("processName: " + processName);
+                System.out.println("processPid: " + pid);
+                System.out.println("annotation: " + annotation);
+                int result = waitControllerLocked(STATE_EARLY_ANR);
+                if (result == RESULT_EARLY_ANR_KILL) return -1;
+                return 0;
+            }
+        }
+
+        @Override
+        public int appNotResponding(String processName, int pid, String processStats)
+                throws RemoteException {
+            synchronized (this) {
+                System.out.println("** ERROR: PROCESS NOT RESPONDING");
+                System.out.println("processName: " + processName);
+                System.out.println("processPid: " + pid);
+                System.out.println("processStats:");
+                System.out.print(processStats);
+                System.out.println("#");
+                int result = waitControllerLocked(STATE_ANR);
+                if (result == RESULT_ANR_KILL) return -1;
+                if (result == RESULT_ANR_WAIT) return 1;
+                return 0;
+            }
+        }
+
+        int waitControllerLocked(int state) {
+            mState = state;
+            System.out.println("");
+            printMessageForState();
+
+            while (mState != STATE_NORMAL) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
+            }
+
+            return mResult;
+        }
+
+        void resumeController(int result) {
+            synchronized (this) {
+                mState = STATE_NORMAL;
+                mResult = result;
+                notifyAll();
+            }
+        }
+
+        void printMessageForState() {
+            switch (mState) {
+                case STATE_NORMAL:
+                    System.out.println("Monitoring activity manager...  available commands:");
+                    break;
+                case STATE_CRASHED:
+                    System.out.println("Waiting after crash...  available commands:");
+                    System.out.println("(c)ontinue: show crash dialog");
+                    System.out.println("(k)ill: immediately kill app");
+                    break;
+                case STATE_EARLY_ANR:
+                    System.out.println("Waiting after early ANR...  available commands:");
+                    System.out.println("(c)ontinue: standard ANR processing");
+                    System.out.println("(k)ill: immediately kill app");
+                    break;
+                case STATE_ANR:
+                    System.out.println("Waiting after ANR...  available commands:");
+                    System.out.println("(c)ontinue: show ANR dialog");
+                    System.out.println("(k)ill: immediately kill app");
+                    System.out.println("(w)ait: wait some more");
+                    break;
+            }
+            System.out.println("(q)uit: finish monitoring");
+        }
+
+        void run() throws RemoteException {
+            try {
+                printMessageForState();
+
+                mAm.setActivityController(this);
+                mState = STATE_NORMAL;
+
+                InputStreamReader converter = new InputStreamReader(System.in);
+                BufferedReader in = new BufferedReader(converter);
+                String line;
+
+                while ((line = in.readLine()) != null) {
+                    boolean addNewline = true;
+                    if (line.length() <= 0) {
+                        addNewline = false;
+                    } else if ("q".equals(line) || "quit".equals(line)) {
+                        resumeController(RESULT_DEFAULT);
+                        break;
+                    } else if (mState == STATE_CRASHED) {
+                        if ("c".equals(line) || "continue".equals(line)) {
+                            resumeController(RESULT_CRASH_DIALOG);
+                        } else if ("k".equals(line) || "kill".equals(line)) {
+                            resumeController(RESULT_CRASH_KILL);
+                        } else {
+                            System.out.println("Invalid command: " + line);
+                        }
+                    } else if (mState == STATE_ANR) {
+                        if ("c".equals(line) || "continue".equals(line)) {
+                            resumeController(RESULT_ANR_DIALOG);
+                        } else if ("k".equals(line) || "kill".equals(line)) {
+                            resumeController(RESULT_ANR_KILL);
+                        } else if ("w".equals(line) || "wait".equals(line)) {
+                            resumeController(RESULT_ANR_WAIT);
+                        } else {
+                            System.out.println("Invalid command: " + line);
+                        }
+                    } else if (mState == STATE_EARLY_ANR) {
+                        if ("c".equals(line) || "continue".equals(line)) {
+                            resumeController(RESULT_EARLY_ANR_CONTINUE);
+                        } else if ("k".equals(line) || "kill".equals(line)) {
+                            resumeController(RESULT_EARLY_ANR_KILL);
+                        } else {
+                            System.out.println("Invalid command: " + line);
+                        }
+                    } else {
+                        System.out.println("Invalid command: " + line);
+                    }
+
+                    synchronized (this) {
+                        if (addNewline) {
+                            System.out.println("");
+                        }
+                        printMessageForState();
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                mAm.setActivityController(null);
+            }
+        }
+    }
+
+    private void runMonitor() throws Exception {
+        MyActivityController controller = new MyActivityController();
+        controller.run();
+    }
+
     private class IntentReceiver extends IIntentReceiver.Stub {
         private boolean mFinished = false;
 
@@ -593,6 +805,8 @@ public class Am {
                 "\n" +
                 "    start profiling: am profile <PROCESS> start <FILE>\n" +
                 "    stop profiling: am profile <PROCESS> stop\n" +
+                "\n" +
+                "    start monitoring: am monitor\n" +
                 "\n" +
                 "    <INTENT> specifications include these flags:\n" +
                 "        [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
