@@ -20,13 +20,63 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * An AudioGroup acts as a router connected to the speaker, the microphone, and
+ * {@link AudioStream}s. Its pipeline has four steps. First, for each
+ * AudioStream not in {@link RtpStream#MODE_SEND_ONLY}, decodes its incoming
+ * packets and stores in its buffer. Then, if the microphone is enabled,
+ * processes the recorded audio and stores in its buffer. Third, if the speaker
+ * is enabled, mixes and playbacks buffers of all AudioStreams. Finally, for
+ * each AudioStream not in {@link RtpStream#MODE_RECEIVE_ONLY}, mixes all other
+ * buffers and sends back the encoded packets. An AudioGroup does nothing if
+ * there is no AudioStream in it.
+ *
+ * <p>Few things must be noticed before using these classes. The performance is
+ * highly related to the system load and the network bandwidth. Usually a
+ * simpler {@link AudioCodec} costs fewer CPU cycles but requires more network
+ * bandwidth, and vise versa. Using two AudioStreams at the same time not only
+ * doubles the load but also the bandwidth. The condition varies from one device
+ * to another, and developers must choose the right combination in order to get
+ * the best result.
+ *
+ * <p>It is sometimes useful to keep multiple AudioGroups at the same time. For
+ * example, a Voice over IP (VoIP) application might want to put a conference
+ * call on hold in order to make a new call but still allow people in the
+ * previous call to talk to each other. This can be done easily using two
+ * AudioGroups, but there are some limitations. Since the speaker and the
+ * microphone are shared globally, only one AudioGroup is allowed to run in
+ * modes other than {@link #MODE_ON_HOLD}. In addition, before adding an
+ * AudioStream into an AudioGroup, one should always put all other AudioGroups
+ * into {@link #MODE_ON_HOLD}. That will make sure the audio driver correctly
+ * initialized.
+ * @hide
  */
-/** @hide */
 public class AudioGroup {
+    /**
+     * This mode is similar to {@link #MODE_NORMAL} except the speaker and
+     * the microphone are disabled.
+     */
     public static final int MODE_ON_HOLD = 0;
+
+    /**
+     * This mode is similar to {@link #MODE_NORMAL} except the microphone is
+     * muted.
+     */
     public static final int MODE_MUTED = 1;
+
+    /**
+     * This mode indicates that the speaker, the microphone, and all
+     * {@link AudioStream}s in the group are enabled. First, the packets
+     * received from the streams are decoded and mixed with the audio recorded
+     * from the microphone. Then, the results are played back to the speaker,
+     * encoded and sent back to each stream.
+     */
     public static final int MODE_NORMAL = 2;
-    public static final int MODE_EC_ENABLED = 3;
+
+    /**
+     * This mode is similar to {@link #MODE_NORMAL} except the echo suppression
+     * is enabled. It should be only used when the speaker phone is on.
+     */
+    public static final int MODE_ECHO_SUPPRESSION = 3;
 
     private final Map<AudioStream, Integer> mStreams;
     private int mMode = MODE_ON_HOLD;
@@ -36,23 +86,42 @@ public class AudioGroup {
         System.loadLibrary("rtp_jni");
     }
 
+    /**
+     * Creates an empty AudioGroup.
+     */
     public AudioGroup() {
         mStreams = new HashMap<AudioStream, Integer>();
     }
 
+    /**
+     * Returns the current mode.
+     */
     public int getMode() {
         return mMode;
     }
 
+    /**
+     * Changes the current mode. It must be one of {@link #MODE_ON_HOLD},
+     * {@link #MODE_MUTED}, {@link #MODE_NORMAL}, and
+     * {@link #MODE_ECHO_SUPPRESSION}.
+     *
+     * @param mode The mode to change to.
+     * @throws IllegalArgumentException if the mode is invalid.
+     */
     public synchronized native void setMode(int mode);
 
-    synchronized void add(AudioStream stream, AudioCodec codec, int codecType, int dtmfType) {
+    private native void add(int mode, int socket, String remoteAddress,
+            int remotePort, String codecSpec, int dtmfType);
+
+    synchronized void add(AudioStream stream, AudioCodec codec, int dtmfType) {
         if (!mStreams.containsKey(stream)) {
             try {
                 int socket = stream.dup();
+                String codecSpec = String.format("%d %s %s", codec.type,
+                        codec.rtpmap, codec.fmtp);
                 add(stream.getMode(), socket,
-                        stream.getRemoteAddress().getHostAddress(), stream.getRemotePort(),
-                        codec.name, codec.sampleRate, codec.sampleCount, codecType, dtmfType);
+                        stream.getRemoteAddress().getHostAddress(),
+                        stream.getRemotePort(), codecSpec, dtmfType);
                 mStreams.put(stream, socket);
             } catch (NullPointerException e) {
                 throw new IllegalStateException(e);
@@ -60,8 +129,7 @@ public class AudioGroup {
         }
     }
 
-    private native void add(int mode, int socket, String remoteAddress, int remotePort,
-            String codecName, int sampleRate, int sampleCount, int codecType, int dtmfType);
+    private native void remove(int socket);
 
     synchronized void remove(AudioStream stream) {
         Integer socket = mStreams.remove(stream);
@@ -69,8 +137,6 @@ public class AudioGroup {
             remove(socket);
         }
     }
-
-    private native void remove(int socket);
 
     /**
      * Sends a DTMF digit to every {@link AudioStream} in this group. Currently
@@ -80,13 +146,16 @@ public class AudioGroup {
      */
     public native synchronized void sendDtmf(int event);
 
-    public synchronized void reset() {
+    /**
+     * Removes every {@link AudioStream} in this group.
+     */
+    public synchronized void clear() {
         remove(-1);
     }
 
     @Override
     protected void finalize() throws Throwable {
-        reset();
+        clear();
         super.finalize();
     }
 }
