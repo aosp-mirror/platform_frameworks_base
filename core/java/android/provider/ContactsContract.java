@@ -445,7 +445,7 @@ public final class ContactsContract {
 
         /**
          * One of {@link #SHORTCUT_SUPPORT_NONE}, {@link #SHORTCUT_SUPPORT_DATA_ITEMS_ONLY},
-         * {@link #SHORTCUT_SUPPORT_FULL}, This is the expectation the directory
+         * {@link #SHORTCUT_SUPPORT_FULL}. This is the expectation the directory
          * has for shortcuts created for its elements. Clients must obey this setting.
          */
         public static final String SHORTCUT_SUPPORT = "shortcutSupport";
@@ -468,6 +468,37 @@ public final class ContactsContract {
          * allow creation of shortcuts for contact as well as their constituent elements.
          */
         public static final int SHORTCUT_SUPPORT_FULL = 2;
+
+        /**
+         * One of {@link #PHOTO_SUPPORT_NONE}, {@link #PHOTO_SUPPORT_THUMBNAIL_ONLY},
+         * {@link #PHOTO_SUPPORT_FULL}. This is a feature flag indicating the extent
+         * to which the directory supports contact photos.
+         */
+        public static final String PHOTO_SUPPORT = "photoSupport";
+
+        /**
+         * An {@link #PHOTO_SUPPORT} setting that indicates that the directory
+         * does not provide any photos.
+         */
+        public static final int PHOTO_SUPPORT_NONE = 0;
+
+        /**
+         * An {@link #PHOTO_SUPPORT} setting that indicates that the directory
+         * can only produce small size thumbnails of contact photos.
+         */
+        public static final int PHOTO_SUPPORT_THUMBNAIL_ONLY = 1;
+
+        /**
+         * An {@link #PHOTO_SUPPORT} setting that indicates that the directory
+         * has full-size contact photos, but cannot provide scaled thumbnails.
+         */
+        public static final int PHOTO_SUPPORT_FULL_SIZE_ONLY = 2;
+
+        /**
+         * An {@link #PHOTO_SUPPORT} setting that indicates that the directory
+         * can produce thumbnails as well as full-size contact photos.
+         */
+        public static final int PHOTO_SUPPORT_FULL = 3;
 
         /**
          * Notifies the system of a change in the list of directories handled by
@@ -676,10 +707,40 @@ public final class ContactsContract {
         public static final String NAME_RAW_CONTACT_ID = "name_raw_contact_id";
 
         /**
-         * Reference to the row in the data table holding the photo.
+         * Reference to the row in the data table holding the photo.  A photo can
+         * be referred to either by ID (this field) or by URI (see {@link #PHOTO_THUMBNAIL_URI}
+         * and {@link #PHOTO_URI}).
+         * If PHOTO_ID is null, consult {@link #PHOTO_URI} or {@link #PHOTO_THUMBNAIL_URI},
+         * which is a more generic mechanism for referencing the contact photo, especially for
+         * contacts returned by non-local directories (see {@link Directory}).
+         *
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
         public static final String PHOTO_ID = "photo_id";
+
+        /**
+         * A URI that can be used to retrieve the contact's full-size photo.
+         * A photo can be referred to either by a URI (this field) or by ID
+         * (see {@link #PHOTO_ID}). If PHOTO_ID is not null, PHOTO_URI and
+         * PHOTO_THUMBNAIL_URI shall not be null (but not necessarily vice versa).
+         * Thus using PHOTO_URI is a more robust method of retrieving contact photos.
+         *
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHOTO_URI = "photo_uri";
+
+        /**
+         * A URI that can be used to retrieve a thumbnail of the contact's photo.
+         * A photo can be referred to either by a URI (this field or {@link #PHOTO_URI})
+         * or by ID (see {@link #PHOTO_ID}). If PHOTO_ID is not null, PHOTO_URI and
+         * PHOTO_THUMBNAIL_URI shall not be null (but not necessarily vice versa).
+         * If the content provider does not differentiate between full-size photos
+         * and thumbnail photos, PHOTO_THUMBNAIL_URI and {@link #PHOTO_URI} can contain
+         * the same value, but either both shell be null or both not null.
+         *
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHOTO_THUMBNAIL_URI = "photo_thumb_uri";
 
         /**
          * Lookup value that reflects the {@link Groups#GROUP_VISIBLE} state of
@@ -1030,6 +1091,20 @@ public final class ContactsContract {
      * is computed automatically based on the
      * {@link CommonDataKinds.Photo#IS_SUPER_PRIMARY} field of the data rows of
      * that mime type.</td>
+     * </tr>
+     * <tr>
+     * <td>long</td>
+     * <td>{@link #PHOTO_URI}</td>
+     * <td>read-only</td>
+     * <td>A URI that can be used to retrieve the contact's full-size photo. This
+     * column is the preferred method of retrieving the contact photo.</td>
+     * </tr>
+     * <tr>
+     * <td>long</td>
+     * <td>{@link #PHOTO_THUMBNAIL_URI}</td>
+     * <td>read-only</td>
+     * <td>A URI that can be used to retrieve the thumbnail of contact's photo.  This
+     * column is the preferred method of retrieving the contact photo.</td>
      * </tr>
      * <tr>
      * <td>int</td>
