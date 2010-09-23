@@ -202,10 +202,12 @@
         <item name="android:textStyle">bold</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent">
+        <item name="android:textColor">#ff6b6b6b</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Title">
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
     </style>
 
     <!-- Widget Styles -->

@@ -232,6 +232,53 @@ static void findNALFragment(
     }
 }
 
+MediaBuffer *AVCDecoder::drainOutputBuffer() {
+    int32_t index;
+    int32_t Release;
+    AVCFrameIO Output;
+    Output.YCbCr[0] = Output.YCbCr[1] = Output.YCbCr[2] = NULL;
+    AVCDec_Status status = PVAVCDecGetOutput(mHandle, &index, &Release, &Output);
+
+    if (status != AVCDEC_SUCCESS) {
+        LOGV("PVAVCDecGetOutput returned error %d", status);
+        return NULL;
+    }
+
+    CHECK(index >= 0);
+    CHECK(index < (int32_t)mFrames.size());
+
+    MediaBuffer *mbuf = mFrames.editItemAt(index);
+
+    bool skipFrame = false;
+
+    if (mTargetTimeUs >= 0) {
+        int64_t timeUs;
+        CHECK(mbuf->meta_data()->findInt64(kKeyTime, &timeUs));
+        CHECK(timeUs <= mTargetTimeUs);
+
+        if (timeUs < mTargetTimeUs) {
+            // We're still waiting for the frame with the matching
+            // timestamp and we won't return the current one.
+            skipFrame = true;
+
+            LOGV("skipping frame at %lld us", timeUs);
+        } else {
+            LOGV("found target frame at %lld us", timeUs);
+
+            mTargetTimeUs = -1;
+        }
+    }
+
+    if (!skipFrame) {
+        mbuf->set_range(0, mbuf->size());
+        mbuf->add_ref();
+
+        return mbuf;
+    }
+
+    return new MediaBuffer(0);
+}
+
 status_t AVCDecoder::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
@@ -279,7 +326,8 @@ status_t AVCDecoder::read(
                 seekOptions.clearSeekTo();
 
                 if (err != OK) {
-                    return err;
+                    *out = drainOutputBuffer();
+                    return (*out == NULL)  ? err : (status_t)OK;
                 }
 
                 if (mInputBuffer->range_length() > 0) {
@@ -415,51 +463,12 @@ status_t AVCDecoder::read(
                         fragSize);
 
                 if (res == AVCDEC_PICTURE_OUTPUT_READY) {
-                    int32_t index;
-                    int32_t Release;
-                    AVCFrameIO Output;
-                    Output.YCbCr[0] = Output.YCbCr[1] = Output.YCbCr[2] = NULL;
-
-                    AVCDec_Status status =
-                        PVAVCDecGetOutput(mHandle, &index, &Release, &Output);
-
-                    if (status != AVCDEC_SUCCESS) {
-                        LOGV("PVAVCDecGetOutput returned error %d", status);
+                    MediaBuffer *mbuf = drainOutputBuffer();
+                    if (mbuf == NULL) {
                         break;
                     }
 
-                    CHECK(index >= 0);
-                    CHECK(index < (int32_t)mFrames.size());
-
-                    MediaBuffer *mbuf = mFrames.editItemAt(index);
-
-                    bool skipFrame = false;
-
-                    if (mTargetTimeUs >= 0) {
-                        int64_t timeUs;
-                        CHECK(mbuf->meta_data()->findInt64(kKeyTime, &timeUs));
-                        CHECK(timeUs <= mTargetTimeUs);
-
-                        if (timeUs < mTargetTimeUs) {
-                            // We're still waiting for the frame with the matching
-                            // timestamp and we won't return the current one.
-                            skipFrame = true;
-
-                            LOGV("skipping frame at %lld us", timeUs);
-                        } else {
-                            LOGV("found target frame at %lld us", timeUs);
-
-                            mTargetTimeUs = -1;
-                        }
-                    }
-
-                    if (!skipFrame) {
-                        *out = mbuf;
-                        (*out)->set_range(0, (*out)->size());
-                        (*out)->add_ref();
-                    } else {
-                        *out = new MediaBuffer(0);
-                    }
+                    *out = mbuf;
 
                     // Do _not_ release input buffer yet.
 
@@ -496,6 +505,7 @@ status_t AVCDecoder::read(
 
             case AVC_NALTYPE_AUD:
             case AVC_NALTYPE_FILL:
+            case AVC_NALTYPE_EOSEQ:
             {
                 *out = new MediaBuffer(0);
 

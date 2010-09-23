@@ -1098,7 +1098,7 @@ class CallbackProxy extends Handler {
         }
     }
 
-    public WebView createWindow(boolean dialog, boolean userGesture) {
+    public BrowserFrame createWindow(boolean dialog, boolean userGesture) {
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
         if (mWebChromeClient == null) {
@@ -1122,9 +1122,15 @@ class CallbackProxy extends Handler {
 
         WebView w = transport.getWebView();
         if (w != null) {
-            w.getWebViewCore().initializeSubwindow();
+            WebViewCore core = w.getWebViewCore();
+            // If WebView.destroy() has been called, core may be null.  Skip
+            // initialization in that case and return null.
+            if (core != null) {
+                core.initializeSubwindow();
+                return core.getBrowserFrame();
+            }
         }
-        return w;
+        return null;
     }
 
     public void onRequestFocus() {

@@ -22,13 +22,25 @@ import java.net.Inet6Address;
 import java.net.SocketException;
 
 /**
- * RtpStream represents a base class of media streams running over
- * Real-time Transport Protocol (RTP).
+ * RtpStream represents the base class of streams which send and receive network
+ * packets with media payloads over Real-time Transport Protocol (RTP).
+ * @hide
  */
-/** @hide */
 public class RtpStream {
+    /**
+     * This mode indicates that the stream sends and receives packets at the
+     * same time. This is the initial mode for new streams.
+     */
     public static final int MODE_NORMAL = 0;
+
+    /**
+     * This mode indicates that the stream only sends packets.
+     */
     public static final int MODE_SEND_ONLY = 1;
+
+    /**
+     * This mode indicates that the stream only receives packets.
+     */
     public static final int MODE_RECEIVE_ONLY = 2;
 
     private final InetAddress mLocalAddress;
@@ -89,15 +101,16 @@ public class RtpStream {
     }
 
     /**
-     * Returns {@code true} if the stream is busy. This method is intended to be
-     * overridden by subclasses.
+     * Returns {@code true} if the stream is busy. In this case most of the
+     * setter methods are disabled. This method is intended to be overridden
+     * by subclasses.
      */
     public boolean isBusy() {
         return false;
     }
 
     /**
-     * Returns the current mode. The initial mode is {@link #MODE_NORMAL}.
+     * Returns the current mode.
      */
     public int getMode() {
         return mMode;
@@ -123,7 +136,8 @@ public class RtpStream {
     }
 
     /**
-     * Associates with a remote host.
+     * Associates with a remote host. This defines the destination of the
+     * outgoing packets.
      *
      * @param address The network address of the remote host.
      * @param port The network port of the remote host.

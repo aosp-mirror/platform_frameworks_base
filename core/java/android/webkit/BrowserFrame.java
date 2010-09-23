@@ -785,11 +785,7 @@ class BrowserFrame extends Handler {
      * @return The BrowserFrame object stored in the new WebView.
      */
     private BrowserFrame createWindow(boolean dialog, boolean userGesture) {
-        WebView w = mCallbackProxy.createWindow(dialog, userGesture);
-        if (w != null) {
-            return w.getWebViewCore().getBrowserFrame();
-        }
-        return null;
+        return mCallbackProxy.createWindow(dialog, userGesture);
     }
 
     /**

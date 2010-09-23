@@ -172,7 +172,7 @@ public final class SipService extends ISipService.Stub {
         SipSessionGroupExt group = mSipGroups.remove(localProfileUri);
         if (group != null) {
             notifyProfileRemoved(group.getLocalProfile());
-            group.closeToNotReceiveCalls();
+            group.close();
             if (isWifiOn() && !anyOpened()) releaseWifiLock();
         }
     }
@@ -449,9 +449,9 @@ public final class SipService extends ISipService.Stub {
             }
         }
 
-        public void closeToNotReceiveCalls() {
+        public void close() {
             mOpened = false;
-            mSipGroup.closeToNotReceiveCalls();
+            mSipGroup.close();
             mAutoRegistration.stop();
             if (DEBUG) Log.d(TAG, "   close: " + getUri() + ": "
                     + mIncomingCallBroadcastAction);
