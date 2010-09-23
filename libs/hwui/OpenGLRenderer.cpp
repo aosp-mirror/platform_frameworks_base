@@ -961,25 +961,36 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
         }
 
         if (underlineWidth > 0.0f) {
-            float textSize = paint->getTextSize();
-            float height = textSize * kStdUnderline_Thickness;
+            const float textSize = paint->getTextSize();
+            const float strokeWidth = textSize * kStdUnderline_Thickness;
 
-            float left = x - offsetX;
+            const float left = x - offsetX;
             float top = 0.0f;
-            float right = left + underlineWidth;
-            float bottom = 0.0f;
+
+            const int pointsCount = 4 * (flags & SkPaint::kStrikeThruText_Flag ? 2 : 1);
+            float points[pointsCount];
+            int currentPoint = 0;
 
             if (flags & SkPaint::kUnderlineText_Flag) {
                 top = y + textSize * kStdUnderline_Offset;
-                bottom = top + height;
-                drawRect(left, top, right, bottom, paint);
+                points[currentPoint++] = left;
+                points[currentPoint++] = top;
+                points[currentPoint++] = left + underlineWidth;
+                points[currentPoint++] = top;
             }
 
             if (flags & SkPaint::kStrikeThruText_Flag) {
                 top = y + textSize * kStdStrikeThru_Offset;
-                bottom = top + height;
-                drawRect(left, top, right, bottom, paint);
+                points[currentPoint++] = left;
+                points[currentPoint++] = top;
+                points[currentPoint++] = left + underlineWidth;
+                points[currentPoint++] = top;
             }
+
+            SkPaint linesPaint(*paint);
+            linesPaint.setStrokeWidth(strokeWidth);
+
+            drawLines(&points[0], pointsCount, &linesPaint);
         }
     }
 }
