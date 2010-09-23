@@ -247,6 +247,7 @@ public class DownloadManager {
         Downloads.COLUMN_LAST_MODIFICATION,
         Downloads.COLUMN_DESTINATION,
         Downloads.Impl.COLUMN_FILE_NAME_HINT,
+        Downloads.Impl._DATA,
     };
 
     private static final Set<String> LONG_COLUMNS = new HashSet<String>(
@@ -879,6 +880,11 @@ public class DownloadManager {
             if (destinationType == Downloads.Impl.DESTINATION_FILE_URI) {
                 // return client-provided file URI for external download
                 return getUnderlyingString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
+            }
+
+            if (destinationType == Downloads.Impl.DESTINATION_EXTERNAL) {
+                // return stored destination for legacy external download
+                return Uri.fromFile(new File(getUnderlyingString(Downloads.Impl._DATA))).toString();
             }
 
             // return content URI for cache download
