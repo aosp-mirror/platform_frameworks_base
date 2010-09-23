@@ -24,7 +24,6 @@ import android.net.Uri;
 import android.provider.Settings.System;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 
 /**
  * A {@link Preference} that allows the user to choose a ringtone from those on the device. 
@@ -137,7 +136,12 @@ public class RingtonePreference extends Preference implements
         // Launch the ringtone picker
         Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
         onPrepareRingtonePickerIntent(intent);
-        getPreferenceManager().getActivity().startActivityForResult(intent, mRequestCode);
+        PreferenceFragment owningFragment = getPreferenceManager().getFragment();
+        if (owningFragment != null) {
+            owningFragment.startActivityForResult(intent, mRequestCode);
+        } else {
+            getPreferenceManager().getActivity().startActivityForResult(intent, mRequestCode);
+        }
     }
 
     /**
