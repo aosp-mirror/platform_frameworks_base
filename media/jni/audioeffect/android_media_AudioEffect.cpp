@@ -37,7 +37,7 @@ using namespace android;
 #define AUDIOEFFECT_ERROR_DEAD_OBJECT           -7
 
 // ----------------------------------------------------------------------------
-static const char* const kClassPathName = "android/media/AudioEffect";
+static const char* const kClassPathName = "android/media/audiofx/AudioEffect";
 
 struct fields_t {
     // these fields provide access from C++ to the...
@@ -228,9 +228,9 @@ android_media_AudioEffect_native_init(JNIEnv *env)
         return;
     }
 
-    clazz = env->FindClass("android/media/AudioEffect$Descriptor");
+    clazz = env->FindClass("android/media/audiofx/AudioEffect$Descriptor");
     if (clazz == NULL) {
-        LOGE("Can't find android/media/AudioEffect$Descriptor class");
+        LOGE("Can't find android/media/audiofx/AudioEffect$Descriptor class");
         return;
     }
     fields.clazzDesc = (jclass)env->NewGlobalRef(clazz);
@@ -241,7 +241,7 @@ android_media_AudioEffect_native_init(JNIEnv *env)
                     "<init>",
                     "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
     if (fields.midDescCstor == NULL) {
-        LOGE("Can't find android/media/AudioEffect$Descriptor class constructor");
+        LOGE("Can't find android/media/audiofx/AudioEffect$Descriptor class constructor");
         return;
     }
 }

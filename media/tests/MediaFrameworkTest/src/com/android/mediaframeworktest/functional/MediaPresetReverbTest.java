@@ -20,10 +20,10 @@ import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
-import android.media.AudioEffect;
+import android.media.audiofx.AudioEffect;
 import android.media.AudioManager;
-import android.media.PresetReverb;
-import android.media.Visualizer;
+import android.media.audiofx.PresetReverb;
+import android.media.audiofx.Visualizer;
 import android.media.MediaPlayer;
 
 import android.os.Looper;
