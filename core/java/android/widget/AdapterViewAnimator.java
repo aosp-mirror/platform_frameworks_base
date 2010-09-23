@@ -389,7 +389,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         int newWindowStartUnbounded = childIndex - mActiveOffset;
         int newWindowEndUnbounded = newWindowStartUnbounded + mNumActiveViews - 1;
         int newWindowStart = Math.max(0, newWindowStartUnbounded);
-        int newWindowEnd = Math.min(mAdapter.getCount(), newWindowEndUnbounded);
+        int newWindowEnd = Math.min(mAdapter.getCount() - 1, newWindowEndUnbounded);
 
         // This section clears out any items that are in our mActiveViews list
         // but are outside the effective bounds of our window (this is becomes an issue
@@ -592,18 +592,18 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
          */
         private SavedState(Parcel in) {
             super(in);
-            whichChild = in.readInt();
+            this.whichChild = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
-            out.writeInt(whichChild);
+            out.writeInt(this.whichChild);
         }
 
         @Override
         public String toString() {
-            return "AdapterViewAnimator.SavedState{ whichChild = " + whichChild + " }";
+            return "AdapterViewAnimator.SavedState{ whichChild = " + this.whichChild + " }";
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR
@@ -781,10 +781,13 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     public void setRemoteViewsAdapter(Intent intent) {
         // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
         // service handling the specified intent.
-        Intent.FilterComparison fc = new Intent.FilterComparison(intent);
-        if (mRemoteViewsAdapter != null &&
-                fc.equals(mRemoteViewsAdapter.getRemoteViewsServiceIntent())) {
-            return;
+        if (mRemoteViewsAdapter != null) {
+            Intent.FilterComparison fcNew = new Intent.FilterComparison(intent);
+            Intent.FilterComparison fcOld = new Intent.FilterComparison(
+                    mRemoteViewsAdapter.getRemoteViewsServiceIntent());
+            if (fcNew.equals(fcOld)) {
+                return;
+            }
         }
 
         // Otherwise, create a new RemoteViewsAdapter for binding
