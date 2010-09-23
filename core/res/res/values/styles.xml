@@ -984,4 +984,686 @@
         <item name="android:textColor">@android:color/secondary_text_light</item>
     </style>
 
+    <!-- Begin Holo theme styles -->
+
+    <!-- Text Styles -->
+    <style name="TextAppearance.Holo" parent="TextAppearance">
+    </style>
+
+    <style name="TextAppearance.Holo.Inverse" parent="TextAppearance.Inverse">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Large" parent="TextAppearance.Large">
+    </style>
+
+    <style name="TextAppearance.Holo.Medium" parent="TextAppearance.Medium">
+    </style>
+
+    <style name="TextAppearance.Holo.Small" parent="TextAppearance.Small">
+    </style>
+
+    <style name="TextAppearance.Holo.Large.Inverse">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Medium.Inverse">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Small.Inverse">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Holo.SearchResult">
+    </style>
+
+    <style name="TextAppearance.Holo.SearchResult.Title">
+    </style>
+
+    <style name="TextAppearance.Holo.SearchResult.Subtitle">
+    </style>
+
+    <style name="TextAppearance.Holo.Widget" parent="TextAppearance.Widget">
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.Button" parent="TextAppearance.Holo.Small.Inverse">
+        <item name="android:textColor">@android:color/primary_text_light_nodisable</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.IconMenu.Item" parent="TextAppearance.Holo.Small">
+        <item name="android:textColor">?textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.TabWidget">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@android:color/tab_indicator_text</item>
+    </style>
+    
+    <style name="TextAppearance.Holo.Widget.TextView">
+        <item name="android:textColor">?textColorPrimaryDisableOnly</item>
+        <item name="android:textColorHint">?textColorHint</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.TextView.PopupMenu">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?textColorPrimaryDisableOnly</item>
+        <item name="android:textColorHint">?textColorHint</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.DropDownHint">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.DropDownItem">
+        <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.TextView.SpinnerItem">
+        <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.EditText">
+        <item name="android:textColor">@color/widget_edittext_holo_dark</item>
+        <item name="android:textColorHint">@android:color/hint_foreground_holo_light</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.PopupMenu" parent="TextAppearance.Widget.PopupMenu">
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.PopupMenu.Large" parent="TextAppearance.Widget.PopupMenu.Large">
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.PopupMenu.Small" parent="TextAppearance.Widget.PopupMenu.Small">
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.ActionMode">
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.ActionMode.Title" parent="TextAppearance.Widget.ActionMode.Title">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.ActionMode.Subtitle" parent="TextAppearance.Widget.ActionMode.Subtitle">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="TextAppearance.Holo.WindowTitle">
+        <item name="android:textColor">#fff</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Holo.DialogWindowTitle">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- Light text styles -->
+    <style name="TextAppearance.Holo.Light" parent="TextAppearance.Holo">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Inverse">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Large">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Medium">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Small">
+    </style>
+ 
+   <style name="TextAppearance.Holo.Light.Large.Inverse">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Medium.Inverse">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Small.Inverse">
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
+        <item name="android:textColorHighlight">?textColorHighlightInverse</item>
+        <item name="android:textColorLink">?textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.SearchResult" parent="TextAppearance.Holo.SearchResult">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.SearchResult.Title">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.SearchResult.Subtitle">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget" parent="TextAppearance.Widget">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.Button">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.PopupMenu" parent="TextAppearance.Holo.Widget.PopupMenu">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.PopupMenu.Large" parent="TextAppearance.Holo.Widget.PopupMenu.Large">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.PopupMenu.Small" parent="TextAppearance.Holo.Widget.PopupMenu.Small">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.DropDownHint" parent="TextAppearance.Holo.Widget.DropDownHint">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.ActionMode.Title" parent="TextAppearance.Widget.ActionMode.Title">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.ActionMode.Subtitle" parent="TextAppearance.Widget.ActionMode.Subtitle">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.WindowTitle">
+        <item name="android:textColor">#fff</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.DialogWindowTitle">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <!-- Widget Styles -->
+
+    <style name="Widget.Holo" parent="Widget">
+    </style>
+
+    <style name="Widget.Holo.Button" parent="Widget.Button">
+        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@android:color/primary_text_holo_dark</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:paddingLeft">32dip</item>
+        <item name="android:paddingRight">32dip</item>
+    </style>
+
+    <style name="Widget.Holo.Button.Small">
+        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@android:color/primary_text_holo_dark</item>
+        <item name="android:minHeight">40dip</item>
+        <item name="android:paddingLeft">24dip</item>
+        <item name="android:paddingRight">24dip</item>
+    </style>
+
+    <style name="Widget.Holo.Button.Inset">
+        <item name="android:background">@android:drawable/button_inset</item>
+    </style>
+
+    <style name="Widget.Holo.Button.Toggle">
+        <item name="android:background">@android:drawable/btn_toggle_holo_dark</item>
+        <item name="android:textOn">@android:string/capital_on</item>
+        <item name="android:textOff">@android:string/capital_off</item>
+        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:paddingLeft">24dip</item>
+        <item name="android:paddingRight">24dip</item>
+    </style>
+
+    <style name="Widget.Holo.TextView" parent="Widget.TextView">
+    </style>
+
+    <style name="Widget.Holo.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
+    </style>
+
+    <style name="Widget.Holo.TextSelectHandle" parent="Widget.TextSelectHandle">
+    </style>
+
+    <style name="Widget.Holo.AbsListView" parent="Widget.AbsListView">
+    </style>
+
+    <style name="Widget.Holo.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
+    </style>
+
+    <style name="Widget.Holo.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">
+    </style>
+
+    <style name="Widget.Holo.ListView.DropDown">
+    </style>
+
+    <style name="Widget.Holo.EditText" parent="Widget.EditText">
+    </style>
+
+    <style name="Widget.Holo.ExpandableListView" parent="Widget.ExpandableListView">
+    </style>
+
+    <style name="Widget.Holo.ExpandableListView.White">
+    </style>
+
+    <style name="Widget.Holo.Gallery" parent="Widget.Gallery">
+    </style>
+
+    <style name="Widget.Holo.GestureOverlayView" parent="Widget.GestureOverlayView">
+    </style>
+
+    <style name="Widget.Holo.GridView" parent="Widget.GridView">
+    </style>
+
+    <style name="Widget.Holo.ImageButton" parent="Widget.ImageButton">
+    </style>
+
+    <style name="Widget.Holo.ImageWell" parent="Widget.ImageWell">
+    </style>
+
+    <style name="Widget.Holo.ListView" parent="Widget.ListView">
+    </style>
+
+    <style name="Widget.Holo.ListView.White">
+    </style>
+
+    <style name="Widget.Holo.PopupWindow" parent="Widget.PopupWindow">
+    </style>
+
+    <style name="Widget.Holo.ProgressBar" parent="Widget.ProgressBar">
+    </style>
+
+    <style name="Widget.Holo.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
+    </style>
+
+    <style name="Widget.Holo.ProgressBar.Small" parent="Widget.ProgressBar.Horizontal">
+    </style>
+
+    <style name="Widget.Holo.ProgressBar.Small.Title" parent="Widget.ProgressBar.Small.Title">
+    </style>
+
+    <style name="Widget.Holo.ProgressBar.Large" parent="Widget.ProgressBar.Large">
+    </style>
+
+    <style name="Widget.Holo.ProgressBar.Inverse" parent="Widget.ProgressBar.Inverse">
+    </style>
+
+    <style name="Widget.Holo.ProgressBar.Small.Inverse" parent="Widget.ProgressBar.Small.Inverse">
+    </style>
+
+    <style name="Widget.Holo.ProgressBar.Large.Inverse" parent="Widget.ProgressBar.Large.Inverse">
+    </style>
+
+    <style name="Widget.Holo.SeekBar" parent="Widget.SeekBar">
+    </style>
+
+    <style name="Widget.Holo.RatingBar" parent="Widget.RatingBar">
+    </style>
+
+    <style name="Widget.Holo.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
+    </style>
+
+    <style name="Widget.Holo.RatingBar.Small">
+    </style>
+
+    <style name="Widget.Holo.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
+    </style>
+
+    <style name="Widget.Holo.ScrollView" parent="Widget.ScrollView">
+    </style>
+
+    <style name="Widget.Holo.HorizontalScrollView" parent="Widget.HorizontalScrollView">
+    </style>
+
+    <style name="Widget.Holo.Spinner" parent="Widget.Spinner.DropDown">
+    </style>
+
+    <style name="Widget.Holo.Spinner.DropDown">
+    </style>
+
+    <style name="Widget.Holo.CompoundButton.Star" parent="Widget.CompoundButton.Star">
+    </style>
+
+    <style name="Widget.Holo.TabWidget" parent="Widget.TabWidget">
+    </style>
+
+    <style name="Widget.Holo.WebTextView" parent="Widget.WebTextView">
+    </style>
+
+    <style name="Widget.Holo.WebView" parent="Widget.WebView">
+    </style>
+
+    <style name="Widget.Holo.DropDownItem" parent="Widget.DropDownItem">
+    </style>
+
+    <style name="Widget.Holo.DropDownItem.Spinner">
+    </style>
+
+    <style name="Widget.Holo.TextView.SpinnerItem" parent="Widget.TextView.SpinnerItem">
+    </style>
+
+    <style name="Widget.Holo.KeyboardView" parent="Widget.KeyboardView">
+    </style>
+
+    <style name="Widget.Holo.QuickContactBadge.WindowSmall" parent="Widget.QuickContactBadge.WindowSmall">
+    </style>
+
+    <style name="Widget.Holo.QuickContactBadge.WindowMedium" parent="Widget.QuickContactBadge.WindowMedium">
+    </style>
+
+    <style name="Widget.Holo.QuickContactBadge.WindowLarge" parent="Widget.QuickContactBadge.WindowLarge">
+    </style>
+
+    <style name="Widget.Holo.QuickContactBadgeSmall.WindowSmall" parent="Widget.QuickContactBadgeSmall.WindowSmall">
+    </style>
+
+    <style name="Widget.Holo.QuickContactBadgeSmall.WindowMedium" parent="Widget.QuickContactBadgeSmall.WindowMedium">
+    </style>
+
+    <style name="Widget.Holo.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge">
+    </style>
+
+    <style name="Widget.Holo.ListPopupWindow" parent="Widget.ListPopupWindow">
+    </style>
+
+    <style name="Widget.Holo.PopupMenu" parent="Widget.PopupMenu">
+    </style>
+
+    <style name="Widget.Holo.ActionButton" parent="Widget.ActionButton">
+    </style>
+
+    <style name="Widget.Holo.ActionButton.Overflow" parent="Widget.ActionButton.Overflow">
+    </style>
+
+    <style name="Widget.Holo.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
+    </style>
+
+    <style name="Widget.Holo.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
+    </style>
+
+    <style name="Widget.Holo.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
+    </style>
+
+    <style name="Widget.Holo.ActionMode" parent="Widget.ActionMode">
+        <item name="android:background">@android:drawable/cab_holo_dark</item>
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
+    </style>
+
+    <style name="Widget.Holo.ActionButton.CloseMode" parent="Widget.ActionButton.CloseMode">
+        <item name="android:src">@drawable/cab_ic_close_holo</item>
+    </style>
+
+    <style name="Widget.Holo.ActionBar" parent="Widget.ActionBar">
+    </style>
+
+    <!-- Light widget styles -->
+
+    <style name="Widget.Holo.Light">
+    </style>
+
+    <style name="Widget.Holo.Light.Button" parent="Widget.Button">
+    </style>
+
+    <style name="Widget.Holo.Light.Button.Small">
+    </style>
+
+    <style name="Widget.Holo.Light.Button.Inset">
+    </style>
+
+    <style name="Widget.Holo.Light.Button.Toggle">
+        <item name="android:background">@android:drawable/btn_toggle_holo_light</item>
+        <item name="android:textOn">@android:string/capital_on</item>
+        <item name="android:textOff">@android:string/capital_off</item>
+        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:paddingLeft">24dip</item>
+        <item name="android:paddingRight">24dip</item>
+    </style>
+
+    <style name="Widget.Holo.Light.TextView" parent="Widget.TextView">
+    </style>
+
+    <style name="Widget.Holo.Light.TextView.ListSeparator">
+    </style>
+
+    <style name="Widget.Holo.Light.TextSelectHandle" parent="Widget.TextSelectHandle">
+    </style>
+
+    <style name="Widget.Holo.Light.AbsListView" parent="Widget.AbsListView">
+    </style>
+
+    <style name="Widget.Holo.Light.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
+    </style>
+
+    <style name="Widget.Holo.Light.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">
+    </style>
+
+    <style name="Widget.Holo.Light.ListView.DropDown">
+    </style>
+
+    <style name="Widget.Holo.Light.EditText" parent="Widget.EditText">
+    </style>
+
+    <style name="Widget.Holo.Light.ExpandableListView" parent="Widget.ExpandableListView">
+    </style>
+
+    <style name="Widget.Holo.Light.ExpandableListView.White">
+    </style>
+
+    <style name="Widget.Holo.Light.Gallery" parent="Widget.Gallery">
+    </style>
+
+    <style name="Widget.Holo.Light.GestureOverlayView" parent="Widget.GestureOverlayView">
+    </style>
+
+    <style name="Widget.Holo.Light.GridView" parent="Widget.GridView">
+    </style>
+
+    <style name="Widget.Holo.Light.ImageButton" parent="Widget.ImageButton">
+    </style>
+
+    <style name="Widget.Holo.Light.ImageWell" parent="Widget.ImageWell">
+    </style>
+
+    <style name="Widget.Holo.Light.ListView" parent="Widget.ListView">
+    </style>
+
+    <style name="Widget.Holo.Light.ListView.White">
+    </style>
+
+    <style name="Widget.Holo.Light.PopupWindow" parent="Widget.PopupWindow">
+    </style>
+
+    <style name="Widget.Holo.Light.ProgressBar" parent="Widget.ProgressBar">
+    </style>
+
+    <style name="Widget.Holo.Light.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
+    </style>
+
+    <style name="Widget.Holo.Light.ProgressBar.Small" parent="Widget.ProgressBar.Small">
+    </style>
+
+    <style name="Widget.Holo.Light.ProgressBar.Small.Title" parent="Widget.ProgressBar.Small.Title">
+    </style>
+
+    <style name="Widget.Holo.Light.ProgressBar.Large" parent="Widget.ProgressBar.Large">
+    </style>
+
+    <style name="Widget.Holo.Light.ProgressBar.Inverse" parent="Widget.ProgressBar.Inverse">
+    </style>
+
+    <style name="Widget.Holo.Light.ProgressBar.Small.Inverse" parent="Widget.ProgressBar.Small.Inverse">
+    </style>
+
+    <style name="Widget.Holo.Light.ProgressBar.Large.Inverse" parent="Widget.ProgressBar.Large.Inverse">
+    </style>
+
+    <style name="Widget.Holo.Light.SeekBar" parent="Widget.SeekBar">
+    </style>
+
+    <style name="Widget.Holo.Light.RatingBar" parent="Widget.RatingBar">
+    </style>
+
+    <style name="Widget.Holo.Light.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
+    </style>
+
+    <style name="Widget.Holo.Light.RatingBar.Small">
+    </style>
+
+    <style name="Widget.Holo.Light.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
+    </style>
+
+    <style name="Widget.Holo.Light.ScrollView" parent="Widget.ScrollView">
+    </style>
+
+    <style name="Widget.Holo.Light.HorizontalScrollView" parent="Widget.HorizontalScrollView">
+    </style>
+
+    <style name="Widget.Holo.Light.Spinner" parent="Widget.Spinner.DropDown">
+    </style>
+
+    <style name="Widget.Holo.Light.Spinner.DropDown">
+    </style>
+
+    <style name="Widget.Holo.Light.CompoundButton.Star" parent="Widget.CompoundButton.Star">
+    </style>
+
+    <style name="Widget.Holo.Light.TabWidget" parent="Widget.TabWidget">
+    </style>
+
+    <style name="Widget.Holo.Light.WebTextView" parent="Widget.WebTextView">
+    </style>
+
+    <style name="Widget.Holo.Light.WebView" parent="Widget.WebView">
+    </style>
+
+    <style name="Widget.Holo.Light.DropDownItem" parent="Widget.DropDownItem">
+    </style>
+
+    <style name="Widget.Holo.Light.DropDownItem.Spinner">
+    </style>
+
+    <style name="Widget.Holo.Light.TextView.SpinnerItem" parent="Widget.TextView.SpinnerItem">
+    </style>
+
+    <style name="Widget.Holo.Light.KeyboardView" parent="Widget.KeyboardView">
+    </style>
+
+    <style name="Widget.Holo.Light.QuickContactBadge.WindowSmall" parent="Widget.QuickContactBadge.WindowSmall">
+    </style>
+
+    <style name="Widget.Holo.Light.QuickContactBadge.WindowMedium" parent="Widget.QuickContactBadge.WindowMedium">
+    </style>
+
+    <style name="Widget.Holo.Light.QuickContactBadge.WindowLarge" parent="Widget.QuickContactBadge.WindowLarge">
+    </style>
+
+    <style name="Widget.Holo.Light.QuickContactBadgeSmall.WindowSmall" parent="Widget.QuickContactBadgeSmall.WindowSmall">
+    </style>
+
+    <style name="Widget.Holo.Light.QuickContactBadgeSmall.WindowMedium" parent="Widget.QuickContactBadgeSmall.WindowMedium">
+    </style>
+
+    <style name="Widget.Holo.Light.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge">
+    </style>
+
+    <style name="Widget.Holo.Light.ListPopupWindow" parent="Widget.ListPopupWindow">
+    </style>
+
+    <style name="Widget.Holo.Light.PopupMenu" parent="Widget.PopupMenu">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionButton" parent="Widget.ActionButton">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionButton.Overflow" parent="Widget.ActionButton.Overflow">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionMode" parent="Widget.ActionMode">
+        <item name="android:background">@android:drawable/cab_holo_light</item>
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
+    </style>
+
+    <style name="Widget.Holo.Light.ActionButton.CloseMode" parent="Widget.ActionButton.CloseMode">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBar" parent="Widget.ActionBar">
+    </style>
+
+    <!-- Animation Styles -->
+
+    <style name="Animation.Holo" parent="Animation">
+    </style>
+
+    <style name="Animation.Holo.Activity" parent="Animation.Activity">
+    </style>
+
+    <style name="Animation.Holo.Dialog" parent="Animation.Dialog">
+    </style>
+
+    <!-- Dialog styles -->
+
+    <style name="AlertDialog.Holo" parent="AlertDialog">
+        <item name="fullDark">@android:drawable/dialog_full_holo</item>
+        <item name="topDark">@android:drawable/dialog_top_holo</item>
+        <item name="centerDark">@android:drawable/dialog_middle_holo</item>
+        <item name="bottomDark">@android:drawable/dialog_bottom_holo</item>
+        <item name="fullBright">@android:drawable/dialog_full_holo</item>
+        <item name="topBright">@android:drawable/dialog_top_holo</item>
+        <item name="centerBright">@android:drawable/dialog_middle_holo</item>
+        <item name="bottomBright">@android:drawable/dialog_bottom_holo</item>
+        <item name="bottomMedium">@android:drawable/dialog_bottom_holo</item>
+        <item name="centerMedium">@android:drawable/dialog_middle_holo</item>
+    </style>
+
+    <!-- Window title -->
+    <style name="WindowTitleBackground.Holo">
+        <item name="android:background">@android:drawable/title_bar</item>
+    </style>
+
+    <style name="WindowTitle.Holo">
+        <item name="android:singleLine">true</item>
+        <item name="android:textAppearance">@style/TextAppearance.Holo.WindowTitle</item>
+        <item name="android:shadowColor">#BB000000</item>
+        <item name="android:shadowRadius">2.75</item>
+    </style>
+
+    <style name="DialogWindowTitle.Holo">
+        <item name="android:maxLines">1</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:textAppearance">@style/TextAppearance.Holo.DialogWindowTitle</item>
+    </style>
+
 </resources>

@@ -76,6 +76,7 @@ import android.net.Uri;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Environment;
@@ -1063,8 +1064,13 @@ class ContextImpl extends Context {
     private NotificationManager getNotificationManager() {
         synchronized (mSync) {
             if (mNotificationManager == null) {
+                final Context outerContext = getOuterContext();
                 mNotificationManager = new NotificationManager(
-                        new ContextThemeWrapper(getOuterContext(), com.android.internal.R.style.Theme_Dialog),
+                        new ContextThemeWrapper(outerContext,
+                                outerContext.getApplicationInfo().targetSdkVersion >=
+                                    Build.VERSION_CODES.HONEYCOMB
+                                ? com.android.internal.R.style.Theme_Holo_Dialog
+                                : com.android.internal.R.style.Theme_Dialog),
                         mMainThread.getHandler());
             }
         }

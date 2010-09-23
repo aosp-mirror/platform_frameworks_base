@@ -18,6 +18,7 @@ package android.app;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -73,7 +74,10 @@ public class ProgressDialog extends AlertDialog {
     private Handler mViewUpdateHandler;
     
     public ProgressDialog(Context context) {
-        this(context, com.android.internal.R.style.Theme_Dialog_Alert);
+        this(context,
+                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
+                ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
+                : com.android.internal.R.style.Theme_Dialog_Alert);
     }
 
     public ProgressDialog(Context context, int theme) {

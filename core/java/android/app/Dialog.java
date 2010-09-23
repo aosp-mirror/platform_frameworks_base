@@ -25,6 +25,7 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -140,7 +141,10 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public Dialog(Context context, int theme) {
         mContext = new ContextThemeWrapper(
-            context, theme == 0 ? com.android.internal.R.style.Theme_Dialog : theme);
+            context, theme == 0 ? 
+                    (context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
+                            ? com.android.internal.R.style.Theme_Holo_Dialog
+                                    : com.android.internal.R.style.Theme_Dialog) : theme);
         mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         Window w = PolicyManager.makeNewWindow(mContext);
         mWindow = w;

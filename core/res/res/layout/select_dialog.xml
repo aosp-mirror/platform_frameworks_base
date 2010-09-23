@@ -30,5 +30,5 @@
     android:layout_height="match_parent"
     android:layout_marginTop="5px"
     android:cacheColorHint="@null"
-    android:divider="@android:drawable/divider_horizontal_bright"
+    android:divider="?android:attr/listDividerAlertDialog"
     android:scrollbars="vertical" />
