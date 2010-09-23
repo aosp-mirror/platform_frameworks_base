@@ -381,8 +381,15 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Copy the framebuffer into the layer
     glBindTexture(GL_TEXTURE_2D, layer->texture);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-            bounds.getWidth(), bounds.getHeight(), 0);
+
+    if (layer->empty) {
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
+                bounds.getWidth(), bounds.getHeight(), 0);
+        layer->empty = false;
+    } else {
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
+                bounds.getWidth(), bounds.getHeight());
+    }
 
     if (flags & SkCanvas::kClipToLayer_SaveFlag) {
         if (mSnapshot->clipTransformed(bounds)) setScissorFromClip();
