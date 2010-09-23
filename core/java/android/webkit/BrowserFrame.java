@@ -1037,14 +1037,15 @@ class BrowserFrame extends Handler {
      * We delegate the request to CallbackProxy, and route its response to
      * {@link #nativeAuthenticationProceed(int, String, String)} or
      * {@link #nativeAuthenticationCancel(int)}.
+     *
+     * We don't care what thread the callback is invoked on. All threading is
+     * handled on the C++ side, because the WebKit thread may be blocked on a
+     * synchronous call and unable to pump our MessageQueue.
      */
     private void didReceiveAuthenticationChallenge(
             final int handle, String host, String realm, final boolean useCachedCredentials) {
 
         HttpAuthHandler handler = new HttpAuthHandler() {
-
-            private static final int AUTH_PROCEED = 1;
-            private static final int AUTH_CANCEL = 2;
 
             @Override
             public boolean useHttpAuthUsernamePassword() {
@@ -1053,30 +1054,12 @@ class BrowserFrame extends Handler {
 
             @Override
             public void proceed(String username, String password) {
-                Message msg = obtainMessage(AUTH_PROCEED);
-                msg.getData().putString("username", username);
-                msg.getData().putString("password", password);
-                sendMessage(msg);
+                nativeAuthenticationProceed(handle, username, password);
             }
 
             @Override
             public void cancel() {
-                sendMessage(obtainMessage(AUTH_CANCEL));
-            }
-
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case AUTH_PROCEED:
-                        String username = msg.getData().getString("username");
-                        String password = msg.getData().getString("password");
-                        nativeAuthenticationProceed(handle, username, password);
-                        break;
-
-                    case AUTH_CANCEL:
-                        nativeAuthenticationCancel(handle);
-                        break;
-                }
+                nativeAuthenticationCancel(handle);
             }
         };
         mCallbackProxy.onReceivedHttpAuthRequest(handler, host, realm);
