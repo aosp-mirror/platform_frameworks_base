@@ -565,6 +565,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final StringBuilder mStrictModeBuffer = new StringBuilder();
 
     /**
+     * True if we have a pending unexpired BROADCAST_TIMEOUT_MSG posted to our handler.
+     */
+    private boolean mPendingBroadcastTimeoutMessage;
+
+    /**
      * Intent broadcast that we have tried to start, but are
      * waiting for its application's process to be created.  We only
      * need one (instead of a list) because we always process broadcasts
@@ -1070,17 +1075,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 processNextBroadcast(true);
             } break;
             case BROADCAST_TIMEOUT_MSG: {
-                if (mDidDexOpt) {
-                    mDidDexOpt = false;
-                    Message nmsg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
-                    mHandler.sendMessageDelayed(nmsg, BROADCAST_TIMEOUT);
-                    return;
-                }
-                // Only process broadcast timeouts if the system is ready. That way
-                // PRE_BOOT_COMPLETED broadcasts can't timeout as they are intended
-                // to do heavy lifting for system up
-                if (mProcessesReady) {
-                    broadcastTimeout();
+                synchronized (ActivityManagerService.this) {
+                    broadcastTimeoutLocked(true);
                 }
             } break;
             case SERVICE_TIMEOUT_MSG: {
@@ -2805,6 +2801,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private final class AppNotResponding implements Runnable {
+        private final ProcessRecord mApp;
+        private final String mAnnotation;
+
+        public AppNotResponding(ProcessRecord app, String annotation) {
+            mApp = app;
+            mAnnotation = annotation;
+        }
+
+        @Override
+        public void run() {
+            appNotResponding(mApp, null, null, mAnnotation);
+        }
+    }
+
     final void appNotResponding(ProcessRecord app, ActivityRecord activity,
             ActivityRecord parent, final String annotation) {
         ArrayList<Integer> firstPids = new ArrayList<Integer>(5);
@@ -3673,7 +3684,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "Exception in new application when starting receiver "
                       + br.curComponent.flattenToShortString(), e);
                 badApp = true;
-                logBroadcastReceiverDiscard(br);
+                logBroadcastReceiverDiscardLocked(br);
                 finishReceiverLocked(br.receiver, br.resultCode, br.resultData,
                         br.resultExtras, br.resultAbort, true);
                 scheduleBroadcastsLocked();
@@ -6349,7 +6360,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // The current broadcast is waiting for this app's receiver
             // to be finished.  Looks like that's not going to happen, so
             // let the broadcast continue.
-            logBroadcastReceiverDiscard(r);
+            logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
                     r.resultExtras, r.resultAbort, true);
             reschedule = true;
@@ -6358,7 +6369,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (r != null && r.curApp == app) {
             if (DEBUG_BROADCAST) Slog.v(TAG,
                     "skip & discard pending app " + r);
-            logBroadcastReceiverDiscard(r);
+            logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
                     r.resultExtras, r.resultAbort, true);
             reschedule = true;
@@ -10494,7 +10505,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         Binder.restoreCallingIdentity(origId);
     }
 
-    private final void logBroadcastReceiverDiscard(BroadcastRecord r) {
+    private final void logBroadcastReceiverDiscardLocked(BroadcastRecord r) {
         if (r.nextReceiver > 0) {
             Object curReceiver = r.receivers.get(r.nextReceiver-1);
             if (curReceiver instanceof BroadcastFilter) {
@@ -10522,67 +10533,108 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private final void broadcastTimeout() {
+    private final void setBroadcastTimeoutLocked(long timeoutTime) {
+        if (! mPendingBroadcastTimeoutMessage) {
+            Message msg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
+            mHandler.sendMessageAtTime(msg, timeoutTime);
+            mPendingBroadcastTimeoutMessage = true;
+        }
+    }
+
+    private final void cancelBroadcastTimeoutLocked() {
+        if (mPendingBroadcastTimeoutMessage) {
+            mHandler.removeMessages(BROADCAST_TIMEOUT_MSG);
+            mPendingBroadcastTimeoutMessage = false;
+        }
+    }
+
+    private final void broadcastTimeoutLocked(boolean fromMsg) {
+        if (fromMsg) {
+            mPendingBroadcastTimeoutMessage = false;
+        }
+
+        if (mOrderedBroadcasts.size() == 0) {
+            return;
+        }
+
+        long now = SystemClock.uptimeMillis();
+        BroadcastRecord r = mOrderedBroadcasts.get(0);
+        if (fromMsg) {
+            if (mDidDexOpt) {
+                // Delay timeouts until dexopt finishes.
+                mDidDexOpt = false;
+                long timeoutTime = SystemClock.uptimeMillis() + BROADCAST_TIMEOUT;
+                setBroadcastTimeoutLocked(timeoutTime);
+                return;
+            }
+            if (! mProcessesReady) {
+                // Only process broadcast timeouts if the system is ready. That way
+                // PRE_BOOT_COMPLETED broadcasts can't timeout as they are intended
+                // to do heavy lifting for system up.
+                return;
+            }
+
+            long timeoutTime = r.receiverTime + BROADCAST_TIMEOUT;
+            if (timeoutTime > now) {
+                // We can observe premature timeouts because we do not cancel and reset the
+                // broadcast timeout message after each receiver finishes.  Instead, we set up
+                // an initial timeout then kick it down the road a little further as needed
+                // when it expires.
+                if (DEBUG_BROADCAST) Slog.v(TAG,
+                        "Premature timeout @ " + now + ": resetting BROADCAST_TIMEOUT_MSG for "
+                        + timeoutTime);
+                setBroadcastTimeoutLocked(timeoutTime);
+                return;
+            }
+        }
+
+        Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver
+                + ", started " + (now - r.receiverTime) + "ms ago");
+        r.receiverTime = now;
+        r.anrCount++;
+
+        // Current receiver has passed its expiration date.
+        if (r.nextReceiver <= 0) {
+            Slog.w(TAG, "Timeout on receiver with nextReceiver <= 0");
+            return;
+        }
+
         ProcessRecord app = null;
         String anrMessage = null;
 
-        synchronized (this) {
-            if (mOrderedBroadcasts.size() == 0) {
-                return;
-            }
-            long now = SystemClock.uptimeMillis();
-            BroadcastRecord r = mOrderedBroadcasts.get(0);
-            if ((r.receiverTime+BROADCAST_TIMEOUT) > now) {
-                if (DEBUG_BROADCAST) Slog.v(TAG,
-                        "Premature timeout @ " + now + ": resetting BROADCAST_TIMEOUT_MSG for "
-                        + (r.receiverTime + BROADCAST_TIMEOUT));
-                Message msg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
-                mHandler.sendMessageAtTime(msg, r.receiverTime+BROADCAST_TIMEOUT);
-                return;
-            }
-
-            Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver);
-            r.receiverTime = now;
-            r.anrCount++;
-
-            // Current receiver has passed its expiration date.
-            if (r.nextReceiver <= 0) {
-                Slog.w(TAG, "Timeout on receiver with nextReceiver <= 0");
-                return;
-            }
-
-            Object curReceiver = r.receivers.get(r.nextReceiver-1);
-            Slog.w(TAG, "Receiver during timeout: " + curReceiver);
-            logBroadcastReceiverDiscard(r);
-            if (curReceiver instanceof BroadcastFilter) {
-                BroadcastFilter bf = (BroadcastFilter)curReceiver;
-                if (bf.receiverList.pid != 0
-                        && bf.receiverList.pid != MY_PID) {
-                    synchronized (this.mPidsSelfLocked) {
-                        app = this.mPidsSelfLocked.get(
-                                bf.receiverList.pid);
-                    }
+        Object curReceiver = r.receivers.get(r.nextReceiver-1);
+        Slog.w(TAG, "Receiver during timeout: " + curReceiver);
+        logBroadcastReceiverDiscardLocked(r);
+        if (curReceiver instanceof BroadcastFilter) {
+            BroadcastFilter bf = (BroadcastFilter)curReceiver;
+            if (bf.receiverList.pid != 0
+                    && bf.receiverList.pid != MY_PID) {
+                synchronized (this.mPidsSelfLocked) {
+                    app = this.mPidsSelfLocked.get(
+                            bf.receiverList.pid);
                 }
-            } else {
-                app = r.curApp;
             }
-            
-            if (app != null) {
-                anrMessage = "Broadcast of " + r.intent.toString();
-            }
-
-            if (mPendingBroadcast == r) {
-                mPendingBroadcast = null;
-            }
-
-            // Move on to the next receiver.
-            finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
-                    r.resultExtras, r.resultAbort, true);
-            scheduleBroadcastsLocked();
+        } else {
+            app = r.curApp;
         }
         
+        if (app != null) {
+            anrMessage = "Broadcast of " + r.intent.toString();
+        }
+
+        if (mPendingBroadcast == r) {
+            mPendingBroadcast = null;
+        }
+
+        // Move on to the next receiver.
+        finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
+                r.resultExtras, r.resultAbort, true);
+        scheduleBroadcastsLocked();
+
         if (anrMessage != null) {
-            appNotResponding(app, null, null, anrMessage);
+            // Post the ANR to the handler since we do not want to process ANRs while
+            // potentially holding our lock.
+            mHandler.post(new AppNotResponding(app, anrMessage));
         }
     }
 
@@ -10624,9 +10676,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     }
 
-    static void performReceive(ProcessRecord app, IIntentReceiver receiver,
+    static void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
             boolean ordered, boolean sticky) throws RemoteException {
+        // Send the intent to the receiver asynchronously using one-way binder calls.
         if (app != null && app.thread != null) {
             // If we have an app thread, do the call through that so it is
             // correctly ordered with other one-way calls.
@@ -10637,7 +10690,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    private final void deliverToRegisteredReceiver(BroadcastRecord r,
+    private final void deliverToRegisteredReceiverLocked(BroadcastRecord r,
             BroadcastFilter filter, boolean ordered) {
         boolean skip = false;
         if (filter.requiredPermission != null) {
@@ -10695,7 +10748,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.i(TAG, "Delivering to " + filter
                             + " (seq=" + seq + "): " + r);
                 }
-                performReceive(filter.receiverList.app, filter.receiverList.receiver,
+                performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode,
                     r.resultData, r.resultExtras, r.ordered, r.initialSticky);
                 if (ordered) {
@@ -10752,7 +10805,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (DEBUG_BROADCAST)  Slog.v(TAG,
                             "Delivering non-ordered to registered "
                             + target + ": " + r);
-                    deliverToRegisteredReceiver(r, (BroadcastFilter)target, false);
+                    deliverToRegisteredReceiverLocked(r, (BroadcastFilter)target, false);
                 }
                 addBroadcastToHistoryLocked(r);
                 if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Done with parallel broadcast "
@@ -10808,7 +10861,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // and continue to make progress.
                 //
                 // This is only done if the system is ready so that PRE_BOOT_COMPLETED
-                // receivers don't get executed with with timeouts. They're intended for
+                // receivers don't get executed with timeouts. They're intended for
                 // one time heavy lifting after system upgrades and can take
                 // significant amounts of time.
                 int numReceivers = (r.receivers != null) ? r.receivers.size() : 0;
@@ -10824,7 +10877,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 + " numReceivers=" + numReceivers
                                 + " nextReceiver=" + r.nextReceiver
                                 + " state=" + r.state);
-                        broadcastTimeout(); // forcibly finish this broadcast
+                        broadcastTimeoutLocked(false); // forcibly finish this broadcast
                         forceReceive = true;
                         r.state = BroadcastRecord.IDLE;
                     }
@@ -10848,7 +10901,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 Slog.i(TAG, "Finishing broadcast " + r.intent.getAction()
                                         + " seq=" + seq + " app=" + r.callerApp);
                             }
-                            performReceive(r.callerApp, r.resultTo,
+                            performReceiveLocked(r.callerApp, r.resultTo,
                                 new Intent(r.intent), r.resultCode,
                                 r.resultData, r.resultExtras, false, false);
                         } catch (RemoteException e) {
@@ -10857,7 +10910,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     
                     if (DEBUG_BROADCAST) Slog.v(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");
-                    mHandler.removeMessages(BROADCAST_TIMEOUT_MSG);
+                    cancelBroadcastTimeoutLocked();
 
                     if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Finished with ordered broadcast "
                             + r);
@@ -10882,11 +10935,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Processing ordered broadcast "
                         + r);
+            }
+            if (! mPendingBroadcastTimeoutMessage) {
+                long timeoutTime = r.receiverTime + BROADCAST_TIMEOUT;
                 if (DEBUG_BROADCAST) Slog.v(TAG,
-                        "Submitting BROADCAST_TIMEOUT_MSG for " + r + " at "
-                        + (r.receiverTime + BROADCAST_TIMEOUT));
-                Message msg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
-                mHandler.sendMessageAtTime(msg, r.receiverTime+BROADCAST_TIMEOUT);
+                        "Submitting BROADCAST_TIMEOUT_MSG for " + r + " at " + timeoutTime);
+                setBroadcastTimeoutLocked(timeoutTime);
             }
 
             Object nextReceiver = r.receivers.get(recIdx);
@@ -10897,7 +10951,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_BROADCAST)  Slog.v(TAG,
                         "Delivering ordered to registered "
                         + filter + ": " + r);
-                deliverToRegisteredReceiver(r, filter, r.ordered);
+                deliverToRegisteredReceiverLocked(r, filter, r.ordered);
                 if (r.receiver == null || !r.ordered) {
                     // The receiver has already finished, so schedule to
                     // process the next one.
@@ -11005,7 +11059,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + info.activityInfo.applicationInfo.packageName + "/"
                         + info.activityInfo.applicationInfo.uid + " for broadcast "
                         + r.intent + ": process is bad");
-                logBroadcastReceiverDiscard(r);
+                logBroadcastReceiverDiscardLocked(r);
                 finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
                         r.resultExtras, r.resultAbort, true);
                 scheduleBroadcastsLocked();
