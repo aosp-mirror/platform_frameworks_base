@@ -620,13 +620,15 @@ class SipSessionGroup implements SipListener {
                         Response.CALL_OR_TRANSACTION_DOES_NOT_EXIST);
                 return true;
             } else if (evt instanceof TransactionTerminatedEvent) {
-                if (evt instanceof TimeoutEvent) {
-                    processTimeout((TimeoutEvent) evt);
-                } else {
-                    processTransactionTerminated(
-                            (TransactionTerminatedEvent) evt);
+                if (isCurrentTransaction((TransactionTerminatedEvent) evt)) {
+                    if (evt instanceof TimeoutEvent) {
+                        processTimeout((TimeoutEvent) evt);
+                    } else {
+                        processTransactionTerminated(
+                                (TransactionTerminatedEvent) evt);
+                    }
+                    return true;
                 }
-                return true;
             } else if (isRequestEvent(Request.OPTIONS, evt)) {
                 mSipHelper.sendResponse((RequestEvent) evt, Response.OK);
                 return true;
@@ -646,6 +648,34 @@ class SipSessionGroup implements SipListener {
             }
         }
 
+        private boolean isCurrentTransaction(TransactionTerminatedEvent event) {
+            Transaction current = event.isServerTransaction()
+                    ? mServerTransaction
+                    : mClientTransaction;
+            Transaction target = event.isServerTransaction()
+                    ? event.getServerTransaction()
+                    : event.getClientTransaction();
+
+            if ((current != target) && (mState != SipSession.State.PINGING)) {
+                Log.d(TAG, "not the current transaction; current="
+                        + toString(current) + ", target=" + toString(target));
+                return false;
+            } else if (current != null) {
+                Log.d(TAG, "transaction terminated: " + toString(current));
+                return true;
+            }
+        }
+
+        private String toString(Transaction transaction) {
+            if (transaction == null) return "null";
+            Request request = transaction.getRequest();
+            Dialog dialog = transaction.getDialog();
+            CSeqHeader cseq = (CSeqHeader) request.getHeader(CSeqHeader.NAME);
+            return String.format("req=%s,%s,s=%s,ds=%s,", request.getMethod(),
+                    cseq.getSeqNumber(), transaction.getState(),
+                    ((dialog == null) ? "-" : dialog.getState()));
+        }
+
         private void processTransactionTerminated(
                 TransactionTerminatedEvent event) {
             switch (mState) {
@@ -661,19 +691,7 @@ class SipSessionGroup implements SipListener {
         }
 
         private void processTimeout(TimeoutEvent event) {
-            Log.d(TAG, "processing Timeout..." + event);
-            Transaction current = event.isServerTransaction()
-                    ? mServerTransaction
-                    : mClientTransaction;
-            Transaction target = event.isServerTransaction()
-                    ? event.getServerTransaction()
-                    : event.getClientTransaction();
-
-            if ((current != target) && (mState != SipSession.State.PINGING)) {
-                Log.d(TAG, "not the current transaction; current=" + current
-                        + ", timed out=" + target);
-                return;
-            }
+            Log.d(TAG, "processing Timeout...");
             switch (mState) {
                 case SipSession.State.REGISTERING:
                 case SipSession.State.DEREGISTERING:
@@ -1000,18 +1018,18 @@ class SipSessionGroup implements SipListener {
                 Response response = event.getResponse();
                 int statusCode = response.getStatusCode();
                 if (expectResponse(Request.CANCEL, evt)) {
+                    if (statusCode == Response.OK) {
+                        // do nothing; wait for REQUEST_TERMINATED
+                        return true;
+                    }
+                } else if (expectResponse(Request.INVITE, evt)) {
                     switch (statusCode) {
                         case Response.OK:
-                            // do nothing; wait for REQUEST_TERMINATED
+                            outgoingCall(evt); // abort Cancel
                             return true;
                         case Response.REQUEST_TERMINATED:
                             endCallNormally();
                             return true;
-                    }
-                } else if (expectResponse(Request.INVITE, evt)) {
-                    if (statusCode == Response.OK) {
-                        outgoingCall(evt); // abort Cancel
-                        return true;
                     }
                 } else {
                     return false;
