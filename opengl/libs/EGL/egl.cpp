@@ -437,6 +437,12 @@ static void gl_no_context() {
     }
 }
 
+// Always return GL_INVALID_OPERATION from glGetError() when called from
+// a thread without a bound context.
+static GLenum gl_no_context_glGetError() {
+    return GL_INVALID_OPERATION;
+}
+
 static void early_egl_init(void) 
 {
 #if !USE_FAST_TLS_KEY
@@ -447,6 +453,9 @@ static void early_egl_init(void)
             (uint32_t*)(void*)&gHooksNoContext, 
             addr, 
             sizeof(gHooksNoContext));
+
+    gHooksNoContext.gl.glGetError = gl_no_context_glGetError;
+
     setGlThreadSpecific(&gHooksNoContext);
 }
 
