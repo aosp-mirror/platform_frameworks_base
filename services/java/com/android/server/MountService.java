@@ -46,6 +46,7 @@ import android.os.storage.IObbActionListener;
 import android.os.storage.StorageResultCode;
 import android.util.Slog;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -148,7 +149,7 @@ class MountService extends IMountService.Stub
      * Mounted OBB tracking information. Used to track the current state of all
      * OBBs.
      */
-    final private Map<IObbActionListener, ObbState> mObbMounts = new HashMap<IObbActionListener, ObbState>();
+    final private Map<IObbActionListener, List<ObbState>> mObbMounts = new HashMap<IObbActionListener, List<ObbState>>();
     final private Map<String, ObbState> mObbPathToStateMap = new HashMap<String, ObbState>();
 
     class ObbState implements IBinder.DeathRecipient {
@@ -160,13 +161,13 @@ class MountService extends IMountService.Stub
         }
 
         // OBB source filename
-        String filename;
+        final String filename;
 
         // Token of remote Binder caller
-        IObbActionListener token;
+        final IObbActionListener token;
 
         // Binder.callingUid()
-        public int callerUid;
+        final public int callerUid;
 
         // Whether this is mounted currently.
         boolean mounted;
@@ -225,9 +226,9 @@ class MountService extends IMountService.Stub
     private static final int MAX_UNMOUNT_RETRIES = 4;
 
     class UnmountCallBack {
-        String path;
+        final String path;
+        final boolean force;
         int retries;
-        boolean force;
 
         UnmountCallBack(String path, boolean force) {
             retries = 0;
@@ -242,7 +243,7 @@ class MountService extends IMountService.Stub
     }
 
     class UmsEnableCallBack extends UnmountCallBack {
-        String method;
+        final String method;
 
         UmsEnableCallBack(String path, String method, boolean force) {
             super(path, force);
@@ -1513,10 +1514,6 @@ class MountService extends IMountService.Stub
                 throw new IllegalArgumentException("OBB file is already mounted");
             }
 
-            if (mObbMounts.containsKey(token)) {
-                throw new IllegalArgumentException("You may only have one OBB mounted at a time");
-            }
-
             final int callerUid = Binder.getCallingUid();
             obbState = new ObbState(filename, token, callerUid);
             addObbState(obbState);
@@ -1554,14 +1551,25 @@ class MountService extends IMountService.Stub
 
     private void addObbState(ObbState obbState) {
         synchronized (mObbMounts) {
-            mObbMounts.put(obbState.token, obbState);
+            List<ObbState> obbStates = mObbMounts.get(obbState.token);
+            if (obbStates == null) {
+                obbStates = new ArrayList<ObbState>();
+                mObbMounts.put(obbState.token, obbStates);
+            }
+            obbStates.add(obbState);
             mObbPathToStateMap.put(obbState.filename, obbState);
         }
     }
 
     private void removeObbState(ObbState obbState) {
         synchronized (mObbMounts) {
-            mObbMounts.remove(obbState.token);
+            final List<ObbState> obbStates = mObbMounts.get(obbState.token);
+            if (obbStates != null) {
+                obbStates.remove(obbState);
+            }
+            if (obbStates == null || obbStates.isEmpty()) {
+                mObbMounts.remove(obbState.token);
+            }
             mObbPathToStateMap.remove(obbState.filename);
         }
     }
@@ -1737,7 +1745,7 @@ class MountService extends IMountService.Stub
             }
         }
 
-        abstract void handleExecute() throws RemoteException;
+        abstract void handleExecute() throws RemoteException, IOException;
         abstract void handleError();
     }
 
@@ -1749,8 +1757,12 @@ class MountService extends IMountService.Stub
             mKey = key;
         }
 
-        public void handleExecute() throws RemoteException {
+        public void handleExecute() throws RemoteException, IOException {
             ObbInfo obbInfo = mContainerService.getObbInfo(mObbState.filename);
+            if (obbInfo == null) {
+                throw new IOException("Couldn't read OBB file");
+            }
+
             if (!isUidOwnerOfPackageOrSystem(obbInfo.packageName, mObbState.callerUid)) {
                 throw new IllegalArgumentException("Caller package does not match OBB file");
             }
@@ -1773,15 +1785,17 @@ class MountService extends IMountService.Stub
 
             if (rc == StorageResultCode.OperationSucceeded) {
                 try {
-                    mObbState.token.onObbResult(mObbState.filename, "mounted");
+                    mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_MOUNTED);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
                 }
             } else {
-                Slog.e(TAG, "Couldn't mount OBB file");
+                Slog.e(TAG, "Couldn't mount OBB file: " + rc);
 
                 // We didn't succeed, so remove this from the mount-set.
                 removeObbState(mObbState);
+
+                mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
             }
         }
 
@@ -1789,7 +1803,7 @@ class MountService extends IMountService.Stub
             removeObbState(mObbState);
 
             try {
-                mObbState.token.onObbResult(mObbState.filename, "error");
+                mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Couldn't send back OBB mount error for " + mObbState.filename);
             }
@@ -1818,8 +1832,11 @@ class MountService extends IMountService.Stub
             mForceUnmount = force;
         }
 
-        public void handleExecute() throws RemoteException {
+        public void handleExecute() throws RemoteException, IOException {
             ObbInfo obbInfo = mContainerService.getObbInfo(mObbState.filename);
+            if (obbInfo == null) {
+                throw new IOException("Couldn't read OBB file");
+            }
 
             if (!isCallerOwnerOfPackageOrSystem(obbInfo.packageName)) {
                 throw new IllegalArgumentException("Caller package does not match OBB file");
@@ -1843,13 +1860,13 @@ class MountService extends IMountService.Stub
                 removeObbState(mObbState);
 
                 try {
-                    mObbState.token.onObbResult(mObbState.filename, "unmounted");
+                    mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_UNMOUNTED);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
                 }
             } else {
                 try {
-                    mObbState.token.onObbResult(mObbState.filename, "error");
+                    mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
                 }
@@ -1860,7 +1877,7 @@ class MountService extends IMountService.Stub
             removeObbState(mObbState);
 
             try {
-                mObbState.token.onObbResult(mObbState.filename, "error");
+                mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Couldn't send back OBB unmount error for " + mObbState.filename);
             }
