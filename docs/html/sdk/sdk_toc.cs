@@ -94,7 +94,7 @@
       <span style="display:none" class="zh-TW"></span>
       </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 0.9.8
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 0.9.9
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>

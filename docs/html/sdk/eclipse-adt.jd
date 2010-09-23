@@ -1,9 +1,9 @@
 page.title=ADT Plugin for Eclipse
 sdk.preview=0
-adt.zip.version=0.9.8
-adt.zip.download=ADT-0.9.8.zip
-adt.zip.bytes=8703591
-adt.zip.checksum=22070f8e52924605a3b3abf87c1ba39f
+adt.zip.version=0.9.9
+adt.zip.download=ADT-0.9.9.zip
+adt.zip.bytes=8301681
+adt.zip.checksum=7deff0c9b25940a74cea7a0815a3bc36
 
 @jd:body
 
@@ -100,11 +100,40 @@ padding: .25em 1em;
 </style>
 
 
-
-
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+ADT 0.9.9</a> <em>(September 2010)</em>
+  <div class="toggleme">
+
+
+</ul>
+</dd>
+
+<dl>
+
+<dt>Dependencies:</dt>
+
+<dd><p>ADT 0.9.9 replaces ADT 0.9.8 and is designed for use with SDK Tools r7
+and later. ADT 0.9.9 includes the ADT 0.9.8 features as well as an important
+bugfix, so we recommend that you upgrade as soon as possible. If you haven't
+already installed SDK Tools r7 into your SDK, use the Android SDK Manager to do
+so.</p></dd>
+
+<dt>General notes:</dt>
+<dd>
+<ul>
+<li>Fixes a problem in project import, in which source files were deleted in some cases.</li>
+<li>Includes all other ADT 0.9.8 features (see below).</li>
+</ul>
+</dd>
+</dl>
+ </div>
+</div>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
 ADT 0.9.8</a> <em>(September 2010)</em>
   <div class="toggleme">
 
@@ -116,9 +145,7 @@ ADT 0.9.8</a> <em>(September 2010)</em>
 
 <dt>Dependencies:</dt>
 
-<dd><p>ADT 0.9.8 is designed for use with SDK Tools r7 and later. Before 
-updating to ADT 0.9.8, we highly recommend that you use the Android SDK and
-AVD Manager to install SDK Tools r7 into your SDK.</p></dd>
+<dd><p>ADT 0.9.8 is now deprecated. Please use ADT 0.9.9 instead.</p></dd>
 
 <dt>General notes:</dt>
 <dd>
