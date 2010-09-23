@@ -9621,20 +9621,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.e(TAG, "Backup agent created for " + agentPackageName + " but not requested!");
                 return;
             }
+        }
 
-            long oldIdent = Binder.clearCallingIdentity();
-            try {
-                IBackupManager bm = IBackupManager.Stub.asInterface(
-                        ServiceManager.getService(Context.BACKUP_SERVICE));
-                bm.agentConnected(agentPackageName, agent);
-            } catch (RemoteException e) {
-                // can't happen; the backup manager service is local
-            } catch (Exception e) {
-                Slog.w(TAG, "Exception trying to deliver BackupAgent binding: ");
-                e.printStackTrace();
-            } finally {
-                Binder.restoreCallingIdentity(oldIdent);
-            }
+        long oldIdent = Binder.clearCallingIdentity();
+        try {
+            IBackupManager bm = IBackupManager.Stub.asInterface(
+                    ServiceManager.getService(Context.BACKUP_SERVICE));
+            bm.agentConnected(agentPackageName, agent);
+        } catch (RemoteException e) {
+            // can't happen; the backup manager service is local
+        } catch (Exception e) {
+            Slog.w(TAG, "Exception trying to deliver BackupAgent binding: ");
+            e.printStackTrace();
+        } finally {
+            Binder.restoreCallingIdentity(oldIdent);
         }
     }
 
