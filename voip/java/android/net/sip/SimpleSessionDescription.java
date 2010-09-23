@@ -343,7 +343,7 @@ public class SimpleSessionDescription {
         }
 
         /**
-         * Sets a RTP payload type and its {@code rtpmap} and {@fmtp}
+         * Sets a RTP payload type and its {@code rtpmap} and {@code fmtp}
          * attributes. If any of the attributes is {@code null}, the
          * corresponding field will be removed. See
          * {@link SimpleSessionDescription} for an example of its usage.
