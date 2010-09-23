@@ -16,6 +16,17 @@
 
 package com.android.internal.telephony.gsm;
 
+import com.android.internal.telephony.CommandException;
+import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.DataConnectionTracker;
+import com.android.internal.telephony.EventLogTags;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.MccTable;
+import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.ServiceStateTracker;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
+
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -46,17 +57,6 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.TimeUtils;
-
-import com.android.internal.telephony.CommandException;
-import com.android.internal.telephony.CommandsInterface;
-import com.android.internal.telephony.DataConnectionTracker;
-import com.android.internal.telephony.EventLogTags;
-import com.android.internal.telephony.IccCard;
-import com.android.internal.telephony.MccTable;
-import com.android.internal.telephony.RILConstants;
-import com.android.internal.telephony.ServiceStateTracker;
-import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -995,7 +995,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     mNeedFixZone = false;
 
                     if (zone != null) {
-                        if (getAutoTime()) {
+                        if (getAutoTimeZone()) {
                             setAndBroadcastNetworkSetTimeZone(zone.getID());
                         }
                         saveNitzTimeZone(zone.getID());
@@ -1476,7 +1476,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             }
 
             if (zone != null) {
-                if (getAutoTime()) {
+                if (getAutoTimeZone()) {
                     setAndBroadcastNetworkSetTimeZone(zone.getID());
                 }
                 saveNitzTimeZone(zone.getID());
@@ -1541,6 +1541,15 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         try {
             return Settings.System.getInt(phone.getContext().getContentResolver(),
                     Settings.System.AUTO_TIME) > 0;
+        } catch (SettingNotFoundException snfe) {
+            return true;
+        }
+    }
+
+    private boolean getAutoTimeZone() {
+        try {
+            return Settings.System.getInt(phone.getContext().getContentResolver(),
+                    Settings.System.AUTO_TIME_ZONE) > 0;
         } catch (SettingNotFoundException snfe) {
             return true;
         }

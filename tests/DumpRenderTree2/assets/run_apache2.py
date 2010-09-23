@@ -109,18 +109,17 @@ def main(options, args):
 
   # Try to execute the commands
   logging.info("Will " + run_cmd + " apache2 server.")
-  cmd_template = export_envvars_cmd + " && " + apache2_restart_template + directives + conf_file_cmd
 
   # It is worth noting here that if the configuration file with which we restart the server points
-  # to a different PidFile it will not work and result in second apache2 instance.
+  # to a different PidFile it will not work and will result in a second apache2 instance.
   if (run_cmd == 'restart'):
     logging.info("First will stop...")
-    execute_cmd(cmd_template % ('stop'))
+    execute_cmd(export_envvars_cmd + " && " + (apache2_restart_template % ('stop')) + directives + conf_file_cmd)
     logging.info("Stopped. Will start now...")
     # We need to sleep breifly to avoid errors with apache being stopped and started too quickly
     time.sleep(0.5)
 
-  execute_cmd(cmd_template % (run_cmd))
+  execute_cmd(export_envvars_cmd + " && " + (apache2_restart_template % (run_cmd)) + directives + conf_file_cmd)
 
 def execute_cmd(cmd):
   p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

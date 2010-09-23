@@ -43,8 +43,8 @@ public final class MtpCursor extends AbstractWindowedCursor {
 
     private int mQueryType;
     private int mDeviceID;
-    private int mStorageID;
-    private int mQbjectID;
+    private long mStorageID;
+    private long mQbjectID;
 
     /** The names of the columns in the projection */
     private String[] mColumns;
@@ -54,7 +54,7 @@ public final class MtpCursor extends AbstractWindowedCursor {
 
     private final MtpClient mClient;
 
-    public MtpCursor(MtpClient client, int queryType, int deviceID, int storageID, int objectID,
+    public MtpCursor(MtpClient client, int queryType, int deviceID, long storageID, long objectID,
             String[] projection) {
 
         mClient = client;
@@ -220,7 +220,7 @@ public final class MtpCursor extends AbstractWindowedCursor {
     private int mNativeContext;
 
     private native final void native_setup(MtpClient client, int queryType,
-            int deviceID, int storageID, int objectID, int[] columns);
+            int deviceID, long storageID, long objectID, int[] columns);
     private native final void native_finalize();
     private native void native_wait_for_event();
     private native int native_fill_window(CursorWindow window, int startPos);

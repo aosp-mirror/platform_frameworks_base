@@ -232,6 +232,8 @@ public class PowerManager
         /**
          * Sets whether this WakeLock is ref counted.
          *
+         * <p>Wake locks are reference counted by default.
+         *
          * @param value true for ref counted, false for not ref counted.
          */
         public void setReferenceCounted(boolean value)

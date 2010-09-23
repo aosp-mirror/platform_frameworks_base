@@ -354,10 +354,6 @@ ScriptSetVarV {
 	}
 
 
-ScriptCSetScript {
-	param void * codePtr
-	}
-
 ScriptCSetText {
 	param const char * text
 	param uint32_t length

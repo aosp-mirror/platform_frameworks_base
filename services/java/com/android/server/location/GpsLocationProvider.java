@@ -1171,7 +1171,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void reportAGpsStatus(int type, int status) {
         switch (status) {
             case GPS_REQUEST_AGPS_DATA_CONN:
-                 int result = mConnMgr.startUsingNetworkFeature(
+                // Set mAGpsDataConnectionState before calling startUsingNetworkFeature
+                //  to avoid a race condition with handleUpdateNetworkState()
+                mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
+                int result = mConnMgr.startUsingNetworkFeature(
                         ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
                 if (result == Phone.APN_ALREADY_ACTIVE) {
                     if (mAGpsApn != null) {
@@ -1179,11 +1182,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
                     } else {
                         Log.e(TAG, "mAGpsApn not set when receiving Phone.APN_ALREADY_ACTIVE");
+                        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                         native_agps_data_conn_failed();
                     }
                 } else if (result == Phone.APN_REQUEST_STARTED) {
-                    mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
+                    // Nothing to do here
                 } else {
+                    mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                     native_agps_data_conn_failed();
                 }
                 break;

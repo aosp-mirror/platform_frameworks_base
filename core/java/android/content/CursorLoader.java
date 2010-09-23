@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -37,12 +38,20 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     public Cursor loadInBackground() {
         Cursor cursor = getContext().getContentResolver().query(mUri, mProjection, mSelection,
                 mSelectionArgs, mSortOrder);
-        // Ensure the cursor window is filled
         if (cursor != null) {
+            // Ensure the cursor window is filled
             cursor.getCount();
-            cursor.registerContentObserver(mObserver);
+            registerContentObserver(cursor, mObserver);
         }
         return cursor;
+    }
+
+    /**
+     * Registers an observer to get notifications from the content provider
+     * when the cursor needs to be refreshed.
+     */
+    public void registerContentObserver(Cursor cursor, ContentObserver observer) {
+        cursor.registerContentObserver(mObserver);
     }
 
     /* Runs on the UI thread */

@@ -82,6 +82,8 @@ private:
 
     void releaseFrames();
 
+    MediaBuffer *drainOutputBuffer();
+
     AVCDecoder(const AVCDecoder &);
     AVCDecoder &operator=(const AVCDecoder &);
 };

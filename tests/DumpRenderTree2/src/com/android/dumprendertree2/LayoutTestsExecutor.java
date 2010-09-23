@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -30,19 +31,20 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.PowerManager.WakeLock;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Window;
 import android.webkit.ConsoleMessage;
+import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.GeolocationPermissions;
 import android.webkit.WebStorage.QuotaUpdater;
 
 import java.io.File;
@@ -74,7 +76,7 @@ public class LayoutTestsExecutor extends Activity {
         }
     }
 
-    private static final String LOG_TAG = "LayoutTestExecutor";
+    private static final String LOG_TAG = "LayoutTestsExecutor";
 
     public static final String EXTRA_TESTS_LIST = "TestsList";
     public static final String EXTRA_TEST_INDEX = "TestIndex";
@@ -180,6 +182,13 @@ public class LayoutTestsExecutor extends Activity {
              }
              handler.cancel();
          }
+
+         @Override
+         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+             // We ignore SSL errors. In particular, the certificate used by the LayoutTests server
+             // produces an error as it lacks a CN field.
+             handler.proceed();
+         }
     };
 
     private WebChromeClient mWebChromeClient = new WebChromeClient() {
@@ -236,7 +245,7 @@ public class LayoutTestsExecutor extends Activity {
                  * We never display the new window, just create the view and allow it's content to
                  * execute and be recorded by the executor.
                  */
-                newWindowWebView = new WebView(LayoutTestsExecutor.this);
+                newWindowWebView = createWebViewWithJavascriptInterfaces();
                 setupWebView(newWindowWebView);
             }
 
@@ -317,7 +326,7 @@ public class LayoutTestsExecutor extends Activity {
         mCurrentResult = null;
         mCurrentAdditionalTextOutput = null;
 
-        mCurrentWebView = new WebView(this);
+        mCurrentWebView = createWebViewWithJavascriptInterfaces();
         setupWebView(mCurrentWebView);
 
         mEventSender.reset(mCurrentWebView);
@@ -329,11 +338,26 @@ public class LayoutTestsExecutor extends Activity {
         }
     }
 
+    private static class WebViewWithJavascriptInterfaces extends WebView {
+        public WebViewWithJavascriptInterfaces(
+                Context context, Map<String, Object> javascriptInterfaces) {
+            super(context,
+                  null, // attribute set
+                  0, // default style resource ID
+                  javascriptInterfaces,
+                  false); // is private browsing
+        }
+    }
+    private WebView createWebViewWithJavascriptInterfaces() {
+        Map<String, Object> javascriptInterfaces = new HashMap<String, Object>();
+        javascriptInterfaces.put("layoutTestController", mLayoutTestController);
+        javascriptInterfaces.put("eventSender", mEventSender);
+        return new WebViewWithJavascriptInterfaces(this, javascriptInterfaces);
+    }
+
     private void setupWebView(WebView webView) {
         webView.setWebViewClient(mWebViewClient);
         webView.setWebChromeClient(mWebChromeClient);
-        webView.addJavascriptInterface(mLayoutTestController, "layoutTestController");
-        webView.addJavascriptInterface(mEventSender, "eventSender");
 
         /**
          * Setting a touch interval of -1 effectively disables the optimisation in WebView

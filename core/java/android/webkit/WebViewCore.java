@@ -1829,9 +1829,11 @@ final class WebViewCore {
                 draw.mViewState = mInitialViewState;
                 if (mViewportWidth == -1 && mSettings.getUseFixedViewport() &&
                     mSettings.getUseWideViewPort()) {
+                    final int fixedViewportMargin = mContext.getResources().getDimensionPixelSize(
+                      com.android.internal.R.dimen.fixed_viewport_margin);
                     // Use website's initial preferred width as the fixed viewport width.
                     mViewportWidth = Math.min(mSettings.getMaxFixedViewportWidth(),
-                        Math.max(draw.mWidthHeight.x, draw.mMinPrefWidth));
+                        draw.mMinPrefWidth + 2 * fixedViewportMargin);
                     draw.mViewState.mViewportWidth = mViewportWidth;
                 }
                 mInitialViewState = null;

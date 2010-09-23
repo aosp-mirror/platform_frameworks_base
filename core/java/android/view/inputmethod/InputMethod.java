@@ -219,4 +219,10 @@ public interface InputMethod {
      * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
      */
     public void hideSoftInput(int flags, ResultReceiver resultReceiver);
+
+    /**
+     * Notify that the input method subtype is being changed in the same input method.
+     * @param subtype New subtype of the notified input method
+     */
+    public void changeInputMethodSubtype(InputMethodSubtype subtype);
 }

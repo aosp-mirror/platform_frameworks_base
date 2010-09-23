@@ -57,20 +57,20 @@ public class MtpClient {
         native_stop();
     }
 
-    public boolean deleteObject(int deviceID, int objectID) {
+    public boolean deleteObject(int deviceID, long objectID) {
         return native_delete_object(deviceID, objectID);
     }
 
-    public int getParent(int deviceID, int objectID) {
+    public long getParent(int deviceID, long objectID) {
         return native_get_parent(deviceID, objectID);
     }
 
-    public int getStorageID(int deviceID, int objectID) {
+    public long getStorageID(int deviceID, long objectID) {
         return native_get_storage_id(deviceID, objectID);
     }
 
     // create a file descriptor for reading the contents of an object over MTP
-    public ParcelFileDescriptor openFile(int deviceID, int objectID) {
+    public ParcelFileDescriptor openFile(int deviceID, long objectID) {
         return native_open_file(deviceID, objectID);
     }
 
@@ -101,8 +101,8 @@ public class MtpClient {
     private native final void native_finalize();
     private native boolean native_start();
     private native void native_stop();
-    private native boolean native_delete_object(int deviceID, int objectID);
-    private native int native_get_parent(int deviceID, int objectID);
-    private native int native_get_storage_id(int deviceID, int objectID);
-    private native ParcelFileDescriptor native_open_file(int deviceID, int objectID);
+    private native boolean native_delete_object(int deviceID, long objectID);
+    private native long native_get_parent(int deviceID, long objectID);
+    private native long native_get_storage_id(int deviceID, long objectID);
+    private native ParcelFileDescriptor native_open_file(int deviceID, long objectID);
 }

@@ -16,6 +16,16 @@
 
 package com.android.internal.telephony.cdma;
 
+import com.android.internal.telephony.CommandException;
+import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.DataConnectionTracker;
+import com.android.internal.telephony.EventLogTags;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.MccTable;
+import com.android.internal.telephony.ServiceStateTracker;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
+
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -38,18 +48,7 @@ import android.telephony.cdma.CdmaCellLocation;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Config;
 import android.util.TimeUtils;
-
-import com.android.internal.telephony.CommandException;
-import com.android.internal.telephony.CommandsInterface;
-import com.android.internal.telephony.DataConnectionTracker;
-import com.android.internal.telephony.EventLogTags;
-import com.android.internal.telephony.IccCard;
-import com.android.internal.telephony.MccTable;
-import com.android.internal.telephony.ServiceStateTracker;
-import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -987,7 +986,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         mNeedFixZone = false;
 
         if (zone != null) {
-            if (getAutoTime()) {
+            if (getAutoTimeZone()) {
                 setAndBroadcastNetworkSetTimeZone(zone.getID());
             }
             saveNitzTimeZone(zone.getID());
@@ -1439,7 +1438,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             }
 
             if (zone != null) {
-                if (getAutoTime()) {
+                if (getAutoTimeZone()) {
                     setAndBroadcastNetworkSetTimeZone(zone.getID());
                 }
                 saveNitzTimeZone(zone.getID());
@@ -1524,6 +1523,14 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private boolean getAutoTime() {
         try {
             return Settings.System.getInt(cr, Settings.System.AUTO_TIME) > 0;
+        } catch (SettingNotFoundException snfe) {
+            return true;
+        }
+    }
+
+    private boolean getAutoTimeZone() {
+        try {
+            return Settings.System.getInt(cr, Settings.System.AUTO_TIME_ZONE) > 0;
         } catch (SettingNotFoundException snfe) {
             return true;
         }

@@ -70,7 +70,7 @@ public class StorageBrowser extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Intent intent = new Intent(this, ObjectBrowser.class);
         intent.putExtra("device", mDeviceID);
-        intent.putExtra("storage", (int)mAdapter.getItemId(position));
+        intent.putExtra("storage", mAdapter.getItemId(position));
         startActivity(intent);
     }
 }

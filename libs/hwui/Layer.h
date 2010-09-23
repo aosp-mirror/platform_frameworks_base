@@ -82,6 +82,10 @@ struct Layer {
      * Indicates whether this layer should be blended.
      */
     bool blend;
+    /**
+     * Indicates that this layer has never been used before.
+     */
+    bool empty;
 }; // struct Layer
 
 }; // namespace uirenderer

@@ -644,8 +644,9 @@ public class MediaScanner
             } else if (MediaFile.isAudioFileType(mFileType)) {
                 map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0) ?
                         mArtist : MediaStore.UNKNOWN_STRING);
-                map.put(Audio.Media.ALBUM_ARTIST, (mAlbumArtist != null &&
-                        mAlbumArtist.length() > 0) ? mAlbumArtist : null);
+// disable album artist support until MediaProvider really supports it
+//                map.put(Audio.Media.ALBUM_ARTIST, (mAlbumArtist != null &&
+//                        mAlbumArtist.length() > 0) ? mAlbumArtist : null);
                 map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0) ?
                         mAlbum : MediaStore.UNKNOWN_STRING);
                 map.put(Audio.Media.COMPOSER, mComposer);
@@ -695,7 +696,7 @@ public class MediaScanner
                 }
             }
             long rowId = entry.mRowId;
-            if (MediaFile.isAudioFileType(mFileType) && rowId == 0) {
+            if (MediaFile.isAudioFileType(mFileType) && (rowId == 0 || mMtpObjectHandle != 0)) {
                 // Only set these for new entries. For existing entries, they
                 // may have been modified later, and we want to keep the current
                 // values so that custom ringtones still show up in the ringtone
@@ -921,136 +922,6 @@ public class MediaScanner
                             FileCacheEntry entry = new FileCacheEntry(mFilesUri, rowId, path,
                                     lastModified, format);
                             mFileCache.put(key, entry);
-                        }
-                    }
-                    c.close();
-                    c = null;
-                }
-            }
-
-            // Read existing files from the audio table and update FileCacheEntry
-            c = mMediaProvider.query(mAudioUri, MEDIA_PRESCAN_PROJECTION,
-                    where, selectionArgs, null);
-            if (c != null) {
-                while (c.moveToNext()) {
-                    long rowId = c.getLong(MEDIA_PRESCAN_ID_COLUMN_INDEX);
-                    String path = c.getString(MEDIA_PRESCAN_PATH_COLUMN_INDEX);
-                    long lastModified = c.getLong(MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
-
-                    // Only consider entries with absolute path names.
-                    // This allows storing URIs in the database without the
-                    // media scanner removing them.
-                    if (path.startsWith("/")) {
-                        String key = path;
-                        if (mCaseInsensitivePaths) {
-                            key = path.toLowerCase();
-                        }
-                        FileCacheEntry entry = mFileCache.get(path);
-                        if (entry == null) {
-                            mFileCache.put(key, new FileCacheEntry(mAudioUri, rowId, path,
-                                    lastModified, 0));
-                        } else {
-                            // update the entry
-                            entry.mTableUri = mAudioUri;
-                            entry.mRowId = rowId;
-                        }
-                    }
-                }
-                c.close();
-                c = null;
-            }
-
-            // Read existing files from the video table and update FileCacheEntry
-            c = mMediaProvider.query(mVideoUri, MEDIA_PRESCAN_PROJECTION,
-                    where, selectionArgs, null);
-            if (c != null) {
-                while (c.moveToNext()) {
-                    long rowId = c.getLong(MEDIA_PRESCAN_ID_COLUMN_INDEX);
-                    String path = c.getString(MEDIA_PRESCAN_PATH_COLUMN_INDEX);
-                    long lastModified = c.getLong(MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
-
-                    // Only consider entries with absolute path names.
-                    // This allows storing URIs in the database without the
-                    // media scanner removing them.
-                    if (path.startsWith("/")) {
-                        String key = path;
-                        if (mCaseInsensitivePaths) {
-                            key = path.toLowerCase();
-                        }
-                        FileCacheEntry entry = mFileCache.get(path);
-                        if (entry == null) {
-                            mFileCache.put(key, new FileCacheEntry(mVideoUri, rowId, path,
-                                    lastModified, 0));
-                        } else {
-                            // update the entry
-                            entry.mTableUri = mVideoUri;
-                            entry.mRowId = rowId;
-                        }
-                    }
-                }
-                c.close();
-                c = null;
-            }
-
-            // Read existing files from the video table and update FileCacheEntry
-            c = mMediaProvider.query(mImagesUri, MEDIA_PRESCAN_PROJECTION,
-                    where, selectionArgs, null);
-            if (c != null) {
-                while (c.moveToNext()) {
-                    long rowId = c.getLong(MEDIA_PRESCAN_ID_COLUMN_INDEX);
-                    String path = c.getString(MEDIA_PRESCAN_PATH_COLUMN_INDEX);
-                    long lastModified = c.getLong(MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
-
-                    // Only consider entries with absolute path names.
-                    // This allows storing URIs in the database without the
-                    // media scanner removing them.
-                    if (path.startsWith("/")) {
-                        String key = path;
-                        if (mCaseInsensitivePaths) {
-                            key = path.toLowerCase();
-                        }
-                        FileCacheEntry entry = mFileCache.get(path);
-                        if (entry == null) {
-                            mFileCache.put(key, new FileCacheEntry(mImagesUri, rowId, path,
-                                    lastModified, 0));
-                        } else {
-                            // update the entry
-                            entry.mTableUri = mImagesUri;
-                            entry.mRowId = rowId;
-                        }
-                    }
-                }
-                c.close();
-                c = null;
-            }
-
-            if (mProcessPlaylists) {
-                // Read existing files from the playlists table and update FileCacheEntry
-                c = mMediaProvider.query(mPlaylistsUri, MEDIA_PRESCAN_PROJECTION,
-                        where, selectionArgs, null);
-                if (c != null) {
-                    while (c.moveToNext()) {
-                        long rowId = c.getLong(MEDIA_PRESCAN_ID_COLUMN_INDEX);
-                        String path = c.getString(MEDIA_PRESCAN_PATH_COLUMN_INDEX);
-                        long lastModified = c.getLong(MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
-
-                        // Only consider entries with absolute path names.
-                        // This allows storing URIs in the database without the
-                        // media scanner removing them.
-                        if (path.startsWith("/")) {
-                            String key = path;
-                            if (mCaseInsensitivePaths) {
-                                key = path.toLowerCase();
-                            }
-                            FileCacheEntry entry = mFileCache.get(path);
-                            if (entry == null) {
-                                mFileCache.put(key, new FileCacheEntry(mPlaylistsUri, rowId, path,
-                                        lastModified, 0));
-                            } else {
-                                // update the entry
-                                entry.mTableUri = mPlaylistsUri;
-                                entry.mRowId = rowId;
-                            }
                         }
                     }
                     c.close();

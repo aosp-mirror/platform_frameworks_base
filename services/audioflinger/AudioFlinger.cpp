@@ -4656,13 +4656,25 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
     {
         Mutex::Autolock _l(mLock);
 
+        // check audio settings permission for global effects
+        if (sessionId == AudioSystem::SESSION_OUTPUT_MIX && !settingsAllowed()) {
+            lStatus = PERMISSION_DENIED;
+            goto Exit;
+        }
+
+        // Session AudioSystem::SESSION_OUTPUT_STAGE is reserved for output stage effects
+        // that can only be created by audio policy manager (running in same process)
+        if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE && getpid() != pid) {
+            lStatus = PERMISSION_DENIED;
+            goto Exit;
+        }
+
         // check recording permission for visualizer
-        if (memcmp(&pDesc->type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0 ||
-            memcmp(&pDesc->uuid, &VISUALIZATION_UUID_, sizeof(effect_uuid_t)) == 0) {
-            if (!recordingAllowed()) {
-                lStatus = PERMISSION_DENIED;
-                goto Exit;
-            }
+        if ((memcmp(&pDesc->type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0 ||
+             memcmp(&pDesc->uuid, &VISUALIZATION_UUID_, sizeof(effect_uuid_t)) == 0) &&
+            !recordingAllowed()) {
+            lStatus = PERMISSION_DENIED;
+            goto Exit;
         }
 
         if (!EffectIsNullUuid(&pDesc->uuid)) {
@@ -4723,14 +4735,6 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         // Do not allow auxiliary effects on a session different from 0 (output mix)
         if (sessionId != AudioSystem::SESSION_OUTPUT_MIX &&
              (desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-            lStatus = INVALID_OPERATION;
-            goto Exit;
-        }
-
-        // Session AudioSystem::SESSION_OUTPUT_STAGE is reserved for output stage effects
-        // that can only be created by audio policy manager (running in same process)
-        if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE &&
-                getpid() != pid) {
             lStatus = INVALID_OPERATION;
             goto Exit;
         }

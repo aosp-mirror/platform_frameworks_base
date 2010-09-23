@@ -36,6 +36,7 @@ import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
+import android.view.inputmethod.InputMethodSubtype;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -64,6 +65,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_REVOKE_SESSION = 50;
     private static final int DO_SHOW_SOFT_INPUT = 60;
     private static final int DO_HIDE_SOFT_INPUT = 70;
+    private static final int DO_CHANGE_INPUTMETHOD_SUBTYPE = 80;
    
     final WeakReference<AbstractInputMethodService> mTarget;
     final HandlerCaller mCaller;
@@ -178,6 +180,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_HIDE_SOFT_INPUT:
                 inputMethod.hideSoftInput(msg.arg1, (ResultReceiver)msg.obj);
                 return;
+            case DO_CHANGE_INPUTMETHOD_SUBTYPE:
+                inputMethod.changeInputMethodSubtype((InputMethodSubtype)msg.obj);
+                return;
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -266,5 +271,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
     public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_HIDE_SOFT_INPUT,
                 flags, resultReceiver));
+    }
+
+    public void changeInputMethodSubtype(InputMethodSubtype subtype) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_CHANGE_INPUTMETHOD_SUBTYPE,
+                subtype));
     }
 }

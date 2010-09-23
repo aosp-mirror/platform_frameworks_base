@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
+import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
@@ -52,4 +53,6 @@ oneway interface IInputMethod {
     void showSoftInput(int flags, in ResultReceiver resultReceiver);
     
     void hideSoftInput(int flags, in ResultReceiver resultReceiver);
+
+    void changeInputMethodSubtype(in InputMethodSubtype subtype);
 }

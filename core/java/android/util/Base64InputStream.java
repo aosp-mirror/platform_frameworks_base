@@ -112,7 +112,7 @@ public class Base64InputStream extends FilterInputStream {
         if (outputStart >= outputEnd) {
             return -1;
         } else {
-            return coder.output[outputStart++];
+            return coder.output[outputStart++] & 0xff;
         }
     }
 

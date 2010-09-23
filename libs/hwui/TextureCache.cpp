@@ -159,32 +159,35 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         return;
     }
 
-    if (!regenerate) {
-        texture->generation = bitmap->getGenerationID();
-        texture->width = bitmap->width();
-        texture->height = bitmap->height();
+    const bool resize = !regenerate || bitmap->width() != int(texture->width) ||
+            bitmap->height() != int(texture->height);
 
+    if (!regenerate) {
         glGenTextures(1, &texture->id);
     }
+
+    texture->generation = bitmap->getGenerationID();
+    texture->width = bitmap->width();
+    texture->height = bitmap->height();
 
     glBindTexture(GL_TEXTURE_2D, texture->id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
 
     switch (bitmap->getConfig()) {
     case SkBitmap::kA8_Config:
-        texture->blend = true;
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, bitmap->rowBytesAsPixels(), texture->height, 0,
-                GL_ALPHA, GL_UNSIGNED_BYTE, bitmap->getPixels());
+        uploadToTexture(resize, GL_ALPHA, bitmap->rowBytesAsPixels(), texture->height,
+                GL_UNSIGNED_BYTE, bitmap->getPixels());
+        texture->blend = true;
         break;
     case SkBitmap::kRGB_565_Config:
+        uploadToTexture(resize, GL_RGB, bitmap->rowBytesAsPixels(), texture->height,
+                GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
         texture->blend = false;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bitmap->rowBytesAsPixels(), texture->height, 0,
-                GL_RGB, GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
         break;
     case SkBitmap::kARGB_8888_Config:
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap->rowBytesAsPixels(), texture->height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
+        uploadToTexture(resize, GL_RGBA, bitmap->rowBytesAsPixels(), texture->height,
+                GL_UNSIGNED_BYTE, bitmap->getPixels());
         // Do this after calling getPixels() to make sure Skia's deferred
         // decoding happened
         texture->blend = !bitmap->isOpaque();
@@ -199,6 +202,15 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void TextureCache::uploadToTexture(bool resize, GLenum format, GLsizei width, GLsizei height,
+        GLenum type, const GLvoid * data) {
+    if (resize) {
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, data);
+    } else {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
+    }
 }
 
 }; // namespace uirenderer

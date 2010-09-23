@@ -161,7 +161,7 @@ android_media_MtpClient_stop(JNIEnv *env, jobject thiz)
 
 static jboolean
 android_media_MtpClient_delete_object(JNIEnv *env, jobject thiz,
-        jint device_id, jint object_id)
+        jint device_id, jlong object_id)
 {
 #ifdef HAVE_ANDROID_OS
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
@@ -173,9 +173,9 @@ android_media_MtpClient_delete_object(JNIEnv *env, jobject thiz,
         return NULL;
 }
 
-static jint
+static jlong
 android_media_MtpClient_get_parent(JNIEnv *env, jobject thiz,
-        jint device_id, jint object_id)
+        jint device_id, jlong object_id)
 {
 #ifdef HAVE_ANDROID_OS
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
@@ -187,9 +187,9 @@ android_media_MtpClient_get_parent(JNIEnv *env, jobject thiz,
         return -1;
 }
 
-static jint
+static jlong
 android_media_MtpClient_get_storage_id(JNIEnv *env, jobject thiz,
-        jint device_id, jint object_id)
+        jint device_id, jlong object_id)
 {
  #ifdef HAVE_ANDROID_OS
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
@@ -203,7 +203,7 @@ android_media_MtpClient_get_storage_id(JNIEnv *env, jobject thiz,
 
 static jobject
 android_media_MtpClient_open_file(JNIEnv *env, jobject thiz,
-        jint device_id, jint object_id)
+        jint device_id, jlong object_id)
 {
 #ifdef HAVE_ANDROID_OS
     MyClient *client = (MyClient *)env->GetIntField(thiz, field_context);
@@ -240,10 +240,10 @@ static JNINativeMethod gMethods[] = {
     {"native_finalize",         "()V",  (void *)android_media_MtpClient_finalize},
     {"native_start",            "()Z",  (void *)android_media_MtpClient_start},
     {"native_stop",             "()V",  (void *)android_media_MtpClient_stop},
-    {"native_delete_object",   "(II)Z", (void *)android_media_MtpClient_delete_object},
-    {"native_get_parent",      "(II)I", (void *)android_media_MtpClient_get_parent},
-    {"native_get_storage_id",  "(II)I", (void *)android_media_MtpClient_get_storage_id},
-    {"native_open_file",       "(II)Landroid/os/ParcelFileDescriptor;",
+    {"native_delete_object",   "(IJ)Z", (void *)android_media_MtpClient_delete_object},
+    {"native_get_parent",      "(IJ)J", (void *)android_media_MtpClient_get_parent},
+    {"native_get_storage_id",  "(IJ)J", (void *)android_media_MtpClient_get_storage_id},
+    {"native_open_file",       "(IJ)Landroid/os/ParcelFileDescriptor;",
                                         (void *)android_media_MtpClient_open_file},
 };
 

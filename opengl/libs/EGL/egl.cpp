@@ -1365,16 +1365,18 @@ EGLBoolean eglWaitNative(EGLint engine)
 EGLint eglGetError(void)
 {
     EGLint result = EGL_SUCCESS;
+    EGLint err;
     for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
-        EGLint err = EGL_SUCCESS;
+        err = EGL_SUCCESS;
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso)
             err = cnx->egl.eglGetError();
         if (err!=EGL_SUCCESS && result==EGL_SUCCESS)
             result = err;
     }
+    err = getError();
     if (result == EGL_SUCCESS)
-        result = getError();
+        result = err;
     return result;
 }
 
@@ -1816,16 +1818,16 @@ EGLSyncKHR eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_l
 {
     EGLContext ctx = eglGetCurrentContext();
     ContextRef _c(ctx);
-    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_NO_IMAGE_KHR);
+    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_NO_SYNC_KHR);
     if (!validate_display_context(dpy, ctx))
-        return EGL_NO_IMAGE_KHR;
+        return EGL_NO_SYNC_KHR;
     egl_display_t const * const dp = get_display(dpy);
     egl_context_t * const c = get_context(ctx);
-    EGLSyncKHR result = EGL_NO_IMAGE_KHR;
+    EGLSyncKHR result = EGL_NO_SYNC_KHR;
     if (c->cnx->egl.eglCreateSyncKHR) {
         EGLSyncKHR sync = c->cnx->egl.eglCreateSyncKHR(
                 dp->disp[c->impl].dpy, type, attrib_list);
-        if (sync == EGL_NO_IMAGE_KHR)
+        if (sync == EGL_NO_SYNC_KHR)
             return sync;
         result = (egl_sync_t*)new egl_sync_t(dpy, ctx, sync);
     }

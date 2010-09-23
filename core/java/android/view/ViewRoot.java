@@ -1584,11 +1584,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mAttachInfo.mRootView = null;
         mAttachInfo.mSurface = null;
 
-        if (mHwRenderer != null) {
-            mHwRenderer.destroy(true);
-            mHwRenderer = null;
-            mAttachInfo.mHardwareAccelerated = false;
-        }
+        destroyHardwareRenderer();
 
         mSurface.release();
 
@@ -2542,6 +2538,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         if (LOCAL_LOGV) Log.v(TAG, "DIE in " + this + " of " + mSurface);
         synchronized (this) {
             if (mAdded && !mFirst) {
+                destroyHardwareRenderer();
+
                 int viewVisibility = mView.getVisibility();
                 boolean viewVisibilityChanged = mViewVisibility != viewVisibility;
                 if (mWindowAttributesChanged || viewVisibilityChanged) {
@@ -2563,6 +2561,14 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 mAdded = false;
                 dispatchDetachedFromWindow();
             }
+        }
+    }
+
+    private void destroyHardwareRenderer() {
+        if (mHwRenderer != null) {
+            mHwRenderer.destroy(true);
+            mHwRenderer = null;
+            mAttachInfo.mHardwareAccelerated = false;
         }
     }
 

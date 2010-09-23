@@ -67,12 +67,15 @@ void ScriptC::setupScript(Context *rsc)
             ptr = mSlots[ct]->getPtr();
         }
         void **dest = ((void ***)mEnviroment.mFieldAddress)[ct];
-        //LOGE("setupScript %i %p = %p    %p %i", ct, dest, ptr, mSlots[ct]->getType(), mSlots[ct]->getType()->getDimX());
 
-        //const uint32_t *p32 = (const uint32_t *)ptr;
-        //for (uint32_t ct2=0; ct2 < mSlots[ct]->getType()->getDimX(); ct2++) {
-            //LOGE("  %i = 0x%08x ", ct2, p32[ct2]);
-        //}
+        if (rsc->props.mLogScripts) {
+            LOGV("%p ScriptC::setupScript slot=%i  dst=%p  src=%p  type=%p", rsc, ct, dest, ptr, mSlots[ct]->getType());
+
+            //const uint32_t *p32 = (const uint32_t *)ptr;
+            //for (uint32_t ct2=0; ct2 < mSlots[ct]->getType()->getDimX(); ct2++) {
+                //LOGE("  %i = 0x%08x ", ct2, p32[ct2]);
+            //}
+        }
 
         if (dest) {
             *dest = ptr;
@@ -136,10 +139,18 @@ uint32_t ScriptC::run(Context *rsc)
 
     uint32_t ret = 0;
     Script * oldTLS = setTLS(this);
-    //LOGE("ScriptC::run %p", mProgram.mRoot);
+
+    if (rsc->props.mLogScripts) {
+        LOGV("%p ScriptC::run invoking root,  ptr %p", rsc, mProgram.mRoot);
+    }
+
     ret = mProgram.mRoot();
+
+    if (rsc->props.mLogScripts) {
+        LOGV("%p ScriptC::run invoking complete, ret=%i", rsc, ret);
+    }
+
     setTLS(oldTLS);
-    //LOGE("ScriptC::run ret %i", ret);
     return ret;
 }
 
@@ -325,8 +336,14 @@ void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len
     setupScript(rsc);
     Script * oldTLS = setTLS(this);
 
+    if (rsc->props.mLogScripts) {
+        LOGV("%p ScriptC::Invoke invoking slot %i,  ptr %p", rsc, slot, mEnviroment.mInvokeFunctions[slot]);
+    }
     ((void (*)(const void *, uint32_t))
         mEnviroment.mInvokeFunctions[slot])(data, len);
+    if (rsc->props.mLogScripts) {
+        LOGV("%p ScriptC::Invoke complete", rsc);
+    }
 
     setTLS(oldTLS);
 }
@@ -377,7 +394,7 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
 
 void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 {
-    LOGV("ScriptCState::runCompiler ");
+    LOGV("%p ScriptCState::runCompiler ", rsc);
 
     s->mBccScript = bccCreateScript();
     s->mEnviroment.mIsThreadable = true;
@@ -386,7 +403,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     bccCompileScript(s->mBccScript);
     bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
     bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
-    LOGV("root %p,  init %p", s->mProgram.mRoot, s->mProgram.mInit);
+    LOGV("%p ScriptCState::runCompiler root %p,  init %p", rsc, s->mProgram.mRoot, s->mProgram.mInit);
 
     if (s->mProgram.mInit) {
         s->mProgram.mInit();
@@ -407,9 +424,6 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
         s->mEnviroment.mFieldAddress = (void **) calloc(s->mEnviroment.mFieldCount, sizeof(void *));
         bccGetExportVars(s->mBccScript, NULL, s->mEnviroment.mFieldCount, (BCCvoid **) s->mEnviroment.mFieldAddress);
     }
-    //for (int ct2=0; ct2 < s->mEnviroment.mFieldCount; ct2++ ) {
-        //LOGE("Script field %i = %p", ct2, s->mEnviroment.mFieldAddress[ct2]);
-    //}
 
     s->mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     s->mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
@@ -489,13 +503,6 @@ void rsi_ScriptCBegin(Context * rsc)
 {
     ScriptCState *ss = &rsc->mScriptC;
     ss->clear();
-}
-
-void rsi_ScriptCSetScript(Context * rsc, void *vp)
-{
-    rsAssert(0);
-    //ScriptCState *ss = &rsc->mScriptC;
-    //ss->mProgram.mScript = reinterpret_cast<ScriptC::RunScript_t>(vp);
 }
 
 void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)

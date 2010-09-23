@@ -133,6 +133,8 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
 
 OpenGLRenderer::~OpenGLRenderer() {
     LOGD("Destroy OpenGLRenderer");
+    // The context has already been destroyed at this point, do not call
+    // GL APIs. All GL state should be kept in Caches.h
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -379,8 +381,15 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Copy the framebuffer into the layer
     glBindTexture(GL_TEXTURE_2D, layer->texture);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-            bounds.getWidth(), bounds.getHeight(), 0);
+
+    if (layer->empty) {
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
+                bounds.getWidth(), bounds.getHeight(), 0);
+        layer->empty = false;
+    } else {
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
+                bounds.getWidth(), bounds.getHeight());
+    }
 
     if (flags & SkCanvas::kClipToLayer_SaveFlag) {
         if (mSnapshot->clipTransformed(bounds)) setScissorFromClip();
@@ -615,14 +624,14 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
     const bool isAA = paint->isAntiAlias();
     if (isAA) {
         GLuint textureUnit = 0;
-        setupTextureAlpha8(mLine.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
-                mode, false, true, mLine.getVertices(), mLine.getTexCoords());
+        setupTextureAlpha8(mCaches.line.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
+                mode, false, true, mCaches.line.getVertices(), mCaches.line.getTexCoords());
     } else {
         setupColorRect(0.0f, 0.0f, 1.0f, 1.0f, r, g, b, a, mode, false);
     }
 
     const float strokeWidth = paint->getStrokeWidth();
-    const GLsizei elementsCount = isAA ? mLine.getElementsCount() : gMeshCount;
+    const GLsizei elementsCount = isAA ? mCaches.line.getElementsCount() : gMeshCount;
     const GLenum drawMode = isAA ? GL_TRIANGLES : GL_TRIANGLE_STRIP;
 
     for (int i = 0; i < count; i += 4) {
@@ -630,7 +639,7 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
         float ty = 0.0f;
 
         if (isAA) {
-            mLine.update(points[i], points[i + 1], points[i + 2], points[i + 3],
+            mCaches.line.update(points[i], points[i + 1], points[i + 2], points[i + 3],
                     strokeWidth, tx, ty);
         } else {
             ty = strokeWidth <= 1.0f ? 0.0f : -strokeWidth * 0.5f;
@@ -647,7 +656,8 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
         }
         mModelView.translate(tx, ty, 0.0f);
         if (!isAA) {
-            float length = mLine.getLength(points[i], points[i + 1], points[i + 2], points[i + 3]);
+            float length = mCaches.line.getLength(points[i], points[i + 1],
+                    points[i + 2], points[i + 3]);
             mModelView.scale(length, strokeWidth, 1.0f);
         }
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
@@ -659,7 +669,9 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
         glDrawArrays(drawMode, 0, elementsCount);
     }
 
-    glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
+    if (isAA) {
+        glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
+    }
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -956,25 +968,36 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
         }
 
         if (underlineWidth > 0.0f) {
-            float textSize = paint->getTextSize();
-            float height = textSize * kStdUnderline_Thickness;
+            const float textSize = paint->getTextSize();
+            const float strokeWidth = textSize * kStdUnderline_Thickness;
 
-            float left = x - offsetX;
+            const float left = x - offsetX;
             float top = 0.0f;
-            float right = left + underlineWidth;
-            float bottom = 0.0f;
+
+            const int pointsCount = 4 * (flags & SkPaint::kStrikeThruText_Flag ? 2 : 1);
+            float points[pointsCount];
+            int currentPoint = 0;
 
             if (flags & SkPaint::kUnderlineText_Flag) {
                 top = y + textSize * kStdUnderline_Offset;
-                bottom = top + height;
-                drawRect(left, top, right, bottom, paint);
+                points[currentPoint++] = left;
+                points[currentPoint++] = top;
+                points[currentPoint++] = left + underlineWidth;
+                points[currentPoint++] = top;
             }
 
             if (flags & SkPaint::kStrikeThruText_Flag) {
                 top = y + textSize * kStdStrikeThru_Offset;
-                bottom = top + height;
-                drawRect(left, top, right, bottom, paint);
+                points[currentPoint++] = left;
+                points[currentPoint++] = top;
+                points[currentPoint++] = left + underlineWidth;
+                points[currentPoint++] = top;
             }
+
+            SkPaint linesPaint(*paint);
+            linesPaint.setStrokeWidth(strokeWidth);
+
+            drawLines(&points[0], pointsCount, &linesPaint);
         }
     }
 }

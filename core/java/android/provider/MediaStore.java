@@ -255,13 +255,6 @@ public final class MediaStore {
         public static final String MIME_TYPE = "mime_type";
 
         /**
-         * The row ID in the MTP object table corresponding to this media file.
-         * <P>Type: INTEGER</P>
-         * @hide
-         */
-        public static final String MTP_OBJECT_ID = "object_id";
-
-        /**
          * The MTP object handle of a newly transfered file.
          * Used to pass the new file's object handle through the media scanner
          * from MTP to the media provider
@@ -327,30 +320,33 @@ public final class MediaStore {
             public static final String PARENT = "parent";
 
             /**
-             * Identifier for the media table containing the file.
-             * Used internally by MediaProvider
-             * <P>Type: INTEGER</P>
+             * The MIME type of the file
+             * <P>Type: TEXT</P>
              */
-            public static final String MEDIA_TABLE = "media_table";
+            public static final String MIME_TYPE = "mime_type";
 
             /**
-             * The ID of the file in its media table.
-             * <P>Type: INTEGER</P>
+             * The title of the content
+             * <P>Type: TEXT</P>
              */
-            public static final String MEDIA_ID = "media_id";
+            public static final String TITLE = "title";
+
+            /**
+             * The media type (audio, video, image or playlist)
+             * of the file, or 0 for not a media file
+             * <P>Type: TEXT</P>
+             */
+            public static final String MEDIA_TYPE = "media_type";
+
+            /**
+             * Constants for MEDIA_TYPE
+             */
+            public static final int MEDIA_TYPE_NONE = 0;
+            public static final int MEDIA_TYPE_IMAGE = 1;
+            public static final int MEDIA_TYPE_AUDIO = 2;
+            public static final int MEDIA_TYPE_VIDEO = 3;
+            public static final int MEDIA_TYPE_PLAYLIST = 4;
         }
-
-        /**
-         * The MIME type of the file
-         * <P>Type: TEXT</P>
-         */
-        public static final String MIME_TYPE = "mime_type";
-
-        /**
-         * The title of the content
-         * <P>Type: TEXT</P>
-         */
-        public static final String TITLE = "title";
     }
 
     /**

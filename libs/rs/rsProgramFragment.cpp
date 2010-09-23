@@ -78,8 +78,6 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
     mConstantColor[2] = 1.f;
     mConstantColor[3] = 1.f;
 
-    LOGE("Custom FP");
-
     mTextureEnableMask = (1 << mTextureCount) -1;
 
     init(rsc);
