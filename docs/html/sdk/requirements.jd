@@ -6,7 +6,7 @@ Android applications using the Android SDK. </p>
 
 <h3>Supported Operating Systems</h3>
 <ul>
-  <li>Windows XP (32-bit) or Vista (32- or 64-bit)</li>
+  <li>Windows XP (32-bit), Vista (32- or 64-bit), or Windows 7 (32- or 64-bit)</li>
   <li>Mac OS X 10.5.8 or later (x86 only)</li>
   <li>Linux (tested on Linux Ubuntu Hardy Heron)
     <ul>
