@@ -1711,6 +1711,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 deliverPointerEvent(event);
             } finally {
                 event.recycle();
+                if (msg.arg1 != 0) {
+                    finishInputEvent();
+                }
                 if (LOCAL_LOGV || WATCH_POINTER) Log.i(TAG, "Done dispatching!");
             }
         } break;
@@ -1720,6 +1723,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 deliverTrackballEvent(event);
             } finally {
                 event.recycle();
+                if (msg.arg1 != 0) {
+                    finishInputEvent();
+                }
             }
         } break;
         case DISPATCH_APP_VISIBILITY:
@@ -1843,15 +1849,24 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         }
     }
     
-    private void finishKeyEvent(KeyEvent event) {
-        if (LOCAL_LOGV) Log.v(TAG, "Telling window manager key is finished");
+    private void startInputEvent(Runnable finishedCallback) {
+        if (mFinishedCallback != null) {
+            Slog.w(TAG, "Received a new input event from the input queue but there is "
+                    + "already an unfinished input event in progress.");
+        }
+
+        mFinishedCallback = finishedCallback;
+    }
+
+    private void finishInputEvent() {
+        if (LOCAL_LOGV) Log.v(TAG, "Telling window manager input event is finished");
 
         if (mFinishedCallback != null) {
             mFinishedCallback.run();
             mFinishedCallback = null;
         } else {
-            Slog.w(TAG, "Attempted to tell the input queue that the current key event "
-                    + "is finished but there is no key event actually in progress.");
+            Slog.w(TAG, "Attempted to tell the input queue that the current input event "
+                    + "is finished but there is no input event actually in progress.");
         }
     }
     
@@ -2310,7 +2325,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         boolean handled = mView == null || mView.dispatchKeyEventPreIme(event);
         if (handled) {
             if (sendDone) {
-                finishKeyEvent(event);
+                finishInputEvent();
             }
             return;
         }
@@ -2340,7 +2355,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (!handled) {
                 deliverKeyEventToViewHierarchy(event, sendDone);
             } else if (sendDone) {
-                finishKeyEvent(event);
+                finishInputEvent();
             } else {
                 Log.w(TAG, "handleFinishedEvent(seq=" + seq
                         + " handled=" + handled + " ev=" + event
@@ -2413,7 +2428,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
 
         } finally {
             if (sendDone) {
-                finishKeyEvent(event);
+                finishInputEvent();
             }
             // Let the exception fall through -- the looper will catch
             // it and take care of the bad app for us.
@@ -2606,20 +2621,13 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     
     private final InputHandler mInputHandler = new InputHandler() {
         public void handleKey(KeyEvent event, Runnable finishedCallback) {
-            if (mFinishedCallback != null) {
-                Slog.w(TAG, "Received a new key event from the input queue but there is "
-                        + "already an unfinished key event in progress.");
-            }
-
-            mFinishedCallback = finishedCallback;
-
+            startInputEvent(finishedCallback);
             dispatchKey(event, true);
         }
 
         public void handleMotion(MotionEvent event, Runnable finishedCallback) {
-            finishedCallback.run();
-            
-            dispatchMotion(event);
+            startInputEvent(finishedCallback);
+            dispatchMotion(event, true);
         }
     };
 
@@ -2651,26 +2659,43 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     }
     
     public void dispatchMotion(MotionEvent event) {
+        dispatchMotion(event, false);
+    }
+
+    private void dispatchMotion(MotionEvent event, boolean sendDone) {
         int source = event.getSource();
         if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            dispatchPointer(event);
+            dispatchPointer(event, sendDone);
         } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-            dispatchTrackball(event);
+            dispatchTrackball(event, sendDone);
         } else {
             // TODO
             Log.v(TAG, "Dropping unsupported motion event (unimplemented): " + event);
+            if (sendDone) {
+                finishInputEvent();
+            }
         }
     }
 
     public void dispatchPointer(MotionEvent event) {
+        dispatchPointer(event, false);
+    }
+
+    private void dispatchPointer(MotionEvent event, boolean sendDone) {
         Message msg = obtainMessage(DISPATCH_POINTER);
         msg.obj = event;
+        msg.arg1 = sendDone ? 1 : 0;
         sendMessageAtTime(msg, event.getEventTime());
     }
 
     public void dispatchTrackball(MotionEvent event) {
+        dispatchTrackball(event, false);
+    }
+
+    private void dispatchTrackball(MotionEvent event, boolean sendDone) {
         Message msg = obtainMessage(DISPATCH_TRACKBALL);
         msg.obj = event;
+        msg.arg1 = sendDone ? 1 : 0;
         sendMessageAtTime(msg, event.getEventTime());
     }
     
