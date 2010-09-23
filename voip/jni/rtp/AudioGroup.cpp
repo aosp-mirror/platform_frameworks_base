@@ -77,7 +77,7 @@ public:
     AudioStream();
     ~AudioStream();
     bool set(int mode, int socket, sockaddr_storage *remote,
-        const char *codecName, int sampleRate, int sampleCount,
+        AudioCodec *codec, int sampleRate, int sampleCount,
         int codecType, int dtmfType);
 
     void sendDtmf(int event);
@@ -104,6 +104,7 @@ private:
     int mSampleRate;
     int mSampleCount;
     int mInterval;
+    int mLogThrottle;
 
     int16_t *mBuffer;
     int mBufferMask;
@@ -140,21 +141,13 @@ AudioStream::~AudioStream()
 }
 
 bool AudioStream::set(int mode, int socket, sockaddr_storage *remote,
-    const char *codecName, int sampleRate, int sampleCount,
+    AudioCodec *codec, int sampleRate, int sampleCount,
     int codecType, int dtmfType)
 {
     if (mode < 0 || mode > LAST_MODE) {
         return false;
     }
     mMode = mode;
-
-    if (codecName) {
-        mRemote = *remote;
-        mCodec = newAudioCodec(codecName);
-        if (!mCodec || !mCodec->set(sampleRate, sampleCount)) {
-            return false;
-        }
-    }
 
     mCodecMagic = (0x8000 | codecType) << 16;
     mDtmfMagic = (dtmfType == -1) ? 0 : (0x8000 | dtmfType) << 16;
@@ -181,11 +174,15 @@ bool AudioStream::set(int mode, int socket, sockaddr_storage *remote,
     mDtmfEvent = -1;
     mDtmfStart = 0;
 
-    // Only take over the socket when succeeded.
+    // Only take over these things when succeeded.
     mSocket = socket;
+    if (codec) {
+        mRemote = *remote;
+        mCodec = codec;
+    }
 
     LOGD("stream[%d] is configured as %s %dkHz %dms", mSocket,
-        (codecName ? codecName : "RAW"), mSampleRate, mInterval);
+        (codec ? codec->name : "RAW"), mSampleRate, mInterval);
     return true;
 }
 
@@ -282,7 +279,10 @@ void AudioStream::encode(int tick, AudioStream *chain)
         chain = chain->mNext;
     }
     if (!mixed) {
-        LOGD("stream[%d] no data", mSocket);
+        if ((mTick ^ mLogThrottle) >> 10) {
+            mLogThrottle = mTick;
+            LOGD("stream[%d] no data", mSocket);
+        }
         return;
     }
 
@@ -831,10 +831,9 @@ static jfieldID gMode;
 
 void add(JNIEnv *env, jobject thiz, jint mode,
     jint socket, jstring jRemoteAddress, jint remotePort,
-    jstring jCodecName, jint sampleRate, jint sampleCount,
-    jint codecType, jint dtmfType)
+    jstring jCodecSpec, jint dtmfType)
 {
-    const char *codecName = NULL;
+    AudioCodec *codec = NULL;
     AudioStream *stream = NULL;
     AudioGroup *group = NULL;
 
@@ -842,33 +841,42 @@ void add(JNIEnv *env, jobject thiz, jint mode,
     sockaddr_storage remote;
     if (parse(env, jRemoteAddress, remotePort, &remote) < 0) {
         // Exception already thrown.
-        goto error;
+        return;
     }
-    if (sampleRate < 0 || sampleCount < 0 || codecType < 0 || codecType > 127) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        goto error;
+    if (!jCodecSpec) {
+        jniThrowNullPointerException(env, "codecSpec");
+        return;
     }
-    if (!jCodecName) {
-        jniThrowNullPointerException(env, "codecName");
-        goto error;
-    }
-    codecName = env->GetStringUTFChars(jCodecName, NULL);
-    if (!codecName) {
+    const char *codecSpec = env->GetStringUTFChars(jCodecSpec, NULL);
+    if (!codecSpec) {
         // Exception already thrown.
+        return;
+    }
+
+    // Create audio codec.
+    int codecType = -1;
+    char codecName[16];
+    int sampleRate = -1;
+    sscanf(codecSpec, "%d %[^/]%*c%d", &codecType, codecName, &sampleRate);
+    codec = newAudioCodec(codecName);
+    int sampleCount = (codec ? codec->set(sampleRate, codecSpec) : -1);
+    env->ReleaseStringUTFChars(jCodecSpec, codecSpec);
+    if (sampleCount <= 0) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "cannot initialize audio codec");
         goto error;
     }
 
     // Create audio stream.
     stream = new AudioStream;
-    if (!stream->set(mode, socket, &remote, codecName, sampleRate, sampleCount,
+    if (!stream->set(mode, socket, &remote, codec, sampleRate, sampleCount,
         codecType, dtmfType)) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "cannot initialize audio stream");
-        env->ReleaseStringUTFChars(jCodecName, codecName);
         goto error;
     }
-    env->ReleaseStringUTFChars(jCodecName, codecName);
     socket = -1;
+    codec = NULL;
 
     // Create audio group.
     group = (AudioGroup *)env->GetIntField(thiz, gNative);
@@ -896,6 +904,7 @@ void add(JNIEnv *env, jobject thiz, jint mode,
 error:
     delete group;
     delete stream;
+    delete codec;
     close(socket);
     env->SetIntField(thiz, gNative, NULL);
 }
@@ -930,7 +939,7 @@ void sendDtmf(JNIEnv *env, jobject thiz, jint event)
 }
 
 JNINativeMethod gMethods[] = {
-    {"add", "(IILjava/lang/String;ILjava/lang/String;IIII)V", (void *)add},
+    {"add", "(IILjava/lang/String;ILjava/lang/String;I)V", (void *)add},
     {"remove", "(I)V", (void *)remove},
     {"setMode", "(I)V", (void *)setMode},
     {"sendDtmf", "(I)V", (void *)sendDtmf},
