@@ -84,7 +84,7 @@ public abstract class Effect {
      * Set start time of the effect. If a preview or export is in progress, then
      * this change is effective for next preview or export session.
      *
-     * @param startTimeMs The start time of the effect relative to the begining
+     * @param startTimeMs The start time of the effect relative to the beginning
      *            of the media item in milliseconds
      */
     public void setStartTime(long startTimeMs) {
