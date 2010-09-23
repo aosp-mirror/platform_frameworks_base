@@ -87,8 +87,8 @@ Open the Notepadv2 class.</p>
     menu callback used for the options menu. Here, we add just one line, which will add a menu item
     to delete a note. Call <code>menu.add()</code> like so:
       <pre>
-public boolean onCreateContextMenu(Menu menu, View v
-        ContextMenuInfo menuInfo) {
+public void onCreateContextMenu(Menu menu, View v,
+        ContextMenu.ContextMenuInfo menuInfo) {
     super.onCreateContextMenu(menu, v, menuInfo);
     menu.add(0, DELETE_ID, 0, R.string.menu_delete);
 }</pre>
