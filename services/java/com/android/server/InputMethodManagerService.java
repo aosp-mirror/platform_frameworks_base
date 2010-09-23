@@ -61,18 +61,21 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.view.IWindowManager;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -93,6 +96,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final String TAG = "InputManagerService";
 
     static final int MSG_SHOW_IM_PICKER = 1;
+    static final int MSG_SHOW_IM_SUBTYPE_PICKER = 2;
 
     static final int MSG_UNBIND_INPUT = 1000;
     static final int MSG_BIND_INPUT = 1010;
@@ -108,6 +112,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_BIND_METHOD = 3010;
 
     static final long TIME_TO_RECONNECT = 10*1000;
+
+    private static final int NOT_A_SUBTYPE_ID = -1;
 
     final Context mContext;
     final Handler mHandler;
@@ -224,6 +230,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     String mCurId;
 
     /**
+     * The current subtype of the current input method.
+     */
+    private InputMethodSubtype mCurrentSubtype;
+
+
+    /**
      * Set to true if our ServiceConnection is currently actively bound to
      * a service (whether or not we have gotten its IBinder back yet).
      */
@@ -292,6 +304,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     AlertDialog mSwitchingDialog;
     InputMethodInfo[] mIms;
     CharSequence[] mItems;
+    int[] mSubtypeIds;
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -299,6 +312,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this);
         }
 
         @Override public void onChange(boolean selfChange) {
@@ -351,9 +366,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                     if (!doit) {
                                         return true;
                                     }
-                                    
                                     Settings.Secure.putString(mContext.getContentResolver(),
                                             Settings.Secure.DEFAULT_INPUT_METHOD, "");
+                                    resetSelectedInputMethodSubtype();
                                     chooseNewDefaultIMELocked();
                                     return true;
                                 }
@@ -409,16 +424,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
-                                curInputMethodId = "";
                                 Slog.i(TAG, "Unsetting current input method");
                                 Settings.Secure.putString(mContext.getContentResolver(),
-                                        Settings.Secure.DEFAULT_INPUT_METHOD,
-                                        curInputMethodId);
+                                        Settings.Secure.DEFAULT_INPUT_METHOD, "");
+                                resetSelectedInputMethodSubtype();
                             }
                         }
                     }
                 }
-                
+
                 if (curIm == null) {
                     // We currently don't have a default input method... is
                     // one now available?
@@ -509,6 +523,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (defIm != null) {
                 Settings.Secure.putString(mContext.getContentResolver(),
                         Settings.Secure.DEFAULT_INPUT_METHOD, defIm.getId());
+                putSelectedInputMethodSubtype(defIm, NOT_A_SUBTYPE_ID);
             }
         }
 
@@ -964,10 +979,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // sync, so we will never have a DEFAULT_INPUT_METHOD that is not
         // enabled.
         String id = Settings.Secure.getString(mContext.getContentResolver(),
-            Settings.Secure.DEFAULT_INPUT_METHOD);
+                Settings.Secure.DEFAULT_INPUT_METHOD);
         if (id != null && id.length() > 0) {
             try {
-                setInputMethodLocked(id);
+                setInputMethodLocked(id, getSelectedInputMethodSubtypeId(id));
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
                 mCurMethodId = null;
@@ -980,21 +995,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    void setInputMethodLocked(String id) {
+    /* package */ void setInputMethodLocked(String id, int subtypeId) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + id);
         }
 
         if (id.equals(mCurMethodId)) {
+            if (subtypeId != NOT_A_SUBTYPE_ID) {
+                InputMethodSubtype subtype = info.getSubtypes().get(subtypeId);
+                if (subtype != mCurrentSubtype) {
+                    synchronized (mMethodMap) {
+                        if (mCurMethod != null) {
+                            try {
+                                putSelectedInputMethodSubtype(info, subtypeId);
+                                mCurMethod.changeInputMethodSubtype(subtype);
+                            } catch (RemoteException e) {
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
             return;
         }
 
         final long ident = Binder.clearCallingIdentity();
         try {
             mCurMethodId = id;
+            // Set a subtype to this input method.
+            // subtypeId the name of a subtype which will be set.
+            if (putSelectedInputMethodSubtype(info, subtypeId)) {
+                mCurrentSubtype = info.getSubtypes().get(subtypeId);
+            } else {
+                mCurrentSubtype = null;
+            }
+
             Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.DEFAULT_INPUT_METHOD, id);
+                    Settings.Secure.DEFAULT_INPUT_METHOD, id);
 
             if (ActivityManagerNative.isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
@@ -1226,7 +1264,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    public void showInputMethodSubtypePickerFromClient(IInputMethodClient client) {
+        synchronized (mMethodMap) {
+            if (mCurClient == null || client == null
+                    || mCurClient.client.asBinder() != client.asBinder()) {
+                Slog.w(TAG, "Ignoring showInputSubtypeMethodDialogFromClient of: " + client);
+            }
+
+            mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_PICKER);
+        }
+    }
+
     public void setInputMethod(IBinder token, String id) {
+        setInputMethodWithSubtype(token, id, NOT_A_SUBTYPE_ID);
+    }
+
+    private void setInputMethodWithSubtype(IBinder token, String id, int subtypeId) {
         synchronized (mMethodMap) {
             if (token == null) {
                 if (mContext.checkCallingOrSelfPermission(
@@ -1243,7 +1296,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             long ident = Binder.clearCallingIdentity();
             try {
-                setInputMethodLocked(id);
+                setInputMethodLocked(id, subtypeId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1305,6 +1358,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         switch (msg.what) {
             case MSG_SHOW_IM_PICKER:
                 showInputMethodMenu();
+                return true;
+
+            case MSG_SHOW_IM_SUBTYPE_PICKER:
+                showInputMethodSubtypeMenu();
                 return true;
 
             // ---------------------------------------------------------
@@ -1417,9 +1474,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     break;
                 }
             }
+            InputMethodInfo imi = enabled.get(i);
             Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.DEFAULT_INPUT_METHOD,
-                    enabled.get(i).getId());
+                    Settings.Secure.DEFAULT_INPUT_METHOD, imi.getId());
+            putSelectedInputMethodSubtype(imi, NOT_A_SUBTYPE_ID);
             return true;
         }
 
@@ -1490,7 +1548,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // ----------------------------------------------------------------------
 
-    void showInputMethodMenu() {
+    private void showInputMethodMenu() {
+        showInputMethodMenuInternal(false);
+    }
+
+    private void showInputMethodSubtypeMenu() {
+        showInputMethodMenuInternal(true);
+    }
+
+    private void showInputMethodMenuInternal(boolean showSubtypes) {
         if (DEBUG) Slog.v(TAG, "Show switching menu");
 
         final Context context = mContext;
@@ -1499,42 +1565,78 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         String lastInputMethodId = Settings.Secure.getString(context
                 .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        int lastInputMethodSubtypeId = getSelectedInputMethodSubtypeId(lastInputMethodId);
         if (DEBUG) Slog.v(TAG, "Current IME: " + lastInputMethodId);
 
         final List<InputMethodInfo> immis = getEnabledInputMethodList();
+        ArrayList<Integer> subtypeIds = new ArrayList<Integer>();
 
         if (immis == null) {
             return;
         }
-        
+
         synchronized (mMethodMap) {
             hideInputMethodMenuLocked();
 
             int N = immis.size();
 
-            final Map<CharSequence, InputMethodInfo> imMap =
-                new TreeMap<CharSequence, InputMethodInfo>(Collator.getInstance());
+            final Map<CharSequence, Pair<InputMethodInfo, Integer>> imMap =
+                new TreeMap<CharSequence, Pair<InputMethodInfo, Integer>>(Collator.getInstance());
 
             for (int i = 0; i < N; ++i) {
                 InputMethodInfo property = immis.get(i);
                 if (property == null) {
                     continue;
                 }
-                imMap.put(property.loadLabel(pm), property);
+                // TODO: Show only enabled subtypes
+                ArrayList<InputMethodSubtype> subtypes = property.getSubtypes();
+                CharSequence label = property.loadLabel(pm);
+                if (showSubtypes && subtypes.size() > 0) {
+                    for (int j = 0; j < subtypes.size(); ++j) {
+                        InputMethodSubtype subtype = subtypes.get(j);
+                        CharSequence title;
+                        int nameResId = subtype.getNameResId();
+                        int modeResId = subtype.getModeResId();
+                        if (nameResId != 0) {
+                            title = pm.getText(property.getPackageName(), nameResId,
+                                    property.getServiceInfo().applicationInfo);
+                        } else {
+                            CharSequence language = subtype.getLocale();
+                            CharSequence mode = modeResId == 0 ? null
+                                    : pm.getText(property.getPackageName(), modeResId,
+                                            property.getServiceInfo().applicationInfo);
+                            // TODO: Use more friendly Title and UI
+                            title = label + "," + (mode == null ? "" : mode) + ","
+                                    + (language == null ? "" : language);
+                        }
+                        imMap.put(title, new Pair<InputMethodInfo, Integer>(property, j));
+                    }
+                } else {
+                    imMap.put(label,
+                            new Pair<InputMethodInfo, Integer>(property, NOT_A_SUBTYPE_ID));
+                    subtypeIds.add(0);
+                }
             }
 
             N = imMap.size();
             mItems = imMap.keySet().toArray(new CharSequence[N]);
-            mIms = imMap.values().toArray(new InputMethodInfo[N]);
-
+            mIms = new InputMethodInfo[N];
+            mSubtypeIds = new int[N];
             int checkedItem = 0;
             for (int i = 0; i < N; ++i) {
+                Pair<InputMethodInfo, Integer> value = imMap.get(mItems[i]);
+                mIms[i] = value.first;
+                mSubtypeIds[i] = value.second;
                 if (mIms[i].getId().equals(lastInputMethodId)) {
-                    checkedItem = i;
-                    break;
+                    int subtypeId = mSubtypeIds[i];
+                    if ((subtypeId == NOT_A_SUBTYPE_ID)
+                            || (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID && subtypeId == 0)
+                            || (subtypeId == lastInputMethodSubtypeId)) {
+                        checkedItem = i;
+                    }
                 }
             }
-    
+
             AlertDialog.OnClickListener adocl = new AlertDialog.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     hideInputMethodMenu();
@@ -1559,13 +1661,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     new AlertDialog.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             synchronized (mMethodMap) {
-                                if (mIms == null || mIms.length <= which) {
+                                if (mIms == null || mIms.length <= which
+                                        || mSubtypeIds == null || mSubtypeIds.length <= which) {
                                     return;
                                 }
                                 InputMethodInfo im = mIms[which];
+                                int subtypeId = mSubtypeIds[which];
                                 hideInputMethodMenu();
                                 if (im != null) {
-                                    setInputMethodLocked(im.getId());
+                                    if ((subtypeId < 0)
+                                            || (subtypeId >= im.getSubtypes().size())) {
+                                        subtypeId = NOT_A_SUBTYPE_ID;
+                                    }
+                                    setInputMethodLocked(im.getId(), subtypeId);
                                 }
                             }
                         }
@@ -1679,6 +1787,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Settings.Secure.putString(mContext.getContentResolver(),
                         Settings.Secure.DEFAULT_INPUT_METHOD,
                         firstId != null ? firstId : "");
+                resetSelectedInputMethodSubtype();
             }
             // Previous state was enabled.
             return true;
@@ -1696,6 +1805,53 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Previous state was disabled.
         return false;
+    }
+
+    private void resetSelectedInputMethodSubtype() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, NOT_A_SUBTYPE_ID);
+    }
+
+    private boolean putSelectedInputMethodSubtype(InputMethodInfo imi, int subtypeId) {
+        ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
+        if (subtypeId >= 0 && subtypeId < subtypes.size()) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
+                    subtypes.get(subtypeId).hashCode());
+            return true;
+        } else {
+            resetSelectedInputMethodSubtype();
+            return false;
+        }
+    }
+
+    private int getSelectedInputMethodSubtypeId(String id) {
+        InputMethodInfo imi = mMethodMap.get(id);
+        if (imi == null) {
+            return NOT_A_SUBTYPE_ID;
+        }
+        ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
+        int subtypeId;
+        try {
+            subtypeId = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE);
+        } catch (SettingNotFoundException e) {
+            return NOT_A_SUBTYPE_ID;
+        }
+        for (int i = 0; i < subtypes.size(); ++i) {
+            InputMethodSubtype ims = subtypes.get(i);
+            if (subtypeId == ims.hashCode()) {
+                return i;
+            }
+        }
+        return NOT_A_SUBTYPE_ID;
+    }
+
+    /**
+     * @return Return the current subtype of this input method.
+     */
+    public InputMethodSubtype getCurrentInputMethodSubtype() {
+        return mCurrentSubtype;
     }
 
     // ----------------------------------------------------------------------

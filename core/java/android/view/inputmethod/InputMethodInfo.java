@@ -44,7 +44,7 @@ import java.util.ArrayList;
  */
 public final class InputMethodInfo implements Parcelable {
     static final String TAG = "InputMethodInfo";
-    
+
     /**
      * The Service that implements this input method component.
      */
@@ -69,102 +69,6 @@ public final class InputMethodInfo implements Parcelable {
      * can change based on the configuration (in particular locale).
      */
     final int mIsDefaultResId;
-
-    /**
-     * InputMethodSubtype is a subtype contained in the input method. Subtype can describe
-     * locales (e.g. en_US, fr_FR...) and modes (e.g. voice, keyboard...), and is used for
-     * IME switch. The subtype allows the system to call the specified subtype of IME directly.
-     */
-    public static class InputMethodSubtype implements Parcelable {
-        private final String mSubtypeName;
-        private final int mSubtypeIconId;
-        private final String mSubtypeLocale;
-        private final String mSubtypeMode;
-        private final String mSubtypeExtraValue;
-
-        /**
-         * Constructor
-         * @param name The name of the subtype
-         * @param iconId The icon of the subtype
-         * @param locale The locale supported by the subtype
-         * @param mode The mode supported by the subtype
-         * @param extraValue The extra value of the subtype
-         */
-        InputMethodSubtype(String name, int iconId, String locale, String mode,
-                String extraValue) {
-            mSubtypeName = name;
-            mSubtypeIconId = iconId;
-            mSubtypeLocale = locale;
-            mSubtypeMode = mode;
-            mSubtypeExtraValue = extraValue;
-        }
-
-        InputMethodSubtype(Parcel source) {
-            mSubtypeName = source.readString();
-            mSubtypeIconId = source.readInt();
-            mSubtypeLocale = source.readString();
-            mSubtypeMode = source.readString();
-            mSubtypeExtraValue = source.readString();
-        }
-
-        /**
-         * @return the name of the subtype
-         */
-        public String getName() {
-            return mSubtypeName;
-        }
-
-        /**
-         * @return the icon of the subtype
-         */
-        public int getIconId() {
-            return mSubtypeIconId;
-        }
-
-        /**
-         * @return the locale of the subtype
-         */
-        public String getLocale() {
-            return mSubtypeLocale;
-        }
-
-        /**
-         * @return the mode of the subtype
-         */
-        public String getMode() {
-            return mSubtypeMode;
-        }
-
-        /**
-         * @return the extra value of the subtype
-         */
-        public String getExtraValue() {
-            return mSubtypeExtraValue;
-        }
-
-        public int describeContents() {
-            return 0;
-        }
-
-        public void writeToParcel(Parcel dest, int parcelableFlags) {
-            dest.writeString(mSubtypeName);
-            dest.writeInt(mSubtypeIconId);
-            dest.writeString(mSubtypeLocale);
-            dest.writeString(mSubtypeMode);
-            dest.writeString(mSubtypeExtraValue);
-        }
-
-        public static final Parcelable.Creator<InputMethodSubtype> CREATOR
-                = new Parcelable.Creator<InputMethodSubtype>() {
-            public InputMethodSubtype createFromParcel(Parcel source) {
-                return new InputMethodSubtype(source);
-            }
-
-            public InputMethodSubtype[] newArray(int size) {
-                return new InputMethodSubtype[size];
-            }
-        };
-    }
 
     /**
      * The array of the subtypes.
@@ -223,24 +127,27 @@ public final class InputMethodInfo implements Parcelable {
             // Parse all subtypes
             while (((type = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
                     && type != XmlPullParser.END_DOCUMENT) {
-                nodeName = parser.getName();
-                if (!"subtype".equals(nodeName)) {
-                    throw new XmlPullParserException(
-                        "Meta-data in input-method does not start with subtype tag");
+                if (type == XmlPullParser.START_TAG) {
+                    nodeName = parser.getName();
+                    if (!"subtype".equals(nodeName)) {
+                        throw new XmlPullParserException(
+                                "Meta-data in input-method does not start with subtype tag");
+                    }
+                    final TypedArray a = res.obtainAttributes(
+                            attrs, com.android.internal.R.styleable.InputMethod_Subtype);
+                    InputMethodSubtype subtype = new InputMethodSubtype(
+                            a.getResourceId(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_label, 0),
+                            a.getResourceId(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_icon, 0),
+                            a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeLocale),
+                            a.getResourceId(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeMode, 0),
+                            a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeExtraValue));
+                    mSubtypes.add(subtype);
                 }
-                final TypedArray a = res.obtainAttributes(
-                        attrs, com.android.internal.R.styleable.InputMethod_Subtype);
-                InputMethodSubtype subtype = new InputMethodSubtype(
-                        a.getString(com.android.internal.R.styleable.InputMethod_Subtype_label),
-                        a.getResourceId(
-                                com.android.internal.R.styleable.InputMethod_Subtype_icon, 0),
-                        a.getString(com.android.internal.R.styleable
-                                .InputMethod_Subtype_imeSubtypeLocale),
-                        a.getString(com.android.internal.R.styleable
-                                .InputMethod_Subtype_imeSubtypeMode),
-                        a.getString(com.android.internal.R.styleable
-                                .InputMethod_Subtype_imeSubtypeExtraValue));
-                mSubtypes.add(subtype);
             }
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException(
