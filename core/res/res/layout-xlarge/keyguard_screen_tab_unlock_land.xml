@@ -58,15 +58,14 @@
                 android:drawablePadding="4dip"
                 />
 
-        <com.android.internal.widget.SlidingTab
-            android:id="@+id/tab_selector"
-            android:orientation="vertical"
+        <com.android.internal.widget.WaveView
+            android:id="@+id/wave_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginRight="0dip"
             android:layout_weight="1.0"
             />
-            
+
         <!-- "emergency calls only" shown when sim is missing or PUKd -->
         <TextView
             android:id="@+id/emergencyCallText"

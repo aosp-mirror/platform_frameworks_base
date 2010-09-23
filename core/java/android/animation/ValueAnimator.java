@@ -614,6 +614,17 @@ public class ValueAnimator<T> extends Animator {
     }
 
     /**
+     * Removes all listeners from the set listening to frame updates for this animation.
+     */
+    public void removeAllUpdateListeners() {
+        if (mUpdateListeners == null) {
+            return;
+        }
+        mUpdateListeners.clear();
+        mUpdateListeners = null;
+    }
+
+    /**
      * Removes a listener from the set listening to frame updates for this animation.
      *
      * @param listener the listener to be removed from the current set of update listeners
@@ -685,7 +696,15 @@ public class ValueAnimator<T> extends Animator {
      */
     private void start(boolean playBackwards) {
         mPlayingBackwards = playBackwards;
-        if ((mStartDelay == 0) && (Thread.currentThread() == Looper.getMainLooper().getThread())) {
+        Looper looper = Looper.getMainLooper();
+        final boolean isUiThread;
+        if (looper != null) {
+            isUiThread = Thread.currentThread() == looper.getThread();
+        } else {
+            // ignore check if we don't have a Looper (this isn't an Activity)
+            isUiThread = true;
+        }
+        if ((mStartDelay == 0) && isUiThread) {
             if (mListeners != null) {
                 ArrayList<AnimatorListener> tmpListeners =
                         (ArrayList<AnimatorListener>) mListeners.clone();
