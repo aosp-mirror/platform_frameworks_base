@@ -19,19 +19,21 @@ package android.net;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.CursorWrapper;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.provider.Downloads;
+import android.util.Pair;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -252,8 +254,12 @@ public class DownloadManager {
                           COLUMN_BYTES_DOWNLOADED_SO_FAR, COLUMN_LAST_MODIFIED_TIMESTAMP));
 
     /**
-     * This class contains all the information necessary to request a new download.  The URI is the
+     * This class contains all the information necessary to request a new download. The URI is the
      * only required parameter.
+     *
+     * Note that the default download destination is a shared volume where the system might delete
+     * your file if it needs to reclaim space for system use. If this is a problem, use a location
+     * on external storage (see {@link #setDestinationUri(Uri)}.
      */
     public static class Request {
         /**
@@ -268,19 +274,13 @@ public class DownloadManager {
          */
         public static final int NETWORK_WIFI = 1 << 1;
 
-        /**
-         * Bit flag for {@link #setAllowedNetworkTypes} corresponding to
-         * {@link ConnectivityManager#TYPE_WIMAX}.
-         */
-        public static final int NETWORK_WIMAX = 1 << 2;
-
         private Uri mUri;
         private Uri mDestinationUri;
-        private Map<String, String> mRequestHeaders = new HashMap<String, String>();
-        private String mTitle;
-        private String mDescription;
+        private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
+        private CharSequence mTitle;
+        private CharSequence mDescription;
         private boolean mShowNotification = true;
-        private String mMediaType;
+        private String mMimeType;
         private boolean mRoamingAllowed = true;
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
         private boolean mIsVisibleInDownloadsUi = true;
@@ -300,12 +300,12 @@ public class DownloadManager {
         }
 
         /**
-         * Set the local destination for the downloaded data. Must be a file URI to a path on
+         * Set the local destination for the downloaded file. Must be a file URI to a path on
          * external storage, and the calling application must have the WRITE_EXTERNAL_STORAGE
          * permission.
          *
-         *  By default, downloads are saved to a generated file in the download cache and may be
-         * deleted by the download manager at any time.
+         * By default, downloads are saved to a generated filename in the shared download cache and
+         * may be deleted by the system at any time to reclaim space.
          *
          * @return this object
          */
@@ -315,13 +315,62 @@ public class DownloadManager {
         }
 
         /**
-         * Set an HTTP header to be included with the download request.
+         * Set the local destination for the downloaded file to a path within the application's
+         * external files directory (as returned by {@link Context#getExternalFilesDir(String)}.
+         *
+         * @param context the {@link Context} to use in determining the external files directory
+         * @param dirType the directory type to pass to {@link Context#getExternalFilesDir(String)}
+         * @param subPath the path within the external directory, including the destination filename
+         * @return this object
+         */
+        public Request setDestinationInExternalFilesDir(Context context, String dirType,
+                String subPath) {
+            setDestinationFromBase(context.getExternalFilesDir(dirType), subPath);
+            return this;
+        }
+
+        /**
+         * Set the local destination for the downloaded file to a path within the public external
+         * storage directory (as returned by
+         * {@link Environment#getExternalStoragePublicDirectory(String)}.
+         *
+         * @param dirType the directory type to pass to
+         *        {@link Environment#getExternalStoragePublicDirectory(String)}
+         * @param subPath the path within the external directory, including the destination filename
+         * @return this object
+         */
+        public Request setDestinationInExternalPublicDir(String dirType, String subPath) {
+            setDestinationFromBase(Environment.getExternalStoragePublicDirectory(dirType), subPath);
+            return this;
+        }
+
+        private void setDestinationFromBase(File base, String subPath) {
+            if (subPath == null) {
+                throw new NullPointerException("subPath cannot be null");
+            }
+            mDestinationUri = Uri.withAppendedPath(Uri.fromFile(base), subPath);
+        }
+
+        /**
+         * Add an HTTP header to be included with the download request.  The header will be added to
+         * the end of the list.
          * @param header HTTP header name
          * @param value header value
          * @return this object
+         * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2">HTTP/1.1
+         *      Message Headers</a>
          */
-        public Request setRequestHeader(String header, String value) {
-            mRequestHeaders.put(header, value);
+        public Request addRequestHeader(String header, String value) {
+            if (header == null) {
+                throw new NullPointerException("header cannot be null");
+            }
+            if (header.contains(":")) {
+                throw new IllegalArgumentException("header may not contain ':'");
+            }
+            if (value == null) {
+                value = "";
+            }
+            mRequestHeaders.add(Pair.create(header, value));
             return this;
         }
 
@@ -329,7 +378,7 @@ public class DownloadManager {
          * Set the title of this download, to be displayed in notifications (if enabled)
          * @return this object
          */
-        public Request setTitle(String title) {
+        public Request setTitle(CharSequence title) {
             mTitle = title;
             return this;
         }
@@ -338,19 +387,20 @@ public class DownloadManager {
          * Set a description of this download, to be displayed in notifications (if enabled)
          * @return this object
          */
-        public Request setDescription(String description) {
+        public Request setDescription(CharSequence description) {
             mDescription = description;
             return this;
         }
 
         /**
-         * Set the Internet Media Type of this download.  This will override the media type declared
+         * Set the MIME content type of this download.  This will override the content type declared
          * in the server's response.
-         * @see <a href="http://www.ietf.org/rfc/rfc1590.txt">RFC 1590, defining Media Types</a>
+         * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7">HTTP/1.1
+         *      Media Types</a>
          * @return this object
          */
-        public Request setMediaType(String mediaType) {
-            mMediaType = mediaType;
+        public Request setMimeType(String mimeType) {
+            mMimeType = mimeType;
             return this;
         }
 
@@ -428,7 +478,7 @@ public class DownloadManager {
 
             putIfNonNull(values, Downloads.COLUMN_TITLE, mTitle);
             putIfNonNull(values, Downloads.COLUMN_DESCRIPTION, mDescription);
-            putIfNonNull(values, Downloads.COLUMN_MIME_TYPE, mMediaType);
+            putIfNonNull(values, Downloads.COLUMN_MIME_TYPE, mMimeType);
 
             values.put(Downloads.COLUMN_VISIBILITY,
                     mShowNotification ? Downloads.VISIBILITY_VISIBLE
@@ -443,16 +493,16 @@ public class DownloadManager {
 
         private void encodeHttpHeaders(ContentValues values) {
             int index = 0;
-            for (Map.Entry<String, String> entry : mRequestHeaders.entrySet()) {
-                String headerString = entry.getKey() + ": " + entry.getValue();
+            for (Pair<String, String> header : mRequestHeaders) {
+                String headerString = header.first + ": " + header.second;
                 values.put(Downloads.Impl.RequestHeaders.INSERT_KEY_PREFIX + index, headerString);
                 index++;
             }
         }
 
-        private void putIfNonNull(ContentValues contentValues, String key, String value) {
+        private void putIfNonNull(ContentValues contentValues, String key, Object value) {
             if (value != null) {
-                contentValues.put(key, value);
+                contentValues.put(key, value.toString());
             }
         }
     }
