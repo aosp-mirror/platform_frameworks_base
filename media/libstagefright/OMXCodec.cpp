@@ -1108,8 +1108,8 @@ status_t OMXCodec::setupH263EncoderParameters(const sp<MetaData>& meta) {
 
     // Check profile and level parameters
     CodecProfileLevel defaultProfileLevel, profileLevel;
-    defaultProfileLevel.mProfile = OMX_VIDEO_H263ProfileBaseline;
-    defaultProfileLevel.mLevel = OMX_VIDEO_H263Level45;
+    defaultProfileLevel.mProfile = h263type.eProfile;
+    defaultProfileLevel.mLevel = h263type.eLevel;
     err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
     if (err != OK) return err;
     h263type.eProfile = static_cast<OMX_VIDEO_H263PROFILETYPE>(profileLevel.mProfile);
@@ -1165,8 +1165,8 @@ status_t OMXCodec::setupMPEG4EncoderParameters(const sp<MetaData>& meta) {
 
     // Check profile and level parameters
     CodecProfileLevel defaultProfileLevel, profileLevel;
-    defaultProfileLevel.mProfile = OMX_VIDEO_MPEG4ProfileSimple;
-    defaultProfileLevel.mLevel = OMX_VIDEO_MPEG4Level2;
+    defaultProfileLevel.mProfile = mpeg4type.eProfile;
+    defaultProfileLevel.mLevel = mpeg4type.eLevel;
     err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
     if (err != OK) return err;
     mpeg4type.eProfile = static_cast<OMX_VIDEO_MPEG4PROFILETYPE>(profileLevel.mProfile);
