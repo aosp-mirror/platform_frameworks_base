@@ -844,7 +844,7 @@ public class StatusBarPolicy {
         int[] iconList;
 
         // Display signal strength while in "emergency calls only" mode
-        if (!hasService() && !mServiceState.isEmergencyOnly()) {
+        if (mServiceState == null || (!hasService() && !mServiceState.isEmergencyOnly())) {
             //Slog.d(TAG, "updateSignalStrength: no service");
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
