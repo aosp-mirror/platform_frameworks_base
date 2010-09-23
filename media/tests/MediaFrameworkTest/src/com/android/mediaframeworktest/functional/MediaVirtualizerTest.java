@@ -45,6 +45,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
     private String TAG = "MediaVirtualizerTest";
     private final static int MIN_ENERGY_RATIO_2 = 3;
     private final static short TEST_STRENGTH = 500;
+    private final static int TEST_VOLUME = 4;
 
     private Virtualizer mVirtualizer = null;
     private int mSession = -1;
@@ -193,7 +194,7 @@ public class MediaVirtualizerTest extends ActivityInstrumentationTestCase2<Media
         AudioManager am = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
         int volume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         am.setStreamVolume(AudioManager.STREAM_MUSIC,
-                           am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                           TEST_VOLUME,
                            0);
 
         try {
