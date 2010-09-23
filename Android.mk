@@ -159,6 +159,14 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodClient.aidl \
 	core/java/com/android/internal/view/IInputMethodManager.aidl \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
+	core/java/com/trustedlogic/trustednfc/android/ILlcpConnectionlessSocket.aidl \
+	core/java/com/trustedlogic/trustednfc/android/ILlcpServiceSocket.aidl \
+	core/java/com/trustedlogic/trustednfc/android/ILlcpSocket.aidl \
+	core/java/com/trustedlogic/trustednfc/android/INdefTag.aidl \
+	core/java/com/trustedlogic/trustednfc/android/INfcManager.aidl \
+	core/java/com/trustedlogic/trustednfc/android/INfcTag.aidl \
+	core/java/com/trustedlogic/trustednfc/android/IP2pInitiator.aidl \
+	core/java/com/trustedlogic/trustednfc/android/IP2pTarget.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \

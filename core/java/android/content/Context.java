@@ -1555,6 +1555,16 @@ public abstract class Context {
     public static final String SIP_SERVICE = "sip";
 
     /**
+     * Use with {@link #getSystemService} to retrieve an
+     * {@link com.trustedlogic.trustednfc.android.INfcManager.INfcManager} for
+     * accessing NFC methods.
+     *
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String NFC_SERVICE = "nfc";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
