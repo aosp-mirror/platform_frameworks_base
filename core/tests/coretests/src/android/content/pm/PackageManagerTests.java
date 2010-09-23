@@ -167,8 +167,7 @@ public class PackageManagerTests extends AndroidTestCase {
         return ipm;
     }
 
-    public boolean invokeInstallPackage(Uri packageURI, int flags,
-            GenericReceiver receiver) throws Exception {
+    public boolean invokeInstallPackage(Uri packageURI, int flags, GenericReceiver receiver) {
         PackageInstallObserver observer = new PackageInstallObserver();
         final boolean received = false;
         mContext.registerReceiver(receiver, receiver.filter);
@@ -180,11 +179,15 @@ public class PackageManagerTests extends AndroidTestCase {
                     getPm().installPackage(packageURI, observer, flags, null);
                     long waitTime = 0;
                     while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
-                        observer.wait(WAIT_TIME_INCR);
-                        waitTime += WAIT_TIME_INCR;
+                        try {
+                            observer.wait(WAIT_TIME_INCR);
+                            waitTime += WAIT_TIME_INCR;
+                        } catch (InterruptedException e) {
+                            Log.i(TAG, "Interrupted during sleep", e);
+                        }
                     }
                     if(!observer.isDone()) {
-                        throw new Exception("Timed out waiting for packageInstalled callback");
+                        fail("Timed out waiting for packageInstalled callback");
                     }
                     if (observer.returnCode != PackageManager.INSTALL_SUCCEEDED) {
                         Log.i(TAG, "Failed to install with error code = " + observer.returnCode);
@@ -193,11 +196,15 @@ public class PackageManagerTests extends AndroidTestCase {
                     // Verify we received the broadcast
                     waitTime = 0;
                     while((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
-                        receiver.wait(WAIT_TIME_INCR);
-                        waitTime += WAIT_TIME_INCR;
+                        try {
+                            receiver.wait(WAIT_TIME_INCR);
+                            waitTime += WAIT_TIME_INCR;
+                        } catch (InterruptedException e) {
+                            Log.i(TAG, "Interrupted during sleep", e);
+                        }
                     }
                     if(!receiver.isDone()) {
-                        throw new Exception("Timed out waiting for PACKAGE_ADDED notification");
+                        fail("Timed out waiting for PACKAGE_ADDED notification");
                     }
                     return receiver.received;
                 }
@@ -207,7 +214,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    public void invokeInstallPackageFail(Uri packageURI, int flags, int result) throws Exception {
+    public void invokeInstallPackageFail(Uri packageURI, int flags, int result) {
         PackageInstallObserver observer = new PackageInstallObserver();
         try {
             // Wait on observer
@@ -215,11 +222,15 @@ public class PackageManagerTests extends AndroidTestCase {
                 getPm().installPackage(packageURI, observer, flags, null);
                 long waitTime = 0;
                 while((!observer.isDone()) && (waitTime < MAX_WAIT_TIME) ) {
-                    observer.wait(WAIT_TIME_INCR);
-                    waitTime += WAIT_TIME_INCR;
+                    try {
+                        observer.wait(WAIT_TIME_INCR);
+                        waitTime += WAIT_TIME_INCR;
+                    } catch (InterruptedException e) {
+                        Log.i(TAG, "Interrupted during sleep", e);
+                    }
                 }
                 if(!observer.isDone()) {
-                    throw new Exception("Timed out waiting for packageInstalled callback");
+                    fail("Timed out waiting for packageInstalled callback");
                 }
                 assertEquals(observer.returnCode, result);
             }
@@ -265,7 +276,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 Environment.getExternalStorageDirectory().getPath());
         sdSize = (long)sdStats.getAvailableBlocks() *
                 (long)sdStats.getBlockSize();
-        // TODO check for thesholds here
+        // TODO check for thresholds here
         return pkgLen <= sdSize;
 
     }
@@ -368,12 +379,21 @@ public class PackageManagerTests extends AndroidTestCase {
                     assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                     assertTrue(info.nativeLibraryDir.startsWith(dataDir.getPath()));
                 } else if (rLoc == INSTALL_LOC_SD){
-                    assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
-                    assertTrue(srcPath.startsWith(SECURE_CONTAINERS_PREFIX));
-                    assertTrue(publicSrcPath.startsWith(SECURE_CONTAINERS_PREFIX));
-                    assertTrue(info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertTrue("Application flags (" + info.flags
+                            + ") should contain FLAG_EXTERNAL_STORAGE",
+                            (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+                    assertTrue("The APK path (" + srcPath + ") should start with "
+                            + SECURE_CONTAINERS_PREFIX, srcPath
+                            .startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertTrue("The public APK path (" + publicSrcPath + ") should start with "
+                            + SECURE_CONTAINERS_PREFIX, publicSrcPath
+                            .startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertTrue("The native library path (" + info.nativeLibraryDir
+                            + ") should start with " + SECURE_CONTAINERS_PREFIX,
+                            info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
                 } else {
                     // TODO handle error. Install should have failed.
+                    fail("Install should have failed");
                 }
             }
         } catch (NameNotFoundException e) {
@@ -544,8 +564,6 @@ public class PackageManagerTests extends AndroidTestCase {
                 // Verify installed information
                 assertInstall(pkg, flags, expInstallLocation);
             }
-        } catch (Exception e) {
-            failStr("Failed with exception : " + e);
         } finally {
             if (cleanUp) {
                 cleanUpInstall(ip);
