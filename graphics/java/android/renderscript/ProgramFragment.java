@@ -55,7 +55,7 @@ public class ProgramFragment extends Program {
             tmp[idx++] = 3;
             tmp[idx++] = mTextureCount;
 
-            int id = mRS.nProgramFragmentCreate2(mShader, tmp);
+            int id = mRS.nProgramFragmentCreate(mShader, tmp);
             ProgramFragment pf = new ProgramFragment(id, mRS);
             initProgram(pf);
             return pf;
@@ -199,6 +199,7 @@ public class ProgramFragment extends Program {
                     mNumTextures ++;
                 }
             }
+            resetConstant();
             buildShaderString();
             Type constType = null;
             if (!mVaryingColorEnable) {

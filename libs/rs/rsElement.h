@@ -72,6 +72,8 @@ public:
     void decRefs(const void *) const;
     bool getHasReferences() const {return mHasReference;}
 
+    bool isEqual(const Element *other) const;
+
 protected:
     // deallocate any components that are part of this element.
     void clear();

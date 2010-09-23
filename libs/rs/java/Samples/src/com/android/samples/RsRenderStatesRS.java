@@ -42,7 +42,7 @@ public class RsRenderStatesRS {
         mOptionsARGB.inScaled = false;
         mOptionsARGB.inPreferredConfig = Bitmap.Config.ARGB_8888;
         mMode = 0;
-        mMaxModes = 7;
+        mMaxModes = 8;
         initRS();
     }
 
@@ -68,6 +68,7 @@ public class RsRenderStatesRS {
     // Custom shaders
     private ProgramVertex mProgVertexCustom;
     private ProgramFragment mProgFragmentCustom;
+    private ProgramFragment mProgFragmentMultitex;
     private ScriptField_VertexShaderConstants_s mVSConst;
     private ScriptField_FragentShaderConstants_s mFSConst;
 
@@ -214,8 +215,14 @@ public class RsRenderStatesRS {
         // Bind the source of constant data
         mProgFragmentCustom.bindConstants(mFSConst.getAllocation(), 0);
 
+        pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
+        pfbCustom.setShader(mRes, R.raw.multitexf);
+        pfbCustom.setTextureCount(3);
+        mProgFragmentMultitex = pfbCustom.create();
+
         mScript.set_gProgVertexCustom(mProgVertexCustom);
         mScript.set_gProgFragmentCustom(mProgFragmentCustom);
+        mScript.set_gProgFragmentMultitex(mProgFragmentMultitex);
     }
 
     private Allocation loadTextureRGB(int id) {

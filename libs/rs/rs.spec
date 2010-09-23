@@ -434,12 +434,6 @@ ProgramBindSampler {
 	}
 
 ProgramFragmentCreate {
-	param const uint32_t * params
-	param uint32_t paramLength
-	ret RsProgramFragment
-	}
-
-ProgramFragmentCreate2 {
 	param const char * shaderText
 	param uint32_t shaderLength
 	param const uint32_t * params
@@ -448,11 +442,6 @@ ProgramFragmentCreate2 {
 	}
 
 ProgramVertexCreate {
-	param bool texMat
-	ret RsProgramVertex
-	}
-
-ProgramVertexCreate2 {
 	param const char * shaderText
 	param uint32_t shaderLength
 	param const uint32_t * params

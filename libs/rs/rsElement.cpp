@@ -138,37 +138,10 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
     // We need to check if this already exists
     for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
         Element *ee = rsc->mStateElement.mElements[ct];
-
-        if (!ee->getFieldCount() ) {
-
-            if((ee->getComponent().getType() == elem->getComponent().getType()) &&
-               (ee->getComponent().getKind() == elem->getComponent().getKind()) &&
-               (ee->getComponent().getIsNormalized() == elem->getComponent().getIsNormalized()) &&
-               (ee->getComponent().getVectorSize() == elem->getComponent().getVectorSize())) {
-                // Match
-                delete elem;
-                ee->incUserRef();
-                return ee;
-            }
-
-        } else if (ee->getFieldCount() == elem->mFieldCount) {
-
-            bool match = true;
-            for (uint32_t i=0; i < elem->mFieldCount; i++) {
-                if ((ee->mFields[i].e.get() != elem->mFields[i].e.get()) ||
-                    (ee->mFields[i].name.length() != elem->mFields[i].name.length()) ||
-                    (ee->mFields[i].name != elem->mFields[i].name) ||
-                    (ee->mFields[i].arraySize != elem->mFields[i].arraySize)) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
-                delete elem;
-                ee->incUserRef();
-                return ee;
-            }
-
+        if(ee->isEqual(elem)) {
+            delete elem;
+            ee->incUserRef();
+            return ee;
         }
     }
 
@@ -176,6 +149,32 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
     return elem;
 }
 
+bool Element::isEqual(const Element *other) const {
+    if(other == NULL) {
+        return false;
+    }
+    if (!other->getFieldCount() && !mFieldCount) {
+        if((other->getType() == getType()) &&
+           (other->getKind() == getKind()) &&
+           (other->getComponent().getIsNormalized() == getComponent().getIsNormalized()) &&
+           (other->getComponent().getVectorSize() == getComponent().getVectorSize())) {
+            return true;
+        }
+        return false;
+    }
+    if (other->getFieldCount() == mFieldCount) {
+        for (uint32_t i=0; i < mFieldCount; i++) {
+            if ((!other->mFields[i].e->isEqual(mFields[i].e.get())) ||
+                (other->mFields[i].name.length() != mFields[i].name.length()) ||
+                (other->mFields[i].name != mFields[i].name) ||
+                (other->mFields[i].arraySize != mFields[i].arraySize)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
 
 const Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
                             bool isNorm, uint32_t vecSize)

@@ -32,20 +32,19 @@ class Program : public ObjectBase
 public:
     const static uint32_t MAX_ATTRIBS = 8;
     const static uint32_t MAX_UNIFORMS = 16;
-    const static uint32_t MAX_TEXTURE = 2;
 
     Program(Context *);
     Program(Context *, const char * shaderText, uint32_t shaderLength,
                        const uint32_t * params, uint32_t paramLength);
     virtual ~Program();
 
-    void bindAllocation(Allocation *, uint32_t slot);
+    void bindAllocation(Context *, Allocation *, uint32_t slot);
     virtual void createShader();
 
     bool isUserProgram() const {return !mIsInternal;}
 
-    void bindTexture(uint32_t slot, Allocation *);
-    void bindSampler(uint32_t slot, Sampler *);
+    void bindTexture(Context *, uint32_t slot, Allocation *);
+    void bindSampler(Context *, uint32_t slot, Sampler *);
 
     uint32_t getShaderID() const {return mShaderID;}
     void setShader(const char *, uint32_t len);
@@ -75,7 +74,7 @@ protected:
 
     // Applies to vertex and fragment shaders only
     void appendUserConstants();
-    void setupUserConstants(ShaderCache *sc, bool isFragment);
+    void setupUserConstants(Context *rsc, ShaderCache *sc, bool isFragment);
     void initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix);
 
     ObjectBaseRef<Allocation> mConstants[MAX_UNIFORMS];
@@ -97,8 +96,8 @@ protected:
     // and filtered.
     //
     // Constants are strictly accessed by programetic loads.
-    ObjectBaseRef<Allocation> mTextures[MAX_TEXTURE];
-    ObjectBaseRef<Sampler> mSamplers[MAX_TEXTURE];
+    ObjectBaseRef<Allocation> *mTextures;
+    ObjectBaseRef<Sampler> *mSamplers;
 
     bool loadShader(Context *, uint32_t type);
 

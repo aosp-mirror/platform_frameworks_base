@@ -31,40 +31,6 @@
 using namespace android;
 using namespace android::renderscript;
 
-
-ProgramFragment::ProgramFragment(Context *rsc, const uint32_t * params,
-                                 uint32_t paramLength) :
-    Program(rsc)
-{
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
-    rsAssert(paramLength == 6);
-
-    mConstantColor[0] = 1.f;
-    mConstantColor[1] = 1.f;
-    mConstantColor[2] = 1.f;
-    mConstantColor[3] = 1.f;
-
-    mEnvModes[0] = (RsTexEnvMode)params[0];
-    mTextureFormats[0] = params[1];
-    mEnvModes[1] = (RsTexEnvMode)params[2];
-    mTextureFormats[1] = params[3];
-    mPointSpriteEnable = params[4] != 0;
-    mVaryingColor = false;
-    if (paramLength > 5)
-        mVaryingColor = params[5] != 0;
-
-    mTextureEnableMask = 0;
-    if (mEnvModes[0]) {
-        mTextureEnableMask |= 1;
-    }
-    if (mEnvModes[1]) {
-        mTextureEnableMask |= 2;
-    }
-
-    init(rsc);
-}
-
 ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
                                  uint32_t shaderLength, const uint32_t * params,
                                  uint32_t paramLength) :
@@ -78,19 +44,23 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
     mConstantColor[2] = 1.f;
     mConstantColor[3] = 1.f;
 
-    mTextureEnableMask = (1 << mTextureCount) -1;
-
     init(rsc);
 }
-
 
 ProgramFragment::~ProgramFragment()
 {
 }
 
-void ProgramFragment::setConstantColor(float r, float g, float b, float a)
+void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, float a)
 {
     if(isUserProgram()) {
+        LOGE("Attempting to set fixed function emulation color on user program");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot  set fixed function emulation color on user program");
+        return;
+    }
+    if(mConstants[0].get() == NULL) {
+        LOGE("Unable to set fixed function emulation color because allocation is missing");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Unable to set fixed function emulation color because allocation is missing");
         return;
     }
     mConstantColor[0] = r;
@@ -101,7 +71,7 @@ void ProgramFragment::setConstantColor(float r, float g, float b, float a)
     mDirty = true;
 }
 
-void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, ShaderCache *sc)
+void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state, ShaderCache *sc)
 {
     //LOGE("sgl2 frag1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
@@ -112,11 +82,22 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
     rsc->checkError("ProgramFragment::setupGL2 start");
 
     rsc->checkError("ProgramFragment::setupGL2 begin uniforms");
-    setupUserConstants(sc, true);
+    setupUserConstants(rsc, sc, true);
 
-    for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
+    uint32_t numTexturesToBind = mTextureCount;
+    uint32_t numTexturesAvailable = rsc->getMaxFragmentTextures();
+    if(numTexturesToBind >= numTexturesAvailable) {
+        LOGE("Attempting to bind %u textures on shader id %u, but only %u are available",
+             mTextureCount, (uint32_t)this, numTexturesAvailable);
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind more textuers than available");
+        numTexturesToBind = numTexturesAvailable;
+    }
+
+    for (uint32_t ct=0; ct < numTexturesToBind; ct++) {
         glActiveTexture(GL_TEXTURE0 + ct);
-        if (!(mTextureEnableMask & (1 << ct)) || !mTextures[ct].get()) {
+        if (!mTextures[ct].get()) {
+            LOGE("No texture bound for shader id %u, texture unit %u", (uint)this, ct);
+            rsc->setError(RS_ERROR_BAD_SHADER, "No texture bound");
             continue;
         }
 
@@ -151,8 +132,8 @@ void ProgramFragment::createShader()
     if (mUserShader.length() > 1) {
         mShader.append("precision mediump float;\n");
         appendUserConstants();
+        char buf[256];
         for (uint32_t ct=0; ct < mTextureCount; ct++) {
-            char buf[256];
             sprintf(buf, "uniform sampler2D UNI_Tex%i;\n", ct);
             mShader.append(buf);
         }
@@ -172,8 +153,11 @@ void ProgramFragment::init(Context *rsc)
         }
     }
     mTextureUniformIndexStart = mUniformCount;
-    mUniformNames[mUniformCount++].setTo("UNI_Tex0");
-    mUniformNames[mUniformCount++].setTo("UNI_Tex1");
+    char buf[256];
+    for (uint32_t ct=0; ct < mTextureCount; ct++) {
+        sprintf(buf, "UNI_Tex%i", ct);
+        mUniformNames[mUniformCount++].setTo(buf);
+    }
 
     createShader();
 }
@@ -228,8 +212,8 @@ void ProgramFragmentState::init(Context *rsc)
     Allocation *constAlloc = new Allocation(rsc, inputType);
     ProgramFragment *pf = new ProgramFragment(rsc, shaderString.string(),
                                               shaderString.length(), tmp, 4);
-    pf->bindAllocation(constAlloc, 0);
-    pf->setConstantColor(1.0f, 1.0f, 1.0f, 1.0f);
+    pf->bindAllocation(rsc, constAlloc, 0);
+    pf->setConstantColor(rsc, 1.0f, 1.0f, 1.0f, 1.0f);
 
     mDefault.set(pf);
 }
@@ -244,23 +228,13 @@ void ProgramFragmentState::deinit(Context *rsc)
 namespace android {
 namespace renderscript {
 
-RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc,
-                                            const uint32_t * params,
-                                            uint32_t paramLength)
-{
-    ProgramFragment *pf = new ProgramFragment(rsc, params, paramLength);
-    pf->incUserRef();
-    //LOGE("rsi_ProgramFragmentCreate %p", pf);
-    return pf;
-}
-
-RsProgramFragment rsi_ProgramFragmentCreate2(Context *rsc, const char * shaderText,
+RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc, const char * shaderText,
                              uint32_t shaderLength, const uint32_t * params,
                              uint32_t paramLength)
 {
     ProgramFragment *pf = new ProgramFragment(rsc, shaderText, shaderLength, params, paramLength);
     pf->incUserRef();
-    //LOGE("rsi_ProgramFragmentCreate2 %p", pf);
+    //LOGE("rsi_ProgramFragmentCreate %p", pf);
     return pf;
 }
 

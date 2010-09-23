@@ -372,7 +372,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
     // This will dirty the texture and the shader so next time
     // we draw it will upload the data
     mTextTexture->deferedUploadToTexture(mRSC, false, 0);
-    mFontShaderF->bindTexture(0, mTextTexture.get());
+    mFontShaderF->bindTexture(mRSC, 0, mTextTexture.get());
 
     // Some debug code
     /*for(uint32_t i = 0; i < mCacheLines.size(); i ++) {
@@ -414,12 +414,12 @@ void FontState::initRenderState()
     ProgramFragment *pf = new ProgramFragment(mRSC, shaderString.string(),
                                               shaderString.length(), tmp, 4);
     mFontShaderF.set(pf);
-    mFontShaderF->bindAllocation(mFontShaderFConstant.get(), 0);
+    mFontShaderF->bindAllocation(mRSC, mFontShaderFConstant.get(), 0);
 
     Sampler *sampler = new Sampler(mRSC, RS_SAMPLER_NEAREST, RS_SAMPLER_NEAREST,
                                       RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP);
     mFontSampler.set(sampler);
-    mFontShaderF->bindSampler(0, sampler);
+    mFontShaderF->bindSampler(mRSC, 0, sampler);
 
     ProgramStore *fontStore = new ProgramStore(mRSC);
     mFontProgramStore.set(fontStore);

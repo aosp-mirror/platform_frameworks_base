@@ -154,6 +154,13 @@ public class Program extends BaseObj {
             mOutputs[mOutputCount++] = e;
         }
 
+        void resetConstant() {
+            mConstantCount = 0;
+            for(int i = 0; i < MAX_CONSTANT; i ++) {
+                mConstants[i] = null;
+            }
+        }
+
         public int addConstant(Type t) throws IllegalStateException {
             // Should check for consistant and non-conflicting names...
             if(mConstantCount >= MAX_CONSTANT) {
@@ -165,7 +172,7 @@ public class Program extends BaseObj {
 
         public BaseProgramBuilder setTextureCount(int count) throws IllegalArgumentException {
             // Should check for consistant and non-conflicting names...
-            if(count >= MAX_CONSTANT) {
+            if(count >= MAX_TEXTURE) {
                 throw new IllegalArgumentException("Max texture count exceeded.");
             }
             mTextureCount = count;
