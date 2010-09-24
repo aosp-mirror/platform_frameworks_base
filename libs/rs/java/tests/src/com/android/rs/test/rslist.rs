@@ -71,8 +71,10 @@ int root(int launchID) {
                 case -1: /* Failed */
                     rsgFontColor(0.9f, 0.5f, 0.5f, 1.0f);
                     break;
-                case 0: /* Unknown */
-                default:
+                case 0: /* Still Testing */
+                    rsgFontColor(0.9f, 0.9f, 0.5f, 1.0f);
+                    break;
+                default: /* Unknown */
                     rsgFontColor(0.9f, 0.9f, 0.9f, 1.0f);
                     break;
             }

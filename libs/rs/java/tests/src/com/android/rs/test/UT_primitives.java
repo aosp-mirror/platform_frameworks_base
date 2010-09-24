@@ -22,8 +22,8 @@ import android.renderscript.*;
 public class UT_primitives extends UnitTest {
     private Resources mRes;
 
-    protected UT_primitives(Resources res) {
-        super("Primitives");
+    protected UT_primitives(RSTestCore rstc, Resources res) {
+        super(rstc, "Primitives");
         mRes = res;
     }
 
@@ -33,8 +33,6 @@ public class UT_primitives extends UnitTest {
         pRS.mMessageCallback = mRsMessage;
         s.invoke_primitives_test(0, 0);
         pRS.finish();
-        //android.util.Log.v("UT", "After pRS.finish");
-
         pRS.destroy();
     }
 }

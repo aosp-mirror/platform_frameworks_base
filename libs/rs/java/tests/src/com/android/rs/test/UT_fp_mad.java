@@ -22,8 +22,8 @@ import android.renderscript.*;
 public class UT_fp_mad extends UnitTest {
     private Resources mRes;
 
-    protected UT_fp_mad(Resources res) {
-        super("Fp_Mad");
+    protected UT_fp_mad(RSTestCore rstc, Resources res) {
+        super(rstc, "Fp_Mad");
         mRes = res;
     }
 

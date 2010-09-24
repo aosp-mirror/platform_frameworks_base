@@ -51,8 +51,8 @@ public class RSTestCore {
 
         unitTests = new ArrayList<UnitTest>();
 
-        unitTests.add(new UT_primitives(mRes));
-        unitTests.add(new UT_fp_mad(mRes));
+        unitTests.add(new UT_primitives(this, mRes));
+        unitTests.add(new UT_fp_mad(this, mRes));
         /*
         unitTests.add(new UnitTest("<Pass>", 1));
         unitTests.add(new UnitTest());
@@ -62,23 +62,26 @@ public class RSTestCore {
         UnitTest [] uta = new UnitTest[unitTests.size()];
         uta = unitTests.toArray(uta);
 
-        /* Run the actual unit tests */
-        ListIterator<UnitTest> test_iter = unitTests.listIterator();
-        while (test_iter.hasNext()) {
-            UnitTest t = test_iter.next();
-            t.start();
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-            }
-        }
-
         mListAllocs = new ScriptField_ListAllocs_s(mRS, uta.length);
         for (int i = 0; i < uta.length; i++) {
             ScriptField_ListAllocs_s.Item listElem = new ScriptField_ListAllocs_s.Item();
             listElem.text = Allocation.createFromString(mRS, uta[i].name);
             listElem.result = uta[i].result;
             mListAllocs.set(listElem, i, false);
+            uta[i].setItem(listElem);
+        }
+
+        /* Run the actual unit tests */
+        ListIterator<UnitTest> test_iter = unitTests.listIterator();
+        while (test_iter.hasNext()) {
+            UnitTest t = test_iter.next();
+            t.start();
+            /*
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+            }
+            */
         }
 
         mListAllocs.copyAll();
@@ -90,6 +93,15 @@ public class RSTestCore {
 
         mRS.contextBindRootScript(mScript);
         mRS.finish();
+    }
+
+    public void refreshTestResults() {
+        if (mListAllocs != null && mScript != null && mRS != null) {
+            mListAllocs.copyAll();
+
+            mScript.bind_gList(mListAllocs);
+            mRS.contextBindRootScript(mScript);
+        }
     }
 
     public void newTouchPosition(float x, float y, float pressure, int id) {
