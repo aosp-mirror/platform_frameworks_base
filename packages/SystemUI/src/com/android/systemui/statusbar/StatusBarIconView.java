@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.util.Slog;
+import android.util.Log;
 import android.view.ViewDebug;
 import android.widget.FrameLayout;
 
@@ -123,5 +124,11 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public StatusBarIcon getStatusBarIcon() {
         return mIcon;
+    }
+
+    protected void debug(int depth) {
+        super.debug(depth);
+        Log.d("View", debugIndent(depth) + "slot=" + mSlot);
+        Log.d("View", debugIndent(depth) + "icon=" + mIcon);
     }
 }
