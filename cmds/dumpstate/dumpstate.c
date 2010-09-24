@@ -122,11 +122,11 @@ static void dumpstate() {
     run_command("PROCESSES AND THREADS", 10, "ps", "-t", "-p", "-P", NULL);
     run_command("LIBRANK", 10, "librank", NULL);
 
-    dump_file("BINDER FAILED TRANSACTION LOG", "/proc/binder/failed_transaction_log");
-    dump_file("BINDER TRANSACTION LOG", "/proc/binder/transaction_log");
-    dump_file("BINDER TRANSACTIONS", "/proc/binder/transactions");
-    dump_file("BINDER STATS", "/proc/binder/stats");
-    run_command("BINDER PROCESS STATE", 10, "sh", "-c", "cat /proc/binder/proc/*");
+    dump_file("BINDER FAILED TRANSACTION LOG", "/sys/kernel/debug/binder/failed_transaction_log");
+    dump_file("BINDER TRANSACTION LOG", "/sys/kernel/debug/binder/transaction_log");
+    dump_file("BINDER TRANSACTIONS", "/sys/kernel/debug/binder/transactions");
+    dump_file("BINDER STATS", "/sys/kernel/debug/binder/stats");
+    dump_file("BINDER STATE", "/sys/kernel/debug/binder/state");
 
     run_command("FILESYSTEMS & FREE SPACE", 10, "df", NULL);
 
