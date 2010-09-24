@@ -35,9 +35,7 @@ import android.util.AndroidException;
 import android.view.IWindowManager;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -433,6 +431,8 @@ public class Am {
     }
 
     class MyActivityController extends IActivityController.Stub {
+        final String mGdbPort;
+
         static final int STATE_NORMAL = 0;
         static final int STATE_CRASHED = 1;
         static final int STATE_EARLY_ANR = 2;
@@ -453,6 +453,14 @@ public class Am {
         static final int RESULT_ANR_WAIT = 1;
 
         int mResult;
+
+        Process mGdbProcess;
+        Thread mGdbThread;
+        boolean mGotGdbPrint;
+
+        MyActivityController(String gdbPort) {
+            mGdbPort = gdbPort;
+        }
 
         @Override
         public boolean activityResuming(String pkg) throws RemoteException {
@@ -483,7 +491,7 @@ public class Am {
                 System.out.println("stack:");
                 System.out.print(stackTrace);
                 System.out.println("#");
-                int result = waitControllerLocked(STATE_CRASHED);
+                int result = waitControllerLocked(pid, STATE_CRASHED);
                 return result == RESULT_CRASH_KILL ? false : true;
             }
         }
@@ -496,7 +504,7 @@ public class Am {
                 System.out.println("processName: " + processName);
                 System.out.println("processPid: " + pid);
                 System.out.println("annotation: " + annotation);
-                int result = waitControllerLocked(STATE_EARLY_ANR);
+                int result = waitControllerLocked(pid, STATE_EARLY_ANR);
                 if (result == RESULT_EARLY_ANR_KILL) return -1;
                 return 0;
             }
@@ -512,14 +520,83 @@ public class Am {
                 System.out.println("processStats:");
                 System.out.print(processStats);
                 System.out.println("#");
-                int result = waitControllerLocked(STATE_ANR);
+                int result = waitControllerLocked(pid, STATE_ANR);
                 if (result == RESULT_ANR_KILL) return -1;
                 if (result == RESULT_ANR_WAIT) return 1;
                 return 0;
             }
         }
 
-        int waitControllerLocked(int state) {
+        void killGdbLocked() {
+            mGotGdbPrint = false;
+            if (mGdbProcess != null) {
+                System.out.println("Stopping gdbserver");
+                mGdbProcess.destroy();
+                mGdbProcess = null;
+            }
+            if (mGdbThread != null) {
+                mGdbThread.interrupt();
+                mGdbThread = null;
+            }
+        }
+
+        int waitControllerLocked(int pid, int state) {
+            if (mGdbPort != null) {
+                killGdbLocked();
+
+                try {
+                    System.out.println("Starting gdbserver on port " + mGdbPort);
+                    System.out.println("Do the following:");
+                    System.out.println("  adb forward tcp:" + mGdbPort + " tcp:" + mGdbPort);
+                    System.out.println("  gdbclient app_process :" + mGdbPort);
+
+                    mGdbProcess = Runtime.getRuntime().exec(new String[] {
+                            "gdbserver", ":" + mGdbPort, "--attach", Integer.toString(pid)
+                    });
+                    final InputStreamReader converter = new InputStreamReader(
+                            mGdbProcess.getInputStream());
+                    mGdbThread = new Thread() {
+                        @Override
+                        public void run() {
+                            BufferedReader in = new BufferedReader(converter);
+                            String line;
+                            int count = 0;
+                            while (true) {
+                                synchronized (MyActivityController.this) {
+                                    if (mGdbThread == null) {
+                                        return;
+                                    }
+                                    if (count == 2) {
+                                        mGotGdbPrint = true;
+                                        MyActivityController.this.notifyAll();
+                                    }
+                                }
+                                try {
+                                    line = in.readLine();
+                                    if (line == null) {
+                                        return;
+                                    }
+                                    System.out.println("GDB: " + line);
+                                    count++;
+                                } catch (IOException e) {
+                                    return;
+                                }
+                            }
+                        }
+                    };
+                    mGdbThread.start();
+
+                    // Stupid waiting for .5s.  Doesn't matter if we end early.
+                    try {
+                        this.wait(500);
+                    } catch (InterruptedException e) {
+                    }
+
+                } catch (IOException e) {
+                    System.err.println("Failure starting gdbserver: " + e);
+                    killGdbLocked();
+                }
+            }
             mState = state;
             System.out.println("");
             printMessageForState();
@@ -530,6 +607,8 @@ public class Am {
                 } catch (InterruptedException e) {
                 }
             }
+
+            killGdbLocked();
 
             return mResult;
         }
@@ -632,7 +711,19 @@ public class Am {
     }
 
     private void runMonitor() throws Exception {
-        MyActivityController controller = new MyActivityController();
+        String opt;
+        String gdbPort = null;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--gdb")) {
+                gdbPort = nextArgRequired();
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                showUsage();
+                return;
+            }
+        }
+
+        MyActivityController controller = new MyActivityController(gdbPort);
         controller.run();
     }
 
@@ -806,7 +897,8 @@ public class Am {
                 "    start profiling: am profile <PROCESS> start <FILE>\n" +
                 "    stop profiling: am profile <PROCESS> stop\n" +
                 "\n" +
-                "    start monitoring: am monitor\n" +
+                "    start monitoring: am monitor [--gdb <port>]\n" +
+                "        --gdb: start gdbserv on the given port at crash/ANR\n" +
                 "\n" +
                 "    <INTENT> specifications include these flags:\n" +
                 "        [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
