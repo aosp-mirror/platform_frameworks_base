@@ -327,10 +327,7 @@ public class SettingsProvider extends ContentProvider {
         try {
             final String value = c.moveToNext() ? c.getString(0) : null;
             if (value == null) {
-                final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-                String serial = SystemProperties.get("ro.serialno", "");
-                random.setSeed(
-                    (serial + System.nanoTime() + new SecureRandom().nextLong()).getBytes());
+                final SecureRandom random = new SecureRandom();
                 final String newAndroidIdValue = Long.toHexString(random.nextLong());
                 Log.d(TAG, "Generated and saved new ANDROID_ID [" + newAndroidIdValue + "]");
                 final ContentValues values = new ContentValues();
@@ -342,8 +339,6 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
             return true;
-        } catch (NoSuchAlgorithmException e) {
-            return false;
         } finally {
             c.close();
         }
