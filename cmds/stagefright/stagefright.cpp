@@ -31,6 +31,8 @@
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ALooper.h>
 #include "include/ARTSPController.h"
+#include "include/LiveSource.h"
+#include "include/NuCachedSource2.h"
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/JPEGSource.h>
@@ -285,19 +287,34 @@ struct DetectSyncSource : public MediaSource {
             MediaBuffer **buffer, const ReadOptions *options);
 
 private:
+    enum StreamType {
+        AVC,
+        MPEG4,
+        H263,
+        OTHER,
+    };
+
     sp<MediaSource> mSource;
-    bool mIsAVC;
+    StreamType mStreamType;
 
     DISALLOW_EVIL_CONSTRUCTORS(DetectSyncSource);
 };
 
 DetectSyncSource::DetectSyncSource(const sp<MediaSource> &source)
     : mSource(source),
-      mIsAVC(false) {
+      mStreamType(OTHER) {
     const char *mime;
     CHECK(mSource->getFormat()->findCString(kKeyMIMEType, &mime));
 
-    mIsAVC = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
+        mStreamType = AVC;
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4)) {
+        mStreamType = MPEG4;
+        CHECK(!"sync frame detection not implemented yet for MPEG4");
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_H263)) {
+        mStreamType = H263;
+        CHECK(!"sync frame detection not implemented yet for H.263");
+    }
 }
 
 status_t DetectSyncSource::start(MetaData *params) {
@@ -336,10 +353,10 @@ status_t DetectSyncSource::read(
         return err;
     }
 
-    if (mIsAVC && isIDRFrame(*buffer)) {
+    if (mStreamType == AVC && isIDRFrame(*buffer)) {
         (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, true);
     } else {
-        (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, false);
+        (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, true);
     }
 
     return OK;
@@ -347,19 +364,21 @@ status_t DetectSyncSource::read(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void writeSourceToMP4(
-        sp<MediaSource> &source, bool syncInfoPresent) {
-    if (!syncInfoPresent) {
-        source = new DetectSyncSource(source);
-    }
-
+static void writeSourcesToMP4(
+        Vector<sp<MediaSource> > &sources, bool syncInfoPresent) {
     sp<MPEG4Writer> writer =
         new MPEG4Writer(gWriteMP4Filename.string());
 
     // at most one minute.
     writer->setMaxFileDuration(60000000ll);
 
-    CHECK_EQ(writer->addSource(source), (status_t)OK);
+    for (size_t i = 0; i < sources.size(); ++i) {
+        sp<MediaSource> source = sources.editItemAt(i);
+
+        CHECK_EQ(writer->addSource(
+                    syncInfoPresent ? source : new DetectSyncSource(source)),
+                (status_t)OK);
+    }
 
     sp<MetaData> params = new MetaData;
     params->setInt32(kKeyNotRealTime, true);
@@ -674,8 +693,10 @@ int main(int argc, char **argv) {
 
         sp<DataSource> dataSource = DataSource::CreateFromURI(filename);
 
-        if ((strncasecmp(filename, "sine:", 5)
-                && strncasecmp(filename, "rtsp://", 7)) && dataSource == NULL) {
+        if (strncasecmp(filename, "sine:", 5)
+                && strncasecmp(filename, "rtsp://", 7)
+                && strncasecmp(filename, "httplive://", 11)
+                && dataSource == NULL) {
             fprintf(stderr, "Unable to create data source.\n");
             return 1;
         }
@@ -687,10 +708,14 @@ int main(int argc, char **argv) {
             isJPEG = true;
         }
 
+        Vector<sp<MediaSource> > mediaSources;
         sp<MediaSource> mediaSource;
 
         if (isJPEG) {
             mediaSource = new JPEGSource(dataSource);
+            if (gWriteMP4) {
+                mediaSources.push(mediaSource);
+            }
         } else if (!strncasecmp("sine:", filename, 5)) {
             char *end;
             long sampleRate = strtol(filename + 5, &end, 10);
@@ -699,6 +724,9 @@ int main(int argc, char **argv) {
                 sampleRate = 44100;
             }
             mediaSource = new SineSource(sampleRate, 1);
+            if (gWriteMP4) {
+                mediaSources.push(mediaSource);
+            }
         } else {
             sp<MediaExtractor> extractor;
 
@@ -718,6 +746,18 @@ int main(int argc, char **argv) {
                 extractor = rtspController.get();
 
                 syncInfoPresent = false;
+            } else if (!strncasecmp("httplive://", filename, 11)) {
+                String8 uri("http://");
+                uri.append(filename + 11);
+
+                dataSource = new LiveSource(uri.string());
+                dataSource = new NuCachedSource2(dataSource);
+
+                extractor =
+                    MediaExtractor::Create(
+                            dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
+
+                syncInfoPresent = false;
             } else {
                 extractor = MediaExtractor::Create(dataSource);
                 if (extractor == NULL) {
@@ -728,46 +768,75 @@ int main(int argc, char **argv) {
 
             size_t numTracks = extractor->countTracks();
 
-            sp<MetaData> meta;
-            size_t i;
-            for (i = 0; i < numTracks; ++i) {
-                meta = extractor->getTrackMetaData(
-                        i, MediaExtractor::kIncludeExtensiveMetaData);
+            if (gWriteMP4) {
+                bool haveAudio = false;
+                bool haveVideo = false;
+                for (size_t i = 0; i < numTracks; ++i) {
+                    sp<MediaSource> source = extractor->getTrack(i);
 
-                const char *mime;
-                meta->findCString(kKeyMIMEType, &mime);
+                    const char *mime;
+                    CHECK(source->getFormat()->findCString(
+                                kKeyMIMEType, &mime));
 
-                if (audioOnly && !strncasecmp(mime, "audio/", 6)) {
-                    break;
+                    bool useTrack = false;
+                    if (!haveAudio && !strncasecmp("audio/", mime, 6)) {
+                        haveAudio = true;
+                        useTrack = true;
+                    } else if (!haveVideo && !strncasecmp("video/", mime, 6)) {
+                        haveVideo = true;
+                        useTrack = true;
+                    }
+
+                    if (useTrack) {
+                        mediaSources.push(source);
+
+                        if (haveAudio && haveVideo) {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                sp<MetaData> meta;
+                size_t i;
+                for (i = 0; i < numTracks; ++i) {
+                    meta = extractor->getTrackMetaData(
+                            i, MediaExtractor::kIncludeExtensiveMetaData);
+
+                    const char *mime;
+                    meta->findCString(kKeyMIMEType, &mime);
+
+                    if (audioOnly && !strncasecmp(mime, "audio/", 6)) {
+                        break;
+                    }
+
+                    if (!audioOnly && !strncasecmp(mime, "video/", 6)) {
+                        break;
+                    }
+
+                    meta = NULL;
                 }
 
-                if (!audioOnly && !strncasecmp(mime, "video/", 6)) {
-                    break;
+                if (meta == NULL) {
+                    fprintf(stderr,
+                            "No suitable %s track found. The '-a' option will "
+                            "target audio tracks only, the default is to target "
+                            "video tracks only.\n",
+                            audioOnly ? "audio" : "video");
+                    return -1;
                 }
 
-                meta = NULL;
-            }
+                int64_t thumbTimeUs;
+                if (meta->findInt64(kKeyThumbnailTime, &thumbTimeUs)) {
+                    printf("thumbnailTime: %lld us (%.2f secs)\n",
+                           thumbTimeUs, thumbTimeUs / 1E6);
+                }
 
-            if (meta == NULL) {
-                fprintf(stderr,
-                        "No suitable %s track found. The '-a' option will "
-                        "target audio tracks only, the default is to target "
-                        "video tracks only.\n",
-                        audioOnly ? "audio" : "video");
-                return -1;
+                mediaSource = extractor->getTrack(i);
             }
-
-            int64_t thumbTimeUs;
-            if (meta->findInt64(kKeyThumbnailTime, &thumbTimeUs)) {
-                printf("thumbnailTime: %lld us (%.2f secs)\n",
-                       thumbTimeUs, thumbTimeUs / 1E6);
-            }
-
-            mediaSource = extractor->getTrack(i);
         }
 
         if (gWriteMP4) {
-            writeSourceToMP4(mediaSource, syncInfoPresent);
+            writeSourcesToMP4(mediaSources, syncInfoPresent);
         } else if (seekTest) {
             performSeekTest(mediaSource);
         } else {
