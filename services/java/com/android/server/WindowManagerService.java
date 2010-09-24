@@ -5679,9 +5679,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 int requestedWidth, int requestedHeight, int viewFlags,
                 boolean insetsPending, Rect outFrame, Rect outContentInsets,
                 Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
-            return relayoutWindow(this, window, attrs,
+            //Log.d(TAG, ">>>>>> ENTERED relayout from " + Binder.getCallingPid());
+            int res = relayoutWindow(this, window, attrs,
                     requestedWidth, requestedHeight, viewFlags, insetsPending,
                     outFrame, outContentInsets, outVisibleInsets, outConfig, outSurface);
+            //Log.d(TAG, "<<<<<< EXITING relayout to " + Binder.getCallingPid());
+            return res;
         }
 
         public void setTransparentRegion(IWindow window, Region region) {
