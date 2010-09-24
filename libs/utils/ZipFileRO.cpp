@@ -22,6 +22,7 @@
 #include <utils/ZipFileRO.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
+#include <utils/threads.h>
 
 #include <zlib.h>
 
@@ -195,7 +196,7 @@ bool ZipFileRO::mapCentralDirectory(void)
             free(scanBuf);
             return false;
         } else if (header != kLFHSignature) {
-            LOGV("Not a Zip archive (found 0x%08x)\n", val);
+            LOGV("Not a Zip archive (found 0x%08x)\n", header);
             free(scanBuf);
             return false;
         }
@@ -496,15 +497,21 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
         }
 
         unsigned char lfhBuf[kLFHLen];
-        if (lseek(mFd, localHdrOffset, SEEK_SET) != localHdrOffset) {
-            LOGW("failed seeking to lfh at offset %ld\n", localHdrOffset);
-            return false;
-        }
-        ssize_t actual =
-            TEMP_FAILURE_RETRY(read(mFd, lfhBuf, sizeof(lfhBuf)));
-        if (actual != sizeof(lfhBuf)) {
-            LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
-            return false;
+
+        {
+            AutoMutex _l(mFdLock);
+
+            if (lseek(mFd, localHdrOffset, SEEK_SET) != localHdrOffset) {
+                LOGW("failed seeking to lfh at offset %ld\n", localHdrOffset);
+                return false;
+            }
+
+            ssize_t actual =
+                TEMP_FAILURE_RETRY(read(mFd, lfhBuf, sizeof(lfhBuf)));
+            if (actual != sizeof(lfhBuf)) {
+                LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
+                return false;
+            }
         }
 
         if (get4LE(lfhBuf) != kLFHSignature) {
