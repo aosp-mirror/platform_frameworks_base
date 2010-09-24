@@ -304,14 +304,7 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
             lpJniStorage->mCallbackData.audioEffect_class,
             &lpJniStorage->mCallbackData);
 
-    if (jId) {
-        nId = (jint *) env->GetPrimitiveArrayCritical(jId, NULL);
-        if (nId == NULL) {
-            LOGE("setup: Error retrieving id pointer");
-            lStatus = AUDIOEFFECT_ERROR_BAD_VALUE;
-            goto setup_failure;
-        }
-    } else {
+    if (jId == NULL) {
         LOGE("setup: NULL java array for id pointer");
         lStatus = AUDIOEFFECT_ERROR_BAD_VALUE;
         goto setup_failure;
@@ -336,8 +329,13 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
         goto setup_failure;
     }
 
+    nId = (jint *) env->GetPrimitiveArrayCritical(jId, NULL);
+    if (nId == NULL) {
+        LOGE("setup: Error retrieving id pointer");
+        lStatus = AUDIOEFFECT_ERROR_BAD_VALUE;
+        goto setup_failure;
+    }
     nId[0] = lpAudioEffect->id();
-
     env->ReleasePrimitiveArrayCritical(jId, nId, 0);
     nId = NULL;
 
