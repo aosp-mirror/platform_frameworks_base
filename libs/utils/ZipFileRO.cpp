@@ -643,7 +643,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, void* buffer) const
         memcpy(buffer, ptr, uncompLen);
     } else {
         if (!inflateBuffer(buffer, ptr, uncompLen, compLen))
-            goto bail;
+            goto unmap;
     }
 
     if (compLen > kSequentialMin)
@@ -651,6 +651,8 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, void* buffer) const
 
     result = true;
 
+unmap:
+    file->release();
 bail:
     return result;
 }
@@ -674,7 +676,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
 
     getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL);
 
-    const FileMap* file = createEntryFileMap(entry);
+    FileMap* file = createEntryFileMap(entry);
     if (file == NULL) {
         goto bail;
     }
@@ -685,21 +687,23 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
         ssize_t actual = write(fd, ptr, uncompLen);
         if (actual < 0) {
             LOGE("Write failed: %s\n", strerror(errno));
-            goto bail;
+            goto unmap;
         } else if ((size_t) actual != uncompLen) {
             LOGE("Partial write during uncompress (%zd of %zd)\n",
                 (size_t)actual, (size_t)uncompLen);
-            goto bail;
+            goto unmap;
         } else {
             LOGI("+++ successful write\n");
         }
     } else {
         if (!inflateBuffer(fd, ptr, uncompLen, compLen))
-            goto bail;
+            goto unmap;
     }
 
     result = true;
 
+unmap:
+    file->release();
 bail:
     return result;
 }
