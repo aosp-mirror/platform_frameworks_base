@@ -25,7 +25,6 @@ import gov.nist.javax.sip.message.SIPMessage;
 
 import android.net.sip.ISipSession;
 import android.net.sip.ISipSessionListener;
-import android.net.sip.SessionDescription;
 import android.net.sip.SipErrorCode;
 import android.net.sip.SipProfile;
 import android.net.sip.SipSession;
