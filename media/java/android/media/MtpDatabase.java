@@ -282,9 +282,13 @@ public class MtpDatabase {
         return new int[] {
             MtpConstants.PROPERTY_STORAGE_ID,
             MtpConstants.PROPERTY_OBJECT_FORMAT,
+            MtpConstants.PROPERTY_PROTECTION_STATUS,
             MtpConstants.PROPERTY_OBJECT_SIZE,
             MtpConstants.PROPERTY_OBJECT_FILE_NAME,
+            MtpConstants.PROPERTY_DATE_MODIFIED,
             MtpConstants.PROPERTY_PARENT_OBJECT,
+            MtpConstants.PROPERTY_PERSISTENT_UID,
+            MtpConstants.PROPERTY_NAME,
         };
     }
 
@@ -300,6 +304,11 @@ public class MtpDatabase {
         Log.d(TAG, "getObjectProperty: " + property);
         String column = null;
         boolean isString = false;
+
+        // temporary hack
+        if (property == MtpConstants.PROPERTY_NAME) {
+            property = MtpConstants.PROPERTY_OBJECT_FILE_NAME;
+        }
 
         switch (property) {
             case MtpConstants.PROPERTY_STORAGE_ID:

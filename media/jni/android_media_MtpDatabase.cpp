@@ -672,12 +672,15 @@ struct PropertyTableEntry {
 };
 
 static const PropertyTableEntry   kObjectPropertyTable[] = {
-    {   MTP_PROPERTY_PARENT_OBJECT,     MTP_TYPE_UINT32 },
-    {   MTP_PROPERTY_STORAGE_ID,        MTP_TYPE_UINT32 },
-    {   MTP_PROPERTY_OBJECT_FORMAT,     MTP_TYPE_UINT16 },
-    {   MTP_PROPERTY_OBJECT_FILE_NAME,  MTP_TYPE_STR    },
-    {   MTP_PROPERTY_OBJECT_SIZE,       MTP_TYPE_UINT64 },
-    {   MTP_PROPERTY_DATE_MODIFIED,     MTP_TYPE_STR    },
+    {   MTP_PROPERTY_STORAGE_ID,        MTP_TYPE_UINT32     },
+    {   MTP_PROPERTY_OBJECT_FORMAT,     MTP_TYPE_UINT16     },
+    {   MTP_PROPERTY_PROTECTION_STATUS, MTP_TYPE_UINT16     },
+    {   MTP_PROPERTY_OBJECT_SIZE,       MTP_TYPE_UINT64     },
+    {   MTP_PROPERTY_OBJECT_FILE_NAME,  MTP_TYPE_STR        },
+    {   MTP_PROPERTY_DATE_MODIFIED,     MTP_TYPE_STR        },
+    {   MTP_PROPERTY_PARENT_OBJECT,     MTP_TYPE_UINT32     },
+    {   MTP_PROPERTY_PERSISTENT_UID,    MTP_TYPE_UINT128    },
+    {   MTP_PROPERTY_NAME,              MTP_TYPE_STR        },
 };
 
 static const PropertyTableEntry   kDevicePropertyTable[] = {
@@ -764,6 +767,7 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
         case MTP_PROPERTY_PERSISTENT_UID:
             result = new MtpProperty(property, MTP_TYPE_UINT128);
             break;
+        case MTP_PROPERTY_NAME:
         case MTP_PROPERTY_OBJECT_FILE_NAME:
         case MTP_PROPERTY_DATE_MODIFIED:
             result = new MtpProperty(property, MTP_TYPE_STR);
@@ -780,6 +784,7 @@ MtpProperty* MyMtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
         case MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
             // writeable string properties
             result = new MtpProperty(property, MTP_TYPE_STR, true);
+            // FIXME - set current value here!
             break;
     }
 
