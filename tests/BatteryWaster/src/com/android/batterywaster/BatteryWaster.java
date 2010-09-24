@@ -25,6 +25,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
@@ -38,7 +39,6 @@ public class BatteryWaster extends Activity {
     TextView mLog;
     DateFormat mDateFormat;
     IntentFilter mFilter;
-    PowerManager.WakeLock mWakeLock;
     PowerManager.WakeLock mPartialWakeLock;
     SpinThread mThread;
 
@@ -65,24 +65,26 @@ public class BatteryWaster extends Activity {
         mFilter.addAction(Intent.ACTION_POWER_CONNECTED);
 
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "BatteryWaster");
-        mWakeLock.setReferenceCounted(false);
         mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BatteryWaster");
         mPartialWakeLock.setReferenceCounted(false);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        stopRunning();
+    public void onResume() {
+        super.onResume();
+        if (((CheckBox)findViewById(R.id.checkbox)).isChecked()) {
+            startRunning();
+        }
+        if (((CheckBox)findViewById(R.id.checkbox_wake)).isChecked()) {
+            mWaking = true;
+            updateWakeLock();
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mWakeLock.isHeld()) {
-            mWakeLock.release();
-        }
+        stopRunning();
         if (mPartialWakeLock.isHeld()) {
             mPartialWakeLock.release();
         }
@@ -140,13 +142,9 @@ public class BatteryWaster extends Activity {
 
     void updateWakeLock() {
         if (mWasting) {
-            if (!mWakeLock.isHeld()) {
-                mWakeLock.acquire();
-            }
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } else {
-            if (mWakeLock.isHeld()) {
-                mWakeLock.release();
-            }
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
         if (mWaking) {
             if (!mPartialWakeLock.isHeld()) {
