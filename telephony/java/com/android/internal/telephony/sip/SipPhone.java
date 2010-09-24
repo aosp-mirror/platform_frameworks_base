@@ -73,7 +73,9 @@ import java.util.List;
 public class SipPhone extends SipPhoneBase {
     private static final String LOG_TAG = "SipPhone";
     private static final boolean LOCAL_DEBUG = true;
-    private static final int SESSION_TIMEOUT = 8; // in seconds
+    private static final int TIMEOUT_MAKE_CALL = 15; // in seconds
+    private static final int TIMEOUT_ANSWER_CALL = 8; // in seconds
+    private static final int TIMEOUT_HOLD_CALL = 15; // in seconds
 
     // A call that is ringing or (call) waiting
     private SipCall ringingCall = new SipCall();
@@ -693,7 +695,7 @@ public class SipPhone extends SipPhoneBase {
 
         void acceptCall() throws CallStateException {
             try {
-                mSipAudioCall.answerCall(SESSION_TIMEOUT);
+                mSipAudioCall.answerCall(TIMEOUT_ANSWER_CALL);
             } catch (SipException e) {
                 throw new CallStateException("acceptCall(): " + e);
             }
@@ -711,7 +713,7 @@ public class SipPhone extends SipPhoneBase {
         void dial() throws SipException {
             setState(Call.State.DIALING);
             mSipAudioCall = mSipManager.makeAudioCall(mProfile, mPeer, null,
-                    SESSION_TIMEOUT);
+                    TIMEOUT_MAKE_CALL);
             mSipAudioCall.setRingbackToneEnabled(false);
             mSipAudioCall.setListener(mAdapter);
         }
@@ -719,7 +721,7 @@ public class SipPhone extends SipPhoneBase {
         void hold() throws CallStateException {
             setState(Call.State.HOLDING);
             try {
-                mSipAudioCall.holdCall(SESSION_TIMEOUT);
+                mSipAudioCall.holdCall(TIMEOUT_HOLD_CALL);
             } catch (SipException e) {
                 throw new CallStateException("hold(): " + e);
             }
@@ -729,7 +731,7 @@ public class SipPhone extends SipPhoneBase {
             mSipAudioCall.setAudioGroup(audioGroup);
             setState(Call.State.ACTIVE);
             try {
-                mSipAudioCall.continueCall(SESSION_TIMEOUT);
+                mSipAudioCall.continueCall(TIMEOUT_HOLD_CALL);
             } catch (SipException e) {
                 throw new CallStateException("unhold(): " + e);
             }
