@@ -266,8 +266,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Uygulamaların uygulama önbelleği dizinindeki dosyaları silerek telefonda yer açmasına izin verir. Erişim genellikle sistem işlemlerine ve yüksek düzeyde kısıtlı olarak verilir."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Uygulama kaynaklarını taşı"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Bir uygulamanın, uygulama kaynaklarını dahili ve harici ortamlar arasında taşımasına olanak tanır."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"sistem günlük dosyalarını oku"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Uygulamaların sistemin çeşitli günlük dosyalarından okumalarına izin verir. Bu, uygulamaların telefon ile neler yaptığınız ile ilgili genel bilgi bulmasına izin verir, ancak bunlar kişisel veya özel bir bilgi içermemelidir."</string>
+    <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"sistem günlük dosyalarını oku"</string>
+    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" msgid="8896449437464867766">"Uygulamaların sistemin çeşitli günlük dosyalarından okumalarına izin verir. Bu, uygulamaların telefon ile neler yaptığınız ile ilgili genel bilgi bulmasına izin verir, ancak bunlar kişisel veya özel bir bilgi içermemelidir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Uygulamanın tanılama grubundaki bir kaynağa ait herhangi bir kaynağı; örneğin /dev içindeki dosyaları okumasına ve bunlara yazmasına izin verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"uygulama bileşenlerini etkinleştir veya devre dışı bırak"</string>
@@ -525,6 +525,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"İş"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Diğer"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Özel"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"<xliff:g id="SOURCE">%1$s</xliff:g> aracılığıyla"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="SOURCE">%2$s</xliff:g> ile <xliff:g id="DATE">%1$s</xliff:g> tarihinde"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN kodunu gir"</string>
@@ -699,7 +707,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Tümünü seç"</string>
-    <!-- outdated translation 3889149123626888637 -->     <string name="selectText" msgid="4862359311088898878">"Metin seç"</string>
+    <string name="selectText" msgid="4862359311088898878">"Kelime seçin"</string>
     <string name="cut" msgid="3092569408438626261">"Kes"</string>
     <string name="copy" msgid="2681946229533511987">"Kopyala"</string>
     <string name="paste" msgid="5629880836805036433">"Yapıştır"</string>

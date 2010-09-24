@@ -266,8 +266,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Permite que una aplicación libere espacio de almacenamiento en el teléfono mediante la eliminación de archivos en el directorio de caché de la aplicación. El acceso al proceso del sistema suele estar muy restringido."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Mover recursos de aplicaciones"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Permite que una aplicación mueva los recursos de aplicaciones de un medio interno a otro externo y viceversa."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"leer archivos de registro del sistema"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Permite que una aplicación lea los distintos archivos de registro del sistema. Con este permiso, la aplicación puede ver información general sobre las acciones que realiza el usuario con el teléfono, pero los registros no deberían contener información personal o privada."</string>
+    <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"leer archivos de registro del sistema"</string>
+    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" msgid="8896449437464867766">"Permite que una aplicación lea los distintos archivos de registro del sistema. Con este permiso, la aplicación puede ver información general sobre las acciones que realiza el usuario con el teléfono, pero los registros no deberían contener información personal o privada."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer/escribir en los recursos propiedad del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permite que una aplicación lea y escriba en cualquier recurso propiedad del grupo de diagnóstico como, por ejemplo, archivos in/dev. Este permiso podría afectar a la seguridad y estabilidad del sistema. SÓLO se debe utilizar para diagnósticos específicos de hardware realizados por el fabricante o el operador."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"habilitar o inhabilitar componentes de la aplicación"</string>
@@ -525,6 +525,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Trabajo"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Otra"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Personalizada"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"a través de <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> a través de <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Introduce el código PIN"</string>
@@ -699,7 +707,7 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Seleccionar todo"</string>
-    <!-- outdated translation 3889149123626888637 -->     <string name="selectText" msgid="4862359311088898878">"Seleccionar texto"</string>
+    <string name="selectText" msgid="4862359311088898878">"Seleccionar palabra"</string>
     <string name="cut" msgid="3092569408438626261">"Cortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Pegar"</string>
