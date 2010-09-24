@@ -20,23 +20,30 @@ import android.renderscript.RenderScript.RSMessage;
 public class UnitTest extends Thread {
     public String name;
     public int result;
+    private ScriptField_ListAllocs_s.Item mItem;
+    private RSTestCore mRSTC;
 
     /* These constants must match those in shared.rsh */
     public static final int RS_MSG_TEST_PASSED = 100;
     public static final int RS_MSG_TEST_FAILED = 101;
 
-    protected UnitTest(String n, int initResult) {
+    protected UnitTest(RSTestCore rstc, String n, int initResult) {
         super();
+        mRSTC = rstc;
         name = n;
         result = initResult;
     }
 
-    protected UnitTest(String n) {
-        this(n, 0);
+    protected UnitTest(RSTestCore rstc, String n) {
+        this(rstc, n, 0);
+    }
+
+    protected UnitTest(RSTestCore rstc) {
+        this (rstc, "<Unknown>");
     }
 
     protected UnitTest() {
-        this ("<Unknown>");
+        this (null);
     }
 
     protected RSMessage mRsMessage = new RSMessage() {
@@ -51,8 +58,17 @@ public class UnitTest extends Thread {
                 default:
                     break;
             }
+
+            if (mItem != null) {
+                mItem.result = result;
+                mRSTC.refreshTestResults();
+            }
         }
     };
+
+    public void setItem(ScriptField_ListAllocs_s.Item item) {
+        mItem = item;
+    }
 
     public void run() {
         /* This method needs to be implemented for each subclass */
