@@ -517,12 +517,26 @@ status_t IPCThreadState::transact(int32_t handle,
     }
     
     if ((flags & TF_ONE_WAY) == 0) {
+        #if 0
+        if (code == 4) { // relayout
+            LOGI(">>>>>> CALLING transaction 4");
+        } else {
+            LOGI(">>>>>> CALLING transaction %d", code);
+        }
+        #endif
         if (reply) {
             err = waitForResponse(reply);
         } else {
             Parcel fakeReply;
             err = waitForResponse(&fakeReply);
         }
+        #if 0
+        if (code == 4) { // relayout
+            LOGI("<<<<<< RETURNING transaction 4");
+        } else {
+            LOGI("<<<<<< RETURNING transaction %d", code);
+        }
+        #endif
         
         IF_LOG_TRANSACTIONS() {
             TextOutput::Bundle _b(alog);

@@ -2459,6 +2459,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (DBG) Log.d(TAG, "WindowLayout in layoutWindow:" + params);
         }
         mPendingConfiguration.seq = 0;
+        //Log.d(TAG, ">>>>>> CALLING relayout");
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
                 (int) (mView.mMeasuredWidth * appScale + 0.5f),
@@ -2466,6 +2467,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 viewVisibility, insetsPending, mWinFrame,
                 mPendingContentInsets, mPendingVisibleInsets,
                 mPendingConfiguration, mSurface);
+        //Log.d(TAG, "<<<<<< BACK FROM relayout");
         if (restore) {
             params.restore();
         }
