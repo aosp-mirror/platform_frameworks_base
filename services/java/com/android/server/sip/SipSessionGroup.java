@@ -349,6 +349,9 @@ class SipSessionGroup implements SipListener {
                 mProxy.onRinging(newSession, newSession.mPeerProfile,
                         newSession.mPeerSessionDescription);
                 return true;
+            } else if (isRequestEvent(Request.OPTIONS, evt)) {
+                mSipHelper.sendResponse((RequestEvent) evt, Response.OK);
+                return true;
             } else {
                 return false;
             }
@@ -624,6 +627,9 @@ class SipSessionGroup implements SipListener {
                     processTransactionTerminated(
                             (TransactionTerminatedEvent) evt);
                 }
+                return true;
+            } else if (isRequestEvent(Request.OPTIONS, evt)) {
+                mSipHelper.sendResponse((RequestEvent) evt, Response.OK);
                 return true;
             } else if (evt instanceof DialogTerminatedEvent) {
                 processDialogTerminated((DialogTerminatedEvent) evt);
