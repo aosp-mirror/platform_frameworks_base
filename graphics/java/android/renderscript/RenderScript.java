@@ -447,25 +447,14 @@ public class RenderScript {
     synchronized void nProgramBindSampler(int vpf, int slot, int s) {
         rsnProgramBindSampler(mContext, vpf, slot, s);
     }
-
-    native int  rsnProgramFragmentCreate(int con, int[] params);
-    synchronized int nProgramFragmentCreate(int[] params) {
-        return rsnProgramFragmentCreate(mContext, params);
+    native int  rsnProgramFragmentCreate(int con, String shader, int[] params);
+    synchronized int nProgramFragmentCreate(String shader, int[] params) {
+        return rsnProgramFragmentCreate(mContext, shader, params);
     }
-    native int  rsnProgramFragmentCreate2(int con, String shader, int[] params);
-    synchronized int nProgramFragmentCreate2(String shader, int[] params) {
-        return rsnProgramFragmentCreate2(mContext, shader, params);
+    native int  rsnProgramVertexCreate(int con, String shader, int[] params);
+    synchronized int nProgramVertexCreate(String shader, int[] params) {
+        return rsnProgramVertexCreate(mContext, shader, params);
     }
-
-    native int  rsnProgramVertexCreate(int con, boolean texMat);
-    synchronized int nProgramVertexCreate(boolean texMat) {
-        return rsnProgramVertexCreate(mContext, texMat);
-    }
-    native int  rsnProgramVertexCreate2(int con, String shader, int[] params);
-    synchronized int nProgramVertexCreate2(String shader, int[] params) {
-        return rsnProgramVertexCreate2(mContext, shader, params);
-    }
-
 
     native int  rsnMeshCreate(int con, int vtxCount, int indexCount);
     synchronized int nMeshCreate(int vtxCount, int indexCount) {

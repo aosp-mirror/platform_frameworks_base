@@ -29,7 +29,6 @@
 using namespace android;
 using namespace android::renderscript;
 
-
 Program::Program(Context *rsc) : ObjectBase(rsc)
 {
     mAllocFile = __FILE__;
@@ -38,7 +37,10 @@ Program::Program(Context *rsc) : ObjectBase(rsc)
     mShaderID = 0;
     mAttribCount = 0;
     mUniformCount = 0;
+    mTextureCount = 0;
 
+    mTextures = NULL;
+    mSamplers = NULL;
     mInputElements = NULL;
     mOutputElements = NULL;
     mConstantTypes = NULL;
@@ -80,6 +82,8 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
         }
     }
 
+    mTextures = new ObjectBaseRef<Allocation>[mTextureCount];
+    mSamplers = new ObjectBaseRef<Sampler>[mTextureCount];
     mInputElements = new ObjectBaseRef<Element>[mInputCount];
     mOutputElements = new ObjectBaseRef<Element>[mOutputCount];
     mConstantTypes = new ObjectBaseRef<Type>[mConstantCount];
@@ -112,9 +116,15 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
 Program::~Program()
 {
     for (uint32_t ct=0; ct < MAX_UNIFORMS; ct++) {
-        bindAllocation(NULL, ct);
+        bindAllocation(NULL, NULL, ct);
     }
 
+    for (uint32_t ct=0; ct < mTextureCount; ct++) {
+        bindTexture(NULL, ct, NULL);
+        bindSampler(NULL, ct, NULL);
+    }
+    delete[] mTextures;
+    delete[] mSamplers;
     delete[] mInputElements;
     delete[] mOutputElements;
     delete[] mConstantTypes;
@@ -124,8 +134,22 @@ Program::~Program()
 }
 
 
-void Program::bindAllocation(Allocation *alloc, uint32_t slot)
+void Program::bindAllocation(Context *rsc, Allocation *alloc, uint32_t slot)
 {
+    if (alloc != NULL) {
+        if (slot >= mConstantCount) {
+            LOGE("Attempt to bind alloc at slot %u, on shader id %u, but const count is %u",
+                 slot, (uint32_t)this, mConstantCount);
+            rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind allocation");
+            return;
+        }
+        if (!alloc->getType()->isEqual(mConstantTypes[slot].get())) {
+            LOGE("Attempt to bind alloc at slot %u, on shader id %u, but types mismatch",
+                 slot, (uint32_t)this);
+            rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind allocation");
+            return;
+        }
+    }
     if (mConstants[slot].get() == alloc) {
         return;
     }
@@ -139,10 +163,11 @@ void Program::bindAllocation(Allocation *alloc, uint32_t slot)
     mDirty = true;
 }
 
-void Program::bindTexture(uint32_t slot, Allocation *a)
+void Program::bindTexture(Context *rsc, uint32_t slot, Allocation *a)
 {
-    if (slot >= MAX_TEXTURE) {
-        LOGE("Attempt to bind a texture to a slot > MAX_TEXTURE");
+    if (slot >= mTextureCount) {
+        LOGE("Attempt to bind texture to slot %u but tex count is %u", slot, mTextureCount);
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind texture");
         return;
     }
 
@@ -151,10 +176,11 @@ void Program::bindTexture(uint32_t slot, Allocation *a)
     mDirty = true;
 }
 
-void Program::bindSampler(uint32_t slot, Sampler *s)
+void Program::bindSampler(Context *rsc, uint32_t slot, Sampler *s)
 {
-    if (slot >= MAX_TEXTURE) {
-        LOGE("Attempt to bind a Sampler to a slot > MAX_TEXTURE");
+    if (slot >= mTextureCount) {
+        LOGE("Attempt to bind sampler to slot %u but tex count is %u", slot, mTextureCount);
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind sampler");
         return;
     }
 
@@ -289,11 +315,13 @@ void Program::appendUserConstants() {
     }
 }
 
-void Program::setupUserConstants(ShaderCache *sc, bool isFragment) {
+void Program::setupUserConstants(Context *rsc, ShaderCache *sc, bool isFragment) {
     uint32_t uidx = 0;
     for (uint32_t ct=0; ct < mConstantCount; ct++) {
         Allocation *alloc = mConstants[ct].get();
         if (!alloc) {
+            LOGE("Attempting to set constants on shader id %u, but alloc at slot %u is not set", (uint32_t)this, ct);
+            rsc->setError(RS_ERROR_BAD_SHADER, "No constant allocation bound");
             continue;
         }
 
@@ -384,19 +412,19 @@ namespace renderscript {
 void rsi_ProgramBindConstants(Context *rsc, RsProgram vp, uint32_t slot, RsAllocation constants)
 {
     Program *p = static_cast<Program *>(vp);
-    p->bindAllocation(static_cast<Allocation *>(constants), slot);
+    p->bindAllocation(rsc, static_cast<Allocation *>(constants), slot);
 }
 
 void rsi_ProgramBindTexture(Context *rsc, RsProgram vpf, uint32_t slot, RsAllocation a)
 {
     Program *p = static_cast<Program *>(vpf);
-    p->bindTexture(slot, static_cast<Allocation *>(a));
+    p->bindTexture(rsc, slot, static_cast<Allocation *>(a));
 }
 
 void rsi_ProgramBindSampler(Context *rsc, RsProgram vpf, uint32_t slot, RsSampler s)
 {
     Program *p = static_cast<Program *>(vpf);
-    p->bindSampler(slot, static_cast<Sampler *>(s));
+    p->bindSampler(rsc, slot, static_cast<Sampler *>(s));
 }
 
 }

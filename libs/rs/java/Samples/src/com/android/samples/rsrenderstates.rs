@@ -60,6 +60,7 @@ VertexShaderInputs *gVSInputs;
 // Custom shaders we use for lighting
 rs_program_vertex gProgVertexCustom;
 rs_program_fragment gProgFragmentCustom;
+rs_program_fragment gProgFragmentMultitex;
 
 #pragma rs export_var(gProgVertex, gProgFragmentColor, gProgFragmentTexture)
 #pragma rs export_var(gProgStoreBlendNoneDepth, gProgStoreBlendNone, gProgStoreBlendAlpha, gProgStoreBlendAdd)
@@ -68,7 +69,7 @@ rs_program_fragment gProgFragmentCustom;
 #pragma rs export_var(gFontSans, gFontSerif, gFontSerifBold, gFontSerifItalic, gFontSerifBoldItalic, gFontMono)
 #pragma rs export_var(gLinearClamp, gLinearWrap, gMipLinearWrap, gNearestClamp)
 #pragma rs export_var(gCullBack, gCullFront)
-#pragma rs export_var(gVSConstants, gFSConstants, gVSInputs, gProgVertexCustom, gProgFragmentCustom)
+#pragma rs export_var(gVSConstants, gFSConstants, gVSInputs, gProgVertexCustom, gProgFragmentCustom, gProgFragmentMultitex)
 
 //What we are showing
 #pragma rs export_var(gDisplayMode)
@@ -414,8 +415,37 @@ void displayCustomShaderSamples() {
 
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgBindFont(gFontMono);
-    //rsgDrawText("Custom shader sample", 10, rsgGetHeight() - 10);
+    rsgDrawText("Custom shader sample", 10, rsgGetHeight() - 10);
 }
+
+void displayMultitextureSample() {
+    bindProgramVertexOrtho();
+    rs_matrix4x4 matrix;
+    rsMatrixLoadIdentity(&matrix);
+    rsgProgramVertexLoadModelMatrix(&matrix);
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendNone);
+    rsgBindProgramFragment(gProgFragmentMultitex);
+    rsgBindSampler(gProgFragmentMultitex, 0, gLinearClamp);
+    rsgBindSampler(gProgFragmentMultitex, 1, gLinearWrap);
+    rsgBindSampler(gProgFragmentMultitex, 2, gLinearClamp);
+    rsgBindTexture(gProgFragmentMultitex, 0, gTexOpaque);
+    rsgBindTexture(gProgFragmentMultitex, 1, gTexTorus);
+    rsgBindTexture(gProgFragmentMultitex, 2, gTexTransparent);
+
+    float startX = 0, startY = 0;
+    float width = 256, height = 256;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 1,
+                         startX + width, startY + height, 0, 1, 1,
+                         startX + width, startY, 0, 1, 0);
+
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgBindFont(gFontMono);
+    rsgDrawText("Custom shader with multitexturing", 10, 280);
+}
+
 
 int root(int launchID) {
 
@@ -445,6 +475,9 @@ int root(int launchID) {
         break;
     case 6:
         displayCustomShaderSamples();
+        break;
+    case 7:
+        displayMultitextureSample();
         break;
     }
 

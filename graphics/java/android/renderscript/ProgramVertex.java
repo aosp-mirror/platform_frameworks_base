@@ -64,7 +64,7 @@ public class ProgramVertex extends Program {
             tmp[idx++] = 3;
             tmp[idx++] = mTextureCount;
 
-            int id = mRS.nProgramVertexCreate2(mShader, tmp);
+            int id = mRS.nProgramVertexCreate(mShader, tmp);
             ProgramVertex pv = new ProgramVertex(id, mRS);
             initProgram(pv);
             return pv;

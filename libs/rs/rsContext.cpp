@@ -163,11 +163,6 @@ uint32_t Context::runRootScript()
     uint32_t ret = runScript(mRootScript.get());
 
     checkError("runRootScript");
-    if (mError != RS_ERROR_NONE) {
-        // If we have an error condition we stop rendering until
-        // somthing changes that might fix it.
-        ret = 0;
-    }
     return ret;
 }
 

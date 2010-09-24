@@ -28,25 +28,18 @@ class ProgramVertexState;
 class ProgramVertex : public Program
 {
 public:
-    const static uint32_t MAX_LIGHTS = 8;
-
     ProgramVertex(Context *,const char * shaderText, uint32_t shaderLength,
                   const uint32_t * params, uint32_t paramLength);
-    ProgramVertex(Context *, bool texMat);
     virtual ~ProgramVertex();
 
-    virtual void setupGL2(const Context *rsc, ProgramVertexState *state, ShaderCache *sc);
+    virtual void setupGL2(Context *rsc, ProgramVertexState *state, ShaderCache *sc);
 
+    void setProjectionMatrix(Context *, const rsc_Matrix *) const;
+    void getProjectionMatrix(Context *, rsc_Matrix *) const;
+    void setModelviewMatrix(Context *, const rsc_Matrix *) const;
+    void setTextureMatrix(Context *, const rsc_Matrix *) const;
 
-    void setTextureMatrixEnable(bool e) {mTextureMatrixEnable = e;}
-    void addLight(const Light *);
-
-    void setProjectionMatrix(const rsc_Matrix *) const;
-    void getProjectionMatrix(rsc_Matrix *) const;
-    void setModelviewMatrix(const rsc_Matrix *) const;
-    void setTextureMatrix(const rsc_Matrix *) const;
-
-    void transformToScreen(const Context *, float *v4out, const float *v3in) const;
+    void transformToScreen(Context *, float *v4out, const float *v3in) const;
 
     virtual void createShader();
     virtual void loadShader(Context *);
@@ -55,13 +48,6 @@ public:
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_VERTEX; }
     static ProgramVertex *createFromStream(Context *rsc, IStream *stream);
-
-protected:
-    uint32_t mLightCount;
-    ObjectBaseRef<const Light> mLights[MAX_LIGHTS];
-
-    // Hacks to create a program for now
-    bool mTextureMatrixEnable;
 };
 
 

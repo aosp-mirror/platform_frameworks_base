@@ -983,29 +983,16 @@ nProgramBindSampler(JNIEnv *_env, jobject _this, RsContext con, jint vpf, jint s
 // ---------------------------------------------------------------------------
 
 static jint
-nProgramFragmentCreate(JNIEnv *_env, jobject _this, RsContext con, jintArray params)
-{
-    jint *paramPtr = _env->GetIntArrayElements(params, NULL);
-    jint paramLen = _env->GetArrayLength(params);
-
-    LOG_API("nProgramFragmentCreate, con(%p), paramLen(%i)", con, paramLen);
-
-    jint ret = (jint)rsProgramFragmentCreate(con, (uint32_t *)paramPtr, paramLen);
-    _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
-    return ret;
-}
-
-static jint
-nProgramFragmentCreate2(JNIEnv *_env, jobject _this, RsContext con, jstring shader, jintArray params)
+nProgramFragmentCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader, jintArray params)
 {
     const char* shaderUTF = _env->GetStringUTFChars(shader, NULL);
     jint shaderLen = _env->GetStringUTFLength(shader);
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
     jint paramLen = _env->GetArrayLength(params);
 
-    LOG_API("nProgramFragmentCreate2, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
+    LOG_API("nProgramFragmentCreate, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
 
-    jint ret = (jint)rsProgramFragmentCreate2(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
+    jint ret = (jint)rsProgramFragmentCreate(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
     _env->ReleaseStringUTFChars(shader, shaderUTF);
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
     return ret;
@@ -1015,23 +1002,16 @@ nProgramFragmentCreate2(JNIEnv *_env, jobject _this, RsContext con, jstring shad
 // ---------------------------------------------------------------------------
 
 static jint
-nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jboolean texMat)
-{
-    LOG_API("nProgramVertexCreate, con(%p), texMat(%i)", con, texMat);
-    return (jint)rsProgramVertexCreate(con, texMat);
-}
-
-static jint
-nProgramVertexCreate2(JNIEnv *_env, jobject _this, RsContext con, jstring shader, jintArray params)
+nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader, jintArray params)
 {
     const char* shaderUTF = _env->GetStringUTFChars(shader, NULL);
     jint shaderLen = _env->GetStringUTFLength(shader);
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
     jint paramLen = _env->GetArrayLength(params);
 
-    LOG_API("nProgramVertexCreate2, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
+    LOG_API("nProgramVertexCreate, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
 
-    jint ret = (jint)rsProgramVertexCreate2(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
+    jint ret = (jint)rsProgramVertexCreate(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
     _env->ReleaseStringUTFChars(shader, shaderUTF);
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
     return ret;
@@ -1217,36 +1197,36 @@ static JNINativeMethod methods[] = {
 
 
 // All methods below are thread protected in java.
-{"rsnContextCreate",                 "(II)I",                                (void*)nContextCreate },
-{"rsnContextCreateGL",               "(IIZ)I",                               (void*)nContextCreateGL },
+{"rsnContextCreate",                 "(II)I",                                 (void*)nContextCreate },
+{"rsnContextCreateGL",               "(IIZ)I",                                (void*)nContextCreateGL },
 {"rsnContextFinish",                 "(I)V",                                  (void*)nContextFinish },
 {"rsnContextSetPriority",            "(II)V",                                 (void*)nContextSetPriority },
 {"rsnContextSetSurface",             "(IIILandroid/view/Surface;)V",          (void*)nContextSetSurface },
-{"rsnContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
+{"rsnContextDestroy",                "(I)V",                                  (void*)nContextDestroy },
 {"rsnContextDump",                   "(II)V",                                 (void*)nContextDump },
 {"rsnContextPause",                  "(I)V",                                  (void*)nContextPause },
 {"rsnContextResume",                 "(I)V",                                  (void*)nContextResume },
 {"rsnAssignName",                    "(II[B)V",                               (void*)nAssignName },
-{"rsnGetName",                       "(II)Ljava/lang/String;",               (void*)nGetName },
+{"rsnGetName",                       "(II)Ljava/lang/String;",                (void*)nGetName },
 {"rsnObjDestroy",                    "(II)V",                                 (void*)nObjDestroy },
 
 {"rsnFileOpen",                      "(I[B)I",                                (void*)nFileOpen },
 {"rsnFileA3DCreateFromAssetStream",  "(II)I",                                 (void*)nFileA3DCreateFromAssetStream },
 {"rsnFileA3DGetNumIndexEntries",     "(II)I",                                 (void*)nFileA3DGetNumIndexEntries },
-{"rsnFileA3DGetIndexEntries",        "(III[I[Ljava/lang/String;)V",          (void*)nFileA3DGetIndexEntries },
+{"rsnFileA3DGetIndexEntries",        "(III[I[Ljava/lang/String;)V",           (void*)nFileA3DGetIndexEntries },
 {"rsnFileA3DGetEntryByIndex",        "(III)I",                                (void*)nFileA3DGetEntryByIndex },
 
-{"rsnFontCreateFromFile",            "(ILjava/lang/String;II)I",             (void*)nFontCreateFromFile },
+{"rsnFontCreateFromFile",            "(ILjava/lang/String;II)I",              (void*)nFontCreateFromFile },
 
 {"rsnElementCreate",                 "(IIIZI)I",                              (void*)nElementCreate },
 {"rsnElementCreate2",                "(I[I[Ljava/lang/String;[I)I",           (void*)nElementCreate2 },
 {"rsnElementGetNativeData",          "(II[I)V",                               (void*)nElementGetNativeData },
-{"rsnElementGetSubElements",         "(II[I[Ljava/lang/String;)V",           (void*)nElementGetSubElements },
+{"rsnElementGetSubElements",         "(II[I[Ljava/lang/String;)V",            (void*)nElementGetSubElements },
 
 {"rsnTypeBegin",                     "(II)V",                                 (void*)nTypeBegin },
 {"rsnTypeAdd",                       "(III)V",                                (void*)nTypeAdd },
 {"rsnTypeCreate",                    "(I)I",                                  (void*)nTypeCreate },
-{"rsnTypeGetNativeData",             "(II[I)V",                                (void*)nTypeGetNativeData },
+{"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },
 
 {"rsnAllocationCreateTyped",         "(II)I",                                 (void*)nAllocationCreateTyped },
 {"rsnAllocationCreateFromBitmap",    "(IIZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
@@ -1307,18 +1287,16 @@ static JNINativeMethod methods[] = {
 {"rsnProgramBindTexture",            "(IIII)V",                               (void*)nProgramBindTexture },
 {"rsnProgramBindSampler",            "(IIII)V",                               (void*)nProgramBindSampler },
 
-{"rsnProgramFragmentCreate",         "(I[I)I",                                (void*)nProgramFragmentCreate },
-{"rsnProgramFragmentCreate2",        "(ILjava/lang/String;[I)I",              (void*)nProgramFragmentCreate2 },
+{"rsnProgramFragmentCreate",        "(ILjava/lang/String;[I)I",               (void*)nProgramFragmentCreate },
 
-{"rsnProgramRasterCreate",           "(IZZZ)I",                             (void*)nProgramRasterCreate },
+{"rsnProgramRasterCreate",           "(IZZZ)I",                               (void*)nProgramRasterCreate },
 {"rsnProgramRasterSetLineWidth",     "(IIF)V",                                (void*)nProgramRasterSetLineWidth },
 {"rsnProgramRasterSetCullMode",      "(III)V",                                (void*)nProgramRasterSetCullMode },
 
-{"rsnProgramVertexCreate",           "(IZ)I",                                 (void*)nProgramVertexCreate },
-{"rsnProgramVertexCreate2",          "(ILjava/lang/String;[I)I",              (void*)nProgramVertexCreate2 },
+{"rsnProgramVertexCreate",          "(ILjava/lang/String;[I)I",               (void*)nProgramVertexCreate },
 
 {"rsnContextBindRootScript",         "(II)V",                                 (void*)nContextBindRootScript },
-{"rsnContextBindProgramStore",       "(II)V",                                (void*)nContextBindProgramStore },
+{"rsnContextBindProgramStore",       "(II)V",                                 (void*)nContextBindProgramStore },
 {"rsnContextBindProgramFragment",    "(II)V",                                 (void*)nContextBindProgramFragment },
 {"rsnContextBindProgramVertex",      "(II)V",                                 (void*)nContextBindProgramVertex },
 {"rsnContextBindProgramRaster",      "(II)V",                                 (void*)nContextBindProgramRaster },
@@ -1333,7 +1311,7 @@ static JNINativeMethod methods[] = {
 
 {"rsnMeshGetVertexBufferCount",      "(II)I",                                 (void*)nMeshGetVertexBufferCount },
 {"rsnMeshGetIndexCount",             "(II)I",                                 (void*)nMeshGetIndexCount },
-{"rsnMeshGetVertices",               "(II[II)V",                             (void*)nMeshGetVertices },
+{"rsnMeshGetVertices",               "(II[II)V",                              (void*)nMeshGetVertices },
 {"rsnMeshGetIndices",                "(II[I[II)V",                            (void*)nMeshGetIndices },
 
 };

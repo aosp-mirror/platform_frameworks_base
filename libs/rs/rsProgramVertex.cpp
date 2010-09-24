@@ -32,16 +32,6 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramVertex::ProgramVertex(Context *rsc, bool texMat) :
-    Program(rsc)
-{
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
-    mTextureMatrixEnable = texMat;
-    mLightCount = 0;
-    init(rsc);
-}
-
 ProgramVertex::ProgramVertex(Context *rsc, const char * shaderText,
                              uint32_t shaderLength, const uint32_t * params,
                              uint32_t paramLength) :
@@ -49,8 +39,6 @@ ProgramVertex::ProgramVertex(Context *rsc, const char * shaderText,
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
-    mTextureMatrixEnable = false;
-    mLightCount = 0;
 
     init(rsc);
 }
@@ -110,7 +98,7 @@ void ProgramVertex::createShader()
     }
 }
 
-void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, ShaderCache *sc)
+void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCache *sc)
 {
     //LOGE("sgl2 vtx1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
@@ -132,23 +120,21 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
     }
 
     rsc->checkError("ProgramVertex::setupGL2 begin uniforms");
-    setupUserConstants(sc, false);
+    setupUserConstants(rsc, sc, false);
 
     state->mLast.set(this);
     rsc->checkError("ProgramVertex::setupGL2");
 }
 
-void ProgramVertex::addLight(const Light *l)
-{
-    if (mLightCount < MAX_LIGHTS) {
-        mLights[mLightCount].set(l);
-        mLightCount++;
-    }
-}
-
-void ProgramVertex::setProjectionMatrix(const rsc_Matrix *m) const
+void ProgramVertex::setProjectionMatrix(Context *rsc, const rsc_Matrix *m) const
 {
     if(isUserProgram()) {
+        LOGE("Attempting to set fixed function emulation matrix projection on user program");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
+        return;
+    }
+    if(mConstants[0].get() == NULL) {
+        LOGE("Unable to set fixed function emulation matrix projection because allocation is missing");
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -156,9 +142,16 @@ void ProgramVertex::setProjectionMatrix(const rsc_Matrix *m) const
     mDirty = true;
 }
 
-void ProgramVertex::setModelviewMatrix(const rsc_Matrix *m) const
+void ProgramVertex::setModelviewMatrix(Context *rsc, const rsc_Matrix *m) const
 {
     if(isUserProgram()) {
+        LOGE("Attempting to set fixed function emulation matrix modelview on user program");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
+        return;
+    }
+    if(mConstants[0].get() == NULL) {
+        LOGE("Unable to set fixed function emulation matrix modelview because allocation is missing");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -166,9 +159,16 @@ void ProgramVertex::setModelviewMatrix(const rsc_Matrix *m) const
     mDirty = true;
 }
 
-void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
+void ProgramVertex::setTextureMatrix(Context *rsc, const rsc_Matrix *m) const
 {
     if(isUserProgram()) {
+        LOGE("Attempting to set fixed function emulation matrix texture on user program");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
+        return;
+    }
+    if(mConstants[0].get() == NULL) {
+        LOGE("Unable to set fixed function emulation matrix texture because allocation is missing");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -176,16 +176,23 @@ void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
     mDirty = true;
 }
 
-void ProgramVertex::getProjectionMatrix(rsc_Matrix *m) const
+void ProgramVertex::getProjectionMatrix(Context *rsc, rsc_Matrix *m) const
 {
     if(isUserProgram()) {
+        LOGE("Attempting to get fixed function emulation matrix projection on user program");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot get emulation matrix on user shader");
+        return;
+    }
+    if(mConstants[0].get() == NULL) {
+        LOGE("Unable to get fixed function emulation matrix projection because allocation is missing");
+        rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
     memcpy(m, &f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], sizeof(rsc_Matrix));
 }
 
-void ProgramVertex::transformToScreen(const Context *rsc, float *v4out, const float *v3in) const
+void ProgramVertex::transformToScreen(Context *rsc, float *v4out, const float *v3in) const
 {
     if(isUserProgram()) {
         return;
@@ -280,11 +287,10 @@ void ProgramVertexState::init(Context *rsc)
     ProgramVertex *pv = new ProgramVertex(rsc, shaderString.string(),
                                           shaderString.length(), tmp, 6);
     Allocation *alloc = new Allocation(rsc, inputType);
-    pv->bindAllocation(alloc, 0);
+    pv->bindAllocation(rsc, alloc, 0);
 
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
-    pv->bindAllocation(alloc, 0);
 
     updateSize(rsc);
 
@@ -315,15 +321,7 @@ void ProgramVertexState::deinit(Context *rsc)
 namespace android {
 namespace renderscript {
 
-
-RsProgramVertex rsi_ProgramVertexCreate(Context *rsc, bool texMat)
-{
-    ProgramVertex *pv = new ProgramVertex(rsc, texMat);
-    pv->incUserRef();
-    return pv;
-}
-
-RsProgramVertex rsi_ProgramVertexCreate2(Context *rsc, const char * shaderText,
+RsProgramVertex rsi_ProgramVertexCreate(Context *rsc, const char * shaderText,
                              uint32_t shaderLength, const uint32_t * params,
                              uint32_t paramLength)
 {
