@@ -48,7 +48,6 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
     private boolean mAutoRegistration = true;
     private transient int mCallingUid = 0;
 
-    /** @hide */
     public static final Parcelable.Creator<SipProfile> CREATOR =
             new Parcelable.Creator<SipProfile>() {
                 public SipProfile createFromParcel(Parcel in) {
@@ -287,7 +286,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         mCallingUid = in.readInt();
     }
 
-    /** @hide */
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeSerializable(mAddress);
         out.writeString(mProxyAddress);
@@ -300,7 +299,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         out.writeInt(mCallingUid);
     }
 
-    /** @hide */
+    @Override
     public int describeContents() {
         return 0;
     }
