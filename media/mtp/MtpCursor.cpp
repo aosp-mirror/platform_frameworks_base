@@ -66,7 +66,8 @@ namespace android {
 #define OBJECT_THUMB                221
 
 MtpCursor::MtpCursor(MtpClient* client, int queryType, int deviceID,
-                int storageID, int objectID, int columnCount, int* columns)
+                MtpStorageID storageID, MtpObjectHandle objectID,
+                int columnCount, int* columns)
         :   mClient(client),
             mQueryType(queryType),
             mDeviceID(deviceID),
@@ -427,7 +428,8 @@ bool MtpCursor::putString(CursorWindow* window, const char* text, int row, int c
     return true;
 }
 
-bool MtpCursor::putThumbnail(CursorWindow* window, int objectID, int format, int row, int column) {
+bool MtpCursor::putThumbnail(CursorWindow* window, MtpObjectHandle objectID,
+                            MtpObjectFormat format, int row, int column) {
     MtpDevice* device = mClient->getDevice(mDeviceID);
     void* thumbnail;
     int size, offset;
