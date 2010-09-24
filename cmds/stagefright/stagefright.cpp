@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "stagefright"
+#include <media/stagefright/foundation/ADebug.h>
+
 #include <sys/time.h>
 
 #include <stdlib.h>
@@ -30,7 +34,6 @@
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/JPEGSource.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaExtractor.h>
@@ -42,6 +45,8 @@
 
 #include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/MPEG4Writer.h>
+
+#include <fcntl.h>
 
 using namespace android;
 
@@ -120,7 +125,7 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
 
             bool shouldSeek = false;
             if (err == INFO_FORMAT_CHANGED) {
-                CHECK_EQ(buffer, NULL);
+                CHECK(buffer == NULL);
 
                 printf("format changed.\n");
                 continue;
@@ -206,7 +211,7 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
             options.clearSeekTo();
 
             if (err != OK) {
-                CHECK_EQ(buffer, NULL);
+                CHECK(buffer == NULL);
 
                 if (err == INFO_FORMAT_CHANGED) {
                     printf("format changed.\n");
@@ -267,14 +272,98 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
     }
 }
 
-static void writeSourceToMP4(const sp<MediaSource> &source) {
+////////////////////////////////////////////////////////////////////////////////
+
+struct DetectSyncSource : public MediaSource {
+    DetectSyncSource(const sp<MediaSource> &source);
+
+    virtual status_t start(MetaData *params = NULL);
+    virtual status_t stop();
+    virtual sp<MetaData> getFormat();
+
+    virtual status_t read(
+            MediaBuffer **buffer, const ReadOptions *options);
+
+private:
+    sp<MediaSource> mSource;
+    bool mIsAVC;
+
+    DISALLOW_EVIL_CONSTRUCTORS(DetectSyncSource);
+};
+
+DetectSyncSource::DetectSyncSource(const sp<MediaSource> &source)
+    : mSource(source),
+      mIsAVC(false) {
+    const char *mime;
+    CHECK(mSource->getFormat()->findCString(kKeyMIMEType, &mime));
+
+    mIsAVC = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
+}
+
+status_t DetectSyncSource::start(MetaData *params) {
+    return mSource->start(params);
+}
+
+status_t DetectSyncSource::stop() {
+    return mSource->stop();
+}
+
+sp<MetaData> DetectSyncSource::getFormat() {
+    return mSource->getFormat();
+}
+
+static bool isIDRFrame(MediaBuffer *buffer) {
+    const uint8_t *data =
+        (const uint8_t *)buffer->data() + buffer->range_offset();
+    size_t size = buffer->range_length();
+    for (size_t i = 0; i + 3 < size; ++i) {
+        if (!memcmp("\x00\x00\x01", &data[i], 3)) {
+            uint8_t nalType = data[i + 3] & 0x1f;
+            if (nalType == 5) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+status_t DetectSyncSource::read(
+        MediaBuffer **buffer, const ReadOptions *options) {
+    status_t err = mSource->read(buffer, options);
+
+    if (err != OK) {
+        return err;
+    }
+
+    if (mIsAVC && isIDRFrame(*buffer)) {
+        (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, true);
+    } else {
+        (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, false);
+    }
+
+    return OK;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static void writeSourceToMP4(
+        sp<MediaSource> &source, bool syncInfoPresent) {
+    if (!syncInfoPresent) {
+        source = new DetectSyncSource(source);
+    }
+
     sp<MPEG4Writer> writer =
         new MPEG4Writer(gWriteMP4Filename.string());
 
-    CHECK_EQ(writer->addSource(source), OK);
+    // at most one minute.
+    writer->setMaxFileDuration(60000000ll);
+
+    CHECK_EQ(writer->addSource(source), (status_t)OK);
 
     sp<MetaData> params = new MetaData;
-    CHECK_EQ(writer->start(), OK);
+    params->setInt32(kKeyNotRealTime, true);
+    CHECK_EQ(writer->start(params.get()), (status_t)OK);
 
     while (!writer->reachedEOS()) {
         usleep(100000);
@@ -283,7 +372,7 @@ static void writeSourceToMP4(const sp<MediaSource> &source) {
 }
 
 static void performSeekTest(const sp<MediaSource> &source) {
-    CHECK_EQ(OK, source->start());
+    CHECK_EQ((status_t)OK, source->start());
 
     int64_t durationUs;
     CHECK(source->getFormat()->findInt64(kKeyDuration, &durationUs));
@@ -335,7 +424,7 @@ static void performSeekTest(const sp<MediaSource> &source) {
         }
     }
 
-    CHECK_EQ(OK, source->stop());
+    CHECK_EQ((status_t)OK, source->stop());
 }
 
 static void usage(const char *me) {
@@ -481,10 +570,10 @@ int main(int argc, char **argv) {
         for (int k = 0; k < argc; ++k) {
             const char *filename = argv[k];
 
-            CHECK_EQ(retriever->setDataSource(filename), OK);
+            CHECK_EQ(retriever->setDataSource(filename), (status_t)OK);
             CHECK_EQ(retriever->setMode(
                         METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL),
-                     OK);
+                     (status_t)OK);
 
             sp<IMemory> mem = retriever->captureFrame();
 
@@ -530,7 +619,7 @@ int main(int argc, char **argv) {
             Vector<CodecCapabilities> results;
             CHECK_EQ(QueryCodecs(omx, kMimeTypes[k],
                                  true, // queryDecoders
-                                 &results), OK);
+                                 &results), (status_t)OK);
 
             for (size_t i = 0; i < results.size(); ++i) {
                 printf("  decoder '%s' supports ",
@@ -579,6 +668,8 @@ int main(int argc, char **argv) {
     status_t err = client.connect();
 
     for (int k = 0; k < argc; ++k) {
+        bool syncInfoPresent = true;
+
         const char *filename = argv[k];
 
         sp<DataSource> dataSource = DataSource::CreateFromURI(filename);
@@ -625,6 +716,8 @@ int main(int argc, char **argv) {
                 }
 
                 extractor = rtspController.get();
+
+                syncInfoPresent = false;
             } else {
                 extractor = MediaExtractor::Create(dataSource);
                 if (extractor == NULL) {
@@ -674,7 +767,7 @@ int main(int argc, char **argv) {
         }
 
         if (gWriteMP4) {
-            writeSourceToMP4(mediaSource);
+            writeSourceToMP4(mediaSource, syncInfoPresent);
         } else if (seekTest) {
             performSeekTest(mediaSource);
         } else {
