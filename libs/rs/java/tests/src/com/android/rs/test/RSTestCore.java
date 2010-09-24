@@ -40,6 +40,8 @@ public class RSTestCore {
     private ScriptC_rslist mScript;
 
     private ArrayList<UnitTest> unitTests;
+    private ListIterator<UnitTest> test_iter;
+    private UnitTest activeTest;
 
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
@@ -54,9 +56,13 @@ public class RSTestCore {
         unitTests.add(new UT_primitives(this, mRes));
         unitTests.add(new UT_fp_mad(this, mRes));
         /*
-        unitTests.add(new UnitTest("<Pass>", 1));
+        unitTests.add(new UnitTest(null, "<Pass>", 1));
         unitTests.add(new UnitTest());
-        unitTests.add(new UnitTest("<Fail>", -1));
+        unitTests.add(new UnitTest(null, "<Fail>", -1));
+
+        for (int i = 0; i < 20; i++) {
+            unitTests.add(new UnitTest(null, "<Pass>", 1));
+        }
         */
 
         UnitTest [] uta = new UnitTest[unitTests.size()];
@@ -71,19 +77,6 @@ public class RSTestCore {
             uta[i].setItem(listElem);
         }
 
-        /* Run the actual unit tests */
-        ListIterator<UnitTest> test_iter = unitTests.listIterator();
-        while (test_iter.hasNext()) {
-            UnitTest t = test_iter.next();
-            t.start();
-            /*
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-            }
-            */
-        }
-
         mListAllocs.copyAll();
 
         mScript.bind_gList(mListAllocs);
@@ -92,10 +85,40 @@ public class RSTestCore {
         mScript.set_gFont(mFont);
 
         mRS.contextBindRootScript(mScript);
-        mRS.finish();
+
+        test_iter = unitTests.listIterator();
+        refreshTestResults(); /* Kick off the first test */
+    }
+
+    static int count = 0;
+    public void checkAndRunNextTest() {
+        if (activeTest != null) {
+            if (!activeTest.isAlive()) {
+                /* Properly clean up on our last test */
+                try {
+                    activeTest.join();
+                }
+                catch (InterruptedException e) {
+                }
+                activeTest = null;
+            }
+        }
+
+        if (activeTest == null) {
+            if (test_iter.hasNext()) {
+                activeTest = test_iter.next();
+                activeTest.start();
+                /* This routine will only get called once when a new test
+                 * should start running. The message handler in UnitTest.java
+                 * ensures this. */
+            }
+        }
+        count++;
     }
 
     public void refreshTestResults() {
+        checkAndRunNextTest();
+
         if (mListAllocs != null && mScript != null && mRS != null) {
             mListAllocs.copyAll();
 
@@ -111,6 +134,7 @@ public class RSTestCore {
         mScript.set_gDY(0.0f);
         mLastX = x;
         mLastY = y;
+        refreshTestResults();
     }
 
     public void onActionMove(int x, int y) {
@@ -125,5 +149,6 @@ public class RSTestCore {
 
         mLastX = x;
         mLastY = y;
+        refreshTestResults();
     }
 }

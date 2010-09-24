@@ -170,7 +170,7 @@ void fp_mad_test(uint32_t index, int test_num) {
 
     // TODO Actually verify test result accuracy
     rsDebug("fp_mad_test PASSED", 0);
-    rsSendToClient(RS_MSG_TEST_PASSED);
+    rsSendToClientBlocking(RS_MSG_TEST_PASSED);
 }
 
 
