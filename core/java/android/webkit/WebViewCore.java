@@ -273,6 +273,16 @@ final class WebViewCore {
         mCallbackProxy.onJsAlert(url, message);
     }
 
+    /**
+     * Called by JNI.  Send a message to the UI thread to hide the soft keyboard
+     * if the node pointed to by nodePointer is still in focus.
+     * @param nodePointer The node which just blurred.
+     */
+    private void formDidBlur(int nodePointer) {
+        if (mWebView == null) return;
+        Message.obtain(mWebView.mPrivateHandler, WebView.FORM_DID_BLUR,
+                nodePointer, 0).sendToTarget();
+    }
 
     /**
      * Called by JNI.  Open a file chooser to upload a file.
