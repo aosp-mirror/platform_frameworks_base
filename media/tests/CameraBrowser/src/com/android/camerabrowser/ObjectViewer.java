@@ -200,9 +200,8 @@ public class ObjectViewer extends Activity {
                 }
 
                 // temporary workaround until we straighten out permissions in /data/media
-                // 1015 is AID_SDCARD_RW
-                FileUtils.setPermissions(destDir.getPath(), 0775, Process.myUid(), 1015);
-                FileUtils.setPermissions(destFile.getPath(), 0664, Process.myUid(), 1015);
+                FileUtils.setPermissions(destDir.getPath(), 0775, Process.myUid(), Process.SDCARD_RW_GID);
+                FileUtils.setPermissions(destFile.getPath(), 0664, Process.myUid(), Process.SDCARD_RW_GID);
 
                 success = true;
             }

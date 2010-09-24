@@ -86,6 +86,12 @@ public class Process {
     public static final int WIFI_UID = 1010;
 
     /**
+     * Defines the GID for the group that allows write access to the SD card.
+     * @hide
+     */
+    public static final int SDCARD_RW_GID = 1015;
+
+    /**
      * Defines the start of a range of UIDs (and GIDs), going from this
      * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
      * to applications.
