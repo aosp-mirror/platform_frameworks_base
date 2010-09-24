@@ -26,6 +26,8 @@
 
 #include <cutils/properties.h>
 
+#define LOG_TAG "MtpServer"
+
 #include "MtpDebug.h"
 #include "MtpDatabase.h"
 #include "MtpProperty.h"
@@ -68,8 +70,8 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 //    MTP_OPERATION_INITIATE_OPEN_CAPTURE,
     MTP_OPERATION_GET_OBJECT_PROPS_SUPPORTED,
     MTP_OPERATION_GET_OBJECT_PROP_DESC,
-//    MTP_OPERATION_GET_OBJECT_PROP_VALUE,
-//    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
+    MTP_OPERATION_GET_OBJECT_PROP_VALUE,
+    MTP_OPERATION_SET_OBJECT_PROP_VALUE,
     MTP_OPERATION_GET_OBJECT_REFERENCES,
     MTP_OPERATION_SET_OBJECT_REFERENCES,
 //    MTP_OPERATION_SKIP,
@@ -294,6 +296,7 @@ bool MtpServer::handleRequest() {
             response = doGetDevicePropDesc();
             break;
         default:
+            LOGE("got unsupported command %s", MtpDebug::getOperationCodeName(operation));
             response = MTP_RESPONSE_OPERATION_NOT_SUPPORTED;
             break;
     }
