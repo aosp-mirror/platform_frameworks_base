@@ -92,6 +92,10 @@ void GLExtensions::initWithGLStrings(
         // hack for Adreno 200
         mHaveTextureExternal = true;
     }
+
+    if (hasExtension("GL_OES_framebuffer_object")) {
+        mHaveFramebufferObject = true;
+    }
 }
 
 bool GLExtensions::hasExtension(char const* extension) const
