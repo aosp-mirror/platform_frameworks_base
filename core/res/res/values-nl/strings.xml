@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Hiermee kan een toepassing opslagruimte op de telefoon vrij maken door bestanden te verwijderen uit de cachemap van de toepassing. De toegang is doorgaans beperkt tot het systeemproces."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Toepassingsbronnen verplaatsen"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Een toepassing toestaan toepassingsbronnen te verplaatsen van interne naar externe media en omgekeerd."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"systeemlogbestanden lezen"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Hiermee kan een toepassing de verschillende logbestanden van het systeem lezen. De toepassing kan op deze manier algemene informatie achterhalen over uw telefoongebruik. Hierin is geen persoonlijke of privé-informatie opgenomen."</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lezen/schrijven naar bronnen van diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Hiermee kan een toepassing lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"toepassingscomponenten in- of uitschakelen"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"De fabrieksinstellingen herstellen, waarbij alle gegevens worden verwijderd zonder bevestiging."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Stel de algemene proxy voor het apparaat in die moet worden gebruikt terwijl het beleid is geactiveerd. Alleen de eerste apparaatbeheerder stelt de algemene proxy is."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Thuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Werk"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Overig"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Aangepast"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN-code invoeren"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Voer het wachtwoord in om te ontgrendelen"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Voer de PIN-code in om te ontgrendelen"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Wilt u deze pagina verlaten?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Kies OK om door te gaan of Annuleren om op de huidige pagina te blijven."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bevestigen"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: tik tweemaal om in of uit te zoomen."</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"browsergeschiedenis en bladwijzers lezen"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Hiermee kan een toepassing de URL\'s lezen die u via de browser heeft bezocht, evenals alle bladwijzers van de browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"browsergeschiedenis en bladwijzers schrijven"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Raak aan voor meer informatie over mobiel gegevensgebruik"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobiele gegevenslimiet overschreden"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Raak aan voor meer informatie over mobiel gegevensgebruik"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"Geen overeenkomsten"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Zoeken op pagina"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 overeenkomst"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> van <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
 </resources>
