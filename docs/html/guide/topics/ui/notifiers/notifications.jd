@@ -5,18 +5,21 @@ parent.link=index.html
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>Key classes</h2>
-    <ol>
-      <li>{@link android.app.Notification}</li>
-      <li>{@link android.app.NotificationManager}</li>
-    </ol>
+    <h2>Quickview</h2>
+    <ul>
+      <li>A status bar notification allows your application to notify the user of an event
+without interupting their current activity</li>
+      <li>You can attach an intent to your notification that the system will initiate when the
+user clicks it</li>
+    </ul>
+    
     <h2>In this document</h2>
     <ol>
       <li><a href="#Basics">The Basics</a></li>
       <li><a href="#ManageYourNotifications">Managing your Notifications</a></li>
       <li><a href="#CreateANotification">Creating a Notification</a>
         <ol>
-          <li><a href="#Update">Updating the notification</a></li>
+          <li><a href="#Updating">Updating the notification</a></li>
           <li><a href="#Sound">Adding a sound</a></li>
           <li><a href="#Vibration">Adding vibration</a></li>
           <li><a href="#Lights">Adding flashing lights</a></li>
@@ -24,6 +27,11 @@ parent.link=index.html
         </ol>
       </li>
       <li><a href="#CustomExpandedView">Creating a Custom Expanded View</a></li>
+    </ol>
+    <h2>Key classes</h2>
+    <ol>
+      <li>{@link android.app.Notification}</li>
+      <li>{@link android.app.NotificationManager}</li>
     </ol>
   </div>
 </div>

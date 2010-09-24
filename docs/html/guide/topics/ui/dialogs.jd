@@ -5,10 +5,6 @@ parent.link=index.html
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>Key classes</h2>
-    <ol>
-      <li>{@link android.app.Dialog}</li>
-    </ol>
     <h2>In this document</h2>
     <ol>
       <li><a href="#ShowingADialog">Showing a Dialog</a></li>
@@ -25,6 +21,11 @@ parent.link=index.html
         </ol>
       </li>
       <li><a href="#CustomDialog">Creating a Custom Dialog</a></li>
+    </ol>
+    
+    <h2>Key classes</h2>
+    <ol>
+      <li>{@link android.app.Dialog}</li>
     </ol>
   </div>
 </div>
