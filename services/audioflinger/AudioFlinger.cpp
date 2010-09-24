@@ -4653,29 +4653,44 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         goto Exit;
     }
 
+    // check audio settings permission for global effects
+    if (sessionId == AudioSystem::SESSION_OUTPUT_MIX && !settingsAllowed()) {
+        lStatus = PERMISSION_DENIED;
+        goto Exit;
+    }
+
+    // Session AudioSystem::SESSION_OUTPUT_STAGE is reserved for output stage effects
+    // that can only be created by audio policy manager (running in same process)
+    if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE && getpid() != pid) {
+        lStatus = PERMISSION_DENIED;
+        goto Exit;
+    }
+
+    // check recording permission for visualizer
+    if ((memcmp(&pDesc->type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0 ||
+         memcmp(&pDesc->uuid, &VISUALIZATION_UUID_, sizeof(effect_uuid_t)) == 0) &&
+        !recordingAllowed()) {
+        lStatus = PERMISSION_DENIED;
+        goto Exit;
+    }
+
+    if (output == 0) {
+        if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE) {
+            // output must be specified by AudioPolicyManager when using session
+            // AudioSystem::SESSION_OUTPUT_STAGE
+            lStatus = BAD_VALUE;
+            goto Exit;
+        } else if (sessionId == AudioSystem::SESSION_OUTPUT_MIX) {
+            // if the output returned by getOutputForEffect() is removed before we lock the
+            // mutex below, the call to checkPlaybackThread_l(output) below will detect it
+            // and we will exit safely
+            output = AudioSystem::getOutputForEffect(&desc);
+        }
+    }
+
     {
         Mutex::Autolock _l(mLock);
 
-        // check audio settings permission for global effects
-        if (sessionId == AudioSystem::SESSION_OUTPUT_MIX && !settingsAllowed()) {
-            lStatus = PERMISSION_DENIED;
-            goto Exit;
-        }
-
-        // Session AudioSystem::SESSION_OUTPUT_STAGE is reserved for output stage effects
-        // that can only be created by audio policy manager (running in same process)
-        if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE && getpid() != pid) {
-            lStatus = PERMISSION_DENIED;
-            goto Exit;
-        }
-
-        // check recording permission for visualizer
-        if ((memcmp(&pDesc->type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0 ||
-             memcmp(&pDesc->uuid, &VISUALIZATION_UUID_, sizeof(effect_uuid_t)) == 0) &&
-            !recordingAllowed()) {
-            lStatus = PERMISSION_DENIED;
-            goto Exit;
-        }
 
         if (!EffectIsNullUuid(&pDesc->uuid)) {
             // if uuid is specified, request effect descriptor
@@ -4744,38 +4759,32 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
 
         // If output is not specified try to find a matching audio session ID in one of the
         // output threads.
-        // TODO: allow attachment of effect to inputs
+        // If output is 0 here, sessionId is neither SESSION_OUTPUT_STAGE nor SESSION_OUTPUT_MIX
+        // because of code checking output when entering the function.
         if (output == 0) {
-            if (sessionId == AudioSystem::SESSION_OUTPUT_STAGE) {
-                // output must be specified by AudioPolicyManager when using session
-                // AudioSystem::SESSION_OUTPUT_STAGE
-                lStatus = BAD_VALUE;
-                goto Exit;
-            } else if (sessionId == AudioSystem::SESSION_OUTPUT_MIX) {
-                output = AudioSystem::getOutputForEffect(&desc);
-                LOGV("createEffect() got output %d for effect %s", output, desc.name);
-            } else {
-                 // look for the thread where the specified audio session is present
-                for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
-                    if (mPlaybackThreads.valueAt(i)->hasAudioSession(sessionId) != 0) {
-                        output = mPlaybackThreads.keyAt(i);
-                        break;
-                    }
-                }
-                // If no output thread contains the requested session ID, default to
-                // first output. The effect chain will be moved to the correct output
-                // thread when a track with the same session ID is created
-                if (output == 0 && mPlaybackThreads.size()) {
-                    output = mPlaybackThreads.keyAt(0);
+             // look for the thread where the specified audio session is present
+            for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
+                if (mPlaybackThreads.valueAt(i)->hasAudioSession(sessionId) != 0) {
+                    output = mPlaybackThreads.keyAt(i);
+                    break;
                 }
             }
+            // If no output thread contains the requested session ID, default to
+            // first output. The effect chain will be moved to the correct output
+            // thread when a track with the same session ID is created
+            if (output == 0 && mPlaybackThreads.size()) {
+                output = mPlaybackThreads.keyAt(0);
+            }
         }
+        LOGV("createEffect() got output %d for effect %s", output, desc.name);
         PlaybackThread *thread = checkPlaybackThread_l(output);
         if (thread == NULL) {
             LOGE("createEffect() unknown output thread");
             lStatus = BAD_VALUE;
             goto Exit;
         }
+
+        // TODO: allow attachment of effect to inputs
 
         wclient = mClients.valueFor(pid);
 
