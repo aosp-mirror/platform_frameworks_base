@@ -80,16 +80,24 @@ public class ProcessStats {
         PROC_SPACE_TERM|PROC_OUT_LONG,                  // 11: major faults
         PROC_SPACE_TERM,
         PROC_SPACE_TERM|PROC_OUT_LONG,                  // 13: utime
-        PROC_SPACE_TERM|PROC_OUT_LONG                   // 14: stime
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 14: stime
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM,
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 21: vsize
     };
 
     static final int PROCESS_FULL_STAT_MINOR_FAULTS = 1;
     static final int PROCESS_FULL_STAT_MAJOR_FAULTS = 2;
     static final int PROCESS_FULL_STAT_UTIME = 3;
     static final int PROCESS_FULL_STAT_STIME = 4;
+    static final int PROCESS_FULL_STAT_VSIZE = 5;
 
-    private final String[] mProcessFullStatsStringData = new String[5];
-    private final long[] mProcessFullStatsData = new long[5];
+    private final String[] mProcessFullStatsStringData = new String[6];
+    private final long[] mProcessFullStatsData = new long[6];
 
     private static final int[] SYSTEM_CPU_FORMAT = new int[] {
         PROC_SPACE_TERM|PROC_COMBINE,
@@ -171,6 +179,8 @@ public class ProcessStats {
         final ArrayList<Stats> threadStats;
         final ArrayList<Stats> workingThreads;
         
+        public boolean interesting;
+
         public String baseName;
         public String name;
         int nameWidth;
@@ -349,59 +359,62 @@ public class ProcessStats {
                         + (parentPid < 0 ? "process" : "thread")
                         + " pid " + pid + ": " + st);
 
-                final long uptime = SystemClock.uptimeMillis();
+                if (st.interesting) {
+                    final long uptime = SystemClock.uptimeMillis();
 
-                final long[] procStats = mProcessStatsData;
-                if (!Process.readProcFile(st.statFile.toString(),
-                        PROCESS_STATS_FORMAT, null, procStats, null)) {
-                    continue;
-                }
-                
-                final long minfaults = procStats[PROCESS_STAT_MINOR_FAULTS];
-                final long majfaults = procStats[PROCESS_STAT_MAJOR_FAULTS];
-                final long utime = procStats[PROCESS_STAT_UTIME];
-                final long stime = procStats[PROCESS_STAT_STIME];
-
-                if (utime == st.base_utime && stime == st.base_stime) {
-                    st.rel_utime = 0;
-                    st.rel_stime = 0;
-                    st.rel_minfaults = 0;
-                    st.rel_majfaults = 0;
-                    if (st.active) {
-                        st.active = false;
+                    final long[] procStats = mProcessStatsData;
+                    if (!Process.readProcFile(st.statFile.toString(),
+                            PROCESS_STATS_FORMAT, null, procStats, null)) {
+                        continue;
                     }
-                    continue;
-                }
                     
-                if (!st.active) {
-                    st.active = true;
-                }
+                    final long minfaults = procStats[PROCESS_STAT_MINOR_FAULTS];
+                    final long majfaults = procStats[PROCESS_STAT_MAJOR_FAULTS];
+                    final long utime = procStats[PROCESS_STAT_UTIME];
+                    final long stime = procStats[PROCESS_STAT_STIME];
 
-                if (parentPid < 0) {
-                    getName(st, st.cmdlineFile);
-                    if (st.threadStats != null) {
-                        mCurThreadPids = collectStats(st.threadsDir, pid, false,
-                                mCurThreadPids, st.threadStats);
+                    if (utime == st.base_utime && stime == st.base_stime) {
+                        st.rel_utime = 0;
+                        st.rel_stime = 0;
+                        st.rel_minfaults = 0;
+                        st.rel_majfaults = 0;
+                        if (st.active) {
+                            st.active = false;
+                        }
+                        continue;
                     }
+
+                    if (!st.active) {
+                        st.active = true;
+                    }
+
+                    if (parentPid < 0) {
+                        getName(st, st.cmdlineFile);
+                        if (st.threadStats != null) {
+                            mCurThreadPids = collectStats(st.threadsDir, pid, false,
+                                    mCurThreadPids, st.threadStats);
+                        }
+                    }
+
+                    if (DEBUG) Slog.v("Load", "Stats changed " + st.name + " pid=" + st.pid
+                            + " utime=" + utime + "-" + st.base_utime
+                            + " stime=" + stime + "-" + st.base_stime
+                            + " minfaults=" + minfaults + "-" + st.base_minfaults
+                            + " majfaults=" + majfaults + "-" + st.base_majfaults);
+
+                    st.rel_uptime = uptime - st.base_uptime;
+                    st.base_uptime = uptime;
+                    st.rel_utime = (int)(utime - st.base_utime);
+                    st.rel_stime = (int)(stime - st.base_stime);
+                    st.base_utime = utime;
+                    st.base_stime = stime;
+                    st.rel_minfaults = (int)(minfaults - st.base_minfaults);
+                    st.rel_majfaults = (int)(majfaults - st.base_majfaults);
+                    st.base_minfaults = minfaults;
+                    st.base_majfaults = majfaults;
+                    st.working = true;
                 }
 
-                if (DEBUG) Slog.v("Load", "Stats changed " + st.name + " pid=" + st.pid
-                        + " utime=" + utime + "-" + st.base_utime
-                        + " stime=" + stime + "-" + st.base_stime
-                        + " minfaults=" + minfaults + "-" + st.base_minfaults
-                        + " majfaults=" + majfaults + "-" + st.base_majfaults);
-
-                st.rel_uptime = uptime - st.base_uptime;
-                st.base_uptime = uptime;
-                st.rel_utime = (int)(utime - st.base_utime);
-                st.rel_stime = (int)(stime - st.base_stime);
-                st.base_utime = utime;
-                st.base_stime = stime;
-                st.rel_minfaults = (int)(minfaults - st.base_minfaults);
-                st.rel_majfaults = (int)(majfaults - st.base_majfaults);
-                st.base_minfaults = minfaults;
-                st.base_majfaults = majfaults;
-                st.working = true;
                 continue;
             }
             
@@ -421,12 +434,24 @@ public class ProcessStats {
                 if (Process.readProcFile(st.statFile.toString(),
                         PROCESS_FULL_STATS_FORMAT, procStatsString,
                         procStats, null)) {
-                    st.baseName = procStatsString[0];
-                    st.base_minfaults = procStats[PROCESS_FULL_STAT_MINOR_FAULTS];
-                    st.base_majfaults = procStats[PROCESS_FULL_STAT_MAJOR_FAULTS];
-                    st.base_utime = procStats[PROCESS_FULL_STAT_UTIME];
-                    st.base_stime = procStats[PROCESS_FULL_STAT_STIME];
+                    // This is a possible way to filter out processes that
+                    // are actually kernel threads...  do we want to?  Some
+                    // of them do use CPU, but there can be a *lot* that are
+                    // not doing anything.
+                    if (true || procStats[PROCESS_FULL_STAT_VSIZE] != 0) {
+                        st.interesting = true;
+                        st.baseName = procStatsString[0];
+                        st.base_minfaults = procStats[PROCESS_FULL_STAT_MINOR_FAULTS];
+                        st.base_majfaults = procStats[PROCESS_FULL_STAT_MAJOR_FAULTS];
+                        st.base_utime = procStats[PROCESS_FULL_STAT_UTIME];
+                        st.base_stime = procStats[PROCESS_FULL_STAT_STIME];
+                    } else {
+                        Slog.i(TAG, "Skipping kernel process pid " + pid
+                                + " name " + procStatsString[0]);
+                        st.baseName = procStatsString[0];
+                    }
                 } else {
+                    Slog.w(TAG, "Skipping unknown process pid " + pid);
                     st.baseName = "<unknown>";
                     st.base_utime = st.base_stime = 0;
                     st.base_minfaults = st.base_majfaults = 0;
@@ -438,7 +463,7 @@ public class ProcessStats {
                         mCurThreadPids = collectStats(st.threadsDir, pid, true,
                                 mCurThreadPids, st.threadStats);
                     }
-                } else {
+                } else if (st.interesting) {
                     st.name = st.baseName;
                     st.nameWidth = onMeasureProcessName(st.name);
                 }
@@ -452,7 +477,7 @@ public class ProcessStats {
                 st.rel_minfaults = 0;
                 st.rel_majfaults = 0;
                 st.added = true;
-                if (!first) {
+                if (!first && st.interesting) {
                     st.working = true;
                 }
                 continue;
@@ -624,6 +649,14 @@ public class ProcessStats {
         }
     }
 
+    final public int countStats() {
+        return mProcStats.size();
+    }
+
+    final public Stats getStats(int index) {
+        return mProcStats.get(index);
+    }
+
     final public int countWorkingStats() {
         buildWorkingProcs();
         return mWorkingProcs.size();
@@ -788,7 +821,8 @@ public class ProcessStats {
 
     private void getName(Stats st, String cmdlineFile) {
         String newName = st.name;
-        if (st.name == null || st.name.equals("app_process")) {
+        if (st.name == null || st.name.equals("app_process")
+                || st.name.equals("<pre-initialized>")) {
             String cmdName = readFile(cmdlineFile, '\0');
             if (cmdName != null && cmdName.length() > 1) {
                 newName = cmdName;

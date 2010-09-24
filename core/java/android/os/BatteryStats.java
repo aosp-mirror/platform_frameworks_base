@@ -301,7 +301,11 @@ public abstract class BatteryStats implements Parcelable {
          */
         public static abstract class Proc {
 
-            public static class ExcessiveWake {
+            public static class ExcessivePower {
+                public static final int TYPE_WAKE = 1;
+                public static final int TYPE_CPU = 2;
+
+                public int type;
                 public long overTime;
                 public long usedTime;
             }
@@ -343,9 +347,9 @@ public abstract class BatteryStats implements Parcelable {
              */
             public abstract long getTimeAtCpuSpeedStep(int speedStep, int which);
 
-            public abstract int countExcessiveWakes();
+            public abstract int countExcessivePowers();
 
-            public abstract ExcessiveWake getExcessiveWake(int i);
+            public abstract ExcessivePower getExcessivePower(int i);
         }
 
         /**
@@ -1593,7 +1597,7 @@ public abstract class BatteryStats implements Parcelable {
                     systemTime = ps.getSystemTime(which);
                     starts = ps.getStarts(which);
                     numExcessive = which == STATS_SINCE_CHARGED
-                            ? ps.countExcessiveWakes() : 0;
+                            ? ps.countExcessivePowers() : 0;
 
                     if (userTime != 0 || systemTime != 0 || starts != 0
                             || numExcessive != 0) {
@@ -1609,9 +1613,17 @@ public abstract class BatteryStats implements Parcelable {
                         }
                         pw.println(sb.toString());
                         for (int e=0; e<numExcessive; e++) {
-                            Uid.Proc.ExcessiveWake ew = ps.getExcessiveWake(e);
+                            Uid.Proc.ExcessivePower ew = ps.getExcessivePower(e);
                             if (ew != null) {
-                                pw.print(prefix); pw.print("      * Killed for wake lock use: ");
+                                pw.print(prefix); pw.print("      * Killed for ");
+                                        if (ew.type == Uid.Proc.ExcessivePower.TYPE_WAKE) {
+                                            pw.print("wake lock");
+                                        } else if (ew.type == Uid.Proc.ExcessivePower.TYPE_CPU) {
+                                            pw.print("cpu");
+                                        } else {
+                                            pw.print("unknown");
+                                        }
+                                        pw.print(" use: ");
                                         TimeUtils.formatDuration(ew.usedTime, pw);
                                         pw.print(" over ");
                                         TimeUtils.formatDuration(ew.overTime, pw);

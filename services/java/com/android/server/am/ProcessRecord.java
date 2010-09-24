@@ -60,6 +60,7 @@ class ProcessRecord {
     int setAdj;                 // Last set OOM adjustment for this process
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
+    boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
     boolean bad;                // True if disabled in the bad process list
@@ -75,6 +76,8 @@ class ProcessRecord {
     ComponentName instrumentationResultClass;// copy of instrumentationClass
     BroadcastRecord curReceiver;// receiver currently running in the app
     long lastWakeTime;          // How long proc held wake lock at last check
+    long lastCpuTime;           // How long proc has run CPU at last check
+    long curCpuTime;            // How long proc has run CPU most recently
     long lastRequestedGc;       // When we last asked the app to do a gc
     long lastLowMemory;         // When we last told the app that memory is low
     boolean reportLowMemory;    // Set to true when waiting to report low mem
@@ -131,13 +134,6 @@ class ProcessRecord {
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
 
-        long wtime;
-        synchronized (batteryStats.getBatteryStats()) {
-            wtime = batteryStats.getBatteryStats().getProcessWakeTime(info.uid,
-                    pid, SystemClock.elapsedRealtime());
-        }
-        long timeUsed = wtime - lastWakeTime;
-
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
         }
@@ -170,6 +166,7 @@ class ProcessRecord {
         pw.print(prefix); pw.print("lastActivityTime=");
                 TimeUtils.formatDuration(lastActivityTime, now, pw);
                 pw.print(" lruWeight="); pw.print(lruWeight);
+                pw.print(" keeping="); pw.print(keeping);
                 pw.print(" hidden="); pw.print(hidden);
                 pw.print(" empty="); pw.println(empty);
         pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
@@ -188,9 +185,20 @@ class ProcessRecord {
                 pw.print(" persistentActivities="); pw.println(persistentActivities);
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.println(lruSeq);
-        pw.print(prefix); pw.print("lastWakeTime="); pw.print(lastWakeTime);
-                pw.print(" time used=");
-                TimeUtils.formatDuration(timeUsed, pw); pw.println("");
+        if (!keeping) {
+            long wtime;
+            synchronized (batteryStats.getBatteryStats()) {
+                wtime = batteryStats.getBatteryStats().getProcessWakeTime(info.uid,
+                        pid, SystemClock.elapsedRealtime());
+            }
+            long timeUsed = wtime - lastWakeTime;
+            pw.print(prefix); pw.print("lastWakeTime="); pw.print(lastWakeTime);
+                    pw.print(" time used=");
+                    TimeUtils.formatDuration(timeUsed, pw); pw.println("");
+            pw.print(prefix); pw.print("lastCpuTime="); pw.print(lastCpuTime);
+                    pw.print(" time used=");
+                    TimeUtils.formatDuration(curCpuTime-lastCpuTime, pw); pw.println("");
+        }
         pw.print(prefix); pw.print("lastRequestedGc=");
                 TimeUtils.formatDuration(lastRequestedGc, now, pw);
                 pw.print(" lastLowMemory=");
