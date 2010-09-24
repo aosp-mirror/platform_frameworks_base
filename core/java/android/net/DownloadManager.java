@@ -214,6 +214,11 @@ public class DownloadManager {
             "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
 
     /**
+     * Intent action to launch an activity to display all downloads.
+     */
+    public final static String ACTION_VIEW_DOWNLOADS = "android.intent.action.VIEW_DOWNLOADS";
+
+    /**
      * Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the ID (as a
      * long) of the download that just completed.
      */
