@@ -2428,73 +2428,73 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     /* package */ static ArrayList<DbStats> getDbStats() {
         ArrayList<DbStats> dbStatsList = new ArrayList<DbStats>();
-        // make a local copy of mActiveDatabases - so that this method is not competing
-        // for synchronization lock on mActiveDatabases
-        ArrayList<WeakReference<SQLiteDatabase>> tempList;
-        synchronized(mActiveDatabases) {
-            tempList = (ArrayList<WeakReference<SQLiteDatabase>>)mActiveDatabases.clone();
-        }
-        for (WeakReference<SQLiteDatabase> w : tempList) {
-            SQLiteDatabase db = w.get();
-            if (db == null || !db.isOpen()) {
-                continue;
-            }
-
-            synchronized (db) {
-                try {
-                    // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
-                    int lookasideUsed = db.native_getDbLookaside();
-
-                    // get the lastnode of the dbname
-                    String path = db.getPath();
-                    int indx = path.lastIndexOf("/");
-                    String lastnode = path.substring((indx != -1) ? ++indx : 0);
-
-                    // get list of attached dbs and for each db, get its size and pagesize
-                    ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
-                    if (attachedDbs == null) {
-                        continue;
-                    }
-                    for (int i = 0; i < attachedDbs.size(); i++) {
-                        Pair<String, String> p = attachedDbs.get(i);
-                        long pageCount = DatabaseUtils.longForQuery(db, "PRAGMA " + p.first
-                                + ".page_count;", null);
-
-                        // first entry in the attached db list is always the main database
-                        // don't worry about prefixing the dbname with "main"
-                        String dbName;
-                        if (i == 0) {
-                            dbName = lastnode;
-                        } else {
-                            // lookaside is only relevant for the main db
-                            lookasideUsed = 0;
-                            dbName = "  (attached) " + p.first;
-                            // if the attached db has a path, attach the lastnode from the path to above
-                            if (p.second.trim().length() > 0) {
-                                int idx = p.second.lastIndexOf("/");
-                                dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
-                            }
-                        }
-                        if (pageCount > 0) {
-                            dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
-                                    lookasideUsed, db.getCacheHitNum(), db.getCacheMissNum(),
-                                    db.getCachesize()));
-                        }
-                    }
-                    // if there are pooled connections, return the cache stats for them also.
-                    if (db.mConnectionPool != null) {
-                        for (SQLiteDatabase pDb : db.mConnectionPool.getConnectionList()) {
-                            dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
-                                    + lastnode, 0, 0, 0, pDb.getCacheHitNum(),
-                                    pDb.getCacheMissNum(), pDb.getCachesize()));
-                        }
-                    }
-                } catch (SQLiteException e) {
-                    // ignore. we don't care about exceptions when we are taking adb
-                    // bugreport!
-                }
-            }
-        }
+//        // make a local copy of mActiveDatabases - so that this method is not competing
+//        // for synchronization lock on mActiveDatabases
+//        ArrayList<WeakReference<SQLiteDatabase>> tempList;
+//        synchronized(mActiveDatabases) {
+//            tempList = (ArrayList<WeakReference<SQLiteDatabase>>)mActiveDatabases.clone();
+//        }
+//        for (WeakReference<SQLiteDatabase> w : tempList) {
+//            SQLiteDatabase db = w.get();
+//            if (db == null || !db.isOpen()) {
+//                continue;
+//            }
+//
+//            synchronized (db) {
+//                try {
+//                    // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
+//                    int lookasideUsed = db.native_getDbLookaside();
+//
+//                    // get the lastnode of the dbname
+//                    String path = db.getPath();
+//                    int indx = path.lastIndexOf("/");
+//                    String lastnode = path.substring((indx != -1) ? ++indx : 0);
+//
+//                    // get list of attached dbs and for each db, get its size and pagesize
+//                    ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
+//                    if (attachedDbs == null) {
+//                        continue;
+//                    }
+//                    for (int i = 0; i < attachedDbs.size(); i++) {
+//                        Pair<String, String> p = attachedDbs.get(i);
+//                        long pageCount = DatabaseUtils.longForQuery(db, "PRAGMA " + p.first
+//                                + ".page_count;", null);
+//
+//                        // first entry in the attached db list is always the main database
+//                        // don't worry about prefixing the dbname with "main"
+//                        String dbName;
+//                        if (i == 0) {
+//                            dbName = lastnode;
+//                        } else {
+//                            // lookaside is only relevant for the main db
+//                            lookasideUsed = 0;
+//                            dbName = "  (attached) " + p.first;
+//                            // if the attached db has a path, attach the lastnode from the path to above
+//                            if (p.second.trim().length() > 0) {
+//                                int idx = p.second.lastIndexOf("/");
+//                                dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
+//                            }
+//                        }
+//                        if (pageCount > 0) {
+//                            dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
+//                                    lookasideUsed, db.getCacheHitNum(), db.getCacheMissNum(),
+//                                    db.getCachesize()));
+//                        }
+//                    }
+//                    // if there are pooled connections, return the cache stats for them also.
+//                    if (db.mConnectionPool != null) {
+//                        for (SQLiteDatabase pDb : db.mConnectionPool.getConnectionList()) {
+//                            dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
+//                                    + lastnode, 0, 0, 0, pDb.getCacheHitNum(),
+//                                    pDb.getCacheMissNum(), pDb.getCachesize()));
+//                        }
+//                    }
+//                } catch (SQLiteException e) {
+//                    // ignore. we don't care about exceptions when we are taking adb
+//                    // bugreport!
+//                }
+//            }
+//        }
         return dbStatsList;
     }
 
