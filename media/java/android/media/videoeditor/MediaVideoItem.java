@@ -82,7 +82,8 @@ public class MediaVideoItem extends MediaItem {
         private final PlaybackProgressListener mListener;
         private final int mCallbackAfterFrameCount;
         private final long mFromMs, mToMs;
-        private boolean mRun, mLoop;
+        private boolean mRun;
+        private final boolean mLoop;
         private long mPositionMs;
 
         /**
