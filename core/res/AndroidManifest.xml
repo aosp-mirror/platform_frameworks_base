@@ -242,6 +242,14 @@
         android:description="@string/permdesc_writeHistoryBookmarks"
         android:protectionLevel="dangerous" />
 
+    <!-- Allows an application to broadcast an Intent to set an alarm for the
+         user. -->
+    <permission android:name="com.android.alarm.permission.SET_ALARM"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:label="@string/permlab_setAlarm"
+        android:description="@string/permdesc_setAlarm"
+        android:protectionLevel="normal" />
+
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->
