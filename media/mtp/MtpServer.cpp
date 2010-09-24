@@ -26,6 +26,8 @@
 
 #include <cutils/properties.h>
 
+#define LOG_TAG "MtpServer"
+
 #include "MtpDebug.h"
 #include "MtpDatabase.h"
 #include "MtpProperty.h"
@@ -294,6 +296,7 @@ bool MtpServer::handleRequest() {
             response = doGetDevicePropDesc();
             break;
         default:
+            LOGE("got unsupported command %s", MtpDebug::getOperationCodeName(operation));
             response = MTP_RESPONSE_OPERATION_NOT_SUPPORTED;
             break;
     }
