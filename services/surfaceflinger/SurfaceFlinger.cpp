@@ -1533,6 +1533,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 hwc.initCheck()==NO_ERROR ? "present" : "not present",
                 mDebugDisableHWC ? "disabled" : "enabled");
         result.append(buffer);
+        hwc.dump(result, buffer, SIZE);
 
         const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
         alloc.dump(result);

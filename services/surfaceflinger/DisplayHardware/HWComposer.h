@@ -27,6 +27,8 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
+class String8;
+
 class HWComposer
 {
 public:
@@ -53,6 +55,9 @@ public:
 
     size_t getNumLayers() const;
     hwc_layer_t* getLayers() const;
+
+    // for debugging
+    void dump(String8& out, char* scratch, size_t SIZE) const;
 
 private:
     hw_module_t const*      mModule;
