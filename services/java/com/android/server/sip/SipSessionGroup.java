@@ -28,8 +28,8 @@ import android.net.sip.ISipSessionListener;
 import android.net.sip.SessionDescription;
 import android.net.sip.SipErrorCode;
 import android.net.sip.SipProfile;
+import android.net.sip.SipSession;
 import android.net.sip.SipSessionAdapter;
-import android.net.sip.SipSessionState;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -121,7 +121,7 @@ class SipSessionGroup implements SipListener {
         reset(localIp);
     }
 
-    void reset(String localIp) throws SipException, IOException {
+    synchronized void reset(String localIp) throws SipException, IOException {
         mLocalIp = localIp;
         if (localIp == null) return;
 
@@ -301,7 +301,7 @@ class SipSessionGroup implements SipListener {
             boolean processed = (session != null) && session.process(event);
             if (isLoggable && processed) {
                 Log.d(TAG, "new state after: "
-                        + SipSessionState.toString(session.mState));
+                        + SipSession.State.toString(session.mState));
             }
         } catch (Throwable e) {
             Log.w(TAG, "event process error: " + event, e);
@@ -332,7 +332,7 @@ class SipSessionGroup implements SipListener {
 
         public boolean process(EventObject evt) throws SipException {
             if (isLoggable(this, evt)) Log.d(TAG, " ~~~~~   " + this + ": "
-                    + SipSessionState.toString(mState) + ": processing "
+                    + SipSession.State.toString(mState) + ": processing "
                     + log(evt));
             if (isRequestEvent(Request.INVITE, evt)) {
                 RequestEvent event = (RequestEvent) evt;
@@ -342,7 +342,7 @@ class SipSessionGroup implements SipListener {
                 newSession.mDialog = newSession.mServerTransaction.getDialog();
                 newSession.mInviteReceived = event;
                 newSession.mPeerProfile = createPeerProfile(event.getRequest());
-                newSession.mState = SipSessionState.INCOMING_CALL;
+                newSession.mState = SipSession.State.INCOMING_CALL;
                 newSession.mPeerSessionDescription =
                         extractContent(event.getRequest());
                 addSipSession(newSession);
@@ -361,7 +361,7 @@ class SipSessionGroup implements SipListener {
     class SipSessionImpl extends ISipSession.Stub {
         SipProfile mPeerProfile;
         SipSessionListenerProxy mProxy = new SipSessionListenerProxy();
-        int mState = SipSessionState.READY_TO_CALL;
+        int mState = SipSession.State.READY_TO_CALL;
         RequestEvent mInviteReceived;
         Dialog mDialog;
         ServerTransaction mServerTransaction;
@@ -381,7 +381,7 @@ class SipSessionGroup implements SipListener {
                         sleep(timeout);
                         if (mRunning) timeout();
                     }
-                }).start();
+                }, "SipSessionTimerThread").start();
             }
 
             synchronized void cancel() {
@@ -416,7 +416,7 @@ class SipSessionGroup implements SipListener {
             mInCall = false;
             removeSipSession(this);
             mPeerProfile = null;
-            mState = SipSessionState.READY_TO_CALL;
+            mState = SipSession.State.READY_TO_CALL;
             mInviteReceived = null;
             mDialog = null;
             mServerTransaction = null;
@@ -473,7 +473,7 @@ class SipSessionGroup implements SipListener {
                             onError(e);
                         }
                     }
-            }).start();
+            }, "SipSessionAsyncCmdThread").start();
         }
 
         public void makeCall(SipProfile peerProfile, String sessionDescription,
@@ -523,10 +523,10 @@ class SipSessionGroup implements SipListener {
         }
 
         public void sendKeepAlive() {
-            mState = SipSessionState.PINGING;
+            mState = SipSession.State.PINGING;
             try {
                 processCommand(new OptionsCommand());
-                while (SipSessionState.PINGING == mState) {
+                while (SipSession.State.PINGING == mState) {
                     Thread.sleep(1000);
                 }
             } catch (SipException e) {
@@ -553,7 +553,7 @@ class SipSessionGroup implements SipListener {
             try {
                 String s = super.toString();
                 return s.substring(s.indexOf("@")) + ":"
-                        + SipSessionState.toString(mState);
+                        + SipSession.State.toString(mState);
             } catch (Throwable e) {
                 return super.toString();
             }
@@ -561,7 +561,7 @@ class SipSessionGroup implements SipListener {
 
         public boolean process(EventObject evt) throws SipException {
             if (isLoggable(this, evt)) Log.d(TAG, " ~~~~~   " + this + ": "
-                    + SipSessionState.toString(mState) + ": processing "
+                    + SipSession.State.toString(mState) + ": processing "
                     + log(evt));
             synchronized (SipSessionGroup.this) {
                 if (isClosed()) return false;
@@ -577,30 +577,30 @@ class SipSessionGroup implements SipListener {
                 boolean processed;
 
                 switch (mState) {
-                case SipSessionState.REGISTERING:
-                case SipSessionState.DEREGISTERING:
+                case SipSession.State.REGISTERING:
+                case SipSession.State.DEREGISTERING:
                     processed = registeringToReady(evt);
                     break;
-                case SipSessionState.PINGING:
+                case SipSession.State.PINGING:
                     processed = keepAliveProcess(evt);
                     break;
-                case SipSessionState.READY_TO_CALL:
+                case SipSession.State.READY_TO_CALL:
                     processed = readyForCall(evt);
                     break;
-                case SipSessionState.INCOMING_CALL:
+                case SipSession.State.INCOMING_CALL:
                     processed = incomingCall(evt);
                     break;
-                case SipSessionState.INCOMING_CALL_ANSWERING:
+                case SipSession.State.INCOMING_CALL_ANSWERING:
                     processed = incomingCallToInCall(evt);
                     break;
-                case SipSessionState.OUTGOING_CALL:
-                case SipSessionState.OUTGOING_CALL_RING_BACK:
+                case SipSession.State.OUTGOING_CALL:
+                case SipSession.State.OUTGOING_CALL_RING_BACK:
                     processed = outgoingCall(evt);
                     break;
-                case SipSessionState.OUTGOING_CALL_CANCELING:
+                case SipSession.State.OUTGOING_CALL_CANCELING:
                     processed = outgoingCallToReady(evt);
                     break;
-                case SipSessionState.IN_CALL:
+                case SipSession.State.IN_CALL:
                     processed = inCall(evt);
                     break;
                 default:
@@ -650,8 +650,8 @@ class SipSessionGroup implements SipListener {
         private void processTransactionTerminated(
                 TransactionTerminatedEvent event) {
             switch (mState) {
-                case SipSessionState.IN_CALL:
-                case SipSessionState.READY_TO_CALL:
+                case SipSession.State.IN_CALL:
+                case SipSession.State.READY_TO_CALL:
                     Log.d(TAG, "Transaction terminated; do nothing");
                     break;
                 default:
@@ -670,27 +670,27 @@ class SipSessionGroup implements SipListener {
                     ? event.getServerTransaction()
                     : event.getClientTransaction();
 
-            if ((current != target) && (mState != SipSessionState.PINGING)) {
+            if ((current != target) && (mState != SipSession.State.PINGING)) {
                 Log.d(TAG, "not the current transaction; current=" + current
                         + ", timed out=" + target);
                 return;
             }
             switch (mState) {
-                case SipSessionState.REGISTERING:
-                case SipSessionState.DEREGISTERING:
+                case SipSession.State.REGISTERING:
+                case SipSession.State.DEREGISTERING:
                     reset();
                     mProxy.onRegistrationTimeout(this);
                     break;
-                case SipSessionState.INCOMING_CALL:
-                case SipSessionState.INCOMING_CALL_ANSWERING:
-                case SipSessionState.OUTGOING_CALL:
-                case SipSessionState.OUTGOING_CALL_CANCELING:
+                case SipSession.State.INCOMING_CALL:
+                case SipSession.State.INCOMING_CALL_ANSWERING:
+                case SipSession.State.OUTGOING_CALL:
+                case SipSession.State.OUTGOING_CALL_CANCELING:
                     onError(SipErrorCode.TIME_OUT, event.toString());
                     break;
-                case SipSessionState.PINGING:
+                case SipSession.State.PINGING:
                     reset();
                     mReRegisterFlag = true;
-                    mState = SipSessionState.READY_TO_CALL;
+                    mState = SipSession.State.READY_TO_CALL;
                     break;
 
                 default:
@@ -764,7 +764,7 @@ class SipSessionGroup implements SipListener {
                 switch (statusCode) {
                 case Response.OK:
                     int state = mState;
-                    onRegistrationDone((state == SipSessionState.REGISTERING)
+                    onRegistrationDone((state == SipSession.State.REGISTERING)
                             ? getExpiryTime(((ResponseEvent) evt).getResponse())
                             : -1);
                     mLastNonce = null;
@@ -851,7 +851,7 @@ class SipSessionGroup implements SipListener {
                         generateTag());
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
-                mState = SipSessionState.OUTGOING_CALL;
+                mState = SipSession.State.OUTGOING_CALL;
                 mProxy.onCalling(this);
                 startSessionTimer(cmd.getTimeout());
                 return true;
@@ -861,7 +861,7 @@ class SipSessionGroup implements SipListener {
                         generateTag(), duration);
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
-                mState = SipSessionState.REGISTERING;
+                mState = SipSession.State.REGISTERING;
                 mProxy.onRegistering(this);
                 return true;
             } else if (DEREGISTER == evt) {
@@ -869,7 +869,7 @@ class SipSessionGroup implements SipListener {
                         generateTag(), 0);
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
-                mState = SipSessionState.DEREGISTERING;
+                mState = SipSession.State.DEREGISTERING;
                 mProxy.onRegistering(this);
                 return true;
             }
@@ -884,7 +884,7 @@ class SipSessionGroup implements SipListener {
                         mLocalProfile,
                         ((MakeCallCommand) evt).getSessionDescription(),
                         mServerTransaction);
-                mState = SipSessionState.INCOMING_CALL_ANSWERING;
+                mState = SipSession.State.INCOMING_CALL_ANSWERING;
                 startSessionTimer(((MakeCallCommand) evt).getTimeout());
                 return true;
             } else if (END_CALL == evt) {
@@ -925,8 +925,8 @@ class SipSessionGroup implements SipListener {
                 int statusCode = response.getStatusCode();
                 switch (statusCode) {
                 case Response.RINGING:
-                    if (mState == SipSessionState.OUTGOING_CALL) {
-                        mState = SipSessionState.OUTGOING_CALL_RING_BACK;
+                    if (mState == SipSession.State.OUTGOING_CALL) {
+                        mState = SipSession.State.OUTGOING_CALL_RING_BACK;
                         mProxy.onRingingBack(this);
                         cancelSessionTimer();
                     }
@@ -969,7 +969,7 @@ class SipSessionGroup implements SipListener {
                 // response comes back yet. We are cheating for not checking
                 // response.
                 mSipHelper.sendCancel(mClientTransaction);
-                mState = SipSessionState.OUTGOING_CALL_CANCELING;
+                mState = SipSession.State.OUTGOING_CALL_CANCELING;
                 startSessionTimer(CANCEL_CALL_TIMER);
                 return true;
             }
@@ -1025,7 +1025,7 @@ class SipSessionGroup implements SipListener {
             } else if (isRequestEvent(Request.INVITE, evt)) {
                 // got Re-INVITE
                 RequestEvent event = mInviteReceived = (RequestEvent) evt;
-                mState = SipSessionState.INCOMING_CALL;
+                mState = SipSession.State.INCOMING_CALL;
                 mPeerSessionDescription = extractContent(event.getRequest());
                 mServerTransaction = null;
                 mProxy.onRinging(this, mPeerProfile, mPeerSessionDescription);
@@ -1038,7 +1038,7 @@ class SipSessionGroup implements SipListener {
                 // to change call
                 mClientTransaction = mSipHelper.sendReinvite(mDialog,
                         ((MakeCallCommand) evt).getSessionDescription());
-                mState = SipSessionState.OUTGOING_CALL;
+                mState = SipSession.State.OUTGOING_CALL;
                 startSessionTimer(((MakeCallCommand) evt).getTimeout());
                 return true;
             }
@@ -1066,14 +1066,14 @@ class SipSessionGroup implements SipListener {
         }
 
         private void establishCall() {
-            mState = SipSessionState.IN_CALL;
+            mState = SipSession.State.IN_CALL;
             mInCall = true;
             cancelSessionTimer();
             mProxy.onCallEstablished(this, mPeerSessionDescription);
         }
 
         private void fallbackToPreviousInCall(int errorCode, String message) {
-            mState = SipSessionState.IN_CALL;
+            mState = SipSession.State.IN_CALL;
             mProxy.onCallChangeFailed(this, errorCode, message);
         }
 
@@ -1095,8 +1095,8 @@ class SipSessionGroup implements SipListener {
         private void onError(int errorCode, String message) {
             cancelSessionTimer();
             switch (mState) {
-                case SipSessionState.REGISTERING:
-                case SipSessionState.DEREGISTERING:
+                case SipSession.State.REGISTERING:
+                case SipSession.State.DEREGISTERING:
                     onRegistrationFailed(errorCode, message);
                     break;
                 default:
@@ -1270,7 +1270,7 @@ class SipSessionGroup implements SipListener {
     private static boolean isLoggable(SipSessionImpl s) {
         if (s != null) {
             switch (s.mState) {
-                case SipSessionState.PINGING:
+                case SipSession.State.PINGING:
                     return DEBUG_PING;
             }
         }

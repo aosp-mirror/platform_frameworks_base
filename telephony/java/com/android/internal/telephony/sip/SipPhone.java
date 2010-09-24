@@ -27,7 +27,7 @@ import android.net.sip.SipErrorCode;
 import android.net.sip.SipException;
 import android.net.sip.SipManager;
 import android.net.sip.SipProfile;
-import android.net.sip.SipSessionState;
+import android.net.sip.SipSession;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
@@ -91,7 +91,7 @@ public class SipPhone extends SipPhoneBase {
         foregroundCall = new SipCall();
         backgroundCall = new SipCall();
         mProfile = profile;
-        mSipManager = SipManager.getInstance(context);
+        mSipManager = SipManager.newInstance(context);
 
         // FIXME: what's this for SIP?
         //Change the system property
@@ -710,8 +710,8 @@ public class SipPhone extends SipPhoneBase {
 
         void dial() throws SipException {
             setState(Call.State.DIALING);
-            mSipAudioCall = mSipManager.makeAudioCall(mContext, mProfile,
-                    mPeer, null, SESSION_TIMEOUT);
+            mSipAudioCall = mSipManager.makeAudioCall(mProfile, mPeer, null,
+                    SESSION_TIMEOUT);
             mSipAudioCall.setRingbackToneEnabled(false);
             mSipAudioCall.setListener(mAdapter);
         }
@@ -807,20 +807,20 @@ public class SipPhone extends SipPhoneBase {
         if (sipAudioCall.isOnHold()) return Call.State.HOLDING;
         int sessionState = sipAudioCall.getState();
         switch (sessionState) {
-            case SipSessionState.READY_TO_CALL:            return Call.State.IDLE;
-            case SipSessionState.INCOMING_CALL:
-            case SipSessionState.INCOMING_CALL_ANSWERING:  return Call.State.INCOMING;
-            case SipSessionState.OUTGOING_CALL:            return Call.State.DIALING;
-            case SipSessionState.OUTGOING_CALL_RING_BACK:  return Call.State.ALERTING;
-            case SipSessionState.OUTGOING_CALL_CANCELING:  return Call.State.DISCONNECTING;
-            case SipSessionState.IN_CALL:                  return Call.State.ACTIVE;
+            case SipSession.State.READY_TO_CALL:            return Call.State.IDLE;
+            case SipSession.State.INCOMING_CALL:
+            case SipSession.State.INCOMING_CALL_ANSWERING:  return Call.State.INCOMING;
+            case SipSession.State.OUTGOING_CALL:            return Call.State.DIALING;
+            case SipSession.State.OUTGOING_CALL_RING_BACK:  return Call.State.ALERTING;
+            case SipSession.State.OUTGOING_CALL_CANCELING:  return Call.State.DISCONNECTING;
+            case SipSession.State.IN_CALL:                  return Call.State.ACTIVE;
             default:
                 Log.w(LOG_TAG, "illegal connection state: " + sessionState);
                 return Call.State.DISCONNECTED;
         }
     }
 
-    private abstract class SipAudioCallAdapter extends SipAudioCall.Adapter {
+    private abstract class SipAudioCallAdapter extends SipAudioCall.Listener {
         protected abstract void onCallEnded(Connection.DisconnectCause cause);
         protected abstract void onError(Connection.DisconnectCause cause);
 
