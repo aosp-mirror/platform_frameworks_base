@@ -124,7 +124,12 @@ public abstract class Transition {
      * @param durationMs the duration of the transition in milliseconds
      */
     public void setDuration(long durationMs) {
+        if (durationMs > getMaximumDuration()) {
+            throw new IllegalArgumentException("The duration is too large");
+        }
+
         mDurationMs = durationMs;
+        invalidate();
     }
 
     /**
@@ -132,6 +137,22 @@ public abstract class Transition {
      */
     public long getDuration() {
         return mDurationMs;
+    }
+
+    /**
+     * The duration of a transition cannot be greater than half of the minimum
+     * duration of the bounding media items.
+     *
+     * @return The maximum duration of this transition
+     */
+    public long getMaximumDuration() {
+        if (mAfterMediaItem == null) {
+            return mBeforeMediaItem.getDuration() / 2;
+        } else if (mBeforeMediaItem == null) {
+            return mAfterMediaItem.getDuration() / 2;
+        } else {
+            return (Math.min(mAfterMediaItem.getDuration(), mBeforeMediaItem.getDuration()) / 2);
+        }
     }
 
     /**
