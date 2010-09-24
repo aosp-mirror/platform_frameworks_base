@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Umožňuje aplikaci uvolnit paměť telefonu smazáním souborů v adresáři mezipaměti aplikace. Přístup je velmi omezený, většinou pouze pro systémové procesy."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Přesun zdrojů aplikace"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Umožňuje aplikaci přesunout své zdroje z interní paměti na externí médium a opačně."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"čtení systémových souborů protokolu"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto nastavení aplikaci umožní získat obecné informace o činnostech s telefonem, ale neměly by obsahovat žádné osobní či soukromé informace."</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat pouze výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"povolení či zakázání komponent aplikací"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Bez dalšího potvrzení obnoví výchozí nastavení z výroby a smaže všechna data."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Nastavte globální server proxy, který je používán, když jsou zásady aktivní. Platný globální server proxy nastavuje pouze první správce zařízení."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domů"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Práce"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Jiné"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Vlastní"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Zadejte kód PIN"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Zadejte heslo pro odblokování"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Zadejte kód PIN pro odblokování"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li na stránce zůstat."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Dotykem zobrazíte další informace o využití mobilních dat"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Byl překročen limit mobilních dat"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Dotykem zobrazíte další informace o využití mobilních dat"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"Žádné shody"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Vyhledat na stránce"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 shoda"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
 </resources>

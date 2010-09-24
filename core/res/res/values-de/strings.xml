@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Ermöglicht einer Anwendung, Telefonspeicher durch das Löschen von Dateien im Cache-Verzeichnis der Anwendung freizugeben. Der Zugriff beschränkt sich in der Regel auf Systemprozesse."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Anwendungsressourcen verschieben"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Ermöglicht einer Anwendung, Anwendungsressourcen von interne auf externe Medien zu verschieben und umgekehrt."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"System-Protokolldateien lesen"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Ermöglicht einer Anwendung, die verschiedenen Protokolldateien des Systems zu lesen. So können allgemeine Informationen zu den auf Ihrem Telefon durchgeführten Aktionen eingesehen werden, diese sollten jedoch keine persönlichen oder geheimen Daten enthalten."</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lese-/Schreibberechtigung für zu Diagnosegruppe gehörige Elemente"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Ermöglicht einer Anwendung, alle Elemente in der Diagnosegruppe zu lesen und zu bearbeiten, etwa Dateien in \"/dev\". Dies könnte eine potenzielle Gefährdung für die Stabilität und Sicherheit des Systems darstellen und sollte NUR für Hardware-spezifische Diagnosen des Herstellers oder Netzbetreibers verwendet werden."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"Anwendungskomponenten aktivieren oder deaktivieren"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Zurücksetzen auf die Werkseinstellungen. Dabei werden alle Ihre Daten ohne Nachfrage gelöscht."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Den globalen Proxy des Geräts zur Verwendung während der Aktivierung der Richtlinie festlegen. Nur der erste Geräteadministrator kann den gültigen globalen Proxy festlegen."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Beruflich"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Andere"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Benutzerdefiniert"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN-Code eingeben"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Passwort zum Entsperren eingeben"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"PIN zum Entsperren eingeben"</string>
@@ -539,7 +548,7 @@
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Display gesperrt."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Drücken Sie die Menütaste, um das Telefon zu entsperren oder einen Notruf zu tätigen."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Zum Entsperren die Menütaste drücken"</string>
-    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Schema für Entsperrung zeichnen"</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Muster zum Entsperren zeichnen"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Notruf"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Zurück zum Anruf"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Korrekt!"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Von dieser Seite navigieren?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Wählen Sie \"OK\", um fortzufahren, oder wählen Sie \"Abbrechen\", um auf der aktuellen Seite zu bleiben."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bestätigen"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tipp: Zum Heranzoomen und Vergrößern zweimal tippen"</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"Browserverlauf und Lesezeichen lesen"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Ermöglicht der Anwendung, alle URLs, die mit dem Browser besucht wurden, sowie alle Lesezeichen des Browsers zu lesen."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"Browserverlauf und Lesezeichen schreiben"</string>
@@ -795,7 +806,7 @@
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB-Speicher aktivieren"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"Bei der Verwendung Ihrer SD-Karte als USB-Speicher ist ein Problem aufgetreten."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB-Verbindung"</string>
-    <string name="usb_storage_notification_message" msgid="7380082404288219341">"Wählen Sie die Dateien aus, die von Ihrem oder auf Ihren Computer kopiert werden sollen."</string>
+    <string name="usb_storage_notification_message" msgid="7380082404288219341">"Zum Kopieren von Dateien zu/von Ihrem Computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB-Speicher deaktivieren"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Auswählen, um USB-Speicher zu deaktivieren."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-Speicher in Verwendung"</string>
@@ -816,7 +827,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"Kandidaten"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"SD-Karte wird vorbereitet"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Nach Fehlern wird gesucht."</string>
+    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Suche nach Fehlern"</string>
     <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"SD-Karte leer"</string>
     <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD-Karte ist leer oder verfügt über ein nicht unterstütztes Dateisystem."</string>
     <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Beschädigte SD-Karte"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Weitere Informationen über die Mobildatennutzung durch Berühren aufrufen"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobildatenlimit überschritten"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Weitere Informationen über die Mobildatennutzung durch Berühren aufrufen"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"Keine Übereinstimmungen"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Auf Seite suchen"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 Übereinstimmung"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> von <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
 </resources>

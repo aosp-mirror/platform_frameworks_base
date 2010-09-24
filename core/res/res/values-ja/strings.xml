@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"アプリケーションのキャッシュディレクトリからファイルを削除して携帯電話のメモリを解放することをアプリケーションに許可します。通常、アクセスはシステムプロセスのみに制限されます。"</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"アプリケーションリソースの移動"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"内部と外部のメディア間でのアプリケーションリソースの移動をアプリケーションに許可します。"</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"システムログファイルの読み取り"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"システムのさまざまなログファイルの読み取りをアプリケーションに許可します。これにより携帯電話の使用状況に関する全般情報が取得されますが、個人情報や非公開情報が含まれることはありません。"</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diagが所有するリソースの読み書き"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"diagグループが所有するリソース（例:/dev内のファイル）への読み書きをアプリケーションに許可します。システムの安定性とセキュリティに影響する恐れがあります。メーカー/オペレーターによるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"アプリケーションのコンポーネントを有効/無効にする"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"出荷時設定にリセットします。確認なしでデータがすべて削除されます。"</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。有効なグローバルプロキシを設定できるのは最初のデバイス管理者だけです。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"自宅"</item>
     <item msgid="869923650527136615">"携帯"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"勤務先"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"その他"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"カスタム"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PINコードを入力"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"ロックを解除するにはパスワードを入力"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"ロックを解除するにはPINを入力"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"このページから移動しますか？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"移動する場合は[OK]、今のページに残る場合は[キャンセル]を選択してください。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"ヒント: ダブルタップで拡大/縮小できます。"</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ブラウザの履歴とブックマークを読み取る"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"ブラウザでアクセスしたすべてのURLおよびブラウザのすべてのブックマークの読み取りをアプリケーションに許可します。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"ブラウザの履歴とブックマークを書き込む"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"タップしてモバイルデータ利用の詳細を表示します"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"モバイルデータの制限を超えました"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"タップしてモバイルデータ利用の詳細を表示します"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"該当なし"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"ページ内を検索"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1件一致"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g>件"</item>
+  </plurals>
 </resources>

@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"애플리케이션이 애플리케이션 캐시 디렉토리에 있는 파일을 삭제하여 휴대전화의 저장공간을 늘릴 수 있도록 합니다. 액세스는 일반적으로 시스템 프로세스로 제한됩니다."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"애플리케이션 리소스 이동"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"애플리케이션이 애플리케이션 리소스를 내부에서 외부 미디어로 또는 그 반대로 이동할 수 있도록 합니다."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"시스템 로그 파일 읽기"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"애플리케이션이 시스템의 다양한 로그 파일을 읽을 수 있도록 합니다. 이 경우 애플리케이션은 사용자가 휴대전화로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있습니다. 하지만 로그 파일에 어떠한 개인정보도 포함되어서는 안 됩니다."</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"진단 그룹 소유의 리소스 읽기/쓰기"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"애플리케이션이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"애플리케이션 구성 요소 사용 또는 사용 안함"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"초기화를 수행하여 모든 데이터를 확인하지 않고 삭제합니다."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"정책이 사용 설정되어 있는 동안 사용될 기기 글로벌 프록시를 설정합니다. 첫 번째 기기 관리자가 설정한 글로벌 프록시만 유효합니다."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"직장"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"기타"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"맞춤설정"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN 코드 입력"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"잠금을 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"잠금을 해제하려면 PIN 입력"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"다른 페이지를 탐색하시겠습니까?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"계속하려면 \'확인\'을 선택하고 현재 페이지에 그대로 있으려면 \'취소\'를 선택하세요."</string>
     <string name="save_password_label" msgid="6860261758665825069">"확인"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"도움말: 축소/확대하려면 두 번 누릅니다."</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"브라우저의 기록 및 북마크 읽기"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"애플리케이션이 브라우저로 방문한 모든 URL과 브라우저의 모든 북마크를 읽도록 허용합니다."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"브라우저의 기록 및 북마크 쓰기"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"모바일 데이터 사용에 대해 자세히 알아보려면 터치하세요."</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"모바일 데이터 제한을 초과했습니다."</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"모바일 데이터 사용에 대해 자세히 알아보려면 터치하세요."</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"검색결과 없음"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"페이지에서 찾기"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"검색결과 1개"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
 </resources>
