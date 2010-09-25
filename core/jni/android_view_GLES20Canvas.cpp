@@ -30,6 +30,7 @@
 #include <SkTemplates.h>
 #include <SkXfermode.h>
 
+#include <OpenGLDebugRenderer.h>
 #include <OpenGLRenderer.h>
 #include <SkiaShader.h>
 #include <SkiaColorFilter.h>
@@ -48,6 +49,8 @@ using namespace uirenderer;
  */
 #ifdef USE_OPENGL_RENDERER
 
+#define DEBUG_RENDERER 0
+
 // ----------------------------------------------------------------------------
 // Java APIs
 // ----------------------------------------------------------------------------
@@ -62,7 +65,11 @@ static struct {
 // ----------------------------------------------------------------------------
 
 static OpenGLRenderer* android_view_GLES20Canvas_createRenderer(JNIEnv* env, jobject canvas) {
+#if DEBUG_RENDERER
+    return new OpenGLDebugRenderer;
+#else
     return new OpenGLRenderer;
+#endif
 }
 
 static void android_view_GLES20Canvas_destroyRenderer(JNIEnv* env, jobject canvas,
