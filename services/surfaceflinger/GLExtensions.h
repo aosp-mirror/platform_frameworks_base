@@ -39,6 +39,7 @@ class GLExtensions : public Singleton<GLExtensions>
     bool mHaveTextureExternal   : 1;
     bool mHaveNpot              : 1;
     bool mHaveDirectTexture     : 1;
+    bool mHaveFramebufferObject : 1;
 
     String8 mVendor;
     String8 mRenderer;
@@ -64,6 +65,10 @@ public:
     }
     inline bool haveDirectTexture() const {
         return mHaveDirectTexture;
+    }
+
+    inline bool haveFramebufferObject() const {
+        return mHaveFramebufferObject;
     }
 
     void initWithGLStrings(

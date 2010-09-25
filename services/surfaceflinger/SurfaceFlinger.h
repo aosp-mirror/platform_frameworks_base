@@ -193,6 +193,11 @@ public:
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
     virtual void                        signal() const;
+    virtual status_t                    captureScreen(DisplayID dpy,
+                                                      sp<IMemoryHeap>* heap,
+                                                      uint32_t* width,
+                                                      uint32_t* height,
+                                                      PixelFormat* format);
 
             void                        screenReleased(DisplayID dpy);
             void                        screenAcquired(DisplayID dpy);
@@ -361,6 +366,7 @@ private:
                 nsecs_t                     mBootTime;
                 Permission                  mHardwareTest;
                 Permission                  mAccessSurfaceFlinger;
+                Permission                  mReadFramebuffer;
                 Permission                  mDump;
                 
                 // Can only accessed from the main thread, these members

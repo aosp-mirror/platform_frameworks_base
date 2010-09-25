@@ -124,6 +124,21 @@ public:
         remote()->transact(BnSurfaceComposer::BOOT_FINISHED, data, &reply);
     }
 
+    virtual status_t captureScreen(DisplayID dpy,
+            sp<IMemoryHeap>* heap,
+            uint32_t* width, uint32_t* height, PixelFormat* format)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
+        data.writeInt32(dpy);
+        remote()->transact(BnSurfaceComposer::CAPTURE_SCREEN, data, &reply);
+        *heap = interface_cast<IMemoryHeap>(reply.readStrongBinder());
+        *width = reply.readInt32();
+        *height = reply.readInt32();
+        *format = reply.readInt32();
+        return reply.readInt32();
+    }
+
     virtual void signal() const
     {
         Parcel data, reply;
@@ -189,6 +204,19 @@ status_t BnSurfaceComposer::onTransact(
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
             sp<IBinder> b = getCblk()->asBinder();
             reply->writeStrongBinder(b);
+        } break;
+        case CAPTURE_SCREEN: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
+            DisplayID dpy = data.readInt32();
+            sp<IMemoryHeap> heap;
+            uint32_t w, h;
+            PixelFormat f;
+            status_t res = captureScreen(dpy, &heap, &w, &h, &f);
+            reply->writeStrongBinder(heap->asBinder());
+            reply->writeInt32(w);
+            reply->writeInt32(h);
+            reply->writeInt32(f);
+            reply->writeInt32(res);
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);
