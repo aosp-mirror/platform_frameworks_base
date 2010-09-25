@@ -31,6 +31,7 @@
 #include "ProgramCache.h"
 #include "PathCache.h"
 #include "TextDropShadowCache.h"
+#include "FboCache.h"
 #include "Line.h"
 
 namespace android {
@@ -65,6 +66,7 @@ public:
     PatchCache patchCache;
     TextDropShadowCache dropShadowCache;
     GammaFontRenderer fontRenderer;
+    FboCache fboCache;
 
     Line line;
 }; // class Caches

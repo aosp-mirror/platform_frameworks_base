@@ -5,11 +5,13 @@ include $(CLEAR_VARS)
 # defined in the current device/board configuration
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SRC_FILES:= \
+		FboCache.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
 		GradientCache.cpp \
 		LayerCache.cpp \
 		Matrix.cpp \
+		OpenGLDebugRenderer.cpp \
 		OpenGLRenderer.cpp \
 		Patch.cpp \
 		PatchCache.cpp \

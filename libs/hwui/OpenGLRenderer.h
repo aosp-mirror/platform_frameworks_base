@@ -62,11 +62,13 @@ namespace uirenderer {
 class OpenGLRenderer {
 public:
     OpenGLRenderer();
-    ~OpenGLRenderer();
+    virtual ~OpenGLRenderer();
 
     void setViewport(int width, int height);
-    void prepare();
-    void finish();
+
+    virtual void prepare();
+    virtual void finish();
+
     void acquireContext();
     void releaseContext();
 
@@ -75,8 +77,10 @@ public:
     void restore();
     void restoreToCount(int saveCount);
 
-    int saveLayer(float left, float top, float right, float bottom, const SkPaint* p, int flags);
-    int saveLayerAlpha(float left, float top, float right, float bottom, int alpha, int flags);
+    virtual int saveLayer(float left, float top, float right, float bottom,
+            const SkPaint* p, int flags);
+    virtual int saveLayerAlpha(float left, float top, float right, float bottom,
+            int alpha, int flags);
 
     void translate(float dx, float dy);
     void rotate(float degrees);
@@ -90,16 +94,19 @@ public:
     bool quickReject(float left, float top, float right, float bottom);
     bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
-    void drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint);
-    void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop, float srcRight, float srcBottom,
-            float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint);
-    void drawPatch(SkBitmap* bitmap, Res_png_9patch* patch, float left, float top,
+    virtual void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
+    virtual void drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint);
+    virtual void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
+            float srcRight, float srcBottom, float dstLeft, float dstTop,
+            float dstRight, float dstBottom, const SkPaint* paint);
+    virtual void drawPatch(SkBitmap* bitmap, Res_png_9patch* patch, float left, float top,
             float right, float bottom, const SkPaint* paint);
-    void drawColor(int color, SkXfermode::Mode mode);
-    void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
-    void drawPath(SkPath* path, SkPaint* paint);
-    void drawLines(float* points, int count, const SkPaint* paint);
+    virtual void drawColor(int color, SkXfermode::Mode mode);
+    virtual void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
+    virtual void drawPath(SkPath* path, SkPaint* paint);
+    virtual void drawLines(float* points, int count, const SkPaint* paint);
+    virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
+            SkPaint* paint);
 
     void resetShader();
     void setupShader(SkiaShader* shader);
@@ -110,7 +117,17 @@ public:
     void resetShadow();
     void setupShadow(float radius, float dx, float dy, int color);
 
-    void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);
+protected:
+    /**
+     * Compose the layer defined in the current snapshot with the layer
+     * defined by the previous snapshot.
+     *
+     * The current snapshot *must* be a layer (flag kFlagIsLayer set.)
+     *
+     * @param curent The current snapshot containing the layer to compose
+     * @param previous The previous snapshot to compose the current layer with
+     */
+    virtual void composeLayer(sp<Snapshot> current, sp<Snapshot> previous);
 
 private:
     /**
@@ -136,17 +153,6 @@ private:
      * the current snapshot's clipRect member.
      */
     void setScissorFromClip();
-
-    /**
-     * Compose the layer defined in the current snapshot with the layer
-     * defined by the previous snapshot.
-     *
-     * The current snapshot *must* be a layer (flag kFlagIsLayer set.)
-     *
-     * @param curent The current snapshot containing the layer to compose
-     * @param previous The previous snapshot to compose the current layer with
-     */
-    void composeLayer(sp<Snapshot> current, sp<Snapshot> previous);
 
     /**
      * Creates a new layer stored in the specified snapshot.

@@ -19,6 +19,7 @@
 #include <SkUtils.h>
 
 #include <cutils/properties.h>
+
 #include <utils/Log.h>
 
 #include "FontRenderer.h"
