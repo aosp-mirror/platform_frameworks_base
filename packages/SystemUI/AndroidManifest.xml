@@ -32,6 +32,7 @@
         <activity android:name=".recent.RecentApplicationsActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
             android:exported="true">
         </activity>
 
