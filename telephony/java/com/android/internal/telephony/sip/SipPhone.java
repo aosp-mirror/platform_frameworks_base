@@ -870,6 +870,9 @@ public class SipPhone extends SipPhoneBase {
                 case SipErrorCode.INVALID_CREDENTIALS:
                     onError(Connection.DisconnectCause.INVALID_CREDENTIALS);
                     break;
+                case SipErrorCode.CROSS_DOMAIN_AUTHENTICATION:
+                    onError(Connection.DisconnectCause.OUT_OF_NETWORK);
+                    break;
                 case SipErrorCode.SOCKET_ERROR:
                 case SipErrorCode.SERVER_ERROR:
                 case SipErrorCode.CLIENT_ERROR:

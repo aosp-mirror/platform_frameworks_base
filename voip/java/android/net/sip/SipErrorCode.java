@@ -58,6 +58,9 @@ public class SipErrorCode {
     /** When data connection is lost. */
     public static final int DATA_CONNECTION_LOST = -10;
 
+    /** Cross-domain authentication required. */
+    public static final int CROSS_DOMAIN_AUTHENTICATION = -11;
+
     public static String toString(int errorCode) {
         switch (errorCode) {
             case NO_ERROR:
@@ -82,6 +85,8 @@ public class SipErrorCode {
                 return "IN_PROGRESS";
             case DATA_CONNECTION_LOST:
                 return "DATA_CONNECTION_LOST";
+            case CROSS_DOMAIN_AUTHENTICATION:
+                return "CROSS_DOMAIN_AUTHENTICATION";
             default:
                 return "UNKNOWN";
         }

@@ -810,6 +810,12 @@ class SipSessionGroup implements SipListener {
             }
         }
 
+        private boolean crossDomainAuthenticationRequired(Response response) {
+            String realm = getRealmFromResponse(response);
+            if (realm == null) realm = "";
+            return !mLocalProfile.getSipDomain().trim().equals(realm.trim());
+        }
+
         private AccountManager getAccountManager() {
             return new AccountManager() {
                 public UserCredentials getCredentials(ClientTransaction
@@ -829,6 +835,15 @@ class SipSessionGroup implements SipListener {
                     };
                 }
             };
+        }
+
+        private String getRealmFromResponse(Response response) {
+            WWWAuthenticate wwwAuth = (WWWAuthenticate)response.getHeader(
+                    SIPHeaderNames.WWW_AUTHENTICATE);
+            if (wwwAuth != null) return wwwAuth.getRealm();
+            ProxyAuthenticate proxyAuth = (ProxyAuthenticate)response.getHeader(
+                    SIPHeaderNames.PROXY_AUTHENTICATE);
+            return (proxyAuth == null) ? null : proxyAuth.getRealm();
         }
 
         private String getNonceFromResponse(Response response) {
@@ -937,7 +952,10 @@ class SipSessionGroup implements SipListener {
                     return true;
                 case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
-                    if (handleAuthentication(event)) {
+                    if (crossDomainAuthenticationRequired(response)) {
+                        onError(SipErrorCode.CROSS_DOMAIN_AUTHENTICATION,
+                                getRealmFromResponse(response));
+                    } else if (handleAuthentication(event)) {
                         addSipSession(this);
                     } else if (mLastNonce == null) {
                         onError(SipErrorCode.SERVER_ERROR,

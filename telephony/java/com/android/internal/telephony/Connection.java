@@ -41,6 +41,7 @@ public abstract class Connection {
         INVALID_NUMBER,                 /* invalid dial string */
         NUMBER_UNREACHABLE,             /* cannot reach the peer */
         INVALID_CREDENTIALS,            /* invalid credentials */
+        OUT_OF_NETWORK,                 /* calling from out of network is not allowed */
         TIMED_OUT,                      /* client timed out */
         LOST_SIGNAL,
         LIMIT_EXCEEDED,                 /* eg GSM ACM limit exceeded */
