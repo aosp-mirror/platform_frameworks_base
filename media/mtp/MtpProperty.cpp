@@ -121,6 +121,7 @@ MtpProperty::~MtpProperty() {
 }
 
 void MtpProperty::read(MtpDataPacket& packet) {
+    bool deviceProp = isDeviceProperty();
 
     mCode = packet.getUInt16();
     mType = packet.getUInt16();
@@ -137,14 +138,16 @@ void MtpProperty::read(MtpDataPacket& packet) {
         case MTP_TYPE_AINT128:
         case MTP_TYPE_AUINT128:
             mDefaultArrayValues = readArrayValues(packet, mDefaultArrayLength);
-            mCurrentArrayValues = readArrayValues(packet, mCurrentArrayLength);
+            if (deviceProp)
+                mCurrentArrayValues = readArrayValues(packet, mCurrentArrayLength);
             break;
         default:
             readValue(packet, mDefaultValue);
-            if (isDeviceProperty())
+            if (deviceProp)
                 readValue(packet, mCurrentValue);
     }
-    mGroupCode = packet.getUInt32();
+    if (!deviceProp)
+        mGroupCode = packet.getUInt32();
     mFormFlag = packet.getUInt8();
 
     if (mFormFlag == kFormRange) {
@@ -160,6 +163,8 @@ void MtpProperty::read(MtpDataPacket& packet) {
 }
 
 void MtpProperty::write(MtpDataPacket& packet) {
+    bool deviceProp = isDeviceProperty();
+
     packet.putUInt16(mCode);
     packet.putUInt16(mType);
     packet.putUInt8(mWriteable ? 1 : 0);
@@ -176,12 +181,17 @@ void MtpProperty::write(MtpDataPacket& packet) {
         case MTP_TYPE_AINT128:
         case MTP_TYPE_AUINT128:
             writeArrayValues(packet, mDefaultArrayValues, mDefaultArrayLength);
+            if (deviceProp)
+                writeArrayValues(packet, mCurrentArrayValues, mCurrentArrayLength);
             break;
         default:
             writeValue(packet, mDefaultValue);
+            if (deviceProp)
+                writeValue(packet, mCurrentValue);
     }
     packet.putUInt32(mGroupCode);
-    packet.putUInt8(mFormFlag);
+    if (!deviceProp)
+        packet.putUInt8(mFormFlag);
     if (mFormFlag == kFormRange) {
             writeValue(packet, mMinimumValue);
             writeValue(packet, mMaximumValue);
