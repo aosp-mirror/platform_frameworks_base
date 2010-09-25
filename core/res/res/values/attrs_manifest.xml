@@ -75,7 +75,8 @@
          header in the Action Bar. The primary differences between an icon
          and a logo are that logos are often wider and more detailed, and are
          used without an accompanying text caption. This must be a reference
-         to a Drawable resource containing the image definition. -->
+         to a Drawable resource containing the image definition.
+         @hide -->
     <attr name="logo" format="reference" />
 
     <!-- Name of the activity to be launched to manage application's space on
@@ -399,7 +400,8 @@
     <attr name="syncable" format="boolean" />
     
     <!-- Flag declaring this activity to be 'immersive'; immersive activities
-         should not be interrupted with other activities or notifications. -->
+         should not be interrupted with other activities or notifications.
+         @hide -->
     <attr name="immersive" format="boolean" />
 
     <!-- Specify the order in which content providers hosted by a process
@@ -715,7 +717,6 @@
         <attr name="theme" />
         <attr name="label" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="description" />
         <attr name="permission" />
         <attr name="process" />
@@ -774,7 +775,6 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="permissionGroup" />
         <attr name="description" />
         <attr name="protectionLevel" />
@@ -799,7 +799,6 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="description" />
     </declare-styleable>
     
@@ -829,7 +828,6 @@
         <attr name="name" />
         <attr name="label" />
         <attr name="icon" />
-        <attr name="logo" />
     </declare-styleable>
     
     <!-- The <code>uses-permission</code> tag requests a
@@ -1034,7 +1032,6 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="process" />
         <attr name="authorities" />
         <attr name="syncable" />
@@ -1114,7 +1111,6 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="permission" />
         <attr name="process" />
         <!-- Specify whether the service is enabled or not (that is, can be instantiated by the system).
@@ -1147,7 +1143,6 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="permission" />
         <attr name="process" />
         <!-- Specify whether the receiver is enabled or not (that is, can be instantiated by the system).
@@ -1180,7 +1175,6 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="launchMode" />
         <attr name="screenOrientation" />
         <attr name="configChanges" />
@@ -1206,7 +1200,6 @@
              this activity.  A value besides "unspecified" here overrides
              any value in the theme. -->
         <attr name="windowSoftInputMode" />
-        <attr name="immersive" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
@@ -1235,7 +1228,6 @@
         <attr name="label" />
         <attr name="description" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="permission" />
         <!-- Specify whether the activity-alias is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
@@ -1305,7 +1297,6 @@
          parent="AndroidManifestActivity AndroidManifestReceiver AndroidManifestService">
         <attr name="label" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="priority" />
     </declare-styleable>
     
@@ -1412,7 +1403,6 @@
         <attr name="targetPackage" />
         <attr name="label" />
         <attr name="icon" />
-        <attr name="logo" />
         <attr name="handleProfiling" />
         <attr name="functionalTest" />
     </declare-styleable>
