@@ -90,7 +90,7 @@ public abstract class MediaItem {
     }
 
     /**
-     * @return The of the media item
+     * @return The id of the media item
      */
     public String getId() {
         return mUniqueId;

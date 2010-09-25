@@ -116,10 +116,30 @@ public class MediaImageItem extends MediaItem {
     }
 
     /**
+     * This method will adjust the duration of bounding transitions if the
+     * current duration of the transactions become greater than the maximum
+     * allowable duration.
+     *
      * @param durationMs The duration of the image in the storyboard timeline
      */
     public void setDuration(long durationMs) {
         mDurationMs = durationMs;
+
+        // Check if the duration of transitions need to be adjusted
+        if (mBeginTransition != null) {
+            final long maxDurationMs = mBeginTransition.getMaximumDuration();
+            if (mBeginTransition.getDuration() > maxDurationMs) {
+                mBeginTransition.setDuration(maxDurationMs);
+            }
+        }
+
+        if (mEndTransition != null) {
+            final long maxDurationMs = mEndTransition.getMaximumDuration();
+            if (mEndTransition.getDuration() > maxDurationMs) {
+                mEndTransition.setDuration(maxDurationMs);
+            }
+        }
+
         // TODO: Validate/modify the start and the end time of effects and overlays
     }
 
