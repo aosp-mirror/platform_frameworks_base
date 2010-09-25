@@ -74,6 +74,11 @@ public class RemoteViews implements Parcelable, Filter {
      */
     private ArrayList<Action> mActions;
     
+    /**
+     * A class to keep track of memory usage by this RemoteViews
+     */
+    private MemoryUsageCounter mMemoryUsageCounter;
+
     
     /**
      * This flag indicates whether this RemoteViews object is being created from a
@@ -117,6 +122,15 @@ public class RemoteViews implements Parcelable, Filter {
 
         public int describeContents() {
             return 0;
+        }
+
+        /**
+         * Overridden by each class to report on it's own memory usage
+         */
+        public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
+            // We currently only calculate Bitmap memory usage, so by default, don't do anything
+            // here
+            return;
         }
     }
 
@@ -525,7 +539,7 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             }
         }
-        
+
         int viewId;
         boolean targetBackground;
         int alpha;
@@ -817,6 +831,35 @@ public class RemoteViews implements Parcelable, Filter {
                 throw new ActionException(ex);
             }
         }
+
+        @Override
+        public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
+            // We currently only calculate Bitmap memory usage
+            switch (this.type) {
+                case BITMAP:
+                    if (this.value != null) {
+                        final Bitmap b = (Bitmap) this.value;
+                        final Bitmap.Config c = b.getConfig();
+                        int bpp = 4;
+                        switch (c) {
+                        case ALPHA_8:
+                            bpp = 1;
+                            break;
+                        case RGB_565:
+                        case ARGB_4444:
+                            bpp = 2;
+                            break;
+                        case ARGB_8888:
+                            bpp = 4;
+                            break;
+                        }
+                        counter.bitmapIncrement(b.getWidth() * b.getHeight() * bpp);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     /**
@@ -854,10 +897,37 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
+        @Override
+        public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
+            if (nestedViews != null) {
+                counter.bitmapIncrement(nestedViews.estimateBitmapMemoryUsage());
+            }
+        }
+
         int viewId;
         RemoteViews nestedViews;
 
         public final static int TAG = 4;
+    }
+
+    /**
+     * Simple class used to keep track of memory usage in a RemoteViews.
+     *
+     */
+    private class MemoryUsageCounter {
+        public void clear() {
+            mBitmapHeapMemoryUsage = 0;
+        }
+
+        public void bitmapIncrement(int numBytes) {
+            mBitmapHeapMemoryUsage += numBytes;
+        }
+
+        public int getBitmapHeapMemoryUsage() {
+            return mBitmapHeapMemoryUsage;
+        }
+
+        int mBitmapHeapMemoryUsage;
     }
 
     /**
@@ -870,6 +940,10 @@ public class RemoteViews implements Parcelable, Filter {
     public RemoteViews(String packageName, int layoutId) {
         mPackage = packageName;
         mLayoutId = layoutId;
+
+        // setup the memory usage statistics
+        mMemoryUsageCounter = new MemoryUsageCounter();
+        recalculateMemoryUsage();
     }
 
     /**
@@ -920,6 +994,10 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             }
         }
+
+        // setup the memory usage statistics
+        mMemoryUsageCounter = new MemoryUsageCounter();
+        recalculateMemoryUsage();
     }
 
     @Override
@@ -928,6 +1006,9 @@ public class RemoteViews implements Parcelable, Filter {
         if (mActions != null) {
             that.mActions = (ArrayList<Action>)mActions.clone();
         }
+
+        // update the memory usage stats of the cloned RemoteViews
+        that.recalculateMemoryUsage();
         return that;
     }
 
@@ -939,7 +1020,7 @@ public class RemoteViews implements Parcelable, Filter {
         return mLayoutId;
     }
 
-    /**
+    /*
      * This flag indicates whether this RemoteViews object is being created from a
      * RemoteViewsService for use as a child of a widget collection. This flag is used
      * to determine whether or not certain features are available, in particular,
@@ -948,6 +1029,28 @@ public class RemoteViews implements Parcelable, Filter {
      */
     void setIsWidgetCollectionChild(boolean isWidgetCollectionChild) {
         mIsWidgetCollectionChild = isWidgetCollectionChild;
+    }
+
+    /**
+     * Updates the memory usage statistics.
+     */
+    private void recalculateMemoryUsage() {
+        mMemoryUsageCounter.clear();
+
+        // Accumulate the memory usage for each action
+        if (mActions != null) {
+            final int count = mActions.size();
+            for (int i= 0; i < count; ++i) {
+                mActions.get(i).updateMemoryUsageEstimate(mMemoryUsageCounter);
+            }
+        }
+    }
+
+    /**
+     * Returns an estimate of the bitmap heap memory usage for this RemoteViews.
+     */
+    int estimateBitmapMemoryUsage() {
+        return mMemoryUsageCounter.getBitmapHeapMemoryUsage();
     }
 
     /**
@@ -960,6 +1063,9 @@ public class RemoteViews implements Parcelable, Filter {
             mActions = new ArrayList<Action>();
         }
         mActions.add(a);
+
+        // update the memory usage stats
+        a.updateMemoryUsageEstimate(mMemoryUsageCounter);
     }
 
     /**

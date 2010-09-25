@@ -4367,9 +4367,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void setRemoteViewsAdapter(Intent intent) {
         // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
         // service handling the specified intent.
-        Intent.FilterComparison fc = new Intent.FilterComparison(intent);
-        if (mRemoteAdapter != null && fc.equals(mRemoteAdapter.getRemoteViewsServiceIntent())) {
-            return;
+        if (mRemoteAdapter != null) {
+            Intent.FilterComparison fcNew = new Intent.FilterComparison(intent);
+            Intent.FilterComparison fcOld = new Intent.FilterComparison(
+                    mRemoteAdapter.getRemoteViewsServiceIntent());
+            if (fcNew.equals(fcOld)) {
+                return;
+            }
         }
 
         // Otherwise, create a new RemoteViewsAdapter for binding
