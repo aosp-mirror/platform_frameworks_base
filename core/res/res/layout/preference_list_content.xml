@@ -30,6 +30,7 @@
         android:layout_weight="1">
 
         <LinearLayout
+            android:id="@+id/headers"
             android:orientation="vertical"
             android:layout_width="0px"
             android:layout_height="match_parent"
