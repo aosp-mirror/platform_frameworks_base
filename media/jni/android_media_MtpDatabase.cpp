@@ -342,11 +342,18 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
     jlong longValue = longValues[0];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
 
-    // special case MTP_PROPERTY_DATE_MODIFIED, which is a string to MTP
+    // special case date properties, which are strings to MTP
     // but stored internally as a uint64
-    if (property == MTP_PROPERTY_DATE_MODIFIED) {
+    if (property == MTP_PROPERTY_DATE_MODIFIED || property == MTP_PROPERTY_DATE_ADDED) {
         char    date[20];
         formatDateTime(longValue, date, sizeof(date));
+        packet.putString(date);
+        return MTP_RESPONSE_OK;
+    }
+    // release date is stored internally as just the year
+    if (property == MTP_PROPERTY_ORIGINAL_RELEASE_DATE) {
+        char    date[20];
+        snprintf(date, sizeof(date), "%04lld0101T000000", longValue);
         packet.putString(date);
         return MTP_RESPONSE_OK;
     }
@@ -680,6 +687,17 @@ static const PropertyTableEntry   kObjectPropertyTable[] = {
     {   MTP_PROPERTY_PARENT_OBJECT,     MTP_TYPE_UINT32     },
     {   MTP_PROPERTY_PERSISTENT_UID,    MTP_TYPE_UINT128    },
     {   MTP_PROPERTY_NAME,              MTP_TYPE_STR        },
+    {   MTP_PROPERTY_DISPLAY_NAME,      MTP_TYPE_STR        },
+    {   MTP_PROPERTY_DATE_ADDED,        MTP_TYPE_STR        },
+    {   MTP_PROPERTY_ARTIST,            MTP_TYPE_STR        },
+    {   MTP_PROPERTY_ALBUM_NAME,        MTP_TYPE_STR        },
+    {   MTP_PROPERTY_ALBUM_ARTIST,      MTP_TYPE_STR        },
+    {   MTP_PROPERTY_TRACK,             MTP_TYPE_UINT16     },
+    {   MTP_PROPERTY_ORIGINAL_RELEASE_DATE, MTP_TYPE_STR    },
+    {   MTP_PROPERTY_GENRE,             MTP_TYPE_STR        },
+    {   MTP_PROPERTY_COMPOSER,          MTP_TYPE_STR        },
+    {   MTP_PROPERTY_DURATION,          MTP_TYPE_UINT32     },
+    {   MTP_PROPERTY_DESCRIPTION,       MTP_TYPE_STR        },
 };
 
 static const PropertyTableEntry   kDevicePropertyTable[] = {
@@ -754,10 +772,12 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
     switch (property) {
         case MTP_PROPERTY_OBJECT_FORMAT:
         case MTP_PROPERTY_PROTECTION_STATUS:
+        case MTP_PROPERTY_TRACK:
             result = new MtpProperty(property, MTP_TYPE_UINT16);
             break;
         case MTP_PROPERTY_STORAGE_ID:
         case MTP_PROPERTY_PARENT_OBJECT:
+        case MTP_PROPERTY_DURATION:
             result = new MtpProperty(property, MTP_TYPE_UINT32);
             break;
         case MTP_PROPERTY_OBJECT_SIZE:
@@ -769,6 +789,15 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
         case MTP_PROPERTY_NAME:
         case MTP_PROPERTY_OBJECT_FILE_NAME:
         case MTP_PROPERTY_DATE_MODIFIED:
+        case MTP_PROPERTY_DISPLAY_NAME:
+        case MTP_PROPERTY_DATE_ADDED:
+        case MTP_PROPERTY_ARTIST:
+        case MTP_PROPERTY_ALBUM_NAME:
+        case MTP_PROPERTY_ALBUM_ARTIST:
+        case MTP_PROPERTY_ORIGINAL_RELEASE_DATE:
+        case MTP_PROPERTY_GENRE:
+        case MTP_PROPERTY_COMPOSER:
+        case MTP_PROPERTY_DESCRIPTION:
             result = new MtpProperty(property, MTP_TYPE_STR);
             break;
     }
