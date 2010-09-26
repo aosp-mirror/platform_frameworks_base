@@ -321,7 +321,7 @@ static int shell() {
         buffer[0] = 0;
         fgets(buffer, sizeof(buffer), stdin);
         int count = strlen(buffer);
-        if (count > 0 && buffer[0] == EOF) {
+        if (count > 0 && buffer[0] == (char)EOF) {
             printf("\n");
             exit(0);
         }
