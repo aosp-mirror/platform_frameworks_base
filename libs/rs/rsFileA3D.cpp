@@ -68,13 +68,11 @@ void FileA3D::parseHeader(IStream *headerStream)
     uint32_t flags = headerStream->loadU32();
     mUse64BitOffsets = (flags & 1) != 0;
 
-    LOGE("file open 64bit = %i", mUse64BitOffsets);
-
     uint32_t numIndexEntries = headerStream->loadU32();
     for(uint32_t i = 0; i < numIndexEntries; i ++) {
         A3DIndexEntry *entry = new A3DIndexEntry();
         headerStream->loadString(&entry->mObjectName);
-        LOGE("Header data, entry name = %s", entry->mObjectName.string());
+        LOGV("Header data, entry name = %s", entry->mObjectName.string());
         entry->mType = (RsA3DClassID)headerStream->loadU32();
         if(mUse64BitOffsets){
             entry->mOffset = headerStream->loadOffset();
@@ -91,7 +89,6 @@ void FileA3D::parseHeader(IStream *headerStream)
 
 bool FileA3D::load(const void *data, size_t length)
 {
-    LOGE("Loading data. Size: %u", length);
     const uint8_t *localData = (const uint8_t *)data;
 
     size_t lengthRemaining = length;
@@ -113,8 +110,6 @@ bool FileA3D::load(const void *data, size_t length)
     memcpy(&headerSize, localData, sizeof(headerSize));
     localData += sizeof(headerSize);
     lengthRemaining -= sizeof(headerSize);
-
-    LOGE("Loading data, headerSize = %lli", headerSize);
 
     if(lengthRemaining < headerSize) {
         return false;
@@ -145,8 +140,6 @@ bool FileA3D::load(const void *data, size_t length)
     localData += sizeof(mDataSize);
     lengthRemaining -= sizeof(mDataSize);
 
-    LOGE("Loading data, mDataSize = %lli", mDataSize);
-
     if(lengthRemaining < mDataSize) {
         return false;
     }
@@ -169,7 +162,7 @@ bool FileA3D::load(FILE *f)
     char magicString[12];
     size_t len;
 
-    LOGE("file open 1");
+    LOGV("file open 1");
     len = fread(magicString, 1, 12, f);
     if ((len != 12) ||
         memcmp(magicString, "Android3D_ff", 12)) {
@@ -205,7 +198,7 @@ bool FileA3D::load(FILE *f)
         return false;
     }
 
-    LOGE("file open size = %lli", mDataSize);
+    LOGV("file open size = %lli", mDataSize);
 
     // We should know enough to read the file in at this point.
     mAlloc = malloc(mDataSize);
@@ -220,7 +213,7 @@ bool FileA3D::load(FILE *f)
 
     mReadStream = new IStream(mData, mUse64BitOffsets);
 
-    LOGE("Header is read an stream initialized");
+    LOGV("Header is read an stream initialized");
     return true;
 }
 
@@ -437,7 +430,7 @@ RsObjectBase rsi_FileA3DGetEntryByIndex(Context *rsc, uint32_t index, RsFile fil
     }
 
     ObjectBase *obj = fa3d->initializeFromEntry(index);
-    LOGE("Returning object with name %s", obj->getName());
+    LOGV("Returning object with name %s", obj->getName());
 
     return obj;
 }

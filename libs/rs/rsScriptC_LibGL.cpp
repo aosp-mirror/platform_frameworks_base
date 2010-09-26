@@ -93,33 +93,33 @@ static void SC_bindProgramRaster(RsProgramRaster pv)
 static void SC_vpLoadProjectionMatrix(const rsc_Matrix *m)
 {
     GET_TLS();
-    rsc->getVertex()->setProjectionMatrix(m);
+    rsc->getVertex()->setProjectionMatrix(rsc, m);
 }
 
 static void SC_vpLoadModelMatrix(const rsc_Matrix *m)
 {
     GET_TLS();
-    rsc->getVertex()->setModelviewMatrix(m);
+    rsc->getVertex()->setModelviewMatrix(rsc, m);
 }
 
 static void SC_vpLoadTextureMatrix(const rsc_Matrix *m)
 {
     GET_TLS();
-    rsc->getVertex()->setTextureMatrix(m);
+    rsc->getVertex()->setTextureMatrix(rsc, m);
 }
 
 
 static void SC_pfConstantColor(RsProgramFragment vpf, float r, float g, float b, float a)
 {
-    //GET_TLS();
+    GET_TLS();
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
-    pf->setConstantColor(r, g, b, a);
+    pf->setConstantColor(rsc, r, g, b, a);
 }
 
 static void SC_vpGetProjectionMatrix(rsc_Matrix *m)
 {
     GET_TLS();
-    rsc->getVertex()->getProjectionMatrix(m);
+    rsc->getVertex()->getProjectionMatrix(rsc, m);
 }
 
 
@@ -280,7 +280,7 @@ static void SC_color(float r, float g, float b, float a)
 {
     GET_TLS();
     ProgramFragment *pf = (ProgramFragment *)rsc->getFragment();
-    pf->setConstantColor(r, g, b, a);
+    pf->setConstantColor(rsc, r, g, b, a);
 }
 
 static void SC_uploadToTexture2(RsAllocation va, uint32_t baseMipLevel)

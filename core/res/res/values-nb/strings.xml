@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Lar applikasjonen frigjøre lagringsplass ved å slette filer i applikasjoners hurtigbufferkatalog. Tilgangen er vanligvis sterkt begrenset, til systemprosesser."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Flytter programressurser"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Gir et program tillatelse til å flytte programressurser fra interne til eksterne medier og omvendt."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"lese systemets loggfiler"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Lar applikasjonen lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med telefonen, men skal ikke inneholde personlig eller privat informasjon."</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Lar applikasjonen lese og skrive enhver ressurs eid av gruppen diag; for eksempel, filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør KUN brukes for maskinvarespesifikke diagnoseverktøy laget av operatøren eller produsenten."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivere eller deaktigere applikasjonskomponenter"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Utfører tilbakestilling til fabrikkstandard. Alle data slettes uten varsel."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Angir den globale mellomtjeneren på enheten som skal brukes når regelen er aktivert. Kun den opprinnelige administratoren av enheten kan angi den globale mellomtjeneren."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjemmenummer"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Arbeid"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Annen"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Egendefinert"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Skriv inn PIN-kode:"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Skriv inn passord for å låse opp"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Skriv inn personlig kode for å låse opp"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Naviger bort fra denne siden?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Velg OK for å fortsette, eller Avbryt for å forbli på denne siden."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekreft"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Dobbelttrykk for å zoome inn og ut."</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lese nettleserens logg og bokmerker"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Lar applikasjonen lese alle adresser nettleseren har besøkt, og alle nettleserens bokmerker."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skrive til nettleserens logg og bokmerker"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Berør for å lese mer om bruk av mobildata"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Grensen for mobildatabruk er overskredet"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Berør for å lese mer om bruk av mobildata"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"Ingen treff"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Finn på side"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 treff"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> av <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
 </resources>

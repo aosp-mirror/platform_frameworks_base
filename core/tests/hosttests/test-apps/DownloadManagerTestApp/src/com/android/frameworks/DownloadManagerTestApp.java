@@ -241,7 +241,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
 
         Uri remoteUri = getExternalFileUri(filename);
         Request request = new Request(remoteUri);
-        request.setMediaType(getMimeMapping(DownloadFileType.APK));
+        request.setMimeType(getMimeMapping(DownloadFileType.APK));
 
         dlRequest = mDownloadManager.enqueue(request);
 

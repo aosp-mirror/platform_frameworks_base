@@ -76,6 +76,7 @@ SurfaceFlinger::SurfaceFlinger()
         mBootTime(systemTime()),
         mHardwareTest("android.permission.HARDWARE_TEST"),
         mAccessSurfaceFlinger("android.permission.ACCESS_SURFACE_FLINGER"),
+        mReadFramebuffer("android.permission.READ_FRAME_BUFFER"),
         mDump("android.permission.DUMP"),
         mVisibleRegionsDirty(false),
         mHwWorkListDirty(false),
@@ -85,6 +86,7 @@ SurfaceFlinger::SurfaceFlinger()
         mFreezeDisplayTime(0),
         mDebugRegion(0),
         mDebugBackground(0),
+        mDebugDisableHWC(0),
         mDebugInSwapBuffers(0),
         mLastSwapBufferTime(0),
         mDebugInTransaction(0),
@@ -768,6 +770,10 @@ void SurfaceFlinger::handleWorkList()
         hwc_layer_t* const cur(hwc.getLayers());
         for (size_t i=0 ; cur && i<count ; i++) {
             currentLayers[i]->setGeometry(&cur[i]);
+            if (mDebugDisableHWC) {
+                cur[i].compositionType = HWC_FRAMEBUFFER;
+                cur[i].flags |= HWC_SKIP_LAYER;
+            }
         }
     }
 }
@@ -901,6 +907,7 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
                 continue;
             }
         }
+
         const sp<LayerBase>& layer(layers[i]);
         const Region clip(dirty.intersect(layer->visibleRegionScreen));
         if (!clip.isEmpty()) {
@@ -1522,6 +1529,13 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
         }
 
+        HWComposer& hwc(hw.getHwComposer());
+        snprintf(buffer, SIZE, "  h/w composer %s and %s\n",
+                hwc.initCheck()==NO_ERROR ? "present" : "not present",
+                mDebugDisableHWC ? "disabled" : "enabled");
+        result.append(buffer);
+        hwc.dump(result, buffer, SIZE);
+
         const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
         alloc.dump(result);
 
@@ -1554,8 +1568,23 @@ status_t SurfaceFlinger::onTransact(
                         "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
                 return PERMISSION_DENIED;
             }
+            break;
+        }
+        case CAPTURE_SCREEN:
+        {
+            // codes that require permission check
+            IPCThreadState* ipc = IPCThreadState::self();
+            const int pid = ipc->getCallingPid();
+            const int uid = ipc->getCallingUid();
+            if ((uid != AID_GRAPHICS) && !mReadFramebuffer.check(pid, uid)) {
+                LOGE("Permission Denial: "
+                        "can't read framebuffer pid=%d, uid=%d", pid, uid);
+                return PERMISSION_DENIED;
+            }
+            break;
         }
     }
+
     status_t err = BnSurfaceComposer::onTransact(code, data, reply, flags);
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {
         CHECK_INTERFACE(ISurfaceComposer, data, reply);
@@ -1580,6 +1609,11 @@ status_t SurfaceFlinger::onTransact(
                 n = data.readInt32();
                 mDebugBackground = n ? 1 : 0;
                 return NO_ERROR;
+            case 1008:  // toggle use of hw composer
+                n = data.readInt32();
+                mDebugDisableHWC = n ? 1 : 0;
+                mHwWorkListDirty = true;
+                // fall-through...
             case 1004:{ // repaint everything
                 Mutex::Autolock _l(mStateLock);
                 const DisplayHardware& hw(graphicPlane(0).displayHardware());
@@ -1615,6 +1649,139 @@ status_t SurfaceFlinger::onTransact(
         }
     }
     return err;
+}
+
+// ---------------------------------------------------------------------------
+
+status_t SurfaceFlinger::captureScreen(DisplayID dpy,
+        sp<IMemoryHeap>* heap,
+        uint32_t* width, uint32_t* height, PixelFormat* format)
+{
+    // only one display supported for now
+    if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
+        return BAD_VALUE;
+
+    if (!GLExtensions::getInstance().haveFramebufferObject())
+        return INVALID_OPERATION;
+
+    class MessageCaptureScreen : public MessageBase {
+        SurfaceFlinger* flinger;
+        DisplayID dpy;
+        sp<IMemoryHeap>* heap;
+        uint32_t* w;
+        uint32_t* h;
+        PixelFormat* f;
+        status_t result;
+    public:
+        MessageCaptureScreen(SurfaceFlinger* flinger, DisplayID dpy,
+                sp<IMemoryHeap>* heap, uint32_t* w, uint32_t* h, PixelFormat* f)
+            : flinger(flinger), dpy(dpy),
+              heap(heap), w(w), h(h), f(f), result(PERMISSION_DENIED)
+        {
+        }
+        status_t getResult() const {
+            return result;
+        }
+        virtual bool handler() {
+            Mutex::Autolock _l(flinger->mStateLock);
+
+            // if we have secure windows, never allow the screen capture
+            if (flinger->mSecureFrameBuffer)
+                return true;
+
+            // make sure to clear all GL error flags
+            while ( glGetError() != GL_NO_ERROR ) ;
+
+            // get screen geometry
+            const DisplayHardware& hw(flinger->graphicPlane(dpy).displayHardware());
+            const uint32_t sw = hw.getWidth();
+            const uint32_t sh = hw.getHeight();
+            const Region screenBounds(hw.bounds());
+            const size_t size = sw * sh * 4;
+
+            // create a FBO
+            GLuint name, tname;
+            glGenRenderbuffersOES(1, &tname);
+            glBindRenderbufferOES(GL_RENDERBUFFER_OES, tname);
+            glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_RGBA8_OES, sw, sh);
+            glGenFramebuffersOES(1, &name);
+            glBindFramebufferOES(GL_FRAMEBUFFER_OES, name);
+            glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES,
+                    GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, tname);
+
+            GLenum status = glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
+            if (status == GL_FRAMEBUFFER_COMPLETE_OES) {
+
+                // invert everything, b/c glReadPixel() below will invert the FB
+                glMatrixMode(GL_PROJECTION);
+                glPushMatrix();
+                glLoadIdentity();
+                glOrthof(0, sw, 0, sh, 0, 1);
+                glMatrixMode(GL_MODELVIEW);
+
+                // redraw the screen entirely...
+                glClearColor(0,0,0,1);
+                glClear(GL_COLOR_BUFFER_BIT);
+                const Vector< sp<LayerBase> >& layers(
+                        flinger->mVisibleLayersSortedByZ);
+                const size_t count = layers.size();
+                for (size_t i=0 ; i<count ; ++i) {
+                    const sp<LayerBase>& layer(layers[i]);
+                    if (!strcmp(layer->getTypeId(), "LayerBuffer")) {
+                        // we cannot render LayerBuffer because it doens't
+                        // use OpenGL, and won't show-up in the FBO.
+                        continue;
+                    }
+                    layer->draw(screenBounds);
+                }
+
+                glMatrixMode(GL_PROJECTION);
+                glPopMatrix();
+                glMatrixMode(GL_MODELVIEW);
+
+                // check for errors and return screen capture
+                if (glGetError() != GL_NO_ERROR) {
+                    // error while rendering
+                    result = INVALID_OPERATION;
+                } else {
+                    // allocate shared memory large enough to hold the
+                    // screen capture
+                    sp<MemoryHeapBase> base(
+                            new MemoryHeapBase(size, 0, "screen-capture") );
+                    void* const ptr = base->getBase();
+                    if (ptr) {
+                        // capture the screen with glReadPixels()
+                        glReadPixels(0, 0, sw, sh, GL_RGBA, GL_UNSIGNED_BYTE, ptr);
+                        if (glGetError() == GL_NO_ERROR) {
+                            *heap = base;
+                            *w = sw;
+                            *h = sh;
+                            *f = PIXEL_FORMAT_RGBA_8888;
+                            result = NO_ERROR;
+                        }
+                    } else {
+                        result = NO_MEMORY;
+                    }
+                }
+            } else {
+                result = BAD_VALUE;
+            }
+
+            // release FBO resources
+            glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+            glDeleteRenderbuffersOES(1, &tname);
+            glDeleteFramebuffersOES(1, &name);
+            return true;
+        }
+    };
+
+    sp<MessageBase> msg = new MessageCaptureScreen(this,
+            dpy, heap, width, height, format);
+    status_t res = postMessageSync(msg);
+    if (res == NO_ERROR) {
+        res = static_cast<MessageCaptureScreen*>( msg.get() )->getResult();
+    }
+    return res;
 }
 
 // ---------------------------------------------------------------------------

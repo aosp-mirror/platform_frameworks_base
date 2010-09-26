@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"允许应用程序通过删除应用程序缓存目录中的文件释放手机存储空间。通常此权限只适用于系统进程。"</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"移动应用程序资源"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"允许应用程序在内部介质和外部介质之间移动应用程序资源。"</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"读取系统日志文件"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"允许应用程序从系统的各日志文件中读取信息。这样应用程序可以发现您的手机使用情况，但这些信息不应包含任何个人信息或保密信息。"</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"允许应用程序读取/写入诊断组所拥有的任何资源（例如，/dev 中的文件）。这可能会影响系统稳定性和安全性。此权限仅供制造商或运营商诊断硬件问题。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"启用或停用应用程序组件"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"恢复出厂设置，这会在不提示确认的情况下删除您的所有数据。"</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"请设置在启用政策的情况下要使用的设备全局代理。只有第一设备管理员才可设置有效的全局代理。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手机"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"公司"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"其他"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"自定义"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"输入 PIN 码"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"输入密码进行解锁"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"输入 PIN 进行解锁"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"是否从该页面导航至它处？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"选择“确定”继续，或选择“取消”留在当前页面。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"确认"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"提示：点按两次可放大和缩小。"</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"读取浏览器的历史记录和书签"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"允许应用程序读取用浏览器访问过的所有网址，以及浏览器的所有书签。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"写入浏览器的历史记录和书签"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"轻触以了解有关手机流量详情"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已超出手机数据上限"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"轻触以了解有关手机流量详情"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"无匹配项"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"在网页上查找"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 个匹配项"</item>
+    <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 项，共 <xliff:g id="TOTAL">%d</xliff:g> 项"</item>
+  </plurals>
 </resources>

@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Permet à une application de libérer de l\'espace dans la mémoire du téléphone en supprimant des fichiers du répertoire du cache des applications. Cet accès est en général limité aux processus système."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Déplacer des ressources d\'application"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Autorise l\'application à déplacer des ressources d\'application d\'un support interne à un support externe et inversement."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"Lecture des fichiers journaux du système"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Permet à une application de lire les différents fichiers journaux du système afin d\'obtenir des informations générales sur la façon dont vous utilisez votre téléphone,  sans pour autant récupérer des informations d\'ordre personnel ou privé."</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Lecture/écriture dans les ressources appartenant aux diagnostics"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permet à une application de lire et d\'éditer toute ressource appartenant au groupe de diagnostics (par exemple, les fichiers in/dev). Ceci peut affecter la stabilité et la sécurité du système. Cette fonctionnalité est UNIQUEMENT réservée aux diagnostics matériels effectués par le fabricant ou l\'opérateur."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"Activer ou désactiver des éléments de l\'application"</string>
@@ -434,11 +436,10 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Rétablit les paramètres d\'usine, supprimant toutes vos données sans demande de confirmation."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Indiquez le proxy global à utiliser pour ce mobile lorsque les règles sont activées. Seul l\'administrateur principal du mobile peut définir le proxy global effectif."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>
-    <item msgid="869923650527136615">"Portable"</item>
+    <item msgid="869923650527136615">"Mobile"</item>
     <item msgid="7897544654242874543">"Bureau"</item>
     <item msgid="1103601433382158155">"Télécopie bureau"</item>
     <item msgid="1735177144948329370">"Télécopie domicile"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Bureau"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Autre"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Personnalisé"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Saisissez le code PIN"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Saisissez le mot de passe pour procéder au déverrouillage."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Saisissez le code PIN pour procéder au déverrouillage."</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Vous souhaitez quitter cette page ?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Sélectionnez OK pour continuer ou Annuler pour rester sur la page actuelle."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmer"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Conseil : Appuyez deux fois pour effectuer un zoom avant ou arrière."</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lire l\'historique et les favoris du navigateur"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Autorise l\'application à lire toutes les URL auxquelles le navigateur a accédé et tous ses favoris."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"écrire dans l\'historique et les favoris du navigateur"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Touchez pour en savoir plus sur l\'utilisation des données mobiles"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Quota d\'utilisation des données mobiles dépassé"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Touchez pour en savoir plus sur l\'utilisation des données mobiles"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"Aucune correspondance"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Rechercher sur la page"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 correspondance"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> sur <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
 </resources>

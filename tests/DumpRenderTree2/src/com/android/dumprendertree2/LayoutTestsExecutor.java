@@ -43,9 +43,10 @@ import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
+import android.webkit.WebStorage.QuotaUpdater;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.WebStorage.QuotaUpdater;
 
 import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -327,6 +328,13 @@ public class LayoutTestsExecutor extends Activity {
         mCurrentAdditionalTextOutput = null;
 
         mCurrentWebView = createWebViewWithJavascriptInterfaces();
+        // When we create the first WebView, we need to pause to wait for the WebView thread to spin
+        // and up and for it to register its message handlers.
+        if (previousWebView == null) {
+            try {
+                Thread.currentThread().sleep(1000);
+            } catch (Exception e) {}
+        }
         setupWebView(mCurrentWebView);
 
         mEventSender.reset(mCurrentWebView);
@@ -386,6 +394,9 @@ public class LayoutTestsExecutor extends Activity {
 
         // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
         mCurrentWebView.useMockDeviceOrientation();
+
+        // Must do this after setting the AppCache path.
+        WebStorage.getInstance().deleteAllData();
     }
 
     private void startTests() {

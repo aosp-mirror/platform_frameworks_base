@@ -2111,7 +2111,15 @@ void MPEG4Writer::Track::writeTrackHeader(
                       mOwner->endBox();  // d263
                   } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
                       CHECK(mCodecSpecificData);
-                      CHECK(mCodecSpecificDataSize > 0);
+                      CHECK(mCodecSpecificDataSize >= 5);
+
+                      // Patch avcc's lengthSize field to match the number
+                      // of bytes we use to indicate the size of a nal unit.
+                      uint8_t *ptr = (uint8_t *)mCodecSpecificData;
+                      ptr[4] =
+                          (ptr[4] & 0xfc)
+                            | (mOwner->useNalLengthFour() ? 3 : 1);
+
                       mOwner->beginBox("avcC");
                         mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
                       mOwner->endBox();  // avcC

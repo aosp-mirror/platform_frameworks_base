@@ -16,16 +16,24 @@
 
 package android.media.videoeditor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
+
 
 /**
- * This class is used to overlay an image on top of a media item. This class
- * does not manage deletion of the overlay file so application may use
- * {@link #getFilename()} for this purpose.
+ * This class is used to overlay an image on top of a media item.
  * {@hide}
  */
 public class OverlayFrame extends Overlay {
     // Instance variables
-    private final String mFilename;
+    private final Bitmap mBitmap;
+    private String mFilename;
 
     /**
      * An object of this type cannot be instantiated by using the default
@@ -33,30 +41,90 @@ public class OverlayFrame extends Overlay {
      */
     @SuppressWarnings("unused")
     private OverlayFrame() {
-        this(null, null, 0, 0);
+        this(null, (String)null, 0, 0);
     }
 
     /**
      * Constructor for an OverlayFrame
      *
      * @param overlayId The overlay id
-     * @param filename The file name that contains the overlay. Only PNG
-     *            supported.
+     * @param bitmap The bitmap to be used as an overlay. The size of the
+     *      bitmap must equal to the size of the media item to which it is
+     *      added. The bitmap is typically a decoded PNG file.
      * @param startTimeMs The overlay start time in milliseconds
      * @param durationMs The overlay duration in milliseconds
      *
      * @throws IllegalArgumentException if the file type is not PNG or the
      *      startTimeMs and durationMs are incorrect.
      */
-    public OverlayFrame(String overlayId, String filename, long startTimeMs, long durationMs) {
+    public OverlayFrame(String overlayId, Bitmap bitmap, long startTimeMs,
+            long durationMs) {
+        super(overlayId, startTimeMs, durationMs);
+        mBitmap = bitmap;
+        mFilename = null;
+    }
+
+    /**
+     * Constructor for an OverlayFrame. This constructor can be used to
+     * restore the overlay after it was saved internally by the video editor.
+     *
+     * @param overlayId The overlay id
+     * @param filename The file name that contains the overlay.
+     * @param startTimeMs The overlay start time in milliseconds
+     * @param durationMs The overlay duration in milliseconds
+     *
+     * @throws IllegalArgumentException if the file type is not PNG or the
+     *      startTimeMs and durationMs are incorrect.
+     */
+    OverlayFrame(String overlayId, String filename, long startTimeMs, long durationMs) {
         super(overlayId, startTimeMs, durationMs);
         mFilename = filename;
+        mBitmap = BitmapFactory.decodeFile(mFilename);
+    }
+
+    /**
+     * @return Get the overlay bitmap
+     */
+    public Bitmap getBitmap() {
+        return mBitmap;
     }
 
     /**
      * Get the file name of this overlay
      */
-    public String getFilename() {
+    String getFilename() {
         return mFilename;
+    }
+
+    /**
+     * Save the overlay to the project folder
+     *
+     * @param editor The video editor
+     *
+     * @return
+     * @throws FileNotFoundException if the bitmap cannot be saved
+     * @throws IOException if the bitmap file cannot be saved
+     */
+    String save(VideoEditor editor) throws FileNotFoundException, IOException {
+        if (mFilename != null) {
+            return mFilename;
+        }
+
+        mFilename = editor.getPath() + "/" + getId() + ".png";
+        // Save the image to a local file
+        final FileOutputStream out = new FileOutputStream(mFilename);
+        mBitmap.compress(CompressFormat.PNG, 100, out);
+        out.flush();
+        out.close();
+        return mFilename;
+    }
+
+    /**
+     * Delete the overlay file
+     */
+    void invalidate() {
+        if (mFilename != null) {
+            new File(mFilename).delete();
+        }
     }
 }

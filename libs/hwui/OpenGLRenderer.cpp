@@ -24,6 +24,7 @@
 #include <SkTypeface.h>
 
 #include <utils/Log.h>
+#include <utils/StopWatch.h>
 
 #include "OpenGLRenderer.h"
 
@@ -710,6 +711,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
         return;
     }
+
     paint->setAntiAlias(true);
 
     float length = -1.0f;
@@ -739,6 +741,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     FontRenderer& fontRenderer = mCaches.fontRenderer.getFontRenderer(paint);
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
+
     if (mHasShadow) {
         glActiveTexture(gTextureUnits[0]);
         mCaches.dropShadowCache.setFontRenderer(fontRenderer);

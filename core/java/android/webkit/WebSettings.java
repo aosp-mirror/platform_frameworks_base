@@ -207,6 +207,7 @@ public class WebSettings {
     private RenderPriority  mRenderPriority = RenderPriority.NORMAL;
     private int             mOverrideCacheMode = LOAD_DEFAULT;
     private boolean         mSaveFormData = true;
+    private boolean         mAutoFillEnabled = false;
     private boolean         mSavePassword = true;
     private boolean         mLightTouchEnabled = false;
     private boolean         mNeedInitialFocus = true;
@@ -593,6 +594,20 @@ public class WebSettings {
      */
     public boolean getSaveFormData() {
         return mSaveFormData;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAutoFillEnabled(boolean enabled) {
+        mAutoFillEnabled = enabled;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean getAutoFillEnabled() {
+        return mAutoFillEnabled;
     }
 
     /**

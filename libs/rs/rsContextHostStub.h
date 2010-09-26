@@ -120,6 +120,9 @@ public:
     mutable const ObjectBase * mObjHead;
 
     bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
+    uint32_t getMaxFragmentTextures() const {return mGL.mMaxFragmentTextureImageUnits;}
+    uint32_t getMaxFragmentUniformVectors() const {return mGL.mMaxFragmentUniformVectors;}
+    uint32_t getMaxVertexUniformVectors() const {return mGL.mMaxVertexUniformVectors;}
 
 protected:
 

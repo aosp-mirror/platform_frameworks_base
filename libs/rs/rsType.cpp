@@ -254,6 +254,20 @@ bool Type::getIsNp2() const
     return false;
 }
 
+bool Type::isEqual(const Type *other) const {
+    if(other == NULL) {
+        return false;
+    }
+    if (other->getElement()->isEqual(getElement()) &&
+        other->getDimX() == mDimX &&
+        other->getDimY() == mDimY &&
+        other->getDimZ() == mDimZ &&
+        other->getDimLOD() == mDimLOD &&
+        other->getDimFaces() == mFaces) {
+        return true;
+    }
+    return false;
+}
 
 //////////////////////////////////////////////////
 //

@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Позволяет приложению освобождать память телефона с помощью удаления файлов из каталога кэша приложений. Обычно это разрешается только системным процессам."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Перемещать ресурсы приложения"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Позволяет приложению перемещать ресурсы приложения с внутренних на внешние носители и наоборот."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"считывать системные файлы журналов"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Позволяет приложению считывать информацию из различных журналов системы. Приложение может получить сведения о работе пользователя с телефоном, но они не должны содержать какой-либо личной или конфиденциальной информации."</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"считывать/записывать данные в ресурсы, принадлежащие группе диагностики"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Позволяет приложению считывать и записывать данные в любые ресурсы, принадлежащие группе диагностики (например, файлы в каталоге /dev). Это может повлиять на стабильность и безопасность системы. Эта возможность может быть использована ТОЛЬКО производителем или оператором для диагностики аппаратного обеспечения."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"включать или отключать компоненты приложения"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Выполнить сброс к начальным настройкам с удалением всех данных без запроса подтверждения."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Настройте глобальный прокси-сервер устройства, который будет использоваться при активной политике. Глобальный прокси-сервер должен настроить администратор первого устройства."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Домашний"</item>
     <item msgid="869923650527136615">"Мобильный"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Работа"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Другое"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Создать свой ярлык"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Введите PIN-код"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Введите пароль для разблокировки"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Введите PIN-код для разблокировки"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Подтвердите"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Совет: нажмите дважды, чтобы увеличить и уменьшить масштаб."</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"считывать историю и закладки браузера"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Разрешает приложению считывать все URL, посещенные браузером, и все его закладки."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"записывать историю и закладки браузера"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Нажмите, чтобы узнать больше о мобильной передаче данных"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Превышен лимит на мобильные данные"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Нажмите, чтобы узнать больше о мобильной передаче данных"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"Нет совпадений"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Найти на странице"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 совпадение"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> из <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
 </resources>

@@ -58,17 +58,19 @@ public class TransitionAlpha extends Transition {
      * Constructor
      *
      * @param transitionId The transition id
-     * @param afterMediaItem The transition is applied to the end of this
-     *      media item
-     * @param beforeMediaItem The transition is applied to the beginning of
-     *      this media item
+     * @param afterMediaItem The transition is applied to the end of this media
+     *            item
+     * @param beforeMediaItem The transition is applied to the beginning of this
+     *            media item
      * @param durationMs duration of the transition in milliseconds
      * @param behavior behavior is one of the behavior defined in Transition
      *            class
-     * @param maskFilename JPEG file name
+     * @param maskFilename JPEG file name. The dimension of the image
+     *           corresponds to 720p (16:9 aspect ratio). Mask files are
+     *           shared between video editors and can be created in the
+     *           projects folder (the parent folder for all projects).
      * @param blendingPercent The blending percent applied
      * @param invert true to invert the direction of the alpha blending
-     *
      * @throws IllegalArgumentException if behavior is not supported, or if
      *             direction are not supported.
      */

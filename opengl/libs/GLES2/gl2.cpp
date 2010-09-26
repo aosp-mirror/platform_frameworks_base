@@ -60,6 +60,7 @@ using namespace android;
             "ldr   r12, [r12, %[tls]] \n"                       \
             "cmp   r12, #0            \n"                       \
             "ldrne pc,  [r12, %[api]] \n"                       \
+            "mov   r0, #0             \n"                       \
             "bx    lr                 \n"                       \
             :                                                   \
             : [tls] "J"(TLS_SLOT_OPENGL_API*4),                 \

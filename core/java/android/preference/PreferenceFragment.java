@@ -144,6 +144,7 @@ public abstract class PreferenceFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPreferenceManager = new PreferenceManager(getActivity(), FIRST_REQUEST_CODE);
+        mPreferenceManager.setFragment(this);
         mPreferenceManager.setOnPreferenceTreeClickListener(this);
     }
 

@@ -30,8 +30,8 @@ import android.net.sip.ISipSessionListener;
 import android.net.sip.SipErrorCode;
 import android.net.sip.SipManager;
 import android.net.sip.SipProfile;
+import android.net.sip.SipSession;
 import android.net.sip.SipSessionAdapter;
-import android.net.sip.SipSessionState;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -143,7 +143,7 @@ public final class SipService extends ISipService.Stub {
     }
 
     private void openToReceiveCalls(SipProfile localProfile) {
-        open3(localProfile, SipManager.SIP_INCOMING_CALL_ACTION, null);
+        open3(localProfile, SipManager.ACTION_SIP_INCOMING_CALL, null);
     }
 
     public synchronized void open3(SipProfile localProfile,
@@ -255,15 +255,15 @@ public final class SipService extends ISipService.Stub {
 
     private void notifyProfileAdded(SipProfile localProfile) {
         if (DEBUG) Log.d(TAG, "notify: profile added: " + localProfile);
-        Intent intent = new Intent(SipManager.SIP_ADD_PHONE_ACTION);
-        intent.putExtra(SipManager.LOCAL_URI_KEY, localProfile.getUriString());
+        Intent intent = new Intent(SipManager.ACTION_SIP_ADD_PHONE);
+        intent.putExtra(SipManager.EXTRA_LOCAL_URI, localProfile.getUriString());
         mContext.sendBroadcast(intent);
     }
 
     private void notifyProfileRemoved(SipProfile localProfile) {
         if (DEBUG) Log.d(TAG, "notify: profile removed: " + localProfile);
-        Intent intent = new Intent(SipManager.SIP_REMOVE_PHONE_ACTION);
-        intent.putExtra(SipManager.LOCAL_URI_KEY, localProfile.getUriString());
+        Intent intent = new Intent(SipManager.ACTION_SIP_REMOVE_PHONE);
+        intent.putExtra(SipManager.EXTRA_LOCAL_URI, localProfile.getUriString());
         mContext.sendBroadcast(intent);
     }
 
@@ -474,8 +474,8 @@ public final class SipService extends ISipService.Stub {
                     // send out incoming call broadcast
                     addPendingSession(session);
                     Intent intent = SipManager.createIncomingCallBroadcast(
-                            mIncomingCallBroadcastAction, session.getCallId(),
-                            sessionDescription);
+                            session.getCallId(), sessionDescription)
+                            .setAction(mIncomingCallBroadcastAction);
                     if (DEBUG) Log.d(TAG, " ringing~~ " + getUri() + ": "
                             + caller.getUri() + ": " + session.getCallId()
                             + " " + mIncomingCallBroadcastAction);
@@ -613,10 +613,10 @@ public final class SipService extends ISipService.Stub {
 
                 try {
                     int state = (mSession == null)
-                            ? SipSessionState.READY_TO_CALL
+                            ? SipSession.State.READY_TO_CALL
                             : mSession.getState();
-                    if ((state == SipSessionState.REGISTERING)
-                            || (state == SipSessionState.DEREGISTERING)) {
+                    if ((state == SipSession.State.REGISTERING)
+                            || (state == SipSession.State.DEREGISTERING)) {
                         mProxy.onRegistering(mSession);
                     } else if (mRegistered) {
                         int duration = (int)
@@ -1138,7 +1138,8 @@ public final class SipService extends ISipService.Stub {
                 event.mTriggerTime += event.mPeriod;
 
                 // run the callback in a new thread to prevent deadlock
-                new Thread(event.mCallback).start();
+                new Thread(event.mCallback, "SipServiceTimerCallbackThread")
+                        .start();
             }
             if (DEBUG_TIMER) {
                 Log.d(TAG, "after timeout execution");

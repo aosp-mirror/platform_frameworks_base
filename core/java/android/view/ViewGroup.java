@@ -1973,8 +1973,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (hasNoCache) {
                     final int multipliedAlpha = (int) (255 * alpha);
                     if (!child.onSetAlpha(multipliedAlpha)) {
+                        int layerFlags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
+                        if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
+                            layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
+                        }
                         canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct, multipliedAlpha,
-                                Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+                                layerFlags);
                     } else {
                         child.mPrivateFlags |= ALPHA_SET;
                     }

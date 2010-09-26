@@ -882,6 +882,8 @@ final class WebViewCore {
 
         static final int USE_MOCK_DEVICE_ORIENTATION = 191;
 
+        static final int AUTOFILL_FORM = 192;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -1416,6 +1418,10 @@ final class WebViewCore {
 
                         case USE_MOCK_DEVICE_ORIENTATION:
                             useMockDeviceOrientation();
+                            break;
+
+                        case AUTOFILL_FORM:
+                            nativeAutoFillForm(msg.arg1);
                             break;
                     }
                 }
@@ -2366,6 +2372,13 @@ final class WebViewCore {
         }
     }
 
+    private void setWebTextViewAutoFillable(int queryId) {
+        if (mWebView != null) {
+            Message.obtain(mWebView.mPrivateHandler, WebView.SET_AUTOFILLABLE, queryId,
+                    /* unused */0).sendToTarget();
+        }
+    }
+
     // called by JNI
     private Context getContext() {
         return mContext;
@@ -2533,4 +2546,6 @@ final class WebViewCore {
 
     private native ArrayList<Rect> nativeGetTouchHighlightRects(int x, int y,
             int slop);
+
+   private native void nativeAutoFillForm(int queryId);
 }

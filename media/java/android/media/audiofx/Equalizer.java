@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.audiofx;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioEffect;
+import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -41,7 +41,11 @@ import java.util.StringTokenizer;
  * <p>To attach the Equalizer to a particular AudioTrack or MediaPlayer, specify the audio session
  * ID of this AudioTrack or MediaPlayer when constructing the Equalizer. If the audio session ID 0
  * is specified, the Equalizer applies to the main audio output mix.
- * <p> See {@link android.media.AudioEffect} class for more details on controlling audio effects.
+ * <p>Creating an Equalizer on the output mix (audio session 0) requires permission
+ * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
+ * <p>See {@link android.media.MediaPlayer#getAudioSessionId()} for details on audio sessions.
+ * <p>See {@link android.media.audiofx.AudioEffect} class for more details on controlling audio
+ * effects.
  */
 
 public class Equalizer extends AudioEffect {
@@ -68,7 +72,7 @@ public class Equalizer extends AudioEffect {
     public static final int PARAM_CENTER_FREQ = 3;
     /**
      * Band frequency range. Parameter ID for
-     * {@link android.media.Equalizer.OnParameterChangeListener}
+     * {@link android.media.audiofx.Equalizer.OnParameterChangeListener}
      */
     public static final int PARAM_BAND_FREQ_RANGE = 4;
     /**
@@ -380,7 +384,6 @@ public class Equalizer extends AudioEffect {
          * Equalizer engine.
          * @param effect the Equalizer on which the interface is registered.
          * @param status status of the set parameter operation.
-         * See {@link android.media.AudioEffect#setParameter(byte[], byte[])}.
          * @param param1 ID of the modified parameter. See {@link #PARAM_BAND_LEVEL} ...
          * @param param2 additional parameter qualifier (e.g the band for band level parameter).
          * @param value the new parameter value.

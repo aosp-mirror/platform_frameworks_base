@@ -40,7 +40,7 @@ using namespace android;
 #define NATIVE_EVENT_FFT_CAPTURE                1
 
 // ----------------------------------------------------------------------------
-static const char* const kClassPathName = "android/media/Visualizer";
+static const char* const kClassPathName = "android/media/audiofx/Visualizer";
 
 struct fields_t {
     // these fields provide access from C++ to the...
@@ -246,14 +246,7 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             lpJniStorage->mCallbackData.visualizer_class,
             &lpJniStorage->mCallbackData);
 
-    if (jId) {
-        nId = (jint *) env->GetPrimitiveArrayCritical(jId, NULL);
-        if (nId == NULL) {
-            LOGE("setup: Error retrieving id pointer");
-            lStatus = VISUALIZER_ERROR_BAD_VALUE;
-            goto setup_failure;
-        }
-    } else {
+    if (jId == NULL) {
         LOGE("setup: NULL java array for id pointer");
         lStatus = VISUALIZER_ERROR_BAD_VALUE;
         goto setup_failure;
@@ -275,8 +268,13 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         goto setup_failure;
     }
 
+    nId = (jint *) env->GetPrimitiveArrayCritical(jId, NULL);
+    if (nId == NULL) {
+        LOGE("setup: Error retrieving id pointer");
+        lStatus = VISUALIZER_ERROR_BAD_VALUE;
+        goto setup_failure;
+    }
     nId[0] = lpVisualizer->id();
-
     env->ReleasePrimitiveArrayCritical(jId, nId, 0);
     nId = NULL;
 
@@ -424,7 +422,6 @@ android_media_visualizer_native_getWaveForm(JNIEnv *env, jobject thiz, jbyteArra
     jint status = translateError(lpVisualizer->getWaveForm((uint8_t *)nWaveform));
 
     env->ReleasePrimitiveArrayCritical(jWaveform, nWaveform, 0);
-
     return status;
 }
 

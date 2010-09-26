@@ -245,7 +245,10 @@ public class MediaVideoItem extends MediaItem {
     }
 
     /**
-     * Sets the start and end marks for trimming a video media item
+     * Sets the start and end marks for trimming a video media item.
+     * This method will adjust the duration of bounding transitions if the
+     * current duration of the transactions become greater than the maximum
+     * allowable duration.
      *
      * @param beginMs Start time in milliseconds. Set to 0 to extract from the
      *           beginning
@@ -264,8 +267,36 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException("Invalid end time");
         }
 
+        if (beginMs != mBeginBoundaryTimeMs) {
+            if (mBeginTransition != null) {
+                mBeginTransition.invalidate();
+            }
+        }
+
+        if (endMs != mEndBoundaryTimeMs) {
+            if (mEndTransition != null) {
+                mEndTransition.invalidate();
+            }
+        }
+
         mBeginBoundaryTimeMs = beginMs;
         mEndBoundaryTimeMs = endMs;
+
+        // Check if the duration of transitions need to be adjusted
+        if (mBeginTransition != null) {
+            final long maxDurationMs = mBeginTransition.getMaximumDuration();
+            if (mBeginTransition.getDuration() > maxDurationMs) {
+                mBeginTransition.setDuration(maxDurationMs);
+            }
+        }
+
+        if (mEndTransition != null) {
+            final long maxDurationMs = mEndTransition.getMaximumDuration();
+            if (mEndTransition.getDuration() > maxDurationMs) {
+                mEndTransition.setDuration(maxDurationMs);
+            }
+        }
+
         // TODO: Validate/modify the start and the end time of effects and overlays
     }
 

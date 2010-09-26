@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Admite una aplicación que libera espacio de almacenamiento en el teléfono al eliminar archivos del directorio de memoria caché de la aplicación. En general, el acceso es muy restringido para el proceso del sistema."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Mover recursos de la aplicación"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Permite a una aplicación mover recursos de aplicación de medios internos a externos y viceversa."</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"leer archivos de registro del sistema"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Admite una aplicación que lee diversos archivos de registro del sistema. Esto le permite descubrir información general sobre lo que haces con el teléfono, pero no debe contener información personal ni privada."</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer y escribir a recursos dentro del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Admite una aplicación que lee y escribe a cualquier recurso dentro del grupo de diagnóstico; por ejemplo, archivos con /dev. Esto puede afectar potencialmente la estabilidad y la seguridad del sistema. Debe utilizarlo SÓLO el fabricante o el operador en los diagnósticos específicos del hardware."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"activar o desactivar componentes de la aplicación"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"Realizar un reestablecimiento de fábrica y borrar todos tus datos sin ninguna confirmación."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Configuración del proxy global de dispositivo que se utilizará mientras se habilita la política. Sólo la primera administración de dispositivo configura el proxy global efectivo."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Celular"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Trabajo"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Otro"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Personalizado"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ingresar el código de PIN"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Ingresar la contraseña para desbloquear"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Ingresa el PIN para desbloquear"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"¿Deseas salir de esta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecciona Aceptar para continuar o Cancelar para permanecer en la página actual."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Sugerencia: presiona dos veces para acercar y alejar"</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"leer historial y marcadores del navegador"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Permite a la aplicación leer todas las URL que ha visitado el navegador y todos los marcadores del navegador."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"escribir historial y marcadores del navegador"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toca para obtener más información acerca de la utilización de datos móviles."</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Límite de datos móviles excedido "</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Toca para obtener más información acerca de la utilización de datos móviles."</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"Sin coincidencias"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Buscar en la página"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 coincidencia"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
 </resources>

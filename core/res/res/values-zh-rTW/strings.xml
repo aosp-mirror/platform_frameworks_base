@@ -266,8 +266,10 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"允許應用程式刪除快取目錄裡的檔案，釋放儲存空間。此操作通常受到系統程序嚴格限制。"</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"移動應用程式資源"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"允許應用程式將應用程式資源從內部媒體移到外部媒體，反之亦可。"</string>
-    <string name="permlab_readLogs" msgid="4811921703882532070">"讀取系統記錄檔"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"允許應用程式讀取系統記錄檔。此項操作可讓應用程式了解目前手機操作狀態，但內容應不含任何個人或隱私資訊。"</string>
+    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
+    <skip />
+    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"讀寫 diag 擁有的資源"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"允許應用程式讀寫 diag 群組的資源；例如：/dev 裡的檔案。這可能會影響系統穩定性與安全性。此功能僅供製造商或技術人員用於硬體規格偵測。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"啟用或停用應用程式元件"</string>
@@ -434,8 +436,7 @@
     <string name="policydesc_wipeData" msgid="2314060933796396205">"重設為原廠設定 (系統會刪除所有資料，且不會向您進行確認)。"</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"設定政策啟用時所要使用的裝置全域 Proxy，只有第一個裝置管理員所設定的全域 Proxy 具有效力。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住家電話"</item>
     <item msgid="869923650527136615">"行動電話"</item>
@@ -529,6 +530,14 @@
     <string name="orgTypeWork" msgid="29268870505363872">"公司"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"其他"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"自訂"</string>
+    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
+    <skip />
+    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"輸入 PIN 碼"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"輸入密碼即可解鎖"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"輸入 PIN 進行解鎖"</string>
@@ -589,6 +598,8 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"離開此頁？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n" 選取 [確定] 離開此頁；或 [取消] 留在此頁。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"提示：輕按兩下可放大縮小。"</string>
+    <!-- no translation found for autofill_this_form (8940110866775097494) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"讀取瀏覽器的記錄與書籤"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"允許應用程式讀取瀏覽器曾經造訪過的所有網址，以及瀏覽器的所有書籤。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"寫入瀏覽器的記錄與書籤"</string>
@@ -875,10 +886,10 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"輕觸即可瞭解更多有關行動資料用量的詳細資訊"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已達行動資料上限"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"輕觸即可瞭解更多有關行動資料用量的詳細資訊"</string>
-    <!-- no translation found for no_matches (8129421908915840737) -->
-    <skip />
-    <!-- no translation found for find_on_page (1946799233822820384) -->
-    <skip />
-    <!-- no translation found for matches_found:one (8167147081136579439) -->
-    <!-- no translation found for matches_found:other (4641872797067609177) -->
+    <string name="no_matches" msgid="8129421908915840737">"沒有相符項目"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"在頁面中尋找"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 個相符項目"</item>
+    <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 個相符項目 (共 <xliff:g id="TOTAL">%d</xliff:g> 個相符項目)"</item>
+  </plurals>
 </resources>

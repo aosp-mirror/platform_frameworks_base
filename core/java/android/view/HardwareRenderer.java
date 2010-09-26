@@ -19,6 +19,7 @@ package android.view;
 
 import android.graphics.Canvas;
 import android.os.SystemClock;
+import android.util.EventLog;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -406,6 +407,11 @@ public abstract class HardwareRenderer {
                 attachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 attachInfo.mIgnoreDirtyState = true;
                 view.mPrivateFlags |= View.DRAWN;
+                
+                long startTime;
+                if (ViewDebug.DEBUG_PROFILE_DRAWING) {
+                    startTime = SystemClock.elapsedRealtime();
+                }
 
                 checkCurrent();
 
@@ -422,6 +428,10 @@ public abstract class HardwareRenderer {
                 }
 
                 onPostDraw();
+
+                if (ViewDebug.DEBUG_PROFILE_DRAWING) {
+                    EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
+                }
 
                 attachInfo.mIgnoreDirtyState = false;
 

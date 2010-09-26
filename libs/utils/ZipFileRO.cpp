@@ -22,6 +22,7 @@
 #include <utils/ZipFileRO.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
+#include <utils/threads.h>
 
 #include <zlib.h>
 
@@ -195,7 +196,7 @@ bool ZipFileRO::mapCentralDirectory(void)
             free(scanBuf);
             return false;
         } else if (header != kLFHSignature) {
-            LOGV("Not a Zip archive (found 0x%08x)\n", val);
+            LOGV("Not a Zip archive (found 0x%08x)\n", header);
             free(scanBuf);
             return false;
         }
@@ -496,15 +497,21 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
         }
 
         unsigned char lfhBuf[kLFHLen];
-        if (lseek(mFd, localHdrOffset, SEEK_SET) != localHdrOffset) {
-            LOGW("failed seeking to lfh at offset %ld\n", localHdrOffset);
-            return false;
-        }
-        ssize_t actual =
-            TEMP_FAILURE_RETRY(read(mFd, lfhBuf, sizeof(lfhBuf)));
-        if (actual != sizeof(lfhBuf)) {
-            LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
-            return false;
+
+        {
+            AutoMutex _l(mFdLock);
+
+            if (lseek(mFd, localHdrOffset, SEEK_SET) != localHdrOffset) {
+                LOGW("failed seeking to lfh at offset %ld\n", localHdrOffset);
+                return false;
+            }
+
+            ssize_t actual =
+                TEMP_FAILURE_RETRY(read(mFd, lfhBuf, sizeof(lfhBuf)));
+            if (actual != sizeof(lfhBuf)) {
+                LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
+                return false;
+            }
         }
 
         if (get4LE(lfhBuf) != kLFHSignature) {
@@ -636,7 +643,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, void* buffer) const
         memcpy(buffer, ptr, uncompLen);
     } else {
         if (!inflateBuffer(buffer, ptr, uncompLen, compLen))
-            goto bail;
+            goto unmap;
     }
 
     if (compLen > kSequentialMin)
@@ -644,6 +651,8 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, void* buffer) const
 
     result = true;
 
+unmap:
+    file->release();
 bail:
     return result;
 }
@@ -667,7 +676,7 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
 
     getEntryInfo(entry, &method, &uncompLen, &compLen, &offset, NULL, NULL);
 
-    const FileMap* file = createEntryFileMap(entry);
+    FileMap* file = createEntryFileMap(entry);
     if (file == NULL) {
         goto bail;
     }
@@ -678,21 +687,23 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
         ssize_t actual = write(fd, ptr, uncompLen);
         if (actual < 0) {
             LOGE("Write failed: %s\n", strerror(errno));
-            goto bail;
+            goto unmap;
         } else if ((size_t) actual != uncompLen) {
             LOGE("Partial write during uncompress (%zd of %zd)\n",
                 (size_t)actual, (size_t)uncompLen);
-            goto bail;
+            goto unmap;
         } else {
             LOGI("+++ successful write\n");
         }
     } else {
         if (!inflateBuffer(fd, ptr, uncompLen, compLen))
-            goto bail;
+            goto unmap;
     }
 
     result = true;
 
+unmap:
+    file->release();
 bail:
     return result;
 }

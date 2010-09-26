@@ -77,6 +77,8 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_TYPE; }
     static Type *createFromStream(Context *rsc, IStream *stream);
 
+    bool isEqual(const Type *other) const;
+
 protected:
     struct LOD {
         size_t mX;

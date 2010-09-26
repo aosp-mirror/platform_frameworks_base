@@ -246,8 +246,30 @@ public class MtpDatabase {
         return new int[] {
             // allow transfering arbitrary files
             MtpConstants.FORMAT_UNDEFINED,
+
             MtpConstants.FORMAT_ASSOCIATION,
+            MtpConstants.FORMAT_TEXT,
+            MtpConstants.FORMAT_HTML,
+            MtpConstants.FORMAT_WAV,
+            MtpConstants.FORMAT_MP3,
+            MtpConstants.FORMAT_MPEG,
+            MtpConstants.FORMAT_EXIF_JPEG,
+            MtpConstants.FORMAT_TIFF_EP,
+            MtpConstants.FORMAT_GIF,
+            MtpConstants.FORMAT_JFIF,
+            MtpConstants.FORMAT_PNG,
+            MtpConstants.FORMAT_TIFF,
+            MtpConstants.FORMAT_WMA,
+            MtpConstants.FORMAT_OGG,
+            MtpConstants.FORMAT_AAC,
+            MtpConstants.FORMAT_MP4_CONTAINER,
+            MtpConstants.FORMAT_MP2,
+            MtpConstants.FORMAT_3GP_CONTAINER,
             MtpConstants.FORMAT_ABSTRACT_AV_PLAYLIST,
+            MtpConstants.FORMAT_WPL_PLAYLIST,
+            MtpConstants.FORMAT_M3U_PLAYLIST,
+            MtpConstants.FORMAT_PLS_PLAYLIST,
+            MtpConstants.FORMAT_XML_DOCUMENT,
         };
     }
 
@@ -260,9 +282,13 @@ public class MtpDatabase {
         return new int[] {
             MtpConstants.PROPERTY_STORAGE_ID,
             MtpConstants.PROPERTY_OBJECT_FORMAT,
+            MtpConstants.PROPERTY_PROTECTION_STATUS,
             MtpConstants.PROPERTY_OBJECT_SIZE,
             MtpConstants.PROPERTY_OBJECT_FILE_NAME,
+            MtpConstants.PROPERTY_DATE_MODIFIED,
             MtpConstants.PROPERTY_PARENT_OBJECT,
+            MtpConstants.PROPERTY_PERSISTENT_UID,
+            MtpConstants.PROPERTY_NAME,
         };
     }
 
@@ -278,6 +304,11 @@ public class MtpDatabase {
         Log.d(TAG, "getObjectProperty: " + property);
         String column = null;
         boolean isString = false;
+
+        // temporary hack
+        if (property == MtpConstants.PROPERTY_NAME) {
+            property = MtpConstants.PROPERTY_OBJECT_FILE_NAME;
+        }
 
         switch (property) {
             case MtpConstants.PROPERTY_STORAGE_ID:

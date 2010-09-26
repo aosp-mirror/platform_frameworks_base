@@ -205,12 +205,14 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.encoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.encoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.Nvidia.mp4.encoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.SEC.MPEG4.Encoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Encoder" },
 //    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.PV.mpeg4enc" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.7x30.video.encoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.encoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.Nvidia.h263.encoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.SEC.H263.Encoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Encoder" },
 //    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263enc" },
@@ -999,7 +1001,10 @@ status_t OMXCodec::setupErrorCorrectionParameters() {
     status_t err = mOMX->getParameter(
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
-    CHECK_EQ(err, OK);
+    if (err != OK) {
+        LOGW("Error correction param query is not supported");
+        return OK;  // Optional feature. Ignore this failure
+    }
 
     errorCorrectionType.bEnableHEC = OMX_FALSE;
     errorCorrectionType.bEnableResync = OMX_TRUE;
@@ -1010,7 +1015,11 @@ status_t OMXCodec::setupErrorCorrectionParameters() {
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
-    CHECK_EQ(err, OK);
+    if (err != OK) {
+        LOGW("Error correction param configuration is not supported");
+    }
+
+    // Optional feature. Ignore the failure.
     return OK;
 }
 
@@ -1108,8 +1117,8 @@ status_t OMXCodec::setupH263EncoderParameters(const sp<MetaData>& meta) {
 
     // Check profile and level parameters
     CodecProfileLevel defaultProfileLevel, profileLevel;
-    defaultProfileLevel.mProfile = OMX_VIDEO_H263ProfileBaseline;
-    defaultProfileLevel.mLevel = OMX_VIDEO_H263Level45;
+    defaultProfileLevel.mProfile = h263type.eProfile;
+    defaultProfileLevel.mLevel = h263type.eLevel;
     err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
     if (err != OK) return err;
     h263type.eProfile = static_cast<OMX_VIDEO_H263PROFILETYPE>(profileLevel.mProfile);
@@ -1165,8 +1174,8 @@ status_t OMXCodec::setupMPEG4EncoderParameters(const sp<MetaData>& meta) {
 
     // Check profile and level parameters
     CodecProfileLevel defaultProfileLevel, profileLevel;
-    defaultProfileLevel.mProfile = OMX_VIDEO_MPEG4ProfileSimple;
-    defaultProfileLevel.mLevel = OMX_VIDEO_MPEG4Level2;
+    defaultProfileLevel.mProfile = mpeg4type.eProfile;
+    defaultProfileLevel.mLevel = mpeg4type.eLevel;
     err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
     if (err != OK) return err;
     mpeg4type.eProfile = static_cast<OMX_VIDEO_MPEG4PROFILETYPE>(profileLevel.mProfile);

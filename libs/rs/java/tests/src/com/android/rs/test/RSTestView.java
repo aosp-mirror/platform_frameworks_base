@@ -67,40 +67,28 @@ public class RSTestView extends RSSurfaceView {
         }
     }
 
-/*
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        return super.onKeyDown(keyCode, event);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev)
     {
-        int act = ev.getActionMasked();
-        if (act == ev.ACTION_UP) {
-            mRender.newTouchPosition(0, 0, 0, ev.getPointerId(0));
-            return false;
-        } else if (act == MotionEvent.ACTION_POINTER_UP) {
-            // only one pointer going up, we can get the index like this
-            int pointerIndex = ev.getActionIndex();
-            int pointerId = ev.getPointerId(pointerIndex);
-            mRender.newTouchPosition(0, 0, 0, pointerId);
+        boolean ret = false;
+        int act = ev.getAction();
+        if (act == ev.ACTION_DOWN) {
+            mRender.onActionDown((int)ev.getX(), (int)ev.getY());
+            ret = true;
         }
-        int count = ev.getHistorySize();
-        int pcount = ev.getPointerCount();
-
-        for (int p=0; p < pcount; p++) {
-            int id = ev.getPointerId(p);
-            mRender.newTouchPosition(ev.getX(p),
-                                     ev.getY(p),
-                                     ev.getPressure(p),
-                                     id);
-
-            for (int i=0; i < count; i++) {
-                mRender.newTouchPosition(ev.getHistoricalX(p, i),
-                                         ev.getHistoricalY(p, i),
-                                         ev.getHistoricalPressure(p, i),
-                                         id);
-            }
+        else if (act == ev.ACTION_MOVE) {
+            mRender.onActionMove((int)ev.getX(), (int)ev.getY());
+            ret = true;
         }
-        return true;
+
+        return ret;
     }
-    */
 }
 
 

@@ -41,6 +41,12 @@ public interface NetworkStateTracker {
      * -------------------------------------------------------------
      */
 
+    // Share the event space with ConnectivityService (which we can't see, but
+    // must send events to).  If you change these, change ConnectivityService
+    // too.
+    static final int MIN_NETWORK_STATE_TRACKER_EVENT = 1;
+    static final int MAX_NETWORK_STATE_TRACKER_EVENT = 100;
+
     /**
      * The network state has changed and the NetworkInfo object
      * contains the new state.
@@ -61,26 +67,6 @@ public interface NetworkStateTracker {
      * msg.obj = FeatureUser object
      */
     public static final int EVENT_RESTORE_DEFAULT_NETWORK = 6;
-
-    /**
-     * USED by ConnectivityService only
-     *
-     * msg.what = EVENT_CLEAR_NET_TRANSITION_WAKELOCK
-     * msg.arg1 = mNetTransitionWakeLockSerialNumber
-     */
-    public static final int EVENT_CLEAR_NET_TRANSITION_WAKELOCK = 7;
-
-    /**
-     * msg.arg1 = network type
-     * msg.arg2 = condition (0 bad, 100 good)
-     */
-    public static final int EVENT_INET_CONDITION_CHANGE = 8;
-
-    /**
-     * msg.arg1 = network type
-     * msg.arg2 = default connection sequence number
-     */
-    public static final int EVENT_INET_CONDITION_HOLD_END = 9;
 
     /**
      * -------------------------------------------------------------

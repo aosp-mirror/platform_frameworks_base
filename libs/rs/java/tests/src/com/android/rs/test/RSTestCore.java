@@ -19,10 +19,13 @@ package com.android.rs.test;
 import android.content.res.Resources;
 import android.renderscript.*;
 import android.util.Log;
+import java.util.ArrayList;
+import java.util.ListIterator;
 
 
 public class RSTestCore {
-    public static final int PART_COUNT = 50000;
+    int mWidth;
+    int mHeight;
 
     public RSTestCore() {
     }
@@ -30,31 +33,97 @@ public class RSTestCore {
     private Resources mRes;
     private RenderScriptGL mRS;
 
-    private ScriptC_test_root mRootScript;
+    private Font mFont;
+    ScriptField_ListAllocs_s mListAllocs;
+    int mLastX;
+    int mLastY;
+    private ScriptC_rslist mScript;
 
-    private boolean fp_mad() {
-        ScriptC_fp_mad s = new ScriptC_fp_mad(mRS, mRes, R.raw.fp_mad, true);
-        s.invoke_doTest(0, 0);
-        return true;
-    }
-
-    private boolean rs_primitives_test() {
-        ScriptC_primitives s = new ScriptC_primitives(mRS, mRes, R.raw.primitives, true);
-        s.invoke_rs_primitives_test(0, 0);
-        return true;
-    }
+    private ArrayList<UnitTest> unitTests;
 
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
+        mWidth = width;
+        mHeight = height;
 
-        mRootScript = new ScriptC_test_root(mRS, mRes, R.raw.test_root, true);
+        mScript = new ScriptC_rslist(mRS, mRes, R.raw.rslist, true);
 
-        rs_primitives_test();
-        fp_mad();
+        unitTests = new ArrayList<UnitTest>();
 
+        unitTests.add(new UT_primitives(this, mRes));
+        unitTests.add(new UT_fp_mad(this, mRes));
+        /*
+        unitTests.add(new UnitTest("<Pass>", 1));
+        unitTests.add(new UnitTest());
+        unitTests.add(new UnitTest("<Fail>", -1));
+        */
+
+        UnitTest [] uta = new UnitTest[unitTests.size()];
+        uta = unitTests.toArray(uta);
+
+        mListAllocs = new ScriptField_ListAllocs_s(mRS, uta.length);
+        for (int i = 0; i < uta.length; i++) {
+            ScriptField_ListAllocs_s.Item listElem = new ScriptField_ListAllocs_s.Item();
+            listElem.text = Allocation.createFromString(mRS, uta[i].name);
+            listElem.result = uta[i].result;
+            mListAllocs.set(listElem, i, false);
+            uta[i].setItem(listElem);
+        }
+
+        /* Run the actual unit tests */
+        ListIterator<UnitTest> test_iter = unitTests.listIterator();
+        while (test_iter.hasNext()) {
+            UnitTest t = test_iter.next();
+            t.start();
+            /*
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+            }
+            */
+        }
+
+        mListAllocs.copyAll();
+
+        mScript.bind_gList(mListAllocs);
+
+        mFont = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD, 8);
+        mScript.set_gFont(mFont);
+
+        mRS.contextBindRootScript(mScript);
+        mRS.finish();
+    }
+
+    public void refreshTestResults() {
+        if (mListAllocs != null && mScript != null && mRS != null) {
+            mListAllocs.copyAll();
+
+            mScript.bind_gList(mListAllocs);
+            mRS.contextBindRootScript(mScript);
+        }
     }
 
     public void newTouchPosition(float x, float y, float pressure, int id) {
+    }
+
+    public void onActionDown(int x, int y) {
+        mScript.set_gDY(0.0f);
+        mLastX = x;
+        mLastY = y;
+    }
+
+    public void onActionMove(int x, int y) {
+        int dx = mLastX - x;
+        int dy = mLastY - y;
+
+        if (Math.abs(dy) <= 2) {
+            dy = 0;
+        }
+
+        mScript.set_gDY(dy);
+
+        mLastX = x;
+        mLastY = y;
     }
 }

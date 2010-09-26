@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.audiofx;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -29,22 +29,35 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 /**
- * AudioEffect is the base class for implementing audio effect control in Java
- * applications.
- * <p>Creating an AudioEffect object will create the effect engine in
- * audio framework if no instance of the same effect type exists in the
- * specified audio session. If one exists, this instance will be used.
- * <p>The application creating the AudioEffect object (or a derived class) will either
- * receive control of the effect engine or not depending on the priority
- * parameter. If priority is higher than the priority used by the current effect
- * engine owner, the control will be transfered to the new object. Otherwise
- * control will remain with the previous object. In this case, the new
- * application will be notified of changes in effect engine state or control
- * ownership by the appropiate listener.
- * <p>If the effect is to be applied to a specific AudioTrack or MediaPlayer instance,
- * the application must specify the audio session ID of that instance when calling the AudioEffect
- * constructor.
+ * AudioEffect is the base class for controlling audio effects provided by the android audio
+ * framework.
+ * <p>Applications should not use the AudioEffect class directly but one of its derived classes to
+ * control specific effects:
+ * <ul>
+ *   <li> {@link android.media.audiofx.Equalizer}</li>
+ *   <li> {@link android.media.audiofx.Virtualizer}</li>
+ *   <li> {@link android.media.audiofx.BassBoost}</li>
+ *   <li> {@link android.media.audiofx.PresetReverb}</li>
+ *   <li> {@link android.media.audiofx.EnvironmentalReverb}</li>
+ * </ul>
+ * <p>If the audio effect is to be applied to a specific AudioTrack or MediaPlayer instance,
+ * the application must specify the audio session ID of that instance when creating the AudioEffect.
+ * (see {@link android.media.MediaPlayer#getAudioSessionId()} for details on audio sessions).
+ * To apply an effect to the global audio output mix, session 0 must be specified when creating the
+ * AudioEffect.
+ * <p>Creating an effect on the output mix (audio session 0) requires permission
+ * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
+ * <p>Creating an AudioEffect object will create the corresponding effect engine in the audio
+ * framework if no instance of the same effect type exists in the specified audio session.
+ * If one exists, this instance will be used.
+ * <p>The application creating the AudioEffect object (or a derived class) will either receive
+ * control of the effect engine or not depending on the priority parameter. If priority is higher
+ * than the priority used by the current effect engine owner, the control will be transfered to the
+ * new object. Otherwise control will remain with the previous object. In this case, the new
+ * application will be notified of changes in effect engine state or control ownership by the
+ * appropiate listener.
  */
+
 public class AudioEffect {
     static {
         System.loadLibrary("audioeffect_jni");
@@ -62,32 +75,38 @@ public class AudioEffect {
 
     /**
      * UUID for environmental reverb effect
+     * @hide
      */
     public static final UUID EFFECT_TYPE_ENV_REVERB = UUID
             .fromString("c2e5d5f0-94bd-4763-9cac-4e234d06839e");
     /**
      * UUID for preset reverb effect
+     * @hide
      */
     public static final UUID EFFECT_TYPE_PRESET_REVERB = UUID
             .fromString("47382d60-ddd8-11db-bf3a-0002a5d5c51b");
     /**
      * UUID for equalizer effect
+     * @hide
      */
     public static final UUID EFFECT_TYPE_EQUALIZER = UUID
             .fromString("0bed4300-ddd6-11db-8f34-0002a5d5c51b");
     /**
      * UUID for bass boost effect
+     * @hide
      */
     public static final UUID EFFECT_TYPE_BASS_BOOST = UUID
             .fromString("0634f220-ddd4-11db-a0fc-0002a5d5c51b");
     /**
      * UUID for virtualizer effect
+     * @hide
      */
     public static final UUID EFFECT_TYPE_VIRTUALIZER = UUID
             .fromString("37cc2c00-dddd-11db-8577-0002a5d5c51b");
 
     /**
      * Null effect UUID. Used when the UUID for effect type of
+     * @hide
      */
     public static final UUID EFFECT_TYPE_NULL = UUID
             .fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
@@ -95,10 +114,12 @@ public class AudioEffect {
     /**
      * State of an AudioEffect object that was not successfully initialized upon
      * creation
+     * @hide
      */
     public static final int STATE_UNINITIALIZED = 0;
     /**
      * State of an AudioEffect object that is ready to be used.
+     * @hide
      */
     public static final int STATE_INITIALIZED = 1;
 
@@ -106,14 +127,17 @@ public class AudioEffect {
     // frameworks/base/include/media/AudioEffect.h
     /**
      * Event id for engine control ownership change notification.
+     * @hide
      */
     public static final int NATIVE_EVENT_CONTROL_STATUS = 0;
     /**
      * Event id for engine state change notification.
+     * @hide
      */
     public static final int NATIVE_EVENT_ENABLED_STATUS = 1;
     /**
      * Event id for engine parameter change notification.
+     * @hide
      */
     public static final int NATIVE_EVENT_PARAMETER_CHANGED = 2;
 
@@ -151,15 +175,17 @@ public class AudioEffect {
     public static final int ERROR_DEAD_OBJECT = -7;
 
     /**
-     * The effect descriptor contains necessary information to facilitate
-     * effects enumeration:<br>
+     * The effect descriptor contains information on a particular effect implemented in the
+     * audio framework:<br>
      * <ul>
-     *  <li>mType: UUID corresponding to the OpenSL ES interface implemented by this effect</li>
-     *  <li>mUuid: UUID for this particular implementation</li>
-     *  <li>mConnectMode: {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}</li>
-     *  <li>mName: human readable effect name</li>
-     *  <li>mImplementor: human readable effect implementor name</li>
+     *  <li>type: UUID corresponding to the OpenSL ES interface implemented by this effect</li>
+     *  <li>uuid: UUID for this particular implementation</li>
+     *  <li>connectMode: {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}</li>
+     *  <li>name: human readable effect name</li>
+     *  <li>implementor: human readable effect implementor name</li>
      * </ul>
+     * The method {@link #queryEffects()} returns an array of Descriptors to facilitate effects
+     * enumeration.
      */
     public static class Descriptor {
 
@@ -168,18 +194,39 @@ public class AudioEffect {
 
         public Descriptor(String type, String uuid, String connectMode,
                 String name, String implementor) {
-            mType = UUID.fromString(type);
-            mUuid = UUID.fromString(uuid);
-            mConnectMode = connectMode;
-            mName = name;
-            mImplementor = implementor;
+            this.type = UUID.fromString(type);
+            this.uuid = UUID.fromString(uuid);
+            this.connectMode = connectMode;
+            this.name = name;
+            this.implementor = implementor;
         }
 
-        public UUID mType;
-        public UUID mUuid;
-        public String mConnectMode;
-        public String mName;
-        public String mImplementor;
+        /**
+         *  Indicates the generic type of the effect (Equalizer, Bass boost ...). The UUID
+         *  corresponds to the OpenSL ES Interface ID for this type of effect.
+         */
+        public UUID type;
+        /**
+         *  Indicates the particular implementation of the effect in that type. Several effects
+         *  can have the same type but this uuid is unique to a given implementation.
+         */
+        public UUID uuid;
+        /**
+         *  Indicates if the effect is of insert category {@link #EFFECT_INSERT} or auxiliary
+         *  category {@link #EFFECT_AUXILIARY}. Insert effects (Typically an Equalizer) are applied
+         *  to the entire audio source and usually not shared by several sources. Auxiliary effects
+         *  (typically a reverberator) are applied to part of the signal (wet) and the effect output
+         *  is added to the original signal (dry).
+         */
+        public String connectMode;
+        /**
+         * Human readable effect name
+         */
+        public String name;
+        /**
+         * Human readable effect implementor name
+         */
+        public String implementor;
     };
 
     /**
@@ -242,10 +289,12 @@ public class AudioEffect {
     private OnParameterChangeListener mParameterChangeListener = null;
     /**
      * Lock to protect listeners updates against event notifications
+     * @hide
      */
     public final Object mListenerLock = new Object();
     /**
      * Handler for events coming from the native code
+     * @hide
      */
     public NativeEventHandler mNativeEventHandler = null;
 
@@ -283,6 +332,7 @@ public class AudioEffect {
      * @throws java.lang.IllegalArgumentException
      * @throws java.lang.UnsupportedOperationException
      * @throws java.lang.RuntimeException
+     * @hide
      */
 
     public AudioEffect(UUID type, UUID uuid, int priority, int audioSession)
@@ -337,7 +387,7 @@ public class AudioEffect {
     /**
      * Get the effect descriptor.
      *
-     * @see android.media.AudioEffect.Descriptor
+     * @see android.media.audiofx.AudioEffect.Descriptor
      * @throws IllegalStateException
      */
     public Descriptor getDescriptor() throws IllegalStateException {
@@ -351,7 +401,7 @@ public class AudioEffect {
 
     /**
      * Query all effects available on the platform. Returns an array of
-     * {@link android.media.AudioEffect.Descriptor} objects
+     * {@link android.media.audiofx.AudioEffect.Descriptor} objects
      *
      * @throws IllegalStateException
      */
@@ -365,7 +415,11 @@ public class AudioEffect {
     // --------------------
 
     /**
-     * Enable or disable effect engine.
+     * Enable or disable the effect.
+     * Creating an audio effect does not automatically apply this effect on the audio source. It
+     * creates the resources necessary to process this effect but the audio signal is still bypassed
+     * through the effect engine. Calling this method will make that the effect is actually applied
+     * or not to the audio content being played in the corresponding audio session.
      *
      * @param enabled the requested enable state
      * @return {@link #SUCCESS} in case of success, {@link #ERROR_INVALID_OPERATION}
@@ -392,6 +446,7 @@ public class AudioEffect {
      *         {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or
      *         {@link #ERROR_DEAD_OBJECT} in case of failure
      * @throws IllegalStateException
+     * @hide
      */
     public int setParameter(byte[] param, byte[] value)
             throws IllegalStateException {
@@ -403,6 +458,7 @@ public class AudioEffect {
      * Set effect parameter. The parameter and its value are integers.
      *
      * @see #setParameter(byte[], byte[])
+     * @hide
      */
     public int setParameter(int param, int value) throws IllegalStateException {
         byte[] p = intToByteArray(param);
@@ -415,6 +471,7 @@ public class AudioEffect {
      * short integer.
      *
      * @see #setParameter(byte[], byte[])
+     * @hide
      */
     public int setParameter(int param, short value)
             throws IllegalStateException {
@@ -428,6 +485,7 @@ public class AudioEffect {
      * array of bytes.
      *
      * @see #setParameter(byte[], byte[])
+     * @hide
      */
     public int setParameter(int param, byte[] value)
             throws IllegalStateException {
@@ -440,6 +498,7 @@ public class AudioEffect {
      * the value is also an array of 1 or 2 integers
      *
      * @see #setParameter(byte[], byte[])
+     * @hide
      */
     public int setParameter(int[] param, int[] value)
             throws IllegalStateException {
@@ -464,6 +523,7 @@ public class AudioEffect {
      * the value is an array of 1 or 2 short integers
      *
      * @see #setParameter(byte[], byte[])
+     * @hide
      */
     public int setParameter(int[] param, short[] value)
             throws IllegalStateException {
@@ -489,6 +549,7 @@ public class AudioEffect {
      * the value is an array of bytes
      *
      * @see #setParameter(byte[], byte[])
+     * @hide
      */
     public int setParameter(int[] param, byte[] value)
             throws IllegalStateException {
@@ -519,6 +580,7 @@ public class AudioEffect {
      *         returning, value.length is updated with the actual size of the
      *         returned value.
      * @throws IllegalStateException
+     * @hide
      */
     public int getParameter(byte[] param, byte[] value)
             throws IllegalStateException {
@@ -539,6 +601,7 @@ public class AudioEffect {
      * array of bytes.
      *
      * @see #getParameter(byte[], byte[])
+     * @hide
      */
     public int getParameter(int param, byte[] value)
             throws IllegalStateException {
@@ -552,6 +615,7 @@ public class AudioEffect {
      * array of 1 or 2 integers
      *
      * @see #getParameter(byte[], byte[])
+     * @hide
      */
     public int getParameter(int param, int[] value)
             throws IllegalStateException {
@@ -576,6 +640,7 @@ public class AudioEffect {
      * array of 1 or 2 short integers
      *
      * @see #getParameter(byte[], byte[])
+     * @hide
      */
     public int getParameter(int param, short[] value)
             throws IllegalStateException {
@@ -600,6 +665,7 @@ public class AudioEffect {
      * the value is also an array of 1 or 2 integers
      *
      * @see #getParameter(byte[], byte[])
+     * @hide
      */
     public int getParameter(int[] param, int[] value)
             throws IllegalStateException {
@@ -627,6 +693,7 @@ public class AudioEffect {
      * the value is an array of 1 or 2 short integers
      *
      * @see #getParameter(byte[], byte[])
+     * @hide
      */
     public int getParameter(int[] param, short[] value)
             throws IllegalStateException {
@@ -654,6 +721,7 @@ public class AudioEffect {
      * the value is an array of bytes
      *
      * @see #getParameter(byte[], byte[])
+     * @hide
      */
     public int getParameter(int[] param, byte[] value)
             throws IllegalStateException {
@@ -673,6 +741,7 @@ public class AudioEffect {
      * Send a command to the effect engine. This method is intended to send
      * proprietary commands to a particular effect implementation.
      *
+     * @hide
      */
     public int command(int cmdCode, byte[] command, byte[] reply)
             throws IllegalStateException {
@@ -709,7 +778,7 @@ public class AudioEffect {
     }
 
     /**
-     * Returns effect engine enable state
+     * Returns effect enabled state
      *
      * @return true if the effect is enabled, false otherwise.
      * @throws IllegalStateException
@@ -768,6 +837,7 @@ public class AudioEffect {
      * Sets the listener AudioEffect notifies when a parameter is changed.
      *
      * @param listener
+     * @hide
      */
     public void setParameterListener(OnParameterChangeListener listener) {
         synchronized (mListenerLock) {
@@ -828,6 +898,7 @@ public class AudioEffect {
     /**
      * The OnParameterChangeListener interface defines a method called by the AudioEffect
      * when a parameter is changed in the effect engine by the controlling application.
+     * @hide
      */
     public interface OnParameterChangeListener {
         /**
@@ -914,8 +985,7 @@ public class AudioEffect {
      * {@link #ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION} and
      * {@link #ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION} intents.
      * <p>The extra value is of type int and is the audio session ID.
-     *
-     *  @see android.media.MediaPlayer#setAudioSessionId(int)
+     *  @see android.media.MediaPlayer#getAudioSessionId() for details on audio sessions.
      */
      public static final String EXTRA_AUDIO_SESSION = "android.media.extra.AUDIO_SESSION";
 
@@ -1086,6 +1156,9 @@ public class AudioEffect {
     // Utility methods
     // ------------------
 
+    /**
+    * @hide
+    */
     public void checkState(String methodName) throws IllegalStateException {
         synchronized (mStateLock) {
             if (mState != STATE_INITIALIZED) {
@@ -1095,6 +1168,9 @@ public class AudioEffect {
         }
     }
 
+    /**
+     * @hide
+     */
     public void checkStatus(int status) {
         switch (status) {
         case AudioEffect.SUCCESS:
@@ -1110,11 +1186,17 @@ public class AudioEffect {
         }
     }
 
+    /**
+     * @hide
+     */
     public int byteArrayToInt(byte[] valueBuf) {
         return byteArrayToInt(valueBuf, 0);
 
     }
 
+    /**
+     * @hide
+     */
     public int byteArrayToInt(byte[] valueBuf, int offset) {
         ByteBuffer converter = ByteBuffer.wrap(valueBuf);
         converter.order(ByteOrder.nativeOrder());
@@ -1122,6 +1204,9 @@ public class AudioEffect {
 
     }
 
+    /**
+     * @hide
+     */
     public byte[] intToByteArray(int value) {
         ByteBuffer converter = ByteBuffer.allocate(4);
         converter.order(ByteOrder.nativeOrder());
@@ -1129,10 +1214,16 @@ public class AudioEffect {
         return converter.array();
     }
 
+    /**
+     * @hide
+     */
     public short byteArrayToShort(byte[] valueBuf) {
         return byteArrayToShort(valueBuf, 0);
     }
 
+    /**
+     * @hide
+     */
     public short byteArrayToShort(byte[] valueBuf, int offset) {
         ByteBuffer converter = ByteBuffer.wrap(valueBuf);
         converter.order(ByteOrder.nativeOrder());
@@ -1140,6 +1231,9 @@ public class AudioEffect {
 
     }
 
+    /**
+     * @hide
+     */
     public byte[] shortToByteArray(short value) {
         ByteBuffer converter = ByteBuffer.allocate(2);
         converter.order(ByteOrder.nativeOrder());
@@ -1148,6 +1242,9 @@ public class AudioEffect {
         return converter.array();
     }
 
+    /**
+     * @hide
+     */
     public byte[] concatArrays(byte[]... arrays) {
         int len = 0;
         for (byte[] a : arrays) {
@@ -1162,5 +1259,4 @@ public class AudioEffect {
         }
         return b;
     }
-
 }

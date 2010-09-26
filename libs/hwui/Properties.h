@@ -30,6 +30,7 @@
 #define PROPERTY_GRADIENT_CACHE_SIZE "ro.hwui.gradient_cache_size"
 #define PROPERTY_PATH_CACHE_SIZE "ro.hwui.path_cache_size"
 #define PROPERTY_DROP_SHADOW_CACHE_SIZE "ro.hwui.drop_shadow_cache_size"
+#define PROPERTY_FBO_CACHE_SIZE "ro.hwui.fbo_cache_size"
 
 // These properties are defined in pixels
 #define PROPERTY_TEXT_CACHE_WIDTH "ro.hwui.text_cache_width"
@@ -43,12 +44,13 @@
 // Converts a number of mega-bytes into bytes
 #define MB(s) s * 1024 * 1024
 
-#define DEFAULT_TEXTURE_CACHE_SIZE 20.0f
-#define DEFAULT_LAYER_CACHE_SIZE 6.0f
-#define DEFAULT_PATH_CACHE_SIZE 6.0f
+#define DEFAULT_TEXTURE_CACHE_SIZE 18.0f
+#define DEFAULT_LAYER_CACHE_SIZE 4.0f
+#define DEFAULT_PATH_CACHE_SIZE 5.0f
 #define DEFAULT_PATCH_CACHE_SIZE 100
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 #define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
+#define DEFAULT_FBO_CACHE_SIZE 25
 
 #define DEFAULT_TEXT_GAMMA 1.4f
 #define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64

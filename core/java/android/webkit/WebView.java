@@ -614,6 +614,8 @@ public class WebView extends AbsoluteLayout
     static final int SET_TOUCH_HIGHLIGHT_RECTS          = 131;
     static final int SAVE_WEBARCHIVE_FINISHED           = 132;
 
+    static final int SET_AUTOFILLABLE                   = 133;
+
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
 
@@ -662,7 +664,8 @@ public class WebView extends AbsoluteLayout
         "SET_SCROLLBAR_MODES", //            = 129;
         "SELECTION_STRING_CHANGED", //       = 130;
         "SET_TOUCH_HIGHLIGHT_RECTS", //      = 131;
-        "SAVE_WEBARCHIVE_FINISHED" //        = 132;
+        "SAVE_WEBARCHIVE_FINISHED", //       = 132;
+        "SET_AUTOFILLABLE" //                = 133;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -734,6 +737,8 @@ public class WebView extends AbsoluteLayout
 
     // for event log
     private long mLastTouchUpTime = 0;
+
+    private int mAutoFillQueryId = WebTextView.FORM_NOT_AUTOFILLABLE;
 
     /**
      * URI scheme for telephone number
@@ -3868,7 +3873,7 @@ public class WebView extends AbsoluteLayout
         // At this point, we know we have found an input field, so go ahead
         // and create the WebTextView if necessary.
         if (mWebTextView == null) {
-            mWebTextView = new WebTextView(mContext, WebView.this);
+            mWebTextView = new WebTextView(mContext, WebView.this, mAutoFillQueryId);
             // Initialize our generation number.
             mTextGeneration = 0;
         }
@@ -3936,13 +3941,15 @@ public class WebView extends AbsoluteLayout
      * @param nodePointer Pointer to the node of the textfield, so it can be
      *          compared to the currently focused textfield when the data is
      *          retrieved.
+     * @param autoFillable true if WebKit has determined this field is part of
+     *          a form that can be auto filled.
      */
-    /* package */ void requestFormData(String name, int nodePointer) {
+    /* package */ void requestFormData(String name, int nodePointer, boolean autoFillable) {
         if (mWebViewCore.getSettings().getSaveFormData()) {
             Message update = mPrivateHandler.obtainMessage(REQUEST_FORM_DATA);
             update.arg1 = nodePointer;
             RequestFormData updater = new RequestFormData(name, getUrl(),
-                    update);
+                    update, autoFillable);
             Thread t = new Thread(updater);
             t.start();
         }
@@ -3968,15 +3975,28 @@ public class WebView extends AbsoluteLayout
         private String mName;
         private String mUrl;
         private Message mUpdateMessage;
+        private boolean mAutoFillable;
 
-        public RequestFormData(String name, String url, Message msg) {
+        public RequestFormData(String name, String url, Message msg, boolean autoFillable) {
             mName = name;
             mUrl = url;
             mUpdateMessage = msg;
+            mAutoFillable = autoFillable;
         }
 
         public void run() {
-            ArrayList<String> pastEntries = mDatabase.getFormData(mUrl, mName);
+            ArrayList<String> pastEntries = new ArrayList();
+
+            if (mAutoFillable) {
+                // Note that code inside the adapter click handler in WebTextView depends
+                // on the AutoFill item being at the top of the drop down list. If you change
+                // the order, make sure to do it there too!
+                pastEntries.add(getResources().getText(
+                        com.android.internal.R.string.autofill_this_form).toString());
+            }
+
+            pastEntries.addAll(mDatabase.getFormData(mUrl, mName));
+
             if (pastEntries.size() > 0) {
                 AutoCompleteAdapter adapter = new
                         AutoCompleteAdapter(mContext, pastEntries);
@@ -6942,6 +6962,14 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
 
+                case SET_AUTOFILLABLE:
+                    mAutoFillQueryId = msg.arg1;
+                    if (mWebTextView != null) {
+                        mWebTextView.setAutoFillable(mAutoFillQueryId);
+                        rebuildWebTextView();
+                    }
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -7473,6 +7501,10 @@ public class WebView extends AbsoluteLayout
         // Also place our generation number so that when we look at the cache
         // we recognize that it is up to date.
         nativeUpdateCachedTextfield(updatedText, mTextGeneration);
+    }
+
+    /*package*/ void autoFillForm(int autoFillQueryId) {
+        mWebViewCore.sendMessage(EventHub.AUTOFILL_FORM, autoFillQueryId, /* unused */0);
     }
 
     private native int nativeCacheHitFramePointer();

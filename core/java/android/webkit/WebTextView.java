@@ -47,6 +47,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputConnection;
 import android.widget.AbsoluteLayout.LayoutParams;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
@@ -116,15 +117,29 @@ import java.util.ArrayList;
     private int mDelSelStart;
     private int mDelSelEnd;
 
+    // Keep in sync with native constant in
+    // external/webkit/WebKit/android/WebCoreSupport/autofill/WebAutoFill.cpp
+    /* package */ static final int FORM_NOT_AUTOFILLABLE = -1;
+
+    private boolean mAutoFillable; // Is this textview part of an autofillable form?
+    private int mQueryId;
+
     /**
      * Create a new WebTextView.
      * @param   context The Context for this WebTextView.
      * @param   webView The WebView that created this.
      */
-    /* package */ WebTextView(Context context, WebView webView) {
+    /* package */ WebTextView(Context context, WebView webView, int autoFillQueryId) {
         super(context, null, com.android.internal.R.attr.webTextViewStyle);
         mWebView = webView;
         mMaxLength = -1;
+        setAutoFillable(autoFillQueryId);
+    }
+
+    public void setAutoFillable(int queryId) {
+        mAutoFillable = mWebView.getSettings().getAutoFillEnabled()
+                && (queryId != FORM_NOT_AUTOFILLABLE);
+        mQueryId = queryId;
     }
 
     @Override
@@ -673,6 +688,22 @@ import java.util.ArrayList;
             adapter.setTextView(this);
         }
         super.setAdapter(adapter);
+        if (mAutoFillable) {
+            setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    if (id == 0 && position == 0) {
+                        // Blank out the text box while we wait for WebCore to fill the form.
+                        replaceText("");
+                        // Call a webview method to tell WebCore to autofill the form.
+                        mWebView.autoFillForm(mQueryId);
+                    }
+                }
+            });
+        } else {
+            setOnItemClickListener(null);
+        }
+        showDropDown();
     }
 
     /**
@@ -964,7 +995,7 @@ import java.util.ArrayList;
             if (type != 2 /* PASSWORD */) {
                 String name = mWebView.nativeFocusCandidateName();
                 if (name != null && name.length() > 0) {
-                    mWebView.requestFormData(name, mNodePointer);
+                    mWebView.requestFormData(name, mNodePointer, mAutoFillable);
                 }
             }
         }

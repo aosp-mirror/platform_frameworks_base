@@ -110,6 +110,13 @@ public:
      */
     virtual void bootFinished() = 0;
 
+    /* Capture the specified screen. requires READ_FRAME_BUFFER permission
+     * This function will fail if there is a secure window on screen.
+     */
+    virtual status_t captureScreen(DisplayID dpy,
+            sp<IMemoryHeap>* heap,
+            uint32_t* width, uint32_t* height, PixelFormat* format) = 0;
+
     /* Signal surfaceflinger that there might be some work to do
      * This is an ASYNCHRONOUS call.
      */
@@ -133,7 +140,8 @@ public:
         SET_ORIENTATION,
         FREEZE_DISPLAY,
         UNFREEZE_DISPLAY,
-        SIGNAL
+        SIGNAL,
+        CAPTURE_SCREEN
     };
 
     virtual status_t    onTransact( uint32_t code,
