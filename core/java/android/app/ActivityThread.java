@@ -60,6 +60,7 @@ import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.LogPrinter;
 import android.util.Slog;
 import android.view.Display;
 import android.view.View;
@@ -118,6 +119,7 @@ public final class ActivityThread {
     private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
     private static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean DEBUG_MESSAGES = false;
     static final boolean DEBUG_BROADCAST = false;
     private static final boolean DEBUG_RESULTS = false;
     private static final boolean DEBUG_BACKUP = false;
@@ -874,7 +876,7 @@ public final class ActivityThread {
         public static final int DISPATCH_PACKAGE_BROADCAST = 133;
         public static final int SCHEDULE_CRASH          = 134;
         String codeToString(int code) {
-            if (localLOGV) {
+            if (DEBUG_MESSAGES) {
                 switch (code) {
                     case LAUNCH_ACTIVITY: return "LAUNCH_ACTIVITY";
                     case PAUSE_ACTIVITY: return "PAUSE_ACTIVITY";
@@ -916,6 +918,7 @@ public final class ActivityThread {
             return "(unknown)";
         }
         public void handleMessage(Message msg) {
+            if (DEBUG_MESSAGES) Slog.v(TAG, ">>> handling: " + msg.what);
             switch (msg.what) {
                 case LAUNCH_ACTIVITY: {
                     ActivityClientRecord r = (ActivityClientRecord)msg.obj;
@@ -1037,6 +1040,7 @@ public final class ActivityThread {
                 case SCHEDULE_CRASH:
                     throw new RemoteServiceException((String)msg.obj);
             }
+            if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + msg.what);
         }
 
         void maybeSnapshot() {
@@ -1484,7 +1488,7 @@ public final class ActivityThread {
 
     private final void queueOrSendMessage(int what, Object obj, int arg1, int arg2) {
         synchronized (this) {
-            if (localLOGV) Slog.v(
+            if (DEBUG_MESSAGES) Slog.v(
                 TAG, "SCHEDULE " + what + " " + mH.codeToString(what)
                 + ": " + arg1 + " / " + obj);
             Message msg = Message.obtain();
@@ -3607,6 +3611,11 @@ public final class ActivityThread {
 
         ActivityThread thread = new ActivityThread();
         thread.attach(false);
+
+        if (false) {
+            Looper.myLooper().setMessageLogging(new
+                    LogPrinter(Log.DEBUG, "ActivityThread"));
+        }
 
         Looper.loop();
 

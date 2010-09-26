@@ -254,7 +254,8 @@ class ServerThread extends Thread {
             try {
                 Slog.i(TAG, "NetworkManagement Service");
                 ServiceManager.addService(
-                        Context.NETWORKMANAGEMENT_SERVICE, new NetworkManagementService(context));
+                        Context.NETWORKMANAGEMENT_SERVICE,
+                        NetworkManagementService.create(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting NetworkManagement Service", e);
             }

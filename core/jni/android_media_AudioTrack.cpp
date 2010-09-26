@@ -252,20 +252,22 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     lpJniStorage->mCallbackData.audioTrack_ref = env->NewGlobalRef(weak_this);
     
     lpJniStorage->mStreamType = atStreamType;
-    
-    jint* nSession = NULL;
-    if (jSession) {
-        nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
-        if (nSession == NULL) {
-            LOGE("Error creating AudioTrack: Error retrieving session id pointer");
-            delete lpJniStorage;
-            return AUDIOTRACK_ERROR;
-        }
-    } else {
+
+    if (jSession == NULL) {
         LOGE("Error creating AudioTrack: invalid session ID pointer");
         delete lpJniStorage;
         return AUDIOTRACK_ERROR;
     }
+
+    jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    if (nSession == NULL) {
+        LOGE("Error creating AudioTrack: Error retrieving session id pointer");
+        delete lpJniStorage;
+        return AUDIOTRACK_ERROR;
+    }
+    int sessionId = nSession[0];
+    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    nSession = NULL;
 
     // create the native AudioTrack object
     AudioTrack* lpTrack = new AudioTrack();
@@ -288,7 +290,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
             0,// shared mem
             true,// thread can call Java
-            nSession[0]);// audio session ID
+            sessionId);// audio session ID
             
     } else if (memoryMode == javaAudioTrackFields.MODE_STATIC) {
         // AudioTrack is using shared memory
@@ -309,7 +311,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack 
             lpJniStorage->mMemBase,// shared mem
             true,// thread can call Java
-            nSession[0]);// audio session ID
+            sessionId);// audio session ID
     }
 
     if (lpTrack->initCheck() != NO_ERROR) {
@@ -317,9 +319,13 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         goto native_init_failure;
     }
 
+    nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    if (nSession == NULL) {
+        LOGE("Error creating AudioTrack: Error retrieving session id pointer");
+        goto native_init_failure;
+    }
     // read the audio session ID back from AudioTrack in case we create a new session
     nSession[0] = lpTrack->getSessionId();
-
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
     nSession = NULL;
 

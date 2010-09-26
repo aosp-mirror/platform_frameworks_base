@@ -121,6 +121,8 @@ import java.io.PrintWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -144,6 +146,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_BROADCAST = localLOGV || false;
     static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
     static final boolean DEBUG_SERVICE = localLOGV || false;
+    static final boolean DEBUG_SERVICE_EXECUTING = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
     static final boolean DEBUG_PROVIDER = localLOGV || false;
@@ -152,6 +155,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_RESULTS = localLOGV || false;
     static final boolean DEBUG_BACKUP = localLOGV || false;
     static final boolean DEBUG_CONFIGURATION = localLOGV || false;
+    static final boolean DEBUG_POWER = localLOGV || false;
+    static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
     
@@ -197,8 +202,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     // The minimum amount of time between successive GC requests for a process.
     static final int GC_MIN_INTERVAL = 60*1000;
 
-    // The rate at which we check for apps using excessive wake locks -- 15 mins.
-    static final int WAKE_LOCK_CHECK_DELAY = 15*60*1000;
+    // The rate at which we check for apps using excessive power -- 15 mins.
+    static final int POWER_CHECK_DELAY = (DEBUG_POWER_QUICK ? 2 : 15) * 60*1000;
+
+    // The minimum sample duration we will allow before deciding we have
+    // enough data on wake locks to start killing things.
+    static final int WAKE_LOCK_MIN_CHECK_DURATION = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
+
+    // The minimum sample duration we will allow before deciding we have
+    // enough data on CPU usage to start killing things.
+    static final int CPU_MIN_CHECK_DURATION = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
 
     // How long we allow a receiver to run before giving up on it.
     static final int BROADCAST_TIMEOUT = 10*1000;
@@ -552,6 +565,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final StringBuilder mStrictModeBuffer = new StringBuilder();
 
     /**
+     * True if we have a pending unexpired BROADCAST_TIMEOUT_MSG posted to our handler.
+     */
+    private boolean mPendingBroadcastTimeoutMessage;
+
+    /**
      * Intent broadcast that we have tried to start, but are
      * waiting for its application's process to be created.  We only
      * need one (instead of a list) because we always process broadcasts
@@ -779,9 +797,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mDidAppSwitch;
     
     /**
-     * Last time (in realtime) at which we checked for wake lock usage.
+     * Last time (in realtime) at which we checked for power usage.
      */
-    long mLastWakeLockCheckTime;
+    long mLastPowerCheckRealtime;
+
+    /**
+     * Last time (in uptime) at which we checked for power usage.
+     */
+    long mLastPowerCheckUptime;
 
     /**
      * Set while we are wanting to sleep, to prevent any
@@ -1052,17 +1075,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 processNextBroadcast(true);
             } break;
             case BROADCAST_TIMEOUT_MSG: {
-                if (mDidDexOpt) {
-                    mDidDexOpt = false;
-                    Message nmsg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
-                    mHandler.sendMessageDelayed(nmsg, BROADCAST_TIMEOUT);
-                    return;
-                }
-                // Only process broadcast timeouts if the system is ready. That way
-                // PRE_BOOT_COMPLETED broadcasts can't timeout as they are intended
-                // to do heavy lifting for system up
-                if (mProcessesReady) {
-                    broadcastTimeout();
+                synchronized (ActivityManagerService.this) {
+                    broadcastTimeoutLocked(true);
                 }
             } break;
             case SERVICE_TIMEOUT_MSG: {
@@ -1194,12 +1208,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case CHECK_EXCESSIVE_WAKE_LOCKS_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    checkExcessiveWakeLocksLocked(true);
+                    checkExcessivePowerUsageLocked(true);
                     removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                    if (mSleeping) {
-                        Message nmsg = obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                        sendMessageDelayed(nmsg, WAKE_LOCK_CHECK_DELAY);
-                    }
+                    Message nmsg = obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                    sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
                 }
             } break;
             }
@@ -1394,7 +1406,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 systemDir, "batterystats.bin").toString());
         mBatteryStatsService.getActiveStatistics().readLocked();
         mBatteryStatsService.getActiveStatistics().writeAsyncLocked();
-        mOnBattery = mBatteryStatsService.getActiveStatistics().getIsOnBattery();
+        mOnBattery = DEBUG_POWER ? true
+                : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
         mBatteryStatsService.getActiveStatistics().setCallback(this);
         
         mUsageStatsService = new UsageStatsService(new File(
@@ -1514,10 +1527,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                             int perc = bstats.startAddingCpuLocked();
                             int totalUTime = 0;
                             int totalSTime = 0;
-                            final int N = mProcessStats.countWorkingStats();
+                            final int N = mProcessStats.countStats();
                             for (int i=0; i<N; i++) {
-                                ProcessStats.Stats st
-                                        = mProcessStats.getWorkingStats(i);
+                                ProcessStats.Stats st = mProcessStats.getStats(i);
+                                if (!st.working) {
+                                    continue;
+                                }
                                 ProcessRecord pr = mPidsSelfLocked.get(st.pid);
                                 int otherUTime = (st.rel_utime*perc)/100;
                                 int otherSTime = (st.rel_stime*perc)/100;
@@ -1528,6 +1543,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     ps.addCpuTimeLocked(st.rel_utime-otherUTime,
                                             st.rel_stime-otherSTime);
                                     ps.addSpeedStepTimes(cpuSpeedTimes);
+                                    pr.curCpuTime += (st.rel_utime+st.rel_stime) * 10;
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps =
                                             bstats.getProcessStatsLocked(st.name, st.pid);
@@ -1564,7 +1580,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         updateCpuStatsNow();
         synchronized (this) {
             synchronized(mPidsSelfLocked) {
-                mOnBattery = onBattery;
+                mOnBattery = DEBUG_POWER ? true : onBattery;
             }
         }
     }
@@ -2785,10 +2801,35 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private final class AppNotResponding implements Runnable {
+        private final ProcessRecord mApp;
+        private final String mAnnotation;
+
+        public AppNotResponding(ProcessRecord app, String annotation) {
+            mApp = app;
+            mAnnotation = annotation;
+        }
+
+        @Override
+        public void run() {
+            appNotResponding(mApp, null, null, mAnnotation);
+        }
+    }
+
     final void appNotResponding(ProcessRecord app, ActivityRecord activity,
             ActivityRecord parent, final String annotation) {
         ArrayList<Integer> firstPids = new ArrayList<Integer>(5);
         SparseArray<Boolean> lastPids = new SparseArray<Boolean>(20);
+
+        if (mController != null) {
+            try {
+                // 0 == continue, -1 = kill process immediately
+                int res = mController.appEarlyNotResponding(app.processName, app.pid, annotation);
+                if (res < 0 && app.pid != MY_PID) Process.killProcess(app.pid);
+            } catch (RemoteException e) {
+                mController = null;
+            }
+        }
 
         long anrTime = SystemClock.uptimeMillis();
         if (MONITOR_CPU_USAGE) {
@@ -2840,10 +2881,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        final ProcessStats processStats = new ProcessStats(true);
-
-        File tracesFile = dumpStackTraces(true, firstPids, processStats, lastPids);
-
         // Log the ANR to the main log.
         StringBuilder info = mStringBuilder;
         info.setLength(0);
@@ -2858,6 +2895,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (parent != null && parent != activity) {
             info.append("Parent: ").append(parent.shortComponentName).append("\n");
         }
+
+        final ProcessStats processStats = new ProcessStats(true);
+
+        File tracesFile = dumpStackTraces(true, firstPids, processStats, lastPids);
 
         String cpuInfo = null;
         if (MONITOR_CPU_USAGE) {
@@ -3643,7 +3684,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "Exception in new application when starting receiver "
                       + br.curComponent.flattenToShortString(), e);
                 badApp = true;
-                logBroadcastReceiverDiscard(br);
+                logBroadcastReceiverDiscardLocked(br);
                 finishReceiverLocked(br.receiver, br.resultCode, br.resultData,
                         br.resultExtras, br.resultAbort, true);
                 scheduleBroadcastsLocked();
@@ -3735,7 +3776,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 // Start looking for apps that are abusing wake locks.
                 Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                mHandler.sendMessageDelayed(nmsg, WAKE_LOCK_CHECK_DELAY);
+                mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
                 // Tell anyone interested that we are done booting!
                 SystemProperties.set("sys.boot_completed", "1");
                 broadcastIntentLocked(null, null,
@@ -5648,10 +5689,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             // Initialize the wake times of all processes.
-            checkExcessiveWakeLocksLocked(false);
+            checkExcessivePowerUsageLocked(false);
             mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
             Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-            mHandler.sendMessageDelayed(nmsg, WAKE_LOCK_CHECK_DELAY);
+            mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
         }
     }
 
@@ -5701,7 +5742,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             mWindowManager.setEventDispatching(true);
             mSleeping = false;
             mMainStack.resumeTopActivityLocked(null);
-            mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
         }
     }
 
@@ -6320,7 +6360,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // The current broadcast is waiting for this app's receiver
             // to be finished.  Looks like that's not going to happen, so
             // let the broadcast continue.
-            logBroadcastReceiverDiscard(r);
+            logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
                     r.resultExtras, r.resultAbort, true);
             reschedule = true;
@@ -6329,7 +6369,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (r != null && r.curApp == app) {
             if (DEBUG_BROADCAST) Slog.v(TAG,
                     "skip & discard pending app " + r);
-            logBroadcastReceiverDiscard(r);
+            logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
                     r.resultExtras, r.resultAbort, true);
             reschedule = true;
@@ -6998,12 +7038,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("Activity manager dump options:");
                 pw.println("  [-a] [-h] [cmd] ...");
                 pw.println("  cmd may be one of:");
-                pw.println("    activities: activity stack state");
-                pw.println("    broadcasts: broadcast state");
-                pw.println("    intents: pending intent state");
-                pw.println("    processes: process state");
-                pw.println("    providers: content provider state");
-                pw.println("    services: service state");
+                pw.println("    a[ctivities]: activity stack state");
+                pw.println("    b[roadcasts]: broadcast state");
+                pw.println("    i[ntents]: pending intent state");
+                pw.println("    p[rocesses]: process state");
+                pw.println("    o[om]: out of memory management");
+                pw.println("    prov[iders]: content provider state");
+                pw.println("    s[ervices]: service state");
                 pw.println("    service [name]: service client-side state");
                 return;
             } else {
@@ -7033,6 +7074,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else if ("processes".equals(cmd) || "p".equals(cmd)) {
                 synchronized (this) {
                     dumpProcessesLocked(fd, pw, args, opti, true);
+                }
+                return;
+            } else if ("oom".equals(cmd) || "o".equals(cmd)) {
+                synchronized (this) {
+                    dumpOomLocked(fd, pw, args, opti, true);
                 }
                 return;
             } else if ("providers".equals(cmd) || "prov".equals(cmd)) {
@@ -7150,7 +7196,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         return true;
     }
-        
+
     boolean dumpProcessesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll) {
         boolean needSep = false;
@@ -7180,8 +7226,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (needSep) pw.println(" ");
             needSep = true;
             pw.println("  Running processes (most recent first):");
-            dumpProcessList(pw, this, mLruProcesses, "    ",
-                    "Proc", "PERS", true);
+            dumpProcessOomList(pw, this, mLruProcesses, "    ",
+                    "Proc", "PERS", false);
             needSep = true;
         }
 
@@ -7212,7 +7258,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = true;
             pw.println("  Persisent processes that are starting:");
             dumpProcessList(pw, this, mPersistentStartingProcesses, "    ",
-                    "Starting Norm", "Restarting PERS", false);
+                    "Starting Norm", "Restarting PERS");
         }
 
         if (mStartingProcesses.size() > 0) {
@@ -7220,7 +7266,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = true;
             pw.println("  Processes that are starting:");
             dumpProcessList(pw, this, mStartingProcesses, "    ",
-                    "Starting Norm", "Starting PERS", false);
+                    "Starting Norm", "Starting PERS");
         }
 
         if (mRemovedProcesses.size() > 0) {
@@ -7228,7 +7274,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = true;
             pw.println("  Processes that are being removed:");
             dumpProcessList(pw, this, mRemovedProcesses, "    ",
-                    "Removed Norm", "Removed PERS", false);
+                    "Removed Norm", "Removed PERS");
         }
         
         if (mProcessesOnHold.size() > 0) {
@@ -7236,26 +7282,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = true;
             pw.println("  Processes that are on old until the system is ready:");
             dumpProcessList(pw, this, mProcessesOnHold, "    ",
-                    "OnHold Norm", "OnHold PERS", false);
+                    "OnHold Norm", "OnHold PERS");
         }
 
-        if (mProcessesToGc.size() > 0) {
-            if (needSep) pw.println(" ");
-            needSep = true;
-            pw.println("  Processes that are waiting to GC:");
-            long now = SystemClock.uptimeMillis();
-            for (int i=0; i<mProcessesToGc.size(); i++) {
-                ProcessRecord proc = mProcessesToGc.get(i);
-                pw.print("    Process "); pw.println(proc);
-                pw.print("      lowMem="); pw.print(proc.reportLowMemory);
-                        pw.print(", last gced=");
-                        pw.print(now-proc.lastRequestedGc);
-                        pw.print(" ms ago, last lowMem=");
-                        pw.print(now-proc.lastLowMemory);
-                        pw.println(" ms ago");
-                
-            }
-        }
+        needSep = dumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll);
         
         if (mProcessCrashTimes.getMap().size() > 0) {
             if (needSep) pw.println(" ");
@@ -7319,11 +7349,86 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  mBooting=" + mBooting
                     + " mBooted=" + mBooted
                     + " mFactoryTest=" + mFactoryTest);
+            pw.print("  mLastPowerCheckRealtime=");
+                    TimeUtils.formatDuration(mLastPowerCheckRealtime, pw);
+                    pw.println("");
+            pw.print("  mLastPowerCheckUptime=");
+                    TimeUtils.formatDuration(mLastPowerCheckUptime, pw);
+                    pw.println("");
             pw.println("  mGoingToSleep=" + mMainStack.mGoingToSleep);
             pw.println("  mLaunchingActivity=" + mMainStack.mLaunchingActivity);
             pw.println("  mAdjSeq=" + mAdjSeq + " mLruSeq=" + mLruSeq);
         }
         
+        return true;
+    }
+
+    boolean dumpProcessesToGc(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean needSep, boolean dumpAll) {
+        if (mProcessesToGc.size() > 0) {
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Processes that are waiting to GC:");
+            long now = SystemClock.uptimeMillis();
+            for (int i=0; i<mProcessesToGc.size(); i++) {
+                ProcessRecord proc = mProcessesToGc.get(i);
+                pw.print("    Process "); pw.println(proc);
+                pw.print("      lowMem="); pw.print(proc.reportLowMemory);
+                        pw.print(", last gced=");
+                        pw.print(now-proc.lastRequestedGc);
+                        pw.print(" ms ago, last lowMem=");
+                        pw.print(now-proc.lastLowMemory);
+                        pw.println(" ms ago");
+
+            }
+        }
+        return needSep;
+    }
+
+    boolean dumpOomLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll) {
+        boolean needSep = false;
+
+        if (mLruProcesses.size() > 0) {
+            ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>(mLruProcesses);
+
+            Comparator<ProcessRecord> comparator = new Comparator<ProcessRecord>() {
+                @Override
+                public int compare(ProcessRecord object1, ProcessRecord object2) {
+                    if (object1.setAdj != object2.setAdj) {
+                        return object1.setAdj > object2.setAdj ? -1 : 1;
+                    }
+                    if (object1.setSchedGroup != object2.setSchedGroup) {
+                        return object1.setSchedGroup > object2.setSchedGroup ? -1 : 1;
+                    }
+                    if (object1.keeping != object2.keeping) {
+                        return object1.keeping ? -1 : 1;
+                    }
+                    if (object1.pid != object2.pid) {
+                        return object1.pid > object2.pid ? -1 : 1;
+                    }
+                    return 0;
+                }
+            };
+
+            Collections.sort(procs, comparator);
+
+            if (needSep) pw.println(" ");
+            needSep = true;
+            pw.println("  Process OOM control:");
+            dumpProcessOomList(pw, this, procs, "    ",
+                    "Proc", "PERS", true);
+            needSep = true;
+        }
+
+        needSep = dumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll);
+
+        pw.println(" ");
+        pw.println("  mHomeProcess: " + mHomeProcess);
+        if (mHeavyWeightProcess != null) {
+            pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
+        }
+
         return true;
     }
 
@@ -7694,89 +7799,145 @@ public final class ActivityManagerService extends ActivityManagerNative
     
     private static final int dumpProcessList(PrintWriter pw,
             ActivityManagerService service, List list,
-            String prefix, String normalLabel, String persistentLabel,
-            boolean inclOomAdj) {
+            String prefix, String normalLabel, String persistentLabel) {
         int numPers = 0;
         final int N = list.size()-1;
         for (int i=N; i>=0; i--) {
             ProcessRecord r = (ProcessRecord)list.get(i);
-            if (false) {
-                pw.println(prefix + (r.persistent ? persistentLabel : normalLabel)
-                      + " #" + i + ":");
-                r.dump(pw, prefix + "  ");
-            } else if (inclOomAdj) {
-                String oomAdj;
-                if (r.setAdj >= EMPTY_APP_ADJ) {
-                    oomAdj = buildOomTag("empty", null, r.setAdj, EMPTY_APP_ADJ);
-                } else if (r.setAdj >= HIDDEN_APP_MIN_ADJ) {
-                    oomAdj = buildOomTag("bak", "  ", r.setAdj, HIDDEN_APP_MIN_ADJ);
-                } else if (r.setAdj >= HOME_APP_ADJ) {
-                    oomAdj = buildOomTag("home ", null, r.setAdj, HOME_APP_ADJ);
-                } else if (r.setAdj >= SECONDARY_SERVER_ADJ) {
-                    oomAdj = buildOomTag("svc", "  ", r.setAdj, SECONDARY_SERVER_ADJ);
-                } else if (r.setAdj >= BACKUP_APP_ADJ) {
-                    oomAdj = buildOomTag("bckup", null, r.setAdj, BACKUP_APP_ADJ);
-                } else if (r.setAdj >= HEAVY_WEIGHT_APP_ADJ) {
-                    oomAdj = buildOomTag("hvy  ", null, r.setAdj, HEAVY_WEIGHT_APP_ADJ);
-                } else if (r.setAdj >= PERCEPTIBLE_APP_ADJ) {
-                    oomAdj = buildOomTag("prcp ", null, r.setAdj, PERCEPTIBLE_APP_ADJ);
-                } else if (r.setAdj >= VISIBLE_APP_ADJ) {
-                    oomAdj = buildOomTag("vis  ", null, r.setAdj, VISIBLE_APP_ADJ);
-                } else if (r.setAdj >= FOREGROUND_APP_ADJ) {
-                    oomAdj = buildOomTag("fore ", null, r.setAdj, FOREGROUND_APP_ADJ);
-                } else if (r.setAdj >= CORE_SERVER_ADJ) {
-                    oomAdj = buildOomTag("core ", null, r.setAdj, CORE_SERVER_ADJ);
-                } else if (r.setAdj >= SYSTEM_ADJ) {
-                    oomAdj = buildOomTag("sys  ", null, r.setAdj, SYSTEM_ADJ);
-                } else {
-                    oomAdj = Integer.toString(r.setAdj);
-                }
-                String schedGroup;
-                switch (r.setSchedGroup) {
-                    case Process.THREAD_GROUP_BG_NONINTERACTIVE:
-                        schedGroup = "B";
-                        break;
-                    case Process.THREAD_GROUP_DEFAULT:
-                        schedGroup = "F";
-                        break;
-                    default:
-                        schedGroup = Integer.toString(r.setSchedGroup);
-                        break;
-                }
-                pw.println(String.format("%s%s #%2d: adj=%s/%s %s (%s)",
-                        prefix, (r.persistent ? persistentLabel : normalLabel),
-                        N-i, oomAdj, schedGroup, r.toShortString(), r.adjType));
-                if (r.adjSource != null || r.adjTarget != null) {
-                    pw.print(prefix);
-                    pw.print("          ");
-                    if (r.adjTarget instanceof ComponentName) {
-                        pw.print(((ComponentName)r.adjTarget).flattenToShortString());
-                    } else if (r.adjTarget != null) {
-                        pw.print(r.adjTarget.toString());
-                    } else {
-                        pw.print("{null}");
-                    }
-                    pw.print("<=");
-                    if (r.adjSource instanceof ProcessRecord) {
-                        pw.print("Proc{");
-                        pw.print(((ProcessRecord)r.adjSource).toShortString());
-                        pw.println("}");
-                    } else if (r.adjSource != null) {
-                        pw.println(r.adjSource.toString());
-                    } else {
-                        pw.println("{null}");
-                    }
-                }
-            } else {
-                pw.println(String.format("%s%s #%2d: %s",
-                        prefix, (r.persistent ? persistentLabel : normalLabel),
-                        i, r.toString()));
-            }
+            pw.println(String.format("%s%s #%2d: %s",
+                    prefix, (r.persistent ? persistentLabel : normalLabel),
+                    i, r.toString()));
             if (r.persistent) {
                 numPers++;
             }
         }
         return numPers;
+    }
+
+    private static final void dumpProcessOomList(PrintWriter pw,
+            ActivityManagerService service, List<ProcessRecord> list,
+            String prefix, String normalLabel, String persistentLabel,
+            boolean inclDetails) {
+
+        final long curRealtime = SystemClock.elapsedRealtime();
+        final long realtimeSince = curRealtime - service.mLastPowerCheckRealtime;
+        final long curUptime = SystemClock.uptimeMillis();
+        final long uptimeSince = curUptime - service.mLastPowerCheckUptime;
+
+        final int N = list.size()-1;
+        for (int i=N; i>=0; i--) {
+            ProcessRecord r = list.get(i);
+            String oomAdj;
+            if (r.setAdj >= EMPTY_APP_ADJ) {
+                oomAdj = buildOomTag("empty", null, r.setAdj, EMPTY_APP_ADJ);
+            } else if (r.setAdj >= HIDDEN_APP_MIN_ADJ) {
+                oomAdj = buildOomTag("bak", "  ", r.setAdj, HIDDEN_APP_MIN_ADJ);
+            } else if (r.setAdj >= HOME_APP_ADJ) {
+                oomAdj = buildOomTag("home ", null, r.setAdj, HOME_APP_ADJ);
+            } else if (r.setAdj >= SECONDARY_SERVER_ADJ) {
+                oomAdj = buildOomTag("svc", "  ", r.setAdj, SECONDARY_SERVER_ADJ);
+            } else if (r.setAdj >= BACKUP_APP_ADJ) {
+                oomAdj = buildOomTag("bckup", null, r.setAdj, BACKUP_APP_ADJ);
+            } else if (r.setAdj >= HEAVY_WEIGHT_APP_ADJ) {
+                oomAdj = buildOomTag("hvy  ", null, r.setAdj, HEAVY_WEIGHT_APP_ADJ);
+            } else if (r.setAdj >= PERCEPTIBLE_APP_ADJ) {
+                oomAdj = buildOomTag("prcp ", null, r.setAdj, PERCEPTIBLE_APP_ADJ);
+            } else if (r.setAdj >= VISIBLE_APP_ADJ) {
+                oomAdj = buildOomTag("vis  ", null, r.setAdj, VISIBLE_APP_ADJ);
+            } else if (r.setAdj >= FOREGROUND_APP_ADJ) {
+                oomAdj = buildOomTag("fore ", null, r.setAdj, FOREGROUND_APP_ADJ);
+            } else if (r.setAdj >= CORE_SERVER_ADJ) {
+                oomAdj = buildOomTag("core ", null, r.setAdj, CORE_SERVER_ADJ);
+            } else if (r.setAdj >= SYSTEM_ADJ) {
+                oomAdj = buildOomTag("sys  ", null, r.setAdj, SYSTEM_ADJ);
+            } else {
+                oomAdj = Integer.toString(r.setAdj);
+            }
+            String schedGroup;
+            switch (r.setSchedGroup) {
+                case Process.THREAD_GROUP_BG_NONINTERACTIVE:
+                    schedGroup = "B";
+                    break;
+                case Process.THREAD_GROUP_DEFAULT:
+                    schedGroup = "F";
+                    break;
+                default:
+                    schedGroup = Integer.toString(r.setSchedGroup);
+                    break;
+            }
+            pw.println(String.format("%s%s #%2d: adj=%s/%s %s (%s)",
+                    prefix, (r.persistent ? persistentLabel : normalLabel),
+                    N-i, oomAdj, schedGroup, r.toShortString(), r.adjType));
+            if (r.adjSource != null || r.adjTarget != null) {
+                pw.print(prefix);
+                pw.print("          ");
+                if (r.adjTarget instanceof ComponentName) {
+                    pw.print(((ComponentName)r.adjTarget).flattenToShortString());
+                } else if (r.adjTarget != null) {
+                    pw.print(r.adjTarget.toString());
+                } else {
+                    pw.print("{null}");
+                }
+                pw.print("<=");
+                if (r.adjSource instanceof ProcessRecord) {
+                    pw.print("Proc{");
+                    pw.print(((ProcessRecord)r.adjSource).toShortString());
+                    pw.println("}");
+                } else if (r.adjSource != null) {
+                    pw.println(r.adjSource.toString());
+                } else {
+                    pw.println("{null}");
+                }
+            }
+            if (inclDetails) {
+                pw.print(prefix);
+                pw.print("    ");
+                pw.print("oom: max="); pw.print(r.maxAdj);
+                pw.print(" hidden="); pw.print(r.hiddenAdj);
+                pw.print(" curRaw="); pw.print(r.curRawAdj);
+                pw.print(" setRaw="); pw.print(r.setRawAdj);
+                pw.print(" cur="); pw.print(r.curAdj);
+                pw.print(" set="); pw.println(r.setAdj);
+                pw.print(prefix);
+                pw.print("    ");
+                pw.print("keeping="); pw.print(r.keeping);
+                pw.print(" hidden="); pw.print(r.hidden);
+                pw.print(" empty="); pw.println(r.empty);
+
+                if (!r.keeping) {
+                    if (r.lastWakeTime != 0) {
+                        long wtime;
+                        BatteryStatsImpl stats = service.mBatteryStatsService.getActiveStatistics();
+                        synchronized (stats) {
+                            wtime = stats.getProcessWakeTime(r.info.uid,
+                                    r.pid, curRealtime);
+                        }
+                        long timeUsed = wtime - r.lastWakeTime;
+                        pw.print(prefix);
+                        pw.print("    ");
+                        pw.print("keep awake over ");
+                        TimeUtils.formatDuration(realtimeSince, pw);
+                        pw.print(" used ");
+                        TimeUtils.formatDuration(timeUsed, pw);
+                        pw.print(" (");
+                        pw.print((timeUsed*100)/realtimeSince);
+                        pw.println("%)");
+                    }
+                    if (r.lastCpuTime != 0) {
+                        long timeUsed = r.curCpuTime - r.lastCpuTime;
+                        pw.print(prefix);
+                        pw.print("    ");
+                        pw.print("run cpu over ");
+                        TimeUtils.formatDuration(uptimeSince, pw);
+                        pw.print(" used ");
+                        TimeUtils.formatDuration(timeUsed, pw);
+                        pw.print(" (");
+                        pw.print((timeUsed*100)/uptimeSince);
+                        pw.println("%)");
+                    }
+                }
+            }
+        }
     }
 
     static final void dumpApplicationMemoryUsage(FileDescriptor fd,
@@ -8405,7 +8566,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         return null;
     }
 
-    private final void bumpServiceExecutingLocked(ServiceRecord r) {
+    private final void bumpServiceExecutingLocked(ServiceRecord r, String why) {
+        if (DEBUG_SERVICE) Log.v(TAG, ">>> EXECUTING "
+                + why + " of " + r + " in app " + r.app);
+        else if (DEBUG_SERVICE_EXECUTING) Log.v(TAG, ">>> EXECUTING "
+                + why + " of " + r.shortName);
         long now = SystemClock.uptimeMillis();
         if (r.executeNesting == 0 && r.app != null) {
             if (r.app.executingServices.size() == 0) {
@@ -8443,8 +8608,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     grantUriPermissionUncheckedFromIntentLocked(si.targetPermissionUid,
                             r.packageName, si.intent, si.getUriPermissionsLocked());
                 }
-                if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING start of " + r);
-                bumpServiceExecutingLocked(r);
+                bumpServiceExecutingLocked(r, "start");
                 if (!oomAdjusted) {
                     oomAdjusted = true;
                     updateOomAdjLocked(r.app);
@@ -8477,9 +8641,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if ((!i.requested || rebind) && i.apps.size() > 0) {
             try {
-                if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING bind of " + r
-                        + " in " + i + ": shouldUnbind=" + i.hasBound);
-                bumpServiceExecutingLocked(r);
+                bumpServiceExecutingLocked(r, "bind");
                 r.app.thread.scheduleBindService(r, i.intent.getIntent(), rebind);
                 if (!rebind) {
                     i.requested = true;
@@ -8514,8 +8676,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         r.restartTime = r.lastActivity = SystemClock.uptimeMillis();
 
         app.services.add(r);
-        if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING create of " + r + " " + r.intent);
-        bumpServiceExecutingLocked(r);
+        bumpServiceExecutingLocked(r, "create");
         updateLruProcessLocked(app, true, true);
 
         boolean created = false;
@@ -8767,9 +8928,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + ": hasBound=" + ibr.hasBound);
                 if (r.app != null && r.app.thread != null && ibr.hasBound) {
                     try {
-                        if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING bring down unbind of " + r
-                                + " for " + ibr);
-                        bumpServiceExecutingLocked(r);
+                        bumpServiceExecutingLocked(r, "bring down unbind");
                         updateOomAdjLocked(r.app);
                         ibr.hasBound = false;
                         r.app.thread.scheduleUnbindService(r,
@@ -8820,12 +8979,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             r.app.services.remove(r);
             if (r.app.thread != null) {
                 try {
-                    if (DEBUG_SERVICE) {
-                        RuntimeException here = new RuntimeException();
-                        here.fillInStackTrace();
-                        Slog.v(TAG, ">>> EXECUTING stop of " + r, here);
-                    }
-                    bumpServiceExecutingLocked(r);
+                    bumpServiceExecutingLocked(r, "stop");
                     mStoppingServices.add(r);
                     updateOomAdjLocked(r.app);
                     r.app.thread.scheduleStopService(r);
@@ -9281,9 +9435,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (s.app != null && s.app.thread != null && b.intent.apps.size() == 0
                 && b.intent.hasBound) {
             try {
-                if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING unbind of " + s
-                        + " from " + b);
-                bumpServiceExecutingLocked(s);
+                bumpServiceExecutingLocked(s, "unbind");
                 updateOomAdjLocked(s.app);
                 b.intent.hasBound = false;
                 // Assume the client doesn't want to know about a rebind;
@@ -9504,14 +9656,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
                 + ": nesting=" + r.executeNesting
                 + ", inStopping=" + inStopping + ", app=" + r.app);
+        else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG, "<<< DONE EXECUTING " + r.shortName);
         r.executeNesting--;
         if (r.executeNesting <= 0 && r.app != null) {
+            if (DEBUG_SERVICE) Slog.v(TAG,
+                    "Nesting at 0 of " + r.shortName);
             r.app.executingServices.remove(r);
             if (r.app.executingServices.size() == 0) {
+                if (DEBUG_SERVICE || DEBUG_SERVICE_EXECUTING) Slog.v(TAG,
+                        "No more executingServices of " + r.shortName);
                 mHandler.removeMessages(SERVICE_TIMEOUT_MSG, r.app);
             }
             if (inStopping) {
-                if (DEBUG_SERVICE) Slog.v(TAG, "doneExecuting remove stopping " + r);
+                if (DEBUG_SERVICE) Slog.v(TAG,
+                        "doneExecuting remove stopping " + r);
                 mStoppingServices.remove(r);
             }
             updateOomAdjLocked(r.app);
@@ -9621,20 +9779,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.e(TAG, "Backup agent created for " + agentPackageName + " but not requested!");
                 return;
             }
+        }
 
-            long oldIdent = Binder.clearCallingIdentity();
-            try {
-                IBackupManager bm = IBackupManager.Stub.asInterface(
-                        ServiceManager.getService(Context.BACKUP_SERVICE));
-                bm.agentConnected(agentPackageName, agent);
-            } catch (RemoteException e) {
-                // can't happen; the backup manager service is local
-            } catch (Exception e) {
-                Slog.w(TAG, "Exception trying to deliver BackupAgent binding: ");
-                e.printStackTrace();
-            } finally {
-                Binder.restoreCallingIdentity(oldIdent);
-            }
+        long oldIdent = Binder.clearCallingIdentity();
+        try {
+            IBackupManager bm = IBackupManager.Stub.asInterface(
+                    ServiceManager.getService(Context.BACKUP_SERVICE));
+            bm.agentConnected(agentPackageName, agent);
+        } catch (RemoteException e) {
+            // can't happen; the backup manager service is local
+        } catch (Exception e) {
+            Slog.w(TAG, "Exception trying to deliver BackupAgent binding: ");
+            e.printStackTrace();
+        } finally {
+            Binder.restoreCallingIdentity(oldIdent);
         }
     }
 
@@ -10347,7 +10505,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         Binder.restoreCallingIdentity(origId);
     }
 
-    private final void logBroadcastReceiverDiscard(BroadcastRecord r) {
+    private final void logBroadcastReceiverDiscardLocked(BroadcastRecord r) {
         if (r.nextReceiver > 0) {
             Object curReceiver = r.receivers.get(r.nextReceiver-1);
             if (curReceiver instanceof BroadcastFilter) {
@@ -10375,67 +10533,108 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private final void broadcastTimeout() {
+    private final void setBroadcastTimeoutLocked(long timeoutTime) {
+        if (! mPendingBroadcastTimeoutMessage) {
+            Message msg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
+            mHandler.sendMessageAtTime(msg, timeoutTime);
+            mPendingBroadcastTimeoutMessage = true;
+        }
+    }
+
+    private final void cancelBroadcastTimeoutLocked() {
+        if (mPendingBroadcastTimeoutMessage) {
+            mHandler.removeMessages(BROADCAST_TIMEOUT_MSG);
+            mPendingBroadcastTimeoutMessage = false;
+        }
+    }
+
+    private final void broadcastTimeoutLocked(boolean fromMsg) {
+        if (fromMsg) {
+            mPendingBroadcastTimeoutMessage = false;
+        }
+
+        if (mOrderedBroadcasts.size() == 0) {
+            return;
+        }
+
+        long now = SystemClock.uptimeMillis();
+        BroadcastRecord r = mOrderedBroadcasts.get(0);
+        if (fromMsg) {
+            if (mDidDexOpt) {
+                // Delay timeouts until dexopt finishes.
+                mDidDexOpt = false;
+                long timeoutTime = SystemClock.uptimeMillis() + BROADCAST_TIMEOUT;
+                setBroadcastTimeoutLocked(timeoutTime);
+                return;
+            }
+            if (! mProcessesReady) {
+                // Only process broadcast timeouts if the system is ready. That way
+                // PRE_BOOT_COMPLETED broadcasts can't timeout as they are intended
+                // to do heavy lifting for system up.
+                return;
+            }
+
+            long timeoutTime = r.receiverTime + BROADCAST_TIMEOUT;
+            if (timeoutTime > now) {
+                // We can observe premature timeouts because we do not cancel and reset the
+                // broadcast timeout message after each receiver finishes.  Instead, we set up
+                // an initial timeout then kick it down the road a little further as needed
+                // when it expires.
+                if (DEBUG_BROADCAST) Slog.v(TAG,
+                        "Premature timeout @ " + now + ": resetting BROADCAST_TIMEOUT_MSG for "
+                        + timeoutTime);
+                setBroadcastTimeoutLocked(timeoutTime);
+                return;
+            }
+        }
+
+        Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver
+                + ", started " + (now - r.receiverTime) + "ms ago");
+        r.receiverTime = now;
+        r.anrCount++;
+
+        // Current receiver has passed its expiration date.
+        if (r.nextReceiver <= 0) {
+            Slog.w(TAG, "Timeout on receiver with nextReceiver <= 0");
+            return;
+        }
+
         ProcessRecord app = null;
         String anrMessage = null;
 
-        synchronized (this) {
-            if (mOrderedBroadcasts.size() == 0) {
-                return;
-            }
-            long now = SystemClock.uptimeMillis();
-            BroadcastRecord r = mOrderedBroadcasts.get(0);
-            if ((r.receiverTime+BROADCAST_TIMEOUT) > now) {
-                if (DEBUG_BROADCAST) Slog.v(TAG,
-                        "Premature timeout @ " + now + ": resetting BROADCAST_TIMEOUT_MSG for "
-                        + (r.receiverTime + BROADCAST_TIMEOUT));
-                Message msg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
-                mHandler.sendMessageAtTime(msg, r.receiverTime+BROADCAST_TIMEOUT);
-                return;
-            }
-
-            Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver);
-            r.receiverTime = now;
-            r.anrCount++;
-
-            // Current receiver has passed its expiration date.
-            if (r.nextReceiver <= 0) {
-                Slog.w(TAG, "Timeout on receiver with nextReceiver <= 0");
-                return;
-            }
-
-            Object curReceiver = r.receivers.get(r.nextReceiver-1);
-            Slog.w(TAG, "Receiver during timeout: " + curReceiver);
-            logBroadcastReceiverDiscard(r);
-            if (curReceiver instanceof BroadcastFilter) {
-                BroadcastFilter bf = (BroadcastFilter)curReceiver;
-                if (bf.receiverList.pid != 0
-                        && bf.receiverList.pid != MY_PID) {
-                    synchronized (this.mPidsSelfLocked) {
-                        app = this.mPidsSelfLocked.get(
-                                bf.receiverList.pid);
-                    }
+        Object curReceiver = r.receivers.get(r.nextReceiver-1);
+        Slog.w(TAG, "Receiver during timeout: " + curReceiver);
+        logBroadcastReceiverDiscardLocked(r);
+        if (curReceiver instanceof BroadcastFilter) {
+            BroadcastFilter bf = (BroadcastFilter)curReceiver;
+            if (bf.receiverList.pid != 0
+                    && bf.receiverList.pid != MY_PID) {
+                synchronized (this.mPidsSelfLocked) {
+                    app = this.mPidsSelfLocked.get(
+                            bf.receiverList.pid);
                 }
-            } else {
-                app = r.curApp;
             }
-            
-            if (app != null) {
-                anrMessage = "Broadcast of " + r.intent.toString();
-            }
-
-            if (mPendingBroadcast == r) {
-                mPendingBroadcast = null;
-            }
-
-            // Move on to the next receiver.
-            finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
-                    r.resultExtras, r.resultAbort, true);
-            scheduleBroadcastsLocked();
+        } else {
+            app = r.curApp;
         }
         
+        if (app != null) {
+            anrMessage = "Broadcast of " + r.intent.toString();
+        }
+
+        if (mPendingBroadcast == r) {
+            mPendingBroadcast = null;
+        }
+
+        // Move on to the next receiver.
+        finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
+                r.resultExtras, r.resultAbort, true);
+        scheduleBroadcastsLocked();
+
         if (anrMessage != null) {
-            appNotResponding(app, null, null, anrMessage);
+            // Post the ANR to the handler since we do not want to process ANRs while
+            // potentially holding our lock.
+            mHandler.post(new AppNotResponding(app, anrMessage));
         }
     }
 
@@ -10477,9 +10676,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     }
 
-    static void performReceive(ProcessRecord app, IIntentReceiver receiver,
+    static void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
             boolean ordered, boolean sticky) throws RemoteException {
+        // Send the intent to the receiver asynchronously using one-way binder calls.
         if (app != null && app.thread != null) {
             // If we have an app thread, do the call through that so it is
             // correctly ordered with other one-way calls.
@@ -10490,7 +10690,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    private final void deliverToRegisteredReceiver(BroadcastRecord r,
+    private final void deliverToRegisteredReceiverLocked(BroadcastRecord r,
             BroadcastFilter filter, boolean ordered) {
         boolean skip = false;
         if (filter.requiredPermission != null) {
@@ -10548,7 +10748,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.i(TAG, "Delivering to " + filter
                             + " (seq=" + seq + "): " + r);
                 }
-                performReceive(filter.receiverList.app, filter.receiverList.receiver,
+                performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode,
                     r.resultData, r.resultExtras, r.ordered, r.initialSticky);
                 if (ordered) {
@@ -10605,7 +10805,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (DEBUG_BROADCAST)  Slog.v(TAG,
                             "Delivering non-ordered to registered "
                             + target + ": " + r);
-                    deliverToRegisteredReceiver(r, (BroadcastFilter)target, false);
+                    deliverToRegisteredReceiverLocked(r, (BroadcastFilter)target, false);
                 }
                 addBroadcastToHistoryLocked(r);
                 if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Done with parallel broadcast "
@@ -10661,7 +10861,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // and continue to make progress.
                 //
                 // This is only done if the system is ready so that PRE_BOOT_COMPLETED
-                // receivers don't get executed with with timeouts. They're intended for
+                // receivers don't get executed with timeouts. They're intended for
                 // one time heavy lifting after system upgrades and can take
                 // significant amounts of time.
                 int numReceivers = (r.receivers != null) ? r.receivers.size() : 0;
@@ -10677,7 +10877,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 + " numReceivers=" + numReceivers
                                 + " nextReceiver=" + r.nextReceiver
                                 + " state=" + r.state);
-                        broadcastTimeout(); // forcibly finish this broadcast
+                        broadcastTimeoutLocked(false); // forcibly finish this broadcast
                         forceReceive = true;
                         r.state = BroadcastRecord.IDLE;
                     }
@@ -10701,7 +10901,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 Slog.i(TAG, "Finishing broadcast " + r.intent.getAction()
                                         + " seq=" + seq + " app=" + r.callerApp);
                             }
-                            performReceive(r.callerApp, r.resultTo,
+                            performReceiveLocked(r.callerApp, r.resultTo,
                                 new Intent(r.intent), r.resultCode,
                                 r.resultData, r.resultExtras, false, false);
                         } catch (RemoteException e) {
@@ -10710,7 +10910,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     
                     if (DEBUG_BROADCAST) Slog.v(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");
-                    mHandler.removeMessages(BROADCAST_TIMEOUT_MSG);
+                    cancelBroadcastTimeoutLocked();
 
                     if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Finished with ordered broadcast "
                             + r);
@@ -10735,11 +10935,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Processing ordered broadcast "
                         + r);
+            }
+            if (! mPendingBroadcastTimeoutMessage) {
+                long timeoutTime = r.receiverTime + BROADCAST_TIMEOUT;
                 if (DEBUG_BROADCAST) Slog.v(TAG,
-                        "Submitting BROADCAST_TIMEOUT_MSG for " + r + " at "
-                        + (r.receiverTime + BROADCAST_TIMEOUT));
-                Message msg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
-                mHandler.sendMessageAtTime(msg, r.receiverTime+BROADCAST_TIMEOUT);
+                        "Submitting BROADCAST_TIMEOUT_MSG for " + r + " at " + timeoutTime);
+                setBroadcastTimeoutLocked(timeoutTime);
             }
 
             Object nextReceiver = r.receivers.get(recIdx);
@@ -10750,7 +10951,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_BROADCAST)  Slog.v(TAG,
                         "Delivering ordered to registered "
                         + filter + ": " + r);
-                deliverToRegisteredReceiver(r, filter, r.ordered);
+                deliverToRegisteredReceiverLocked(r, filter, r.ordered);
                 if (r.receiver == null || !r.ordered) {
                     // The receiver has already finished, so schedule to
                     // process the next one.
@@ -10858,7 +11059,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + info.activityInfo.applicationInfo.packageName + "/"
                         + info.activityInfo.applicationInfo.uid + " for broadcast "
                         + r.intent + ": process is bad");
-                logBroadcastReceiverDiscard(r);
+                logBroadcastReceiverDiscardLocked(r);
                 finishReceiverLocked(r.receiver, r.resultCode, r.resultData,
                         r.resultExtras, r.resultAbort, true);
                 scheduleBroadcastsLocked();
@@ -11187,6 +11388,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.adjType = "fixed";
             app.adjSeq = mAdjSeq;
             app.curRawAdj = app.maxAdj;
+            app.keeping = true;
             app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
             return (app.curAdj=app.maxAdj);
        }
@@ -11194,6 +11396,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.adjTypeCode = ActivityManager.RunningAppProcessInfo.REASON_UNKNOWN;
         app.adjSource = null;
         app.adjTarget = null;
+        app.keeping = false;
         app.empty = false;
         app.hidden = false;
 
@@ -11323,6 +11526,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (adj > SECONDARY_SERVER_ADJ) {
                         app.adjType = "started-bg-services";
                     }
+                    // Don't kill this process because it is doing work; it
+                    // has said it is doing work.
+                    app.keeping = true;
                 }
                 if (s.connections.size() > 0 && (adj > FOREGROUND_APP_ADJ
                         || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
@@ -11355,6 +11561,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                             ? clientAdj : VISIBLE_APP_ADJ;
                                     if (!client.hidden) {
                                         app.hidden = false;
+                                    }
+                                    if (client.keeping) {
+                                        app.keeping = true;
                                     }
                                     app.adjType = "service";
                                     app.adjTypeCode = ActivityManager.RunningAppProcessInfo
@@ -11389,7 +11598,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             
-            // Finally, f this process has active services running in it, we
+            // Finally, if this process has active services running in it, we
             // would like to avoid killing it unless it would prevent the current
             // application from running.  By default we put the process in
             // with the rest of the background processes; as we scan through
@@ -11431,6 +11640,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                             if (!client.hidden) {
                                 app.hidden = false;
                             }
+                            if (client.keeping) {
+                                app.keeping = true;
+                            }
                             app.adjType = "provider";
                             app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                     .REASON_PROVIDER_IN_USE;
@@ -11450,6 +11662,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         adj = FOREGROUND_APP_ADJ;
                         schedGroup = Process.THREAD_GROUP_DEFAULT;
                         app.hidden = false;
+                        app.keeping = true;
                         app.adjType = "provider";
                         app.adjTarget = cpr.name;
                     }
@@ -11466,6 +11679,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app.maxAdj <= PERCEPTIBLE_APP_ADJ) {
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
             }
+        }
+        if (adj < HIDDEN_APP_MIN_ADJ) {
+            app.keeping = true;
         }
 
         app.curAdj = adj;
@@ -11604,57 +11820,99 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    final void checkExcessiveWakeLocksLocked(boolean doKills) {
+    final void checkExcessivePowerUsageLocked(boolean doKills) {
+        updateCpuStatsNow();
+
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        if (mLastWakeLockCheckTime == 0) {
-            doKills = false;
+        boolean doWakeKills = doKills;
+        boolean doCpuKills = doKills;
+        if (mLastPowerCheckRealtime == 0) {
+            doWakeKills = false;
+        }
+        if (mLastPowerCheckUptime == 0) {
+            doCpuKills = false;
         }
         if (stats.isScreenOn()) {
-            doKills = false;
+            doWakeKills = false;
         }
         final long curRealtime = SystemClock.elapsedRealtime();
-        final long timeSince = curRealtime - mLastWakeLockCheckTime;
-        mLastWakeLockCheckTime = curRealtime;
-        if (timeSince < (WAKE_LOCK_CHECK_DELAY/3)) {
-            doKills = false;
+        final long realtimeSince = curRealtime - mLastPowerCheckRealtime;
+        final long curUptime = SystemClock.uptimeMillis();
+        final long uptimeSince = curUptime - mLastPowerCheckUptime;
+        mLastPowerCheckRealtime = curRealtime;
+        mLastPowerCheckUptime = curUptime;
+        if (realtimeSince < WAKE_LOCK_MIN_CHECK_DURATION) {
+            doWakeKills = false;
+        }
+        if (uptimeSince < CPU_MIN_CHECK_DURATION) {
+            doCpuKills = false;
         }
         int i = mLruProcesses.size();
         while (i > 0) {
             i--;
             ProcessRecord app = mLruProcesses.get(i);
-            if (app.curAdj >= HIDDEN_APP_MIN_ADJ) {
+            if (!app.keeping) {
                 long wtime;
                 synchronized (stats) {
                     wtime = stats.getProcessWakeTime(app.info.uid,
                             app.pid, curRealtime);
                 }
-                long timeUsed = wtime - app.lastWakeTime;
-                if (false) {
+                long wtimeUsed = wtime - app.lastWakeTime;
+                long cputimeUsed = app.curCpuTime - app.lastCpuTime;
+                if (DEBUG_POWER) {
                     StringBuilder sb = new StringBuilder(128);
                     sb.append("Wake for ");
                     app.toShortString(sb);
                     sb.append(": over ");
-                    TimeUtils.formatDuration(timeSince, sb);
+                    TimeUtils.formatDuration(realtimeSince, sb);
                     sb.append(" used ");
-                    TimeUtils.formatDuration(timeUsed, sb);
+                    TimeUtils.formatDuration(wtimeUsed, sb);
                     sb.append(" (");
-                    sb.append((timeUsed*100)/timeSince);
+                    sb.append((wtimeUsed*100)/realtimeSince);
+                    sb.append("%)");
+                    Slog.i(TAG, sb.toString());
+                    sb.setLength(0);
+                    sb.append("CPU for ");
+                    app.toShortString(sb);
+                    sb.append(": over ");
+                    TimeUtils.formatDuration(uptimeSince, sb);
+                    sb.append(" used ");
+                    TimeUtils.formatDuration(cputimeUsed, sb);
+                    sb.append(" (");
+                    sb.append((cputimeUsed*100)/uptimeSince);
                     sb.append("%)");
                     Slog.i(TAG, sb.toString());
                 }
                 // If a process has held a wake lock for more
                 // than 50% of the time during this period,
                 // that sounds pad.  Kill!
-                if (doKills && timeSince > 0
-                        && ((timeUsed*100)/timeSince) >= 50) {
-                    Slog.i(TAG, "Excessive wake lock in " + app.processName
-                            + " (pid " + app.pid + "): held " + timeUsed
-                            + " during " + timeSince);
+                if (doWakeKills && realtimeSince > 0
+                        && ((wtimeUsed*100)/realtimeSince) >= 50) {
+                    synchronized (stats) {
+                        stats.reportExcessiveWakeLocked(app.info.uid, app.processName,
+                                realtimeSince, wtimeUsed);
+                    }
+                    Slog.w(TAG, "Excessive wake lock in " + app.processName
+                            + " (pid " + app.pid + "): held " + wtimeUsed
+                            + " during " + realtimeSince);
                     EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
                             app.processName, app.setAdj, "excessive wake lock");
                     Process.killProcessQuiet(app.pid);
+                } else if (doCpuKills && uptimeSince > 0
+                        && ((cputimeUsed*100)/uptimeSince) >= 50) {
+                    synchronized (stats) {
+                        stats.reportExcessiveCpuLocked(app.info.uid, app.processName,
+                                uptimeSince, cputimeUsed);
+                    }
+                    Slog.w(TAG, "Excessive CPU in " + app.processName
+                            + " (pid " + app.pid + "): used " + cputimeUsed
+                            + " during " + uptimeSince);
+                    EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                            app.processName, app.setAdj, "excessive cpu");
+                    Process.killProcessQuiet(app.pid);
                 } else {
                     app.lastWakeTime = wtime;
+                    app.lastCpuTime = app.curCpuTime;
                 }
             }
         }
@@ -11667,6 +11925,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app.thread == null) {
             return true;
         }
+
+        final boolean wasKeeping = app.keeping;
 
         int adj = computeOomAdjLocked(app, hiddenAdj, TOP_APP, false);
 
@@ -11682,13 +11942,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Likewise do a gc when an app is moving in to the
                     // background (such as a service stopping).
                     scheduleAppGcLocked(app);
-                    // And note its current wake lock time.
+                }
+
+                if (wasKeeping && !app.keeping) {
+                    // This app is no longer something we want to keep.  Note
+                    // its current wake lock time to later know to kill it if
+                    // it is not behaving well.
                     BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
                     synchronized (stats) {
                         app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
                                 app.pid, SystemClock.elapsedRealtime());
                     }
+                    app.lastCpuTime = app.curCpuTime;
                 }
+
                 app.setRawAdj = app.curRawAdj;
             }
             if (adj != app.setAdj) {

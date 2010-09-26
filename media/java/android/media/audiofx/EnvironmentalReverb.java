@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.audiofx;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioEffect;
+import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -28,18 +28,18 @@ import java.nio.ByteBuffer;
 import java.util.StringTokenizer;
 
 /**
- * A sound generated within a room travels in many directions. The listener first hears the
- * direct sound from the source itself. Later, he or she hears discrete echoes caused by sound
- * bouncing off nearby walls, the ceiling and the floor. As sound waves arrive after
- * undergoing more and more reflections, individual reflections become indistinguishable and
- * the listener hears continuous reverberation that decays over time.
+ * A sound generated within a room travels in many directions. The listener first hears the direct
+ * sound from the source itself. Later, he or she hears discrete echoes caused by sound bouncing off
+ * nearby walls, the ceiling and the floor. As sound waves arrive after undergoing more and more
+ * reflections, individual reflections become indistinguishable and the listener hears continuous
+ * reverberation that decays over time.
  * Reverb is vital for modeling a listener's environment. It can be used in music applications
  * to simulate music being played back in various environments, or in games to immerse the
  * listener within the game's environment.
  * The EnvironmentalReverb class allows an application to control each reverb engine property in a
  * global reverb environment and is more suitable for games. For basic control, more suitable for
  * music applications, it is recommended to use the
- * {@link android.media.PresetReverb} class.
+ * {@link android.media.audiofx.PresetReverb} class.
  * <p>An application creates a EnvironmentalReverb object to instantiate and control a reverb engine
  * in the audio framework.
  * <p>The methods, parameter types and units exposed by the EnvironmentalReverb implementation are
@@ -51,7 +51,9 @@ import java.util.StringTokenizer;
  * they must be explicitely attached to it and a send level must be specified. Use the effect ID
  * returned by getId() method to designate this particular effect when attaching it to the
  * MediaPlayer or AudioTrack.
- * <p> See {@link android.media.AudioEffect} class for more details on controlling
+ * <p>Creating a reverb on the output mix (audio session 0) requires permission
+ * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
+ * <p>See {@link android.media.audiofx.AudioEffect} class for more details on controlling
  * audio effects.
  */
 
@@ -76,7 +78,7 @@ public class EnvironmentalReverb extends AudioEffect {
     public static final int PARAM_DECAY_TIME = 2;
     /**
      * Decay HF ratio. Parameter ID for
-     * {@link android.media.EnvironmentalReverb.OnParameterChangeListener}
+     * {@link android.media.audiofx.EnvironmentalReverb.OnParameterChangeListener}
      */
     public static final int PARAM_DECAY_HF_RATIO = 3;
     /**
@@ -444,7 +446,6 @@ public class EnvironmentalReverb extends AudioEffect {
          * EnvironmentalReverb engine.
          * @param effect the EnvironmentalReverb on which the interface is registered.
          * @param status status of the set parameter operation.
-         * See {@link android.media.AudioEffect#setParameter(byte[], byte[])}.
          * @param param ID of the modified parameter. See {@link #PARAM_ROOM_LEVEL} ...
          * @param value the new parameter value.
          */

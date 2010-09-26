@@ -980,7 +980,10 @@ status_t OMXCodec::setupErrorCorrectionParameters() {
     status_t err = mOMX->getParameter(
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
-    CHECK_EQ(err, OK);
+    if (err != OK) {
+        LOGW("Error correction param query is not supported");
+        return OK;  // Optional feature. Ignore this failure
+    }
 
     errorCorrectionType.bEnableHEC = OMX_FALSE;
     errorCorrectionType.bEnableResync = OMX_TRUE;
@@ -991,7 +994,11 @@ status_t OMXCodec::setupErrorCorrectionParameters() {
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
-    CHECK_EQ(err, OK);
+    if (err != OK) {
+        LOGW("Error correction param configuration is not supported");
+    }
+
+    // Optional feature. Ignore the failure.
     return OK;
 }
 
@@ -1089,8 +1096,8 @@ status_t OMXCodec::setupH263EncoderParameters(const sp<MetaData>& meta) {
 
     // Check profile and level parameters
     CodecProfileLevel defaultProfileLevel, profileLevel;
-    defaultProfileLevel.mProfile = OMX_VIDEO_H263ProfileBaseline;
-    defaultProfileLevel.mLevel = OMX_VIDEO_H263Level45;
+    defaultProfileLevel.mProfile = h263type.eProfile;
+    defaultProfileLevel.mLevel = h263type.eLevel;
     err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
     if (err != OK) return err;
     h263type.eProfile = static_cast<OMX_VIDEO_H263PROFILETYPE>(profileLevel.mProfile);
@@ -1146,8 +1153,8 @@ status_t OMXCodec::setupMPEG4EncoderParameters(const sp<MetaData>& meta) {
 
     // Check profile and level parameters
     CodecProfileLevel defaultProfileLevel, profileLevel;
-    defaultProfileLevel.mProfile = OMX_VIDEO_MPEG4ProfileSimple;
-    defaultProfileLevel.mLevel = OMX_VIDEO_MPEG4Level2;
+    defaultProfileLevel.mProfile = mpeg4type.eProfile;
+    defaultProfileLevel.mLevel = mpeg4type.eLevel;
     err = getVideoProfileLevel(meta, defaultProfileLevel, profileLevel);
     if (err != OK) return err;
     mpeg4type.eProfile = static_cast<OMX_VIDEO_MPEG4PROFILETYPE>(profileLevel.mProfile);

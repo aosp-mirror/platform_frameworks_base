@@ -428,13 +428,14 @@ static void(*findProcAddress(const char* name,
 
 // ----------------------------------------------------------------------------
 
-static void gl_no_context() {
+static int gl_no_context() {
     tls_t* tls = getTLS();
     if (tls->logCallWithNoContext == EGL_TRUE) {
         tls->logCallWithNoContext = EGL_FALSE;
         LOGE("call to OpenGL ES API with no current context "
              "(logged once per thread)");
     }
+    return 0;
 }
 
 static void early_egl_init(void) 
@@ -447,6 +448,7 @@ static void early_egl_init(void)
             (uint32_t*)(void*)&gHooksNoContext, 
             addr, 
             sizeof(gHooksNoContext));
+
     setGlThreadSpecific(&gHooksNoContext);
 }
 

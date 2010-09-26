@@ -24,8 +24,9 @@
 #ifndef __LIBS_ZIPFILERO_H
 #define __LIBS_ZIPFILERO_H
 
-#include "Errors.h"
-#include "FileMap.h"
+#include <utils/Errors.h>
+#include <utils/FileMap.h>
+#include <utils/threads.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -210,6 +211,9 @@ private:
 
     /* open Zip archive */
     int         mFd;
+
+    /* Lock for handling the file descriptor (seeks, etc) */
+    mutable Mutex mFdLock;
 
     /* zip file name */
     char*       mFileName;

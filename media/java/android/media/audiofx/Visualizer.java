@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.audiofx;
 
 import android.util.Log;
 import java.lang.ref.WeakReference;
@@ -32,8 +32,8 @@ import android.os.Message;
  * visualized:<br>
  * <ul>
  *   <li>If the session is 0, the audio output mix is visualized</li>
- *   <li>If the session is not 0, the audio from a particular {@link MediaPlayer} or
- *   {@link AudioTrack}
+ *   <li>If the session is not 0, the audio from a particular {@link android.media.MediaPlayer} or
+ *   {@link android.media.AudioTrack}
  *   using this audio session is visualized </li>
  * </ul>
  * <p>Two types of representation of audio content can be captured: <br>
@@ -57,6 +57,8 @@ import android.os.Message;
  * When data capture is not needed any more, the Visualizer should be disabled.
  * <p>It is good practice to call the {@link #release()} method when the Visualizer is not used
  * anymore to free up native resources associated to the Visualizer instance.
+ * <p>Creating a Visualizer on the output mix (audio session 0) requires permission
+ * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
  */
 
 public class Visualizer {

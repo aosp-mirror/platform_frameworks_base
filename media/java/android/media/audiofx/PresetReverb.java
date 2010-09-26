@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.audiofx;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioEffect;
+import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -40,7 +40,7 @@ import java.util.StringTokenizer;
  * The PresetReverb class allows an application to configure the global reverb using a reverb preset.
  * This is primarily used for adding some reverb in a music playback context. Applications
  * requiring control over a more advanced environmental reverb are advised to use the
- * {@link android.media.EnvironmentalReverb} class.
+ * {@link android.media.audiofx.EnvironmentalReverb} class.
  * <p>An application creates a PresetReverb object to instantiate and control a reverb engine in the
  * audio framework.
  * <p>The methods, parameter types and units exposed by the PresetReverb implementation are
@@ -52,7 +52,10 @@ import java.util.StringTokenizer;
  * they must be explicitely attached to it and a send level must be specified. Use the effect ID
  * returned by getId() method to designate this particular effect when attaching it to the
  * MediaPlayer or AudioTrack.
- * <p> See {@link android.media.AudioEffect} class for more details on controlling audio effects.
+ * <p>Creating a reverb on the output mix (audio session 0) requires permission
+ * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
+ * <p>See {@link android.media.audiofx.AudioEffect} class for more details on controlling
+ * audio effects.
  */
 
 public class PresetReverb extends AudioEffect {
@@ -64,7 +67,7 @@ public class PresetReverb extends AudioEffect {
 
     /**
      * Preset. Parameter ID for
-     * {@link android.media.PresetReverb.OnParameterChangeListener}
+     * {@link android.media.audiofx.PresetReverb.OnParameterChangeListener}
      */
     public static final int PARAM_PRESET = 0;
 
@@ -174,7 +177,6 @@ public class PresetReverb extends AudioEffect {
          * PresetReverb engine.
          * @param effect the PresetReverb on which the interface is registered.
          * @param status status of the set parameter operation.
-         * See {@link android.media.AudioEffect#setParameter(byte[], byte[])}.
          * @param param ID of the modified parameter. See {@link #PARAM_PRESET} ...
          * @param value the new parameter value.
          */

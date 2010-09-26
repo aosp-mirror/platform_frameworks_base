@@ -164,15 +164,17 @@ public class NinePatchDrawable extends Drawable {
                     sdensity, tdensity);
             mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(),
                     sdensity, tdensity);
-            Rect dest = mPadding;
-            Rect src = mNinePatchState.mPadding;
-            if (dest == src) {
-                mPadding = dest = new Rect(src);
+            if (mNinePatchState.mPadding != null && mPadding != null) {
+                Rect dest = mPadding;
+                Rect src = mNinePatchState.mPadding;
+                if (dest == src) {
+                    mPadding = dest = new Rect(src);
+                }
+                dest.left = Bitmap.scaleFromDensity(src.left, sdensity, tdensity);
+                dest.top = Bitmap.scaleFromDensity(src.top, sdensity, tdensity);
+                dest.right = Bitmap.scaleFromDensity(src.right, sdensity, tdensity);
+                dest.bottom = Bitmap.scaleFromDensity(src.bottom, sdensity, tdensity);
             }
-            dest.left = Bitmap.scaleFromDensity(src.left, sdensity, tdensity);
-            dest.top = Bitmap.scaleFromDensity(src.top, sdensity, tdensity);
-            dest.right = Bitmap.scaleFromDensity(src.right, sdensity, tdensity);
-            dest.bottom = Bitmap.scaleFromDensity(src.bottom, sdensity, tdensity);
         }
     }
     

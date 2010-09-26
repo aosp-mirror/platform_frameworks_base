@@ -67,6 +67,7 @@ void usage(void)
         "        [-A asset-source-dir]  [-G class-list-file] [-P public-definitions-file] \\\n"
         "        [-S resource-sources [-S resource-sources ...]] "
         "        [-F apk-file] [-J R-file-dir] \\\n"
+        "        [--product product1,product2,...] \\\n"
         "        [raw-files-dir [raw-files-dir] ...]\n"
         "\n"
         "   Package the android resources.  It will read assets and resources that are\n"
@@ -154,6 +155,9 @@ void usage(void)
         "       components target the given package.  Useful when used in\n"
         "       conjunction with --rename-manifest-package to fix tests against\n"
         "       a package that has been renamed.\n"
+        "   --product\n"
+        "       Specifies which variant to choose for strings that have\n"
+        "       product variants\n"
         "   --utf16\n"
         "       changes default encoding for resources to UTF-16.  Only useful when API\n"
         "       level is set to 7 or higher where the default encoding is UTF-8.\n");
@@ -484,6 +488,15 @@ int main(int argc, char* const argv[])
                     bundle.setInstrumentationPackageNameOverride(argv[0]);
                 } else if (strcmp(cp, "-auto-add-overlay") == 0) {
                     bundle.setAutoAddOverlay(true);
+                } else if (strcmp(cp, "-product") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--product' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setProduct(argv[0]);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;

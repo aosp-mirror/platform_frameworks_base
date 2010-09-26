@@ -37,7 +37,7 @@ using namespace android;
 #define AUDIOEFFECT_ERROR_DEAD_OBJECT           -7
 
 // ----------------------------------------------------------------------------
-static const char* const kClassPathName = "android/media/AudioEffect";
+static const char* const kClassPathName = "android/media/audiofx/AudioEffect";
 
 struct fields_t {
     // these fields provide access from C++ to the...
@@ -228,9 +228,9 @@ android_media_AudioEffect_native_init(JNIEnv *env)
         return;
     }
 
-    clazz = env->FindClass("android/media/AudioEffect$Descriptor");
+    clazz = env->FindClass("android/media/audiofx/AudioEffect$Descriptor");
     if (clazz == NULL) {
-        LOGE("Can't find android/media/AudioEffect$Descriptor class");
+        LOGE("Can't find android/media/audiofx/AudioEffect$Descriptor class");
         return;
     }
     fields.clazzDesc = (jclass)env->NewGlobalRef(clazz);
@@ -241,7 +241,7 @@ android_media_AudioEffect_native_init(JNIEnv *env)
                     "<init>",
                     "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
     if (fields.midDescCstor == NULL) {
-        LOGE("Can't find android/media/AudioEffect$Descriptor class constructor");
+        LOGE("Can't find android/media/audiofx/AudioEffect$Descriptor class constructor");
         return;
     }
 }
@@ -304,14 +304,7 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
             lpJniStorage->mCallbackData.audioEffect_class,
             &lpJniStorage->mCallbackData);
 
-    if (jId) {
-        nId = (jint *) env->GetPrimitiveArrayCritical(jId, NULL);
-        if (nId == NULL) {
-            LOGE("setup: Error retrieving id pointer");
-            lStatus = AUDIOEFFECT_ERROR_BAD_VALUE;
-            goto setup_failure;
-        }
-    } else {
+    if (jId == NULL) {
         LOGE("setup: NULL java array for id pointer");
         lStatus = AUDIOEFFECT_ERROR_BAD_VALUE;
         goto setup_failure;
@@ -336,8 +329,13 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
         goto setup_failure;
     }
 
+    nId = (jint *) env->GetPrimitiveArrayCritical(jId, NULL);
+    if (nId == NULL) {
+        LOGE("setup: Error retrieving id pointer");
+        lStatus = AUDIOEFFECT_ERROR_BAD_VALUE;
+        goto setup_failure;
+    }
     nId[0] = lpAudioEffect->id();
-
     env->ReleasePrimitiveArrayCritical(jId, nId, 0);
     nId = NULL;
 

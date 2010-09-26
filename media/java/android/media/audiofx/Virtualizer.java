@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.media;
+package android.media.audiofx;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioEffect;
+import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -30,37 +30,42 @@ import java.util.StringTokenizer;
 
 
 /**
- * Bass boost is an audio effect to boost or amplify low frequencies of the sound. It is comparable
- * to a simple equalizer but limited to one band amplification in the low frequency range.
- * <p>An application creates a BassBoost object to instantiate and control a bass boost engine
+ * An audio virtualizer is a general name for an effect to spatialize audio channels. The exact
+ * behavior of this effect is dependent on the number of audio input channels and the types and
+ * number of audio output channels of the device. For example, in the case of a stereo input and
+ * stereo headphone output, a stereo widening effect is used when this effect is turned on.
+ * <p>An application creates a Virtualizer object to instantiate and control a virtualizer engine
  * in the audio framework.
- * <p>The methods, parameter types and units exposed by the BassBoost implementation are directly
+ * <p>The methods, parameter types and units exposed by the Virtualizer implementation are directly
  * mapping those defined by the OpenSL ES 1.0.1 Specification (http://www.khronos.org/opensles/)
- * for the SLBassBoostItf interface. Please refer to this specification for more details.
- * <p>To attach the BassBoost to a particular AudioTrack or MediaPlayer, specify the audio session
- * ID of this AudioTrack or MediaPlayer when constructing the BassBoost. If the audio session ID 0
- * is specified, the BassBoost applies to the main audio output mix.
- * <p> See {@link android.media.AudioEffect} class for more details on controlling audio effects.
+ * for the SLVirtualizerItf interface. Please refer to this specification for more details.
+ * <p>To attach the Virtualizer to a particular AudioTrack or MediaPlayer, specify the audio session
+ * ID of this AudioTrack or MediaPlayer when constructing the Virtualizer. If the audio session ID 0
+ * is specified, the Virtualizer applies to the main audio output mix.
+ * <p>Creating a Virtualizer on the output mix (audio session 0) requires permission
+ * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
+ * <p>See {@link android.media.MediaPlayer#getAudioSessionId()} for details on audio sessions.
+ * <p>See {@link android.media.audiofx.AudioEffect} class for more details on controlling
+ * audio effects.
  */
 
-public class BassBoost extends AudioEffect {
+public class Virtualizer extends AudioEffect {
 
-    private final static String TAG = "BassBoost";
+    private final static String TAG = "Virtualizer";
 
-    // These constants must be synchronized with those in
-    // frameworks/base/include/media/EffectBassBoostApi.h
+    // These constants must be synchronized with those in frameworks/base/include/media/EffectVirtualizerApi.h
     /**
-     * Is strength parameter supported by bass boost engine. Parameter ID for getParameter().
+     * Is strength parameter supported by virtualizer engine. Parameter ID for getParameter().
      */
     public static final int PARAM_STRENGTH_SUPPORTED = 0;
     /**
-     * Bass boost effect strength. Parameter ID for
-     * {@link android.media.BassBoost.OnParameterChangeListener}
+     * Virtualizer effect strength. Parameter ID for
+     * {@link android.media.audiofx.Virtualizer.OnParameterChangeListener}
      */
     public static final int PARAM_STRENGTH = 1;
 
     /**
-     * Indicates if strength parameter is supported by the bass boost engine
+     * Indicates if strength parameter is supported by the virtualizer engine
      */
     private boolean mStrengthSupported = false;
 
@@ -81,23 +86,23 @@ public class BassBoost extends AudioEffect {
 
     /**
      * Class constructor.
-     * @param priority the priority level requested by the application for controlling the BassBoost
+     * @param priority the priority level requested by the application for controlling the Virtualizer
      * engine. As the same engine can be shared by several applications, this parameter indicates
      * how much the requesting application needs control of effect parameters. The normal priority
      * is 0, above normal is a positive number, below normal a negative number.
-     * @param audioSession system wide unique audio session identifier. If audioSession
-     *  is not 0, the BassBoost will be attached to the MediaPlayer or AudioTrack in the
-     *  same audio session. Otherwise, the BassBoost will apply to the output mix.
+     * @param audioSession  system wide unique audio session identifier. If audioSession
+     *  is not 0, the Virtualizer will be attached to the MediaPlayer or AudioTrack in the
+     *  same audio session. Otherwise, the Virtualizer will apply to the output mix.
      *
      * @throws java.lang.IllegalStateException
      * @throws java.lang.IllegalArgumentException
      * @throws java.lang.UnsupportedOperationException
      * @throws java.lang.RuntimeException
      */
-    public BassBoost(int priority, int audioSession)
+    public Virtualizer(int priority, int audioSession)
     throws IllegalStateException, IllegalArgumentException,
            UnsupportedOperationException, RuntimeException {
-        super(EFFECT_TYPE_BASS_BOOST, EFFECT_TYPE_NULL, priority, audioSession);
+        super(EFFECT_TYPE_VIRTUALIZER, EFFECT_TYPE_NULL, priority, audioSession);
 
         int[] value = new int[1];
         checkStatus(getParameter(PARAM_STRENGTH_SUPPORTED, value));
@@ -114,7 +119,7 @@ public class BassBoost extends AudioEffect {
     }
 
     /**
-     * Sets the strength of the bass boost effect. If the implementation does not support per mille
+     * Sets the strength of the virtualizer effect. If the implementation does not support per mille
      * accuracy for setting the strength, it is allowed to round the given strength to the nearest
      * supported value. You can use the {@link #getRoundedStrength()} method to query the
      * (possibly rounded) value that was actually set.
@@ -145,21 +150,20 @@ public class BassBoost extends AudioEffect {
     }
 
     /**
-     * The OnParameterChangeListener interface defines a method called by the BassBoost when a
+     * The OnParameterChangeListener interface defines a method called by the Virtualizer when a
      * parameter value has changed.
      */
     public interface OnParameterChangeListener  {
         /**
          * Method called when a parameter value has changed. The method is called only if the
          * parameter was changed by another application having the control of the same
-         * BassBoost engine.
-         * @param effect the BassBoost on which the interface is registered.
+         * Virtualizer engine.
+         * @param effect the Virtualizer on which the interface is registered.
          * @param status status of the set parameter operation.
-         * See {@link android.media.AudioEffect#setParameter(byte[], byte[])}.
          * @param param ID of the modified parameter. See {@link #PARAM_STRENGTH} ...
          * @param value the new parameter value.
          */
-        void onParameterChange(BassBoost effect, int status, int param, short value);
+        void onParameterChange(Virtualizer effect, int status, int param, short value);
     }
 
     /**
@@ -189,7 +193,7 @@ public class BassBoost extends AudioEffect {
                     v = byteArrayToShort(value, 0);
                 }
                 if (p != -1 && v != -1) {
-                    l.onParameterChange(BassBoost.this, status, p, v);
+                    l.onParameterChange(Virtualizer.this, status, p, v);
                 }
             }
         }
@@ -210,7 +214,7 @@ public class BassBoost extends AudioEffect {
     }
 
     /**
-     * The Settings class regroups all bass boost parameters. It is used in
+     * The Settings class regroups all virtualizer parameters. It is used in
      * conjuntion with getProperties() and setProperties() methods to backup and restore
      * all parameters in a single call.
      */
@@ -232,9 +236,9 @@ public class BassBoost extends AudioEffect {
                 throw new IllegalArgumentException("settings: " + settings);
             }
             String key = st.nextToken();
-            if (!key.equals("BassBoost")) {
+            if (!key.equals("Virtualizer")) {
                 throw new IllegalArgumentException(
-                        "invalid settings for BassBoost: " + key);
+                        "invalid settings for Virtualizer: " + key);
             }
             try {
                 key = st.nextToken();
@@ -250,7 +254,7 @@ public class BassBoost extends AudioEffect {
         @Override
         public String toString() {
             String str = new String (
-                    "BassBoost"+
+                    "Virtualizer"+
                     ";strength="+Short.toString(strength)
                     );
             return str;
@@ -259,14 +263,14 @@ public class BassBoost extends AudioEffect {
 
 
     /**
-     * Gets the bass boost properties. This method is useful when a snapshot of current
-     * bass boost settings must be saved by the application.
-     * @return a BassBoost.Settings object containing all current parameters values
+     * Gets the virtualizer properties. This method is useful when a snapshot of current
+     * virtualizer settings must be saved by the application.
+     * @return a Virtualizer.Settings object containing all current parameters values
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
      */
-    public BassBoost.Settings getProperties()
+    public Virtualizer.Settings getProperties()
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         Settings settings = new Settings();
         short[] value = new short[1];
@@ -276,14 +280,14 @@ public class BassBoost extends AudioEffect {
     }
 
     /**
-     * Sets the bass boost properties. This method is useful when bass boost settings have to
+     * Sets the virtualizer properties. This method is useful when virtualizer settings have to
      * be applied from a previous backup.
-     * @param settings a BassBoost.Settings object containing the properties to apply
+     * @param settings a Virtualizer.Settings object containing the properties to apply
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
      */
-    public void setProperties(BassBoost.Settings settings)
+    public void setProperties(Virtualizer.Settings settings)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         checkStatus(setParameter(PARAM_STRENGTH, settings.strength));
     }

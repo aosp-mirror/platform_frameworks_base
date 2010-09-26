@@ -574,6 +574,7 @@ status_t parseAndAddBag(Bundle* bundle,
                         const String16& itemIdent,
                         int32_t curFormat,
                         bool isFormatted,
+                        const String16& product,
                         bool pseudolocalize,
                         const bool overwrite,
                         ResourceTable* outTable)
@@ -606,6 +607,32 @@ status_t parseAndAddBag(Bundle* bundle,
     return err;
 }
 
+/*
+ * Returns true if needle is one of the elements in the comma-separated list
+ * haystack, false otherwise.
+ */
+bool isInProductList(const String16& needle, const String16& haystack) {
+    const char16_t *needle2 = needle.string();
+    const char16_t *haystack2 = haystack.string();
+    size_t needlesize = needle.size();
+
+    while (*haystack2 != '\0') {
+        if (strncmp16(haystack2, needle2, needlesize) == 0) {
+            if (haystack2[needlesize] == '\0' || haystack2[needlesize] == ',') {
+                return true;
+            }
+        }
+
+        while (*haystack2 != '\0' && *haystack2 != ',') {
+            haystack2++;
+        }
+        if (*haystack2 == ',') {
+            haystack2++;
+        }
+    }
+
+    return false;
+}
 
 status_t parseAndAddEntry(Bundle* bundle,
                         const sp<AaptFile>& in,
@@ -618,6 +645,7 @@ status_t parseAndAddEntry(Bundle* bundle,
                         bool curIsStyled,
                         int32_t curFormat,
                         bool isFormatted,
+                        const String16& product,
                         bool pseudolocalize,
                         const bool overwrite,
                         ResourceTable* outTable)
@@ -632,6 +660,47 @@ status_t parseAndAddEntry(Bundle* bundle,
 
     if (err < NO_ERROR) { 
         return err;
+    }
+
+    /*
+     * If a product type was specified on the command line
+     * and also in the string, and the two are not the same,
+     * return without adding the string.
+     */
+
+    const char *bundleProduct = bundle->getProduct();
+    if (bundleProduct == NULL) {
+        bundleProduct = "";
+    }
+
+    if (product.size() != 0) {
+        /*
+         * If the command-line-specified product is empty, only "default"
+         * matches.  Other variants are skipped.  This is so generation
+         * of the R.java file when the product is not known is predictable.
+         */
+
+        if (bundleProduct[0] == '\0') {
+            if (strcmp16(String16("default").string(), product.string()) != 0) {
+                return NO_ERROR;
+            }
+        } else {
+            /*
+             * The command-line product is not empty.
+             * If the product for this string is on the command-line list,
+             * it matches.  "default" also matches, but only if nothing
+             * else has matched already.
+             */
+
+            if (isInProductList(product, String16(bundleProduct))) {
+                ;
+            } else if (strcmp16(String16("default").string(), product.string()) == 0 &&
+                       !outTable->hasBagOrEntry(myPackage, curType, ident)) {
+                ;
+            } else {
+                return NO_ERROR;
+            }
+        }
     }
 
     NOISY(printf("Adding resource entry l=%c%c c=%c%c orien=%d d=%d id=%s: %s\n",
@@ -713,6 +782,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 translatable16("translatable");
     const String16 formatted16("formatted");
     const String16 false16("false");
+    const String16 product16("product");
 
     const String16 myPackage(assets->getPackage());
 
@@ -760,6 +830,7 @@ status_t compileResourceFile(Bundle* bundle,
             bool curIsStyled = false;
             bool curIsPseudolocalizable = false;
             bool curIsFormatted = fileIsTranslatable;
+            String16 curProduct;
             bool localHasErrors = false;
 
             if (strcmp16(block.getElementName(&len), skip16.string()) == 0) {
@@ -1157,6 +1228,8 @@ status_t compileResourceFile(Bundle* bundle,
                         translatable.setTo(block.getAttributeStringValue(i, &length));
                     } else if (strcmp16(attr, formatted16.string()) == 0) {
                         formatted.setTo(block.getAttributeStringValue(i, &length));
+                    } else if (strcmp16(attr, product16.string()) == 0) {
+                        curProduct.setTo(block.getAttributeStringValue(i, &length));
                     }
                 }
                 
@@ -1374,7 +1447,7 @@ status_t compileResourceFile(Bundle* bundle,
 
                         err = parseAndAddBag(bundle, in, &block, curParams, myPackage, curType,
                                 ident, parentIdent, itemIdent, curFormat, curIsFormatted,
-                                false, overwrite, outTable);
+                                curProduct, false, overwrite, outTable);
                         if (err == NO_ERROR) {
                             if (curIsPseudolocalizable && localeIsDefined(curParams)
                                     && bundle->getPseudolocalize()) {
@@ -1383,7 +1456,7 @@ status_t compileResourceFile(Bundle* bundle,
                                 block.setPosition(parserPosition);
                                 err = parseAndAddBag(bundle, in, &block, pseudoParams, myPackage,
                                         curType, ident, parentIdent, itemIdent, curFormat,
-                                        curIsFormatted, true, overwrite, outTable);
+                                        curIsFormatted, curProduct, true, overwrite, outTable);
 #endif
                             }
                         } 
@@ -1407,7 +1480,7 @@ status_t compileResourceFile(Bundle* bundle,
 
                 err = parseAndAddEntry(bundle, in, &block, curParams, myPackage, curType, ident,
                         *curTag, curIsStyled, curFormat, curIsFormatted,
-                        false, overwrite, outTable);
+                        curProduct, false, overwrite, outTable);
 
                 if (err < NO_ERROR) { // Why err < NO_ERROR instead of err != NO_ERROR?
                     hasErrors = localHasErrors = true;
@@ -1419,7 +1492,8 @@ status_t compileResourceFile(Bundle* bundle,
                         block.setPosition(parserPosition);
                         err = parseAndAddEntry(bundle, in, &block, pseudoParams, myPackage, curType,
                                 ident, *curTag, curIsStyled, curFormat,
-                                curIsFormatted, true, overwrite, outTable);
+                                curIsFormatted, curProduct,
+                                true, overwrite, outTable);
                         if (err != NO_ERROR) {
                             hasErrors = localHasErrors = true;
                         }

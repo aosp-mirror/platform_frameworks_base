@@ -180,7 +180,8 @@ final class NativeDaemonConnector implements Runnable {
         }
     }
 
-    private void sendCommand(String command) {
+    private void sendCommand(String command)
+            throws NativeDaemonConnectorException  {
         sendCommand(command, null);
     }
 
@@ -190,11 +191,13 @@ final class NativeDaemonConnector implements Runnable {
      * @param command  The command to send to the daemon
      * @param argument The argument to send with the command (or null)
      */
-    private void sendCommand(String command, String argument) {
+    private void sendCommand(String command, String argument)
+            throws NativeDaemonConnectorException  {
         synchronized (this) {
             if (LOCAL_LOGD) Slog.d(TAG, String.format("SND -> {%s} {%s}", command, argument));
             if (mOutputStream == null) {
                 Slog.e(TAG, "No connection to daemon", new IllegalStateException());
+                throw new NativeDaemonConnectorException("No output stream!");
             } else {
                 StringBuilder builder = new StringBuilder(command);
                 if (argument != null) {
@@ -224,6 +227,7 @@ final class NativeDaemonConnector implements Runnable {
 
         while (!complete) {
             try {
+                // TODO - this should not block forever
                 String line = mResponseQueue.take();
                 if (LOCAL_LOGD) Slog.d(TAG, String.format("RSP <- {%s}", line));
                 String[] tokens = line.split(" ");

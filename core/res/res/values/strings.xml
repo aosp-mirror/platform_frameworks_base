@@ -1619,6 +1619,15 @@
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
+    <string name="permlab_setAlarm">set alarm in alarm clock</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_setAlarm">Allows the application to set an alarm in
+      an installed alarm clock application. Some alarm clock applications may
+      not implement this feature.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
     <string name="permlab_writeGeolocationPermissions">Modify Browser geolocation permissions</string>
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
