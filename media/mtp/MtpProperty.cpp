@@ -36,10 +36,10 @@ MtpProperty::MtpProperty()
         mEnumLength(0),
         mEnumValues(NULL)
 {
-    mDefaultValue.str = NULL;
-    mCurrentValue.str = NULL;
-    mMinimumValue.str = NULL;
-    mMaximumValue.str = NULL;
+    memset(&mDefaultValue, 0, sizeof(mDefaultValue));
+    memset(&mCurrentValue, 0, sizeof(mCurrentValue));
+    memset(&mMinimumValue, 0, sizeof(mMinimumValue));
+    memset(&mMaximumValue, 0, sizeof(mMaximumValue));
 }
 
 MtpProperty::MtpProperty(MtpPropertyCode propCode,
@@ -66,28 +66,28 @@ MtpProperty::MtpProperty(MtpPropertyCode propCode,
     if (defaultValue) {
         switch (type) {
             case MTP_TYPE_INT8:
-                mDefaultValue.i8 = defaultValue;
+                mDefaultValue.u.i8 = defaultValue;
                 break;
             case MTP_TYPE_UINT8:
-                mDefaultValue.u8 = defaultValue;
+                mDefaultValue.u.u8 = defaultValue;
                 break;
             case MTP_TYPE_INT16:
-                mDefaultValue.i16 = defaultValue;
+                mDefaultValue.u.i16 = defaultValue;
                 break;
             case MTP_TYPE_UINT16:
-                mDefaultValue.u16 = defaultValue;
+                mDefaultValue.u.u16 = defaultValue;
                 break;
             case MTP_TYPE_INT32:
-                mDefaultValue.i32 = defaultValue;
+                mDefaultValue.u.i32 = defaultValue;
                 break;
             case MTP_TYPE_UINT32:
-                mDefaultValue.u32 = defaultValue;
+                mDefaultValue.u.u32 = defaultValue;
                 break;
             case MTP_TYPE_INT64:
-                mDefaultValue.i64 = defaultValue;
+                mDefaultValue.u.i64 = defaultValue;
                 break;
             case MTP_TYPE_UINT64:
-                mDefaultValue.u64 = defaultValue;
+                mDefaultValue.u.u64 = defaultValue;
                 break;
             default:
                 LOGE("unknown type %04X in MtpProperty::MtpProperty", type);
@@ -203,6 +203,26 @@ void MtpProperty::write(MtpDataPacket& packet) {
     }
 }
 
+void MtpProperty::setDefaultValue(const uint16_t* string) {
+    free(mDefaultValue.str);
+    if (string) {
+        MtpStringBuffer buffer(string);
+        mDefaultValue.str = strdup(buffer);
+    }
+    else
+        mDefaultValue.str = NULL;
+}
+
+void MtpProperty::setCurrentValue(const uint16_t* string) {
+    free(mCurrentValue.str);
+    if (string) {
+        MtpStringBuffer buffer(string);
+        mCurrentValue.str = strdup(buffer);
+    }
+    else
+        mCurrentValue.str = NULL;
+}
+
 void MtpProperty::print() {
     LOGV("MtpProperty %04X\n", mCode);
     LOGV("    type %04X\n", mType);
@@ -215,43 +235,43 @@ void MtpProperty::readValue(MtpDataPacket& packet, MtpPropertyValue& value) {
     switch (mType) {
         case MTP_TYPE_INT8:
         case MTP_TYPE_AINT8:
-            value.i8 = packet.getInt8();
+            value.u.i8 = packet.getInt8();
             break;
         case MTP_TYPE_UINT8:
         case MTP_TYPE_AUINT8:
-            value.u8 = packet.getUInt8();
+            value.u.u8 = packet.getUInt8();
             break;
         case MTP_TYPE_INT16:
         case MTP_TYPE_AINT16:
-            value.i16 = packet.getInt16();
+            value.u.i16 = packet.getInt16();
             break;
         case MTP_TYPE_UINT16:
         case MTP_TYPE_AUINT16:
-            value.u16 = packet.getUInt16();
+            value.u.u16 = packet.getUInt16();
             break;
         case MTP_TYPE_INT32:
         case MTP_TYPE_AINT32:
-            value.i32 = packet.getInt32();
+            value.u.i32 = packet.getInt32();
             break;
         case MTP_TYPE_UINT32:
         case MTP_TYPE_AUINT32:
-            value.u32 = packet.getUInt32();
+            value.u.u32 = packet.getUInt32();
             break;
         case MTP_TYPE_INT64:
         case MTP_TYPE_AINT64:
-            value.i64 = packet.getInt64();
+            value.u.i64 = packet.getInt64();
             break;
         case MTP_TYPE_UINT64:
         case MTP_TYPE_AUINT64:
-            value.u64 = packet.getUInt64();
+            value.u.u64 = packet.getUInt64();
             break;
         case MTP_TYPE_INT128:
         case MTP_TYPE_AINT128:
-            packet.getInt128(value.i128);
+            packet.getInt128(value.u.i128);
             break;
         case MTP_TYPE_UINT128:
         case MTP_TYPE_AUINT128:
-            packet.getUInt128(value.u128);
+            packet.getUInt128(value.u.u128);
             break;
         case MTP_TYPE_STR:
             packet.getString(stringBuffer);
@@ -268,43 +288,43 @@ void MtpProperty::writeValue(MtpDataPacket& packet, MtpPropertyValue& value) {
     switch (mType) {
         case MTP_TYPE_INT8:
         case MTP_TYPE_AINT8:
-            packet.putInt8(value.i8);
+            packet.putInt8(value.u.i8);
             break;
         case MTP_TYPE_UINT8:
         case MTP_TYPE_AUINT8:
-            packet.putUInt8(value.u8);
+            packet.putUInt8(value.u.u8);
             break;
         case MTP_TYPE_INT16:
         case MTP_TYPE_AINT16:
-            packet.putInt16(value.i16);
+            packet.putInt16(value.u.i16);
             break;
         case MTP_TYPE_UINT16:
         case MTP_TYPE_AUINT16:
-            packet.putUInt16(value.u16);
+            packet.putUInt16(value.u.u16);
             break;
         case MTP_TYPE_INT32:
         case MTP_TYPE_AINT32:
-            packet.putInt32(value.i32);
+            packet.putInt32(value.u.i32);
             break;
         case MTP_TYPE_UINT32:
         case MTP_TYPE_AUINT32:
-            packet.putUInt32(value.u32);
+            packet.putUInt32(value.u.u32);
             break;
         case MTP_TYPE_INT64:
         case MTP_TYPE_AINT64:
-            packet.putInt64(value.i64);
+            packet.putInt64(value.u.i64);
             break;
         case MTP_TYPE_UINT64:
         case MTP_TYPE_AUINT64:
-            packet.putUInt64(value.u64);
+            packet.putUInt64(value.u.u64);
             break;
         case MTP_TYPE_INT128:
         case MTP_TYPE_AINT128:
-            packet.putInt128(value.i128);
+            packet.putInt128(value.u.i128);
             break;
         case MTP_TYPE_UINT128:
         case MTP_TYPE_AUINT128:
-            packet.putUInt128(value.u128);
+            packet.putUInt128(value.u.u128);
             break;
         case MTP_TYPE_STR:
             if (value.str)

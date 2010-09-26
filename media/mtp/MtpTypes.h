@@ -43,20 +43,6 @@ typedef MtpPropertyCode MtpObjectProperty;
 // values 0x00000000 and 0xFFFFFFFF are reserved for special purposes.
 typedef uint32_t MtpObjectHandle;
 
-union MtpPropertyValue {
-    int8_t          i8;
-    uint8_t         u8;
-    int16_t         i16;
-    uint16_t        u16;
-    int32_t         i32;
-    uint32_t        u32;
-    int64_t         i64;
-    uint64_t        u64;
-    int128_t        i128;
-    uint128_t       u128;
-    char*           str;
-};
-
 // Special values
 #define MTP_PARENT_ROOT         0xFFFFFFFF       // parent is root of the storage
 #define kInvalidObjectHandle    0xFFFFFFFF
