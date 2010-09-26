@@ -3808,6 +3808,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 imm.focusOut(this);
             }
             removeLongPressCallback();
+            removeTapCallback();
             onFocusLost();
         } else if (imm != null && (mPrivateFlags & FOCUSED) != 0) {
             imm.focusIn(this);
