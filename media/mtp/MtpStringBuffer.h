@@ -27,6 +27,7 @@ class MtpDataPacket;
 class MtpStringBuffer {
 
 private:
+    // mBuffer contains string in UTF8 format
     // maximum 3 bytes/character, with 1 extra for zero termination
     uint8_t         mBuffer[255 * 3 + 1];
     int             mCharCount;
@@ -35,10 +36,12 @@ private:
 public:
                     MtpStringBuffer();
                     MtpStringBuffer(const char* src);
+                    MtpStringBuffer(const uint16_t* src);
                     MtpStringBuffer(const MtpStringBuffer& src);
     virtual         ~MtpStringBuffer();
 
     void            set(const char* src);
+    void            set(const uint16_t* src);
 
     void            readFromPacket(MtpDataPacket* packet);
     void            writeToPacket(MtpDataPacket* packet) const;
