@@ -19,6 +19,7 @@
 #include "rsMatrix.h"
 #include "../../compile/libbcc/include/bcc/bcc.h"
 #include "utils/Timers.h"
+#include "utils/StopWatch.h"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -395,14 +396,16 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
 void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 {
     LOGV("%p ScriptCState::runCompiler ", rsc);
-
-    s->mBccScript = bccCreateScript();
-    s->mEnviroment.mIsThreadable = true;
-    bccScriptBitcode(s->mBccScript, s->mEnviroment.mScriptText, s->mEnviroment.mScriptTextLength);
-    bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
-    bccCompileScript(s->mBccScript);
-    bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
-    bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
+    {
+        StopWatch compileTimer("RenderScript compile time");
+        s->mBccScript = bccCreateScript();
+        s->mEnviroment.mIsThreadable = true;
+        bccScriptBitcode(s->mBccScript, s->mEnviroment.mScriptText, s->mEnviroment.mScriptTextLength);
+        bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
+        bccCompileScript(s->mBccScript);
+        bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
+        bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
+    }
     LOGV("%p ScriptCState::runCompiler root %p,  init %p", rsc, s->mProgram.mRoot, s->mProgram.mInit);
 
     if (s->mProgram.mInit) {
