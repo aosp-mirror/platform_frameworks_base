@@ -27,25 +27,6 @@
     android:orientation="vertical"
     >
 
-    <TextView android:id="@+id/clear_all_button"
-        style="?android:attr/textAppearance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right|center_vertical"
-        android:layout_marginTop="2dip"
-        android:layout_marginBottom="1dip"
-        android:layout_marginRight="10dip"
-        android:padding="6dip"
-        android:textSize="14sp"
-        android:text="@string/status_bar_clear_all_button"
-        />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1sp"
-        android:background="@android:drawable/divider_horizontal_dark"
-        />
-
     <ScrollView
         android:id="@+id/notificationScroller"
         android:layout_height="wrap_content"
