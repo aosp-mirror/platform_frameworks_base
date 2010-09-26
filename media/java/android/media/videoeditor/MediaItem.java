@@ -158,11 +158,6 @@ public abstract class MediaItem {
     }
 
     /**
-     * @return The duration of the media item
-     */
-    public abstract long getDuration();
-
-    /**
      * @return The timeline duration. This is the actual duration in the
      *      timeline (trimmed duration)
      */
@@ -214,7 +209,7 @@ public abstract class MediaItem {
             throw new IllegalArgumentException("Effect already exists: " + effect.getId());
         }
 
-        if (effect.getStartTime() + effect.getDuration() > getDuration()) {
+        if (effect.getStartTime() + effect.getDuration() > getTimelineDuration()) {
             throw new IllegalArgumentException(
                     "Effect start time + effect duration > media clip duration");
         }
@@ -287,7 +282,7 @@ public abstract class MediaItem {
             throw new IllegalArgumentException("Overlay already exists: " + overlay.getId());
         }
 
-        if (overlay.getStartTime() + overlay.getDuration() > getDuration()) {
+        if (overlay.getStartTime() + overlay.getDuration() > getTimelineDuration()) {
             throw new IllegalArgumentException(
                     "Overlay start time + overlay duration > media clip duration");
         }
@@ -299,9 +294,18 @@ public abstract class MediaItem {
                 throw new IllegalArgumentException("Overlay bitmap not specified");
             }
 
+            final int scaledWidth, scaledHeight;
+            if (this instanceof MediaVideoItem) {
+                scaledWidth = getWidth();
+                scaledHeight = getHeight();
+            } else {
+                scaledWidth = ((MediaImageItem)this).getScaledWidth();
+                scaledHeight = ((MediaImageItem)this).getScaledHeight();
+            }
+
             // The dimensions of the overlay bitmap must be the same as the
             // media item dimensions
-            if (bitmap.getWidth() != getWidth() || bitmap.getHeight() != getHeight()) {
+            if (bitmap.getWidth() != scaledWidth || bitmap.getHeight() != scaledHeight) {
                 throw new IllegalArgumentException(
                         "Bitmap dimensions must match media item dimensions");
             }
@@ -433,7 +437,7 @@ public abstract class MediaItem {
         }
 
         if (mEndTransition != null) {
-            if (effect.getStartTime() + effect.getDuration() > getDuration()
+            if (effect.getStartTime() + effect.getDuration() > getTimelineDuration()
                     - mEndTransition.getDuration()) {
                 mEndTransition.invalidate();
             }
@@ -454,7 +458,7 @@ public abstract class MediaItem {
         }
 
         if (mEndTransition != null) {
-            if (overlay.getStartTime() + overlay.getDuration() > getDuration()
+            if (overlay.getStartTime() + overlay.getDuration() > getTimelineDuration()
                     - mEndTransition.getDuration()) {
                 mEndTransition.invalidate();
             }
