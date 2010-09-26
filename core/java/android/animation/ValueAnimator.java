@@ -258,6 +258,8 @@ public class ValueAnimator<T> extends Animator {
             PropertyValuesHolder valuesHolder = (PropertyValuesHolder) values[i];
             mValuesMap.put(valuesHolder.getPropertyName(), valuesHolder);
         }
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
     }
 
     /**
@@ -292,6 +294,8 @@ public class ValueAnimator<T> extends Animator {
             PropertyValuesHolder valuesHolder = mValues[0];
             valuesHolder.setValues(values);
         }
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
     }
 
     /**

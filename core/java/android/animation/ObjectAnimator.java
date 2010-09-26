@@ -54,8 +54,9 @@ public final class ObjectAnimator<T> extends ValueAnimator<T> {
      * @param propertyName The name of the property being animated.
      */
     public void setPropertyName(String propertyName) {
+        // mValues could be null if this is being constructed piecemeal. Just record the
+        // propertyName to be used later when setValues() is called if so.
         if (mValues != null) {
-            // mValues should always be non-null
             PropertyValuesHolder valuesHolder = mValues[0];
             String oldName = valuesHolder.getPropertyName();
             valuesHolder.setPropertyName(propertyName);
@@ -63,6 +64,8 @@ public final class ObjectAnimator<T> extends ValueAnimator<T> {
             mValuesMap.put(propertyName, valuesHolder);
         }
         mPropertyName = propertyName;
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
     }
 
     /**
@@ -154,6 +157,18 @@ public final class ObjectAnimator<T> extends ValueAnimator<T> {
         mTarget = target;
     }
 
+    @Override
+    public void setValues(T... values) {
+        if (mValues == null || mValues.length == 0) {
+            // No values yet - this animator is being constructed piecemeal. Init the values with
+            // whatever the current propertyName is
+            setValues(new PropertyValuesHolder[]{
+                    new PropertyValuesHolder(mPropertyName, (Object[])values)});
+        } else {
+            super.setValues((T[]) values);
+        }
+    }
+
     /**
      * This function is called immediately before processing the first animation
      * frame of an animation. If there is a nonzero <code>startDelay</code>, the
@@ -197,6 +212,8 @@ public final class ObjectAnimator<T> extends ValueAnimator<T> {
     @Override
     public void setTarget(Object target) {
         mTarget = target;
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
     }
 
     @Override
