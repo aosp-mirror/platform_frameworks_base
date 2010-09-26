@@ -79,7 +79,7 @@ public class TabletStatusBarService extends StatusBarService {
     View mNotificationButtons;
     View mSystemInfo;
 
-    View mNotificationPanel;
+    NotificationPanel mNotificationPanel;
     SystemPanel mSystemPanel;
 
     ViewGroup mPile;
@@ -110,10 +110,11 @@ public class TabletStatusBarService extends StatusBarService {
         final int barHeight= res.getDimensionPixelSize(
             com.android.internal.R.dimen.status_bar_height);
 
-        mNotificationPanel = View.inflate(this, R.layout.sysbar_panel_notifications, null);
+        mNotificationPanel = (NotificationPanel)View.inflate(this,
+                R.layout.sysbar_panel_notifications, null);
         mNotificationPanel.setVisibility(View.GONE);
         mNotificationPanel.setOnTouchListener(
-                new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL));
+                new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPanel));
 
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
@@ -135,7 +136,8 @@ public class TabletStatusBarService extends StatusBarService {
 
         mSystemPanel = (SystemPanel) View.inflate(this, R.layout.sysbar_panel_system, null);
         mSystemPanel.setVisibility(View.GONE);
-        mSystemPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_SYSTEM_PANEL));
+        mSystemPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_SYSTEM_PANEL,
+                    mSystemPanel));
 
         mStatusBarView.setIgnoreChildren(1, mSystemInfo, mSystemPanel);
 
@@ -787,13 +789,18 @@ public class TabletStatusBarService extends StatusBarService {
 
     public class TouchOutsideListener implements View.OnTouchListener {
         private int mMsg;
+        private StatusBarPanel mPanel;
 
-        public TouchOutsideListener(int msg) {
+        public TouchOutsideListener(int msg, StatusBarPanel panel) {
             mMsg = msg;
+            mPanel = panel;
         }
 
         public boolean onTouch(View v, MotionEvent ev) {
-            if (ev.getAction() == MotionEvent.ACTION_OUTSIDE) {
+            final int action = ev.getAction();
+            if (action == MotionEvent.ACTION_OUTSIDE
+                    || (action == MotionEvent.ACTION_DOWN
+                        && !mPanel.isInContentArea((int)ev.getX(), (int)ev.getY()))) {
                 mHandler.removeMessages(mMsg);
                 mHandler.sendEmptyMessage(mMsg);
                 return true;

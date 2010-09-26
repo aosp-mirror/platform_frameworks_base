@@ -206,12 +206,16 @@ public class NotificationTestList extends TestActivity
         new Test("Layout") {
             public void run()
             {
+                Notification n;
 
-                mNM.notify(1, new Notification(NotificationTestList.this,
+                n = new Notification(NotificationTestList.this,
                             R.drawable.ic_statusbar_missedcall,
                             null, System.currentTimeMillis()-(1000*60*60*24),
                             "(453) 123-2328",
-                            "", null));
+                            "", null);
+                n.flags |= Notification.FLAG_ONGOING_EVENT;
+
+                mNM.notify(1, n);
 
                 mNM.notify(2, new Notification(NotificationTestList.this,
                             R.drawable.ic_statusbar_email,

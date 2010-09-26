@@ -19,7 +19,7 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<LinearLayout
+<com.android.systemui.statusbar.tablet.NotificationPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
@@ -46,4 +46,4 @@
             >
         </LinearLayout>
     </ScrollView>
-</LinearLayout>
+</com.android.systemui.statusbar.tablet.NotificationPanel>
