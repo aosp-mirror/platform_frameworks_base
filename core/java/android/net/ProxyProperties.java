@@ -88,13 +88,23 @@ public class ProxyProperties implements Parcelable {
      * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
+        String host = null;
         if (mProxy != null) {
-            InetAddress addr = mProxy.getAddress();
-            if (addr != null) {
-                dest.writeByte((byte)1);
-                dest.writeByteArray(addr.getAddress());
-                dest.writeInt(mProxy.getPort());
-            }
+            try {
+                InetAddress addr = mProxy.getAddress();
+                if (addr != null) {
+                    host = addr.getHostAddress();
+                } else {
+                    /* Does not resolve when addr is null */
+                    host = mProxy.getHostName();
+                }
+            } catch (Exception e) { }
+        }
+
+        if (host != null) {
+            dest.writeByte((byte)1);
+            dest.writeString(host);
+            dest.writeInt(mProxy.getPort());
         } else {
             dest.writeByte((byte)0);
         }
@@ -111,9 +121,11 @@ public class ProxyProperties implements Parcelable {
                 ProxyProperties proxyProperties = new ProxyProperties();
                 if (in.readByte() == 1) {
                     try {
-                        InetAddress addr = InetAddress.getByAddress(in.createByteArray());
-                        proxyProperties.setSocketAddress(new InetSocketAddress(addr, in.readInt()));
-                    } catch (UnknownHostException e) { }
+                        String host = in.readString();
+                        int port = in.readInt();
+                        proxyProperties.setSocketAddress(InetSocketAddress.createUnresolved(
+                                host, port));
+                    } catch (IllegalArgumentException e) { }
                 }
                 proxyProperties.setExclusionList(in.readString());
                 return proxyProperties;
