@@ -1234,6 +1234,19 @@ public final class MediaStore {
             }
 
             /**
+             * Get the content:// style URI for querying the genres of an audio file.
+             *
+             * @param volumeName the name of the volume to get the URI for
+             * @param audioId the ID of the audio file for which to retrieve the genres
+             * @return the URI to for querying the genres for the audio file
+             * with the given the volume and audioID
+             */
+            public static Uri getContentUriForAudioId(String volumeName, int audioId) {
+                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
+                        "/audio/media/" + audioId + "/genres");
+            }
+
+            /**
              * The content:// style URI for the internal storage.
              */
             public static final Uri INTERNAL_CONTENT_URI =
