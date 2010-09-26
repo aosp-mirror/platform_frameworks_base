@@ -87,7 +87,7 @@ class CameraHardwareInterface : public virtual RefBase {
 public:
     virtual ~CameraHardwareInterface() { }
 
-    /** Set the ISurface from which the preview buffers should be dequeued */
+    /** Set the ANativeWindow to which preview frames are sent */
     virtual status_t setPreviewWindow(const sp<ANativeWindow>& buf) = 0;
 
     /** Return the IMemoryHeap for the raw image heap */
