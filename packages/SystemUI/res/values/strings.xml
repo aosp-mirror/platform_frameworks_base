@@ -24,6 +24,18 @@
          all of the currently visible notifications. -->
     <string name="status_bar_clear_all_button">Clear</string>
 
+    <!-- The text for the button in the notification window-shade that turns
+         on do not disturb mode, where notifications no longer show their ticker,
+         no sound plays, and no icons are visible.  The windowshade continues to show
+         the notifications. -->
+    <string name="status_bar_do_not_disturb_button">Do not disturb</string>
+
+    <!-- The text for the button in the notification window-shade that turns
+         off do not disturb mode.  After clicking this, notifications will be
+         shown again. -->
+    <string name="status_bar_please_disturb_button">Show notifications</string>
+
+
     <!-- The label in the bar at the top of the status bar when there are no notifications
          showing. -->
     <string name="status_bar_no_notifications_title">No notifications</string>
