@@ -108,7 +108,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public ClipData getPrimaryClip() {
         try {
-            return getService().getPrimaryClip();
+            return getService().getPrimaryClip(mContext.getPackageName());
         } catch (RemoteException e) {
             return null;
         }

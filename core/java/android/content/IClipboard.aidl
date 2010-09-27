@@ -27,7 +27,7 @@ import android.content.IOnPrimaryClipChangedListener;
  */
 interface IClipboard {
     void setPrimaryClip(in ClipData clip);
-    ClipData getPrimaryClip();
+    ClipData getPrimaryClip(String pkg);
     ClipDescription getPrimaryClipDescription();
     boolean hasPrimaryClip();
     void addPrimaryClipChangedListener(in IOnPrimaryClipChangedListener listener);
