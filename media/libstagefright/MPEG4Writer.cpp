@@ -1541,20 +1541,52 @@ status_t MPEG4Writer::Track::threadEntry() {
         int32_t isSync = false;
         meta_data->findInt32(kKeyIsSyncFrame, &isSync);
 
+        /*
+         * The original timestamp found in the data buffer will be modified as below:
+         *
+         * There is a playback offset into this track if the track's start time
+         * is not the same as the movie start time, which will be recorded in edst
+         * box of the output file. The playback offset is to make sure that the
+         * starting time of the audio/video tracks are synchronized. Although the
+         * track's media timestamp may be subject to various modifications
+         * as outlined below, the track's playback offset time remains unchanged
+         * once the first data buffer of the track is received.
+         *
+         * The media time stamp will be calculated by subtracting the playback offset
+         * (and potential pause durations) from the original timestamp in the buffer.
+         *
+         * If this track is a video track for a real-time recording application with
+         * both audio and video tracks, its media timestamp will subject to further
+         * modification based on the media clock of the audio track. This modification
+         * is needed for the purpose of maintaining good audio/video synchronization.
+         *
+         * If the recording session is paused and resumed multiple times, the track
+         * media timestamp will be modified as if the  recording session had never been
+         * paused at all during playback of the recorded output file. In other words,
+         * the output file will have no memory of pause/resume durations.
+         *
+         */
         CHECK(meta_data->findInt64(kKeyTime, &timestampUs));
+        LOGV("%s timestampUs: %lld", mIsAudio? "Audio": "Video", timestampUs);
 
 ////////////////////////////////////////////////////////////////////////////////
         if (mSampleSizes.empty()) {
             mStartTimestampUs = timestampUs;
             mOwner->setStartTimestampUs(mStartTimestampUs);
+            previousPausedDurationUs = mStartTimestampUs;
         }
 
         if (mResumed) {
-            previousPausedDurationUs += (timestampUs - mTrackDurationUs - lastDurationUs);
+            int64_t durExcludingEarlierPausesUs = timestampUs - previousPausedDurationUs;
+            CHECK(durExcludingEarlierPausesUs >= 0);
+            int64_t pausedDurationUs = durExcludingEarlierPausesUs - mTrackDurationUs;
+            CHECK(pausedDurationUs >= lastDurationUs);
+            previousPausedDurationUs += pausedDurationUs - lastDurationUs;
             mResumed = false;
         }
 
         timestampUs -= previousPausedDurationUs;
+        CHECK(timestampUs >= 0);
         if (mIsRealTimeRecording && !mIsAudio) {
             // The minor adjustment on the timestamp is heuristic/experimental
             // We are adjusting the timestamp to reduce the fluctuation of the duration
@@ -1590,8 +1622,8 @@ status_t MPEG4Writer::Track::threadEntry() {
             }
         }
 
-        LOGV("time stamp: %lld and previous paused duration %lld",
-                timestampUs, previousPausedDurationUs);
+        LOGV("%s media time stamp: %lld and previous paused duration %lld",
+                mIsAudio? "Audio": "Video", timestampUs, previousPausedDurationUs);
         if (timestampUs > mTrackDurationUs) {
             mTrackDurationUs = timestampUs;
         }
@@ -1873,6 +1905,7 @@ void MPEG4Writer::Track::writeTrackHeader(
 
             // First elst entry: specify the starting time offset
             int64_t offsetUs = mStartTimestampUs - moovStartTimeUs;
+            LOGV("OffsetUs: %lld", offsetUs);
             int32_t seg = (offsetUs * mvhdTimeScale + 5E5) / 1E6;
             mOwner->writeInt32(seg);         // in mvhd timecale
             mOwner->writeInt32(-1);          // starting time offset
