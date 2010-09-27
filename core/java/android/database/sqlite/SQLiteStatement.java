@@ -31,7 +31,7 @@ import dalvik.system.BlockGuard;
  * Don't use SQLiteStatement constructor directly, please use
  * {@link SQLiteDatabase#compileStatement(String)}
  *<p>
- * SQLiteStatement is not internally synchronized so code using a SQLiteStatement from multiple
+ * SQLiteStatement is NOT internally synchronized so code using a SQLiteStatement from multiple
  * threads should perform its own synchronization when using the SQLiteStatement.
  */
 @SuppressWarnings("deprecation")
@@ -79,23 +79,21 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public int executeUpdateDelete() {
-        synchronized(this) {
-            try {
-                long timeStart = acquireAndLock(WRITE);
-                int numChanges = 0;
-                if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
-                    // since the statement doesn't have to be prepared,
-                    // call the following native method which will not prepare
-                    // the query plan
-                    native_executeSql(mSql);
-                } else {
-                    numChanges = native_execute();
-                }
-                mDatabase.logTimeStat(mSql, timeStart);
-                return numChanges;
-            } finally {
-                releaseAndUnlock();
+        try {
+            long timeStart = acquireAndLock(WRITE);
+            int numChanges = 0;
+            if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
+                // since the statement doesn't have to be prepared,
+                // call the following native method which will not prepare
+                // the query plan
+                native_executeSql(mSql);
+            } else {
+                numChanges = native_execute();
             }
+            mDatabase.logTimeStat(mSql, timeStart);
+            return numChanges;
+        } finally {
+            releaseAndUnlock();
         }
     }
 
@@ -109,15 +107,13 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public long executeInsert() {
-        synchronized(this) {
-            try {
-                long timeStart = acquireAndLock(WRITE);
-                long lastInsertedRowId = native_executeInsert();
-                mDatabase.logTimeStat(mSql, timeStart);
-                return lastInsertedRowId;
-            } finally {
-                releaseAndUnlock();
-            }
+        try {
+            long timeStart = acquireAndLock(WRITE);
+            long lastInsertedRowId = native_executeInsert();
+            mDatabase.logTimeStat(mSql, timeStart);
+            return lastInsertedRowId;
+        } finally {
+            releaseAndUnlock();
         }
     }
 
@@ -130,15 +126,13 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public long simpleQueryForLong() {
-        synchronized(this) {
-            try {
-                long timeStart = acquireAndLock(READ);
-                long retValue = native_1x1_long();
-                mDatabase.logTimeStat(mSql, timeStart);
-                return retValue;
-            } finally {
-                releaseAndUnlock();
-            }
+        try {
+            long timeStart = acquireAndLock(READ);
+            long retValue = native_1x1_long();
+            mDatabase.logTimeStat(mSql, timeStart);
+            return retValue;
+        } finally {
+            releaseAndUnlock();
         }
     }
 
@@ -151,15 +145,13 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public String simpleQueryForString() {
-        synchronized(this) {
-            try {
-                long timeStart = acquireAndLock(READ);
-                String retValue = native_1x1_string();
-                mDatabase.logTimeStat(mSql, timeStart);
-                return retValue;
-            } finally {
-                releaseAndUnlock();
-            }
+        try {
+            long timeStart = acquireAndLock(READ);
+            String retValue = native_1x1_string();
+            mDatabase.logTimeStat(mSql, timeStart);
+            return retValue;
+        } finally {
+            releaseAndUnlock();
         }
     }
 
@@ -172,18 +164,16 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public ParcelFileDescriptor simpleQueryForBlobFileDescriptor() {
-        synchronized(this) {
-            try {
-                long timeStart = acquireAndLock(READ);
-                ParcelFileDescriptor retValue = native_1x1_blob_ashmem();
-                mDatabase.logTimeStat(mSql, timeStart);
-                return retValue;
-            } catch (IOException ex) {
-                Log.e(TAG, "simpleQueryForBlobFileDescriptor() failed", ex);
-                return null;
-            } finally {
-                releaseAndUnlock();
-            }
+        try {
+            long timeStart = acquireAndLock(READ);
+            ParcelFileDescriptor retValue = native_1x1_blob_ashmem();
+            mDatabase.logTimeStat(mSql, timeStart);
+            return retValue;
+        } catch (IOException ex) {
+            Log.e(TAG, "simpleQueryForBlobFileDescriptor() failed", ex);
+            return null;
+        } finally {
+            releaseAndUnlock();
         }
     }
 

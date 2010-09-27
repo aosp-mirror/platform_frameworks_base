@@ -276,6 +276,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     // default statement-cache size per database connection ( = instance of this class)
     private int mMaxSqlCacheSize = 25;
+    // guarded by itself
     /* package */ final Map<String, SQLiteCompiledSql> mCompiledQueries =
         new LinkedHashMap<String, SQLiteCompiledSql>(mMaxSqlCacheSize + 1, 0.75f, true) {
             @Override
@@ -306,8 +307,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     public static final int MAX_SQL_CACHE_SIZE = 100;
     private boolean mCacheFullWarning;
 
-    /** maintain stats about number of cache hits and misses */
+    /** Number of cache hits on this database connection. guarded by {@link #mCompiledQueries}. */
     private int mNumCacheHits;
+    /** Number of cache misses on this database connection. guarded by {@link #mCompiledQueries}. */
     private int mNumCacheMisses;
 
     /** Used to find out where this object was created in case it never got closed. */
@@ -343,6 +345,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     /* package */ SQLiteDatabase mParentConnObj = null;
 
     private static final String MEMORY_DB_PATH = ":memory:";
+
+    /** set to true if the database has attached databases */
+    private volatile boolean mHasAttachedDbs = false;
 
     /** stores reference to all databases opened in the current process. */
     private static ArrayList<WeakReference<SQLiteDatabase>> mActiveDatabases =
@@ -1836,6 +1841,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
         executeSql(sql, null);
 
+        if (stmtType == DatabaseUtils.STATEMENT_ATTACH) {
+            mHasAttachedDbs = true;
+        }
         // Log commit statements along with the most recently executed
         // SQL statement for disambiguation.
         if (stmtType == DatabaseUtils.STATEMENT_COMMIT) {
@@ -2183,22 +2191,34 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
-    /* package */ boolean isInStatementCache(SQLiteCompiledSql sqliteCompiledSql) {
+    /* package */ void releaseCompiledSqlObj(SQLiteCompiledSql compiledSql) {
         synchronized (mCompiledQueries) {
-            return mCompiledQueries.containsValue(sqliteCompiledSql);
+            if (mCompiledQueries.containsValue(compiledSql)) {
+                // it is in cache - reset its inUse flag
+                compiledSql.release();
+            } else {
+                // it is NOT in cache. finalize it.
+                compiledSql.releaseSqlStatement();
+            }
         }
     }
 
-    private synchronized int getCacheHitNum() {
-        return mNumCacheHits;
+    private int getCacheHitNum() {
+        synchronized(mCompiledQueries) {
+            return mNumCacheHits;
+        }
     }
 
-    private synchronized int getCacheMissNum() {
-        return mNumCacheMisses;
+    private int getCacheMissNum() {
+        synchronized(mCompiledQueries) {
+            return mNumCacheMisses;
+        }
     }
 
-    private synchronized int getCachesize() {
-        return mCompiledQueries.size();
+    private int getCachesize() {
+        synchronized(mCompiledQueries) {
+            return mCompiledQueries.size();
+        }
     }
 
     /* package */ void finalizeStatementLater(int id) {
@@ -2285,7 +2305,13 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return true if write-ahead-logging is set. false otherwise
      */
     public boolean enableWriteAheadLogging() {
-        synchronized(this) {
+        // acquire lock - no that no other thread is enabling WAL at the same time
+        lock();
+        try {
+            if (mConnectionPool != null) {
+                // already enabled
+                return true;
+            }
             if (mPath.equalsIgnoreCase(MEMORY_DB_PATH)) {
                 Log.i(TAG, "can't enable WAL for memory databases.");
                 return false;
@@ -2293,18 +2319,18 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             // make sure this database has NO attached databases because sqlite's write-ahead-logging
             // doesn't work for databases with attached databases
-            if (getAttachedDbs().size() > 1) {
+            if (mHasAttachedDbs) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
                     Log.d(TAG,
                             "this database: " + mPath + " has attached databases. can't  enable WAL.");
                 }
                 return false;
             }
-            if (mConnectionPool == null) {
-                mConnectionPool = new DatabaseConnectionPool(this);
-                setJournalMode(mPath, "WAL");
-            }
+            mConnectionPool = new DatabaseConnectionPool(this);
+            setJournalMode(mPath, "WAL");
             return true;
+        } finally {
+            unlock();
         }
     }
 
@@ -2313,13 +2339,18 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @hide
      */
     public void disableWriteAheadLogging() {
-        synchronized (this) {
+        // grab database lock so that writeAheadLogging is not disabled from 2 different threads
+        // at the same time
+        lock();
+        try {
             if (mConnectionPool == null) {
-                return;
+                return; // already disabled
             }
             mConnectionPool.close();
-            mConnectionPool = null;
             setJournalMode(mPath, "TRUNCATE");
+            mConnectionPool = null;
+        } finally {
+            unlock();
         }
     }
 
@@ -2409,73 +2440,74 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     /* package */ static ArrayList<DbStats> getDbStats() {
         ArrayList<DbStats> dbStatsList = new ArrayList<DbStats>();
-//        // make a local copy of mActiveDatabases - so that this method is not competing
-//        // for synchronization lock on mActiveDatabases
-//        ArrayList<WeakReference<SQLiteDatabase>> tempList;
-//        synchronized(mActiveDatabases) {
-//            tempList = (ArrayList<WeakReference<SQLiteDatabase>>)mActiveDatabases.clone();
-//        }
-//        for (WeakReference<SQLiteDatabase> w : tempList) {
-//            SQLiteDatabase db = w.get();
-//            if (db == null || !db.isOpen()) {
-//                continue;
-//            }
-//
-//            synchronized (db) {
-//                try {
-//                    // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
-//                    int lookasideUsed = db.native_getDbLookaside();
-//
-//                    // get the lastnode of the dbname
-//                    String path = db.getPath();
-//                    int indx = path.lastIndexOf("/");
-//                    String lastnode = path.substring((indx != -1) ? ++indx : 0);
-//
-//                    // get list of attached dbs and for each db, get its size and pagesize
-//                    ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
-//                    if (attachedDbs == null) {
-//                        continue;
-//                    }
-//                    for (int i = 0; i < attachedDbs.size(); i++) {
-//                        Pair<String, String> p = attachedDbs.get(i);
-//                        long pageCount = DatabaseUtils.longForQuery(db, "PRAGMA " + p.first
-//                                + ".page_count;", null);
-//
-//                        // first entry in the attached db list is always the main database
-//                        // don't worry about prefixing the dbname with "main"
-//                        String dbName;
-//                        if (i == 0) {
-//                            dbName = lastnode;
-//                        } else {
-//                            // lookaside is only relevant for the main db
-//                            lookasideUsed = 0;
-//                            dbName = "  (attached) " + p.first;
-//                            // if the attached db has a path, attach the lastnode from the path to above
-//                            if (p.second.trim().length() > 0) {
-//                                int idx = p.second.lastIndexOf("/");
-//                                dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
-//                            }
-//                        }
-//                        if (pageCount > 0) {
-//                            dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
-//                                    lookasideUsed, db.getCacheHitNum(), db.getCacheMissNum(),
-//                                    db.getCachesize()));
-//                        }
-//                    }
-//                    // if there are pooled connections, return the cache stats for them also.
-//                    if (db.mConnectionPool != null) {
-//                        for (SQLiteDatabase pDb : db.mConnectionPool.getConnectionList()) {
-//                            dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
-//                                    + lastnode, 0, 0, 0, pDb.getCacheHitNum(),
-//                                    pDb.getCacheMissNum(), pDb.getCachesize()));
-//                        }
-//                    }
-//                } catch (SQLiteException e) {
-//                    // ignore. we don't care about exceptions when we are taking adb
-//                    // bugreport!
-//                }
-//            }
-//        }
+        // make a local copy of mActiveDatabases - so that this method is not competing
+        // for synchronization lock on mActiveDatabases
+        ArrayList<WeakReference<SQLiteDatabase>> tempList;
+        synchronized(mActiveDatabases) {
+            tempList = (ArrayList<WeakReference<SQLiteDatabase>>)mActiveDatabases.clone();
+        }
+        for (WeakReference<SQLiteDatabase> w : tempList) {
+            SQLiteDatabase db = w.get();
+            if (db == null || !db.isOpen()) {
+                continue;
+            }
+
+            try {
+                // get SQLITE_DBSTATUS_LOOKASIDE_USED for the db
+                int lookasideUsed = db.native_getDbLookaside();
+
+                // get the lastnode of the dbname
+                String path = db.getPath();
+                int indx = path.lastIndexOf("/");
+                String lastnode = path.substring((indx != -1) ? ++indx : 0);
+
+                // get list of attached dbs and for each db, get its size and pagesize
+                ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
+                if (attachedDbs == null) {
+                    continue;
+                }
+                for (int i = 0; i < attachedDbs.size(); i++) {
+                    Pair<String, String> p = attachedDbs.get(i);
+                    long pageCount = DatabaseUtils.longForQuery(db, "PRAGMA " + p.first
+                            + ".page_count;", null);
+
+                    // first entry in the attached db list is always the main database
+                    // don't worry about prefixing the dbname with "main"
+                    String dbName;
+                    if (i == 0) {
+                        dbName = lastnode;
+                    } else {
+                        // lookaside is only relevant for the main db
+                        lookasideUsed = 0;
+                        dbName = "  (attached) " + p.first;
+                        // if the attached db has a path, attach the lastnode from the path to above
+                        if (p.second.trim().length() > 0) {
+                            int idx = p.second.lastIndexOf("/");
+                            dbName += " : " + p.second.substring((idx != -1) ? ++idx : 0);
+                        }
+                    }
+                    if (pageCount > 0) {
+                        dbStatsList.add(new DbStats(dbName, pageCount, db.getPageSize(),
+                                lookasideUsed, db.getCacheHitNum(), db.getCacheMissNum(),
+                                db.getCachesize()));
+                    }
+                }
+                // if there are pooled connections, return the cache stats for them also.
+                // while we are trying to query the pooled connections for stats, some other thread
+                // could be disabling conneciton pool. so, grab a reference to the connection pool.
+                DatabaseConnectionPool connPool = db.mConnectionPool;
+                if (connPool != null) {
+                    for (SQLiteDatabase pDb : connPool.getConnectionList()) {
+                        dbStatsList.add(new DbStats("(pooled # " + pDb.mConnectionNum + ") "
+                                + lastnode, 0, 0, 0, pDb.getCacheHitNum(),
+                                pDb.getCacheMissNum(), pDb.getCachesize()));
+                    }
+                }
+            } catch (SQLiteException e) {
+                // ignore. we don't care about exceptions when we are taking adb
+                // bugreport!
+            }
+        }
         return dbStatsList;
     }
 
@@ -2491,6 +2523,20 @@ public class SQLiteDatabase extends SQLiteClosable {
             return null;
         }
         ArrayList<Pair<String, String>> attachedDbs = new ArrayList<Pair<String, String>>();
+        if (!mHasAttachedDbs) {
+            // No attached databases.
+            // There is a small window where attached databases exist but this flag is not set yet.
+            // This can occur when this thread is in a race condition with another thread
+            // that is executing the SQL statement: "attach database <blah> as <foo>"
+            // If this thread is NOT ok with such a race condition (and thus possibly not receive
+            // the entire list of attached databases), then the caller should ensure that no thread
+            // is executing any SQL statements while a thread is calling this method.
+            // Typically, this method is called when 'adb bugreport' is done or the caller wants to
+            // collect stats on the database and all its attached databases.
+            attachedDbs.add(new Pair<String, String>("main", mPath));
+            return attachedDbs;
+        }
+        // has attached databases. query sqlite to get the list of attached databases.
         Cursor c = null;
         try {
             c = rawQuery("pragma database_list;", null);
