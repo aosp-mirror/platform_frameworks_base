@@ -23,6 +23,23 @@ namespace android {
 
 class MtpDataPacket;
 
+struct MtpPropertyValue {
+    union {
+        int8_t          i8;
+        uint8_t         u8;
+        int16_t         i16;
+        uint16_t        u16;
+        int32_t         i32;
+        uint32_t        u32;
+        int64_t         i64;
+        uint64_t        u64;
+        int128_t        i128;
+        uint128_t       u128;
+    } u;
+    // string in UTF8 format
+    char*               str;
+};
+
 class MtpProperty {
 public:
     MtpPropertyCode     mCode;
@@ -67,6 +84,9 @@ public:
 
     void                read(MtpDataPacket& packet);
     void                write(MtpDataPacket& packet);
+
+    void                setDefaultValue(const uint16_t* string);
+    void                setCurrentValue(const uint16_t* string);
 
     void                print();
 

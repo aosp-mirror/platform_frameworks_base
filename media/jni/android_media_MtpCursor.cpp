@@ -52,7 +52,7 @@ android_media_MtpCursor_setup(JNIEnv *env, jobject thiz, jobject javaClient,
         jint queryType, jint deviceID, jlong storageID, jlong objectID, jintArray javaColumns)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("android_media_MtpCursor_setup queryType: %d deviceID: %d storageID: %d objectID: %d\n",
+    LOGD("android_media_MtpCursor_setup queryType: %d deviceID: %d storageID: %lld objectID: %lld\n",
                 queryType, deviceID, storageID, objectID);
 
     int* columns = NULL;

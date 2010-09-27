@@ -5,6 +5,7 @@ include $(CLEAR_VARS)
 # defined in the current device/board configuration
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SRC_FILES:= \
+		DisplayListRenderer.cpp \
 		FboCache.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \

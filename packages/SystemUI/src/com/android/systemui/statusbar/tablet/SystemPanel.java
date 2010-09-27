@@ -77,7 +77,7 @@ import com.android.internal.telephony.cdma.TtyIntent;
 import com.android.systemui.statusbar.*;
 import com.android.systemui.R;
 
-public class SystemPanel extends LinearLayout {
+public class SystemPanel extends LinearLayout implements StatusBarPanel {
     private static final String TAG = "SystemPanel";
     private static final boolean DEBUG = TabletStatusBarService.DEBUG;
     private static final boolean DEBUG_SIGNAL = false;
@@ -121,6 +121,14 @@ public class SystemPanel extends LinearLayout {
 
     boolean mDataEnabled, mDataConnected, mDataRoaming;
     int mDataLevel;
+
+    public boolean isInContentArea(int x, int y) {
+        final int l = getPaddingLeft();
+        final int r = getWidth() - getPaddingRight();
+        final int t = getPaddingTop();
+        final int b = getHeight() - getPaddingBottom();
+        return x >= l && x < r && y >= t && y < b;
+    }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override

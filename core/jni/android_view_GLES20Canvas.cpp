@@ -241,7 +241,8 @@ static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject canvas,
     Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(storage);
     Res_png_9patch::deserialize(patch);
 
-    renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
+    renderer->drawPatch(bitmap, &patch->xDivs[0], &patch->yDivs[0],
+            patch->numXDivs, patch->numYDivs, left, top, right, bottom, paint);
 
     env->ReleaseByteArrayElements(chunks, storage, 0);
 }

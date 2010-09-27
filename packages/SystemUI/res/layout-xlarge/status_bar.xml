@@ -27,23 +27,64 @@
         android:layout_height="match_parent"
         >
 
+        <ImageView
+            class="com.android.systemui.statusbar.tablet.NotificationIconArea$MoreView"
+            android:id="@+id/expand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_sysbar_open"
+            android:paddingLeft="6dip"
+            android:onClick="notificationIconsClicked"
+            />
+
+        <LinearLayout
+            android:id="@+id/notificationButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/expand"
+            android:layout_toLeftOf="@+id/systemInfo"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            >
+
+            <TextView android:id="@+id/do_not_disturb"
+                style="?android:attr/textAppearance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="1dip"
+                android:layout_marginRight="10dip"
+                android:padding="6dip"
+                android:textSize="14sp"
+                android:text="@string/status_bar_do_not_disturb_button"
+                />
+
+            <TextView android:id="@+id/clear_all_button"
+                style="?android:attr/textAppearance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginTop="2dip"
+                android:layout_marginBottom="1dip"
+                android:layout_marginRight="10dip"
+                android:padding="6dip"
+                android:textSize="14sp"
+                android:text="@string/status_bar_clear_all_button"
+                />
+
+        </LinearLayout>
+
         <com.android.systemui.statusbar.tablet.NotificationIconArea
             android:id="@+id/notificationIcons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:paddingLeft="6dip"
+            android:layout_toRightOf="@+id/expand"
+            android:layout_toLeftOf="@+id/systemInfo"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             >
-            <ImageView
-                class="com.android.systemui.statusbar.tablet.NotificationIconArea$MoreView"
-                android:id="@+id/expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_sysbar_open"
-                android:onClick="notificationIconsClicked"
-                />
             <view
                 class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
                 android:id="@+id/icons"
@@ -59,7 +100,6 @@
                 android:background="@drawable/sysbar_hidenotification_handle"
                 android:layout_marginLeft="8dip"
                 />
-
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
 
         <FrameLayout
@@ -79,46 +119,50 @@
             android:layout_centerInParent="true"
             />
 
-        <com.android.systemui.statusbar.KeyButtonView android:id="@+id/menu"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_toLeftOf="@+id/recent"
-            android:src="@drawable/ic_sysbar_menu"
-            android:background="@drawable/ic_sysbar_icon_bg"
-            android:paddingLeft="4dip"
-            android:paddingRight="4dip"
-            systemui:keyCode="82"
-            />
-        <ImageButton android:id="@+id/recent"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_toLeftOf="@+id/home"
-            android:src="@drawable/ic_sysbar_recent"
-            android:background="@drawable/ic_sysbar_icon_bg"
-            android:paddingLeft="4dip"
-            android:paddingRight="4dip"
-            android:onClick="recentButtonClicked"
-            />
-        <com.android.systemui.statusbar.KeyButtonView android:id="@+id/home"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_toLeftOf="@+id/back"
-            android:paddingLeft="4dip"
-            android:paddingRight="4dip"
-            android:src="@drawable/ic_sysbar_home"
-            android:background="@drawable/ic_sysbar_icon_bg"
-            systemui:keyCode="3"
-            />
-        <com.android.systemui.statusbar.KeyButtonView android:id="@+id/back"
+        <LinearLayout
+            android:id="@+id/navigationArea"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:paddingLeft="4dip"
-            android:paddingRight="4dip"
-            android:src="@drawable/ic_sysbar_back"
-            android:background="@drawable/ic_sysbar_icon_bg"
-            systemui:keyCode="4"
-            />
+            android:orientation="horizontal"
+            >
+            <com.android.systemui.statusbar.KeyButtonView android:id="@+id/menu"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_menu"
+                android:background="@drawable/ic_sysbar_icon_bg"
+                android:paddingLeft="4dip"
+                android:paddingRight="4dip"
+                systemui:keyCode="82"
+                />
+            <ImageButton android:id="@+id/recent"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_recent"
+                android:background="@drawable/ic_sysbar_icon_bg"
+                android:paddingLeft="4dip"
+                android:paddingRight="4dip"
+                android:onClick="recentButtonClicked"
+                />
+            <com.android.systemui.statusbar.KeyButtonView android:id="@+id/home"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingLeft="4dip"
+                android:paddingRight="4dip"
+                android:src="@drawable/ic_sysbar_home"
+                android:background="@drawable/ic_sysbar_icon_bg"
+                systemui:keyCode="3"
+                />
+            <com.android.systemui.statusbar.KeyButtonView android:id="@+id/back"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingLeft="4dip"
+                android:paddingRight="4dip"
+                android:src="@drawable/ic_sysbar_back"
+                android:background="@drawable/ic_sysbar_icon_bg"
+                systemui:keyCode="4"
+                />
+        </LinearLayout>
     </RelativeLayout>
 
     <!-- It's curtains for you. -->

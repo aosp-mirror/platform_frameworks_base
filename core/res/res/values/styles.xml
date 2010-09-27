@@ -227,7 +227,7 @@
 
     <style name="Widget.AbsListView">
         <item name="android:scrollbars">vertical</item>
-        <item name="android:fadingEdge">vertical</item>
+        <item name="android:fadingEdge">none</item>
     </style>
 
     <style name="Widget.GestureOverlayView">
@@ -495,12 +495,12 @@
 
     <style name="Widget.ScrollView">
         <item name="android:scrollbars">vertical</item>
-        <item name="android:fadingEdge">vertical</item>
+        <item name="android:fadingEdge">none</item>
     </style>
 
     <style name="Widget.HorizontalScrollView">
         <item name="android:scrollbars">horizontal</item>
-        <item name="android:fadingEdge">horizontal</item>
+        <item name="android:fadingEdge">none</item>
     </style>
 
     <style name="Widget.ListView" parent="Widget.AbsListView">
@@ -523,7 +523,7 @@
     <style name="Widget.ListView.Menu">
 		<item name="android:cacheColorHint">@null</item>
         <item name="android:scrollbars">vertical</item>
-        <item name="android:fadingEdge">vertical</item>
+        <item name="android:fadingEdge">none</item>
         <item name="listSelector">@android:drawable/menu_selector</item>
         <!-- Light background for the list in menus, so the divider for bright themes -->
         <item name="android:divider">@android:drawable/divider_horizontal_dark</item>
@@ -556,7 +556,7 @@
     </style>
 
     <style name="Widget.Gallery">
-        <item name="android:fadingEdge">horizontal</item>
+        <item name="android:fadingEdge">none</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:spacing">-20dip</item>
         <item name="android:unselectedAlpha">0.85</item>

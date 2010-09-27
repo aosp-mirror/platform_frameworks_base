@@ -17,8 +17,6 @@
 #ifndef ANDROID_UI_PATCH_CACHE_H
 #define ANDROID_UI_PATCH_CACHE_H
 
-#include <utils/ResourceTypes.h>
-
 #include "Patch.h"
 #include "GenerationCache.h"
 
@@ -55,7 +53,7 @@ public:
      */
     void operator()(PatchDescription& description, Patch*& mesh);
 
-    Patch* get(const Res_png_9patch* patch);
+    Patch* get(uint32_t width, uint32_t height);
     void clear();
 
 private:

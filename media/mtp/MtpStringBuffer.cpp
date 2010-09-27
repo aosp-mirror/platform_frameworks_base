@@ -37,6 +37,13 @@ MtpStringBuffer::MtpStringBuffer(const char* src)
     set(src);
 }
 
+MtpStringBuffer::MtpStringBuffer(const uint16_t* src)
+    :   mCharCount(0),
+        mByteCount(1)
+{
+    set(src);
+}
+
 MtpStringBuffer::MtpStringBuffer(const MtpStringBuffer& src)
     :   mCharCount(src.mCharCount),
         mByteCount(src.mByteCount)
@@ -86,6 +93,29 @@ void MtpStringBuffer::set(const char* src) {
     mByteCount = length + 1;
     mBuffer[length] = 0;
     mCharCount = count;
+}
+
+void MtpStringBuffer::set(const uint16_t* src) {
+    int count = 0;
+    uint16_t ch;
+    uint8_t* dest = mBuffer;
+
+    while ((ch = *src++) != 0 && count < 255) {
+        if (ch >= 0x0800) {
+            *dest++ = (uint8_t)(0xE0 | (ch >> 12));
+            *dest++ = (uint8_t)(0x80 | ((ch >> 6) & 0x3F));
+            *dest++ = (uint8_t)(0x80 | (ch & 0x3F));
+        } else if (ch >= 0x80) {
+            *dest++ = (uint8_t)(0xC0 | (ch >> 6));
+            *dest++ = (uint8_t)(0x80 | (ch & 0x3F));
+        } else {
+            *dest++ = ch;
+        }
+        count++;
+    }
+    *dest++ = 0;
+    mCharCount = count;
+    mByteCount = dest - mBuffer;
 }
 
 void MtpStringBuffer::readFromPacket(MtpDataPacket* packet) {

@@ -46,7 +46,7 @@ public class RecurrenceSetTest extends TestCase {
         String recurrence = "DTSTART;VALUE=DATE:20090821\nDTEND;VALUE=DATE:20090822\n"
                 + "RRULE:FREQ=YEARLY;WKST=SU";
         verifyPopulateContentValues(recurrence, "FREQ=YEARLY;WKST=SU", null,
-                null, null, 1250812800000L, null, "P1D", 1);
+                null, null, 1250812800000L, "UTC", "P1D", 1);
     }
 
     // Test 2 day all-day event
@@ -55,7 +55,7 @@ public class RecurrenceSetTest extends TestCase {
         String recurrence = "DTSTART;VALUE=DATE:20090821\nDTEND;VALUE=DATE:20090823\n"
                 + "RRULE:FREQ=YEARLY;WKST=SU";
         verifyPopulateContentValues(recurrence, "FREQ=YEARLY;WKST=SU", null,
-                null, null, 1250812800000L, null,  "P2D", 1);
+                null, null, 1250812800000L, "UTC",  "P2D", 1);
     }
 
     // run populateContentValues and verify the results

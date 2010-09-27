@@ -455,7 +455,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         // visibility for other configurations.
         if (initialFragment != null && mSinglePane) {
             // Single pane, showing just a prefs fragment.
-            getListView().setVisibility(View.GONE);
+            findViewById(com.android.internal.R.id.headers).setVisibility(View.GONE);
             mPrefsContainer.setVisibility(View.VISIBLE);
         } else if (mHeaders.size() > 0) {
             mAdapter = new HeaderAdapter(this, mHeaders);

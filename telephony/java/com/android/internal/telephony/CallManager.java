@@ -54,9 +54,9 @@ import java.util.List;
  */
 public final class CallManager {
 
-    private static final String LOG_TAG ="Phone";
+    private static final String LOG_TAG ="CallManager";
     private static final boolean DBG = true;
-    private static final boolean VDBG = false;
+    private static final boolean VDBG = true;
 
     private static final int EVENT_DISCONNECT = 100;
     private static final int EVENT_PRECISE_CALL_STATE_CHANGED = 101;
@@ -291,6 +291,12 @@ public final class CallManager {
         Phone basePhone = getPhoneBase(phone);
 
         if (basePhone != null && !mPhones.contains(basePhone)) {
+
+            if (VDBG) {
+                Log.d(LOG_TAG, "registerPhone(" +
+                        phone.getPhoneName() + " " + phone + ")");
+            }
+
             if (mPhones.isEmpty()) {
                 mDefaultPhone = basePhone;
             }
@@ -312,6 +318,12 @@ public final class CallManager {
         Phone basePhone = getPhoneBase(phone);
 
         if (basePhone != null && mPhones.contains(basePhone)) {
+
+            if (VDBG) {
+                Log.d(LOG_TAG, "unregisterPhone(" +
+                        phone.getPhoneName() + " " + phone + ")");
+            }
+
             mPhones.remove(basePhone);
             mRingingCalls.remove(basePhone.getRingingCall());
             mBackgroundCalls.remove(basePhone.getBackgroundCall());
@@ -466,7 +478,8 @@ public final class CallManager {
         Phone ringingPhone = ringingCall.getPhone();
 
         if (VDBG) {
-            Log.d(LOG_TAG, "CallManager.acceptCall " + this);
+            Log.d(LOG_TAG, "acceptCall(" +ringingCall + " from " + ringingCall.getPhone() + ")");
+            Log.d(LOG_TAG, this.toString());
         }
 
         if ( hasActiveFgCall() ) {
@@ -488,6 +501,11 @@ public final class CallManager {
         }
 
         ringingPhone.acceptCall();
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End acceptCall(" +ringingCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
     }
 
     /**
@@ -500,9 +518,19 @@ public final class CallManager {
      * @exception CallStateException when no call is ringing or waiting
      */
     public void rejectCall(Call ringingCall) throws CallStateException {
+        if (VDBG) {
+            Log.d(LOG_TAG, "rejectCall(" +ringingCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
         Phone ringingPhone = ringingCall.getPhone();
 
         ringingPhone.rejectCall();
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End rejectCall(" +ringingCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
     }
 
     /**
@@ -527,6 +555,11 @@ public final class CallManager {
         Phone activePhone = null;
         Phone heldPhone = null;
 
+        if (VDBG) {
+            Log.d(LOG_TAG, "switchHoldingAndActive(" +heldCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
         if (hasActiveFgCall()) {
             activePhone = getActiveFgCall().getPhone();
         }
@@ -542,6 +575,11 @@ public final class CallManager {
         if (heldPhone != null && heldPhone != activePhone) {
             heldPhone.switchHoldingAndActive();
         }
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End switchHoldingAndActive(" +heldCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
     }
 
     /**
@@ -556,6 +594,11 @@ public final class CallManager {
         Phone foregroundPhone = null;
         Phone backgroundPhone = null;
 
+        if (VDBG) {
+            Log.d(LOG_TAG, "hangupForegroundResumeBackground(" +heldCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
         if (hasActiveFgCall()) {
             foregroundPhone = getFgPhone();
             if (heldCall != null) {
@@ -568,6 +611,11 @@ public final class CallManager {
                     switchHoldingAndActive(heldCall);
                 }
             }
+        }
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End hangupForegroundResumeBackground(" +heldCall + ")");
+            Log.d(LOG_TAG, this.toString());
         }
     }
 
@@ -601,6 +649,13 @@ public final class CallManager {
      * In these cases, this operation may not be performed.
      */
     public void conference(Call heldCall) throws CallStateException {
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "conference(" +heldCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
+
         Phone fgPhone = getFgPhone();
         if (fgPhone instanceof SipPhone) {
             ((SipPhone) fgPhone).conference(heldCall);
@@ -609,6 +664,12 @@ public final class CallManager {
         } else {
             throw(new CallStateException("Can't conference foreground and selected background call"));
         }
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End conference(" +heldCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
     }
 
     /**
@@ -623,10 +684,13 @@ public final class CallManager {
      */
     public Connection dial(Phone phone, String dialString) throws CallStateException {
         Phone basePhone = getPhoneBase(phone);
+        Connection result;
+
         if (VDBG) {
-            Log.d(LOG_TAG, "CallManager.dial( phone=" + basePhone + ", dialString="+ dialString + ")");
+            Log.d(LOG_TAG, " dial(" + basePhone + ", "+ dialString + ")");
             Log.d(LOG_TAG, this.toString());
         }
+
         if ( hasActiveFgCall() ) {
             Phone activePhone = getActiveFgCall().getPhone();
             boolean hasBgCall = !(activePhone.getBackgroundCall().isIdle());
@@ -645,7 +709,15 @@ public final class CallManager {
                 }
             }
         }
-        return basePhone.dial(dialString);
+
+        result = basePhone.dial(dialString);
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End dial(" + basePhone + ", "+ dialString + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
+        return result;
     }
 
     /**
@@ -704,9 +776,20 @@ public final class CallManager {
      * In these cases, this operation may not be performed.
      */
     public void explicitCallTransfer(Call heldCall) throws CallStateException {
+        if (VDBG) {
+            Log.d(LOG_TAG, " explicitCallTransfer(" + heldCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
         if (canTransfer(heldCall)) {
             heldCall.getPhone().explicitCallTransfer();
         }
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End explicitCallTransfer(" + heldCall + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
     }
 
     /**
@@ -719,6 +802,7 @@ public final class CallManager {
      * @return null if phone doesn't have or support mmi code
      */
     public List<? extends MmiCode> getPendingMmiCodes(Phone phone) {
+        Log.e(LOG_TAG, "getPendingMmiCodes not implemented");
         return null;
     }
 
@@ -731,6 +815,7 @@ public final class CallManager {
      * @return false if phone doesn't support ussd service
      */
     public boolean sendUssdResponse(Phone phone, String ussdMessge) {
+        Log.e(LOG_TAG, "sendUssdResponse not implemented");
         return false;
     }
 
@@ -744,8 +829,18 @@ public final class CallManager {
      */
 
     public void setMute(boolean muted) {
+        if (VDBG) {
+            Log.d(LOG_TAG, " setMute(" + muted + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
         if (hasActiveFgCall()) {
             getActiveFgCall().getPhone().setMute(muted);
+        }
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End setMute(" + muted + ")");
+            Log.d(LOG_TAG, this.toString());
         }
     }
 
@@ -774,11 +869,23 @@ public final class CallManager {
      *         dtmf tone
      */
     public boolean sendDtmf(char c) {
+        boolean result = false;
+
+        if (VDBG) {
+            Log.d(LOG_TAG, " sendDtmf(" + c + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
         if (hasActiveFgCall()) {
             getActiveFgCall().getPhone().sendDtmf(c);
-            return true;
+            result = true;
         }
-        return false;
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End sendDtmf(" + c + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+        return result;
     }
 
     /**
@@ -791,11 +898,24 @@ public final class CallManager {
      *         dtmf tone
      */
     public boolean startDtmf(char c) {
+        boolean result = false;
+
+        if (VDBG) {
+            Log.d(LOG_TAG, " startDtmf(" + c + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
         if (hasActiveFgCall()) {
             getActiveFgCall().getPhone().sendDtmf(c);
-            return true;
+            result = true;
         }
-        return false;
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End startDtmf(" + c + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
+        return result;
     }
 
     /**
@@ -803,7 +923,17 @@ public final class CallManager {
      * tone or no active call.
      */
     public void stopDtmf() {
+        if (VDBG) {
+            Log.d(LOG_TAG, " stopDtmf()" );
+            Log.d(LOG_TAG, this.toString());
+        }
+
         if (hasActiveFgCall()) getFgPhone().stopDtmf();
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End stopDtmf()");
+            Log.d(LOG_TAG, this.toString());
+        }
     }
 
     /**
@@ -1469,70 +1599,91 @@ public final class CallManager {
 
         @Override
         public void handleMessage(Message msg) {
+
             switch (msg.what) {
                 case EVENT_DISCONNECT:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_DISCONNECT)");
                     mDisconnectRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_PRECISE_CALL_STATE_CHANGED:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_PRECISE_CALL_STATE_CHANGED)");
                     mPreciseCallStateRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_NEW_RINGING_CONNECTION:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_NEW_RINGING_CONNECTION)");
                     mNewRingingConnectionRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_UNKNOWN_CONNECTION:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_UNKNOWN_CONNECTION)");
                     mUnknownConnectionRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_INCOMING_RING:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_INCOMING_RING)");
                     // The event may come from RIL who's not aware of an ongoing fg call
                     if (!hasActiveFgCall()) {
                         mIncomingRingRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     }
                     break;
                 case EVENT_RINGBACK_TONE:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_RINGBACK_TONE)");
                     mRingbackToneRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_IN_CALL_VOICE_PRIVACY_ON:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_IN_CALL_VOICE_PRIVACY_ON)");
                     mInCallVoicePrivacyOnRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_IN_CALL_VOICE_PRIVACY_OFF:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_IN_CALL_VOICE_PRIVACY_OFF)");
                     mInCallVoicePrivacyOffRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_CALL_WAITING:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_CALL_WAITING)");
                     mCallWaitingRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_DISPLAY_INFO:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_DISPLAY_INFO)");
                     mDisplayInfoRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_SIGNAL_INFO:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_SIGNAL_INFO)");
                     mSignalInfoRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_CDMA_OTA_STATUS_CHANGE:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_CDMA_OTA_STATUS_CHANGE)");
                     mCdmaOtaStatusChangeRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_RESEND_INCALL_MUTE:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_RESEND_INCALL_MUTE)");
                     mResendIncallMuteRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_MMI_INITIATE:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_MMI_INITIATE)");
                     mMmiInitiateRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_MMI_COMPLETE:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_MMI_COMPLETE)");
                     mMmiCompleteRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_ECM_TIMER_RESET:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_ECM_TIMER_RESET)");
                     mEcmTimerResetRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_SUBSCRIPTION_INFO_READY:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_SUBSCRIPTION_INFO_READY)");
                     mSubscriptionInfoReadyRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_SUPP_SERVICE_FAILED:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_SUPP_SERVICE_FAILED)");
                     mSuppServiceFailedRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_SERVICE_STATE_CHANGED:
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_SERVICE_STATE_CHANGED)");
                     mServiceStateChangedRegistrants.notifyRegistrants((AsyncResult) msg.obj);
                     break;
                 case EVENT_POST_DIAL_CHARACTER:
                     // we need send the character that is being processed in msg.arg1
                     // so can't use notifyRegistrants()
+                    if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_POST_DIAL_CHARACTER)");
                     for(int i=0; i < mPostDialCharacterRegistrants.size(); i++) {
                         Message notifyMsg;
                         notifyMsg = ((Registrant)mPostDialCharacterRegistrants.get(i)).messageForRegistrant();
@@ -1551,36 +1702,29 @@ public final class CallManager {
         StringBuilder b = new StringBuilder();
 
         b.append("########### Dump CallManager ############");
-        b.append("\nCM state = " + getState());
+        b.append("\nCallManager state = " + getState());
         call = getActiveFgCall();
-        b.append("\n   - FG call: " + getActiveFgCallState());
+        b.append("\n   - Foreground: " + getActiveFgCallState());
         b.append(" from " + call.getPhone());
         b.append("\n     Conn: ").append(getFgCallConnections());
         call = getFirstActiveBgCall();
-        b.append("\n   - BG call: " + call.getState());
+        b.append("\n   - Background: " + call.getState());
         b.append(" from " + call.getPhone());
         b.append("\n     Conn: ").append(getBgCallConnections());
         call = getFirstActiveRingingCall();
-        b.append("\n   - RINGING call: " +call.getState());
+        b.append("\n   - Ringing: " +call.getState());
         b.append(" from " + call.getPhone());
 
-        b.append("\n");
         for (Phone phone : getAllPhones()) {
             if (phone != null) {
                 b.append("\n Phone: " + phone + ", name = " + phone.getPhoneName()
                         + ", state = " + phone.getState());
                 call = phone.getForegroundCall();
-                b.append("\n   - FG call: ").append(call);
-                b.append("  State: ").append(call.getState());
-                b.append("\n     Conn: ").append(call.getConnections());
+                b.append("\n   - Foreground: ").append(call);
                 call = phone.getBackgroundCall();
-                b.append("\n   - BG call: ").append(call);
-                b.append("  State: ").append(call.getState());
-                b.append("\n     Conn: ").append(call.getConnections());
+                b.append(" Background: ").append(call);
                 call = phone.getRingingCall();
-                b.append("\n   - RINGING call: ").append(call);
-                b.append( "  State: ").append(call.getState());
-                b.append("\n     Conn: ").append(call.getConnections());
+                b.append(" Ringing: ").append(call);
             }
         }
         b.append("\n########## End Dump CallManager ##########");

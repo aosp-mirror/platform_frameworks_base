@@ -101,7 +101,7 @@ void MtpObjectInfo::print() {
             mImagePixWidth, mImagePixHeight, mImagePixDepth);
     LOGD("  mParent: %08X mAssociationType: %04X mAssociationDesc: %04X\n",
             mParent, mAssociationType, mAssociationDesc);
-    LOGD("  mSequenceNumber: %d mDateCreated: %d mDateModified: %d mKeywords: %s\n",
+    LOGD("  mSequenceNumber: %d mDateCreated: %ld mDateModified: %ld mKeywords: %s\n",
             mSequenceNumber, mDateCreated, mDateModified, mKeywords);
 }
 

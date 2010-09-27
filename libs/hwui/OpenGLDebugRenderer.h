@@ -45,8 +45,9 @@ public:
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint);
-    void drawPatch(SkBitmap* bitmap, Res_png_9patch* patch, float left, float top,
-            float right, float bottom, const SkPaint* paint);
+    void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
+            uint32_t width, uint32_t height, float left, float top, float right, float bottom,
+            const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);

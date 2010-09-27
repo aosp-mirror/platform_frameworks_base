@@ -28,7 +28,6 @@
 #include <SkXfermode.h>
 
 #include <utils/RefBase.h>
-#include <utils/ResourceTypes.h>
 #include <utils/Vector.h>
 
 #include "Extensions.h"
@@ -69,38 +68,39 @@ public:
     virtual void prepare();
     virtual void finish();
 
-    void acquireContext();
-    void releaseContext();
+    virtual void acquireContext();
+    virtual void releaseContext();
 
     int getSaveCount() const;
-    int save(int flags);
-    void restore();
-    void restoreToCount(int saveCount);
+    virtual int save(int flags);
+    virtual void restore();
+    virtual void restoreToCount(int saveCount);
 
     virtual int saveLayer(float left, float top, float right, float bottom,
             const SkPaint* p, int flags);
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
             int alpha, int flags);
 
-    void translate(float dx, float dy);
-    void rotate(float degrees);
-    void scale(float sx, float sy);
+    virtual void translate(float dx, float dy);
+    virtual void rotate(float degrees);
+    virtual void scale(float sx, float sy);
 
-    void setMatrix(SkMatrix* matrix);
     void getMatrix(SkMatrix* matrix);
-    void concatMatrix(SkMatrix* matrix);
+    virtual void setMatrix(SkMatrix* matrix);
+    virtual void concatMatrix(SkMatrix* matrix);
 
     const Rect& getClipBounds();
     bool quickReject(float left, float top, float right, float bottom);
-    bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
+    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint);
-    virtual void drawPatch(SkBitmap* bitmap, Res_png_9patch* patch, float left, float top,
-            float right, float bottom, const SkPaint* paint);
+    virtual void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
+            uint32_t width, uint32_t height, float left, float top, float right, float bottom,
+            const SkPaint* paint);
     virtual void drawColor(int color, SkXfermode::Mode mode);
     virtual void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
     virtual void drawPath(SkPath* path, SkPaint* paint);
@@ -108,14 +108,14 @@ public:
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
             SkPaint* paint);
 
-    void resetShader();
-    void setupShader(SkiaShader* shader);
+    virtual void resetShader();
+    virtual void setupShader(SkiaShader* shader);
 
-    void resetColorFilter();
-    void setupColorFilter(SkiaColorFilter* filter);
+    virtual void resetColorFilter();
+    virtual void setupColorFilter(SkiaColorFilter* filter);
 
-    void resetShadow();
-    void setupShadow(float radius, float dx, float dy, int color);
+    virtual void resetShadow();
+    virtual void setupShadow(float radius, float dx, float dy, int color);
 
 protected:
     /**

@@ -456,7 +456,6 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(MtpObjectHandle handle,
 
 MtpResponseCode MyMtpDatabase::getDevicePropertyValue(MtpDeviceProperty property,
                                             MtpDataPacket& packet) {
-
     int         type;
 
     if (!getDevicePropertyInfo(property, type))
@@ -782,10 +781,25 @@ MtpProperty* MyMtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
     switch (property) {
         case MTP_DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
         case MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
+        {
             // writeable string properties
             result = new MtpProperty(property, MTP_TYPE_STR, true);
-            // FIXME - set current value here!
+
+            // set current value
+            JNIEnv* env = AndroidRuntime::getJNIEnv();
+            jint ret = env->CallIntMethod(mDatabase, method_getDeviceProperty,
+                        (jint)property, mLongBuffer, mStringBuffer);
+            if (ret == MTP_RESPONSE_OK) {
+                jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
+                result->setCurrentValue(str);
+                env->ReleaseCharArrayElements(mStringBuffer, str, 0);
+            } else {
+                LOGE("unable to read device property, response: %04X", ret);
+            }
+
+            checkAndClearExceptionFromCallback(env, __FUNCTION__);
             break;
+        }
     }
 
     return result;

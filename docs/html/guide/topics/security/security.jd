@@ -21,14 +21,15 @@ page.title=Security and Permissions
 </div>
 </div>
 
-<p>Android is a multi-process system, in which each application (and parts of the
-system) runs in its own process.  Most security between applications and
-the system is enforced at the process level through standard Linux facilities,
-such as user and group IDs that are assigned to applications.
-Additional finer-grained security features are provided
-through a "permission" mechanism that enforces restrictions on the specific
-operations that a particular process can perform, and per-URI permissions
-for granting ad-hoc access to specific pieces of data.</p>
+<p>Android is a privilege-separated operating system, in which each
+application runs with a distinct system identity (Linux user ID and group
+ID).  Parts of the system are also separated into distinct identities.
+Linux thereby isolates applications from each other and from the system.</p>
+
+<p>Additional finer-grained security features are provided through a
+"permission" mechanism that enforces restrictions on the specific operations
+that a particular process can perform, and per-URI permissions for granting
+ad-hoc access to specific pieces of data.</p>
 
 <a name="arch"></a>
 <h2>Security Architecture</h2>
@@ -38,39 +39,46 @@ application, by default, has permission to perform any operations that would
 adversely impact other applications, the operating system, or the user.  This
 includes reading or writing the user's private data (such as contacts or
 e-mails), reading or writing another application's files, performing
-network access, keeping the device awake, etc.<p>
+network access, keeping the device awake, etc.</p>
 
-<p>An application's process runs in a security sandbox. The sandbox is designed
-to prevent applications from disrupting each other, except by explicitly
-declaring the <em>permissions</em> they need for additional capabilities not
-provided by the basic sandbox. The system handles requests for permissions
-in various ways, typically by automatically allowing or disallowing based on
-certificates or by prompting the user.  The permissions required by an
-application are declared statically in that application, so they can be known
-up-front at install time and will not change after that.</p>
+<p>Because the kernel sandboxes applications from each other, applications
+must explicitly share resources and data. They do this by declaring the
+<em>permissions</em> they need for additional capabilities not provided by
+the basic sandbox. Applications statically declare the permissions they
+require, and the Android system prompts the user for consent at the time the
+application is installed. Android has no mechanism for granting permissions
+dynamically (at run-time) because it complicates the user experience to the
+detriment of security.</p>
+
+<p>The kernel is solely responsible for sandboxing applications from each
+other. In particular the Dalvik VM is not a security boundary, and any app
+can run native code (see <a href="/sdk/ndk/index.html">the Android NDK</a>).
+All types of applications &mdash; Java, native, and hybrid &mdash; are
+sandboxed in the same way and have the same degree of security from each
+other.</p>
 
 <a name="signing"></a>
 <h2>Application Signing</h2>
 
-<p>All Android applications (.apk files) must be signed with a certificate whose
-private key is held by their developer.  This certificate identifies the author
-of the application.  The certificate does <em>not</em> need to be signed by
-a certificate authority: it is perfectly allowable, and typical, for Android
-applications to use self-signed certificates.  The certificate is used only
-to establish trust relationships between applications, not for wholesale
-control over whether an application can be installed.  The most significant
-ways that signatures impact security is by determining who can access
-signature-based permissions and who can share user IDs.</p>
-
+<p>All Android applications (.apk files) must be signed with a certificate
+whose private key is held by their developer.  This certificate identifies
+the author of the application.  The certificate does <em>not</em> need to be
+signed by a certificate authority: it is perfectly allowable, and typical,
+for Android applications to use self-signed certificates. The purpose of
+certificates in Android is to distinguish application authors. This allows
+the system to grant or deny applications access to <a
+href="/guide/topics/manifest/permission-element.html#plevel">signature-level
+permissions</a> and to grant or deny an application's <a
+href="/guide/topics/manifest/manifest-element.html#uid">request to be given
+the same Linux identity</a> as another application.</p>
 
 <a name="userid"></a>
 <h2>User IDs and File Access</h2>
 
-<p>Each Android package (.apk) file installed on the device is given its
-own unique Linux user ID, creating a sandbox for it and preventing it from touching
-other applications (or other applications from touching it).  This user ID is
-assigned to it when the application is installed on the device, and
-remains constant for the duration of its life on that device.</p>
+<p>At install time, Android gives each package a distinct Linux user ID. The
+identity remains constant for the duration of the package's life on that
+device. On a different device, the same package may have a different UID;
+what matters is that each package has a distinct UID on a given device.</p>
 
 <p>Because security enforcement happens at the
 process level, the code of any two packages can not normally
@@ -150,7 +158,7 @@ activities of other applications.</li>
 <li>Both sending and receiving broadcasts, to control who can receive
 your broadcast or who can send a broadcast to you.</li>
 <li>When accessing and operating on a content provider.</li>
-<li>Binding or starting a service.</li>
+<li>Binding to or starting a service.</li>
 </ul>
 
 
