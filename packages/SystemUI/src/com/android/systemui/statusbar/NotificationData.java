@@ -117,7 +117,7 @@ public class NotificationData {
     public boolean hasClearableItems() {
         for (Entry e : mEntries) {
             if (e.expanded != null) { // the view successfully inflated
-                if ((e.notification.notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
+                if (e.notification.isClearable()) {
                     return true;
                 }
             }
