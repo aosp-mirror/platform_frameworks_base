@@ -27,8 +27,8 @@ import java.util.HashSet;
  *
  * CTS tests for this functionality can be run with "runtest cts-appsecurity".
  *
- * Test cases are at cts/tests/appsecurity-tests/test-apps/UsePermissionDiffCert
- *      /src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
+ * Test cases are at cts/tests/appsecurity-tests/test-apps/UsePermissionDiffCert/
+ *      src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
  */
 class UriPermission {
     final int uid;
