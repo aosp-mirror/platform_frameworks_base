@@ -269,7 +269,12 @@ public class SipManager {
             throws SipException {
         SipAudioCall call = new SipAudioCall(mContext, localProfile);
         call.setListener(listener);
-        call.makeCall(peerProfile, this, timeout);
+        SipSession s = createSipSession(localProfile, null);
+        if (s == null) {
+            throw new SipException(
+                    "Failed to create SipSession; network available?");
+        }
+        call.makeCall(peerProfile, s, timeout);
         return call;
     }
 
