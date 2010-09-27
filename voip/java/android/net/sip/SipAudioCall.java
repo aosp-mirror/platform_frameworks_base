@@ -46,7 +46,7 @@ import java.util.Map;
  * Class that handles an audio call over SIP.
  */
 /** @hide */
-public class SipAudioCall extends SipSessionAdapter {
+public class SipAudioCall {
     private static final String TAG = SipAudioCall.class.getSimpleName();
     private static final boolean RELEASE_SOCKET = true;
     private static final boolean DONT_RELEASE_SOCKET = false;
@@ -530,7 +530,7 @@ public class SipAudioCall extends SipSessionAdapter {
      * will be called.
      *
      * @param callee the SIP profile to make the call to
-     * @param sipManager the {@link SipManager} object to help make call with
+     * @param sipSession the {@link SipSession} for carrying out the call
      * @param timeout the timeout value in seconds. Default value (defined by
      *        SIP protocol) is used if {@code timeout} is zero or negative.
      * @see Listener.onError
@@ -538,16 +538,12 @@ public class SipAudioCall extends SipSessionAdapter {
      *        call
      */
     public synchronized void makeCall(SipProfile peerProfile,
-        SipManager sipManager, int timeout) throws SipException {
-        SipSession s = mSipSession = sipManager.createSipSession(
-                mLocalProfile, createListener());
-        if (s == null) {
-            throw new SipException(
-                    "Failed to create SipSession; network available?");
-        }
+            SipSession sipSession, int timeout) throws SipException {
+        mSipSession = sipSession;
         try {
             mAudioStream = new AudioStream(InetAddress.getByName(getLocalIp()));
-            s.makeCall(peerProfile, createOffer().encode(), timeout);
+            sipSession.setListener(createListener());
+            sipSession.makeCall(peerProfile, createOffer().encode(), timeout);
         } catch (IOException e) {
             throw new SipException("makeCall()", e);
         }
