@@ -145,6 +145,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         // WebView::setJsFlags is noop in JSC build.
         mWebView.setJsFlags("--expose_gc");
 
+        // Always send multitouch events to Webkit since the layout test
+        // is only for the Webkit not the browser's UI.
+        mWebView.setDeferMultiTouch(true);
+
         mHandler = new AsyncHandler();
 
         Intent intent = getIntent();
