@@ -636,6 +636,15 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's audio pipeline is low-latency,
+     * more suitable for audio applications sensitive to delays or lag in
+     * sound input or output.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_AUDIO_LOW_LATENCY = "android.hardware.audio.low_latency";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device is capable of communicating with
      * other devices via Bluetooth.
      */
