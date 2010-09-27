@@ -5592,6 +5592,38 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * Allows app to retrieve the MIME type of a URI without having permission
+     * to access its content provider.
+     *
+     * CTS tests for this functionality can be run with "runtest cts-appsecurity".
+     *
+     * Test cases are at cts/tests/appsecurity-tests/test-apps/UsePermissionDiffCert/
+     *     src/com/android/cts/usespermissiondiffcertapp/AccessPermissionWithDiffSigTest.java
+     */
+    public String getProviderMimeType(Uri uri) {
+        final String name = uri.getAuthority();
+        final long ident = Binder.clearCallingIdentity();
+        ContentProviderHolder holder = null;
+
+        try {
+            holder = getContentProviderExternal(name);
+            if (holder != null) {
+                return holder.provider.getType(uri);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Content provider dead retrieving " + uri, e);
+            return null;
+        } finally {
+            if (holder != null) {
+                removeContentProviderExternal(name);
+            }
+            Binder.restoreCallingIdentity(ident);
+        }
+
+        return null;
+    }
+
     // =========================================================
     // GLOBAL MANAGEMENT
     // =========================================================
