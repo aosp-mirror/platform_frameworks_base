@@ -590,7 +590,10 @@ public class SipPhone extends SipPhoneBase {
             // set state to DISCONNECTED only when all conns are disconnected
             if (state != State.DISCONNECTED) {
                 boolean allConnectionsDisconnected = true;
+                Log.v(LOG_TAG, "---check if all connections are disconnected: "
+                        + connections.size());
                 for (Connection c : connections) {
+                    Log.v(LOG_TAG, "   state=" + c.getState() + ": " + c);
                     if (c.getState() != State.DISCONNECTED) {
                         allConnectionsDisconnected = false;
                         break;
