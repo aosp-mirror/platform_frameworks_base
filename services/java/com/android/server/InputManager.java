@@ -77,6 +77,8 @@ public class InputManager {
     private static native InputDevice nativeGetInputDevice(int deviceId);
     private static native void nativeGetInputConfiguration(Configuration configuration);
     private static native int[] nativeGetInputDeviceIds();
+    private static native boolean nativeTransferTouchFocus(InputChannel fromChannel,
+            InputChannel toChannel);
     private static native String nativeDump();
     
     // Input event injection constants defined in InputDispatcher.h.
@@ -318,6 +320,29 @@ public class InputManager {
     
     public void setInputDispatchMode(boolean enabled, boolean frozen) {
         nativeSetInputDispatchMode(enabled, frozen);
+    }
+    
+    /**
+     * Atomically transfers touch focus from one window to another as identified by
+     * their input channels.  It is possible for multiple windows to have
+     * touch focus if they support split touch dispatch
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
+     * method only transfers touch focus of the specified window without affecting
+     * other windows that may also have touch focus at the same time.
+     * @param fromChannel The channel of a window that currently has touch focus.
+     * @param toChannel The channel of the window that should receive touch focus in
+     * place of the first.
+     * @return True if the transfer was successful.  False if the window with the
+     * specified channel did not actually have touch focus at the time of the request.
+     */
+    public boolean transferTouchFocus(InputChannel fromChannel, InputChannel toChannel) {
+        if (fromChannel == null) {
+            throw new IllegalArgumentException("fromChannel must not be null.");
+        }
+        if (toChannel == null) {
+            throw new IllegalArgumentException("toChannel must not be null.");
+        }
+        return nativeTransferTouchFocus(fromChannel, toChannel);
     }
     
     public void dump(PrintWriter pw) {

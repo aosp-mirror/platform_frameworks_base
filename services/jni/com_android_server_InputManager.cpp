@@ -1286,6 +1286,25 @@ static void android_server_InputManager_nativeGetInputConfiguration(JNIEnv* env,
     env->SetIntField(configObj, gConfigurationClassInfo.navigation, config.navigation);
 }
 
+static jboolean android_server_InputManager_nativeTransferTouchFocus(JNIEnv* env,
+        jclass clazz, jobject fromChannelObj, jobject toChannelObj) {
+    if (checkInputManagerUnitialized(env)) {
+        return false;
+    }
+
+    sp<InputChannel> fromChannel =
+            android_view_InputChannel_getInputChannel(env, fromChannelObj);
+    sp<InputChannel> toChannel =
+            android_view_InputChannel_getInputChannel(env, toChannelObj);
+
+    if (fromChannel == NULL || toChannel == NULL) {
+        return false;
+    }
+
+    return gNativeInputManager->getInputManager()->getDispatcher()->
+            transferTouchFocus(fromChannel, toChannel);
+}
+
 static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz) {
     if (checkInputManagerUnitialized(env)) {
         return NULL;
@@ -1334,6 +1353,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeGetInputDeviceIds },
     { "nativeGetInputConfiguration", "(Landroid/content/res/Configuration;)V",
             (void*) android_server_InputManager_nativeGetInputConfiguration },
+    { "nativeTransferTouchFocus", "(Landroid/view/InputChannel;Landroid/view/InputChannel;)Z",
+            (void*) android_server_InputManager_nativeTransferTouchFocus },
     { "nativeDump", "()Ljava/lang/String;",
             (void*) android_server_InputManager_nativeDump },
 };

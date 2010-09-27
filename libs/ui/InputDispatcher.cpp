@@ -2464,6 +2464,70 @@ void InputDispatcher::setInputDispatchMode(bool enabled, bool frozen) {
     }
 }
 
+bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,
+        const sp<InputChannel>& toChannel) {
+#if DEBUG_FOCUS
+    LOGD("transferTouchFocus: fromChannel=%s, toChannel=%s",
+            fromChannel->getName().string(), toChannel->getName().string());
+#endif
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        const InputWindow* fromWindow = getWindowLocked(fromChannel);
+        const InputWindow* toWindow = getWindowLocked(toChannel);
+        if (! fromWindow || ! toWindow) {
+#if DEBUG_FOCUS
+            LOGD("Cannot transfer focus because from or to window not found.");
+#endif
+            return false;
+        }
+        if (fromWindow == toWindow) {
+#if DEBUG_FOCUS
+            LOGD("Trivial transfer to same window.");
+#endif
+            return true;
+        }
+
+        bool found = false;
+        for (size_t i = 0; i < mTouchState.windows.size(); i++) {
+            const TouchedWindow& touchedWindow = mTouchState.windows[i];
+            if (touchedWindow.window == fromWindow) {
+                int32_t oldTargetFlags = touchedWindow.targetFlags;
+                BitSet32 pointerIds = touchedWindow.pointerIds;
+
+                mTouchState.windows.removeAt(i);
+
+                int32_t newTargetFlags = 0;
+                if (oldTargetFlags & InputTarget::FLAG_FOREGROUND) {
+                    newTargetFlags |= InputTarget::FLAG_FOREGROUND;
+                    if (toWindow->layoutParamsFlags & InputWindow::FLAG_SPLIT_TOUCH) {
+                        newTargetFlags |= InputTarget::FLAG_SPLIT;
+                    }
+                }
+                mTouchState.addOrUpdateWindow(toWindow, newTargetFlags, pointerIds);
+
+                found = true;
+                break;
+            }
+        }
+
+        if (! found) {
+#if DEBUG_FOCUS
+            LOGD("Focus transfer failed because from window did not have focus.");
+#endif
+            return false;
+        }
+
+#if DEBUG_FOCUS
+        logDispatchStateLocked();
+#endif
+    } // release lock
+
+    // Wake up poll loop since it may need to make new input dispatching choices.
+    mLooper->wake();
+    return true;
+}
+
 void InputDispatcher::logDispatchStateLocked() {
     String8 dump;
     dumpDispatchStateLocked(dump);
