@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Autorise l\'application à lire toutes les URL auxquelles le navigateur a accédé et tous ses favoris."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"écrire dans l\'historique et les favoris du navigateur"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Autorise une application à modifier l\'historique du navigateur ou les favoris enregistrés sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonction pour effacer ou modifier les données de votre navigateur."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifier les autorisations de géolocalisation du navigateur"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permet à une application de modifier les autorisations de géolocalisation du navigateur. Les applications malveillantes peuvent se servir de cette fonctionnalité pour envoyer des informations de lieu à des sites Web arbitraires."</string>
     <string name="save_password_message" msgid="767344687139195790">"Voulez-vous que le navigateur se souvienne de ce mot de passe ?"</string>

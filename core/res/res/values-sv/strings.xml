@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillåter att program läser alla webbadresser som webbläsaren har öppnat och alla webbläsarens bokmärken."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skriva webbläsarhistorik och bokmärken"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Tillåter att ett program ändrar webbläsarhistoriken och bokmärkena i din telefon. Skadliga program kan använda detta för att ta bort eller ändra data i webbläsaren."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Ändra geografisk plats för webbläsaren"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Tillåter att ett program ändrar webbläsarens behörigheter för geografisk plats. Skadliga program kan använda detta för att tillåta att platsinformation skickas till godtyckliga webbplatser."</string>
     <string name="save_password_message" msgid="767344687139195790">"Vill du att webbläsaren ska komma ihåg lösenordet?"</string>

@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Uygulamaya Tarayıcının ziyaret etmiş olduğu tüm URL\'leri ve Tarayıcının tüm favorilerini okuma izni verir."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"Tarayıcı geçmişini ve favorileri yaz"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Uygulamaya telefonunuzda depolanan Tarayıcı geçmişini veya favorileri değiştirme izni verir. Kötü amaçlı uygulamalar bunu Tarayıcı verilerinizi silmek veya değiştirmek için kullanabilir."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Tarayıcı\'nın coğrafi konum izinlerini değiştir"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Bir uygulamanın, Tarayıcı\'nın coğrafi konum izinlerini değiştirmesine izin verir. Kötü amaçlı uygulamalar, bu özelliği konum bilgilerini rastgele web sitelerine göndermek için kullanabilir."</string>
     <string name="save_password_message" msgid="767344687139195790">"Tarayıcının bu şifreyi anımsamasını istiyor musunuz?"</string>
