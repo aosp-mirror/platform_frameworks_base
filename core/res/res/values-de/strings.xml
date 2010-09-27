@@ -468,7 +468,7 @@
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
     <item msgid="7390473628275490700">"Windows Live"</item>
-    <item msgid="7882877134931458217">"Yahoo"</item>
+    <item msgid="7882877134931458217">"Yahoo!"</item>
     <item msgid="5035376313200585242">"Skype"</item>
     <item msgid="7532363178459444943">"QQ"</item>
     <item msgid="3713441034299660749">"Google Talk"</item>
@@ -515,7 +515,7 @@
     <string name="imProtocolCustom" msgid="6919453836618749992">"Benutzerdefiniert"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
-    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo!"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
     <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Ermöglicht der Anwendung, alle URLs, die mit dem Browser besucht wurden, sowie alle Lesezeichen des Browsers zu lesen."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"Browserverlauf und Lesezeichen schreiben"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Ermöglicht einer Anwendung, den auf Ihrem Telefon gespeicherten Browserverlauf und die Lesezeichen zu ändern. Schädliche Anwendungen können so Ihre Browserdaten löschen oder ändern."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Geolokalisierungsberechtigungen des Browsers ändern"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Ermöglicht einer Anwendung, die Geolokalisierungsberechtigungen des Browsers zu ändern. Schädliche Anwendungen können dies nutzen, um das Senden von Standortinformationen an willkürliche Websites zuzulassen."</string>
     <string name="save_password_message" msgid="767344687139195790">"Möchten Sie, dass der Browser dieses Passwort speichert?"</string>
@@ -824,7 +828,7 @@
     <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"Die SD-Karte ist beschädigt. Sie müssen Ihre Karte eventuell neu formatieren."</string>
     <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD-Karte unerwartet entfernt"</string>
     <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"SD-Karte vor dem Entnehmen trennen, um Datenverlust zu vermeiden."</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"SD-Karte\nkann entfernt werden."</string>
+    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"SD-Karte kann entfernt werden."</string>
     <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"Die SD-Karte kann entfernt werden."</string>
     <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"SD-Karte entfernt"</string>
     <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD-Karte entfernt. Legen Sie eine neue ein."</string>

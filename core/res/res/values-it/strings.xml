@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Consente all\'applicazione di leggere tutti gli URL visitati e tutti i segnalibri del browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"creazione cronologia e segnalibri del browser"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Consente a un\'applicazione di modificare la cronologia o i segnalibri del browser memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare i dati del browser."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifica le autorizzazioni di localizzazione geografica del browser"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Consente a un\'applicazione di modificare le autorizzazioni di localizzazione geografica del browser. Le applicazioni dannose possono utilizzare questa autorizzazione per consentire l\'invio di informazioni sulla posizione a siti web arbitrari."</string>
     <string name="save_password_message" msgid="767344687139195790">"Memorizzare la password nel browser?"</string>
@@ -752,7 +756,7 @@
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Seleziona per passare all\'applicazione"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Scambiare le applicazioni?"</string>
     <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Un\'altra applicazione già in esecuzione deve essere chiusa prima di poterne avviare un\'altra."</string>
-    <string name="old_app_action" msgid="493129172238566282">"Torna a <xliff:g id="OLD_APP">%1$s</xliff:g> "</string>
+    <string name="old_app_action" msgid="493129172238566282">"Torna a <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="old_app_description" msgid="942967900237208466">"Non avviare la nuova applicazione."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Avvia <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="6830398339826789493">"Interrompi la vecchia applicazione senza salvare."</string>

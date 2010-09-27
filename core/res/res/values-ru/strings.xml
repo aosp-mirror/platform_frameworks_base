@@ -563,7 +563,7 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-карта заблокирована."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Разблокировка SIM-карты…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток вам будет предложено разблокировать телефон с помощью учетных данных Google.\n "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток вам будет предложено разблокировать телефон с помощью учетных данных Google.  "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> с."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забыли графический ключ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Снятие блокировки аккаунта"</string>
@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Разрешает приложению считывать все URL, посещенные браузером, и все его закладки."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"записывать историю и закладки браузера"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Разрешает приложению изменять историю и закладки браузера, сохраненные в вашем телефоне. Вредоносное ПО может пользоваться этим, чтобы стирать или изменять данные вашего браузера."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Изменить разрешения браузера для доступа к географическому местоположению"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Позволяет программе изменять разрешения браузера для доступа к географическому положению. Вредоносные программы могут пользоваться этим для отправки информации о местоположении на некоторые сайты."</string>
     <string name="save_password_message" msgid="767344687139195790">"Вы хотите, чтобы браузер запомнил этот пароль?"</string>

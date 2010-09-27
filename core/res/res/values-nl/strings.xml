@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Hiermee kan een toepassing de URL\'s lezen die u via de browser heeft bezocht, evenals alle bladwijzers van de browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"browsergeschiedenis en bladwijzers schrijven"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Hiermee kan een toepassing de op uw telefoon opgeslagen browsergeschiedenis of bladwijzers wijzigen. Schadelijke toepassingen kunnen hiermee uw browsergegevens verwijderen of wijzigen."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Geolocatierechten voor browser aanpassen"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Staat een toepassing toe de geolocatierechten van de browser aan te passen. Schadelijke toepassingen kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>

@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Permite que o aplicativo leia todos os URLs visitados pelo Navegador e todos os favoritos do Navegador."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"gravar histórico e favoritos do Navegador"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Permite que um aplicativo modifique o histórico ou os favoritos do Navegador armazenados no seu telefone. Aplicativos maliciosos podem usar isso para apagar ou modificar os dados do seu Navegador."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifique as permissões de geolocalização do seu navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permite que um aplicativo modifique as permissões de geolocalização do navegador. Aplicativos maliciosos podem usar isso para permitir o envio de informações de localização a sites arbitrários."</string>
     <string name="save_password_message" msgid="767344687139195790">"Deseja que o navegador lembre desta senha?"</string>
@@ -650,7 +654,7 @@
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
     <item quantity="one" msgid="1849036840200069118">"1 seg. atrás"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> segundos\n  atrás"</item>
+    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> segundos   atrás"</item>
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
     <item quantity="one" msgid="6361490147113871545">"1 minuto atrás"</item>
