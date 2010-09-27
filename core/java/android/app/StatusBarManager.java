@@ -55,6 +55,18 @@ public class StatusBarManager {
     public static final int DISABLE_NOTIFICATION_TICKER = 0x00000008;
 
     /**
+     * Flag for {@link #disable} to hide the center system info area.
+     */
+    public static final int DISABLE_SYSTEM_INFO = 0x00000010;
+
+    /**
+     * Flag for {@link #disable} to hide only the navigation buttons.  Don't use this
+     * unless you're the setup wizard.
+     */
+    public static final int DISABLE_NAVIGATION = 0x00000020;
+
+
+    /**
      * Re-enable all of the status bar features that you've disabled.
      */
     public static final int DISABLE_NONE = 0x00000000;
