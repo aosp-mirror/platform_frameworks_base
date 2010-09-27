@@ -206,6 +206,9 @@ public class TabletStatusBarService extends StatusBarService {
         // The navigation buttons
         mNavigationArea = sb.findViewById(R.id.navigationArea);
 
+        // set the initial view visibility
+        setAreThereNotifications();
+
         // Add the windows
         addPanelWindows();
 
@@ -318,6 +321,8 @@ public class TabletStatusBarService extends StatusBarService {
         } else {
             tick(notification);
         }
+
+        setAreThereNotifications();
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
@@ -387,11 +392,14 @@ public class TabletStatusBarService extends StatusBarService {
             addNotificationViews(key, notification);
         }
         // TODO: ticker; immersive mode
+
+        setAreThereNotifications();
     }
 
     public void removeNotification(IBinder key) {
         if (DEBUG) Slog.d(TAG, "removeNotification(" + key + ") // TODO");
         removeNotificationViews(key);
+        setAreThereNotifications();
     }
 
     public void disable(int state) {
@@ -493,6 +501,41 @@ public class TabletStatusBarService extends StatusBarService {
             setViewVisibility(mCurtains, View.VISIBLE, R.anim.lights_out_in);
             setViewVisibility(mBarContents, View.GONE, R.anim.status_bar_out);
         }
+    }
+
+    private void setAreThereNotifications() {
+        final boolean hasClearable = mNotns.hasClearableItems();
+
+        //Slog.d(TAG, "setAreThereNotifications hasClerable=" + hasClearable);
+
+        // Show or hide the "Clear all" button.  Note that we don't do an animation
+        // if it's not on screen, so that if someone opens the bar right then they
+        // don't see the animation in progress.
+        // (no ongoing notifications are clearable)
+        if (hasClearable) {
+            if (mNotificationButtons.getVisibility() == View.VISIBLE) {
+                setViewVisibility(mClearButton, View.VISIBLE, R.anim.notification_buttons_in);
+            } else {
+                mClearButton.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (mNotificationButtons.getVisibility() == View.VISIBLE) {
+                setViewVisibility(mClearButton, View.GONE, R.anim.notification_buttons_out);
+            } else {
+                mClearButton.setVisibility(View.GONE);
+            }
+        }
+
+        /*
+        mOngoingTitle.setVisibility(ongoing ? View.VISIBLE : View.GONE);
+        mLatestTitle.setVisibility(latest ? View.VISIBLE : View.GONE);
+
+        if (ongoing || latest) {
+            mNoNotificationsTitle.setVisibility(View.GONE);
+        } else {
+            mNoNotificationsTitle.setVisibility(View.VISIBLE);
+        }
+        */
     }
 
     public void notificationIconsClicked(View v) {
@@ -790,6 +833,7 @@ public class TabletStatusBarService extends StatusBarService {
 
     private void setViewVisibility(View v, int vis, int anim) {
         if (v.getVisibility() != vis) {
+            //Slog.d(TAG, "setViewVisibility vis=" + (vis == View.VISIBLE) + " v=" + v);
             v.setAnimation(AnimationUtils.loadAnimation((Context)this, anim));
             v.setVisibility(vis);
         }

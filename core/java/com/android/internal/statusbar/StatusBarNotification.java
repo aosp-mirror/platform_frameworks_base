@@ -121,6 +121,10 @@ public class StatusBarNotification implements Parcelable {
         return (notification.flags & Notification.FLAG_ONGOING_EVENT) != 0;
     }
 
+    public boolean isClearable() {
+        return ((notification.flags & Notification.FLAG_ONGOING_EVENT) == 0)
+                && ((notification.flags & Notification.FLAG_NO_CLEAR) == 0);
+    }
 }
 
 
