@@ -441,18 +441,23 @@ public class SipPhone extends SipPhoneBase {
         @Override
         public void hangup() throws CallStateException {
             synchronized (SipPhone.class) {
-                Log.v(LOG_TAG, "hang up call: " + getState() + ": " + this
-                        + " on phone " + getPhone());
-                CallStateException excp = null;
-                for (Connection c : connections) {
-                    try {
-                        c.hangup();
-                    } catch (CallStateException e) {
-                        excp = e;
+                if (mState.isAlive()) {
+                    Log.d(LOG_TAG, "hang up call: " + getState() + ": " + this
+                            + " on phone " + getPhone());
+                    CallStateException excp = null;
+                    for (Connection c : connections) {
+                        try {
+                            c.hangup();
+                        } catch (CallStateException e) {
+                            excp = e;
+                        }
                     }
+                    if (excp != null) throw excp;
+                    setState(State.DISCONNECTING);
+                } else {
+                    Log.d(LOG_TAG, "hang up dead call: " + getState() + ": "
+                            + this + " on phone " + getPhone());
                 }
-                if (excp != null) throw excp;
-                setState(State.DISCONNECTING);
             }
         }
 
@@ -784,11 +789,13 @@ public class SipPhone extends SipPhoneBase {
         public void hangup() throws CallStateException {
             synchronized (SipPhone.class) {
                 Log.v(LOG_TAG, "hangup conn: " + mPeer.getUriString() + ": "
-                        + ": on phone " + getPhone().getPhoneName());
+                        + mState + ": on phone " + getPhone().getPhoneName());
                 try {
-                    if (mSipAudioCall != null) mSipAudioCall.endCall();
-                    setState(Call.State.DISCONNECTING);
-                    setDisconnectCause(DisconnectCause.LOCAL);
+                    if (mState.isAlive()) {
+                        if (mSipAudioCall != null) mSipAudioCall.endCall();
+                        setState(Call.State.DISCONNECTING);
+                        setDisconnectCause(DisconnectCause.LOCAL);
+                    }
                 } catch (SipException e) {
                     throw new CallStateException("hangup(): " + e);
                 }
