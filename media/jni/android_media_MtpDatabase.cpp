@@ -207,10 +207,13 @@ MtpObjectHandle MyMtpDatabase::beginSendObject(const char* path,
                                             uint64_t size,
                                             time_t modified) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jstring pathStr = env->NewStringUTF(path);
     MtpObjectHandle result = env->CallIntMethod(mDatabase, method_beginSendObject,
-            env->NewStringUTF(path), (jint)format, (jint)parent, (jint)storage,
+            pathStr, (jint)format, (jint)parent, (jint)storage,
             (jlong)size, (jlong)modified);
 
+    if (pathStr)
+        env->DeleteLocalRef(pathStr);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
 }
@@ -218,9 +221,12 @@ MtpObjectHandle MyMtpDatabase::beginSendObject(const char* path,
 void MyMtpDatabase::endSendObject(const char* path, MtpObjectHandle handle,
                                 MtpObjectFormat format, bool succeeded) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(mDatabase, method_endSendObject, env->NewStringUTF(path),
+    jstring pathStr = env->NewStringUTF(path);
+    env->CallVoidMethod(mDatabase, method_endSendObject, pathStr,
                         (jint)handle, (jint)format, (jboolean)succeeded);
 
+    if (pathStr)
+        env->DeleteLocalRef(pathStr);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
@@ -238,6 +244,7 @@ MtpObjectHandleList* MyMtpDatabase::getObjectList(MtpStorageID storageID,
     for (int i = 0; i < length; i++)
         list->push(handles[i]);
     env->ReleaseIntArrayElements(array, handles, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -266,6 +273,7 @@ MtpObjectFormatList* MyMtpDatabase::getSupportedPlaybackFormats() {
     for (int i = 0; i < length; i++)
         list->push(formats[i]);
     env->ReleaseIntArrayElements(array, formats, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -283,6 +291,7 @@ MtpObjectFormatList* MyMtpDatabase::getSupportedCaptureFormats() {
     for (int i = 0; i < length; i++)
         list->push(formats[i]);
     env->ReleaseIntArrayElements(array, formats, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -300,6 +309,7 @@ MtpObjectPropertyList* MyMtpDatabase::getSupportedObjectProperties(MtpObjectForm
     for (int i = 0; i < length; i++)
         list->push(properties[i]);
     env->ReleaseIntArrayElements(array, properties, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -317,6 +327,7 @@ MtpDevicePropertyList* MyMtpDatabase::getSupportedDeviceProperties() {
     for (int i = 0; i < length; i++)
         list->push(properties[i]);
     env->ReleaseIntArrayElements(array, properties, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -456,6 +467,8 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(MtpObjectHandle handle,
 
     jint result = env->CallIntMethod(mDatabase, method_setObjectProperty,
                 (jint)handle, (jint)property, longValue, stringValue);
+    if (stringValue)
+        env->DeleteLocalRef(stringValue);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
@@ -577,6 +590,8 @@ MtpResponseCode MyMtpDatabase::setDevicePropertyValue(MtpDeviceProperty property
 
     jint result = env->CallIntMethod(mDatabase, method_setDeviceProperty,
                 (jint)property, longValue, stringValue);
+    if (stringValue)
+        env->DeleteLocalRef(stringValue);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
@@ -741,6 +756,7 @@ MtpObjectHandleList* MyMtpDatabase::getObjectReferences(MtpObjectHandle handle) 
     for (int i = 0; i < length; i++)
         list->push(handles[i]);
     env->ReleaseIntArrayElements(array, handles, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -761,6 +777,7 @@ MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle,
     env->ReleaseIntArrayElements(array, handles, 0);
     MtpResponseCode result = env->CallIntMethod(mDatabase, method_setObjectReferences,
                 (jint)handle, array);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
