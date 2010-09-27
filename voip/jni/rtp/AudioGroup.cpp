@@ -86,6 +86,8 @@ public:
     void decode(int tick);
 
 private:
+    bool isNatAddress(struct sockaddr_storage *addr);
+
     enum {
         NORMAL = 0,
         SEND_ONLY = 1,
@@ -316,6 +318,16 @@ void AudioStream::encode(int tick, AudioStream *chain)
         sizeof(mRemote));
 }
 
+bool AudioStream::isNatAddress(struct sockaddr_storage *addr) {
+    if (addr->ss_family != AF_INET) return false;
+    struct sockaddr_in *s4 = (struct sockaddr_in *)addr;
+    unsigned char *d = (unsigned char *) &s4->sin_addr;
+    if ((d[0] == 10)
+        || ((d[0] == 172) && (d[1] & 0x10))
+        || ((d[0] == 192) && (d[1] == 168))) return true;
+    return false;
+}
+
 void AudioStream::decode(int tick)
 {
     char c;
@@ -363,8 +375,21 @@ void AudioStream::decode(int tick)
             MSG_TRUNC | MSG_DONTWAIT) >> 1;
     } else {
         __attribute__((aligned(4))) uint8_t buffer[2048];
-        length = recv(mSocket, buffer, sizeof(buffer),
-            MSG_TRUNC | MSG_DONTWAIT);
+        struct sockaddr_storage src_addr;
+        socklen_t addrlen;
+        length = recvfrom(mSocket, buffer, sizeof(buffer),
+            MSG_TRUNC|MSG_DONTWAIT, (sockaddr*)&src_addr, &addrlen);
+
+        // The following if clause is for fixing the target address if
+        // proxy server did not replace the NAT address with its media
+        // port in SDP. Although it is proxy server's responsibility for
+        // replacing the connection address with correct one, we will change
+        // the target address as we detect the difference for now until we
+        // know the best way to get rid of this issue.
+        if ((memcmp((void*)&src_addr, (void*)&mRemote, addrlen) != 0) &&
+            isNatAddress(&mRemote)) {
+            memcpy((void*)&mRemote, (void*)&src_addr, addrlen);
+        }
 
         // Do we need to check SSRC, sequence, and timestamp? They are not
         // reliable but at least they can be used to identify duplicates?
