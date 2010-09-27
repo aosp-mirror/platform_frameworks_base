@@ -207,7 +207,7 @@ public:
     virtual int32_t getMaxEventsPerSecond();
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags);
-    virtual void pokeUserActivity(nsecs_t eventTime, int32_t windowType, int32_t eventType);
+    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
             int32_t injectorPid, int32_t injectorUid);
 
@@ -973,10 +973,8 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& i
     return consumed && ! error;
 }
 
-void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t windowType, int32_t eventType) {
-    if (windowType != InputWindow::TYPE_KEYGUARD) {
-        android_server_PowerManagerService_userActivity(eventTime, eventType);
-    }
+void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) {
+    android_server_PowerManagerService_userActivity(eventTime, eventType);
 }
 
 
