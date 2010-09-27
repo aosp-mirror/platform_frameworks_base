@@ -355,6 +355,20 @@ public final class Settings {
             "android.settings.MANAGE_APPLICATIONS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to manage all applications.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS =
+            "android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS";
+
+    /**
      * Activity Action: Show screen of details about a particular application.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
