@@ -88,13 +88,9 @@ import android.util.Log;
         mInUse = false;
     }
 
-    /* package */ synchronized boolean isInUse() {
-        return mInUse;
-    }
-
     /* package */ synchronized void releaseIfNotInUse() {
         // if it is not in use, release its memory from the database
-        if (!isInUse()) {
+        if (!mInUse) {
             releaseSqlStatement();
         }
     }
@@ -110,7 +106,7 @@ import android.util.Log;
             // but if the database itself is not closed and is GC'ed, then
             // all sub-objects attached to the database could end up getting GC'ed too.
             // in that case, don't print any warning.
-            if (!mInUse) {
+            if (mInUse) {
                 int len = mSqlStmt.length();
                 Log.w(TAG, "Releasing statement in a finalizer. Please ensure " +
                         "that you explicitly call close() on your cursor: " +
