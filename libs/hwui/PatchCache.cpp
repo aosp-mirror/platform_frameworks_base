@@ -57,9 +57,7 @@ void PatchCache::clear() {
     mCache.setOnEntryRemovedListener(NULL);
 }
 
-Patch* PatchCache::get(const Res_png_9patch* patch) {
-    const uint32_t width = patch->numXDivs;
-    const uint32_t height = patch->numYDivs;
+Patch* PatchCache::get(uint32_t width, uint32_t height) {
     const PatchDescription description(width, height);
 
     Patch* mesh = mCache.get(description);

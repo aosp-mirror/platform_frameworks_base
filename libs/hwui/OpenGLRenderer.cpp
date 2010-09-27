@@ -585,8 +585,9 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 }
 
-void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-        float left, float top, float right, float bottom, const SkPaint* paint) {
+void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
+        uint32_t width, uint32_t height, float left, float top, float right, float bottom,
+        const SkPaint* paint) {
     if (quickReject(left, top, right, bottom)) {
         return;
     }
@@ -600,9 +601,9 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    Patch* mesh = mCaches.patchCache.get(patch);
+    Patch* mesh = mCaches.patchCache.get(width, height);
     mesh->updateVertices(bitmap->width(), bitmap->height(),left, top, right, bottom,
-            &patch->xDivs[0], &patch->yDivs[0], patch->numXDivs, patch->numYDivs);
+            xDivs, yDivs, width, height);
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size
