@@ -355,6 +355,14 @@ public:
      */
     virtual void setInputDispatchMode(bool enabled, bool frozen) = 0;
 
+    /* Transfers touch focus from the window associated with one channel to the
+     * window associated with the other channel.
+     *
+     * Returns true on success.  False if the window did not actually have touch focus.
+     */
+    virtual bool transferTouchFocus(const sp<InputChannel>& fromChannel,
+            const sp<InputChannel>& toChannel) = 0;
+
     /* Registers or unregister input channels that may be used as targets for input events.
      * If monitor is true, the channel will receive a copy of all input events.
      *
@@ -408,6 +416,9 @@ public:
     virtual void setInputWindows(const Vector<InputWindow>& inputWindows);
     virtual void setFocusedApplication(const InputApplication* inputApplication);
     virtual void setInputDispatchMode(bool enabled, bool frozen);
+
+    virtual bool transferTouchFocus(const sp<InputChannel>& fromChannel,
+            const sp<InputChannel>& toChannel);
 
     virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
