@@ -1623,22 +1623,23 @@ class ContextImpl extends Context {
     // ----------------------------------------------------------------------
 
     private static final class ApplicationContentResolver extends ContentResolver {
-        public ApplicationContentResolver(Context context,
-                                          ActivityThread mainThread)
-        {
+        public ApplicationContentResolver(Context context, ActivityThread mainThread) {
             super(context);
             mMainThread = mainThread;
         }
 
         @Override
-        protected IContentProvider acquireProvider(Context context, String name)
-        {
+        protected IContentProvider acquireProvider(Context context, String name) {
             return mMainThread.acquireProvider(context, name);
         }
 
         @Override
-        public boolean releaseProvider(IContentProvider provider)
-        {
+        protected IContentProvider acquireExistingProvider(Context context, String name) {
+            return mMainThread.acquireExistingProvider(context, name);
+        }
+
+        @Override
+        public boolean releaseProvider(IContentProvider provider) {
             return mMainThread.releaseProvider(provider);
         }
 

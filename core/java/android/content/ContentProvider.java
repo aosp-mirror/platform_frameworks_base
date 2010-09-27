@@ -544,6 +544,12 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      *
+     * <p>Note that there are no permissions needed for an application to
+     * access this information; if your content provider requires read and/or
+     * write permissions, or is not exported, all applications can still call
+     * this method regardless of their access permissions.  This allows them
+     * to retrieve the MIME type for a URI when dispatching intents.
+     *
      * @param uri the URI to query.
      * @return a MIME type string, or null if there is no type.
      */
