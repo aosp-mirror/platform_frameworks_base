@@ -45,7 +45,10 @@ def main(options, args):
   os.system(cmd);
 
   # Run the tests in path
-  cmd = "adb shell am instrument "
+  adb_cmd = "adb"
+  if options.serial:
+    adb_cmd += " -s " + options.serial
+  cmd = adb_cmd + " shell am instrument "
   cmd += "-e class com.android.dumprendertree2.scriptsupport.Starter#startLayoutTests "
   cmd += "-e path \"" + path + "\" "
   cmd += "-w com.android.dumprendertree2/com.android.dumprendertree2.scriptsupport.ScriptTestRunner"
@@ -61,13 +64,13 @@ def main(options, args):
   # Download the txt summary to tmp folder
   summary_txt_tmp_path = os.path.join(tmpdir, SUMMARY_TXT)
   cmd = "rm -f " + summary_txt_tmp_path + ";"
-  cmd += "adb pull " + RESULTS_ABSOLUTE_PATH + SUMMARY_TXT + " " + summary_txt_tmp_path
+  cmd += adb_cmd + " pull " + RESULTS_ABSOLUTE_PATH + SUMMARY_TXT + " " + summary_txt_tmp_path
   subprocess.Popen(cmd, shell=True).wait()
 
   # Download the html summary to tmp folder
   details_html_tmp_path = os.path.join(tmpdir, DETAILS_HTML)
   cmd = "rm -f " + details_html_tmp_path + ";"
-  cmd += "adb pull " + RESULTS_ABSOLUTE_PATH + DETAILS_HTML + " " + details_html_tmp_path
+  cmd += adb_cmd + " pull " + RESULTS_ABSOLUTE_PATH + DETAILS_HTML + " " + details_html_tmp_path
   subprocess.Popen(cmd, shell=True).wait()
 
   # Print summary to console
@@ -86,5 +89,6 @@ if __name__ == "__main__":
                            help="Show the results the host's default web browser, default=true")
   option_parser.add_option("", "--tests-root-directory",
                            help="The directory from which to take the tests, default is external/webkit/LayoutTests in this checkout of the Android tree")
+  option_parser.add_option("-s", "--serial", default=None, help="Specify the serial number of device to run test on")
   options, args = option_parser.parse_args();
   main(options, args);
