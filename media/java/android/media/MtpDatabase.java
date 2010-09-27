@@ -25,8 +25,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.MediaStore.Audio;
-import android.provider.MediaStore.MediaColumns;
 import android.provider.MediaStore.Files;
+import android.provider.MediaStore.Images;
+import android.provider.MediaStore.MediaColumns;
 import android.provider.Mtp;
 import android.util.Log;
 
@@ -278,8 +279,9 @@ public class MtpDatabase {
         return null;
     }
 
-    private int[] getSupportedObjectProperties(int handle) {
-        return new int[] {
+    static final int[] FILE_PROPERTIES = {
+            // NOTE must match beginning of AUDIO_PROPERTIES, VIDEO_PROPERTIES
+            // and IMAGE_PROPERTIES below
             MtpConstants.PROPERTY_STORAGE_ID,
             MtpConstants.PROPERTY_OBJECT_FORMAT,
             MtpConstants.PROPERTY_PROTECTION_STATUS,
@@ -289,7 +291,93 @@ public class MtpDatabase {
             MtpConstants.PROPERTY_PARENT_OBJECT,
             MtpConstants.PROPERTY_PERSISTENT_UID,
             MtpConstants.PROPERTY_NAME,
-        };
+            MtpConstants.PROPERTY_DATE_ADDED,
+    };
+
+    static final int[] AUDIO_PROPERTIES = {
+            // NOTE must match FILE_PROPERTIES above
+            MtpConstants.PROPERTY_STORAGE_ID,
+            MtpConstants.PROPERTY_OBJECT_FORMAT,
+            MtpConstants.PROPERTY_PROTECTION_STATUS,
+            MtpConstants.PROPERTY_OBJECT_SIZE,
+            MtpConstants.PROPERTY_OBJECT_FILE_NAME,
+            MtpConstants.PROPERTY_DATE_MODIFIED,
+            MtpConstants.PROPERTY_PARENT_OBJECT,
+            MtpConstants.PROPERTY_PERSISTENT_UID,
+            MtpConstants.PROPERTY_NAME,
+            MtpConstants.PROPERTY_DISPLAY_NAME,
+            MtpConstants.PROPERTY_DATE_ADDED,
+
+            // audio specific properties
+            MtpConstants.PROPERTY_ARTIST,
+            MtpConstants.PROPERTY_ALBUM_NAME,
+            MtpConstants.PROPERTY_ALBUM_ARTIST,
+            MtpConstants.PROPERTY_TRACK,
+            MtpConstants.PROPERTY_ORIGINAL_RELEASE_DATE,
+            MtpConstants.PROPERTY_DURATION,
+            MtpConstants.PROPERTY_GENRE,
+            MtpConstants.PROPERTY_COMPOSER,
+    };
+
+    static final int[] VIDEO_PROPERTIES = {
+            // NOTE must match FILE_PROPERTIES above
+            MtpConstants.PROPERTY_STORAGE_ID,
+            MtpConstants.PROPERTY_OBJECT_FORMAT,
+            MtpConstants.PROPERTY_PROTECTION_STATUS,
+            MtpConstants.PROPERTY_OBJECT_SIZE,
+            MtpConstants.PROPERTY_OBJECT_FILE_NAME,
+            MtpConstants.PROPERTY_DATE_MODIFIED,
+            MtpConstants.PROPERTY_PARENT_OBJECT,
+            MtpConstants.PROPERTY_PERSISTENT_UID,
+            MtpConstants.PROPERTY_NAME,
+            MtpConstants.PROPERTY_DISPLAY_NAME,
+            MtpConstants.PROPERTY_DATE_ADDED,
+
+            // video specific properties
+            MtpConstants.PROPERTY_ARTIST,
+            MtpConstants.PROPERTY_ALBUM_NAME,
+            MtpConstants.PROPERTY_DURATION,
+            MtpConstants.PROPERTY_DESCRIPTION,
+    };
+
+    static final int[] IMAGE_PROPERTIES = {
+            // NOTE must match FILE_PROPERTIES above
+            MtpConstants.PROPERTY_STORAGE_ID,
+            MtpConstants.PROPERTY_OBJECT_FORMAT,
+            MtpConstants.PROPERTY_PROTECTION_STATUS,
+            MtpConstants.PROPERTY_OBJECT_SIZE,
+            MtpConstants.PROPERTY_OBJECT_FILE_NAME,
+            MtpConstants.PROPERTY_DATE_MODIFIED,
+            MtpConstants.PROPERTY_PARENT_OBJECT,
+            MtpConstants.PROPERTY_PERSISTENT_UID,
+            MtpConstants.PROPERTY_NAME,
+            MtpConstants.PROPERTY_DISPLAY_NAME,
+            MtpConstants.PROPERTY_DATE_ADDED,
+
+            // image specific properties
+            MtpConstants.PROPERTY_DESCRIPTION,
+    };
+
+    private int[] getSupportedObjectProperties(int format) {
+        switch (format) {
+            case MtpConstants.FORMAT_MP3:
+            case MtpConstants.FORMAT_WAV:
+            case MtpConstants.FORMAT_WMA:
+            case MtpConstants.FORMAT_OGG:
+            case MtpConstants.FORMAT_AAC:
+                return AUDIO_PROPERTIES;
+            case MtpConstants.FORMAT_MPEG:
+            case MtpConstants.FORMAT_3GP_CONTAINER:
+            case MtpConstants.FORMAT_WMV:
+                return VIDEO_PROPERTIES;
+            case MtpConstants.FORMAT_EXIF_JPEG:
+            case MtpConstants.FORMAT_GIF:
+            case MtpConstants.FORMAT_PNG:
+            case MtpConstants.FORMAT_BMP:
+                return IMAGE_PROPERTIES;
+            default:
+                return FILE_PROPERTIES;
+        }
     }
 
     private int[] getSupportedDeviceProperties() {
@@ -299,16 +387,89 @@ public class MtpDatabase {
         };
     }
 
+    private String queryString(int id, String column) {
+        Cursor c = null;
+        try {
+            // for now we are only reading properties from the "objects" table
+            c = mMediaProvider.query(mObjectsUri,
+                            new String [] { Files.FileColumns._ID, column },
+                            ID_WHERE, new String[] { Integer.toString(id) }, null);
+            if (c != null && c.moveToNext()) {
+                return c.getString(1);
+            } else {
+                return "";
+            }
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
+
+    private String queryGenre(int id) {
+        Cursor c = null;
+        try {
+            Uri uri = Audio.Genres.getContentUriForAudioId(mVolumeName, id);
+            c = mMediaProvider.query(uri,
+                            new String [] { Files.FileColumns._ID, Audio.GenresColumns.NAME },
+                            null, null, null);
+            if (c != null && c.moveToNext()) {
+                return c.getString(1);
+            } else {
+                return "";
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "queryGenre exception", e);
+            return null;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
+
+    private boolean queryInt(int id, String column, long[] outValue) {
+        Cursor c = null;
+        try {
+            // for now we are only reading properties from the "objects" table
+            c = mMediaProvider.query(mObjectsUri,
+                            new String [] { Files.FileColumns._ID, column },
+                            ID_WHERE, new String[] { Integer.toString(id) }, null);
+            if (c != null && c.moveToNext()) {
+                outValue[0] = c.getLong(1);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
+
+    private String nameFromPath(String path) {
+        // extract name from full path
+        int start = 0;
+        int lastSlash = path.lastIndexOf('/');
+        if (lastSlash >= 0) {
+            start = lastSlash + 1;
+        }
+        int end = path.length();
+        if (end - start > 255) {
+            end = start + 255;
+        }
+        return path.substring(start, end);
+    }
+
     private int getObjectProperty(int handle, int property,
                             long[] outIntValue, char[] outStringValue) {
         Log.d(TAG, "getObjectProperty: " + property);
         String column = null;
         boolean isString = false;
-
-        // temporary hack
-        if (property == MtpConstants.PROPERTY_NAME) {
-            property = MtpConstants.PROPERTY_OBJECT_FILE_NAME;
-        }
 
         switch (property) {
             case MtpConstants.PROPERTY_STORAGE_ID:
@@ -325,11 +486,45 @@ public class MtpDatabase {
                 column = Files.FileColumns.SIZE;
                 break;
             case MtpConstants.PROPERTY_OBJECT_FILE_NAME:
-                column = Files.FileColumns.DATA;
-                isString = true;
-                break;
+                // special case - need to extract file name from full path
+                String value = queryString(handle, Files.FileColumns.DATA);
+                if (value != null) {
+                    value = nameFromPath(value);
+                    value.getChars(0, value.length(), outStringValue, 0);
+                    outStringValue[value.length()] = 0;
+                    return MtpConstants.RESPONSE_OK;
+                } else {
+                    return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
+                }
+            case MtpConstants.PROPERTY_NAME:
+                // first try title
+                String name = queryString(handle, MediaColumns.TITLE);
+                // then try name
+                if (name == null) {
+                    name = queryString(handle, Audio.PlaylistsColumns.NAME);
+                }
+                // if title and name fail, extract name from full path
+                if (name == null) {
+                    name = queryString(handle, Files.FileColumns.DATA);
+                    if (name != null) {
+                        name = nameFromPath(name);
+                    }
+                }
+                if (name != null) {
+                    name.getChars(0, name.length(), outStringValue, 0);
+                    outStringValue[name.length()] = 0;
+                    return MtpConstants.RESPONSE_OK;
+                } else {
+                    return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
+                }
             case MtpConstants.PROPERTY_DATE_MODIFIED:
                 column = Files.FileColumns.DATE_MODIFIED;
+                break;
+            case MtpConstants.PROPERTY_DATE_ADDED:
+                column = Files.FileColumns.DATE_ADDED;
+                break;
+            case MtpConstants.PROPERTY_ORIGINAL_RELEASE_DATE:
+                column = Audio.AudioColumns.YEAR;
                 break;
             case MtpConstants.PROPERTY_PARENT_OBJECT:
                 column = Files.FileColumns.PARENT;
@@ -341,44 +536,64 @@ public class MtpDatabase {
                 puid += handle;
                 outIntValue[0] = puid;
                 return MtpConstants.RESPONSE_OK;
+            case MtpConstants.PROPERTY_DURATION:
+                column = Audio.AudioColumns.DURATION;
+                break;
+            case MtpConstants.PROPERTY_TRACK:
+                if (queryInt(handle, Audio.AudioColumns.TRACK, outIntValue)) {
+                    // track is stored in lower 3 decimal digits
+                    outIntValue[0] %= 1000;
+                    return MtpConstants.RESPONSE_OK;
+                } else {
+                    return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
+                }
+            case MtpConstants.PROPERTY_DISPLAY_NAME:
+                column = MediaColumns.DISPLAY_NAME;
+                isString = true;
+                break;
+            case MtpConstants.PROPERTY_ARTIST:
+                column = Audio.AudioColumns.ARTIST;
+                isString = true;
+                break;
+            case MtpConstants.PROPERTY_ALBUM_NAME:
+                column = Audio.AudioColumns.ALBUM;
+                isString = true;
+                break;
+            case MtpConstants.PROPERTY_ALBUM_ARTIST:
+                column = Audio.AudioColumns.ALBUM_ARTIST;
+                isString = true;
+                break;
+            case MtpConstants.PROPERTY_GENRE:
+                String genre = queryGenre(handle);
+                if (genre != null) {
+                    genre.getChars(0, genre.length(), outStringValue, 0);
+                    outStringValue[genre.length()] = 0;
+                    return MtpConstants.RESPONSE_OK;
+                } else {
+                    return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
+                }
+            case MtpConstants.PROPERTY_COMPOSER:
+                column = Audio.AudioColumns.COMPOSER;
+                isString = true;
+                break;
+            case MtpConstants.PROPERTY_DESCRIPTION:
+                column = Images.ImageColumns.DESCRIPTION;
+                isString = true;
+                break;
             default:
                 return MtpConstants.RESPONSE_OBJECT_PROP_NOT_SUPPORTED;
         }
 
-        Cursor c = null;
-        try {
-            // for now we are only reading properties from the "objects" table
-            c = mMediaProvider.query(mObjectsUri,
-                            new String [] { Files.FileColumns._ID, column },
-                            ID_WHERE, new String[] { Integer.toString(handle) }, null);
-            if (c != null && c.moveToNext()) {
-                if (isString) {
-                    String value = c.getString(1);
-                    int start = 0;
-
-                    if (property == MtpConstants.PROPERTY_OBJECT_FILE_NAME) {
-                        // extract name from full path
-                        int lastSlash = value.lastIndexOf('/');
-                        if (lastSlash >= 0) {
-                            start = lastSlash + 1;
-                        }
-                    }
-                    int end = value.length();
-                    if (end - start > 255) {
-                        end = start + 255;
-                    }
-                    value.getChars(start, end, outStringValue, 0);
-                    outStringValue[end - start] = 0;
-                } else {
-                    outIntValue[0] = c.getLong(1);
-                }
+        if (isString) {
+            String value = queryString(handle, column);
+            if (value != null) {
+                value.getChars(0, value.length(), outStringValue, 0);
+                outStringValue[value.length()] = 0;
                 return MtpConstants.RESPONSE_OK;
             }
-        } catch (Exception e) {
-            return MtpConstants.RESPONSE_GENERAL_ERROR;
-        } finally {
-            if (c != null) {
-                c.close();
+        } else {
+            if (queryInt(handle, column, outIntValue)) {
+                return MtpConstants.RESPONSE_OK;
             }
         }
         // query failed if we get here
