@@ -91,6 +91,7 @@ import android.util.*;
 import android.view.Display;
 import android.view.WindowManager;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -8304,7 +8305,8 @@ class PackageManagerService extends IPackageManager.Stub {
             mPastSignatures.clear();
 
             try {
-                FileOutputStream str = new FileOutputStream(mSettingsFilename);
+                BufferedOutputStream str = new BufferedOutputStream(new FileOutputStream(
+                        mSettingsFilename));
 
                 //XmlSerializer serializer = XmlUtils.serializerInstance();
                 XmlSerializer serializer = new FastXmlSerializer();
@@ -8401,7 +8403,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 File tempFile = new File(mPackageListFilename.toString() + ".tmp");
                 JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
 
-                str = new FileOutputStream(journal.chooseForWrite());
+                str = new BufferedOutputStream(new FileOutputStream(journal.chooseForWrite()));
                 try {
                     StringBuilder sb = new StringBuilder();
                     for (PackageSetting pkg : mPackages.values()) {
