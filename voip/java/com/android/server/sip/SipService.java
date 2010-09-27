@@ -40,6 +40,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
@@ -90,12 +91,14 @@ public final class SipService extends ISipService.Stub {
     private ConnectivityReceiver mConnectivityReceiver;
 
     /**
-     * Creates a {@code SipService} instance. Returns null if SIP API is not
-     * supported.
+     * Starts the SIP service. Do nothing if the SIP API is not supported on the
+     * device.
      */
-    public static SipService create(Context context) {
-        return (SipManager.isApiSupported(context) ? new SipService(context)
-                                                   : null);
+    public static void start(Context context) {
+        if (SipManager.isApiSupported(context)) {
+            ServiceManager.addService("sip", new SipService(context));
+            Log.i(TAG, "SIP service started");
+        }
     }
 
     private SipService(Context context) {
