@@ -228,24 +228,32 @@ status_t AudioEffect::command(uint32_t cmdCode,
                               void *replyData)
 {
     if (mStatus != NO_ERROR && mStatus != ALREADY_EXISTS) {
+        LOGV("command() bad status %d", mStatus);
         return INVALID_OPERATION;
+    }
+
+    if ((cmdCode == EFFECT_CMD_ENABLE || cmdCode == EFFECT_CMD_DISABLE) &&
+            (replySize == NULL || *replySize != sizeof(status_t) || replyData == NULL)) {
+        return BAD_VALUE;
     }
 
     status_t status = mIEffect->command(cmdCode, cmdSize, cmdData, replySize, replyData);
     if (status != NO_ERROR) {
         return status;
     }
-    status = *(status_t *)replyData;
-    if (status != NO_ERROR) {
-        return status;
+
+    if (cmdCode == EFFECT_CMD_ENABLE || cmdCode == EFFECT_CMD_DISABLE) {
+        status = *(status_t *)replyData;
+        if (status != NO_ERROR) {
+            return status;
+        }
+        if (cmdCode == EFFECT_CMD_ENABLE) {
+            android_atomic_or(1, &mEnabled);
+        } else {
+            android_atomic_and(~1, &mEnabled);
+        }
     }
 
-    if (cmdCode == EFFECT_CMD_ENABLE) {
-        android_atomic_or(1, &mEnabled);
-    }
-    if (cmdCode == EFFECT_CMD_DISABLE) {
-        android_atomic_and(~1, &mEnabled);
-    }
     return status;
 }
 

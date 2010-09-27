@@ -65,8 +65,8 @@ void Visualizer_reset(VisualizerContext *pContext)
 {
     pContext->mCaptureIdx = 0;
     pContext->mCurrentBuf = 0;
-    memset(pContext->mCaptureBuf[0], 0, VISUALIZER_CAPTURE_SIZE_MAX);
-    memset(pContext->mCaptureBuf[1], 0, VISUALIZER_CAPTURE_SIZE_MAX);
+    memset(pContext->mCaptureBuf[0], 0x80, VISUALIZER_CAPTURE_SIZE_MAX);
+    memset(pContext->mCaptureBuf[1], 0x80, VISUALIZER_CAPTURE_SIZE_MAX);
 }
 
 //----------------------------------------------------------------------------
