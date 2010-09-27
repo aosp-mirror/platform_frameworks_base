@@ -1048,14 +1048,16 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Close the database.
      */
     public void close() {
-        if (!isOpen()) {
-            return; // already closed
-        }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.i(TAG, "closing db: " + mPath + " (connection # " + mConnectionNum);
         }
         lock();
         try {
+            // some other thread could have closed this database while I was waiting for lock.
+            // check the database state
+            if (!isOpen()) {
+                return;
+            }
             closeClosable();
             // finalize ALL statements queued up so far
             closePendingStatements();
@@ -2102,7 +2104,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                 return;
             }
 
-            if (!isCacheFullWarningLogged() && mCompiledQueries.size() == mMaxSqlCacheSize) {
+            if (!mCacheFullWarning && mCompiledQueries.size() == mMaxSqlCacheSize) {
                 /*
                  * cache size of {@link #mMaxSqlCacheSize} is not enough for this app.
                  * log a warning.
@@ -2110,7 +2112,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                  */
                 Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
                         getPath() + ". Use setMaxSqlCacheSize() to increase cachesize. ");
-                setCacheFullWarningLogged();
+                mCacheFullWarning = true;
             } 
             /* add the given SQLiteCompiledSql compiledStatement to cache.
              * no need to worry about the cache size - because {@link #mCompiledQueries}
@@ -2134,14 +2136,16 @@ public class SQLiteDatabase extends SQLiteClosable {
      * From the compiledQueries cache, returns the compiled-statement-id for the given SQL.
      * Returns null, if not found in the cache.
      */
-    /* package */ synchronized SQLiteCompiledSql getCompiledStatementForSql(String sql) {
-        SQLiteCompiledSql compiledStatement = mCompiledQueries.get(sql);
-        if (compiledStatement == null) {
-            mNumCacheMisses++;
-            return null;
+    /* package */ SQLiteCompiledSql getCompiledStatementForSql(String sql) {
+        synchronized (mCompiledQueries) {
+            SQLiteCompiledSql compiledStatement = mCompiledQueries.get(sql);
+            if (compiledStatement == null) {
+                mNumCacheMisses++;
+                return null;
+            }
+            mNumCacheHits++;
+            return compiledStatement;
         }
-        mNumCacheHits++;
-        return compiledStatement;
     }
 
     /**
@@ -2159,7 +2163,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * the value set with previous setMaxSqlCacheSize() call.
      */
     public void setMaxSqlCacheSize(int cacheSize) {
-        synchronized(this) {
+        synchronized(mCompiledQueries) {
             if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
                 throw new IllegalStateException("expected value between 0 and " + MAX_SQL_CACHE_SIZE);
             } else if (cacheSize < mMaxSqlCacheSize) {
@@ -2174,14 +2178,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         synchronized (mCompiledQueries) {
             return mCompiledQueries.containsKey(sql);
         }
-    }
-
-    private synchronized boolean isCacheFullWarningLogged() {
-        return mCacheFullWarning;
-    }
-
-    private synchronized void setCacheFullWarningLogged() {
-        mCacheFullWarning = true;
     }
 
     private synchronized int getCacheHitNum() {
@@ -2279,26 +2275,28 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @return true if write-ahead-logging is set. false otherwise
      */
-    public synchronized boolean enableWriteAheadLogging() {
-        if (mPath.equalsIgnoreCase(MEMORY_DB_PATH)) {
-            Log.i(TAG, "can't enable WAL for memory databases.");
-            return false;
-        }
-
-        // make sure this database has NO attached databases because sqlite's write-ahead-logging
-        // doesn't work for databases with attached databases
-        if (getAttachedDbs().size() > 1) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG,
-                        "this database: " + mPath + " has attached databases. can't  enable WAL.");
+    public boolean enableWriteAheadLogging() {
+        synchronized(this) {
+            if (mPath.equalsIgnoreCase(MEMORY_DB_PATH)) {
+                Log.i(TAG, "can't enable WAL for memory databases.");
+                return false;
             }
-            return false;
+
+            // make sure this database has NO attached databases because sqlite's write-ahead-logging
+            // doesn't work for databases with attached databases
+            if (getAttachedDbs().size() > 1) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG,
+                            "this database: " + mPath + " has attached databases. can't  enable WAL.");
+                }
+                return false;
+            }
+            if (mConnectionPool == null) {
+                mConnectionPool = new DatabaseConnectionPool(this);
+                setJournalMode(mPath, "WAL");
+            }
+            return true;
         }
-        if (mConnectionPool == null) {
-            mConnectionPool = new DatabaseConnectionPool(this);
-            setJournalMode(mPath, "WAL");
-        }
-        return true;
     }
 
     /**
@@ -2335,32 +2333,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         } else {
             // this is NOT a pooled connection. can we get one?
             return getDbConnection(sql);
-        }
-    }
-
-    /**
-     * Sets the database connection handle pool size to the given value.
-     * Database connection handle pool is enabled when the app calls
-     * {@link #enableWriteAheadLogging()}.
-     * <p>
-     * The default connection handle pool is set by the system by taking into account various
-     * aspects of the device, such as memory, number of cores etc. It is recommended that
-     * applications use the default pool size set by the system.
-     *
-     * @param size the value the connection handle pool size should be set to.
-     */
-    public void setConnectionPoolSize(int size) {
-        synchronized(this) {
-            if (mConnectionPool == null) {
-                throw new IllegalStateException("connection pool not enabled");
-            }
-            int i = mConnectionPool.getMaxPoolSize();
-            if (size < i) {
-                throw new IllegalArgumentException(
-                        "cannot set max pool size to a value less than the current max value(=" +
-                        i + ")");
-            }
-            mConnectionPool.setMaxPoolSize(size);
         }
     }
 

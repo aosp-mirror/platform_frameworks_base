@@ -246,16 +246,14 @@ import java.util.Random;
         }
     }
 
-    /* package */ void setMaxPoolSize(int size) {
-        synchronized(mParentDbObj) {
-            mMaxPoolSize = size;
-        }
+    /** only used for testing purposes. */
+    /* package */ synchronized void setMaxPoolSize(int size) {
+        mMaxPoolSize = size;
     }
 
-    /* package */ int getMaxPoolSize() {
-        synchronized(mParentDbObj) {
-            return mMaxPoolSize;
-        }
+    /** only used for testing purposes. */
+    /* package */ synchronized int getMaxPoolSize() {
+        return mMaxPoolSize;
     }
 
     /** only used for testing purposes. */
