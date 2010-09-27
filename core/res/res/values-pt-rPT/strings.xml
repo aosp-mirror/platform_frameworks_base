@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Permite que a aplicação leia todos os URLs visitados pelo browser e todos os marcadores do browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"gravar histórico e marcadores do browser"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Permite que uma aplicação modifique o histórico e os marcadores do browser armazenados no telefone. As aplicações maliciosas podem utilizar esta permissão para apagar ou modificar os dados do browser."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modificar permissões de localização geográfica do Navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permite a uma aplicação modificar as permissões de localização geográfica do Navegador. As aplicações mal intencionadas podem utilizar isto para enviar informações de localização para Web sites arbitrários."</string>
     <string name="save_password_message" msgid="767344687139195790">"Quer que o browser memorize esta palavra-passe?"</string>
@@ -790,7 +794,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Não são necessárias permissões"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ocultar"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar tudo"</b></string>
-    <string name="usb_storage_activity_title" msgid="2399289999608900443">"Armazenamento em massa USB "</string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"Armazenamento em massa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Ligado através de USB"</string>
     <string name="usb_storage_message" msgid="4796759646167247178">"Ligou o telefone ao computador através de USB. Seleccione o botão abaixo se pretender copiar ficheiros entre o computador e o cartão SD do Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Activar armazenamento USB"</string>

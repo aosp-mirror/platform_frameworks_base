@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Permite a la aplicación leer todas las URL que ha visitado el navegador y todos los marcadores del navegador."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"escribir historial y marcadores del navegador"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Permite a una aplicación modificar el historial y los marcadores del navegador almacenados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para borrar o modificar tus datos."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modificar los permisos de ubicación geográfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permite que una aplicación modifique los permisos de ubicación geográfica del navegador. Las aplicaciones maliciosas pueden utilizarlos para permitir el envío de información sobre la ubicación a sitos web de forma arbitraria."</string>
     <string name="save_password_message" msgid="767344687139195790">"¿Quieres recordar esta contraseña en el navegador?"</string>
@@ -871,6 +875,6 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"Tocar para configurar"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Amplia utilización de datos móviles"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Toca para obtener más información acerca de la utilización de datos móviles."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Límite de datos móviles excedido "</string>
+    <string name="throttled_notification_title" msgid="6269541897729781332">"Límite de datos móviles excedido"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Toca para obtener más información acerca de la utilización de datos móviles."</string>
 </resources>
