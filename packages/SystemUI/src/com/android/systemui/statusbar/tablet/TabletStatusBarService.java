@@ -733,19 +733,23 @@ public class TabletStatusBarService extends StatusBarService {
         LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
         View vetoButton = row.findViewById(R.id.veto);
-        final String _pkg = sbn.pkg;
-        final String _tag = sbn.tag;
-        final int _id = sbn.id;
-        vetoButton.setOnClickListener(new View.OnClickListener() { 
-                public void onClick(View v) {
-                    try {
-                        mBarService.onNotificationClear(_pkg, _tag, _id);
-                    } catch (RemoteException ex) {
-                        // system process is dead if we're here.
+        if (entry.notification.isClearable()) {
+            final String _pkg = sbn.pkg;
+            final String _tag = sbn.tag;
+            final int _id = sbn.id;
+            vetoButton.setOnClickListener(new View.OnClickListener() { 
+                    public void onClick(View v) {
+                        try {
+                            mBarService.onNotificationClear(_pkg, _tag, _id);
+                        } catch (RemoteException ex) {
+                            // system process is dead if we're here.
+                        }
+    //                    animateCollapse();
                     }
-//                    animateCollapse();
-                }
-            });
+                });
+        } else {
+            vetoButton.setVisibility(View.INVISIBLE);
+        }
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);

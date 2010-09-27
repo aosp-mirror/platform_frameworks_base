@@ -8,12 +8,14 @@
     <ImageButton
         android:id="@+id/veto"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:src="@drawable/status_bar_veto"
+        android:scaleType="center"
         android:background="@null"
-        android:padding="2dip"
+        android:paddingLeft="16dip"
+        android:paddingRight="16dip"
         />
 
     <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
