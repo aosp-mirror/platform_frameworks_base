@@ -59,7 +59,6 @@ public class TabletTicker extends Handler {
 
         // TODO: Make this a configuration value.
         // 3 is enough to let us see most cases, but not get so far behind that it's annoying.
-        int mQueuePos = 0;
         mQueue = new StatusBarNotification[3];
     }
 
@@ -77,6 +76,18 @@ public class TabletTicker extends Handler {
 
         if (mQueuePos < mQueue.length - 1) {
             mQueuePos++;
+        }
+    }
+
+    public void halt() {
+        removeMessages(MSG_ADVANCE);
+        if (mCurrentView != null) {
+            final int N = mQueue.length;
+            for (int i=0; i<N; i++) {
+                mQueue[i] = null;
+            }
+            mQueuePos = 0;
+            sendEmptyMessage(MSG_ADVANCE);
         }
     }
 
