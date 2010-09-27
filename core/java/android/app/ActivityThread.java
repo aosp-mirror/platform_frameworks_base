@@ -3377,12 +3377,20 @@ public final class ActivityThread {
         }
     }
 
-    private final IContentProvider getProvider(Context context, String name) {
+    private final IContentProvider getExistingProvider(Context context, String name) {
         synchronized(mProviderMap) {
             final ProviderClientRecord pr = mProviderMap.get(name);
             if (pr != null) {
                 return pr.mProvider;
             }
+            return null;
+        }
+    }
+
+    private final IContentProvider getProvider(Context context, String name) {
+        IContentProvider existing = getExistingProvider(context, name);
+        if (existing != null) {
+            return existing;
         }
 
         IActivityManager.ContentProviderHolder holder = null;
@@ -3427,6 +3435,22 @@ public final class ActivityThread {
         return provider;
     }
 
+    public final IContentProvider acquireExistingProvider(Context c, String name) {
+        IContentProvider provider = getExistingProvider(c, name);
+        if(provider == null)
+            return null;
+        IBinder jBinder = provider.asBinder();
+        synchronized(mProviderMap) {
+            ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
+            if(prc == null) {
+                mProviderRefCountMap.put(jBinder, new ProviderRefCount(1));
+            } else {
+                prc.count++;
+            } //end else
+        } //end synchronized
+        return provider;
+    }
+
     public final boolean releaseProvider(IContentProvider provider) {
         if(provider == null) {
             return false;
@@ -3435,7 +3459,7 @@ public final class ActivityThread {
         synchronized(mProviderMap) {
             ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
             if(prc == null) {
-                if(localLOGV) Slog.v(TAG, "releaseProvider::Weird shouldnt be here");
+                if(localLOGV) Slog.v(TAG, "releaseProvider::Weird shouldn't be here");
                 return false;
             } else {
                 prc.count--;

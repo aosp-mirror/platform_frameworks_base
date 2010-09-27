@@ -1297,7 +1297,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-        
+
+        case GET_PROVIDER_MIME_TYPE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            Uri uri = Uri.CREATOR.createFromParcel(data);
+            String type = getProviderMimeType(uri);
+            reply.writeNoException();
+            reply.writeString(type);
+            return true;
+        }
+
         case NEW_URI_PERMISSION_OWNER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String name = data.readString();
@@ -2924,6 +2933,20 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public String getProviderMimeType(Uri uri)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        uri.writeToParcel(data, 0);
+        mRemote.transact(GET_PROVIDER_MIME_TYPE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        String res = reply.readString();
+        data.recycle();
+        reply.recycle();
+        return res;
     }
 
     public IBinder newUriPermissionOwner(String name)
