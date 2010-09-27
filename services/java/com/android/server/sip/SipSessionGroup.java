@@ -663,6 +663,9 @@ class SipSessionGroup implements SipListener {
             } else if (current != null) {
                 Log.d(TAG, "transaction terminated: " + toString(current));
                 return true;
+            } else {
+                // no transaction; shouldn't be here; ignored
+                return true;
             }
         }
 
