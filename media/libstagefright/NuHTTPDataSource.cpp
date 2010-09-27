@@ -96,6 +96,11 @@ status_t NuHTTPDataSource::connect(
     return connect(host, port, path, headers, offset);
 }
 
+static bool IsRedirectStatusCode(int httpStatus) {
+    return httpStatus == 301 || httpStatus == 302
+        || httpStatus == 303 || httpStatus == 307;
+}
+
 status_t NuHTTPDataSource::connect(
         const char *host, unsigned port, const char *path,
         const String8 &headers,
@@ -161,7 +166,7 @@ status_t NuHTTPDataSource::connect(
             return err;
         }
 
-        if (httpStatus == 302) {
+        if (IsRedirectStatusCode(httpStatus)) {
             string value;
             CHECK(mHTTP.find_header_value("Location", &value));
 
