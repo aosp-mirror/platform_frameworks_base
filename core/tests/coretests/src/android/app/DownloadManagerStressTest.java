@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package android.net;
+package android.app;
 
 import java.io.File;
 import java.util.Random;
 
+import android.app.DownloadManager.Query;
+import android.app.DownloadManager.Request;
 import android.database.Cursor;
-import android.net.DownloadManager.Query;
-import android.net.DownloadManager.Request;
+import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
