@@ -7601,16 +7601,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * A CursorController instance can be used to control a cursor in the text.
-     *
-     * It can be passed to an {@link ArrowKeyMovementMethod} which can intercepts events
-     * and send them to this object instead of the cursor.
-     *
+     * It is not used outside of {@link TextView}.
      * @hide
      */
-    public interface CursorController {
-        /* Cursor fade-out animation duration, in milliseconds. */
-        static final int FADE_OUT_DURATION = 400;
-
+    private interface CursorController {
         /**
          * Makes the cursor controller visible on screen. Will be drawn by {@link #draw(Canvas)}.
          * See also {@link #hide()}.
@@ -7631,21 +7625,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         /**
          * Update the controller's position.
          */
-        public void updatePosition(int x, int y);
+        public void updatePosition(HandleView handle, int x, int y);
 
         public void updatePosition();
-
-        /**
-         * The controller and the cursor's positions can be link by a fixed offset,
-         * computed when the controller is touched, and then maintained as it moves
-         * @return Horizontal offset between the controller and the cursor.
-         */
-        public float getOffsetX();
-
-        /**
-         * @return Vertical offset between the controller and the cursor.
-         */
-        public float getOffsetY();
 
         /**
          * This method is called by {@link #onTouchEvent(MotionEvent)} and gives the controller
@@ -7670,6 +7652,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mDrawable = handle;
             mContainer = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
+            mContainer.setSplitTouchEnabled(true);
         }
 
         @Override
@@ -7768,7 +7751,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 TextView.this.getLocationOnScreen(coords);
                 final int x = (int) (rawX - coords[0] + 0.5f);
                 final int y = (int) (rawY - coords[1] + 0.5f);
-                mController.updatePosition(x, y);
+                mController.updatePosition(this, x, y);
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -7802,13 +7785,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    class InsertionPointCursorController implements CursorController {
+    private class InsertionPointCursorController implements CursorController {
         private static final int DELAY_BEFORE_FADE_OUT = 4100;
 
         // The cursor controller image
         private final HandleView mHandle;
-        // Offset between finger hot point on cursor controller and actual cursor
-        private float mOffsetX, mOffsetY;
 
         private final Runnable mHider = new Runnable() {
             public void run() {
@@ -7841,7 +7822,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mHandle.isShowing();
         }
 
-        public void updatePosition(int x, int y) {
+        public void updatePosition(HandleView handle, int x, int y) {
             final int previousOffset = getSelectionStart();
             int offset = getHysteresisOffset(x, y, previousOffset);
 
@@ -7865,24 +7846,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mHandle.positionAtCursor(offset, true);
         }
 
-        public float getOffsetX() {
-            return mOffsetX;
-        }
-
-        public float getOffsetY() {
-            return mOffsetY;
-        }
-
         public boolean onTouchEvent(MotionEvent ev) {
             return false;
         }
     }
 
-    class SelectionModifierCursorController implements CursorController {
+    private class SelectionModifierCursorController implements CursorController {
         // The cursor controller images
         private HandleView mStartHandle, mEndHandle;
-        // Offset between finger hot point on active cursor controller and actual cursor
-        private float mOffsetX, mOffsetY;
         // The offsets of that last touch down event. Remembered to start selection there.
         private int mMinTouchOffset, mMaxTouchOffset;
         // Whether selection anchors are active
@@ -7916,15 +7887,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             hide();
         }
 
-        public void updatePosition(int x, int y) {
+        public void updatePosition(HandleView handle, int x, int y) {
             int selectionStart = getSelectionStart();
             int selectionEnd = getSelectionEnd();
 
-            final int previousOffset = mStartHandle.isDragging() ? selectionStart : selectionEnd;
+            final int previousOffset = handle == mStartHandle ? selectionStart : selectionEnd;
             int offset = getHysteresisOffset(x, y, previousOffset);
 
             // Handle the case where start and end are swapped, making sure start <= end
-            if (mStartHandle.isDragging()) {
+            if (handle == mStartHandle) {
                 if (offset <= selectionEnd) {
                     if (selectionStart == offset) {
                         return; // no change, no need to redraw;
@@ -8019,14 +7990,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public int getMaxTouchOffset() {
             return mMaxTouchOffset;
-        }
-
-        public float getOffsetX() {
-            return mOffsetX;
-        }
-
-        public float getOffsetY() {
-            return mOffsetY;
         }
 
         /**
