@@ -20,12 +20,10 @@ import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.OperationApplicationException;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
-import android.provider.ContactsContract.Contacts;
-import android.provider.ContactsContract.Data;
-import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
@@ -38,6 +36,10 @@ import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
+import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.Groups;
+import android.provider.ContactsContract.RawContacts;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
@@ -58,6 +60,9 @@ public class VCardEntry {
     private static final String LOG_TAG = "VCardEntry";
 
     private final static int DEFAULT_ORGANIZATION_TYPE = Organization.TYPE_WORK;
+
+    private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
+    private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
 
     private static final Map<String, Integer> sImMap = new HashMap<String, Integer>();
 
@@ -1111,6 +1116,23 @@ public class VCardEntry {
         if (mAccount != null) {
             builder.withValue(RawContacts.ACCOUNT_NAME, mAccount.name);
             builder.withValue(RawContacts.ACCOUNT_TYPE, mAccount.type);
+
+            // Assume that caller side creates this group if it does not exist.
+            if (ACCOUNT_TYPE_GOOGLE.equals(mAccount.type)) {
+                final Cursor cursor = resolver.query(Groups.CONTENT_URI, new String[] {
+                        Groups.SOURCE_ID },
+                        Groups.TITLE + "=?", new String[] {
+                        GOOGLE_MY_CONTACTS_GROUP }, null);
+                try {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        myGroupsId = cursor.getString(0);
+                    }
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+            }
         } else {
             builder.withValue(RawContacts.ACCOUNT_NAME, null);
             builder.withValue(RawContacts.ACCOUNT_TYPE, null);
