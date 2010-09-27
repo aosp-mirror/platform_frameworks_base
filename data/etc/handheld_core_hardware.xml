@@ -57,4 +57,7 @@
          android.hardware.sensor.proximity.xml -->
     <!-- GSM phones must also include android.hardware.telephony.gsm.xml -->
     <!-- CDMA phones must also include android.hardware.telephony.cdma.xml -->
+    <!-- Devices that have low-latency audio stacks suitable for apps like
+         VoIP may include android.hardware.audio.low_latency.xml. ONLY apps
+         that meet the requirements specified in the CDD may include this. -->
 </permissions>
