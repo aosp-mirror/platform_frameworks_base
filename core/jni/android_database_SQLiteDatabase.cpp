@@ -91,7 +91,7 @@ static void registerLoggingFunc(const char *path) {
     LOGV("Registering sqlite logging func \n");
     int err = sqlite3_config(SQLITE_CONFIG_LOG, &sqlLogger, (void *)createStr(path, 0));
     if (err != SQLITE_OK) {
-        LOGE("sqlite_config failed error_code = %d. THIS SHOULD NEVER occur.\n", err);
+        LOGW("sqlite returned error = %d when trying to register logging func.\n", err);
         return;
     }
     loggingFuncSet = true;
