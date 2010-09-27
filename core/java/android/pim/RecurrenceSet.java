@@ -181,7 +181,9 @@ public class RecurrenceSet {
         boolean inUtc = start.parse(dtstart);
         boolean allDay = start.allDay;
 
-        if (inUtc) {
+        // We force TimeZone to UTC for "all day recurring events" as the server is sending no
+        // TimeZone in DTSTART for them
+        if (inUtc || allDay) {
             tzid = Time.TIMEZONE_UTC;
         }
                 

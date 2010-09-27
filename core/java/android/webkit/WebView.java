@@ -2950,16 +2950,28 @@ public class WebView extends AbsoluteLayout
                     if (rangeY > 0 || getOverscrollMode() == OVERSCROLL_ALWAYS) {
                         if (y < 0 && oldY >= 0) {
                             mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
+                            if (!mEdgeGlowBottom.isFinished()) {
+                                mEdgeGlowBottom.onRelease();
+                            }
                         } else if (y > rangeY && oldY <= rangeY) {
                             mEdgeGlowBottom.onAbsorb((int) mScroller.getCurrVelocity());
+                            if (!mEdgeGlowTop.isFinished()) {
+                                mEdgeGlowTop.onRelease();
+                            }
                         }
                     }
 
                     if (rangeX > 0) {
                         if (x < 0 && oldX >= 0) {
                             mEdgeGlowLeft.onAbsorb((int) mScroller.getCurrVelocity());
+                            if (!mEdgeGlowRight.isFinished()) {
+                                mEdgeGlowRight.onRelease();
+                            }
                         } else if (x > rangeX && oldX <= rangeX) {
                             mEdgeGlowRight.onAbsorb((int) mScroller.getCurrVelocity());
+                            if (!mEdgeGlowLeft.isFinished()) {
+                                mEdgeGlowLeft.onRelease();
+                            }
                         }
                     }
                 }
@@ -5548,8 +5560,14 @@ public class WebView extends AbsoluteLayout
                     final int pulledToX = oldX + deltaX;
                     if (pulledToX < 0) {
                         mEdgeGlowLeft.onPull((float) deltaX / getWidth());
+                        if (!mEdgeGlowRight.isFinished()) {
+                            mEdgeGlowRight.onRelease();
+                        }
                     } else if (pulledToX > rangeX) {
                         mEdgeGlowRight.onPull((float) deltaX / getWidth());
+                        if (!mEdgeGlowLeft.isFinished()) {
+                            mEdgeGlowLeft.onRelease();
+                        }
                     }
                 }
 
@@ -5557,8 +5575,14 @@ public class WebView extends AbsoluteLayout
                     final int pulledToY = oldY + deltaY;
                     if (pulledToY < 0) {
                         mEdgeGlowTop.onPull((float) deltaY / getHeight());
+                        if (!mEdgeGlowBottom.isFinished()) {
+                            mEdgeGlowBottom.onRelease();
+                        }
                     } else if (pulledToY > rangeY) {
                         mEdgeGlowBottom.onPull((float) deltaY / getHeight());
+                        if (!mEdgeGlowTop.isFinished()) {
+                            mEdgeGlowTop.onRelease();
+                        }
                     }
                 }
             }
