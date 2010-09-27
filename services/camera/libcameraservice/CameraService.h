@@ -164,7 +164,9 @@ private:
         int                             mOverlayW;
         int                             mOverlayH;
         int                             mPreviewCallbackFlag;
-        int                             mOrientation;
+        int                             mOrientation;     // Current display orientation
+        // True if display orientation has been changed. This is only used in overlay.
+        int                             mOrientationChanged;
 
         // Ensures atomicity among the public methods
         mutable Mutex                   mLock;
