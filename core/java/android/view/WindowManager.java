@@ -590,6 +590,19 @@ public interface WindowManager extends ViewManager {
          * also been set.
          */
         public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
+        
+        /** Window flag: when set the window will accept for touch events
+         * outside of its bounds to be sent to other windows that also
+         * support split touch.  When this flag is not set, the first pointer
+         * that goes down determines the window to which all subsequent touches
+         * go until all pointers go up.  When this flag is set, each pointer
+         * (not necessarily the first) that goes down determines the window
+         * to which all subsequent touches of that pointer will go until that
+         * pointer goes up thereby enabling touches with multiple pointers
+         * to be split across multiple windows.
+         * 
+         * {@hide} */
+        public static final int FLAG_SPLIT_TOUCH = 0x00800000;
 
         /** Window flag: *sigh* The lock screen wants to continue running its
          * animation while it is fading.  A kind-of hack to allow this.  Maybe
