@@ -82,7 +82,7 @@ import com.android.systemui.statusbar.policy.StatusBarPolicy;
 
 public class StatusBarService extends Service implements CommandQueue.Callbacks {
     static final String TAG = "StatusBarService";
-    static final boolean SPEW_ICONS = true;
+    static final boolean SPEW_ICONS = false;
     static final boolean SPEW = false;
 
     public static final String ACTION_STATUSBAR_START
