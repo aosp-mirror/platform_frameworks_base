@@ -147,11 +147,12 @@ public abstract class Transition {
      */
     public long getMaximumDuration() {
         if (mAfterMediaItem == null) {
-            return mBeforeMediaItem.getDuration() / 2;
+            return mBeforeMediaItem.getTimelineDuration() / 2;
         } else if (mBeforeMediaItem == null) {
-            return mAfterMediaItem.getDuration() / 2;
+            return mAfterMediaItem.getTimelineDuration() / 2;
         } else {
-            return (Math.min(mAfterMediaItem.getDuration(), mBeforeMediaItem.getDuration()) / 2);
+            return (Math.min(mAfterMediaItem.getTimelineDuration(),
+                    mBeforeMediaItem.getTimelineDuration()) / 2);
         }
     }
 

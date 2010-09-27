@@ -17,6 +17,7 @@
 package android.media.videoeditor;
 
 import java.io.IOException;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -24,9 +25,14 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
+import android.util.Pair;
 
 /**
- * This class represents an image item on the storyboard.
+ * This class represents an image item on the storyboard. Note that images are
+ * scaled down to the maximum supported resolution by preserving the native
+ * aspect ratio. To learn the scaled image dimensions use
+ * {@link #getScaledWidth()} and {@link #getScaledHeight()} respectively.
+ *
  * {@hide}
  */
 public class MediaImageItem extends MediaItem {
@@ -41,6 +47,7 @@ public class MediaImageItem extends MediaItem {
     private final int mHeight;
     private final int mAspectRatio;
     private long mDurationMs;
+    private int mScaledWidth, mScaledHeight;
 
     /**
      * This class cannot be instantiated by using the default constructor
@@ -53,7 +60,7 @@ public class MediaImageItem extends MediaItem {
     /**
      * Constructor
      *
-     * @param mediaItemId The MediaItem id
+     * @param mediaItemId The media item id
      * @param filename The image file name
      * @param durationMs The duration of the image on the storyboard
      * @param renderingMode The rendering mode
@@ -64,7 +71,7 @@ public class MediaImageItem extends MediaItem {
             throws IOException {
         super(mediaItemId, filename, renderingMode);
 
-        // Determine the size of the image
+        // Determine the dimensions of the image
         final BitmapFactory.Options dbo = new BitmapFactory.Options();
         dbo.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filename, dbo);
@@ -75,6 +82,22 @@ public class MediaImageItem extends MediaItem {
 
         // TODO: Determine the aspect ratio from the width and height
         mAspectRatio = MediaProperties.ASPECT_RATIO_4_3;
+
+        // Images are stored in memory scaled to the maximum resolution to
+        // save memory.
+        final Pair<Integer, Integer>[] resolutions =
+            MediaProperties.getSupportedResolutions(mAspectRatio);
+        // Get the highest resolution
+        final Pair<Integer, Integer> maxResolution = resolutions[resolutions.length - 1];
+        if (mHeight > maxResolution.second) {
+            // We need to scale the image
+            scaleImage(filename, maxResolution.first, maxResolution.second);
+            mScaledWidth = maxResolution.first;
+            mScaledHeight = maxResolution.second;
+        } else {
+            mScaledWidth = mWidth;
+            mScaledHeight = mHeight;
+        }
     }
 
     /*
@@ -105,6 +128,20 @@ public class MediaImageItem extends MediaItem {
     @Override
     public int getHeight() {
         return mHeight;
+    }
+
+    /**
+     * @return The scaled width of the image.
+     */
+    public int getScaledWidth() {
+        return mScaledWidth;
+    }
+
+    /**
+     * @return The scaled height of the image.
+     */
+    public int getScaledHeight() {
+        return mScaledHeight;
     }
 
     /*
@@ -140,15 +177,31 @@ public class MediaImageItem extends MediaItem {
             }
         }
 
-        // TODO: Validate/modify the start and the end time of effects and overlays
-    }
+        final List<Overlay> overlays = getAllOverlays();
+        for (Overlay overlay : overlays) {
+            // Adjust the start time if necessary
+            if (overlay.getStartTime() < getTimelineDuration()) {
+                overlay.setStartTime(0);
+            }
 
-    /*
-     * {@inheritDoc}
-     */
-    @Override
-    public long getDuration() {
-        return mDurationMs;
+            // Adjust the duration if necessary
+            if (overlay.getStartTime() + overlay.getDuration() > getTimelineDuration()) {
+                overlay.setDuration(getTimelineDuration() - overlay.getStartTime());
+            }
+        }
+
+        final List<Effect> effects = getAllEffects();
+        for (Effect effect : effects) {
+            // Adjust the start time if necessary
+            if (effect.getStartTime() < getTimelineDuration()) {
+                effect.setStartTime(0);
+            }
+
+            // Adjust the duration if necessary
+            if (effect.getStartTime() + effect.getDuration() > getTimelineDuration()) {
+                effect.setDuration(getTimelineDuration() - effect.getStartTime());
+            }
+        }
     }
 
     /*
@@ -164,7 +217,7 @@ public class MediaImageItem extends MediaItem {
      */
     @Override
     public Bitmap getThumbnail(int width, int height, long timeMs) throws IOException {
-        return generateImageThumbnail(mFilename, width, height);
+        return scaleImage(mFilename, width, height);
     }
 
     /*
@@ -173,7 +226,7 @@ public class MediaImageItem extends MediaItem {
     @Override
     public Bitmap[] getThumbnailList(int width, int height, long startMs, long endMs,
             int thumbnailCount) throws IOException {
-        final Bitmap thumbnail = generateImageThumbnail(mFilename, width, height);
+        final Bitmap thumbnail = scaleImage(mFilename, width, height);
         final Bitmap[] thumbnailArray = new Bitmap[thumbnailCount];
         for (int i = 0; i < thumbnailCount; i++) {
             thumbnailArray[i] = thumbnail;
@@ -182,7 +235,7 @@ public class MediaImageItem extends MediaItem {
     }
 
     /**
-     * Resize a bitmap within an input stream
+     * Resize a bitmap to the specified width and height
      *
      * @param filename The filename
      * @param width The thumbnail width
@@ -190,7 +243,7 @@ public class MediaImageItem extends MediaItem {
      *
      * @return The resized bitmap
      */
-    private Bitmap generateImageThumbnail(String filename, int width, int height)
+    private Bitmap scaleImage(String filename, int width, int height)
             throws IOException {
         final BitmapFactory.Options dbo = new BitmapFactory.Options();
         dbo.inJustDecodeBounds = true;
