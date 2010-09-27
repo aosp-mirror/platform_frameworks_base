@@ -3366,7 +3366,7 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
                 if (id > MAX_POINTER_ID) {
 #if DEBUG_POINTERS
                     LOGD("Pointers: Ignoring driver provided pointer id %d because "
-                            "it is larger than max supported id %d for optimizations",
+                            "it is larger than max supported id %d",
                             id, MAX_POINTER_ID);
 #endif
                     havePointerIds = false;

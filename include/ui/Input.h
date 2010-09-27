@@ -40,8 +40,16 @@ enum {
 
 /*
  * Maximum number of pointers supported per motion event.
+ * Smallest number of pointers is 1.
  */
 #define MAX_POINTERS 10
+
+/*
+ * Maximum pointer id value supported in a motion event.
+ * Smallest pointer id is 0.
+ * (This is limited by our use of BitSet32 to track pointer assignments.)
+ */
+#define MAX_POINTER_ID 31
 
 /*
  * Declare a concrete type for the NDK's input event forward declaration.
