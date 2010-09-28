@@ -16,6 +16,7 @@ LOCAL_SRC_FILES:=                         \
         HTTPStream.cpp                    \
         JPEGSource.cpp                    \
         MP3Extractor.cpp                  \
+        MPEG2TSWriter.cpp                 \
         MPEG4Extractor.cpp                \
         MPEG4Writer.cpp                   \
         MediaBuffer.cpp                   \

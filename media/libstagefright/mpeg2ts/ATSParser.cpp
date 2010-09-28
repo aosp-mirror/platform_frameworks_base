@@ -389,20 +389,23 @@ void ATSParser::Stream::parsePES(ABitReader *br) {
 
         // ES data follows.
 
-        onPayloadData(
-                PTS_DTS_flags, PTS, DTS,
-                br->data(), br->numBitsLeft() / 8);
-
         if (PES_packet_length != 0) {
             CHECK_GE(PES_packet_length, PES_header_data_length + 3);
 
             unsigned dataLength =
                 PES_packet_length - 3 - PES_header_data_length;
 
-            CHECK_EQ(br->numBitsLeft(), dataLength * 8);
+            CHECK_GE(br->numBitsLeft(), dataLength * 8);
+
+            onPayloadData(
+                    PTS_DTS_flags, PTS, DTS, br->data(), dataLength);
 
             br->skipBits(dataLength * 8);
         } else {
+            onPayloadData(
+                    PTS_DTS_flags, PTS, DTS,
+                    br->data(), br->numBitsLeft() / 8);
+
             size_t payloadSizeBits = br->numBitsLeft();
             CHECK((payloadSizeBits % 8) == 0);
 
@@ -491,7 +494,7 @@ static sp<ABuffer> MakeAVCCodecSpecificData(
     CHECK(picParamSet != NULL);
 
     buffer->setRange(stopOffset, size - stopOffset);
-    LOGI("buffer has %d bytes left.", buffer->size());
+    LOGV("buffer has %d bytes left.", buffer->size());
 
     size_t csdSize =
         1 + 3 + 1 + 1
@@ -526,6 +529,8 @@ static bool getNextNALUnit(
         const uint8_t **nalStart, size_t *nalSize) {
     const uint8_t *data = *_data;
     size_t size = *_size;
+
+    // hexdump(data, size);
 
     *nalStart = NULL;
     *nalSize = 0;
@@ -572,18 +577,23 @@ static bool getNextNALUnit(
         ++offset;
     }
 
-    CHECK_LT(offset + 2, size);
-
     *nalStart = &data[startOffset];
     *nalSize = endOffset - startOffset;
 
-    *_data = &data[offset];
-    *_size = size - offset;
+    if (offset + 2 < size) {
+        *_data = &data[offset];
+        *_size = size - offset;
+    } else {
+        *_data = NULL;
+        *_size = 0;
+    }
 
     return true;
 }
 
 sp<ABuffer> MakeCleanAVCData(const uint8_t *data, size_t size) {
+    // hexdump(data, size);
+
     const uint8_t *tmpData = data;
     size_t tmpSize = size;
 
@@ -591,6 +601,7 @@ sp<ABuffer> MakeCleanAVCData(const uint8_t *data, size_t size) {
     const uint8_t *nalStart;
     size_t nalSize;
     while (getNextNALUnit(&tmpData, &tmpSize, &nalStart, &nalSize)) {
+        // hexdump(nalStart, nalSize);
         totalSize += 4 + nalSize;
     }
 
@@ -615,15 +626,15 @@ static sp<ABuffer> FindMPEG2ADTSConfig(
     CHECK_EQ(br.getBits(2), 0u);
     br.getBits(1);  // protection_absent
     unsigned profile = br.getBits(2);
-    LOGI("profile = %u", profile);
+    LOGV("profile = %u", profile);
     CHECK_NE(profile, 3u);
     unsigned sampling_freq_index = br.getBits(4);
     br.getBits(1);  // private_bit
     unsigned channel_configuration = br.getBits(3);
     CHECK_NE(channel_configuration, 0u);
 
-    LOGI("sampling_freq_index = %u", sampling_freq_index);
-    LOGI("channel_configuration = %u", channel_configuration);
+    LOGV("sampling_freq_index = %u", sampling_freq_index);
+    LOGV("channel_configuration = %u", channel_configuration);
 
     CHECK_LE(sampling_freq_index, 11u);
     static const int32_t kSamplingFreq[] = {
@@ -707,8 +718,8 @@ void ATSParser::Stream::onPayloadData(
             sp<ABuffer> csd =
                 FindMPEG2ADTSConfig(buffer, &sampleRate, &channelCount);
 
-            LOGI("sampleRate = %d", sampleRate);
-            LOGI("channelCount = %d", channelCount);
+            LOGV("sampleRate = %d", sampleRate);
+            LOGV("channelCount = %d", channelCount);
 
             meta->setInt32(kKeySampleRate, sampleRate);
             meta->setInt32(kKeyChannelCount, channelCount);
@@ -716,7 +727,7 @@ void ATSParser::Stream::onPayloadData(
             meta->setData(kKeyESDS, 0, csd->data(), csd->size());
         }
 
-        LOGI("created source!");
+        LOGV("created source!");
         mSource = new AnotherPacketSource(meta);
 
         // fall through
@@ -915,7 +926,10 @@ void ATSParser::parseTS(ABitReader *br) {
     unsigned adaptation_field_control = br->getBits(2);
     LOGV("adaptation_field_control = %u", adaptation_field_control);
 
-    MY_LOGV("continuity_counter = %u", br->getBits(4));
+    unsigned continuity_counter = br->getBits(4);
+    LOGV("continuity_counter = %u", continuity_counter);
+
+    // LOGI("PID = 0x%04x, continuity_counter = %u", PID, continuity_counter);
 
     if (adaptation_field_control == 2 || adaptation_field_control == 3) {
         parseAdaptationField(br);

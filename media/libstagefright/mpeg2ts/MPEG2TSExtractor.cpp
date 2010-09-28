@@ -32,6 +32,8 @@
 
 namespace android {
 
+static const size_t kTSPacketSize = 188;
+
 struct MPEG2TSSource : public MediaSource {
     MPEG2TSSource(
             const sp<MPEG2TSExtractor> &extractor,
@@ -126,27 +128,37 @@ sp<MetaData> MPEG2TSExtractor::getMetaData() {
 void MPEG2TSExtractor::init() {
     bool haveAudio = false;
     bool haveVideo = false;
+    int numPacketsParsed = 0;
 
     while (feedMore() == OK) {
         ATSParser::SourceType type;
         if (haveAudio && haveVideo) {
             break;
         }
-        if (haveVideo) {
-            type = ATSParser::MPEG2ADTS_AUDIO;
-        } else {
-            type = ATSParser::AVC_VIDEO;
-        }
-        sp<AnotherPacketSource> impl =
-            (AnotherPacketSource *)mParser->getSource(type).get();
+        if (!haveVideo) {
+            sp<AnotherPacketSource> impl =
+                (AnotherPacketSource *)mParser->getSource(
+                        ATSParser::AVC_VIDEO).get();
 
-        if (impl != NULL) {
-            if (type == ATSParser::MPEG2ADTS_AUDIO) {
-                haveAudio = true;
-            } else {
+            if (impl != NULL) {
                 haveVideo = true;
+                mSourceImpls.push(impl);
             }
-            mSourceImpls.push(impl);
+        }
+
+        if (!haveAudio) {
+            sp<AnotherPacketSource> impl =
+                (AnotherPacketSource *)mParser->getSource(
+                        ATSParser::MPEG2ADTS_AUDIO).get();
+
+            if (impl != NULL) {
+                haveAudio = true;
+                mSourceImpls.push(impl);
+            }
+        }
+
+        if (++numPacketsParsed > 1500) {
+            break;
         }
     }
 
@@ -155,8 +167,6 @@ void MPEG2TSExtractor::init() {
 
 status_t MPEG2TSExtractor::feedMore() {
     Mutex::Autolock autoLock(mLock);
-
-    static const size_t kTSPacketSize = 188;
 
     uint8_t packet[kTSPacketSize];
     ssize_t n = mDataSource->readAt(mOffset, packet, kTSPacketSize);
@@ -176,23 +186,18 @@ status_t MPEG2TSExtractor::feedMore() {
 bool SniffMPEG2TS(
         const sp<DataSource> &source, String8 *mimeType, float *confidence,
         sp<AMessage> *) {
-#if 0
-    char header;
-    if (source->readAt(0, &header, 1) != 1 || header != 0x47) {
-        return false;
+    for (int i = 0; i < 5; ++i) {
+        char header;
+        if (source->readAt(kTSPacketSize * i, &header, 1) != 1
+                || header != 0x47) {
+            return false;
+        }
     }
 
-    *confidence = 0.05f;
+    *confidence = 0.1f;
     mimeType->setTo(MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
 
     return true;
-#else
-    // For now we're going to never identify this type of stream, since we'd
-    // just base our decision on a single byte...
-    // Instead you can instantiate an MPEG2TSExtractor by explicitly stating
-    // its proper mime type in the call to MediaExtractor::Create(...).
-    return false;
-#endif
 }
 
 }  // namespace android
