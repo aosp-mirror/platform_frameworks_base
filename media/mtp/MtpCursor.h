@@ -67,7 +67,7 @@ private:
                         MtpObjectHandle objectID, int row);
 
     bool        prepareRow(CursorWindow* window);
-    bool        putLong(CursorWindow* window, int value, int row, int column);
+    bool        putLong(CursorWindow* window, int64_t value, int row, int column);
     bool        putString(CursorWindow* window, const char* text, int row, int column);
     bool        putThumbnail(CursorWindow* window, MtpObjectHandle objectID,
                             MtpObjectFormat format, int row, int column);
