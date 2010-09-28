@@ -1191,7 +1191,7 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private boolean acquireWifiLockLocked(WifiLock wifiLock) {
-        Slog.d(TAG, "acquireWifiLockLocked: " + wifiLock);
+        if (DBG) Slog.d(TAG, "acquireWifiLockLocked: " + wifiLock);
 
         mLocks.addLock(wifiLock);
 
@@ -1258,7 +1258,7 @@ public class WifiService extends IWifiManager.Stub {
 
         WifiLock wifiLock = mLocks.removeLock(lock);
 
-        Slog.d(TAG, "releaseWifiLockLocked: " + wifiLock);
+        if (DBG) Slog.d(TAG, "releaseWifiLockLocked: " + wifiLock);
 
         hadLock = (wifiLock != null);
 
