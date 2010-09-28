@@ -883,8 +883,10 @@ public class SipPhone extends SipPhoneBase {
                 case SipErrorCode.CROSS_DOMAIN_AUTHENTICATION:
                     onError(Connection.DisconnectCause.OUT_OF_NETWORK);
                     break;
-                case SipErrorCode.SOCKET_ERROR:
                 case SipErrorCode.SERVER_ERROR:
+                    onError(Connection.DisconnectCause.SERVER_ERROR);
+                    break;
+                case SipErrorCode.SOCKET_ERROR:
                 case SipErrorCode.CLIENT_ERROR:
                 default:
                     Log.w(LOG_TAG, "error: " + SipErrorCode.toString(errorCode)
