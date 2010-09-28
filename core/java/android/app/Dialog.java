@@ -177,7 +177,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     /**
      * Retrieve the Context this Dialog is running in.
      * 
-     * @return Context The Context that was supplied to the constructor.
+     * @return Context The Context used by the Dialog.
      */
     public final Context getContext() {
         return mContext;
