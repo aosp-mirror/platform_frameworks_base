@@ -444,7 +444,7 @@ public class SipPhone extends SipPhoneBase {
         @Override
         public void hangup() throws CallStateException {
             synchronized (SipPhone.class) {
-                if (mState.isAlive()) {
+                if (state.isAlive()) {
                     Log.d(LOG_TAG, "hang up call: " + getState() + ": " + this
                             + " on phone " + getPhone());
                     CallStateException excp = null;
