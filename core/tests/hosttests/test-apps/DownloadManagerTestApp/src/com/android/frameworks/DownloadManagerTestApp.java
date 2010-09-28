@@ -15,13 +15,13 @@
  */
 package com.android.frameworks.downloadmanagertests;
 
+import android.app.DownloadManager;
+import android.app.DownloadManager.Query;
+import android.app.DownloadManager.Request;
+import android.app.DownloadManagerBaseTest;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.DownloadManager;
-import android.net.DownloadManager.Query;
-import android.net.DownloadManager.Request;
-import android.net.DownloadManagerBaseTest;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package android.net;
+package android.app;
 
+import android.app.DownloadManager.Query;
+import android.app.DownloadManager.Request;
+import android.app.DownloadManagerBaseTest.DataType;
+import android.app.DownloadManagerBaseTest.MultipleDownloadsCompletedReceiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.net.DownloadManager;
-import android.net.DownloadManager.Query;
-import android.net.DownloadManager.Request;
-import android.net.DownloadManagerBaseTest.DataType;
-import android.net.DownloadManagerBaseTest.MultipleDownloadsCompletedReceiver;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
