@@ -1048,6 +1048,9 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Close the database.
      */
     public void close() {
+        if (!isOpen()) {
+            return;
+        }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.i(TAG, "closing db: " + mPath + " (connection # " + mConnectionNum);
         }
@@ -2174,9 +2177,15 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
-    /* package */ boolean isSqlInStatementCache(String sql) {
+    /* package */ boolean isInStatementCache(String sql) {
         synchronized (mCompiledQueries) {
             return mCompiledQueries.containsKey(sql);
+        }
+    }
+
+    /* package */ boolean isInStatementCache(SQLiteCompiledSql sqliteCompiledSql) {
+        synchronized (mCompiledQueries) {
+            return mCompiledQueries.containsValue(sqliteCompiledSql);
         }
     }
 
