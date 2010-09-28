@@ -24,9 +24,12 @@ package android.media.videoeditor;
 public abstract class Overlay {
     // Instance variables
     private final String mUniqueId;
+    // The overlay owner
+    private final MediaItem mMediaItem;
 
     protected long mStartTimeMs;
     protected long mDurationMs;
+
 
     /**
      * Default constructor
@@ -34,6 +37,7 @@ public abstract class Overlay {
     @SuppressWarnings("unused")
     private Overlay() {
         mUniqueId = null;
+        mMediaItem = null;
         mStartTimeMs = 0;
         mDurationMs = 0;
     }
@@ -41,6 +45,7 @@ public abstract class Overlay {
     /**
      * Constructor
      *
+     * @param mediaItem The media item owner
      * @param overlayId The overlay id
      * @param startTimeMs The start time relative to the media item start time
      * @param durationMs The duration
@@ -48,7 +53,12 @@ public abstract class Overlay {
      * @throws IllegalArgumentException if the file type is not PNG or the
      *      startTimeMs and durationMs are incorrect.
      */
-    public Overlay(String overlayId, long startTimeMs, long durationMs) {
+    public Overlay(MediaItem mediaItem, String overlayId, long startTimeMs, long durationMs) {
+        if (mediaItem == null) {
+            throw new IllegalArgumentException("Media item cannot be null");
+        }
+
+        mMediaItem = mediaItem;
         mUniqueId = overlayId;
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
@@ -75,7 +85,13 @@ public abstract class Overlay {
      * @param durationMs The duration in milliseconds
      */
     public void setDuration(long durationMs) {
+        if (mStartTimeMs + durationMs > mMediaItem.getTimelineDuration()) {
+            throw new IllegalArgumentException("Duration is too large");
+        }
+
         mDurationMs = durationMs;
+
+        mMediaItem.invalidateTransitions(this);
     }
 
     /**
@@ -93,7 +109,20 @@ public abstract class Overlay {
      * @param startTimeMs start time in milliseconds
      */
     public void setStartTime(long startTimeMs) {
+        if (startTimeMs + mDurationMs > mMediaItem.getTimelineDuration()) {
+            throw new IllegalArgumentException("Start time is too large");
+        }
+
         mStartTimeMs = startTimeMs;
+
+        mMediaItem.invalidateTransitions(this);
+    }
+
+    /**
+     * @return The media item owner
+     */
+    public MediaItem getMediaItem() {
+        return mMediaItem;
     }
 
     /*

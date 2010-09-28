@@ -205,6 +205,10 @@ public abstract class MediaItem {
      *      added.
      */
     public void addEffect(Effect effect) {
+        if (effect.getMediaItem() != this) {
+            throw new IllegalArgumentException("Media item mismatch");
+        }
+
         if (mEffects.contains(effect)) {
             throw new IllegalArgumentException("Effect already exists: " + effect.getId());
         }
@@ -278,6 +282,10 @@ public abstract class MediaItem {
      *             the bitmap do not match the dimensions of the media item
      */
     public void addOverlay(Overlay overlay) {
+        if (overlay.getMediaItem() != this) {
+            throw new IllegalArgumentException("Media item mismatch");
+        }
+
         if (mOverlays.contains(overlay)) {
             throw new IllegalArgumentException("Overlay already exists: " + overlay.getId());
         }
@@ -428,7 +436,7 @@ public abstract class MediaItem {
      *
      * @param effect The effect that was added or removed
      */
-    private void invalidateTransitions(Effect effect) {
+    void invalidateTransitions(Effect effect) {
         // Check if the effect overlaps with the beginning and end transitions
         if (mBeginTransition != null) {
             if (effect.getStartTime() < mBeginTransition.getDuration()) {
@@ -449,7 +457,7 @@ public abstract class MediaItem {
      *
      * @param overlay The effect that was added or removed
      */
-    private void invalidateTransitions(Overlay overlay) {
+    void invalidateTransitions(Overlay overlay) {
         // Check if the overlay overlaps with the beginning and end transitions
         if (mBeginTransition != null) {
             if (overlay.getStartTime() < mBeginTransition.getDuration()) {

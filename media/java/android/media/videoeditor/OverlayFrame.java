@@ -41,12 +41,13 @@ public class OverlayFrame extends Overlay {
      */
     @SuppressWarnings("unused")
     private OverlayFrame() {
-        this(null, (String)null, 0, 0);
+        this(null, null, (String)null, 0, 0);
     }
 
     /**
      * Constructor for an OverlayFrame
      *
+     * @param mediaItem The media item owner
      * @param overlayId The overlay id
      * @param bitmap The bitmap to be used as an overlay. The size of the
      *      bitmap must equal to the size of the media item to which it is
@@ -57,9 +58,9 @@ public class OverlayFrame extends Overlay {
      * @throws IllegalArgumentException if the file type is not PNG or the
      *      startTimeMs and durationMs are incorrect.
      */
-    public OverlayFrame(String overlayId, Bitmap bitmap, long startTimeMs,
+    public OverlayFrame(MediaItem mediaItem, String overlayId, Bitmap bitmap, long startTimeMs,
             long durationMs) {
-        super(overlayId, startTimeMs, durationMs);
+        super(mediaItem, overlayId, startTimeMs, durationMs);
         mBitmap = bitmap;
         mFilename = null;
     }
@@ -68,6 +69,7 @@ public class OverlayFrame extends Overlay {
      * Constructor for an OverlayFrame. This constructor can be used to
      * restore the overlay after it was saved internally by the video editor.
      *
+     * @param mediaItem The media item owner
      * @param overlayId The overlay id
      * @param filename The file name that contains the overlay.
      * @param startTimeMs The overlay start time in milliseconds
@@ -76,8 +78,9 @@ public class OverlayFrame extends Overlay {
      * @throws IllegalArgumentException if the file type is not PNG or the
      *      startTimeMs and durationMs are incorrect.
      */
-    OverlayFrame(String overlayId, String filename, long startTimeMs, long durationMs) {
-        super(overlayId, startTimeMs, durationMs);
+    OverlayFrame(MediaItem mediaItem, String overlayId, String filename, long startTimeMs,
+            long durationMs) {
+        super(mediaItem, overlayId, startTimeMs, durationMs);
         mFilename = filename;
         mBitmap = BitmapFactory.decodeFile(mFilename);
     }

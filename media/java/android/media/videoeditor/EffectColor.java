@@ -61,12 +61,13 @@ public class EffectColor extends Effect {
      */
     @SuppressWarnings("unused")
     private EffectColor() {
-        this(null, 0, 0, 0, 0);
+        this(null, null, 0, 0, 0, 0);
     }
 
     /**
      * Constructor
      *
+     * @param mediaItem The media item owner
      * @param effectId The effect id
      * @param startTimeMs The start time relative to the media item to which it
      *            is applied
@@ -77,9 +78,9 @@ public class EffectColor extends Effect {
      * @param param if type is TYPE_COLOR, param is the RGB color as 888.
      *            Otherwise, param is ignored
      */
-    public EffectColor(String effectId, long startTimeMs, long durationMs,
+    public EffectColor(MediaItem mediaItem, String effectId, long startTimeMs, long durationMs,
             int type, int param) {
-        super(effectId, startTimeMs, durationMs);
+        super(mediaItem, effectId, startTimeMs, durationMs);
         mType = type;
         mParam = param;
     }
