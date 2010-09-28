@@ -639,7 +639,7 @@ status_t AwesomePlayer::play_l() {
     if (mAudioSource != NULL) {
         if (mAudioPlayer == NULL) {
             if (mAudioSink != NULL) {
-                mAudioPlayer = new AudioPlayer(mAudioSink);
+                mAudioPlayer = new AudioPlayer(mAudioSink, this);
                 mAudioPlayer->setSource(mAudioSource);
 
                 // We've already started the MediaSource in order to enable
@@ -666,8 +666,6 @@ status_t AwesomePlayer::play_l() {
         } else {
             mAudioPlayer->resume();
         }
-
-        postCheckAudioStatusEvent_l();
     }
 
     if (mTimeSource == NULL && mAudioPlayer == NULL) {
@@ -1169,7 +1167,7 @@ void AwesomePlayer::postCheckAudioStatusEvent_l() {
         return;
     }
     mAudioStatusEventPending = true;
-    mQueue.postEventWithDelay(mCheckAudioStatusEvent, 100000ll);
+    mQueue.postEvent(mCheckAudioStatusEvent);
 }
 
 void AwesomePlayer::onCheckAudioStatus() {
@@ -1200,8 +1198,6 @@ void AwesomePlayer::onCheckAudioStatus() {
         mFlags |= FIRST_FRAME;
         postStreamDoneEvent_l(finalStatus);
     }
-
-    postCheckAudioStatusEvent_l();
 }
 
 status_t AwesomePlayer::prepare() {
@@ -1660,6 +1656,14 @@ status_t AwesomePlayer::resume() {
 
 uint32_t AwesomePlayer::flags() const {
     return mExtractorFlags;
+}
+
+void AwesomePlayer::postAudioEOS() {
+    postCheckAudioStatusEvent_l();
+}
+
+void AwesomePlayer::postAudioSeekComplete() {
+    postCheckAudioStatusEvent_l();
 }
 
 }  // namespace android
