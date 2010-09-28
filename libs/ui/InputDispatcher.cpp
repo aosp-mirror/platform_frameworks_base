@@ -1070,7 +1070,8 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         }
 
         // Figure out whether splitting will be allowed for this window.
-        if (newTouchedWindow->layoutParamsFlags & InputWindow::FLAG_SPLIT_TOUCH) {
+        if (newTouchedWindow
+                && (newTouchedWindow->layoutParamsFlags & InputWindow::FLAG_SPLIT_TOUCH)) {
             // New window supports splitting.
             isSplit = true;
         } else if (isSplit) {
