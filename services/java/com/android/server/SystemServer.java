@@ -434,16 +434,6 @@ class ServerThread extends Thread {
             }
 
             try {
-                SipService sipService = SipService.create(context);
-                if (sipService != null) {
-                    Slog.i(TAG, "Sip Service");
-                    ServiceManager.addService("sip", sipService);
-                }
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting SIP Service", e);
-            }
-
-            try {
                 Slog.i(TAG, "NetworkTimeUpdateService");
                 networkTimeUpdater = new NetworkTimeUpdateService(context);
             } catch (Throwable e) {
