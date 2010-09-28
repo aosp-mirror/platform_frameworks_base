@@ -4948,7 +4948,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mNativeClass == 0 || !isClickable() || !isLongClickable()) {
+        if (mNativeClass == 0 || (!isClickable() && !isLongClickable())) {
             return false;
         }
 
