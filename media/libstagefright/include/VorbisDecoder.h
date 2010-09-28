@@ -55,6 +55,7 @@ private:
     int32_t mSampleRate;
     int64_t mAnchorTimeUs;
     int64_t mNumFramesOutput;
+    int32_t mNumFramesLeftOnPage;
 
     vorbis_dsp_state *mState;
     vorbis_info *mVi;
