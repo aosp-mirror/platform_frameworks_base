@@ -27,9 +27,13 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 
+#include "include/AwesomePlayer.h"
+
 namespace android {
 
-AudioPlayer::AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink)
+AudioPlayer::AudioPlayer(
+        const sp<MediaPlayerBase::AudioSink> &audioSink,
+        AwesomePlayer *observer)
     : mAudioTrack(NULL),
       mInputBuffer(NULL),
       mSampleRate(0),
@@ -45,7 +49,8 @@ AudioPlayer::AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink)
       mIsFirstBuffer(false),
       mFirstBufferResult(OK),
       mFirstBuffer(NULL),
-      mAudioSink(audioSink) {
+      mAudioSink(audioSink),
+      mObserver(observer) {
 }
 
 AudioPlayer::~AudioPlayer() {
@@ -301,6 +306,9 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
                 }
 
                 mSeeking = false;
+                if (mObserver) {
+                    mObserver->postAudioSeekComplete();
+                }
             }
         }
 
@@ -323,6 +331,10 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
             Mutex::Autolock autoLock(mLock);
 
             if (err != OK) {
+                if (mObserver && !mReachedEOS) {
+                    mObserver->postAudioEOS();
+                }
+
                 mReachedEOS = true;
                 mFinalStatus = err;
                 break;
