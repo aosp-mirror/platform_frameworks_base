@@ -46,6 +46,7 @@
 #include <media/mediametadataretriever.h>
 
 #include <media/stagefright/foundation/hexdump.h>
+#include <media/stagefright/MPEG2TSWriter.h>
 #include <media/stagefright/MPEG4Writer.h>
 
 #include <fcntl.h>
@@ -366,8 +367,13 @@ status_t DetectSyncSource::read(
 
 static void writeSourcesToMP4(
         Vector<sp<MediaSource> > &sources, bool syncInfoPresent) {
+#if 0
     sp<MPEG4Writer> writer =
         new MPEG4Writer(gWriteMP4Filename.string());
+#else
+    sp<MPEG2TSWriter> writer =
+        new MPEG2TSWriter(gWriteMP4Filename.string());
+#endif
 
     // at most one minute.
     writer->setMaxFileDuration(60000000ll);
