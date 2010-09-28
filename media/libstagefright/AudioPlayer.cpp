@@ -423,6 +423,12 @@ status_t AudioPlayer::seekTo(int64_t time_us) {
     mReachedEOS = false;
     mSeekTimeUs = time_us;
 
+    if (mAudioSink != NULL) {
+        mAudioSink->flush();
+    } else {
+        mAudioTrack->flush();
+    }
+
     return OK;
 }
 

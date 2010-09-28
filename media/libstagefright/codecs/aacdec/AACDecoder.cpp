@@ -171,6 +171,10 @@ status_t AACDecoder::read(
             mInputBuffer->release();
             mInputBuffer = NULL;
         }
+
+        // Make sure that the next buffer output does not still
+        // depend on fragments from the last one decoded.
+        PVMP4AudioDecoderResetBuffer(mDecoderBuf);
     } else {
         seekTimeUs = -1;
     }
