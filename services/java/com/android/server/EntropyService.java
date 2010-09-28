@@ -139,6 +139,7 @@ public class EntropyService extends Binder {
             out.println(SystemProperties.get("ro.bootloader"));
             out.println(SystemProperties.get("ro.hardware"));
             out.println(SystemProperties.get("ro.revision"));
+            out.println(new Object().hashCode());
             out.println(System.currentTimeMillis());
             out.println(System.nanoTime());
         } catch (IOException e) {
