@@ -16,18 +16,19 @@
 
 package android.media;
 
-import java.util.NoSuchElementException;
 import android.app.ActivityManagerNative;
+import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.bluetooth.BluetoothA2dp;
-import android.bluetooth.BluetoothClass;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -40,6 +41,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.telephony.PhoneStateListener;
@@ -47,7 +49,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.VolumePanel;
-import android.os.SystemProperties;
 
 import com.android.internal.telephony.ITelephony;
 
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Stack;
 
@@ -258,8 +260,8 @@ public class AudioService extends IAudioService.Stub {
     // BluetoothHeadset API to control SCO connection
     private BluetoothHeadset mBluetoothHeadset;
 
-    // Bluetooth headset connection state
-    private boolean mBluetoothHeadsetConnected;
+    // Bluetooth headset device
+    private BluetoothDevice mBluetoothHeadsetDevice;
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -294,17 +296,20 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.setErrorCallback(mAudioSystemCallback);
         loadSoundEffects();
 
-        mBluetoothHeadsetConnected = false;
-        mBluetoothHeadset = new BluetoothHeadset(context,
-                                                 mBluetoothHeadsetServiceListener);
+        mBluetoothHeadsetDevice = null;
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
+                                    BluetoothProfile.HEADSET);
+        }
 
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-        intentFilter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
-        intentFilter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
+        intentFilter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
+        intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
         context.registerReceiver(mReceiver, intentFilter);
 
         // Register for media button intent broadcasts.
@@ -1000,7 +1005,7 @@ public class AudioService extends IAudioService.Stub {
 
         public void incCount() {
             synchronized(mScoClients) {
-                requestScoState(BluetoothHeadset.AUDIO_STATE_CONNECTED);
+                requestScoState(BluetoothHeadset.STATE_AUDIO_CONNECTED);
                 if (mStartcount == 0) {
                     try {
                         mCb.linkToDeath(this, 0);
@@ -1026,7 +1031,7 @@ public class AudioService extends IAudioService.Stub {
                             Log.w(TAG, "decCount() going to 0 but not registered to binder");
                         }
                     }
-                    requestScoState(BluetoothHeadset.AUDIO_STATE_DISCONNECTED);
+                    requestScoState(BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
                 }
             }
         }
@@ -1042,7 +1047,7 @@ public class AudioService extends IAudioService.Stub {
                 }
                 mStartcount = 0;
                 if (stopSco) {
-                    requestScoState(BluetoothHeadset.AUDIO_STATE_DISCONNECTED);
+                    requestScoState(BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
                 }
             }
         }
@@ -1068,12 +1073,12 @@ public class AudioService extends IAudioService.Stub {
 
         private void requestScoState(int state) {
             if (totalCount() == 0 &&
-                mBluetoothHeadsetConnected &&
+                mBluetoothHeadsetDevice != null &&
                 AudioService.this.mMode == AudioSystem.MODE_NORMAL) {
-                if (state == BluetoothHeadset.AUDIO_STATE_CONNECTED) {
-                    mBluetoothHeadset.startVoiceRecognition();
+                if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED) {
+                    mBluetoothHeadset.startVoiceRecognition(mBluetoothHeadsetDevice);
                 } else {
-                    mBluetoothHeadset.stopVoiceRecognition();
+                    mBluetoothHeadset.stopVoiceRecognition(mBluetoothHeadsetDevice);
                 }
             }
         }
@@ -1103,23 +1108,27 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    private BluetoothHeadset.ServiceListener mBluetoothHeadsetServiceListener =
-        new BluetoothHeadset.ServiceListener() {
-        public void onServiceConnected() {
-            if (mBluetoothHeadset != null) {
-                BluetoothDevice device = mBluetoothHeadset.getCurrentHeadset();
-                if (mBluetoothHeadset.getState(device) == BluetoothHeadset.STATE_CONNECTED) {
-                    mBluetoothHeadsetConnected = true;
-                }
+    private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
+        new BluetoothProfile.ServiceListener() {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            mBluetoothHeadset = (BluetoothHeadset) proxy;
+            Set<BluetoothDevice> deviceSet = mBluetoothHeadset.getConnectedDevices();
+            if (deviceSet.size() > 0) {
+                BluetoothDevice[] devices =
+                    deviceSet.toArray(new BluetoothDevice[deviceSet.size()]);
+                mBluetoothHeadsetDevice = devices[0];
+            } else {
+                mBluetoothHeadsetDevice = null;
             }
         }
-        public void onServiceDisconnected() {
+        public void onServiceDisconnected(int profile) {
             if (mBluetoothHeadset != null) {
-                BluetoothDevice device = mBluetoothHeadset.getCurrentHeadset();
-                if (mBluetoothHeadset.getState(device) == BluetoothHeadset.STATE_DISCONNECTED) {
-                    mBluetoothHeadsetConnected = false;
+                Set<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
+                if (devices.size() == 0) {
+                    mBluetoothHeadsetDevice = null;
                     clearAllScoClients();
                 }
+                mBluetoothHeadset = null;
             }
         }
     };
@@ -1813,18 +1822,18 @@ public class AudioService extends IAudioService.Stub {
                         config = AudioSystem.FORCE_NONE;
                 }
                 AudioSystem.setForceUse(AudioSystem.FOR_DOCK, config);
-            } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
-                int state = intent.getIntExtra(BluetoothA2dp.EXTRA_SINK_STATE,
-                                               BluetoothA2dp.STATE_DISCONNECTED);
+            } else if (action.equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
+                                               BluetoothProfile.STATE_DISCONNECTED);
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String address = btDevice.getAddress();
-                boolean isConnected = (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
-                                       ((String)mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)).equals(address));
+                boolean isConnected =
+                    (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
+                     mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP).equals(address));
 
-                if (isConnected &&
-                    state != BluetoothA2dp.STATE_CONNECTED && state != BluetoothA2dp.STATE_PLAYING) {
+                if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
                     if (btDevice.isBluetoothDock()) {
-                        if (state == BluetoothA2dp.STATE_DISCONNECTED) {
+                        if (state == BluetoothProfile.STATE_DISCONNECTED) {
                             // introduction of a delay for transient disconnections of docks when
                             // power is rapidly turned off/on, this message will be canceled if
                             // we reconnect the dock under a preset delay
@@ -1834,9 +1843,7 @@ public class AudioService extends IAudioService.Stub {
                     } else {
                         makeA2dpDeviceUnavailableNow(address);
                     }
-                } else if (!isConnected &&
-                             (state == BluetoothA2dp.STATE_CONNECTED ||
-                              state == BluetoothA2dp.STATE_PLAYING)) {
+                } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
                     if (btDevice.isBluetoothDock()) {
                         // this could be a reconnection after a transient disconnection
                         cancelA2dpDeviceTimeout();
@@ -1851,9 +1858,9 @@ public class AudioService extends IAudioService.Stub {
                     }
                     makeA2dpDeviceAvailable(address);
                 }
-            } else if (action.equals(BluetoothHeadset.ACTION_STATE_CHANGED)) {
-                int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE,
-                                               BluetoothHeadset.STATE_ERROR);
+            } else if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
+                                               BluetoothProfile.STATE_DISCONNECTED);
                 int device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
                 BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String address = null;
@@ -1874,21 +1881,21 @@ public class AudioService extends IAudioService.Stub {
                 }
 
                 boolean isConnected = (mConnectedDevices.containsKey(device) &&
-                                       ((String)mConnectedDevices.get(device)).equals(address));
+                                       mConnectedDevices.get(device).equals(address));
 
-                if (isConnected && state != BluetoothHeadset.STATE_CONNECTED) {
+                if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
                     AudioSystem.setDeviceConnectionState(device,
                                                          AudioSystem.DEVICE_STATE_UNAVAILABLE,
                                                          address);
                     mConnectedDevices.remove(device);
-                    mBluetoothHeadsetConnected = false;
+                    mBluetoothHeadsetDevice = null;
                     clearAllScoClients();
-                } else if (!isConnected && state == BluetoothHeadset.STATE_CONNECTED) {
+                } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
                     AudioSystem.setDeviceConnectionState(device,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
                     mConnectedDevices.put(new Integer(device), address);
-                    mBluetoothHeadsetConnected = true;
+                    mBluetoothHeadsetDevice = btDevice;
                 }
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
@@ -1922,15 +1929,14 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
-                int state = intent.getIntExtra(BluetoothHeadset.EXTRA_AUDIO_STATE,
-                                               BluetoothHeadset.STATE_ERROR);
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
                 synchronized (mScoClients) {
                     if (!mScoClients.isEmpty()) {
                         switch (state) {
-                        case BluetoothHeadset.AUDIO_STATE_CONNECTED:
+                        case BluetoothHeadset.STATE_AUDIO_CONNECTED:
                             state = AudioManager.SCO_AUDIO_STATE_CONNECTED;
                             break;
-                        case BluetoothHeadset.AUDIO_STATE_DISCONNECTED:
+                        case BluetoothHeadset.STATE_AUDIO_DISCONNECTED:
                             state = AudioManager.SCO_AUDIO_STATE_DISCONNECTED;
                             break;
                         default:
