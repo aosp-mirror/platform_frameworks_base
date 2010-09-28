@@ -645,14 +645,14 @@ public class SipPhone extends SipPhoneBase {
 
             @Override
             public void onCallEstablished(SipAudioCall call) {
-                call.startAudio();
                 onChanged(call);
+                if (mState == Call.State.ACTIVE) call.startAudio();
             }
 
             @Override
             public void onCallHeld(SipAudioCall call) {
-                call.startAudio();
                 onChanged(call);
+                if (mState == Call.State.HOLDING) call.startAudio();
             }
 
             @Override
