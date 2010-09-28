@@ -57,6 +57,10 @@ public abstract class Effect {
             throw new IllegalArgumentException("Media item cannot be null");
         }
 
+        if (startTimeMs + durationMs > mediaItem.getTimelineDuration()) {
+            throw new IllegalArgumentException("Invalid start time and duration");
+        }
+
         mMediaItem = mediaItem;
         mUniqueId = effectId;
         mStartTimeMs = startTimeMs;
