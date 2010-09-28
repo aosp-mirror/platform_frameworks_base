@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"ブラウザでアクセスしたすべてのURLおよびブラウザのすべてのブックマークの読み取りをアプリケーションに許可します。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"ブラウザの履歴とブックマークを書き込む"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"携帯電話に保存されているブラウザの履歴やブックマークの修正をアプリケーショに許可します。これにより悪意のあるアプリケーションが、ブラウザのデータを消去または変更する恐れがあります。"</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"ブラウザの位置情報へのアクセス権を変更"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"ブラウザの位置情報に対するアクセス権の変更をアプリケーションに許可します。この設定では、悪意のあるアプリケーションが任意のウェブサイトに位置情報を送信する可能性があります。"</string>
     <string name="save_password_message" msgid="767344687139195790">"このパスワードをブラウザで保存しますか？"</string>

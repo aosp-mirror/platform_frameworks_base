@@ -75,6 +75,12 @@ public class MockContentResolver extends ContentResolver {
     /** @hide */
     @Override
     protected IContentProvider acquireProvider(Context context, String name) {
+        return acquireExistingProvider(context, name);
+    }
+
+    /** @hide */
+    @Override
+    protected IContentProvider acquireExistingProvider(Context context, String name) {
 
         /*
          * Gets the content provider from the local map

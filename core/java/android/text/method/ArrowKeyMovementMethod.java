@@ -23,19 +23,12 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.TextView.CursorController;
 
 // XXX this doesn't extend MetaKeyKeyListener because the signatures
 // don't match.  Need to figure that out.  Meanwhile the meta keys
 // won't work in fields that don't take input.
 
 public class ArrowKeyMovementMethod implements MovementMethod {
-    /**
-     * An optional controller for the cursor.
-     * Use {@link #setCursorController(CursorController)} to set this field.
-     */
-    private CursorController mCursorController;
-
     private boolean isCap(Spannable buffer) {
         return ((MetaKeyKeyListener.getMetaState(buffer, KeyEvent.META_SHIFT_ON) == 1) ||
                 (MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SELECTING) != 0));
@@ -192,21 +185,10 @@ public class ArrowKeyMovementMethod implements MovementMethod {
     }
 
     public boolean onTrackballEvent(TextView widget, Spannable text, MotionEvent event) {
-        if (mCursorController != null) {
-            mCursorController.hide();
-        }
         return false;
     }
 
     public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
-        if (mCursorController != null) {
-            return onTouchEventCursor(widget, buffer, event);
-        } else {
-            return onTouchEventStandard(widget, buffer, event);
-        }
-    }
-
-    private boolean onTouchEventStandard(TextView widget, Spannable buffer, MotionEvent event) {
         int initialScrollX = -1, initialScrollY = -1;
         if (event.getAction() == MotionEvent.ACTION_UP) {
             initialScrollX = Touch.getInitialScrollX(widget, buffer);
@@ -276,49 +258,6 @@ public class ArrowKeyMovementMethod implements MovementMethod {
         }
 
         return handled;
-    }
-
-    private boolean onTouchEventCursor(TextView widget, Spannable buffer, MotionEvent event) {
-        if (widget.isFocused() && !widget.didTouchFocusSelect()) {
-            switch (event.getActionMasked()) {
-                case MotionEvent.ACTION_MOVE:
-                    widget.cancelLongPress();
-
-                    // Offset the current touch position (from controller to cursor)
-                    final float x = event.getX() + mCursorController.getOffsetX();
-                    final float y = event.getY() + mCursorController.getOffsetY();
-                    mCursorController.updatePosition((int) x, (int) y);
-                    return true;
-
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    mCursorController = null;
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Defines the cursor controller.
-     *
-     * When set, this object can be used to handle touch events, that can be translated into cursor
-     * updates.
-     *
-     * {@link MotionEvent#ACTION_MOVE} events will call back the 
-     * {@link CursorController#updatePosition(int, int)} controller's method, passing the current
-     * finger coordinates (offset by {@link CursorController#getOffsetX()} and
-     * {@link CursorController#getOffsetY()}) as parameters. 
-     *
-     * When the gesture is finished (on a {@link MotionEvent#ACTION_UP} or
-     * {@link MotionEvent#ACTION_CANCEL} event), the controller is reset to null.
-     *
-     * @param cursorController A cursor controller implementation
-     *
-     * @hide
-     */
-    public void setCursorController(CursorController cursorController) {
-        mCursorController = cursorController;
     }
 
     public boolean canSelectArbitrarily() {

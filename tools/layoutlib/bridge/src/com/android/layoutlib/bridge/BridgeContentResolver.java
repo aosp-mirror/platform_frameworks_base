@@ -43,6 +43,12 @@ public class BridgeContentResolver extends ContentResolver {
     }
 
     @Override
+    public IContentProvider acquireExistingProvider(Context c, String name) {
+        // ignore
+        return null;
+    }
+
+    @Override
     public boolean releaseProvider(IContentProvider icp) {
         // ignore
         return false;

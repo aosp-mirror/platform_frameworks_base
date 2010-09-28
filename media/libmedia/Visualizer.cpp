@@ -169,11 +169,13 @@ status_t Visualizer::getWaveForm(uint8_t *waveform)
     status_t status = NO_ERROR;
     if (mEnabled) {
         uint32_t replySize = mCaptureSize;
-        status_t status = command(VISU_CMD_CAPTURE, 0, NULL, &replySize, waveform);
+        status = command(VISU_CMD_CAPTURE, 0, NULL, &replySize, waveform);
+        LOGV("getWaveForm() command returned %d", status);
         if (replySize == 0) {
             status = NOT_ENOUGH_DATA;
         }
     } else {
+        LOGV("getWaveForm() disabled");
         memset(waveform, 0x80, mCaptureSize);
     }
     return status;
@@ -191,7 +193,7 @@ status_t Visualizer::getFft(uint8_t *fft)
     status_t status = NO_ERROR;
     if (mEnabled) {
         uint8_t buf[mCaptureSize];
-        status_t status = getWaveForm(buf);
+        status = getWaveForm(buf);
         if (status == NO_ERROR) {
             status = doFft(fft, buf);
         }

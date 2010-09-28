@@ -39,6 +39,7 @@ import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -336,7 +337,7 @@ public class PackageParser {
         try {
             // We must read the stream for the JarEntry to retrieve
             // its certificates.
-            InputStream is = jarFile.getInputStream(je);
+            InputStream is = new BufferedInputStream(jarFile.getInputStream(je));
             while (is.read(readBuffer, 0, readBuffer.length) != -1) {
                 // not using
             }

@@ -441,18 +441,23 @@ public class SipPhone extends SipPhoneBase {
         @Override
         public void hangup() throws CallStateException {
             synchronized (SipPhone.class) {
-                Log.v(LOG_TAG, "hang up call: " + getState() + ": " + this
-                        + " on phone " + getPhone());
-                CallStateException excp = null;
-                for (Connection c : connections) {
-                    try {
-                        c.hangup();
-                    } catch (CallStateException e) {
-                        excp = e;
+                if (state.isAlive()) {
+                    Log.d(LOG_TAG, "hang up call: " + getState() + ": " + this
+                            + " on phone " + getPhone());
+                    CallStateException excp = null;
+                    for (Connection c : connections) {
+                        try {
+                            c.hangup();
+                        } catch (CallStateException e) {
+                            excp = e;
+                        }
                     }
+                    if (excp != null) throw excp;
+                    setState(State.DISCONNECTING);
+                } else {
+                    Log.d(LOG_TAG, "hang up dead call: " + getState() + ": "
+                            + this + " on phone " + getPhone());
                 }
-                if (excp != null) throw excp;
-                setState(State.DISCONNECTING);
             }
         }
 
@@ -590,7 +595,10 @@ public class SipPhone extends SipPhoneBase {
             // set state to DISCONNECTED only when all conns are disconnected
             if (state != State.DISCONNECTED) {
                 boolean allConnectionsDisconnected = true;
+                Log.v(LOG_TAG, "---check if all connections are disconnected: "
+                        + connections.size());
                 for (Connection c : connections) {
+                    Log.v(LOG_TAG, "   state=" + c.getState() + ": " + c);
                     if (c.getState() != State.DISCONNECTED) {
                         allConnectionsDisconnected = false;
                         break;
@@ -633,6 +641,18 @@ public class SipPhone extends SipPhoneBase {
             }
 
             @Override
+            public void onCallEstablished(SipAudioCall call) {
+                onChanged(call);
+                if (mState == Call.State.ACTIVE) call.startAudio();
+            }
+
+            @Override
+            public void onCallHeld(SipAudioCall call) {
+                onChanged(call);
+                if (mState == Call.State.HOLDING) call.startAudio();
+            }
+
+            @Override
             public void onChanged(SipAudioCall call) {
                 synchronized (SipPhone.class) {
                     Call.State newState = getCallStateFrom(call);
@@ -652,7 +672,6 @@ public class SipPhone extends SipPhoneBase {
                             }
                             foregroundCall.switchWith(ringingCall);
                         }
-                        if (newState == Call.State.ACTIVE) call.startAudio();
                         setState(newState);
                     }
                     mOwner.onConnectionStateChanged(SipConnection.this);
@@ -770,11 +789,13 @@ public class SipPhone extends SipPhoneBase {
         public void hangup() throws CallStateException {
             synchronized (SipPhone.class) {
                 Log.v(LOG_TAG, "hangup conn: " + mPeer.getUriString() + ": "
-                        + ": on phone " + getPhone().getPhoneName());
+                        + mState + ": on phone " + getPhone().getPhoneName());
                 try {
-                    if (mSipAudioCall != null) mSipAudioCall.endCall();
-                    setState(Call.State.DISCONNECTING);
-                    setDisconnectCause(DisconnectCause.LOCAL);
+                    if (mState.isAlive()) {
+                        if (mSipAudioCall != null) mSipAudioCall.endCall();
+                        setState(Call.State.DISCONNECTING);
+                        setDisconnectCause(DisconnectCause.LOCAL);
+                    }
                 } catch (SipException e) {
                     throw new CallStateException("hangup(): " + e);
                 }
@@ -859,8 +880,13 @@ public class SipPhone extends SipPhoneBase {
                 case SipErrorCode.INVALID_CREDENTIALS:
                     onError(Connection.DisconnectCause.INVALID_CREDENTIALS);
                     break;
-                case SipErrorCode.SOCKET_ERROR:
+                case SipErrorCode.CROSS_DOMAIN_AUTHENTICATION:
+                    onError(Connection.DisconnectCause.OUT_OF_NETWORK);
+                    break;
                 case SipErrorCode.SERVER_ERROR:
+                    onError(Connection.DisconnectCause.SERVER_ERROR);
+                    break;
+                case SipErrorCode.SOCKET_ERROR:
                 case SipErrorCode.CLIENT_ERROR:
                 default:
                     Log.w(LOG_TAG, "error: " + SipErrorCode.toString(errorCode)

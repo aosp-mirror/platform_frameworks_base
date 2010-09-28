@@ -549,10 +549,6 @@ public:
             const int32_t* keyCodes, uint8_t* outFlags);
 
 protected:
-    /* Maximum pointer id value supported.
-     * (This is limited by our use of BitSet32 to track pointer assignments.) */
-    static const uint32_t MAX_POINTER_ID = 31;
-
     Mutex mLock;
 
     struct VirtualKey {

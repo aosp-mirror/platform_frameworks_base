@@ -40,6 +40,7 @@ static struct {
     { AID_RADIO, "radio.simphonebook" },
 /* TODO: remove after phone services are updated: */
     { AID_RADIO, "phone" },
+    { AID_RADIO, "sip" },
     { AID_RADIO, "isms" },
     { AID_RADIO, "iphonesubinfo" },
     { AID_RADIO, "simphonebook" },

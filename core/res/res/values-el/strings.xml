@@ -563,7 +563,7 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Η κάρτα SIM είναι κλειδωμένη."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Ξεκλείδωμα κάρτας SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος<xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Προσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση της σύνδεσής σας Google."\n\n" Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> \nδευτερόλεπτα."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση της σύνδεσής σας Google."\n\n" Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g>  δευτερόλεπτα."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Προσπαθήστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Ξεχάσατε το μοτίβο;"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Ξεκλείδωμα λογαριασμού"</string>
@@ -595,6 +595,10 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Επιτρέπει στην εφαρμογή την ανάγνωση όλων των διευθύνσεων URL που το πρόγραμμα περιήγησης έχει επισκεφθεί και όλων των σελιδοδεικτών του προγράμματος περιήγησης."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"εγγραφή ιστορικού και σελιδοδεικτών προγράμματος περιήγησης"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Επιτρέπει σε μια εφαρμογή να τροποποιήσει το ιστορικό ή τους σελιδοδείκτες του προγράμματος περιήγησης που βρίσκονται αποθηκευμένα στο τηλέφωνό σας. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να διαγράψουν ή να τροποποιήσουν τα δεδομένα του προγράμματος περιήγησης."</string>
+    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
+    <skip />
+    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Τροποποίηση δικαιωμάτων γεωγραφικής θέσης προγράμματος περιήγησης"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Επιτρέπει σε μια εφαρμογή την τροποποίηση των δικαιωμάτων γεωγραφικής θέσης του προγράμματος περιήγησης. Οι κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να επιτρέψουν την αποστολή στοιχείων τοποθεσίας σε αυθαίρετους ιστότοπους."</string>
     <string name="save_password_message" msgid="767344687139195790">"Θέλετε το πρόγραμμα περιήγησης να διατηρήσει αυτόν τον κωδικό πρόσβασης;"</string>
