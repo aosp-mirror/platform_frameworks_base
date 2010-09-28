@@ -40,15 +40,10 @@ public class AdbUtils {
      * remote machine. This can be achieved by calling configureSocket()
      *
      * @return a socket that can be configured to link to remote machine
+     * @throws IOException
      */
-    public static Socket createSocket() {
-        Socket socket = null;
-        try {
-            socket = new Socket(ADB_HOST, ADB_PORT);
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Creation failed.", e);
-        }
-        return socket;
+    public static Socket createSocket() throws IOException{
+        return new Socket(ADB_HOST, ADB_PORT);
     }
 
     /**
@@ -72,7 +67,7 @@ public class AdbUtils {
         outputStream.write(cmd.getBytes());
         int read = inputStream.read(buf);
         if (read != ADB_RESPONSE_SIZE || !ADB_OK.equals(new String(buf))) {
-            Log.w(LOG_TAG, "adb cmd faild.");
+            Log.w(LOG_TAG, "adb cmd failed.");
             return false;
         }
         return true;

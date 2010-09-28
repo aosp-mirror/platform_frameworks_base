@@ -93,7 +93,8 @@ public class ConnectionHandler {
 
     private OnFinishedCallback mOnFinishedCallback;
 
-    public ConnectionHandler(String remoteMachineIp, int port, Socket fromSocket, Socket toSocket) {
+    public ConnectionHandler(String remoteMachineIp, int port, Socket fromSocket, Socket toSocket)
+            throws IOException {
         mRemoteMachineIpAddress = remoteMachineIp;
         mPort = port;
 
@@ -105,14 +106,12 @@ public class ConnectionHandler {
             mToSocketInputStream = mToSocket.getInputStream();
             mFromSocketOutputStream = mFromSocket.getOutputStream();
             mToSocketOutputStream = mToSocket.getOutputStream();
-            if (!AdbUtils.configureConnection(mToSocketInputStream, mToSocketOutputStream,
-                    mRemoteMachineIpAddress, mPort)) {
-                throw new IOException("Configuring socket failed!");
-            }
+            AdbUtils.configureConnection(mToSocketInputStream, mToSocketOutputStream,
+                    mRemoteMachineIpAddress, mPort);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Unable to start ConnectionHandler", e);
             closeStreams();
-            return;
+            throw e;
         }
 
         mFromToPipe = new SocketPipeThread(mFromSocketInputStream, mToSocketOutputStream);

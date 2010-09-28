@@ -61,7 +61,6 @@ public class Forwarder extends Thread {
     public void run() {
         while (true) {
             Socket localSocket;
-            Socket remoteSocket;
             try {
                 localSocket = mServerSocket.accept();
             } catch (IOException e) {
@@ -70,23 +69,27 @@ public class Forwarder extends Thread {
                 break;
             }
 
-            remoteSocket = AdbUtils.createSocket();
-
-            if (remoteSocket == null) {
+            Socket remoteSocket = null;
+            final ConnectionHandler connectionHandler;
+            try {
+                remoteSocket = AdbUtils.createSocket();
+                connectionHandler = new ConnectionHandler(
+                        mRemoteMachineIpAddress, mPort, localSocket, remoteSocket);
+            } catch (IOException exception) {
                 try {
                     localSocket.close();
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "mPort=" + mPort, e);
                 }
-
-                Log.e(LOG_TAG, "run(): mPort= " + mPort + " Failed to start forwarding from " +
-                        localSocket);
+                if (remoteSocket != null) {
+                    try {
+                        remoteSocket.close();
+                    } catch (IOException e) {
+                        Log.e(LOG_TAG, "mPort=" + mPort, e);
+                    }
+                }
                 continue;
             }
-
-            final ConnectionHandler connectionHandler =
-                    new ConnectionHandler(mRemoteMachineIpAddress, mPort, localSocket,
-                            remoteSocket);
 
             /**
              * We have to close the sockets after the ConnectionHandler finishes, so we
