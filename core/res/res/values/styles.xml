@@ -1091,6 +1091,14 @@
     <style name="TextAppearance.Holo.Widget.PopupMenu.Small" parent="TextAppearance.Widget.PopupMenu.Small">
     </style>
 
+    <style name="TextAppearance.Holo.Widget.ActionBar.Title"
+           parent="TextAppearance.Holo.Medium">
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.ActionBar.Subtitle"
+           parent="TextAppearance.Holo.Small">
+    </style>
+
     <style name="TextAppearance.Holo.Widget.ActionMode">
     </style>
 
@@ -1166,6 +1174,11 @@
     </style>
 
     <style name="TextAppearance.Holo.Light.Widget.Button">
+    </style>
+
+    <style name="TextAppearance.Holo.Light.Widget.EditText">
+        <item name="android:textColor">@color/widget_edittext_holo_light</item>
+        <item name="android:textColorHint">@android:color/hint_foreground_holo_dark</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.Widget.PopupMenu" parent="TextAppearance.Holo.Widget.PopupMenu">
@@ -1402,6 +1415,9 @@
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
+        <item name="android:textAppearance">@style/TextAppearance.Holo.Medium</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="Widget.Holo.ActionMode" parent="Widget.ActionMode">
@@ -1415,6 +1431,8 @@
     </style>
 
     <style name="Widget.Holo.ActionBar" parent="Widget.ActionBar">
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
     </style>
 
     <!-- Light widget styles -->
@@ -1445,7 +1463,7 @@
     <style name="Widget.Holo.Light.TextView" parent="Widget.TextView">
     </style>
 
-    <style name="Widget.Holo.Light.TextView.ListSeparator">
+    <style name="Widget.Holo.Light.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
     </style>
 
     <style name="Widget.Holo.Light.TextSelectHandle" parent="Widget.TextSelectHandle">
@@ -1620,6 +1638,8 @@
     </style>
 
     <style name="Widget.Holo.Light.ActionBar" parent="Widget.ActionBar">
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
     </style>
 
     <!-- Animation Styles -->

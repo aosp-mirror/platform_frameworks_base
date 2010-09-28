@@ -884,7 +884,7 @@
         
         <item name="textAppearanceButton">@android:style/TextAppearance.Holo.Light.Widget.Button</item>
         
-        <item name="editTextColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="editTextColor">?android:attr/textColorPrimary</item>
         <item name="editTextBackground">@android:drawable/edit_text_holo_light</item>
         
         <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
