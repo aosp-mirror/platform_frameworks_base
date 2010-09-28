@@ -132,7 +132,7 @@ public class StackView extends AdapterViewAnimator {
     }
 
     private void initStackView() {
-        configureViewAnimator(NUM_ACTIVE_VIEWS, NUM_ACTIVE_VIEWS - 2, false);
+        configureViewAnimator(NUM_ACTIVE_VIEWS, NUM_ACTIVE_VIEWS - 2);
         setStaticTransformationsEnabled(true);
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
@@ -287,7 +287,6 @@ public class StackView extends AdapterViewAnimator {
     // framework level support for drawing outside of a parent's bounds.
     private void disableParentalClipping() {
         if (mAncestorContainingAllChildren != null) {
-            Log.v(TAG, "Disabling parental clipping.");
             ViewGroup vg = this;
             while (vg.getParent() != null && vg.getParent() instanceof ViewGroup) {
                 if (vg == mAncestorContainingAllChildren) break;
@@ -363,7 +362,9 @@ public class StackView extends AdapterViewAnimator {
 
             if (mAdapter == null) return;
 
-            if (mCurrentWindowStartUnbounded + activeIndex == 0) {
+            if (mLoopViews) {
+                mStackSlider.setMode(StackSlider.NORMAL_MODE);
+            } else if (mCurrentWindowStartUnbounded + activeIndex == 0) {
                 mStackSlider.setMode(StackSlider.BEGINNING_OF_STACK_MODE);
             } else if (mCurrentWindowStartUnbounded + activeIndex == mAdapter.getCount()) {
                 activeIndex--;
