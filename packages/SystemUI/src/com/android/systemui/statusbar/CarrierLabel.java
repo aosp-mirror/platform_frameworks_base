@@ -99,7 +99,7 @@ public class CarrierLabel extends TextView {
         }
         if (showSpn && spn != null) {
             if (something) {
-                str.append(' ');
+                str.append('\n');
             }
             str.append(spn);
             something = true;

@@ -1207,7 +1207,7 @@ public abstract class Context {
      * <dt> {@link #UI_MODE_SERVICE} ("uimode")
      * <dd> An {@link android.app.UiModeManager} for controlling UI modes.
      * <dt> {@link #DOWNLOAD_SERVICE} ("download")
-     * <dd> A {@link android.net.DownloadManager} for requesting HTTP downloads
+     * <dd> A {@link android.app.DownloadManager} for requesting HTTP downloads
      * </dl>
      * 
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -1256,7 +1256,7 @@ public abstract class Context {
      * @see #UI_MODE_SERVICE
      * @see android.app.UiModeManager
      * @see #DOWNLOAD_SERVICE
-     * @see android.net.DownloadManager
+     * @see android.app.DownloadManager
      */
     public abstract Object getSystemService(String name);
 
@@ -1539,7 +1539,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.net.DownloadManager} for requesting HTTP downloads.
+     * {@link android.app.DownloadManager} for requesting HTTP downloads.
      *
      * @see #getSystemService
      */

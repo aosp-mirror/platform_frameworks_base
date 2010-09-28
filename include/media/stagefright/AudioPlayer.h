@@ -27,6 +27,7 @@ namespace android {
 
 class MediaSource;
 class AudioTrack;
+class AwesomePlayer;
 
 class AudioPlayer : public TimeSource {
 public:
@@ -35,7 +36,9 @@ public:
         SEEK_COMPLETE
     };
 
-    AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink);
+    AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink,
+                AwesomePlayer *audioObserver = NULL);
+
     virtual ~AudioPlayer();
 
     // Caller retains ownership of "source".
@@ -91,6 +94,7 @@ private:
     MediaBuffer *mFirstBuffer;
 
     sp<MediaPlayerBase::AudioSink> mAudioSink;
+    AwesomePlayer *mObserver;
 
     static void AudioCallback(int event, void *user, void *info);
     void AudioCallback(int event, void *info);

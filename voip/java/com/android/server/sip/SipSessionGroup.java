@@ -28,7 +28,6 @@ import android.net.sip.ISipSessionListener;
 import android.net.sip.SipErrorCode;
 import android.net.sip.SipProfile;
 import android.net.sip.SipSession;
-import android.net.sip.SipSessionAdapter;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -959,6 +958,11 @@ class SipSessionGroup implements SipListener {
                 int statusCode = response.getStatusCode();
                 switch (statusCode) {
                 case Response.RINGING:
+                case Response.CALL_IS_BEING_FORWARDED:
+                case Response.QUEUED:
+                case Response.SESSION_PROGRESS:
+                    // feedback any provisional responses (except TRYING) as
+                    // ring back for better UX
                     if (mState == SipSession.State.OUTGOING_CALL) {
                         mState = SipSession.State.OUTGOING_CALL_RING_BACK;
                         mProxy.onRingingBack(this);

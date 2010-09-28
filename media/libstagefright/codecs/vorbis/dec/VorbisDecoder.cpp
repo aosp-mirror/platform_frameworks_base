@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "VorbisDecoder"
+#include <utils/Log.h>
+
 #include "VorbisDecoder.h"
 
 #include <media/stagefright/MediaBufferGroup.h>
@@ -108,6 +112,7 @@ status_t VorbisDecoder::start(MetaData *params) {
 
     mAnchorTimeUs = 0;
     mNumFramesOutput = 0;
+    mNumFramesLeftOnPage = 0;
     mStarted = true;
 
     return OK;
@@ -188,6 +193,13 @@ int VorbisDecoder::decodePacket(MediaBuffer *packet, MediaBuffer *out) {
         }
     }
 
+    if (numFrames > mNumFramesLeftOnPage) {
+        LOGV("discarding %d frames at end of page",
+             numFrames - mNumFramesLeftOnPage);
+        numFrames = mNumFramesLeftOnPage;
+    }
+    mNumFramesLeftOnPage -= numFrames;
+
     out->set_range(0, numFrames * sizeof(int16_t) * mNumChannels);
 
     return numFrames;
@@ -224,6 +236,12 @@ status_t VorbisDecoder::read(
     } else {
         // We must have a new timestamp after seeking.
         CHECK(seekTimeUs < 0);
+    }
+
+    int32_t numPageSamples;
+    if (inputBuffer->meta_data()->findInt32(
+                kKeyValidSamples, &numPageSamples)) {
+        mNumFramesLeftOnPage = numPageSamples;
     }
 
     MediaBuffer *outputBuffer;

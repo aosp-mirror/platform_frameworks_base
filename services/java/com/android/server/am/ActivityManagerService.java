@@ -4218,29 +4218,75 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean checkHoldingPermissionsLocked(IPackageManager pm,
-            ProviderInfo pi, int uid, int modeFlags) {
+            ProviderInfo pi, Uri uri, int uid, int modeFlags) {
+        boolean readPerm = (modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) == 0;
+        boolean writePerm = (modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == 0;
+        if (DEBUG_URI_PERMISSION) Slog.v(TAG,
+                "checkHoldingPermissionsLocked: uri=" + uri + " uid=" + uid);
         try {
-            if ((modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
-                if ((pi.readPermission != null) &&
+            // Is the component private from the target uid?
+            final boolean prv = !pi.exported && pi.applicationInfo.uid != uid;
+
+            // Acceptable if the there is no read permission needed from the
+            // target or the target is holding the read permission.
+            if (!readPerm) {
+                if ((!prv && pi.readPermission == null) ||
                         (pm.checkUidPermission(pi.readPermission, uid)
-                                != PackageManager.PERMISSION_GRANTED)) {
-                    return false;
+                                == PackageManager.PERMISSION_GRANTED)) {
+                    readPerm = true;
                 }
             }
-            if ((modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
-                if ((pi.writePermission != null) &&
+
+            // Acceptable if the there is no write permission needed from the
+            // target or the target is holding the read permission.
+            if (!writePerm) {
+                if (!prv && (pi.writePermission == null) ||
                         (pm.checkUidPermission(pi.writePermission, uid)
-                                != PackageManager.PERMISSION_GRANTED)) {
-                    return false;
+                                == PackageManager.PERMISSION_GRANTED)) {
+                    writePerm = true;
                 }
             }
-            if (!pi.exported && pi.applicationInfo.uid != uid) {
-                return false;
+
+            // Acceptable if there is a path permission matching the URI that
+            // the target holds the permission on.
+            PathPermission[] pps = pi.pathPermissions;
+            if (pps != null && (!readPerm || !writePerm)) {
+                final String path = uri.getPath();
+                int i = pps.length;
+                while (i > 0 && (!readPerm || !writePerm)) {
+                    i--;
+                    PathPermission pp = pps[i];
+                    if (!readPerm) {
+                        final String pprperm = pp.getReadPermission();
+                        if (DEBUG_URI_PERMISSION) Slog.v(TAG, "Checking read perm for "
+                                + pprperm + " for " + pp.getPath()
+                                + ": match=" + pp.match(path)
+                                + " check=" + pm.checkUidPermission(pprperm, uid));
+                        if (pprperm != null && pp.match(path) &&
+                                (pm.checkUidPermission(pprperm, uid)
+                                        == PackageManager.PERMISSION_GRANTED)) {
+                            readPerm = true;
+                        }
+                    }
+                    if (!writePerm) {
+                        final String ppwperm = pp.getWritePermission();
+                        if (DEBUG_URI_PERMISSION) Slog.v(TAG, "Checking write perm "
+                                + ppwperm + " for " + pp.getPath()
+                                + ": match=" + pp.match(path)
+                                + " check=" + pm.checkUidPermission(ppwperm, uid));
+                        if (ppwperm != null && pp.match(path) &&
+                                (pm.checkUidPermission(ppwperm, uid)
+                                        == PackageManager.PERMISSION_GRANTED)) {
+                            writePerm = true;
+                        }
+                    }
+                }
             }
-            return true;
         } catch (RemoteException e) {
             return false;
         }
+
+        return readPerm && writePerm;
     }
 
     private final boolean checkUriPermissionLocked(Uri uri, int uid,
@@ -4333,7 +4379,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // First...  does the target actually need this permission?
-        if (checkHoldingPermissionsLocked(pm, pi, targetUid, modeFlags)) {
+        if (checkHoldingPermissionsLocked(pm, pi, uri, targetUid, modeFlags)) {
             // No need to grant the target this permission.
             if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
                     "Target " + targetPkg + " already has full permission to " + uri);
@@ -4367,7 +4413,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Third...  does the caller itself have permission to access
         // this uri?
-        if (!checkHoldingPermissionsLocked(pm, pi, callingUid, modeFlags)) {
+        if (!checkHoldingPermissionsLocked(pm, pi, uri, callingUid, modeFlags)) {
             if (!checkUriPermissionLocked(uri, callingUid, modeFlags)) {
                 throw new SecurityException("Uid " + callingUid
                         + " does not have permission to uri " + uri);
@@ -4535,7 +4581,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Does the caller have this permission on the URI?
-        if (!checkHoldingPermissionsLocked(pm, pi, callingUid, modeFlags)) {
+        if (!checkHoldingPermissionsLocked(pm, pi, uri, callingUid, modeFlags)) {
             // Right now, if you are not the original owner of the permission,
             // you are not allowed to revoke it.
             //if (!checkUriPermissionLocked(uri, callingUid, modeFlags)) {
