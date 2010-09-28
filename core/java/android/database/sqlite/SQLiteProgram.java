@@ -25,7 +25,7 @@ import java.util.HashMap;
 /**
  * A base class for compiled SQLite programs.
  *<p>
- * SQLiteProgram is not internally synchronized so code using a SQLiteProgram from multiple
+ * SQLiteProgram is NOT internally synchronized so code using a SQLiteProgram from multiple
  * threads should perform its own synchronization when using the SQLiteProgram.
  */
 public abstract class SQLiteProgram extends SQLiteClosable {
@@ -180,23 +180,11 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         mDatabase.releaseReference();
     }
 
-    /* package */ synchronized void release() {
+    /* package */ void release() {
         if (mCompiledSql == null) {
             return;
         }
-        if ((mStatementType & STATEMENT_CACHEABLE) == 0) {
-            // this SQL statement was never in cache
-            mCompiledSql.releaseSqlStatement();
-        } else {
-            if (!mDatabase.isInStatementCache(mCompiledSql)) {
-                // it is NOT in compiled-sql cache. i.e., responsibility of
-                // releasing this statement is on me.
-                mCompiledSql.releaseSqlStatement();
-            } else {
-                // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
-                mCompiledSql.release();
-            }
-        }
+        mDatabase.releaseCompiledSqlObj(mCompiledSql);
         mCompiledSql = null;
         nStatement = 0;
     }
@@ -239,34 +227,32 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     }
 
     private void bind(int type, int index, Object value) {
-        synchronized (this) {
-            mDatabase.verifyDbIsOpen();
-            addToBindArgs(index, (type == Cursor.FIELD_TYPE_NULL) ? null : value);
-            if (nStatement > 0) {
-                // bind only if the SQL statement is compiled
-                acquireReference();
-                try {
-                    switch (type) {
-                        case Cursor.FIELD_TYPE_NULL:
-                            native_bind_null(index);
-                            break;
-                        case Cursor.FIELD_TYPE_BLOB:
-                            native_bind_blob(index, (byte[]) value);
-                            break;
-                        case Cursor.FIELD_TYPE_FLOAT:
-                            native_bind_double(index, (Double) value);
-                            break;
-                        case Cursor.FIELD_TYPE_INTEGER:
-                            native_bind_long(index, (Long) value);
-                            break;
-                        case Cursor.FIELD_TYPE_STRING:
-                        default:
-                            native_bind_string(index, (String) value);
-                            break;
-                    }
-                } finally {
-                    releaseReference();
+        mDatabase.verifyDbIsOpen();
+        addToBindArgs(index, (type == Cursor.FIELD_TYPE_NULL) ? null : value);
+        if (nStatement > 0) {
+            // bind only if the SQL statement is compiled
+            acquireReference();
+            try {
+                switch (type) {
+                    case Cursor.FIELD_TYPE_NULL:
+                        native_bind_null(index);
+                        break;
+                    case Cursor.FIELD_TYPE_BLOB:
+                        native_bind_blob(index, (byte[]) value);
+                        break;
+                    case Cursor.FIELD_TYPE_FLOAT:
+                        native_bind_double(index, (Double) value);
+                        break;
+                    case Cursor.FIELD_TYPE_INTEGER:
+                        native_bind_long(index, (Long) value);
+                        break;
+                    case Cursor.FIELD_TYPE_STRING:
+                    default:
+                        native_bind_string(index, (String) value);
+                        break;
                 }
+            } finally {
+                releaseReference();
             }
         }
     }
@@ -335,18 +321,16 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * Clears all existing bindings. Unset bindings are treated as NULL.
      */
     public void clearBindings() {
-        synchronized (this) {
-            mBindArgs = null;
-            if (this.nStatement == 0) {
-                return;
-            }
-            mDatabase.verifyDbIsOpen();
-            acquireReference();
-            try {
-                native_clear_bindings();
-            } finally {
-                releaseReference();
-            }
+        mBindArgs = null;
+        if (this.nStatement == 0) {
+            return;
+        }
+        mDatabase.verifyDbIsOpen();
+        acquireReference();
+        try {
+            native_clear_bindings();
+        } finally {
+            releaseReference();
         }
     }
 
@@ -354,23 +338,21 @@ public abstract class SQLiteProgram extends SQLiteClosable {
      * Release this program's resources, making it invalid.
      */
     public void close() {
-        synchronized (this) {
-            mBindArgs = null;
-            if (nHandle == 0 || !mDatabase.isOpen()) {
-                return;
-            }
-            releaseReference();
+        mBindArgs = null;
+        if (nHandle == 0 || !mDatabase.isOpen()) {
+            return;
         }
+        releaseReference();
     }
 
-    private synchronized void addToBindArgs(int index, Object value) {
+    private void addToBindArgs(int index, Object value) {
         if (mBindArgs == null) {
             mBindArgs = new HashMap<Integer, Object>();
         }
         mBindArgs.put(index, value);
     }
 
-    /* package */ synchronized void compileAndbindAllArgs() {
+    /* package */ void compileAndbindAllArgs() {
         if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
             // no need to prepare this SQL statement
             if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
@@ -422,10 +404,8 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             return;
         }
         int size = bindArgs.length;
-        synchronized(this) {
-            for (int i = 0; i < size; i++) {
-                bindString(i + 1, bindArgs[i]);
-            }
+        for (int i = 0; i < size; i++) {
+            bindString(i + 1, bindArgs[i]);
         }
     }
 
