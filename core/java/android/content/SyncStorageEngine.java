@@ -1088,23 +1088,6 @@ public class SyncStorageEngine extends Handler {
     }
 
     /**
-     * Return the currently active sync information, or null if there is no
-     * active sync.  Note that the returned object is the real, live active
-     * sync object, so be careful what you do with it.
-     * <p>
-     * Since multiple concurrent syncs are now supported you should use
-     * {@link #getCurrentSyncs()} to get the accurate list of current syncs.
-     * This method returns the first item from the list of current syncs
-     * or null if there are none.
-     * @deprecated use {@link #getCurrentSyncs()}
-     */
-    public SyncInfo getCurrentSync() {
-        synchronized (mAuthorities) {
-            return !mCurrentSyncs.isEmpty() ? mCurrentSyncs.get(0) : null;
-        }
-    }
-
-    /**
      * Return a list of the currently active syncs. Note that the returned items are the
      * real, live active sync objects, so be careful what you do with it.
      */

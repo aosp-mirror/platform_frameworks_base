@@ -18,12 +18,13 @@ package android.content;
 
 import android.accounts.Account;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Parcelable.Creator;
 
 /**
  * Information about the sync operation that is currently underway.
  */
-public class SyncInfo {
+public class SyncInfo implements Parcelable {
     /** @hide */
     public final int authorityId;
 
