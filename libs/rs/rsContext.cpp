@@ -294,6 +294,7 @@ void * Context::threadProc(void *vrsc)
          LOGE("pthread_setspecific %i", status);
      }
 
+     rsc->mScriptC.init(rsc);
      if (rsc->mIsGraphicsContext) {
          rsc->mStateRaster.init(rsc);
          rsc->setRaster(NULL);

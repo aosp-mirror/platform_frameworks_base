@@ -33,6 +33,7 @@ public class UT_fp_mad extends UnitTest {
         pRS.mMessageCallback = mRsMessage;
         s.invoke_fp_mad_test(0, 0);
         pRS.finish();
+        waitForMessage();
         pRS.destroy();
     }
 }
