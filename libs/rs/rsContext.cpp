@@ -33,6 +33,8 @@
 #include <GLES2/gl2ext.h>
 
 #include <cutils/sched_policy.h>
+#include <sys/syscall.h>
+#include <string.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -371,11 +373,15 @@ void * Context::helperThreadProc(void *vrsc)
      rsc->mWorkers.mLaunchSignals[idx].init();
      rsc->mWorkers.mNativeThreadId[idx] = gettid();
 
-     //cpu_set_t cpset[16];
-     //int ret = sched_getaffinity(rsc->mWorkers.mNativeThreadId[idx], sizeof(cpset), &cpset);
-     //LOGE("ret = %i", ret);
-
-//sched_setaffinity
+#if 0
+     typedef struct {uint64_t bits[1024 / 64]; } cpu_set_t;
+     cpu_set_t cpuset;
+     memset(&cpuset, 0, sizeof(cpuset));
+     cpuset.bits[idx / 64] |= 1ULL << (idx % 64);
+     int ret = syscall(241, rsc->mWorkers.mNativeThreadId[idx],
+		       sizeof(cpuset), &cpuset);
+     LOGE("SETAFFINITY ret = %i %s", ret, EGLUtils::strerror(ret));
+#endif
 
      setpriority(PRIO_PROCESS, rsc->mWorkers.mNativeThreadId[idx], rsc->mThreadPriority);
      while(rsc->mRunning) {
@@ -490,6 +496,7 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
         usleep(100);
     }
 
+    mWorkers.mCompleteSignal.init();
     mWorkers.mRunningCount = 0;
     mWorkers.mLaunchCount = 0;
     for (uint32_t ct=0; ct < mWorkers.mCount; ct++) {

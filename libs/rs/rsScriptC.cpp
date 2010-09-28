@@ -201,7 +201,7 @@ static void wc_xy(void *usr, uint32_t idx)
         }
 
         //LOGE("usr idx %i, x %i,%i  y %i,%i", idx, mtls->xStart, mtls->xEnd, yStart, yEnd);
-
+        //LOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
         for (uint32_t y = yStart; y < yEnd; y++) {
             uint32_t offset = mtls->dimX * y;
             uint8_t *xPtrOut = mtls->ptrOut + (mtls->eStrideOut * offset);
@@ -296,14 +296,12 @@ void ScriptC::runForEach(Context *rsc,
         mtls.eStrideOut = aout->getType()->getElementSizeBytes();
     }
 
-
-    if ((rsc->getWorkerPoolSize() > 1) && mEnviroment.mIsThreadable &&
-        ((mtls.dimY * mtls.dimZ * mtls.dimArray) > 1)) {
+    if ((rsc->getWorkerPoolSize() > 1) && mEnviroment.mIsThreadable && (mtls.dimY > 1)) {
 
         //LOGE("launch 1");
         rsc->launchThreads(wc_xy, &mtls);
-        //LOGE("launch 2");
     } else {
+        //LOGE("launch 3");
         for (uint32_t ar = mtls.arrayStart; ar < mtls.arrayEnd; ar++) {
             for (uint32_t z = mtls.zStart; z < mtls.zEnd; z++) {
                 for (uint32_t y = mtls.yStart; y < mtls.yEnd; y++) {
@@ -380,11 +378,11 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
     if (sym) {
         return sym->mPtr;
     }
-    s->mEnviroment.mIsThreadable = false;
     sym = ScriptCState::lookupSymbolCL(name);
     if (sym) {
         return sym->mPtr;
     }
+    s->mEnviroment.mIsThreadable = false;
     sym = ScriptCState::lookupSymbolGL(name);
     if (sym) {
         return sym->mPtr;
