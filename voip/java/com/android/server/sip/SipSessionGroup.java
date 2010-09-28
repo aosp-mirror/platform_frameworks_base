@@ -82,7 +82,6 @@ class SipSessionGroup implements SipListener {
     private static final boolean DEBUG = true;
     private static final boolean DEBUG_PING = DEBUG && false;
     private static final String ANONYMOUS = "anonymous";
-    private static final String SERVER_ERROR_PREFIX = "Response: ";
     private static final int EXPIRY_TIME = 3600; // in seconds
     private static final int CANCEL_CALL_TIMER = 3; // in seconds
 
@@ -1099,8 +1098,8 @@ class SipSessionGroup implements SipListener {
         }
 
         private String createErrorMessage(Response response) {
-            return String.format(SERVER_ERROR_PREFIX + "%s (%d)",
-                    response.getReasonPhrase(), response.getStatusCode());
+            return String.format("%s (%d)", response.getReasonPhrase(),
+                    response.getStatusCode());
         }
 
         private void establishCall() {
@@ -1204,8 +1203,6 @@ class SipSessionGroup implements SipListener {
                 return SipErrorCode.INVALID_REMOTE_URI;
             } else if (exception instanceof IOException) {
                 return SipErrorCode.SOCKET_ERROR;
-            } else if (message.startsWith(SERVER_ERROR_PREFIX)) {
-                return SipErrorCode.SERVER_ERROR;
             } else {
                 return SipErrorCode.CLIENT_ERROR;
             }
