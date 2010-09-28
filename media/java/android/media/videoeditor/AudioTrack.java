@@ -35,6 +35,11 @@ public class AudioTrack {
     private long mEndBoundaryTimeMs;
     private boolean mLoop;
 
+    private final int mAudioChannels;
+    private final int mAudioType;
+    private final int mAudioBitrate;
+    private final int mAudioSamplingFrequency;
+
     // Ducking variables
     private int mDuckingThreshold;
     private int mDuckingLowVolume;
@@ -54,7 +59,6 @@ public class AudioTrack {
 
     /**
      * Constructor
-     *
      * @param audioTrackId The AudioTrack id
      * @param filename The absolute file name
      *
@@ -68,6 +72,13 @@ public class AudioTrack {
         mStartTimeMs = 0;
         // TODO: This value represents to the duration of the audio file
         mDurationMs = 300000;
+        // TODO: This value needs to be read from the audio track of the source
+        // file
+        mAudioChannels = 2;
+        mAudioType = MediaProperties.ACODEC_AAC_LC;
+        mAudioBitrate = 128000;
+        mAudioSamplingFrequency = 44100;
+
         mTimelineDurationMs = mDurationMs;
         mVolumePercent = 100;
 
@@ -104,6 +115,34 @@ public class AudioTrack {
     }
 
     /**
+     * @return The number of audio channels in the source of this audio track
+     */
+    public int getAudioChannels() {
+        return mAudioChannels;
+    }
+
+    /**
+     * @return The audio codec of the source of this audio track
+     */
+    public int getAudioType() {
+        return mAudioType;
+    }
+
+    /**
+     * @return The audio sample frequency of the audio track
+     */
+    public int getAudioSamplingFrequency() {
+        return mAudioSamplingFrequency;
+    }
+
+    /**
+     * @return The audio bitrate of the audio track
+     */
+    public int getAudioBitrate() {
+        return mAudioBitrate;
+    }
+
+    /**
      * Set the volume of this audio track as percentage of the volume in the
      * original audio source file.
      *
@@ -112,8 +151,8 @@ public class AudioTrack {
      *            is same as original volume. It it is set to 200, then volume
      *            is doubled (provided that volume amplification is supported)
      *
-     * @throws UnsupportedOperationException if volume amplification is requested
-     *             and is not supported.
+     * @throws UnsupportedOperationException if volume amplification is
+     *             requested and is not supported.
      */
     public void setVolume(int volumePercent) {
         mVolumePercent = volumePercent;
@@ -209,8 +248,8 @@ public class AudioTrack {
 
     /**
      * Enable the loop mode for this audio track. Note that only one of the
-     * audio tracks in the timeline can have the loop mode enabled. When
-     * looping is enabled the samples between mBeginBoundaryTimeMs and
+     * audio tracks in the timeline can have the loop mode enabled. When looping
+     * is enabled the samples between mBeginBoundaryTimeMs and
      * mEndBoundaryTimeMs are looped.
      */
     public void enableLoop() {
@@ -285,18 +324,19 @@ public class AudioTrack {
      */
     public void extractAudioWaveform(ExtractAudioWaveformProgressListener listener)
             throws IOException {
-        // TODO: Set mAudioWaveformFilename at the end once the extract is complete
+        // TODO: Set mAudioWaveformFilename at the end once the extract is
+        // complete
     }
 
     /**
      * Get the audio waveform file name if extractAudioWaveform was successful.
      * The file format is as following:
      * <ul>
-     *  <li>first 4 bytes provide the number of samples for each value, as
-     *      big-endian signed</li>
-     *  <li>4 following bytes is the total number of values in the file, as
-     *      big-endian signed</li>
-     *  <li>then, all values follow as bytes</li>
+     * <li>first 4 bytes provide the number of samples for each value, as
+     * big-endian signed</li>
+     * <li>4 following bytes is the total number of values in the file, as
+     * big-endian signed</li>
+     * <li>then, all values follow as bytes</li>
      * </ul>
      *
      * @return the name of the file, null if the file does not exist
