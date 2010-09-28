@@ -241,15 +241,14 @@ public abstract class ContentResolver {
         if (provider == null) {
             return null;
         }
+
         try {
             return provider.getStreamTypes(url, mimeTypeFilter);
         } catch (RemoteException e) {
             return null;
-        } catch (java.lang.Exception e) {
-            return null;
         } finally {
-            releaseProvider(provider);
-        }
+			releaseProvider(provider);
+		}
     }
 
     /**
