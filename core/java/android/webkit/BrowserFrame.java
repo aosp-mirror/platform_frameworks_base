@@ -74,7 +74,8 @@ class BrowserFrame extends Handler {
     // queue has been cleared,they are ignored.
     private boolean mBlockMessages = false;
 
-    private static String sDataDirectory = "";
+    private static String sDatabaseDirectory;
+    private static String sCacheDirectory;
 
     // Is this frame the main frame?
     private boolean mIsMainFrame;
@@ -228,9 +229,11 @@ class BrowserFrame extends Handler {
         AssetManager am = context.getAssets();
         nativeCreateFrame(w, am, proxy.getBackForwardList());
 
-        if (sDataDirectory.length() == 0) {
-            String dir = appContext.getFilesDir().getAbsolutePath();
-            sDataDirectory =  dir.substring(0, dir.lastIndexOf('/'));
+        if (sDatabaseDirectory == null) {
+            sDatabaseDirectory = appContext.getDatabasePath("dummy").getParent();
+        }
+        if (sCacheDirectory == null) {
+            sCacheDirectory = appContext.getCacheDir().getAbsolutePath();
         }
 
         if (DebugFlags.BROWSER_FRAME) {
@@ -652,11 +655,19 @@ class BrowserFrame extends Handler {
     }
 
     /**
-     * Called by JNI. Gets the applications data directory
-     * @return String The applications data directory
+     * Called by JNI. Gets the application's database directory, excluding the trailing slash.
+     * @return String The application's database directory
      */
-    private static String getDataDirectory() {
-        return sDataDirectory;
+    private static String getDatabaseDirectory() {
+        return sDatabaseDirectory;
+    }
+
+    /**
+     * Called by JNI. Gets the application's cache directory, excluding the trailing slash.
+     * @return String The application's cache directory
+     */
+    private static String getCacheDirectory() {
+        return sCacheDirectory;
     }
 
     /**

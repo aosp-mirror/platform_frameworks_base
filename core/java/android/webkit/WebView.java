@@ -1875,10 +1875,18 @@ public class WebView extends AbsoluteLayout
      * @hide pending API council approval.
      */
     public static boolean cleanupPrivateBrowsingFiles(Context context) {
-        return nativeCleanupPrivateBrowsingFiles(context.getFilesDir().getParent());
+        // It seems wrong that we have to pass the storage locations here, given
+        // that the storage files are created native-side in WebRequestContext
+        // (albeit using a dumb getter on BrowserFrame to get the paths from
+        // Java). It looks like this is required because we may need to call
+        // this method before the BrowserFrame has been set up.
+        // TODO: Investigate whether this can be avoided.
+        return nativeCleanupPrivateBrowsingFiles(context.getDatabasePath("dummy").getParent(),
+                                                 context.getCacheDir().getAbsolutePath());
     }
 
-    private static native boolean nativeCleanupPrivateBrowsingFiles(String dataDirectory);
+    private static native boolean nativeCleanupPrivateBrowsingFiles(String databaseDirectory,
+                                                                    String cacheDirectory);
 
     private boolean extendScroll(int y) {
         int finalY = mScroller.getFinalY();

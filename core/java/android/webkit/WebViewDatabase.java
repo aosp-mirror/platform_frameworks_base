@@ -67,6 +67,9 @@ public class WebViewDatabase {
     private final Object mFormLock = new Object();
     private final Object mHttpAuthLock = new Object();
 
+    // TODO: The Chromium HTTP stack handles cookies independently.
+    // We should consider removing the cookies table if and when we switch to
+    // the Chromium HTTP stack for good.
     private static final String mTableNames[] = {
         "cookies", "password", "formurl", "formdata", "httpauth"
     };
