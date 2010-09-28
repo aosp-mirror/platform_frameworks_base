@@ -21,6 +21,7 @@ import android.os.Message;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A Thread that is responsible for generating a lists of tests to run.
@@ -35,7 +36,7 @@ public class TestsListPreloaderThread extends Thread {
     private FileFilter mFileFilter;
 
     /**
-     * A relative path to the folder with the tests we want to run or particular test.
+     * A relative path to the directory with the tests we want to run or particular test.
      * Used up to and including preloadTests().
      */
     private String mRelativePath;
@@ -67,40 +68,44 @@ public class TestsListPreloaderThread extends Thread {
     }
 
     /**
-     * Loads all the tests from the given folders and all the subfolders
+     * Loads all the tests from the given directories and all the subdirectories
      * into mTestsList.
      *
      * @param dirRelativePath
      */
-    private void loadTestsFromUrl(String dirRelativePath) {
-        LinkedList<String> foldersList = new LinkedList<String>();
-        foldersList.add(dirRelativePath);
+    private void loadTestsFromUrl(String rootRelativePath) {
+        LinkedList<String> directoriesList = new LinkedList<String>();
+        directoriesList.add(rootRelativePath);
 
         String relativePath;
         String itemName;
-        while (!foldersList.isEmpty()) {
-            relativePath = foldersList.removeFirst();
+        while (!directoriesList.isEmpty()) {
+            relativePath = directoriesList.removeFirst();
 
-            for (String folderRelativePath : FsUtils.getLayoutTestsDirContents(relativePath,
-                    false, true)) {
-                itemName = new File(folderRelativePath).getName();
-                if (FileFilter.isTestDir(itemName)) {
-                    foldersList.add(folderRelativePath);
+            List<String> dirRelativePaths = FsUtils.getLayoutTestsDirContents(relativePath, false, true);
+            if (dirRelativePaths != null) {
+                for (String dirRelativePath : dirRelativePaths) {
+                    itemName = new File(dirRelativePath).getName();
+                    if (FileFilter.isTestDir(itemName)) {
+                        directoriesList.add(dirRelativePath);
+                    }
                 }
             }
 
-            for (String testRelativePath : FsUtils.getLayoutTestsDirContents(relativePath,
-                    false, false)) {
-                itemName = new File(testRelativePath).getName();
-                if (FileFilter.isTestFile(itemName)) {
-                    /** We chose to skip all the tests that are expected to crash. */
-                    if (!mFileFilter.isCrash(testRelativePath)) {
-                        mTestsList.add(testRelativePath);
-                    } else {
-                        /**
-                         * TODO: Summarizer is now in service - figure out how to send the info.
-                         * Previously: mSummarizer.addSkippedTest(relativePath);
-                         */
+            List<String> testRelativePaths = FsUtils.getLayoutTestsDirContents(relativePath, false, false);
+            if (testRelativePaths != null) {
+                for (String testRelativePath : testRelativePaths) {
+                    itemName = new File(testRelativePath).getName();
+                    if (FileFilter.isTestFile(itemName)) {
+                        /** We choose to skip all the tests that are expected to crash. */
+                        if (!mFileFilter.isCrash(testRelativePath)) {
+                            mTestsList.add(testRelativePath);
+                        } else {
+                            /**
+                             * TODO: Summarizer is now in service - figure out how to send the info.
+                             * Previously: mSummarizer.addSkippedTest(relativePath);
+                             */
+                        }
                     }
                 }
             }
