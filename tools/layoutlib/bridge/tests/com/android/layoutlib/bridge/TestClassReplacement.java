@@ -17,6 +17,8 @@
 package com.android.layoutlib.bridge;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 
 import junit.framework.TestCase;
 
@@ -26,7 +28,8 @@ public class TestClassReplacement extends TestCase {
         // TODO: we want to test all the classes. For now only Paint passes the tests.
 //        final String[] classes = CreateInfo.RENAMED_CLASSES;
         final String[] classes = new String[] {
-                "android.graphics.Paint",               "android.graphics._Original_Paint"
+                "android.graphics.Paint",               "android.graphics._Original_Paint",
+                "android.graphics.Canvas",               "android.graphics._Original_Canvas",
         };
         final int count = classes.length;
         for (int i = 0 ; i < count ; i += 2) {
@@ -52,12 +55,21 @@ public class TestClassReplacement extends TestCase {
         Method[] oldClassMethods = oldClass.getDeclaredMethods();
 
         for (Method oldMethod : oldClassMethods) {
-            // we ignore anything that starts with native
+            // we ignore anything that starts with native. This is because the class we are looking
+            // at has already been modified to remove the native modifiers.
             if (oldMethod.getName().startsWith("native")) {
                 continue;
             }
+
+            // or static and private
+            int privateStatic = Modifier.STATIC | Modifier.PRIVATE;
+            if ((oldMethod.getModifiers() & privateStatic) == privateStatic) {
+                continue;
+            }
+
             boolean found = false;
             for (Method newMethod : newClassMethods) {
+
                 if (compareMethods(newClass, newMethod, oldClass, oldMethod)) {
                     found = true;
                     break;
@@ -65,7 +77,31 @@ public class TestClassReplacement extends TestCase {
             }
 
             if (found == false) {
-                fail(String.format("Unable to find %1$s", oldMethod.toGenericString()));
+                // compute a full class name that's long but not too long.
+                StringBuilder sb = new StringBuilder(oldMethod.getName() + "(");
+                Type[] params = oldMethod.getGenericParameterTypes();
+                for (int j = 0; j < params.length; j++) {
+                    if (params[j] instanceof Class) {
+                        Class theClass = (Class)params[j];
+                        sb.append(theClass.getName());
+                        int dimensions = 0;
+                        while (theClass.isArray()) {
+                            dimensions++;
+                            theClass = theClass.getComponentType();
+                        }
+                        for (int i = 0; i < dimensions; i++) {
+                            sb.append("[]");
+                        }
+
+                    } else {
+                        sb.append(params[j].toString());
+                    }
+                if (j < (params.length - 1))
+                    sb.append(",");
+                }
+                sb.append(")");
+
+                fail(String.format("Missing %1$s.%2$s", newClass.getName(), sb.toString()));
             }
         }
 
