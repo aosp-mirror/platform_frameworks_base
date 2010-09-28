@@ -42,10 +42,10 @@ void primitives_test(uint32_t index, int test_num) {
     failed |= test_primitive_types(index);
 
     if (failed) {
-        rsSendToClient(RS_MSG_TEST_FAILED);
+        rsSendToClientBlocking(RS_MSG_TEST_FAILED);
     }
     else {
-        rsSendToClient(RS_MSG_TEST_PASSED);
+        rsSendToClientBlocking(RS_MSG_TEST_PASSED);
     }
 }
 

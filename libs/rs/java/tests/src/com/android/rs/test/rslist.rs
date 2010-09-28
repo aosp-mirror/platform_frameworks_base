@@ -56,6 +56,27 @@ int root(int launchID) {
     int height = rsgGetHeight();
 
     int itemHeight = 80;
+    int totalItemHeight = itemHeight * allocSize;
+
+    /* Prevent scrolling above the top of the list */
+    int firstItem = height - totalItemHeight;
+    if (firstItem < 0) {
+        firstItem = 0;
+    }
+
+    /* Prevent scrolling past the last line of the list */
+    int lastItem = -1 * (totalItemHeight - height);
+    if (lastItem > 0) {
+        lastItem = 0;
+    }
+
+    if (textPos > firstItem) {
+        textPos = firstItem;
+    }
+    else if (textPos < lastItem) {
+        textPos = lastItem;
+    }
+
     int currentYPos = itemHeight + textPos;
 
     for(int i = 0; i < allocSize; i ++) {
