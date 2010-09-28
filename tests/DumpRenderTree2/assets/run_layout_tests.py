@@ -12,6 +12,7 @@
 import logging
 import optparse
 import os
+import re
 import sys
 import subprocess
 import tempfile
@@ -47,10 +48,13 @@ def main(options, args):
   cmd = "adb shell am instrument "
   cmd += "-e class com.android.dumprendertree2.scriptsupport.Starter#startLayoutTests "
   cmd += "-e path \"" + path + "\" "
-  cmd +="-w com.android.dumprendertree2/com.android.dumprendertree2.scriptsupport.ScriptTestRunner"
+  cmd += "-w com.android.dumprendertree2/com.android.dumprendertree2.scriptsupport.ScriptTestRunner"
 
   logging.info("Running the tests...")
-  subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+  (stdoutdata, stderrdata) = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+  if re.search("^INSTRUMENTATION_STATUS_CODE: -1", stdoutdata, re.MULTILINE) != None:
+    logging.info("Failed to run the tests. Is DumpRenderTree2 installed on the device?")
+    return
 
   logging.info("Downloading the summaries...")
 
@@ -58,13 +62,13 @@ def main(options, args):
   summary_txt_tmp_path = os.path.join(tmpdir, SUMMARY_TXT)
   cmd = "rm -f " + summary_txt_tmp_path + ";"
   cmd += "adb pull " + RESULTS_ABSOLUTE_PATH + SUMMARY_TXT + " " + summary_txt_tmp_path
-  subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+  subprocess.Popen(cmd, shell=True).wait()
 
   # Download the html summary to tmp folder
   details_html_tmp_path = os.path.join(tmpdir, DETAILS_HTML)
   cmd = "rm -f " + details_html_tmp_path + ";"
   cmd += "adb pull " + RESULTS_ABSOLUTE_PATH + DETAILS_HTML + " " + details_html_tmp_path
-  subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+  subprocess.Popen(cmd, shell=True).wait()
 
   # Print summary to console
   logging.info("All done.\n")

@@ -568,7 +568,8 @@ public class VideoEditorTestImpl implements VideoEditor {
                             mvi.getAudioWaveformFilename());
                 }
             } else if (mediaItem instanceof MediaImageItem) {
-                serializer.attribute("", ATTR_DURATION, Long.toString(mediaItem.getDuration()));
+                serializer.attribute("", ATTR_DURATION,
+                        Long.toString(mediaItem.getTimelineDuration()));
             }
 
             serializer.endTag("", TAG_MEDIA_ITEM);

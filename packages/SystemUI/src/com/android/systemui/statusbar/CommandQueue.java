@@ -175,8 +175,10 @@ public class CommandQueue extends IStatusBar.Stub {
                             break;
                         }
                         case OP_REMOVE_ICON:
-                            mList.removeIcon(index);
-                            mCallbacks.removeIcon(mList.getSlot(index), index, viewIndex);
+                            if (mList.getIcon(index) != null) {
+                                mList.removeIcon(index);
+                                mCallbacks.removeIcon(mList.getSlot(index), index, viewIndex);
+                            }
                             break;
                     }
                     break;

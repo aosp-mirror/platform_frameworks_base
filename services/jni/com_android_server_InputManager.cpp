@@ -207,7 +207,7 @@ public:
     virtual int32_t getMaxEventsPerSecond();
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags);
-    virtual void pokeUserActivity(nsecs_t eventTime, int32_t windowType, int32_t eventType);
+    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
             int32_t injectorPid, int32_t injectorUid);
 
@@ -973,10 +973,8 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& i
     return consumed && ! error;
 }
 
-void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t windowType, int32_t eventType) {
-    if (windowType != InputWindow::TYPE_KEYGUARD) {
-        android_server_PowerManagerService_userActivity(eventTime, eventType);
-    }
+void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) {
+    android_server_PowerManagerService_userActivity(eventTime, eventType);
 }
 
 
@@ -1288,6 +1286,25 @@ static void android_server_InputManager_nativeGetInputConfiguration(JNIEnv* env,
     env->SetIntField(configObj, gConfigurationClassInfo.navigation, config.navigation);
 }
 
+static jboolean android_server_InputManager_nativeTransferTouchFocus(JNIEnv* env,
+        jclass clazz, jobject fromChannelObj, jobject toChannelObj) {
+    if (checkInputManagerUnitialized(env)) {
+        return false;
+    }
+
+    sp<InputChannel> fromChannel =
+            android_view_InputChannel_getInputChannel(env, fromChannelObj);
+    sp<InputChannel> toChannel =
+            android_view_InputChannel_getInputChannel(env, toChannelObj);
+
+    if (fromChannel == NULL || toChannel == NULL) {
+        return false;
+    }
+
+    return gNativeInputManager->getInputManager()->getDispatcher()->
+            transferTouchFocus(fromChannel, toChannel);
+}
+
 static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz) {
     if (checkInputManagerUnitialized(env)) {
         return NULL;
@@ -1336,6 +1353,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeGetInputDeviceIds },
     { "nativeGetInputConfiguration", "(Landroid/content/res/Configuration;)V",
             (void*) android_server_InputManager_nativeGetInputConfiguration },
+    { "nativeTransferTouchFocus", "(Landroid/view/InputChannel;Landroid/view/InputChannel;)Z",
+            (void*) android_server_InputManager_nativeTransferTouchFocus },
     { "nativeDump", "()Ljava/lang/String;",
             (void*) android_server_InputManager_nativeDump },
 };

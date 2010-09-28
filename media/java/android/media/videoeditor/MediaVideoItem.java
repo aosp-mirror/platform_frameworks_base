@@ -17,6 +17,7 @@
 package android.media.videoeditor;
 
 import java.io.IOException;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.media.MediaRecorder;
@@ -81,7 +82,8 @@ public class MediaVideoItem extends MediaItem {
         private final PlaybackProgressListener mListener;
         private final int mCallbackAfterFrameCount;
         private final long mFromMs, mToMs;
-        private boolean mRun, mLoop;
+        private boolean mRun;
+        private final boolean mLoop;
         private long mPositionMs;
 
         /**
@@ -222,8 +224,8 @@ public class MediaVideoItem extends MediaItem {
             String audioWaveformFilename)  throws IOException {
         super(mediaItemId, filename, renderingMode);
         // TODO: Set these variables correctly
-        mWidth = 0;
-        mHeight = 0;
+        mWidth = 1080;
+        mHeight = 720;
         mAspectRatio = MediaProperties.ASPECT_RATIO_3_2;
         mFileType = MediaProperties.FILE_MP4;
         mVideoType = MediaRecorder.VideoEncoder.H264;
@@ -297,7 +299,31 @@ public class MediaVideoItem extends MediaItem {
             }
         }
 
-        // TODO: Validate/modify the start and the end time of effects and overlays
+        final List<Overlay> overlays = getAllOverlays();
+        for (Overlay overlay : overlays) {
+            // Adjust the start time if necessary
+            if (overlay.getStartTime() < mBeginBoundaryTimeMs) {
+                overlay.setStartTime(mBeginBoundaryTimeMs);
+            }
+
+            // Adjust the duration if necessary
+            if (overlay.getStartTime() + overlay.getDuration() > getTimelineDuration()) {
+                overlay.setDuration(getTimelineDuration() - overlay.getStartTime());
+            }
+        }
+
+        final List<Effect> effects = getAllEffects();
+        for (Effect effect : effects) {
+            // Adjust the start time if necessary
+            if (effect.getStartTime() < mBeginBoundaryTimeMs) {
+                effect.setStartTime(mBeginBoundaryTimeMs);
+            }
+
+            // Adjust the duration if necessary
+            if (effect.getStartTime() + effect.getDuration() > getTimelineDuration()) {
+                effect.setDuration(getTimelineDuration() - effect.getStartTime());
+            }
+        }
     }
 
     /**
@@ -374,10 +400,9 @@ public class MediaVideoItem extends MediaItem {
         return mHeight;
     }
 
-    /*
-     * {@inheritDoc}
+    /**
+     * @return The duration of the video clip
      */
-    @Override
     public long getDuration() {
         return mDurationMs;
     }

@@ -18,8 +18,8 @@
 */
 -->
 <resources>
-	<drawable name="screen_background_light">#ffefefef</drawable>
-	<drawable name="screen_background_dark">#ff101010</drawable>
+	  <drawable name="screen_background_light">#fff3f3f3</drawable>
+	  <drawable name="screen_background_dark">#ff000000</drawable>
     <drawable name="status_bar_closed_default_background">#ff000000</drawable>
     <drawable name="status_bar_opened_default_background">#ff000000</drawable>
     <drawable name="search_bar_default_color">#ff000000</drawable>
@@ -36,8 +36,8 @@
     <color name="white">#ffffffff</color>
     <color name="black">#ff000000</color>
     <color name="transparent">#00000000</color>
-    <color name="background_dark">#ff101010</color>
-    <color name="background_light">#ffefefef</color>
+    <color name="background_dark">#ff000000</color>
+    <color name="background_light">#fff3f3f3</color>
     <color name="bright_foreground_dark">@android:color/background_light</color>
     <color name="bright_foreground_light">@android:color/background_dark</color>
     <color name="bright_foreground_dark_disabled">#80ffffff</color>
@@ -103,5 +103,32 @@
     <color name="keyguard_text_color_soundon">#e69310</color>
     <color name="keyguard_text_color_decline">#fe0a5a</color>
 
+    <!-- For holo theme -->
+	  <drawable name="screen_background_holo_light">#fff3f3f3</drawable>
+	  <drawable name="screen_background_holo_dark">#ff000000</drawable>
+    <color name="background_holo_dark">#ff000000</color>
+    <color name="background_holo_light">#fff3f3f3</color>
+    <color name="bright_foreground_holo_dark">@android:color/background_holo_light</color>
+    <color name="bright_foreground_holo_light">@android:color/background_holo_dark</color>
+    <color name="bright_foreground_disabled_holo_dark">#80ffffff</color>
+    <color name="bright_foreground_disabled_holo_light">#80000000</color>
+    <color name="bright_foreground_inverse_holo_dark">@android:color/bright_foreground_holo_light</color>
+    <color name="bright_foreground_inverse_holo_light">@android:color/bright_foreground_holo_dark</color>
+    <color name="dim_foreground_holo_dark">#bebebe</color>
+    <color name="dim_foreground_disabled_holo_dark">#80bebebe</color>
+    <color name="dim_foreground_inverse_holo_dark">#323232</color>
+    <color name="dim_foreground_inverse_disabled_holo_dark">#80323232</color>
+    <color name="hint_foreground_holo_dark">#808080</color>
+    <color name="dim_foreground_holo_light">#323232</color>
+    <color name="dim_foreground_disabled_holo_light">#80323232</color>
+    <color name="dim_foreground_inverse_holo_light">#bebebe</color>
+    <color name="dim_foreground_inverse_disabled_holo_light">#80bebebe</color>
+    <color name="hint_foreground_holo_light">#808080</color>
+    <color name="highlight_background_holo">#cc475925</color>
+    <color name="highlight_background_inverse_holo">#ccd2e461</color>
+    <color name="highlighted_text_holo_dark">#cc475925</color>
+    <color name="highlighted_text_holo_light">#ccd2e461</color>
+    <color name="link_text_holo_dark">#5c5cff</color>
+    <color name="link_text_holo_light">#0000ee</color>
 </resources>
 

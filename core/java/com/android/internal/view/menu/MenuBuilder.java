@@ -84,7 +84,7 @@ public class MenuBuilder implements Menu {
     static final int THEME_RES_FOR_TYPE[] = new int[] {
         com.android.internal.R.style.Theme_IconMenu,
         com.android.internal.R.style.Theme_ExpandedMenu,
-        0,
+        com.android.internal.R.style.Theme_Light,
         -1,
         -1,
     };

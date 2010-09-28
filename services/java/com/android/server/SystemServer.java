@@ -17,7 +17,6 @@
 package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
-import com.android.server.sip.SipService;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 
@@ -432,16 +431,6 @@ class ServerThread extends Thread {
                             new SamplingProfilerService(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting SamplingProfiler Service", e);
-            }
-
-            try {
-                SipService sipService = SipService.create(context);
-                if (sipService != null) {
-                    Slog.i(TAG, "Sip Service");
-                    ServiceManager.addService("sip", sipService);
-                }
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting SIP Service", e);
             }
 
             try {

@@ -85,6 +85,8 @@ public class FileFilter {
         // http://b/issue?id=2889598
         "http/tests/xmlhttprequest/simple-cross-origin-progress-events.html", // runs webcore into bad state
         // http://b/2982500
+        "canvas/philip/tests/2d.drawImage.broken.html", // blocks test
+        // http://b/2982500
     };
 
     static void fillIgnoreResultList() {

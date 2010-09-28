@@ -29,6 +29,7 @@ public class MediaProperties {
     public static final int HEIGHT_360 = 360;
     public static final int HEIGHT_480 = 480;
     public static final int HEIGHT_720 = 720;
+    public static final int HEIGHT_1080 = 1080;
 
     // Supported aspect ratios
     public static final int ASPECT_RATIO_UNDEFINED = 0;

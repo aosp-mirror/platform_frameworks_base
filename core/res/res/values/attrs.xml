@@ -101,6 +101,9 @@
         <attr name="textColorHighlightInverse" format="reference|color" />
         <!-- Color of link text (URLs), when used in a light theme. @hide -->
         <attr name="textColorLinkInverse" format="reference|color" />
+
+        <!-- Color of list item text in alert dialogs. -->
+        <attr name="textColorAlertDialogListItem" format="reference|color" />
         
         <!-- Search widget more corpus result item background. -->
         <attr name="searchWidgetCorpusItemBackground" format="reference|color" />
@@ -197,6 +200,8 @@
         <!-- The list item height for search results. @hide -->
         <attr name="searchResultListItemHeight" format="dimension" />
         <attr name="listDivider" format="reference" />
+        <!-- The list divider used in alert dialogs. -->
+        <attr name="listDividerAlertDialog" format="reference" />
         <!-- TextView style for list separators. -->
         <attr name="listSeparatorTextViewStyle" format="reference" />
         <!-- The preferred left padding for an expandable list item (for child-specific layouts,

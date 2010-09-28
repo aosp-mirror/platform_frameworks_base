@@ -1358,6 +1358,8 @@
   <public type="attr" name="textAppearanceSmallPopupMenu" />
   <public type="attr" name="breadCrumbTitle" />
   <public type="attr" name="breadCrumbShortTitle" />
+  <public type="attr" name="listDividerAlertDialog" />
+  <public type="attr" name="textColorAlertDialogListItem" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

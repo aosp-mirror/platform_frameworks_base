@@ -135,28 +135,6 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         c.close();
     }
 
-    @SmallTest
-    public void testSetConnectionPoolSize() {
-        mDatabase.enableWriteAheadLogging();
-        // can't set pool size to zero
-        try {
-            mDatabase.setConnectionPoolSize(0);
-            fail("IllegalStateException expected");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("less than the current max value"));
-        }
-        // set pool size to a valid value
-        mDatabase.setConnectionPoolSize(10);
-        assertEquals(10, mDatabase.mConnectionPool.getMaxPoolSize());
-        // can't set pool size to < the value above
-        try {
-            mDatabase.setConnectionPoolSize(1);
-            fail("IllegalStateException expected");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("less than the current max value"));
-        }
-    }
-
     /**
      * a transaction should be started before a standalone-update/insert/delete statement
      */
@@ -299,7 +277,7 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
             if (useWal) {
                 // set up connection pool
                 mDatabase.enableWriteAheadLogging();
-                mDatabase.setConnectionPoolSize(i + 1);
+                mDatabase.mConnectionPool.setMaxPoolSize(i + 1);
             } else {
                 mDatabase.disableWriteAheadLogging();
             }

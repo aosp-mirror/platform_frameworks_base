@@ -19,6 +19,7 @@ package android.app;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils.TruncateAt;
 import android.view.LayoutInflater;
@@ -82,7 +83,9 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
             int year,
             int monthOfYear,
             int dayOfMonth) {
-        this(context, com.android.internal.R.style.Theme_Dialog_Alert,
+        this(context, context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
+                        ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
+                        : com.android.internal.R.style.Theme_Dialog_Alert,
                 callBack, year, monthOfYear, dayOfMonth);
     }
 

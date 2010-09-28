@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.view.KeyEvent;
@@ -56,7 +57,10 @@ public class AlertDialog extends Dialog implements DialogInterface {
     private AlertController mAlert;
 
     protected AlertDialog(Context context) {
-        this(context, com.android.internal.R.style.Theme_Dialog_Alert);
+        this(context,
+                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
+                        ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
+                        : com.android.internal.R.style.Theme_Dialog_Alert);
     }
 
     protected AlertDialog(Context context, int theme) {
@@ -65,7 +69,10 @@ public class AlertDialog extends Dialog implements DialogInterface {
     }
 
     protected AlertDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
-        super(context, com.android.internal.R.style.Theme_Dialog_Alert);
+        super(context,
+                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
+                ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
+                : com.android.internal.R.style.Theme_Dialog_Alert);
         setCancelable(cancelable);
         setOnCancelListener(cancelListener);
         mAlert = new AlertController(context, this, getWindow());
@@ -271,7 +278,10 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * Constructor using a context for this builder and the {@link AlertDialog} it creates.
          */
         public Builder(Context context) {
-            this(context, com.android.internal.R.style.Theme_Dialog_Alert);
+            this(context,
+                    context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
+                    ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
+                    : com.android.internal.R.style.Theme_Dialog_Alert);
         }
 
         /**

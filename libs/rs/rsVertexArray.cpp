@@ -84,6 +84,10 @@ void VertexArray::clear(uint32_t n)
 
 void VertexArray::add(const Attrib &a, uint32_t stride)
 {
+    // Skip padding
+    if(a.name[0] == '#') {
+        return;
+    }
     rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].set(a);
     mAttribs[mCount].buffer = mActiveBuffer;
@@ -94,6 +98,10 @@ void VertexArray::add(const Attrib &a, uint32_t stride)
 
 void VertexArray::add(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name)
 {
+    // Skip padding
+    if(name[0] == '#') {
+        return;
+    }
     rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].clear();
     mAttribs[mCount].type = type;
@@ -129,12 +137,7 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
 
     rsc->checkError("VertexArray::setupGL2 disabled");
     for (uint32_t ct=0; ct < mCount; ct++) {
-        int32_t slot = 0;
-
-        if (mAttribs[ct].name[0] == '#') {
-            continue;
-        }
-
+        int32_t slot = -1;
         if (sc->isUserVertexProgram()) {
             slot = sc->vtxAttribSlot(ct);
         } else {
@@ -146,14 +149,11 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
                 slot = 2;
             } else if (mAttribs[ct].name == "texture0") {
                 slot = 3;
-            } else {
-                continue;
             }
         }
         if(slot < 0) {
             continue;
         }
-
         //logAttrib(ct, slot);
         glEnableVertexAttribArray(slot);
         glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);

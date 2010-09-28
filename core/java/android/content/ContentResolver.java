@@ -17,6 +17,7 @@
 package android.content;
 
 import android.accounts.Account;
+import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -176,6 +177,12 @@ public abstract class ContentResolver {
 
     /** @hide */
     protected abstract IContentProvider acquireProvider(Context c, String name);
+    /** Providing a default implementation of this, to avoid having to change
+     * a lot of other things, but implementations of ContentResolver should
+     * implement it. @hide */
+    protected IContentProvider acquireExistingProvider(Context c, String name) {
+        return acquireProvider(c, name);
+    }
     /** @hide */
     public abstract boolean releaseProvider(IContentProvider icp);
 
@@ -187,18 +194,28 @@ public abstract class ContentResolver {
      * @return A MIME type for the content, or null if the URL is invalid or the type is unknown
      */
     public final String getType(Uri url) {
-        IContentProvider provider = acquireProvider(url);
-        if (provider == null) {
+        IContentProvider provider = acquireExistingProvider(url);
+        if (provider != null) {
+            try {
+                return provider.getType(url);
+            } catch (RemoteException e) {
+                return null;
+            } catch (java.lang.Exception e) {
+                return null;
+            } finally {
+                releaseProvider(provider);
+            }
+        }
+
+        if (!SCHEME_CONTENT.equals(url.getScheme())) {
             return null;
         }
+
         try {
-            return provider.getType(url);
+            String type = ActivityManagerNative.getDefault().getProviderMimeType(url);
+            return type;
         } catch (RemoteException e) {
             return null;
-        } catch (java.lang.Exception e) {
-            return null;
-        } finally {
-            releaseProvider(provider);
         }
     }
 
@@ -224,15 +241,14 @@ public abstract class ContentResolver {
         if (provider == null) {
             return null;
         }
+
         try {
             return provider.getStreamTypes(url, mimeTypeFilter);
         } catch (RemoteException e) {
             return null;
-        } catch (java.lang.Exception e) {
-            return null;
         } finally {
-            releaseProvider(provider);
-        }
+			releaseProvider(provider);
+		}
     }
 
     /**
@@ -821,20 +837,38 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Returns the content provider for the given content URI..
+     * Returns the content provider for the given content URI.
      *
      * @param uri The URI to a content provider
      * @return The ContentProvider for the given URI, or null if no content provider is found.
      * @hide
      */
-    public final IContentProvider acquireProvider(Uri uri)
-    {
+    public final IContentProvider acquireProvider(Uri uri) {
         if (!SCHEME_CONTENT.equals(uri.getScheme())) {
             return null;
         }
         String auth = uri.getAuthority();
         if (auth != null) {
             return acquireProvider(mContext, uri.getAuthority());
+        }
+        return null;
+    }
+
+    /**
+     * Returns the content provider for the given content URI if the process
+     * already has a reference on it.
+     *
+     * @param uri The URI to a content provider
+     * @return The ContentProvider for the given URI, or null if no content provider is found.
+     * @hide
+     */
+    public final IContentProvider acquireExistingProvider(Uri uri) {
+        if (!SCHEME_CONTENT.equals(uri.getScheme())) {
+            return null;
+        }
+        String auth = uri.getAuthority();
+        if (auth != null) {
+            return acquireExistingProvider(mContext, uri.getAuthority());
         }
         return null;
     }

@@ -207,10 +207,13 @@ MtpObjectHandle MyMtpDatabase::beginSendObject(const char* path,
                                             uint64_t size,
                                             time_t modified) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jstring pathStr = env->NewStringUTF(path);
     MtpObjectHandle result = env->CallIntMethod(mDatabase, method_beginSendObject,
-            env->NewStringUTF(path), (jint)format, (jint)parent, (jint)storage,
+            pathStr, (jint)format, (jint)parent, (jint)storage,
             (jlong)size, (jlong)modified);
 
+    if (pathStr)
+        env->DeleteLocalRef(pathStr);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
 }
@@ -218,9 +221,12 @@ MtpObjectHandle MyMtpDatabase::beginSendObject(const char* path,
 void MyMtpDatabase::endSendObject(const char* path, MtpObjectHandle handle,
                                 MtpObjectFormat format, bool succeeded) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(mDatabase, method_endSendObject, env->NewStringUTF(path),
+    jstring pathStr = env->NewStringUTF(path);
+    env->CallVoidMethod(mDatabase, method_endSendObject, pathStr,
                         (jint)handle, (jint)format, (jboolean)succeeded);
 
+    if (pathStr)
+        env->DeleteLocalRef(pathStr);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
@@ -238,6 +244,7 @@ MtpObjectHandleList* MyMtpDatabase::getObjectList(MtpStorageID storageID,
     for (int i = 0; i < length; i++)
         list->push(handles[i]);
     env->ReleaseIntArrayElements(array, handles, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -266,6 +273,7 @@ MtpObjectFormatList* MyMtpDatabase::getSupportedPlaybackFormats() {
     for (int i = 0; i < length; i++)
         list->push(formats[i]);
     env->ReleaseIntArrayElements(array, formats, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -283,6 +291,7 @@ MtpObjectFormatList* MyMtpDatabase::getSupportedCaptureFormats() {
     for (int i = 0; i < length; i++)
         list->push(formats[i]);
     env->ReleaseIntArrayElements(array, formats, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -300,6 +309,7 @@ MtpObjectPropertyList* MyMtpDatabase::getSupportedObjectProperties(MtpObjectForm
     for (int i = 0; i < length; i++)
         list->push(properties[i]);
     env->ReleaseIntArrayElements(array, properties, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -317,6 +327,7 @@ MtpDevicePropertyList* MyMtpDatabase::getSupportedDeviceProperties() {
     for (int i = 0; i < length; i++)
         list->push(properties[i]);
     env->ReleaseIntArrayElements(array, properties, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -342,11 +353,18 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
     jlong longValue = longValues[0];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
 
-    // special case MTP_PROPERTY_DATE_MODIFIED, which is a string to MTP
+    // special case date properties, which are strings to MTP
     // but stored internally as a uint64
-    if (property == MTP_PROPERTY_DATE_MODIFIED) {
+    if (property == MTP_PROPERTY_DATE_MODIFIED || property == MTP_PROPERTY_DATE_ADDED) {
         char    date[20];
         formatDateTime(longValue, date, sizeof(date));
+        packet.putString(date);
+        return MTP_RESPONSE_OK;
+    }
+    // release date is stored internally as just the year
+    if (property == MTP_PROPERTY_ORIGINAL_RELEASE_DATE) {
+        char    date[20];
+        snprintf(date, sizeof(date), "%04lld0101T000000", longValue);
         packet.putString(date);
         return MTP_RESPONSE_OK;
     }
@@ -449,6 +467,8 @@ MtpResponseCode MyMtpDatabase::setObjectPropertyValue(MtpObjectHandle handle,
 
     jint result = env->CallIntMethod(mDatabase, method_setObjectProperty,
                 (jint)handle, (jint)property, longValue, stringValue);
+    if (stringValue)
+        env->DeleteLocalRef(stringValue);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
@@ -570,6 +590,8 @@ MtpResponseCode MyMtpDatabase::setDevicePropertyValue(MtpDeviceProperty property
 
     jint result = env->CallIntMethod(mDatabase, method_setDeviceProperty,
                 (jint)property, longValue, stringValue);
+    if (stringValue)
+        env->DeleteLocalRef(stringValue);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
@@ -680,6 +702,17 @@ static const PropertyTableEntry   kObjectPropertyTable[] = {
     {   MTP_PROPERTY_PARENT_OBJECT,     MTP_TYPE_UINT32     },
     {   MTP_PROPERTY_PERSISTENT_UID,    MTP_TYPE_UINT128    },
     {   MTP_PROPERTY_NAME,              MTP_TYPE_STR        },
+    {   MTP_PROPERTY_DISPLAY_NAME,      MTP_TYPE_STR        },
+    {   MTP_PROPERTY_DATE_ADDED,        MTP_TYPE_STR        },
+    {   MTP_PROPERTY_ARTIST,            MTP_TYPE_STR        },
+    {   MTP_PROPERTY_ALBUM_NAME,        MTP_TYPE_STR        },
+    {   MTP_PROPERTY_ALBUM_ARTIST,      MTP_TYPE_STR        },
+    {   MTP_PROPERTY_TRACK,             MTP_TYPE_UINT16     },
+    {   MTP_PROPERTY_ORIGINAL_RELEASE_DATE, MTP_TYPE_STR    },
+    {   MTP_PROPERTY_GENRE,             MTP_TYPE_STR        },
+    {   MTP_PROPERTY_COMPOSER,          MTP_TYPE_STR        },
+    {   MTP_PROPERTY_DURATION,          MTP_TYPE_UINT32     },
+    {   MTP_PROPERTY_DESCRIPTION,       MTP_TYPE_STR        },
 };
 
 static const PropertyTableEntry   kDevicePropertyTable[] = {
@@ -723,6 +756,7 @@ MtpObjectHandleList* MyMtpDatabase::getObjectReferences(MtpObjectHandle handle) 
     for (int i = 0; i < length; i++)
         list->push(handles[i]);
     env->ReleaseIntArrayElements(array, handles, 0);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return list;
@@ -743,6 +777,7 @@ MtpResponseCode MyMtpDatabase::setObjectReferences(MtpObjectHandle handle,
     env->ReleaseIntArrayElements(array, handles, 0);
     MtpResponseCode result = env->CallIntMethod(mDatabase, method_setObjectReferences,
                 (jint)handle, array);
+    env->DeleteLocalRef(array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
@@ -754,10 +789,12 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
     switch (property) {
         case MTP_PROPERTY_OBJECT_FORMAT:
         case MTP_PROPERTY_PROTECTION_STATUS:
+        case MTP_PROPERTY_TRACK:
             result = new MtpProperty(property, MTP_TYPE_UINT16);
             break;
         case MTP_PROPERTY_STORAGE_ID:
         case MTP_PROPERTY_PARENT_OBJECT:
+        case MTP_PROPERTY_DURATION:
             result = new MtpProperty(property, MTP_TYPE_UINT32);
             break;
         case MTP_PROPERTY_OBJECT_SIZE:
@@ -769,6 +806,15 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
         case MTP_PROPERTY_NAME:
         case MTP_PROPERTY_OBJECT_FILE_NAME:
         case MTP_PROPERTY_DATE_MODIFIED:
+        case MTP_PROPERTY_DISPLAY_NAME:
+        case MTP_PROPERTY_DATE_ADDED:
+        case MTP_PROPERTY_ARTIST:
+        case MTP_PROPERTY_ALBUM_NAME:
+        case MTP_PROPERTY_ALBUM_ARTIST:
+        case MTP_PROPERTY_ORIGINAL_RELEASE_DATE:
+        case MTP_PROPERTY_GENRE:
+        case MTP_PROPERTY_COMPOSER:
+        case MTP_PROPERTY_DESCRIPTION:
             result = new MtpProperty(property, MTP_TYPE_STR);
             break;
     }

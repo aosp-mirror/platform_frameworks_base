@@ -108,6 +108,11 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCach
     rsc->checkError("ProgramVertex::setupGL2 start");
 
     if(!isUserProgram()) {
+        if(mConstants[0].get() == NULL) {
+            LOGE("Unable to set fixed function emulation matrices because allocation is missing");
+            rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
+            return;
+        }
         float *f = static_cast<float *>(mConstants[0]->getPtr());
         Matrix mvp;
         mvp.load(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);

@@ -593,7 +593,10 @@ public class SipPhone extends SipPhoneBase {
             // set state to DISCONNECTED only when all conns are disconnected
             if (state != State.DISCONNECTED) {
                 boolean allConnectionsDisconnected = true;
+                Log.v(LOG_TAG, "---check if all connections are disconnected: "
+                        + connections.size());
                 for (Connection c : connections) {
+                    Log.v(LOG_TAG, "   state=" + c.getState() + ": " + c);
                     if (c.getState() != State.DISCONNECTED) {
                         allConnectionsDisconnected = false;
                         break;
@@ -636,6 +639,18 @@ public class SipPhone extends SipPhoneBase {
             }
 
             @Override
+            public void onCallEstablished(SipAudioCall call) {
+                call.startAudio();
+                onChanged(call);
+            }
+
+            @Override
+            public void onCallHeld(SipAudioCall call) {
+                call.startAudio();
+                onChanged(call);
+            }
+
+            @Override
             public void onChanged(SipAudioCall call) {
                 synchronized (SipPhone.class) {
                     Call.State newState = getCallStateFrom(call);
@@ -655,7 +670,6 @@ public class SipPhone extends SipPhoneBase {
                             }
                             foregroundCall.switchWith(ringingCall);
                         }
-                        if (newState == Call.State.ACTIVE) call.startAudio();
                         setState(newState);
                     }
                     mOwner.onConnectionStateChanged(SipConnection.this);
@@ -857,6 +871,9 @@ public class SipPhone extends SipPhoneBase {
                     break;
                 case SipErrorCode.INVALID_CREDENTIALS:
                     onError(Connection.DisconnectCause.INVALID_CREDENTIALS);
+                    break;
+                case SipErrorCode.CROSS_DOMAIN_AUTHENTICATION:
+                    onError(Connection.DisconnectCause.OUT_OF_NETWORK);
                     break;
                 case SipErrorCode.SOCKET_ERROR:
                 case SipErrorCode.SERVER_ERROR:

@@ -19,6 +19,7 @@ package android.app;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -76,7 +77,10 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
     public TimePickerDialog(Context context,
             OnTimeSetListener callBack,
             int hourOfDay, int minute, boolean is24HourView) {
-        this(context, com.android.internal.R.style.Theme_Dialog_Alert,
+        this(context,
+                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
+                        ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
+                        : com.android.internal.R.style.Theme_Dialog_Alert,
                 callBack, hourOfDay, minute, is24HourView);
     }
 

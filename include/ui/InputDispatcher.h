@@ -27,6 +27,7 @@
 #include <utils/String8.h>
 #include <utils/Looper.h>
 #include <utils/Pool.h>
+#include <utils/BitSet.h>
 
 #include <stddef.h>
 #include <unistd.h>
@@ -89,17 +90,13 @@ struct InputTarget {
          * AMOTION_EVENT_ACTION_OUTSIDE to this target. */
         FLAG_OUTSIDE = 0x02,
 
-        /* This flag indicates that a KeyEvent or MotionEvent is being canceled.
-         * In the case of a key event, it should be delivered with flag
-         * AKEY_EVENT_FLAG_CANCELED set.
-         * In the case of a motion event, it should be delivered with action
-         * AMOTION_EVENT_ACTION_CANCEL instead. */
-        FLAG_CANCEL = 0x04,
-
         /* This flag indicates that the target of a MotionEvent is partly or wholly
          * obscured by another visible window above it.  The motion event should be
          * delivered with flag AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED. */
-        FLAG_WINDOW_IS_OBSCURED = 0x08,
+        FLAG_WINDOW_IS_OBSCURED = 0x04,
+
+        /* This flag indicates that a motion event is being split across multiple windows. */
+        FLAG_SPLIT = 0x08,
     };
 
     // The input channel to be targeted.
@@ -111,6 +108,13 @@ struct InputTarget {
     // The x and y offset to add to a MotionEvent as it is delivered.
     // (ignored for KeyEvents)
     float xOffset, yOffset;
+
+    // The window type of the input target.
+    int32_t windowType;
+
+    // The subset of pointer ids to include in motion events dispatched to this input target
+    // if FLAG_SPLIT is set.
+    BitSet32 pointerIds;
 };
 
 
@@ -143,7 +147,7 @@ struct InputWindow {
         FLAG_SHOW_WALLPAPER = 0x00100000,
         FLAG_TURN_SCREEN_ON = 0x00200000,
         FLAG_DISMISS_KEYGUARD = 0x00400000,
-        FLAG_IMMERSIVE = 0x00800000,
+        FLAG_SPLIT_TOUCH = 0x00800000,
         FLAG_KEEP_SURFACE_WHILE_ANIMATING = 0x10000000,
         FLAG_COMPATIBLE_WINDOW = 0x20000000,
         FLAG_SYSTEM_ERROR = 0x40000000,
@@ -276,7 +280,7 @@ public:
             const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
 
     /* Poke user activity for an event dispatched to a window. */
-    virtual void pokeUserActivity(nsecs_t eventTime, int32_t windowType, int32_t eventType) = 0;
+    virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType) = 0;
 
     /* Checks whether a given application pid/uid has permission to inject input events
      * into other applications.
@@ -351,6 +355,14 @@ public:
      */
     virtual void setInputDispatchMode(bool enabled, bool frozen) = 0;
 
+    /* Transfers touch focus from the window associated with one channel to the
+     * window associated with the other channel.
+     *
+     * Returns true on success.  False if the window did not actually have touch focus.
+     */
+    virtual bool transferTouchFocus(const sp<InputChannel>& fromChannel,
+            const sp<InputChannel>& toChannel) = 0;
+
     /* Registers or unregister input channels that may be used as targets for input events.
      * If monitor is true, the channel will receive a copy of all input events.
      *
@@ -405,6 +417,9 @@ public:
     virtual void setFocusedApplication(const InputApplication* inputApplication);
     virtual void setInputDispatchMode(bool enabled, bool frozen);
 
+    virtual bool transferTouchFocus(const sp<InputChannel>& fromChannel,
+            const sp<InputChannel>& toChannel);
+
     virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor);
     virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel);
 
@@ -415,6 +430,16 @@ private:
         T* prev;
     };
 
+    struct InjectionState {
+        mutable int32_t refCount;
+
+        int32_t injectorPid;
+        int32_t injectorUid;
+        int32_t injectionResult;  // initially INPUT_EVENT_INJECTION_PENDING
+        bool injectionIsAsync; // set to true if injection is not waiting for the result
+        int32_t pendingForegroundDispatches; // the number of foreground dispatches in progress
+    };
+
     struct EventEntry : Link<EventEntry> {
         enum {
             TYPE_SENTINEL,
@@ -423,21 +448,14 @@ private:
             TYPE_MOTION
         };
 
-        int32_t refCount;
+        mutable int32_t refCount;
         int32_t type;
         nsecs_t eventTime;
-
-        int32_t injectionResult;  // initially INPUT_EVENT_INJECTION_PENDING
-        bool    injectionIsAsync; // set to true if injection is not waiting for the result
-        int32_t injectorPid;      // -1 if not injected
-        int32_t injectorUid;      // -1 if not injected
+        InjectionState* injectionState;
 
         bool dispatchInProgress; // initially false, set to true while dispatching
-        int32_t pendingForegroundDispatches; // the number of foreground dispatches in progress
 
-        inline bool isInjected() { return injectorPid >= 0; }
-
-        void recycle();
+        inline bool isInjected() { return injectionState != NULL; }
     };
 
     struct ConfigurationChangedEntry : EventEntry {
@@ -463,8 +481,6 @@ private:
             INTERCEPT_KEY_RESULT_CONTINUE,
         };
         InterceptKeyResult interceptKeyResult; // set based on the interception result
-
-        void recycle();
     };
 
     struct MotionSample {
@@ -521,6 +537,10 @@ private:
         inline bool hasForegroundTarget() const {
             return targetFlags & InputTarget::FLAG_FOREGROUND;
         }
+
+        inline bool isSplit() const {
+            return targetFlags & InputTarget::FLAG_SPLIT;
+        }
     };
 
     // A command entry captures state and behavior for an action to be performed in the
@@ -555,7 +575,6 @@ private:
         KeyEntry* keyEntry;
         sp<InputChannel> inputChannel;
         sp<InputApplicationHandle> inputApplicationHandle;
-        int32_t windowType;
         int32_t userActivityEventType;
     };
 
@@ -611,6 +630,7 @@ private:
     public:
         Allocator();
 
+        InjectionState* obtainInjectionState(int32_t injectorPid, int32_t injectorUid);
         ConfigurationChangedEntry* obtainConfigurationChangedEntry(nsecs_t eventTime);
         KeyEntry* obtainKeyEntry(nsecs_t eventTime,
                 int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
@@ -626,6 +646,7 @@ private:
                 int32_t targetFlags, float xOffset, float yOffset);
         CommandEntry* obtainCommandEntry(Command command);
 
+        void releaseInjectionState(InjectionState* injectionState);
         void releaseEventEntry(EventEntry* entry);
         void releaseConfigurationChangedEntry(ConfigurationChangedEntry* entry);
         void releaseKeyEntry(KeyEntry* entry);
@@ -633,10 +654,13 @@ private:
         void releaseDispatchEntry(DispatchEntry* entry);
         void releaseCommandEntry(CommandEntry* entry);
 
+        void recycleKeyEntry(KeyEntry* entry);
+
         void appendMotionSample(MotionEntry* motionEntry,
                 nsecs_t eventTime, const PointerCoords* pointerCoords);
 
     private:
+        Pool<InjectionState> mInjectionStatePool;
         Pool<ConfigurationChangedEntry> mConfigurationChangeEntryPool;
         Pool<KeyEntry> mKeyEntryPool;
         Pool<MotionEntry> mMotionEntryPool;
@@ -645,6 +669,7 @@ private:
         Pool<CommandEntry> mCommandEntryPool;
 
         void initializeEventEntry(EventEntry* entry, int32_t type, nsecs_t eventTime);
+        void releaseEventEntryInjectionState(EventEntry* entry);
     };
 
     /* Tracks dispatched key and motion event state so that cancelation events can be
@@ -823,6 +848,7 @@ private:
     void setInjectionResultLocked(EventEntry* entry, int32_t injectionResult);
 
     Condition mInjectionSyncFinishedCondition;
+    void incrementPendingForegroundDispatchesLocked(EventEntry* entry);
     void decrementPendingForegroundDispatchesLocked(EventEntry* entry);
 
     // Throttling state.
@@ -858,23 +884,37 @@ private:
     // Dispatch state.
     bool mDispatchEnabled;
     bool mDispatchFrozen;
+
     Vector<InputWindow> mWindows;
-    Vector<InputWindow*> mWallpaperWindows;
+
+    const InputWindow* getWindowLocked(const sp<InputChannel>& inputChannel);
 
     // Focus tracking for keys, trackball, etc.
-    InputWindow* mFocusedWindow;
+    const InputWindow* mFocusedWindow;
 
     // Focus tracking for touch.
-    bool mTouchDown;
-    InputWindow* mTouchedWindow;                   // primary target for current down
-    bool mTouchedWindowIsObscured;                 // true if other windows may obscure the target
-    Vector<InputWindow*> mTouchedWallpaperWindows; // wallpaper targets
-    struct OutsideTarget {
-        InputWindow* window;
-        bool obscured;
+    struct TouchedWindow {
+        const InputWindow* window;
+        int32_t targetFlags;
+        BitSet32 pointerIds;
+        sp<InputChannel> channel;
     };
-    Vector<OutsideTarget> mTempTouchedOutsideTargets; // temporary outside touch targets
-    Vector<sp<InputChannel> > mTempTouchedWallpaperChannels; // temporary wallpaper targets
+    struct TouchState {
+        bool down;
+        bool split;
+        Vector<TouchedWindow> windows;
+
+        TouchState();
+        ~TouchState();
+        void reset();
+        void copyFrom(const TouchState& other);
+        void addOrUpdateWindow(const InputWindow* window, int32_t targetFlags, BitSet32 pointerIds);
+        void removeOutsideTouchWindows();
+        const InputWindow* getFirstForegroundWindow();
+    };
+
+    TouchState mTouchState;
+    TouchState mTempTouchState;
 
     // Focused application.
     InputApplication* mFocusedApplication;
@@ -899,8 +939,6 @@ private:
     // The input targets that were most recently identified for dispatch.
     bool mCurrentInputTargetsValid; // false while targets are being recomputed
     Vector<InputTarget> mCurrentInputTargets;
-    int32_t mCurrentInputWindowType;
-    sp<InputChannel> mCurrentInputChannel;
 
     enum InputTargetWaitCause {
         INPUT_TARGET_WAIT_CAUSE_NONE,
@@ -915,7 +953,7 @@ private:
 
     // Finding targets for input events.
     void resetTargetsLocked();
-    void commitTargetsLocked(const InputWindow* window);
+    void commitTargetsLocked();
     int32_t handleTargetsNotReadyLocked(nsecs_t currentTime, const EventEntry* entry,
             const InputApplication* application, const InputWindow* window,
             nsecs_t* nextWakeupTime);
@@ -924,19 +962,19 @@ private:
     nsecs_t getTimeSpentWaitingForApplicationLocked(nsecs_t currentTime);
     void resetANRTimeoutsLocked();
 
-    int32_t findFocusedWindowLocked(nsecs_t currentTime, const EventEntry* entry,
-            nsecs_t* nextWakeupTime, InputWindow** outWindow);
-    int32_t findTouchedWindowLocked(nsecs_t currentTime, const MotionEntry* entry,
-            nsecs_t* nextWakeupTime, InputWindow** outWindow);
+    int32_t findFocusedWindowTargetsLocked(nsecs_t currentTime, const EventEntry* entry,
+            nsecs_t* nextWakeupTime);
+    int32_t findTouchedWindowTargetsLocked(nsecs_t currentTime, const MotionEntry* entry,
+            nsecs_t* nextWakeupTime);
 
-    void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags);
+    void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags,
+            BitSet32 pointerIds);
     void addMonitoringTargetsLocked();
-    void pokeUserActivityLocked(nsecs_t eventTime, int32_t windowType, int32_t eventType);
-    bool checkInjectionPermission(const InputWindow* window,
-            int32_t injectorPid, int32_t injectorUid);
+    bool shouldPokeUserActivityForCurrentInputTargetsLocked();
+    void pokeUserActivityLocked(nsecs_t eventTime, int32_t eventType);
+    bool checkInjectionPermission(const InputWindow* window, const InjectionState* injectionState);
     bool isWindowObscuredLocked(const InputWindow* window);
     bool isWindowFinishedWithPreviousInputLocked(const InputWindow* window);
-    void releaseTouchedWindowLocked();
     String8 getApplicationWindowLabelLocked(const InputApplication* application,
             const InputWindow* window);
 
@@ -954,6 +992,9 @@ private:
             bool broken);
     void drainOutboundQueueLocked(Connection* connection);
     static int handleReceiveCallback(int receiveFd, int events, void* data);
+
+    // Splitting motion events across windows.
+    MotionEntry* splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet32 pointerIds);
 
     // Dump state.
     void dumpDispatchStateLocked(String8& dump);

@@ -377,6 +377,7 @@ public class LayoutTestsExecutor extends Activity {
         webView.setTouchInterval(-1);
 
         webView.clearCache(true);
+        webView.setDeferMultiTouch(true);
 
         WebSettings webViewSettings = webView.getSettings();
         webViewSettings.setAppCacheEnabled(true);

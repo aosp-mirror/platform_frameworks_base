@@ -188,15 +188,13 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             // this SQL statement was never in cache
             mCompiledSql.releaseSqlStatement();
         } else {
-            synchronized(mDatabase.mCompiledQueries) {
-                if (!mDatabase.mCompiledQueries.containsValue(mCompiledSql)) {
-                    // it is NOT in compiled-sql cache. i.e., responsibility of
-                    // releasing this statement is on me.
-                    mCompiledSql.releaseSqlStatement();
-                } else {
-                    // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
-                    mCompiledSql.release();
-                }
+            if (!mDatabase.isInStatementCache(mCompiledSql)) {
+                // it is NOT in compiled-sql cache. i.e., responsibility of
+                // releasing this statement is on me.
+                mCompiledSql.releaseSqlStatement();
+            } else {
+                // it is in compiled-sql cache. reset its CompiledSql#mInUse flag
+                mCompiledSql.release();
             }
         }
         mCompiledSql = null;

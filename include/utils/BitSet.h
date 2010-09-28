@@ -38,6 +38,9 @@ struct BitSet32 {
     // Clears the bit set.
     inline void clear() { value = 0; }
 
+    // Returns the number of marked bits in the set.
+    inline uint32_t count() const { return __builtin_popcount(value); }
+
     // Returns true if the bit set does not contain any marked bits.
     inline bool isEmpty() const { return ! value; }
 
