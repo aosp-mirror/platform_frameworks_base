@@ -545,7 +545,8 @@ public class Adapters {
             String name = parser.getName();
             if (assertName != null && !assertName.equals(name)) {
                 throw new IllegalArgumentException("The adapter defined in " +
-                        c.getResources().getResourceEntryName(id) + " must be a <" + name + " />");
+                        c.getResources().getResourceEntryName(id) + " must be a <" +
+                        assertName + " />");
             }
 
             if (ADAPTER_CURSOR.equals(name)) {
