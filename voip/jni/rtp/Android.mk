@@ -22,6 +22,7 @@ LOCAL_MODULE := librtp_jni
 LOCAL_SRC_FILES := \
 	AudioCodec.cpp \
 	AudioGroup.cpp \
+	G711Codec.cpp \
 	RtpStream.cpp \
 	util.cpp \
 	rtp_jni.cpp
