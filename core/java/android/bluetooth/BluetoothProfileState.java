@@ -59,16 +59,16 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (action.equals(BluetoothHeadset.ACTION_STATE_CHANGED)) {
-                int newState = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, 0);
-                if (mProfile == HFP && (newState == BluetoothHeadset.STATE_CONNECTED ||
-                    newState == BluetoothHeadset.STATE_DISCONNECTED)) {
+            if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
+                int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, 0);
+                if (mProfile == HFP && (newState == BluetoothProfile.STATE_CONNECTED ||
+                    newState == BluetoothProfile.STATE_DISCONNECTED)) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
-            } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
-                int newState = intent.getIntExtra(BluetoothA2dp.EXTRA_SINK_STATE, 0);
-                if (mProfile == A2DP && (newState == BluetoothA2dp.STATE_CONNECTED ||
-                    newState == BluetoothA2dp.STATE_DISCONNECTED)) {
+            } else if (action.equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
+                int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, 0);
+                if (mProfile == A2DP && (newState == BluetoothProfile.STATE_CONNECTED ||
+                    newState == BluetoothProfile.STATE_DISCONNECTED)) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
             } else if (action.equals(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED)) {
@@ -89,8 +89,8 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         setInitialState(mStableState);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
-        filter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+        filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
         context.registerReceiver(mBroadcastReceiver, filter);
     }
