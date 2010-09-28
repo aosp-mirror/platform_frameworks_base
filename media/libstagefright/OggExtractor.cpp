@@ -93,7 +93,10 @@ private:
     sp<DataSource> mSource;
     off_t mOffset;
     Page mCurrentPage;
+    uint64_t mPrevGranulePosition;
     size_t mCurrentPageSize;
+    bool mFirstPacketInPage;
+    uint64_t mCurrentPageSamples;
     size_t mNextLaceIndex;
 
     off_t mFirstDataOffset;
@@ -112,6 +115,8 @@ private:
 
     void parseFileMetaData();
     void extractAlbumArt(const void *data, size_t size);
+
+    uint64_t findPrevGranulePosition(off_t pageOffset);
 
     MyVorbisExtractor(const MyVorbisExtractor &);
     MyVorbisExtractor &operator=(const MyVorbisExtractor &);
@@ -193,7 +198,10 @@ status_t OggSource::read(
 MyVorbisExtractor::MyVorbisExtractor(const sp<DataSource> &source)
     : mSource(source),
       mOffset(0),
+      mPrevGranulePosition(0),
       mCurrentPageSize(0),
+      mFirstPacketInPage(true),
+      mCurrentPageSamples(0),
       mNextLaceIndex(0),
       mFirstDataOffset(-1) {
     mCurrentPage.mNumSegments = 0;
@@ -238,6 +246,52 @@ status_t MyVorbisExtractor::findNextPage(
     }
 }
 
+// Given the offset of the "current" page, find the page immediately preceding
+// it (if any) and return its granule position.
+// To do this we back up from the "current" page's offset until we find any
+// page preceding it and then scan forward to just before the current page.
+uint64_t MyVorbisExtractor::findPrevGranulePosition(off_t pageOffset) {
+    off_t prevPageOffset = 0;
+    off_t prevGuess = pageOffset;
+    for (;;) {
+        if (prevGuess >= 5000) {
+            prevGuess -= 5000;
+        } else {
+            prevGuess = 0;
+        }
+
+        LOGV("backing up %ld bytes", pageOffset - prevGuess);
+
+        CHECK_EQ(findNextPage(prevGuess, &prevPageOffset), (status_t)OK);
+
+        if (prevPageOffset < pageOffset || prevGuess == 0) {
+            break;
+        }
+    }
+
+    if (prevPageOffset == pageOffset) {
+        // We did not find a page preceding this one.
+        return 0;
+    }
+
+    LOGV("prevPageOffset at %ld, pageOffset at %ld", prevPageOffset, pageOffset);
+
+    for (;;) {
+        Page prevPage;
+        ssize_t n = readPage(prevPageOffset, &prevPage);
+
+        if (n <= 0) {
+            return 0;
+        }
+
+        prevPageOffset += n;
+
+        if (prevPageOffset == pageOffset) {
+            return prevPage.mGranulePosition;
+        }
+    }
+}
+
 status_t MyVorbisExtractor::seekToOffset(off_t offset) {
     if (mFirstDataOffset >= 0 && offset < mFirstDataOffset) {
         // Once we know where the actual audio data starts (past the headers)
@@ -252,9 +306,16 @@ status_t MyVorbisExtractor::seekToOffset(off_t offset) {
         return err;
     }
 
+    // We found the page we wanted to seek to, but we'll also need
+    // the page preceding it to determine how many valid samples are on
+    // this page.
+    mPrevGranulePosition = findPrevGranulePosition(pageOffset);
+
     mOffset = pageOffset;
 
     mCurrentPageSize = 0;
+    mFirstPacketInPage = true;
+    mCurrentPageSamples = 0;
     mCurrentPage.mNumSegments = 0;
     mNextLaceIndex = 0;
 
@@ -399,6 +460,12 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
                     buffer->meta_data()->setInt64(kKeyTime, timeUs);
                 }
 
+                if (mFirstPacketInPage) {
+                    buffer->meta_data()->setInt32(
+                            kKeyValidSamples, mCurrentPageSamples);
+                    mFirstPacketInPage = false;
+                }
+
                 *out = buffer;
 
                 return OK;
@@ -423,6 +490,12 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
             return n < 0 ? n : (status_t)ERROR_END_OF_STREAM;
         }
 
+        mCurrentPageSamples =
+            mCurrentPage.mGranulePosition - mPrevGranulePosition;
+        mFirstPacketInPage = true;
+
+        mPrevGranulePosition = mCurrentPage.mGranulePosition;
+
         mCurrentPageSize = n;
         mNextLaceIndex = 0;
 
@@ -434,6 +507,10 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
                 if (timeUs >= 0) {
                     buffer->meta_data()->setInt64(kKeyTime, timeUs);
                 }
+
+                buffer->meta_data()->setInt32(
+                        kKeyValidSamples, mCurrentPageSamples);
+                mFirstPacketInPage = false;
 
                 *out = buffer;
 
