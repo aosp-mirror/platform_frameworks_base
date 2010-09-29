@@ -21,10 +21,12 @@ import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.provider.SyncStateContract;
 import android.util.Pair;
 
 /**
@@ -492,5 +494,62 @@ public class BrowserContract {
          * <p>Type: INTEGER (boolean)</p>
          */
         public static final String IS_BOOKMARK = "bookmark";
+    }
+
+    /**
+     * A table that stores settings specific to the browser. Only support query and insert.
+     */
+    public static final class Settings {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Settings() {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "settings");
+
+        /**
+         * Key for a setting value.
+         */
+        public static final String KEY = "key";
+
+        /**
+         * Value for a setting.
+         */
+        public static final String VALUE = "value";
+
+        /**
+         * If set to non-0 the user has opted into bookmark sync.
+         */
+        public static final String KEY_SYNC_ENABLED = "sync_enabled";
+
+        /**
+         * Returns true if bookmark sync is enabled
+         */
+        static public boolean isSyncEnabled(Context context) {
+            Cursor cursor = null;
+            try {
+                cursor = context.getContentResolver().query(CONTENT_URI, new String[] { VALUE },
+                        KEY + "=?", new String[] { KEY_SYNC_ENABLED }, null);
+                if (cursor == null || !cursor.moveToFirst()) {
+                    return false;
+                }
+                return cursor.getInt(0) != 0;
+            } finally {
+                if (cursor != null) cursor.close();
+            }
+        }
+
+        /**
+         * Sets the bookmark sync enabled setting.
+         */
+        static public void setSyncEnabled(Context context, boolean enabled) {
+            ContentValues values = new ContentValues();
+            values.put(KEY, KEY_SYNC_ENABLED);
+            values.put(VALUE, enabled ? 1 : 0);
+            context.getContentResolver().insert(CONTENT_URI, values);
+        }
     }
 }
