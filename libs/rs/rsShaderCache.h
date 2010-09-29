@@ -40,22 +40,22 @@ public:
 
     void cleanupAll();
 
-    int32_t vtxAttribSlot(uint32_t a) const {return mCurrent->mVtxAttribSlots[a];}
+    int32_t vtxAttribSlot(const String8 &attrName) const;
     int32_t vtxUniformSlot(uint32_t a) const {return mCurrent->mVtxUniformSlots[a];}
     int32_t fragAttribSlot(uint32_t a) const {return mCurrent->mFragAttribSlots[a];}
     int32_t fragUniformSlot(uint32_t a) const {return mCurrent->mFragUniformSlots[a];}
-    bool isUserVertexProgram() const {return mCurrent->mUserVertexProgram;}
 
 protected:
     typedef struct {
         uint32_t vtx;
         uint32_t frag;
         uint32_t program;
+        uint32_t vtxAttrCount;
+        const char* mVtxAttribNames[Program::MAX_ATTRIBS];
         int32_t mVtxAttribSlots[Program::MAX_ATTRIBS];
         int32_t mVtxUniformSlots[Program::MAX_UNIFORMS];
         int32_t mFragAttribSlots[Program::MAX_ATTRIBS];
         int32_t mFragUniformSlots[Program::MAX_UNIFORMS];
-        bool mUserVertexProgram;
         bool mIsValid;
     } entry_t;
     entry_t *mEntries;

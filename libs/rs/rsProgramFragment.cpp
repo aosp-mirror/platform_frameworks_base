@@ -149,7 +149,7 @@ void ProgramFragment::init(Context *rsc)
     mUniformCount = 0;
     if (mUserShader.size() > 0) {
         for (uint32_t ct=0; ct < mConstantCount; ct++) {
-            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, "UNI_");
+            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, RS_SHADER_UNI);
         }
     }
     mTextureUniformIndexStart = mUniformCount;

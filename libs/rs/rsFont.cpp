@@ -575,8 +575,8 @@ void FontState::issueDrawCommand() {
     float *tex = vtx + 3;
 
     VertexArray va;
-    va.add(GL_FLOAT, 3, 20, false, (uint32_t)vtx, "position");
-    va.add(GL_FLOAT, 2, 20, false, (uint32_t)tex, "texture0");
+    va.add(GL_FLOAT, 3, 20, false, (uint32_t)vtx, "ATTRIB_position");
+    va.add(GL_FLOAT, 2, 20, false, (uint32_t)tex, "ATTRIB_texture0");
     va.setupGL2(mRSC, &mRSC->mStateVertexArray, &mRSC->mShaderCache);
 
     mIndexBuffer->uploadCheck(mRSC);

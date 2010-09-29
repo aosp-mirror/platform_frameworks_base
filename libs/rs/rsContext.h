@@ -158,6 +158,8 @@ public:
         bool mLogScripts;
         bool mLogObjects;
         bool mLogShaders;
+        bool mLogShadersAttr;
+        bool mLogShadersUniforms;
         bool mLogVisual;
     } props;
 
@@ -169,6 +171,7 @@ public:
     mutable const ObjectBase * mObjHead;
 
     bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
+    float ext_texture_max_aniso() const {return mGL.EXT_texture_max_aniso; }
     uint32_t getMaxFragmentTextures() const {return mGL.mMaxFragmentTextureImageUnits;}
     uint32_t getMaxFragmentUniformVectors() const {return mGL.mMaxFragmentUniformVectors;}
     uint32_t getMaxVertexUniformVectors() const {return mGL.mMaxVertexUniformVectors;}
@@ -209,6 +212,7 @@ protected:
         int32_t mMaxVertexTextureUnits;
 
         bool OES_texture_npot;
+        float EXT_texture_max_aniso;
     } mGL;
 
     uint32_t mWidth;

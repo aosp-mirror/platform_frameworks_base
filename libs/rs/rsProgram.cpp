@@ -346,36 +346,61 @@ void Program::setupUserConstants(Context *rsc, ShaderCache *sc, bool isFragment)
                 slot = sc->fragUniformSlot(uidx);
             }
 
-            //LOGE("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s", slot, offset, ct, field, uidx, fieldName);
+            if(rsc->props.mLogShadersUniforms) {
+                LOGV("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s", slot, offset, ct, field, uidx, fieldName);
+            }
             if (slot >= 0) {
                 if(f->getType() == RS_TYPE_MATRIX_4X4) {
+                    if(rsc->props.mLogShadersUniforms) {
+                        LOGV("Matrix4x4");
+                        LOGV("{%f, %f, %f, %f",  fd[0], fd[4], fd[8], fd[12]);
+                        LOGV(" %f, %f, %f, %f",  fd[1], fd[5], fd[9], fd[13]);
+                        LOGV(" %f, %f, %f, %f",  fd[2], fd[6], fd[10], fd[14]);
+                        LOGV(" %f, %f, %f, %f}", fd[3], fd[7], fd[11], fd[15]);
+                    }
                     glUniformMatrix4fv(slot, 1, GL_FALSE, fd);
-                    /*for(int i = 0; i < 4; i++) {
-                        LOGE("Mat = %f %f %f %f", fd[i*4 + 0], fd[i*4 + 1], fd[i*4 + 2], fd[i*4 + 3]);
-                    }*/
                 }
                 else if(f->getType() == RS_TYPE_MATRIX_3X3) {
+                    if(rsc->props.mLogShadersUniforms) {
+                        LOGV("Matrix3x3");
+                        LOGV("{%f, %f, %f",  fd[0], fd[3], fd[6]);
+                        LOGV(" %f, %f, %f",  fd[1], fd[4], fd[7]);
+                        LOGV(" %f, %f, %f}", fd[2], fd[5], fd[8]);
+                    }
                     glUniformMatrix3fv(slot, 1, GL_FALSE, fd);
                 }
                 else if(f->getType() == RS_TYPE_MATRIX_2X2) {
+                    if(rsc->props.mLogShadersUniforms){
+                        LOGV("Matrix2x2");
+                        LOGV("{%f, %f",  fd[0], fd[2]);
+                        LOGV(" %f, %f}", fd[1], fd[3]);
+                    }
                     glUniformMatrix2fv(slot, 1, GL_FALSE, fd);
                 }
                 else {
                     switch(f->getComponent().getVectorSize()) {
                     case 1:
-                        //LOGE("Uniform 1 = %f", fd[0]);
+                        if(rsc->props.mLogShadersUniforms) {
+                            LOGV("Uniform 1 = %f", fd[0]);
+                        }
                         glUniform1fv(slot, 1, fd);
                         break;
                     case 2:
-                        //LOGE("Uniform 2 = %f %f", fd[0], fd[1]);
+                        if(rsc->props.mLogShadersUniforms) {
+                            LOGV("Uniform 2 = %f %f", fd[0], fd[1]);
+                        }
                         glUniform2fv(slot, 1, fd);
                         break;
                     case 3:
-                        //LOGE("Uniform 3 = %f %f %f", fd[0], fd[1], fd[2]);
+                        if(rsc->props.mLogShadersUniforms) {
+                            LOGV("Uniform 3 = %f %f %f", fd[0], fd[1], fd[2]);
+                        }
                         glUniform3fv(slot, 1, fd);
                         break;
                     case 4:
-                        //LOGE("Uniform 4 = %f %f %f %f", fd[0], fd[1], fd[2], fd[3]);
+                        if(rsc->props.mLogShadersUniforms) {
+                            LOGV("Uniform 4 = %f %f %f %f", fd[0], fd[1], fd[2], fd[3]);
+                        }
                         glUniform4fv(slot, 1, fd);
                         break;
                     default:
