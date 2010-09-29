@@ -98,8 +98,6 @@ public class FileFilter {
         ignoreResultList.add("fast/encoding/hanarei-blog32-fc2-com.html"); // fails in Java HTTP stack, see http://b/issue?id=3046986
         ignoreResultList.add("fast/encoding/mailto-always-utf-8.html"); // Requires waitForPolicyDelegate(), see http://b/issue?id=3043468
         ignoreResultList.add("fast/encoding/percent-escaping.html"); // fails in Java HTTP stack, see http://b/issue?id=3046984
-        ignoreResultList.add("fast/events/touch/basic-multi-touch-events.html"); // Requires multi-touch
-        ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
         ignoreResultList.add("http/tests/appcache/fallback.html"); // http://b/issue?id=2713004
         ignoreResultList.add("http/tests/appcache/foreign-iframe-main.html"); // flaky - skips states
@@ -114,11 +112,13 @@ public class FileFilter {
         ignoreResultList.add("storage/transaction-error-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
         ignoreResultList.add("storage/transaction-success-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
 
-        // Expected failures due to unsupported features.
+        // Expected failures due to unsupported features or tests unsuitable for Android.
         ignoreResultList.add("fast/encoding/char-decoding-mac.html"); // Mac-specific encodings (also marked Won't Fix in Chromium, bug 7388)
         ignoreResultList.add("fast/encoding/char-encoding-mac.html"); // Mac-specific encodings (also marked Won't Fix in Chromium, bug 7388)
         ignoreResultList.add("fast/encoding/idn-security.html"); // Mac-specific IDN checks (also marked Won't Fix in Chromium, bug 21814)
+        ignoreResultList.add("fast/events/touch/basic-multi-touch-events.html"); // Requires multi-touch gestures not supported by Android system
         ignoreResultList.add("fast/events/touch/touch-coords-in-zoom-and-scroll.html"); // Requires eventSender.zoomPageIn(),zoomPageOut()
+        ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch gestures not supported by Android system
         ignoreResultList.add("fast/workers"); // workers not supported
         ignoreResultList.add("http/tests/eventsource/workers"); // workers not supported
         ignoreResultList.add("http/tests/workers"); // workers not supported
