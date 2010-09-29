@@ -87,18 +87,24 @@ public class TextResult extends AbstractResult {
 
     @Override
     public ResultCode getResultCode() {
-        if (mResultCode != null) {
-            return mResultCode;
-        }
-
-        if (mExpectedResult == null) {
-            mResultCode = AbstractResult.ResultCode.NO_EXPECTED_RESULT;
-        } else if (!mExpectedResult.equals(mActualResult)) {
-            mResultCode = AbstractResult.ResultCode.RESULTS_DIFFER;
-        } else {
-            mResultCode = AbstractResult.ResultCode.RESULTS_MATCH;
+        if (mResultCode == null) {
+            mResultCode = resultsMatch() ? AbstractResult.ResultCode.RESULTS_MATCH
+                    : AbstractResult.ResultCode.RESULTS_DIFFER;
         }
         return mResultCode;
+    }
+
+    private boolean resultsMatch() {
+        assert mExpectedResult != null;
+        assert mActualResult != null;
+        // Trim leading and trailing empty lines, as other WebKit platforms do.
+        String leadingEmptyLines = "^\\n+";
+        String trailingEmptyLines = "\\n+$";
+        String trimmedExpectedResult = mExpectedResult.replaceFirst(leadingEmptyLines, "")
+                .replaceFirst(trailingEmptyLines, "");
+        String trimmedActualResult = mActualResult.replaceFirst(leadingEmptyLines, "")
+                .replaceFirst(trailingEmptyLines, "");
+        return trimmedExpectedResult.equals(trimmedActualResult);
     }
 
     @Override
@@ -125,7 +131,7 @@ public class TextResult extends AbstractResult {
     public String getActualTextResult() {
         String additionalTextResultString = getAdditionalTextOutputString();
         if (additionalTextResultString != null) {
-            return additionalTextResultString+ mActualResult;
+            return additionalTextResultString + mActualResult;
         }
 
         return mActualResult;
@@ -159,11 +165,16 @@ public class TextResult extends AbstractResult {
 
     @Override
     public void setExpectedTextResult(String expectedResult) {
-        mExpectedResult = expectedResult;
+        // For text results, we use an empty string for the expected result when none is
+        // present, as other WebKit platforms do.
+        mExpectedResult = expectedResult == null ? "" : expectedResult;
     }
 
     @Override
     public String getDiffAsHtml() {
+        assert mExpectedResult != null;
+        assert mActualResult != null;
+
         StringBuilder html = new StringBuilder();
         html.append("<table class=\"visual_diff\">");
         html.append("    <tr class=\"headers\">");
@@ -172,11 +183,7 @@ public class TextResult extends AbstractResult {
         html.append("        <td colspan=\"2\">Actual result:</td>");
         html.append("    </tr>");
 
-        if (mExpectedResult == null || mActualResult == null) {
-            appendNullsHtml(html);
-        } else {
-            appendDiffHtml(html);
-        }
+        appendDiffHtml(html);
 
         html.append("    <tr class=\"footers\">");
         html.append("        <td colspan=\"2\"></td>");
@@ -201,34 +208,13 @@ public class TextResult extends AbstractResult {
 
         VisualDiffUtils.generateExpectedResultLines(diffs, expectedLineNums, expectedLines);
         VisualDiffUtils.generateActualResultLines(diffs, actualLineNums, actualLines);
+        // TODO: We should use a map for each line number and lines pair.
+        assert expectedLines.size() == expectedLineNums.size();
+        assert actualLines.size() == actualLineNums.size();
+        assert expectedLines.size() == actualLines.size();
 
         html.append(VisualDiffUtils.getHtml(expectedLineNums, expectedLines,
                 actualLineNums, actualLines));
-    }
-
-    private void appendNullsHtml(StringBuilder html) {
-        /** TODO: Create a separate row for each line of not null result */
-        html.append("    <tr class=\"results\">");
-        html.append("    <td class=\"line_count\">");
-        html.append("    </td>");
-        html.append("    <td class=\"line\">");
-        if (mExpectedResult == null) {
-            html.append("Expected result was NULL");
-        } else {
-            html.append(mExpectedResult.replace("\n", "<br />"));
-        }
-        html.append("        </td>");
-        html.append("        <td class=\"space\"></td>");
-        html.append("    <td class=\"line_count\">");
-        html.append("    </td>");
-        html.append("    <td class=\"line\">");
-        if (mActualResult == null) {
-            html.append("Actual result was NULL");
-        } else {
-            html.append(mActualResult.replace("\n", "<br />"));
-        }
-        html.append("        </td>");
-        html.append("    </tr>");
     }
 
     @Override

@@ -19,6 +19,7 @@ package com.android.server;
 import com.android.server.am.ActivityManagerService;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
+import com.trustedlogic.trustednfc.android.server.NfcService;
 
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
@@ -44,6 +45,7 @@ import android.server.BluetoothA2dpService;
 import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 
 import java.io.File;
@@ -412,6 +414,20 @@ class ServerThread extends Thread {
                 recognition = new RecognitionManagerService(context);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Recognition Service", e);
+            }
+            
+            try {
+                Slog.i(TAG, "Nfc Service");
+                NfcService nfc;
+                try {
+                    nfc = new NfcService(context);
+                } catch (UnsatisfiedLinkError e) { // gross hack to detect NFC
+                    nfc = null;
+                    Slog.w(TAG, "No NFC support");
+                }
+                ServiceManager.addService(Context.NFC_SERVICE, nfc);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting NFC Service", e);
             }
 
             try {

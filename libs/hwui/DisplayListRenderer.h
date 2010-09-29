@@ -81,7 +81,7 @@ public:
 
     int count() const { return mPaths.count(); }
 
-    const SkPath& operator[](int index) const {
+    SkPath& operator[](int index) const {
         return *mPaths[index];
     }
 
@@ -103,16 +103,18 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Renderer
+// Display list
 ///////////////////////////////////////////////////////////////////////////////
 
+class DisplayListRenderer;
+
 /**
- * Records drawing commands in a display list for latter playback.
+ * Replays recorded drawing commands.
  */
-class DisplayListRenderer: public OpenGLRenderer {
+class DisplayList {
 public:
-    DisplayListRenderer();
-    ~DisplayListRenderer();
+    DisplayList(const DisplayListRenderer& recorder);
+    ~DisplayList();
 
     enum Op {
         AcquireContext,
@@ -121,7 +123,6 @@ public:
         Restore,
         RestoreToCount,
         SaveLayer,
-        SaveLayerAlpha,
         Translate,
         Rotate,
         Scale,
@@ -144,6 +145,109 @@ public:
         ResetShadow,
         SetupShadow
     };
+
+    void replay(OpenGLRenderer& renderer);
+
+private:
+    void init();
+
+    class TextContainer {
+    public:
+        size_t length() const {
+            return mByteLength;
+        }
+
+        const char* text() const {
+            return (const char*) mText;
+        }
+
+        size_t mByteLength;
+        const char* mText;
+    };
+
+    SkBitmap* getBitmap() {
+        int index = getInt();
+        return &mBitmaps[index - 1];
+    }
+
+    inline int getIndex() {
+        return mReader.readInt();
+    }
+
+    inline int getInt() {
+        return mReader.readInt();
+    }
+
+    SkMatrix* getMatrix() {
+        int index = getInt();
+        if (index == 0) {
+            return NULL;
+        }
+        return &mMatrices[index - 1];
+    }
+
+    SkPath* getPath() {
+        return &(*mPathHeap)[getInt() - 1];
+    }
+
+    SkPaint* getPaint() {
+        int index = getInt();
+        if (index == 0) {
+            return NULL;
+        }
+        return &mPaints[index - 1];
+    }
+
+    inline float getFloat() {
+        return mReader.readScalar();
+    }
+
+    int32_t* getInts(uint32_t& count) {
+        count = getInt();
+        return (int32_t*) mReader.skip(count * sizeof(int32_t));
+    }
+
+    float* getFloats(int& count) {
+        count = getInt();
+        return (float*) mReader.skip(count * sizeof(float));
+    }
+
+    void getText(TextContainer* text) {
+        size_t length = text->mByteLength = getInt();
+        text->mText = (const char*) mReader.skip(length);
+    }
+
+    PathHeap* mPathHeap;
+
+    SkBitmap* mBitmaps;
+    int mBitmapCount;
+
+    SkMatrix* mMatrices;
+    int mMatrixCount;
+
+    SkPaint* mPaints;
+    int mPaintCount;
+
+    mutable SkFlattenableReadBuffer mReader;
+
+    SkRefCntPlayback mRCPlayback;
+    SkTypefacePlayback mTFPlayback;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// Renderer
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Records drawing commands in a display list for latter playback.
+ */
+class DisplayListRenderer: public OpenGLRenderer {
+public:
+    DisplayListRenderer();
+    ~DisplayListRenderer();
+
+    void setViewport(int width, int height);
+    void prepare();
 
     void acquireContext();
     void releaseContext();
@@ -189,8 +293,28 @@ public:
 
     void reset();
 
+    DisplayList* getDisplayList() const {
+        return new DisplayList(*this);
+    }
+
+    const SkWriter32& writeStream() const {
+        return mWriter;
+    }
+
+    const SkTDArray<const SkFlatBitmap*>& getBitmaps() const {
+        return mBitmaps;
+    }
+
+    const SkTDArray<const SkFlatMatrix*>& getMatrices() const {
+        return mMatrices;
+    }
+
+    const SkTDArray<const SkFlatPaint*>& getPaints() const {
+        return mPaints;
+    }
+
 private:
-    inline void addOp(Op drawOp) {
+    inline void addOp(DisplayList::Op drawOp) {
         mWriter.writeInt(drawOp);
     }
 
@@ -199,6 +323,7 @@ private:
     }
 
     void addInts(const int32_t* values, uint32_t count) {
+        mWriter.writeInt(count);
         for (uint32_t i = 0; i < count; i++) {
             mWriter.writeInt(values[i]);
         }
@@ -209,6 +334,7 @@ private:
     }
 
     void addFloats(const float* values, int count) {
+        mWriter.writeInt(count);
         for (int i = 0; i < count; i++) {
             mWriter.writeScalar(values[i]);
         }
@@ -272,6 +398,8 @@ private:
 
     SkRefCntRecorder mRCRecorder;
     SkRefCntRecorder mTFRecorder;
+
+    friend class DisplayList;
 
 }; // class DisplayListRenderer
 
