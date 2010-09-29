@@ -26,13 +26,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
@@ -49,6 +48,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
 
     private Context mContext;
     private Intent mIntent;
+    private LayoutInflater mLayoutInflater;
     private RemoteViewsAdapterServiceConnection mServiceConnection;
     private WeakReference<RemoteAdapterConnectionCallback> mCallback;
     private FixedSizeRemoteViewsCache mCache;
@@ -334,16 +334,13 @@ public class RemoteViewsAdapter extends BaseAdapter {
                     }
 
                     // Compose the loading view text
-                    TextView textView = new TextView(parent.getContext());
-                    textView.setText(com.android.internal.R.string.loading);
-                    textView.setHeight(mFirstViewHeight);
-                    textView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-                    textView.setTextSize(18.0f);
-                    textView.setTextColor(Color.argb(96, 255, 255, 255));
-                    textView.setShadowLayer(2.0f, 0.0f, 1.0f, Color.BLACK);
-                    textView.setTag(new Integer(0));
+                    TextView loadingTextView = (TextView) mLayoutInflater.inflate(
+				com.android.internal.R.layout.remote_views_adapter_default_loading_view,
+				layout, false);
+                    loadingTextView.setHeight(mFirstViewHeight);
+                    loadingTextView.setTag(new Integer(0));
 
-                    layout.addView(textView);
+                    layout.addView(loadingTextView);
                 }
             }
 
@@ -579,6 +576,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
     public RemoteViewsAdapter(Context context, Intent intent, RemoteAdapterConnectionCallback callback) {
         mContext = context;
         mIntent = intent;
+        mLayoutInflater = LayoutInflater.from(context);
         if (mIntent == null) {
             throw new IllegalArgumentException("Non-null Intent must be specified.");
         }
