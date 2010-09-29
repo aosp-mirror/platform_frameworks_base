@@ -1250,12 +1250,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     private static final int[][] VIEW_STATE_SETS;
 
-    static final int VIEW_STATE_WINDOW_FOCUSED = 1<<0;
-    static final int VIEW_STATE_SELECTED = 1<<1;
-    static final int VIEW_STATE_FOCUSED = 1<<2;
-    static final int VIEW_STATE_ENABLED = 1<<3;
-    static final int VIEW_STATE_PRESSED = 1<<4;
-    static final int VIEW_STATE_ACTIVATED = 1<<5;
+    static final int VIEW_STATE_WINDOW_FOCUSED = 1;
+    static final int VIEW_STATE_SELECTED = 1 << 1;
+    static final int VIEW_STATE_FOCUSED = 1 << 2;
+    static final int VIEW_STATE_ENABLED = 1 << 3;
+    static final int VIEW_STATE_PRESSED = 1 << 4;
+    static final int VIEW_STATE_ACTIVATED = 1 << 5;
 
     static final int[] VIEW_STATE_IDS = new int[] {
         R.attr.state_window_focused,    VIEW_STATE_WINDOW_FOCUSED,
@@ -1268,28 +1268,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     static {
         int[] orderedIds = new int[VIEW_STATE_IDS.length];
-        for (int i=0; i<R.styleable.ViewDrawableStates.length; i++) {
+        for (int i = 0; i < R.styleable.ViewDrawableStates.length; i++) {
             int viewState = R.styleable.ViewDrawableStates[i];
-            for (int j=0; j<VIEW_STATE_IDS.length; j+=2) {
+            for (int j = 0; j<VIEW_STATE_IDS.length; j += 2) {
                 if (VIEW_STATE_IDS[j] == viewState) {
-                    orderedIds[i*2] = viewState;
-                    orderedIds[i*2+1] = VIEW_STATE_IDS[j+1];
+                    orderedIds[i * 2] = viewState;
+                    orderedIds[i * 2 + 1] = VIEW_STATE_IDS[j + 1];
                 }
             }
         }
-        final int NUM_BITS = VIEW_STATE_IDS.length/2;
-        VIEW_STATE_SETS = new int[1<<NUM_BITS][];
-        for (int i=0; i<VIEW_STATE_SETS.length; i++) {
+        final int NUM_BITS = VIEW_STATE_IDS.length / 2;
+        VIEW_STATE_SETS = new int[1 << NUM_BITS][];
+        for (int i = 0; i < VIEW_STATE_SETS.length; i++) {
             int numBits = Integer.bitCount(i);
             int[] set = new int[numBits];
             int pos = 0;
-            for (int j=0; j<orderedIds.length; j+=2) {
-                if ((i&orderedIds[j+1]) != 0) {
-                    if (false) {
-                        Log.i("View", "Index #" + i + " @ ordered #" + j
-                                + " resid=0x" + Integer.toHexString(orderedIds[j])
-                                + " mask " + orderedIds[j+1]);
-                    }
+            for (int j = 0; j < orderedIds.length; j += 2) {
+                if ((i & orderedIds[j+1]) != 0) {
                     set[pos++] = orderedIds[j];
                 }
             }
@@ -1958,6 +1953,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     private Bitmap mDrawingCache;
     private Bitmap mUnscaledDrawingCache;
+    private DisplayList mDisplayList;
 
     /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
@@ -7317,6 +7313,64 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * <p>Returns a display list that can be used to draw this view again
+     * without executing its draw method.</p>
+     * 
+     * @return A DisplayList ready to replay, or null if caching is not enabled.
+     */
+    DisplayList getDisplayList() {
+        if ((mViewFlags & WILL_NOT_CACHE_DRAWING) == WILL_NOT_CACHE_DRAWING) {
+            return null;
+        }
+        
+        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
+            return null;
+        }
+
+        if ((mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED &&
+                ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || mDisplayList == null)) {
+
+            if (mDisplayList != null) {
+                mDisplayList.destroy();
+            }
+
+            mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList();
+
+            final HardwareCanvas canvas = mDisplayList.start();
+            try {
+                int width = mRight - mLeft;
+                int height = mBottom - mTop;
+
+                canvas.setViewport(width, height);
+                canvas.onPreDraw();
+
+                final int restoreCount = canvas.save();
+
+                mPrivateFlags |= DRAWN;
+                mPrivateFlags |= DRAWING_CACHE_VALID;
+    
+                // Fast path for layouts with no backgrounds
+                if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+                    mPrivateFlags &= ~DIRTY_MASK;
+                    dispatchDraw(canvas);
+                } else {
+                    draw(canvas);
+                }
+    
+                canvas.restoreToCount(restoreCount);
+            } finally {
+                canvas.onPostDraw();
+
+                mDisplayList.end();
+
+                canvas.destroy();                
+            }
+        }
+
+        return mDisplayList;
+    }
+
+    /**
      * <p>Calling this method is equivalent to calling <code>getDrawingCache(false)</code>.</p>
      * 
      * @return A non-scaled bitmap representing this view or null if cache is disabled.
@@ -7382,6 +7436,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mUnscaledDrawingCache != null) {
             mUnscaledDrawingCache.recycle();
             mUnscaledDrawingCache = null;
+        }
+        if (mDisplayList != null) {
+            mDisplayList.destroy();
+            mDisplayList = null;
         }
     }
 
@@ -10167,7 +10225,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         IBinder mPanelParentWindowToken;
         Surface mSurface;
 
-        boolean mHardwareAccelerated;        
+        boolean mHardwareAccelerated;
+        HardwareRenderer mHardwareRenderer;
         
         /**
          * Scale factor used by the compatibility mode

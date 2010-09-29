@@ -103,6 +103,14 @@ public abstract class HardwareRenderer {
     abstract void draw(View view, View.AttachInfo attachInfo, int yOffset);
 
     /**
+     * Creates a new canvas that can be used to record drawing operations
+     * in the specified display list.
+     * 
+     * @return A new recording canvas.
+     */
+    abstract DisplayList createDisplayList();
+
+    /**
      * Initializes the hardware renderer for the specified surface and setup the
      * renderer for drawing, if needed. This is invoked when the ViewRoot has
      * potentially lost the hardware renderer. The hardware renderer should be
@@ -577,7 +585,7 @@ public abstract class HardwareRenderer {
 
         @Override
         GLES20Canvas createCanvas() {
-            return mGlCanvas = new GLES20Canvas(mGl, true);
+            return mGlCanvas = new GLES20Canvas(true);
         }
 
         @Override
@@ -588,6 +596,11 @@ public abstract class HardwareRenderer {
         @Override
         void onPostDraw() {
             mGlCanvas.onPostDraw();
+        }
+
+        @Override
+        DisplayList createDisplayList() {
+            return new GLES20DisplayList();
         }
 
         static HardwareRenderer create(boolean translucent) {

@@ -1830,8 +1830,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         boolean scalingRequired = false;
         boolean caching = false;
-        if (!canvas.isHardwareAccelerated() &&
-                (flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
+        if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
                 (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
             caching = true;
             if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
@@ -1914,12 +1913,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int sx = child.mScrollX;
         final int sy = child.mScrollY;
 
+        DisplayList displayList = null;
         Bitmap cache = null;
         if (caching) {
-            cache = child.getDrawingCache(true);
+            if (!canvas.isHardwareAccelerated()) {
+                cache = child.getDrawingCache(true);
+            } else {
+                displayList = child.getDisplayList();
+            }
         }
 
-        final boolean hasNoCache = cache == null;
+        final boolean hasDisplayList = displayList != null && displayList.isReady();
+        final boolean hasNoCache = cache == null || hasDisplayList;
 
         final int restoreTo = canvas.save();
         if (hasNoCache) {
@@ -2002,17 +2007,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (hasNoCache) {
-            // Fast path for layouts with no backgrounds
-            if ((child.mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                if (ViewDebug.TRACE_HIERARCHY) {
-                    ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
+            if (!hasDisplayList) {
+                // Fast path for layouts with no backgrounds
+                if ((child.mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+                    if (ViewDebug.TRACE_HIERARCHY) {
+                        ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
+                    }
+                    child.mPrivateFlags &= ~DIRTY_MASK;
+                    child.dispatchDraw(canvas);
+                } else {
+                    child.draw(canvas);
                 }
-                child.mPrivateFlags &= ~DIRTY_MASK;
-                child.dispatchDraw(canvas);
             } else {
-                child.draw(canvas);
+                ((HardwareCanvas) canvas).drawDisplayList(displayList);
             }
-        } else {
+        } else if (cache != null) {
             final Paint cachePaint = mCachePaint;
             if (alpha < 1.0f) {
                 cachePaint.setAlpha((int) (alpha * 255));

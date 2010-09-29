@@ -35,14 +35,10 @@ import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
 
-import javax.microedition.khronos.opengles.GL;
-
 /**
  * An implementation of Canvas on top of OpenGL ES 2.0.
  */
-class GLES20Canvas extends Canvas {
-    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-    private final GL mGl;
+class GLES20Canvas extends HardwareCanvas {
     private final boolean mOpaque;
     private int mRenderer;
     
@@ -72,27 +68,29 @@ class GLES20Canvas extends Canvas {
     ///////////////////////////////////////////////////////////////////////////
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
+
+    GLES20Canvas(boolean translucent) {
+        this(false, translucent);
+    }
     
-    GLES20Canvas(GL gl, boolean translucent) {
-        mGl = gl;
+    GLES20Canvas(boolean record, boolean translucent) {
         mOpaque = !translucent;
 
-        mRenderer = nCreateRenderer();
+        if (record) {
+            mRenderer = nCreateDisplayListRenderer();
+        } else {
+            mRenderer = nCreateRenderer();
+        }
+       
         if (mRenderer == 0) {
             throw new IllegalStateException("Could not create GLES20Canvas renderer");
         }
     }
-    
-    private native int nCreateRenderer();
 
-    /**
-     * This method <strong>must</strong> be called before releasing a
-     * reference to a GLES20Canvas. This method is responsible for freeing
-     * native resources associated with the hardware. Not invoking this
-     * method properly can result in memory leaks.
-     * 
-     * @hide
-     */
+    private native int nCreateRenderer();    
+    private native int nCreateDisplayListRenderer();    
+
+    @Override
     public synchronized void destroy() {
         if (mRenderer != 0) {
             nDestroyRenderer(mRenderer);
@@ -105,16 +103,6 @@ class GLES20Canvas extends Canvas {
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
     ///////////////////////////////////////////////////////////////////////////
-    
-    @Override
-    public boolean isHardwareAccelerated() {
-        return true;
-    }
-
-    @Override
-    public void setBitmap(Bitmap bitmap) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public boolean isOpaque() {
@@ -145,12 +133,14 @@ class GLES20Canvas extends Canvas {
     
     private native void nSetViewport(int renderer, int width, int height);
 
+    @Override
     void onPreDraw() {
         nPrepare(mRenderer);
     }
 
     private native void nPrepare(int renderer);
 
+    @Override
     void onPostDraw() {
         nFinish(mRenderer);
     }
@@ -177,6 +167,29 @@ class GLES20Canvas extends Canvas {
     }
 
     private native void nReleaseContext(int renderer);
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // Display list
+    ///////////////////////////////////////////////////////////////////////////
+
+    int getDisplayList() {
+        return nCreateDisplayList(mRenderer);
+    }
+
+    private native int nCreateDisplayList(int renderer);
+    
+    void destroyDisplayList(int displayList) {
+        nDestroyDisplayList(displayList);
+    }
+
+    private native void nDestroyDisplayList(int displayList);
+
+    @Override
+    public void drawDisplayList(DisplayList displayList) {
+        nDrawDisplayList(mRenderer, ((GLES20DisplayList) displayList).mNativeDisplayList);
+    }
+
+    private native void nDrawDisplayList(int renderer, int displayList);
 
     ///////////////////////////////////////////////////////////////////////////
     // Clipping

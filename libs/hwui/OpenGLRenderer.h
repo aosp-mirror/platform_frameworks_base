@@ -54,6 +54,8 @@ namespace uirenderer {
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
 
+class DisplayListRenderer;
+
 /**
  * OpenGL renderer used to draw accelerated 2D graphics. The API is a
  * simplified version of Skia's Canvas API.
@@ -63,7 +65,7 @@ public:
     OpenGLRenderer();
     virtual ~OpenGLRenderer();
 
-    void setViewport(int width, int height);
+    virtual void setViewport(int width, int height);
 
     virtual void prepare();
     virtual void finish();
@@ -427,6 +429,8 @@ private:
 
     // Misc
     GLint mMaxTextureSize;
+
+    friend class DisplayListRenderer;
 
 }; // class OpenGLRenderer
 
