@@ -45,6 +45,7 @@ public class LocationProviderProxy implements LocationProviderInterface {
 
     private final Context mContext;
     private final String mName;
+    private final String mServiceName;
     private ILocationProvider mProvider;
     private Handler mHandler;
     private final Connection mServiceConnection = new Connection();
@@ -65,14 +66,24 @@ public class LocationProviderProxy implements LocationProviderInterface {
             Handler handler) {
         mContext = context;
         mName = name;
+        mServiceName = serviceName;
         mHandler = handler;
         mContext.bindService(new Intent(serviceName), mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    public void reconnect() {
+        synchronized (mServiceConnection) {
+            // unbind first
+            mContext.unbindService(mServiceConnection);
+            mContext.bindService(new Intent(mServiceName), mServiceConnection,
+                Context.BIND_AUTO_CREATE);
+        }
     }
 
     private class Connection implements ServiceConnection {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "LocationProviderProxy.onServiceConnected " + className);
-            synchronized (this) {
+            synchronized (mServiceConnection) {
                 mProvider = ILocationProvider.Stub.asInterface(service);
                 if (mProvider != null) {
                     mHandler.post(mServiceConnectedTask);
@@ -82,7 +93,7 @@ public class LocationProviderProxy implements LocationProviderInterface {
 
         public void onServiceDisconnected(ComponentName className) {
             Log.d(TAG, "LocationProviderProxy.onServiceDisconnected " + className);
-            synchronized (this) {
+            synchronized (mServiceConnection) {
                 mProvider = null;
             }
         }
