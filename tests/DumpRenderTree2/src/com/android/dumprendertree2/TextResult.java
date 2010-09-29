@@ -208,6 +208,10 @@ public class TextResult extends AbstractResult {
 
         VisualDiffUtils.generateExpectedResultLines(diffs, expectedLineNums, expectedLines);
         VisualDiffUtils.generateActualResultLines(diffs, actualLineNums, actualLines);
+        // TODO: We should use a map for each line number and lines pair.
+        assert expectedLines.size() == expectedLineNums.size();
+        assert actualLines.size() == actualLineNums.size();
+        assert expectedLines.size() == actualLines.size();
 
         html.append(VisualDiffUtils.getHtml(expectedLineNums, expectedLines,
                 actualLineNums, actualLines));

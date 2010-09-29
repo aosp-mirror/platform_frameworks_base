@@ -68,34 +68,37 @@ public class VisualDiffUtils {
 
         String line = "";
         int i = 1;
-        for (diff_match_patch.Diff diff : diffs) {
+        diff_match_patch.Diff diff;
+        int size = diffs.size();
+        boolean isLastDiff;
+        for (int j = 0; j < size; j++) {
+            diff = diffs.get(j);
+            isLastDiff = j == size - 1;
             switch (diff.operation) {
                 case DELETE:
-                    line = processDiff(diff, lineNums, lines, line, i, delSpan);
+                    line = processDiff(diff, lineNums, lines, line, i, delSpan, isLastDiff);
                     if (line.equals("")) {
                         i++;
                     }
                     break;
 
                 case INSERT:
-                    if (diff.text.endsWith("\n")) {
-                        lineNums.add(DONT_PRINT_LINE_NUMBER);
-                        lines.add("");
+                    // If the line is currently empty and this insertion is the entire line, the
+                    // expected line is absent, so it has no line number.
+                    if (diff.text.endsWith("\n") || isLastDiff) {
+                        lineNums.add(line.equals("") ? DONT_PRINT_LINE_NUMBER : i++);
+                        lines.add(line);
+                        line = "";
                     }
                     break;
 
                 case EQUAL:
-                    line = processDiff(diff, lineNums, lines, line, i, eqlSpan);
+                    line = processDiff(diff, lineNums, lines, line, i, eqlSpan, isLastDiff);
                     if (line.equals("")) {
                         i++;
                     }
                     break;
             }
-        }
-
-        if (!line.isEmpty()) {
-            lines.add(line);
-            lineNums.add(i);
         }
     }
 
@@ -106,34 +109,37 @@ public class VisualDiffUtils {
 
         String line = "";
         int i = 1;
-        for (diff_match_patch.Diff diff : diffs) {
+        diff_match_patch.Diff diff;
+        int size = diffs.size();
+        boolean isLastDiff;
+        for (int j = 0; j < size; j++) {
+            diff = diffs.get(j);
+            isLastDiff = j == size - 1;
             switch (diff.operation) {
                 case INSERT:
-                    line = processDiff(diff, lineNums, lines, line, i, insSpan);
+                    line = processDiff(diff, lineNums, lines, line, i, insSpan, isLastDiff);
                     if (line.equals("")) {
                         i++;
                     }
                     break;
 
                 case DELETE:
-                    if (diff.text.endsWith("\n")) {
-                        lineNums.add(DONT_PRINT_LINE_NUMBER);
-                        lines.add("");
+                    // If the line is currently empty and deletion is the entire line, the
+                    // actual line is absent, so it has no line number.
+                    if (diff.text.endsWith("\n") || isLastDiff) {
+                        lineNums.add(line.equals("") ? DONT_PRINT_LINE_NUMBER : i++);
+                        lines.add(line);
+                        line = "";
                     }
                     break;
 
                 case EQUAL:
-                    line = processDiff(diff, lineNums, lines, line, i, eqlSpan);
+                    line = processDiff(diff, lineNums, lines, line, i, eqlSpan, isLastDiff);
                     if (line.equals("")) {
                         i++;
                     }
                     break;
             }
-        }
-
-        if (!line.isEmpty()) {
-            lines.add(line);
-            lineNums.add(i);
         }
     }
 
@@ -147,15 +153,16 @@ public class VisualDiffUtils {
      * @param line
      * @param i
      * @param begSpan
+     * @param forceOutputLine Force the current line to be output
      * @return
      */
     public static String processDiff(diff_match_patch.Diff diff, LinkedList<Integer> lineNums,
-            LinkedList<String> lines, String line, int i, String begSpan) {
+            LinkedList<String> lines, String line, int i, String begSpan, boolean forceOutputLine) {
         String endSpan = "</span>";
         String br = "&nbsp;";
 
-        if (diff.text.endsWith("\n")) {
-            lineNums.add(i++);
+        if (diff.text.endsWith("\n") || forceOutputLine) {
+            lineNums.add(i);
             /** TODO: Think of better way to replace stuff */
             line += begSpan + diff.text.replace("  ", "&nbsp;&nbsp;")
                     + endSpan + br;
