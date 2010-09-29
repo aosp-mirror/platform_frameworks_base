@@ -82,27 +82,27 @@ public abstract class RemoteViewsService extends Service {
         public RemoteViewsFactoryAdapter(RemoteViewsFactory factory) {
             mFactory = factory;
         }
-        public void onDataSetChanged() {
+        public synchronized void onDataSetChanged() {
             mFactory.onDataSetChanged();
         }
-        public int getCount() {
+        public synchronized int getCount() {
             return mFactory.getCount();
         }
-        public RemoteViews getViewAt(int position) {
+        public synchronized RemoteViews getViewAt(int position) {
             RemoteViews rv = mFactory.getViewAt(position);
             rv.setIsWidgetCollectionChild(true);
             return rv;
         }
-        public RemoteViews getLoadingView() {
+        public synchronized RemoteViews getLoadingView() {
             return mFactory.getLoadingView();
         }
-        public int getViewTypeCount() {
+        public synchronized int getViewTypeCount() {
             return mFactory.getViewTypeCount();
         }
-        public long getItemId(int position) {
+        public synchronized long getItemId(int position) {
             return mFactory.getItemId(position);
         }
-        public boolean hasStableIds() {
+        public synchronized boolean hasStableIds() {
             return mFactory.hasStableIds();
         }
 
