@@ -23,13 +23,28 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * StorageManager is the interface to the systems storage service.
+ * StorageManager is the interface to the systems storage service. The storage
+ * manager handles storage-related items such as Opaque Binary Blobs (OBBs).
+ * <p>
+ * OBBs contain a filesystem that maybe be encrypted on disk and mounted
+ * on-demand from an application. OBBs are a good way of providing large amounts
+ * of binary assets without packaging them into APKs as they may be multiple
+ * gigabytes in size. However, due to their size, they're most likely stored in
+ * a shared storage pool accessible from all programs. The system does not
+ * guarantee the security of the OBB file itself: if any program modifies the
+ * OBB, there is no guarantee that a read from that OBB will produce the
+ * expected output.
+ * <p>
  * Get an instance of this class by calling
- * {@link android.content.Context#getSystemService(java.lang.String)} with an argument
- * of {@link android.content.Context#STORAGE_SERVICE}.
+ * {@link android.content.Context#getSystemService(java.lang.String)} with an
+ * argument of {@link android.content.Context#STORAGE_SERVICE}.
  */
 
 public class StorageManager
@@ -75,11 +90,113 @@ public class StorageManager
     /**
      * Binder listener for OBB action results.
      */
-    private final ObbActionBinderListener mObbActionListener = new ObbActionBinderListener();
-    private class ObbActionBinderListener extends IObbActionListener.Stub {
+    private final ObbActionListener mObbActionListener = new ObbActionListener();
+
+    private class ObbActionListener extends IObbActionListener.Stub {
+        private List<WeakReference<ObbListenerDelegate>> mListeners = new LinkedList<WeakReference<ObbListenerDelegate>>();
+
         @Override
         public void onObbResult(String filename, String status) throws RemoteException {
-            Log.i(TAG, "filename = " + filename + ", result = " + status);
+            synchronized (mListeners) {
+                final Iterator<WeakReference<ObbListenerDelegate>> iter = mListeners.iterator();
+                while (iter.hasNext()) {
+                    final WeakReference<ObbListenerDelegate> ref = iter.next();
+
+                    final ObbListenerDelegate delegate = (ref == null) ? null : ref.get();
+                    if (delegate == null) {
+                        iter.remove();
+                        continue;
+                    }
+
+                    delegate.sendObbStateChanged(filename, status);
+                }
+            }
+        }
+
+        public void addListener(OnObbStateChangeListener listener) {
+            if (listener == null) {
+                return;
+            }
+
+            synchronized (mListeners) {
+                final Iterator<WeakReference<ObbListenerDelegate>> iter = mListeners.iterator();
+                while (iter.hasNext()) {
+                    final WeakReference<ObbListenerDelegate> ref = iter.next();
+
+                    final ObbListenerDelegate delegate = (ref == null) ? null : ref.get();
+                    if (delegate == null) {
+                        iter.remove();
+                        continue;
+                    }
+
+                    /*
+                     * If we're already in the listeners, we don't need to be in
+                     * there again.
+                     */
+                    if (listener.equals(delegate.getListener())) {
+                        return;
+                    }
+                }
+
+                final ObbListenerDelegate delegate = new ObbListenerDelegate(listener);
+                mListeners.add(new WeakReference<ObbListenerDelegate>(delegate));
+            }
+        }
+    }
+
+    /**
+     * Private class containing sender and receiver code for StorageEvents.
+     */
+    private class ObbListenerDelegate {
+        private final WeakReference<OnObbStateChangeListener> mObbEventListenerRef;
+        private final Handler mHandler;
+
+        ObbListenerDelegate(OnObbStateChangeListener listener) {
+            mObbEventListenerRef = new WeakReference<OnObbStateChangeListener>(listener);
+            mHandler = new Handler(mTgtLooper) {
+                @Override
+                public void handleMessage(Message msg) {
+                    final OnObbStateChangeListener listener = getListener();
+                    if (listener == null) {
+                        return;
+                    }
+
+                    StorageEvent e = (StorageEvent) msg.obj;
+
+                    if (msg.what == StorageEvent.EVENT_OBB_STATE_CHANGED) {
+                        ObbStateChangedStorageEvent ev = (ObbStateChangedStorageEvent) e;
+                        listener.onObbStateChange(ev.path, ev.state);
+                    } else {
+                        Log.e(TAG, "Unsupported event " + msg.what);
+                    }
+                }
+            };
+        }
+
+        OnObbStateChangeListener getListener() {
+            if (mObbEventListenerRef == null) {
+                return null;
+            }
+            return mObbEventListenerRef.get();
+        }
+
+        void sendObbStateChanged(String path, String state) {
+            ObbStateChangedStorageEvent e = new ObbStateChangedStorageEvent(path, state);
+            mHandler.sendMessage(e.getMessage());
+        }
+    }
+
+    /**
+     * Message sent during an OBB status change event.
+     */
+    private class ObbStateChangedStorageEvent extends StorageEvent {
+        public final String path;
+        public final String state;
+
+        public ObbStateChangedStorageEvent(String path, String state) {
+            super(EVENT_OBB_STATE_CHANGED);
+            this.path = path;
+            this.state = state;
         }
     }
 
@@ -88,8 +205,9 @@ public class StorageManager
      * and the target looper handler.
      */
     private class StorageEvent {
-        public static final int EVENT_UMS_CONNECTION_CHANGED = 1;
-        public static final int EVENT_STORAGE_STATE_CHANGED   = 2;
+        static final int EVENT_UMS_CONNECTION_CHANGED = 1;
+        static final int EVENT_STORAGE_STATE_CHANGED = 2;
+        static final int EVENT_OBB_STATE_CHANGED = 3;
 
         private Message mMessage;
 
@@ -300,19 +418,27 @@ public class StorageManager
      * specified, it is supplied to the mounting process to be used in any
      * encryption used in the OBB.
      * <p>
+     * The OBB will remain mounted for as long as the StorageManager reference
+     * is held by the application. As soon as this reference is lost, the OBBs
+     * in use will be unmounted. The {@link OnObbStateChangeListener} registered with
+     * this call will receive all further OBB-related events until it goes out
+     * of scope. If the caller is not interested in whether the call succeeds,
+     * the <code>listener</code> may be specified as <code>null</code>.
+     * <p>
      * <em>Note:</em> you can only mount OBB files for which the OBB tag on the
      * file matches a package ID that is owned by the calling program's UID.
-     * That is, shared UID applications can obtain access to any other
+     * That is, shared UID applications can attempt to mount any other
      * application's OBB that shares its UID.
-     * <p>
-     * STOPSHIP document more; discuss lack of guarantees of security
      * 
      * @param filename the path to the OBB file
-     * @param key decryption key
+     * @param key secret used to encrypt the OBB; may be <code>null</code> if no
+     *            encryption was used on the OBB.
      * @return whether the mount call was successfully queued or not
+     * @throws IllegalArgumentException when the OBB is already mounted
      */
-    public boolean mountObb(String filename, String key) {
+    public boolean mountObb(String filename, String key, OnObbStateChangeListener listener) {
         try {
+            mObbActionListener.addListener(listener);
             mMountService.mountObb(filename, key, mObbActionListener);
             return true;
         } catch (RemoteException e) {
@@ -323,15 +449,20 @@ public class StorageManager
     }
 
     /**
-     * Unmount an Opaque Binary Blob (OBB) file. If the <code>force</code> flag
-     * is true, it will kill any application needed to unmount the given OBB.
+     * Unmount an Opaque Binary Blob (OBB) file asynchronously. If the
+     * <code>force</code> flag is true, it will kill any application needed to
+     * unmount the given OBB (even the calling application).
+     * <p>
+     * The {@link OnObbStateChangeListener} registered with this call will receive all
+     * further OBB-related events until it goes out of scope. If the caller is
+     * not interested in whether the call succeeded, the listener may be
+     * specified as <code>null</code>.
      * <p>
      * <em>Note:</em> you can only mount OBB files for which the OBB tag on the
      * file matches a package ID that is owned by the calling program's UID.
      * That is, shared UID applications can obtain access to any other
      * application's OBB that shares its UID.
      * <p>
-     * STOPSHIP document more; discuss lack of guarantees of security
      * 
      * @param filename path to the OBB file
      * @param force whether to kill any programs using this in order to unmount
@@ -339,8 +470,10 @@ public class StorageManager
      * @return whether the unmount call was successfully queued or not
      * @throws IllegalArgumentException when OBB is not already mounted
      */
-    public boolean unmountObb(String filename, boolean force) throws IllegalArgumentException {
+    public boolean unmountObb(String filename, boolean force, OnObbStateChangeListener listener)
+            throws IllegalArgumentException {
         try {
+            mObbActionListener.addListener(listener);
             mMountService.unmountObb(filename, force, mObbActionListener);
             return true;
         } catch (RemoteException e) {

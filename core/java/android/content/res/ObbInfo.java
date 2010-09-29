@@ -20,9 +20,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Basic information about a Opaque Binary Blob (OBB) that reflects
- * the info from the footer on the OBB file.
- * @hide
+ * Basic information about a Opaque Binary Blob (OBB) that reflects the info
+ * from the footer on the OBB file. This information may be manipulated by a
+ * developer with the <code>obbtool</code> program in the Android SDK.
  */
 public class ObbInfo implements Parcelable {
     /** Flag noting that this OBB is an overlay patch for a base OBB. */
@@ -43,7 +43,8 @@ public class ObbInfo implements Parcelable {
      */
     public int flags;
 
-    public ObbInfo() {
+    // Only allow things in this package to instantiate.
+    /* package */ ObbInfo() {
     }
 
     public String toString() {

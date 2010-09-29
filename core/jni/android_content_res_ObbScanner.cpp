@@ -34,7 +34,17 @@ static struct {
     jfieldID flags;
 } gObbInfoClassInfo;
 
-static jboolean android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject clazz, jstring file,
+static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
+{
+    jclass npeClazz;
+
+    npeClazz = env->FindClass(exc);
+    LOG_FATAL_IF(npeClazz == NULL, "Unable to find class %s", exc);
+
+    env->ThrowNew(npeClazz, msg);
+}
+
+static void android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject clazz, jstring file,
         jobject obbInfo)
 {
     const char* filePath = env->GetStringUTFChars(file, JNI_FALSE);
@@ -42,7 +52,8 @@ static jboolean android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject c
     sp<ObbFile> obb = new ObbFile();
     if (!obb->readFrom(filePath)) {
         env->ReleaseStringUTFChars(file, filePath);
-        return JNI_FALSE;
+        doThrow(env, "java/io/IOException", "Could not read OBB file");
+        return;
     }
 
     env->ReleaseStringUTFChars(file, filePath);
@@ -51,13 +62,13 @@ static jboolean android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject c
 
     jstring packageName = env->NewStringUTF(packageNameStr);
     if (packageName == NULL) {
-        return JNI_FALSE;
+        doThrow(env, "java/io/IOException", "Could not read OBB file");
+        return;
     }
 
     env->SetObjectField(obbInfo, gObbInfoClassInfo.packageName, packageName);
     env->SetIntField(obbInfo, gObbInfoClassInfo.version, obb->getVersion());
-
-    return JNI_TRUE;
+    env->SetIntField(obbInfo, gObbInfoClassInfo.flags, obb->getFlags());
 }
 
 /*
@@ -65,7 +76,7 @@ static jboolean android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject c
  */
 static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
-    { "getObbInfo_native", "(Ljava/lang/String;Landroid/content/res/ObbInfo;)Z",
+    { "getObbInfo_native", "(Ljava/lang/String;Landroid/content/res/ObbInfo;)V",
             (void*) android_content_res_ObbScanner_getObbInfo },
 };
 
