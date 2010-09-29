@@ -197,7 +197,9 @@ public:
                                                       sp<IMemoryHeap>* heap,
                                                       uint32_t* width,
                                                       uint32_t* height,
-                                                      PixelFormat* format);
+                                                      PixelFormat* format,
+                                                      uint32_t reqWidth,
+                                                      uint32_t reqHeight);
 
             void                        screenReleased(DisplayID dpy);
             void                        screenAcquired(DisplayID dpy);
@@ -318,6 +320,11 @@ private:
             uint32_t    setTransactionFlags(uint32_t flags);
             void        commitTransaction();
 
+
+            status_t captureScreenImplLocked(DisplayID dpy,
+                    sp<IMemoryHeap>* heap,
+                    uint32_t* width, uint32_t* height, PixelFormat* format,
+                    uint32_t reqWidth = 0, uint32_t reqHeight = 0);
 
             friend class FreezeLock;
             sp<FreezeLock> getFreezeLock() const;

@@ -70,6 +70,7 @@ public:
     // LayerBase interface
     virtual void setGeometry(hwc_layer_t* hwcl);
     virtual void setPerFrameData(hwc_layer_t* hwcl);
+    virtual void drawForSreenShot() const;
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t transactionFlags);
     virtual void lockPageFlip(bool& recomputeVisibleRegions);

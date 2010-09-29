@@ -17,32 +17,21 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <utils/Log.h>
-
-#include <binder/IPCThreadState.h>
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
-
 #include <binder/IMemory.h>
-#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
 
 using namespace android;
 
 int main(int argc, char** argv)
 {
-    const String16 name("SurfaceFlinger");
-    sp<ISurfaceComposer> composer;
-    if (getService(name, &composer) != NO_ERROR)
+    ScreenshotClient screenshot;
+    if (screenshot.update() != NO_ERROR)
         return 0;
 
-    sp<IMemoryHeap> heap;
-    uint32_t w, h;
-    PixelFormat f;
-    status_t err = composer->captureScreen(0, &heap, &w, &h, &f);
-    if (err != NO_ERROR)
-        return 0;
-
-    uint8_t* base = (uint8_t*)heap->getBase();
+    void const* base = screenshot.getPixels();
+    uint32_t w = screenshot.getWidth();
+    uint32_t h = screenshot.getHeight();
+    uint32_t f = screenshot.getFormat();
     int fd = dup(STDOUT_FILENO);
     write(fd, &w, 4);
     write(fd, &h, 4);

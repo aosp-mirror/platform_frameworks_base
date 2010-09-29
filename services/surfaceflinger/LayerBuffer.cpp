@@ -132,6 +132,12 @@ void LayerBuffer::unlockPageFlip(const Transform& planeTransform,
     LayerBase::unlockPageFlip(planeTransform, outDirtyRegion);    
 }
 
+void LayerBuffer::drawForSreenShot() const
+{
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    clearWithOpenGL( Region(hw.bounds()) );
+}
+
 void LayerBuffer::onDraw(const Region& clip) const
 {
     sp<Source> source(getSource());
