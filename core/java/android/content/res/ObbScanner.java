@@ -42,7 +42,7 @@ public class ObbScanner {
 
         final File obbFile = new File(filePath);
         if (!obbFile.exists()) {
-            throw new IllegalArgumentException("OBB file does nto exist: " + filePath);
+            throw new IllegalArgumentException("OBB file does not exist: " + filePath);
         }
 
         final String canonicalFilePath = obbFile.getCanonicalPath();
