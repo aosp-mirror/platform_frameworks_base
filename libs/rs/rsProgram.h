@@ -26,6 +26,8 @@ namespace renderscript {
 class ShaderCache;
 
 #define RS_SHADER_INTERNAL "//rs_shader_internal\n"
+#define RS_SHADER_ATTR "ATTRIB_"
+#define RS_SHADER_UNI "UNI_"
 
 class Program : public ObjectBase
 {
