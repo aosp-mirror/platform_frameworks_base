@@ -88,12 +88,13 @@ struct BundledEffectContext{
     int                             positionSaved;
     bool                            bMuteEnabled;   /* Must store as mute = -96dB level */
     bool                            bStereoPositionEnabled;
-    int                             frameCount;
     LVM_Fs_en                       SampleRate;
     int                             SamplesPerSecond;
     int                             SamplesToExitCountEq;
     int                             SamplesToExitCountBb;
     int                             SamplesToExitCountVirt;
+    LVM_INT16                       *workBuffer;
+    int                             frameCount;
     #ifdef LVM_PCM
     FILE                            *PcmInPtr;
     FILE                            *PcmOutPtr;

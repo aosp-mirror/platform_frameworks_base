@@ -156,7 +156,12 @@ public class DefaultContainerService extends IntentService {
         }
 
         public ObbInfo getObbInfo(String filename) {
-            return ObbScanner.getObbInfo(filename);
+            try {
+                return ObbScanner.getObbInfo(filename);
+            } catch (IOException e) {
+                Log.d(TAG, "Couldn't get OBB info", e);
+                return null;
+            }
         }
     };
 

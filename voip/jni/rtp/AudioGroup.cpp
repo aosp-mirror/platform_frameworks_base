@@ -461,18 +461,15 @@ private:
         EC_ENABLED = 3,
         LAST_MODE = 3,
     };
-    int mMode;
+
     AudioStream *mChain;
     int mEventQueue;
     volatile int mDtmfEvent;
 
+    int mMode;
+    int mSampleRate;
     int mSampleCount;
     int mDeviceSocket;
-    AudioTrack mTrack;
-    AudioRecord mRecord;
-
-    bool networkLoop();
-    bool deviceLoop();
 
     class NetworkThread : public Thread
     {
@@ -490,10 +487,7 @@ private:
 
     private:
         AudioGroup *mGroup;
-        bool threadLoop()
-        {
-            return mGroup->networkLoop();
-        }
+        bool threadLoop();
     };
     sp<NetworkThread> mNetworkThread;
 
@@ -504,9 +498,6 @@ private:
 
         bool start()
         {
-            char c;
-            while (recv(mGroup->mDeviceSocket, &c, 1, MSG_DONTWAIT) == 1);
-
             if (run("Device", ANDROID_PRIORITY_AUDIO) != NO_ERROR) {
                 LOGE("cannot start device thread");
                 return false;
@@ -516,10 +507,7 @@ private:
 
     private:
         AudioGroup *mGroup;
-        bool threadLoop()
-        {
-            return mGroup->deviceLoop();
-        }
+        bool threadLoop();
     };
     sp<DeviceThread> mDeviceThread;
 };
@@ -539,8 +527,6 @@ AudioGroup::~AudioGroup()
 {
     mNetworkThread->requestExitAndWait();
     mDeviceThread->requestExitAndWait();
-    mTrack.stop();
-    mRecord.stop();
     close(mEventQueue);
     close(mDeviceSocket);
     while (mChain) {
@@ -559,39 +545,8 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
         return false;
     }
 
+    mSampleRate = sampleRate;
     mSampleCount = sampleCount;
-
-    // Find out the frame count for AudioTrack and AudioRecord.
-    int output = 0;
-    int input = 0;
-    if (AudioTrack::getMinFrameCount(&output, AudioSystem::VOICE_CALL,
-        sampleRate) != NO_ERROR || output <= 0 ||
-        AudioRecord::getMinFrameCount(&input, sampleRate,
-        AudioSystem::PCM_16_BIT, 1) != NO_ERROR || input <= 0) {
-        LOGE("cannot compute frame count");
-        return false;
-    }
-    LOGD("reported frame count: output %d, input %d", output, input);
-
-    if (output < sampleCount * 2) {
-        output = sampleCount * 2;
-    }
-    if (input < sampleCount * 2) {
-        input = sampleCount * 2;
-    }
-    LOGD("adjusted frame count: output %d, input %d", output, input);
-
-    // Initialize AudioTrack and AudioRecord.
-    if (mTrack.set(AudioSystem::VOICE_CALL, sampleRate, AudioSystem::PCM_16_BIT,
-        AudioSystem::CHANNEL_OUT_MONO, output) != NO_ERROR ||
-        mRecord.set(AUDIO_SOURCE_MIC, sampleRate, AudioSystem::PCM_16_BIT,
-        AudioSystem::CHANNEL_IN_MONO, input) != NO_ERROR) {
-        LOGE("cannot initialize audio device");
-        return false;
-    }
-    LOGD("latency: output %d, input %d", mTrack.latency(), mRecord.latency());
-
-    // TODO: initialize echo canceler here.
 
     // Create device socket.
     int pair[2];
@@ -610,13 +565,11 @@ bool AudioGroup::set(int sampleRate, int sampleCount)
         return false;
     }
 
-    // Give device socket a reasonable timeout and buffer size.
+    // Give device socket a reasonable timeout.
     timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 1000 * sampleCount / sampleRate * 500;
-    if (setsockopt(pair[0], SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) ||
-        setsockopt(pair[0], SOL_SOCKET, SO_RCVBUF, &output, sizeof(output)) ||
-        setsockopt(pair[1], SOL_SOCKET, SO_SNDBUF, &output, sizeof(output))) {
+    if (setsockopt(pair[0], SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv))) {
         LOGE("setsockopt: %s", strerror(errno));
         return false;
     }
@@ -644,29 +597,10 @@ bool AudioGroup::setMode(int mode)
         return true;
     }
 
+    mDeviceThread->requestExitAndWait();
     LOGD("group[%d] switches from mode %d to %d", mDeviceSocket, mMode, mode);
     mMode = mode;
-
-    mDeviceThread->requestExitAndWait();
-    if (mode == ON_HOLD) {
-        mTrack.stop();
-        mRecord.stop();
-        return true;
-    }
-
-    mTrack.start();
-    if (mode == MUTED) {
-        mRecord.stop();
-    } else {
-        mRecord.start();
-    }
-
-    if (!mDeviceThread->start()) {
-        mTrack.stop();
-        mRecord.stop();
-        return false;
-    }
-    return true;
+    return (mode == ON_HOLD) || mDeviceThread->start();
 }
 
 bool AudioGroup::sendDtmf(int event)
@@ -741,15 +675,16 @@ bool AudioGroup::remove(int socket)
     return true;
 }
 
-bool AudioGroup::networkLoop()
+bool AudioGroup::NetworkThread::threadLoop()
 {
+    AudioStream *chain = mGroup->mChain;
     int tick = elapsedRealtime();
     int deadline = tick + 10;
     int count = 0;
 
-    for (AudioStream *stream = mChain; stream; stream = stream->mNext) {
+    for (AudioStream *stream = chain; stream; stream = stream->mNext) {
         if (!stream->mTick || tick - stream->mTick >= 0) {
-            stream->encode(tick, mChain);
+            stream->encode(tick, chain);
         }
         if (deadline - stream->mTick > 0) {
             deadline = stream->mTick;
@@ -757,12 +692,12 @@ bool AudioGroup::networkLoop()
         ++count;
     }
 
-    if (mDtmfEvent != -1) {
-        int event = mDtmfEvent;
-        for (AudioStream *stream = mChain; stream; stream = stream->mNext) {
+    int event = mGroup->mDtmfEvent;
+    if (event != -1) {
+        for (AudioStream *stream = chain; stream; stream = stream->mNext) {
             stream->sendDtmf(event);
         }
-        mDtmfEvent = -1;
+        mGroup->mDtmfEvent = -1;
     }
 
     deadline -= tick;
@@ -771,7 +706,7 @@ bool AudioGroup::networkLoop()
     }
 
     epoll_event events[count];
-    count = epoll_wait(mEventQueue, events, count, deadline);
+    count = epoll_wait(mGroup->mEventQueue, events, count, deadline);
     if (count == -1) {
         LOGE("epoll_wait: %s", strerror(errno));
         return false;
@@ -783,70 +718,125 @@ bool AudioGroup::networkLoop()
     return true;
 }
 
-bool AudioGroup::deviceLoop()
+bool AudioGroup::DeviceThread::threadLoop()
 {
-    int16_t output[mSampleCount];
+    int mode = mGroup->mMode;
+    int sampleRate = mGroup->mSampleRate;
+    int sampleCount = mGroup->mSampleCount;
+    int deviceSocket = mGroup->mDeviceSocket;
 
-    if (recv(mDeviceSocket, output, sizeof(output), 0) <= 0) {
-        memset(output, 0, sizeof(output));
-    }
-
-    int16_t input[mSampleCount];
-    int toWrite = mSampleCount;
-    int toRead = (mMode == MUTED) ? 0 : mSampleCount;
-    int chances = 100;
-
-    while (--chances > 0 && (toWrite > 0 || toRead > 0)) {
-        if (toWrite > 0) {
-            AudioTrack::Buffer buffer;
-            buffer.frameCount = toWrite;
-
-            status_t status = mTrack.obtainBuffer(&buffer, 1);
-            if (status == NO_ERROR) {
-                memcpy(buffer.i8, &output[mSampleCount - toWrite], buffer.size);
-                toWrite -= buffer.frameCount;
-                mTrack.releaseBuffer(&buffer);
-            } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
-                LOGE("cannot write to AudioTrack");
-                return false;
-            }
-        }
-
-        if (toRead > 0) {
-            AudioRecord::Buffer buffer;
-            buffer.frameCount = mRecord.frameCount();
-
-            status_t status = mRecord.obtainBuffer(&buffer, 1);
-            if (status == NO_ERROR) {
-                int count = ((int)buffer.frameCount < toRead) ?
-                        buffer.frameCount : toRead;
-                memcpy(&input[mSampleCount - toRead], buffer.i8, count * 2);
-                toRead -= count;
-                if (buffer.frameCount < mRecord.frameCount()) {
-                    buffer.frameCount = count;
-                }
-                mRecord.releaseBuffer(&buffer);
-            } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
-                LOGE("cannot read from AudioRecord");
-                return false;
-            }
-        }
-    }
-
-    if (!chances) {
-        LOGE("device loop timeout");
+    // Find out the frame count for AudioTrack and AudioRecord.
+    int output = 0;
+    int input = 0;
+    if (AudioTrack::getMinFrameCount(&output, AudioSystem::VOICE_CALL,
+        sampleRate) != NO_ERROR || output <= 0 ||
+        AudioRecord::getMinFrameCount(&input, sampleRate,
+        AudioSystem::PCM_16_BIT, 1) != NO_ERROR || input <= 0) {
+        LOGE("cannot compute frame count");
         return false;
     }
+    LOGD("reported frame count: output %d, input %d", output, input);
 
-    if (mMode != MUTED) {
-        if (mMode == NORMAL) {
-            send(mDeviceSocket, input, sizeof(input), MSG_DONTWAIT);
-        } else {
-            // TODO: Echo canceller runs here.
-            send(mDeviceSocket, input, sizeof(input), MSG_DONTWAIT);
+    if (output < sampleCount * 2) {
+        output = sampleCount * 2;
+    }
+    if (input < sampleCount * 2) {
+        input = sampleCount * 2;
+    }
+    LOGD("adjusted frame count: output %d, input %d", output, input);
+
+    // Initialize AudioTrack and AudioRecord.
+    AudioTrack track;
+    AudioRecord record;
+    if (track.set(AudioSystem::VOICE_CALL, sampleRate, AudioSystem::PCM_16_BIT,
+        AudioSystem::CHANNEL_OUT_MONO, output) != NO_ERROR ||
+        record.set(AUDIO_SOURCE_MIC, sampleRate, AudioSystem::PCM_16_BIT,
+        AudioSystem::CHANNEL_IN_MONO, input) != NO_ERROR) {
+        LOGE("cannot initialize audio device");
+        return false;
+    }
+    LOGD("latency: output %d, input %d", track.latency(), record.latency());
+
+    // TODO: initialize echo canceler here.
+
+    // Give device socket a reasonable buffer size.
+    setsockopt(deviceSocket, SOL_SOCKET, SO_RCVBUF, &output, sizeof(output));
+    setsockopt(deviceSocket, SOL_SOCKET, SO_SNDBUF, &output, sizeof(output));
+
+    // Drain device socket.
+    char c;
+    while (recv(deviceSocket, &c, 1, MSG_DONTWAIT) == 1);
+
+    // Start your engine!
+    track.start();
+    if (mode != MUTED) {
+        record.start();
+    }
+
+    while (!exitPending()) {
+        int16_t output[sampleCount];
+        if (recv(deviceSocket, output, sizeof(output), 0) <= 0) {
+            memset(output, 0, sizeof(output));
+        }
+
+        int16_t input[sampleCount];
+        int toWrite = sampleCount;
+        int toRead = (mode == MUTED) ? 0 : sampleCount;
+        int chances = 100;
+
+        while (--chances > 0 && (toWrite > 0 || toRead > 0)) {
+            if (toWrite > 0) {
+                AudioTrack::Buffer buffer;
+                buffer.frameCount = toWrite;
+
+                status_t status = track.obtainBuffer(&buffer, 1);
+                if (status == NO_ERROR) {
+                    int offset = sampleCount - toWrite;
+                    memcpy(buffer.i8, &output[offset], buffer.size);
+                    toWrite -= buffer.frameCount;
+                    track.releaseBuffer(&buffer);
+                } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
+                    LOGE("cannot write to AudioTrack");
+                    break;
+                }
+            }
+
+            if (toRead > 0) {
+                AudioRecord::Buffer buffer;
+                buffer.frameCount = record.frameCount();
+
+                status_t status = record.obtainBuffer(&buffer, 1);
+                if (status == NO_ERROR) {
+                    int count = ((int)buffer.frameCount < toRead) ?
+                            buffer.frameCount : toRead;
+                    memcpy(&input[sampleCount - toRead], buffer.i8, count * 2);
+                    toRead -= count;
+                    if (buffer.frameCount < record.frameCount()) {
+                        buffer.frameCount = count;
+                    }
+                    record.releaseBuffer(&buffer);
+                } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
+                    LOGE("cannot read from AudioRecord");
+                    break;
+                }
+            }
+        }
+
+        if (chances <= 0) {
+            LOGE("device loop timeout");
+            break;
+        }
+
+        if (mode != MUTED) {
+            if (mode == NORMAL) {
+                send(deviceSocket, input, sizeof(input), MSG_DONTWAIT);
+            } else {
+                // TODO: Echo canceller runs here.
+                send(deviceSocket, input, sizeof(input), MSG_DONTWAIT);
+            }
         }
     }
-    return true;
+    return false;
 }
 
 //------------------------------------------------------------------------------

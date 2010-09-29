@@ -26,16 +26,21 @@ LOCAL_SRC_FILES := \
 	util.cpp \
 	rtp_jni.cpp
 
+LOCAL_SRC_FILES += \
+	G711Codec.cpp \
+	GsmCodec.cpp
+
 LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libcutils \
 	libutils \
 	libmedia
 
-LOCAL_STATIC_LIBRARIES :=
+LOCAL_STATIC_LIBRARIES := libgsm
 
 LOCAL_C_INCLUDES += \
-	$(JNI_H_INCLUDE)
+	$(JNI_H_INCLUDE) \
+	external/libgsm/inc
 
 LOCAL_CFLAGS += -fvisibility=hidden
 

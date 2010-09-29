@@ -86,6 +86,7 @@ terms listed above has been obtained from the copyright holder.
 ----------------------------------------------------------------------------*/
 
 #include "gsm_amr_typedefs.h"
+#include "frame_type_3gpp.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
@@ -135,26 +136,6 @@ extern "C"
         MR122,    /* 12.2 kbps */
         MRDTX,    /* DTX       */
         N_MODES   /* Not Used  */
-    };
-
-    enum Frame_Type_3GPP
-    {
-        AMR_475 = 0,        /* 4.75 kbps    */
-        AMR_515,            /* 5.15 kbps    */
-        AMR_59,             /* 5.9 kbps     */
-        AMR_67,             /* 6.7 kbps     */
-        AMR_74,             /* 7.4 kbps     */
-        AMR_795,            /* 7.95 kbps    */
-        AMR_102,            /* 10.2 kbps    */
-        AMR_122,            /* 12.2 kbps    */
-        AMR_SID,            /* GSM AMR DTX  */
-        GSM_EFR_SID,        /* GSM EFR DTX  */
-        TDMA_EFR_SID,       /* TDMA EFR DTX */
-        PDC_EFR_SID,        /* PDC EFR DTX  */
-        FOR_FUTURE_USE1,    /* Unused 1     */
-        FOR_FUTURE_USE2,    /* Unused 2     */
-        FOR_FUTURE_USE3,    /* Unused 3     */
-        AMR_NO_DATA         /* No data      */
     };
 
     /*----------------------------------------------------------------------------

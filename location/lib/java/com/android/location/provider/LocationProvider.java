@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.location.provider;
+package com.android.location.provider;
 
 import android.content.Context;
 import android.net.NetworkInfo;
@@ -356,4 +356,3 @@ public abstract class LocationProvider {
      */
     public abstract void onRemoveListener(int uid, WorkSource ws);
 }
-
