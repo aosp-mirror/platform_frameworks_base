@@ -142,9 +142,9 @@ public class EventSenderImpl {
     private Handler mEventSenderHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            TouchPoint touchPoint;
             Bundle bundle;
-            KeyEvent event;
+            MotionEvent event;
+            long ts;
 
             switch (msg.what) {
                 case MSG_ENABLE_DOM_UI_EVENT_LOGGING:
@@ -177,45 +177,25 @@ public class EventSenderImpl {
                 /** MOUSE */
 
                 case MSG_MOUSE_DOWN:
-                    /** TODO: Implement */
+                    ts = SystemClock.uptimeMillis();
+                    event = MotionEvent.obtain(ts, ts, MotionEvent.ACTION_DOWN, mMouseX, mMouseY, 0);
+                    mWebView.onTouchEvent(event);
                     break;
 
                 case MSG_MOUSE_UP:
-                    /** TODO: Implement */
+                    ts = SystemClock.uptimeMillis();
+                    event = MotionEvent.obtain(ts, ts, MotionEvent.ACTION_UP, mMouseX, mMouseY, 0);
+                    mWebView.onTouchEvent(event);
                     break;
 
                 case MSG_MOUSE_CLICK:
-                    /** TODO: Implement */
+                    mouseDown();
+                    mouseUp();
                     break;
 
                 case MSG_MOUSE_MOVE_TO:
-                    int x = msg.arg1;
-                    int y = msg.arg2;
-
-                    event = null;
-                    if (x > mMouseX) {
-                        event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT);
-                    } else if (x < mMouseX) {
-                        event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT);
-                    }
-                    if (event != null) {
-                        mWebView.onKeyDown(event.getKeyCode(), event);
-                        mWebView.onKeyUp(event.getKeyCode(), event);
-                    }
-
-                    event = null;
-                    if (y > mMouseY) {
-                        event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN);
-                    } else if (y < mMouseY) {
-                        event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP);
-                    }
-                    if (event != null) {
-                        mWebView.onKeyDown(event.getKeyCode(), event);
-                        mWebView.onKeyUp(event.getKeyCode(), event);
-                    }
-
-                    mMouseX = x;
-                    mMouseY = y;
+                    mMouseX = msg.arg1;
+                    mMouseY = msg.arg2;
                     break;
 
                 /** TOUCH */
