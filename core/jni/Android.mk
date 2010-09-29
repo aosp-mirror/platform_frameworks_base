@@ -193,6 +193,14 @@ LOCAL_SHARED_LIBRARIES := \
 	libwpa_client \
 	libjpeg
 
+ifeq ($(BOARD_HAVE_NFC),true)
+LOCAL_SHARED_LIBRARIES += \
+	libnfc_jni \
+	libnfc
+
+LOCAL_CFLAGS += -DHAVE_NFC
+endif
+
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \
 	external/dbus \

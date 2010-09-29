@@ -1,0 +1,473 @@
+<html>
+<body>
+
+<p>Provides classes that manage the NFC functionality.</p>
+
+<p>The NFC functionality is related to Near Field Communication.</p>
+
+<p>The NFC APIs let applications:</p>
+<ul>
+  <li>Scan for remote NFC targets (NFC Tag or NFC Peer)</li>
+  <li>Transfer raw data to and from remote NFC targets (NFC Tags or NFC Peer)</li>
+  <li>Read/Write NDEF data from/to remote NFC targets (NFC Tags)</li>
+  <li>Establish LLCP connection with a remote NFC target (NFC Peer with LLCP support)</li>
+  <li>Exchange data with a remote NFC target through LLCP services (NFC Peer with LLCP support)</li>
+  <li>Be notified of transactions on the local Secure Element by an external NFC reader</li>
+</ul>
+
+
+<h1>Setting Up NFC</h1>
+
+<p>
+Before an application can use the NFC feature, it needs to check if NFC is
+supported on the device by getting an instance of the
+{@link com.trustedlogic.trustednfc.android.NfcManager} class.
+</p>
+
+<pre>
+	NfcManager mNfcManager = (NfcManager) getSystemService(Context.NFC_SERVICE);
+	if (mNfcManager == null) {
+		// Device does not support NFC
+	}
+</pre>
+
+<p>
+An application can ensure that NFC is enabled.
+If not, an application with the needed permission can request that NFC be
+enabled.
+</p>
+
+<pre>
+	if (!mNfcManager.isEnabled) {
+		// NFC is currently disabled.
+		// Enable NFC.
+		mNfcManager.enable();
+	}
+</pre>
+
+<p>
+Before using the card emulation mode, an application can ensure that a secure
+element is selected ({@link com.trustedlogic.trustednfc.android.NfcManager#getSelectedSecureElement}).
+If not, an application with the needed permission can recover the list of
+available secure elements on the device
+({@link com.trustedlogic.trustednfc.android.NfcManager#getSecureElementList}) and select one
+({@link com.trustedlogic.trustednfc.android.NfcManager#selectSecureElement}).
+</p>
+
+<p>
+Before using the NFC feature, an application can configure the NFC device by
+calling {@link com.trustedlogic.trustednfc.android.NfcManager#setProperties}. This function allows:
+</p>
+<ul>
+  <li>Enabling/disabling the NFC device capabilities (RF types, baudrates,
+  NFCIP-1 mode and role...)</li>
+  <li>Settings the NFCIP-1 general bytes and the LLCP link parameters</li>
+</ul>
+<p>
+The setting properties can be customized according to the Device capabilities.
+The next table give the minimal set of properties supported by the Device.
+Depending on the implementation, the table may be completed.
+</p>
+<table>
+  <TR><TH> Property Name </TH><TH> Property Values </TH></TR>
+  <TR><TD> discovery.felica    </TD><TD> <b>true</b>|false </TD></TR>
+  <TR><TD> discovery.iso14443A </TD><TD> <b>true</b>|false </TD></TR>
+  <TR><TD> discovery.iso14443B </TD><TD> <b>true</b>|false </TD></TR>
+  <TR><TD> discovery.iso15693  </TD><TD> <b>true</b>|false </TD></TR>
+  <TR><TD> discovery.nfcip     </TD><TD> <b>true</b>|false </TD></TR>
+  <TR><TD> nfcip.baudrate     </TD><TD> 106|212|424 </TD></TR>
+  <TR><TD> nfcip.generalbytes </TD><TD>  </TD></TR>
+  <TR><TD> nfcip.mode         </TD><TD> active|passive|<b>all</b> </TD></TR>
+  <TR><TD> nfcip.role         </TD><TD> initiator|target|<b>both</b> </TD></TR>
+  <TR><TD> llcp.lto </TD><TD> <b>150</b> (0 to 255) </TD></TR>
+  <TR><TD> llcp.opt </TD><TD>   <b>0</b> (0 to 3) </TD></TR>
+  <TR><TD> llcp.miu </TD><TD> <b>128</b> (128 to 2176) </TD></TR>
+  <TR><TD> llcp.wks </TD><TD>   <b>1</b> (0 to 15) </TD></TR>
+</table> 
+<p>(default values in bold)</p>
+
+
+<h1>NFC Permissions</h1>
+
+<p>
+To change the NFC service settings such as enabling the NFC targets
+discovery or activating the secure element, an application must declare the
+NFC_ADMIN permission.
+</p>
+<p>
+To perform NFC raw communication with a remote NFC target in
+Reader/Write Mode or Peer-to-Peer Mode, an application must declare the NFC_RAW
+permission.
+</p>
+<p>
+To receive NDEF message or Secure Element intents, an application must declare
+the NFC_NOTIFY permission.
+</p>
+<p>
+To receive the LLCP link intent and perform an LLCP communication with a remote NFC target, an application must
+declare the NFC_LLCP permission.
+</p>
+
+
+<h1>NFC Usage</h1>
+
+<p>
+The following code samples illustrate the APIs usage regarding the NFC service
+use cases.
+</p>
+
+<h2>Reader/Writer Mode NDEF message notification</h2>
+
+<p>
+This code sample illustrates the NDEF message notification through an Intent declared in the manifest and a receiver implemented in the application.
+</p>
+<p>Main involved classes/methods:</p>
+
+<p>Manifest Example:</p>
+<pre>
+	&lt;receiver android:name=".NfcReaderDemoReceiver">
+            &lt;intent-filter>
+               &lt;action android:name= "com.trustedlogic.trustednfc.android.action.NDEF_TAG_DISCOVERED"/>
+            &lt;/intent-filter>
+        &lt;/receiver>
+</pre>
+
+<p>Receiver Example:</p>
+<ul>
+  <li>{@link com.trustedlogic.trustednfc.android.NdefMessage}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#NDEF_TAG_DISCOVERED_ACTION}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#NDEF_MESSAGE_EXTRA}</li>
+</ul>
+<pre>
+public class NdefMessageReceiverSample extends BroadcastReceiver {
+	public void onReceive(Context context, Intent intent) {
+		if (intent.getAction().equals(NfcManager.NDEF_TAG_DISCOVERERD_ACTION)) {
+			NdefMessage msg = intent.getParcelableExtra(NfcManager.NDEF_MESSAGE_EXTRA);
+		
+		/* Manage the NdefMessage received */
+	}
+</pre>
+
+<h2>Reader/Writer Mode raw exchange</h2>
+
+<p>
+This code sample illustrates raw exchanges with a NFC target in Reader/Writer
+mode.
+</p>
+<p>Main involved classes/methods:</p>
+<ul>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#openTagConnection}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcTag}</li>
+</ul>
+
+<pre>
+public class TagReaderSample {
+
+	/** The NFC manager to access NFC features */
+	private NfcManager manager = (NfcManager) getSystemService(Context.NFC_SERVICE);
+
+	private void runTagReader() {
+		NfcTag tag = null;
+		String type;
+		byte[] cmd = { 0x01, 0x02, 0x03 };
+		byte[] res;
+
+		while (true) {
+			try {
+				Log.i("NFC example", "Please wave in front of the tag");
+				// Open a connection on next available tag
+				try {
+					tag = manager.openTagConnection();
+				} catch (NfcException e) {
+					// TODO: Handle open failure
+				}
+
+				// Look for a mifare 4k
+				type = tag.getType();
+				if (type.equals("Mifare4K")) {
+					Log.i("NFC example", "Tag detected");
+					tag.connect();
+					// Ready to communicate, we can send transceive !
+					res = tag.transceive(cmd);
+				} else {
+					Log.i("NFC example", "Unknown tag");
+				}
+			} catch (IOException e) {
+				// TODO: Handle broken connection
+			} finally {
+				if (tag != null) {
+					tag.close();
+				}
+			}
+		}
+	}
+}
+</pre>
+
+<h2>Peer-to-Peer Mode raw exchange</h2>
+
+<p>
+This code sample illustrates raw exchanges with a NFC target in Peer-to-Peer
+mode.
+</p>
+<p>Main involved classes/methods:</p>
+<ul>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#openP2pConnection}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.P2pDevice}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.P2pInitiator}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.P2pTarget}</li>
+</ul>
+
+<pre>
+public class P2pSample {
+
+	/** The NFC manager to access NFC features */
+	private NfcManager manager = (NfcManager) getSystemService(Context.NFC_SERVICE);
+
+	private void runP2p() {
+		P2pDevice deviceP2p;
+		P2pInitiator initiator;
+		P2pTarget target;
+		byte[] data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		byte[] echo = new byte[data.length * 10];
+
+		try {
+			deviceP2p = manager.openP2pConnection();
+
+			if (deviceP2p.getMode() == P2pDevice.MODE_P2P_INITIATOR) {
+				target = new P2pTarget(deviceP2p);
+				// Connect to the detected P2P target
+				target.connect();
+				// send data to the target
+				target.transceive(data);
+				// disconnect the connected target
+				target.disconnect();
+			} else if (deviceP2p.getMode() == P2pDevice.MODE_P2P_TARGET) {
+				initiator = new P2pInitiator(deviceP2p);
+				//target in receive state 
+				echo = initiator.receive();	
+				// send back the data received
+				initiator.send(echo);
+			}
+		} catch (IOException e0) {
+
+		} catch (NfcException e1) {
+
+		}
+	}
+}
+</pre>
+
+<h2>Peer-to-Peer Mode LLCP exchange</h2>
+
+<p>
+This code sample illustrates how to get LLCP link state notification with the declaration of a Receiver in the manifest of the application  and the implementation 
+of the receiver in the application.
+</p>
+<p>Manifest Example:</p>
+<pre>
+	&lt;receiver android:name=".LlcpModeReceiverSample">
+            &lt;intent-filter>
+		&lt;action android:name= "com.trustedlogic.trustednfc.android.action.LLCP_LINK_STATE_CHANGED"/>
+            &lt;/intent-filter>
+        &lt;/receiver>
+</pre>
+
+<p>Receiver Example:</p>
+<ul>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#LLCP_LINK_STATE_CHANGED_ACTION}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#LLCP_LINK_STATE_CHANGED_EXTRA}</li> 
+</ul> 
+<pre>
+public class LlcpModeReceiverSample extends BroadcastReceiver {
+	public void onReceive(Context context, Intent intent) {
+
+		if (intent.getAction().equals(NfcManager.LLCP_LINK_STATE_CHANGED_ACTION)){
+			byte[] aid = intent.getByteArrayExtra(NfcManager.LLCP_LINK_STATE_CHANGED_EXTRA);
+			/* Create an LLCP service or client and start an LLCP communication */
+		} 
+	}
+</pre>
+
+
+<p>
+This code samples illustrate LLCP exchanges with a NFC Peer.
+</p>
+<p>Main involved classes/methods:</p>
+<ul>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#createLlcpSocket}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#createLlcpConnectionlessSocket}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#createLlcpServiceSocket}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.LlcpSocket}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.LlcpConnectionlessSocket}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.LlcpPacket}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.LlcpServiceSocket}</li>
+</ul>
+
+<pre>
+public class LlcpServerSample {
+
+	/** The NFC manager to access NFC features */
+	private NfcManager manager = (NfcManager) getSystemService(Context.NFC_SERVICE);
+
+	private void runLlcpClient() {
+		LlcpSocket sock;
+		byte[] data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		byte[] echo = new byte[data.length * 10];
+		int length = 0;
+
+		sock = manager.createLlcpSocket((short) 128, (byte) 2, 1024);
+		
+		// set a timeout in ms for connect request
+		sock.setConnectTimeout(10);
+		
+		try {
+			// Connect to remote service
+			// NOTE: could be sock.connect("com.trusted-logic.tnfc.testapp");
+			sock.connect((byte) 0x10);
+
+			// Send data
+			for (int i = 0; i < 10; i++) {
+				sock.send(data);
+			}
+
+			// Receive echo
+			while (length < 10 * data.length) {
+				length += sock.receive(echo);
+			}
+
+		} catch (IOException e) {
+			// TODO: Handle broken connection broken (link down, remote closure
+			// or connect rejected) or Timeout expired
+		}
+	}
+}
+</pre>
+
+<pre>
+public class LlcpClientSample {
+
+	/** The NFC manager to access NFC features */
+	private NfcManager manager = (NfcManager) getSystemService(Context.NFC_SERVICE);
+
+	private void runLlcpClient() {
+		LlcpSocket sock;
+		byte[] data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		byte[] echo = new byte[data.length * 10];
+		int length = 0;
+
+		sock = manager.createLlcpSocket((short) 128, (byte) 2, 1024);
+		try {
+			// Connect to remote service
+			// NOTE: could be sock.connect("com.trusted-logic.tnfc.testapp");
+			sock.connect((byte) 0x10);
+
+			// Send data
+			for (int i = 0; i < 10; i++) {
+				sock.send(data);
+			}
+
+			// Receive echo
+			while (length < 10 * data.length) {
+				length += sock.receive(echo);
+			}
+
+		} catch (IOException e) {
+			// TODO: Handle broken connection broken (link down, remote closure
+			// or connect rejected)
+		}
+	}
+}
+</pre>
+
+<h2>Card Emulation Mode transaction notification</h2>
+
+<p>
+This code sample illustrates how to get the card emulation notification with the declaration of a Receiver in the manifest of the application  and the implementation 
+of the receiver in the application.
+</p>
+<p>Manifest Example:</p>
+<pre>
+	&lt;receiver android:name=".NfcReaderDemoReceiver">
+            &lt;intent-filter>
+		&lt;action android:name= "com.trustedlogic.trustednfc.android.action.TRANSACTION_DETECTED"/>
+            &lt;/intent-filter>
+        &lt;/receiver>
+</pre>
+
+<p>Receiver Example:</p>
+<ul>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#TRANSACTION_DETECTED_ACTION}</li>
+  <li>{@link com.trustedlogic.trustednfc.android.NfcManager#AID_EXTRA}</li> 
+</ul> 
+<pre>
+public class CardEmulationReceiverSample extends BroadcastReceiver {
+	public void onReceive(Context context, Intent intent) {
+
+		if (intent.getAction().equals(NfcManager.TRANSACTION_DETECTED_ACTION)){
+			byte[] aid = intent.getByteArrayExtra(NfcManager.AID_EXTRA);
+			/* Manage the AID: */
+			/* For example start an activity related to this AID value or display a popup with the AID */
+		} 
+	}
+</pre>
+
+
+
+<h1>Multiple Applications rules</h1>
+
+<p>
+Several LLCP sockets can be created by a single application or by multiple
+applications by calling {@link com.trustedlogic.trustednfc.android.NfcManager#createLlcpSocket}, 
+{@link com.trustedlogic.trustednfc.android.NfcManager#createLlcpConnectionlessSocket} or 
+{@link com.trustedlogic.trustednfc.android.NfcManager#createLlcpServiceSocket}, provided the local SAP
+numbers are differents.
+</p>
+
+<p>
+Only one application can open a raw connection by calling 
+{@link com.trustedlogic.trustednfc.android.NfcManager#openTagConnection} or
+{@link com.trustedlogic.trustednfc.android.NfcManager#openP2pConnection}.
+While this application has not closed or cancelled its connection, any other
+application that attempts to open another raw connection will raise an
+exception.
+During an open connnection, the card emulation mode is always enabled and 
+applications are able to receive card emulation intents.
+</p>
+
+<p>
+When an application opens a tag connection by calling 
+{@link com.trustedlogic.trustednfc.android.NfcManager#openTagConnection}, this operation is exclusive, no NDEF message intent are
+broadcast while the connection is not closed or canceled.
+</p>
+
+<p>
+When an application opens a peer-to-peer connection by calling
+{@link com.trustedlogic.trustednfc.android.NfcManager#openP2pConnection}, this operation is exclusive, no LLCP intent are broadcast and LLCP sockets are
+disabled while the connection is not closed or canceled. 
+</p>
+
+
+<h1>NFC Tag types</h1>
+
+<p>
+The {@link com.trustedlogic.trustednfc.android.NfcTag} type returned by
+{@link com.trustedlogic.trustednfc.android.NfcTag#getType} indicates the set of
+commands supported by the tag. These commands can be used in
+{@link com.trustedlogic.trustednfc.android.NfcTag#transceive}.
+</p>
+
+<TABLE BORDER="1">
+  <TR><TH> Tag Type </TH><TH> Returned string </TH></TR>
+  <TR><TD> Jewel/Topaz </TD><TD> Jewel </TD></TR>
+  <TR><TD> Mifare UltraLight </TD><TD> MifareUL </TD></TR>
+  <TR><TD> Mifare Standard 1K </TD><TD> Mifare1K </TD></TR>
+  <TR><TD> Mifare Standard 4K </TD><TD> Mifare4K </TD></TR>
+  <TR><TD> Mifare DESFIRE </TD><TD> MifareDESFIRE </TD></TR>
+  <TR><TD> Felica </TD><TD> Felica </TD></TR>
+  <TR><TD> ISO14443-4 A or B </TD><TD> Iso14443 </TD></TR>
+  <TR><TD> ISO15693 </TD><TD> Iso15693 </TD></TR>
+</TABLE> 
+
+</body>
+</html>
