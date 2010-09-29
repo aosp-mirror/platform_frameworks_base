@@ -25,15 +25,11 @@ include $(CLEAR_VARS)
 # We need to process the framework classes.jar file, but we can't
 # depend directly on it (private vars won't be inherited correctly).
 # So, we depend on framework's BUILT file.
-built_framework_dep := \
-	$(call intermediates-dir-for,JAVA_LIBRARIES,framework)/javalib.jar
-built_framework_classes := \
-	$(call intermediates-dir-for,JAVA_LIBRARIES,framework)/classes.jar
+built_framework_dep := $(call java-lib-deps,framework)
+built_framework_classes := $(call java-lib-files,framework)
 
-built_core_dep := \
-	$(call intermediates-dir-for,JAVA_LIBRARIES,core)/javalib.jar
-built_core_classes := \
-	$(call intermediates-dir-for,JAVA_LIBRARIES,core)/classes.jar
+built_core_dep := $(call java-lib-deps,core)
+built_core_classes := $(call java-lib-files,core)
 
 built_layoutlib_create_jar := $(call intermediates-dir-for, \
 			JAVA_LIBRARIES,layoutlib_create,HOST)/javalib.jar
