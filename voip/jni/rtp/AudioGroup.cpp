@@ -86,8 +86,6 @@ public:
     void decode(int tick);
 
 private:
-    bool isNatAddress(struct sockaddr_storage *addr);
-
     enum {
         NORMAL = 0,
         SEND_ONLY = 1,
@@ -101,6 +99,7 @@ private:
     AudioCodec *mCodec;
     uint32_t mCodecMagic;
     uint32_t mDtmfMagic;
+    bool mFixRemote;
 
     int mTick;
     int mSampleRate;
@@ -181,6 +180,20 @@ bool AudioStream::set(int mode, int socket, sockaddr_storage *remote,
     if (codec) {
         mRemote = *remote;
         mCodec = codec;
+
+        // Here we should never get an private address, but some buggy proxy
+        // servers do give us one. To solve this, we replace the address when
+        // the first time we successfully decode an incoming packet.
+        mFixRemote = false;
+        if (remote->ss_family == AF_INET) {
+            unsigned char *address =
+                (unsigned char *)&((sockaddr_in *)remote)->sin_addr;
+            if (address[0] == 10 ||
+                (address[0] == 172 && (address[1] >> 4) == 1) ||
+                (address[0] == 192 && address[1] == 168)) {
+                mFixRemote = true;
+            }
+        }
     }
 
     LOGD("stream[%d] is configured as %s %dkHz %dms", mSocket,
@@ -318,16 +331,6 @@ void AudioStream::encode(int tick, AudioStream *chain)
         sizeof(mRemote));
 }
 
-bool AudioStream::isNatAddress(struct sockaddr_storage *addr) {
-    if (addr->ss_family != AF_INET) return false;
-    struct sockaddr_in *s4 = (struct sockaddr_in *)addr;
-    unsigned char *d = (unsigned char *) &s4->sin_addr;
-    if ((d[0] == 10)
-        || ((d[0] == 172) && (d[1] & 0x10))
-        || ((d[0] == 192) && (d[1] == 168))) return true;
-    return false;
-}
-
 void AudioStream::decode(int tick)
 {
     char c;
@@ -375,21 +378,11 @@ void AudioStream::decode(int tick)
             MSG_TRUNC | MSG_DONTWAIT) >> 1;
     } else {
         __attribute__((aligned(4))) uint8_t buffer[2048];
-        struct sockaddr_storage src_addr;
-        socklen_t addrlen;
-        length = recvfrom(mSocket, buffer, sizeof(buffer),
-            MSG_TRUNC|MSG_DONTWAIT, (sockaddr*)&src_addr, &addrlen);
+        sockaddr_storage remote;
+        socklen_t len = sizeof(remote);
 
-        // The following if clause is for fixing the target address if
-        // proxy server did not replace the NAT address with its media
-        // port in SDP. Although it is proxy server's responsibility for
-        // replacing the connection address with correct one, we will change
-        // the target address as we detect the difference for now until we
-        // know the best way to get rid of this issue.
-        if ((memcmp((void*)&src_addr, (void*)&mRemote, addrlen) != 0) &&
-            isNatAddress(&mRemote)) {
-            memcpy((void*)&mRemote, (void*)&src_addr, addrlen);
-        }
+        length = recvfrom(mSocket, buffer, sizeof(buffer),
+            MSG_TRUNC | MSG_DONTWAIT, (sockaddr *)&remote, &len);
 
         // Do we need to check SSRC, sequence, and timestamp? They are not
         // reliable but at least they can be used to identify duplicates?
@@ -409,8 +402,12 @@ void AudioStream::decode(int tick)
         if (length >= 0) {
             length = mCodec->decode(samples, &buffer[offset], length);
         }
+        if (length > 0 && mFixRemote) {
+            mRemote = remote;
+            mFixRemote = false;
+        }
     }
-    if (length != mSampleCount) {
+    if (length <= 0) {
         LOGD("stream[%d] decoder error", mSocket);
         return;
     }
