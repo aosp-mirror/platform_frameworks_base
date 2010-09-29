@@ -267,7 +267,7 @@ public class ManagerService extends Service {
             bytes = FsUtils.readDataFromUrl(FileFilter.getUrl(relativePath));
         }
 
-        mLastExpectedResultPathFetched = relativePath;
+        mLastExpectedResultPathFetched = bytes == null ? null : relativePath;
         return bytes;
     }
 
