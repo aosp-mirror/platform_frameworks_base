@@ -38,20 +38,20 @@ public:
             mStorageManager(mgr)
     {}
 
-    virtual void onObbResult(const android::String16& filename, const android::String16& state) {
-        LOGD("Got obb result (%s, %s)\n", String8(filename).string(), String8(state).string());
-    }
+    virtual void onObbResult(const android::String16& filename, const android::String16& state);
 };
 
 struct AStorageManager : public RefBase {
 protected:
-    void* mObbCallback;
+    AStorageManager_obbCallbackFunc mObbCallback;
+    void* mObbCallbackData;
     sp<ObbActionListener> mObbActionListener;
     sp<IMountService> mMountService;
 
 public:
-    AStorageManager() :
-            mObbCallback(NULL)
+    AStorageManager()
+            : mObbCallback(NULL)
+            , mObbCallbackData(NULL)
     {
     }
 
@@ -73,8 +73,15 @@ public:
         return true;
     }
 
-    void setObbCallback(void* cb) {
+    void setObbCallback(AStorageManager_obbCallbackFunc cb, void* data) {
         mObbCallback = cb;
+        mObbCallbackData = data;
+    }
+
+    void fireCallback(const char* filename, const char* state) {
+        if (mObbCallback != NULL) {
+            mObbCallback(filename, state, mObbCallbackData);
+        }
     }
 
     void mountObb(const char* filename, const char* key) {
@@ -85,7 +92,7 @@ public:
 
     void unmountObb(const char* filename, const bool force) {
         String16 filename16(filename);
-        mMountService->unmountObb(filename16, force);
+        mMountService->unmountObb(filename16, force, mObbActionListener);
     }
 
     int isObbMounted(const char* filename) {
@@ -104,6 +111,10 @@ public:
     }
 };
 
+void ObbActionListener::onObbResult(const android::String16& filename, const android::String16& state) {
+    mStorageManager->fireCallback(String8(filename).string(), String8(state).string());
+}
+
 
 AStorageManager* AStorageManager_new() {
     sp<AStorageManager> mgr = new AStorageManager();
@@ -120,8 +131,8 @@ void AStorageManager_delete(AStorageManager* mgr) {
     }
 }
 
-void AStorageManager_setObbCallback(AStorageManager* mgr, void* cb) {
-    mgr->setObbCallback(cb);
+void AStorageManager_setObbCallback(AStorageManager* mgr, AStorageManager_obbCallbackFunc cb, void* data) {
+    mgr->setObbCallback(cb, data);
 }
 
 void AStorageManager_mountObb(AStorageManager* mgr, const char* filename, const char* key) {

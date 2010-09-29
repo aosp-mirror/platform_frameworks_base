@@ -37,17 +37,22 @@ AStorageManager* AStorageManager_new();
 void AStorageManager_delete(AStorageManager* mgr);
 
 /**
- * Callback to call when requested OBB is complete.
+ * Callback function for asynchronous calls made on OBB files.
  */
-void AStorageManager_setObbCallback(AStorageManager* mgr, void* cb);
+typedef void (*AStorageManager_obbCallbackFunc)(const char* filename, const char* state, void* data);
 
 /**
- * Attempts to mount an OBB file.
+ * Callback to call when requested asynchronous OBB operation is complete.
+ */
+void AStorageManager_setObbCallback(AStorageManager* mgr, AStorageManager_obbCallbackFunc cb, void* data);
+
+/**
+ * Attempts to mount an OBB file. This is an asynchronous operation.
  */
 void AStorageManager_mountObb(AStorageManager* mgr, const char* filename, const char* key);
 
 /**
- * Attempts to unmount an OBB file.
+ * Attempts to unmount an OBB file. This is an asynchronous operation.
  */
 void AStorageManager_unmountObb(AStorageManager* mgr, const char* filename, const int force);
 
@@ -66,4 +71,4 @@ const char* AStorageManager_getMountedObbPath(AStorageManager* mgr, const char* 
 };
 #endif
 
-#endif      // ANDROID_PACKAGE_MANAGER_H
+#endif      // ANDROID_STORAGE_MANAGER_H

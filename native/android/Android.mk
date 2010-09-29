@@ -12,6 +12,7 @@ LOCAL_SRC_FILES:= \
     looper.cpp \
     native_activity.cpp \
     native_window.cpp \
+    obb.cpp \
     sensor.cpp \
     storage_manager.cpp
 
