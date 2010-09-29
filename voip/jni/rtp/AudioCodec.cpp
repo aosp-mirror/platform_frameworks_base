@@ -20,6 +20,7 @@
 
 extern AudioCodec *newAlawCodec();
 extern AudioCodec *newUlawCodec();
+extern AudioCodec *newGsmCodec();
 
 struct AudioCodecType {
     const char *name;
@@ -27,6 +28,7 @@ struct AudioCodecType {
 } gAudioCodecTypes[] = {
     {"PCMA", newAlawCodec},
     {"PCMU", newUlawCodec},
+    {"GSM", newGsmCodec},
     {NULL, NULL},
 };
 
