@@ -30,6 +30,7 @@
 #include <SkTemplates.h>
 #include <SkXfermode.h>
 
+#include <DisplayListRenderer.h>
 #include <OpenGLDebugRenderer.h>
 #include <OpenGLRenderer.h>
 #include <SkiaShader.h>
@@ -378,6 +379,30 @@ static void android_view_GLES20Canvas_drawTextRun(JNIEnv* env, jobject canvas,
     env->ReleaseStringChars(text, textArray);
 }
 
+// ----------------------------------------------------------------------------
+// Display lists
+// ----------------------------------------------------------------------------
+
+static OpenGLRenderer* android_view_GLES20Canvas_createDisplayListRenderer(
+        JNIEnv* env, jobject canvas) {
+    return new DisplayListRenderer;
+}
+
+static DisplayList* android_view_GLES20Canvas_createDisplayList(JNIEnv* env,
+        jobject canvas, DisplayListRenderer* renderer) {
+    return renderer->getDisplayList();
+}
+
+static void android_view_GLES20Canvas_destroyDisplayList(JNIEnv* env,
+        jobject canvas, DisplayList* displayList) {
+    delete displayList;
+}
+
+static void android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
+        jobject canvas, OpenGLRenderer* renderer, DisplayList* displayList) {
+    displayList->replay(*renderer);
+}
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -455,6 +480,12 @@ static JNINativeMethod gMethods[] = {
 
     { "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },
+
+    { "nCreateDisplayListRenderer", "()I",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
+    { "nCreateDisplayList",  "(I)I",           (void*) android_view_GLES20Canvas_createDisplayList },
+    { "nDestroyDisplayList", "(I)V",           (void*) android_view_GLES20Canvas_destroyDisplayList },
+    { "nDrawDisplayList",    "(II)V",          (void*) android_view_GLES20Canvas_drawDisplayList },
+
 #endif
 };
 

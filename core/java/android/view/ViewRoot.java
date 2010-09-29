@@ -196,8 +196,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     int mCurScrollY;
     Scroller mScroller;
 
-    HardwareRenderer mHwRenderer;
-
     final ViewConfiguration mViewConfiguration;
 
     /**
@@ -451,10 +449,10 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (attrs != null &&
                     (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE;
-                if (mHwRenderer != null) {
-                    mHwRenderer.destroy(true);
+                if (mAttachInfo.mHardwareRenderer != null) {
+                    mAttachInfo.mHardwareRenderer.destroy(true);
                 }                
-                mHwRenderer = HardwareRenderer.createGlRenderer(2, translucent);
+                mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
                 mAttachInfo.mHardwareAccelerated = true;
             }
         }
@@ -663,8 +661,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             attachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
-                if (mHwRenderer != null) {
-                    mHwRenderer.destroy(false);
+                if (mAttachInfo.mHardwareRenderer != null) {
+                    mAttachInfo.mHardwareRenderer.destroy(false);
                 }                
             }
             if (viewVisibility == View.GONE) {
@@ -869,8 +867,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         fullRedrawNeeded = true;
                         mPreviousTransparentRegion.setEmpty();
 
-                        if (mHwRenderer != null) {
-                            hwIntialized = mHwRenderer.initialize(mHolder);
+                        if (mAttachInfo.mHardwareRenderer != null) {
+                            hwIntialized = mAttachInfo.mHardwareRenderer.initialize(mHolder);
                         }
                     }
                 } else if (!mSurface.isValid()) {
@@ -948,8 +946,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 }
             }
 
-            if (hwIntialized || (windowShouldResize && mHwRenderer != null)) {
-                mHwRenderer.setup(mWidth, mHeight);
+            if (hwIntialized || (windowShouldResize && mAttachInfo.mHardwareRenderer != null)) {
+                mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
             }
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
@@ -1262,9 +1260,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             dirty.union(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
         }
         
-        if (mHwRenderer != null && mHwRenderer.isEnabled()) {
+        if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
             if (!dirty.isEmpty()) {
-                mHwRenderer.draw(mView, mAttachInfo, yoff);
+                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, yoff);
             }
 
             if (scrolling) {
@@ -1774,8 +1772,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     boolean inTouchMode = msg.arg2 != 0;
                     ensureTouchModeLocally(inTouchMode);
 
-                    if (mHwRenderer != null) {
-                        mHwRenderer.initializeIfNeeded(mWidth, mHeight, mAttachInfo, mHolder);
+                    if (mAttachInfo.mHardwareRenderer != null) {
+                        mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
+                                mAttachInfo, mHolder);
                     }
                 }
 
@@ -2582,9 +2581,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     }
 
     private void destroyHardwareRenderer() {
-        if (mHwRenderer != null) {
-            mHwRenderer.destroy(true);
-            mHwRenderer = null;
+        if (mAttachInfo.mHardwareRenderer != null) {
+            mAttachInfo.mHardwareRenderer.destroy(true);
+            mAttachInfo.mHardwareRenderer = null;
             mAttachInfo.mHardwareAccelerated = false;
         }
     }
