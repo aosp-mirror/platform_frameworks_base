@@ -32,7 +32,7 @@ import android.graphics.Bitmap.CompressFormat;
  */
 public class OverlayFrame extends Overlay {
     // Instance variables
-    private final Bitmap mBitmap;
+    private Bitmap mBitmap;
     private String mFilename;
 
     /**
@@ -90,6 +90,22 @@ public class OverlayFrame extends Overlay {
      */
     public Bitmap getBitmap() {
         return mBitmap;
+    }
+
+    /**
+     * @param bitmap The overlay bitmap
+     */
+    public void setBitmap(Bitmap bitmap) {
+        mBitmap = bitmap;
+        if (mFilename != null) {
+            // Delete the file
+            new File(mFilename).delete();
+            // Invalidate the filename
+            mFilename = null;
+        }
+
+        // Invalidate the transitions if necessary
+        getMediaItem().invalidateTransitions(this);
     }
 
     /**

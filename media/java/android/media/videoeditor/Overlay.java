@@ -16,6 +16,9 @@
 
 package android.media.videoeditor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * This is the super class for all Overlay classes.
@@ -26,6 +29,8 @@ public abstract class Overlay {
     private final String mUniqueId;
     // The overlay owner
     private final MediaItem mMediaItem;
+    // user attributes
+    private final Map<String, String> mUserAttributes;
 
     protected long mStartTimeMs;
     protected long mDurationMs;
@@ -36,10 +41,7 @@ public abstract class Overlay {
      */
     @SuppressWarnings("unused")
     private Overlay() {
-        mUniqueId = null;
-        mMediaItem = null;
-        mStartTimeMs = 0;
-        mDurationMs = 0;
+        this(null, null, 0, 0);
     }
 
     /**
@@ -58,10 +60,15 @@ public abstract class Overlay {
             throw new IllegalArgumentException("Media item cannot be null");
         }
 
+        if (startTimeMs + durationMs > mediaItem.getTimelineDuration()) {
+            throw new IllegalArgumentException("Invalid start time and duration");
+        }
+
         mMediaItem = mediaItem;
         mUniqueId = overlayId;
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
+        mUserAttributes = new HashMap<String, String>();
     }
 
     /**
@@ -123,6 +130,23 @@ public abstract class Overlay {
      */
     public MediaItem getMediaItem() {
         return mMediaItem;
+    }
+
+    /**
+     * Set a user attribute
+     *
+     * @param name The attribute name
+     * @param value The attribute value
+     */
+    public void setUserAttribute(String name, String value) {
+        mUserAttributes.put(name, value);
+    }
+
+    /**
+     * @return The user attributes
+     */
+    public Map<String, String> getUserAttributes() {
+        return mUserAttributes;
     }
 
     /*

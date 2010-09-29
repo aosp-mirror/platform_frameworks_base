@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -50,6 +51,10 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String TAG_MEDIA_ITEM = "media_item";
     private static final String TAG_TRANSITIONS = "transitions";
     private static final String TAG_TRANSITION = "transition";
+    private static final String TAG_OVERLAYS = "overlays";
+    private static final String TAG_OVERLAY = "overlay";
+    private static final String TAG_OVERLAY_USER_ATTRIBUTES = "overlay_user_attributes";
+
     private static final String ATTR_ID = "id";
     private static final String ATTR_FILENAME = "filename";
     private static final String ATTR_AUDIO_WAVEFORM_FILENAME = "wavefoem";
@@ -572,6 +577,40 @@ public class VideoEditorTestImpl implements VideoEditor {
                         Long.toString(mediaItem.getTimelineDuration()));
             }
 
+            final List<Overlay> overlays = mediaItem.getAllOverlays();
+            if (overlays.size() > 0) {
+                serializer.startTag("", TAG_OVERLAYS);
+                for (Overlay overlay : overlays) {
+                    serializer.startTag("", TAG_OVERLAY);
+                    serializer.attribute("", ATTR_ID, overlay.getId());
+                    serializer.attribute("", ATTR_TYPE, overlay.getClass().getSimpleName());
+                    serializer.attribute("", ATTR_BEGIN_TIME,
+                            Long.toString(overlay.getStartTime()));
+                    serializer.attribute("", ATTR_DURATION, Long.toString(overlay.getDuration()));
+                    if (overlay instanceof OverlayFrame) {
+                        final OverlayFrame overlayFrame = (OverlayFrame)overlay;
+                        overlayFrame.save(this);
+                        if (overlayFrame.getFilename() != null) {
+                            serializer.attribute("", ATTR_FILENAME, overlayFrame.getFilename());
+                        }
+                    }
+
+                    // Save the user attributes
+                    serializer.startTag("", TAG_OVERLAY_USER_ATTRIBUTES);
+                    final Map<String, String> userAttributes = overlay.getUserAttributes();
+                    for (String name : userAttributes.keySet()) {
+                        final String value = userAttributes.get(name);
+                        if (value != null) {
+                            serializer.attribute("", name, value);
+                        }
+                    }
+                    serializer.endTag("", TAG_OVERLAY_USER_ATTRIBUTES);
+
+                    serializer.endTag("", TAG_OVERLAY);
+                }
+                serializer.endTag("", TAG_OVERLAYS);
+            }
+
             serializer.endTag("", TAG_MEDIA_ITEM);
         }
         serializer.endTag("", TAG_MEDIA_ITEMS);
@@ -629,21 +668,22 @@ public class VideoEditorTestImpl implements VideoEditor {
         parser.setInput(new FileInputStream(file), "UTF-8");
         int eventType = parser.getEventType();
         String name;
+        MediaItem currentMediaItem = null;
+        Overlay currentOverlay = null;
         while (eventType != XmlPullParser.END_DOCUMENT) {
             switch (eventType) {
                 case XmlPullParser.START_TAG: {
                     name = parser.getName();
-                    if (name.equals(TAG_PROJECT)) {
+                    if (TAG_PROJECT.equals(name)) {
                         mAspectRatio = Integer.parseInt(parser.getAttributeValue("",
                                 ATTR_ASPECT_RATIO));
-                    } else if (name.equals(TAG_MEDIA_ITEM)) {
+                    } else if (TAG_MEDIA_ITEM.equals(name)) {
                         final String mediaItemId = parser.getAttributeValue("", ATTR_ID);
                         final String type = parser.getAttributeValue("", ATTR_TYPE);
                         final String filename = parser.getAttributeValue("", ATTR_FILENAME);
                         final int renderingMode = Integer.parseInt(parser.getAttributeValue("",
                                 ATTR_RENDERING_MODE));
 
-                        MediaItem currentMediaItem;
                         if (MediaImageItem.class.getSimpleName().equals(type)) {
                             final long durationMs = Long.parseLong(parser.getAttributeValue("",
                                     ATTR_DURATION));
@@ -673,11 +713,36 @@ public class VideoEditorTestImpl implements VideoEditor {
                         if (currentMediaItem != null) {
                             mMediaItems.add(currentMediaItem);
                         }
-                    } else if (name.equals(TAG_TRANSITION)) {
+                    } else if (TAG_TRANSITION.equals(name)) {
                         final Transition transition = parseTransition(parser);
                         if (transition != null) {
                             mTransitions.add(transition);
                         }
+                    } else if (TAG_OVERLAY.equals(name)) {
+                        if (currentMediaItem != null) {
+                            currentOverlay = parseOverlay(parser, currentMediaItem);
+                            if (currentOverlay != null) {
+                                currentMediaItem.addOverlay(currentOverlay);
+                            }
+                        }
+                    } else if (TAG_OVERLAY_USER_ATTRIBUTES.equals(name)) {
+                        if (currentOverlay != null) {
+                            final int attributesCount = parser.getAttributeCount();
+                            for (int i = 0; i < attributesCount; i++) {
+                                currentOverlay.setUserAttribute(parser.getAttributeName(i),
+                                        parser.getAttributeValue(i));
+                            }
+                        }
+                    }
+                    break;
+                }
+
+                case XmlPullParser.END_TAG: {
+                    name = parser.getName();
+                    if (TAG_MEDIA_ITEM.equals(name)) {
+                        currentMediaItem = null;
+                    } else if (TAG_OVERLAY.equals(name)) {
+                        currentOverlay = null;
                     }
                     break;
                 }
@@ -762,6 +827,31 @@ public class VideoEditorTestImpl implements VideoEditor {
         }
 
         return transition;
+    }
+
+    /**
+     * Parse the overlay
+     *
+     * @param parser The parser
+     * @param mediaItem The media item owner
+     *
+     * @return The overlay
+     */
+    private Overlay parseOverlay(XmlPullParser parser, MediaItem mediaItem) {
+        final String overlayId = parser.getAttributeValue("", ATTR_ID);
+        final String type = parser.getAttributeValue("", ATTR_TYPE);
+        final long durationMs = Long.parseLong(parser.getAttributeValue("", ATTR_DURATION));
+        final long startTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
+
+        final Overlay overlay;
+        if (OverlayFrame.class.getSimpleName().equals(type)) {
+            final String filename = parser.getAttributeValue("", ATTR_FILENAME);
+            overlay = new OverlayFrame(mediaItem, overlayId, filename, startTimeMs, durationMs);
+        } else {
+            overlay = null;
+        }
+
+        return overlay;
     }
 
     public void cancelExport(String filename) {
