@@ -169,7 +169,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"개발 도구"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"애플리케이션 개발자에게만 필요한 기능입니다."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
+    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"SD 카드에 액세스합니다."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"애플리케이션이 상태 표시줄을 사용 중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 합니다."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"상태 표시줄"</string>
@@ -402,6 +403,22 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"애플리케이션이 로컬 Bluetooth 휴대전화를 구성한 다음 원격 장치를 검색하여 페어링할 수 있도록 합니다."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth 연결 만들기"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"애플리케이션이 로컬 Bluetooth 전화의 구성을 보고 페어링된 장치에 연결하며 연결을 수락할 수 있도록 합니다."</string>
+    <!-- no translation found for permlab_nfcAdmin (2251302233012250056) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcAdmin (1935842611464895785) -->
+    <skip />
+    <!-- no translation found for permlab_nfcRaw (4423471711114325708) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcRaw (5533022736559385665) -->
+    <skip />
+    <!-- no translation found for permlab_nfcNotify (478470360082792358) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcNotify (2990053517962070617) -->
+    <skip />
+    <!-- no translation found for permlab_nfcLlcp (4972051461007030426) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcLlcp (91592127786004640) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"키 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"애플리케이션이 키 잠금 및 관련 비밀번호 보안을 사용 중지할 수 있도록 합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용 중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
@@ -418,20 +435,22 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"애플리케이션이 사용자 사전에 보관되어 있는 비공개 단어, 이름 및 구문을 읽도록 합니다."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"사용자정의 사전에 작성"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"애플리케이션이 사용자 사전에 새 단어를 입력할 수 있도록 합니다."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"SD 카드 콘텐츠 수정/삭제"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"애플리케이션이 SD 카드에 쓸 수 있도록 합니다."</string>
+    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"SD 카드 콘텐츠 수정/삭제"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SD 카드 콘텐츠 수정/삭제"</string>
+    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"애플리케이션이 SD 카드에 쓸 수 있도록 합니다."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"애플리케이션이 SD 카드에 쓸 수 있도록 합니다."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"캐시 파일시스템 액세스"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"애플리케이션이 캐시 파일시스템을 읽고 쓸 수 있도록 합니다."</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"비밀번호 제한"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"사용할 수 있는 비밀번호 유형을 제한합니다."</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"로그인 시도 보기"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"몇 가지 작업을 수행하기 위해 기기에 대해 실패한 로그인 시도를 모니터링합니다."</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"비밀번호 재설정"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"비밀번호를 새 값으로 강제 설정합니다. 이를 수행하려면 로그인하기 전에 관리자에게 새로 지정할 비밀번호 값을 요청해야 합니다."</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"강제 잠금"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"기기가 잠겨 있을 때 작동하려면 비밀번호를 다시 입력해야 합니다."</string>
+    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 제한"</string>
+    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"사용할 수 있는 비밀번호 유형을 제한합니다."</string>
+    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"로그인 시도 보기"</string>
+    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" msgid="7227578260165172673">"몇 가지 작업을 수행하기 위해 기기에 대해 실패한 로그인 시도를 모니터링합니다."</string>
+    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"비밀번호 재설정"</string>
+    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"비밀번호를 새 값으로 강제 설정합니다. 이를 수행하려면 로그인하기 전에 관리자에게 새로 지정할 비밀번호 값을 요청해야 합니다."</string>
+    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"강제 잠금"</string>
+    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"기기가 잠겨 있을 때 작동하려면 비밀번호를 다시 입력해야 합니다."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"모든 데이터 삭제"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"초기화를 수행하여 모든 데이터를 확인하지 않고 삭제합니다."</string>
+    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" msgid="7669895333814222586">"초기화를 수행하여 모든 데이터를 확인하지 않고 삭제합니다."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>
@@ -744,12 +763,9 @@
     <string name="force_close" msgid="3653416315450806396">"닫기"</string>
     <string name="report" msgid="4060218260984795706">"신고"</string>
     <string name="wait" msgid="7147118217226317732">"대기"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"애플리케이션 리디렉션됨"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>이(가) 실행 중입니다."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"원래 <xliff:g id="APP_NAME">%1$s</xliff:g>을(를) 실행했습니다."</string>
     <string name="smv_application" msgid="295583804361236288">"애플리케이션 <xliff:g id="APPLICATION">%1$s</xliff:g>(프로세스 <xliff:g id="PROCESS">%2$s</xliff:g>)이(가) 자체 시행 StrictMode 정책을 위반했습니다."</string>
     <string name="smv_process" msgid="5120397012047462446">"프로세스(<xliff:g id="PROCESS">%1$s</xliff:g>)가 자체 시행 StrictMode 정책을 위반했습니다."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>
@@ -796,23 +812,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"모두 표시"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB 대용량 저장소"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 연결됨"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"USB를 통해 휴대전화를 컴퓨터에 연결했습니다. 컴퓨터와 Android의 SD 카드 간에 파일을 복사하려면 아래의 버튼을 선택하세요."</string>
+    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"USB를 통해 휴대전화를 컴퓨터에 연결했습니다. 컴퓨터와 Android의 SD 카드 간에 파일을 복사하려면 아래의 버튼을 선택하세요."</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"USB를 통해 휴대전화를 컴퓨터에 연결했습니다. 컴퓨터와 Android의 SD 카드 간에 파일을 복사하려면 아래의 버튼을 선택하세요."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB 저장소 사용"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"USB 저장소로 SD 카드를 사용하는 동안 문제가 발생했습니다."</string>
+    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"USB 저장소로 SD 카드를 사용하는 동안 문제가 발생했습니다."</string>
+    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"USB 저장소로 SD 카드를 사용하는 동안 문제가 발생했습니다."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 연결됨"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"컴퓨터에 파일을 복사하거나 컴퓨터의 파일을 복사하려면 선택합니다."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB 저장소 끄기"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"USB 저장소 끄기를 선택하세요."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB 저장소 사용 중"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"USB 저장소를 사용하지 않도록 설정하기 전에 컴퓨터에서 Android의 SD 카드를 마운트 해제했는지(꺼냈는지) 확인하시기 바랍니다."</string>
+    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"USB 저장소를 사용하지 않도록 설정하기 전에 컴퓨터에서 Android의 SD 카드를 마운트 해제했는지(꺼냈는지) 확인하시기 바랍니다."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"USB 저장소를 사용하지 않도록 설정하기 전에 컴퓨터에서 Android의 SD 카드를 마운트 해제했는지(꺼냈는지) 확인하시기 바랍니다."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB 저장소 사용 안함"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USB 저장소를 사용하지 않도록 설정하는 동안 문제가 발생했습니다. USB 호스트와 연결을 해제했는지 확인한 다음 다시 시도하세요."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB 저장소 사용"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB 저장소를 사용 설정하면 사용 중인 일부 애플리케이션이 중지되고 USB 저장소를 사용 중지할 때까지 사용할 수 없게 됩니다."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB 작업 실패"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"확인"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"SD 카드 포맷"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"SD 카드를 포맷하시겠습니까? 포맷하면 카드의 모든 데이터를 잃게 됩니다."</string>
+    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"SD 카드 포맷"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD 카드 포맷"</string>
+    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"SD 카드를 포맷하시겠습니까? 포맷하면 카드의 모든 데이터를 잃게 됩니다."</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"SD 카드를 포맷하시겠습니까? 포맷하면 카드의 모든 데이터를 잃게 됩니다."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"포맷"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"USB 디버깅을 사용하지 않으려면 선택합니다."</string>
@@ -820,18 +841,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"SD 카드 준비 중"</string>
+    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"SD 카드 준비 중"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD 카드 준비 중"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"오류 확인 중입니다."</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"빈 SD 카드"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD 카드가 비어 있거나 지원되지 않는 파일 시스템을 사용합니다."</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"손상된 SD 카드"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SD 카드가 손상되었습니다. 카드를 다시 포맷해야 할 수 있습니다."</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD 카드가 예상치 않게 제거되었습니다."</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"데이터 손실을 피하려면 SD 카드를 제거하기 전에 마운트 해제합니다."</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"SD 카드 제거 가능"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"안전하게 SD 카드를 제거할 수 있습니다."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"SD 카드 없음"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD 카드가 없습니다.  SD 카드를 넣으세요."</string>
+    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"빈 SD 카드"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"빈 SD 카드"</string>
+    <!-- outdated translation 1312266820092958014 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"SD 카드가 비어 있거나 지원되지 않는 파일시스템을 사용 중입니다."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD 카드가 비어 있거나 지원되지 않는 파일 시스템을 사용합니다."</string>
+    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"손상된 SD 카드"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"손상된 SD 카드"</string>
+    <!-- outdated translation 2679412884290061775 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"SD 카드가 손상되었습니다. 카드를 다시 포맷하시기 바랍니다."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD 카드가 손상되었습니다. 카드를 다시 포맷해야 할 수 있습니다."</string>
+    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"SD 카드가 예상치 않게 제거되었습니다."</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD 카드가 예상치 않게 제거되었습니다."</string>
+    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"데이터 손실을 피하려면 SD 카드를 제거하기 전에 마운트 해제합니다."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"데이터 손실을 피하려면 SD 카드를 제거하기 전에 마운트 해제합니다."</string>
+    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"SD 카드 제거 가능"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD 카드 제거 가능"</string>
+    <!-- outdated translation 7613960686747592770 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"이제 SD 카드를 안전하게 제거할 수 있습니다."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"안전하게 SD 카드를 제거할 수 있습니다."</string>
+    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"SD 카드 없음"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD 카드 없음"</string>
+    <!-- outdated translation 4205117227342822275 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"SD가 제거되었습니다. 기기의 저장 용량을 늘리려면 새 SD 카드를 삽입하세요."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD 카드가 없습니다.  SD 카드를 넣으세요."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"일치하는 활동이 없습니다."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"구성 요소 사용 통계 업데이트"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"수집된 구성요소 사용 통계를 수정할 수 있는 권한을 부여합니다. 일반 애플리케이션은 이 권한을 사용하지 않습니다."</string>

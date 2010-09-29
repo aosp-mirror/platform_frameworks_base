@@ -169,7 +169,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Ferramentas de desenvolvimento"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funcionalidades apenas necessárias para programadores de aplicações."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Armazenamento"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"Aceder ao cartão SD."</string>
+    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Aceder ao cartão SD."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Aceder ao cartão SD."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Permite à aplicação desactivar a barra de estado ou adicionar e remover ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barra de estado"</string>
@@ -402,6 +403,22 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Permite a uma aplicação configurar o telefone Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"criar ligações Bluetooth"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Permite a uma aplicação ver a configuração do telefone Bluetooth local, bem como efectuar e aceitar ligações com dispositivos emparelhados."</string>
+    <!-- no translation found for permlab_nfcAdmin (2251302233012250056) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcAdmin (1935842611464895785) -->
+    <skip />
+    <!-- no translation found for permlab_nfcRaw (4423471711114325708) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcRaw (5533022736559385665) -->
+    <skip />
+    <!-- no translation found for permlab_nfcNotify (478470360082792358) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcNotify (2990053517962070617) -->
+    <skip />
+    <!-- no translation found for permlab_nfcLlcp (4972051461007030426) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcLlcp (91592127786004640) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"desactivar bloqueio de teclas"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permite a uma aplicação desactivar o bloqueio de teclas e qualquer segurança por palavra-passe associada. Um exemplo legítimo é a desactivação do bloqueio de teclas pelo telefone ao receber uma chamada, reactivando, em seguida, o bloqueio de teclas ao terminar a chamada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler definições de sincronização"</string>
@@ -418,20 +435,22 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permite a uma aplicação ler quaisquer palavras, nomes e expressões privadas que o utilizador possa ter armazenado no dicionário do utilizador."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"escrever no dicionário definido pelo utilizador"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permite a uma aplicação escrever novas palavras no dicionário do utilizador."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modificar/eliminar conteúdo do cartão SD"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Permite que uma aplicação escreva no cartão SD."</string>
+    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"modificar/eliminar conteúdo do cartão SD"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificar/eliminar conteúdo do cartão SD"</string>
+    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Permite que uma aplicação escreva no cartão SD."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Permite que uma aplicação escreva no cartão SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"aceder ao sistema de ficheiros da cache"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permite a uma aplicação ler e escrever no sistema de ficheiros da cache."</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"Limitar palavra-passe"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Restrinja os tipos de palavras-passe que está autorizado a utilizar."</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"Ver tentativas de início de sessão"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"O monitor falhou as tentativas de iniciar sessão no dispositivo para efectuar algumas acções."</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"Repor palavra-passe"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Force a palavra-passe para um novo valor, sendo necessário que o administrador lho forneça antes de poder iniciar sessão."</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"Forçar bloqueio"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"Controle quando o dispositivo é bloqueado, sendo necessário reintroduzir a respectiva palavra-passe."</string>
+    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Limitar palavra-passe"</string>
+    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Restrinja os tipos de palavras-passe que está autorizado a utilizar."</string>
+    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Ver tentativas de início de sessão"</string>
+    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" msgid="7227578260165172673">"O monitor falhou as tentativas de iniciar sessão no dispositivo para efectuar algumas acções."</string>
+    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Repor palavra-passe"</string>
+    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Force a palavra-passe para um novo valor, sendo necessário que o administrador lho forneça antes de poder iniciar sessão."</string>
+    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Forçar bloqueio"</string>
+    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Controle quando o dispositivo é bloqueado, sendo necessário reintroduzir a respectiva palavra-passe."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Apagar todos os dados"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"Efectue uma reposição de fábrica, eliminando todos os dados sem qualquer confirmação."</string>
+    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" msgid="7669895333814222586">"Efectue uma reposição de fábrica, eliminando todos os dados sem qualquer confirmação."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Residência"</item>
     <item msgid="869923650527136615">"Móvel"</item>
@@ -744,12 +763,9 @@
     <string name="force_close" msgid="3653416315450806396">"Forçar fecho"</string>
     <string name="report" msgid="4060218260984795706">"Relatório"</string>
     <string name="wait" msgid="7147118217226317732">"Esperar"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Aplicação redireccionada"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> está agora a ser executado."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> foi originalmente iniciado."</string>
     <string name="smv_application" msgid="295583804361236288">"A aplicação <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) violou a política StrictMode auto-imposta."</string>
     <string name="smv_process" msgid="5120397012047462446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode auto-imposta."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> em execução"</string>
@@ -796,23 +812,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar tudo"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Armazenamento em massa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Ligado através de USB"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"Ligou o telefone ao computador através de USB. Seleccione o botão abaixo se pretender copiar ficheiros entre o computador e o cartão SD do Android."</string>
+    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Ligou o telefone ao computador através de USB. Seleccione o botão abaixo se pretender copiar ficheiros entre o computador e o cartão SD do Android."</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Ligou o telefone ao computador através de USB. Seleccione o botão abaixo se pretender copiar ficheiros entre o computador e o cartão SD do Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Activar armazenamento USB"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"Existe um problema ao utilizar o cartão SD para armazenamento USB."</string>
+    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"Existe um problema ao utilizar o cartão SD para armazenamento USB."</string>
+    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"Existe um problema ao utilizar o cartão SD para armazenamento USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"Ligado através de USB"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Seleccione para copiar ficheiro para/do seu computador."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Desactivar armazenamento USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Opte por desactivar o armazenamento USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"O armazenamento USB está a ser utilizado"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Antes de desactivar o armazenamento USB, certifique-se de que desinstalou (\"ejectou\") o cartão SD do Android do computador."</string>
+    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Antes de desactivar o armazenamento USB, certifique-se de que desinstalou (\"ejectou\") o cartão SD do Android do computador."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Antes de desactivar o armazenamento USB, certifique-se de que desinstalou (\"ejectou\") o cartão SD do Android do computador."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Desactivar armazenamento USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Ocorreu um problema ao desactivar o armazenamento USB. Confirme se desinstalou o anfitrião USB e, em seguida, tente novamente."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Activar armazenamento USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Se activar o armazenamento USB, algumas aplicações que estiver a utilizar serão paradas e poderão ficar indisponíveis até desactivar o armazenamento USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Falha na operação USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"Formatar cartão SD"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"Tem a certeza de que pretende formatar o cartão SD? Perder-se-ão todos os dados no cartão."</string>
+    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"Formatar cartão SD"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatar cartão SD"</string>
+    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"Tem a certeza de que pretende formatar o cartão SD? Perder-se-ão todos os dados no cartão."</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Tem a certeza de que pretende formatar o cartão SD? Perder-se-ão todos os dados no cartão."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatar"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB ligada"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleccione para desactivar depuração USB."</string>
@@ -820,18 +841,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"A preparar cartão SD"</string>
+    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"A preparar cartão SD"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"A preparar cartão SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"A verificar a presença de erros."</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Cartão SD vazio"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"Cartão SD vazio ou sistema de ficheiros não suportado."</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Cartão SD danificado"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"Cartão SD danificado. Poderá ser necessário reformatá-lo."</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"Cartão SD removido de forma inesperada"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Desmonte o cartão SD antes de retirá-lo para evitar a perda de dados."</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"É seguro retirar o cartão SD"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"Pode remover o cartão SD com segurança."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"Cartão SD removido"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"Cartão SD removido. Insira um novo cartão."</string>
+    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Cartão SD vazio"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Cartão SD vazio"</string>
+    <!-- outdated translation 1312266820092958014 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"O cartão SD está vazio ou a utilizar um sistema de ficheiros não suportado."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"Cartão SD vazio ou sistema de ficheiros não suportado."</string>
+    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Cartão SD danificado"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Cartão SD danificado"</string>
+    <!-- outdated translation 2679412884290061775 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"O cartão SD está danificado. Poderá ser necessário reformatar o cartão."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Cartão SD danificado. Poderá ser necessário reformatá-lo."</string>
+    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"Cartão SD removido de forma inesperada"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Cartão SD removido de forma inesperada"</string>
+    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Desmonte o cartão SD antes de retirá-lo para evitar a perda de dados."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Desmonte o cartão SD antes de retirá-lo para evitar a perda de dados."</string>
+    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"É seguro retirar o cartão SD"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"É seguro retirar o cartão SD"</string>
+    <!-- outdated translation 7613960686747592770 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"É possível remover agora o cartão SD em segurança."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Pode remover o cartão SD com segurança."</string>
+    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"Cartão SD removido"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Cartão SD removido"</string>
+    <!-- outdated translation 4205117227342822275 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"O cartão SD foi removido. Introduza um novo cartão SD para aumentar a capacidade de armazenamento do dispositivo."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Cartão SD removido. Insira um novo cartão."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Nenhuma actividade correspondente encontrada"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"actualizar estatísticas de utilização de componentes"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Permite a modificação de estatísticas de utilização de componentes recolhidas. Não se destina a utilização por aplicações normais."</string>
