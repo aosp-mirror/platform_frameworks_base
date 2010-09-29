@@ -88,12 +88,8 @@ public class TextResult extends AbstractResult {
     @Override
     public ResultCode getResultCode() {
         if (mResultCode == null) {
-            if (mExpectedResult == null) {
-                mResultCode = AbstractResult.ResultCode.NO_EXPECTED_RESULT;
-            } else {
-                mResultCode = resultsMatch() ? AbstractResult.ResultCode.RESULTS_MATCH
-                        : AbstractResult.ResultCode.RESULTS_DIFFER;
-            }
+            mResultCode = resultsMatch() ? AbstractResult.ResultCode.RESULTS_MATCH
+                    : AbstractResult.ResultCode.RESULTS_DIFFER;
         }
         return mResultCode;
     }
@@ -135,7 +131,7 @@ public class TextResult extends AbstractResult {
     public String getActualTextResult() {
         String additionalTextResultString = getAdditionalTextOutputString();
         if (additionalTextResultString != null) {
-            return additionalTextResultString+ mActualResult;
+            return additionalTextResultString + mActualResult;
         }
 
         return mActualResult;
@@ -169,11 +165,16 @@ public class TextResult extends AbstractResult {
 
     @Override
     public void setExpectedTextResult(String expectedResult) {
-        mExpectedResult = expectedResult;
+        // For text results, we use an empty string for the expected result when none is
+        // present, as other WebKit platforms do.
+        mExpectedResult = expectedResult == null ? "" : expectedResult;
     }
 
     @Override
     public String getDiffAsHtml() {
+        assert mExpectedResult != null;
+        assert mActualResult != null;
+
         StringBuilder html = new StringBuilder();
         html.append("<table class=\"visual_diff\">");
         html.append("    <tr class=\"headers\">");
@@ -182,11 +183,7 @@ public class TextResult extends AbstractResult {
         html.append("        <td colspan=\"2\">Actual result:</td>");
         html.append("    </tr>");
 
-        if (mExpectedResult == null || mActualResult == null) {
-            appendNullsHtml(html);
-        } else {
-            appendDiffHtml(html);
-        }
+        appendDiffHtml(html);
 
         html.append("    <tr class=\"footers\">");
         html.append("        <td colspan=\"2\"></td>");
@@ -214,31 +211,6 @@ public class TextResult extends AbstractResult {
 
         html.append(VisualDiffUtils.getHtml(expectedLineNums, expectedLines,
                 actualLineNums, actualLines));
-    }
-
-    private void appendNullsHtml(StringBuilder html) {
-        /** TODO: Create a separate row for each line of not null result */
-        html.append("    <tr class=\"results\">");
-        html.append("    <td class=\"line_count\">");
-        html.append("    </td>");
-        html.append("    <td class=\"line\">");
-        if (mExpectedResult == null) {
-            html.append("Expected result was NULL");
-        } else {
-            html.append(mExpectedResult.replace("\n", "<br />"));
-        }
-        html.append("        </td>");
-        html.append("        <td class=\"space\"></td>");
-        html.append("    <td class=\"line_count\">");
-        html.append("    </td>");
-        html.append("    <td class=\"line\">");
-        if (mActualResult == null) {
-            html.append("Actual result was NULL");
-        } else {
-            html.append(mActualResult.replace("\n", "<br />"));
-        }
-        html.append("        </td>");
-        html.append("    </tr>");
     }
 
     @Override
