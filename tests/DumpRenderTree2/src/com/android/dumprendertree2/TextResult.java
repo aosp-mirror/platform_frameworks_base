@@ -87,18 +87,28 @@ public class TextResult extends AbstractResult {
 
     @Override
     public ResultCode getResultCode() {
-        if (mResultCode != null) {
-            return mResultCode;
-        }
-
-        if (mExpectedResult == null) {
-            mResultCode = AbstractResult.ResultCode.NO_EXPECTED_RESULT;
-        } else if (!mExpectedResult.equals(mActualResult)) {
-            mResultCode = AbstractResult.ResultCode.RESULTS_DIFFER;
-        } else {
-            mResultCode = AbstractResult.ResultCode.RESULTS_MATCH;
+        if (mResultCode == null) {
+            if (mExpectedResult == null) {
+                mResultCode = AbstractResult.ResultCode.NO_EXPECTED_RESULT;
+            } else {
+                mResultCode = resultsMatch() ? AbstractResult.ResultCode.RESULTS_MATCH
+                        : AbstractResult.ResultCode.RESULTS_DIFFER;
+            }
         }
         return mResultCode;
+    }
+
+    private boolean resultsMatch() {
+        assert mExpectedResult != null;
+        assert mActualResult != null;
+        // Trim leading and trailing empty lines, as other WebKit platforms do.
+        String leadingEmptyLines = "^\\n+";
+        String trailingEmptyLines = "\\n+$";
+        String trimmedExpectedResult = mExpectedResult.replaceFirst(leadingEmptyLines, "")
+                .replaceFirst(trailingEmptyLines, "");
+        String trimmedActualResult = mActualResult.replaceFirst(leadingEmptyLines, "")
+                .replaceFirst(trailingEmptyLines, "");
+        return trimmedExpectedResult.equals(trimmedActualResult);
     }
 
     @Override
