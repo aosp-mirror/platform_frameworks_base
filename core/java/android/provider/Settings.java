@@ -1642,6 +1642,86 @@ public final class Settings {
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
         /**
+         * Whether nfc is enabled/disabled
+         * 0=disabled. 1=enabled.
+         * @hide
+         */
+        public static final String NFC_ON = "nfc_on";
+
+        /**
+         * Whether nfc secure element is enabled/disabled
+         * 0=disabled. 1=enabled.
+         * @hide
+         */
+        public static final String NFC_SECURE_ELEMENT_ON = "nfc_secure_element_on";
+
+        /**
+         * Whether nfc secure element is enabled/disabled
+         * 0=disabled. 1=enabled.
+         * @hide
+         */
+        public static final String NFC_SECURE_ELEMENT_ID = "nfc_secure_element_id";
+
+        /**
+         * LLCP LTO value
+         * @hide
+         */
+        public static final String NFC_LLCP_LTO = "nfc_llcp_lto";
+
+        /**
+         * LLCP MIU value
+         * @hide
+         */
+        public static final String NFC_LLCP_MIU = "nfc_llcp_miu";
+
+        /**
+         * LLCP WKS value
+         * @hide
+         */
+        public static final String NFC_LLCP_WKS = "nfc_llcp_wks";
+
+        /**
+         * LLCP OPT value
+         * @hide
+         */
+        public static final String NFC_LLCP_OPT = "nfc_llcp_opt";
+
+        /**
+         * NFC Discovery Reader A
+         * 0=disabled. 1=enabled.
+         * @hide
+         */
+        public static final String NFC_DISCOVERY_A = "nfc_discovery_a";
+
+        /**
+         * NFC Discovery Reader B
+         * 0=disabled. 1=enabled.
+         * @hide
+         */
+        public static final String NFC_DISCOVERY_B = "nfc_discovery_b";
+
+        /**
+         * NFC Discovery Reader Felica
+         * 0=disabled. 1=enabled.
+         * @hide
+         */
+        public static final String NFC_DISCOVERY_F = "nfc_discovery_felica";
+
+        /**
+         * NFC Discovery Reader 15693
+         * 0=disabled. 1=enabled.
+         * @hide
+         */
+        public static final String NFC_DISCOVERY_15693 = "nfc_discovery_15693";
+
+        /**
+         * NFC Discovery NFCIP
+         * 0=disabled. 1=enabled.
+         * @hide
+         */
+        public static final String NFC_DISCOVERY_NFCIP = "nfc_discovery_nfcip";
+
+        /**
          * Show pointer location on screen?
          * 0 = no
          * 1 = yes
@@ -1814,7 +1894,19 @@ public final class Settings {
             NOTIFICATION_LIGHT_PULSE,
             USE_PTP_INTERFACE,
             SIP_CALL_OPTIONS,
-            SIP_RECEIVE_CALLS
+            SIP_RECEIVE_CALLS,
+            NFC_ON,
+            NFC_SECURE_ELEMENT_ON,
+            NFC_SECURE_ELEMENT_ID,
+            NFC_LLCP_LTO,
+            NFC_LLCP_MIU,
+            NFC_LLCP_WKS,
+            NFC_LLCP_OPT,
+            NFC_DISCOVERY_A,
+            NFC_DISCOVERY_B,
+            NFC_DISCOVERY_F,
+            NFC_DISCOVERY_15693,
+            NFC_DISCOVERY_NFCIP,
         };
 
         // Settings moved to Settings.Secure

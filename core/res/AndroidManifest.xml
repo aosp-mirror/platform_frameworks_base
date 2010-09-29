@@ -88,6 +88,10 @@
     <protected-broadcast android:name="android.hardware.action.USB_CAMERA_ATTACHED" />
     <protected-broadcast android:name="android.hardware.action.USB_CAMERA_DETACHED" />
 
+    <protected-broadcast android:name="com.trustedlogic.trustednfc.android.action.NDEF_TAG_DISCOVERED" />
+    <protected-broadcast android:name="com.trustedlogic.trustednfc.android.action.TRANSACTION_DETECTED" />
+    <protected-broadcast android:name="com.trustedlogic.trustednfc.android.action.LLCP_LINK_STATE_CHANGED" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
@@ -337,6 +341,30 @@
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_bluetooth"
         android:label="@string/permlab_bluetooth" />
+
+    <!-- Allows applications to access remote NFC devices
+         @hide -->
+    <permission android:name="com.trustedlogic.trustednfc.permission.NFC_RAW"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_nfcRaw"
+        android:label="@string/permlab_nfcRaw" />
+
+    <!-- Allows applications to be notified of remote NFC devices
+         @hide -->
+    <permission android:name="com.trustedlogic.trustednfc.permission.NFC_NOTIFY"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_nfcNotify"
+        android:label="@string/permlab_nfcNotify" />
+
+    <!-- Allows applications to be notified of remote NFC LLCP devices
+         @hide -->
+    <permission android:name="com.trustedlogic.trustednfc.permission.NFC_LLCP"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_nfcLlcp"
+        android:label="@string/permlab_nfcLlcp" />
 
     <!-- Allows applications to call into AccountAuthenticators. Only
     the system can get this permission. -->
@@ -847,6 +875,14 @@
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_bluetoothAdmin"
         android:label="@string/permlab_bluetoothAdmin" />
+
+    <!-- Allows applications to change NFC connectivity settings 
+         @hide -->
+    <permission android:name="com.trustedlogic.trustednfc.permission.NFC_ADMIN"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_nfcAdmin"
+        android:label="@string/permlab_nfcAdmin" />
 
     <!-- Allows an application to clear the caches of all installed
          applications on the device.  -->

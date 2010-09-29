@@ -1157,6 +1157,30 @@
       connections with paired devices.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_nfcAdmin">NFC administration</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_nfcAdmin">Allows an application to configure
+      the local NFC phone.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_nfcRaw">NFC full access to remote device</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_nfcRaw">Allows an application to access
+      remote NFC devices.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_nfcNotify">NFC notification from remote device</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_nfcNotify">Allows an application to be notified
+      of operations related to remote NFC devices.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_nfcLlcp">NFC notification from remote LLCP device</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_nfcLlcp">Allows an application to be notified
+      of LLCP operations related to remote NFC devices.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_disableKeyguard">disable keylock</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_disableKeyguard">Allows an application to disable

@@ -170,6 +170,18 @@ extern int register_android_view_MotionEvent(JNIEnv* env);
 extern int register_android_content_res_ObbScanner(JNIEnv* env);
 extern int register_android_content_res_Configuration(JNIEnv* env);
 
+#ifdef HAVE_NFC
+extern int register_com_trustedlogic_trustednfc_android_internal_NativeNfcManager(JNIEnv *env);
+extern int register_com_trustedlogic_trustednfc_android_internal_NativeNfcTag(JNIEnv *env);
+extern int register_com_trustedlogic_trustednfc_android_internal_NativeNdefTag(JNIEnv *env);
+extern int register_com_trustedlogic_trustednfc_android_NdefMessage(JNIEnv *env);
+extern int register_com_trustedlogic_trustednfc_android_NdefRecord(JNIEnv *env);
+extern int register_com_trustedlogic_trustednfc_android_internal_NativeP2pDevice(JNIEnv *env);
+extern int register_com_trustedlogic_trustednfc_android_internal_NativeLlcpSocket(JNIEnv *env);
+extern int register_com_trustedlogic_trustednfc_android_internal_NativeLlcpConnectionlessSocket(JNIEnv *env);
+extern int register_com_trustedlogic_trustednfc_android_internal_NativeLlcpServiceSocket(JNIEnv *env);
+#endif
+
 static AndroidRuntime* gCurRuntime = NULL;
 
 static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
@@ -1287,6 +1299,18 @@ static const RegJNIRec gRegJNI[] = {
 
     REG_JNI(register_android_content_res_ObbScanner),
     REG_JNI(register_android_content_res_Configuration),
+
+#ifdef HAVE_NFC
+    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeNfcManager),
+    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeNfcTag),
+    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeNdefTag),
+    REG_JNI(register_com_trustedlogic_trustednfc_android_NdefMessage),
+    REG_JNI(register_com_trustedlogic_trustednfc_android_NdefRecord),
+    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeP2pDevice),
+    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeLlcpSocket),
+    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeLlcpConnectionlessSocket),
+    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeLlcpServiceSocket),
+#endif
 };
 
 /*
