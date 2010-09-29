@@ -399,8 +399,7 @@ bool MtpCursor::prepareRow(CursorWindow* window) {
 }
 
 
-bool MtpCursor::putLong(CursorWindow* window, int value, int row, int column) {
-
+bool MtpCursor::putLong(CursorWindow* window, int64_t value, int row, int column) {
     if (!window->putLong(row, column, value)) {
         window->freeLastRow();
         LOGE("Failed allocating space for a long in column %d", column);

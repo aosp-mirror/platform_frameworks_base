@@ -1917,6 +1917,14 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
                 // The first/last pointer went down/up.
                 action = maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN
                         ? AMOTION_EVENT_ACTION_DOWN : AMOTION_EVENT_ACTION_UP;
+            } else {
+                // A secondary pointer went down/up.
+                uint32_t splitPointerIndex = 0;
+                while (pointerId != splitPointerIds[splitPointerIndex]) {
+                    splitPointerIndex += 1;
+                }
+                action = maskedAction | (splitPointerIndex
+                        << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
             }
         } else {
             // An unrelated pointer changed.

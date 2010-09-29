@@ -31,7 +31,7 @@ public final class MtpCursor extends AbstractWindowedCursor {
     static final String TAG = "MtpCursor";
     static final int NO_COUNT = -1;
 
-    /* constants for mQueryType */
+    /* constants for queryType */
     public static final int DEVICE              = 1;
     public static final int DEVICE_ID           = 2;
     public static final int STORAGE             = 3;
@@ -41,27 +41,15 @@ public final class MtpCursor extends AbstractWindowedCursor {
     public static final int STORAGE_CHILDREN    = 7;
     public static final int OBJECT_CHILDREN     = 8;
 
-    private int mQueryType;
-    private int mDeviceID;
-    private long mStorageID;
-    private long mQbjectID;
-
     /** The names of the columns in the projection */
     private String[] mColumns;
 
     /** The number of rows in the cursor */
     private int mCount = NO_COUNT;
 
-    private final MtpClient mClient;
 
     public MtpCursor(MtpClient client, int queryType, int deviceID, long storageID, long objectID,
             String[] projection) {
-
-        mClient = client;
-        mQueryType = queryType;
-        mDeviceID = deviceID;
-        mStorageID = storageID;
-        mQbjectID = objectID;
         mColumns = projection;
 
         HashMap<String, Integer> map;

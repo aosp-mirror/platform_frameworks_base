@@ -382,7 +382,9 @@ public class LayoutTestsExecutor extends Activity {
         WebSettings webViewSettings = webView.getSettings();
         webViewSettings.setAppCacheEnabled(true);
         webViewSettings.setAppCachePath(getApplicationContext().getCacheDir().getPath());
-        webViewSettings.setAppCacheMaxSize(Long.MAX_VALUE);
+        // Use of larger values causes unexplained AppCache database corruption.
+        // TODO: Investigate what's really going on here.
+        webViewSettings.setAppCacheMaxSize(100 * 1024 * 1024);
         webViewSettings.setJavaScriptEnabled(true);
         webViewSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webViewSettings.setSupportMultipleWindows(true);

@@ -601,9 +601,9 @@ public class RenderScript {
             while(mRun) {
                 rbuf[0] = 0;
                 int msg = mRS.nContextGetMessage(mRS.mContext, rbuf, true);
-                if ((msg == 0) && mRun) {
+                if ((msg == 0)) {
                     // Can happen for two reasons
-                    if (rbuf[0] > 0) {
+                    if (rbuf[0] > 0 && mRun) {
                         // 1: Buffer needs to be enlarged.
                         rbuf = new int[rbuf[0] + 2];
                     } else {
@@ -616,6 +616,7 @@ public class RenderScript {
                         } catch(InterruptedException e) {
                         }
                     }
+                    continue;
                 }
                 if(mRS.mMessageCallback != null) {
                     mRS.mMessageCallback.mData = rbuf;

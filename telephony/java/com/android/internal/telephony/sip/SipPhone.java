@@ -444,18 +444,23 @@ public class SipPhone extends SipPhoneBase {
         @Override
         public void hangup() throws CallStateException {
             synchronized (SipPhone.class) {
-                Log.v(LOG_TAG, "hang up call: " + getState() + ": " + this
-                        + " on phone " + getPhone());
-                CallStateException excp = null;
-                for (Connection c : connections) {
-                    try {
-                        c.hangup();
-                    } catch (CallStateException e) {
-                        excp = e;
+                if (state.isAlive()) {
+                    Log.d(LOG_TAG, "hang up call: " + getState() + ": " + this
+                            + " on phone " + getPhone());
+                    CallStateException excp = null;
+                    for (Connection c : connections) {
+                        try {
+                            c.hangup();
+                        } catch (CallStateException e) {
+                            excp = e;
+                        }
                     }
+                    if (excp != null) throw excp;
+                    setState(State.DISCONNECTING);
+                } else {
+                    Log.d(LOG_TAG, "hang up dead call: " + getState() + ": "
+                            + this + " on phone " + getPhone());
                 }
-                if (excp != null) throw excp;
-                setState(State.DISCONNECTING);
             }
         }
 
@@ -640,14 +645,14 @@ public class SipPhone extends SipPhoneBase {
 
             @Override
             public void onCallEstablished(SipAudioCall call) {
-                call.startAudio();
                 onChanged(call);
+                if (mState == Call.State.ACTIVE) call.startAudio();
             }
 
             @Override
             public void onCallHeld(SipAudioCall call) {
-                call.startAudio();
                 onChanged(call);
+                if (mState == Call.State.HOLDING) call.startAudio();
             }
 
             @Override
@@ -787,11 +792,13 @@ public class SipPhone extends SipPhoneBase {
         public void hangup() throws CallStateException {
             synchronized (SipPhone.class) {
                 Log.v(LOG_TAG, "hangup conn: " + mPeer.getUriString() + ": "
-                        + ": on phone " + getPhone().getPhoneName());
+                        + mState + ": on phone " + getPhone().getPhoneName());
                 try {
-                    if (mSipAudioCall != null) mSipAudioCall.endCall();
-                    setState(Call.State.DISCONNECTING);
-                    setDisconnectCause(DisconnectCause.LOCAL);
+                    if (mState.isAlive()) {
+                        if (mSipAudioCall != null) mSipAudioCall.endCall();
+                        setState(Call.State.DISCONNECTING);
+                        setDisconnectCause(DisconnectCause.LOCAL);
+                    }
                 } catch (SipException e) {
                     throw new CallStateException("hangup(): " + e);
                 }
@@ -875,8 +882,10 @@ public class SipPhone extends SipPhoneBase {
                 case SipErrorCode.CROSS_DOMAIN_AUTHENTICATION:
                     onError(Connection.DisconnectCause.OUT_OF_NETWORK);
                     break;
-                case SipErrorCode.SOCKET_ERROR:
                 case SipErrorCode.SERVER_ERROR:
+                    onError(Connection.DisconnectCause.SERVER_ERROR);
+                    break;
+                case SipErrorCode.SOCKET_ERROR:
                 case SipErrorCode.CLIENT_ERROR:
                 default:
                     Log.w(LOG_TAG, "error: " + SipErrorCode.toString(errorCode)

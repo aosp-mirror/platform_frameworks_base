@@ -223,10 +223,9 @@ public class FsUtils {
         try {
             return getHttpClient().execute(httpRequest, handler);
         } catch (IOException e) {
-            Log.e(LOG_TAG, "url=" + url, e);
+            Log.e(LOG_TAG, "getLayoutTestsDirContents(): HTTP GET failed for URL " + url);
+            return null;
         }
-
-        return new LinkedList<String>();
     }
 
     public static void closeInputStream(InputStream inputStream) {

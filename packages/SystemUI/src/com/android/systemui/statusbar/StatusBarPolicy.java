@@ -18,9 +18,8 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.StatusBarManager;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothPbap;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -319,9 +318,6 @@ public class StatusBarPolicy {
     private boolean mVolumeVisible;
 
     // bluetooth device status
-    private int mBluetoothHeadsetState;
-    private boolean mBluetoothA2dpConnected;
-    private int mBluetoothPbapState;
     private boolean mBluetoothEnabled;
 
     // wifi
@@ -369,9 +365,7 @@ public class StatusBarPolicy {
                 onBatteryOkay(intent);
             }
             else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
-                    action.equals(BluetoothHeadset.ACTION_STATE_CHANGED) ||
-                    action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED) ||
-                    action.equals(BluetoothPbap.PBAP_STATE_CHANGED_ACTION)) {
+                    action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
                 updateBluetooth(intent);
             }
             else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION) ||
@@ -454,9 +448,6 @@ public class StatusBarPolicy {
         } else {
             mBluetoothEnabled = false;
         }
-        mBluetoothA2dpConnected = false;
-        mBluetoothHeadsetState = BluetoothHeadset.STATE_DISCONNECTED;
-        mBluetoothPbapState = BluetoothPbap.STATE_DISCONNECTED;
         mService.setIconVisibility("bluetooth", mBluetoothEnabled);
 
         // Gps status
@@ -490,9 +481,7 @@ public class StatusBarPolicy {
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
-        filter.addAction(BluetoothPbap.PBAP_STATE_CHANGED_ACTION);
+        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
@@ -1064,26 +1053,14 @@ public class StatusBarPolicy {
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
             mBluetoothEnabled = state == BluetoothAdapter.STATE_ON;
-        } else if (action.equals(BluetoothHeadset.ACTION_STATE_CHANGED)) {
-            mBluetoothHeadsetState = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE,
-                    BluetoothHeadset.STATE_ERROR);
-        } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
-            BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
-            if (a2dp.getConnectedSinks().size() != 0) {
-                mBluetoothA2dpConnected = true;
-            } else {
-                mBluetoothA2dpConnected = false;
+        } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                BluetoothAdapter.STATE_DISCONNECTED);
+            if (state == BluetoothAdapter.STATE_CONNECTED) {
+                iconId = R.drawable.stat_sys_data_bluetooth_connected;
             }
-        } else if (action.equals(BluetoothPbap.PBAP_STATE_CHANGED_ACTION)) {
-            mBluetoothPbapState = intent.getIntExtra(BluetoothPbap.PBAP_STATE,
-                    BluetoothPbap.STATE_DISCONNECTED);
         } else {
             return;
-        }
-
-        if (mBluetoothHeadsetState == BluetoothHeadset.STATE_CONNECTED || mBluetoothA2dpConnected ||
-                mBluetoothPbapState == BluetoothPbap.STATE_CONNECTED) {
-            iconId = R.drawable.stat_sys_data_bluetooth_connected;
         }
 
         mService.setIcon("bluetooth", iconId, 0);

@@ -16,6 +16,8 @@
 
 package android.app;
 
+import com.android.internal.app.AlertController;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -23,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -30,8 +33,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-
-import com.android.internal.app.AlertController;
 
 /**
  * A subclass of Dialog that can display one, two or three buttons. If you only want to
@@ -273,6 +274,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
     public static class Builder {
         private final AlertController.AlertParams P;
         private int mTheme;
+        private Context mWrappedContext;
         
         /**
          * Constructor using a context for this builder and the {@link AlertDialog} it creates.
@@ -293,6 +295,21 @@ public class AlertDialog extends Dialog implements DialogInterface {
             mTheme = theme;
         }
         
+        /**
+         * Returns a {@link Context} with the appropriate theme for dialogs created by this Builder.
+         * Applications should use this Context for obtaining LayoutInflaters for inflating views
+         * that will be used in the resulting dialogs, as it will cause views to be inflated with
+         * the correct theme.
+         *
+         * @return A Context for built Dialogs.
+         */
+        public Context getContext() {
+            if (mWrappedContext == null) {
+                mWrappedContext = new ContextThemeWrapper(P.mContext, mTheme);
+            }
+            return mWrappedContext;
+        }
+
         /**
          * Set the title using the given resource id.
          *

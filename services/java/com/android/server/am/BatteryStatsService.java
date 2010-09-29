@@ -16,7 +16,9 @@
 
 package com.android.server.am;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -43,6 +45,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     final BatteryStatsImpl mStats;
     Context mContext;
+    private boolean mBluetoothPendingStats;
+    private BluetoothHeadset mBluetoothHeadset;
 
     BatteryStatsService(String filename) {
         mStats = new BatteryStatsImpl(filename);
@@ -283,16 +287,43 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
 
     public void noteBluetoothOn() {
         enforceCallingPermission();
-        BluetoothHeadset headset = new BluetoothHeadset(mContext, null);
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
+                                    BluetoothProfile.HEADSET);
+        }
         synchronized (mStats) {
-            mStats.noteBluetoothOnLocked();
-            mStats.setBtHeadset(headset);
+            if (mBluetoothHeadset != null) {
+                mStats.noteBluetoothOnLocked();
+                mStats.setBtHeadset(mBluetoothHeadset);
+            } else {
+                mBluetoothPendingStats = true;
+            }
         }
     }
-    
+
+    private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
+        new BluetoothProfile.ServiceListener() {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            mBluetoothHeadset = (BluetoothHeadset) proxy;
+            synchronized (mStats) {
+                if (mBluetoothPendingStats) {
+                    mStats.noteBluetoothOnLocked();
+                    mStats.setBtHeadset(mBluetoothHeadset);
+                    mBluetoothPendingStats = false;
+                }
+            }
+        }
+
+        public void onServiceDisconnected(int profile) {
+            mBluetoothHeadset = null;
+        }
+    };
+
     public void noteBluetoothOff() {
         enforceCallingPermission();
         synchronized (mStats) {
+            mBluetoothPendingStats = false;
             mStats.noteBluetoothOffLocked();
         }
     }

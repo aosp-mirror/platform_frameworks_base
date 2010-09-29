@@ -63,9 +63,11 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.app.backup.IBackupManager;
+import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
-import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothProfile;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
@@ -444,8 +446,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
         mSupplicantStateTracker = new SupplicantStateTracker(context, getHandler());
 
-        mBluetoothHeadset = new BluetoothHeadset(mContext, null);
         mLinkProperties = new LinkProperties();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
+                                    BluetoothProfile.A2DP);
+            adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
+                                    BluetoothProfile.HEADSET);
+        }
 
         mNetworkInfo.setIsAvailable(false);
         mLinkProperties.clear();
@@ -1278,23 +1286,49 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @return Whether to disable coexistence mode.
      */
-    private boolean shouldDisableCoexistenceMode() {
-        int state = mBluetoothHeadset.getState(mBluetoothHeadset.getCurrentHeadset());
-        return state == BluetoothHeadset.STATE_DISCONNECTED;
+    private synchronized boolean shouldDisableCoexistenceMode() {
+        Set<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
+
+        return (devices.size() != 0 ? true : false);
     }
 
-    private void checkIsBluetoothPlaying() {
+    private synchronized void checkIsBluetoothPlaying() {
         boolean isBluetoothPlaying = false;
-        Set<BluetoothDevice> connected = mBluetoothA2dp.getConnectedSinks();
+        if (mBluetoothA2dp != null) {
+            Set<BluetoothDevice> connected = mBluetoothA2dp.getConnectedDevices();
 
-        for (BluetoothDevice device : connected) {
-            if (mBluetoothA2dp.getSinkState(device) == BluetoothA2dp.STATE_PLAYING) {
-                isBluetoothPlaying = true;
-                break;
+            for (BluetoothDevice device : connected) {
+                if (mBluetoothA2dp.isA2dpPlaying(device)) {
+                    isBluetoothPlaying = true;
+                    break;
+                }
             }
         }
         setBluetoothScanMode(isBluetoothPlaying);
     }
+
+    private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
+        new BluetoothProfile.ServiceListener() {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            synchronized (WifiStateMachine.this) {
+                if (profile == BluetoothProfile.HEADSET) {
+                    mBluetoothHeadset = (BluetoothHeadset) proxy;
+                } else if (profile == BluetoothProfile.A2DP) {
+                    mBluetoothA2dp = (BluetoothA2dp)proxy;
+                }
+            }
+        }
+
+        public void onServiceDisconnected(int profile) {
+            synchronized (WifiStateMachine.this) {
+                if (profile == BluetoothProfile.HEADSET) {
+                    mBluetoothHeadset = null;
+                } else if (profile == BluetoothProfile.A2DP) {
+                    mBluetoothA2dp = null;
+                }
+            }
+        }
+    };
 
     private void sendScanResultsAvailableBroadcast() {
         if (!ActivityManagerNative.isSystemReady()) return;
@@ -1905,9 +1939,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     //TODO: initialize and fix multicast filtering
                     //mWM.initializeMulticastFiltering();
 
-                    if (mBluetoothA2dp == null) {
-                        mBluetoothA2dp = new BluetoothA2dp(mContext);
-                    }
                     checkIsBluetoothPlaying();
 
                     sendSupplicantConnectionChangedBroadcast(true);
@@ -2458,7 +2489,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 mModifiedBluetoothCoexistenceMode = false;
                 mPowerMode = DRIVER_POWER_MODE_AUTO;
 
-                if (shouldDisableCoexistenceMode()) {
+                // TODO(): Incorporate the else part in the state machine
+                // If mBluetoothHeadset == null, means it not conencted to the
+                // service yet.
+                if (mBluetoothHeadset != null && shouldDisableCoexistenceMode()) {
                     /*
                      * There are problems setting the Wi-Fi driver's power
                      * mode to active when bluetooth coexistence mode is

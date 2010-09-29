@@ -21,7 +21,9 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -86,6 +88,7 @@ public class WifiService extends IWifiManager.Stub {
 
     private AlarmManager mAlarmManager;
     private PendingIntent mIdleIntent;
+    private BluetoothA2dp mBluetoothA2dp;
     private static final int IDLE_REQUEST = 0;
     private boolean mScreenOff;
     private boolean mDeviceIdle;
@@ -182,7 +185,7 @@ public class WifiService extends IWifiManager.Stub {
      * something other than scanning, we reset this to 0.
      */
     private int mNumScansSinceNetworkStateChange;
-    
+
     /**
      * Temporary for computing UIDS that are responsible for starting WIFI.
      * Protected by mWifiStateTracker lock.
@@ -888,17 +891,10 @@ public class WifiService extends IWifiManager.Stub {
                     return;
                 }
                 mPluggedType = pluggedType;
-            } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
-                BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
-                Set<BluetoothDevice> sinks = a2dp.getConnectedSinks();
-                boolean isBluetoothPlaying = false;
-                for (BluetoothDevice sink : sinks) {
-                    if (a2dp.getSinkState(sink) == BluetoothA2dp.STATE_PLAYING) {
-                        isBluetoothPlaying = true;
-                    }
-                }
-                mWifiStateMachine.setBluetoothScanMode(isBluetoothPlaying);
-
+            } else if (action.equals(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
+                                               BluetoothA2dp.STATE_NOT_PLAYING);
+                mWifiStateMachine.setBluetoothScanMode(state == BluetoothA2dp.STATE_PLAYING);
             } else {
                 return;
             }
@@ -958,7 +954,7 @@ public class WifiService extends IWifiManager.Stub {
         }
         mWifiStateMachine.updateBatteryWorkSource(mTmpWorkSource);
     }
-    
+
     private void updateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
         boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden.get();
@@ -999,7 +995,7 @@ public class WifiService extends IWifiManager.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(ACTION_DEVICE_IDLE);
-        intentFilter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
+        intentFilter.addAction(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
 
@@ -1191,7 +1187,7 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private boolean acquireWifiLockLocked(WifiLock wifiLock) {
-        Slog.d(TAG, "acquireWifiLockLocked: " + wifiLock);
+        if (DBG) Slog.d(TAG, "acquireWifiLockLocked: " + wifiLock);
 
         mLocks.addLock(wifiLock);
 
@@ -1214,7 +1210,7 @@ public class WifiService extends IWifiManager.Stub {
         // Be aggressive about adding new locks into the accounted state...
         // we want to over-report rather than under-report.
         reportStartWorkSource();
-        
+
         updateWifiState();
         return true;
     }
@@ -1258,7 +1254,7 @@ public class WifiService extends IWifiManager.Stub {
 
         WifiLock wifiLock = mLocks.removeLock(lock);
 
-        Slog.d(TAG, "releaseWifiLockLocked: " + wifiLock);
+        if (DBG) Slog.d(TAG, "releaseWifiLockLocked: " + wifiLock);
 
         hadLock = (wifiLock != null);
 

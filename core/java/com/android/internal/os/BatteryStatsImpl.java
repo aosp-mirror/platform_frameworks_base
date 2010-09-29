@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import com.android.internal.util.JournaledFile;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.net.TrafficStats;
 import android.os.BatteryManager;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -1150,7 +1152,11 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private int getCurrentBluetoothPingCount() {
         if (mBtHeadset != null) {
-            return mBtHeadset.getBatteryUsageHint();
+            Set<BluetoothDevice> deviceSet = mBtHeadset.getConnectedDevices();
+            BluetoothDevice[] devices = deviceSet.toArray(new BluetoothDevice[deviceSet.size()]);
+            if (devices.length > 0) {
+                return mBtHeadset.getBatteryUsageHint(devices[0]);
+            }
         }
         return -1;
     }

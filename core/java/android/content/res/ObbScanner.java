@@ -16,25 +16,43 @@
 
 package android.content.res;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
- * Class to scan Opaque Binary Blob (OBB) files.
- * @hide
+ * Class to scan Opaque Binary Blob (OBB) files. Use this to get information
+ * about an OBB file for use in a program via {@link ObbInfo}.
  */
 public class ObbScanner {
     // Don't allow others to instantiate this class
     private ObbScanner() {}
 
-    public static ObbInfo getObbInfo(String filePath) {
+    /**
+     * Scan a file for OBB information.
+     * 
+     * @param filePath path to the OBB file to be scanned.
+     * @return ObbInfo object information corresponding to the file path
+     * @throws IllegalArgumentException if the OBB file couldn't be found
+     * @throws IOException if the OBB file couldn't be read
+     */
+    public static ObbInfo getObbInfo(String filePath) throws IOException {
         if (filePath == null) {
-            return null;
+            throw new IllegalArgumentException("file path cannot be null");
         }
 
-        ObbInfo obbInfo = new ObbInfo();
-        if (!getObbInfo_native(filePath, obbInfo)) {
-            throw new IllegalArgumentException("Could not read OBB file: " + filePath);
+        final File obbFile = new File(filePath);
+        if (!obbFile.exists()) {
+            throw new IllegalArgumentException("OBB file does nto exist: " + filePath);
         }
+
+        final String canonicalFilePath = obbFile.getCanonicalPath();
+
+        ObbInfo obbInfo = new ObbInfo();
+        getObbInfo_native(canonicalFilePath, obbInfo);
+
         return obbInfo;
     }
 
-    private native static boolean getObbInfo_native(String filePath, ObbInfo obbInfo);
+    private native static void getObbInfo_native(String filePath, ObbInfo obbInfo)
+            throws IOException;
 }

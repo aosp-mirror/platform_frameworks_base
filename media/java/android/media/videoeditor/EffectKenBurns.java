@@ -35,22 +35,23 @@ public class EffectKenBurns extends Effect {
      */
     @SuppressWarnings("unused")
     private EffectKenBurns() throws IOException {
-        this(null, null, null, 0, 0);
+        this(null, null, null, null, 0, 0);
     }
 
     /**
      * Constructor
      *
+     * @param mediaItem The media item owner
      * @param effectId The effect id
      * @param startRect The start rectangle
      * @param endRect The end rectangle
      * @param startTimeMs The start time
      * @param durationMs The duration of the Ken Burns effect in milliseconds
      */
-    public EffectKenBurns(String effectId, Rect startRect, Rect endRect, long startTime,
-            long durationMs)
+    public EffectKenBurns(MediaItem mediaItem, String effectId, Rect startRect, Rect endRect,
+            long startTime, long durationMs)
             throws IOException {
-        super(effectId, startTime, durationMs);
+        super(mediaItem, effectId, startTime, durationMs);
 
         mStartRect = startRect;
         mEndRect = endRect;

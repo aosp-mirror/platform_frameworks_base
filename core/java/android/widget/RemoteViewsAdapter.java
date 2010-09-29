@@ -122,7 +122,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
 
                         // Post a runnable to call back to the view to notify it that we have
                         // connected
-                        adapter. mMainQueue.post(new Runnable() {
+                        adapter.mMainQueue.post(new Runnable() {
                             @Override
                             public void run() {
                                 final RemoteAdapterConnectionCallback callback =
@@ -148,7 +148,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
             adapter.mMainQueue.removeMessages(0);
             adapter.mWorkerQueue.removeMessages(0);
 
-            // Clear the cache
+            // Clear the cache (the meta data will be re-requested on service re-connection)
             synchronized (adapter.mCache) {
                 adapter.mCache.reset();
             }
@@ -183,9 +183,13 @@ public class RemoteViewsAdapter extends BaseAdapter {
          *             successfully.
          */
         public void onRemoteViewsLoaded(RemoteViews view) {
-            // Remove all the children of this layout first
-            removeAllViews();
-            addView(view.apply(getContext(), this));
+            try {
+                // Remove all the children of this layout first
+                removeAllViews();
+                addView(view.apply(getContext(), this));
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to apply RemoteViews.");
+            }
         }
     }
 
@@ -224,6 +228,8 @@ public class RemoteViewsAdapter extends BaseAdapter {
          * the associated RemoteViews has loaded.
          */
         public void notifyOnRemoteViewsLoaded(int position, RemoteViews view, int typeId) {
+            if (view == null) return;
+
             final Integer pos = position;
             if (mReferences.containsKey(pos)) {
                 // Notify all the references for that position of the newly loaded RemoteViews
@@ -555,11 +561,14 @@ public class RemoteViewsAdapter extends BaseAdapter {
         }
 
         public void reset() {
+            // Note: We do not try and reset the meta data, since that information is still used by
+            // collection views to validate it's own contents (and will be re-requested if the data
+            // is invalidated through the notifyDataSetChanged() flow).
+
             mPreloadLowerBound = 0;
             mPreloadUpperBound = -1;
             mIndexRemoteViews.clear();
             mIndexMetaData.clear();
-            mMetaData.reset();
             synchronized (mLoadIndices) {
                 mRequestedIndices.clear();
                 mLoadIndices.clear();
@@ -834,11 +843,6 @@ public class RemoteViewsAdapter extends BaseAdapter {
     }
 
     public void notifyDataSetChanged() {
-        synchronized (mCache) {
-            // Flush the cache so that we can reload new items from the service
-            mCache.reset();
-        }
-
         final RemoteViewsMetaData metaData = mCache.getMetaData();
         synchronized (metaData) {
             // Set flag to calls the remote factory's onDataSetChanged() on the next worker loop
@@ -862,6 +866,11 @@ public class RemoteViewsAdapter extends BaseAdapter {
                 // Return early to prevent from further being notified (since nothing has changed)
                 return;
             }
+        }
+
+        // Flush the cache so that we can reload new items from the service
+        synchronized (mCache) {
+            mCache.reset();
         }
 
         // Re-request the new metadata (only after the notification to the factory)

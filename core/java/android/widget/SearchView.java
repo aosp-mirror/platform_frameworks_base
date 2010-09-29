@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.Editable;
@@ -348,15 +349,19 @@ public class SearchView extends LinearLayout {
     }
 
     private void setImeVisibility(boolean visible) {
-        // We made sure the IME was displayed, so also make sure it is closed
-        // when we go away.
-        InputMethodManager imm = (InputMethodManager)
-                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            if (visible) {
-                imm.showSoftInputUnchecked(0, null);
-            } else {
-                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+        // don't mess with the soft input if we're not iconified by default
+        if (mIconifiedByDefault) {
+            InputMethodManager imm = (InputMethodManager)
+            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+            // We made sure the IME was displayed, so also make sure it is closed
+            // when we go away.
+            if (imm != null) {
+                if (visible) {
+                    imm.showSoftInputUnchecked(0, null);
+                } else {
+                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                }
             }
         }
     }
@@ -717,4 +722,13 @@ public class SearchView extends LinearLayout {
         public void afterTextChanged(Editable s) {
         }
     };
-}
+
+    /*
+     * Avoid getting focus when searching for something to focus on.
+     * The user will have to touch the text view to get focus.
+     */
+    protected boolean onRequestFocusInDescendants(int direction,
+            Rect previouslyFocusedRect) {
+        return false;
+    }
+ }

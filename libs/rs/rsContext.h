@@ -174,7 +174,7 @@ public:
     uint32_t getMaxVertexUniformVectors() const {return mGL.mMaxVertexUniformVectors;}
 
     void launchThreads(WorkerCallback_t cbk, void *data);
-    uint32_t getWorkerPoolSize() const {return (uint32_t)mWorkers.mRunningCount;}
+    uint32_t getWorkerPoolSize() const {return (uint32_t)mWorkers.mCount;}
 
 protected:
     Device *mDev;

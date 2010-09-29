@@ -607,7 +607,7 @@ public class WebView extends AbsoluteLayout
     static final int HIDE_FULLSCREEN                    = 121;
     static final int DOM_FOCUS_CHANGED                  = 122;
     static final int REPLACE_BASE_CONTENT               = 123;
-    // 124;
+    static final int FORM_DID_BLUR                      = 124;
     static final int RETURN_LABEL                       = 125;
     static final int FIND_AGAIN                         = 126;
     static final int CENTER_FIT_RECT                    = 127;
@@ -659,7 +659,7 @@ public class WebView extends AbsoluteLayout
         "HIDE_FULLSCREEN", //                = 121;
         "DOM_FOCUS_CHANGED", //              = 122;
         "REPLACE_BASE_CONTENT", //           = 123;
-        "124", //                            = 124;
+        "FORM_DID_BLUR", //                  = 124;
         "RETURN_LABEL", //                   = 125;
         "FIND_AGAIN", //                     = 126;
         "CENTER_FIT_RECT", //                = 127;
@@ -3854,10 +3854,9 @@ public class WebView extends AbsoluteLayout
 
     // Called by WebKit to instruct the UI to hide the keyboard
     private void hideSoftKeyboard() {
-        InputMethodManager imm = (InputMethodManager)
-                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm.isActive(this)
-                || (inEditingMode() && imm.isActive(mWebTextView))) {
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null && (imm.isActive(this)
+                || (inEditingMode() && imm.isActive(mWebTextView)))) {
             imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
         }
     }
@@ -4949,7 +4948,7 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mNativeClass == 0 || !isClickable() || !isLongClickable()) {
+        if (mNativeClass == 0 || (!isClickable() && !isLongClickable())) {
             return false;
         }
 
@@ -6687,6 +6686,12 @@ public class WebView extends AbsoluteLayout
                 case UPDATE_TEXT_SELECTION_MSG_ID:
                     updateTextSelectionFromMessage(msg.arg1, msg.arg2,
                             (WebViewCore.TextSelectionData) msg.obj);
+                    break;
+                case FORM_DID_BLUR:
+                    if (inEditingMode()
+                            && mWebTextView.isSameTextField(msg.arg1)) {
+                        hideSoftKeyboard();
+                    }
                     break;
                 case RETURN_LABEL:
                     if (inEditingMode()

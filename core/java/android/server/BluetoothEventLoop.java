@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +55,7 @@ class BluetoothEventLoop {
     private final HashMap<String, Integer> mPasskeyAgentRequestData;
     private final BluetoothService mBluetoothService;
     private final BluetoothAdapter mAdapter;
+    private BluetoothA2dp mA2dp;
     private final Context mContext;
     // The WakeLock is used for bringing up the LCD during a pairing request
     // from remote device when Android is in Suspend state.
@@ -118,7 +120,20 @@ class BluetoothEventLoop {
                 | PowerManager.ON_AFTER_RELEASE, TAG);
         mWakeLock.setReferenceCounted(false);
         initializeNativeDataNative();
+
+        mAdapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.A2DP);
     }
+
+    private BluetoothProfile.ServiceListener mProfileServiceListener =
+        new BluetoothProfile.ServiceListener() {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            mA2dp = (BluetoothA2dp) proxy;
+        }
+        public void onServiceDisconnected(int profile) {
+            mA2dp = null;
+        }
+    };
+
 
     protected void finalize() throws Throwable {
         try {
@@ -574,12 +589,11 @@ class BluetoothEventLoop {
 
         // Bluez sends the UUID of the local service being accessed, _not_ the
         // remote service
-        if ((BluetoothUuid.isAudioSource(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
+        if (mA2dp != null &&
+            (BluetoothUuid.isAudioSource(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
               || BluetoothUuid.isAdvAudioDist(uuid)) &&
-              !isOtherSinkInNonDisconnectingState(address)) {
-            BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
-
-            authorized = a2dp.getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF;
+              !isOtherSinkInNonDisconnectedState(address)) {
+            authorized = mA2dp.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
             if (authorized) {
                 Log.i(TAG, "Allowing incoming A2DP / AVRCP connection from " + address);
                 mBluetoothService.notifyIncomingA2dpConnection(address);
@@ -630,9 +644,12 @@ class BluetoothEventLoop {
         return false;
     }
 
-    private boolean isOtherSinkInNonDisconnectingState(String address) {
-        BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
-        Set<BluetoothDevice> devices = a2dp.getNonDisconnectedSinks();
+    private boolean isOtherSinkInNonDisconnectedState(String address) {
+        Set<BluetoothDevice> devices =
+            mA2dp.getDevicesMatchingConnectionStates(new int[] {BluetoothA2dp.STATE_CONNECTED,
+                                                     BluetoothA2dp.STATE_CONNECTING,
+                                                     BluetoothA2dp.STATE_DISCONNECTING});
+
         if (devices.size() == 0) return false;
         for(BluetoothDevice dev: devices) {
             if (!dev.getAddress().equals(address)) return true;

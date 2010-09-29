@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -278,6 +279,61 @@ public final class BluetoothAdapter {
      * intents to request the local Bluetooth name.
      */
     public static final String EXTRA_LOCAL_NAME = "android.bluetooth.adapter.extra.LOCAL_NAME";
+
+    /**
+     * Intent used to broadcast the change in connection state of the local
+     * Bluetooth adapter to a profile of the remote device. When the adapter is
+     * not connected to any profiles of any remote devices and it attempts a
+     * connection to a profile this intent will sent. Once connected, this intent
+     * will not be sent for any more connection attempts to any profiles of any
+     * remote device. When the adapter disconnects from the last profile its
+     * connected to of any remote device, this intent will be sent.
+     *
+     * <p> This intent is useful for applications that are only concerned about
+     * whether the local adapter is connected to any profile of any device and
+     * are not really concerned about which profile. For example, an application
+     * which displays an icon to display whether Bluetooth is connected or not
+     * can use this intent.
+     *
+     * <p>This intent will have 3 extras:
+     * {@link #EXTRA_STATE} - The current state.
+     * {@link #EXTRA_PREVIOUS_STATE}- The previous.
+     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote device.
+     *
+     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
+     * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONNECTION_STATE_CHANGED =
+        "android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED";
+
+    /**
+     * Extra used by {@link #ACTION_CONNECTION_STATE_CHANGED}
+     *
+     * This extra represents the current connection state.
+     */
+    public static final String EXTRA_CONNECTION_STATE =
+        "android.bluetooth.adapter.extra.CONNECTION_STATE";
+
+    /**
+     * Extra used by {@link #ACTION_CONNECTION_STATE_CHANGED}
+     *
+     * This extra represents the previous connection state.
+     */
+    public static final String EXTRA_PREVIOUS_CONNECTION_STATE =
+          "android.bluetooth.adapter.extra.PREVIOUS_CONNECTION_STATE";
+
+    /** The profile is in disconnected state */
+    public static final int STATE_DISCONNECTED  = 0;
+    /** The profile is in connecting state */
+    public static final int STATE_CONNECTING    = 1;
+    /** The profile is in connected state */
+    public static final int STATE_CONNECTED     = 2;
+    /** The profile is in disconnecting state */
+    public static final int STATE_DISCONNECTING = 3;
 
     /** @hide */
     public static final String BLUETOOTH_SERVICE = "bluetooth";
@@ -894,6 +950,54 @@ public final class BluetoothAdapter {
 
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
+    }
+
+    /*
+     * Get the profile proxy object associated with the profile.
+     *
+     * <p>Profile can be one of {@link BluetoothProfile.HEADSET} or
+     * {@link BluetoothProfile.A2DP}. Clients must implements
+     * {@link BluetoothProfile.ServiceListener} to get notified of
+     * the connection status and to get the proxy object.
+     *
+     * @param context Context of the application
+     * @param listener The service Listener for connection callbacks.
+     * @param profile
+     * @return true on success, false on error
+     */
+    public boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
+                                   int profile) {
+        if (context == null || listener == null) return false;
+
+        if (profile == BluetoothProfile.HEADSET) {
+            BluetoothHeadset headset = new BluetoothHeadset(context, listener);
+            return true;
+        } else if (profile == BluetoothProfile.A2DP) {
+            BluetoothA2dp a2dp = new BluetoothA2dp(context, listener);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Close the connection of the profile proxy to the Service.
+     *
+     * <p> Clients should call this when they are no longer using
+     * the proxy obtained from {@link #getProfileProxy}.
+     * Profile can be one of {@link BluetoothProfile#HEADSET} or
+     * {@link BluetoothProfile#A2DP}
+     *
+     * @param profile
+     * @param proxy Profile proxy object
+     */
+    public void closeProfileProxy(int profile, BluetoothProfile proxy) {
+        if (profile == BluetoothProfile.HEADSET) {
+            BluetoothHeadset headset = (BluetoothHeadset)proxy;
+            if (headset != null) {
+                headset.close();
+            }
+        }
     }
 
     private Set<BluetoothDevice> toDeviceSet(String[] addresses) {

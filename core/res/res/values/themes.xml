@@ -1106,6 +1106,7 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Holo.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:windowActionBar">false</item>
 
         <item name="android:colorBackgroundCacheHint">@null</item>
         

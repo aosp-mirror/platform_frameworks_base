@@ -5332,6 +5332,15 @@ size_t AudioFlinger::EffectModule::removeHandle(const wp<EffectHandle>& handle)
         }
     }
 
+    // Release effect engine here so that it is done immediately. Otherwise it will be released
+    // by the destructor when the last strong reference on the this object is released which can
+    // happen after next process is called on this effect.
+    if (size == 0 && mEffectInterface != NULL) {
+        // release effect engine
+        EffectRelease(mEffectInterface);
+        mEffectInterface = NULL;
+    }
+
     return size;
 }
 
@@ -6145,21 +6154,36 @@ sp<AudioFlinger::EffectModule> AudioFlinger::EffectChain::getEffectFromId_l(int 
 // Must be called with EffectChain::mLock locked
 void AudioFlinger::EffectChain::process_l()
 {
+    sp<ThreadBase> thread = mThread.promote();
+    if (thread == 0) {
+        LOGW("process_l(): cannot promote mixer thread");
+        return;
+    }
+    PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
+    bool isGlobalSession = (mSessionId == AudioSystem::SESSION_OUTPUT_MIX) ||
+            (mSessionId == AudioSystem::SESSION_OUTPUT_STAGE);
+    bool tracksOnSession = false;
+    if (!isGlobalSession) {
+        tracksOnSession =
+                playbackThread->hasAudioSession(mSessionId) & PlaybackThread::TRACK_SESSION;
+    }
+
     size_t size = mEffects.size();
-    for (size_t i = 0; i < size; i++) {
-        mEffects[i]->process();
+    // do not process effect if no track is present in same audio session
+    if (isGlobalSession || tracksOnSession) {
+        for (size_t i = 0; i < size; i++) {
+            mEffects[i]->process();
+        }
     }
     for (size_t i = 0; i < size; i++) {
         mEffects[i]->updateState();
     }
     // if no track is active, input buffer must be cleared here as the mixer process
     // will not do it
-    if (mSessionId > 0 && activeTracks() == 0) {
-        sp<ThreadBase> thread = mThread.promote();
-        if (thread != 0) {
-            size_t numSamples = thread->frameCount() * thread->channelCount();
-            memset(mInBuffer, 0, numSamples * sizeof(int16_t));
-        }
+    if (tracksOnSession &&
+        activeTracks() == 0) {
+        size_t numSamples = playbackThread->frameCount() * playbackThread->channelCount();
+        memset(mInBuffer, 0, numSamples * sizeof(int16_t));
     }
 }
 

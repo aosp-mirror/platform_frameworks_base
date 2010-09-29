@@ -429,8 +429,8 @@ public:
         reply.readExceptionCode();
     }
 
-    void mountObb(const String16& filename, const String16& key, const sp<
-            IObbActionListener>& token)
+    void mountObb(const String16& filename, const String16& key,
+            const sp<IObbActionListener>& token)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
@@ -448,7 +448,7 @@ public:
         }
     }
 
-    void unmountObb(const String16& filename, const bool force)
+    void unmountObb(const String16& filename, const bool force, const sp<IObbActionListener>& token)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());

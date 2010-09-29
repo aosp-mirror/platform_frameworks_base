@@ -30,6 +30,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothDeviceProfileState;
 import android.bluetooth.BluetoothPan;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfileState;
 import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothSocket;
@@ -88,6 +89,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private int mNativeData;
     private BluetoothEventLoop mEventLoop;
+    private BluetoothHeadset mBluetoothHeadset;
     private boolean mIsAirplaneSensitive;
     private boolean mIsAirplaneToggleable;
     private int mBluetoothState;
@@ -2434,7 +2436,8 @@ public class BluetoothService extends IBluetooth.Stub {
         pw.println("Local name = " + getName());
         pw.println("isDiscovering() = " + isDiscovering());
 
-        BluetoothHeadset headset = new BluetoothHeadset(mContext, null);
+        mAdapter.getProfileProxy(mContext,
+                                 mBluetoothProfileServiceListener, BluetoothProfile.HEADSET);
 
         pw.println("\n--Known devices--");
         for (String address : mDeviceProperties.keySet()) {
@@ -2479,30 +2482,64 @@ public class BluetoothService extends IBluetooth.Stub {
         // Rather not do this from here, but no-where else and I need this
         // dump
         pw.println("\n--Headset Service--");
-        switch (headset.getState(headset.getCurrentHeadset())) {
-        case BluetoothHeadset.STATE_DISCONNECTED:
-            pw.println("getState() = STATE_DISCONNECTED");
-            break;
-        case BluetoothHeadset.STATE_CONNECTING:
-            pw.println("getState() = STATE_CONNECTING");
-            break;
-        case BluetoothHeadset.STATE_CONNECTED:
-            pw.println("getState() = STATE_CONNECTED");
-            break;
-        case BluetoothHeadset.STATE_ERROR:
-            pw.println("getState() = STATE_ERROR");
-            break;
+        if (mBluetoothHeadset != null) {
+           Set<BluetoothDevice> deviceSet = mBluetoothHeadset.getConnectedDevices();
+           if (deviceSet.size() == 0) {
+              pw.println("\n--No headsets connected--");
+           }
+           BluetoothDevice device = (BluetoothDevice) deviceSet.toArray()[0];
+
+            switch (mBluetoothHeadset.getConnectionState(device)) {
+                case BluetoothHeadset.STATE_DISCONNECTED:
+                    pw.println("getConnectionState() = STATE_DISCONNECTED");
+                    break;
+                case BluetoothHeadset.STATE_CONNECTING:
+                    pw.println("getConnectionState() = STATE_CONNECTING");
+                    break;
+                case BluetoothHeadset.STATE_CONNECTED:
+                    pw.println("getConnectionState() = STATE_CONNECTED");
+                    break;
+                case BluetoothHeadset.STATE_DISCONNECTING:
+                    pw.println("getConnectionState() = STATE_DISCONNECTING");
+                    break;
+                case BluetoothHeadset.STATE_AUDIO_CONNECTED:
+                    pw.println("getConnectionState() = STATE_AUDIO_CONNECTED");
+                    break;
+            }
+
+            deviceSet.clear();
+            deviceSet = mBluetoothHeadset.getDevicesMatchingConnectionStates(new int[] {
+                     BluetoothProfile.STATE_CONNECTED, BluetoothProfile.STATE_DISCONNECTED});
+            pw.println("\n--Connected and Disconnected Headsets");
+            for (BluetoothDevice dev: deviceSet) {
+                pw.println(device);
+                if (mBluetoothHeadset.isAudioConnected(device)) {
+                    pw.println("SCO audio connected to device:" + device);
+                }
+            }
+
+            pw.println("\ngetCurrentHeadset() = " + device);
+            pw.println("getBatteryUsageHint() = " +
+                       mBluetoothHeadset.getBatteryUsageHint(device));
+            mAdapter.closeProfileProxy(BluetoothProfile.HEADSET, mBluetoothHeadset);
         }
 
-        pw.println("\ngetCurrentHeadset() = " + headset.getCurrentHeadset());
-        pw.println("getBatteryUsageHint() = " + headset.getBatteryUsageHint());
-        headset.close();
         pw.println("\n--Application Service Records--");
         for (Integer handle : mServiceRecordToPid.keySet()) {
             Integer pid = mServiceRecordToPid.get(handle);
             pw.println("\tpid " + pid + " handle " + Integer.toHexString(handle));
         }
     }
+
+    private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
+        new BluetoothProfile.ServiceListener() {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            mBluetoothHeadset = (BluetoothHeadset) proxy;
+    }
+        public void onServiceDisconnected(int profile) {
+            mBluetoothHeadset = null;
+        }
+    };
 
     /* package */ static int bluezStringToScanMode(boolean pairable, boolean discoverable) {
         if (pairable && discoverable)
@@ -2563,6 +2600,8 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public boolean connectHeadset(String address) {
+        if (getBondState(address) != BluetoothDevice.BOND_BONDED) return false;
+
         BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
         if (state != null) {
             Message msg = new Message();
@@ -2575,6 +2614,8 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public boolean disconnectHeadset(String address) {
+        if (getBondState(address) != BluetoothDevice.BOND_BONDED) return false;
+
         BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
         if (state != null) {
             Message msg = new Message();
@@ -2587,6 +2628,8 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public boolean connectSink(String address) {
+        if (getBondState(address) != BluetoothDevice.BOND_BONDED) return false;
+
         BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
         if (state != null) {
             Message msg = new Message();
@@ -2599,6 +2642,8 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public boolean disconnectSink(String address) {
+        if (getBondState(address) != BluetoothDevice.BOND_BONDED) return false;
+
         BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
         if (state != null) {
             Message msg = new Message();

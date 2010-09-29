@@ -87,22 +87,22 @@ extern "C"
 
     enum Frame_Type_3GPP
     {
-        AMR_475 = 0,
-        AMR_515,
-        AMR_59,
-        AMR_67,
-        AMR_74,
-        AMR_795,
-        AMR_102,
-        AMR_122,
-        AMR_SID,
-        GSM_EFR_SID,
-        TDMA_EFR_SID,
-        PDC_EFR_SID,
-        FOR_FUTURE_USE1,
-        FOR_FUTURE_USE2,
-        FOR_FUTURE_USE3,
-        AMR_NO_DATA
+        AMR_475 = 0,        /* 4.75 kbps    */
+        AMR_515,            /* 5.15 kbps    */
+        AMR_59,             /* 5.9 kbps     */
+        AMR_67,             /* 6.7 kbps     */
+        AMR_74,             /* 7.4 kbps     */
+        AMR_795,            /* 7.95 kbps    */
+        AMR_102,            /* 10.2 kbps    */
+        AMR_122,            /* 12.2 kbps    */
+        AMR_SID,            /* GSM AMR DTX  */
+        GSM_EFR_SID,        /* GSM EFR DTX  */
+        TDMA_EFR_SID,       /* TDMA EFR DTX */
+        PDC_EFR_SID,        /* PDC EFR DTX  */
+        FOR_FUTURE_USE1,    /* Unused 1     */
+        FOR_FUTURE_USE2,    /* Unused 2     */
+        FOR_FUTURE_USE3,    /* Unused 3     */
+        AMR_NO_DATA         /* No data      */
     };
 
     /*----------------------------------------------------------------------------

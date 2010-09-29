@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.location.provider;
+package com.android.location.provider;
 
 import android.os.IBinder;
 
@@ -80,4 +80,3 @@ public abstract class GeocodeProvider {
         return mProvider;
     }
 }
-

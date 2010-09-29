@@ -16,6 +16,7 @@
 
 package com.android.rs.test;
 import android.renderscript.RenderScript.RSMessage;
+import android.util.Log;
 
 public class UnitTest extends Thread {
     public String name;
@@ -27,11 +28,15 @@ public class UnitTest extends Thread {
     public static final int RS_MSG_TEST_PASSED = 100;
     public static final int RS_MSG_TEST_FAILED = 101;
 
+    private static int numTests = 0;
+    public int testID;
+
     protected UnitTest(RSTestCore rstc, String n, int initResult) {
         super();
         mRSTC = rstc;
         name = n;
         result = initResult;
+        testID = numTests++;
     }
 
     protected UnitTest(RSTestCore rstc, String n) {
@@ -56,12 +61,20 @@ public class UnitTest extends Thread {
                     result = -1;
                     break;
                 default:
-                    break;
+                    android.util.Log.v("RenderScript", "Unit test got unexpected message");
+                    return;
             }
 
             if (mItem != null) {
                 mItem.result = result;
-                mRSTC.refreshTestResults();
+                try {
+                    mRSTC.refreshTestResults();
+                }
+                catch (IllegalStateException e) {
+                    /* Ignore the case where our message receiver has been
+                       disconnected. This happens when we leave the application
+                       before it finishes running all of the unit tests. */
+                }
             }
         }
     };
@@ -72,6 +85,9 @@ public class UnitTest extends Thread {
 
     public void run() {
         /* This method needs to be implemented for each subclass */
+        if (mRSTC != null) {
+            mRSTC.refreshTestResults();
+        }
     }
 }
 

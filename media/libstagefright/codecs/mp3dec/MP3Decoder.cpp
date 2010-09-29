@@ -132,6 +132,10 @@ status_t MP3Decoder::read(
             mInputBuffer->release();
             mInputBuffer = NULL;
         }
+
+        // Make sure that the next buffer output does not still
+        // depend on fragments from the last one decoded.
+        pvmp3_InitDecoder(mConfig, mDecoderBuf);
     } else {
         seekTimeUs = -1;
     }

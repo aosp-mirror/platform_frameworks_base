@@ -26,6 +26,8 @@ package android.media.videoeditor;
 public abstract class Effect {
     // Instance variables
     private final String mUniqueId;
+    // The effect owner
+    private final MediaItem mMediaItem;
     protected long mDurationMs;
     // The start time of the effect relative to the media item timeline
     protected long mStartTimeMs;
@@ -35,6 +37,7 @@ public abstract class Effect {
      */
     @SuppressWarnings("unused")
     private Effect() {
+        mMediaItem = null;
         mUniqueId = null;
         mStartTimeMs = 0;
         mDurationMs = 0;
@@ -43,12 +46,22 @@ public abstract class Effect {
     /**
      * Constructor
      *
+     * @param mediaItem The media item owner
      * @param effectId The effect id
      * @param startTimeMs The start time relative to the media item to which it
      *            is applied
      * @param durationMs The effect duration in milliseconds
      */
-    public Effect(String effectId, long startTimeMs, long durationMs) {
+    public Effect(MediaItem mediaItem, String effectId, long startTimeMs, long durationMs) {
+        if (mediaItem == null) {
+            throw new IllegalArgumentException("Media item cannot be null");
+        }
+
+        if (startTimeMs + durationMs > mediaItem.getTimelineDuration()) {
+            throw new IllegalArgumentException("Invalid start time and duration");
+        }
+
+        mMediaItem = mediaItem;
         mUniqueId = effectId;
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
@@ -68,7 +81,13 @@ public abstract class Effect {
      * @param durationMs of the effect in milliseconds
      */
     public void setDuration(long durationMs) {
+        if (mStartTimeMs + durationMs > mMediaItem.getTimelineDuration()) {
+            throw new IllegalArgumentException("Duration is too large");
+        }
+
         mDurationMs = durationMs;
+
+        mMediaItem.invalidateTransitions(this);
     }
 
     /**
@@ -88,7 +107,13 @@ public abstract class Effect {
      *            of the media item in milliseconds
      */
     public void setStartTime(long startTimeMs) {
+        if (startTimeMs + mDurationMs > mMediaItem.getTimelineDuration()) {
+            throw new IllegalArgumentException("Start time is too large");
+        }
+
         mStartTimeMs = startTimeMs;
+
+        mMediaItem.invalidateTransitions(this);
     }
 
     /**
@@ -96,6 +121,13 @@ public abstract class Effect {
      */
     public long getStartTime() {
         return mStartTimeMs;
+    }
+
+    /**
+     * @return The media item owner
+     */
+    public MediaItem getMediaItem() {
+        return mMediaItem;
     }
 
     /*

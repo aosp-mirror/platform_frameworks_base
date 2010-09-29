@@ -45,6 +45,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -68,6 +69,9 @@ public class DirListActivity extends ListActivity {
     /** Messages codes */
     private static final int MSG_LOADED_ITEMS = 0;
     private static final int MSG_SHOW_PROGRESS_DIALOG = 1;
+
+    private static final CharSequence NO_RESPONSE_MESSAGE =
+            "No response from host when getting directory contents. Is the host server running?";
 
     /** Initialized lazily before first sProgressDialog.show() */
     private static ProgressDialog sProgressDialog;
@@ -349,12 +353,17 @@ public class DirListActivity extends ListActivity {
             @Override
             public void handleMessage(Message msg) {
                 if (msg.what == MSG_LOADED_ITEMS) {
-                    setListAdapter(new DirListAdapter(DirListActivity.this,
-                            (ListItem[])msg.obj));
-                    delayedDialogHandler.removeMessages(MSG_SHOW_PROGRESS_DIALOG);
                     setTitle(shortenTitle(mCurrentDirPath));
+                    delayedDialogHandler.removeMessages(MSG_SHOW_PROGRESS_DIALOG);
                     if (sProgressDialog != null) {
                         sProgressDialog.dismiss();
+                    }
+                    if (msg.obj == null) {
+                        Toast.makeText(DirListActivity.this, NO_RESPONSE_MESSAGE,
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        setListAdapter(new DirListAdapter(DirListActivity.this,
+                                (ListItem[])msg.obj));
                     }
                 }
             }
@@ -389,15 +398,21 @@ public class DirListActivity extends ListActivity {
         List<ListItem> subDirs = new ArrayList<ListItem>();
         List<ListItem> subFiles = new ArrayList<ListItem>();
 
-        for (String dirRelativePath : FsUtils.getLayoutTestsDirContents(dirPath, false,
-                true)) {
+        List<String> dirRelativePaths = FsUtils.getLayoutTestsDirContents(dirPath, false, true);
+        if (dirRelativePaths == null) {
+            return null;
+        }
+        for (String dirRelativePath : dirRelativePaths) {
             if (FileFilter.isTestDir(new File(dirRelativePath).getName())) {
                 subDirs.add(new ListItem(dirRelativePath, true));
             }
         }
 
-        for (String testRelativePath : FsUtils.getLayoutTestsDirContents(dirPath, false,
-                false)) {
+        List<String> testRelativePaths = FsUtils.getLayoutTestsDirContents(dirPath, false, false);
+        if (testRelativePaths == null) {
+            return null;
+        }
+        for (String testRelativePath : testRelativePaths) {
             if (FileFilter.isTestFile(new File(testRelativePath).getName())) {
                 subFiles.add(new ListItem(testRelativePath, false));
             }
