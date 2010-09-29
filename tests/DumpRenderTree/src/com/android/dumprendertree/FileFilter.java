@@ -93,6 +93,11 @@ public class FileFilter {
         // This first block of tests are for features for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
+        ignoreResultList.add("fast/encoding/char-encoding.html"); // fails in Java HTTP stack, see http://b/issue?id=3047156
+        ignoreResultList.add("fast/encoding/char-decoding.html"); // fails in Java HTTP stack, see http://b/issue?id=3047156
+        ignoreResultList.add("fast/encoding/hanarei-blog32-fc2-com.html"); // fails in Java HTTP stack, see http://b/issue?id=3046986
+        ignoreResultList.add("fast/encoding/mailto-always-utf-8.html"); // Requires waitForPolicyDelegate(), see http://b/issue?id=3043468
+        ignoreResultList.add("fast/encoding/percent-escaping.html"); // fails in Java HTTP stack, see http://b/issue?id=3046984
         ignoreResultList.add("fast/events/touch/basic-multi-touch-events.html"); // Requires multi-touch
         ignoreResultList.add("fast/events/touch/touch-target.html"); // Requires multi-touch
         ignoreResultList.add("http/tests/appcache/empty-manifest.html"); // flaky
@@ -110,6 +115,9 @@ public class FileFilter {
         ignoreResultList.add("storage/transaction-success-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
 
         // Expected failures due to unsupported features.
+        ignoreResultList.add("fast/encoding/char-decoding-mac.html"); // Mac-specific encodings (also marked Won't Fix in Chromium, bug 7388)
+        ignoreResultList.add("fast/encoding/char-encoding-mac.html"); // Mac-specific encodings (also marked Won't Fix in Chromium, bug 7388)
+        ignoreResultList.add("fast/encoding/idn-security.html"); // Mac-specific IDN checks (also marked Won't Fix in Chromium, bug 21814)
         ignoreResultList.add("fast/events/touch/touch-coords-in-zoom-and-scroll.html"); // Requires eventSender.zoomPageIn(),zoomPageOut()
         ignoreResultList.add("fast/workers"); // workers not supported
         ignoreResultList.add("http/tests/eventsource/workers"); // workers not supported
