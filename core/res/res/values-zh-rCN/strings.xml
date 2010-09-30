@@ -169,7 +169,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"开发工具"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"只有应用程序开发人员才会用到的功能。"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"访问 SD 卡。"</string>
+    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"访问 SD 卡。"</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问 SD 卡。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"允许应用程序停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"状态栏"</string>
@@ -402,6 +403,22 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"允许应用程序配置本地蓝牙手机，以及发现远程设备并与其配对。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"创建蓝牙连接"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"允许应用程序查看本地蓝牙手机的配置，以及建立或接受与配对设备的连接。"</string>
+    <!-- no translation found for permlab_nfcAdmin (2251302233012250056) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcAdmin (1935842611464895785) -->
+    <skip />
+    <!-- no translation found for permlab_nfcRaw (4423471711114325708) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcRaw (5533022736559385665) -->
+    <skip />
+    <!-- no translation found for permlab_nfcNotify (478470360082792358) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcNotify (2990053517962070617) -->
+    <skip />
+    <!-- no translation found for permlab_nfcLlcp (4972051461007030426) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcLlcp (91592127786004640) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"停用键锁"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"允许应用程序停用键锁和任何关联的密码安全设置。例如，在手机上接听电话时停用键锁，在通话结束后重新启用键锁。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
@@ -418,20 +435,22 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"允许应用程序读取用户在用户词典中存储的任意私有字词、名称和短语。"</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"写入用户定义的词典"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"允许应用程序向用户词典中写入新词。"</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"修改/删除 SD 卡中的内容"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"允许应用程序写入 SD 卡。"</string>
+    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"修改/删除 SD 卡中的内容"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"修改/删除 SD 卡中的内容"</string>
+    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"允许应用程序写入 SD 卡。"</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"允许应用程序写入 SD 卡。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"访问缓存文件系统"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"允许应用程序读取和写入缓存文件系统。"</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"限制密码选择"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"限制您能够使用的密码类型。"</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"监控登录尝试"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"监控对于登录设备和执行某项操作的失败尝试。"</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"重置密码"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"强行更新密码，您需要获得管理员提供的新密码才能登录。"</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"强行锁定"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"控制何时锁定设备，这需要您重新输入密码。"</string>
+    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"限制密码选择"</string>
+    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"限制您能够使用的密码类型。"</string>
+    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"监控登录尝试"</string>
+    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" msgid="7227578260165172673">"监控对于登录设备和执行某项操作的失败尝试。"</string>
+    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"重置密码"</string>
+    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"强行更新密码，您需要获得管理员提供的新密码才能登录。"</string>
+    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"强行锁定"</string>
+    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"控制何时锁定设备，这需要您重新输入密码。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有数据"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"恢复出厂设置，这会在不提示确认的情况下删除您的所有数据。"</string>
+    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" msgid="7669895333814222586">"恢复出厂设置，这会在不提示确认的情况下删除您的所有数据。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手机"</item>
@@ -744,12 +763,9 @@
     <string name="force_close" msgid="3653416315450806396">"强行关闭"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"应用程序已重定向"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前正在运行。"</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g>已启动。"</string>
     <string name="smv_application" msgid="295583804361236288">"应用程序<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g> 进程）违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
@@ -796,23 +812,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"全部显示"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB 大容量存储"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 已连接"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"您已通过 USB 将手机连接至计算机。如果您要在计算机和 Android 手机的 SD 卡之间复制文件，请点击下面的按钮。"</string>
+    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"您已通过 USB 将手机连接至计算机。如果您要在计算机和 Android 手机的 SD 卡之间复制文件，请点击下面的按钮。"</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"您已通过 USB 将手机连接至计算机。如果您要在计算机和 Android 手机的 SD 卡之间复制文件，请点击下面的按钮。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"打开 USB 存储设备"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"使用 SD 卡进行 USB 存储时出现问题。"</string>
+    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"使用 SD 卡进行 USB 存储时出现问题。"</string>
+    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"使用 SD 卡进行 USB 存储时出现问题。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 已连接"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"选择将文件复制到计算机或从计算机复制到存储设备。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"关闭 USB 存储设备"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"选中以关闭 USB 存储设备。"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"使用中的 USB 存储设备"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"在关闭 USB 存储设备前，请确保您已从计算机中卸载（“弹出”）Android 手机的 SD 卡。"</string>
+    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"在关闭 USB 存储设备前，请确保您已从计算机中卸载（“弹出”）Android 手机的 SD 卡。"</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"在关闭 USB 存储设备前，请确保您已从计算机中卸载（“弹出”）Android 手机的 SD 卡。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"关闭 USB 存储设备"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"关闭 USB 存储设备时遇到问题。请检查并确保已卸载了 USB 主设备，然后重试。"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"打开 USB 存储设备"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"如果您打开了 USB 存储设备，则您当前使用的某些应用程序会停止，而且在您关闭 USB 存储设备前可能都无法使用。"</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB 操作失败"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"确定"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"格式化 SD 卡"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"确定要将 SD 卡格式化吗？该卡上的所有数据都将丢失。"</string>
+    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"格式化 SD 卡"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"格式化 SD 卡"</string>
+    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"确定要将 SD 卡格式化吗？该卡上的所有数据都将丢失。"</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"确定要将 SD 卡格式化吗？该卡上的所有数据都将丢失。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接 USB 调试"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"选择停用 USB 调试。"</string>
@@ -820,18 +841,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候选"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"正在准备 SD 卡"</string>
+    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"正在准备 SD 卡"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"正在准备 SD 卡"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"正在检查是否有错误。"</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"空 SD 卡"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD 卡无文件系统，或文件系统不受支持。"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"SD 卡受损"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SD 卡已损坏。您可能必须将其重新格式化。"</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD 卡未正常移除"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"请先卸载 SD 卡，再将其移除，以防数据丢失。"</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"SD 卡已安全移除"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"您现在可以安全移除 SD 卡。"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"已移除 SD 卡"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD 卡已移除。请插入新的 SD 卡。"</string>
+    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"空 SD 卡"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"空 SD 卡"</string>
+    <!-- outdated translation 1312266820092958014 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"SD 卡为空或使用不支持的文件系统。"</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD 卡无文件系统，或文件系统不受支持。"</string>
+    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"SD 卡受损"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"SD 卡受损"</string>
+    <!-- outdated translation 2679412884290061775 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"SD 卡受损。您可能需要重新格式化您的卡。"</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD 卡已损坏。您可能必须将其重新格式化。"</string>
+    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"SD 卡未正常移除"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD 卡未正常移除"</string>
+    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"请先卸载 SD 卡，再将其移除，以防数据丢失。"</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"请先卸载 SD 卡，再将其移除，以防数据丢失。"</string>
+    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"SD 卡已安全移除"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD 卡已安全移除"</string>
+    <!-- outdated translation 7613960686747592770 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"现在可以安全移除 SD 卡。"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"您现在可以安全移除 SD 卡。"</string>
+    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"已移除 SD 卡"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"已移除 SD 卡"</string>
+    <!-- outdated translation 4205117227342822275 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"SD 卡已移除。请插入新 SD 卡来增加您的设备存储空间。"</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD 卡已移除。请插入新的 SD 卡。"</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"找不到匹配的活动"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"更新组件使用情况统计"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"允许修改收集的组件使用情况统计。普通应用程序不能使用此权限。"</string>

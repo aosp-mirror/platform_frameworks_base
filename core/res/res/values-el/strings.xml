@@ -169,7 +169,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Εργαλεία ανάπτυξης"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Δυνατότητες που είναι απαραίτητες μόνο σε προγραμματιστές εφαρμογών."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Αποθηκευτικός χώρος"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"Πρόσβαση στην κάρτα SD."</string>
+    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Πρόσβαση στην κάρτα SD."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Πρόσβαση στην κάρτα SD."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"απενεργοποίηση ή τροποποίηση γραμμής κατάστασης"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Επιτρέπει στην εφαρμογή να απενεργοποιεί τη γραμμή κατάστασης ή να προσθέτει και να αφαιρεί εικονίδια συστήματος."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"γραμμή κατάστασης"</string>
@@ -402,6 +403,22 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Επιτρέπει σε μια εφαρμογή τη διαμόρφωση του τοπικού τηλεφώνου Bluetooth και την ανακάλυψη και σύζευξη με απομακρυσμένες συσκευές."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"δημιουργία συνδέσεων Bluetooth"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Επιτρέπει σε μια εφαρμογή να προβάλει τη διαμόρφωση του τοπικού τηλεφώνου Bluetooth και επίσης να πραγματοποιεί και να αποδέχεται συνδέσεις με συζευγμένες συσκευές."</string>
+    <!-- no translation found for permlab_nfcAdmin (2251302233012250056) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcAdmin (1935842611464895785) -->
+    <skip />
+    <!-- no translation found for permlab_nfcRaw (4423471711114325708) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcRaw (5533022736559385665) -->
+    <skip />
+    <!-- no translation found for permlab_nfcNotify (478470360082792358) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcNotify (2990053517962070617) -->
+    <skip />
+    <!-- no translation found for permlab_nfcLlcp (4972051461007030426) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcLlcp (91592127786004640) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"απενεργοποίηση κλειδώματος πληκτρολογίου"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Επιτρέπει σε μια εφαρμογή την απενεργοποίηση του κλειδώματος πληκτρολογίου και άλλης σχετικής ασφάλειας με κωδικό πρόσβασης. Για παράδειγμα, η απενεργοποίηση του κλειδώματος πληκτρολογίου όταν λαμβάνεται εισερχόμενη τηλεφωνική κλήση και η επανενεργοποίηση του κλειδώματος πληκτρολογίου όταν η κλήση τερματιστεί."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ανάγνωση ρυθμίσεων συγχρονισμού"</string>
@@ -418,20 +435,22 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Επιτρέπει σε μια εφαρμογή να αναγνώσει ιδιωτικές λέξεις και φράσεις και ιδιωτικά ονόματα, τα οποία ο χρήστης ενδέχεται να έχει αποθηκεύσει στο λεξικό χρήστη."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"εγγραφή σε καθορισμένο από τον χρήστη λεξικό"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Επιτρέπει σε μια εφαρμογή την εγγραφή νέων λέξεων στο λεξικό χρήστη."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"τροποποίηση/διαγραφή περιεχομένων κάρτας SD"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
+    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"τροποποίηση/διαγραφή περιεχομένων κάρτας SD"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"τροποποίηση/διαγραφή περιεχομένων κάρτας SD"</string>
+    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"πρόσβαση στο σύστημα αρχείων προσωρινής μνήμης"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Επιτρέπει σε μια εφαρμογή την ανάγνωση και την εγγραφή του συστήματος αρχείων προσωρινής μνήμης."</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"Περιορισμός επιλογών κωδικού πρόσβασης"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Περιορισμός των τύπων κωδικού πρόσβασης που επιτρέπεται να χρησιμοποιείτε."</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"Παρακολούθηση προσπαθειών σύνδεσης"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Παρακολούθηση αποτυχημένων προσπαθειών σύνδεσης με τη συσκευή, για την εκτέλεσης κάποιας ενέργειας."</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"Επαναφορά κωδικού πρόσβασης"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Εφαρμογή του κωδικού πρόσβασής σας σε μια νέα τιμή, με την προϋπόθεση ότι σας παρέχεται από τον διαχειριστή για να μπορείτε να συνδεθείτε."</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"Εφαρμογή κλειδώματος"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"Ελέγχει πότε κλειδώνει η συσκευή, απαιτώντας κωδικό πρόσβασης για επανείσοδο."</string>
+    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Περιορισμός επιλογών κωδικού πρόσβασης"</string>
+    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Περιορισμός των τύπων κωδικού πρόσβασης που επιτρέπεται να χρησιμοποιείτε."</string>
+    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών σύνδεσης"</string>
+    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" msgid="7227578260165172673">"Παρακολούθηση αποτυχημένων προσπαθειών σύνδεσης με τη συσκευή, για την εκτέλεσης κάποιας ενέργειας."</string>
+    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Επαναφορά κωδικού πρόσβασης"</string>
+    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Εφαρμογή του κωδικού πρόσβασής σας σε μια νέα τιμή, με την προϋπόθεση ότι σας παρέχεται από τον διαχειριστή για να μπορείτε να συνδεθείτε."</string>
+    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Εφαρμογή κλειδώματος"</string>
+    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Ελέγχει πότε κλειδώνει η συσκευή, απαιτώντας κωδικό πρόσβασης για επανείσοδο."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Διαγραφή όλων των δεδομένων"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"Πραγματοποιείται επαναφορά εργοστασιακών ρυθμίσεων, με τη διαγραφή όλων των δεδομένων σας χωρίς επιβεβαίωση."</string>
+    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" msgid="7669895333814222586">"Πραγματοποιείται επαναφορά εργοστασιακών ρυθμίσεων, με τη διαγραφή όλων των δεδομένων σας χωρίς επιβεβαίωση."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Οικία"</item>
     <item msgid="869923650527136615">"Κινητό"</item>
@@ -563,7 +582,7 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Η κάρτα SIM είναι κλειδωμένη."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Ξεκλείδωμα κάρτας SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος<xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Προσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση της σύνδεσής σας Google."\n\n" Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g>  δευτερόλεπτα."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση της σύνδεσής σας Google."\n\n" Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Προσπαθήστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Ξεχάσατε το μοτίβο;"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Ξεκλείδωμα λογαριασμού"</string>
@@ -744,12 +763,9 @@
     <string name="force_close" msgid="3653416315450806396">"Αναγκαστικό κλείσιμο"</string>
     <string name="report" msgid="4060218260984795706">"Αναφορά"</string>
     <string name="wait" msgid="7147118217226317732">"Αναμονή"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Ανακατεύθυνση εφαρμογής"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εκτελείται τώρα."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"Έγινε εκκίνηση πρώτα της εφαρμογής <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="smv_application" msgid="295583804361236288">"Η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> (διεργασία <xliff:g id="PROCESS">%2$s</xliff:g>) παραβίασε την αυτοεπιβαλόμενη πολιτική StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Η διεργασία <xliff:g id="PROCESS">%1$s</xliff:g> παραβίασε την αυτοεπιβαλόμενη πολιτική StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται"</string>
@@ -796,23 +812,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Εμφάνιση όλων"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Μαζική αποθήκευση USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Το USB είναι συνδεδεμένο"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"Συνδέσατε το τηλέφωνό σας στον υπολογιστή μέσω USB. Επιλέξτε το παρακάτω κουμπί αν θέλετε να αντιγράψετε αρχεία μεταξύ του υπολογιστή και της κάρτας SD του Android."</string>
+    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Συνδέσατε το τηλέφωνό σας στον υπολογιστή μέσω USB. Επιλέξτε το παρακάτω κουμπί αν θέλετε να αντιγράψετε αρχεία μεταξύ του υπολογιστή και της κάρτας SD του Android."</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Συνδέσατε το τηλέφωνό σας στον υπολογιστή μέσω USB. Επιλέξτε το παρακάτω κουμπί αν θέλετε να αντιγράψετε αρχεία μεταξύ του υπολογιστή και της κάρτας SD του Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Ενεργοποίηση αποθηκευτικού χώρου USB"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"Παρουσιάστηκε ένα πρόβλημα στη χρήση της κάρτας SD ως αποθηκευτικό χώρο USB."</string>
+    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"Παρουσιάστηκε ένα πρόβλημα στη χρήση της κάρτας SD ως αποθηκευτικό χώρο USB."</string>
+    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"Παρουσιάστηκε ένα πρόβλημα στη χρήση της κάρτας SD ως αποθηκευτικό χώρο USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"Το USB είναι συνδεδεμένο"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Επιλέξτε για αντιγραφή προς/από τον υπολογιστή σας."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Απενεργοποίηση αποθηκευτικού χώρου USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Επιλογή για απενεργοποίηση αποθηκευτικού χώρου USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"Χώρος αποθήκευσης USB σε χρήση"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Προτού απενεργοποιήσετε το χώρο αποθήκευσης USB, βεβαιωθείτε ότι έχετε αποσυνδέσει (“αφαιρέσει”) την κάρτα SD του Android από τον υπολογιστή σας."</string>
+    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Προτού απενεργοποιήσετε το χώρο αποθήκευσης USB, βεβαιωθείτε ότι έχετε αποσυνδέσει (“αφαιρέσει”) την κάρτα SD του Android από τον υπολογιστή σας."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Προτού απενεργοποιήσετε το χώρο αποθήκευσης USB, βεβαιωθείτε ότι έχετε αποσυνδέσει (“αφαιρέσει”) την κάρτα SD του Android από τον υπολογιστή σας."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Απενεργοποίηση χώρου αποθήκευσης USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Παρουσιάστηκε πρόβλημα κατά την απενεργοποίηση του αποθηκευτικού χώρου USB. Βεβαιωθείτε ότι έχετε αφαιρέσει την υποδοχή USB και προσπαθήστε ξανά."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Ενεργοποίηση αποθηκευτικού χώρου USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Εάν ενεργοποιήσετε τον αποθηκευτικό χώρο USB, ορισμένες από τις εφαρμογές που χρησιμοποιείτε θα σταματήσουν και ενδέχεται να μην είναι διαθέσιμες μέχρι να απενεργοποιήσετε τον αποθηκευτικό χώρο USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Απέτυχε η λειτουργία USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ΟΚ"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"Διαμόρφωση κάρτας SD"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"Είστε βέβαιοι ότι θέλετε να διαμορφώσετε την κάρτα SD; Όλα τα δεδομένα στην κάρτα σας θα χαθούν."</string>
+    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"Διαμόρφωση κάρτας SD"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Διαμόρφωση κάρτας SD"</string>
+    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"Είστε βέβαιοι ότι θέλετε να διαμορφώσετε την κάρτα SD; Όλα τα δεδομένα στην κάρτα σας θα χαθούν."</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Είστε βέβαιοι ότι θέλετε να διαμορφώσετε την κάρτα SD; Όλα τα δεδομένα στην κάρτα σας θα χαθούν."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Διαμόρφωση"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Επιλογή για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
@@ -820,18 +841,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"υποψήφιοι"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"Προετοιμασία κάρτας SD"</string>
+    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"Προετοιμασία κάρτας SD"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Προετοιμασία κάρτας SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Έλεγχος για σφάλματα."</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Κενή κάρτα SD"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"Η κάρτα SD είναι κενή ή έχει μη υποστηριζόμενο σύστημα αρχείων."</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Κατεστραμμένη κάρτα SD"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"Η κάρτα SD παρουσιάζει βλάβη. Ενδεχομένως θα πρέπει να προβείτε σε διαμόρφωσή της."</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"Μη αναμενόμενη αφαίρεση κάρτας SD"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Αποπροσαρτήστε την κάρτα SD πριν την αφαιρέσετε για την αποφυγή απώλειας δεδομένων."</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"Η κάρτα SD μπορεί να αφαιρεθεί με ασφάλεια"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"Μπορείτε να αφαιρέσετε με ασφάλεια της κάρτα SD."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"Η κάρτα SD αφαιρέθηκε"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"Αφαιρέθηκε η κάρτα SD. Τοποθετήστε μια νέα κάρτα."</string>
+    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Κενή κάρτα SD"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Κενή κάρτα SD"</string>
+    <!-- outdated translation 1312266820092958014 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"Η κάρτα SD είναι κενή ή χρησιμοποιεί σύστημα αρχείων που δεν υποστηρίζεται."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"Η κάρτα SD είναι κενή ή έχει μη υποστηριζόμενο σύστημα αρχείων."</string>
+    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Κατεστραμμένη κάρτα SD"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Κατεστραμμένη κάρτα SD"</string>
+    <!-- outdated translation 2679412884290061775 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"Η κάρτα SD έχει υποστεί βλάβη. Ενδέχεται να χρειαστεί αναδιαμόρφωση της κάρτας σας."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Η κάρτα SD παρουσιάζει βλάβη. Ενδεχομένως θα πρέπει να προβείτε σε διαμόρφωσή της."</string>
+    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"Μη αναμενόμενη αφαίρεση κάρτας SD"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Μη αναμενόμενη αφαίρεση κάρτας SD"</string>
+    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Αποπροσαρτήστε την κάρτα SD πριν την αφαιρέσετε για την αποφυγή απώλειας δεδομένων."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Αποπροσαρτήστε την κάρτα SD πριν την αφαιρέσετε για την αποφυγή απώλειας δεδομένων."</string>
+    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"Η κάρτα SD μπορεί να αφαιρεθεί με ασφάλεια"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Η κάρτα SD μπορεί να αφαιρεθεί με ασφάλεια"</string>
+    <!-- outdated translation 7613960686747592770 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"Τώρα μπορείτε να αφαιρέσετε με ασφάλεια την κάρτα SD."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Μπορείτε να αφαιρέσετε με ασφάλεια της κάρτα SD."</string>
+    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"Η κάρτα SD αφαιρέθηκε"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Η κάρτα SD αφαιρέθηκε"</string>
+    <!-- outdated translation 4205117227342822275 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"Η κάρτα SD αφαιρέθηκε. Εισαγάγετε μια νέα κάρτα SD για να αυξήσετε τον αποθηκευτικό χώρο της συσκευής σας."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Αφαιρέθηκε η κάρτα SD. Τοποθετήστε μια νέα κάρτα."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Δεν βρέθηκαν δραστηριότητες που να αντιστοιχούν"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"ενημέρωση στατιστικών χρήσης στοιχείου"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Επιτρέπει την τροποποίηση στατιστικών χρήσης στοιχείων που έχουν συλλεχθεί. Δεν πρέπει να χρησιμοποιείται από κανονικές εφαρμογές."</string>
