@@ -39,6 +39,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -49,6 +50,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -119,17 +121,19 @@ public final class SipService extends ISipService.Stub {
     }
 
     public synchronized SipProfile[] getListOfProfiles() {
-        SipProfile[] profiles = new SipProfile[mSipGroups.size()];
-        int i = 0;
+        boolean isCallerRadio = isCallerRadio();
+        ArrayList<SipProfile> profiles = new ArrayList<SipProfile>();
         for (SipSessionGroupExt group : mSipGroups.values()) {
-            profiles[i++] = group.getLocalProfile();
+            if (isCallerRadio || isCallerCreator(group)) {
+                profiles.add(group.getLocalProfile());
+            }
         }
-        return profiles;
+        return profiles.toArray(new SipProfile[profiles.size()]);
     }
 
     public void open(SipProfile localProfile) {
         localProfile.setCallingUid(Binder.getCallingUid());
-        if (localProfile.getAutoRegistration()) {
+        if (localProfile.getAutoRegistration() && isCallerRadio()) {
             openToReceiveCalls(localProfile);
         } else {
             openToMakeCalls(localProfile);
@@ -153,8 +157,14 @@ public final class SipService extends ISipService.Stub {
             String incomingCallBroadcastAction, ISipSessionListener listener) {
         localProfile.setCallingUid(Binder.getCallingUid());
         if (TextUtils.isEmpty(incomingCallBroadcastAction)) {
-            throw new RuntimeException(
-                    "empty broadcast action for incoming call");
+            Log.w(TAG, "empty broadcast action for incoming call");
+            return;
+        }
+        if (incomingCallBroadcastAction.equals(
+                SipManager.ACTION_SIP_INCOMING_CALL) && !isCallerRadio()) {
+            Log.w(TAG, "failed to open the profile; "
+                    + "the action string is reserved");
+            return;
         }
         if (DEBUG) Log.d(TAG, "open3: " + localProfile.getUriString() + ": "
                 + incomingCallBroadcastAction + ": " + listener);
@@ -171,29 +181,64 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
+    private boolean isCallerCreator(SipSessionGroupExt group) {
+        SipProfile profile = group.getLocalProfile();
+        return (profile.getCallingUid() == Binder.getCallingUid());
+    }
+
+    private boolean isCallerCreatorOrRadio(SipSessionGroupExt group) {
+        return (isCallerRadio() || isCallerCreator(group));
+    }
+
+    private boolean isCallerRadio() {
+        return (Binder.getCallingUid() == Process.PHONE_UID);
+    }
+
     public synchronized void close(String localProfileUri) {
-        SipSessionGroupExt group = mSipGroups.remove(localProfileUri);
-        if (group != null) {
-            notifyProfileRemoved(group.getLocalProfile());
-            group.close();
-            if (isWifiOn() && !anyOpened()) releaseWifiLock();
+        SipSessionGroupExt group = mSipGroups.get(localProfileUri);
+        if (group == null) return;
+        if (!isCallerCreatorOrRadio(group)) {
+            Log.d(TAG, "only creator or radio can close this profile");
+            return;
         }
+
+        group = mSipGroups.remove(localProfileUri);
+        notifyProfileRemoved(group.getLocalProfile());
+        group.close();
+        if (isWifiOn() && !anyOpened()) releaseWifiLock();
     }
 
     public synchronized boolean isOpened(String localProfileUri) {
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
-        return ((group != null) ? group.isOpened() : false);
+        if (group == null) return false;
+        if (isCallerCreatorOrRadio(group)) {
+            return group.isOpened();
+        } else {
+            Log.i(TAG, "only creator or radio can query on the profile");
+            return false;
+        }
     }
 
     public synchronized boolean isRegistered(String localProfileUri) {
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
-        return ((group != null) ? group.isRegistered() : false);
+        if (group == null) return false;
+        if (isCallerCreatorOrRadio(group)) {
+            return group.isRegistered();
+        } else {
+            Log.i(TAG, "only creator or radio can query on the profile");
+            return false;
+        }
     }
 
     public synchronized void setRegistrationListener(String localProfileUri,
             ISipSessionListener listener) {
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
-        if (group != null) group.setListener(listener);
+        if (group == null) return;
+        if (isCallerCreator(group)) {
+            group.setListener(listener);
+        } else {
+            Log.i(TAG, "only creator can set listener on the profile");
+        }
     }
 
     public synchronized ISipSession createSession(SipProfile localProfile,
@@ -234,6 +279,8 @@ public final class SipService extends ISipService.Stub {
             group = new SipSessionGroupExt(localProfile, null, null);
             mSipGroups.put(key, group);
             notifyProfileAdded(localProfile);
+        } else if (!isCallerCreator(group)) {
+            throw new SipException("only creator can access the profile");
         }
         return group;
     }
@@ -244,6 +291,9 @@ public final class SipService extends ISipService.Stub {
         String key = localProfile.getUriString();
         SipSessionGroupExt group = mSipGroups.get(key);
         if (group != null) {
+            if (!isCallerCreator(group)) {
+                throw new SipException("only creator can access the profile");
+            }
             group.setIncomingCallBroadcastAction(
                     incomingCallBroadcastAction);
             group.setListener(listener);
