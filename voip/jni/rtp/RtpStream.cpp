@@ -88,13 +88,11 @@ jint create(JNIEnv *env, jobject thiz, jstring jAddress)
 
 jint dup(JNIEnv *env, jobject thiz)
 {
-    int socket1 = env->GetIntField(thiz, gNative);
-    int socket2 = ::dup(socket1);
-    if (socket2 == -1) {
+    int socket = ::dup(env->GetIntField(thiz, gNative));
+    if (socket == -1) {
         jniThrowException(env, "java/lang/IllegalStateException", strerror(errno));
     }
-    LOGD("dup %d to %d", socket1, socket2);
-    return socket2;
+    return socket;
 }
 
 void close(JNIEnv *env, jobject thiz)
@@ -102,7 +100,6 @@ void close(JNIEnv *env, jobject thiz)
     int socket = env->GetIntField(thiz, gNative);
     ::close(socket);
     env->SetIntField(thiz, gNative, -1);
-    LOGD("close %d", socket);
 }
 
 JNINativeMethod gMethods[] = {
