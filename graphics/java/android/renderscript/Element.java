@@ -39,7 +39,7 @@ public class Element extends BaseObj {
     public enum DataType {
         //FLOAT_16 (1, 2),
         FLOAT_32 (2, 4),
-        //FLOAT_64 (3, 8),
+        FLOAT_64 (3, 8),
         SIGNED_8 (4, 1),
         SIGNED_16 (5, 2),
         SIGNED_32 (6, 4),
@@ -147,6 +147,13 @@ public class Element extends BaseObj {
             rs.mElement_F32 = createUser(rs, DataType.FLOAT_32);
         }
         return rs.mElement_F32;
+    }
+
+    public static Element F64(RenderScript rs) {
+        if(rs.mElement_F64 == null) {
+            rs.mElement_F64 = createUser(rs, DataType.FLOAT_64);
+        }
+        return rs.mElement_F64;
     }
 
     public static Element ELEMENT(RenderScript rs) {

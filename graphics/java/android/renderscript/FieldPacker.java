@@ -124,7 +124,7 @@ public class FieldPacker {
         addI32(Float.floatToRawIntBits(v));
     }
 
-    public void addF64(float v) {
+    public void addF64(double v) {
         addI64(Double.doubleToRawLongBits(v));
     }
 
