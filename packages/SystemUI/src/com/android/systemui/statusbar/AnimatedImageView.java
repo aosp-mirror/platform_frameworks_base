@@ -20,6 +20,8 @@ import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Slog;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews.RemoteView;
 
@@ -43,7 +45,7 @@ public class AnimatedImageView extends ImageView {
         }
         if (drawable instanceof AnimationDrawable) {
             mAnim = (AnimationDrawable)drawable;
-            if (mAttached) {
+            if (isShown()) {
                 mAnim.start();
             }
         } else {
@@ -67,9 +69,6 @@ public class AnimatedImageView extends ImageView {
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mAnim != null) {
-            mAnim.start();
-        }
         mAttached = true;
     }
 
@@ -80,6 +79,18 @@ public class AnimatedImageView extends ImageView {
             mAnim.stop();
         }
         mAttached = false;
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int vis) {
+        super.onVisibilityChanged(changedView, vis);
+        if (mAnim != null) {
+            if (isShown()) {
+                mAnim.start();
+            } else {
+                mAnim.stop();
+            }
+        }
     }
 }
 
