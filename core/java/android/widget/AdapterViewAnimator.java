@@ -339,7 +339,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         return new ViewGroup.LayoutParams(0, 0);
     }
 
-    private void refreshChildren() {
+    void refreshChildren() {
         for (int i = mCurrentWindowStart; i <= mCurrentWindowEnd; i++) {
             int index = modulo(i, mNumActiveViews);
 

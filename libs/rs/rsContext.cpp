@@ -278,6 +278,8 @@ void * Context::threadProc(void *vrsc)
      rsc->props.mLogScripts = getProp("debug.rs.script");
      rsc->props.mLogObjects = getProp("debug.rs.object");
      rsc->props.mLogShaders = getProp("debug.rs.shader");
+     rsc->props.mLogShadersAttr = getProp("debug.rs.shader.attributes");
+     rsc->props.mLogShadersUniforms = getProp("debug.rs.shader.uniforms");
      rsc->props.mLogVisual = getProp("debug.rs.visual");
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
@@ -379,7 +381,7 @@ void * Context::helperThreadProc(void *vrsc)
      memset(&cpuset, 0, sizeof(cpuset));
      cpuset.bits[idx / 64] |= 1ULL << (idx % 64);
      int ret = syscall(241, rsc->mWorkers.mNativeThreadId[idx],
-		       sizeof(cpuset), &cpuset);
+               sizeof(cpuset), &cpuset);
      LOGE("SETAFFINITY ret = %i %s", ret, EGLUtils::strerror(ret));
 #endif
 
@@ -614,6 +616,11 @@ void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
             glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &mGL.mMaxFragmentUniformVectors);
 
             mGL.OES_texture_npot = NULL != strstr((const char *)mGL.mExtensions, "GL_OES_texture_npot");
+            mGL.EXT_texture_max_aniso = 1.0f;
+            bool hasAniso = NULL != strstr((const char *)mGL.mExtensions, "GL_EXT_texture_filter_anisotropic");
+            if(hasAniso) {
+                glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mGL.EXT_texture_max_aniso);
+            }
         }
 
     }

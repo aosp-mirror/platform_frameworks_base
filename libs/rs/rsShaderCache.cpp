@@ -53,6 +53,11 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
     if (!frag->getShaderID()) {
         frag->loadShader(rsc);
     }
+
+    // Don't try to cache if shaders failed to load
+    if(!vtx->getShaderID() || !frag->getShaderID()) {
+        return false;
+    }
     //LOGV("ShaderCache lookup  vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
 
     for (uint32_t ct=0; ct < mEntryCount; ct++) {
@@ -90,7 +95,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
     e->vtx = vtx->getShaderID();
     e->frag = frag->getShaderID();
     e->program = glCreateProgram();
-    e->mUserVertexProgram = vtx->isUserProgram();
+    e->vtxAttrCount = vtx->getAttribCount();
     if (mEntries[mEntryCount].program) {
         GLuint pgm = e->program;
         glAttachShader(pgm, vtx->getShaderID());
@@ -124,14 +129,15 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
             rsc->setError(RS_ERROR_BAD_SHADER, "Error linking GL Programs");
             return false;
         }
-        if (vtx->isUserProgram()) {
-            for (uint32_t ct=0; ct < vtx->getAttribCount(); ct++) {
-                e->mVtxAttribSlots[ct] = glGetAttribLocation(pgm, vtx->getAttribName(ct));
-                if (rsc->props.mLogShaders) {
-                    LOGV("vtx A %i, %s = %d\n", ct, vtx->getAttribName(ct).string(), e->mVtxAttribSlots[ct]);
-                }
+
+        for (uint32_t ct=0; ct < e->vtxAttrCount; ct++) {
+            e->mVtxAttribSlots[ct] = glGetAttribLocation(pgm, vtx->getAttribName(ct));
+            e->mVtxAttribNames[ct] = vtx->getAttribName(ct).string();
+            if (rsc->props.mLogShaders) {
+                LOGV("vtx A %i, %s = %d\n", ct, vtx->getAttribName(ct).string(), e->mVtxAttribSlots[ct]);
             }
         }
+
         for (uint32_t ct=0; ct < vtx->getUniformCount(); ct++) {
             e->mVtxUniformSlots[ct] = glGetUniformLocation(pgm, vtx->getUniformName(ct));
             if (rsc->props.mLogShaders) {
@@ -152,6 +158,15 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
     mEntryCount++;
     rsc->checkError("ShaderCache::lookup (miss)");
     return true;
+}
+
+int32_t ShaderCache::vtxAttribSlot(const String8 &attrName) const {
+    for (uint32_t ct=0; ct < mCurrent->vtxAttrCount; ct++) {
+        if(attrName == mCurrent->mVtxAttribNames[ct]) {
+            return mCurrent->mVtxAttribSlots[ct];
+        }
+    }
+    return -1;
 }
 
 void ShaderCache::cleanupVertex(uint32_t id)

@@ -84,10 +84,6 @@ void VertexArray::clear(uint32_t n)
 
 void VertexArray::add(const Attrib &a, uint32_t stride)
 {
-    // Skip padding
-    if(a.name[0] == '#') {
-        return;
-    }
     rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].set(a);
     mAttribs[mCount].buffer = mActiveBuffer;
@@ -98,10 +94,6 @@ void VertexArray::add(const Attrib &a, uint32_t stride)
 
 void VertexArray::add(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name)
 {
-    // Skip padding
-    if(name[0] == '#') {
-        return;
-    }
     rsAssert(mCount < RS_MAX_ATTRIBS);
     mAttribs[mCount].clear();
     mAttribs[mCount].type = type;
@@ -117,7 +109,11 @@ void VertexArray::add(uint32_t type, uint32_t size, uint32_t stride, bool normal
 }
 
 void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
-    LOGE("va %i: slot=%i name=%s buf=%i ptr=%p size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x", idx, slot,
+    if(idx == 0) {
+        LOGV("Starting vertex attribute binding");
+    }
+    LOGV("va %i: slot=%i name=%s buf=%i ptr=%p size=%i  type=0x%x  stride=0x%x  norm=%i  offset=0x%x",
+         idx, slot,
          mAttribs[idx].name.string(),
          mAttribs[idx].buffer,
          mAttribs[idx].ptr,
@@ -137,24 +133,13 @@ void VertexArray::setupGL2(const Context *rsc, class VertexArrayState *state, Sh
 
     rsc->checkError("VertexArray::setupGL2 disabled");
     for (uint32_t ct=0; ct < mCount; ct++) {
-        int32_t slot = -1;
-        if (sc->isUserVertexProgram()) {
-            slot = sc->vtxAttribSlot(ct);
-        } else {
-            if (mAttribs[ct].name == "position") {
-                slot = 0;
-            } else if (mAttribs[ct].name == "color") {
-                slot = 1;
-            } else if (mAttribs[ct].name == "normal") {
-                slot = 2;
-            } else if (mAttribs[ct].name == "texture0") {
-                slot = 3;
-            }
+        int32_t slot = sc->vtxAttribSlot(mAttribs[ct].name);
+        if(rsc->props.mLogShadersAttr) {
+            logAttrib(ct, slot);
         }
         if(slot < 0) {
             continue;
         }
-        //logAttrib(ct, slot);
         glEnableVertexAttribArray(slot);
         glBindBuffer(GL_ARRAY_BUFFER, mAttribs[ct].buffer);
         glVertexAttribPointer(slot,

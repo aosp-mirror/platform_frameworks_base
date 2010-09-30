@@ -16,8 +16,6 @@
 
 package android.media.videoeditor;
 
-import java.io.IOException;
-
 import android.graphics.Rect;
 
 /**
@@ -34,7 +32,7 @@ public class EffectKenBurns extends Effect {
      * constructor
      */
     @SuppressWarnings("unused")
-    private EffectKenBurns() throws IOException {
+    private EffectKenBurns() {
         this(null, null, null, null, 0, 0);
     }
 
@@ -49,9 +47,8 @@ public class EffectKenBurns extends Effect {
      * @param durationMs The duration of the Ken Burns effect in milliseconds
      */
     public EffectKenBurns(MediaItem mediaItem, String effectId, Rect startRect, Rect endRect,
-            long startTime, long durationMs)
-            throws IOException {
-        super(mediaItem, effectId, startTime, durationMs);
+            long startTimeMs, long durationMs) {
+        super(mediaItem, effectId, startTimeMs, durationMs);
 
         mStartRect = startRect;
         mEndRect = endRect;

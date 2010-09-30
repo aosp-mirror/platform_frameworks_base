@@ -19,6 +19,8 @@ package android.media.videoeditor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 
 /**
@@ -28,12 +30,19 @@ import java.io.IOException;
  * {@hide}
  */
 public class VideoEditorFactory {
+    // VideoEditor implementation classes
+    public static final String TEST_CLASS_IMPLEMENTATION
+            = "android.media.videoeditor.VideoEditorTestImpl";
+    public static final String DEFAULT_CLASS_IMPLEMENTATION
+            = "android.media.videoeditor.VideoEditorImpl";
+
     /**
      * This is the factory method for creating a new VideoEditor instance.
      *
      * @param projectPath The path where all VideoEditor internal
      *            files are stored. When a project is deleted the application is
      *            responsible for deleting the path and its contents.
+     * @param className The implementation class name
      *
      * @return The VideoEditor instance
      *
@@ -41,8 +50,14 @@ public class VideoEditorFactory {
      *             not be accessed in read/write mode
      * @throws IllegalStateException if a previous VideoEditor instance has not
      *             been released
+     * @throws ClassNotFoundException, NoSuchMethodException,
+     *             InvocationTargetException, IllegalAccessException,
+     *             InstantiationException if the implementation class cannot
+     *             be instantiated.
      */
-    public static VideoEditor create(String projectPath) throws IOException {
+    public static VideoEditor create(String projectPath, String className) throws IOException,
+            ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
+            IllegalAccessException, InstantiationException {
         // If the project path does not exist create it
         final File dir = new File(projectPath);
         if (!dir.exists()) {
@@ -50,7 +65,15 @@ public class VideoEditorFactory {
                 throw new FileNotFoundException("Cannot create project path: " + projectPath);
             }
         }
-        return new VideoEditorTestImpl(projectPath);
+
+        Class<?> cls = Class.forName(className);
+        Class<?> partypes[] = new Class[1];
+        partypes[0] = String.class;
+        Constructor<?> ct = cls.getConstructor(partypes);
+        Object arglist[] = new Object[1];
+        arglist[0] = projectPath;
+
+        return (VideoEditor)ct.newInstance(arglist);
     }
 
     /**

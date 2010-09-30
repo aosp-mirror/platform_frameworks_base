@@ -145,21 +145,26 @@ uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) co
 
 void Type::makeGLComponents()
 {
-    if(getElement()->getFieldCount() >= RS_MAX_ATTRIBS) {
-        return;
-    }
-
     uint32_t userNum = 0;
-
     for (uint32_t ct=0; ct < getElement()->getFieldCount(); ct++) {
         const Component &c = getElement()->getField(ct)->getComponent();
+
+        if(getElement()->getFieldName(ct)[0] == '#') {
+            continue;
+        }
 
         mAttribs[userNum].size = c.getVectorSize();
         mAttribs[userNum].offset = mElement->getFieldOffsetBytes(ct);
         mAttribs[userNum].type = c.getGLType();
         mAttribs[userNum].normalized = c.getType() != RS_TYPE_FLOAT_32;//c.getIsNormalized();
-        mAttribs[userNum].name.setTo(getElement()->getFieldName(ct));
+        String8 tmp(RS_SHADER_ATTR);
+        tmp.append(getElement()->getFieldName(ct));
+        mAttribs[userNum].name.setTo(tmp.string());
         userNum ++;
+
+        if(userNum == RS_MAX_ATTRIBS) {
+            return;
+        }
     }
 }
 

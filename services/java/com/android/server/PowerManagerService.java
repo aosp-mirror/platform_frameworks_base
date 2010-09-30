@@ -2105,6 +2105,7 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     public void userActivity(long time, boolean noChangeLights) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         userActivity(time, -1, noChangeLights, OTHER_EVENT, false);
     }
 
@@ -2128,7 +2129,6 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void userActivity(long time, long timeoutOverride, boolean noChangeLights,
             int eventType, boolean force) {
-        //mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
         if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)
                 && (eventType == CHEEK_EVENT || eventType == TOUCH_EVENT)) {

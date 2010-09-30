@@ -297,9 +297,25 @@ static JNINativeMethod gBitmapRegionDecoderMethods[] = {
 
 #define kClassPathName  "android/graphics/BitmapRegionDecoder"
 
+static jclass make_globalref(JNIEnv* env, const char classname[]) {
+    jclass c = env->FindClass(classname);
+    SkASSERT(c);
+    return (jclass)env->NewGlobalRef(c);
+}
+
+static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
+                                const char fieldname[], const char type[]) {
+    jfieldID id = env->GetFieldID(clazz, fieldname, type);
+    SkASSERT(id);
+    return id;
+}
+
 int register_android_graphics_BitmapRegionDecoder(JNIEnv* env);
 int register_android_graphics_BitmapRegionDecoder(JNIEnv* env)
 {
+
+    gFileDescriptor_class = make_globalref(env, "java/io/FileDescriptor");
+    gFileDescriptor_descriptor = getFieldIDCheck(env, gFileDescriptor_class, "descriptor", "I");
     return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,
             gBitmapRegionDecoderMethods, SK_ARRAY_COUNT(gBitmapRegionDecoderMethods));
 }
