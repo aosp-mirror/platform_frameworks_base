@@ -143,15 +143,20 @@ static void send_message(uint8_t *message, int length)
     send(the_socket, message, length, 0);
 }
 
-/* Here is the file format. Values are encrypted by AES CBC, and MD5 is used to
- * compute their checksums. To make the files portable, the length is stored in
- * network order. Note that the first four bytes are reserved for future use and
- * are always set to zero in this implementation. */
+/* Here is the file format. There are two parts in blob.value, the secret and
+ * the description. The secret is stored in ciphertext, and its original size
+ * can be found in blob.length. The description is stored after the secret in
+ * plaintext, and its size is specified in blob.info. The total size of the two
+ * parts must be no more than VALUE_SIZE bytes. The first three bytes of the
+ * file are reserved for future use and are always set to zero. Fields other
+ * than blob.info, blob.length, and blob.value are modified by encrypt_blob()
+ * and decrypt_blob(). Thus they should not be accessed from outside. */
 
 static int the_entropy = -1;
 
 static struct __attribute__((packed)) {
-    uint32_t reserved;
+    uint8_t reserved[3];
+    uint8_t info;
     uint8_t vector[AES_BLOCK_SIZE];
     uint8_t encrypted[0];
     uint8_t digest[MD5_DIGEST_LENGTH];
@@ -170,8 +175,12 @@ static int8_t encrypt_blob(char *name, AES_KEY *aes_key)
         return SYSTEM_ERROR;
     }
 
-    length = blob.length + blob.value - blob.encrypted;
+    length = blob.length + (blob.value - blob.encrypted);
     length = (length + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE * AES_BLOCK_SIZE;
+
+    if (blob.info != 0) {
+        memmove(&blob.encrypted[length], &blob.value[blob.length], blob.info);
+    }
 
     blob.length = htonl(blob.length);
     MD5(blob.digested, length - (blob.digested - blob.encrypted), blob.digest);
@@ -180,8 +189,8 @@ static int8_t encrypt_blob(char *name, AES_KEY *aes_key)
     AES_cbc_encrypt(blob.encrypted, blob.encrypted, length, aes_key, vector,
                     AES_ENCRYPT);
 
-    blob.reserved = 0;
-    length += blob.encrypted - (uint8_t *)&blob;
+    memset(blob.reserved, 0, sizeof(blob.reserved));
+    length += (blob.encrypted - (uint8_t *)&blob) + blob.info;
 
     fd = open(".tmp", O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
     length -= write(fd, &blob, length);
@@ -200,7 +209,7 @@ static int8_t decrypt_blob(char *name, AES_KEY *aes_key)
     length = read(fd, &blob, sizeof(blob));
     close(fd);
 
-    length -= blob.encrypted - (uint8_t *)&blob;
+    length -= (blob.encrypted - (uint8_t *)&blob) + blob.info;
     if (length < blob.value - blob.encrypted || length % AES_BLOCK_SIZE != 0) {
         return VALUE_CORRUPTED;
     }
@@ -215,8 +224,13 @@ static int8_t decrypt_blob(char *name, AES_KEY *aes_key)
 
     length -= blob.value - blob.digested;
     blob.length = ntohl(blob.length);
-    return (blob.length < 0 || blob.length > length) ? VALUE_CORRUPTED :
-           NO_ERROR;
+    if (blob.length < 0 || blob.length > length) {
+        return VALUE_CORRUPTED;
+    }
+    if (blob.info != 0) {
+        memmove(&blob.value[blob.length], &blob.value[length], blob.info);
+    }
+    return NO_ERROR;
 }
 
 /* Here are the actions. Each of them is a function without arguments. All
@@ -266,6 +280,7 @@ static int8_t insert()
     char name[NAME_MAX];
     int n = sprintf(name, "%u_", uid);
     encode_key(&name[n], params[0].value, params[0].length);
+    blob.info = 0;
     blob.length = params[1].length;
     memcpy(blob.value, params[1].value, params[1].length);
     return encrypt_blob(name, &encryption_key);
@@ -336,56 +351,88 @@ static int8_t reset()
 
 #define MASTER_KEY_FILE ".masterkey"
 #define MASTER_KEY_SIZE 16
+#define SALT_SIZE       16
 
-static void generate_key(uint8_t *key, uint8_t *password, int length)
+static void set_key(uint8_t *key, uint8_t *password, int length, uint8_t *salt)
 {
-    PKCS5_PBKDF2_HMAC_SHA1((char *)password, length, (uint8_t *)"keystore",
-                           sizeof("keystore"), 1024, MASTER_KEY_SIZE, key);
+    if (salt) {
+        PKCS5_PBKDF2_HMAC_SHA1((char *)password, length, salt, SALT_SIZE,
+                               8192, MASTER_KEY_SIZE, key);
+    } else {
+        PKCS5_PBKDF2_HMAC_SHA1((char *)password, length, (uint8_t *)"keystore",
+                               sizeof("keystore"), 1024, MASTER_KEY_SIZE, key);
+    }
 }
+
+/* Here is the history. To improve the security, the parameters to generate the
+ * master key has been changed. To make a seamless transition, we update the
+ * file using the same password when the user unlock it for the first time. If
+ * any thing goes wrong during the transition, the new file will not overwrite
+ * the old one. This avoids permanent damages of the existing data. */
 
 static int8_t password()
 {
     uint8_t key[MASTER_KEY_SIZE];
     AES_KEY aes_key;
-    int n;
+    int8_t response = SYSTEM_ERROR;
 
     if (state == UNINITIALIZED) {
-        blob.length = MASTER_KEY_SIZE;
         if (read(the_entropy, blob.value, MASTER_KEY_SIZE) != MASTER_KEY_SIZE) {
            return SYSTEM_ERROR;
         }
     } else {
-        generate_key(key, params[0].value, params[0].length);
+        int fd = open(MASTER_KEY_FILE, O_RDONLY);
+        uint8_t *salt = NULL;
+        if (fd != -1) {
+            int length = read(fd, &blob, sizeof(blob));
+            close(fd);
+            if (length > SALT_SIZE && blob.info == SALT_SIZE) {
+                salt = (uint8_t *)&blob + length - SALT_SIZE;
+            }
+        }
+
+        set_key(key, params[0].value, params[0].length, salt);
         AES_set_decrypt_key(key, MASTER_KEY_SIZE * 8, &aes_key);
-        n = decrypt_blob(MASTER_KEY_FILE, &aes_key);
-        if (n == SYSTEM_ERROR) {
+        response = decrypt_blob(MASTER_KEY_FILE, &aes_key);
+        if (response == SYSTEM_ERROR) {
             return SYSTEM_ERROR;
         }
-        if (n != NO_ERROR || blob.length != MASTER_KEY_SIZE) {
+        if (response != NO_ERROR || blob.length != MASTER_KEY_SIZE) {
             if (retry <= 0) {
                 reset();
                 return UNINITIALIZED;
             }
             return WRONG_PASSWORD + --retry;
         }
+
+        if (!salt && params[1].length == -1) {
+            params[1] = params[0];
+        }
     }
 
     if (params[1].length == -1) {
         memcpy(key, blob.value, MASTER_KEY_SIZE);
     } else {
-        generate_key(key, params[1].value, params[1].length);
+        uint8_t *salt = &blob.value[MASTER_KEY_SIZE];
+        if (read(the_entropy, salt, SALT_SIZE) != SALT_SIZE) {
+            return SYSTEM_ERROR;
+        }
+
+        set_key(key, params[1].value, params[1].length, salt);
         AES_set_encrypt_key(key, MASTER_KEY_SIZE * 8, &aes_key);
         memcpy(key, blob.value, MASTER_KEY_SIZE);
-        n = encrypt_blob(MASTER_KEY_FILE, &aes_key);
+        blob.info = SALT_SIZE;
+        blob.length = MASTER_KEY_SIZE;
+        response = encrypt_blob(MASTER_KEY_FILE, &aes_key);
     }
 
-    if (n == NO_ERROR) {
+    if (response == NO_ERROR) {
         AES_set_encrypt_key(key, MASTER_KEY_SIZE * 8, &encryption_key);
         AES_set_decrypt_key(key, MASTER_KEY_SIZE * 8, &decryption_key);
         state = NO_ERROR;
         retry = MAX_RETRY;
     }
-    return n;
+    return response;
 }
 
 static int8_t lock()
