@@ -46,7 +46,7 @@ void doThrowOOME(JNIEnv* env, const char* msg) {
 }
 
 void doThrowIOE(JNIEnv* env, const char* msg) {
-    doThrow(env, "java/lang/IOException", msg);
+    doThrow(env, "java/io/IOException", msg);
 }
 
 bool GraphicsJNI::hasException(JNIEnv *env) {
