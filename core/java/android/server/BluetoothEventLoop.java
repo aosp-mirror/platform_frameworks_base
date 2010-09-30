@@ -252,10 +252,10 @@ class BluetoothEventLoop {
         }
         String name = propValues[0];
         if (name.equals("Name")) {
+            mBluetoothService.setProperty(name, propValues[1]);
             Intent intent = new Intent(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
             intent.putExtra(BluetoothAdapter.EXTRA_LOCAL_NAME, propValues[1]);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-            mBluetoothService.setProperty(name, propValues[1]);
         } else if (name.equals("Pairable") || name.equals("Discoverable")) {
             String pairable = name.equals("Pairable") ? propValues[1] :
                 mBluetoothService.getPropertyInternal("Pairable");
@@ -266,6 +266,7 @@ class BluetoothEventLoop {
             if (pairable == null || discoverable == null)
                 return;
 
+            mBluetoothService.setProperty(name, propValues[1]);
             int mode = BluetoothService.bluezStringToScanMode(
                     pairable.equals("true"),
                     discoverable.equals("true"));
@@ -275,9 +276,9 @@ class BluetoothEventLoop {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             }
-            mBluetoothService.setProperty(name, propValues[1]);
         } else if (name.equals("Discovering")) {
             Intent intent;
+            mBluetoothService.setProperty(name, propValues[1]);
             if (propValues[1].equals("true")) {
                 mBluetoothService.setIsDiscovering(true);
                 intent = new Intent(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
@@ -288,7 +289,6 @@ class BluetoothEventLoop {
                 intent = new Intent(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
             }
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-            mBluetoothService.setProperty(name, propValues[1]);
         } else if (name.equals("Devices")) {
             String value = null;
             int len = Integer.valueOf(propValues[1]);
@@ -322,19 +322,20 @@ class BluetoothEventLoop {
         }
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         if (name.equals("Name")) {
+            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
             Intent intent = new Intent(BluetoothDevice.ACTION_NAME_CHANGED);
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
             intent.putExtra(BluetoothDevice.EXTRA_NAME, propValues[1]);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
         } else if (name.equals("Class")) {
+            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
             Intent intent = new Intent(BluetoothDevice.ACTION_CLASS_CHANGED);
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
             intent.putExtra(BluetoothDevice.EXTRA_CLASS,
                     new BluetoothClass(Integer.valueOf(propValues[1])));
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
         } else if (name.equals("Connected")) {
+            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
             Intent intent = null;
             if (propValues[1].equals("true")) {
                 intent = new Intent(BluetoothDevice.ACTION_ACL_CONNECTED);
@@ -348,7 +349,6 @@ class BluetoothEventLoop {
             }
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
         } else if (name.equals("UUIDs")) {
             String uuid = null;
             int len = Integer.valueOf(propValues[1]);
