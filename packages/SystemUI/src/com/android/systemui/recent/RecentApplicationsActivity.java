@@ -366,6 +366,7 @@ public class RecentApplicationsActivity extends Activity {
             mCarouselView.setStartAngle((float) -(2.0f*Math.PI * 5 / CARD_SLOTS));
             mCarouselView.setDefaultBitmap(mLoadingBitmap);
             mCarouselView.setLoadingBitmap(mLoadingBitmap);
+            mCarouselView.setRezInCardCount(3.0f);
             mCarouselView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
             mNoRecentsView = (View) findViewById(R.id.no_applications_message);
