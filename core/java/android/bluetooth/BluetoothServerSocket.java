@@ -29,14 +29,14 @@ import java.io.IOException;
  * side, use a {@link BluetoothServerSocket} to create a listening server
  * socket. When a connection is accepted by the {@link BluetoothServerSocket},
  * it will return a new {@link BluetoothSocket} to manage the connection.
- * On the client side, use a single {@link BluetoothSocket} to both intiate
+ * On the client side, use a single {@link BluetoothSocket} to both initiate
  * an outgoing connection and to manage the connection.
  *
  * <p>The most common type of Bluetooth socket is RFCOMM, which is the type
  * supported by the Android APIs. RFCOMM is a connection-oriented, streaming
  * transport over Bluetooth. It is also known as the Serial Port Profile (SPP).
  *
- * <p>To create a listenting {@link BluetoothServerSocket} that's ready for
+ * <p>To create a listening {@link BluetoothServerSocket} that's ready for
  * incoming connections, use
  * {@link BluetoothAdapter#listenUsingRfcommWithServiceRecord
  * BluetoothAdapter.listenUsingRfcommWithServiceRecord()}. Then call
@@ -70,7 +70,7 @@ public final class BluetoothServerSocket implements Closeable {
      * @param encrypt require the connection to be encrypted
      * @param port    remote port
      * @throws IOException On error, for example Bluetooth not available, or
-     *                     insufficient priveleges
+     *                     insufficient privileges
      */
     /*package*/ BluetoothServerSocket(int type, boolean auth, boolean encrypt, int port)
             throws IOException {
