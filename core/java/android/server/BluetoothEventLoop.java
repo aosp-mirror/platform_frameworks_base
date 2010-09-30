@@ -36,7 +36,7 @@ import android.os.PowerManager;
 /**
  * TODO: Move this to
  * java/services/com/android/server/BluetoothEventLoop.java
- * and make the contructor package private again.
+ * and make the constructor package private again.
  *
  * @hide
  */
@@ -617,7 +617,7 @@ class BluetoothEventLoop {
 
     private void onRestartRequired() {
         if (mBluetoothService.isEnabled()) {
-            Log.e(TAG, "*** A serious error occured (did bluetoothd crash?) - " +
+            Log.e(TAG, "*** A serious error occurred (did bluetoothd crash?) - " +
                        "restarting Bluetooth ***");
             mHandler.sendEmptyMessage(EVENT_RESTART_BLUETOOTH);
         }

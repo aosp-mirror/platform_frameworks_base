@@ -153,11 +153,11 @@ public final class BluetoothHeadset {
     public static final int LOCAL_DISCONNECT = 1;
 
 
-    /** Default priority for headsets that  for which we will accept
-     * inconing connections and auto-connect */
+    /** Default priority for headsets for which we will accept
+     * incoming connections and auto-connect. */
     public static final int PRIORITY_AUTO_CONNECT = 1000;
-    /** Default priority for headsets that  for which we will accept
-     * inconing connections but not auto-connect */
+    /** Default priority for headsets for which we will accept
+     * incoming connections but not auto-connect. */
     public static final int PRIORITY_ON = 100;
     /** Default priority for headsets that should not be auto-connected
      * and not allow incoming connections. */
@@ -305,7 +305,7 @@ public final class BluetoothHeadset {
 
     /**
      * Disconnects the current headset. Currently this call blocks, it may soon
-     * be made asynchornous. Returns false if this proxy object is
+     * be made asynchronous. Returns false if this proxy object is
      * not currently connected to the Headset service.
      */
     public boolean disconnectHeadset(BluetoothDevice device) {

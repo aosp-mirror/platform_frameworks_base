@@ -197,7 +197,7 @@ public class BluetoothPbap {
 
     /**
      * Disconnects the current Pbap client (PCE). Currently this call blocks,
-     * it may soon be made asynchornous. Returns false if this proxy object is
+     * it may soon be made asynchronous. Returns false if this proxy object is
      * not currently connected to the Pbap service.
      */
     public boolean disconnect() {
