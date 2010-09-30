@@ -100,16 +100,23 @@ public class DownloadManager {
     public final static String COLUMN_STATUS = "status";
 
     /**
-     * Indicates the type of error that occurred, when {@link #COLUMN_STATUS} is
-     * {@link #STATUS_FAILED}.  If an HTTP error occurred, this will hold the HTTP status code as
-     * defined in RFC 2616.  Otherwise, it will hold one of the ERROR_* constants.
+     * Provides more detail on the status of the download.  Its meaning depends on the value of
+     * {@link #COLUMN_STATUS}.
      *
-     * If {@link #COLUMN_STATUS} is not {@link #STATUS_FAILED}, this column's value is undefined.
+     * When {@link #COLUMN_STATUS} is {@link #STATUS_FAILED}, this indicates the type of error that
+     * occurred.  If an HTTP error occurred, this will hold the HTTP status code as defined in RFC
+     * 2616.  Otherwise, it will hold one of the ERROR_* constants.
+     *
+     * When {@link #COLUMN_STATUS} is {@link #STATUS_PAUSED}, this indicates why the download is
+     * paused.  It will hold one of the PAUSED_* constants.
+     *
+     * If {@link #COLUMN_STATUS} is neither {@link #STATUS_FAILED} nor {@link #STATUS_PAUSED}, this
+     * column's value is undefined.
      *
      * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html#sec6.1.1">RFC 2616
      * status codes</a>
      */
-    public final static String COLUMN_ERROR_CODE = "error_code";
+    public final static String COLUMN_REASON = "reason";
 
     /**
      * Number of bytes download so far.
@@ -156,52 +163,75 @@ public class DownloadManager {
     public final static int ERROR_UNKNOWN = 1000;
 
     /**
-     * Value of {@link #COLUMN_ERROR_CODE} when a storage issue arises which doesn't fit under any
+     * Value of {@link #COLUMN_REASON} when a storage issue arises which doesn't fit under any
      * other error code. Use the more specific {@link #ERROR_INSUFFICIENT_SPACE} and
      * {@link #ERROR_DEVICE_NOT_FOUND} when appropriate.
      */
     public final static int ERROR_FILE_ERROR = 1001;
 
     /**
-     * Value of {@link #COLUMN_ERROR_CODE} when an HTTP code was received that download manager
+     * Value of {@link #COLUMN_REASON} when an HTTP code was received that download manager
      * can't handle.
      */
     public final static int ERROR_UNHANDLED_HTTP_CODE = 1002;
 
     /**
-     * Value of {@link #COLUMN_ERROR_CODE} when an error receiving or processing data occurred at
+     * Value of {@link #COLUMN_REASON} when an error receiving or processing data occurred at
      * the HTTP level.
      */
     public final static int ERROR_HTTP_DATA_ERROR = 1004;
 
     /**
-     * Value of {@link #COLUMN_ERROR_CODE} when there were too many redirects.
+     * Value of {@link #COLUMN_REASON} when there were too many redirects.
      */
     public final static int ERROR_TOO_MANY_REDIRECTS = 1005;
 
     /**
-     * Value of {@link #COLUMN_ERROR_CODE} when there was insufficient storage space. Typically,
+     * Value of {@link #COLUMN_REASON} when there was insufficient storage space. Typically,
      * this is because the SD card is full.
      */
     public final static int ERROR_INSUFFICIENT_SPACE = 1006;
 
     /**
-     * Value of {@link #COLUMN_ERROR_CODE} when no external storage device was found. Typically,
+     * Value of {@link #COLUMN_REASON} when no external storage device was found. Typically,
      * this is because the SD card is not mounted.
      */
     public final static int ERROR_DEVICE_NOT_FOUND = 1007;
 
     /**
-     * Value of {@link #COLUMN_ERROR_CODE} when some possibly transient error occurred but we can't
+     * Value of {@link #COLUMN_REASON} when some possibly transient error occurred but we can't
      * resume the download.
      */
     public final static int ERROR_CANNOT_RESUME = 1008;
 
     /**
-     * Value of {@link #COLUMN_ERROR_CODE} when the requested destination file already exists (the
+     * Value of {@link #COLUMN_REASON} when the requested destination file already exists (the
      * download manager will not overwrite an existing file).
      */
     public final static int ERROR_FILE_ALREADY_EXISTS = 1009;
+
+    /**
+     * Value of {@link #COLUMN_REASON} when the download is paused because some network error
+     * occurred and the download manager is waiting before retrying the request.
+     */
+    public final static int PAUSED_WAITING_TO_RETRY = 1;
+
+    /**
+     * Value of {@link #COLUMN_REASON} when the download is waiting for network connectivity to
+     * proceed.
+     */
+    public final static int PAUSED_WAITING_FOR_NETWORK = 2;
+
+    /**
+     * Value of {@link #COLUMN_REASON} when the download exceeds a size limit for downloads over
+     * the mobile network and the download manager is waiting for a Wi-Fi connection to proceed.
+     */
+    public final static int PAUSED_QUEUED_FOR_WIFI = 3;
+
+    /**
+     * Value of {@link #COLUMN_REASON} when the download is paused for some other reason.
+     */
+    public final static int PAUSED_UNKNOWN = 4;
 
     /**
      * Broadcast intent action sent by the download manager when a download completes.
@@ -236,7 +266,7 @@ public class DownloadManager {
         COLUMN_TOTAL_SIZE_BYTES,
         COLUMN_LOCAL_URI,
         COLUMN_STATUS,
-        COLUMN_ERROR_CODE,
+        COLUMN_REASON,
         COLUMN_BYTES_DOWNLOADED_SO_FAR,
         COLUMN_LAST_MODIFIED_TIMESTAMP
     };
@@ -258,7 +288,7 @@ public class DownloadManager {
     };
 
     private static final Set<String> LONG_COLUMNS = new HashSet<String>(
-            Arrays.asList(COLUMN_ID, COLUMN_TOTAL_SIZE_BYTES, COLUMN_STATUS, COLUMN_ERROR_CODE,
+            Arrays.asList(COLUMN_ID, COLUMN_TOTAL_SIZE_BYTES, COLUMN_STATUS, COLUMN_REASON,
                           COLUMN_BYTES_DOWNLOADED_SO_FAR, COLUMN_LAST_MODIFIED_TIMESTAMP));
 
     /**
@@ -617,8 +647,10 @@ public class DownloadManager {
                     parts.add(statusClause("=", Downloads.STATUS_RUNNING));
                 }
                 if ((mStatusFlags & STATUS_PAUSED) != 0) {
-                    parts.add(statusClause("=", Downloads.STATUS_PENDING_PAUSED));
-                    parts.add(statusClause("=", Downloads.STATUS_RUNNING_PAUSED));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_PAUSED_BY_APP));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_TO_RETRY));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_FOR_NETWORK));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
                 }
                 if ((mStatusFlags & STATUS_SUCCESSFUL) != 0) {
                     parts.add(statusClause("=", Downloads.STATUS_SUCCESS));
@@ -914,8 +946,8 @@ public class DownloadManager {
             if (column.equals(COLUMN_STATUS)) {
                 return translateStatus((int) getUnderlyingLong(Downloads.COLUMN_STATUS));
             }
-            if (column.equals(COLUMN_ERROR_CODE)) {
-                return translateErrorCode((int) getUnderlyingLong(Downloads.COLUMN_STATUS));
+            if (column.equals(COLUMN_REASON)) {
+                return getReason((int) getUnderlyingLong(Downloads.COLUMN_STATUS));
             }
             if (column.equals(COLUMN_BYTES_DOWNLOADED_SO_FAR)) {
                 return getUnderlyingLong(Downloads.COLUMN_CURRENT_BYTES);
@@ -924,10 +956,36 @@ public class DownloadManager {
             return getUnderlyingLong(Downloads.COLUMN_LAST_MODIFICATION);
         }
 
-        private long translateErrorCode(int status) {
-            if (translateStatus(status) != STATUS_FAILED) {
-                return 0; // arbitrary value when status is not an error
+        private long getReason(int status) {
+            switch (translateStatus(status)) {
+                case STATUS_FAILED:
+                    return getErrorCode(status);
+
+                case STATUS_PAUSED:
+                    return getPausedReason(status);
+
+                default:
+                    return 0; // arbitrary value when status is not an error
             }
+        }
+
+        private long getPausedReason(int status) {
+            switch (status) {
+                case Downloads.Impl.STATUS_WAITING_TO_RETRY:
+                    return PAUSED_WAITING_TO_RETRY;
+
+                case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
+                    return PAUSED_WAITING_FOR_NETWORK;
+
+                case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
+                    return PAUSED_QUEUED_FOR_WIFI;
+
+                default:
+                    return PAUSED_UNKNOWN;
+            }
+        }
+
+        private long getErrorCode(int status) {
             if ((400 <= status && status < Downloads.Impl.MIN_ARTIFICIAL_ERROR_STATUS)
                     || (500 <= status && status < 600)) {
                 // HTTP status code
@@ -973,7 +1031,7 @@ public class DownloadManager {
             return super.getString(super.getColumnIndex(column));
         }
 
-        private long translateStatus(int status) {
+        private int translateStatus(int status) {
             switch (status) {
                 case Downloads.STATUS_PENDING:
                     return STATUS_PENDING;
@@ -981,8 +1039,10 @@ public class DownloadManager {
                 case Downloads.STATUS_RUNNING:
                     return STATUS_RUNNING;
 
-                case Downloads.STATUS_PENDING_PAUSED:
-                case Downloads.STATUS_RUNNING_PAUSED:
+                case Downloads.Impl.STATUS_PAUSED_BY_APP:
+                case Downloads.Impl.STATUS_WAITING_TO_RETRY:
+                case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
+                case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
                     return STATUS_PAUSED;
 
                 case Downloads.STATUS_SUCCESS:
