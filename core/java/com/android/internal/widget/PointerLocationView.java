@@ -165,7 +165,7 @@ public class PointerLocationView extends View {
     private void drawOval(Canvas canvas, float x, float y, float major, float minor,
             float angle, Paint paint) {
         canvas.save(Canvas.MATRIX_SAVE_FLAG);
-        canvas.rotate((float) (-angle * 180 / Math.PI), x, y);
+        canvas.rotate((float) (angle * 180 / Math.PI), x, y);
         mReusableOvalRect.left = x - minor / 2;
         mReusableOvalRect.right = x + minor / 2;
         mReusableOvalRect.top = y - major / 2;
