@@ -24,6 +24,7 @@ import android.database.SQLException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
@@ -582,11 +583,14 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         try {
             // if the cursor hasn't been closed yet, close it first
             if (mWindow != null) {
-                int len = mQuery.mSql.length();
-                Log.e(TAG, "Finalizing a Cursor that has not been deactivated or closed. " +
+                if (StrictMode.vmSqliteObjectLeaksEnabled()) {
+                    int len = mQuery.mSql.length();
+                    StrictMode.onSqliteObjectLeaked(
+                        "Finalizing a Cursor that has not been deactivated or closed. " +
                         "database = " + mDatabase.getPath() + ", table = " + mEditTable +
                         ", query = " + mQuery.mSql.substring(0, (len > 100) ? 100 : len),
                         mStackTrace);
+                }
                 close();
                 SQLiteDebug.notifyActiveCursorFinalized();
             } else {
