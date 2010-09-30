@@ -510,31 +510,43 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
+    // KeepAliveProcess is controlled by AutoRegistrationProcess.
+    // All methods will be invoked in sync with SipService.this except realRun()
     private class KeepAliveProcess implements Runnable {
         private static final String TAG = "\\KEEPALIVE/";
         private static final int INTERVAL = 10;
         private SipSessionGroup.SipSessionImpl mSession;
+        private boolean mRunning = false;
 
         public KeepAliveProcess(SipSessionGroup.SipSessionImpl session) {
             mSession = session;
         }
 
         public void start() {
+            if (mRunning) return;
+            mRunning = true;
             mTimer.set(INTERVAL * 1000, this);
         }
 
+        // timeout handler
         public void run() {
+            if (!mRunning) return;
+            final SipSessionGroup.SipSessionImpl session = mSession;
+
             // delegate to mExecutor
             getExecutor().addTask(new Runnable() {
                 public void run() {
-                    realRun();
+                    realRun(session);
                 }
             });
         }
 
-        private void realRun() {
+        // real timeout handler
+        private void realRun(SipSessionGroup.SipSessionImpl session) {
             synchronized (SipService.this) {
-                SipSessionGroup.SipSessionImpl session = mSession.duplicate();
+                if (notCurrentSession(session)) return;
+
+                session = session.duplicate();
                 if (DEBUG) Log.d(TAG, "~~~ keepalive");
                 mTimer.cancel(this);
                 session.sendKeepAlive();
@@ -547,7 +559,13 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void stop() {
+            mRunning = false;
+            mSession = null;
             mTimer.cancel(this);
+        }
+
+        private boolean notCurrentSession(ISipSession session) {
+            return (session != mSession) || !mRunning;
         }
     }
 
@@ -561,13 +579,15 @@ public final class SipService extends ISipService.Stub {
         private long mExpiryTime;
         private int mErrorCode;
         private String mErrorMessage;
+        private boolean mRunning = false;
 
         private String getAction() {
             return toString();
         }
 
         public void start(SipSessionGroup group) {
-            if (mSession == null) {
+            if (!mRunning) {
+                mRunning = true;
                 mBackoff = 1;
                 mSession = (SipSessionGroup.SipSessionImpl)
                         group.createSession(this);
@@ -584,35 +604,24 @@ public final class SipService extends ISipService.Stub {
         }
 
         public void stop() {
-            stop(false);
-        }
-
-        private void stopButKeepStates() {
-            stop(true);
-        }
-
-        private void stop(boolean keepStates) {
-            if (mSession == null) return;
+            if (!mRunning) return;
+            mRunning = false;
+            mSession.setListener(null);
             if (mConnected && mRegistered) mSession.unregister();
+
             mTimer.cancel(this);
             if (mKeepAliveProcess != null) {
                 mKeepAliveProcess.stop();
                 mKeepAliveProcess = null;
             }
-            if (!keepStates) {
-                mSession = null;
-                mRegistered = false;
-            }
-        }
 
-        private boolean isStopped() {
-            return (mSession == null);
+            mRegistered = false;
+            setListener(mProxy.getListener());
         }
 
         public void setListener(ISipSessionListener listener) {
             synchronized (SipService.this) {
                 mProxy.setListener(listener);
-                if (mSession == null) return;
 
                 try {
                     int state = (mSession == null)
@@ -632,6 +641,18 @@ public final class SipService extends ISipService.Stub {
                             mProxy.onRegistrationFailed(mSession, mErrorCode,
                                     mErrorMessage);
                         }
+                    } else if (!mConnected) {
+                        mProxy.onRegistrationFailed(mSession,
+                                SipErrorCode.DATA_CONNECTION_LOST,
+                                "no data connection");
+                    } else if (!mRunning) {
+                        mProxy.onRegistrationFailed(mSession,
+                                SipErrorCode.CLIENT_ERROR,
+                                "registration not running");
+                    } else {
+                        mProxy.onRegistrationFailed(mSession,
+                                SipErrorCode.IN_PROGRESS,
+                                String.valueOf(state));
                     }
                 } catch (Throwable t) {
                     Log.w(TAG, "setListener(): " + t);
@@ -643,21 +664,29 @@ public final class SipService extends ISipService.Stub {
             return mRegistered;
         }
 
+        // timeout handler
         public void run() {
-            // delegate to mExecutor
-            getExecutor().addTask(new Runnable() {
-                public void run() {
-                    realRun();
-                }
-            });
+            synchronized (SipService.this) {
+                if (!mRunning) return;
+                final SipSessionGroup.SipSessionImpl session = mSession;
+
+                // delegate to mExecutor
+                getExecutor().addTask(new Runnable() {
+                    public void run() {
+                        realRun(session);
+                    }
+                });
+            }
         }
 
-        private void realRun() {
-            mErrorCode = SipErrorCode.NO_ERROR;
-            mErrorMessage = null;
-            if (DEBUG) Log.d(TAG, "~~~ registering");
+        // real timeout handler
+        private void realRun(SipSessionGroup.SipSessionImpl session) {
             synchronized (SipService.this) {
-                if (mConnected && !isStopped()) mSession.register(EXPIRY_TIME);
+                if (notCurrentSession(session)) return;
+                mErrorCode = SipErrorCode.NO_ERROR;
+                mErrorMessage = null;
+                if (DEBUG) Log.d(TAG, "~~~ registering");
+                if (mConnected) session.register(EXPIRY_TIME);
             }
         }
 
@@ -697,21 +726,28 @@ public final class SipService extends ISipService.Stub {
         public void onRegistering(ISipSession session) {
             if (DEBUG) Log.d(TAG, "onRegistering(): " + session);
             synchronized (SipService.this) {
-                if (!isStopped() && (session != mSession)) return;
+                if (notCurrentSession(session)) return;
+
                 mRegistered = false;
                 mProxy.onRegistering(session);
             }
+        }
+
+        private boolean notCurrentSession(ISipSession session) {
+            if (session != mSession) {
+                ((SipSessionGroup.SipSessionImpl) session).setListener(null);
+                return true;
+            }
+            return !mRunning;
         }
 
         @Override
         public void onRegistrationDone(ISipSession session, int duration) {
             if (DEBUG) Log.d(TAG, "onRegistrationDone(): " + session);
             synchronized (SipService.this) {
-                if (!isStopped() && (session != mSession)) return;
+                if (notCurrentSession(session)) return;
 
                 mProxy.onRegistrationDone(session, duration);
-
-                if (isStopped()) return;
 
                 if (duration > 0) {
                     mSession.clearReRegisterRequired();
@@ -751,17 +787,18 @@ public final class SipService extends ISipService.Stub {
             if (DEBUG) Log.d(TAG, "onRegistrationFailed(): " + session + ": "
                     + SipErrorCode.toString(errorCode) + ": " + message);
             synchronized (SipService.this) {
-                if (!isStopped() && (session != mSession)) return;
-                mErrorCode = errorCode;
-                mErrorMessage = message;
-                mProxy.onRegistrationFailed(session, errorCode, message);
+                if (notCurrentSession(session)) return;
 
                 if (errorCode == SipErrorCode.INVALID_CREDENTIALS) {
                     if (DEBUG) Log.d(TAG, "   pause auto-registration");
-                    stopButKeepStates();
-                } else if (!isStopped()) {
+                    stop();
+                } else {
                     onError();
                 }
+
+                mErrorCode = errorCode;
+                mErrorMessage = message;
+                mProxy.onRegistrationFailed(session, errorCode, message);
             }
         }
 
@@ -769,14 +806,11 @@ public final class SipService extends ISipService.Stub {
         public void onRegistrationTimeout(ISipSession session) {
             if (DEBUG) Log.d(TAG, "onRegistrationTimeout(): " + session);
             synchronized (SipService.this) {
-                if (!isStopped() && (session != mSession)) return;
+                if (notCurrentSession(session)) return;
+
                 mErrorCode = SipErrorCode.TIME_OUT;
                 mProxy.onRegistrationTimeout(session);
-
-                if (!isStopped()) {
-                    mRegistered = false;
-                    onError();
-                }
+                onError();
             }
         }
 
@@ -883,6 +917,7 @@ public final class SipService extends ISipService.Stub {
                 mConnected = connected;
             }
 
+            // timeout handler
             @Override
             public void run() {
                 // delegate to mExecutor

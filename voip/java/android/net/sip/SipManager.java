@@ -520,7 +520,9 @@ public class SipManager {
 
         private String getUri(ISipSession session) {
             try {
-                return session.getLocalProfile().getUriString();
+                return ((session == null)
+                        ? "no session"
+                        : session.getLocalProfile().getUriString());
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
