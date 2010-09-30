@@ -31,6 +31,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.graphics.Rect;
 import android.util.Log;
 import android.util.Xml;
 import android.view.SurfaceHolder;
@@ -54,6 +55,8 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String TAG_OVERLAYS = "overlays";
     private static final String TAG_OVERLAY = "overlay";
     private static final String TAG_OVERLAY_USER_ATTRIBUTES = "overlay_user_attributes";
+    private static final String TAG_EFFECTS = "effects";
+    private static final String TAG_EFFECT = "effect";
 
     private static final String ATTR_ID = "id";
     private static final String ATTR_FILENAME = "filename";
@@ -72,6 +75,16 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String ATTR_MASK = "mask";
     private static final String ATTR_BEFORE_MEDIA_ITEM_ID = "before_media_item";
     private static final String ATTR_AFTER_MEDIA_ITEM_ID = "after_media_item";
+    private static final String ATTR_COLOR_EFFECT_TYPE = "color_type";
+    private static final String ATTR_COLOR_EFFECT_VALUE = "color_value";
+    private static final String ATTR_START_RECT_L = "start_l";
+    private static final String ATTR_START_RECT_T = "start_t";
+    private static final String ATTR_START_RECT_R = "start_r";
+    private static final String ATTR_START_RECT_B = "start_b";
+    private static final String ATTR_END_RECT_L = "end_l";
+    private static final String ATTR_END_RECT_T = "end_t";
+    private static final String ATTR_END_RECT_R = "end_r";
+    private static final String ATTR_END_RECT_B = "end_b";
 
     // Instance variables
     private long mDurationMs;
@@ -589,7 +602,7 @@ public class VideoEditorTestImpl implements VideoEditor {
                     serializer.attribute("", ATTR_DURATION, Long.toString(overlay.getDuration()));
                     if (overlay instanceof OverlayFrame) {
                         final OverlayFrame overlayFrame = (OverlayFrame)overlay;
-                        overlayFrame.save(this);
+                        overlayFrame.save(getPath());
                         if (overlayFrame.getFilename() != null) {
                             serializer.attribute("", ATTR_FILENAME, overlayFrame.getFilename());
                         }
@@ -609,6 +622,48 @@ public class VideoEditorTestImpl implements VideoEditor {
                     serializer.endTag("", TAG_OVERLAY);
                 }
                 serializer.endTag("", TAG_OVERLAYS);
+            }
+
+            final List<Effect> effects = mediaItem.getAllEffects();
+            if (effects.size() > 0) {
+                serializer.startTag("", TAG_EFFECTS);
+                for (Effect effect : effects) {
+                    serializer.startTag("", TAG_EFFECT);
+                    serializer.attribute("", ATTR_ID, effect.getId());
+                    serializer.attribute("", ATTR_TYPE, effect.getClass().getSimpleName());
+                    serializer.attribute("", ATTR_BEGIN_TIME,
+                            Long.toString(effect.getStartTime()));
+                    serializer.attribute("", ATTR_DURATION, Long.toString(effect.getDuration()));
+                    if (effect instanceof EffectColor) {
+                        final EffectColor colorEffect = (EffectColor)effect;
+                        serializer.attribute("", ATTR_COLOR_EFFECT_TYPE,
+                                Integer.toString(colorEffect.getType()));
+                        if (colorEffect.getType() == EffectColor.TYPE_COLOR) {
+                            serializer.attribute("", ATTR_COLOR_EFFECT_VALUE,
+                                    Integer.toString(colorEffect.getParam()));
+                        }
+                    } else if (effect instanceof EffectKenBurns) {
+                        final Rect startRect = ((EffectKenBurns)effect).getStartRect();
+                        serializer.attribute("", ATTR_START_RECT_L,
+                                Integer.toString(startRect.left));
+                        serializer.attribute("", ATTR_START_RECT_T,
+                                Integer.toString(startRect.top));
+                        serializer.attribute("", ATTR_START_RECT_R,
+                                Integer.toString(startRect.right));
+                        serializer.attribute("", ATTR_START_RECT_B,
+                                Integer.toString(startRect.bottom));
+
+                        final Rect endRect = ((EffectKenBurns)effect).getEndRect();
+                        serializer.attribute("", ATTR_END_RECT_L, Integer.toString(endRect.left));
+                        serializer.attribute("", ATTR_END_RECT_T, Integer.toString(endRect.top));
+                        serializer.attribute("", ATTR_END_RECT_R, Integer.toString(endRect.right));
+                        serializer.attribute("", ATTR_END_RECT_B,
+                                Integer.toString(endRect.bottom));
+                    }
+
+                    serializer.endTag("", TAG_EFFECT);
+                }
+                serializer.endTag("", TAG_EFFECTS);
             }
 
             serializer.endTag("", TAG_MEDIA_ITEM);
@@ -733,6 +788,13 @@ public class VideoEditorTestImpl implements VideoEditor {
                                         parser.getAttributeValue(i));
                             }
                         }
+                    } else if (TAG_EFFECT.equals(name)) {
+                        if (currentMediaItem != null) {
+                            final Effect effect = parseEffect(parser, currentMediaItem);
+                            if (effect != null) {
+                                currentMediaItem.addEffect(effect);
+                            }
+                        }
                     }
                     break;
                 }
@@ -852,6 +914,52 @@ public class VideoEditorTestImpl implements VideoEditor {
         }
 
         return overlay;
+    }
+
+    /**
+     * Parse the effect
+     *
+     * @param parser The parser
+     * @param mediaItem The media item owner
+     *
+     * @return The effect
+     */
+    private Effect parseEffect(XmlPullParser parser, MediaItem mediaItem) {
+        final String effectId = parser.getAttributeValue("", ATTR_ID);
+        final String type = parser.getAttributeValue("", ATTR_TYPE);
+        final long durationMs = Long.parseLong(parser.getAttributeValue("", ATTR_DURATION));
+        final long startTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
+
+        final Effect effect;
+        if (EffectColor.class.getSimpleName().equals(type)) {
+            final int colorEffectType =
+                Integer.parseInt(parser.getAttributeValue("", ATTR_COLOR_EFFECT_TYPE));
+            final int color;
+            if (colorEffectType == EffectColor.TYPE_COLOR) {
+                color = Integer.parseInt(parser.getAttributeValue("", ATTR_COLOR_EFFECT_VALUE));
+            } else {
+                color = 0;
+            }
+            effect = new EffectColor(mediaItem, effectId, startTimeMs, durationMs,
+                    colorEffectType, color);
+        } else if (EffectKenBurns.class.getSimpleName().equals(type)) {
+            final Rect startRect = new Rect(
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_START_RECT_L)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_START_RECT_T)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_START_RECT_R)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_START_RECT_B)));
+            final Rect endRect = new Rect(
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_END_RECT_L)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_END_RECT_T)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_END_RECT_R)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_END_RECT_B)));
+            effect = new EffectKenBurns(mediaItem, effectId, startRect, endRect, startTimeMs,
+                    durationMs);
+        } else {
+            effect = null;
+        }
+
+        return effect;
     }
 
     public void cancelExport(String filename) {

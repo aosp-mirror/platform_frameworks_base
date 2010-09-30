@@ -118,18 +118,18 @@ public class OverlayFrame extends Overlay {
     /**
      * Save the overlay to the project folder
      *
-     * @param editor The video editor
+     * @param path The path where the overlay will be saved
      *
-     * @return
+     * @return The filename
      * @throws FileNotFoundException if the bitmap cannot be saved
      * @throws IOException if the bitmap file cannot be saved
      */
-    String save(VideoEditor editor) throws FileNotFoundException, IOException {
+    String save(String path) throws FileNotFoundException, IOException {
         if (mFilename != null) {
             return mFilename;
         }
 
-        mFilename = editor.getPath() + "/" + getId() + ".png";
+        mFilename = path + "/" + getId() + ".png";
         // Save the image to a local file
         final FileOutputStream out = new FileOutputStream(mFilename);
         mBitmap.compress(CompressFormat.PNG, 100, out);
