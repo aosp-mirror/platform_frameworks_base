@@ -57,9 +57,9 @@ int gRandom = -1;
 // a modulo operation on the index while accessing the array. However modulo can
 // be expensive on some platforms, such as ARM. Thus we round up the size of the
 // array to the nearest power of 2 and then use bitwise-and instead of modulo.
-// Currently we make it 256ms long and assume packet interval is 32ms or less.
-// The first 64ms is the place where samples get mixed. The rest 192ms is the
-// real jitter buffer. For a stream at 8000Hz it takes 4096 bytes. These numbers
+// Currently we make it 512ms long and assume packet interval is 40ms or less.
+// The first 80ms is the place where samples get mixed. The rest 432ms is the
+// real jitter buffer. For a stream at 8000Hz it takes 8192 bytes. These numbers
 // are chosen by experiments and each of them can be adjusted as needed.
 
 // Other notes:
@@ -69,7 +69,11 @@ int gRandom = -1;
 //   milliseconds. No floating points.
 // + If we cannot get enough CPU, we drop samples and simulate packet loss.
 // + Resampling is not done yet, so streams in one group must use the same rate.
-//   For the first release we might only support 8kHz and 16kHz.
+//   For the first release only 8000Hz is supported.
+
+#define BUFFER_SIZE     512
+#define HISTORY_SIZE    80
+#define MEASURE_PERIOD  2000
 
 class AudioStream
 {
@@ -111,6 +115,7 @@ private:
     int mBufferMask;
     int mBufferHead;
     int mBufferTail;
+    int mLatencyTimer;
     int mLatencyScore;
 
     uint16_t mSequence;
@@ -159,12 +164,13 @@ bool AudioStream::set(int mode, int socket, sockaddr_storage *remote,
     mInterval = mSampleCount / mSampleRate;
 
     // Allocate jitter buffer.
-    for (mBufferMask = 8192; mBufferMask < sampleRate; mBufferMask <<= 1);
-    mBufferMask >>= 2;
+    for (mBufferMask = 8; mBufferMask < mSampleRate; mBufferMask <<= 1);
+    mBufferMask *= BUFFER_SIZE;
     mBuffer = new int16_t[mBufferMask];
     --mBufferMask;
     mBufferHead = 0;
     mBufferTail = 0;
+    mLatencyTimer = 0;
     mLatencyScore = 0;
 
     // Initialize random bits.
@@ -340,29 +346,35 @@ void AudioStream::decode(int tick)
     }
 
     // Make sure mBufferHead and mBufferTail are reasonable.
-    if ((unsigned int)(tick + 256 - mBufferHead) > 1024) {
-        mBufferHead = tick - 64;
+    if ((unsigned int)(tick + BUFFER_SIZE - mBufferHead) > BUFFER_SIZE * 2) {
+        mBufferHead = tick - HISTORY_SIZE;
         mBufferTail = mBufferHead;
     }
 
-    if (tick - mBufferHead > 64) {
+    if (tick - mBufferHead > HISTORY_SIZE) {
         // Throw away outdated samples.
-        mBufferHead = tick - 64;
+        mBufferHead = tick - HISTORY_SIZE;
         if (mBufferTail - mBufferHead < 0) {
             mBufferTail = mBufferHead;
         }
     }
 
-    if (mBufferTail - tick <= 80) {
-        mLatencyScore = tick;
-    } else if (tick - mLatencyScore >= 5000) {
-        // Reset the jitter buffer to 40ms if the latency keeps larger than 80ms
-        // in the past 5s. This rarely happens, so let us just keep it simple.
-        LOGD("stream[%d] latency control", mSocket);
-        mBufferTail = tick + 40;
+    // Adjust the jitter buffer if the latency keeps larger than two times of the
+    // packet interval in the past two seconds.
+    int score = mBufferTail - tick - mInterval * 2;
+    if (mLatencyScore > score) {
+        mLatencyScore = score;
+    }
+    if (mLatencyScore <= 0) {
+        mLatencyTimer = tick;
+        mLatencyScore = score;
+    } else if (tick - mLatencyTimer >= MEASURE_PERIOD) {
+        LOGD("stream[%d] reduces latency of %dms", mSocket, mLatencyScore);
+        mBufferTail -= mLatencyScore;
+        mLatencyTimer = tick;
     }
 
-    if (mBufferTail - mBufferHead > 256 - mInterval) {
+    if (mBufferTail - mBufferHead > BUFFER_SIZE - mInterval) {
         // Buffer overflow. Drop the packet.
         LOGD("stream[%d] buffer overflow", mSocket);
         recv(mSocket, &c, 1, MSG_DONTWAIT);
@@ -413,17 +425,17 @@ void AudioStream::decode(int tick)
     }
 
     if (tick - mBufferTail > 0) {
-        // Buffer underrun. Reset the jitter buffer to 40ms.
+        // Buffer underrun. Reset the jitter buffer.
         LOGD("stream[%d] buffer underrun", mSocket);
         if (mBufferTail - mBufferHead <= 0) {
-            mBufferHead = tick + 40;
+            mBufferHead = tick + mInterval;
             mBufferTail = mBufferHead;
         } else {
-            int tail = (tick + 40) * mSampleRate;
+            int tail = (tick + mInterval) * mSampleRate;
             for (int i = mBufferTail * mSampleRate; i - tail < 0; ++i) {
                 mBuffer[i & mBufferMask] = 0;
             }
-            mBufferTail = tick + 40;
+            mBufferTail = tick + mInterval;
         }
     }
 
@@ -680,7 +692,7 @@ bool AudioGroup::NetworkThread::threadLoop()
     int count = 0;
 
     for (AudioStream *stream = chain; stream; stream = stream->mNext) {
-        if (!stream->mTick || tick - stream->mTick >= 0) {
+        if (tick - stream->mTick >= 0) {
             stream->encode(tick, chain);
         }
         if (deadline - stream->mTick > 0) {
