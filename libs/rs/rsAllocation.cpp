@@ -293,7 +293,6 @@ void Allocation::subData(Context *rsc, uint32_t xoff, uint32_t yoff,
     }
 
     for (uint32_t line=yoff; line < (yoff+h); line++) {
-        uint8_t * ptr = static_cast<uint8_t *>(mPtr);
         if (mType->getElement()->getHasReferences()) {
             incRefs(src, w);
             decRefs(dst, w);

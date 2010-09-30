@@ -130,6 +130,7 @@ public class Sampler extends BaseObj {
         Value mWrapS;
         Value mWrapT;
         Value mWrapR;
+        float mAniso;
 
         public Builder(RenderScript rs) {
             mRS = rs;
@@ -138,6 +139,7 @@ public class Sampler extends BaseObj {
             mWrapS = Value.WRAP;
             mWrapT = Value.WRAP;
             mWrapR = Value.WRAP;
+            mAniso = 1.0f;
         }
 
         public void setMin(Value v) {
@@ -182,6 +184,14 @@ public class Sampler extends BaseObj {
             }
         }
 
+        public void setAnisotropy(float v) {
+            if(v >= 0.0f) {
+                mAniso = v;
+            } else {
+                throw new IllegalArgumentException("Invalid value");
+            }
+        }
+
         static synchronized Sampler internalCreate(RenderScript rs, Builder b) {
             rs.nSamplerBegin();
             rs.nSamplerSet(0, b.mMin.mID);
@@ -189,6 +199,7 @@ public class Sampler extends BaseObj {
             rs.nSamplerSet(2, b.mWrapS.mID);
             rs.nSamplerSet(3, b.mWrapT.mID);
             rs.nSamplerSet(4, b.mWrapR.mID);
+            rs.nSamplerSet2(5, b.mAniso);
             int id = rs.nSamplerCreate();
             return new Sampler(id, rs);
         }

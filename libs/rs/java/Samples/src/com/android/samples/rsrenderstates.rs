@@ -31,6 +31,7 @@ rs_program_store gProgStoreBlendAdd;
 rs_allocation gTexOpaque;
 rs_allocation gTexTorus;
 rs_allocation gTexTransparent;
+rs_allocation gTexChecker;
 
 rs_mesh gMbyNMesh;
 rs_mesh gTorusMesh;
@@ -47,10 +48,13 @@ int gDisplayMode;
 rs_sampler gLinearClamp;
 rs_sampler gLinearWrap;
 rs_sampler gMipLinearWrap;
+rs_sampler gMipLinearAniso8;
+rs_sampler gMipLinearAniso15;
 rs_sampler gNearestClamp;
 
 rs_program_raster gCullBack;
 rs_program_raster gCullFront;
+rs_program_raster gCullNone;
 
 // Custom vertex shader compunents
 VertexShaderConstants *gVSConstants;
@@ -64,11 +68,11 @@ rs_program_fragment gProgFragmentMultitex;
 
 #pragma rs export_var(gProgVertex, gProgFragmentColor, gProgFragmentTexture)
 #pragma rs export_var(gProgStoreBlendNoneDepth, gProgStoreBlendNone, gProgStoreBlendAlpha, gProgStoreBlendAdd)
-#pragma rs export_var(gTexOpaque, gTexTorus, gTexTransparent)
+#pragma rs export_var(gTexOpaque, gTexTorus, gTexTransparent, gTexChecker)
 #pragma rs export_var(gMbyNMesh, gTorusMesh)
 #pragma rs export_var(gFontSans, gFontSerif, gFontSerifBold, gFontSerifItalic, gFontSerifBoldItalic, gFontMono)
-#pragma rs export_var(gLinearClamp, gLinearWrap, gMipLinearWrap, gNearestClamp)
-#pragma rs export_var(gCullBack, gCullFront)
+#pragma rs export_var(gLinearClamp, gLinearWrap, gMipLinearWrap, gMipLinearAniso8, gMipLinearAniso15, gNearestClamp)
+#pragma rs export_var(gCullBack, gCullFront, gCullNone)
 #pragma rs export_var(gVSConstants, gFSConstants, gVSInputs, gProgVertexCustom, gProgFragmentCustom, gProgFragmentMultitex)
 
 //What we are showing
@@ -110,7 +114,7 @@ void bindProgramVertexOrtho() {
     rsgBindProgramVertex(gProgVertex);
     // Setup the projectioni matrix
     rs_matrix4x4 proj;
-    rsMatrixLoadOrtho(&proj, 0, rsgGetWidth(), rsgGetHeight(), 0, -1,1);
+    rsMatrixLoadOrtho(&proj, 0, rsgGetWidth(), rsgGetHeight(), 0, -500, 500);
     rsgProgramVertexLoadProjectionMatrix(&proj);
 }
 
@@ -276,14 +280,12 @@ void displayTextureSamplers() {
                          startX + width, startY + height, 0, 1.5, 1.5,
                          startX + width, startY, 0, 1.5, 0);
 
-
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgBindFont(gFontMono);
     rsgDrawText("Filtering: linear clamp", 10, 290);
     rsgDrawText("Filtering: linear wrap", 10, 590);
     rsgDrawText("Filtering: nearest clamp", 310, 290);
     rsgDrawText("Filtering: miplinear wrap", 310, 590);
-
 }
 
 float gTorusRotation = 0;
@@ -430,7 +432,7 @@ void displayMultitextureSample() {
     rsgBindSampler(gProgFragmentMultitex, 0, gLinearClamp);
     rsgBindSampler(gProgFragmentMultitex, 1, gLinearWrap);
     rsgBindSampler(gProgFragmentMultitex, 2, gLinearClamp);
-    rsgBindTexture(gProgFragmentMultitex, 0, gTexOpaque);
+    rsgBindTexture(gProgFragmentMultitex, 0, gTexChecker);
     rsgBindTexture(gProgFragmentMultitex, 1, gTexTorus);
     rsgBindTexture(gProgFragmentMultitex, 2, gTexTransparent);
 
@@ -446,6 +448,69 @@ void displayMultitextureSample() {
     rsgDrawText("Custom shader with multitexturing", 10, 280);
 }
 
+float gAnisoTime = 0.0f;
+uint anisoMode = 0;
+void displayAnisoSample() {
+
+    gAnisoTime += gDt;
+
+    rsgBindProgramVertex(gProgVertex);
+    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    rs_matrix4x4 proj;
+    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
+    rsgProgramVertexLoadProjectionMatrix(&proj);
+
+    rs_matrix4x4 matrix;
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendNone);
+    rsgBindProgramFragment(gProgFragmentTexture);
+    rsMatrixLoadTranslate(&matrix, 0.0f, 0.0f, -10.0f);
+    rsMatrixRotate(&matrix, -80, 1.0f, 0.0f, 0.0f);
+    rsgProgramVertexLoadModelMatrix(&matrix);
+
+    rsgBindProgramRaster(gCullNone);
+
+    rsgBindTexture(gProgFragmentTexture, 0, gTexChecker);
+
+    if(gAnisoTime >= 5.0f) {
+        gAnisoTime = 0.0f;
+        anisoMode ++;
+        anisoMode = anisoMode % 3;
+    }
+
+    if(anisoMode == 0) {
+        rsgBindSampler(gProgFragmentTexture, 0, gMipLinearAniso8);
+    }
+    else if(anisoMode == 1) {
+        rsgBindSampler(gProgFragmentTexture, 0, gMipLinearAniso15);
+    }
+    else {
+        rsgBindSampler(gProgFragmentTexture, 0, gMipLinearWrap);
+    }
+
+    float startX = -15;
+    float startY = -15;
+    float width = 30;
+    float height = 30;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
+                         startX, startY + height, 0, 0, 10,
+                         startX + width, startY + height, 0, 10, 10,
+                         startX + width, startY, 0, 10, 0);
+
+    rsgBindProgramRaster(gCullBack);
+
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgBindFont(gFontMono);
+    if(anisoMode == 0) {
+        rsgDrawText("Anisotropic filtering 8", 10, 40);
+    }
+    else if(anisoMode == 1) {
+        rsgDrawText("Anisotropic filtering 15", 10, 40);
+    }
+    else {
+        rsgDrawText("Miplinear filtering", 10, 40);
+    }
+}
 
 int root(int launchID) {
 
@@ -478,6 +543,9 @@ int root(int launchID) {
         break;
     case 7:
         displayMultitextureSample();
+        break;
+    case 8:
+        displayAnisoSample();
         break;
     }
 

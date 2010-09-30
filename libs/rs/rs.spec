@@ -288,6 +288,11 @@ SamplerSet {
 	param RsSamplerValue value
 	}
 
+SamplerSet2 {
+	param RsSamplerParam p
+	param float value
+	}
+
 SamplerCreate {
 	ret RsSampler
 	}
