@@ -236,6 +236,7 @@ public class Path {
      * @param y The y-coordinate of the end of a line
      */
     public void lineTo(float x, float y) {
+        isSimplePath = false;
         native_lineTo(mNativePath, x, y);
     }
 
@@ -250,6 +251,7 @@ public class Path {
      *           this contour, to specify a line
      */
     public void rLineTo(float dx, float dy) {
+        isSimplePath = false;
         native_rLineTo(mNativePath, dx, dy);
     }
 
