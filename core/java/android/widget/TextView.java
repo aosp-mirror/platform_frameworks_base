@@ -7594,28 +7594,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (canSelectAll()) {
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
-                    setIcon(com.android.internal.R.drawable.ic_menu_chat_dashboard).
+                    setIcon(com.android.internal.R.drawable.ic_menu_select_all).
                     setAlphabeticShortcut('a');
                 atLeastOne = true;
             }
 
             if (canCut()) {
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
-                    setIcon(com.android.internal.R.drawable.ic_menu_compose).
+                    setIcon(com.android.internal.R.drawable.ic_menu_cut).
                     setAlphabeticShortcut('x');
                 atLeastOne = true;
             }
 
             if (canCopy()) {
                 menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
-                    setIcon(com.android.internal.R.drawable.ic_menu_attachment).
+                    setIcon(com.android.internal.R.drawable.ic_menu_copy).
                     setAlphabeticShortcut('c');
                 atLeastOne = true;
             }
 
             if (canPaste()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
-                        setIcon(com.android.internal.R.drawable.ic_menu_camera).
+                        setIcon(com.android.internal.R.drawable.ic_menu_paste).
                         setAlphabeticShortcut('v');
                 atLeastOne = true;
             }

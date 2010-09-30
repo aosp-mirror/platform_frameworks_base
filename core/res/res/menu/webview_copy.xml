@@ -16,7 +16,7 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/copy"
-        android:icon="@drawable/ic_menu_attachment"
+        android:icon="@drawable/ic_menu_copy"
         android:showAsAction="always"
         />
     <item android:id="@+id/share"
@@ -24,7 +24,7 @@
         android:showAsAction="always"
         />
     <item android:id="@+id/select_all"
-        android:icon="@drawable/ic_menu_chat_dashboard"
+        android:icon="@drawable/ic_menu_select_all"
         android:showAsAction="always"
         />
     <item android:id="@+id/find"
