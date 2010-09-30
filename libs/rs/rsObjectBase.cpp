@@ -61,6 +61,7 @@ void ObjectBase::setContext(Context *rsc)
     if (mRSC) {
         remove();
     }
+    rsAssert(rsc);
     mRSC = rsc;
     if (rsc) {
         add();

@@ -349,25 +349,29 @@ void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len
 
 ScriptCState::ScriptCState()
 {
-    mScript = NULL;
-    clear();
+    mScript.clear();
 }
 
 ScriptCState::~ScriptCState()
 {
-    delete mScript;
-    mScript = NULL;
+    mScript.clear();
 }
 
-void ScriptCState::clear()
+void ScriptCState::init(Context *rsc)
 {
+    clear(rsc);
+}
+
+void ScriptCState::clear(Context *rsc)
+{
+    rsAssert(rsc);
     for (uint32_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         mConstantBufferTypes[ct].clear();
         mSlotWritable[ct] = false;
     }
 
-    delete mScript;
-    mScript = new ScriptC(NULL);
+    mScript.clear();
+    mScript.set(new ScriptC(rsc));
 }
 
 static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
@@ -503,7 +507,7 @@ namespace renderscript {
 void rsi_ScriptCBegin(Context * rsc)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->clear();
+    ss->clear(rsc);
 }
 
 void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)
@@ -522,10 +526,10 @@ RsScript rsi_ScriptCCreate(Context * rsc)
 {
     ScriptCState *ss = &rsc->mScriptC;
 
-    ScriptC *s = ss->mScript;
-    ss->mScript = NULL;
+    ObjectBaseRef<ScriptC> s = ss->mScript.get();
+    ss->mScript.clear();
 
-    ss->runCompiler(rsc, s);
+    ss->runCompiler(rsc, s.get());
     s->incUserRef();
     s->setContext(rsc);
     for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
@@ -533,8 +537,8 @@ RsScript rsi_ScriptCCreate(Context * rsc)
         s->mSlotWritable[ct] = ss->mSlotWritable[ct];
     }
 
-    ss->clear();
-    return s;
+    ss->clear(rsc);
+    return s.get();
 }
 
 }

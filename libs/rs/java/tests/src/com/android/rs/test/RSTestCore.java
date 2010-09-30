@@ -21,6 +21,8 @@ import android.renderscript.*;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.ListIterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class RSTestCore {
@@ -42,12 +44,18 @@ public class RSTestCore {
     private ArrayList<UnitTest> unitTests;
     private ListIterator<UnitTest> test_iter;
     private UnitTest activeTest;
+    private boolean stopTesting;
+
+    /* Periodic timer for ensuring future tests get scheduled */
+    private Timer mTimer;
+    public static final int RS_TIMER_PERIOD = 100;
 
     public void init(RenderScriptGL rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
         mWidth = width;
         mHeight = height;
+        stopTesting = false;
 
         mScript = new ScriptC_rslist(mRS, mRes, R.raw.rslist, true);
 
@@ -88,9 +96,17 @@ public class RSTestCore {
 
         test_iter = unitTests.listIterator();
         refreshTestResults(); /* Kick off the first test */
+
+        TimerTask pTask = new TimerTask() {
+            public void run() {
+                refreshTestResults();
+            }
+        };
+
+        mTimer = new Timer();
+        mTimer.schedule(pTask, RS_TIMER_PERIOD, RS_TIMER_PERIOD);
     }
 
-    static int count = 0;
     public void checkAndRunNextTest() {
         if (activeTest != null) {
             if (!activeTest.isAlive()) {
@@ -104,7 +120,7 @@ public class RSTestCore {
             }
         }
 
-        if (activeTest == null) {
+        if (!stopTesting && activeTest == null) {
             if (test_iter.hasNext()) {
                 activeTest = test_iter.next();
                 activeTest.start();
@@ -112,8 +128,14 @@ public class RSTestCore {
                  * should start running. The message handler in UnitTest.java
                  * ensures this. */
             }
+            else {
+                if (mTimer != null) {
+                    mTimer.cancel();
+                    mTimer.purge();
+                    mTimer = null;
+                }
+            }
         }
-        count++;
     }
 
     public void refreshTestResults() {
@@ -125,6 +147,29 @@ public class RSTestCore {
             mScript.bind_gList(mListAllocs);
             mRS.contextBindRootScript(mScript);
         }
+    }
+
+    public void cleanup() {
+        stopTesting = true;
+        UnitTest t = activeTest;
+
+        /* Stop periodic refresh of testing */
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer.purge();
+            mTimer = null;
+        }
+
+        /* Wait to exit until we finish the current test */
+        if (t != null) {
+            try {
+                t.join();
+            }
+            catch (InterruptedException e) {
+            }
+            t = null;
+        }
+
     }
 
     public void newTouchPosition(float x, float y, float pressure, int id) {
