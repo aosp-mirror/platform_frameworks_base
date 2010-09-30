@@ -181,6 +181,7 @@ public class Camera {
          * value should be 90.
          *
          * @see #setDisplayOrientation(int)
+         * @see #setRotation(int)
          */
         public int orientation;
     };
@@ -1716,23 +1717,46 @@ public class Camera {
         }
 
         /**
-         * Sets the orientation of the device in degrees. For example, suppose
-         * the natural position of the device is landscape. If the user takes a
-         * picture in landscape mode in 2048x1536 resolution, the rotation
-         * should be set to 0. If the user rotates the phone 90 degrees
-         * clockwise, the rotation should be set to 90. Applications can use
-         * {@link android.view.OrientationEventListener} to set this parameter.
+         * Sets the rotation angle in degrees relative to the orientation of
+         * the camera. This affects the pictures returned from JPEG {@link
+         * PictureCallback}. The camera driver may set orientation in the
+         * EXIF header without rotating the picture. Or the driver may rotate
+         * the picture and the EXIF thumbnail. If the Jpeg picture is rotated,
+         * the orientation in the EXIF header will be missing or 1 (row #0 is
+         * top and column #0 is left side).
          *
-         * The camera driver may set orientation in the EXIF header without
-         * rotating the picture. Or the driver may rotate the picture and
-         * the EXIF thumbnail. If the Jpeg picture is rotated, the orientation
-         * in the EXIF header will be missing or 1 (row #0 is top and column #0
-         * is left side).
+         * If appplications want to rotate the picture to match the
+         * orientation of what users see, apps should use {@link
+         * android.view.OrientationEventListener} and {@link CameraInfo}.
+         * The value from OrientationEventListener is relative to the natural
+         * orientation of the device. CameraInfo.mOrientation is the angle
+         * between camera orientation and natural device orientation. The sum
+         * of the two is the angle for rotation.
          *
-         * @param rotation The orientation of the device in degrees. Rotation
-         *                 can only be 0, 90, 180 or 270.
+         * For example, suppose the natural orientation of the device is
+         * portrait. The device is rotated 270 degrees clockwise, so the device
+         * orientation is 270. Suppose the camera sensor is mounted in landscape
+         * and the top side of the camera sensor is aligned with the right edge
+         * of the display in natural orientation. So the camera orientation is
+         * 90. The rotation should be set to 0 (270 + 90).
+         *
+         * The reference code is as follows.
+         *
+         * public void public void onOrientationChanged(int orientation) {
+         *     if (orientation == ORIENTATION_UNKNOWN) return;
+         *     android.hardware.Camera.CameraInfo info =
+         *            new android.hardware.Camera.CameraInfo();
+         *     android.hardware.Camera.getCameraInfo(cameraId, info);
+         *     orientation = (orientation + 45) / 90 * 90;
+         *     mParameters.setRotation((orientation + info.mOrientation) % 360);
+         * }
+         *
+         * @param rotation The rotation angle in degrees relative to the
+         *                 orientation of the camera. Rotation can only be 0,
+         *                 90, 180 or 270.
          * @throws IllegalArgumentException if rotation value is invalid.
          * @see android.view.OrientationEventListener
+         * @see #getCameraInfo(int, CameraInfo)
          */
         public void setRotation(int rotation) {
             if (rotation == 0 || rotation == 90 || rotation == 180
