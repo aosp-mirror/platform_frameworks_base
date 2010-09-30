@@ -166,7 +166,7 @@ static int8_t encrypt_blob(char *name, AES_KEY *aes_key)
     int length;
     int fd;
 
-    if (read(the_entropy, vector, AES_BLOCK_SIZE) != AES_BLOCK_SIZE) {
+    if (read(the_entropy, blob.vector, AES_BLOCK_SIZE) != AES_BLOCK_SIZE) {
         return SYSTEM_ERROR;
     }
 
