@@ -145,7 +145,7 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
 
             cursor = getCursor(dlRequest);
             verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_FAILED);
-            verifyInt(cursor, DownloadManager.COLUMN_ERROR_CODE,
+            verifyInt(cursor, DownloadManager.COLUMN_REASON,
                     DownloadManager.ERROR_INSUFFICIENT_SPACE);
         } finally {
             if (cursor != null) {
