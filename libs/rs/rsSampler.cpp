@@ -44,7 +44,8 @@ Sampler::Sampler(Context *rsc,
                  RsSamplerValue minFilter,
                  RsSamplerValue wrapS,
                  RsSamplerValue wrapT,
-                 RsSamplerValue wrapR) : ObjectBase(rsc)
+                 RsSamplerValue wrapR,
+                 float aniso) : ObjectBase(rsc)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
@@ -53,6 +54,7 @@ Sampler::Sampler(Context *rsc,
     mWrapS = wrapS;
     mWrapT = wrapT;
     mWrapR = wrapR;
+    mAniso = aniso;
 }
 
 Sampler::~Sampler()
@@ -91,6 +93,11 @@ void Sampler::setupGL(const Context *rsc, const Allocation *tex)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, trans[mWrapS]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, trans[mWrapT]);
+    }
+
+    float anisoValue = rsMin(rsc->ext_texture_max_aniso(), mAniso);
+    if(rsc->ext_texture_max_aniso() > 1.0f) {
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
     }
 
     rsc->checkError("Sampler::setupGL2 tex env");
@@ -147,6 +154,7 @@ void rsi_SamplerBegin(Context *rsc)
     ss->mWrapS = RS_SAMPLER_WRAP;
     ss->mWrapT = RS_SAMPLER_WRAP;
     ss->mWrapR = RS_SAMPLER_WRAP;
+    ss->mAniso = 1.0f;
 }
 
 void rsi_SamplerSet(Context *rsc, RsSamplerParam param, RsSamplerValue value)
@@ -169,21 +177,37 @@ void rsi_SamplerSet(Context *rsc, RsSamplerParam param, RsSamplerValue value)
     case RS_SAMPLER_WRAP_R:
         ss->mWrapR = value;
         break;
+    default:
+        LOGE("Attempting to set invalid value on sampler");
+        break;
     }
+}
 
+void rsi_SamplerSet2(Context *rsc, RsSamplerParam param, float value)
+{
+    SamplerState * ss = &rsc->mStateSampler;
+
+    switch(param) {
+    case RS_SAMPLER_ANISO:
+        ss->mAniso = value;
+        break;
+    default:
+        LOGE("Attempting to set invalid value on sampler");
+        break;
+    }
 }
 
 RsSampler rsi_SamplerCreate(Context *rsc)
 {
     SamplerState * ss = &rsc->mStateSampler;
 
-
     Sampler * s = new Sampler(rsc,
                               ss->mMagFilter,
                               ss->mMinFilter,
                               ss->mWrapS,
                               ss->mWrapT,
-                              ss->mWrapR);
+                              ss->mWrapR,
+                              ss->mAniso);
     s->incUserRef();
     return s;
 }

@@ -321,8 +321,6 @@ void rsi_TypeAdd(Context *rsc, RsDimension dim, size_t value)
         break;
     }
 
-
-    int32_t arrayNum = dim - RS_DIMENSION_ARRAY_0;
     if ((dim < 0) || (dim > RS_DIMENSION_MAX)) {
         LOGE("rsTypeAdd: Bad dimension");
         //error

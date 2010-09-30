@@ -1096,6 +1096,13 @@ nSamplerSet(JNIEnv *_env, jobject _this, RsContext con, jint p, jint v)
     rsSamplerSet(con, (RsSamplerParam)p, (RsSamplerValue)v);
 }
 
+static void
+nSamplerSet2(JNIEnv *_env, jobject _this, RsContext con, jint p, jfloat v)
+{
+    LOG_API("nSamplerSet2, con(%p), param(%i), value(%f)", con, p, v);
+    rsSamplerSet2(con, (RsSamplerParam)p, v);
+}
+
 static jint
 nSamplerCreate(JNIEnv *_env, jobject _this, RsContext con)
 {
@@ -1303,6 +1310,7 @@ static JNINativeMethod methods[] = {
 
 {"rsnSamplerBegin",                  "(I)V",                                  (void*)nSamplerBegin },
 {"rsnSamplerSet",                    "(III)V",                                (void*)nSamplerSet },
+{"rsnSamplerSet2",                   "(IIF)V",                                (void*)nSamplerSet2 },
 {"rsnSamplerCreate",                 "(I)I",                                  (void*)nSamplerCreate },
 
 {"rsnMeshCreate",                    "(III)I",                                (void*)nMeshCreate },
