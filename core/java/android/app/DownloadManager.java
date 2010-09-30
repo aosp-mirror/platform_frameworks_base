@@ -923,7 +923,11 @@ public class DownloadManager {
 
             if (destinationType == Downloads.Impl.DESTINATION_EXTERNAL) {
                 // return stored destination for legacy external download
-                return Uri.fromFile(new File(getUnderlyingString(Downloads.Impl._DATA))).toString();
+                String localPath = getUnderlyingString(Downloads.Impl._DATA);
+                if (localPath == null) {
+                    return null;
+                }
+                return Uri.fromFile(new File(localPath)).toString();
             }
 
             // return content URI for cache download
