@@ -58,6 +58,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.PrintWriterPrinter;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.GpsNetInitiatedHandler;
 
 import com.android.server.location.GeocoderProxy;
@@ -116,13 +117,15 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private static boolean sProvidersLoaded = false;
 
     private final Context mContext;
+    private final String mNetworkLocationProviderPackageName;
+    private final String mGeocodeProviderPackageName;
     private GeocoderProxy mGeocodeProvider;
     private IGpsStatusProvider mGpsStatusProvider;
     private INetInitiatedListener mNetInitiatedListener;
     private LocationWorkerHandler mLocationHandler;
 
     // Cache the real providers for use in addTestProvider() and removeTestProvider()
-     LocationProviderInterface mNetworkLocationProvider;
+     LocationProviderProxy mNetworkLocationProvider;
      LocationProviderInterface mGpsLocationProvider;
 
     // Handler messages
@@ -472,20 +475,18 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         mEnabledProviders.add(passiveProvider.getName());
 
         // initialize external network location and geocoder services
-        PackageManager pm = mContext. getPackageManager();
-        Resources resources = mContext.getResources();
-        String serviceName = resources.getString(
-                com.android.internal.R.string.config_networkLocationProvider);
-        if (serviceName != null && pm.resolveService(new Intent(serviceName), 0) != null) {
+        PackageManager pm = mContext.getPackageManager();
+        if (mNetworkLocationProviderPackageName != null &&
+                pm.resolveService(new Intent(mNetworkLocationProviderPackageName), 0) != null) {
             mNetworkLocationProvider =
                 new LocationProviderProxy(mContext, LocationManager.NETWORK_PROVIDER,
-                        serviceName, mLocationHandler);
+                        mNetworkLocationProviderPackageName, mLocationHandler);
             addProvider(mNetworkLocationProvider);
         }
 
-        serviceName = resources.getString(com.android.internal.R.string.config_geocodeProvider);
-        if (serviceName != null && pm.resolveService(new Intent(serviceName), 0) != null) {
-            mGeocodeProvider = new GeocoderProxy(mContext, serviceName);
+        if (mGeocodeProviderPackageName != null &&
+                pm.resolveService(new Intent(mGeocodeProviderPackageName), 0) != null) {
+            mGeocodeProvider = new GeocoderProxy(mContext, mGeocodeProviderPackageName);
         }
 
         updateProvidersLocked();
@@ -497,6 +498,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     public LocationManagerService(Context context) {
         super();
         mContext = context;
+        Resources resources = context.getResources();
+        mNetworkLocationProviderPackageName = resources.getString(
+                com.android.internal.R.string.config_networkLocationProvider);
+        mGeocodeProviderPackageName = resources.getString(
+                com.android.internal.R.string.config_geocodeProvider);
+        mPackageMonitor.register(context, true);
 
         if (LOCAL_LOGV) {
             Slog.v(TAG, "Constructed LocationManager Service");
@@ -1917,6 +1924,23 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                         }
                     }
                 }
+            }
+        }
+    };
+
+    private final PackageMonitor mPackageMonitor = new PackageMonitor() {
+        @Override
+        public void onPackageUpdateFinished(String packageName, int uid) {
+            String packageDot = packageName + ".";
+
+            // reconnect to external providers after their packages have been updated
+            if (mNetworkLocationProvider != null &&
+                    mNetworkLocationProviderPackageName.startsWith(packageDot)) {
+                mNetworkLocationProvider.reconnect();
+            }
+            if (mGeocodeProvider != null &&
+                    mGeocodeProviderPackageName.startsWith(packageDot)) {
+                mGeocodeProvider.reconnect();
             }
         }
     };
