@@ -173,7 +173,7 @@ public class SipManager {
             SipRegistrationListener listener) throws SipException {
         try {
             mSipService.open3(localProfile, incomingCallBroadcastAction,
-                    createRelay(listener));
+                    createRelay(listener, localProfile.getUriString()));
         } catch (RemoteException e) {
             throw new SipException("open()", e);
         }
@@ -191,7 +191,7 @@ public class SipManager {
             SipRegistrationListener listener) throws SipException {
         try {
             mSipService.setRegistrationListener(
-                    localProfileUri, createRelay(listener));
+                    localProfileUri, createRelay(listener, localProfileUri));
         } catch (RemoteException e) {
             throw new SipException("setRegistrationListener()", e);
         }
@@ -425,8 +425,8 @@ public class SipManager {
     public void register(SipProfile localProfile, int expiryTime,
             SipRegistrationListener listener) throws SipException {
         try {
-            ISipSession session = mSipService.createSession(
-                    localProfile, createRelay(listener));
+            ISipSession session = mSipService.createSession(localProfile,
+                    createRelay(listener, localProfile.getUriString()));
             session.register(expiryTime);
         } catch (RemoteException e) {
             throw new SipException("register()", e);
@@ -446,8 +446,8 @@ public class SipManager {
     public void unregister(SipProfile localProfile,
             SipRegistrationListener listener) throws SipException {
         try {
-            ISipSession session = mSipService.createSession(
-                    localProfile, createRelay(listener));
+            ISipSession session = mSipService.createSession(localProfile,
+                    createRelay(listener, localProfile.getUriString()));
             session.unregister();
         } catch (RemoteException e) {
             throw new SipException("unregister()", e);
@@ -475,8 +475,8 @@ public class SipManager {
     }
 
     private static ISipSessionListener createRelay(
-            SipRegistrationListener listener) {
-        return ((listener == null) ? null : new ListenerRelay(listener));
+            SipRegistrationListener listener, String uri) {
+        return ((listener == null) ? null : new ListenerRelay(listener, uri));
     }
 
     /**
@@ -512,15 +512,19 @@ public class SipManager {
 
     private static class ListenerRelay extends SipSessionAdapter {
         private SipRegistrationListener mListener;
+        private String mUri;
 
         // listener must not be null
-        public ListenerRelay(SipRegistrationListener listener) {
+        public ListenerRelay(SipRegistrationListener listener, String uri) {
             mListener = listener;
+            mUri = uri;
         }
 
         private String getUri(ISipSession session) {
             try {
-                return session.getLocalProfile().getUriString();
+                return ((session == null)
+                        ? mUri
+                        : session.getLocalProfile().getUriString());
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

@@ -21,6 +21,8 @@
 extern AudioCodec *newAlawCodec();
 extern AudioCodec *newUlawCodec();
 extern AudioCodec *newGsmCodec();
+extern AudioCodec *newAmrCodec();
+extern AudioCodec *newGsmEfrCodec();
 
 struct AudioCodecType {
     const char *name;
@@ -29,6 +31,8 @@ struct AudioCodecType {
     {"PCMA", newAlawCodec},
     {"PCMU", newUlawCodec},
     {"GSM", newGsmCodec},
+    {"AMR", newAmrCodec},
+    {"GSM-EFR", newGsmEfrCodec},
     {NULL, NULL},
 };
 

@@ -126,14 +126,27 @@ public class SipPhone extends SipPhoneBase {
                 return false;
             }
 
-            SipAudioCall sipAudioCall = (SipAudioCall) incomingCall;
-            Log.v(LOG_TAG, "  ++++++ taking call from: "
-                    + sipAudioCall.getPeerProfile().getUriString());
-            String localUri = sipAudioCall.getLocalProfile().getUriString();
-            if (localUri.equals(mProfile.getUriString())) {
-                boolean makeCallWait = foregroundCall.getState().isAlive();
-                ringingCall.initIncomingCall(sipAudioCall, makeCallWait);
-                return true;
+            try {
+                SipAudioCall sipAudioCall = (SipAudioCall) incomingCall;
+                Log.d(LOG_TAG, "+++ taking call from: "
+                        + sipAudioCall.getPeerProfile().getUriString());
+                String localUri = sipAudioCall.getLocalProfile().getUriString();
+                if (localUri.equals(mProfile.getUriString())) {
+                    boolean makeCallWait = foregroundCall.getState().isAlive();
+                    ringingCall.initIncomingCall(sipAudioCall, makeCallWait);
+                    if (sipAudioCall.getState()
+                            != SipSession.State.INCOMING_CALL) {
+                        // Peer cancelled the call!
+                        Log.d(LOG_TAG, "    call cancelled !!");
+                        ringingCall.reset();
+                    }
+                    return true;
+                }
+            } catch (Exception e) {
+                // Peer may cancel the call at any time during the time we hook
+                // up ringingCall with sipAudioCall. Clean up ringingCall when
+                // that happens.
+                ringingCall.reset();
             }
             return false;
         }
@@ -358,6 +371,11 @@ public class SipPhone extends SipPhoneBase {
     }
 
     private class SipCall extends SipCallBase {
+        void reset() {
+            connections.clear();
+            setState(Call.State.IDLE);
+        }
+
         void switchWith(SipCall that) {
             synchronized (SipPhone.class) {
                 SipCall tmp = new SipCall();
@@ -444,6 +462,7 @@ public class SipPhone extends SipPhoneBase {
                 if (state.isAlive()) {
                     Log.d(LOG_TAG, "hang up call: " + getState() + ": " + this
                             + " on phone " + getPhone());
+                    setState(State.DISCONNECTING);
                     CallStateException excp = null;
                     for (Connection c : connections) {
                         try {
@@ -453,7 +472,6 @@ public class SipPhone extends SipPhoneBase {
                         }
                     }
                     if (excp != null) throw excp;
-                    setState(State.DISCONNECTING);
                 } else {
                     Log.d(LOG_TAG, "hang up dead call: " + getState() + ": "
                             + this + " on phone " + getPhone());
@@ -630,13 +648,20 @@ public class SipPhone extends SipPhoneBase {
                 }
                 synchronized (SipPhone.class) {
                     setState(Call.State.DISCONNECTED);
-                    mSipAudioCall.close();
-                    mOwner.onConnectionEnded(SipConnection.this);
-                    Log.v(LOG_TAG, "-------- connection ended: "
-                            + mPeer.getUriString() + ": "
-                            + mSipAudioCall.getState() + ", cause: "
-                            + getDisconnectCause() + ", on phone "
+                    SipAudioCall sipAudioCall = mSipAudioCall;
+                    mSipAudioCall = null;
+                    String sessionState = (sipAudioCall == null)
+                            ? ""
+                            : (sipAudioCall.getState() + ", ");
+                    Log.v(LOG_TAG, "--- connection ended: "
+                            + mPeer.getUriString() + ": " + sessionState
+                            + "cause: " + getDisconnectCause() + ", on phone "
                             + getPhone());
+                    if (sipAudioCall != null) {
+                        sipAudioCall.setListener(null);
+                        sipAudioCall.close();
+                    }
+                    mOwner.onConnectionEnded(SipConnection.this);
                 }
             }
 
@@ -790,14 +815,17 @@ public class SipPhone extends SipPhoneBase {
             synchronized (SipPhone.class) {
                 Log.v(LOG_TAG, "hangup conn: " + mPeer.getUriString() + ": "
                         + mState + ": on phone " + getPhone().getPhoneName());
+                if (!mState.isAlive()) return;
                 try {
-                    if (mState.isAlive()) {
-                        if (mSipAudioCall != null) mSipAudioCall.endCall();
-                        setState(Call.State.DISCONNECTING);
-                        setDisconnectCause(DisconnectCause.LOCAL);
+                    SipAudioCall sipAudioCall = mSipAudioCall;
+                    if (sipAudioCall != null) {
+                        sipAudioCall.setListener(null);
+                        sipAudioCall.endCall();
                     }
                 } catch (SipException e) {
                     throw new CallStateException("hangup(): " + e);
+                } finally {
+                    mAdapter.onCallEnded(DisconnectCause.LOCAL);
                 }
             }
         }

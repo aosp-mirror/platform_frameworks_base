@@ -334,12 +334,12 @@ class SipSessionGroup implements SipListener {
             if (isRequestEvent(Request.INVITE, evt)) {
                 RequestEvent event = (RequestEvent) evt;
                 SipSessionImpl newSession = new SipSessionImpl(mProxy);
+                newSession.mState = SipSession.State.INCOMING_CALL;
                 newSession.mServerTransaction = mSipHelper.sendRinging(event,
                         generateTag());
                 newSession.mDialog = newSession.mServerTransaction.getDialog();
                 newSession.mInviteReceived = event;
                 newSession.mPeerProfile = createPeerProfile(event.getRequest());
-                newSession.mState = SipSession.State.INCOMING_CALL;
                 newSession.mPeerSessionDescription =
                         extractContent(event.getRequest());
                 addSipSession(newSession);
@@ -708,7 +708,6 @@ class SipSessionGroup implements SipListener {
                 case SipSession.State.PINGING:
                     reset();
                     mReRegisterFlag = true;
-                    mState = SipSession.State.READY_TO_CALL;
                     break;
 
                 default:
@@ -877,6 +876,7 @@ class SipSessionGroup implements SipListener {
         private boolean readyForCall(EventObject evt) throws SipException {
             // expect MakeCallCommand, RegisterCommand, DEREGISTER
             if (evt instanceof MakeCallCommand) {
+                mState = SipSession.State.OUTGOING_CALL;
                 MakeCallCommand cmd = (MakeCallCommand) evt;
                 mPeerProfile = cmd.getPeerProfile();
                 mClientTransaction = mSipHelper.sendInvite(mLocalProfile,
@@ -884,25 +884,24 @@ class SipSessionGroup implements SipListener {
                         generateTag());
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
-                mState = SipSession.State.OUTGOING_CALL;
                 mProxy.onCalling(this);
                 startSessionTimer(cmd.getTimeout());
                 return true;
             } else if (evt instanceof RegisterCommand) {
+                mState = SipSession.State.REGISTERING;
                 int duration = ((RegisterCommand) evt).getDuration();
                 mClientTransaction = mSipHelper.sendRegister(mLocalProfile,
                         generateTag(), duration);
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
-                mState = SipSession.State.REGISTERING;
                 mProxy.onRegistering(this);
                 return true;
             } else if (DEREGISTER == evt) {
+                mState = SipSession.State.DEREGISTERING;
                 mClientTransaction = mSipHelper.sendRegister(mLocalProfile,
                         generateTag(), 0);
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
-                mState = SipSession.State.DEREGISTERING;
                 mProxy.onRegistering(this);
                 return true;
             }
@@ -913,11 +912,11 @@ class SipSessionGroup implements SipListener {
             // expect MakeCallCommand(answering) , END_CALL cmd , Cancel
             if (evt instanceof MakeCallCommand) {
                 // answer call
+                mState = SipSession.State.INCOMING_CALL_ANSWERING;
                 mServerTransaction = mSipHelper.sendInviteOk(mInviteReceived,
                         mLocalProfile,
                         ((MakeCallCommand) evt).getSessionDescription(),
                         mServerTransaction);
-                mState = SipSession.State.INCOMING_CALL_ANSWERING;
                 startSessionTimer(((MakeCallCommand) evt).getTimeout());
                 return true;
             } else if (END_CALL == evt) {
@@ -1009,8 +1008,8 @@ class SipSessionGroup implements SipListener {
                 // RFC says that UA should not send out cancel when no
                 // response comes back yet. We are cheating for not checking
                 // response.
-                mSipHelper.sendCancel(mClientTransaction);
                 mState = SipSession.State.OUTGOING_CALL_CANCELING;
+                mSipHelper.sendCancel(mClientTransaction);
                 startSessionTimer(CANCEL_CALL_TIMER);
                 return true;
             }
@@ -1065,8 +1064,8 @@ class SipSessionGroup implements SipListener {
                 return true;
             } else if (isRequestEvent(Request.INVITE, evt)) {
                 // got Re-INVITE
-                RequestEvent event = mInviteReceived = (RequestEvent) evt;
                 mState = SipSession.State.INCOMING_CALL;
+                RequestEvent event = mInviteReceived = (RequestEvent) evt;
                 mPeerSessionDescription = extractContent(event.getRequest());
                 mServerTransaction = null;
                 mProxy.onRinging(this, mPeerProfile, mPeerSessionDescription);
@@ -1077,9 +1076,9 @@ class SipSessionGroup implements SipListener {
                 return true;
             } else if (evt instanceof MakeCallCommand) {
                 // to change call
+                mState = SipSession.State.OUTGOING_CALL;
                 mClientTransaction = mSipHelper.sendReinvite(mDialog,
                         ((MakeCallCommand) evt).getSessionDescription());
-                mState = SipSession.State.OUTGOING_CALL;
                 startSessionTimer(((MakeCallCommand) evt).getTimeout());
                 return true;
             }

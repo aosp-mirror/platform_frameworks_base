@@ -27,6 +27,7 @@ LOCAL_SRC_FILES := \
 	rtp_jni.cpp
 
 LOCAL_SRC_FILES += \
+	AmrCodec.cpp \
 	G711Codec.cpp \
 	GsmCodec.cpp
 
@@ -34,13 +35,20 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libcutils \
 	libutils \
-	libmedia
+	libmedia \
+	libstagefright
 
 LOCAL_STATIC_LIBRARIES := libgsm
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
-	external/libgsm/inc
+	external/libgsm/inc \
+	frameworks/base/media/libstagefright/codecs/amrnb/common/include \
+	frameworks/base/media/libstagefright/codecs/amrnb/common/ \
+	frameworks/base/media/libstagefright/codecs/amrnb/enc/include \
+	frameworks/base/media/libstagefright/codecs/amrnb/enc/src \
+	frameworks/base/media/libstagefright/codecs/amrnb/dec/include \
+	frameworks/base/media/libstagefright/codecs/amrnb/dec/src
 
 LOCAL_CFLAGS += -fvisibility=hidden
 
