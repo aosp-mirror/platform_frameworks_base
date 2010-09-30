@@ -120,7 +120,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
 
         Cursor cursor = getCursor(dlRequest);
         try {
-            verifyInt(cursor, DownloadManager.COLUMN_ERROR_CODE, error);
+            verifyInt(cursor, DownloadManager.COLUMN_REASON, error);
         } finally {
             cursor.close();
         }
@@ -183,7 +183,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
         Cursor cursor = getCursor(dlRequest);
         try {
             verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_FAILED);
-            verifyInt(cursor, DownloadManager.COLUMN_ERROR_CODE,
+            verifyInt(cursor, DownloadManager.COLUMN_REASON,
                     DownloadManager.ERROR_CANNOT_RESUME);
         } finally {
             cursor.close();
@@ -269,7 +269,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
 
             try {
                 verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_FAILED);
-                verifyInt(cursor, DownloadManager.COLUMN_ERROR_CODE,
+                verifyInt(cursor, DownloadManager.COLUMN_REASON,
                         DownloadManager.ERROR_FILE_ERROR);
             } finally {
                 cursor.close();
@@ -476,7 +476,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
         // For the last download we should have failed b/c there is not enough space left in cache
         Cursor cursor = getCursor(dlRequest);
         try {
-            verifyInt(cursor, DownloadManager.COLUMN_ERROR_CODE,
+            verifyInt(cursor, DownloadManager.COLUMN_REASON,
                     DownloadManager.ERROR_INSUFFICIENT_SPACE);
         } finally {
             cursor.close();
