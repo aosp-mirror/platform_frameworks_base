@@ -378,16 +378,6 @@ public final class Downloads {
     }
 
     /**
-     * Returns whether the download is suspended. (i.e. whether the download
-     * won't complete without some action from outside the download
-     * manager).
-     * @hide
-     */
-    public static boolean isStatusSuspended(int status) {
-        return (status == STATUS_PENDING_PAUSED || status == STATUS_RUNNING_PAUSED);
-    }
-
-    /**
      * Returns whether the status is a success (i.e. 2xx).
      * @hide
      */
@@ -435,22 +425,10 @@ public final class Downloads {
     public static final int STATUS_PENDING = 190;
 
     /**
-     * This download hasn't stated yet and is paused
-     * @hide
-     */
-    public static final int STATUS_PENDING_PAUSED = 191;
-
-    /**
      * This download has started
      * @hide
      */
     public static final int STATUS_RUNNING = 192;
-
-    /**
-     * This download has started and is paused
-     * @hide
-     */
-    public static final int STATUS_RUNNING_PAUSED = 193;
 
     /**
      * This download has successfully completed.
@@ -980,15 +958,6 @@ public final class Downloads {
         }
 
         /**
-         * Returns whether the download is suspended. (i.e. whether the download
-         * won't complete without some action from outside the download
-         * manager).
-         */
-        public static boolean isStatusSuspended(int status) {
-            return (status == STATUS_PENDING_PAUSED || status == STATUS_RUNNING_PAUSED);
-        }
-
-        /**
          * Returns whether the status is a success (i.e. 2xx).
          */
         public static boolean isStatusSuccess(int status) {
@@ -1030,19 +999,30 @@ public final class Downloads {
         public static final int STATUS_PENDING = 190;
 
         /**
-         * This download hasn't stated yet and is paused
-         */
-        public static final int STATUS_PENDING_PAUSED = 191;
-
-        /**
          * This download has started
          */
         public static final int STATUS_RUNNING = 192;
 
         /**
-         * This download has started and is paused
+         * This download has been paused by the owning app.
          */
-        public static final int STATUS_RUNNING_PAUSED = 193;
+        public static final int STATUS_PAUSED_BY_APP = 193;
+
+        /**
+         * This download encountered some network error and is waiting before retrying the request.
+         */
+        public static final int STATUS_WAITING_TO_RETRY = 194;
+
+        /**
+         * This download is waiting for network connectivity to proceed.
+         */
+        public static final int STATUS_WAITING_FOR_NETWORK = 195;
+
+        /**
+         * This download exceeded a size limit for mobile networks and is waiting for a Wi-Fi
+         * connection to proceed.
+         */
+        public static final int STATUS_QUEUED_FOR_WIFI = 196;
 
         /**
          * This download has successfully completed.
