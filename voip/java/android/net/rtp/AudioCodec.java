@@ -80,8 +80,7 @@ public class AudioCodec {
      */
     public static final AudioCodec AMR = new AudioCodec(97, "AMR/8000", null);
 
-    // TODO: add rest of the codecs when the native part is done.
-    private static final AudioCodec[] sCodecs = {GSM_EFR, GSM, PCMU, PCMA};
+    private static final AudioCodec[] sCodecs = {GSM_EFR, AMR, GSM, PCMU, PCMA};
 
     private AudioCodec(int type, String rtpmap, String fmtp) {
         this.type = type;
