@@ -50,16 +50,16 @@
     <!-- Disabled states -->
 
     <item android:state_checked="true" android:state_window_focused="false"
-          android:drawable="@drawable/btn_check_on_disable_holo_dark" />
+          android:drawable="@drawable/btn_check_on_disabled_holo_dark" />
     <item android:state_checked="false" android:state_window_focused="false"
-          android:drawable="@drawable/btn_check_off_disable_holo_dark" />
+          android:drawable="@drawable/btn_check_off_disabled_holo_dark" />
 
     <item android:state_checked="true" android:state_focused="true"
-          android:drawable="@drawable/btn_check_on_disable_focused_holo_dark" />
+          android:drawable="@drawable/btn_check_on_disabled_focused_holo_dark" />
     <item android:state_checked="false" android:state_focused="true"
-          android:drawable="@drawable/btn_check_off_disable_focused_holo_dark" />
+          android:drawable="@drawable/btn_check_off_disabled_focused_holo_dark" />
 
-    <item android:state_checked="false" android:drawable="@drawable/btn_check_off_disable_holo_dark" />
-    <item android:state_checked="true" android:drawable="@drawable/btn_check_on_disable_holo_dark" />
+    <item android:state_checked="false" android:drawable="@drawable/btn_check_off_disabled_holo_dark" />
+    <item android:state_checked="true" android:drawable="@drawable/btn_check_on_disabled_holo_dark" />
 
 </selector>
