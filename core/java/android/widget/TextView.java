@@ -3798,6 +3798,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mError != null) {
             hideError();
         }
+
+        hideControllers();
     }
 
     @Override
@@ -4165,6 +4167,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         */
 
         canvas.restore();
+
+        if (mInsertionPointCursorController != null &&
+                mInsertionPointCursorController.isShowing()) {
+            mInsertionPointCursorController.updatePosition();
+        }
+        if (mSelectionModifierCursorController != null &&
+                mSelectionModifierCursorController.isShowing()) {
+            mSelectionModifierCursorController.updatePosition();
+        }
     }
 
     @Override
@@ -4788,6 +4799,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mInputMethodState != null) {
             mInputMethodState.mExtracting = req;
         }
+        hideControllers();
     }
     
     /**
@@ -6326,7 +6338,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
-        hideControllers();
+
+        // Hide the controller if the amount of content changed
+        if (before != after) {
+            hideControllers();
+        }
     }
     
     /**
@@ -6668,9 +6684,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mInputContentType != null) {
                 mInputContentType.enterDown = false;
             }
+            hideControllers();
         }
 
         startStopMarquee(hasWindowFocus);
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (visibility != VISIBLE) {
+            hideControllers();
+        }
     }
 
     /**
@@ -6742,8 +6767,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (hasSelection()) {
                     startSelectionActionMode();
-                } else if (mInsertionPointCursorController != null) {
-                    mInsertionPointCursorController.show();
                 }
             }
         }
@@ -7732,6 +7755,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mPositionY;
         private CursorController mController;
         private boolean mIsDragging;
+        private int mOffsetX;
+        private int mOffsetY;
 
         public HandleView(CursorController controller, Drawable handle) {
             super(TextView.this.mContext);
@@ -7740,6 +7765,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainer = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mContainer.setSplitTouchEnabled(true);
+            mContainer.setClippingEnabled(false);
+            mContainer.setLayoutInScreenEnabled(true);
         }
 
         @Override
@@ -7777,19 +7804,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int compoundPaddingRight = getCompoundPaddingRight();
 
             final TextView hostView = TextView.this;
-            final int right = hostView.mRight;
-            final int left = hostView.mLeft;
-            final int bottom = hostView.mBottom;
-            final int top = hostView.mTop;
+            final int handleWidth = mDrawable.getIntrinsicWidth();
+            final int left = 0;
+            final int right = hostView.getWidth();
+            final int top = 0;
+            final int bottom = hostView.getHeight();
 
-            final int clipLeft = left + compoundPaddingLeft;
+            final int clipLeft = left + compoundPaddingLeft - (int) (handleWidth * 0.75f);
             final int clipTop = top + extendedPaddingTop;
-            final int clipRight = right - compoundPaddingRight;
+            final int clipRight = right - compoundPaddingRight + (int) (handleWidth * 0.25f);
             final int clipBottom = bottom - extendedPaddingBottom;
 
-            final int handleWidth = mDrawable.getIntrinsicWidth();
-            return mPositionX >= clipLeft - handleWidth * 0.75f &&
-                    mPositionX <= clipRight + handleWidth * 0.25f &&
+            return mPositionX >= clipLeft && mPositionX <= clipRight &&
                     mPositionY >= clipTop && mPositionY <= clipBottom;
         }
 
@@ -7828,6 +7854,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public boolean onTouchEvent(MotionEvent ev) {
             switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                mOffsetX = (int) (ev.getX() - mDrawable.getIntrinsicWidth() / 2.f + 0.5f);
+                mOffsetY = (int) (ev.getY() - mDrawable.getIntrinsicHeight() / 2.f + 0.5f);
                 mIsDragging = true;
                 break;
 
@@ -7836,8 +7864,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final float rawY = ev.getRawY();
                 final int[] coords = mTempCoords;
                 TextView.this.getLocationOnScreen(coords);
-                final int x = (int) (rawX - coords[0] + 0.5f);
-                final int y = (int) (rawY - coords[1] + 0.5f);
+                final int x = (int) (rawX - coords[0] + 0.5f) - mOffsetX;
+                final int y = (int) (rawY - coords[1] + 0.5f) -
+                        (int) (mDrawable.getIntrinsicHeight() * 0.8f) - mOffsetY;
+
                 mController.updatePosition(this, x, y);
                 break;
 
@@ -8146,7 +8176,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int previousLine = layout.getLineForOffset(previousOffset);
         final int previousLineTop = layout.getLineTop(previousLine);
         final int previousLineBottom = layout.getLineBottom(previousLine);
-        final int hysteresisThreshold = (previousLineBottom - previousLineTop) / 2;
+        final int hysteresisThreshold = (previousLineBottom - previousLineTop) / 6;
 
         // If new line is just before or after previous line and y position is less than
         // hysteresisThreshold away from previous line, keep cursor on previous line.
