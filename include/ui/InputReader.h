@@ -308,9 +308,6 @@ private:
             GetStateFunc getStateFunc);
     bool markSupportedKeyCodes(int32_t deviceId, uint32_t sourceMask, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags);
-
-    // dump state
-    void dumpDeviceInfo(String8& dump);
 };
 
 
@@ -340,6 +337,7 @@ public:
 
     inline bool isIgnored() { return mMappers.isEmpty(); }
 
+    void dump(String8& dump);
     void addMapper(InputMapper* mapper);
     void configure();
     void reset();
@@ -393,6 +391,7 @@ public:
 
     virtual uint32_t getSources() = 0;
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
+    virtual void dump(String8& dump);
     virtual void configure();
     virtual void reset();
     virtual void process(const RawEvent* rawEvent) = 0;
@@ -436,6 +435,7 @@ public:
 
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
+    virtual void dump(String8& dump);
     virtual void reset();
     virtual void process(const RawEvent* rawEvent);
 
@@ -484,6 +484,7 @@ public:
 
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
+    virtual void dump(String8& dump);
     virtual void reset();
     virtual void process(const RawEvent* rawEvent);
 
@@ -540,6 +541,7 @@ public:
 
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
+    virtual void dump(String8& dump);
     virtual void configure();
     virtual void reset();
 
@@ -761,15 +763,16 @@ protected:
     } mLocked;
 
     virtual void configureParameters();
-    virtual void logParameters();
+    virtual void dumpParameters(String8& dump);
     virtual void configureRawAxes();
-    virtual void logRawAxes();
+    virtual void dumpRawAxes(String8& dump);
     virtual bool configureSurfaceLocked();
-    virtual void logMotionRangesLocked();
+    virtual void dumpSurfaceLocked(String8& dump);
     virtual void configureVirtualKeysLocked();
+    virtual void dumpVirtualKeysLocked(String8& dump);
     virtual void parseCalibration();
     virtual void resolveCalibration();
-    virtual void logCalibration();
+    virtual void dumpCalibration(String8& dump);
 
     enum TouchResult {
         // Dispatch the touch normally.
