@@ -89,7 +89,6 @@ public:
     void encode(int tick, AudioStream *chain);
     void decode(int tick);
 
-private:
     enum {
         NORMAL = 0,
         SEND_ONLY = 1,
@@ -97,6 +96,7 @@ private:
         LAST_MODE = 2,
     };
 
+private:
     int mMode;
     int mSocket;
     sockaddr_storage mRemote;
@@ -202,8 +202,8 @@ bool AudioStream::set(int mode, int socket, sockaddr_storage *remote,
         }
     }
 
-    LOGD("stream[%d] is configured as %s %dkHz %dms", mSocket,
-        (codec ? codec->name : "RAW"), mSampleRate, mInterval);
+    LOGD("stream[%d] is configured as %s %dkHz %dms mode %d", mSocket,
+        (codec ? codec->name : "RAW"), mSampleRate, mInterval, mMode);
     return true;
 }
 
@@ -253,7 +253,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
         mTick += skipped * mInterval;
         mSequence += skipped;
         mTimestamp += skipped * mSampleCount;
-        LOGD("stream[%d] skips %d packets", mSocket, skipped);
+        LOGV("stream[%d] skips %d packets", mSocket, skipped);
     }
 
     tick = mTick;
@@ -302,7 +302,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
     if (!mixed) {
         if ((mTick ^ mLogThrottle) >> 10) {
             mLogThrottle = mTick;
-            LOGD("stream[%d] no data", mSocket);
+            LOGV("stream[%d] no data", mSocket);
         }
         return;
     }
@@ -330,7 +330,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
     buffer[2] = mSsrc;
     int length = mCodec->encode(&buffer[3], samples);
     if (length <= 0) {
-        LOGD("stream[%d] encoder error", mSocket);
+        LOGV("stream[%d] encoder error", mSocket);
         return;
     }
     sendto(mSocket, buffer, length + 12, MSG_DONTWAIT, (sockaddr *)&mRemote,
@@ -369,14 +369,14 @@ void AudioStream::decode(int tick)
         mLatencyTimer = tick;
         mLatencyScore = score;
     } else if (tick - mLatencyTimer >= MEASURE_PERIOD) {
-        LOGD("stream[%d] reduces latency of %dms", mSocket, mLatencyScore);
+        LOGV("stream[%d] reduces latency of %dms", mSocket, mLatencyScore);
         mBufferTail -= mLatencyScore;
         mLatencyTimer = tick;
     }
 
     if (mBufferTail - mBufferHead > BUFFER_SIZE - mInterval) {
         // Buffer overflow. Drop the packet.
-        LOGD("stream[%d] buffer overflow", mSocket);
+        LOGV("stream[%d] buffer overflow", mSocket);
         recv(mSocket, &c, 1, MSG_DONTWAIT);
         return;
     }
@@ -400,7 +400,7 @@ void AudioStream::decode(int tick)
         // reliable but at least they can be used to identify duplicates?
         if (length < 12 || length > (int)sizeof(buffer) ||
             (ntohl(*(uint32_t *)buffer) & 0xC07F0000) != mCodecMagic) {
-            LOGD("stream[%d] malformed packet", mSocket);
+            LOGV("stream[%d] malformed packet", mSocket);
             return;
         }
         int offset = 12 + ((buffer[0] & 0x0F) << 2);
@@ -420,13 +420,13 @@ void AudioStream::decode(int tick)
         }
     }
     if (length <= 0) {
-        LOGD("stream[%d] decoder error", mSocket);
+        LOGV("stream[%d] decoder error", mSocket);
         return;
     }
 
     if (tick - mBufferTail > 0) {
         // Buffer underrun. Reset the jitter buffer.
-        LOGD("stream[%d] buffer underrun", mSocket);
+        LOGV("stream[%d] buffer underrun", mSocket);
         if (mBufferTail - mBufferHead <= 0) {
             mBufferHead = tick + mInterval;
             mBufferTail = mBufferHead;
@@ -462,7 +462,6 @@ public:
     bool add(AudioStream *stream);
     bool remove(int socket);
 
-private:
     enum {
         ON_HOLD = 0,
         MUTED = 1,
@@ -471,6 +470,7 @@ private:
         LAST_MODE = 3,
     };
 
+private:
     AudioStream *mChain;
     int mEventQueue;
     volatile int mDtmfEvent;
@@ -946,6 +946,10 @@ void remove(JNIEnv *env, jobject thiz, jint socket)
 
 void setMode(JNIEnv *env, jobject thiz, jint mode)
 {
+    if (mode < 0 || mode > AudioGroup::LAST_MODE) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
     AudioGroup *group = (AudioGroup *)env->GetIntField(thiz, gNative);
     if (group && !group->setMode(mode)) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
