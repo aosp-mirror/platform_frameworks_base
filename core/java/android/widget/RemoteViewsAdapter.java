@@ -601,19 +601,6 @@ public class RemoteViewsAdapter extends BaseAdapter {
         mWorkerQueue.post(new Runnable() {
             @Override
             public void run() {
-                boolean isDataDirty = false;
-
-                // If the data set has changed, then notify the remote factory so that it can
-                // update its internals first.
-                final RemoteViewsMetaData metaData = mCache.getMetaData();
-                synchronized (metaData) {
-                    isDataDirty = metaData.isDataDirty;
-                    metaData.isDataDirty = false;
-                }
-                if (isDataDirty) {
-                    completeNotifyDataSetChanged();
-                }
-
                 // Get the next index to load
                 int position = -1;
                 synchronized (mCache) {
@@ -843,46 +830,43 @@ public class RemoteViewsAdapter extends BaseAdapter {
     }
 
     public void notifyDataSetChanged() {
-        final RemoteViewsMetaData metaData = mCache.getMetaData();
-        synchronized (metaData) {
-            // Set flag to calls the remote factory's onDataSetChanged() on the next worker loop
-            metaData.isDataDirty = true;
-        }
-
-        // Note: we do not call super.notifyDataSetChanged() until the RemoteViewsFactory has had
-        // a chance to update itself, and return new meta data associated with the new data.  After
-        // which completeNotifyDataSetChanged() is called.
-    }
-
-    private void completeNotifyDataSetChanged() {
-        // Complete the actual notifyDataSetChanged() call initiated earlier
-        if (mServiceConnection.isConnected()) {
-            IRemoteViewsFactory factory = mServiceConnection.getRemoteViewsFactory();
-            try {
-                factory.onDataSetChanged();
-            } catch (Exception e) {
-                Log.e(TAG, "Error in updateNotifyDataSetChanged(): " + e.getMessage());
-
-                // Return early to prevent from further being notified (since nothing has changed)
-                return;
-            }
-        }
-
-        // Flush the cache so that we can reload new items from the service
-        synchronized (mCache) {
-            mCache.reset();
-        }
-
-        // Re-request the new metadata (only after the notification to the factory)
-        updateMetaData();
-
-        // Propagate the notification back to the base adapter
-        mMainQueue.post(new Runnable() {
+        mWorkerQueue.post(new Runnable() {
             @Override
             public void run() {
-                superNotifyDataSetChanged();
+                // Complete the actual notifyDataSetChanged() call initiated earlier
+                if (mServiceConnection.isConnected()) {
+                    IRemoteViewsFactory factory = mServiceConnection.getRemoteViewsFactory();
+                    try {
+                        factory.onDataSetChanged();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in updateNotifyDataSetChanged(): " + e.getMessage());
+
+                        // Return early to prevent from further being notified (since nothing has
+                        // changed)
+                        return;
+                    }
+                }
+
+                // Flush the cache so that we can reload new items from the service
+                synchronized (mCache) {
+                    mCache.reset();
+                }
+
+                // Re-request the new metadata (only after the notification to the factory)
+                updateMetaData();
+
+                // Propagate the notification back to the base adapter
+                mMainQueue.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        superNotifyDataSetChanged();
+                    }
+                });
             }
         });
+
+        // Note: we do not call super.notifyDataSetChanged() until the RemoteViewsFactory has had
+        // a chance to update itself and return new meta data associated with the new data.
     }
 
     private void superNotifyDataSetChanged() {

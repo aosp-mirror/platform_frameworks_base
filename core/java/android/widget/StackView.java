@@ -776,6 +776,7 @@ public class StackView extends AdapterViewAnimator {
                 mWhichChild = 0;
 
             showOnly(mWhichChild, true, true);
+            refreshChildren();
         }
 
         final int childCount = getChildCount();
