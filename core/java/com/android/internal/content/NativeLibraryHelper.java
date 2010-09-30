@@ -180,7 +180,7 @@ public class NativeLibraryHelper {
                 Log.d(TAG, "Found gdbserver: " + entry.getName());
             }
 
-            final String installGdbServerPath = APK_LIB + GDBSERVER;
+            final String installGdbServerPath = GDBSERVER;
             nativeFiles.add(Pair.create(entry, installGdbServerPath));
 
             return PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES;
