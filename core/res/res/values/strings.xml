@@ -387,8 +387,10 @@
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_storage">Storage</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this.   [CHAR LIMIT=30] -->
+    <string name="permgroupdesc_storage" product="nosdcard">Access the shared storage.</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_storage">Access the SD card.</string>
+    <string name="permgroupdesc_storage" product="default">Access the SD card.</string>
 
     <!--  Permissions -->
 
@@ -1230,10 +1232,14 @@
     <string name="permdesc_writeDictionary">Allows an application to write new words into the
       user dictionary.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
+    <string name="permlab_sdcardWrite" product="nosdcard">modify/delete shared storage contents</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sdcardWrite">modify/delete SD card contents</string>
+    <string name="permlab_sdcardWrite" product="default">modify/delete SD card contents</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
+    <string name="permdesc_sdcardWrite" product="nosdcard">Allows an application to write to the shared storage.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_sdcardWrite">Allows an application to write to the SD card.</string>
+    <string name="permdesc_sdcardWrite" product="default">Allows an application to write to the SD card.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_cache_filesystem">access the cache filesystem</string>
@@ -2115,12 +2121,16 @@
 
     <!-- See USB_STORAGE.  USB_STORAGE_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to mount.  This is the title. -->
     <string name="usb_storage_title">USB connected</string>
+    <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
+    <string name="usb_storage_message" product="nosdcard">You have connected your phone to your computer via USB. Select the button below if you want to copy files between your computer and your Android\u2018s shared storage.</string>
     <!-- See USB_STORAGE.    This is the message. -->
-    <string name="usb_storage_message">You have connected your phone to your computer via USB. Select the button below if you want to copy files between your computer and your Android\u2018s SD card.</string>
+    <string name="usb_storage_message" product="default">You have connected your phone to your computer via USB. Select the button below if you want to copy files between your computer and your Android\u2018s SD card.</string>
     <!-- See USB_STORAGE.    This is the button text to mount the phone on the computer. -->
     <string name="usb_storage_button_mount">Turn on USB storage</string>
+    <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. [CHAR LIMIT=NONE] -->
+    <string name="usb_storage_error_message" product="nosdcard">There is a problem using your shared storage for USB storage.</string>
     <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. -->
-    <string name="usb_storage_error_message">There is a problem using your SD card for USB storage.</string>
+    <string name="usb_storage_error_message" product="default">There is a problem using your SD card for USB storage.</string>
     <!-- USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
     <string name="usb_storage_notification_title">USB connected</string>
     <!-- See USB_STORAGE. This is the message. -->
@@ -2135,8 +2145,10 @@
     <!-- This is the label for the activity, and should never be visible to the user. -->
     <!-- See USB_STORAGE_STOP.  USB_STORAGE_STOP_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to stop usb storage.  This is the title. -->
     <string name="usb_storage_stop_title">USB storage in use</string>
+    <!-- See USB_STORAGE_STOP.    This is the message. [CHAR LIMIT=NONE] -->
+    <string name="usb_storage_stop_message" product="nosdcard">Before turning off USB storage, make sure you have unmounted (\u201cejected\u201d) your Android\u2018s shared storage from your computer.</string>
     <!-- See USB_STORAGE_STOP.    This is the message. -->
-    <string name="usb_storage_stop_message">Before turning off USB storage, make sure you have unmounted (\u201cejected\u201d) your Android\u2018s SD card from your computer.</string>
+    <string name="usb_storage_stop_message" product="default">Before turning off USB storage, make sure you have unmounted (\u201cejected\u201d) your Android\u2018s SD card from your computer.</string>
     <!-- See USB_STORAGE_STOP.    This is the button text to stop usb storage. -->
     <string name="usb_storage_stop_button_mount">Turn off USB storage</string>
     <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. -->
@@ -2153,10 +2165,14 @@
 
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
+    <!-- See EXTMEDIA_FORMAT.  EXTMEDIA_FORMAT_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to format the SD card.  This is the title. [CHAR LIMIT=20] -->
+    <string name="extmedia_format_title" product="nosdcard">Format shared storage</string>
     <!-- See EXTMEDIA_FORMAT.  EXTMEDIA_FORMAT_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to format the SD card.  This is the title. -->
-    <string name="extmedia_format_title">Format SD card</string>
+    <string name="extmedia_format_title" product="default">Format SD card</string>
+    <!-- See EXTMEDIA_FORMAT.   This is the message. [CHAR LIMIT=NONE] -->
+    <string name="extmedia_format_message" product="nosdcard">Format shared storage, erasing all files stored there?  Action cannot be reversed!</string>
     <!-- See EXTMEDIA_FORMAT.   This is the message. -->
-    <string name="extmedia_format_message">Are you sure you want to format the SD card? All data on your card will be lost.</string>
+    <string name="extmedia_format_message" product="default">Are you sure you want to format the SD card? All data on your card will be lost.</string>
     <!-- See EXTMEDIA_FORMAT.    This is the button text to format the sd card. -->
     <string name="extmedia_format_button_format">Format</string>
 
@@ -2181,29 +2197,51 @@
     <string name="candidates_style"><u>candidates</u></string>
 
     <!-- External media notification strings -->
+    <!-- Shown when external media is being checked [CHAR LIMIT=30] -->
+    <string name="ext_media_checking_notification_title" product="nosdcard">Preparing shared storage</string>
     <!-- Shown when external media is being checked -->
-    <string name="ext_media_checking_notification_title">Preparing SD card</string>
+    <string name="ext_media_checking_notification_title" product="default">Preparing SD card</string>
     <string name="ext_media_checking_notification_message">Checking for errors.</string>
 
+    <!-- Shown when external media is blank (or unsupported filesystem) [CHAR LIMIT=30] -->
+    <string name="ext_media_nofs_notification_title" product="nosdcard">Blank shared storage</string>
     <!-- Shown when external media is blank (or unsupported filesystem) -->
-    <string name="ext_media_nofs_notification_title">Blank SD card</string>
-    <string name="ext_media_nofs_notification_message">SD card blank or has unsupported filesystem.</string>
+    <string name="ext_media_nofs_notification_title" product="default">Blank SD card</string>
+    <!-- Shown when shared storage cannot be read.  [CHAR LIMIT=NONE] -->
+    <string name="ext_media_nofs_notification_message" product="nosdcard">Shared storage blank or has unsupported filesystem.</string>
+    <string name="ext_media_nofs_notification_message" product="default">SD card blank or has unsupported filesystem.</string>
 
+    <!-- Shown when external media is unmountable (corrupt)) [CHAR LIMIT=30] -->
+    <string name="ext_media_unmountable_notification_title" product="nosdcard">Damaged shared storage</string>
     <!-- Shown when external media is unmountable (corrupt)) -->
-    <string name="ext_media_unmountable_notification_title">Damaged SD card</string>
-    <string name="ext_media_unmountable_notification_message">SD card damaged. You may have to reformat it.</string>
+    <string name="ext_media_unmountable_notification_title" product="default">Damaged SD card</string>
+    <!-- Shown when shared storage cannot be read.  [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unmountable_notification_message" product="nosdcard">Shared storage damaged. You may have to reformat it.</string>
+    <string name="ext_media_unmountable_notification_message" product="default">SD card damaged. You may have to reformat it.</string>
 
+    <!-- Shown when external media is unsafely removed [CHAR LIMIT=30] -->
+    <string name="ext_media_badremoval_notification_title" product="nosdcard">Shared storage unexpectedly removed</string>
     <!-- Shown when external media is unsafely removed -->
-    <string name="ext_media_badremoval_notification_title">SD card unexpectedly removed</string>
-    <string name="ext_media_badremoval_notification_message">Unmount SD card before removing to avoid data loss.</string>
+    <string name="ext_media_badremoval_notification_title" product="default">SD card unexpectedly removed</string>
+    <!-- Shown when external media is unsafely removed.  [CHAR LIMIT=NONE] -->
+    <string name="ext_media_badremoval_notification_message" product="nosdcard">Unmount shared storage before removing to avoid data loss.</string>
+    <string name="ext_media_badremoval_notification_message" product="default">Unmount SD card before removing to avoid data loss.</string>
 
+    <!-- Shown when external media has been safely removed [CHAR LIMIT=30] -->
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard">Shared storage safe to remove</string>
     <!-- Shown when external media has been safely removed -->
-    <string name="ext_media_safe_unmount_notification_title">SD card safe to remove</string>
-    <string name="ext_media_safe_unmount_notification_message">You can safely remove SD card.</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default">SD card safe to remove</string>
+    <!-- Shown when external media has been safely removed.  [CHAR LIMIT=NONE] -->
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard">You can safely remove shared storage.</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default">You can safely remove SD card.</string>
 
+    <!-- Shown when external media is missing [CHAR LIMIT=30] -->
+    <string name="ext_media_nomedia_notification_title" product="nosdcard">Removed shared storage</string>
     <!-- Shown when external media is missing -->
-    <string name="ext_media_nomedia_notification_title">Removed SD card</string>
-    <string name="ext_media_nomedia_notification_message">SD card removed. Insert a new one.</string>
+    <string name="ext_media_nomedia_notification_title" product="default">Removed SD card</string>
+    <!-- Shown when external media is missing.  [CHAR LIMIT=NONE] -->
+    <string name="ext_media_nomedia_notification_message" product="nosdcard">Shared storage removed. Insert new media.</string>
+    <string name="ext_media_nomedia_notification_message" product="default">SD card removed. Insert a new one.</string>
 
     <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
     <string name="activity_list_empty">No matching activities found</string>
