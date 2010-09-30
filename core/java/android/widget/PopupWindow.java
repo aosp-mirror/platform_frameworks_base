@@ -88,6 +88,7 @@ public class PopupWindow {
     private boolean mOutsideTouchable = false;
     private boolean mClippingEnabled = true;
     private boolean mSplitTouchEnabled;
+    private boolean mLayoutInScreen;
 
     private OnTouchListener mTouchInterceptor;
     
@@ -607,6 +608,29 @@ public class PopupWindow {
     }
 
     /**
+     * <p>Indicates whether the popup window will be forced into using absolute screen coordinates
+     * for positioning.</p>
+     *
+     * @return true if the window will always be positioned in screen coordinates.
+     * @hide
+     */
+    public boolean isLayoutInScreenEnabled() {
+        return mLayoutInScreen;
+    }
+
+    /**
+     * <p>Allows the popup window to force the flag
+     * {@link WindowManager.LayoutParams#FLAG_LAYOUT_IN_SCREEN}, overriding default behavior.
+     * This will cause the popup to be positioned in absolute screen coordinates.</p>
+     *
+     * @param enabled true if the popup should always be positioned in screen coordinates
+     * @hide
+     */
+    public void setLayoutInScreenEnabled(boolean enabled) {
+        mLayoutInScreen = enabled;
+    }
+
+    /**
      * <p>Change the width and height measure specs that are given to the
      * window manager by the popup.  By default these are 0, meaning that
      * the current width or height is requested as an explicit size from
@@ -910,7 +934,8 @@ public class PopupWindow {
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
-                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM |
+                WindowManager.LayoutParams.FLAG_SPLIT_TOUCH);
         if(mIgnoreCheekPress) {
             curFlags |= WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
         }
@@ -933,6 +958,9 @@ public class PopupWindow {
         }
         if (mSplitTouchEnabled) {
             curFlags |= WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+        }
+        if (mLayoutInScreen) {
+            curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
         }
         return curFlags;
     }
