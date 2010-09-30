@@ -133,14 +133,27 @@ public class SipPhone extends SipPhoneBase {
                 return false;
             }
 
-            SipAudioCall sipAudioCall = (SipAudioCall) incomingCall;
-            Log.v(LOG_TAG, "  ++++++ taking call from: "
-                    + sipAudioCall.getPeerProfile().getUriString());
-            String localUri = sipAudioCall.getLocalProfile().getUriString();
-            if (localUri.equals(mProfile.getUriString())) {
-                boolean makeCallWait = foregroundCall.getState().isAlive();
-                ringingCall.initIncomingCall(sipAudioCall, makeCallWait);
-                return true;
+            try {
+                SipAudioCall sipAudioCall = (SipAudioCall) incomingCall;
+                Log.d(LOG_TAG, "+++ taking call from: "
+                        + sipAudioCall.getPeerProfile().getUriString());
+                String localUri = sipAudioCall.getLocalProfile().getUriString();
+                if (localUri.equals(mProfile.getUriString())) {
+                    boolean makeCallWait = foregroundCall.getState().isAlive();
+                    ringingCall.initIncomingCall(sipAudioCall, makeCallWait);
+                    if (sipAudioCall.getState()
+                            != SipSession.State.INCOMING_CALL) {
+                        // Peer cancelled the call!
+                        Log.d(LOG_TAG, "    call cancelled !!");
+                        ringingCall.reset();
+                    }
+                    return true;
+                }
+            } catch (Exception e) {
+                // Peer may cancel the call at any time during the time we hook
+                // up ringingCall with sipAudioCall. Clean up ringingCall when
+                // that happens.
+                ringingCall.reset();
             }
             return false;
         }
@@ -361,6 +374,11 @@ public class SipPhone extends SipPhoneBase {
     }
 
     private class SipCall extends SipCallBase {
+        void reset() {
+            connections.clear();
+            setState(Call.State.IDLE);
+        }
+
         void switchWith(SipCall that) {
             synchronized (SipPhone.class) {
                 SipCall tmp = new SipCall();
