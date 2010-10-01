@@ -66,6 +66,7 @@ import javax.sip.SipException;
  */
 public final class SipService extends ISipService.Stub {
     private static final String TAG = "SipService";
+    private static final boolean DEBUGV = false;
     private static final boolean DEBUG = true;
     private static final boolean DEBUG_TIMER = DEBUG && false;
     private static final int EXPIRY_TIME = 3600;
@@ -597,7 +598,7 @@ public final class SipService extends ISipService.Stub {
                 if (notCurrentSession(session)) return;
 
                 session = session.duplicate();
-                if (DEBUG) Log.d(TAG, "~~~ keepalive");
+                if (DEBUGV) Log.v(TAG, "~~~ keepalive");
                 mTimer.cancel(this);
                 session.sendKeepAlive();
                 if (session.isReRegisterRequired()) {
