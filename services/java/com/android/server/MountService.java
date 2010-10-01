@@ -2062,6 +2062,9 @@ class MountService extends IMountService.Stub
                     int code = e.getCode();
                     if (code == VoldResponseCode.OpFailedStorageBusy) {
                         rc = StorageResultCode.OperationFailedStorageBusy;
+                    } else if (code == VoldResponseCode.OpFailedStorageNotFound) {
+                        // If it's not mounted then we've already won.
+                        rc = StorageResultCode.OperationSucceeded;
                     } else {
                         rc = StorageResultCode.OperationFailedInternalError;
                     }
