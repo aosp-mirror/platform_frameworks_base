@@ -1968,7 +1968,8 @@ class MountService extends IMountService.Stub
                 }
 
                 rc = StorageResultCode.OperationSucceeded;
-                String cmd = String.format("obb mount %s %s %d", mObbState.filename, mKey,
+                String cmd = String.format("obb mount %s %s %d", mObbState.filename,
+                        mKey != null ? mKey : "none",
                         mObbState.callerUid);
                 try {
                     mConnector.doCommand(cmd);

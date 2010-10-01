@@ -161,11 +161,10 @@ eval set -- "$args"
 
 while true; do \
     case "$1" in
-        -c) use_crypto=1; shift;;
         -d) directory=$2; shift 2;;
         -h) usage; exit 1;;
-        -k) key=$2; shift 2;;
-        -K) prompt_key=1; shift;;
+        -k) key=$2; use_crypto=1; shift 2;;
+        -K) prompt_key=1; use_crypto=1; shift;;
         -v) verbose=1; shift;;
         -o) filename=$2; shift 2;;
         --) shift; break;;
