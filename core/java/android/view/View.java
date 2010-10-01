@@ -5229,11 +5229,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setRotation(float rotation) {
         if (mRotation != rotation) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mRotation = rotation;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5260,11 +5260,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setRotationY(float rotationY) {
         if (mRotationY != rotationY) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mRotationY = rotationY;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5291,11 +5291,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setRotationX(float rotationX) {
         if (mRotationX != rotationX) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mRotationX = rotationX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5324,11 +5324,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setScaleX(float scaleX) {
         if (mScaleX != scaleX) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mScaleX = scaleX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5357,11 +5357,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setScaleY(float scaleY) {
         if (mScaleY != scaleY) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mScaleY = scaleY;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5396,11 +5396,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
         if (mPivotX != pivotX) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mPivotX = pivotX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5434,11 +5434,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
         if (mPivotY != pivotY) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mPivotY = pivotY;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5461,8 +5461,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setAlpha(float alpha) {
         mAlpha = alpha;
-        onSetAlpha((int) (alpha * 255));
-        invalidate();
+        if (onSetAlpha((int) (alpha * 255))) {
+            // subclass is handling alpha - don't optimize rendering cache invalidation
+            invalidate();
+        } else {
+            invalidate(false);
+        }
     }
 
     /**
@@ -5506,7 +5510,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 invalidate();
             }
 
+            int width = mRight - mLeft;
+            int oldHeight = mBottom - mTop;
+
             mTop = top;
+
+            onSizeChanged(width, mBottom - mTop, width, oldHeight);
 
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
@@ -5553,7 +5562,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 invalidate();
             }
 
+            int width = mRight - mLeft;
+            int oldHeight = mBottom - mTop;
+
             mBottom = bottom;
+
+            onSizeChanged(width, mBottom - mTop, width, oldHeight);
 
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
@@ -5603,12 +5617,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 invalidate();
             }
 
+            int oldWidth = mRight - mLeft;
+            int height = mBottom - mTop;
+
             mLeft = left;
+
+            onSizeChanged(mRight - mLeft, height, oldWidth, height);
 
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate();
             }
+
         }
     }
 
@@ -5650,7 +5670,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 invalidate();
             }
 
+            int oldWidth = mRight - mLeft;
+            int height = mBottom - mTop;
+
             mRight = right;
+
+            onSizeChanged(mRight - mLeft, height, oldWidth, height);
 
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
@@ -5726,11 +5751,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setTranslationX(float translationX) {
         if (mTranslationX != translationX) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mTranslationX = translationX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5757,11 +5782,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setTranslationY(float translationY) {
         if (mTranslationY != translationY) {
             // Double-invalidation is necessary to capture view's old and new areas
-            invalidate();
+            invalidate(false);
             mTranslationY = translationY;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-            invalidate();
+            invalidate(false);
         }
     }
 
@@ -5884,7 +5909,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     p.invalidateChild(this, r);
                 }
             } else {
-                invalidate();
+                invalidate(false);
             }
 
             mTop += offset;
@@ -5892,7 +5917,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
+                invalidate(false);
             }
         }
     }
@@ -5922,7 +5947,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     p.invalidateChild(this, r);
                 }
             } else {
-                invalidate();
+                invalidate(false);
             }
 
             mLeft += offset;
@@ -5930,7 +5955,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             if (!mMatrixIsIdentity) {
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
+                invalidate(false);
             }
         }
     }
@@ -6228,12 +6253,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * UI thread. To call from a non-UI thread, call {@link #postInvalidate()}.
      */
     public void invalidate() {
+        invalidate(true);
+    }
+
+    /**
+     * This is where the invalidate() work actually happens. A full invalidate()
+     * causes the drawing cache to be invalidated, but this function can be called with
+     * invalidateCache set to false to skip that invalidation step for cases that do not
+     * need it (for example, a component that remains at the same dimensions with the same
+     * content).
+     *
+     * @param invalidateCache Whether the drawing cache for this view should be invalidated as
+     * well. This is usually true for a full invalidate, but may be set to false if the
+     * View's contents or dimensions have not changed.
+     */
+    private void invalidate(boolean invalidateCache) {
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
-            mPrivateFlags &= ~DRAWN & ~DRAWING_CACHE_VALID;
+            mPrivateFlags &= ~DRAWN;
+            if (invalidateCache) {
+                mPrivateFlags &= ~DRAWING_CACHE_VALID;
+            }
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null) {
