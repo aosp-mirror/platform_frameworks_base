@@ -87,6 +87,7 @@ public class TransparentListActivity extends Activity {
         ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setCacheColorHint(0);
+        list.setVerticalFadingEdgeEnabled(true);
 
         registerForContextMenu(list);
     }
