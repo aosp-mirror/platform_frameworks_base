@@ -241,6 +241,10 @@ bool Context::setupCheck()
     return true;
 }
 
+void Context::setupProgramStore() {
+    mFragmentStore->setupGL2(this, &mStateFragmentStore);
+}
+
 static bool getProp(const char *str)
 {
     char buf[PROPERTY_VALUE_MAX];

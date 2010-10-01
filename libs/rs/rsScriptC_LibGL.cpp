@@ -319,9 +319,7 @@ static void SC_uploadToBufferObject(RsAllocation va)
 static void SC_ClearColor(float r, float g, float b, float a)
 {
     GET_TLS();
-    if (!rsc->setupCheck()) {
-        return;
-    }
+    rsc->setupProgramStore();
 
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -330,9 +328,7 @@ static void SC_ClearColor(float r, float g, float b, float a)
 static void SC_ClearDepth(float v)
 {
     GET_TLS();
-    if (!rsc->setupCheck()) {
-        return;
-    }
+    rsc->setupProgramStore();
 
     glClearDepthf(v);
     glClear(GL_DEPTH_BUFFER_BIT);

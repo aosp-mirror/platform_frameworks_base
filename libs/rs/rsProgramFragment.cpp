@@ -49,6 +49,9 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
 
 ProgramFragment::~ProgramFragment()
 {
+    if(mShaderID) {
+        mRSC->mShaderCache.cleanupFragment(mShaderID);
+    }
 }
 
 void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, float a)

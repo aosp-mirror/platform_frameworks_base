@@ -58,11 +58,12 @@ protected:
         int32_t mFragUniformSlots[Program::MAX_UNIFORMS];
         bool mIsValid;
     } entry_t;
-    entry_t *mEntries;
+    //entry_t *mEntries;
+    Vector<entry_t*> mEntries;
     entry_t *mCurrent;
 
-    uint32_t mEntryCount;
-    uint32_t mEntryAllocationCount;
+    /*uint32_t mEntryCount;
+    uint32_t mEntryAllocationCount;*/
 
 };
 
