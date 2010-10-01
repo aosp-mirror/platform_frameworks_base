@@ -1856,6 +1856,8 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 if (--(track->mRetryCount) <= 0) {
                     LOGV("BUFFER TIMEOUT: remove(%d) from active list on thread %p", track->name(), this);
                     tracksToRemove->add(track);
+                    // indicate to client process that the track was disabled because of underrun
+                    cblk->flags |= CBLK_DISABLED_ON;
                 } else if (mixerStatus != MIXER_TRACKS_READY) {
                     mixerStatus = MIXER_TRACKS_ENABLED;
                 }
@@ -2790,7 +2792,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
                     mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
                     memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
                     // Force underrun condition to avoid false underrun callback until first data is
-                    // written to buffer
+                    // written to buffer (other flags are cleared)
                     mCblk->flags = CBLK_UNDERRUN_ON;
                 } else {
                     mBuffer = sharedBuffer->pointer();
@@ -2813,7 +2815,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
            mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
            memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
            // Force underrun condition to avoid false underrun callback until first data is
-           // written to buffer
+           // written to buffer (other flags are cleared)
            mCblk->flags = CBLK_UNDERRUN_ON;
            mBufferEnd = (uint8_t *)mBuffer + bufferSize;
        }
@@ -3794,6 +3796,8 @@ bool AudioFlinger::RecordThread::threadLoop()
     AudioBufferProvider::Buffer buffer;
     sp<RecordTrack> activeTrack;
 
+    nsecs_t lastWarning = 0;
+
     // start recording
     while (!exitPending()) {
 
@@ -3935,8 +3939,13 @@ bool AudioFlinger::RecordThread::threadLoop()
             }
             // client isn't retrieving buffers fast enough
             else {
-                if (!mActiveTrack->setOverflow())
-                    LOGW("RecordThread: buffer overflow");
+                if (!mActiveTrack->setOverflow()) {
+                    nsecs_t now = systemTime();
+                    if ((now - lastWarning) > kWarningThrottle) {
+                        LOGW("RecordThread: buffer overflow");
+                        lastWarning = now;
+                    }
+                }
                 // Release the processor for a while before asking for a new buffer.
                 // This will give the application more chance to read from the buffer and
                 // clear the overflow.
