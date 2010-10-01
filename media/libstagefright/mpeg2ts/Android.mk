@@ -5,6 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:=                 \
         AnotherPacketSource.cpp   \
         ATSParser.cpp             \
+        ESQueue.cpp               \
         MPEG2TSExtractor.cpp      \
 
 LOCAL_C_INCLUDES:= \

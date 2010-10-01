@@ -157,7 +157,7 @@ void MPEG2TSExtractor::init() {
             }
         }
 
-        if (++numPacketsParsed > 1500) {
+        if (++numPacketsParsed > 2500) {
             break;
         }
     }
