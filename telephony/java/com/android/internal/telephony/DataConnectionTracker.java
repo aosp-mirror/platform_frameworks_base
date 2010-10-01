@@ -35,7 +35,7 @@ import java.util.ArrayList;
  *
  */
 public abstract class DataConnectionTracker extends Handler {
-    protected static final boolean DBG = true;
+    protected static final boolean DBG = false;
     protected final String LOG_TAG = "DataConnectionTracker";
 
     /**

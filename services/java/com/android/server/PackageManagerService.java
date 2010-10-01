@@ -1102,27 +1102,6 @@ class PackageManagerService extends IPackageManager.Stub {
         final File permFile = new File(Environment.getRootDirectory(),
                 "etc/permissions/platform.xml");
         readPermissionsFromXml(permFile);
-
-        StringBuilder sb = new StringBuilder(128);
-        sb.append("Libs:");
-        Iterator<String> it = mSharedLibraries.keySet().iterator();
-        while (it.hasNext()) {
-            sb.append(' ');
-            String name = it.next();
-            sb.append(name);
-            sb.append(':');
-            sb.append(mSharedLibraries.get(name));
-        }
-        Log.i(TAG, sb.toString());
-
-        sb.setLength(0);
-        sb.append("Features:");
-        it = mAvailableFeatures.keySet().iterator();
-        while (it.hasNext()) {
-            sb.append(' ');
-            sb.append(it.next());
-        }
-        Log.i(TAG, sb.toString());
     }
 
     private void readPermissionsFromXml(File permFile) {
@@ -2632,7 +2611,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     // The system package has been updated and the code path does not match
                     // Ignore entry. Skip it.
                     Log.i(TAG, "Package " + ps.name + " at " + scanFile
-                            + "ignored: updated version " + ps.versionCode
+                            + " ignored: updated version " + ps.versionCode
                             + " better than this " + pkg.mVersionCode);
                     mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
                     return null;
@@ -6866,7 +6845,18 @@ class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        boolean dumpStar = true;
+        boolean dumpLibs = false;
+        boolean dumpFeatures = false;
+        boolean dumpResolvers = false;
+        boolean dumpPermissions = false;
+        boolean dumpPackages = false;
+        boolean dumpSharedUsers = false;
+        boolean dumpMessages = false;
+        boolean dumpProviders = false;
+        
         String packageName = null;
+        boolean showFilters = false;
         
         int opti = 0;
         while (opti < args.length) {
@@ -6879,10 +6869,22 @@ class PackageManagerService extends IPackageManager.Stub {
                 // Right now we only know how to print all.
             } else if ("-h".equals(opt)) {
                 pw.println("Package manager dump options:");
-                pw.println("  [-h] [cmd] ...");
+                pw.println("  [-h] [-f] [cmd] ...");
+                pw.println("    -f: print details of intent filters");
+                pw.println("    -h: print this help");
                 pw.println("  cmd may be one of:");
-                pw.println("    [package.name]: info about given package");
+                pw.println("    l[ibraries]: list known shared libraries");
+                pw.println("    f[ibraries]: list device features");
+                pw.println("    r[esolvers]: dump intent resolvers");
+                pw.println("    perm[issions]: dump permissions");
+                pw.println("    prov[iders]: dump content providers");
+                pw.println("    p[ackages]: dump installed packages");
+                pw.println("    s[hared-users]: dump shared user IDs");
+                pw.println("    m[essages]: print collected runtime messages");
+                pw.println("    <package.name>: info about given package");
                 return;
+            } else if ("-f".equals(opt)) {
+                showFilters = true;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
             }
@@ -6895,32 +6897,87 @@ class PackageManagerService extends IPackageManager.Stub {
             // Is this a package name?
             if ("android".equals(cmd) || cmd.contains(".")) {
                 packageName = cmd;
+            } else if ("l".equals(cmd) || "libraries".equals(cmd)) {
+                dumpStar = false;
+                dumpLibs = true;
+            } else if ("f".equals(cmd) || "features".equals(cmd)) {
+                dumpStar = false;
+                dumpFeatures = true;
+            } else if ("r".equals(cmd) || "resolvers".equals(cmd)) {
+                dumpStar = false;
+                dumpResolvers = true;
+            } else if ("perm".equals(cmd) || "permissions".equals(cmd)) {
+                dumpStar = false;
+                dumpPermissions = true;
+            } else if ("p".equals(cmd) || "packages".equals(cmd)) {
+                dumpStar = false;
+                dumpPackages = true;
+            } else if ("s".equals(cmd) || "shared-users".equals(cmd)) {
+                dumpStar = false;
+                dumpSharedUsers = true;
+            } else if ("prov".equals(cmd) || "providers".equals(cmd)) {
+                dumpStar = false;
+                dumpProviders = true;
+            } else if ("m".equals(cmd) || "messages".equals(cmd)) {
+                dumpStar = false;
+                dumpMessages = true;
             }
         }
         
         boolean printedTitle = false;
         
         synchronized (mPackages) {
-            if (mActivities.dump(pw, "Activity Resolver Table:", "  ", packageName)) {
+            if ((dumpStar || dumpLibs) && packageName == null) {
+                if (printedTitle) pw.println(" ");
                 printedTitle = true;
+                pw.println("Libraries:");
+                Iterator<String> it = mSharedLibraries.keySet().iterator();
+                while (it.hasNext()) {
+                    String name = it.next();
+                    pw.print("  ");
+                    pw.print(name);
+                    pw.print(" -> ");
+                    pw.println(mSharedLibraries.get(name));
+                }
             }
-            if (mReceivers.dump(pw, printedTitle
-                    ? "\nReceiver Resolver Table:" : "Receiver Resolver Table:",
-                    "  ", packageName)) {
+
+            if ((dumpStar || dumpFeatures) && packageName == null) {
+                if (printedTitle) pw.println(" ");
                 printedTitle = true;
+                pw.println("Features:");
+                Iterator<String> it = mAvailableFeatures.keySet().iterator();
+                while (it.hasNext()) {
+                    String name = it.next();
+                    pw.print("  ");
+                    pw.println(name);
+                }
             }
-            if (mServices.dump(pw, printedTitle
-                    ? "\nService Resolver Table:" : "Service Resolver Table:",
-                    "  ", packageName)) {
-                printedTitle = true;
+
+            if (dumpStar || dumpResolvers) {
+                if (mActivities.dump(pw, printedTitle
+                        ? "\nActivity Resolver Table:" : "Activity Resolver Table:",
+                        "  ", packageName, showFilters)) {
+                    printedTitle = true;
+                }
+                if (mReceivers.dump(pw, printedTitle
+                        ? "\nReceiver Resolver Table:" : "Receiver Resolver Table:",
+                        "  ", packageName, showFilters)) {
+                    printedTitle = true;
+                }
+                if (mServices.dump(pw, printedTitle
+                        ? "\nService Resolver Table:" : "Service Resolver Table:",
+                        "  ", packageName, showFilters)) {
+                    printedTitle = true;
+                }
+                if (mSettings.mPreferredActivities.dump(pw, printedTitle
+                        ? "\nPreferred Activities:" : "Preferred Activities:",
+                        "  ", packageName, showFilters)) {
+                    printedTitle = true;
+                }
             }
-            if (mSettings.mPreferredActivities.dump(pw, printedTitle
-                    ? "\nPreferred Activities:" : "Preferred Activities:",
-                    "  ", packageName)) {
-                printedTitle = true;
-            }
+            
             boolean printedSomething = false;
-            {
+            if (dumpStar || dumpPermissions) {
                 for (BasePermission p : mSettings.mPermissions.values()) {
                     if (packageName != null && !packageName.equals(p.sourcePackage)) {
                         continue;
@@ -6947,9 +7004,27 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
+
+            if (dumpStar || dumpProviders) {
+                printedSomething = false;
+                for (PackageParser.Provider p : mProviders.values()) {
+                    if (packageName != null && !packageName.equals(p.info.packageName)) {
+                        continue;
+                    }
+                    if (!printedSomething) {
+                        if (printedTitle) pw.println(" ");
+                        pw.println("Registered ContentProviders:");
+                        printedSomething = true;
+                        printedTitle = true;
+                    }
+                    pw.print("  ["); pw.print(p.info.authority); pw.print("]: ");
+                            pw.println(p.toString());
+                }
+            }
+            
             printedSomething = false;
             SharedUserSetting packageSharedUser = null;
-            {
+            if (dumpStar || dumpPackages) {
                 for (PackageSetting ps : mSettings.mPackages.values()) {
                     if (packageName != null && !packageName.equals(ps.realName)
                             && !packageName.equals(ps.name)) {
@@ -7052,52 +7127,54 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             printedSomething = false;
-            if (mSettings.mRenamedPackages.size() > 0) {
-                for (HashMap.Entry<String, String> e
-                        : mSettings.mRenamedPackages.entrySet()) {
-                    if (packageName != null && !packageName.equals(e.getKey())
-                            && !packageName.equals(e.getValue())) {
-                        continue;
+            if (dumpStar || dumpPackages) {
+                if (mSettings.mRenamedPackages.size() > 0) {
+                    for (HashMap.Entry<String, String> e
+                            : mSettings.mRenamedPackages.entrySet()) {
+                        if (packageName != null && !packageName.equals(e.getKey())
+                                && !packageName.equals(e.getValue())) {
+                            continue;
+                        }
+                        if (!printedSomething) {
+                            if (printedTitle) pw.println(" ");
+                            pw.println("Renamed packages:");
+                            printedSomething = true;
+                            printedTitle = true;
+                        }
+                        pw.print("  "); pw.print(e.getKey()); pw.print(" -> ");
+                                pw.println(e.getValue());
                     }
-                    if (!printedSomething) {
-                        if (printedTitle) pw.println(" ");
-                        pw.println("Renamed packages:");
-                        printedSomething = true;
-                        printedTitle = true;
+                }
+                printedSomething = false;
+                if (mSettings.mDisabledSysPackages.size() > 0) {
+                    for (PackageSetting ps : mSettings.mDisabledSysPackages.values()) {
+                        if (packageName != null && !packageName.equals(ps.realName)
+                                && !packageName.equals(ps.name)) {
+                            continue;
+                        }
+                        if (!printedSomething) {
+                            if (printedTitle) pw.println(" ");
+                            pw.println("Hidden system packages:");
+                            printedSomething = true;
+                            printedTitle = true;
+                        }
+                       pw.print("  Package [");
+                                pw.print(ps.realName != null ? ps.realName : ps.name);
+                                pw.print("] (");
+                                pw.print(Integer.toHexString(System.identityHashCode(ps)));
+                                pw.println("):");
+                        if (ps.realName != null) {
+                            pw.print("    compat name="); pw.println(ps.name);
+                        }
+                        pw.print("    userId="); pw.println(ps.userId);
+                        pw.print("    sharedUser="); pw.println(ps.sharedUser);
+                        pw.print("    codePath="); pw.println(ps.codePathString);
+                        pw.print("    resourcePath="); pw.println(ps.resourcePathString);
                     }
-                    pw.print("  "); pw.print(e.getKey()); pw.print(" -> ");
-                            pw.println(e.getValue());
                 }
             }
             printedSomething = false;
-            if (mSettings.mDisabledSysPackages.size() > 0) {
-                for (PackageSetting ps : mSettings.mDisabledSysPackages.values()) {
-                    if (packageName != null && !packageName.equals(ps.realName)
-                            && !packageName.equals(ps.name)) {
-                        continue;
-                    }
-                    if (!printedSomething) {
-                        if (printedTitle) pw.println(" ");
-                        pw.println("Hidden system packages:");
-                        printedSomething = true;
-                        printedTitle = true;
-                    }
-                   pw.print("  Package [");
-                            pw.print(ps.realName != null ? ps.realName : ps.name);
-                            pw.print("] (");
-                            pw.print(Integer.toHexString(System.identityHashCode(ps)));
-                            pw.println("):");
-                    if (ps.realName != null) {
-                        pw.print("    compat name="); pw.println(ps.name);
-                    }
-                    pw.print("    userId="); pw.println(ps.userId);
-                    pw.print("    sharedUser="); pw.println(ps.sharedUser);
-                    pw.print("    codePath="); pw.println(ps.codePathString);
-                    pw.print("    resourcePath="); pw.println(ps.resourcePathString);
-                }
-            }
-            printedSomething = false;
-            {
+            if (dumpStar || dumpSharedUsers) {
                 for (SharedUserSetting su : mSettings.mSharedUsers.values()) {
                     if (packageName != null && su != packageSharedUser) {
                         continue;
@@ -7120,11 +7197,11 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             
-            if (packageName == null) {
+            if ((dumpStar || dumpMessages) && packageName == null) {
                 if (printedTitle) pw.println(" ");
                 printedTitle = true;
                 pw.println("Settings parse messages:");
-                pw.println(mSettings.mReadMessages.toString());
+                pw.print(mSettings.mReadMessages.toString());
                 
                 pw.println(" ");
                 pw.println("Package warning messages:");
@@ -7135,27 +7212,10 @@ class PackageManagerService extends IPackageManager.Stub {
                     int avail = in.available();
                     byte[] data = new byte[avail];
                     in.read(data);
-                    pw.println(new String(data));
+                    pw.print(new String(data));
                 } catch (FileNotFoundException e) {
                 } catch (IOException e) {
                 }
-            }
-        }
-
-        synchronized (mProviders) {
-            boolean printedSomething = false;
-            for (PackageParser.Provider p : mProviders.values()) {
-                if (packageName != null && !packageName.equals(p.info.packageName)) {
-                    continue;
-                }
-                if (!printedSomething) {
-                    if (printedTitle) pw.println(" ");
-                    pw.println("Registered ContentProviders:");
-                    printedSomething = true;
-                    printedTitle = true;
-                }
-                pw.print("  ["); pw.print(p.info.authority); pw.print("]: ");
-                        pw.println(p.toString());
             }
         }
     }

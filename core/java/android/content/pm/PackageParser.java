@@ -1730,6 +1730,11 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
+            } else if (tagName.equals("uses-package")) {
+                // Dependencies for app installers; we don't currently try to
+                // enforce this.
+                XmlUtils.skipCurrentTag(parser);
+
             } else {
                 if (!RIGID_PARSER) {
                     Log.w(TAG, "Unknown element under <application>: " + tagName

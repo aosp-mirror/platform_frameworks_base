@@ -58,6 +58,7 @@ import android.view.WindowManagerPolicy;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -605,6 +606,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Slog.w(TAG, "failed parsing " + file + " " + e);
         } catch (XmlPullParserException e) {
             Slog.w(TAG, "failed parsing " + file + " " + e);
+        } catch (FileNotFoundException e) {
+            // Don't be noisy, this is normal if we haven't defined any policies.
         } catch (IOException e) {
             Slog.w(TAG, "failed parsing " + file + " " + e);
         } catch (IndexOutOfBoundsException e) {
