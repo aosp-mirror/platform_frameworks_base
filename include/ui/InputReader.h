@@ -103,10 +103,6 @@ public:
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation) = 0;
 
-    /* Provides feedback for a virtual key down.
-     */
-    virtual void virtualKeyDownFeedback() = 0;
-
     /* Intercepts a key event.
      * The policy can use this method as an opportunity to perform power management functions
      * and early event preprocessing such as updating policy flags.
