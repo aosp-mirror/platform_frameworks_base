@@ -34,7 +34,6 @@ public final class Bmgr {
 
     private String[] mArgs;
     private int mNextArg;
-    private String mCurArgData;
 
     public static void main(String[] args) {
         try {
@@ -274,6 +273,10 @@ public final class Bmgr {
     }
 
     private void printRestoreSets(RestoreSet[] sets) {
+        if (sets == null || sets.length == 0) {
+            System.out.println("No restore sets");
+            return;
+        }
         for (RestoreSet s : sets) {
             System.out.println("  " + Long.toHexString(s.token) + " : " + s.name);
         }
