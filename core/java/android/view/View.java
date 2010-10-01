@@ -1683,7 +1683,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * The transform matrix for the View. This transform is calculated internally
      * based on the rotation, scaleX, and scaleY properties. The identity matrix
      * is used by default. Do *not* use this variable directly; instead call
-     * getMatrix(), which will automatically recalculate the matrix if necessary
+     * getInverseMatrix(), which will automatically recalculate the matrix if necessary
      * to get the correct matrix based on the latest rotation and scale properties.
      */
     private Matrix mInverseMatrix;
@@ -1706,7 +1706,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * A variable that tracks whether we need to recalculate the
      * transform matrix, based on whether the rotation or scaleX/Y properties
      * have changed since the matrix was last calculated. This variable
-     * is only valid after a call to getMatrix().
+     * is only valid after a call to updateMatrix() or to a function that
+     * calls it such as getMatrix(), hasIdentityMatrix() and getInverseMatrix().
      */
     private boolean mMatrixIsIdentity = true;
 
@@ -5118,7 +5119,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return The current transform matrix for the view
      */
     public Matrix getMatrix() {
-        hasIdentityMatrix();
+        updateMatrix();
         return mMatrix;
     }
 
@@ -5133,11 +5134,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Recomputes the transform matrix if necessary.
+     * Returns true if the transform matrix is the identity matrix.
+     * Recomputes the matrix if necessary.
      * 
      * @return True if the transform matrix is the identity matrix, false otherwise.
      */
-    boolean hasIdentityMatrix() {
+    final boolean hasIdentityMatrix() {
+        updateMatrix();
+        return mMatrixIsIdentity;
+    }
+
+    /**
+     * Recomputes the transform matrix if necessary.
+     */
+    private final void updateMatrix() {
         if (mMatrixDirty) {
             // transform-related properties have changed since the last time someone
             // asked for the matrix; recalculate it with the current values
@@ -5176,7 +5186,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixIsIdentity = mMatrix.isIdentity();
             mInverseMatrixDirty = true;
         }
-        return mMatrixIsIdentity;
     }
 
     /**
@@ -5186,7 +5195,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return The inverse of the current matrix of this view.
      */
-    Matrix getInverseMatrix() {
+    final Matrix getInverseMatrix() {
+        updateMatrix();
         if (mInverseMatrixDirty) {
             if (mInverseMatrix == null) {
                 mInverseMatrix = new Matrix();
@@ -5474,7 +5484,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setTop(int top) {
         if (top != mTop) {
-            if (hasIdentityMatrix()) {
+            updateMatrix();
+            if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
@@ -5523,7 +5534,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setBottom(int bottom) {
         if (bottom != mBottom) {
-            if (hasIdentityMatrix()) {
+            updateMatrix();
+            if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
@@ -5569,8 +5581,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
-            System.out.println("view " + this + " left = " + left);
-            if (hasIdentityMatrix()) {
+            updateMatrix();
+            if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
@@ -5619,7 +5631,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public final void setRight(int right) {
         if (right != mRight) {
-            if (hasIdentityMatrix()) {
+            updateMatrix();
+            if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
@@ -5758,13 +5771,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param outRect The hit rectangle of the view.
      */
     public void getHitRect(Rect outRect) {
-        if (hasIdentityMatrix() || mAttachInfo == null) {
+        updateMatrix();
+        if (mMatrixIsIdentity || mAttachInfo == null) {
             outRect.set(mLeft, mTop, mRight, mBottom);
         } else {
-            Matrix m = getMatrix();
             final RectF tmpRect = mAttachInfo.mTmpTransformRect;
             tmpRect.set(-mPivotX, -mPivotY, getWidth() - mPivotX, getHeight() - mPivotY);
-            m.mapRect(tmpRect);
+            mMatrix.mapRect(tmpRect);
             outRect.set((int) tmpRect.left + mLeft, (int) tmpRect.top + mTop,
                     (int) tmpRect.right + mLeft, (int) tmpRect.bottom + mTop);
         }
@@ -5850,7 +5863,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void offsetTopAndBottom(int offset) {
         if (offset != 0) {
-            if (hasIdentityMatrix()) {
+            updateMatrix();
+            if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
@@ -5890,7 +5904,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
-            if (hasIdentityMatrix()) {
+            updateMatrix();
+            if (mMatrixIsIdentity) {
                 final ViewParent p = mParent;
                 if (p != null && mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
