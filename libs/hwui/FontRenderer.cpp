@@ -435,25 +435,25 @@ void FontRenderer::initTextTexture() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mCacheWidth, mCacheHeight, 0,
             GL_ALPHA, GL_UNSIGNED_BYTE, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     // Split up our cache texture into lines of certain widths
     int nextLine = 0;
-    mCacheLines.push(new CacheTextureLine(mCacheWidth, 16, nextLine, 0));
+    mCacheLines.push(new CacheTextureLine(mCacheWidth, 18, nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mCacheWidth, 24, nextLine, 0));
+    mCacheLines.push(new CacheTextureLine(mCacheWidth, 26, nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mCacheWidth, 24, nextLine, 0));
+    mCacheLines.push(new CacheTextureLine(mCacheWidth, 26, nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mCacheWidth, 32, nextLine, 0));
+    mCacheLines.push(new CacheTextureLine(mCacheWidth, 34, nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mCacheWidth, 32, nextLine, 0));
+    mCacheLines.push(new CacheTextureLine(mCacheWidth, 34, nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
-    mCacheLines.push(new CacheTextureLine(mCacheWidth, 40, nextLine, 0));
+    mCacheLines.push(new CacheTextureLine(mCacheWidth, 42, nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
     mCacheLines.push(new CacheTextureLine(mCacheWidth, mCacheHeight - nextLine, nextLine, 0));
 }
@@ -631,6 +631,7 @@ void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
         precacheLatin(paint);
     }
 }
+
 FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, uint32_t radius) {
     checkInit();
@@ -713,7 +714,7 @@ void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {
 
     float normalizeFactor = 0.0f;
     for(int32_t r = -radius; r <= radius; r ++) {
-        float floatR = (float)r;
+        float floatR = (float) r;
         weights[r + radius] = coeff1 * pow(e, floatR * floatR * coeff2);
         normalizeFactor += weights[r + radius];
     }
@@ -742,7 +743,7 @@ void FontRenderer::horizontalBlur(float* weights, int32_t radius,
             if ((x > radius) && (x < (width - radius))) {
                 const uint8_t *i = input + (x - radius);
                 for(int r = -radius; r <= radius; r ++) {
-                    currentPixel = (float)(*i);
+                    currentPixel = (float) (*i);
                     blurredPixel += currentPixel * gPtr[0];
                     gPtr++;
                     i++;

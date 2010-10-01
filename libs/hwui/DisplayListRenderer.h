@@ -45,39 +45,11 @@ namespace uirenderer {
 
 class PathHeap: public SkRefCnt {
 public:
-    PathHeap(): mHeap(64 * sizeof(SkPath)) {
-    };
+    PathHeap();
+    PathHeap(SkFlattenableReadBuffer& buffer);
+    ~PathHeap();
 
-    PathHeap(SkFlattenableReadBuffer& buffer): mHeap(64 * sizeof(SkPath)) {
-        int count = buffer.readS32();
-
-        mPaths.setCount(count);
-        SkPath** ptr = mPaths.begin();
-        SkPath* p = (SkPath*) mHeap.allocThrow(count * sizeof(SkPath));
-
-        for (int i = 0; i < count; i++) {
-            new (p) SkPath;
-            p->unflatten(buffer);
-            *ptr++ = p;
-            p++;
-        }
-    }
-
-    ~PathHeap() {
-        SkPath** iter = mPaths.begin();
-        SkPath** stop = mPaths.end();
-        while (iter < stop) {
-            (*iter)->~SkPath();
-            iter++;
-        }
-    }
-
-    int append(const SkPath& path) {
-        SkPath* p = (SkPath*) mHeap.allocThrow(sizeof(SkPath));
-        new (p) SkPath(path);
-        *mPaths.append() = p;
-        return mPaths.count();
-    }
+    int append(const SkPath& path);
 
     int count() const { return mPaths.count(); }
 
@@ -85,17 +57,7 @@ public:
         return *mPaths[index];
     }
 
-    void flatten(SkFlattenableWriteBuffer& buffer) const {
-        int count = mPaths.count();
-
-        buffer.write32(count);
-        SkPath** iter = mPaths.begin();
-        SkPath** stop = mPaths.end();
-        while (iter < stop) {
-            (*iter)->flatten(buffer);
-            iter++;
-        }
-    }
+    void flatten(SkFlattenableWriteBuffer& buffer) const;
 
 private:
     SkChunkAlloc mHeap;

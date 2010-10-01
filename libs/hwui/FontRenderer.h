@@ -183,14 +183,14 @@ protected:
         }
 
         bool fitBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY) {
-            if (glyph.fHeight > mMaxHeight) {
+            if (glyph.fHeight + 2 > mMaxHeight) {
                 return false;
             }
 
-            if (mCurrentCol + glyph.fWidth < mMaxWidth) {
-                *retOriginX = mCurrentCol;
-                *retOriginY = mCurrentRow;
-                mCurrentCol += glyph.fWidth;
+            if (mCurrentCol + glyph.fWidth + 2 < mMaxWidth) {
+                *retOriginX = mCurrentCol + 1;
+                *retOriginY = mCurrentRow + 1;
+                mCurrentCol += glyph.fWidth + 2;
                 mDirty = true;
                 return true;
             }

@@ -22,6 +22,62 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+#define PATH_HEAP_SIZE 64
+
+///////////////////////////////////////////////////////////////////////////////
+// Helpers
+///////////////////////////////////////////////////////////////////////////////
+
+PathHeap::PathHeap(): mHeap(PATH_HEAP_SIZE * sizeof(SkPath)) {
+}
+
+PathHeap::PathHeap(SkFlattenableReadBuffer& buffer): mHeap(PATH_HEAP_SIZE * sizeof(SkPath)) {
+    int count = buffer.readS32();
+
+    mPaths.setCount(count);
+    SkPath** ptr = mPaths.begin();
+    SkPath* p = (SkPath*) mHeap.allocThrow(count * sizeof(SkPath));
+
+    for (int i = 0; i < count; i++) {
+        new (p) SkPath;
+        p->unflatten(buffer);
+        *ptr++ = p;
+        p++;
+    }
+}
+
+PathHeap::~PathHeap() {
+    SkPath** iter = mPaths.begin();
+    SkPath** stop = mPaths.end();
+    while (iter < stop) {
+        (*iter)->~SkPath();
+        iter++;
+    }
+}
+
+int PathHeap::append(const SkPath& path) {
+    SkPath* p = (SkPath*) mHeap.allocThrow(sizeof(SkPath));
+    new (p) SkPath(path);
+    *mPaths.append() = p;
+    return mPaths.count();
+}
+
+void PathHeap::flatten(SkFlattenableWriteBuffer& buffer) const {
+    int count = mPaths.count();
+
+    buffer.write32(count);
+    SkPath** iter = mPaths.begin();
+    SkPath** stop = mPaths.end();
+    while (iter < stop) {
+        (*iter)->flatten(buffer);
+        iter++;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Display list
 ///////////////////////////////////////////////////////////////////////////////
 
