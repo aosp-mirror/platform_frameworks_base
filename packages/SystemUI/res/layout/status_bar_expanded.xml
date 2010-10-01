@@ -57,7 +57,7 @@
             style="?android:attr/buttonStyle"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
-            android:background="@drawable/btn_default_small"
+            android:background="@android:drawable/btn_default_small"
             />
     </LinearLayout>
 
