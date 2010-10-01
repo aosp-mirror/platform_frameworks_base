@@ -277,6 +277,7 @@ status_t AwesomePlayer::setDataSource_l(
 status_t AwesomePlayer::setDataSource(
         int fd, int64_t offset, int64_t length) {
 #if 0
+    // return setDataSource("httplive://ipad.akamai.com/Video_Content/usat/tt_062209_iphone/440k/prog_index.m3u8");
     // return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/sl.m3u8");
     return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/0440.m3u8");
     // return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/0640.m3u8");

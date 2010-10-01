@@ -21,7 +21,7 @@
 
 namespace android {
 
-static unsigned parseUE(ABitReader *br) {
+unsigned parseUE(ABitReader *br) {
     unsigned numZeroes = 0;
     while (br->getBits(1) == 0) {
         ++numZeroes;
