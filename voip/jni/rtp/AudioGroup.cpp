@@ -776,11 +776,14 @@ bool AudioGroup::DeviceThread::threadLoop()
     char c;
     while (recv(deviceSocket, &c, 1, MSG_DONTWAIT) == 1);
 
-    // Start your engine!
-    track.start();
+    // Start AudioRecord before AudioTrack. This prevents AudioTrack from being
+    // disabled due to buffer underrun while waiting for AudioRecord.
     if (mode != MUTED) {
         record.start();
+        int16_t one;
+        record.read(&one, sizeof(one));
     }
+    track.start();
 
     while (!exitPending()) {
         int16_t output[sampleCount];
@@ -806,34 +809,30 @@ bool AudioGroup::DeviceThread::threadLoop()
                     track.releaseBuffer(&buffer);
                 } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
                     LOGE("cannot write to AudioTrack");
-                    break;
+                    return true;
                 }
             }
 
             if (toRead > 0) {
                 AudioRecord::Buffer buffer;
-                buffer.frameCount = record.frameCount();
+                buffer.frameCount = toRead;
 
                 status_t status = record.obtainBuffer(&buffer, 1);
                 if (status == NO_ERROR) {
-                    int count = ((int)buffer.frameCount < toRead) ?
-                            buffer.frameCount : toRead;
-                    memcpy(&input[sampleCount - toRead], buffer.i8, count * 2);
-                    toRead -= count;
-                    if (buffer.frameCount < record.frameCount()) {
-                        buffer.frameCount = count;
-                    }
+                    int offset = sampleCount - toRead;
+                    memcpy(&input[offset], buffer.i8, buffer.size);
+                    toRead -= buffer.frameCount;
                     record.releaseBuffer(&buffer);
                 } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
                     LOGE("cannot read from AudioRecord");
-                    break;
+                    return true;
                 }
             }
         }
 
         if (chances <= 0) {
-            LOGE("device loop timeout");
-            break;
+            LOGW("device loop timeout");
+            while (recv(deviceSocket, &c, 1, MSG_DONTWAIT) == 1);
         }
 
         if (mode != MUTED) {
