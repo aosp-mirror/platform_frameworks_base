@@ -115,7 +115,8 @@ public:
      */
     virtual status_t captureScreen(DisplayID dpy,
             sp<IMemoryHeap>* heap,
-            uint32_t* width, uint32_t* height, PixelFormat* format) = 0;
+            uint32_t* width, uint32_t* height, PixelFormat* format,
+            uint32_t reqWidth, uint32_t reqHeight) = 0;
 
     /* Signal surfaceflinger that there might be some work to do
      * This is an ASYNCHRONOUS call.
