@@ -23,6 +23,7 @@
 
 #include "rsFont.h"
 #include "rsProgramFragment.h"
+#include <cutils/properties.h>
 #include FT_BITMAP_H
 
 #include <GLES/gl.h>
@@ -268,6 +269,44 @@ FontState::FontState()
     mRSC = NULL;
     mLibrary = NULL;
     setFontColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+    // Get the renderer properties
+    char property[PROPERTY_VALUE_MAX];
+
+    // Get the gamma
+    float gamma = DEFAULT_TEXT_GAMMA;
+    if (property_get(PROPERTY_TEXT_GAMMA, property, NULL) > 0) {
+        LOGD("  Setting text gamma to %s", property);
+        gamma = atof(property);
+    } else {
+        LOGD("  Using default text gamma of %.2f", DEFAULT_TEXT_GAMMA);
+    }
+
+    // Get the black gamma threshold
+    int blackThreshold = DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD;
+    if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, NULL) > 0) {
+        LOGD("  Setting text black gamma threshold to %s", property);
+        blackThreshold = atoi(property);
+    } else {
+        LOGD("  Using default text black gamma threshold of %d",
+                DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD);
+    }
+    mBlackThreshold = (float)(blackThreshold) / 255.0f;
+
+    // Get the white gamma threshold
+    int whiteThreshold = DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD;
+    if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, NULL) > 0) {
+        LOGD("  Setting text white gamma threshold to %s", property);
+        whiteThreshold = atoi(property);
+    } else {
+        LOGD("  Using default white black gamma threshold of %d",
+                DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD);
+    }
+    mWhiteThreshold = (float)(whiteThreshold) / 255.0f;
+
+    // Compute the gamma tables
+    mBlackGamma = gamma;
+    mWhiteGamma = 1.0f / gamma;
 }
 
 FontState::~FontState()
@@ -391,12 +430,15 @@ void FontState::initRenderState()
     shaderString.append("void main() {\n");
     shaderString.append("  lowp vec4 col = UNI_Color;\n");
     shaderString.append("  col.a = texture2D(UNI_Tex0, varTex0.xy).a;\n");
+    shaderString.append("  col.a = pow(col.a, UNI_Gamma);\n");
     shaderString.append("  gl_FragColor = col;\n");
     shaderString.append("}\n");
 
     const Element *colorElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
+    const Element *gammaElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
     mRSC->mStateElement.elementBuilderBegin();
     mRSC->mStateElement.elementBuilderAdd(colorElem, "Color", 1);
+    mRSC->mStateElement.elementBuilderAdd(gammaElem, "Gamma", 1);
     const Element *constInput = mRSC->mStateElement.elementBuilderCreate(mRSC);
 
     Type *inputType = new Type(mRSC);
@@ -558,9 +600,9 @@ void FontState::issueDrawCommand() {
     ObjectBaseRef<const ProgramStore> tmpPS(mRSC->getFragmentStore());
     mRSC->setFragmentStore(mFontProgramStore.get());
 
-    if(mFontColorDirty) {
-        mFontShaderFConstant->data(mRSC, &mFontColor, 4*sizeof(float));
-        mFontColorDirty = false;
+    if(mConstantsDirty) {
+        mFontShaderFConstant->data(mRSC, &mConstants, sizeof(mConstants));
+        mConstantsDirty = false;
     }
 
     if (!mRSC->setupCheck()) {
@@ -725,18 +767,26 @@ void FontState::renderText(Allocation *alloc, uint32_t start, int len, int x, in
 }
 
 void FontState::setFontColor(float r, float g, float b, float a) {
-    mFontColor[0] = r;
-    mFontColor[1] = g;
-    mFontColor[2] = b;
-    mFontColor[3] = a;
-    mFontColorDirty = true;
+    mConstants.mFontColor[0] = r;
+    mConstants.mFontColor[1] = g;
+    mConstants.mFontColor[2] = b;
+    mConstants.mFontColor[3] = a;
+
+    mConstants.mGamma = 1.0f;
+    const int luminance = (r * 2.0f + g * 5.0f + b) / 8.0f;
+    if (luminance <= mBlackThreshold) {
+        mConstants.mGamma = mBlackGamma;
+    } else if (luminance >= mWhiteThreshold) {
+        mConstants.mGamma = mWhiteGamma;
+    }
+    mConstantsDirty = true;
 }
 
 void FontState::getFontColor(float *r, float *g, float *b, float *a) const {
-    *r = mFontColor[0];
-    *g = mFontColor[1];
-    *b = mFontColor[2];
-    *a = mFontColor[3];
+    *r = mConstants.mFontColor[0];
+    *g = mConstants.mFontColor[1];
+    *b = mConstants.mFontColor[2];
+    *a = mConstants.mFontColor[3];
 }
 
 void FontState::deinit(Context *rsc)
