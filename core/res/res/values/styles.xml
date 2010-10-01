@@ -572,7 +572,7 @@
     </style>
 
     <style name="Widget.QuickContactBadge">
-        <item name="android:layout_width">50dip</item>
+        <item name="android:layout_width">47.33333dip</item>
         <item name="android:layout_height">56dip</item>
         <item name="android:background">@android:drawable/quickcontact_badge</item>
         <item name="android:clickable">true</item>
