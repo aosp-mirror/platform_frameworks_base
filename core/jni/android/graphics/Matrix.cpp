@@ -27,6 +27,8 @@
 #include "SkMatrix.h"
 #include "SkTemplates.h"
 
+#include "Matrix.h"
+
 namespace android {
 
 class SkMatrixGlue {
@@ -403,10 +405,20 @@ static JNINativeMethod methods[] = {
     {"native_equals", "(II)Z", (void*) SkMatrixGlue::equals}
 };
 
+static jfieldID sNativeInstanceField;
+
 int register_android_graphics_Matrix(JNIEnv* env) {
     int result = AndroidRuntime::registerNativeMethods(env, "android/graphics/Matrix", methods,
         sizeof(methods) / sizeof(methods[0]));
+
+    jclass clazz = env->FindClass("android/graphics/Matrix");
+    sNativeInstanceField = env->GetFieldID(clazz, "native_instance", "I");
+
     return result;
+}
+
+SkMatrix* android_graphics_Matrix_getSkMatrix(JNIEnv* env, jobject matrixObj) {
+    return reinterpret_cast<SkMatrix*>(env->GetIntField(matrixObj, sNativeInstanceField));
 }
 
 }

@@ -122,7 +122,8 @@ enum RsSamplerParam {
     RS_SAMPLER_MAG_FILTER,
     RS_SAMPLER_WRAP_S,
     RS_SAMPLER_WRAP_T,
-    RS_SAMPLER_WRAP_R
+    RS_SAMPLER_WRAP_R,
+    RS_SAMPLER_ANISO
 };
 
 enum RsSamplerValue {

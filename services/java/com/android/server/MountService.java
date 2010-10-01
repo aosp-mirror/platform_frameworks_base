@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.internal.app.IMediaContainerService;
+import com.android.internal.util.HexDump;
 import com.android.server.am.ActivityManagerService;
 
 import android.content.BroadcastReceiver;
@@ -44,15 +45,22 @@ import android.os.storage.IMountServiceListener;
 import android.os.storage.IMountShutdownObserver;
 import android.os.storage.IObbActionListener;
 import android.os.storage.StorageResultCode;
+import android.security.MessageDigest;
 import android.util.Slog;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * MountService implements back-end services for platform storage
@@ -70,6 +78,8 @@ class MountService extends IMountService.Stub
     private static final String TAG = "MountService";
 
     private static final String VOLD_TAG = "VoldConnector";
+
+    protected static final int MAX_OBBS = 8;
 
     /*
      * Internal vold volume state constants
@@ -151,15 +161,19 @@ class MountService extends IMountService.Stub
      * Mounted OBB tracking information. Used to track the current state of all
      * OBBs.
      */
-    final private Map<IObbActionListener, List<ObbState>> mObbMounts = new HashMap<IObbActionListener, List<ObbState>>();
+    final private Map<Integer, Integer> mObbUidUsage = new HashMap<Integer, Integer>();
+    final private Map<IBinder, List<ObbState>> mObbMounts = new HashMap<IBinder, List<ObbState>>();
     final private Map<String, ObbState> mObbPathToStateMap = new HashMap<String, ObbState>();
 
     class ObbState implements IBinder.DeathRecipient {
-        public ObbState(String filename, IObbActionListener token, int callerUid) {
+        public ObbState(String filename, IObbActionListener token, int callerUid)
+                throws RemoteException {
             this.filename = filename;
             this.token = token;
             this.callerUid = callerUid;
             mounted = false;
+
+            getBinder().linkToDeath(this, 0);
         }
 
         // OBB source filename
@@ -174,14 +188,33 @@ class MountService extends IMountService.Stub
         // Whether this is mounted currently.
         boolean mounted;
 
+        public IBinder getBinder() {
+            return token.asBinder();
+        }
+
         @Override
         public void binderDied() {
             ObbAction action = new UnmountObbAction(this, true);
             mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
+        }
 
-            removeObbState(this);
+        public void cleanUp() {
+            getBinder().unlinkToDeath(this, 0);
+        }
 
-            token.asBinder().unlinkToDeath(this, 0);
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder("ObbState{");
+            sb.append("filename=");
+            sb.append(filename);
+            sb.append(",token=");
+            sb.append(token.toString());
+            sb.append(",callerUid=");
+            sb.append(callerUid);
+            sb.append(",mounted=");
+            sb.append(mounted);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -481,6 +514,34 @@ class MountService extends IMountService.Stub
                 mPms.updateExternalMediaStatus(true, false);
             }
         }
+
+        // Remove all OBB mappings and listeners from this path
+        synchronized (mObbMounts) {
+            final List<ObbState> obbStatesToRemove = new LinkedList<ObbState>();
+
+            final Iterator<Entry<String, ObbState>> i = mObbPathToStateMap.entrySet().iterator();
+            while (i.hasNext()) {
+                final Entry<String, ObbState> obbEntry = i.next();
+
+                // If this entry's source file is in the volume path that got
+                // unmounted, remove it because it's no longer valid.
+                if (obbEntry.getKey().startsWith(path)) {
+                    obbStatesToRemove.add(obbEntry.getValue());
+                }
+            }
+
+            for (final ObbState obbState : obbStatesToRemove) {
+                removeObbState(obbState);
+
+                try {
+                    obbState.token.onObbResult(obbState.filename, Environment.MEDIA_UNMOUNTED);
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Couldn't send unmount notification for  OBB: "
+                            + obbState.filename);
+                }
+            }
+        }
+
         String oldState = mLegacyState;
         mLegacyState = state;
 
@@ -1507,11 +1568,18 @@ class MountService extends IMountService.Stub
 
     public boolean isObbMounted(String filename) {
         synchronized (mObbMounts) {
-            return mObbPathToStateMap.containsKey(filename);
+            final ObbState obbState = mObbPathToStateMap.get(filename);
+            if (obbState != null) {
+                synchronized (obbState) {
+                    return obbState.mounted;
+                }
+            }
         }
+        return false;
     }
 
-    public void mountObb(String filename, String key, IObbActionListener token) {
+    public void mountObb(String filename, String key, IObbActionListener token)
+            throws RemoteException {
         waitForReady();
         warnOnNotMounted();
 
@@ -1525,21 +1593,41 @@ class MountService extends IMountService.Stub
 
         synchronized (mObbMounts) {
             if (isObbMounted(filename)) {
-                throw new IllegalArgumentException("OBB file is already mounted");
+                try {
+                    token.onObbResult(filename, Environment.MEDIA_MOUNTED);
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "Could not send unmount notification for: " + filename);
+                }
+                return;
             }
 
             final int callerUid = Binder.getCallingUid();
+
+            final Integer uidUsage = mObbUidUsage.get(callerUid);
+            if (uidUsage != null && uidUsage > MAX_OBBS) {
+                throw new IllegalStateException("Maximum number of OBBs mounted!");
+            }
+
             obbState = new ObbState(filename, token, callerUid);
             addObbState(obbState);
         }
 
+        final MessageDigest md;
         try {
-            token.asBinder().linkToDeath(obbState, 0);
-        } catch (RemoteException rex) {
-            Slog.e(TAG, "Failed to link to listener death");
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            Slog.e(TAG, "Could not load MD5 algorithm", e);
+            try {
+                token.onObbResult(filename, Environment.MEDIA_UNMOUNTED);
+            } catch (RemoteException e1) {
+                Slog.d(TAG, "Could not send unmount notification for: " + filename);
+            }
+            return;
         }
 
-        MountObbAction action = new MountObbAction(obbState, key);
+        String hashedKey = HexDump.toHexString(md.digest(key.getBytes()));
+
+        ObbAction action = new MountObbAction(obbState, hashedKey);
         mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
 
         if (DEBUG_OBB)
@@ -1557,18 +1645,24 @@ class MountService extends IMountService.Stub
 
         synchronized (mObbMounts) {
             if (!isObbMounted(filename)) {
-                throw new IllegalArgumentException("OBB is not mounted");
+                try {
+                    token.onObbResult(filename, Environment.MEDIA_UNMOUNTED);
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "Could not send unmount notification for: " + filename);
+                }
+                return;
             }
+
             obbState = mObbPathToStateMap.get(filename);
 
             if (Binder.getCallingUid() != obbState.callerUid) {
                 throw new SecurityException("caller UID does not match original mount caller UID");
-            } else if (!token.asBinder().equals(obbState.token.asBinder())) {
+            } else if (!token.asBinder().equals(obbState.getBinder())) {
                 throw new SecurityException("caller does not match original mount caller");
             }
         }
 
-        UnmountObbAction action = new UnmountObbAction(obbState, force);
+        ObbAction action = new UnmountObbAction(obbState, force);
         mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
 
         if (DEBUG_OBB)
@@ -1577,26 +1671,57 @@ class MountService extends IMountService.Stub
 
     private void addObbState(ObbState obbState) {
         synchronized (mObbMounts) {
-            List<ObbState> obbStates = mObbMounts.get(obbState.token);
+            List<ObbState> obbStates = mObbMounts.get(obbState.getBinder());
             if (obbStates == null) {
                 obbStates = new ArrayList<ObbState>();
-                mObbMounts.put(obbState.token, obbStates);
+                mObbMounts.put(obbState.getBinder(), obbStates);
             }
             obbStates.add(obbState);
             mObbPathToStateMap.put(obbState.filename, obbState);
+
+            // Track the number of OBBs used by this UID.
+            final int uid = obbState.callerUid;
+            final Integer uidUsage = mObbUidUsage.get(uid);
+            if (uidUsage == null) {
+                mObbUidUsage.put(uid, 1);
+            } else {
+                mObbUidUsage.put(uid, uidUsage + 1);
+            }
         }
     }
 
     private void removeObbState(ObbState obbState) {
         synchronized (mObbMounts) {
-            final List<ObbState> obbStates = mObbMounts.get(obbState.token);
+            final List<ObbState> obbStates = mObbMounts.get(obbState.getBinder());
             if (obbStates != null) {
                 obbStates.remove(obbState);
             }
             if (obbStates == null || obbStates.isEmpty()) {
-                mObbMounts.remove(obbState.token);
+                mObbMounts.remove(obbState.getBinder());
+                obbState.cleanUp();
             }
             mObbPathToStateMap.remove(obbState.filename);
+
+            // Track the number of OBBs used by this UID.
+            final int uid = obbState.callerUid;
+            final Integer uidUsage = mObbUidUsage.get(uid);
+            if (uidUsage == null) {
+                Slog.e(TAG, "Called removeObbState for UID that isn't in map: " + uid);
+            } else {
+                final int newUsage = uidUsage - 1;
+                if (newUsage == 0) {
+                    mObbUidUsage.remove(uid);
+                } else {
+                    mObbUidUsage.put(uid, newUsage);
+                }
+            }
+        }
+    }
+
+    private void replaceObbState(ObbState oldObbState, ObbState newObbState) {
+        synchronized (mObbMounts) {
+            removeObbState(oldObbState);
+            addObbState(newObbState);
         }
     }
 
@@ -1627,20 +1752,16 @@ class MountService extends IMountService.Stub
                             Slog.e(TAG, "Failed to bind to media container service");
                             action.handleError();
                             return;
-                        } else {
-                            // Once we bind to the service, the first
-                            // pending request will be processed.
-                            mActions.add(action);
-                        }
-                    } else {
-                        // Already bound to the service. Just make
-                        // sure we trigger off processing the first request.
-                        if (mActions.size() == 0) {
-                            mObbActionHandler.sendEmptyMessage(OBB_MCS_BOUND);
                         }
 
                         mActions.add(action);
+                        break;
                     }
+
+                    // Once we bind to the service, the first
+                    // pending request will be processed.
+                    mActions.add(action);
+                    mObbActionHandler.sendEmptyMessage(OBB_MCS_BOUND);
                     break;
                 }
                 case OBB_MCS_BOUND: {
@@ -1773,6 +1894,29 @@ class MountService extends IMountService.Stub
 
         abstract void handleExecute() throws RemoteException, IOException;
         abstract void handleError();
+
+        protected ObbInfo getObbInfo() throws IOException {
+            ObbInfo obbInfo;
+            try {
+                obbInfo = mContainerService.getObbInfo(mObbState.filename);
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Couldn't call DefaultContainerService to fetch OBB info for "
+                        + mObbState.filename);
+                obbInfo = null;
+            }
+            if (obbInfo == null) {
+                throw new IOException("Couldn't read OBB file: " + mObbState.filename);
+            }
+            return obbInfo;
+        }
+
+        protected void sendNewStatusOrIgnore(String filename, String status) {
+            try {
+                mObbState.token.onObbResult(filename, status);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
+            }
+        }
     }
 
     class MountObbAction extends ObbAction {
@@ -1783,10 +1927,42 @@ class MountService extends IMountService.Stub
             mKey = key;
         }
 
-        public void handleExecute() throws RemoteException, IOException {
-            final ObbInfo obbInfo = mContainerService.getObbInfo(mObbState.filename);
-            if (obbInfo == null) {
-                throw new IOException("Couldn't read OBB file: " + mObbState.filename);
+        public void handleExecute() throws IOException, RemoteException {
+            final ObbInfo obbInfo = getObbInfo();
+
+            /*
+             * If someone tried to trick us with some weird characters, rectify
+             * it here.
+             */
+            if (!mObbState.filename.equals(obbInfo.filename)) {
+                if (DEBUG_OBB)
+                    Slog.i(TAG, "OBB filename " + mObbState.filename + " is actually "
+                            + obbInfo.filename);
+
+                synchronized (mObbMounts) {
+                    /*
+                     * If the real filename is already mounted, discard this
+                     * state and notify the caller that the OBB is already
+                     * mounted.
+                     */
+                    if (isObbMounted(obbInfo.filename)) {
+                        if (DEBUG_OBB)
+                            Slog.i(TAG, "OBB already mounted as " + obbInfo.filename);
+
+                        removeObbState(mObbState);
+                        sendNewStatusOrIgnore(obbInfo.filename, Environment.MEDIA_MOUNTED);
+                        return;
+                    }
+
+                    /*
+                     * It's not already mounted, so we have to replace the state
+                     * with the state containing the actual filename.
+                     */
+                    ObbState newObbState = new ObbState(obbInfo.filename, mObbState.token,
+                            mObbState.callerUid);
+                    replaceObbState(mObbState, newObbState);
+                    mObbState = newObbState;
+                }
             }
 
             if (!isUidOwnerOfPackageOrSystem(obbInfo.packageName, mObbState.callerUid)) {
@@ -1797,42 +1973,47 @@ class MountService extends IMountService.Stub
                 mKey = "none";
             }
 
-            int rc = StorageResultCode.OperationSucceeded;
-            String cmd = String.format("obb mount %s %s %d", mObbState.filename, mKey,
-                    mObbState.callerUid);
-            try {
-                mConnector.doCommand(cmd);
-            } catch (NativeDaemonConnectorException e) {
-                int code = e.getCode();
-                if (code != VoldResponseCode.OpFailedStorageBusy) {
-                    rc = StorageResultCode.OperationFailedInternalError;
+            boolean mounted = false;
+            int rc;
+            synchronized (mObbState) {
+                if (mObbState.mounted) {
+                    sendNewStatusOrIgnore(mObbState.filename, Environment.MEDIA_MOUNTED);
+                    return;
+                }
+
+                rc = StorageResultCode.OperationSucceeded;
+                String cmd = String.format("obb mount %s %s %d", mObbState.filename, mKey,
+                        mObbState.callerUid);
+                try {
+                    mConnector.doCommand(cmd);
+                } catch (NativeDaemonConnectorException e) {
+                    int code = e.getCode();
+                    if (code != VoldResponseCode.OpFailedStorageBusy) {
+                        rc = StorageResultCode.OperationFailedInternalError;
+                    }
+                }
+
+                if (rc == StorageResultCode.OperationSucceeded) {
+                    mObbState.mounted = mounted = true;
                 }
             }
 
-            if (rc == StorageResultCode.OperationSucceeded) {
-                try {
-                    mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_MOUNTED);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
-                }
+            if (mounted) {
+                sendNewStatusOrIgnore(mObbState.filename, Environment.MEDIA_MOUNTED);
             } else {
                 Slog.e(TAG, "Couldn't mount OBB file: " + rc);
 
                 // We didn't succeed, so remove this from the mount-set.
                 removeObbState(mObbState);
 
-                mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
+                sendNewStatusOrIgnore(mObbState.filename, Environment.MEDIA_UNMOUNTED);
             }
         }
 
         public void handleError() {
             removeObbState(mObbState);
 
-            try {
-                mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Couldn't send back OBB mount error for " + mObbState.filename);
-            }
+            sendNewStatusOrIgnore(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
         }
 
         @Override
@@ -1858,51 +2039,69 @@ class MountService extends IMountService.Stub
             mForceUnmount = force;
         }
 
-        public void handleExecute() throws RemoteException, IOException {
-            final ObbInfo obbInfo = mContainerService.getObbInfo(mObbState.filename);
-            if (obbInfo == null) {
-                throw new IOException("Couldn't read OBB file: " + mObbState.filename);
-            }
+        public void handleExecute() throws IOException {
+            final ObbInfo obbInfo = getObbInfo();
 
-            int rc = StorageResultCode.OperationSucceeded;
-            String cmd = String.format("obb unmount %s%s", mObbState.filename,
-                    (mForceUnmount ? " force" : ""));
-            try {
-                mConnector.doCommand(cmd);
-            } catch (NativeDaemonConnectorException e) {
-                int code = e.getCode();
-                if (code == VoldResponseCode.OpFailedStorageBusy) {
-                    rc = StorageResultCode.OperationFailedStorageBusy;
-                } else {
-                    rc = StorageResultCode.OperationFailedInternalError;
+            /*
+             * If someone tried to trick us with some weird characters, rectify
+             * it here.
+             */
+            synchronized (mObbMounts) {
+                if (!isObbMounted(obbInfo.filename)) {
+                    removeObbState(mObbState);
+                    sendNewStatusOrIgnore(mObbState.filename, Environment.MEDIA_UNMOUNTED);
+                    return;
+                }
+
+                if (!mObbState.filename.equals(obbInfo.filename)) {
+                    removeObbState(mObbState);
+                    mObbState = mObbPathToStateMap.get(obbInfo.filename);
                 }
             }
 
-            if (rc == StorageResultCode.OperationSucceeded) {
+            boolean unmounted = false;
+            synchronized (mObbState) {
+                if (!mObbState.mounted) {
+                    sendNewStatusOrIgnore(obbInfo.filename, Environment.MEDIA_UNMOUNTED);
+                    return;
+                }
+
+                int rc = StorageResultCode.OperationSucceeded;
+                String cmd = String.format("obb unmount %s%s", mObbState.filename,
+                        (mForceUnmount ? " force" : ""));
+                try {
+                    mConnector.doCommand(cmd);
+                } catch (NativeDaemonConnectorException e) {
+                    int code = e.getCode();
+                    if (code == VoldResponseCode.OpFailedStorageBusy) {
+                        rc = StorageResultCode.OperationFailedStorageBusy;
+                    } else if (code == VoldResponseCode.OpFailedStorageNotFound) {
+                        // If it's not mounted then we've already won.
+                        rc = StorageResultCode.OperationSucceeded;
+                    } else {
+                        rc = StorageResultCode.OperationFailedInternalError;
+                    }
+                }
+
+                if (rc == StorageResultCode.OperationSucceeded) {
+                    mObbState.mounted = false;
+                    unmounted = true;
+                }
+            }
+
+            if (unmounted) {
                 removeObbState(mObbState);
 
-                try {
-                    mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_UNMOUNTED);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
-                }
+                sendNewStatusOrIgnore(mObbState.filename, Environment.MEDIA_UNMOUNTED);
             } else {
-                try {
-                    mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "MountServiceListener went away while calling onObbStateChanged");
-                }
+                sendNewStatusOrIgnore(mObbState.filename, Environment.MEDIA_MOUNTED);
             }
         }
 
         public void handleError() {
             removeObbState(mObbState);
 
-            try {
-                mObbState.token.onObbResult(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Couldn't send back OBB unmount error for " + mObbState.filename);
-            }
+            sendNewStatusOrIgnore(mObbState.filename, Environment.MEDIA_BAD_REMOVAL);
         }
 
         @Override
@@ -1917,8 +2116,32 @@ class MountService extends IMountService.Stub
             sb.append(mObbState.callerUid);
             sb.append(",token=");
             sb.append(mObbState.token != null ? mObbState.token.toString() : "null");
+            sb.append(",binder=");
+            sb.append(mObbState.getBinder().toString());
             sb.append('}');
             return sb.toString();
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP) != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump ActivityManager from from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " without permission " + android.Manifest.permission.DUMP);
+            return;
+        }
+
+        pw.println("  mObbMounts:");
+
+        synchronized (mObbMounts) {
+            final Collection<List<ObbState>> obbStateLists = mObbMounts.values();
+
+            for (final List<ObbState> obbStates : obbStateLists) {
+                for (final ObbState obbState : obbStates) {
+                    pw.print("    "); pw.println(obbState.toString());
+                }
+            }
         }
     }
 }

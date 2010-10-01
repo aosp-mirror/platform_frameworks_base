@@ -36,7 +36,8 @@ public:
             RsSamplerValue minFilter,
             RsSamplerValue wrapS,
             RsSamplerValue wrapT,
-            RsSamplerValue wrapR);
+            RsSamplerValue wrapR,
+            float aniso = 1.0f);
 
     virtual ~Sampler();
 
@@ -56,6 +57,7 @@ protected:
     RsSamplerValue mWrapS;
     RsSamplerValue mWrapT;
     RsSamplerValue mWrapR;
+    float mAniso;
 
     int32_t mBoundSlot;
 
@@ -74,6 +76,7 @@ public:
     RsSamplerValue mWrapS;
     RsSamplerValue mWrapT;
     RsSamplerValue mWrapR;
+    float mAniso;
 
 
     ObjectBaseRef<Sampler> mSamplers[RS_MAX_SAMPLER_SLOT];

@@ -23,6 +23,7 @@ public class UnitTest extends Thread {
     public int result;
     private ScriptField_ListAllocs_s.Item mItem;
     private RSTestCore mRSTC;
+    private boolean msgHandled;
 
     /* These constants must match those in shared.rsh */
     public static final int RS_MSG_TEST_PASSED = 100;
@@ -35,6 +36,7 @@ public class UnitTest extends Thread {
         super();
         mRSTC = rstc;
         name = n;
+        msgHandled = false;
         result = initResult;
         testID = numTests++;
     }
@@ -67,6 +69,7 @@ public class UnitTest extends Thread {
 
             if (mItem != null) {
                 mItem.result = result;
+                msgHandled = true;
                 try {
                     mRSTC.refreshTestResults();
                 }
@@ -78,6 +81,12 @@ public class UnitTest extends Thread {
             }
         }
     };
+
+    public void waitForMessage() {
+        while (!msgHandled) {
+            yield();
+        }
+    }
 
     public void setItem(ScriptField_ListAllocs_s.Item item) {
         mItem = item;

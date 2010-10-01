@@ -341,7 +341,7 @@ public final class BluetoothAdapter {
     private static final int ADDRESS_LENGTH = 17;
 
     /**
-     * Lazyily initialized singleton. Guaranteed final after first object
+     * Lazily initialized singleton. Guaranteed final after first object
      * constructed.
      */
     private static BluetoothAdapter sAdapter;
@@ -466,7 +466,7 @@ public final class BluetoothAdapter {
      * user action to turn off Bluetooth.
      * <p>This gracefully shuts down all Bluetooth connections, stops Bluetooth
      * system services, and powers down the underlying Bluetooth hardware.
-     * <p class="caution"><strong>Bluetooth should never be disbled without
+     * <p class="caution"><strong>Bluetooth should never be disabled without
      * direct user consent</strong>. The {@link #disable()} method is
      * provided only for applications that include a user interface for changing
      * system settings, such as a "power manager" app.</p>
@@ -932,8 +932,8 @@ public final class BluetoothAdapter {
     public Pair<byte[], byte[]> readOutOfBandData() {
         if (getState() != STATE_ON) return null;
         try {
-            byte[] hash = new byte[16];
-            byte[] randomizer = new byte[16];
+            byte[] hash;
+            byte[] randomizer;
 
             byte[] ret = mService.readOutOfBandData();
 

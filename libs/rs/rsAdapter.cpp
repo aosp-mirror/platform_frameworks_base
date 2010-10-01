@@ -183,7 +183,6 @@ void Adapter2D::subData(uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, co
 
     uint32_t eSize = mAllocation.get()->getType()->getElementSizeBytes();
     uint32_t lineSize = eSize * w;
-    uint32_t destW = getDimX();
 
     const uint8_t *src = static_cast<const uint8_t *>(data);
     for (uint32_t line=yoff; line < (yoff+h); line++) {

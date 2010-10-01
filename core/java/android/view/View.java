@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -614,6 +615,7 @@ import java.util.WeakHashMap;
  */
 public class View implements Drawable.Callback, KeyEvent.Callback, AccessibilityEventSource {
     private static final boolean DBG = false;
+    static final boolean DEBUG_DRAG = true;
 
     /**
      * The logging tag used by this class with android.util.Log.
@@ -2028,6 +2030,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Cache the touch slop from the context that created the view.
      */
     private int mTouchSlop;
+
+    /**
+     * Cache drag/drop state
+     *
+     */
+    boolean mCanAcceptDrop;
+    private int mThumbnailWidth;
+    private int mThumbnailHeight;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -5761,13 +5771,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Determines whether the given point, in local coordinates is inside the view.
+     */
+    /*package*/ final boolean pointInView(float localX, float localY) {
+        return localX >= 0 && localX < (mRight - mLeft)
+                && localY >= 0 && localY < (mBottom - mTop);
+    }
+
+    /**
      * Utility method to determine whether the given point, in local coordinates,
      * is inside the view, where the area of the view is expanded by the slop factor.
      * This method is called while processing touch-move events to determine if the event
      * is still within the view.
      */
     private boolean pointInView(float localX, float localY, float slop) {
-        return localX > -slop && localY > -slop && localX < ((mRight - mLeft) + slop) &&
+        return localX >= -slop && localY >= -slop && localX < ((mRight - mLeft) + slop) &&
                 localY < ((mBottom - mTop) + slop);
     }
 
@@ -9754,6 +9772,140 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Drag and drop.  App calls startDrag(), then callbacks to onMeasureDragThumbnail()
+     * and onDrawDragThumbnail() happen, then the drag operation is handed over to the
+     * OS.
+     * !!! TODO: real docs
+     * @hide
+     */
+    public final boolean startDrag(ClipData data, float touchX, float touchY,
+            float thumbnailTouchX, float thumbnailTouchY, boolean myWindowOnly) {
+        if (DEBUG_DRAG) {
+            Log.d(VIEW_LOG_TAG, "startDrag: touch=(" + touchX + "," + touchY
+                    + ") thumb=(" + thumbnailTouchX + "," + thumbnailTouchY
+                    + ") data=" + data + " local=" + myWindowOnly);
+        }
+        boolean okay = false;
+
+        measureThumbnail();     // throws if the view fails to specify dimensions
+
+        Surface surface = new Surface();
+        try {
+            IBinder token = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
+                    myWindowOnly, mThumbnailWidth, mThumbnailHeight, surface);
+            if (DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token=" + token
+                    + " surface=" + surface);
+            if (token != null) {
+                Canvas canvas = surface.lockCanvas(null);
+                try {
+                    onDrawDragThumbnail(canvas);
+                } finally {
+                    surface.unlockCanvasAndPost(canvas);
+                }
+
+                okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, token,
+                        touchX, touchY, thumbnailTouchX, thumbnailTouchY, data);
+                if (DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
+            }
+        } catch (Exception e) {
+            Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
+            surface.destroy();
+        }
+
+        return okay;
+    }
+
+    private void measureThumbnail() {
+        mPrivateFlags &= ~MEASURED_DIMENSION_SET;
+
+        onMeasureDragThumbnail();
+
+        // flag not set, setDragThumbnailDimension() was not invoked, we raise
+        // an exception to warn the developer
+        if ((mPrivateFlags & MEASURED_DIMENSION_SET) != MEASURED_DIMENSION_SET) {
+            throw new IllegalStateException("onMeasureDragThumbnail() did not set the"
+                    + " measured dimension by calling setDragThumbnailDimension()");
+        }
+
+        if (DEBUG_DRAG) {
+            Log.d(VIEW_LOG_TAG, "Drag thumb measured: w=" + mThumbnailWidth
+                    + " h=" + mThumbnailHeight);
+        }
+    }
+
+    /**
+     * The View must call this method from onMeasureDragThumbnail() in order to
+     * specify the dimensions of the drag thumbnail image.
+     *
+     * @param width The desired thumbnail width.
+     * @param height The desired thumbnail height.
+     */
+    protected final void setDragThumbnailDimension(int width, int height) {
+        mPrivateFlags |= MEASURED_DIMENSION_SET;
+        mThumbnailWidth = width;
+        mThumbnailHeight = height;
+    }
+
+    /**
+     * The default implementation specifies a drag thumbnail that matches the
+     * View's current size and appearance.
+     */
+    protected void onMeasureDragThumbnail() {
+        setDragThumbnailDimension(getWidth(), getHeight());
+    }
+
+    /**
+     * The default implementation just draws the current View appearance as the thumbnail
+     * @param canvas
+     */
+    protected void onDrawDragThumbnail(Canvas canvas) {
+        draw(canvas);
+    }
+
+    /**
+     * Drag-and-drop event dispatch.  The event.getAction() verb is one of the DragEvent
+     * constants DRAG_STARTED_EVENT, DRAG_EVENT, DROP_EVENT, and DRAG_ENDED_EVENT.
+     *
+     * For DRAG_STARTED_EVENT, event.getClipDescription() describes the content
+     * being dragged.  onDragEvent() should return 'true' if the view can handle
+     * a drop of that content.  A view that returns 'false' here will receive no
+     * further calls to onDragEvent() about the drag/drop operation.
+     *
+     * For DRAG_ENTERED, event.getClipDescription() describes the content being
+     * dragged.  This will be the same content description passed in the
+     * DRAG_STARTED_EVENT invocation.
+     *
+     * For DRAG_EXITED, event.getClipDescription() describes the content being
+     * dragged.  This will be the same content description passed in the
+     * DRAG_STARTED_EVENT invocation.  The view should return to its approriate
+     * drag-acceptance visual state.
+     *
+     * For DRAG_LOCATION_EVENT, event.getX() and event.getY() give the location in View
+     * coordinates of the current drag point.  The view must return 'true' if it
+     * can accept a drop of the current drag content, false otherwise.
+     *
+     * For DROP_EVENT, event.getX() and event.getY() give the location of the drop
+     * within the view; also, event.getClipData() returns the full data payload
+     * being dropped.  The view should return 'true' if it consumed the dropped
+     * content, 'false' if it did not.
+     *
+     * For DRAG_ENDED_EVENT, the 'event' argument may be null.  The view should return
+     * to its normal visual state.
+     */
+    protected boolean onDragEvent(DragEvent event) {
+        return false;
+    }
+
+    /**
+     * Views typically don't need to override dispatchDragEvent(); it just calls
+     * onDragEvent(what, event) and passes the result up appropriately.
+     *
+     */
+    public boolean dispatchDragEvent(DragEvent event) {
+        return onDragEvent(event);
+    }
+
+    /**
      * This needs to be a better API (NOT ON VIEW) before it is exposed.  If
      * it is ever exposed at all.
      * @hide
@@ -9819,30 +9971,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mPendingCheckForLongPress.rememberWindowAttachCount();
         postDelayed(mPendingCheckForLongPress,
                 ViewConfiguration.getLongPressTimeout() - delayOffset);
-    }
-
-    private static int[] stateSetUnion(final int[] stateSet1, final int[] stateSet2) {
-        final int stateSet1Length = stateSet1.length;
-        final int stateSet2Length = stateSet2.length;
-        final int[] newSet = new int[stateSet1Length + stateSet2Length];
-        int k = 0;
-        int i = 0;
-        int j = 0;
-        // This is a merge of the two input state sets and assumes that the
-        // input sets are sorted by the order imposed by ViewDrawableStates.
-        for (int viewState : R.styleable.ViewDrawableStates) {
-            if (i < stateSet1Length && stateSet1[i] == viewState) {
-                newSet[k++] = viewState;
-                i++;
-            } else if (j < stateSet2Length && stateSet2[j] == viewState) {
-                newSet[k++] = viewState;
-                j++;
-            }
-            if (k > 1) {
-                assert(newSet[k - 1] > newSet[k - 2]);
-            }
-        }
-        return newSet;
     }
 
     /**

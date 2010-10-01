@@ -30,7 +30,6 @@ import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
 import android.test.MoreAsserts;
 
-import com.android.common.Rfc822Validator;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -235,39 +234,6 @@ public class TextUtilsTest extends TestCase {
 
         for (String s : strings) {
             assertEquals(s.trim().length(), TextUtils.getTrimmedLength(s));
-        }
-    }
-
-    //==============================================================================================
-    // Email validator
-    //==============================================================================================
-    
-    @SmallTest
-    public void testEmailValidator() {
-        Rfc822Validator validator = new Rfc822Validator("gmail.com");
-        String[] validEmails = new String[] {
-            "a@b.com", "a@b.fr", "a+b@c.com", "a@b.info",
-        };
-        
-        for (String email : validEmails) {
-            assertTrue(email + " should be a valid email address", validator.isValid(email));
-        }
-        
-        String[] invalidEmails = new String[] {
-            "a", "a@b", "a b", "a@b.12"
-        };
-
-        for (String email : invalidEmails) {
-            assertFalse(email + " should not be a valid email address", validator.isValid(email));
-        }
-        
-        Map<String, String> fixes = Maps.newHashMap();
-        fixes.put("a", "<a@gmail.com>");
-        fixes.put("a b", "<ab@gmail.com>");
-        fixes.put("a@b", "<a@b>");
-        
-        for (Map.Entry<String, String> e : fixes.entrySet()) {
-            assertEquals(e.getValue(), validator.fixText(e.getKey()).toString());
         }
     }
 

@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * side, use a {@link BluetoothServerSocket} to create a listening server
  * socket. When a connection is accepted by the {@link BluetoothServerSocket},
  * it will return a new {@link BluetoothSocket} to manage the connection.
- * On the client side, use a single {@link BluetoothSocket} to both intiate
+ * On the client side, use a single {@link BluetoothSocket} to both initiate
  * an outgoing connection and to manage the connection.
  *
  * <p>The most common type of Bluetooth socket is RFCOMM, which is the type
@@ -113,7 +113,7 @@ public final class BluetoothSocket implements Closeable {
      * @param port    remote port
      * @param uuid    SDP uuid
      * @throws IOException On error, for example Bluetooth not available, or
-     *                     insufficient priveleges
+     *                     insufficient privileges
      */
     /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
             BluetoothDevice device, int port, ParcelUuid uuid) throws IOException {
@@ -158,7 +158,7 @@ public final class BluetoothSocket implements Closeable {
      * @param address remote device that this socket can connect to
      * @param port    remote port
      * @throws IOException On error, for example Bluetooth not available, or
-     *                     insufficient priveleges
+     *                     insufficient privileges
      */
     private BluetoothSocket(int type, int fd, boolean auth, boolean encrypt, String address,
             int port) throws IOException {
@@ -226,7 +226,7 @@ public final class BluetoothSocket implements Closeable {
         }
 
         // all native calls are guaranteed to immediately return after
-        // abortNative(), so this lock should immediatley acquire
+        // abortNative(), so this lock should immediately acquire
         mLock.writeLock().lock();
         try {
             mClosed = true;

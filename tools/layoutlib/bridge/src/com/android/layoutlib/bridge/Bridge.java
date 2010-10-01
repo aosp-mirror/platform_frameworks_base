@@ -30,6 +30,8 @@ import com.android.ninepatch.NinePatch;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -46,6 +48,7 @@ import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.BridgeInflater;
+import android.view.DragEvent;
 import android.view.InputChannel;
 import android.view.IWindow;
 import android.view.IWindowSession;
@@ -1073,6 +1076,33 @@ public final class Bridge implements ILayoutBridge {
         }
 
         @SuppressWarnings("unused")
+        public IBinder prepareDrag(IWindow window, boolean localOnly,
+                int thumbnailWidth, int thumbnailHeight, Surface outSurface)
+                throws RemoteException {
+            // pass for now
+            return null;
+        }
+
+        @SuppressWarnings("unused")
+        public boolean performDrag(IWindow window, IBinder dragToken,
+                float touchX, float touchY, float thumbCenterX, float thumbCenterY,
+                ClipData data)
+                throws RemoteException {
+            // pass for now
+            return false;
+        }
+
+        @SuppressWarnings("unused")
+        public void dragRecipientEntered(IWindow window) throws RemoteException {
+            // pass for now
+        }
+
+        @SuppressWarnings("unused")
+        public void dragRecipientExited(IWindow window) throws RemoteException {
+            // pass for now
+        }
+
+        @SuppressWarnings("unused")
         public void setWallpaperPosition(IBinder window, float x, float y,
             float xStep, float yStep) {
             // pass for now.
@@ -1167,6 +1197,11 @@ public final class Bridge implements ILayoutBridge {
 
         @SuppressWarnings("unused")
         public void closeSystemDialogs(String reason) {
+            // pass for now.
+        }
+
+        @SuppressWarnings("unused")
+        public void dispatchDragEvent(DragEvent event) {
             // pass for now.
         }
 

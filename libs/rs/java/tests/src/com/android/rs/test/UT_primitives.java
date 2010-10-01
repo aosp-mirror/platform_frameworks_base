@@ -33,6 +33,7 @@ public class UT_primitives extends UnitTest {
         pRS.mMessageCallback = mRsMessage;
         s.invoke_primitives_test(0, 0);
         pRS.finish();
+        waitForMessage();
         pRS.destroy();
     }
 }

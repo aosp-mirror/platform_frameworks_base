@@ -57,9 +57,9 @@ int gRandom = -1;
 // a modulo operation on the index while accessing the array. However modulo can
 // be expensive on some platforms, such as ARM. Thus we round up the size of the
 // array to the nearest power of 2 and then use bitwise-and instead of modulo.
-// Currently we make it 256ms long and assume packet interval is 32ms or less.
-// The first 64ms is the place where samples get mixed. The rest 192ms is the
-// real jitter buffer. For a stream at 8000Hz it takes 4096 bytes. These numbers
+// Currently we make it 512ms long and assume packet interval is 40ms or less.
+// The first 80ms is the place where samples get mixed. The rest 432ms is the
+// real jitter buffer. For a stream at 8000Hz it takes 8192 bytes. These numbers
 // are chosen by experiments and each of them can be adjusted as needed.
 
 // Other notes:
@@ -69,7 +69,11 @@ int gRandom = -1;
 //   milliseconds. No floating points.
 // + If we cannot get enough CPU, we drop samples and simulate packet loss.
 // + Resampling is not done yet, so streams in one group must use the same rate.
-//   For the first release we might only support 8kHz and 16kHz.
+//   For the first release only 8000Hz is supported.
+
+#define BUFFER_SIZE     512
+#define HISTORY_SIZE    80
+#define MEASURE_PERIOD  2000
 
 class AudioStream
 {
@@ -85,7 +89,6 @@ public:
     void encode(int tick, AudioStream *chain);
     void decode(int tick);
 
-private:
     enum {
         NORMAL = 0,
         SEND_ONLY = 1,
@@ -93,6 +96,7 @@ private:
         LAST_MODE = 2,
     };
 
+private:
     int mMode;
     int mSocket;
     sockaddr_storage mRemote;
@@ -111,6 +115,7 @@ private:
     int mBufferMask;
     int mBufferHead;
     int mBufferTail;
+    int mLatencyTimer;
     int mLatencyScore;
 
     uint16_t mSequence;
@@ -159,12 +164,13 @@ bool AudioStream::set(int mode, int socket, sockaddr_storage *remote,
     mInterval = mSampleCount / mSampleRate;
 
     // Allocate jitter buffer.
-    for (mBufferMask = 8192; mBufferMask < sampleRate; mBufferMask <<= 1);
-    mBufferMask >>= 2;
+    for (mBufferMask = 8; mBufferMask < mSampleRate; mBufferMask <<= 1);
+    mBufferMask *= BUFFER_SIZE;
     mBuffer = new int16_t[mBufferMask];
     --mBufferMask;
     mBufferHead = 0;
     mBufferTail = 0;
+    mLatencyTimer = 0;
     mLatencyScore = 0;
 
     // Initialize random bits.
@@ -196,8 +202,8 @@ bool AudioStream::set(int mode, int socket, sockaddr_storage *remote,
         }
     }
 
-    LOGD("stream[%d] is configured as %s %dkHz %dms", mSocket,
-        (codec ? codec->name : "RAW"), mSampleRate, mInterval);
+    LOGD("stream[%d] is configured as %s %dkHz %dms mode %d", mSocket,
+        (codec ? codec->name : "RAW"), mSampleRate, mInterval, mMode);
     return true;
 }
 
@@ -247,7 +253,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
         mTick += skipped * mInterval;
         mSequence += skipped;
         mTimestamp += skipped * mSampleCount;
-        LOGD("stream[%d] skips %d packets", mSocket, skipped);
+        LOGV("stream[%d] skips %d packets", mSocket, skipped);
     }
 
     tick = mTick;
@@ -296,7 +302,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
     if (!mixed) {
         if ((mTick ^ mLogThrottle) >> 10) {
             mLogThrottle = mTick;
-            LOGD("stream[%d] no data", mSocket);
+            LOGV("stream[%d] no data", mSocket);
         }
         return;
     }
@@ -324,7 +330,7 @@ void AudioStream::encode(int tick, AudioStream *chain)
     buffer[2] = mSsrc;
     int length = mCodec->encode(&buffer[3], samples);
     if (length <= 0) {
-        LOGD("stream[%d] encoder error", mSocket);
+        LOGV("stream[%d] encoder error", mSocket);
         return;
     }
     sendto(mSocket, buffer, length + 12, MSG_DONTWAIT, (sockaddr *)&mRemote,
@@ -340,31 +346,37 @@ void AudioStream::decode(int tick)
     }
 
     // Make sure mBufferHead and mBufferTail are reasonable.
-    if ((unsigned int)(tick + 256 - mBufferHead) > 1024) {
-        mBufferHead = tick - 64;
+    if ((unsigned int)(tick + BUFFER_SIZE - mBufferHead) > BUFFER_SIZE * 2) {
+        mBufferHead = tick - HISTORY_SIZE;
         mBufferTail = mBufferHead;
     }
 
-    if (tick - mBufferHead > 64) {
+    if (tick - mBufferHead > HISTORY_SIZE) {
         // Throw away outdated samples.
-        mBufferHead = tick - 64;
+        mBufferHead = tick - HISTORY_SIZE;
         if (mBufferTail - mBufferHead < 0) {
             mBufferTail = mBufferHead;
         }
     }
 
-    if (mBufferTail - tick <= 80) {
-        mLatencyScore = tick;
-    } else if (tick - mLatencyScore >= 5000) {
-        // Reset the jitter buffer to 40ms if the latency keeps larger than 80ms
-        // in the past 5s. This rarely happens, so let us just keep it simple.
-        LOGD("stream[%d] latency control", mSocket);
-        mBufferTail = tick + 40;
+    // Adjust the jitter buffer if the latency keeps larger than two times of the
+    // packet interval in the past two seconds.
+    int score = mBufferTail - tick - mInterval * 2;
+    if (mLatencyScore > score) {
+        mLatencyScore = score;
+    }
+    if (mLatencyScore <= 0) {
+        mLatencyTimer = tick;
+        mLatencyScore = score;
+    } else if (tick - mLatencyTimer >= MEASURE_PERIOD) {
+        LOGV("stream[%d] reduces latency of %dms", mSocket, mLatencyScore);
+        mBufferTail -= mLatencyScore;
+        mLatencyTimer = tick;
     }
 
-    if (mBufferTail - mBufferHead > 256 - mInterval) {
+    if (mBufferTail - mBufferHead > BUFFER_SIZE - mInterval) {
         // Buffer overflow. Drop the packet.
-        LOGD("stream[%d] buffer overflow", mSocket);
+        LOGV("stream[%d] buffer overflow", mSocket);
         recv(mSocket, &c, 1, MSG_DONTWAIT);
         return;
     }
@@ -388,7 +400,7 @@ void AudioStream::decode(int tick)
         // reliable but at least they can be used to identify duplicates?
         if (length < 12 || length > (int)sizeof(buffer) ||
             (ntohl(*(uint32_t *)buffer) & 0xC07F0000) != mCodecMagic) {
-            LOGD("stream[%d] malformed packet", mSocket);
+            LOGV("stream[%d] malformed packet", mSocket);
             return;
         }
         int offset = 12 + ((buffer[0] & 0x0F) << 2);
@@ -408,22 +420,22 @@ void AudioStream::decode(int tick)
         }
     }
     if (length <= 0) {
-        LOGD("stream[%d] decoder error", mSocket);
+        LOGV("stream[%d] decoder error", mSocket);
         return;
     }
 
     if (tick - mBufferTail > 0) {
-        // Buffer underrun. Reset the jitter buffer to 40ms.
-        LOGD("stream[%d] buffer underrun", mSocket);
+        // Buffer underrun. Reset the jitter buffer.
+        LOGV("stream[%d] buffer underrun", mSocket);
         if (mBufferTail - mBufferHead <= 0) {
-            mBufferHead = tick + 40;
+            mBufferHead = tick + mInterval;
             mBufferTail = mBufferHead;
         } else {
-            int tail = (tick + 40) * mSampleRate;
+            int tail = (tick + mInterval) * mSampleRate;
             for (int i = mBufferTail * mSampleRate; i - tail < 0; ++i) {
                 mBuffer[i & mBufferMask] = 0;
             }
-            mBufferTail = tick + 40;
+            mBufferTail = tick + mInterval;
         }
     }
 
@@ -450,7 +462,6 @@ public:
     bool add(AudioStream *stream);
     bool remove(int socket);
 
-private:
     enum {
         ON_HOLD = 0,
         MUTED = 1,
@@ -459,6 +470,7 @@ private:
         LAST_MODE = 3,
     };
 
+private:
     AudioStream *mChain;
     int mEventQueue;
     volatile int mDtmfEvent;
@@ -680,7 +692,7 @@ bool AudioGroup::NetworkThread::threadLoop()
     int count = 0;
 
     for (AudioStream *stream = chain; stream; stream = stream->mNext) {
-        if (!stream->mTick || tick - stream->mTick >= 0) {
+        if (tick - stream->mTick >= 0) {
             stream->encode(tick, chain);
         }
         if (deadline - stream->mTick > 0) {
@@ -764,11 +776,14 @@ bool AudioGroup::DeviceThread::threadLoop()
     char c;
     while (recv(deviceSocket, &c, 1, MSG_DONTWAIT) == 1);
 
-    // Start your engine!
-    track.start();
+    // Start AudioRecord before AudioTrack. This prevents AudioTrack from being
+    // disabled due to buffer underrun while waiting for AudioRecord.
     if (mode != MUTED) {
         record.start();
+        int16_t one;
+        record.read(&one, sizeof(one));
     }
+    track.start();
 
     while (!exitPending()) {
         int16_t output[sampleCount];
@@ -794,34 +809,30 @@ bool AudioGroup::DeviceThread::threadLoop()
                     track.releaseBuffer(&buffer);
                 } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
                     LOGE("cannot write to AudioTrack");
-                    break;
+                    return true;
                 }
             }
 
             if (toRead > 0) {
                 AudioRecord::Buffer buffer;
-                buffer.frameCount = record.frameCount();
+                buffer.frameCount = toRead;
 
                 status_t status = record.obtainBuffer(&buffer, 1);
                 if (status == NO_ERROR) {
-                    int count = ((int)buffer.frameCount < toRead) ?
-                            buffer.frameCount : toRead;
-                    memcpy(&input[sampleCount - toRead], buffer.i8, count * 2);
-                    toRead -= count;
-                    if (buffer.frameCount < record.frameCount()) {
-                        buffer.frameCount = count;
-                    }
+                    int offset = sampleCount - toRead;
+                    memcpy(&input[offset], buffer.i8, buffer.size);
+                    toRead -= buffer.frameCount;
                     record.releaseBuffer(&buffer);
                 } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
                     LOGE("cannot read from AudioRecord");
-                    break;
+                    return true;
                 }
             }
         }
 
         if (chances <= 0) {
-            LOGE("device loop timeout");
-            break;
+            LOGW("device loop timeout");
+            while (recv(deviceSocket, &c, 1, MSG_DONTWAIT) == 1);
         }
 
         if (mode != MUTED) {
@@ -934,6 +945,10 @@ void remove(JNIEnv *env, jobject thiz, jint socket)
 
 void setMode(JNIEnv *env, jobject thiz, jint mode)
 {
+    if (mode < 0 || mode > AudioGroup::LAST_MODE) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
     AudioGroup *group = (AudioGroup *)env->GetIntField(thiz, gNative);
     if (group && !group->setMode(mode)) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);

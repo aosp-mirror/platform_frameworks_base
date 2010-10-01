@@ -366,6 +366,8 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         return false;
     }
 
+    glActiveTexture(GL_TEXTURE0);
+
     LayerSize size(bounds.getWidth(), bounds.getHeight());
     Layer* layer = mCaches.layerCache.get(size);
     if (!layer) {
@@ -383,17 +385,22 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     // Copy the framebuffer into the layer
     glBindTexture(GL_TEXTURE_2D, layer->texture);
 
-    if (layer->empty) {
-        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-                bounds.getWidth(), bounds.getHeight(), 0);
-        layer->empty = false;
-    } else {
-        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
-                bounds.getWidth(), bounds.getHeight());
-    }
+    // TODO: Workaround for b/3054204
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
+            bounds.getWidth(), bounds.getHeight(), 0);
 
-    if (flags & SkCanvas::kClipToLayer_SaveFlag) {
-        if (mSnapshot->clipTransformed(bounds)) setScissorFromClip();
+    // TODO: Waiting for b/3054204 to be fixed
+//    if (layer->empty) {
+//        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
+//                bounds.getWidth(), bounds.getHeight(), 0);
+//        layer->empty = false;
+//    } else {
+//        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
+//                bounds.getWidth(), bounds.getHeight());
+//    }
+
+    if (flags & SkCanvas::kClipToLayer_SaveFlag && mSnapshot->clipTransformed(bounds)) {
+        setScissorFromClip();
     }
 
     // Enqueue the buffer coordinates to clear the corresponding region later

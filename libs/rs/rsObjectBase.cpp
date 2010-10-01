@@ -61,6 +61,7 @@ void ObjectBase::setContext(Context *rsc)
     if (mRSC) {
         remove();
     }
+    rsAssert(rsc);
     mRSC = rsc;
     if (rsc) {
         add();
@@ -192,5 +193,17 @@ void ObjectBase::dumpAll(Context *rsc)
         o->dumpLOGV("  ");
         o = o->mNext;
     }
+}
+
+bool ObjectBase::isValid(const Context *rsc, const ObjectBase *obj)
+{
+    const ObjectBase * o = rsc->mObjHead;
+    while (o) {
+        if (o == obj) {
+            return true;
+        }
+        o = o->mNext;
+    }
+    return false;
 }
 

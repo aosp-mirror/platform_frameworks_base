@@ -282,18 +282,19 @@ void * Context::threadProc(void *vrsc)
      rsc->props.mLogShadersUniforms = getProp("debug.rs.shader.uniforms");
      rsc->props.mLogVisual = getProp("debug.rs.visual");
 
-     ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
-     if (!tlsStruct) {
+     rsc->mTlsStruct = new ScriptTLSStruct;
+     if (!rsc->mTlsStruct) {
          LOGE("Error allocating tls storage");
          return NULL;
      }
-     tlsStruct->mContext = rsc;
-     tlsStruct->mScript = NULL;
-     int status = pthread_setspecific(rsc->gThreadTLSKey, tlsStruct);
+     rsc->mTlsStruct->mContext = rsc;
+     rsc->mTlsStruct->mScript = NULL;
+     int status = pthread_setspecific(rsc->gThreadTLSKey, rsc->mTlsStruct);
      if (status) {
          LOGE("pthread_setspecific %i", status);
      }
 
+     rsc->mScriptC.init(rsc);
      if (rsc->mIsGraphicsContext) {
          rsc->mStateRaster.init(rsc);
          rsc->setRaster(NULL);
@@ -360,6 +361,7 @@ void * Context::threadProc(void *vrsc)
          rsc->deinitEGL();
          pthread_mutex_unlock(&gInitMutex);
      }
+     delete rsc->mTlsStruct;
 
      LOGV("%p, RS Thread exited", rsc);
      return NULL;
@@ -386,6 +388,11 @@ void * Context::helperThreadProc(void *vrsc)
 #endif
 
      setpriority(PRIO_PROCESS, rsc->mWorkers.mNativeThreadId[idx], rsc->mThreadPriority);
+     int status = pthread_setspecific(rsc->gThreadTLSKey, rsc->mTlsStruct);
+     if (status) {
+         LOGE("pthread_setspecific %i", status);
+     }
+
      while(rsc->mRunning) {
          rsc->mWorkers.mLaunchSignals[idx].wait();
          if (rsc->mWorkers.mLaunchCallback) {

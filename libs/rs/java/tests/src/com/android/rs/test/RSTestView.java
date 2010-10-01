@@ -62,6 +62,7 @@ public class RSTestView extends RSSurfaceView {
     @Override
     protected void onDetachedFromWindow() {
         if(mRS != null) {
+            mRender.cleanup();
             mRS = null;
             destroyRenderScript();
         }

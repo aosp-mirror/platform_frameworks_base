@@ -388,6 +388,10 @@ public class RenderScript {
     synchronized void nSamplerSet(int param, int value) {
         rsnSamplerSet(mContext, param, value);
     }
+    native void rsnSamplerSet2(int con, int param, float value);
+    synchronized void nSamplerSet2(int param, float value) {
+        rsnSamplerSet2(mContext, param, value);
+    }
     native int  rsnSamplerCreate(int con);
     synchronized int nSamplerCreate() {
         return rsnSamplerCreate(mContext);
@@ -498,6 +502,7 @@ public class RenderScript {
     Element mElement_U32;
     Element mElement_I32;
     Element mElement_F32;
+    Element mElement_F64;
     Element mElement_BOOLEAN;
 
     Element mElement_ELEMENT;

@@ -1881,7 +1881,7 @@ public class ActivityStack {
             String resultWho, int requestCode,
             int callingPid, int callingUid, boolean onlyIfNeeded,
             boolean componentSpecified) {
-        Slog.i(TAG, "Starting activity: " + intent);
+        Slog.i(TAG, "Starting: " + intent);
 
         ActivityRecord sourceRecord = null;
         ActivityRecord resultRecord = null;

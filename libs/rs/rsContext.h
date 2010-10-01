@@ -49,6 +49,24 @@ namespace android {
 
 namespace renderscript {
 
+#if 0
+#define CHECK_OBJ(o) { \
+    GET_TLS(); \
+    if(!ObjectBase::isValid(rsc, (const ObjectBase *)o)) {  \
+        LOGE("Bad object %p at %s, %i", o, __FILE__, __LINE__);  \
+    } \
+}
+#define CHECK_OBJ_OR_NULL(o) { \
+    GET_TLS(); \
+    if(o && !ObjectBase::isValid(rsc, (const ObjectBase *)o)) {  \
+        LOGE("Bad object %p at %s, %i", o, __FILE__, __LINE__);  \
+    } \
+}
+#else
+#define CHECK_OBJ(o)
+#define CHECK_OBJ_OR_NULL(o)
+#endif
+
 class Context
 {
 public:
@@ -64,6 +82,7 @@ public:
         Context * mContext;
         Script * mScript;
     };
+    ScriptTLSStruct *mTlsStruct;
 
     typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
 

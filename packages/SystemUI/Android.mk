@@ -13,6 +13,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := android-common-carousel
 LOCAL_PACKAGE_NAME := SystemUI
 LOCAL_CERTIFICATE := platform
 
-LOCAL_PROGUARD_FLAGS := -include $(LOCAL_PATH)/proguard.flags
+LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
 include $(BUILD_PACKAGE)

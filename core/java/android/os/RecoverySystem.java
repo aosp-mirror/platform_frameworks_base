@@ -68,6 +68,7 @@ public class RecoverySystem {
     private static File RECOVERY_DIR = new File("/cache/recovery");
     private static File COMMAND_FILE = new File(RECOVERY_DIR, "command");
     private static File LOG_FILE = new File(RECOVERY_DIR, "log");
+    private static String LAST_LOG_FILENAME = "last_log";
 
     // Length limits for reading files.
     private static int LOG_FILE_MAX_LENGTH = 64 * 1024;
@@ -399,9 +400,10 @@ public class RecoverySystem {
             Log.e(TAG, "Error reading recovery log", e);
         }
 
-        // Delete everything in RECOVERY_DIR
+        // Delete everything in RECOVERY_DIR except LAST_LOG_FILENAME
         String[] names = RECOVERY_DIR.list();
         for (int i = 0; names != null && i < names.length; i++) {
+            if (names[i].equals(LAST_LOG_FILENAME)) continue;
             File f = new File(RECOVERY_DIR, names[i]);
             if (!f.delete()) {
                 Log.e(TAG, "Can't delete: " + f);

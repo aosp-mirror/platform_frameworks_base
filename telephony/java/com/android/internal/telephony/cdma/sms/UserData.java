@@ -56,7 +56,7 @@ public class UserData {
      * 0, with the resulting code of 0x20.
      *
      * Note this mapping is also equivalent to that used by both the
-     * IS5 and the IS-91 encodings.  For the former this is defined
+     * IA5 and the IS-91 encodings.  For the former this is defined
      * using CCITT Rec. T.50 Tables 1 and 3.  For the latter IS 637 B,
      * Table 4.3.1.4.1-1 -- and note the encoding uses only 6 bits,
      * and hence only maps entries up to the '_' character.

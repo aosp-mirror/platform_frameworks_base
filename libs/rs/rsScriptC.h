@@ -79,14 +79,16 @@ public:
     ScriptCState();
     ~ScriptCState();
 
-    ScriptC *mScript;
+    ObjectBaseRef<ScriptC> mScript;
 
     ObjectBaseRef<const Type> mConstantBufferTypes[MAX_SCRIPT_BANKS];
     //String8 mSlotNames[MAX_SCRIPT_BANKS];
     bool mSlotWritable[MAX_SCRIPT_BANKS];
     //String8 mInvokableNames[MAX_SCRIPT_BANKS];
 
-    void clear();
+    void init(Context *rsc);
+
+    void clear(Context *rsc);
     void runCompiler(Context *rsc, ScriptC *s);
 
     struct SymbolTable_t {

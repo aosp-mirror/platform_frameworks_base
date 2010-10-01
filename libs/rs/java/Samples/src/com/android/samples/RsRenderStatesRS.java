@@ -19,11 +19,12 @@ package com.android.samples;
 import java.io.Writer;
 
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.renderscript.*;
 import android.renderscript.ProgramStore.DepthFunc;
+import android.renderscript.Sampler.Value;
 import android.util.Log;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
 
 
 public class RsRenderStatesRS {
@@ -42,7 +43,7 @@ public class RsRenderStatesRS {
         mOptionsARGB.inScaled = false;
         mOptionsARGB.inPreferredConfig = Bitmap.Config.ARGB_8888;
         mMode = 0;
-        mMaxModes = 8;
+        mMaxModes = 9;
         initRS();
     }
 
@@ -53,6 +54,8 @@ public class RsRenderStatesRS {
     private Sampler mLinearWrap;
     private Sampler mMipLinearWrap;
     private Sampler mNearestClamp;
+    private Sampler mMipLinearAniso8;
+    private Sampler mMipLinearAniso15;
 
     private ProgramStore mProgStoreBlendNoneDepth;
     private ProgramStore mProgStoreBlendNone;
@@ -74,10 +77,12 @@ public class RsRenderStatesRS {
 
     private ProgramRaster mCullBack;
     private ProgramRaster mCullFront;
+    private ProgramRaster mCullNone;
 
     private Allocation mTexTorus;
     private Allocation mTexOpaque;
     private Allocation mTexTransparent;
+    private Allocation mTexChecker;
 
     private Allocation mAllocPV;
 
@@ -243,10 +248,12 @@ public class RsRenderStatesRS {
         mTexTorus = loadTextureRGB(R.drawable.torusmap);
         mTexOpaque = loadTextureRGB(R.drawable.data);
         mTexTransparent = loadTextureARGB(R.drawable.leaf);
+        mTexChecker = loadTextureRGB(R.drawable.checker);
 
         mScript.set_gTexTorus(mTexTorus);
         mScript.set_gTexOpaque(mTexOpaque);
         mScript.set_gTexTransparent(mTexTransparent);
+        mScript.set_gTexChecker(mTexChecker);
     }
 
     private void initFonts() {
@@ -295,18 +302,32 @@ public class RsRenderStatesRS {
         mNearestClamp = Sampler.CLAMP_NEAREST(mRS);
         mMipLinearWrap = Sampler.WRAP_LINEAR_MIP_LINEAR(mRS);
 
+        bs = new Sampler.Builder(mRS);
+        bs.setMin(Sampler.Value.LINEAR_MIP_LINEAR);
+        bs.setMag(Sampler.Value.LINEAR);
+        bs.setWrapS(Sampler.Value.WRAP);
+        bs.setWrapT(Sampler.Value.WRAP);
+        bs.setAnisotropy(8.0f);
+        mMipLinearAniso8 = bs.create();
+        bs.setAnisotropy(15.0f);
+        mMipLinearAniso15 = bs.create();
+
         mScript.set_gLinearClamp(mLinearClamp);
         mScript.set_gLinearWrap(mLinearWrap);
         mScript.set_gMipLinearWrap(mMipLinearWrap);
+        mScript.set_gMipLinearAniso8(mMipLinearAniso8);
+        mScript.set_gMipLinearAniso15(mMipLinearAniso15);
         mScript.set_gNearestClamp(mNearestClamp);
     }
 
     private void initProgramRaster() {
         mCullBack = ProgramRaster.CULL_BACK(mRS);
         mCullFront = ProgramRaster.CULL_FRONT(mRS);
+        mCullNone = ProgramRaster.CULL_NONE(mRS);
 
         mScript.set_gCullBack(mCullBack);
         mScript.set_gCullFront(mCullFront);
+        mScript.set_gCullNone(mCullNone);
     }
 
     private void initRS() {

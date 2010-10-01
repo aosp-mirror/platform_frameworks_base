@@ -44,7 +44,7 @@ struct LayerSize {
     uint32_t id;
 
     bool operator<(const LayerSize& rhs) const {
-        if (id != 0 && rhs.id != 0) {
+        if (id != 0 && rhs.id != 0 && id != rhs.id) {
             return id < rhs.id;
         }
         if (width == rhs.width) {
@@ -54,7 +54,7 @@ struct LayerSize {
     }
 
     bool operator==(const LayerSize& rhs) const {
-        return width == rhs.width && height == rhs.height;
+        return id == rhs.id && width == rhs.width && height == rhs.height;
     }
 }; // struct LayerSize
 
@@ -83,7 +83,7 @@ struct Layer {
      */
     bool blend;
     /**
-     * Indicates that this layer has never been used before.
+     * Indicates whether this layer has been used already.
      */
     bool empty;
 }; // struct Layer

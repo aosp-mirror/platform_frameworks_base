@@ -138,8 +138,8 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
         const SkPath *path, const SkPaint* paint) {
     const SkRect& bounds = path->getBounds();
 
-    const float pathWidth = bounds.width();
-    const float pathHeight = bounds.height();
+    const float pathWidth = fmax(bounds.width(), 1.0f);
+    const float pathHeight = fmax(bounds.height(), 1.0f);
 
     if (pathWidth > mMaxTextureSize || pathHeight > mMaxTextureSize) {
         LOGW("Path too large to be rendered into a texture");

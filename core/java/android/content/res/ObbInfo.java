@@ -29,6 +29,11 @@ public class ObbInfo implements Parcelable {
     public static final int OBB_OVERLAY = 1 << 0;
 
     /**
+     * The canonical filename of the OBB.
+     */
+    public String filename;
+
+    /**
      * The name of the package to which the OBB file belongs.
      */
     public String packageName;
@@ -66,6 +71,7 @@ public class ObbInfo implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int parcelableFlags) {
+        dest.writeString(filename);
         dest.writeString(packageName);
         dest.writeInt(version);
         dest.writeInt(flags);
@@ -83,6 +89,7 @@ public class ObbInfo implements Parcelable {
     };
 
     private ObbInfo(Parcel source) {
+        filename = source.readString();
         packageName = source.readString();
         version = source.readInt();
         flags = source.readInt();

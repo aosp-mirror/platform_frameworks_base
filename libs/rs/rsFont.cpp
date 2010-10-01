@@ -743,6 +743,8 @@ void FontState::deinit(Context *rsc)
 {
     mInitialized = false;
 
+    mFontShaderFConstant.clear();
+
     mIndexBuffer.clear();
     mVertexArray.clear();
 
