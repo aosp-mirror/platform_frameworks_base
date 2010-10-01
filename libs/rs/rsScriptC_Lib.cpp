@@ -203,45 +203,46 @@ static float SC_getDt()
 
 static uint32_t SC_allocGetDimX(RsAllocation va)
 {
-    GET_TLS();
     const Allocation *a = static_cast<const Allocation *>(va);
-    //LOGE("SC_allocGetDimX a=%p", a);
-    //LOGE(" type=%p", a->getType());
+    CHECK_OBJ(a);
+    //LOGE("SC_allocGetDimX a=%p  type=%p", a, a->getType());
     return a->getType()->getDimX();
 }
 
 static uint32_t SC_allocGetDimY(RsAllocation va)
 {
-    GET_TLS();
     const Allocation *a = static_cast<const Allocation *>(va);
+    CHECK_OBJ(a);
     return a->getType()->getDimY();
 }
 
 static uint32_t SC_allocGetDimZ(RsAllocation va)
 {
-    GET_TLS();
     const Allocation *a = static_cast<const Allocation *>(va);
+    CHECK_OBJ(a);
     return a->getType()->getDimZ();
 }
 
 static uint32_t SC_allocGetDimLOD(RsAllocation va)
 {
-    GET_TLS();
     const Allocation *a = static_cast<const Allocation *>(va);
+    CHECK_OBJ(a);
     return a->getType()->getDimLOD();
 }
 
 static uint32_t SC_allocGetDimFaces(RsAllocation va)
 {
-    GET_TLS();
     const Allocation *a = static_cast<const Allocation *>(va);
+    CHECK_OBJ(a);
     return a->getType()->getDimFaces();
 }
 
 static const void * SC_getElementAtX(RsAllocation va, uint32_t x)
 {
     const Allocation *a = static_cast<const Allocation *>(va);
+    CHECK_OBJ(a);
     const Type *t = a->getType();
+    CHECK_OBJ(t);
     const uint8_t *p = (const uint8_t *)a->getPtr();
     return &p[t->getElementSizeBytes() * x];
 }
@@ -249,7 +250,9 @@ static const void * SC_getElementAtX(RsAllocation va, uint32_t x)
 static const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y)
 {
     const Allocation *a = static_cast<const Allocation *>(va);
+    CHECK_OBJ(a);
     const Type *t = a->getType();
+    CHECK_OBJ(t);
     const uint8_t *p = (const uint8_t *)a->getPtr();
     return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
 }
@@ -257,7 +260,9 @@ static const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y)
 static const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, uint32_t z)
 {
     const Allocation *a = static_cast<const Allocation *>(va);
+    CHECK_OBJ(a);
     const Type *t = a->getType();
+    CHECK_OBJ(t);
     const uint8_t *p = (const uint8_t *)a->getPtr();
     return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
 }
@@ -265,9 +270,11 @@ static const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, 
 static void SC_setObject(void **vdst, void * vsrc) {
     //LOGE("SC_setObject  %p,%p  %p", vdst, *vdst, vsrc);
     if (vsrc) {
+        CHECK_OBJ(vsrc);
         static_cast<ObjectBase *>(vsrc)->incSysRef();
     }
     if (vdst[0]) {
+        CHECK_OBJ(vdst[0]);
         static_cast<ObjectBase *>(vdst[0])->decSysRef();
     }
     *vdst = vsrc;
@@ -276,6 +283,7 @@ static void SC_setObject(void **vdst, void * vsrc) {
 static void SC_clearObject(void **vdst) {
     //LOGE("SC_clearObject  %p,%p", vdst, *vdst);
     if (vdst[0]) {
+        CHECK_OBJ(vdst[0]);
         static_cast<ObjectBase *>(vdst[0])->decSysRef();
     }
     *vdst = NULL;

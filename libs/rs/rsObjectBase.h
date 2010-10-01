@@ -56,6 +56,8 @@ public:
     virtual void serialize(OStream *stream) const = 0;
     virtual RsA3DClassID getClassId() const = 0;
 
+    static bool isValid(const Context *rsc, const ObjectBase *obj);
+
 protected:
     const char *mAllocFile;
     uint32_t mAllocLine;

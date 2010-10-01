@@ -195,3 +195,15 @@ void ObjectBase::dumpAll(Context *rsc)
     }
 }
 
+bool ObjectBase::isValid(const Context *rsc, const ObjectBase *obj)
+{
+    const ObjectBase * o = rsc->mObjHead;
+    while (o) {
+        if (o == obj) {
+            return true;
+        }
+        o = o->mNext;
+    }
+    return false;
+}
+
