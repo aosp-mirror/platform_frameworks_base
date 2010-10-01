@@ -90,7 +90,7 @@ public class EdgeGlow {
 
     // How much dragging should effect the height of the glow image.
     // Number determined by user testing.
-    private static final int PULL_DISTANCE_GLOW_FACTOR = 10;
+    private static final int PULL_DISTANCE_GLOW_FACTOR = 5;
 
     private static final int VELOCITY_EDGE_FACTOR = 8;
     private static final int VELOCITY_GLOW_FACTOR = 16;
