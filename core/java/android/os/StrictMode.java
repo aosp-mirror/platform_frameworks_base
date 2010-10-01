@@ -30,8 +30,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * <p>StrictMode is a developer tool which lets you impose stricter
- * rules under which your application runs.
+ * <p>StrictMode is a developer tool which detects things you might be
+ * doing by accident and brings them to your attention so you can fix
+ * them.
  *
  * <p>StrictMode is most commonly used to catch accidental disk or
  * network access on the application's main thread, where UI
@@ -55,24 +56,33 @@ import java.util.HashMap;
  * <pre>
  * public void onCreate() {
  *     if (DEVELOPER_MODE) {
- *         StrictMode.setThreadPolicy(StrictMode.DISALLOW_DISK_WRITE |
- *                 StrictMode.DISALLOW_DISK_READ |
- *                 StrictMode.DISALLOW_NETWORK |
- *                 StrictMode.PENALTY_LOG);
+ *         StrictMode.setThreadPolicy(new {@link ThreadPolicy.Builder StrictMode.ThreadPolicy.Builder}()
+ *                 .detectDiskReads()
+ *                 .detectDiskWrites()
+ *                 .detectNetwork()   // or .detectAll() for all detectable problems
+ *                 .penaltyLog()
+ *                 .build());
+ *         StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
+ *                 .detectLeakedSqlLiteCursors()
+ *                 .penaltyLog()
+ *                 .penaltyDeath()
+ *                 .build());
  *     }
  *     super.onCreate();
  * }
  * </pre>
  *
- * <p>Then you can watch the output of <code>adb logcat</code> while you
- * use your application.
+ * <p>You can decide what should happen when a violation is detected.
+ * For example, using {@link ThreadPolicy.Builder#penaltyLog} you can
+ * watch the output of <code>adb logcat</code> while you use your
+ * application to see the violations as they happen.
  *
  * <p>If you find violations that you feel are problematic, there are
  * a variety of tools to help solve them: threads, {@link android.os.Handler},
  * {@link android.os.AsyncTask}, {@link android.app.IntentService}, etc.
  * But don't feel compelled to fix everything that StrictMode finds.  In particular,
- * a lot of disk accesses are often necessary during the normal activity lifecycle.  Use
- * StrictMode to find things you did on accident.  Network requests on the UI thread
+ * many cases of disk access are often necessary during the normal activity lifecycle.  Use
+ * StrictMode to find things you did by accident.  Network requests on the UI thread
  * are almost always a problem, though.
  *
  * <p class="note">StrictMode is not a security mechanism and is not
@@ -94,55 +104,50 @@ public final class StrictMode {
     // Only show an annoying dialog at most every 30 seconds
     private static final long MIN_DIALOG_INTERVAL_MS = 30000;
 
-    private StrictMode() {}
+    // Thread-policy:
 
     /**
-     * Flag for {@link #setThreadPolicy} to signal that you don't intend for this
-     * thread to write to disk.
+     * @hide
      */
-    public static final int DISALLOW_DISK_WRITE = 0x01;
+    public static final int DETECT_DISK_WRITE = 0x01;  // for ThreadPolicy
 
     /**
-     * Flag for {@link #setThreadPolicy} to signal that you don't intend for this
-     * thread to read from disk.
+      * @hide
      */
-    public static final int DISALLOW_DISK_READ = 0x02;
+    public static final int DETECT_DISK_READ = 0x02;  // for ThreadPolicy
 
     /**
-     * Flag for {@link #setThreadPolicy} to signal that you don't intend for this
-     * thread to access the network.
+     * @hide
      */
-    public static final int DISALLOW_NETWORK = 0x04;
+    public static final int DETECT_NETWORK = 0x04;  // for ThreadPolicy
 
-    /** @hide */
-    public static final int DISALLOW_MASK =
-            DISALLOW_DISK_WRITE | DISALLOW_DISK_READ | DISALLOW_NETWORK;
+    // Process-policy:
 
     /**
-     * Penalty flag for {@link #setThreadPolicy} to log violations to
-     * the system log, visible with <code>adb logcat</code>.
+     * Note, a "VM_" bit, not thread.
+     * @hide
+     */
+    public static final int DETECT_VM_CURSOR_LEAKS = 0x200;  // for ProcessPolicy
+
+    /**
+     * @hide
      */
     public static final int PENALTY_LOG = 0x10;  // normal android.util.Log
 
+    // Used for both process and thread policy:
+
     /**
-     * Penalty flag for {@link #setThreadPolicy} to show an annoying
-     * dialog to the developer, rate-limited to be only a little
-     * annoying.
+     * @hide
      */
     public static final int PENALTY_DIALOG = 0x20;
 
     /**
-     * Penalty flag for {@link #setThreadPolicy} to crash hard if
-     * policy is violated.
+     * @hide
      */
     public static final int PENALTY_DEATH = 0x40;
 
     /**
-     * Penalty flag for {@link #setThreadPolicy} to log a stacktrace
-     * and timing data to the
-     * {@link android.os.DropBoxManager DropBox} on policy violation.
-     * Intended mostly for platform integrators doing beta user field
-     * data collection.
+     * @hide
      */
     public static final int PENALTY_DROPBOX = 0x80;
 
@@ -159,10 +164,321 @@ public final class StrictMode {
      */
     public static final int PENALTY_GATHER = 0x100;
 
-    /** @hide */
-    public static final int PENALTY_MASK =
-            PENALTY_LOG | PENALTY_DIALOG |
-            PENALTY_DROPBOX | PENALTY_DEATH;
+    /**
+     * The current VmPolicy in effect.
+     */
+    private static volatile int sVmPolicyMask = 0;
+
+    private StrictMode() {}
+
+    /**
+     * {@link StrictMode} policy applied to a certain thread.
+     *
+     * <p>The policy is enabled by {@link #setThreadPolicy}.  The current policy
+     * can be retrieved with {@link #getThreadPolicy}.
+     *
+     * <p>Note that multiple penalties may be provided and they're run
+     * in order from least to most severe (logging before process
+     * death, for example).  There's currently no mechanism to choose
+     * different penalties for different detected actions.
+     */
+    public static final class ThreadPolicy {
+        /**
+         * The default, lax policy which doesn't catch anything.
+         */
+        public static final ThreadPolicy LAX = new ThreadPolicy(0);
+
+        final int mask;
+
+        private ThreadPolicy(int mask) {
+            this.mask = mask;
+        }
+
+        @Override
+        public String toString() {
+            return "[StrictMode.ThreadPolicy; mask=" + mask + "]";
+        }
+
+        /**
+         * Creates ThreadPolicy instances.  Methods whose names start
+         * with {@code detect} specify what problems we should look
+         * for.  Methods whose names start with {@code penalty} specify what
+         * we should do when we detect a problem.
+         *
+         * <p>You can call as many {@code detect} and {@code penalty}
+         * methods as you like. Currently order is insignificant: all
+         * penalties apply to all detected problems.
+         *
+         * <p>For example, detect everything and log anything that's found:
+         * <pre>
+         * StrictMode.VmPolicy policy = new StrictMode.VmPolicy.Builder()
+         *     .detectAll()
+         *     .penaltyLog()
+         *     .build();
+         * StrictMode.setVmPolicy(policy);
+         * </pre>
+         */
+        public static final class Builder {
+            private int mMask = 0;
+
+            /**
+             * Create a Builder that detects nothing and has no
+             * violations.  (but note that {@link #build} will default
+             * to enabling {@link #penaltyLog} if no other penalties
+             * are specified)
+             */
+            public Builder() {
+                mMask = 0;
+            }
+
+            /**
+             * Initialize a Builder from an existing ThreadPolicy.
+             */
+            public Builder(ThreadPolicy policy) {
+                mMask = policy.mask;
+            }
+
+            /**
+             * Detect everything that's potentially suspect.
+             *
+             * <p>As of the Gingerbread release this includes network and
+             * disk operations but will likely expand in future releases.
+             */
+            public Builder detectAll() {
+                return enable(DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK);
+            }
+
+            /**
+             * Disable the detection of everything.
+             */
+            public Builder permitAll() {
+                return disable(DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK);
+            }
+
+            /**
+             * Enable detection of network operations.
+             */
+            public Builder detectNetwork() {
+                return enable(DETECT_NETWORK);
+            }
+
+            /**
+             * Disable detection of network operations.
+             */
+            public Builder permitNetwork() {
+                return disable(DETECT_NETWORK);
+            }
+
+            /**
+             * Enable detection of disk reads.
+             */
+            public Builder detectDiskReads() {
+                return enable(DETECT_DISK_READ);
+            }
+
+            /**
+             * Disable detection of disk reads.
+             */
+            public Builder permitDiskReads() {
+                return disable(DETECT_DISK_READ);
+            }
+
+            /**
+             * Enable detection of disk writes.
+             */
+            public Builder detectDiskWrites() {
+                return enable(DETECT_DISK_WRITE);
+            }
+
+            /**
+             * Disable detection of disk writes.
+             */
+            public Builder permitDiskWrites() {
+                return disable(DETECT_DISK_WRITE);
+            }
+
+            /**
+             * Show an annoying dialog to the developer on detected
+             * violations, rate-limited to be only a little annoying.
+             */
+            public Builder penaltyDialog() {
+                return enable(PENALTY_DIALOG);
+            }
+
+            /**
+             * Crash the whole process on violation.  This penalty runs at
+             * the end of all enabled penalties so you'll still get
+             * see logging or other violations before the process dies.
+             */
+            public Builder penaltyDeath() {
+                return enable(PENALTY_DEATH);
+            }
+
+            /**
+             * Log detected violations to the system log.
+             */
+            public Builder penaltyLog() {
+                return enable(PENALTY_LOG);
+            }
+
+            /**
+             * Enable detected violations log a stacktrace and timing data
+             * to the {@link android.os.DropBoxManager DropBox} on policy
+             * violation.  Intended mostly for platform integrators doing
+             * beta user field data collection.
+             */
+            public Builder penaltyDropBox() {
+                return enable(PENALTY_DROPBOX);
+            }
+
+            private Builder enable(int bit) {
+                mMask |= bit;
+                return this;
+            }
+
+            private Builder disable(int bit) {
+                mMask &= ~bit;
+                return this;
+            }
+
+            /**
+             * Construct the ThreadPolicy instance.
+             *
+             * <p>Note: if no penalties are enabled before calling
+             * <code>build</code>, {@link #penaltyLog} is implicitly
+             * set.
+             */
+            public ThreadPolicy build() {
+                // If there are detection bits set but no violation bits
+                // set, enable simple logging.
+                if (mMask != 0 &&
+                    (mMask & (PENALTY_DEATH | PENALTY_LOG |
+                              PENALTY_DROPBOX | PENALTY_DIALOG)) == 0) {
+                    penaltyLog();
+                }
+                return new ThreadPolicy(mMask);
+            }
+        }
+    }
+
+    /**
+     * {@link StrictMode} policy applied to all threads in the virtual machine's process.
+     *
+     * <p>The policy is enabled by {@link #setVmPolicy}.
+     */
+    public static final class VmPolicy {
+        /**
+         * The default, lax policy which doesn't catch anything.
+         */
+        public static final VmPolicy LAX = new VmPolicy(0);
+
+        final int mask;
+
+        private VmPolicy(int mask) {
+            this.mask = mask;
+        }
+
+        @Override
+        public String toString() {
+            return "[StrictMode.VmPolicy; mask=" + mask + "]";
+        }
+
+        /**
+         * Creates {@link VmPolicy} instances.  Methods whose names start
+         * with {@code detect} specify what problems we should look
+         * for.  Methods whose names start with {@code penalty} specify what
+         * we should do when we detect a problem.
+         *
+         * <p>You can call as many {@code detect} and {@code penalty}
+         * methods as you like. Currently order is insignificant: all
+         * penalties apply to all detected problems.
+         *
+         * <p>For example, detect everything and log anything that's found:
+         * <pre>
+         * StrictMode.VmPolicy policy = new StrictMode.VmPolicy.Builder()
+         *     .detectAll()
+         *     .penaltyLog()
+         *     .build();
+         * StrictMode.setVmPolicy(policy);
+         * </pre>
+         */
+        public static final class Builder {
+            private int mMask;
+
+            /**
+             * Detect everything that's potentially suspect.
+             *
+             * <p>As of the Gingerbread release this only includes
+             * SQLite cursor leaks but will likely expand in future
+             * releases.
+             */
+            public Builder detectAll() {
+                return enable(DETECT_VM_CURSOR_LEAKS);
+            }
+
+            /**
+             * Detect when an
+             * {@link android.database.sqlite.SQLiteCursor} or other
+             * SQLite object is finalized without having been closed.
+             *
+             * <p>You always want to explicitly close your SQLite
+             * cursors to avoid unnecessary database contention and
+             * temporary memory leaks.
+             */
+            public Builder detectLeakedSqlLiteObjects() {
+                return enable(DETECT_VM_CURSOR_LEAKS);
+            }
+
+            /**
+             * Crashes the whole process on violation.  This penalty runs at
+             * the end of all enabled penalties so yo you'll still get
+             * your logging or other violations before the process dies.
+             */
+            public Builder penaltyDeath() {
+                return enable(PENALTY_DEATH);
+            }
+
+            /**
+             * Log detected violations to the system log.
+             */
+            public Builder penaltyLog() {
+                return enable(PENALTY_LOG);
+            }
+
+            /**
+             * Enable detected violations log a stacktrace and timing data
+             * to the {@link android.os.DropBoxManager DropBox} on policy
+             * violation.  Intended mostly for platform integrators doing
+             * beta user field data collection.
+             */
+            public Builder penaltyDropBox() {
+                return enable(PENALTY_DROPBOX);
+            }
+
+            private Builder enable(int bit) {
+                mMask |= bit;
+                return this;
+            }
+
+            /**
+             * Construct the VmPolicy instance.
+             *
+             * <p>Note: if no penalties are enabled before calling
+             * <code>build</code>, {@link #penaltyLog} is implicitly
+             * set.
+             */
+            public VmPolicy build() {
+                // If there are detection bits set but no violation bits
+                // set, enable simple logging.
+                if (mMask != 0 &&
+                    (mMask & (PENALTY_DEATH | PENALTY_LOG |
+                              PENALTY_DROPBOX | PENALTY_DIALOG)) == 0) {
+                    penaltyLog();
+                }
+                return new VmPolicy(mMask);
+            }
+        }
+    }
 
     /**
      * Log of strict mode violation stack traces that have occurred
@@ -181,19 +497,21 @@ public final class StrictMode {
     };
 
     /**
-     * Sets the policy for what actions the current thread isn't
-     * expected to do, as well as the penalty if it does.
+     * Sets the policy for what actions on the current thread should
+     * be detected, as well as the penalty if such actions occur.
      *
-     * <p>Internally this sets a thread-local integer which is
+     * <p>Internally this sets a thread-local variable which is
      * propagated across cross-process IPC calls, meaning you can
      * catch violations when a system service or another process
      * accesses the disk or network on your behalf.
      *
-     * @param policyMask a bitmask of DISALLOW_* and PENALTY_* values,
-     *     e.g. {@link #DISALLOW_DISK_READ}, {@link #DISALLOW_DISK_WRITE},
-     *     {@link #DISALLOW_NETWORK}, {@link #PENALTY_LOG}.
+     * @param policy the policy to put into place
      */
-    public static void setThreadPolicy(final int policyMask) {
+    public static void setThreadPolicy(final ThreadPolicy policy) {
+        setThreadPolicyMask(policy.mask);
+    }
+
+    private static void setThreadPolicyMask(final int policyMask) {
         // In addition to the Java-level thread-local in Dalvik's
         // BlockGuard, we also need to keep a native thread-local in
         // Binder in order to propagate the value across Binder calls,
@@ -222,65 +540,76 @@ public final class StrictMode {
 
     private static class StrictModeNetworkViolation extends BlockGuard.BlockGuardPolicyException {
         public StrictModeNetworkViolation(int policyMask) {
-            super(policyMask, DISALLOW_NETWORK);
+            super(policyMask, DETECT_NETWORK);
         }
     }
 
     private static class StrictModeDiskReadViolation extends BlockGuard.BlockGuardPolicyException {
         public StrictModeDiskReadViolation(int policyMask) {
-            super(policyMask, DISALLOW_DISK_READ);
+            super(policyMask, DETECT_DISK_READ);
         }
     }
 
     private static class StrictModeDiskWriteViolation extends BlockGuard.BlockGuardPolicyException {
         public StrictModeDiskWriteViolation(int policyMask) {
-            super(policyMask, DISALLOW_DISK_WRITE);
+            super(policyMask, DETECT_DISK_WRITE);
         }
     }
 
     /**
      * Returns the bitmask of the current thread's policy.
      *
-     * @return the bitmask of all the DISALLOW_* and PENALTY_* bits currently enabled
+     * @return the bitmask of all the DETECT_* and PENALTY_* bits currently enabled
+     *
+     * @hide
      */
-    public static int getThreadPolicy() {
+    public static int getThreadPolicyMask() {
         return BlockGuard.getThreadPolicy().getPolicyMask();
     }
 
     /**
-     * A convenience wrapper around {@link #getThreadPolicy} and
-     * {@link #setThreadPolicy}.  Updates the current thread's policy
-     * mask to allow both reading &amp; writing to disk, returning the
-     * old policy so you can restore it at the end of a block.
-     *
-     * @return the old policy mask, to be passed to setThreadPolicy to
-     *         restore the policy.
+     * Returns the current thread's policy.
      */
-    public static int allowThreadDiskWrites() {
-        int oldPolicy = getThreadPolicy();
-        int newPolicy = oldPolicy & ~(DISALLOW_DISK_WRITE | DISALLOW_DISK_READ);
-        if (newPolicy != oldPolicy) {
-            setThreadPolicy(newPolicy);
-        }
-        return oldPolicy;
+    public static ThreadPolicy getThreadPolicy() {
+        return new ThreadPolicy(getThreadPolicyMask());
     }
 
     /**
-     * A convenience wrapper around {@link #getThreadPolicy} and
-     * {@link #setThreadPolicy}.  Updates the current thread's policy
-     * mask to allow reading from disk, returning the old
-     * policy so you can restore it at the end of a block.
+     * A convenience wrapper that takes the current
+     * {@link ThreadPolicy} from {@link #getThreadPolicy}, modifies it
+     * to permit both disk reads &amp; writes, and sets the new policy
+     * with {@link #setThreadPolicy}, returning the old policy so you
+     * can restore it at the end of a block.
      *
-     * @return the old policy mask, to be passed to setThreadPolicy to
+     * @return the old policy, to be passed to {@link #setThreadPolicy} to
+     *         restore the policy at the end of a block
+     */
+    public static ThreadPolicy allowThreadDiskWrites() {
+        int oldPolicyMask = getThreadPolicyMask();
+        int newPolicyMask = oldPolicyMask & ~(DETECT_DISK_WRITE | DETECT_DISK_READ);
+        if (newPolicyMask != oldPolicyMask) {
+            setThreadPolicyMask(newPolicyMask);
+        }
+        return new ThreadPolicy(oldPolicyMask);
+    }
+
+    /**
+     * A convenience wrapper that takes the current
+     * {@link ThreadPolicy} from {@link #getThreadPolicy}, modifies it
+     * to permit disk reads, and sets the new policy
+     * with {@link #setThreadPolicy}, returning the old policy so you
+     * can restore it at the end of a block.
+     *
+     * @return the old policy, to be passed to setThreadPolicy to
      *         restore the policy.
      */
-    public static int allowThreadDiskReads() {
-        int oldPolicy = getThreadPolicy();
-        int newPolicy = oldPolicy & ~(DISALLOW_DISK_READ);
-        if (newPolicy != oldPolicy) {
-            setThreadPolicy(newPolicy);
+    public static ThreadPolicy allowThreadDiskReads() {
+        int oldPolicyMask = getThreadPolicyMask();
+        int newPolicyMask = oldPolicyMask & ~(DETECT_DISK_READ);
+        if (newPolicyMask != oldPolicyMask) {
+            setThreadPolicyMask(newPolicyMask);
         }
-        return oldPolicy;
+        return new ThreadPolicy(oldPolicyMask);
     }
 
     /**
@@ -294,11 +623,14 @@ public final class StrictMode {
         if ("user".equals(Build.TYPE)) {
             return false;
         }
-        StrictMode.setThreadPolicy(
-            StrictMode.DISALLOW_DISK_WRITE |
-            StrictMode.DISALLOW_DISK_READ |
-            StrictMode.DISALLOW_NETWORK |
+        StrictMode.setThreadPolicyMask(
+            StrictMode.DETECT_DISK_WRITE |
+            StrictMode.DETECT_DISK_READ |
+            StrictMode.DETECT_NETWORK |
             StrictMode.PENALTY_DROPBOX);
+        sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
+                StrictMode.PENALTY_DROPBOX |
+                StrictMode.PENALTY_LOG;
         return true;
     }
 
@@ -372,7 +704,7 @@ public final class StrictMode {
 
         // Part of BlockGuard.Policy interface:
         public void onWriteToDisk() {
-            if ((mPolicyMask & DISALLOW_DISK_WRITE) == 0) {
+            if ((mPolicyMask & DETECT_DISK_WRITE) == 0) {
                 return;
             }
             BlockGuard.BlockGuardPolicyException e = new StrictModeDiskWriteViolation(mPolicyMask);
@@ -382,7 +714,7 @@ public final class StrictMode {
 
         // Part of BlockGuard.Policy interface:
         public void onReadFromDisk() {
-            if ((mPolicyMask & DISALLOW_DISK_READ) == 0) {
+            if ((mPolicyMask & DETECT_DISK_READ) == 0) {
                 return;
             }
             BlockGuard.BlockGuardPolicyException e = new StrictModeDiskReadViolation(mPolicyMask);
@@ -392,7 +724,7 @@ public final class StrictMode {
 
         // Part of BlockGuard.Policy interface:
         public void onNetwork() {
-            if ((mPolicyMask & DISALLOW_NETWORK) == 0) {
+            if ((mPolicyMask & DETECT_NETWORK) == 0) {
                 return;
             }
             BlockGuard.BlockGuardPolicyException e = new StrictModeNetworkViolation(mPolicyMask);
@@ -547,13 +879,13 @@ public final class StrictMode {
             if (violationMaskSubset != 0) {
                 int violationBit = parseViolationFromMessage(info.crashInfo.exceptionMessage);
                 violationMaskSubset |= violationBit;
-                final int savedPolicy = getThreadPolicy();
+                final int savedPolicyMask = getThreadPolicyMask();
                 try {
                     // First, remove any policy before we call into the Activity Manager,
                     // otherwise we'll infinite recurse as we try to log policy violations
                     // to disk, thus violating policy, thus requiring logging, etc...
                     // We restore the current policy below, in the finally block.
-                    setThreadPolicy(0);
+                    setThreadPolicyMask(0);
 
                     ActivityManagerNative.getDefault().handleApplicationStrictModeViolation(
                         RuntimeInit.getApplicationObject(),
@@ -563,7 +895,7 @@ public final class StrictMode {
                     Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
                 } finally {
                     // Restore the policy.
-                    setThreadPolicy(savedPolicy);
+                    setThreadPolicyMask(savedPolicyMask);
                 }
             }
 
@@ -589,6 +921,74 @@ public final class StrictMode {
      */
     /* package */ static void clearGatheredViolations() {
         gatheredViolations.set(null);
+    }
+
+    /**
+     * Sets the policy for what actions in the VM process (on any
+     * thread) should be detected, as well as the penalty if such
+     * actions occur.
+     *
+     * @param policy the policy to put into place
+     */
+    public static void setVmPolicy(final VmPolicy policy) {
+        sVmPolicyMask = policy.mask;
+    }
+
+    /**
+     * Gets the current VM policy.
+     */
+    public static VmPolicy getVmPolicy() {
+        return new VmPolicy(sVmPolicyMask);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean vmSqliteObjectLeaksEnabled() {
+        return (sVmPolicyMask & DETECT_VM_CURSOR_LEAKS) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public static void onSqliteObjectLeaked(String message, Throwable originStack) {
+        if ((sVmPolicyMask & PENALTY_LOG) != 0) {
+            Log.e(TAG, message, originStack);
+        }
+
+        if ((sVmPolicyMask & PENALTY_DROPBOX) != 0) {
+            final ViolationInfo info = new ViolationInfo(originStack, sVmPolicyMask);
+
+            // The violationMask, passed to ActivityManager, is a
+            // subset of the original StrictMode policy bitmask, with
+            // only the bit violated and penalty bits to be executed
+            // by the ActivityManagerService remaining set.
+            int violationMaskSubset = PENALTY_DROPBOX | DETECT_VM_CURSOR_LEAKS;
+            final int savedPolicyMask = getThreadPolicyMask();
+            try {
+                // First, remove any policy before we call into the Activity Manager,
+                // otherwise we'll infinite recurse as we try to log policy violations
+                // to disk, thus violating policy, thus requiring logging, etc...
+                // We restore the current policy below, in the finally block.
+                setThreadPolicyMask(0);
+
+                ActivityManagerNative.getDefault().handleApplicationStrictModeViolation(
+                    RuntimeInit.getApplicationObject(),
+                    violationMaskSubset,
+                    info);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
+            } finally {
+                // Restore the policy.
+                setThreadPolicyMask(savedPolicyMask);
+            }
+        }
+
+        if ((sVmPolicyMask & PENALTY_DEATH) != 0) {
+            System.err.println("StrictMode VmPolicy violation with POLICY_DEATH; shutting down.");
+            Process.killProcess(Process.myPid());
+            System.exit(10);
+        }
     }
 
     /**
@@ -621,7 +1021,7 @@ public final class StrictMode {
         new LogStackTrace().printStackTrace(new PrintWriter(sw));
         String ourStack = sw.toString();
 
-        int policyMask = getThreadPolicy();
+        int policyMask = getThreadPolicyMask();
         boolean currentlyGathering = (policyMask & PENALTY_GATHER) != 0;
 
         int numViolations = p.readInt();
