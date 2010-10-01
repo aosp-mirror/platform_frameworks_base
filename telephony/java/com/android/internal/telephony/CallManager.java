@@ -861,6 +861,25 @@ public final class CallManager {
     }
 
     /**
+     * Enables or disables echo suppression.
+     */
+    public void setEchoSuppressionEnabled(boolean enabled) {
+        if (VDBG) {
+            Log.d(LOG_TAG, " setEchoSuppression(" + enabled + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+
+        if (hasActiveFgCall()) {
+            getActiveFgCall().getPhone().setEchoSuppressionEnabled(enabled);
+        }
+
+        if (VDBG) {
+            Log.d(LOG_TAG, "End setEchoSuppression(" + enabled + ")");
+            Log.d(LOG_TAG, this.toString());
+        }
+    }
+
+    /**
      * Play a DTMF tone on the active call.
      *
      * @param c should be one of 0-9, '*' or '#'. Other values will be
