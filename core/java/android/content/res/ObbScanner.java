@@ -45,9 +45,14 @@ public class ObbScanner {
             throw new IllegalArgumentException("OBB file does not exist: " + filePath);
         }
 
+        /*
+         * XXX This will fail to find the real canonical path if bind mounts are
+         * used, but we don't use any bind mounts right now.
+         */
         final String canonicalFilePath = obbFile.getCanonicalPath();
 
         ObbInfo obbInfo = new ObbInfo();
+        obbInfo.filename = canonicalFilePath;
         getObbInfo_native(canonicalFilePath, obbInfo);
 
         return obbInfo;
