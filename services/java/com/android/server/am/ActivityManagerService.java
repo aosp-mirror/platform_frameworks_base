@@ -113,9 +113,15 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -6090,6 +6096,76 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mSystemReady;
     }
     
+    private static File getCalledPreBootReceiversFile() {
+        File dataDir = Environment.getDataDirectory();
+        File systemDir = new File(dataDir, "system");
+        File fname = new File(systemDir, "called_pre_boots.dat");
+        return fname;
+    }
+    
+    private static ArrayList<ComponentName> readLastDonePreBootReceivers() {
+        ArrayList<ComponentName> lastDoneReceivers = new ArrayList<ComponentName>();
+        File file = getCalledPreBootReceiversFile();
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            DataInputStream dis = new DataInputStream(new BufferedInputStream(fis, 2048));
+            int vers = dis.readInt();
+            String codename = dis.readUTF();
+            if (vers == android.os.Build.VERSION.SDK_INT
+                    && codename.equals(android.os.Build.VERSION.CODENAME)) {
+                int num = dis.readInt();
+                while (num > 0) {
+                    num--;
+                    String pkg = dis.readUTF();
+                    String cls = dis.readUTF();
+                    lastDoneReceivers.add(new ComponentName(pkg, cls));
+                }
+            }
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+            Slog.w(TAG, "Failure reading last done pre-boot receivers", e);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+        return lastDoneReceivers;
+    }
+    
+    private static void writeLastDonePreBootReceivers(ArrayList<ComponentName> list) {
+        File file = getCalledPreBootReceiversFile();
+        FileOutputStream fos = null;
+        DataOutputStream dos = null;
+        try {
+            Slog.i(TAG, "Writing new set of last done pre-boot receivers...");
+            fos = new FileOutputStream(file);
+            dos = new DataOutputStream(new BufferedOutputStream(fos, 2048));
+            dos.writeInt(android.os.Build.VERSION.SDK_INT);
+            dos.writeUTF(android.os.Build.VERSION.CODENAME);
+            dos.writeInt(list.size());
+            for (int i=0; i<list.size(); i++) {
+                dos.writeUTF(list.get(i).getPackageName());
+                dos.writeUTF(list.get(i).getClassName());
+            }
+        } catch (IOException e) {
+            Slog.w(TAG, "Failure writing last done pre-boot receivers", e);
+            file.delete();
+        } finally {
+            if (dos != null) {
+                try {
+                    dos.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    
     public void systemReady(final Runnable goingCallback) {
         // In the simulator, startRunning will never have been called, which
         // normally sets a few crucial variables. Do it here instead.
@@ -6124,9 +6200,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     intent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE);
+                    
+                    ArrayList<ComponentName> lastDoneReceivers = readLastDonePreBootReceivers();
+                    
+                    final ArrayList<ComponentName> doneReceivers = new ArrayList<ComponentName>();
                     for (int i=0; i<ris.size(); i++) {
                         ActivityInfo ai = ris.get(i).activityInfo;
-                        intent.setComponent(new ComponentName(ai.packageName, ai.name));
+                        ComponentName comp = new ComponentName(ai.packageName, ai.name);
+                        if (lastDoneReceivers.contains(comp)) {
+                            ris.remove(i);
+                            i--;
+                        }
+                    }
+                    
+                    for (int i=0; i<ris.size(); i++) {
+                        ActivityInfo ai = ris.get(i).activityInfo;
+                        ComponentName comp = new ComponentName(ai.packageName, ai.name);
+                        doneReceivers.add(comp);
+                        intent.setComponent(comp);
                         IIntentReceiver finisher = null;
                         if (i == ris.size()-1) {
                             finisher = new IIntentReceiver.Stub() {
@@ -6141,6 +6232,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                             synchronized (ActivityManagerService.this) {
                                                 mDidUpdate = true;
                                             }
+                                            writeLastDonePreBootReceivers(doneReceivers);
                                             systemReady(goingCallback);
                                         }
                                     });
@@ -6180,19 +6272,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         
-        if (procsToKill != null) {
-            synchronized(this) {
+        synchronized(this) {
+            if (procsToKill != null) {
                 for (int i=procsToKill.size()-1; i>=0; i--) {
                     ProcessRecord proc = procsToKill.get(i);
                     Slog.i(TAG, "Removing system update proc: " + proc);
                     removeProcessLocked(proc, true);
                 }
-
-                // Now that we have cleaned up any update processes, we
-                // are ready to start launching real processes and know that
-                // we won't trample on them any more.
-                mProcessesReady = true;
             }
+            
+            // Now that we have cleaned up any update processes, we
+            // are ready to start launching real processes and know that
+            // we won't trample on them any more.
+            mProcessesReady = true;
         }
         
         Slog.i(TAG, "System now ready");
@@ -7626,7 +7718,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     
             pw.println(" ");
             pw.println("Receiver Resolver Table:");
-            mReceiverResolver.dump(pw, null, "  ", null);
+            mReceiverResolver.dump(pw, null, "  ", null, false);
             needSep = true;
         }
         
