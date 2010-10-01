@@ -17,7 +17,6 @@
 package android.view;
 
 import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -55,7 +54,6 @@ import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.DragEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -2038,7 +2036,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      */
     boolean mCanAcceptDrop;
-    private boolean mIsCurrentDropTarget;
     private int mThumbnailWidth;
     private int mThumbnailHeight;
 
@@ -9800,11 +9797,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     + " surface=" + surface);
             if (token != null) {
                 Canvas canvas = surface.lockCanvas(null);
-                onDrawDragThumbnail(canvas);
-                surface.unlockCanvasAndPost(canvas);
+                try {
+                    onDrawDragThumbnail(canvas);
+                } finally {
+                    surface.unlockCanvasAndPost(canvas);
+                }
 
                 okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, token,
-                        touchX, touchY, thumbnailTouchX, thumbnailTouchX, data);
+                        touchX, touchY, thumbnailTouchX, thumbnailTouchY, data);
                 if (DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
             }
         } catch (Exception e) {
@@ -9837,8 +9837,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * The View must call this method from onMeasureDragThumbnail() in order to
      * specify the dimensions of the drag thumbnail image.
      *
-     * @param width
-     * @param height
+     * @param width The desired thumbnail width.
+     * @param height The desired thumbnail height.
      */
     protected final void setDragThumbnailDimension(int width, int height) {
         mPrivateFlags |= MEASURED_DIMENSION_SET;
@@ -9971,30 +9971,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mPendingCheckForLongPress.rememberWindowAttachCount();
         postDelayed(mPendingCheckForLongPress,
                 ViewConfiguration.getLongPressTimeout() - delayOffset);
-    }
-
-    private static int[] stateSetUnion(final int[] stateSet1, final int[] stateSet2) {
-        final int stateSet1Length = stateSet1.length;
-        final int stateSet2Length = stateSet2.length;
-        final int[] newSet = new int[stateSet1Length + stateSet2Length];
-        int k = 0;
-        int i = 0;
-        int j = 0;
-        // This is a merge of the two input state sets and assumes that the
-        // input sets are sorted by the order imposed by ViewDrawableStates.
-        for (int viewState : R.styleable.ViewDrawableStates) {
-            if (i < stateSet1Length && stateSet1[i] == viewState) {
-                newSet[k++] = viewState;
-                i++;
-            } else if (j < stateSet2Length && stateSet2[j] == viewState) {
-                newSet[k++] = viewState;
-                j++;
-            }
-            if (k > 1) {
-                assert(newSet[k - 1] > newSet[k - 2]);
-            }
-        }
-        return newSet;
     }
 
     /**

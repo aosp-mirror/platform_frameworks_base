@@ -114,6 +114,8 @@ Layer* LayerCache::get(LayerSize& size) {
         glGenTextures(1, &layer->texture);
         glBindTexture(GL_TEXTURE_2D, layer->texture);
 
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

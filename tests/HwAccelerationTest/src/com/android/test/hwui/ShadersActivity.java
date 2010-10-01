@@ -77,8 +77,13 @@ public class ShadersActivity extends Activity {
             m2.setScale(0.5f, 0.5f);
             mScaledShader.setLocalMatrix(m2);
 
-            mHorGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth, 0.0f,
+            mHorGradient = new LinearGradient(0.0f, 0.0f, 1.0f, 0.0f,
                     Color.RED, Color.GREEN, Shader.TileMode.CLAMP);
+            Matrix m3 = new Matrix();
+            m3.setScale(mDrawHeight, 1.0f);
+            m3.postRotate(-90.0f);
+            m3.postTranslate(0.0f, mDrawHeight);
+            mHorGradient.setLocalMatrix(m3);
             
             mDiagGradient = new LinearGradient(0.0f, 0.0f, mDrawWidth / 1.5f, mDrawHeight,
                     Color.BLUE, Color.MAGENTA, Shader.TileMode.CLAMP);
