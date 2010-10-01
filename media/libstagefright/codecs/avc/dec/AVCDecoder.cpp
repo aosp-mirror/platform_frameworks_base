@@ -31,6 +31,7 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/Utils.h>
+#include <media/stagefright/foundation/hexdump.h>
 
 namespace android {
 

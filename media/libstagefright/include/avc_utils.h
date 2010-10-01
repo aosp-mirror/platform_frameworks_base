@@ -22,8 +22,12 @@
 
 namespace android {
 
+struct ABitReader;
+
 void FindAVCDimensions(
         const sp<ABuffer> &seqParamSet, int32_t *width, int32_t *height);
+
+unsigned parseUE(ABitReader *br);
 
 }  // namespace android
 

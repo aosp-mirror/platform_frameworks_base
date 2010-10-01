@@ -21,6 +21,7 @@
 #include "ATSParser.h"
 
 #include "AnotherPacketSource.h"
+#include "ESQueue.h"
 #include "include/avc_utils.h"
 
 #include <media/stagefright/foundation/ABitReader.h>
@@ -78,6 +79,8 @@ private:
     sp<ABuffer> mBuffer;
     sp<AnotherPacketSource> mSource;
     bool mPayloadStarted;
+
+    ElementaryStreamQueue mQueue;
 
     void flush();
     void parsePES(ABitReader *br);
@@ -232,7 +235,9 @@ ATSParser::Stream::Stream(unsigned elementaryPID, unsigned streamType)
     : mElementaryPID(elementaryPID),
       mStreamType(streamType),
       mBuffer(new ABuffer(128 * 1024)),
-      mPayloadStarted(false) {
+      mPayloadStarted(false),
+      mQueue(streamType == 0x1b
+              ? ElementaryStreamQueue::H264 : ElementaryStreamQueue::AAC) {
     mBuffer->setRange(0, 0);
 }
 
@@ -433,373 +438,31 @@ void ATSParser::Stream::flush() {
     mBuffer->setRange(0, 0);
 }
 
-static sp<ABuffer> FindNAL(
-        const uint8_t *data, size_t size, unsigned nalType,
-        size_t *stopOffset) {
-    bool foundStart = false;
-    size_t startOffset = 0;
-
-    size_t offset = 0;
-    for (;;) {
-        while (offset + 3 < size
-                && memcmp("\x00\x00\x00\x01", &data[offset], 4)) {
-            ++offset;
-        }
-
-        if (foundStart) {
-            size_t nalSize;
-            if (offset + 3 >= size) {
-                nalSize = size - startOffset;
-            } else {
-                nalSize = offset - startOffset;
-            }
-
-            sp<ABuffer> nal = new ABuffer(nalSize);
-            memcpy(nal->data(), &data[startOffset], nalSize);
-
-            if (stopOffset != NULL) {
-                *stopOffset = startOffset + nalSize;
-            }
-
-            return nal;
-        }
-
-        if (offset + 4 >= size) {
-            return NULL;
-        }
-
-        if ((data[offset + 4] & 0x1f) == nalType) {
-            foundStart = true;
-            startOffset = offset + 4;
-        }
-
-        offset += 4;
-    }
-}
-
-static sp<ABuffer> MakeAVCCodecSpecificData(
-        const sp<ABuffer> &buffer, int32_t *width, int32_t *height) {
-    const uint8_t *data = buffer->data();
-    size_t size = buffer->size();
-
-    sp<ABuffer> seqParamSet = FindNAL(data, size, 7, NULL);
-    if (seqParamSet == NULL) {
-        return NULL;
-    }
-
-    FindAVCDimensions(seqParamSet, width, height);
-
-    size_t stopOffset;
-    sp<ABuffer> picParamSet = FindNAL(data, size, 8, &stopOffset);
-    CHECK(picParamSet != NULL);
-
-    buffer->setRange(stopOffset, size - stopOffset);
-    LOGV("buffer has %d bytes left.", buffer->size());
-
-    size_t csdSize =
-        1 + 3 + 1 + 1
-        + 2 * 1 + seqParamSet->size()
-        + 1 + 2 * 1 + picParamSet->size();
-
-    sp<ABuffer> csd = new ABuffer(csdSize);
-    uint8_t *out = csd->data();
-
-    *out++ = 0x01;  // configurationVersion
-    memcpy(out, seqParamSet->data() + 1, 3);  // profile/level...
-    out += 3;
-    *out++ = (0x3f << 2) | 1;  // lengthSize == 2 bytes
-    *out++ = 0xe0 | 1;
-
-    *out++ = seqParamSet->size() >> 8;
-    *out++ = seqParamSet->size() & 0xff;
-    memcpy(out, seqParamSet->data(), seqParamSet->size());
-    out += seqParamSet->size();
-
-    *out++ = 1;
-
-    *out++ = picParamSet->size() >> 8;
-    *out++ = picParamSet->size() & 0xff;
-    memcpy(out, picParamSet->data(), picParamSet->size());
-
-    return csd;
-}
-
-static bool getNextNALUnit(
-        const uint8_t **_data, size_t *_size,
-        const uint8_t **nalStart, size_t *nalSize) {
-    const uint8_t *data = *_data;
-    size_t size = *_size;
-
-    // hexdump(data, size);
-
-    *nalStart = NULL;
-    *nalSize = 0;
-
-    if (size == 0) {
-        return false;
-    }
-
-    size_t offset = 0;
-    for (;;) {
-        CHECK_LT(offset + 2, size);
-
-        if (!memcmp("\x00\x00\x01", &data[offset], 3)) {
-            break;
-        }
-
-        CHECK_EQ((unsigned)data[offset], 0x00u);
-        ++offset;
-    }
-
-    offset += 3;
-    size_t startOffset = offset;
-
-    while (offset + 2 < size
-            && memcmp("\x00\x00\x00", &data[offset], 3)
-            && memcmp("\x00\x00\x01", &data[offset], 3)) {
-        ++offset;
-    }
-
-    if (offset + 2 >= size) {
-        *nalStart = &data[startOffset];
-        *nalSize = size - startOffset;
-
-        *_data = NULL;
-        *_size = 0;
-
-        return true;
-    }
-
-    size_t endOffset = offset;
-
-    while (offset + 2 < size && memcmp("\x00\x00\x01", &data[offset], 3)) {
-        CHECK_EQ((unsigned)data[offset], 0x00u);
-        ++offset;
-    }
-
-    *nalStart = &data[startOffset];
-    *nalSize = endOffset - startOffset;
-
-    if (offset + 2 < size) {
-        *_data = &data[offset];
-        *_size = size - offset;
-    } else {
-        *_data = NULL;
-        *_size = 0;
-    }
-
-    return true;
-}
-
-sp<ABuffer> MakeCleanAVCData(const uint8_t *data, size_t size) {
-    // hexdump(data, size);
-
-    const uint8_t *tmpData = data;
-    size_t tmpSize = size;
-
-    size_t totalSize = 0;
-    const uint8_t *nalStart;
-    size_t nalSize;
-    while (getNextNALUnit(&tmpData, &tmpSize, &nalStart, &nalSize)) {
-        // hexdump(nalStart, nalSize);
-        totalSize += 4 + nalSize;
-    }
-
-    sp<ABuffer> buffer = new ABuffer(totalSize);
-    size_t offset = 0;
-    while (getNextNALUnit(&data, &size, &nalStart, &nalSize)) {
-        memcpy(buffer->data() + offset, "\x00\x00\x00\x01", 4);
-        memcpy(buffer->data() + offset + 4, nalStart, nalSize);
-
-        offset += 4 + nalSize;
-    }
-
-    return buffer;
-}
-
-static sp<ABuffer> FindMPEG2ADTSConfig(
-        const sp<ABuffer> &buffer, int32_t *sampleRate, int32_t *channelCount) {
-    ABitReader br(buffer->data(), buffer->size());
-
-    CHECK_EQ(br.getBits(12), 0xfffu);
-    CHECK_EQ(br.getBits(1), 0u);
-    CHECK_EQ(br.getBits(2), 0u);
-    br.getBits(1);  // protection_absent
-    unsigned profile = br.getBits(2);
-    LOGV("profile = %u", profile);
-    CHECK_NE(profile, 3u);
-    unsigned sampling_freq_index = br.getBits(4);
-    br.getBits(1);  // private_bit
-    unsigned channel_configuration = br.getBits(3);
-    CHECK_NE(channel_configuration, 0u);
-
-    LOGV("sampling_freq_index = %u", sampling_freq_index);
-    LOGV("channel_configuration = %u", channel_configuration);
-
-    CHECK_LE(sampling_freq_index, 11u);
-    static const int32_t kSamplingFreq[] = {
-        96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050,
-        16000, 12000, 11025, 8000
-    };
-    *sampleRate = kSamplingFreq[sampling_freq_index];
-
-    *channelCount = channel_configuration;
-
-    static const uint8_t kStaticESDS[] = {
-        0x03, 22,
-        0x00, 0x00,     // ES_ID
-        0x00,           // streamDependenceFlag, URL_Flag, OCRstreamFlag
-
-        0x04, 17,
-        0x40,                       // Audio ISO/IEC 14496-3
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-
-        0x05, 2,
-        // AudioSpecificInfo follows
-
-        // oooo offf fccc c000
-        // o - audioObjectType
-        // f - samplingFreqIndex
-        // c - channelConfig
-    };
-    sp<ABuffer> csd = new ABuffer(sizeof(kStaticESDS) + 2);
-    memcpy(csd->data(), kStaticESDS, sizeof(kStaticESDS));
-
-    csd->data()[sizeof(kStaticESDS)] =
-        ((profile + 1) << 3) | (sampling_freq_index >> 1);
-
-    csd->data()[sizeof(kStaticESDS) + 1] =
-        ((sampling_freq_index << 7) & 0x80) | (channel_configuration << 3);
-
-    // hexdump(csd->data(), csd->size());
-    return csd;
-}
-
 void ATSParser::Stream::onPayloadData(
         unsigned PTS_DTS_flags, uint64_t PTS, uint64_t DTS,
         const uint8_t *data, size_t size) {
     LOGV("onPayloadData mStreamType=0x%02x", mStreamType);
 
-    sp<ABuffer> buffer;
-
-    if (mStreamType == 0x1b) {
-        buffer = MakeCleanAVCData(data, size);
-    } else {
-        // hexdump(data, size);
-
-        buffer = new ABuffer(size);
-        memcpy(buffer->data(), data, size);
-    }
-
-    if (mSource == NULL) {
-        sp<MetaData> meta = new MetaData;
-
-        if (mStreamType == 0x1b) {
-            meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
-
-            int32_t width, height;
-            sp<ABuffer> csd = MakeAVCCodecSpecificData(buffer, &width, &height);
-
-            if (csd == NULL) {
-                return;
-            }
-
-            meta->setData(kKeyAVCC, 0, csd->data(), csd->size());
-            meta->setInt32(kKeyWidth, width);
-            meta->setInt32(kKeyHeight, height);
-        } else {
-            CHECK_EQ(mStreamType, 0x0fu);
-
-            meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
-
-            int32_t sampleRate, channelCount;
-            sp<ABuffer> csd =
-                FindMPEG2ADTSConfig(buffer, &sampleRate, &channelCount);
-
-            LOGV("sampleRate = %d", sampleRate);
-            LOGV("channelCount = %d", channelCount);
-
-            meta->setInt32(kKeySampleRate, sampleRate);
-            meta->setInt32(kKeyChannelCount, channelCount);
-
-            meta->setData(kKeyESDS, 0, csd->data(), csd->size());
-        }
-
-        LOGV("created source!");
-        mSource = new AnotherPacketSource(meta);
-
-        // fall through
-    }
-
     CHECK(PTS_DTS_flags == 2 || PTS_DTS_flags == 3);
-    buffer->meta()->setInt64("time", (PTS * 100) / 9);
+    int64_t timeUs = (PTS * 100) / 9;
 
-    if (mStreamType == 0x0f) {
-        extractAACFrames(buffer);
-    }
+    status_t err = mQueue.appendData(data, size, timeUs);
+    CHECK_EQ(err, (status_t)OK);
 
-    mSource->queueAccessUnit(buffer);
-}
+    sp<ABuffer> accessUnit;
+    while ((accessUnit = mQueue.dequeueAccessUnit()) != NULL) {
+        if (mSource == NULL) {
+            sp<MetaData> meta = mQueue.getFormat();
 
-// Disassemble one or more ADTS frames into their constituent parts and
-// leave only the concatenated raw_data_blocks in the buffer.
-void ATSParser::Stream::extractAACFrames(const sp<ABuffer> &buffer) {
-    size_t dstOffset = 0;
-
-    size_t offset = 0;
-    while (offset < buffer->size()) {
-        CHECK_LE(offset + 7, buffer->size());
-
-        ABitReader bits(buffer->data() + offset, buffer->size() - offset);
-
-        // adts_fixed_header
-
-        CHECK_EQ(bits.getBits(12), 0xfffu);
-        bits.skipBits(3);  // ID, layer
-        bool protection_absent = bits.getBits(1) != 0;
-
-        // profile_ObjectType, sampling_frequency_index, private_bits,
-        // channel_configuration, original_copy, home
-        bits.skipBits(12);
-
-        // adts_variable_header
-
-        // copyright_identification_bit, copyright_identification_start
-        bits.skipBits(2);
-
-        unsigned aac_frame_length = bits.getBits(13);
-
-        bits.skipBits(11);  // adts_buffer_fullness
-
-        unsigned number_of_raw_data_blocks_in_frame = bits.getBits(2);
-
-        if (number_of_raw_data_blocks_in_frame == 0) {
-            size_t scan = offset + aac_frame_length;
-
-            offset += 7;
-            if (!protection_absent) {
-                offset += 2;
+            if (meta != NULL) {
+                LOGV("created source!");
+                mSource = new AnotherPacketSource(meta);
+                mSource->queueAccessUnit(accessUnit);
             }
-
-            CHECK_LE(scan, buffer->size());
-
-            LOGV("found aac raw data block at [0x%08x ; 0x%08x)", offset, scan);
-
-            memmove(&buffer->data()[dstOffset], &buffer->data()[offset],
-                    scan - offset);
-
-            dstOffset += scan - offset;
-            offset = scan;
         } else {
-            // To be implemented.
-            TRESPASS();
+            mSource->queueAccessUnit(accessUnit);
         }
     }
-    CHECK_EQ(offset, buffer->size());
-
-    buffer->setRange(buffer->offset(), dstOffset);
 }
 
 sp<MediaSource> ATSParser::Stream::getSource(SourceType type) {
