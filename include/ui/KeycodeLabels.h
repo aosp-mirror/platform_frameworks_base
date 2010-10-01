@@ -142,6 +142,7 @@ static const KeycodeLabel KEYCODES[] = {
     { NULL, 0 }
 };
 
+// See also policy flags in Input.h.
 static const KeycodeLabel FLAGS[] = {
     { "WAKE", 0x00000001 },
     { "WAKE_DROPPED", 0x00000002 },
@@ -151,6 +152,7 @@ static const KeycodeLabel FLAGS[] = {
     { "ALT_GR", 0x00000020 },
     { "MENU", 0x00000040 },
     { "LAUNCHER", 0x00000080 },
+    { "VIRTUAL", 0x00000100 },
     { NULL, 0 }
 };
 
