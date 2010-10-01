@@ -34,8 +34,8 @@ import android.os.Parcelable;
  * Bluetooth profiles or services are actually supported by a device. Accurate
  * service discovery is done through SDP requests, which are automatically
  * performed when creating an RFCOMM socket with {@link
- * BluetoothDevice#createRfcommSocketToServiceRecord(UUID)} and {@link
- * BluetoothAdapter#listenUsingRfcommWithServiceRecord(String,UUID)}</p>
+ * BluetoothDevice#createRfcommSocketToServiceRecord} and {@link
+ * BluetoothAdapter#listenUsingRfcommWithServiceRecord}</p>
  *
  * <p>Use {@link BluetoothDevice#getBluetoothClass} to retrieve the class for
  * a remote device.
