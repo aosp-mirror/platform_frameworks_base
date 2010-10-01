@@ -316,6 +316,7 @@ void AudioTrack::start()
         mNewPosition = mCblk->server + mUpdatePeriod;
         mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
         mCblk->waitTimeMs = 0;
+        mCblk->flags &= ~CBLK_DISABLED_ON;
         if (t != 0) {
            t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
         } else {
@@ -840,6 +841,13 @@ create_new_track:
             framesAvail = cblk->framesAvailable_l();
         }
         cblk->lock.unlock();
+    }
+
+    // restart track if it was disabled by audioflinger due to previous underrun
+    if (cblk->flags & CBLK_DISABLED_MSK) {
+        cblk->flags &= ~CBLK_DISABLED_ON;
+        LOGW("obtainBuffer() track %p disabled, restarting", this);
+        mAudioTrack->start();
     }
 
     cblk->waitTimeMs = 0;

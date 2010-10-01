@@ -169,7 +169,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Geliştirme araçları"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Yalnızca uygulama geliştiriciler için gerekli özellikler."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Depolama"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"SD karta erişin."</string>
+    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"SD karta erişin."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD karta erişin."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"durum çubuğunu devre dışı bırak veya değiştir"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Uygulamanın durum çubuğunu devre dışı bırakmasına veya sistem simgeleri ekleyip kaldırmasına izin verir."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"durum çubuğu"</string>
@@ -402,6 +403,22 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Uygulamaların yerel Bluetooth telefonunu yapılandırmasına ve uzak cihazları keşfedip bunlar ile eşleşmesine izin verir."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth bağlantıları oluştur"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Uygulamaların yerel Bluetooth telefonunun yapılandırmasını görüntülemesine ve eşleşilmiş cihazlar ile bağlantı kurup kabul etmesine izin verir."</string>
+    <!-- no translation found for permlab_nfcAdmin (2251302233012250056) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcAdmin (1935842611464895785) -->
+    <skip />
+    <!-- no translation found for permlab_nfcRaw (4423471711114325708) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcRaw (5533022736559385665) -->
+    <skip />
+    <!-- no translation found for permlab_nfcNotify (478470360082792358) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcNotify (2990053517962070617) -->
+    <skip />
+    <!-- no translation found for permlab_nfcLlcp (4972051461007030426) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcLlcp (91592127786004640) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"tuş kilidini devre dışı bırak"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Uygulamaların tuş kilidini ve ilgili şifreli güvenlik önlemini devre dışı bırakmasına izin verir. Bunun geçerli bir örneği gelen bir çağrı alındığında tuş kilidinin devre dışı bırakılması, sonra çağrı bittiğinde kilidin yeniden devreye sokulmasıdır."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını oku"</string>
@@ -418,20 +435,22 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Kullanıcının kullanıcı sözlüğünde depolamış olabileceği kişisel kelimeleri, adları ve kelime öbeklerini uygulamaların okumasına izin verir."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"kullanıcı tanımlı sözlüğe yaz"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Uygulamaların kullanıcı sözlüğüne yeni kelimeler yazmasına izin verir."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"SD kart içeriklerini değiştir/sil"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Bir uygulamaya SD karta yazma izni verir."</string>
+    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"SD kart içeriklerini değiştir/sil"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SD kart içeriklerini değiştir/sil"</string>
+    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Bir uygulamaya SD karta yazma izni verir."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Bir uygulamaya SD karta yazma izni verir."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"önbellek dosya sistemine eriş"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Bir uygulamanın önbellek dosya sisteminde okuma yazma yapmasına izin verir."</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"Şifreyi sınırla"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Kullanmanıza izin verilen şifre türlerini sınırlayın."</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"Oturum açma denemelerini izle"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Bir işlem gerçekleştirmek için cihazdaki başarısız oturum açma girişimlerini izleyin."</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"Şifre sıfırlama"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Şifrenizi yeni bir değer alması için zorlayın. Giriş yapabilmeniz için yöneticinin size yeni bir değer sağlamasını gerekecektir."</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"Kilitlemeye zorlama"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"Cihaz kilitlendiğinde, şifresini yeniden girmenizi gerektiren denetim."</string>
+    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifreyi sınırla"</string>
+    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kullanmanıza izin verilen şifre türlerini sınırlayın."</string>
+    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Oturum açma denemelerini izle"</string>
+    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" msgid="7227578260165172673">"Bir işlem gerçekleştirmek için cihazdaki başarısız oturum açma girişimlerini izleyin."</string>
+    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Şifre sıfırlama"</string>
+    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Şifrenizi yeni bir değer alması için zorlayın. Giriş yapabilmeniz için yöneticinin size yeni bir değer sağlamasını gerekecektir."</string>
+    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Kilitlemeye zorlama"</string>
+    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Cihaz kilitlendiğinde, şifresini yeniden girmenizi gerektiren denetim."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri sil"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"Tüm verilerinizi onay olmadan silmek için fabrika ayarlarına sıfırlayın."</string>
+    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" msgid="7669895333814222586">"Tüm verilerinizi onay olmadan silmek için fabrika ayarlarına sıfırlayın."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ev"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -744,12 +763,9 @@
     <string name="force_close" msgid="3653416315450806396">"Kapanmaya zorla"</string>
     <string name="report" msgid="4060218260984795706">"Rapor"</string>
     <string name="wait" msgid="7147118217226317732">"Bekle"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Uygulama yönlendirildi"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> şimdi çalışıyor."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"İlk olarak <xliff:g id="APP_NAME">%1$s</xliff:g> başlatıldı."</string>
     <string name="smv_application" msgid="295583804361236288">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işlemi) kendiliğinden uyguladığı StrictMode politikasını ihlal etti."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> işlemi kendiliğinden uyguladığı StrictMode politikasını ihlal etti."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> çalışıyor"</string>
@@ -796,23 +812,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Tümünü göster"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB Yığın Depolama"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB bağlandı"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"Telefonunuzu USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin SD kartı arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeyi seçin."</string>
+    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Telefonunuzu USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin SD kartı arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeyi seçin."</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Telefonunuzu USB ile bilgisayarınıza bağladınız. Bilgisayarınız ile Android\'inizin SD kartı arasında dosya kopyalamak istiyorsanız aşağıdaki düğmeyi seçin."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB depolama birimini aç"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"SD kartınızı USB depolama birimi için kullanmada bir sorun var."</string>
+    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"SD kartınızı USB depolama birimi için kullanmada bir sorun var."</string>
+    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"SD kartınızı USB depolama birimi için kullanmada bir sorun var."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB bağlandı"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Bilgisayarınıza/bilgisayarınızdan dosya kopyalamak için seçin."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB depolama birimini kapat"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"USB depolama birimini kapatmak için seçin."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB depolama birimi kullanılıyor"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"USB depolama birimini kapatmadan önce Android SD kartını bilgisayarınızdan kaldırdığınızdan (\"çıkardığınızdan\") emin olun."</string>
+    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"USB depolama birimini kapatmadan önce Android SD kartını bilgisayarınızdan kaldırdığınızdan (\"çıkardığınızdan\") emin olun."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"USB depolama birimini kapatmadan önce Android SD kartını bilgisayarınızdan kaldırdığınızdan (\"çıkardığınızdan\") emin olun."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB depolama birimini kapat"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USB depolama birimini kapatırken bir sorun oluştu. USB ana makinesini kaldırdığınızdan emin olun ve daha sonra tekrar deneyin."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB depolama birimini aç"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB depolama birimini açarsanız, kullanmakta olduğunuz bazı uygulamalar durur ve USB depolama birimi kapatılıncaya kadar kullanılamayabilir."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB işlemi başarısız oldu"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"SD kartı biçimlendir"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>
+    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"SD kartı biçimlendir"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD kartı biçimlendir"</string>
+    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Biçimlendir"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hata ayıklaması bağlandı"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"USB hata ayıklamasını devre dışı bırakmak için tıklayın."</string>
@@ -820,18 +841,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"adaylar"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"SD kart hazırlanıyor"</string>
+    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"SD kart hazırlanıyor"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD kart hazırlanıyor"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Hatalar denetleniyor."</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Boş SD kart"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD kart boş veya desteklenmeyen dosya sistemi içeriyor"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Hasarlı SD kart"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SD kart zarar gördü. Yeniden biçimlendirmeniz gerekebilir."</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD kart beklenmedik biçimde çıkarıldı"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Veri kaybından kaçınmak için SD kartı çıkarmadan önce bağlantısını kesin."</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"SD kart güvenle çıkarılabilir"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"SD kartı güvenle kaldırabilirsiniz."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"SD kart çıkarılmış"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD kart çıkarıldı. Yeni bir SD kart takın."</string>
+    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Boş SD kart"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Boş SD kart"</string>
+    <!-- outdated translation 1312266820092958014 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"SD kart boş veya desteklenmeyen bir dosya sistemi kullanıyor."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD kart boş veya desteklenmeyen dosya sistemi içeriyor"</string>
+    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Hasarlı SD kart"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Hasarlı SD kart"</string>
+    <!-- outdated translation 2679412884290061775 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"SD kart hasarlı. Kartınızı yeniden biçimlendirmeniz gerekebilir."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD kart zarar gördü. Yeniden biçimlendirmeniz gerekebilir."</string>
+    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"SD kart beklenmedik biçimde çıkarıldı"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD kart beklenmedik biçimde çıkarıldı"</string>
+    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Veri kaybından kaçınmak için SD kartı çıkarmadan önce bağlantısını kesin."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Veri kaybından kaçınmak için SD kartı çıkarmadan önce bağlantısını kesin."</string>
+    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"SD kart güvenle çıkarılabilir"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD kart güvenle çıkarılabilir"</string>
+    <!-- outdated translation 7613960686747592770 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"SD kart şimdi güvenli bir şekilde çıkarılabilir."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"SD kartı güvenle kaldırabilirsiniz."</string>
+    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"SD kart çıkarılmış"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD kart çıkarılmış"</string>
+    <!-- outdated translation 4205117227342822275 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"SD kart çıkarılmış. Cihazınızın depolama alanını artırmak için yeni bir SD kart takın."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD kart çıkarıldı. Yeni bir SD kart takın."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Eşleşen hiçbir etkinlik bulunamadı"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"bileşen kullanım istatistiklerini güncelle"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Toplanmış bileşen istatistiklerinin değiştirilmesine izin verir. Normal uygulamalarda kullanılmamalıdır."</string>

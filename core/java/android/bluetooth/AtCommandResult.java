@@ -16,8 +16,6 @@
 
 package android.bluetooth;
 
-import java.util.*;
-
 /**
  * The result of execution of an single AT command.<p>
  *

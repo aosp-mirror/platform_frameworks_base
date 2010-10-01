@@ -57,6 +57,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class UsageStatsService extends IUsageStats.Stub {
     public static final String SERVICE_NAME = "usagestats";
     private static final boolean localLOGV = false;
+    private static final boolean REPORT_UNEXPECTED = false;
     private static final String TAG = "UsageStats";
     
     // Current on-disk Parcel version
@@ -404,11 +405,11 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 new Thread("UsageStatsService_DiskWriter") {
                     public void run() {
                         try {
-                            Slog.d(TAG, "Disk writer thread starting.");
+                            if (localLOGV) Slog.d(TAG, "Disk writer thread starting.");
                             writeStatsToFile(true);
                         } finally {
                             mUnforcedDiskWriteRunning.set(false);
-                            Slog.d(TAG, "Disk writer thread ending.");
+                            if (localLOGV) Slog.d(TAG, "Disk writer thread ending.");
                         }
                     }
                 }.start();
@@ -458,7 +459,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 }
             }
         }
-        Slog.d(TAG, "Dumped usage stats.");
+        if (localLOGV) Slog.d(TAG, "Dumped usage stats.");
     }
 
     private void writeStatsFLOCK(File file) throws IOException {
@@ -493,7 +494,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     }
     
     public void shutdown() {
-        Slog.w(TAG, "Writing usage stats before shutdown...");
+        Slog.i(TAG, "Writing usage stats before shutdown...");
         writeStatsToFile(true);
     }
     
@@ -520,7 +521,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 if (mLastResumedPkg != null) {
                     // We last resumed some other package...  just pause it now
                     // to recover.
-                    Slog.i(TAG, "Unexpected resume of " + pkgName
+                    if (REPORT_UNEXPECTED) Slog.i(TAG, "Unexpected resume of " + pkgName
                             + " while already resumed in " + mLastResumedPkg);
                     PkgUsageStatsExtended pus = mStats.get(mLastResumedPkg);
                     if (pus != null) {
@@ -559,7 +560,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 return;
             }
             if (!mIsResumed) {
-                Slog.i(TAG, "Something wrong here, didn't expect "
+                if (REPORT_UNEXPECTED) Slog.i(TAG, "Something wrong here, didn't expect "
                         + pkgName + " to be paused");
                 return;
             }

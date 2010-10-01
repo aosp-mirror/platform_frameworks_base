@@ -42,8 +42,11 @@ namespace android {
 #define CBLK_FORCEREADY_ON      0x0004  // track is considered ready immediately by AudioFlinger
 #define CBLK_FORCEREADY_OFF     0x0000  // track is ready when buffer full
 #define CBLK_INVALID_MSK        0x0008
-#define CBLK_INVALID_ON         0x0008  // track buffer is invalidated by AudioFlinger: must be re-created
-#define CBLK_INVALID_OFF        0x0000
+#define CBLK_INVALID_ON         0x0008  // track buffer is invalidated by AudioFlinger:
+#define CBLK_INVALID_OFF        0x0000  // must be re-created
+#define CBLK_DISABLED_MSK       0x0010
+#define CBLK_DISABLED_ON        0x0010  // track disabled by AudioFlinger due to underrun:
+#define CBLK_DISABLED_OFF       0x0000  // must be re-started
 
 struct audio_track_cblk_t
 {

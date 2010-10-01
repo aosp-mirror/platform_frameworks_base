@@ -871,7 +871,7 @@ class PowerManagerService extends IPowerManager.Stub
             mWakeLockState = mLocks.gatherState();
             // goes in the middle to reduce flicker
             if ((wl.flags & PowerManager.ON_AFTER_RELEASE) != 0) {
-                userActivity(SystemClock.uptimeMillis(), false);
+                userActivity(SystemClock.uptimeMillis(), -1, false, OTHER_EVENT, false);
             }
             setPowerState(mWakeLockState | mUserState);
         }

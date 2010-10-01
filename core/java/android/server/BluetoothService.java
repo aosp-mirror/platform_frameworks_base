@@ -464,7 +464,7 @@ public class BluetoothService extends IBluetooth.Stub {
                 // forked multiple times in a row, probably because there is
                 // some race in sdptool or bluez when operated in parallel.
                 // As a workaround, delay 500ms between each fork of sdptool.
-                // TODO: Don't fork sdptool in order to regsiter service
+                // TODO: Don't fork sdptool in order to register service
                 // records, use a DBUS call instead.
                 switch (msg.arg1) {
                 case 1:
@@ -673,7 +673,7 @@ public class BluetoothService extends IBluetooth.Stub {
     /** local cache of bonding state.
     /* we keep our own state to track the intermediate state BONDING, which
     /* bluez does not track.
-     * All addreses must be passed in upper case.
+     * All addresses must be passed in upper case.
      */
     public class BondState {
         private final HashMap<String, Integer> mState = new HashMap<String, Integer>();
@@ -932,7 +932,7 @@ public class BluetoothService extends IBluetooth.Stub {
             }
         }
 
-        // This function adds a bluetooth address to the auto pairing blacklis
+        // This function adds a bluetooth address to the auto pairing blacklist
         // file. These addresses are added to DynamicAddressBlacklistSection
         private void updateAutoPairingData(String address) {
             BufferedWriter out = null;
@@ -1062,7 +1062,7 @@ public class BluetoothService extends IBluetooth.Stub {
      * a device discoverable; you need to call setMode() to make the device
      * explicitly discoverable.
      *
-     * @param timeout_s The discoverable timeout in seconds.
+     * @param timeout The discoverable timeout in seconds.
      */
     public synchronized boolean setDiscoverableTimeout(int timeout) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
@@ -2083,12 +2083,12 @@ public class BluetoothService extends IBluetooth.Stub {
     /*package*/ String getAddressFromObjectPath(String objectPath) {
         String adapterObjectPath = getPropertyInternal("ObjectPath");
         if (adapterObjectPath == null || objectPath == null) {
-            Log.e(TAG, "getAddressFromObjectPath: AdpaterObjectPath:" + adapterObjectPath +
+            Log.e(TAG, "getAddressFromObjectPath: AdapterObjectPath:" + adapterObjectPath +
                     "  or deviceObjectPath:" + objectPath + " is null");
             return null;
         }
         if (!objectPath.startsWith(adapterObjectPath)) {
-            Log.e(TAG, "getAddressFromObjectPath: AdpaterObjectPath:" + adapterObjectPath +
+            Log.e(TAG, "getAddressFromObjectPath: AdapterObjectPath:" + adapterObjectPath +
                     "  is not a prefix of deviceObjectPath:" + objectPath +
                     "bluetoothd crashed ?");
             return null;

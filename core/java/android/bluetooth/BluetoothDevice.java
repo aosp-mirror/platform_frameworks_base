@@ -32,7 +32,7 @@ import java.util.UUID;
 
 /**
  * Represents a remote Bluetooth device. A {@link BluetoothDevice} lets you
- * create a connection with the repective device or query information about
+ * create a connection with the respective device or query information about
  * it, such as the name, address, class, and bonding state.
  *
  * <p>This class is really just a thin wrapper for a Bluetooth hardware
@@ -48,7 +48,7 @@ import java.util.UUID;
  * {@link BluetoothAdapter}) or get one from the set of bonded devices
  * returned by {@link BluetoothAdapter#getBondedDevices()
  * BluetoothAdapter.getBondedDevices()}. You can then open a
- * {@link BluetoothSocket} for communciation with the remote device, using
+ * {@link BluetoothSocket} for communication with the remote device, using
  * {@link #createRfcommSocketToServiceRecord(UUID)}.
  *
  * <p class="note"><strong>Note:</strong>
@@ -226,8 +226,8 @@ public final class BluetoothDevice implements Parcelable {
      * <p>A shared link keys exists locally for the remote device, so
      * communication can be authenticated and encrypted.
      * <p><i>Being bonded (paired) with a remote device does not necessarily
-     * mean the device is currently connected. It just means that the ponding
-     * procedure was compeleted at some earlier time, and the link key is still
+     * mean the device is currently connected. It just means that the pending
+     * procedure was completed at some earlier time, and the link key is still
      * stored locally, ready to use on the next connection.
      * </i>
      */
@@ -283,7 +283,7 @@ public final class BluetoothDevice implements Parcelable {
      * not respond to pin request in time
      * @hide */
     public static final int UNBOND_REASON_AUTH_FAILED = 1;
-    /** A bond attempt failed because the other side explicilty rejected
+    /** A bond attempt failed because the other side explicitly rejected
      * bonding
      * @hide */
     public static final int UNBOND_REASON_AUTH_REJECTED = 2;
@@ -515,7 +515,7 @@ public final class BluetoothDevice implements Parcelable {
      * Cancel an in-progress bonding request started with {@link #createBond}.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
-     * @return true on sucess, false on error
+     * @return true on success, false on error
      * @hide
      */
     public boolean cancelBondProcess() {
@@ -532,7 +532,7 @@ public final class BluetoothDevice implements Parcelable {
      * authentication and encryption.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
-     * @return true on sucess, false on error
+     * @return true on success, false on error
      * @hide
      */
     public boolean removeBond() {
@@ -617,7 +617,7 @@ public final class BluetoothDevice implements Parcelable {
       *  with the UUIDs supported by the remote end. If there is an error
       *  in getting the SDP records or if the process takes a long time,
       *  an Intent is sent with the UUIDs that is currently present in the
-      *  cache. Clients should use the {@link getUuids} to get UUIDs
+      *  cache. Clients should use the {@link #getUuids} to get UUIDs
       *  is SDP is not to be performed.
       *
       *  @return False if the sanity check fails, True if the process
@@ -693,7 +693,7 @@ public final class BluetoothDevice implements Parcelable {
      * outgoing connection to this remote device on given channel.
      * <p>The remote device will be authenticated and communication on this
      * socket will be encrypted.
-     * <p>Use {@link BluetoothSocket#connect} to intiate the outgoing
+     * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
      * connection.
      * <p>Valid RFCOMM channels are in range 1 to 30.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
@@ -715,7 +715,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>This is designed to be used with {@link
      * BluetoothAdapter#listenUsingRfcommWithServiceRecord} for peer-peer
      * Bluetooth applications.
-     * <p>Use {@link BluetoothSocket#connect} to intiate the outgoing
+     * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
      * connection. This will also perform an SDP lookup of the given uuid to
      * determine which channel to connect to.
      * <p>The remote device will be authenticated and communication on this
@@ -772,9 +772,9 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Check that a pin is valid and convert to byte array.
      *
-     * Bluetooth pin's are 1 to 16 bytes of UTF8 characters.
+     * Bluetooth pin's are 1 to 16 bytes of UTF-8 characters.
      * @param pin pin as java String
-     * @return the pin code as a UTF8 byte array, or null if it is an invalid
+     * @return the pin code as a UTF-8 byte array, or null if it is an invalid
      *         Bluetooth pin.
      * @hide
      */
@@ -784,9 +784,9 @@ public final class BluetoothDevice implements Parcelable {
         }
         byte[] pinBytes;
         try {
-            pinBytes = pin.getBytes("UTF8");
+            pinBytes = pin.getBytes("UTF-8");
         } catch (UnsupportedEncodingException uee) {
-            Log.e(TAG, "UTF8 not supported?!?");  // this should not happen
+            Log.e(TAG, "UTF-8 not supported?!?");  // this should not happen
             return null;
         }
         if (pinBytes.length <= 0 || pinBytes.length > 16) {

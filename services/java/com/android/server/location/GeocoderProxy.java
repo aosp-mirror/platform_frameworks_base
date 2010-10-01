@@ -50,17 +50,24 @@ public class GeocoderProxy {
         mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    public void reconnect() {
+        synchronized (mServiceConnection) {
+            mContext.unbindService(mServiceConnection);
+            mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
     private class Connection implements ServiceConnection {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "onServiceConnected " + className);
-            synchronized (this) {
+            synchronized (mServiceConnection) {
                 mProvider = IGeocodeProvider.Stub.asInterface(service);
             }
         }
 
         public void onServiceDisconnected(ComponentName className) {
             Log.d(TAG, "onServiceDisconnected " + className);
-            synchronized (this) {
+            synchronized (mServiceConnection) {
                 mProvider = null;
             }
         }

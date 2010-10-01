@@ -434,7 +434,6 @@ public class StorageManager
      * @param key secret used to encrypt the OBB; may be <code>null</code> if no
      *            encryption was used on the OBB.
      * @return whether the mount call was successfully queued or not
-     * @throws IllegalArgumentException when the OBB is already mounted
      */
     public boolean mountObb(String filename, String key, OnObbStateChangeListener listener) {
         try {
@@ -468,10 +467,8 @@ public class StorageManager
      * @param force whether to kill any programs using this in order to unmount
      *            it
      * @return whether the unmount call was successfully queued or not
-     * @throws IllegalArgumentException when OBB is not already mounted
      */
-    public boolean unmountObb(String filename, boolean force, OnObbStateChangeListener listener)
-            throws IllegalArgumentException {
+    public boolean unmountObb(String filename, boolean force, OnObbStateChangeListener listener) {
         try {
             mObbActionListener.addListener(listener);
             mMountService.unmountObb(filename, force, mObbActionListener);
