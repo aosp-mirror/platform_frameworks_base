@@ -261,24 +261,6 @@ public interface WindowManagerPolicy {
         boolean isDisplayedLw();
 
         /**
-         * Returns true if the window is both full screen and opaque.  Must be
-         * called with the window manager lock held.
-         * 
-         * @param width The width of the screen
-         * @param height The height of the screen 
-         * @param shownFrame If true, this is based on the actual shown frame of 
-         *                   the window (taking into account animations); if
-         *                   false, this is based on the currently requested
-         *                   frame, which any current animation will be moving
-         *                   towards.
-         * @param onlyOpaque If true, this will only pass if the window is
-         * also opaque.
-         * @return Returns true if the window is both full screen and opaque
-         */
-        public boolean fillsScreenLw(int width, int height, boolean shownFrame,
-                boolean onlyOpaque);
-
-        /**
          * Returns true if this window has been shown on screen at some time in 
          * the past.  Must be called with the window manager lock held.
          * 
