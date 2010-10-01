@@ -73,7 +73,8 @@ namespace android {
  * policy decisions such as waking from device sleep.
  */
 enum {
-    /* These flags originate in RawEvents and are generally set in the key map. */
+    /* These flags originate in RawEvents and are generally set in the key map.
+     * See also labels for policy flags in KeycodeLabels.h. */
 
     POLICY_FLAG_WAKE = 0x00000001,
     POLICY_FLAG_WAKE_DROPPED = 0x00000002,
@@ -83,6 +84,7 @@ enum {
     POLICY_FLAG_ALT_GR = 0x00000020,
     POLICY_FLAG_MENU = 0x00000040,
     POLICY_FLAG_LAUNCHER = 0x00000080,
+    POLICY_FLAG_VIRTUAL = 0x00000100,
 
     POLICY_FLAG_RAW_MASK = 0x0000ffff,
 

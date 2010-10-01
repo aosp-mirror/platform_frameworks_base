@@ -182,7 +182,6 @@ public:
 
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation);
-    virtual void virtualKeyDownFeedback();
     virtual int32_t interceptKey(nsecs_t when, int32_t deviceId,
             bool down, int32_t keyCode, int32_t scanCode, uint32_t& policyFlags);
     virtual int32_t interceptSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
@@ -464,17 +463,6 @@ bool NativeInputManager::isScreenBright() {
     return android_server_PowerManagerService_isScreenBright();
 }
 
-void NativeInputManager::virtualKeyDownFeedback() {
-#if DEBUG_INPUT_READER_POLICY
-    LOGD("virtualKeyDownFeedback");
-#endif
-
-    JNIEnv* env = jniEnv();
-
-    env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyDownFeedback);
-    checkAndClearExceptionFromCallback(env, "virtualKeyDownFeedback");
-}
-
 int32_t NativeInputManager::interceptKey(nsecs_t when,
         int32_t deviceId, bool down, int32_t keyCode, int32_t scanCode, uint32_t& policyFlags) {
 #if DEBUG_INPUT_READER_POLICY
@@ -482,6 +470,12 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
             "policyFlags=0x%x",
             when, deviceId, down, keyCode, scanCode, policyFlags);
 #endif
+
+    if (down && (policyFlags & POLICY_FLAG_VIRTUAL)) {
+        JNIEnv* env = jniEnv();
+        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyDownFeedback);
+        checkAndClearExceptionFromCallback(env, "virtualKeyDownFeedback");
+    }
 
     const int32_t WM_ACTION_PASS_TO_USER = 1;
     const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
