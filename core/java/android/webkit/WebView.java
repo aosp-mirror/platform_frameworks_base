@@ -1291,6 +1291,7 @@ public class WebView extends AbsoluteLayout
     private void clearHelpers() {
         clearTextEntry();
         clearActionModes();
+        dismissFullScreenMode();
     }
 
     /**
@@ -4911,6 +4912,13 @@ public class WebView extends AbsoluteLayout
         return mFullScreenHolder != null;
     }
 
+    private void dismissFullScreenMode() {
+        if (inFullScreenMode()) {
+            mFullScreenHolder.dismiss();
+            mFullScreenHolder = null;
+        }
+    }
+
     void onPinchToZoomAnimationStart() {
         // cancel the single touch handling
         cancelTouch();
@@ -6878,9 +6886,9 @@ public class WebView extends AbsoluteLayout
                     View view = (View) msg.obj;
                     int npp = msg.arg1;
 
-                    if (mFullScreenHolder != null) {
+                    if (inFullScreenMode()) {
                         Log.w(LOGTAG, "Should not have another full screen.");
-                        mFullScreenHolder.dismiss();
+                        dismissFullScreenMode();
                     }
                     mFullScreenHolder = new PluginFullScreenHolder(WebView.this, npp);
                     mFullScreenHolder.setContentView(view);
@@ -6891,10 +6899,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case HIDE_FULLSCREEN:
-                    if (inFullScreenMode()) {
-                        mFullScreenHolder.dismiss();
-                        mFullScreenHolder = null;
-                    }
+                    dismissFullScreenMode();
                     break;
 
                 case DOM_FOCUS_CHANGED:
