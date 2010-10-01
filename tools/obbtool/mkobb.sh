@@ -21,7 +21,7 @@
 MOUNTDIR=/tmp
 
 # Presets. Changing these will probably break your OBB on the device
-CRYPTO=blowfish
+CRYPTO=twofish
 FS=vfat
 MKFS=mkfs.vfat
 LOSETUP=losetup
@@ -122,7 +122,12 @@ onexit() {
         rmdir ${temp_mount}
     fi
     if [ "x${loop_dev}" != "x" ]; then \
-        ${LOSETUPBIN} -d ${loop_dev}
+        if [ ${use_crypto} -eq 1 ]; then \
+            dmsetup remove -f ${loop_dev}
+            ${LOSETUPBIN} -d ${old_loop_dev}
+        else \
+            ${LOSETUPBIN} -d ${loop_dev}
+        fi
     fi
     if [ "x${tempfile}" != "x" -a -f "${tempfile}" ]; then \
         rm -f ${tempfile}
@@ -202,7 +207,7 @@ trap onexit ERR
 
 tempfile=$(tempfile -d ${outdir}) || ( echo "ERROR: couldn't create temporary file in ${outdir}"; exit 1 )
 
-block_count=`du --apparent-size --block-size=512 ${directory} | awk '{ print $1; }'`
+block_count=`du -s --apparent-size --block-size=512 ${directory} | awk '{ print $1; }'`
 if [ $? -ne 0 ]; then \
     echo "ERROR: Couldn't read size of input directory ${directory}"
     exit 1
@@ -216,12 +221,14 @@ fi
 
 loop_dev=$(${LOSETUPBIN} -f) || ( echo "ERROR: losetup wouldn't tell us the next unused device"; exit 1 )
 
+${LOSETUPBIN} ${loop_dev} ${tempfile} || ( echo "ERROR: couldn't create loopback device"; exit 1 )
+
 if [ ${use_crypto} -eq 1 ]; then \
-    keyfile=$(tempfile -d ${outdir}) || ( echo "ERROR: could not create temporary key file"; exit 1 )
-    ${LOSETUPBIN} -p 5 -e ${CRYPTO} ${loop_dev} ${tempfile} 5< ${keyfile} || ( echo "ERROR: couldn't create loopback device"; exit 1 )
-    rm -f ${keyfile}
-else \
-    ${LOSETUPBIN} ${loop_dev} ${tempfile} || ( echo "ERROR: couldn't create loopback device"; exit 1 )
+    hashed_key=`echo -n "${key}" | md5sum | awk '{ print $1 }'`
+    unique_dm_name=`basename ${tempfile}`
+    echo "0 `blockdev --getsize ${loop_dev}` crypt ${CRYPTO} ${hashed_key} 0 ${loop_dev} 0" | dmsetup create ${unique_dm_name}
+    old_loop_dev=${loop_dev}
+    loop_dev=/dev/mapper/${unique_dm_name}
 fi
 
 #
@@ -252,7 +259,12 @@ echo "Successfully created \`${filename}'"
 #
 umount ${temp_mount}
 rmdir ${temp_mount}
-${LOSETUPBIN} -d ${loop_dev}
+if [ ${use_crypto} -eq 1 ]; then \
+    dmsetup remove -f ${loop_dev}
+    ${LOSETUPBIN} -d ${old_loop_dev}
+else \
+    ${LOSETUPBIN} -d ${loop_dev}
+fi
 mv ${tempfile} ${filename}
 
 trap - ERR
