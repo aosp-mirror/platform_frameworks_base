@@ -347,6 +347,13 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14;
         
         /**
+         * Window type: the drag-and-drop pseudowindow.  There is only one
+         * drag layer (at most), and it is placed on top of all other windows.
+         * @hide
+         */
+        public static final int TYPE_DRAG               = FIRST_SYSTEM_WINDOW+15;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;

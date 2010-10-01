@@ -24,6 +24,7 @@ import com.android.internal.view.RootViewSurfaceTaker;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.*;
@@ -45,6 +46,8 @@ import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.app.ActivityManagerNative;
@@ -197,6 +200,11 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     Scroller mScroller;
 
     final ViewConfiguration mViewConfiguration;
+
+    /* Drag/drop */
+    ClipDescription mDragDescription;
+    View mCurrentDragView;
+    final PointF mDragPoint = new PointF();
 
     /**
      * see {@link #playSoundEffect(int)}
@@ -1670,6 +1678,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     public final static int FINISH_INPUT_CONNECTION = 1012;
     public final static int CHECK_FOCUS = 1013;
     public final static int CLOSE_SYSTEM_DIALOGS = 1014;
+    public final static int DISPATCH_DRAG_EVENT = 1015;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1844,6 +1853,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (mView != null) {
                 mView.onCloseSystemDialogs((String)msg.obj);
             }
+        } break;
+        case DISPATCH_DRAG_EVENT: {
+            handleDragEvent((DragEvent)msg.obj);
         } break;
         }
     }
@@ -2434,6 +2446,87 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         }
     }
 
+    /* drag/drop */
+    private void handleDragEvent(DragEvent event) {
+        // From the root, only drag start/end/location are dispatched.  entered/exited
+        // are determined and dispatched by the viewgroup hierarchy, who then report
+        // that back here for ultimate reporting back to the framework.
+        if (mView != null && mAdded) {
+            final int what = event.mAction;
+
+            if (what == DragEvent.ACTION_DRAG_EXITED) {
+                // A direct EXITED event means that the window manager knows we've just crossed
+                // a window boundary, so the current drag target within this one must have
+                // just been exited.  Send it the usual notifications and then we're done
+                // for now.
+                setDragFocus(event, null);
+            } else {
+                // Cache the drag description when the operation starts, then fill it in
+                // on subsequent calls as a convenience
+                if (what == DragEvent.ACTION_DRAG_STARTED) {
+                    mDragDescription = event.mClipDescription;
+                } else {
+                    event.mClipDescription = mDragDescription;
+                }
+
+                // For events with a [screen] location, translate into window coordinates
+                if ((what == DragEvent.ACTION_DRAG_LOCATION) || (what == DragEvent.ACTION_DROP)) {
+                    mDragPoint.set(event.mX, event.mY);
+                    if (mTranslator != null) {
+                        mTranslator.translatePointInScreenToAppWindow(mDragPoint);
+                    }
+
+                    if (mCurScrollY != 0) {
+                        mDragPoint.offset(0, mCurScrollY);
+                    }
+
+                    event.mX = mDragPoint.x;
+                    event.mY = mDragPoint.y;
+                }
+
+                // Remember who the current drag target is pre-dispatch
+                final View prevDragView = mCurrentDragView;
+
+                // Now dispatch the drag/drop event
+                mView.dispatchDragEvent(event);
+
+                // If we changed apparent drag target, tell the OS about it
+                if (prevDragView != mCurrentDragView) {
+                    try {
+                        if (prevDragView != null) {
+                            sWindowSession.dragRecipientExited(mWindow);
+                        }
+                        if (mCurrentDragView != null) {
+                            sWindowSession.dragRecipientEntered(mWindow);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to note drag target change");
+                    }
+                    mCurrentDragView = prevDragView;
+                }
+            }
+        }
+        event.recycle();
+    }
+
+    public void setDragFocus(DragEvent event, View newDragTarget) {
+        final int action = event.mAction;
+        // If we've dragged off of a view, send it the EXITED message
+        if (mCurrentDragView != newDragTarget) {
+            if (mCurrentDragView != null) {
+                event.mAction = DragEvent.ACTION_DRAG_EXITED;
+                mCurrentDragView.dispatchDragEvent(event);
+            }
+        }
+        // If we've dragged over a new view, send it the ENTERED message
+        if (newDragTarget != null) {
+            event.mAction = DragEvent.ACTION_DRAG_ENTERED;
+            newDragTarget.dispatchDragEvent(event);
+        }
+        mCurrentDragView = newDragTarget;
+        event.mAction = action;  // restore the event's original state
+    }
+
     private AudioManager getAudioManager() {
         if (mView == null) {
             throw new IllegalStateException("getAudioManager called when there is no mView");
@@ -2725,7 +2818,12 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         msg.obj = reason;
         sendMessage(msg);
     }
-    
+
+    public void dispatchDragEvent(DragEvent event) {
+        Message msg = obtainMessage(DISPATCH_DRAG_EVENT, event);
+        sendMessage(msg);
+    }
+
     /**
      * The window is getting focus so if there is anything focused/selected
      * send an {@link AccessibilityEvent} to announce that.
@@ -2934,6 +3032,14 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     sWindowSession.wallpaperCommandComplete(asBinder(), null);
                 } catch (RemoteException e) {
                 }
+            }
+        }
+
+        /* Drag/drop */
+        public void dispatchDragEvent(DragEvent event) {
+            final ViewRoot viewRoot = mViewRoot.get();
+            if (viewRoot != null) {
+                viewRoot.dispatchDragEvent(event);
             }
         }
     }

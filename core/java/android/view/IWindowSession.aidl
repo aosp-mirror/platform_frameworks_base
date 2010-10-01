@@ -17,6 +17,7 @@
 
 package android.view;
 
+import android.content.ClipData;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -115,6 +116,30 @@ interface IWindowSession {
     
     boolean performHapticFeedback(IWindow window, int effectId, boolean always);
     
+    /**
+     * Allocate the drag's thumbnail surface.  Also assigns a token that identifies
+     * the drag to the OS and passes that as the return value.  A return value of
+     * null indicates failure.
+     */
+    IBinder prepareDrag(IWindow window, boolean localOnly,
+            int thumbnailWidth, int thumbnailHeight, out Surface outSurface);
+
+    /**
+     * Initiate the drag operation itself
+     */
+    boolean performDrag(IWindow window, IBinder dragToken, float touchX, float touchY,
+            float thumbCenterX, float thumbCenterY, in ClipData data);
+
+    /**
+     * Tell the OS that we've just dragged into a View that is willing to accept the drop
+     */
+    void dragRecipientEntered(IWindow window);
+
+    /**
+     * Tell the OS that we've just dragged *off* of a View that was willing to accept the drop
+     */
+    void dragRecipientExited(IWindow window);
+
     /**
      * For windows with the wallpaper behind them, and the wallpaper is
      * larger than the screen, set the offset within the screen.

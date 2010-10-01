@@ -342,6 +342,7 @@ public class InputManager {
         if (toChannel == null) {
             throw new IllegalArgumentException("toChannel must not be null.");
         }
+        Slog.d(TAG, "transferring touch focus");
         return nativeTransferTouchFocus(fromChannel, toChannel);
     }
     
