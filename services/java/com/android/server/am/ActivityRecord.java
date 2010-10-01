@@ -439,10 +439,11 @@ class ActivityRecord extends IApplicationToken.Stub {
                     sb.append(shortComponentName);
                     sb.append(": ");
                     TimeUtils.formatDuration(thisTime, sb);
-                    sb.append(" (total ");
-                    TimeUtils.formatDuration(totalTime, sb);
-                    sb.append(totalTime);
-                    sb.append(")");
+                    if (thisTime != totalTime) {
+                        sb.append(" (total ");
+                        TimeUtils.formatDuration(totalTime, sb);
+                        sb.append(")");
+                    }
                     Log.i(ActivityManagerService.TAG, sb.toString());
                 }
                 stack.reportActivityLaunchedLocked(false, this, thisTime, totalTime);

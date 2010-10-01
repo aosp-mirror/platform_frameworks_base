@@ -55,7 +55,7 @@ import java.util.concurrent.CountDownLatch;
 class NetworkManagementService extends INetworkManagementService.Stub {
 
     private static final String TAG = "NetworkManagmentService";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String NETD_TAG = "NetdConnector";
 
     class NetdResponseCode {
