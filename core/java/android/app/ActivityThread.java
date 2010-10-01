@@ -3262,7 +3262,7 @@ public final class ActivityThread {
         while (i.hasNext()) {
             ProviderInfo cpi = i.next();
             StringBuilder buf = new StringBuilder(128);
-            buf.append("Publishing provider ");
+            buf.append("Pub ");
             buf.append(cpi.authority);
             buf.append(": ");
             buf.append(cpi.name);

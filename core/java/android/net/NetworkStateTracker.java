@@ -47,7 +47,7 @@ public abstract class NetworkStateTracker extends Handler {
     protected int mDefaultGatewayAddr;
     private boolean mTeardownRequested;
 
-    private static boolean DBG = true;
+    private static boolean DBG = false;
     private static final String TAG = "NetworkStateTracker";
 
     // Share the event space with ConnectivityService (which we can't see, but
@@ -186,7 +186,7 @@ public abstract class NetworkStateTracker extends Handler {
         String bufferSizes = SystemProperties.get(key);
 
         if (bufferSizes.length() == 0) {
-            Log.e(TAG, key + " not found in system properties. Using defaults");
+            Log.w(TAG, key + " not found in system properties. Using defaults");
 
             // Setting to default values so we won't be stuck to previous values
             key = "net.tcp.buffersize.default";
@@ -230,10 +230,10 @@ public abstract class NetworkStateTracker extends Handler {
                 stringToFile(prefix + "wmem_def", values[4]);
                 stringToFile(prefix + "wmem_max", values[5]);
             } else {
-                Log.e(TAG, "Invalid buffersize string: " + bufferSizes);
+                Log.w(TAG, "Invalid buffersize string: " + bufferSizes);
             }
         } catch (IOException e) {
-            Log.e(TAG, "Can't set tcp buffer sizes:" + e);
+            Log.w(TAG, "Can't set tcp buffer sizes:" + e);
         }
     }
 

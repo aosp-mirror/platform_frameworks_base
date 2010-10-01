@@ -936,10 +936,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public void updateStatusIcon(IBinder token, String packageName, int iconId) {
+        int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
             if (token == null || mCurToken != token) {
-                Slog.w(TAG, "Ignoring setInputMethod of token: " + token);
+                Slog.w(TAG, "Ignoring setInputMethod of uid " + uid + " token: " + token);
                 return;
             }
 
@@ -1010,6 +1011,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     public boolean showSoftInput(IInputMethodClient client, int flags,
             ResultReceiver resultReceiver) {
+        int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mMethodMap) {
@@ -1020,7 +1022,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // focus in the window manager, to allow this call to
                         // be made before input is started in it.
                         if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                            Slog.w(TAG, "Ignoring showSoftInput of: " + client);
+                            Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
                             return false;
                         }
                     } catch (RemoteException e) {
@@ -1074,6 +1076,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     public boolean hideSoftInput(IInputMethodClient client, int flags,
             ResultReceiver resultReceiver) {
+        int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mMethodMap) {
@@ -1084,7 +1087,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // focus in the window manager, to allow this call to
                         // be made before input is started in it.
                         if (!mIWindowManager.inputMethodClientHasFocus(client)) {
-                            Slog.w(TAG, "Ignoring hideSoftInput of: " + client);
+                            if (DEBUG) Slog.w(TAG, "Ignoring hideSoftInput of uid "
+                                    + uid + ": " + client);
                             return false;
                         }
                     } catch (RemoteException e) {
@@ -1219,7 +1223,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             if (mCurClient == null || client == null
                     || mCurClient.client.asBinder() != client.asBinder()) {
-                Slog.w(TAG, "Ignoring showInputMethodDialogFromClient of: " + client);
+                Slog.w(TAG, "Ignoring showInputMethodDialogFromClient of uid "
+                        + Binder.getCallingUid() + ": " + client);
             }
 
             mHandler.sendEmptyMessage(MSG_SHOW_IM_PICKER);
@@ -1237,7 +1242,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + android.Manifest.permission.WRITE_SECURE_SETTINGS);
                 }
             } else if (mCurToken != token) {
-                Slog.w(TAG, "Ignoring setInputMethod of token: " + token);
+                Slog.w(TAG, "Ignoring setInputMethod of uid " + Binder.getCallingUid()
+                        + " token: " + token);
                 return;
             }
 
@@ -1253,7 +1259,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void hideMySoftInput(IBinder token, int flags) {
         synchronized (mMethodMap) {
             if (token == null || mCurToken != token) {
-                Slog.w(TAG, "Ignoring hideInputMethod of token: " + token);
+                if (DEBUG) Slog.w(TAG, "Ignoring hideInputMethod of uid "
+                        + Binder.getCallingUid() + " token: " + token);
                 return;
             }
             long ident = Binder.clearCallingIdentity();
@@ -1268,7 +1275,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public void showMySoftInput(IBinder token, int flags) {
         synchronized (mMethodMap) {
             if (token == null || mCurToken != token) {
-                Slog.w(TAG, "Ignoring hideInputMethod of token: " + token);
+                Slog.w(TAG, "Ignoring showMySoftInput of uid "
+                        + Binder.getCallingUid() + " token: " + token);
                 return;
             }
             long ident = Binder.clearCallingIdentity();

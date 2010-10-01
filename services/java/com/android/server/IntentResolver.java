@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import android.util.Log;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.LogPrinter;
 import android.util.Printer;
@@ -92,10 +93,12 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
     }
 
     boolean dumpMap(PrintWriter out, String titlePrefix, String title,
-            String prefix, Map<String, ArrayList<F>> map, String packageName) {
+            String prefix, Map<String, ArrayList<F>> map, String packageName,
+            boolean printFilter) {
         String eprefix = prefix + "  ";
         String fprefix = prefix + "    ";
         boolean printedSomething = false;
+        Printer printer = null;
         for (Map.Entry<String, ArrayList<F>> e : map.entrySet()) {
             ArrayList<F> a = e.getValue();
             final int N = a.size();
@@ -115,37 +118,44 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
                 }
                 printedSomething = true;
                 dumpFilter(out, fprefix, filter);
+                if (printFilter) {
+                    if (printer == null) {
+                        printer = new PrintWriterPrinter(out);
+                    }
+                    filter.dump(printer, fprefix + "  ");
+                }
             }
         }
         return printedSomething;
     }
 
-    public boolean dump(PrintWriter out, String title, String prefix, String packageName) {
+    public boolean dump(PrintWriter out, String title, String prefix, String packageName,
+            boolean printFilter) {
         String innerPrefix = prefix + "  ";
         String sepPrefix = "\n" + prefix;
         String curPrefix = title + "\n" + prefix;
         if (dumpMap(out, curPrefix, "Full MIME Types:", innerPrefix,
-                mTypeToFilter, packageName)) {
+                mTypeToFilter, packageName, printFilter)) {
             curPrefix = sepPrefix;
         }
         if (dumpMap(out, curPrefix, "Base MIME Types:", innerPrefix,
-                mBaseTypeToFilter, packageName)) {
+                mBaseTypeToFilter, packageName, printFilter)) {
             curPrefix = sepPrefix;
         }
         if (dumpMap(out, curPrefix, "Wild MIME Types:", innerPrefix,
-                mWildTypeToFilter, packageName)) {
+                mWildTypeToFilter, packageName, printFilter)) {
             curPrefix = sepPrefix;
         }
         if (dumpMap(out, curPrefix, "Schemes:", innerPrefix,
-                mSchemeToFilter, packageName)) {
+                mSchemeToFilter, packageName, printFilter)) {
             curPrefix = sepPrefix;
         }
         if (dumpMap(out, curPrefix, "Non-Data Actions:", innerPrefix,
-                mActionToFilter, packageName)) {
+                mActionToFilter, packageName, printFilter)) {
             curPrefix = sepPrefix;
         }
         if (dumpMap(out, curPrefix, "MIME Typed Actions:", innerPrefix,
-                mTypedActionToFilter, packageName)) {
+                mTypedActionToFilter, packageName, printFilter)) {
             curPrefix = sepPrefix;
         }
         return curPrefix == sepPrefix;
