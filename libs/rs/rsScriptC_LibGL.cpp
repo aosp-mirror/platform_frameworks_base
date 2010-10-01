@@ -44,6 +44,8 @@ using namespace android::renderscript;
 
 static void SC_bindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va)
 {
+    CHECK_OBJ_OR_NULL(va);
+    CHECK_OBJ(vpf);
     GET_TLS();
     rsi_ProgramBindTexture(rsc,
                            static_cast<ProgramFragment *>(vpf),
@@ -54,6 +56,8 @@ static void SC_bindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va
 
 static void SC_bindSampler(RsProgramFragment vpf, uint32_t slot, RsSampler vs)
 {
+    CHECK_OBJ_OR_NULL(vs);
+    CHECK_OBJ(vpf);
     GET_TLS();
     rsi_ProgramBindSampler(rsc,
                            static_cast<ProgramFragment *>(vpf),
@@ -64,24 +68,28 @@ static void SC_bindSampler(RsProgramFragment vpf, uint32_t slot, RsSampler vs)
 
 static void SC_bindProgramStore(RsProgramStore pfs)
 {
+    CHECK_OBJ_OR_NULL(pfs);
     GET_TLS();
     rsi_ContextBindProgramStore(rsc, pfs);
 }
 
 static void SC_bindProgramFragment(RsProgramFragment pf)
 {
+    CHECK_OBJ_OR_NULL(pf);
     GET_TLS();
     rsi_ContextBindProgramFragment(rsc, pf);
 }
 
 static void SC_bindProgramVertex(RsProgramVertex pv)
 {
+    CHECK_OBJ_OR_NULL(pv);
     GET_TLS();
     rsi_ContextBindProgramVertex(rsc, pv);
 }
 
 static void SC_bindProgramRaster(RsProgramRaster pv)
 {
+    CHECK_OBJ_OR_NULL(pv);
     GET_TLS();
     rsi_ContextBindProgramRaster(rsc, pv);
 }
@@ -112,6 +120,7 @@ static void SC_vpLoadTextureMatrix(const rsc_Matrix *m)
 static void SC_pfConstantColor(RsProgramFragment vpf, float r, float g, float b, float a)
 {
     GET_TLS();
+    CHECK_OBJ(vpf);
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
     pf->setConstantColor(rsc, r, g, b, a);
 }
@@ -228,6 +237,7 @@ static void SC_drawRect(float x1, float y1,
 
 static void SC_drawMesh(RsMesh vsm)
 {
+    CHECK_OBJ(vsm);
     GET_TLS();
     Mesh *sm = static_cast<Mesh *>(vsm);
     if (!rsc->setupCheck()) {
@@ -238,6 +248,7 @@ static void SC_drawMesh(RsMesh vsm)
 
 static void SC_drawMeshPrimitive(RsMesh vsm, uint32_t primIndex)
 {
+    CHECK_OBJ(vsm);
     GET_TLS();
     Mesh *sm = static_cast<Mesh *>(vsm);
     if (!rsc->setupCheck()) {
@@ -248,6 +259,7 @@ static void SC_drawMeshPrimitive(RsMesh vsm, uint32_t primIndex)
 
 static void SC_drawMeshPrimitiveRange(RsMesh vsm, uint32_t primIndex, uint32_t start, uint32_t len)
 {
+    CHECK_OBJ(vsm);
     GET_TLS();
     Mesh *sm = static_cast<Mesh *>(vsm);
     if (!rsc->setupCheck()) {
@@ -259,6 +271,7 @@ static void SC_drawMeshPrimitiveRange(RsMesh vsm, uint32_t primIndex, uint32_t s
 static void SC_meshComputeBoundingBox(RsMesh vsm, float *minX, float *minY, float *minZ,
                                                      float *maxX, float *maxY, float *maxZ)
 {
+    CHECK_OBJ(vsm);
     GET_TLS();
     Mesh *sm = static_cast<Mesh *>(vsm);
     sm->computeBBox();
@@ -285,17 +298,20 @@ static void SC_color(float r, float g, float b, float a)
 
 static void SC_uploadToTexture2(RsAllocation va, uint32_t baseMipLevel)
 {
+    CHECK_OBJ(va);
     GET_TLS();
     rsi_AllocationUploadToTexture(rsc, va, false, baseMipLevel);
 }
 static void SC_uploadToTexture(RsAllocation va)
 {
+    CHECK_OBJ(va);
     GET_TLS();
     rsi_AllocationUploadToTexture(rsc, va, false, 0);
 }
 
 static void SC_uploadToBufferObject(RsAllocation va)
 {
+    CHECK_OBJ(va);
     GET_TLS();
     rsi_AllocationUploadToBufferObject(rsc, va);
 }
@@ -336,6 +352,7 @@ static uint32_t SC_getHeight()
 
 static void SC_DrawTextAlloc(RsAllocation va, int x, int y)
 {
+    CHECK_OBJ(va);
     GET_TLS();
     Allocation *alloc = static_cast<Allocation *>(va);
     rsc->mStateFont.renderText(alloc, x, y);
@@ -349,6 +366,7 @@ static void SC_DrawText(const char *text, int x, int y)
 
 static void SC_BindFont(RsFont font)
 {
+    CHECK_OBJ(font);
     GET_TLS();
     rsi_ContextBindFont(rsc, font);
 }
