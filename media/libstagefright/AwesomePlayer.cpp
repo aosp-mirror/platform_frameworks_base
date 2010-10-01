@@ -276,21 +276,6 @@ status_t AwesomePlayer::setDataSource_l(
 
 status_t AwesomePlayer::setDataSource(
         int fd, int64_t offset, int64_t length) {
-#if 0
-    // return setDataSource("httplive://ipad.akamai.com/Video_Content/usat/tt_062209_iphone/440k/prog_index.m3u8");
-    // return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/sl.m3u8");
-    return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/0440.m3u8");
-    // return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/0640.m3u8");
-    // return setDataSource("httplive://qthttp.apple.com.edgesuite.net/1009qpeijrfn/1240_vod.m3u8");
-    // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/nasatv/nasatv_96.m3u8");
-    // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/nasatv/nasatv_1500.m3u8");
-    // return setDataSource("httplive://iphone.video.hsn.com/iPhone_high.m3u8");
-    // return setDataSource("httplive://iphoned5.akamai.com.edgesuite.net/mhbarron/iphonewebcast/webcast090209_all/webcast090209_all.m3u8");
-    // return setDataSource("httplive://qthttp.akamai.com.edgesuite.net/iphone_demo/Video_Content/usat/tt_062209_iphone/hi/prog_index.m3u8");
-    // return setDataSource("httplive://qthttp.akamai.com.edgesuite.net/iphone_demo/Video_Content/usat/tt_googmaps/hi/prog_index.m3u8");
-    // return setDataSource("httplive://qthttp.akamai.com.edgesuite.net/iphone_demo/Video_Content/mtv/ni_spo_25a_rt74137_clip_syn/hi/prog_index.m3u8");
-#endif
-
     Mutex::Autolock autoLock(mLock);
 
     reset_l();
