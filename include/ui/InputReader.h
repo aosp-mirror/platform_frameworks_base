@@ -279,14 +279,14 @@ private:
     // low-level input event decoding and device management
     void process(const RawEvent* rawEvent);
 
-    void addDevice(nsecs_t when, int32_t deviceId);
-    void removeDevice(nsecs_t when, int32_t deviceId);
+    void addDevice(int32_t deviceId);
+    void removeDevice(int32_t deviceId);
     InputDevice* createDevice(int32_t deviceId, const String8& name, uint32_t classes);
     void configureExcludedDevices();
 
     void consumeEvent(const RawEvent* rawEvent);
 
-    void handleConfigurationChanged(nsecs_t when);
+    void handleConfigurationChanged();
 
     // state management for all devices
     Mutex mStateLock;
