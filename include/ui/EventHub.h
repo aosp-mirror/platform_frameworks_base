@@ -142,8 +142,13 @@ protected:
 public:
     // Synthetic raw event type codes produced when devices are added or removed.
     enum {
+        // Sent when a device is added.
         DEVICE_ADDED = 0x10000000,
-        DEVICE_REMOVED = 0x20000000
+        // Sent when a device is removed.
+        DEVICE_REMOVED = 0x20000000,
+        // Sent when all added/removed devices from the most recent scan have been reported.
+        // This event is always sent at least once.
+        FINISHED_DEVICE_SCAN = 0x30000000,
     };
 
     virtual uint32_t getDeviceClasses(int32_t deviceId) const = 0;
@@ -221,10 +226,10 @@ protected:
 private:
     bool openPlatformInput(void);
 
-    int open_device(const char *device);
-    int close_device(const char *device);
-    int scan_dir(const char *dirname);
-    int read_notify(int nfd);
+    int openDevice(const char *device);
+    int closeDevice(const char *device);
+    int scanDir(const char *dirname);
+    int readNotify(int nfd);
 
     status_t mError;
 
@@ -273,6 +278,7 @@ private:
     int             mFDCount;
 
     bool            mOpened;
+    bool            mNeedToSendFinishedDeviceScan;
     List<String8>   mExcludedDevices;
 
     // device ids that report particular switches.
