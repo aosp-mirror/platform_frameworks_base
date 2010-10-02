@@ -330,6 +330,20 @@ public class SipPhone extends SipPhoneBase {
         Log.e(LOG_TAG, "call waiting not supported");
     }
 
+    @Override
+    public void setEchoSuppressionEnabled(boolean enabled) {
+        synchronized (SipPhone.class) {
+            AudioGroup audioGroup = foregroundCall.getAudioGroup();
+            if (audioGroup == null) return;
+            int mode = audioGroup.getMode();
+            audioGroup.setMode(enabled
+                    ? AudioGroup.MODE_ECHO_SUPPRESSION
+                    : AudioGroup.MODE_NORMAL);
+            Log.d(LOG_TAG, String.format("audioGroup mode change: %d --> %d",
+                    mode, audioGroup.getMode()));
+        }
+    }
+
     public void setMute(boolean muted) {
         synchronized (SipPhone.class) {
             foregroundCall.setMute(muted);
