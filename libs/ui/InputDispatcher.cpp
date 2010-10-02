@@ -46,6 +46,9 @@
 #include <errno.h>
 #include <limits.h>
 
+#define INDENT "  "
+#define INDENT2 "    "
+
 namespace android {
 
 // Delay between reporting long touch events to the power manager.
@@ -2490,74 +2493,96 @@ void InputDispatcher::logDispatchStateLocked() {
 }
 
 void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
-    dump.appendFormat("  dispatchEnabled: %d\n", mDispatchEnabled);
-    dump.appendFormat("  dispatchFrozen: %d\n", mDispatchFrozen);
+    dump.appendFormat(INDENT "DispatchEnabled: %d\n", mDispatchEnabled);
+    dump.appendFormat(INDENT "DispatchFrozen: %d\n", mDispatchFrozen);
 
     if (mFocusedApplication) {
-        dump.appendFormat("  focusedApplication: name='%s', dispatchingTimeout=%0.3fms\n",
+        dump.appendFormat(INDENT "FocusedApplication: name='%s', dispatchingTimeout=%0.3fms\n",
                 mFocusedApplication->name.string(),
                 mFocusedApplication->dispatchingTimeout / 1000000.0);
     } else {
-        dump.append("  focusedApplication: <null>\n");
+        dump.append(INDENT "FocusedApplication: <null>\n");
     }
-    dump.appendFormat("  focusedWindow: name='%s'\n",
+    dump.appendFormat(INDENT "FocusedWindow: name='%s'\n",
             mFocusedWindow != NULL ? mFocusedWindow->name.string() : "<null>");
-    dump.appendFormat("  touchState: down=%s, split=%s\n", toString(mTouchState.down),
-            toString(mTouchState.split));
-    for (size_t i = 0; i < mTouchState.windows.size(); i++) {
-        const TouchedWindow& touchedWindow = mTouchState.windows[i];
-        dump.appendFormat("  touchedWindow[%d]: name='%s', pointerIds=0x%0x, targetFlags=0x%x\n",
-                i, touchedWindow.window->name.string(), touchedWindow.pointerIds.value,
-                touchedWindow.targetFlags);
-    }
-    for (size_t i = 0; i < mWindows.size(); i++) {
-        dump.appendFormat("  windows[%d]: name='%s', paused=%s, hasFocus=%s, hasWallpaper=%s, "
-                "visible=%s, canReceiveKeys=%s, flags=0x%08x, type=0x%08x, layer=%d, "
-                "frame=[%d,%d][%d,%d], "
-                "visibleFrame=[%d,%d][%d,%d], "
-                "touchableArea=[%d,%d][%d,%d], "
-                "ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
-                i, mWindows[i].name.string(),
-                toString(mWindows[i].paused),
-                toString(mWindows[i].hasFocus),
-                toString(mWindows[i].hasWallpaper),
-                toString(mWindows[i].visible),
-                toString(mWindows[i].canReceiveKeys),
-                mWindows[i].layoutParamsFlags, mWindows[i].layoutParamsType,
-                mWindows[i].layer,
-                mWindows[i].frameLeft, mWindows[i].frameTop,
-                mWindows[i].frameRight, mWindows[i].frameBottom,
-                mWindows[i].visibleFrameLeft, mWindows[i].visibleFrameTop,
-                mWindows[i].visibleFrameRight, mWindows[i].visibleFrameBottom,
-                mWindows[i].touchableAreaLeft, mWindows[i].touchableAreaTop,
-                mWindows[i].touchableAreaRight, mWindows[i].touchableAreaBottom,
-                mWindows[i].ownerPid, mWindows[i].ownerUid,
-                mWindows[i].dispatchingTimeout / 1000000.0);
+
+    dump.appendFormat(INDENT "TouchDown: %s\n", toString(mTouchState.down));
+    dump.appendFormat(INDENT "TouchSplit: %s\n", toString(mTouchState.split));
+    if (!mTouchState.windows.isEmpty()) {
+        dump.append(INDENT "TouchedWindows:\n");
+        for (size_t i = 0; i < mTouchState.windows.size(); i++) {
+            const TouchedWindow& touchedWindow = mTouchState.windows[i];
+            dump.appendFormat(INDENT2 "%d: name='%s', pointerIds=0x%0x, targetFlags=0x%x\n",
+                    i, touchedWindow.window->name.string(), touchedWindow.pointerIds.value,
+                    touchedWindow.targetFlags);
+        }
+    } else {
+        dump.append(INDENT "TouchedWindows: <none>\n");
     }
 
-    for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
-        const sp<InputChannel>& channel = mMonitoringChannels[i];
-        dump.appendFormat("  monitoringChannel[%d]: '%s'\n",
-                i, channel->getName().string());
+    if (!mWindows.isEmpty()) {
+        dump.append(INDENT "Windows:\n");
+        for (size_t i = 0; i < mWindows.size(); i++) {
+            const InputWindow& window = mWindows[i];
+            dump.appendFormat(INDENT2 "%d: name='%s', paused=%s, hasFocus=%s, hasWallpaper=%s, "
+                    "visible=%s, canReceiveKeys=%s, flags=0x%08x, type=0x%08x, layer=%d, "
+                    "frame=[%d,%d][%d,%d], "
+                    "visibleFrame=[%d,%d][%d,%d], "
+                    "touchableArea=[%d,%d][%d,%d], "
+                    "ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
+                    i, window.name.string(),
+                    toString(window.paused),
+                    toString(window.hasFocus),
+                    toString(window.hasWallpaper),
+                    toString(window.visible),
+                    toString(window.canReceiveKeys),
+                    window.layoutParamsFlags, window.layoutParamsType,
+                    window.layer,
+                    window.frameLeft, window.frameTop,
+                    window.frameRight, window.frameBottom,
+                    window.visibleFrameLeft, window.visibleFrameTop,
+                    window.visibleFrameRight, window.visibleFrameBottom,
+                    window.touchableAreaLeft, window.touchableAreaTop,
+                    window.touchableAreaRight, window.touchableAreaBottom,
+                    window.ownerPid, window.ownerUid,
+                    window.dispatchingTimeout / 1000000.0);
+        }
+    } else {
+        dump.append(INDENT "Windows: <none>\n");
     }
 
-    dump.appendFormat("  inboundQueue: length=%u", mInboundQueue.count());
+    if (!mMonitoringChannels.isEmpty()) {
+        dump.append(INDENT "MonitoringChannels:\n");
+        for (size_t i = 0; i < mMonitoringChannels.size(); i++) {
+            const sp<InputChannel>& channel = mMonitoringChannels[i];
+            dump.appendFormat(INDENT2 "%d: '%s'\n", i, channel->getName().string());
+        }
+    } else {
+        dump.append(INDENT "MonitoringChannels: <none>\n");
+    }
 
-    for (size_t i = 0; i < mActiveConnections.size(); i++) {
-        const Connection* connection = mActiveConnections[i];
-        dump.appendFormat("  activeConnection[%d]: '%s', status=%s, outboundQueueLength=%u"
-                "inputState.isNeutral=%s, inputState.isOutOfSync=%s\n",
-                i, connection->getInputChannelName(), connection->getStatusLabel(),
-                connection->outboundQueue.count(),
-                toString(connection->inputState.isNeutral()),
-                toString(connection->inputState.isOutOfSync()));
+    dump.appendFormat(INDENT "InboundQueue: length=%u\n", mInboundQueue.count());
+
+    if (!mActiveConnections.isEmpty()) {
+        dump.append(INDENT "ActiveConnections:\n");
+        for (size_t i = 0; i < mActiveConnections.size(); i++) {
+            const Connection* connection = mActiveConnections[i];
+            dump.appendFormat(INDENT2 "%d: '%s', status=%s, outboundQueueLength=%u"
+                    "inputState.isNeutral=%s, inputState.isOutOfSync=%s\n",
+                    i, connection->getInputChannelName(), connection->getStatusLabel(),
+                    connection->outboundQueue.count(),
+                    toString(connection->inputState.isNeutral()),
+                    toString(connection->inputState.isOutOfSync()));
+        }
+    } else {
+        dump.append(INDENT "ActiveConnections: <none>\n");
     }
 
     if (isAppSwitchPendingLocked()) {
-        dump.appendFormat("  appSwitch: pending, due in %01.1fms\n",
+        dump.appendFormat(INDENT "AppSwitch: pending, due in %01.1fms\n",
                 (mAppSwitchDueTime - now()) / 1000000.0);
     } else {
-        dump.append("  appSwitch: not pending\n");
+        dump.append(INDENT "AppSwitch: not pending\n");
     }
 }
 
@@ -2774,6 +2799,7 @@ void InputDispatcher::updateDispatchStatisticsLocked(nsecs_t currentTime, const 
 }
 
 void InputDispatcher::dump(String8& dump) {
+    dump.append("Input Dispatcher State:\n");
     dumpDispatchStateLocked(dump);
 }
 
