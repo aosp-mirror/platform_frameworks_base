@@ -17,6 +17,8 @@
 package com.android.internal.telephony.cdma.sms;
 
 
+import com.android.internal.telephony.cdma.sms.CdmaSmsSubaddress;
+
 public final class SmsEnvelope{
     /**
      * Message Types
@@ -74,15 +76,21 @@ public final class SmsEnvelope{
 
     /**
      * The origination address identifies the originator of the SMS message.
-     * (See 3GPP2 C.S0015-B, v2, 3.4.3.4)
+     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
      */
     public CdmaSmsAddress origAddress;
 
     /**
      * The destination address identifies the target of the SMS message.
-     * (See 3GPP2 C.S0015-B, v2, 3.4.3.4)
+     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
      */
     public CdmaSmsAddress destAddress;
+
+    /**
+     * The origination subaddress identifies the originator of the SMS message.
+     * (See 3GPP2 C.S0015-B, v2, 3.4.3.4)
+     */
+    public CdmaSmsSubaddress origSubaddress;
 
     /**
      * The 6-bit bearer reply parameter is used to request the return of a
