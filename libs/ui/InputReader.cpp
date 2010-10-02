@@ -575,6 +575,11 @@ bool InputReader::markSupportedKeyCodes(int32_t deviceId, uint32_t sourceMask, s
 }
 
 void InputReader::dump(String8& dump) {
+    mEventHub->dump(dump);
+    dump.append("\n");
+
+    dump.append("Input Reader State:\n");
+
     { // acquire device registry reader lock
         RWLock::AutoRLock _rl(mDeviceRegistryLock);
 
@@ -861,7 +866,6 @@ void KeyboardInputMapper::dump(String8& dump) {
         AutoMutex _l(mLock);
         dump.append(INDENT2 "Keyboard Input Mapper:\n");
         dump.appendFormat(INDENT3 "AssociatedDisplayId: %d\n", mAssociatedDisplayId);
-        dump.appendFormat(INDENT3 "Sources: 0x%x\n", mSources);
         dump.appendFormat(INDENT3 "KeyboardType: %d\n", mKeyboardType);
         dump.appendFormat(INDENT3 "KeyDowns: %d keys currently down\n", mLocked.keyDowns.size());
         dump.appendFormat(INDENT3 "MetaState: 0x%0x\n", mLocked.metaState);
