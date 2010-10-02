@@ -19,6 +19,7 @@ package com.android.internal.telephony.sip;
 import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.Connection;
+import com.android.internal.telephony.DriverCall;
 import com.android.internal.telephony.Phone;
 
 import android.net.sip.SipManager;
@@ -27,9 +28,14 @@ import java.util.Iterator;
 import java.util.List;
 
 abstract class SipCallBase extends Call {
+    private static final int MAX_CONNECTIONS_PER_CALL = 5;
+
     protected List<Connection> connections = new ArrayList<Connection>();
 
     protected abstract void setState(State newState);
+
+    public void dispose() {
+    }
 
     public List<Connection> getConnections() {
         // FIXME should return Collections.unmodifiableList();
@@ -41,7 +47,48 @@ abstract class SipCallBase extends Call {
     }
 
     public String toString() {
-        return state.toString() + ":" + super.toString();
+        return state.toString();
+    }
+
+    /**
+     * Called by SipConnection when it has disconnected
+     */
+    void connectionDisconnected(Connection conn) {
+        if (state != State.DISCONNECTED) {
+            /* If only disconnected connections remain, we are disconnected*/
+
+            boolean hasOnlyDisconnectedConnections = true;
+
+            for (int i = 0, s = connections.size()  ; i < s; i ++) {
+                if (connections.get(i).getState()
+                    != State.DISCONNECTED
+                ) {
+                    hasOnlyDisconnectedConnections = false;
+                    break;
+                }
+            }
+
+            if (hasOnlyDisconnectedConnections) {
+                state = State.DISCONNECTED;
+            }
+        }
+    }
+
+
+    /*package*/ void detach(Connection conn) {
+        connections.remove(conn);
+
+        if (connections.size() == 0) {
+            state = State.IDLE;
+        }
+    }
+
+    /**
+     * @return true if there's no space in this call for additional
+     * connections to be added via "conference"
+     */
+    /*package*/ boolean isFull() {
+        return connections.size() == MAX_CONNECTIONS_PER_CALL;
     }
 
     void clearDisconnected() {

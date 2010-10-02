@@ -330,6 +330,7 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     public void setGsmBroadcastActivation(boolean activate, Message response) {
     }
 
+
     // ***** Methods for CDMA support
     public void getDeviceIdentity(Message response) {
     }
