@@ -283,11 +283,9 @@ NativeInputManager::~NativeInputManager() {
 }
 
 void NativeInputManager::dump(String8& dump) {
-    dump.append("Input Reader State:\n");
     mInputManager->getReader()->dump(dump);
     dump.append("\n");
 
-    dump.append("Input Dispatcher State:\n");
     mInputManager->getDispatcher()->dump(dump);
     dump.append("\n");
 }
