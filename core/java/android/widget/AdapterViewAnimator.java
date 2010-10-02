@@ -17,6 +17,7 @@
 package android.widget;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.view.animation.AnimationUtils;
  * @attr ref android.R.styleable#AdapterViewAnimator_inAnimation
  * @attr ref android.R.styleable#AdapterViewAnimator_outAnimation
  * @attr ref android.R.styleable#AdapterViewAnimator_animateFirstView
+ * @attr ref android.R.styleable#AdapterViewAnimator_loopViews
  */
 public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         implements RemoteViewsAdapter.RemoteAdapterConnectionCallback {
@@ -69,15 +71,14 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     int mNumActiveViews = 1;
 
     /**
-     * Array of the children of the {@link AdapterViewAnimator}. This array
-     * is accessed in a circular fashion
+     * Map of the children of the {@link AdapterViewAnimator}.
      */
-    View[] mActiveViews;
+    private HashMap<Integer, ViewAndIndex> mViewsMap = new HashMap<Integer, ViewAndIndex>();
 
     /**
      * List of views pending removal from the {@link AdapterViewAnimator}
      */
-    ArrayList<View> mPreviousViews;
+    ArrayList<Integer> mPreviousViews;
 
     /**
      * The index, relative to the adapter, of the beginning of the window of views
@@ -124,7 +125,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * Specifies if the animator should wrap from 0 to the end and vice versa
      * or have hard boundaries at the beginning and end
      */
-    boolean mShouldLoop = true;
+    boolean mLoopViews = true;
 
     /**
      * The width and height of some child, used as a size reference in-case our
@@ -149,21 +150,24 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         super(context, attrs);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ViewAnimator);
+                com.android.internal.R.styleable.AdapterViewAnimator);
         int resource = a.getResourceId(
-                com.android.internal.R.styleable.ViewAnimator_inAnimation, 0);
+                com.android.internal.R.styleable.AdapterViewAnimator_inAnimation, 0);
         if (resource > 0) {
             setInAnimation(context, resource);
         }
 
-        resource = a.getResourceId(com.android.internal.R.styleable.ViewAnimator_outAnimation, 0);
+        resource = a.getResourceId(com.android.internal.R.styleable.AdapterViewAnimator_outAnimation, 0);
         if (resource > 0) {
             setOutAnimation(context, resource);
         }
 
         boolean flag = a.getBoolean(
-                com.android.internal.R.styleable.ViewAnimator_animateFirstView, true);
+                com.android.internal.R.styleable.AdapterViewAnimator_animateFirstView, true);
         setAnimateFirstView(flag);
+
+        mLoopViews = a.getBoolean(
+                com.android.internal.R.styleable.AdapterViewAnimator_loopViews, false);
 
         a.recycle();
 
@@ -175,9 +179,17 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      */
     private void initViewAnimator() {
         mMainQueue = new Handler(Looper.myLooper());
-        mActiveViews = new View[mNumActiveViews];
-        mPreviousViews = new ArrayList<View>();
+        mPreviousViews = new ArrayList<Integer>();
         mViewsToBringToFront = new ArrayList<View>();
+    }
+
+    private class ViewAndIndex {
+        ViewAndIndex(View v, int i) {
+            view = v;
+            index = i;
+        }
+        View view;
+        int index;
     }
 
     /**
@@ -193,18 +205,17 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @param shouldLoop If the animator is show view 0, and setPrevious() is called, do we
      *        we loop back to the end, or do we do nothing
      */
-     void configureViewAnimator(int numVisibleViews, int activeOffset, boolean shouldLoop) {
+     void configureViewAnimator(int numVisibleViews, int activeOffset) {
         if (activeOffset > numVisibleViews - 1) {
             // Throw an exception here.
         }
         mNumActiveViews = numVisibleViews;
         mActiveOffset = activeOffset;
-        mActiveViews = new View[mNumActiveViews];
         mPreviousViews.clear();
+        mViewsMap.clear();
         removeAllViewsInLayout();
         mCurrentWindowStart = 0;
         mCurrentWindowEnd = -1;
-        mShouldLoop = shouldLoop;
     }
 
     /**
@@ -238,9 +249,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (mAdapter != null) {
             mWhichChild = whichChild;
             if (whichChild >= mAdapter.getCount()) {
-                mWhichChild = mShouldLoop ? 0 : mAdapter.getCount() - 1;
+                mWhichChild = mLoopViews ? 0 : mAdapter.getCount() - 1;
             } else if (whichChild < 0) {
-                mWhichChild = mShouldLoop ? mAdapter.getCount() - 1 : 0;
+                mWhichChild = mLoopViews ? mAdapter.getCount() - 1 : 0;
             }
 
             boolean hasFocus = getFocusedChild() != null;
@@ -323,9 +334,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @return View at this index, null if the index is outside the bounds
      */
     View getViewAtRelativeIndex(int relativeIndex) {
-        if (relativeIndex >= 0 && relativeIndex <= mNumActiveViews - 1) {
-            int index = mCurrentWindowStartUnbounded + relativeIndex;
-            return mActiveViews[modulo(index, mNumActiveViews)];
+        if (relativeIndex >= 0 && relativeIndex <= mNumActiveViews - 1 && mAdapter != null) {
+            int adapterCount =  mAdapter.getCount();
+            int i = modulo(mCurrentWindowStartUnbounded + relativeIndex, adapterCount);
+            return mViewsMap.get(i).view;
         }
         return null;
     }
@@ -346,8 +358,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             // get the fresh child from the adapter
             View updatedChild = mAdapter.getView(i, null, this);
 
-            if (mActiveViews[index] != null) {
-                FrameLayout fl = (FrameLayout) mActiveViews[index];
+            if (mViewsMap.containsKey(index)) {
+                FrameLayout fl = (FrameLayout) mViewsMap.get(index).view;
                 // flush out the old child
                 fl.removeAllViewsInLayout();
                 // add the new child to the frame, if it exists
@@ -373,7 +385,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (mAdapter == null) return;
 
         for (int i = 0; i < mPreviousViews.size(); i++) {
-            View viewToRemove = mPreviousViews.get(i);
+            View viewToRemove = mViewsMap.get(mPreviousViews.get(i)).view;
+            mViewsMap.remove(mPreviousViews.get(i));
             viewToRemove.clearAnimation();
             if (viewToRemove instanceof ViewGroup) {
                 ViewGroup vg = (ViewGroup) viewToRemove;
@@ -386,64 +399,74 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             removeViewInLayout(viewToRemove);
         }
         mPreviousViews.clear();
+        int adapterCount = mAdapter.getCount();
         int newWindowStartUnbounded = childIndex - mActiveOffset;
         int newWindowEndUnbounded = newWindowStartUnbounded + mNumActiveViews - 1;
         int newWindowStart = Math.max(0, newWindowStartUnbounded);
-        int newWindowEnd = Math.min(mAdapter.getCount() - 1, newWindowEndUnbounded);
+        int newWindowEnd = Math.min(adapterCount - 1, newWindowEndUnbounded);
 
-        // This section clears out any items that are in our mActiveViews list
+        if (mLoopViews) {
+            newWindowStart = newWindowStartUnbounded;
+            newWindowEnd = newWindowEndUnbounded;
+        }
+        int rangeStart = modulo(newWindowStart, adapterCount);
+        int rangeEnd = modulo(newWindowEnd, adapterCount);
+
+        boolean wrap = false;
+        if (rangeStart > rangeEnd) {
+            wrap = true;
+        }
+
+        // This section clears out any items that are in our active views list
         // but are outside the effective bounds of our window (this is becomes an issue
         // at the extremities of the list, eg. where newWindowStartUnbounded < 0 or
         // newWindowEndUnbounded > mAdapter.getCount() - 1
-        for (int i = newWindowStartUnbounded; i < newWindowEndUnbounded; i++) {
-            if (i < newWindowStart || i > newWindowEnd) {
-                int index = modulo(i, mNumActiveViews);
-                if (mActiveViews[index] != null) {
-                    View previousView = mActiveViews[index];
-                    mPreviousViews.add(previousView);
-                    int previousViewRelativeIndex = modulo(index - mCurrentWindowStart,
-                            mNumActiveViews);
-                    animateViewForTransition(previousViewRelativeIndex, -1, previousView);
-                    mActiveViews[index] = null;
-                }
+        for (Integer index : mViewsMap.keySet()) {
+            boolean remove = false;
+            if (!wrap && (index < rangeStart || index > rangeEnd)) {
+                remove = true;
+            } else if (wrap && (index > rangeEnd && index < rangeStart)) {
+                remove = true;
+            }
+
+            if (remove) {
+                View previousView = mViewsMap.get(index).view;
+                int oldRelativeIndex = mViewsMap.get(index).index;
+
+                mPreviousViews.add(index);
+                animateViewForTransition(oldRelativeIndex, -1, previousView);
             }
         }
 
         // If the window has changed
-        if (! (newWindowStart == mCurrentWindowStart && newWindowEnd == mCurrentWindowEnd)) {
+        if (!(newWindowStart == mCurrentWindowStart && newWindowEnd == mCurrentWindowEnd)) {
             // Run through the indices in the new range
             for (int i = newWindowStart; i <= newWindowEnd; i++) {
 
-                int oldRelativeIndex = i - mCurrentWindowStartUnbounded;
+                int index = modulo(i, adapterCount);
+                int oldRelativeIndex;
+                if (mViewsMap.containsKey(index)) {
+                    oldRelativeIndex = mViewsMap.get(index).index;
+                } else {
+                    oldRelativeIndex = -1;
+                }
                 int newRelativeIndex = i - newWindowStartUnbounded;
-                int index = modulo(i, mNumActiveViews);
 
                 // If this item is in the current window, great, we just need to apply
                 // the transform for it's new relative position in the window, and animate
                 // between it's current and new relative positions
-                if (i >= mCurrentWindowStart && i <= mCurrentWindowEnd) {
-                    View view = mActiveViews[index];
+                boolean inOldRange = mViewsMap.containsKey(index) && !mPreviousViews.contains(index);
+
+                if (inOldRange) {
+                    View view = mViewsMap.get(index).view;
+                    mViewsMap.get(index).index = newRelativeIndex;
                     applyTransformForChildAtIndex(view, newRelativeIndex);
                     animateViewForTransition(oldRelativeIndex, newRelativeIndex, view);
 
-                // Otherwise this view is new, so first we have to displace the view that's
-                // taking the new view's place within our cache (a circular array)
+                // Otherwise this view is new to the window
                 } else {
-                    if (mActiveViews[index] != null) {
-                        View previousView = mActiveViews[index];
-                        mPreviousViews.add(previousView);
-                        int previousViewRelativeIndex = modulo(index - mCurrentWindowStart,
-                                mNumActiveViews);
-                        animateViewForTransition(previousViewRelativeIndex, -1, previousView);
-
-                        if (mCurrentWindowStart > newWindowStart) {
-                            mViewsToBringToFront.add(previousView);
-                        }
-                    }
-
-                    // We've cleared a spot for the new view. Get it from the adapter, add it
-                    // and apply any transform / animation
-                    View newView = mAdapter.getView(i, null, this);
+                    // Get the new view from the adapter, add it and apply any transform / animation
+                    View newView = mAdapter.getView(modulo(i, adapterCount), null, this);
 
                     // We wrap the new view in a FrameLayout so as to respect the contract
                     // with the adapter, that is, that we don't modify this view directly
@@ -453,12 +476,12 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     if (newView != null) {
                        fl.addView(newView);
                     }
-                    mActiveViews[index] = fl;
+                    mViewsMap.put(index, new ViewAndIndex(fl, newRelativeIndex));
                     addChild(fl);
                     applyTransformForChildAtIndex(fl, newRelativeIndex);
                     animateViewForTransition(-1, newRelativeIndex, fl);
                 }
-                mActiveViews[index].bringToFront();
+                mViewsMap.get(index).view.bringToFront();
             }
 
             for (int i = 0; i < mViewsToBringToFront.size(); i++) {

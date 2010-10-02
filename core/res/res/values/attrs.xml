@@ -2384,8 +2384,11 @@
         <attr name="inAnimation" />
         <!-- Identifier for the animation to use when a view is hidden. -->
         <attr name="outAnimation" />
+        <!--Defines whether the animator loops to the first view once it
+        has reached the end of the list. -->
+        <attr name="loopViews" format="boolean" />
         <!-- Defines whether to animate the current View when the ViewAnimation
-             is first displayed. -->
+        is first displayed. -->
         <attr name="animateFirstView" />
     </declare-styleable>
     <declare-styleable name="AdapterViewFlipper">
