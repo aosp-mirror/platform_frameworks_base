@@ -181,6 +181,8 @@ public:
      */
     virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes, const int32_t* keyCodes,
             uint8_t* outFlags) const = 0;
+
+    virtual void dump(String8& dump) = 0;
 };
 
 class EventHub : public EventHubInterface
@@ -211,6 +213,8 @@ public:
 
     virtual bool getEvent(RawEvent* outEvent);
 
+    virtual void dump(String8& dump);
+
 protected:
     virtual ~EventHub();
     
@@ -239,8 +243,8 @@ private:
         ~device_t();
     };
 
-    device_t* getDevice(int32_t deviceId) const;
-    bool hasKeycode(device_t* device, int keycode) const;
+    device_t* getDeviceLocked(int32_t deviceId) const;
+    bool hasKeycodeLocked(device_t* device, int keycode) const;
     
     int32_t getScanCodeStateLocked(device_t* device, int32_t scanCode) const;
     int32_t getKeyCodeStateLocked(device_t* device, int32_t keyCode) const;
