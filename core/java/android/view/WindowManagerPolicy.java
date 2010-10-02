@@ -73,6 +73,7 @@ public interface WindowManagerPolicy {
     public final static int FLAG_ALT_GR = 0x00000020;
     public final static int FLAG_MENU = 0x00000040;
     public final static int FLAG_LAUNCHER = 0x00000080;
+    public final static int FLAG_VIRTUAL = 0x00000100;
 
     public final static int FLAG_INJECTED = 0x01000000;
 

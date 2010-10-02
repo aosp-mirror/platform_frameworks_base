@@ -993,7 +993,10 @@ void KeyboardInputMapper::applyPolicyAndDispatch(nsecs_t when, uint32_t policyFl
     int32_t keyEventAction = down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP;
     int32_t keyEventFlags = AKEY_EVENT_FLAG_FROM_SYSTEM;
     if (policyFlags & POLICY_FLAG_WOKE_HERE) {
-        keyEventFlags = keyEventFlags | AKEY_EVENT_FLAG_WOKE_HERE;
+        keyEventFlags |= AKEY_EVENT_FLAG_WOKE_HERE;
+    }
+    if (policyFlags & POLICY_FLAG_VIRTUAL) {
+        keyEventFlags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
     }
 
     getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
@@ -2162,10 +2165,7 @@ void TouchInputMapper::applyPolicyAndDispatchVirtualKey(nsecs_t when, uint32_t p
         int32_t keyCode, int32_t scanCode, nsecs_t downTime) {
     int32_t metaState = mContext->getGlobalMetaState();
 
-    if (keyEventAction == AKEY_EVENT_ACTION_DOWN) {
-        getPolicy()->virtualKeyDownFeedback();
-    }
-
+    policyFlags |= POLICY_FLAG_VIRTUAL;
     int32_t policyActions = getPolicy()->interceptKey(when, getDeviceId(),
             keyEventAction == AKEY_EVENT_ACTION_DOWN, keyCode, scanCode, policyFlags);
 
