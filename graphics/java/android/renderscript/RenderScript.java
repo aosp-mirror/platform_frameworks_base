@@ -501,6 +501,7 @@ public class RenderScript {
     Element mElement_I16;
     Element mElement_U32;
     Element mElement_I32;
+    Element mElement_I64;
     Element mElement_F32;
     Element mElement_F64;
     Element mElement_BOOLEAN;
