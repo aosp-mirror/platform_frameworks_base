@@ -288,7 +288,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     int mLandscapeRotation = -1; // default landscape rotation
     int mSeascapeRotation = -1; // "other" landscape rotation, 180 degrees from mLandscapeRotation
-    int mPortraitRotation = -1;
+    int mPortraitRotation = -1; // default portrait rotation
+    int mUpsideDownRotation = -1; // "other" portrait rotation
 
     // Nothing to see here, move along...
     int mFancyRotationAnimation;
@@ -353,26 +354,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     boolean useSensorForOrientationLp(int appOrientation) {
         // The app says use the sensor.
-        if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
+        if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                || appOrientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                || appOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                || appOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT) {
             return true;
         }
         // The user preference says we can rotate, and the app is willing to rotate.
-        // Note we include SCREEN_ORIENTATION_LANDSCAPE since we can use the sensor to choose
-        // between the two possible landscape rotations.
         if (mAccelerometerDefault != 0 &&
                 (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER
-                 || appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                 || appOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)) {
+                 || appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
             return true;
         }
-        // We're in a dock that has a rotation affinity, an the app is willing to rotate.
+        // We're in a dock that has a rotation affinity, and the app is willing to rotate.
         if ((mCarDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_CAR)
                 || (mDeskDockEnablesAccelerometer && mDockMode == Intent.EXTRA_DOCK_STATE_DESK)) {
             // Note we override the nosensor flag here.
             if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER
                     || appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                    || appOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
-                    || appOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                    || appOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
                 return true;
             }
         }
@@ -386,7 +386,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * screen is switched off.
      */
     boolean needSensorRunningLp() {
-        if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
+        if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE) {
             // If the application has explicitly requested to follow the
             // orientation, then we need to turn the sensor or.
             return true;
@@ -2060,21 +2063,42 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (d.getWidth() > d.getHeight()) {
                 mPortraitRotation = Surface.ROTATION_90;
                 mLandscapeRotation = Surface.ROTATION_0;
+                mUpsideDownRotation = Surface.ROTATION_270;
                 mSeascapeRotation = Surface.ROTATION_180;
             } else {
                 mPortraitRotation = Surface.ROTATION_0;
                 mLandscapeRotation = Surface.ROTATION_90;
+                mUpsideDownRotation = Surface.ROTATION_180;
                 mSeascapeRotation = Surface.ROTATION_270;
             }
         }
 
         synchronized (mLock) {
-            if (orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                //always return portrait if orientation set to portrait
-                return mPortraitRotation;
-            } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-                return getCurrentLandscapeRotation(lastRotation);
+            switch (orientation) {
+                case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
+                    //always return portrait if orientation set to portrait
+                    return mPortraitRotation;
+                case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
+                    //always return landscape if orientation set to landscape
+                    return mLandscapeRotation;
+                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+                    //always return portrait if orientation set to portrait
+                    return mUpsideDownRotation;
+                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+                    //always return seascape if orientation set to reverse landscape
+                    return mSeascapeRotation;
+                case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
+                    //return either landscape rotation based on the sensor
+                    mOrientationListener.setAllow180Rotation(false);
+                    return getCurrentLandscapeRotation(lastRotation);
+                case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
+                    mOrientationListener.setAllow180Rotation(true);
+                    return getCurrentPortraitRotation(lastRotation);
             }
+
+            mOrientationListener.setAllow180Rotation(
+                    orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+
             // case for nosensor meaning ignore sensor and consider only lid
             // or orientation sensor disabled
             //or case.unspecified
@@ -2094,23 +2118,37 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int getCurrentLandscapeRotation(int lastRotation) {
-        // landscape-only apps can take either landscape rotation
-        if (useSensorForOrientationLp(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)) {
-            int sensorRotation = mOrientationListener.getCurrentRotation(lastRotation);
-            if (isLandscapeOrSeascape(sensorRotation)) {
-                return sensorRotation;
-            }
+        int sensorRotation = mOrientationListener.getCurrentRotation(lastRotation);
+        if (isLandscapeOrSeascape(sensorRotation)) {
+            return sensorRotation;
         }
         // try to preserve the old rotation if it was landscape
         if (isLandscapeOrSeascape(lastRotation)) {
             return lastRotation;
         }
-        // default to one of the two landscape rotations
+        // default to one of the primary landscape rotation
         return mLandscapeRotation;
     }
 
     private boolean isLandscapeOrSeascape(int sensorRotation) {
         return sensorRotation == mLandscapeRotation || sensorRotation == mSeascapeRotation;
+    }
+
+    private int getCurrentPortraitRotation(int lastRotation) {
+        int sensorRotation = mOrientationListener.getCurrentRotation(lastRotation);
+        if (isAnyPortrait(sensorRotation)) {
+            return sensorRotation;
+        }
+        // try to preserve the old rotation if it was portrait
+        if (isAnyPortrait(lastRotation)) {
+            return lastRotation;
+        }
+        // default to one of the primary portrait rotations
+        return mPortraitRotation;
+    }
+
+    private boolean isAnyPortrait(int sensorRotation) {
+        return sensorRotation == mPortraitRotation || sensorRotation == mUpsideDownRotation;
     }
 
     public boolean detectSafeMode() {
