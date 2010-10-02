@@ -106,7 +106,7 @@ EventHub::EventHub(void)
     : mError(NO_INIT), mHaveFirstKeyboard(false), mFirstKeyboardId(0)
     , mDevicesById(0), mNumDevicesById(0)
     , mOpeningDevices(0), mClosingDevices(0)
-    , mDevices(0), mFDs(0), mFDCount(0), mOpened(false)
+    , mDevices(0), mFDs(0), mFDCount(0), mOpened(false), mNeedToSendFinishedDeviceScan(false)
     , mInputBufferIndex(0), mInputBufferCount(0), mInputDeviceIndex(0)
 {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
@@ -354,6 +354,7 @@ bool EventHub::getEvent(RawEvent* outEvent)
     if (!mOpened) {
         mError = openPlatformInput() ? NO_ERROR : UNKNOWN_ERROR;
         mOpened = true;
+        mNeedToSendFinishedDeviceScan = true;
     }
 
     for (;;) {
@@ -370,6 +371,7 @@ bool EventHub::getEvent(RawEvent* outEvent)
             }
             outEvent->type = DEVICE_REMOVED;
             delete device;
+            mNeedToSendFinishedDeviceScan = true;
             return true;
         }
 
@@ -384,6 +386,13 @@ bool EventHub::getEvent(RawEvent* outEvent)
                 outEvent->deviceId = device->id;
             }
             outEvent->type = DEVICE_ADDED;
+            mNeedToSendFinishedDeviceScan = true;
+            return true;
+        }
+
+        if (mNeedToSendFinishedDeviceScan) {
+            mNeedToSendFinishedDeviceScan = false;
+            outEvent->type = FINISHED_DEVICE_SCAN;
             return true;
         }
 
@@ -451,10 +460,10 @@ bool EventHub::getEvent(RawEvent* outEvent)
             }
         }
 
-        // read_notify() will modify mFDs and mFDCount, so this must be done after
+        // readNotify() will modify mFDs and mFDCount, so this must be done after
         // processing all other events.
         if(mFDs[0].revents & POLLIN) {
-            read_notify(mFDs[0].fd);
+            readNotify(mFDs[0].fd);
         }
 
         // Poll for events.  Mind the wake lock dance!
@@ -510,10 +519,9 @@ bool EventHub::openPlatformInput(void)
     mFDs[0].fd = -1;
 #endif
 
-    res = scan_dir(device_path);
+    res = scanDir(device_path);
     if(res < 0) {
         LOGE("scan dir failed for %s\n", device_path);
-        //open_device("/dev/input/event0");
     }
 
     return true;
@@ -541,8 +549,7 @@ static const int32_t GAMEPAD_KEYCODES[] = {
         AKEYCODE_BUTTON_START, AKEYCODE_BUTTON_SELECT, AKEYCODE_BUTTON_MODE
 };
 
-int EventHub::open_device(const char *deviceName)
-{
+int EventHub::openDevice(const char *deviceName) {
     int version;
     int fd;
     struct pollfd *new_mFDs;
@@ -859,10 +866,9 @@ bool EventHub::hasKeycodeLocked(device_t* device, int keycode) const
     return false;
 }
 
-int EventHub::close_device(const char *deviceName)
-{
+int EventHub::closeDevice(const char *deviceName) {
     AutoMutex _l(mLock);
-    
+
     int i;
     for(i = 1; i < mFDCount; i++) {
         if(strcmp(mDevices[i]->path.string(), deviceName) == 0) {
@@ -912,8 +918,7 @@ int EventHub::close_device(const char *deviceName)
     return -1;
 }
 
-int EventHub::read_notify(int nfd)
-{
+int EventHub::readNotify(int nfd) {
 #ifdef HAVE_INOTIFY
     int res;
     char devname[PATH_MAX];
@@ -923,7 +928,7 @@ int EventHub::read_notify(int nfd)
     int event_pos = 0;
     struct inotify_event *event;
 
-    LOGV("EventHub::read_notify nfd: %d\n", nfd);
+    LOGV("EventHub::readNotify nfd: %d\n", nfd);
     res = read(nfd, event_buf, sizeof(event_buf));
     if(res < (int)sizeof(*event)) {
         if(errno == EINTR)
@@ -943,10 +948,10 @@ int EventHub::read_notify(int nfd)
         if(event->len) {
             strcpy(filename, event->name);
             if(event->mask & IN_CREATE) {
-                open_device(devname);
+                openDevice(devname);
             }
             else {
-                close_device(devname);
+                closeDevice(devname);
             }
         }
         event_size = sizeof(*event) + event->len;
@@ -958,7 +963,7 @@ int EventHub::read_notify(int nfd)
 }
 
 
-int EventHub::scan_dir(const char *dirname)
+int EventHub::scanDir(const char *dirname)
 {
     char devname[PATH_MAX];
     char *filename;
@@ -976,7 +981,7 @@ int EventHub::scan_dir(const char *dirname)
             (de->d_name[1] == '.' && de->d_name[2] == '\0')))
             continue;
         strcpy(filename, de->d_name);
-        open_device(devname);
+        openDevice(devname);
     }
     closedir(dir);
     return 0;
