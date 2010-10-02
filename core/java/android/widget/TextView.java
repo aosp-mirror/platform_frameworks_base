@@ -7673,8 +7673,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mPositionY;
         private CursorController mController;
         private boolean mIsDragging;
-        private int mOffsetX;
-        private int mOffsetY;
+        private float mOffsetX;
+        private float mOffsetY;
+        private float mHotspotX;
+        private float mHotspotY;
 
         public HandleView(CursorController controller, Drawable handle) {
             super(TextView.this.mContext);
@@ -7684,7 +7686,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mContainer.setSplitTouchEnabled(true);
             mContainer.setClippingEnabled(false);
-            mContainer.setLayoutInScreenEnabled(true);
+            mHotspotX = mDrawable.getIntrinsicWidth() * 0.5f;
+            mHotspotY = -mDrawable.getIntrinsicHeight() * 0.2f;
         }
 
         @Override
@@ -7700,7 +7703,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             mContainer.setContentView(this);
             final int[] coords = mTempCoords;
-            TextView.this.getLocationOnScreen(coords);
+            TextView.this.getLocationInWindow(coords);
             coords[0] += mPositionX;
             coords[1] += mPositionY;
             mContainer.showAtLocation(TextView.this, 0, coords[0], coords[1]);
@@ -7743,7 +7746,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (isPositionInBounds()) {
                 if (mContainer.isShowing()){
                     final int[] coords = mTempCoords;
-                    TextView.this.getLocationOnScreen(coords);
+                    TextView.this.getLocationInWindow(coords);
                     coords[0] += mPositionX;
                     coords[1] += mPositionY;
                     mContainer.update(coords[0], coords[1], mRight - mLeft, mBottom - mTop);
@@ -7771,24 +7774,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
             switch (ev.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-                mOffsetX = (int) (ev.getX() - mDrawable.getIntrinsicWidth() / 2.f + 0.5f);
-                mOffsetY = (int) (ev.getY() - mDrawable.getIntrinsicHeight() / 2.f + 0.5f);
-                mIsDragging = true;
-                break;
-
-            case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_DOWN: {
                 final float rawX = ev.getRawX();
                 final float rawY = ev.getRawY();
-                final int[] coords = mTempCoords;
-                TextView.this.getLocationOnScreen(coords);
-                final int x = (int) (rawX - coords[0] + 0.5f) - mOffsetX;
-                final int y = (int) (rawY - coords[1] + 0.5f) -
-                        (int) (mDrawable.getIntrinsicHeight() * 0.8f) - mOffsetY;
-
-                mController.updatePosition(this, x, y);
+                mOffsetX = rawX - mPositionX;
+                mOffsetY = rawY - mPositionY;
+                mIsDragging = true;
                 break;
+            }
+            case MotionEvent.ACTION_MOVE: {
+                final float rawX = ev.getRawX();
+                final float rawY = ev.getRawY();
+                final float newPosX = rawX - mOffsetX + mHotspotX;
+                final float newPosY = rawY - mOffsetY + mHotspotY;
 
+                mController.updatePosition(this, (int) Math.round(newPosX),
+                        (int) Math.round(newPosY));
+
+                break;
+            }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mIsDragging = false;
