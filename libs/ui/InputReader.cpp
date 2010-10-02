@@ -226,11 +226,15 @@ void InputReader::loopOnce() {
 void InputReader::process(const RawEvent* rawEvent) {
     switch (rawEvent->type) {
     case EventHubInterface::DEVICE_ADDED:
-        addDevice(rawEvent->when, rawEvent->deviceId);
+        addDevice(rawEvent->deviceId);
         break;
 
     case EventHubInterface::DEVICE_REMOVED:
-        removeDevice(rawEvent->when, rawEvent->deviceId);
+        removeDevice(rawEvent->deviceId);
+        break;
+
+    case EventHubInterface::FINISHED_DEVICE_SCAN:
+        handleConfigurationChanged();
         break;
 
     default:
@@ -239,7 +243,7 @@ void InputReader::process(const RawEvent* rawEvent) {
     }
 }
 
-void InputReader::addDevice(nsecs_t when, int32_t deviceId) {
+void InputReader::addDevice(int32_t deviceId) {
     String8 name = mEventHub->getDeviceName(deviceId);
     uint32_t classes = mEventHub->getDeviceClasses(deviceId);
 
@@ -269,11 +273,9 @@ void InputReader::addDevice(nsecs_t when, int32_t deviceId) {
         delete device;
         return;
     }
-
-    handleConfigurationChanged(when);
 }
 
-void InputReader::removeDevice(nsecs_t when, int32_t deviceId) {
+void InputReader::removeDevice(int32_t deviceId) {
     bool removed = false;
     InputDevice* device = NULL;
     { // acquire device registry writer lock
@@ -303,8 +305,6 @@ void InputReader::removeDevice(nsecs_t when, int32_t deviceId) {
     device->reset();
 
     delete device;
-
-    handleConfigurationChanged(when);
 }
 
 InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, uint32_t classes) {
@@ -372,7 +372,7 @@ void InputReader::consumeEvent(const RawEvent* rawEvent) {
     } // release device registry reader lock
 }
 
-void InputReader::handleConfigurationChanged(nsecs_t when) {
+void InputReader::handleConfigurationChanged() {
     // Reset global meta state because it depends on the list of all configured devices.
     updateGlobalMetaState();
 
@@ -380,6 +380,7 @@ void InputReader::handleConfigurationChanged(nsecs_t when) {
     updateInputConfiguration();
 
     // Enqueue configuration changed.
+    nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
     mDispatcher->notifyConfigurationChanged(when);
 }
 
