@@ -7807,19 +7807,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int compoundPaddingRight = getCompoundPaddingRight();
 
             final TextView hostView = TextView.this;
-            final int handleWidth = mDrawable.getIntrinsicWidth();
             final int left = 0;
             final int right = hostView.getWidth();
             final int top = 0;
             final int bottom = hostView.getHeight();
 
-            final int clipLeft = left + compoundPaddingLeft - (int) (handleWidth * 0.75f);
+            final int clipLeft = left + compoundPaddingLeft;
             final int clipTop = top + extendedPaddingTop;
-            final int clipRight = right - compoundPaddingRight + (int) (handleWidth * 0.25f);
+            final int clipRight = right - compoundPaddingRight;
             final int clipBottom = bottom - extendedPaddingBottom;
 
-            return mPositionX >= clipLeft && mPositionX <= clipRight &&
-                    mPositionY >= clipTop && mPositionY <= clipBottom;
+            return mPositionX + mHotspotX >= clipLeft && mPositionX + mHotspotX <= clipRight &&
+                    mPositionY + mHotspotY >= clipTop && mPositionY + mHotspotY <= clipBottom;
         }
 
         private void moveTo(int x, int y) {
