@@ -3751,17 +3751,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             showError();
             mShowErrorAfterAttach = false;
         }
+
+        final ViewTreeObserver observer = getViewTreeObserver();
+        if (observer != null) {
+            if (mInsertionPointCursorController != null) {
+                observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
+            }
+            if (mSelectionModifierCursorController != null) {
+                observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
+            }
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        if (mPreDrawState != PREDRAW_NOT_REGISTERED) {
-            final ViewTreeObserver observer = getViewTreeObserver();
-            if (observer != null) {
+        final ViewTreeObserver observer = getViewTreeObserver();
+        if (observer != null) {
+            if (mPreDrawState != PREDRAW_NOT_REGISTERED) {
                 observer.removeOnPreDrawListener(this);
                 mPreDrawState = PREDRAW_NOT_REGISTERED;
+            }
+            if (mInsertionPointCursorController != null) {
+                observer.removeOnTouchModeChangeListener(mInsertionPointCursorController);
+            }
+            if (mSelectionModifierCursorController != null) {
+                observer.removeOnTouchModeChangeListener(mSelectionModifierCursorController);
             }
         }
 
@@ -6621,7 +6637,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mInputContentType != null) {
                 mInputContentType.enterDown = false;
             }
-            hideControllers();
+            hideInsertionPointCursorController();
+            if (mSelectionModifierCursorController != null) {
+                mSelectionModifierCursorController.hide();
+            }
         }
 
         startStopMarquee(hasWindowFocus);
@@ -6631,7 +6650,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (visibility != VISIBLE) {
-            hideControllers();
+            hideInsertionPointCursorController();
+            if (mSelectionModifierCursorController != null) {
+                mSelectionModifierCursorController.hide();
+            }
         }
     }
 
@@ -6669,8 +6691,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (start >= prevStart && start < prevEnd) {
                 // Restore previous selection
                 Selection.setSelection((Spannable)mText, prevStart, prevEnd);
-                // Tapping inside the selection displays the cut/copy/paste context menu.
-                showContextMenu();
+
+                if (mSelectionModifierCursorController != null &&
+                        !mSelectionModifierCursorController.isShowing()) {
+                    // If the anchors aren't showing, revive them.
+                    mSelectionModifierCursorController.show();
+                } else {
+                    // Tapping inside the selection displays the cut/copy/paste context menu
+                    // as long as the anchors are already showing.
+                    showContextMenu();
+                }
                 return;
             } else {
                 // Tapping outside stops selection mode, if any
@@ -6680,6 +6710,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mInsertionPointCursorController.show();
                 }
             }
+        } else if (hasSelection() && mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.show();
         }
     }
 
@@ -7627,7 +7659,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * It is not used outside of {@link TextView}.
      * @hide
      */
-    private interface CursorController {
+    private interface CursorController extends ViewTreeObserver.OnTouchModeChangeListener {
         /**
          * Makes the cursor controller visible on screen. Will be drawn by {@link #draw(Canvas)}.
          * See also {@link #hide()}.
@@ -7882,6 +7914,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public boolean onTouchEvent(MotionEvent ev) {
             return false;
         }
+
+        public void onTouchModeChanged(boolean isInTouchMode) {
+            if (!isInTouchMode) {
+                hide();
+            }
+        }
     }
 
     private class SelectionModifierCursorController implements CursorController {
@@ -7891,6 +7929,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mMinTouchOffset, mMaxTouchOffset;
         // Whether selection anchors are active
         private boolean mIsShowing;
+
+        private static final int DELAY_BEFORE_FADE_OUT = 4100;
+
+        private final Runnable mHider = new Runnable() {
+            public void run() {
+                hide();
+            }
+        };
 
         SelectionModifierCursorController() {
             Resources res = mContext.getResources();
@@ -7904,12 +7950,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mStartHandle.show();
             mEndHandle.show();
             hideInsertionPointCursorController();
+            hideDelayed(DELAY_BEFORE_FADE_OUT);
         }
 
         public void hide() {
             mStartHandle.hide();
             mEndHandle.hide();
             mIsShowing = false;
+            removeCallbacks(mHider);
+        }
+
+        private void hideDelayed(int delay) {
+            removeCallbacks(mHider);
+            postDelayed(mHider, delay);
         }
 
         public boolean isShowing() {
@@ -7975,6 +8028,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mLayout.getLineForOffset(selectionEnd);
             mStartHandle.positionAtCursor(selectionStart, oneLineSelection);
             mEndHandle.positionAtCursor(selectionEnd, true);
+            hideDelayed(DELAY_BEFORE_FADE_OUT);
         }
 
         public boolean onTouchEvent(MotionEvent event) {
@@ -8030,6 +8084,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          */
         public boolean isSelectionStartDragged() {
             return mStartHandle.isDragging();
+        }
+
+        public void onTouchModeChanged(boolean isInTouchMode) {
+            if (!isInTouchMode) {
+                hide();
+            }
         }
     }
 
