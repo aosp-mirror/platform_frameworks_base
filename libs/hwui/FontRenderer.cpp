@@ -426,6 +426,8 @@ bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint3
 
 void FontRenderer::initTextTexture() {
     mTextTexture = new uint8_t[mCacheWidth * mCacheHeight];
+    memset(mTextTexture, 0, mCacheWidth * mCacheHeight * sizeof(uint8_t));
+
     mUploadTexture = false;
 
     glGenTextures(1, &mTextureId);
