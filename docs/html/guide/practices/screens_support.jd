@@ -5,7 +5,7 @@ page.title=Supporting Multiple Screens
 <div id="qv-wrapper">
 <div id="qv">
 
-  <h2>Multiple screens quickview: </h2>
+  <h2>Quickview</h2>
   <ul>
     <li>Android runs on devices that have different screen sizes and resolutions.</li>
     <li>The screen on which your application is displayed can affect its user interface.</li>

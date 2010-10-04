@@ -52,7 +52,7 @@ page.title=Testing and Instrumentation
       </ol>
     </li>
   </ol>
-  <h2>Key Classes</h2>
+  <h2>Key classes</h2>
     <ol>
       <li>{@link android.test.InstrumentationTestRunner}</li>
       <li>{@link android.test.ActivityInstrumentationTestCase2}</li>
@@ -61,7 +61,7 @@ page.title=Testing and Instrumentation
       <li>{@link android.test.ProviderTestCase2}</li>
       <li>{@link android.test.ServiceTestCase}</li>
     </ol>
-  <h2>Related Tutorials</h2>
+  <h2>Related tutorials</h2>
     <ol>
         <li>
             <a href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">Hello, Testing</a>
@@ -70,7 +70,7 @@ page.title=Testing and Instrumentation
             <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
         </li>
     </ol>
-  <h2>See Also</h2>
+  <h2>See also</h2>
       <ol>
         <li>
           <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in Eclipse, with ADT</a>

@@ -4,7 +4,7 @@ page.title=Icon Design Guidelines, Android 2.0
 <div id="qv-wrapper">
 <div id="qv">
 
-<h2>Icon design quickview</h2>
+<h2>Quickview</h2>
 
 <ul>
 <li>You can use several types of icons in an Android application.</li>
@@ -35,23 +35,28 @@ page.title=Icon Design Guidelines, Android 2.0
 
 </ol>
 
-<h2>See also</h2>
-
-<ol>
-<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
-Screens</a></li>
-<li><a href="{@docRoot}shareables/icon_templates-v2.0.zip">Android Icon
-Templates Pack, v2.0 &raquo;</a></li>
-</ol>
-
 <h2>Older versions</h2>
 
 <ol>
 <li style="margin-top:4px;"><a
 href="{@docRoot}guide/practices/ui_guidelines/icon_design_1.html">Icon Design
 Guidelines, Android 1.0</a></li>
+</ol>
+
+<h2>Downloads</h2>
+
+<ol>
+<li><a href="{@docRoot}shareables/icon_templates-v2.0.zip">Android Icon
+Templates Pack, v2.0 &raquo;</a></li>
 <li><a href="{@docRoot}shareables/icon_templates-v1.0.zip">Android Icon
 Templates Pack, v1.0 &raquo;</a></li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
 </ol>
 
 

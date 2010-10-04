@@ -3,13 +3,7 @@ page.title=Notifying the User
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>In this document</h2>
-    <ol>
-      <li><a href="#Toast">Toast Notification</a></li>
-      <li><a href="#StatusBarNotification">Status Bar Notification</a></li>
-      <li><a href="#Dialog">Dialog Notification</a></li>
-    </ol>
-    <h2>More about</h2>
+    <h2>Topics</h2>
     <ol>
       <li><a href="toasts.html">Creating Toast Notifications</a></li>
       <li><a href="notifications.html">Creating Status Bar Notifications</a></li>

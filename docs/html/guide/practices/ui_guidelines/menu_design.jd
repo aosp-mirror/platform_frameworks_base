@@ -4,7 +4,7 @@ page.title=Menu Design Guidelines
 <div id="qv-wrapper">
 <div id="qv">
 			
-<h2>Menu design quickview</h2>
+<h2>Quickview</h2>
 
 <ul>
   <li>An Options menu is for any commands that are global to the current activity. </li>
