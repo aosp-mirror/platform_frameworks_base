@@ -19,19 +19,6 @@ page.title=Designing for Responsiveness
 <p><strong>Figure 1.</strong> An ANR dialog displayed to the user.</p>
 </div>
 
-<p>It's possible to write code that wins every performance test in the world, but still sends users
-in a fiery rage when they try to use the application. These are the applications that aren't
-<em>responsive</em> enough &mdash; the ones that feel
-sluggish, hang or freeze for significant periods, or take too long to process
-input. </p>
-
-<p>In Android, the system guards against applications that are insufficiently responsive for a
-period of time by displaying a dialog to the user, called the Application Not Responding (ANR)
-dialog. The user can choose to let the application continue, but the user won't appreciate having to
-act on this dialog every time he or she uses your application. So it's important to design
-responsiveness into your application, so that the system never has cause to display an ANR to the
-user. </p>
-
 <p>It's possible to write code that wins every performance test in the world,
 but still sends users in a fiery rage when they try to use the application.
 These are the applications that aren't <em>responsive</em> enough &mdash; the
