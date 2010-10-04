@@ -835,9 +835,7 @@ public class PduComposer {
         appendOctet(PduHeaders.CONTENT_TYPE);
 
         //  Message body
-        makeMessageBody();
-
-        return PDU_COMPOSE_SUCCESS;  // Composing the message is OK
+        return makeMessageBody();
     }
 
     /**
