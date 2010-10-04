@@ -317,11 +317,17 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
             setAudioSource(extractor->getTrack(i));
             haveAudio = true;
 
-            sp<MetaData> fileMeta = extractor->getMetaData();
-            int32_t loop;
-            if (fileMeta != NULL
-                    && fileMeta->findInt32(kKeyAutoLoop, &loop) && loop != 0) {
-                mFlags |= AUTO_LOOPING;
+            if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_VORBIS)) {
+                // Only do this for vorbis audio, none of the other audio
+                // formats even support this ringtone specific hack and
+                // retrieving the metadata on some extractors may turn out
+                // to be very expensive.
+                sp<MetaData> fileMeta = extractor->getMetaData();
+                int32_t loop;
+                if (fileMeta != NULL
+                        && fileMeta->findInt32(kKeyAutoLoop, &loop) && loop != 0) {
+                    mFlags |= AUTO_LOOPING;
+                }
             }
         }
 
