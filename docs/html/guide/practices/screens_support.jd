@@ -131,57 +131,79 @@ screens. </p></dd>
 </dl>
 
 
-<h3 id="range">Range of Screens Supported</h3>
+<h3 id="range">Range of screens supported</h3>
 
-<p>Android 1.5 and earlier versions of the platform were designed to support a
-single screen configuration &mdash; HVGA (320x480) resolution on a 3.2" screen.
-Because the platform targeted just one screen, application developers could
-write their applications specifically for that screen, without needing to worry
-about how their applications would be displayed on other screens. </p>
-
-<p>Starting from Android 1.6, the platform adds support for multiple screen
+<p>Starting from Android 1.6, the platform provides support for multiple screen
 sizes and resolutions, reflecting the many new types and sizes of devices on
-which the platform will run. This means that developers must design their
-applications for proper display on a range of devices and screens.</p>
+which the platform runs. If you are developing an application that will run
+on Android 1.6 or later, you can use the compatibility features of the Android
+platform to ensure that your application UI renders properly across the range of
+supported screen sizes and resolutions.</p>
 
-<p>To simplify the way application developers design their user interfaces for
-multiple devices, and to allow more devices to participate without impacting
+<p>To simplify the way that developers design their user interfaces for
+multiple devices and to allow more devices to participate without affecting
 applications, the platform divides the range of actual supported screen sizes
 and resolutions into:</p>
 
 <ul>
 <li>A set of three generalized sizes: <em>large</em>, <em>normal</em>, and <em>small</em>, and </li>
-<li>A set of three generalized densities: high (<em>hdpi</em>), medium (<em>mdpi</em>), and low (<em>ldpi</em>)
+<li>A set of three generalized densities:  <em>hdpi</em> (high), <em>mdpi</em> (medium), and <em>ldpi</em> (low)
 </ul>
 
-<!--<p>Applications use to these generalized sizesThe to let you apply custom UI
-and enable/disable functionality according to the generalized class of screen,
-rather than by the specific screen. When you are developing your application,
-you use these generalized sizes and densities and  Applications can use these
-generalized sizes and densities to tell the platform I will do it or you do it.
-Or a combination of both. -->
-
 <p>Applications can provide custom resources (primarily layouts) for any of the
-three generalized sizes, if needed, and they can also provide resources
-(primarily drawables such as images) for any of the three generalized densities.
-Applications do not need to work with the actual physical size or density of the
-device screen. At run time, the platform handles the loading of the correct size
-or density resources, based on the generalized size or density of the current
-device screen, and adapts them to the actual pixel map of the screen.</p>
+three generalized sizes and can provide resources (primarily drawables such as
+images) for any of the three generalized densities. Applications do not need to
+work with the actual physical size or density of the device screen. At run time,
+the platform handles the loading of the correct size or density resources, based
+on the generalized size or density of the current device screen, and adapts them
+to the actual pixel map of the screen.</p>
 
-<p>The table below lists some of the more common screens supported
-by Android and illustrates how the platform maps them to generalized screen
-configurations. Some devices use screens that are not specifically listed
-in the table &mdash; the platform maps those to the same set generalized
-screen configurations. </p>
+<p>The generalized size/density configurations are arranged around a
+baseline configuration that is assigned a size of <em>normal</em> and a density of
+<em>mdpi</em> (medium). All applications written for Android 1.5 or earlier are (by
+definition) designed for the baseline HVGA screen used on the T-Mobile G1 and
+similar devices, which is size <em>normal</em> and density
+<em>mdpi</em>.</p>
 
-<p class="table-caption" id="screens-table"><strong>Table 1.</strong> Examples of
-device screens supported by Android.</p> 
+<p>Each generalized screen configuration spans a range of actual screen
+densities and physical sizes. For example, that means that multiple devices that
+report a screen size of <em>normal</em> might offer screens that differ slightly
+in actual size or aspect ratio. Similarly, devices that report a screen density
+of <em>hdpi</em> might offer screens with slightly different pixel densities.
+The platform makes these differences abstract, however &mdash; applications can
+offer UI designed for the generalized sizes and densities and let the system
+handle the actual rendering of the UI on the current device screen according to
+its characteristics. </p>
 
-  <table id="screens-table" width="80%" style="margin-top:2em;">
+
+<img src="{@docRoot}images/screens_support/screens-ranges.png" />
+<p class="img-caption"><strong>Figure 1.</strong> 
+Illustration of how the Android platform maps actual screen densities and sizes 
+to generalized density and size configurations. </p>
+
+<p>Although the platform lets your application provide layouts and resources for
+generalized size-density configurations, you do not necessarily need to do write
+custom code or provide custom resources for each of the nine supported
+configurations. The platform provides robust compatibility features, described
+in the sections below, that can handle most of the work of rendering your
+application on any device screen, provided that you've implemented your
+application UI properly. For more information about how to implement a UI that
+renders properly across device screens and platform versions, see
+<a href="#screen-independence">Best Practices for Screen Independence</a>.</p>
+
+<p>To help you test your applications, the Android SDK includes emulator skins
+that replicate the sizes and densities of actual device screens on which your
+application is likely to run. You can also modify the default size and density
+of the emulator skins to replicate the characteristics of any specific
+screen.</p>
+
+<p class="table-caption" id="screens-table"><strong>Table 1.</strong> Screen
+sizes and densities of emulator skins included in the Android SDK.</p>
+
+  <table id="screens-table">
     <tbody>
     <tr>
-      <td></td>
+      <td style="border:none"></td>
       <td style="background-color:#f3f3f3">
         <nobr>Low density (120), <em>ldpi</em></nobr>
       </td>
@@ -196,10 +218,7 @@ device screens supported by Android.</p>
       <td  style="background-color:#f3f3f3">
         <em>Small</em> screen
       </td>
-      <td style="font-size:.9em;">
-        <ul style="padding:0">
-          <li style="margin: 0 0 0 1em;padding:.25em 0 0 0; font-size:.9em;">QVGA (240x320), <nobr>2.6"-3.0" diagonal</nobr></li>
-        </ul>
+      <td style="font-size:.9em;">QVGA (240x320)</td>
       </td>
       <td></td>
       <td></td>
@@ -208,74 +227,29 @@ device screens supported by Android.</p>
       <td style="background-color:#f3f3f3">
         <em>Normal</em> screen
       </td>
-      <td style="font-size:.9em;">
-        <ul style="padding:0">
-          <li style="margin: 0 0 0 1em;padding:.25em 0 0 0; font-size:.9em;">WQVGA (240x400), <nobr>3.2"-3.5" diagonal</nobr></li>
-          <li style="margin: 0 0 0 1em;padding:.25em 0 0 0; font-size:.9em;">FWQVGA (240x432), <nobr>3.5"-3.8" diagonal</nobr></li>
-        </ul>
-      </td>
-      <td style="font-size:.9em;background-color:#FFE;">
-        <ul style="padding:0">
-          <li  style="margin: 0 0 0 1em;padding:.25em 0 0 0; font-size:.9em;">HVGA (320x480), <nobr>3.0"-3.5" diagonal</nobr></li>
-        </ul>
-      </td>
-      <td style="font-size:.9em;">
-       <ul style="padding:0">
-          <li style="margin: 0 0 0 1em;padding:.25em 0 0 0; font-size:.9em;">WVGA (480x800), <nobr>3.3"-4.0" diagonal</nobr></li>
-          <li style="margin: 0 0 0 1em;padding:.25em 0 0 0; font-size:.9em;">FWVGA (480x854), <nobr>3.5"-4.0" diagonal</nobr></li>
-        </ul>
-      </td>
+      <td style="font-size:.9em;">WQVGA400 (240x400)<br>WQVGA432 (240x432)</td>
+      <td style="font-size:.9em;">HVGA (320x480)</td>
+      <td style="font-size:.9em;">WVGA800 (480x800)<br>WVGA854 (480x854)</td>
     </tr>
     <tr>
       <td style="background-color:#f3f3f3">
         <em>Large</em> screen
       </td>
       <td></td>
-      <td style="font-size:.9em;">
-       <ul style="padding:0">
-          <li style="margin: 0 0 0 1em;padding:.25em 0 0 0; font-size:.9em;">WVGA (480x800), <nobr>4.8"-5.5" diagonal</nobr></li>
-          <li style="margin: 0 0 0 1em;padding:.25em 0 0 0; font-size:.9em;">FWVGA (480x854), <nobr>5.0"-5.8" diagonal</nobr></li>
-        </ul>
-      </td>
+      <td style="font-size:.9em;">WVGA800* (480x800)<br>WVGA854* (480x854)</td>
       <td></td>
     </tr>
-    </tbody>
-  </table>
+    <tr>
+      <td colspan="4" style="border:none;font-size:90%;">* To emulate this 
+        configuration, specify a custom density of 160 when 
+        creating an AVD that uses a WVGA800 or WVGA854 skin.
+      </td>
+</table>
 
-<p class="caption" style="margin-top:1em;margin-bottom:1.5em;"> </p>
-
-<p>As shown above, the various screen configurations are arranged around a
-<em>baseline screen</em> that is assigned a size of "normal" and a density of
-"medium". The HVGA screen is used as the baseline because all applications
-written against Android 1.5 or earlier are (by definition) written for the HVGA
-screen used on the T-Mobile G1 and similar devices.</p>
-
-<!-- <p>Note that each screen configuration spans a range of actual resolutions
-and physical screen sizes. For example, the The baseline configuration spans a
-range of actual screen sizes &mdash; from 3.0" to 3.5" diagonal &mdash; all with
-the same HVGA resolution. That means that the actual pixel density of devices in
-a single screen configuration can vary. </p>
-
-Because differences in density can affect the displayed size of UI elements
-declared in pixels, the framework provides a density-independent pixel (dip)
-unit that applications can use to declare UI dimensions, letting the platform
-automatically handle the scaling to the actual pixel density of the screen. When
-UI dimensions are declared in dip, the result is that they are displayed at the
-same physical size on all screens in a given configuration. </p> -->
-
-<p>Although the platform currently supports the nine possible size-density
-configurations listed in the table, you do not necessarily need to create custom
-resources for each one of them. The platform provides robust compatibility
-features, described in the sections below, that can handle most of the work of
-rendering your application on the current device screen, provided that the UI is
-properly implemented. For more information, see  <a
-href="#screen-independence">Best Practices for Screen Independence</a>.</p>
-
-<!--
 <p>For an overview of the relative numbers of high (hdpi), medium (mdpi), and 
-low (ldpi) density screens, see the <a 
-href="{@docRoot}guide/resources/dashboard/screen-densities.html">Screen Densities dashboard</a>.</p> 
--->
+low (ldpi) density screens in Android-powered devices available now, see the <a 
+href="{@docRoot}resources/dashboard/screens.html">Screen Sizes and Densities</a> dashboard.</p>
+
 
 <h3 id="support">How Android supports multiple screens</h3>
 
@@ -307,8 +281,8 @@ size- and density-specific resources, if needed. The qualifiers for
 size-specific resources are <code>large</code>, <code>normal</code>, and
 <code>small</code>, and those for density-specific resources are
 <code>hdpi</code> (high), <code>mdpi</code> (medium), and <code>ldpi</code>
-(low). The qualifiers correspond to the generalized densities given in 
-<a href="#range">Table 1</a>, above.</li>
+(low). The qualifiers correspond to the generalized densities described in 
+<a href="#range">Range of screens supported</a>, above.</li>
   <li>The platform also provides a 
 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">
 <code>&lt;supports-screens&gt;</code></a>
@@ -457,7 +431,7 @@ different.</p>
 <div id=vi09 style=TEXT-ALIGN:left>
 <img src="{@docRoot}images/screens_support/dip.png" style="padding-bottom:0;margin-bottom:0;" />
 <p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0
-1em;"><strong>Figure 1.</strong> Examples of density independence on WVGA high
+1em;"><strong>Figure 2.</strong> Examples of density independence on WVGA high
 density (left), HVGA medium density (center), and QVGA low density (right). </p>
 </div>
 
@@ -479,7 +453,8 @@ whose attributes you can use to control the
 display of your application on different classes of device screens, as listed
 below. The <code>smallScreens</code>, <code>normalScreens</code>, and
 <code>largeScreens</code> attributes correspond to the generalized screen sizes
-shown in <a href="#range">Table 1</a>, earlier in this document.</p>
+described in <a href="#range">Range of screens supported</a>, earlier in this
+document.</p>
 
     <table id="vrr8">
       <tr>
@@ -489,6 +464,12 @@ shown in <a href="#range">Table 1</a>, earlier in this document.</p>
         <th >
           Description
         </th>
+        <th>
+          Default value,<br><nobr>Android 1.5 and Lower</nobr>
+        </th>
+        <th>
+          Default value,<br><nobr>Android 1.6 and Higher</nobr>
+        </th>
       </tr>
       <tr>
         <td>
@@ -497,10 +478,10 @@ shown in <a href="#range">Table 1</a>, earlier in this document.</p>
         <td>
           Whether or not the application UI is designed for use on
 <em>small</em> screens &mdash; "<code>true</code>" if it is, and
-"<code>false</code>" if not. See <a href="#defaults">Default values for
-attributes</a> for information about the assumed value of this attribute, if not
-declared.
+"<code>false</code>" if not. </p>
         </td>
+<td>"<code>false</code>"</td>
+<td>"<code>true</code>"</td>
       </tr>
       <tr>
         <td>
@@ -509,8 +490,10 @@ declared.
         <td>
            Whether or not the application UI is designed for use on
 <em>normal</em> screens &mdash; "<code>true</code>" if it is, and
-"<code>false</code>" if not. The default value is "<code>true</code>".
+"<code>false</code>" if not. The default value is always "<code>true</code>".
         </td>
+<td>"<code>true</code>"</td>
+<td>"<code>true</code>"</td>
       </tr>
       <tr>
         <td>
@@ -519,10 +502,10 @@ declared.
         <td>
            Whether or not the application UI is designed for use on
 <em>large</em> screens &mdash; "<code>true</code>" if it is, and
-"<code>false</code>" if not. See <a href="#defaults">Default values for
-attributes</a> for information about the assumed value of this attribute, if not
-declared.
+"<code>false</code>" if not.
         </td>
+<td>"<code>false</code>"</td>
+<td>"<code>true</code>"</td>
       </tr>
       <tr>
         <td>
@@ -535,9 +518,13 @@ in different density environments &mdash; "<code>true</code>" if so, and
         <ul>
           <li>If set to "<code>true</code>", the platform disables its
 density-compatibility features for all screen densities &mdash; specifically,
-the auto-scaling of absolute pixel units and math &mdash; and relies on the
-application to use density-independent pixel units and/or to manage the
-adaptation of pixel values according to density of the current screen. </li>
+the auto-scaling of absolute pixel units (<code>px</code>) and math &mdash; and
+relies on the application to use density-independent pixel units
+(<code>dp</code>) and/or math to manage the adaptation of pixel values according
+to density of the current screen. That is, as long as your application uses
+density-independent units (dp) for screen layout sizes, then it will perform
+properly on different densities when this attribute is set to
+"<code>true</code>".</li>
 
           <li>If set to "<code>false</code>", the platform enables its
 density-compatibility features for all screen densities. In this case, the
@@ -546,45 +533,73 @@ which it can layout and draw its UI as though against a medium-density screen
 (160). The platform then transparently auto-scales the application's pixel units
 and math as needed to match the actual device screen density. </li>
         </ul>
-        <p>See <a href="#defaults">Default values for attributes</a> for
-information about the assumed value of this attribute, if not declared.</p>
+<p>Note that the setting of this attribute affects density-compatibility only.
+It does not affect size-compatibility features such as display on a virtual
+baseline screen.</p>
         </td>
+<td>"<code>false</code>"</td>
+<td>"<code>true</code>"</td>
       </tr>
     </table>
 
 <p>In general, when you declare a screen-size attribute
 (<code>smallScreens</code>, <code>normalScreens</code>, or
-<code>largeScreens</code>) as "true", you are signaling to the platform that
-your application wants to manage its UI by itself, for all screen sizes, without
-the platform applying any size-compatibility behaviors (such as a virtual HVGA
-display area). If you declare a screen-size attribute as "false", you are
-signaling that your application is not designed for that screen size. The
-effects are conditioned by the screen size that your application does not
-support:</p>
-	
+<code>largeScreens</code>) as "<code>true</code>", you are signaling to the
+platform that your application is designed to render properly on that screen
+size. As a result, the platform does not apply any size-compatibility features
+(such as a virtual HVGA display area). If you declare a screen-size attribute as
+"<code>false</code>", you are signaling that your application is <em>not</em>
+designed for that screen size. In this case, the platform <em>does</em> apply
+size-compatibility features, rendering the application in an HVGA baseline
+display area. If the current screen is larger than <em>normal</em> size, the
+platform renders the application in a virtual HVGA screen on the larger screen.
+See <a href="#compatibility-examples">Screen-Compatibility Examples</a> for an
+illustration of what an application looks like when displayed in a virtual HVGA
+screen.</p>
+
+<p>In other words, setting a <code>&lt;supports-screens&gt;</code> attribute to
+"<code>false</code>" tells the platform to enable it's compatibility features
+when displaying the application on a screen of that size <em>or any larger
+size</em>, if also disallowed. Otherwise, the platform gives the application a
+normal display area that can use the full device screen area, if
+appropriate.</p>
+
+<p>Android Market also makes use of the <code>&lt;supports-screens&gt;</code>
+attributes. It uses them to filter the application from devices whose screens
+are not supported by the application. Specifically, Android Market considers an
+application compatible with a device if the application supports a screen that
+is the same or smaller than the current device screen. Android Market filters
+the application if it disallows the device's screen size and does not support a
+smaller size. In general, Android does not provide downward size-compatibility
+features for applications.</p>
+
+<p>Here are some examples:</p>
+
 <ul>
-    <li>If you declare <code>largeScreens="false"</code>, your application can
-still be installed by users of devices with large screens. When run on a device
-with a large screen, this attribute value causes the platform to run the
-application in compatibility mode, rendering it in a baseline screen area
-(normal size, medium density) reserved on the larger screen. See 
-<a href="#compatibility-examples">Screen-Compatibility Examples</a> for an
-illustration of what an application looks like when displayed in compatibility
-mode.</li>
-    <li>If you declare <code>smallScreens="false"</code>, your application can
-still be installed by users of devices with small screens. However, this
-attribute value causes Android Market to filter your application from the list
-of applications available to such users. In effect, this prevents users from
-installing the application on small-screen devices. </li>
+    <li>Assume that you declare <code>smallScreens="false" normalScreens="true"
+largeScreens="false" </code> in your application's manifest. <p>Although the
+application is not designed for display on large screens, the platform can still
+run it successfully in <a href="#compatibility-examples">size-compatibility
+mode</a>. Android Market does not filter the application from devices
+<em>normal</em> and <em>large</em> size screens, but does filter it from
+<em>small</em> size screens, since the application provides no screen support at
+<em>small</em> size (and there is no smaller size).</p></li>
+
+    <li>Assume that you declare <code>smallScreens="false" normalScreens="false"
+largeScreens="true"</code> in your application's manifest. <p>Android Market
+filters the application from users of devices with <em>small</em> and
+<em>normal</em> size screens. In effect, this prevents such users from
+installing the application.</p></li>
 </ul>
 
-<p>If you declare the <code>android:anyDensity</code> attribute as "true", you
-are signaling to the platform that your application wants to manage its UI by
-itself, for all screen densities, using the actual screen dimensions and pixels.
-In this case, the application must ensure that it declares its UI dimensions
-using density-independent pixels and scales any actual pixel values or math by
-the scaling factor available from 
-{@link android.util.DisplayMetrics#density android.util.DisplayMetrics.density}.</p>
+<p>If you declare the <code>android:anyDensity</code> attribute as
+"<code>true</code>", you are signaling to the platform that your application is
+designed to display properly on any screen density. In this case, the
+application must ensure that it declares its UI dimensions using
+density-independent pixels (<code>dp</code>) and scales any absolute pixel
+values (<code>px</code>) or math by the scaling factor available from {@link
+android.util.DisplayMetrics#density android.util.DisplayMetrics.density}. See <a
+href="#dips-pels">Converting from dips to pixels</a> for an example.</p>
 
 <p>Note that the setting of the <code>android:anyDensity</code> attribute does
 not affect the platform's pre-scaling of drawable resources, such as bitmaps and
@@ -594,22 +609,22 @@ nine-patch images, which always takes place by default. </p>
 normal, and small screens in any densities.</p>
 
 <pre>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"&gt;
-
+  ...
   &lt;supports-screens
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; android:largeScreens="true"
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; android:normalScreens="true"
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; android:smallScreens="true"
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; android:resizable="true"
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; android:anyDensity="true" /&gt;
-  &lt;/manifest&gt;
+  ...
+&lt;/manifest&gt;
 </pre>
-
+<!--  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; android:resizeable="true" -->
 <h4 id="defaults">
   Default values for attributes
 </h4>
 
 <p>The default values for the <code>&lt;supports-screens&gt;</code> attributes
-differs, depending on the the value of the 
+differ, depending on the the value of the 
 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>android:minSdkVersion</code></a>
  attribute in the application's manifest, as well as on
 the value of <code>android:targetSdkVersion</code>, if declared:</p>
@@ -618,19 +633,20 @@ the value of <code>android:targetSdkVersion</code>, if declared:</p>
   <ul>
     <li>
       If <code>android:minSdkVersion</code> or
-<code>android:targetSdkVersion</code> is "3" (Android 1.5) or lower, the default
-value for everything except android:normalScreens is <code>false</code>. If you
-are primarily targeting pre-Android 1.6 platforms but also want to support other
-densities/screen sizes, you need to set the appropriate attributes to
-<code>true</code>.
+<code>android:targetSdkVersion</code> is "4" (Android 1.6) or higher, the
+default value for everything is "<code>true</code>". If your application uses
+APIs introduced in Android 1.6 or higher, but does not support specific screen
+densities and/or screen sizes, you need to explicitly set the appropriate
+attributes to "<code>false</code>".
     </li>
     <li>
-      If <code>android:minSdkVersion</code> or
-<code>android:targetSdkVersion</code> is "4" (Android 1.6) or higher, the
-default value for everything is <code>true</code>. If your application
-requires&nbsp;<span style=BACKGROUND-COLOR:#ffffff>Android 1.6 </span>features,
-but does not support these densities and/or screen sizes, you need to set the
-appropriate attributes to <code>false</code>.
+      If <code>android:minSdkVersion</code> is declared with a value of "3"
+(Android 1.5) or lower <em>and</em> a <code>android:targetSdkVersion</code>
+attribute is <em>not</em> declared with a value of "4" or higher, the default
+value for all attributes except <code>android:normalScreens</code> is
+"<code>false</code>". If you are primarily targeting pre-Android 1.6 platforms
+but also want to support other densities/screen sizes, you need to explicitly
+set the appropriate attributes to "<code>true</code>".
     </li>
     <li>
       Note that <code>android:normalScreens</code> always defaults to
@@ -646,8 +662,8 @@ appropriate attributes to <code>false</code>.
 of resources based on the characteristics of the screen on which your application
 is running. You can use these qualifiers to provide size- and density-specific
 resources in your application. For more information about the generalized sizes
-and densities that correspond to the qualifiers, see <a href="#range">Table
-1</a>, earlier in this document.</p>
+and densities that correspond to the qualifiers, see <a href="#range">Range
+of Screens Supported</a>, earlier in this document.</p>
 
 <table>
 <tr>
@@ -659,30 +675,29 @@ and densities that correspond to the qualifiers, see <a href="#range">Table
 <tr>
   <td rowspan="3">Size</td>
   <td><code>small</code></td>
-  <td>Resources for small screens, such as QVGA low density.</td>
+  <td>Resources designed for <em>small</em> size screens.</td>
 </tr>
 <tr>
   <td><code>normal</code></td>
-  <td>Resources for normal (baseline configuration) screens, such as T-Mobile
-G1/HTC Magic screen size, or equivalent.</td>
+  <td>Resources designed for <em>normal</em> size screens.</td>
 </tr>
 <tr>
 <td><code>large</code></td>
-<td>Resources for large screens. Typical example is a tablet like device.</td>
+<td>Resources for <em>large</em> size screens.</td>
 </tr>
 
 <tr>
 <td rowspan="4">Density</td>
 <td><code>ldpi</code></td>
-<td>Low-density resources, for 100 to 140 dpi screens.</td>
+<td>Resources designed for low-density (<em>ldpi</em>) screens.</td>
 </tr>
 <tr>
 <td><code>mdpi</code></td>
-<td>Medium-density resources for 140 to 180 dpi screens.</td>
+<td>Resources designed for medium-density (<em>mdpi</em>) screens.</td>
 </tr>
 <tr>
 <td><code>hdpi</code></td>
-<td>High-density resources for 190 to 250 dpi screens.</td>
+<td>Resources designed for high-density (<em>hdpi</em>) screens.</td>
 </tr>
 <tr>
 <td><code>nodpi</code></td>
@@ -747,8 +762,8 @@ Alternative Resources</a>.</p>
 <h2 id="screen-independence">Best practices for Screen Independence</h2>
 
 <p>The objective of supporting multiple screens is to create an application that
-can run properly on any display and function properly on any of the screen
-configurations listed in <a href="#range">Table 1</a> earlier in this document.
+can run properly on any display and function properly on any of the generalized
+screen configurations supported by the platform.
 </p>
 
 <p>You can easily ensure that your application will display properly on
@@ -855,7 +870,7 @@ scroll threshold can be obtained as follows:</p>
 
 <div style="float: right;background-color:#fff;margin: 0;padding: 20px 0 20px 20px;">
 <img src="{@docRoot}images/screens_support/scale-test.png" style="padding:0;margin:0;">
-<p class="caption" style="margin:0;padding:0;"><strong>Figure 2.</strong> Comparison of pre-scaled and auto-scaled bitmaps.</p>
+<p class="caption" style="margin:0;padding:0;"><strong>Figure 3.</strong> Comparison of pre-scaled and auto-scaled bitmaps.</p>
 </div>
 
 <p>Even with the size- and density-compatibility features that the platform
@@ -947,7 +962,7 @@ pre-scaling but uses less memory. You can refer to the documentation of
 {@link android.graphics.Canvas Canvas} for more
 information on auto-scaling.</p>
 
-<p>Figure 2, at right, demonstrates the results of the pre-scale and auto-scale
+<p>Figure 3, at right, demonstrates the results of the pre-scale and auto-scale
 mechanisms when loading low (120), medium (160) and high (240) density bitmaps
 on a baseline screen. The differences are subtle, because all of the bitmaps are
 being scaled to match the current screen density, however the scaled bitmaps
@@ -1078,7 +1093,7 @@ attribute(s) to your application's manifest. -->
 
 <div id="f9.5" style="float:right;margin:0;padding:0;">
   <img src="{@docRoot}images/screens_support/avds-config.png" style="padding:0;margin:0;">
-  <p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0 1em;"><strong>Figure 3.</strong>
+  <p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0 1em;"><strong>Figure 4.</strong>
   A typical set of AVDs for testing screens support.</p>
 </div>
 
@@ -1143,52 +1158,29 @@ launching the emulator, for example:</p>
 
 <p>Note that starting the emulator with the <code>-scale</code> option will
 scale the entire emulator display, based on both the dpi of the skin and of your
-monitor. Using the default densities, the emulator skins included in the Android
-1.6 SDK will emulate the following screen sizes:</p>
-
-<ul>
-  <li>
-    QVGA, low density: 3.3"
-  </li>
-  <li>
-    WQVGA, low density: 3.9"
-  </li>
-  <li>
-    WQVGA432, low density: 4.1"
-  </li>
-  <li>
-    HVGA, medium density: 3.6"
-  </li>
-  <li>
-    WVGA800, high density: 3.9"
-  </li>
-  <li>
-    WVGA854, high density: 4.1"
-  </li>
-</ul>
+monitor. The default emulator skins included in the Android SDK are listed
+in <a href="#screens-table">Table 1</a>, earlier in this document.</p>
 
 <div style="float: right;background-color:#fff;margin: 0;padding: 20px 0 20px 20px;width:520px;">
   <img src="{@docRoot}images/screens_support/avd-density.png" style="padding:0;margin:0;">
-  <p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0 1em; width:280px;"><strong>Figure 4.</strong>
+  <p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0 1em; width:280px;"><strong>Figure 5.</strong>
   Resolution and density options that you can use, when creating an AVD using the AVD Manager.</p>
 </div>
 
 <p>You should also make sure to test your application on different physical
-screen sizes within a single size-density configuration. For example, according
-to <a href="#range">Table 1</a>, the minimum supported diagonal of QVGA is 2.8".
-To display this is on a 30" monitor you will need to adjust the value passed to
-<code>-scale</code> to 96*2.8/3.3 = 81dpi. You can also pass a float value to
-<code>-scale</code> to specify your own scaling factor:</p>
+screen sizes within a single size-density configuration. For example, to 
+display this screen configuration on a 30" monitor you will need to adjust 
+the value passed to <code>-scale</code> to 96*2.8/3.3 = 81dpi. You can also
+pass a float value to <code>-scale</code> to specify your own scaling factor:</p>
 
 <pre>emulator -avd &lt;name&gt; -scale 0.6</pre>
 
 <p>If you would like to test your application on a screen that uses a resolution
 or density not supported by the built-in skins, you can either adjust an
-existing skin, or create an AVD
-that uses a custom resolution or density.</p>
+existing skin, or create an AVD that uses a custom resolution or density.</p>
 
 <p>In the AVD Manager, you can specify a custom skin resolution or density in
-the Create New AVD dialog, as shown in Figure 4, at right.</p>
+the Create New AVD dialog, as shown in Figure 5, at right.</p>
 
 <p>In the <code>android</code> tool, follow these steps to create an AVD with a
 custom resolution or density:</p>
@@ -1203,9 +1195,9 @@ Here's an example:
   <li>To specify a custom density for the skin, answer "yes" when asked whether
 you want to create a custom hardware profile for the new AVD.</li>
   <li>Continue through the various profile settings until the tool asks you to
-specify "Abstracted LCD density" (<em>hw.lcd.density</em>). Consult <a
-href="#range">Table 1</a>, earlier in this document, and enter the appropriate
-value. For example, enter "160" to use medium density for the WVGA800 screen.</li>
+specify "Abstracted LCD density" (<em>hw.lcd.density</em>). Enter an appropriate
+value, such as "120" for a low-density screen, "160" for a medium density screen,
+or "240" for a high-density screen.</li>
   <li>Set any other hardware options and complete the AVD creation.</li>
 </ol>
 
