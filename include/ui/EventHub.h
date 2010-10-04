@@ -142,8 +142,13 @@ protected:
 public:
     // Synthetic raw event type codes produced when devices are added or removed.
     enum {
+        // Sent when a device is added.
         DEVICE_ADDED = 0x10000000,
-        DEVICE_REMOVED = 0x20000000
+        // Sent when a device is removed.
+        DEVICE_REMOVED = 0x20000000,
+        // Sent when all added/removed devices from the most recent scan have been reported.
+        // This event is always sent at least once.
+        FINISHED_DEVICE_SCAN = 0x30000000,
     };
 
     virtual uint32_t getDeviceClasses(int32_t deviceId) const = 0;
@@ -181,6 +186,8 @@ public:
      */
     virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes, const int32_t* keyCodes,
             uint8_t* outFlags) const = 0;
+
+    virtual void dump(String8& dump) = 0;
 };
 
 class EventHub : public EventHubInterface
@@ -211,16 +218,18 @@ public:
 
     virtual bool getEvent(RawEvent* outEvent);
 
+    virtual void dump(String8& dump);
+
 protected:
     virtual ~EventHub();
     
 private:
     bool openPlatformInput(void);
 
-    int open_device(const char *device);
-    int close_device(const char *device);
-    int scan_dir(const char *dirname);
-    int read_notify(int nfd);
+    int openDevice(const char *device);
+    int closeDevice(const char *device);
+    int scanDir(const char *dirname);
+    int readNotify(int nfd);
 
     status_t mError;
 
@@ -239,8 +248,8 @@ private:
         ~device_t();
     };
 
-    device_t* getDevice(int32_t deviceId) const;
-    bool hasKeycode(device_t* device, int keycode) const;
+    device_t* getDeviceLocked(int32_t deviceId) const;
+    bool hasKeycodeLocked(device_t* device, int keycode) const;
     
     int32_t getScanCodeStateLocked(device_t* device, int32_t scanCode) const;
     int32_t getKeyCodeStateLocked(device_t* device, int32_t keyCode) const;
@@ -269,6 +278,7 @@ private:
     int             mFDCount;
 
     bool            mOpened;
+    bool            mNeedToSendFinishedDeviceScan;
     List<String8>   mExcludedDevices;
 
     // device ids that report particular switches.

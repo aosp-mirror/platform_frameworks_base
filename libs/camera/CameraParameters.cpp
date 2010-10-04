@@ -73,6 +73,8 @@ const char CameraParameters::KEY_ZOOM_SUPPORTED[] = "zoom-supported";
 const char CameraParameters::KEY_SMOOTH_ZOOM_SUPPORTED[] = "smooth-zoom-supported";
 const char CameraParameters::KEY_FOCUS_DISTANCES[] = "focus-distances";
 const char CameraParameters::KEY_VIDEO_FRAME_FORMAT[] = "video-frame-format";
+const char CameraParameters::KEY_VIDEO_SIZE[] = "video-size";
+const char CameraParameters::KEY_SUPPORTED_VIDEO_SIZES[] = "video-size-values";
 
 const char CameraParameters::TRUE[] = "true";
 const char CameraParameters::FOCUS_DISTANCE_INFINITY[] = "Infinity";
@@ -335,6 +337,27 @@ void CameraParameters::getSupportedPreviewSizes(Vector<Size> &sizes) const
 {
     const char *previewSizesStr = get(KEY_SUPPORTED_PREVIEW_SIZES);
     parseSizesList(previewSizesStr, sizes);
+}
+
+void CameraParameters::setVideoSize(int width, int height)
+{
+    char str[32];
+    sprintf(str, "%dx%d", width, height);
+    set(KEY_VIDEO_SIZE, str);
+}
+
+void CameraParameters::getVideoSize(int *width, int *height) const
+{
+    *width = *height = -1;
+    const char *p = get(KEY_VIDEO_SIZE);
+    if (p == 0) return;
+    parse_pair(p, width, height, 'x');
+}
+
+void CameraParameters::getSupportedVideoSizes(Vector<Size> &sizes) const
+{
+    const char *videoSizesStr = get(KEY_SUPPORTED_VIDEO_SIZES);
+    parseSizesList(videoSizesStr, sizes);
 }
 
 void CameraParameters::setPreviewFrameRate(int fps)

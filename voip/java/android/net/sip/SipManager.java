@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
 
 import java.text.ParseException;
 
@@ -82,6 +83,8 @@ public class SipManager {
 
     /** Part of the incoming call intent. */
     public static final String EXTRA_OFFER_SD = "android:sipOfferSD";
+
+    private static final String TAG = "SipManager";
 
     private ISipService mSipService;
     private Context mContext;
@@ -525,8 +528,10 @@ public class SipManager {
                 return ((session == null)
                         ? mUri
                         : session.getLocalProfile().getUriString());
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
+            } catch (Throwable e) {
+                // SipService died? SIP stack died?
+                Log.w(TAG, "getUri(): " + e);
+                return null;
             }
         }
 

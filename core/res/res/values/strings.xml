@@ -1249,31 +1249,29 @@
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->
-    <string name="policylab_limitPassword">Limit password</string>
+    <string name="policylab_limitPassword">Set password rules</string>
     <!-- Description of policy access to limiting the user's password choices -->
-    <string name="policydesc_limitPassword">Restrict the types of passwords you
-        are allowed to use.</string>
+    <string name="policydesc_limitPassword">Control the length and the characters 
+    allowed in screen-unlock passwords</string>
     <!-- Title of policy access to watch user login attempts -->
-    <string name="policylab_watchLogin">Watch login attempts</string>
+    <string name="policylab_watchLogin">Monitor screen-unlock attempts</string>
     <!-- Description of policy access to watch user login attempts -->
-    <string name="policydesc_watchLogin">Monitor failed attempts to login to
-        the device, to perform some action.</string>
+    <string name="policydesc_watchLogin">Monitor the number of incorrect passwords 
+    entered when unlocking the screen, and lock the phone or erase all the phone\'s 
+    data if too many incorrect passwords are entered</string>
     <!-- Title of policy access to reset user's password -->
-    <string name="policylab_resetPassword">Reset password</string>
+    <string name="policylab_resetPassword">Change the screen-unlock password</string>
     <!-- Description of policy access to reset user's password -->
-    <string name="policydesc_resetPassword">Force your password
-        to a new value, requiring the administrator give it to you
-        before you can log in.</string>
+    <string name="policydesc_resetPassword">Change the screen-unlock password</string>
     <!-- Title of policy access to force lock the device -->
-    <string name="policylab_forceLock">Force lock</string>
+    <string name="policylab_forceLock">Lock the screen</string>
     <!-- Description of policy access to limiting the user's password choices -->
-    <string name="policydesc_forceLock">Control when device locks,
-        requiring you re-enter its password.</string>
+    <string name="policydesc_forceLock">Control how and when the screen locks</string>
     <!-- Title of policy access to wipe the user's data -->
     <string name="policylab_wipeData">Erase all data</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData">Perform a factory reset, deleting
-        all of your data without any confirmation.</string>
+    <string name="policydesc_wipeData">Erase the phone\'s data without warning, 
+    by performing a factory data reset</string>
     <string name="policylab_setGlobalProxy">Set the device global proxy</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_setGlobalProxy">Set the device global proxy

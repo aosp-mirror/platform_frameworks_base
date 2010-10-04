@@ -59,6 +59,27 @@ public:
     void setPreviewSize(int width, int height);
     void getPreviewSize(int *width, int *height) const;
     void getSupportedPreviewSizes(Vector<Size> &sizes) const;
+
+    // Set the dimensions in pixels to the given width and height
+    // for video frames. The given width and height must be one
+    // of the supported dimensions returned from
+    // getSupportedVideoSizes(). Must not be called if
+    // getSupportedVideoSizes() returns an empty Vector of Size.
+    void setVideoSize(int width, int height);
+    // Retrieve the current dimensions (width and height)
+    // in pixels for video frames, which must be one of the
+    // supported dimensions returned from getSupportedVideoSizes().
+    // Must not be called if getSupportedVideoSizes() returns an
+    // empty Vector of Size.
+    void getVideoSize(int *width, int *height) const;
+    // Retrieve a Vector of supported dimensions (width and height)
+    // in pixels for video frames. If sizes returned from the method
+    // is empty, the camera does not support calls to setVideoSize()
+    // or getVideoSize(). In adddition, it also indicates that
+    // the camera only has a single output, and does not have
+    // separate output for video frames and preview frame.
+    void getSupportedVideoSizes(Vector<Size> &sizes) const;
+
     void setPreviewFrameRate(int fps);
     int getPreviewFrameRate() const;
     void getPreviewFpsRange(int *min_fps, int *max_fps) const;
@@ -281,6 +302,16 @@ public:
     // Example value: "0.95,1.9,Infinity" or "0.049,0.05,0.051". Read only.
     static const char KEY_FOCUS_DISTANCES[];
 
+    // The current dimensions in pixels (width x height) for video frames.
+    // The width and height must be one of the supported sizes retrieved
+    // via KEY_SUPPORTED_VIDEO_SIZES.
+    // Example value: "1280x720". Read/write.
+    static const char KEY_VIDEO_SIZE[];
+    // A list of the supported dimensions in pixels (width x height)
+    // for video frames. See CAMERA_MSG_VIDEO_FRAME for details in
+    // frameworks/base/include/camera/Camera.h.
+    // Example: "176x144,1280x720". Read only.
+    static const char KEY_SUPPORTED_VIDEO_SIZES[];
     // The image format for video frames. See CAMERA_MSG_VIDEO_FRAME in
     // frameworks/base/include/camera/Camera.h.
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read only.

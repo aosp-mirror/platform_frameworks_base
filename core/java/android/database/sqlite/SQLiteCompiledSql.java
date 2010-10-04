@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.os.StrictMode;
 import android.util.Log;
 
 /**
@@ -106,11 +107,13 @@ import android.util.Log;
             // but if the database itself is not closed and is GC'ed, then
             // all sub-objects attached to the database could end up getting GC'ed too.
             // in that case, don't print any warning.
-            if (mInUse) {
+            if (mInUse && StrictMode.vmSqliteObjectLeaksEnabled()) {
                 int len = mSqlStmt.length();
-                Log.w(TAG, "Releasing statement in a finalizer. Please ensure " +
-                        "that you explicitly call close() on your cursor: " +
-                        mSqlStmt.substring(0, (len > 100) ? 100 : len), mStackTrace);
+                StrictMode.onSqliteObjectLeaked(
+                    "Releasing statement in a finalizer. Please ensure " +
+                    "that you explicitly call close() on your cursor: " +
+                    mSqlStmt.substring(0, (len > 100) ? 100 : len),
+                    mStackTrace);
             }
             releaseSqlStatement();
         } finally {

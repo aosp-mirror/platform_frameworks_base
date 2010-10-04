@@ -53,6 +53,31 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=         \
         SineSource.cpp    \
+        recordvideo.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+	libstagefright liblog libutils libbinder
+
+LOCAL_C_INCLUDES:= \
+	$(JNI_H_INCLUDE) \
+	frameworks/base/media/libstagefright \
+	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
+
+LOCAL_CFLAGS += -Wno-multichar
+
+LOCAL_MODULE_TAGS := debug
+
+LOCAL_MODULE:= recordvideo
+
+include $(BUILD_EXECUTABLE)
+
+
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=         \
+        SineSource.cpp    \
         audioloop.cpp
 
 LOCAL_SHARED_LIBRARIES := \

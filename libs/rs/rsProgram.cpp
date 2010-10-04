@@ -115,6 +115,14 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
 
 Program::~Program()
 {
+    if(mRSC->props.mLogShaders) {
+        LOGV("Program::~Program with shader id %u", mShaderID);
+    }
+
+    if(mShaderID) {
+        glDeleteShader(mShaderID);
+    }
+
     for (uint32_t ct=0; ct < MAX_UNIFORMS; ct++) {
         bindAllocation(NULL, NULL, ct);
     }

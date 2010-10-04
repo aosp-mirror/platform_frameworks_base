@@ -578,6 +578,10 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getMute();
     }
 
+    public void setEchoSuppressionEnabled(boolean enabled) {
+        mActivePhone.setEchoSuppressionEnabled(enabled);
+    }
+
     public void invokeOemRilRequestRaw(byte[] data, Message response) {
         mActivePhone.invokeOemRilRequestRaw(data, response);
     }

@@ -68,6 +68,11 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
                 com.android.internal.R.styleable.ViewFlipper_flipInterval, DEFAULT_INTERVAL);
         mAutoStart = a.getBoolean(
                 com.android.internal.R.styleable.ViewFlipper_autoStart, false);
+
+        // By default we want the flipper to loop
+        mLoopViews = a.getBoolean(
+                com.android.internal.R.styleable.AdapterViewAnimator_loopViews, true);
+
         a.recycle();
         initDefaultAnimations();
     }
@@ -193,8 +198,6 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
        }
        super.showPrevious();
    }
-
-   /**
 
     /**
      * Internal method to start or stop dispatching flip {@link Message} based

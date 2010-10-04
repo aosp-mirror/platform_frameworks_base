@@ -121,6 +121,7 @@ public:
      * to perform the actual drawing.  
      */
     virtual void draw(const Region& clip) const;
+    virtual void drawForSreenShot() const;
     
     /**
      * onDraw - draws the surface.

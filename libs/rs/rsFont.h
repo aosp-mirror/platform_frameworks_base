@@ -31,6 +31,15 @@ namespace android {
 
 namespace renderscript {
 
+// Gamma (>= 1.0, <= 10.0)
+#define PROPERTY_TEXT_GAMMA "ro.text_gamma"
+#define PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD "ro.text_gamma.black_threshold"
+#define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "ro.text_gamma.white_threshold"
+
+#define DEFAULT_TEXT_GAMMA 1.4f
+#define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
+#define DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD 192
+
 class FontState;
 
 class Font : public ObjectBase
@@ -162,8 +171,17 @@ protected:
 
     Context *mRSC;
 
-    float mFontColor[4];
-    bool mFontColorDirty;
+    struct {
+        float mFontColor[4];
+        float mGamma;
+    } mConstants;
+    bool mConstantsDirty;
+
+    float mBlackGamma;
+    float mWhiteGamma;
+
+    float mBlackThreshold;
+    float mWhiteThreshold;
 
     // Free type library, we only need one copy
     FT_Library mLibrary;

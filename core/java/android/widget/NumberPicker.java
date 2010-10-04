@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.annotation.Widget;
 import android.content.Context;
 import android.os.Handler;
@@ -26,14 +28,6 @@ import android.text.method.NumberKeyListener;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
-import android.view.View.OnLongClickListener;
-import android.widget.TextView;
-import android.widget.LinearLayout;
-import android.widget.EditText;
-
-import com.android.internal.R;
 
 /**
  * A view for selecting a number
@@ -274,6 +268,12 @@ public class NumberPicker extends LinearLayout {
         mEnd = end;
         mCurrent = start;
         updateView();
+
+        if (displayedValues != null) {
+            // Allow text entry rather than strictly numeric entry.
+            mText.setRawInputType(InputType.TYPE_CLASS_TEXT |
+                    InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        }
     }
 
     /**

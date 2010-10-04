@@ -103,10 +103,6 @@ public:
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation) = 0;
 
-    /* Provides feedback for a virtual key down.
-     */
-    virtual void virtualKeyDownFeedback() = 0;
-
     /* Intercepts a key event.
      * The policy can use this method as an opportunity to perform power management functions
      * and early event preprocessing such as updating policy flags.
@@ -283,14 +279,14 @@ private:
     // low-level input event decoding and device management
     void process(const RawEvent* rawEvent);
 
-    void addDevice(nsecs_t when, int32_t deviceId);
-    void removeDevice(nsecs_t when, int32_t deviceId);
+    void addDevice(int32_t deviceId);
+    void removeDevice(int32_t deviceId);
     InputDevice* createDevice(int32_t deviceId, const String8& name, uint32_t classes);
     void configureExcludedDevices();
 
     void consumeEvent(const RawEvent* rawEvent);
 
-    void handleConfigurationChanged(nsecs_t when);
+    void handleConfigurationChanged();
 
     // state management for all devices
     Mutex mStateLock;

@@ -1079,7 +1079,7 @@ public class Canvas {
      *
      * @param colors Array of colors representing the pixels of the bitmap
      * @param offset Offset into the array of colors for the first pixel
-     * @param stride The number of of colors in the array between rows (must be
+     * @param stride The number of colors in the array between rows (must be
      *               >= width or <= -width).
      * @param x The X coordinate for where to draw the bitmap
      * @param y The Y coordinate for where to draw the bitmap

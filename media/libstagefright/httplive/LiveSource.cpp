@@ -93,7 +93,7 @@ bool LiveSource::switchToNext() {
         }
 
         if (mLastFetchTimeUs < 0) {
-            mPlaylistIndex = mPlaylist->size() / 2;
+            mPlaylistIndex = 0;
         } else {
             if (nextSequenceNumber < mFirstItemSequenceNumber
                     || nextSequenceNumber

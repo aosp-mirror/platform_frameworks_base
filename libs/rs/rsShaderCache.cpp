@@ -29,20 +29,15 @@ using namespace android::renderscript;
 
 ShaderCache::ShaderCache()
 {
-    mEntryCount = 0;
-    mEntryAllocationCount = 16;
-    mEntries = (entry_t *)calloc(mEntryAllocationCount, sizeof(entry_t));
+    mEntries.setCapacity(16);
 }
 
 ShaderCache::~ShaderCache()
 {
-    for (uint32_t ct=0; ct < mEntryCount; ct++) {
-        glDeleteProgram(mEntries[ct].program);
+    for (uint32_t ct=0; ct < mEntries.size(); ct++) {
+        glDeleteProgram(mEntries[ct]->program);
+        free(mEntries[ct]);
     }
-
-    mEntryCount = 0;
-    mEntryAllocationCount = 0;
-    free(mEntries);
 }
 
 bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag)
@@ -59,44 +54,30 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
         return false;
     }
     //LOGV("ShaderCache lookup  vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
+    uint32_t entryCount = mEntries.size();
+    for(uint32_t ct = 0; ct < entryCount; ct ++) {
+        if ((mEntries[ct]->vtx == vtx->getShaderID()) &&
+            (mEntries[ct]->frag == frag->getShaderID())) {
 
-    for (uint32_t ct=0; ct < mEntryCount; ct++) {
-        if ((mEntries[ct].vtx == vtx->getShaderID()) &&
-            (mEntries[ct].frag == frag->getShaderID())) {
-
-            //LOGV("SC using program %i", mEntries[ct].program);
-            glUseProgram(mEntries[ct].program);
-            mCurrent = &mEntries[ct];
+            //LOGV("SC using program %i", mEntries[ct]->program);
+            glUseProgram(mEntries[ct]->program);
+            mCurrent = mEntries[ct];
             //LOGV("ShaderCache hit, using %i", ct);
             rsc->checkError("ShaderCache::lookup (hit)");
             return true;
         }
     }
-    // Not in cache, add it.
 
-    if (mEntryAllocationCount == mEntryCount) {
-        // Out of space, make some.
-        mEntryAllocationCount *= 2;
-        entry_t *e = (entry_t *)calloc(mEntryAllocationCount, sizeof(entry_t));
-        if (!e) {
-            LOGE("Out of memory for ShaderCache::lookup");
-            return false;
-        }
-        memcpy(e, mEntries, sizeof(entry_t) * mEntryCount);
-        free(mEntries);
-        mEntries = e;
-    }
-
-    //LOGV("ShaderCache miss, using %i", mEntryCount);
+    //LOGV("ShaderCache miss");
     //LOGE("e0 %x", glGetError());
-
-    entry_t *e = &mEntries[mEntryCount];
+    entry_t *e = (entry_t *)malloc(sizeof(entry_t));
+    mEntries.push(e);
     mCurrent = e;
     e->vtx = vtx->getShaderID();
     e->frag = frag->getShaderID();
     e->program = glCreateProgram();
     e->vtxAttrCount = vtx->getAttribCount();
-    if (mEntries[mEntryCount].program) {
+    if (e->program) {
         GLuint pgm = e->program;
         glAttachShader(pgm, vtx->getShaderID());
         //LOGE("e1 %x", glGetError());
@@ -155,7 +136,6 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
     e->mIsValid = true;
     //LOGV("SC made program %i", e->program);
     glUseProgram(e->program);
-    mEntryCount++;
     rsc->checkError("ShaderCache::lookup (miss)");
     return true;
 }
@@ -171,10 +151,32 @@ int32_t ShaderCache::vtxAttribSlot(const String8 &attrName) const {
 
 void ShaderCache::cleanupVertex(uint32_t id)
 {
+    int32_t numEntries = (int32_t)mEntries.size();
+    for(int32_t ct = 0; ct < numEntries; ct ++) {
+        if (mEntries[ct]->vtx == id) {
+            glDeleteProgram(mEntries[ct]->program);
+
+            free(mEntries[ct]);
+            mEntries.removeAt(ct);
+            numEntries = (int32_t)mEntries.size();
+            ct --;
+        }
+    }
 }
 
 void ShaderCache::cleanupFragment(uint32_t id)
 {
+    int32_t numEntries = (int32_t)mEntries.size();
+    for(int32_t ct = 0; ct < numEntries; ct ++) {
+        if (mEntries[ct]->frag == id) {
+            glDeleteProgram(mEntries[ct]->program);
+
+            free(mEntries[ct]);
+            mEntries.removeAt(ct);
+            numEntries = (int32_t)mEntries.size();
+            ct --;
+        }
+    }
 }
 
 void ShaderCache::cleanupAll()

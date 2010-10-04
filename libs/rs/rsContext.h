@@ -118,6 +118,7 @@ public:
     Font * getFont() {return mFont.get();}
 
     bool setupCheck();
+    void setupProgramStore();
     bool checkDriver() const {return mEGL.mSurface != 0;}
 
     void pause();

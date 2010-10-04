@@ -1187,6 +1187,11 @@ public interface Phone {
     boolean getMute();
 
     /**
+     * Enables or disables echo suppression.
+     */
+    void setEchoSuppressionEnabled(boolean enabled);
+
+    /**
      * Invokes RIL_REQUEST_OEM_HOOK_RAW on RIL implementation.
      *
      * @param data The data for the request.

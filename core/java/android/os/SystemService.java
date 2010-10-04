@@ -28,4 +28,9 @@ public class SystemService
     public static void stop(String name) {
         SystemProperties.set("ctl.stop", name);
     }
+
+    /** Request that the init daemon restart a named service. */
+    public static void restart(String name) {
+        SystemProperties.set("ctl.restart", name);
+    }
 }

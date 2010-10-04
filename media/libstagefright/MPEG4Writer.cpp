@@ -1118,7 +1118,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
         startTimeUs = 0;
     }
 
-    mIsRealTimeRecording = true;
+    mIsRealTimeRecording = false;
     {
         int32_t isNotRealTime;
         if (params && params->findInt32(kKeyNotRealTime, &isNotRealTime)) {

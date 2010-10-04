@@ -545,5 +545,55 @@ status_t SurfaceComposerClient::setFreezeTint(SurfaceID id, uint32_t tint)
 }
 
 // ----------------------------------------------------------------------------
+
+ScreenshotClient::ScreenshotClient()
+    : mWidth(0), mHeight(0), mFormat(PIXEL_FORMAT_NONE) {
+}
+
+status_t ScreenshotClient::update() {
+    sp<ISurfaceComposer> s(ComposerService::getComposerService());
+    if (s == NULL) return NO_INIT;
+    mHeap = 0;
+    return s->captureScreen(0, &mHeap,
+            &mWidth, &mHeight, &mFormat, 0, 0);
+}
+
+status_t ScreenshotClient::update(uint32_t reqWidth, uint32_t reqHeight) {
+    sp<ISurfaceComposer> s(ComposerService::getComposerService());
+    if (s == NULL) return NO_INIT;
+    mHeap = 0;
+    return s->captureScreen(0, &mHeap,
+            &mWidth, &mHeight, &mFormat, reqWidth, reqHeight);
+}
+
+void ScreenshotClient::release() {
+    mHeap = 0;
+}
+
+void const* ScreenshotClient::getPixels() const {
+    return mHeap->getBase();
+}
+
+uint32_t ScreenshotClient::getWidth() const {
+    return mWidth;
+}
+
+uint32_t ScreenshotClient::getHeight() const {
+    return mHeight;
+}
+
+PixelFormat ScreenshotClient::getFormat() const {
+    return mFormat;
+}
+
+uint32_t ScreenshotClient::getStride() const {
+    return mWidth;
+}
+
+size_t ScreenshotClient::getSize() const {
+    return mHeap->getSize();
+}
+
+// ----------------------------------------------------------------------------
 }; // namespace android
 

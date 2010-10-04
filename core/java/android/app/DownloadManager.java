@@ -47,6 +47,10 @@ import java.util.Set;
  * Instances of this class should be obtained through
  * {@link android.content.Context#getSystemService(String)} by passing
  * {@link android.content.Context#DOWNLOAD_SERVICE}.
+ *
+ * Apps that request downloads through this API should register a broadcast receiver for
+ * {@link #ACTION_NOTIFICATION_CLICKED} to appropriately handle when the user clicks on a running
+ * download in a notification or from the downloads UI.
  */
 public class DownloadManager {
     /**
@@ -239,8 +243,8 @@ public class DownloadManager {
     public final static String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.DOWNLOAD_COMPLETE";
 
     /**
-     * Broadcast intent action sent by the download manager when a running download notification is
-     * clicked.
+     * Broadcast intent action sent by the download manager when the user clicks on a running
+     * download, either from a system notification or from the downloads UI.
      */
     public final static String ACTION_NOTIFICATION_CLICKED =
             "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
@@ -413,7 +417,9 @@ public class DownloadManager {
         }
 
         /**
-         * Set the title of this download, to be displayed in notifications (if enabled)
+         * Set the title of this download, to be displayed in notifications (if enabled).  If no
+         * title is given, a default one will be assigned based on the download filename, once the
+         * download starts.
          * @return this object
          */
         public Request setTitle(CharSequence title) {

@@ -505,6 +505,10 @@ public abstract class PhoneBase extends Handler implements Phone {
         mCM.unregisterForResendIncallMute(h);
     }
 
+    public void setEchoSuppressionEnabled(boolean enabled) {
+        // no need for regular phone
+    }
+
     /**
      * Subclasses of Phone probably want to replace this with a
      * version scoped to their packages

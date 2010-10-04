@@ -146,6 +146,9 @@ public class CalendarUtils {
          * This formats a date/time range using Calendar's time zone and the
          * local conventions for the region of the device.
          *
+         * If the {@link DateUtils#FORMAT_UTC} flag is used it will pass in
+         * the UTC time zone instead.
+         *
          * @param context the context is required only if the time is shown
          * @param startMillis the start time in UTC milliseconds
          * @param endMillis the end time in UTC milliseconds
@@ -156,10 +159,16 @@ public class CalendarUtils {
         public String formatDateRange(Context context, long startMillis,
                 long endMillis, int flags) {
             String date;
+            String tz;
+            if ((flags & DateUtils.FORMAT_UTC) != 0) {
+                tz = Time.TIMEZONE_UTC;
+            } else {
+                tz = getTimeZone(context, null);
+            }
             synchronized (mSB) {
                 mSB.setLength(0);
                 date = DateUtils.formatDateRange(context, mF, startMillis, endMillis, flags,
-                        getTimeZone(context, null)).toString();
+                        tz).toString();
             }
             return date;
         }
