@@ -319,6 +319,15 @@ public final class Bitmap implements Parcelable {
         return b;
     }
 
+    /**
+     * Creates a new bitmap, scaled from an existing bitmap.
+     *
+     * @param src       The source bitmap.
+     * @param dstWidth  The new bitmap's desired width.
+     * @param dstHeight The new bitmap's desired height.
+     * @param filter    true if the source should be filtered.
+     * @return the new scaled bitmap.
+     */
     public static Bitmap createScaledBitmap(Bitmap src, int dstWidth,
             int dstHeight, boolean filter) {
         Matrix m;
