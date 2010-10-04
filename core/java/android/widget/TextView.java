@@ -64,7 +64,6 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.DateKeyListener;
 import android.text.method.DateTimeKeyListener;
 import android.text.method.DialerKeyListener;
@@ -1160,7 +1159,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         fixFocusableAndClickableSettings();
 
-        // SelectionModifierCursorController depends on canSelectText, which depends on mMovement
+        // SelectionModifierCursorController depends on textCanBeSelected, which depends on mMovement
         prepareCursorControllers();
     }
 
@@ -2730,7 +2729,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             sendAfterTextChanged((Editable) text);
         }
 
-        // SelectionModifierCursorController depends on canSelectText, which depends on text
+        // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
         prepareCursorControllers();
     }
 
@@ -6667,6 +6666,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 terminateSelectionActionMode();
             }
+
+            mLastTouchOffset = -1;
         }
 
         startStopMarquee(focused);
@@ -6899,7 +6900,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mInsertionPointCursorController = null;
         }
 
-        if (canSelectText() && mLayout != null) {
+        if (textCanBeSelected() && mLayout != null) {
             if (mSelectionModifierCursorController == null) {
                 mSelectionModifierCursorController = new SelectionModifierCursorController();
             }
@@ -7119,7 +7120,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onKeyShortcut(int keyCode, KeyEvent event) {
         switch (keyCode) {
         case KeyEvent.KEYCODE_A:
-            if (canSelectAll()) {
+            if (canSelectText()) {
                 return onTextContextMenuItem(ID_SELECT_ALL);
             }
 
@@ -7150,11 +7151,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onKeyShortcut(keyCode, event);
     }
 
-    private boolean canSelectAll() {
-        return canSelectText() && mText.length() != 0;
+    private boolean canSelectText() {
+        return textCanBeSelected() && mText.length() != 0;
     }
 
-    private boolean canSelectText() {
+    private boolean textCanBeSelected() {
         // prepareCursorController() relies on this method.
         // If you change this condition, make sure prepareCursorController is called anywhere
         // the value of this condition might be changed.
@@ -7624,7 +7625,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             boolean atLeastOne = false;
 
-            if (canSelectAll()) {
+            if (canSelectText()) {
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                     setIcon(com.android.internal.R.drawable.ic_menu_select_all).
                     setAlphabeticShortcut('a');
