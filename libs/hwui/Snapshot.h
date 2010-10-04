@@ -141,6 +141,7 @@ public:
         }
 
         if (clipped) {
+            clipRect->snapToPixelBoundaries();
             flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
         }
 
