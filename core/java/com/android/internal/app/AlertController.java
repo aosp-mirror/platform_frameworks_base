@@ -17,6 +17,9 @@
 package com.android.internal.app;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
+import com.android.internal.R;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -32,10 +35,11 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
@@ -48,9 +52,6 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
-
-import com.android.internal.R;
 
 import java.lang.ref.WeakReference;
 
@@ -403,12 +404,10 @@ public class AlertController {
             
             mIconView = (ImageView) mWindow.findViewById(R.id.icon);
             if (hasTextTitle) {
-                
                 /* Display the title if a title is supplied, else hide it */
                 mTitleView = (TextView) mWindow.findViewById(R.id.alertTitle);
 
                 mTitleView.setText(mTitle);
-                mIconView.setImageResource(R.drawable.ic_dialog_menu_generic);
                 
                 /* Do this last so that if the user has supplied any
                  * icons we use them instead of the default ones. If the
@@ -688,7 +687,7 @@ public class AlertController {
         public final Context mContext;
         public final LayoutInflater mInflater;
         
-        public int mIconId = -1;
+        public int mIconId = 0;
         public Drawable mIcon;
         public CharSequence mTitle;
         public View mCustomTitleView;
