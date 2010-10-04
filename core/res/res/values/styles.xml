@@ -196,6 +196,9 @@
         <item name="windowExitAnimation">@anim/fade_out</item>
     </style>
 
+    <!-- A special animation value used internally for popup windows. -->
+    <style name="Animation.PopupWindow" />
+
     <!-- Status Bar Styles -->
 
     <style name="TextAppearance.StatusBar">
@@ -564,6 +567,7 @@
     
     <style name="Widget.PopupWindow">
         <item name="android:popupBackground">@android:drawable/editbox_dropdown_background_dark</item>
+        <item name="android:popupAnimationStyle">@android:style/Animation.PopupWindow</item>
     </style>
 
     <!-- Default style for {@link android.app.FragmentBreadCrumbs} view. -->
@@ -883,7 +887,7 @@
 
     <!-- Style for the small popup windows that contain text selection anchors. -->
     <style name="Widget.TextSelectHandle">
-        <item name="android:windowAnimationStyle">@android:style/Animation.TextSelectHandle</item>
+        <item name="android:popupAnimationStyle">@android:style/Animation.TextSelectHandle</item>
     </style>
 
     <!-- Style for animating text selection handles. -->
