@@ -103,6 +103,8 @@ public:
         multiply(u);
     }
 
+    bool changesBounds();
+
     void copyTo(float* v) const;
     void copyTo(SkMatrix& v) const;
 

@@ -767,8 +767,10 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
-    setupTextureAlpha8(fontRenderer.getTexture(), 0, 0, textureUnit, x, y, r, g, b, a,
-            mode, false, true);
+    // Assume that the modelView matrix does not force scales, rotates, etc.
+    const bool linearFilter = mSnapshot->transform->changesBounds();
+    setupTextureAlpha8(fontRenderer.getTexture(linearFilter), 0, 0, textureUnit,
+            x, y, r, g, b, a, mode, false, true);
 
     const Rect& clip = mSnapshot->getLocalClip();
     clearLayerRegions();
