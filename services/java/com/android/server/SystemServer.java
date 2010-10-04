@@ -31,6 +31,7 @@ import android.content.ContentResolver;
 import android.content.ContentService;
 import android.content.Context;
 import android.content.pm.IPackageManager;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.media.AudioService;
 import android.os.Build;
@@ -44,6 +45,9 @@ import android.provider.Settings;
 import android.server.BluetoothA2dpService;
 import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
+import android.view.Display;
+import android.view.WindowManager;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -496,6 +500,16 @@ class ServerThread extends Thread {
             statusBar.systemReady();
         }
         wm.systemReady();
+
+        // Update the configuration for this context by hand, because we're going
+        // to start using it before the config change done in wm.systemReady() will
+        // propagate to it.
+        Configuration config = wm.computeNewConfiguration();
+        DisplayMetrics metrics = new DisplayMetrics();
+        WindowManager w = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        w.getDefaultDisplay().getMetrics(metrics);
+        context.getResources().updateConfiguration(config, metrics);
+
         power.systemReady();
         try {
             pm.systemReady();
