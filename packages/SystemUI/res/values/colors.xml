@@ -19,4 +19,5 @@
 <resources>
     <drawable name="shade_bgcolor">#ff282828</drawable>
     <drawable name="notification_header_text_color">#ff969696</drawable>
+    <drawable name="notification_number_text_color">#ffffffff</drawable>
 </resources>
