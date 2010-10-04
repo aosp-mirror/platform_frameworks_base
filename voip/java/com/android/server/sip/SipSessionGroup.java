@@ -49,6 +49,7 @@ import javax.sip.DialogTerminatedEvent;
 import javax.sip.IOExceptionEvent;
 import javax.sip.InvalidArgumentException;
 import javax.sip.ListeningPoint;
+import javax.sip.ObjectInUseException;
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
 import javax.sip.ServerTransaction;
@@ -415,10 +416,24 @@ class SipSessionGroup implements SipListener {
             mPeerProfile = null;
             mState = SipSession.State.READY_TO_CALL;
             mInviteReceived = null;
-            mDialog = null;
-            mServerTransaction = null;
-            mClientTransaction = null;
             mPeerSessionDescription = null;
+
+            if (mDialog != null) mDialog.delete();
+            mDialog = null;
+
+            try {
+                if (mServerTransaction != null) mServerTransaction.terminate();
+            } catch (ObjectInUseException e) {
+                // ignored
+            }
+            mServerTransaction = null;
+
+            try {
+                if (mClientTransaction != null) mClientTransaction.terminate();
+            } catch (ObjectInUseException e) {
+                // ignored
+            }
+            mClientTransaction = null;
 
             cancelSessionTimer();
         }
@@ -884,8 +899,8 @@ class SipSessionGroup implements SipListener {
                         generateTag());
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
-                mProxy.onCalling(this);
                 startSessionTimer(cmd.getTimeout());
+                mProxy.onCalling(this);
                 return true;
             } else if (evt instanceof RegisterCommand) {
                 mState = SipSession.State.REGISTERING;
@@ -964,8 +979,8 @@ class SipSessionGroup implements SipListener {
                     // ring back for better UX
                     if (mState == SipSession.State.OUTGOING_CALL) {
                         mState = SipSession.State.OUTGOING_CALL_RING_BACK;
-                        mProxy.onRingingBack(this);
                         cancelSessionTimer();
+                        mProxy.onRingingBack(this);
                     }
                     return true;
                 case Response.OK:
@@ -1222,14 +1237,12 @@ class SipSessionGroup implements SipListener {
         }
 
         private void onRegistrationFailed(Throwable exception) {
-            reset();
             exception = getRootCause(exception);
             onRegistrationFailed(getErrorCode(exception),
                     exception.toString());
         }
 
         private void onRegistrationFailed(Response response) {
-            reset();
             int statusCode = response.getStatusCode();
             onRegistrationFailed(getErrorCode(statusCode),
                     createErrorMessage(response));
