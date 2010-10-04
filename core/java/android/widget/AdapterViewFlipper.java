@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.animation.ObjectAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,10 +44,8 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     private static final boolean LOGD = false;
 
     private static final int DEFAULT_INTERVAL = 10000;
-    private static final int DEFAULT_ANIMATION_DURATION = 200;
 
     private int mFlipInterval = DEFAULT_INTERVAL;
-    private int mAnimationDuration = DEFAULT_ANIMATION_DURATION;
     private boolean mAutoStart = false;
 
     private boolean mRunning = false;
@@ -56,7 +55,6 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
 
     public AdapterViewFlipper(Context context) {
         super(context);
-        initDefaultAnimations();
     }
 
     public AdapterViewFlipper(Context context, AttributeSet attrs) {
@@ -74,19 +72,6 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
                 com.android.internal.R.styleable.AdapterViewAnimator_loopViews, true);
 
         a.recycle();
-        initDefaultAnimations();
-    }
-
-    private void initDefaultAnimations() {
-        // Set the default animations to be fade in/out
-        if (mInAnimation == null) {
-            mInAnimation = new AlphaAnimation(0.0f, 1.0f);
-            mInAnimation.setDuration(mAnimationDuration);
-        }
-        if (mOutAnimation == null) {
-            mOutAnimation = new AlphaAnimation(1.0f, 0.0f);
-            mOutAnimation.setDuration(mAnimationDuration);
-        }
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
