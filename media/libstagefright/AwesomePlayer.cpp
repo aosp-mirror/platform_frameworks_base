@@ -484,6 +484,10 @@ void AwesomePlayer::onBufferingUpdate() {
 
         if (eos) {
             notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
+            if (mFlags & PREPARING) {
+                LOGV("cache has reached EOS, prepare is done.");
+                finishAsyncPrepare_l();
+            }
         } else {
             off_t size;
             if (mDurationUs >= 0 && mCachedSource->getSize(&size) == OK) {
