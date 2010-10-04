@@ -66,6 +66,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     protected MockWebServer mServer = null;
     protected String mFileType = "text/plain";
     protected Context mContext = null;
+    protected MultipleDownloadsCompletedReceiver mReceiver = null;
     protected static final int DEFAULT_FILE_SIZE = 130 * 1024;  // 130kb
     protected static final int FILE_BLOCK_READ_SIZE = 1024 * 1024;
 
@@ -131,12 +132,15 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
          */
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.i(LOG_TAG, "Received Notification:");
             if (intent.getAction().equalsIgnoreCase(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-                ++mNumDownloadsCompleted;
-                Log.i(LOG_TAG, "MultipleDownloadsCompletedReceiver got intent: " +
-                        intent.getAction() + " --> total count: " + mNumDownloadsCompleted);
-                Bundle extras = intent.getExtras();
-                downloadIds.add(new Long(extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID)));
+                synchronized(this) {
+                    ++mNumDownloadsCompleted;
+                    Log.i(LOG_TAG, "MultipleDownloadsCompletedReceiver got intent: " +
+                            intent.getAction() + " --> total count: " + mNumDownloadsCompleted);
+                    Bundle extras = intent.getExtras();
+                    downloadIds.add(new Long(extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID)));
+                }
             }
         }
 
@@ -212,6 +216,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         mContext = getInstrumentation().getContext();
         mDownloadManager = (DownloadManager)mContext.getSystemService(Context.DOWNLOAD_SERVICE);
         mServer = new MockWebServer();
+        mReceiver = registerNewMultipleDownloadsReceiver();
         // Note: callers overriding this should call mServer.play() with the desired port #
     }
 
@@ -712,8 +717,9 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
             Cursor cursor = mDownloadManager.query(query);
 
             try {
-                // If we've finished the downloads then we're done
-                if (cursor.getCount() == 0) {
+                // @TODO: there may be a little cleaner way to check for success, perhaps
+                // via STATUS_SUCCESSFUL and/or STATUS_FAILED
+                if (cursor.getCount() == 0 && mReceiver.numDownloadsCompleted() > 0) {
                     break;
                 }
                 currentWaitTime = timeoutWait(currentWaitTime, poll, timeoutMillis,
