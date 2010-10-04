@@ -537,16 +537,13 @@ public class VideoEditorTestImpl implements VideoEditor {
      * {@inheritDoc}
      */
     public AudioTrack getAudioTrack(String audioTrackId) {
-        if (mPreviewThread != null) {
-            throw new IllegalStateException("Previewing is in progress");
+        for (AudioTrack at : mAudioTracks) {
+            if (at.getId().equals(audioTrackId)) {
+                return at;
+            }
         }
 
-        final AudioTrack audioTrack = getAudioTrack(audioTrackId);
-        if (audioTrack != null) {
-            mAudioTracks.remove(audioTrack);
-        }
-
-        return audioTrack;
+        return null;
     }
 
     /*
