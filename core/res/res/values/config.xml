@@ -82,6 +82,15 @@
     <!-- Set to true if external storage is case sensitive.
          Typically external storage is FAT, which is case insensitive. -->
     <bool name="config_caseSensitiveExternalStorage">false</bool>
+    
+    <!-- A product with no SD card == not removable. -->
+    <bool name="config_externalStorageRemovable" product="nosdcard">false</bool>
+    <!-- Configures whether the primary external storage device is
+         removable.  For example, if external storage is on an SD card,
+         it is removable; if it is built in to the device, it is not removable.
+         The default product has external storage on an SD card, which is
+         removable. -->
+    <bool name="config_externalStorageRemovable" product="default">true</bool>
 
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->

@@ -782,7 +782,6 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 translatable16("translatable");
     const String16 formatted16("formatted");
     const String16 false16("false");
-    const String16 product16("product");
 
     const String16 myPackage(assets->getPackage());
 
@@ -830,7 +829,6 @@ status_t compileResourceFile(Bundle* bundle,
             bool curIsStyled = false;
             bool curIsPseudolocalizable = false;
             bool curIsFormatted = fileIsTranslatable;
-            String16 curProduct;
             bool localHasErrors = false;
 
             if (strcmp16(block.getElementName(&len), skip16.string()) == 0) {
@@ -1228,8 +1226,6 @@ status_t compileResourceFile(Bundle* bundle,
                         translatable.setTo(block.getAttributeStringValue(i, &length));
                     } else if (strcmp16(attr, formatted16.string()) == 0) {
                         formatted.setTo(block.getAttributeStringValue(i, &length));
-                    } else if (strcmp16(attr, product16.string()) == 0) {
-                        curProduct.setTo(block.getAttributeStringValue(i, &length));
                     }
                 }
                 
@@ -1356,6 +1352,12 @@ status_t compileResourceFile(Bundle* bundle,
                 hasErrors = localHasErrors = true;
             }
 
+            String16 product;
+            identIdx = block.indexOfAttribute(NULL, "product");
+            if (identIdx >= 0) {
+                product = String16(block.getAttributeStringValue(identIdx, &len));
+            }
+
             String16 comment(block.getComment(&len) ? block.getComment(&len) : nulStr);
             
             if (curIsBag) {
@@ -1447,7 +1449,7 @@ status_t compileResourceFile(Bundle* bundle,
 
                         err = parseAndAddBag(bundle, in, &block, curParams, myPackage, curType,
                                 ident, parentIdent, itemIdent, curFormat, curIsFormatted,
-                                curProduct, false, overwrite, outTable);
+                                product, false, overwrite, outTable);
                         if (err == NO_ERROR) {
                             if (curIsPseudolocalizable && localeIsDefined(curParams)
                                     && bundle->getPseudolocalize()) {
@@ -1456,7 +1458,7 @@ status_t compileResourceFile(Bundle* bundle,
                                 block.setPosition(parserPosition);
                                 err = parseAndAddBag(bundle, in, &block, pseudoParams, myPackage,
                                         curType, ident, parentIdent, itemIdent, curFormat,
-                                        curIsFormatted, curProduct, true, overwrite, outTable);
+                                        curIsFormatted, product, true, overwrite, outTable);
 #endif
                             }
                         } 
@@ -1480,7 +1482,7 @@ status_t compileResourceFile(Bundle* bundle,
 
                 err = parseAndAddEntry(bundle, in, &block, curParams, myPackage, curType, ident,
                         *curTag, curIsStyled, curFormat, curIsFormatted,
-                        curProduct, false, overwrite, outTable);
+                        product, false, overwrite, outTable);
 
                 if (err < NO_ERROR) { // Why err < NO_ERROR instead of err != NO_ERROR?
                     hasErrors = localHasErrors = true;
@@ -1492,7 +1494,7 @@ status_t compileResourceFile(Bundle* bundle,
                         block.setPosition(parserPosition);
                         err = parseAndAddEntry(bundle, in, &block, pseudoParams, myPackage, curType,
                                 ident, *curTag, curIsStyled, curFormat,
-                                curIsFormatted, curProduct,
+                                curIsFormatted, product,
                                 true, overwrite, outTable);
                         if (err != NO_ERROR) {
                             hasErrors = localHasErrors = true;
