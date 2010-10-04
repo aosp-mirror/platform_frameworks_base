@@ -615,7 +615,6 @@ import java.util.WeakHashMap;
  */
 public class View implements Drawable.Callback, KeyEvent.Callback, AccessibilityEventSource {
     private static final boolean DBG = false;
-    static final boolean DEBUG_DRAG = true;
 
     /**
      * The logging tag used by this class with android.util.Log.
@@ -3957,6 +3956,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         return true;
     }
 
+    /** Gets the ViewRoot, or null if not attached. */
+    /*package*/ ViewRoot getViewRoot() {
+        View root = getRootView();
+        return root != null ? (ViewRoot)root.getParent() : null;
+    }
+
     /**
      * Call this to try to give focus to a specific view or to one of its descendants. This is a
      * special variant of {@link #requestFocus() } that will allow views that are not focuable in
@@ -3970,12 +3975,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public final boolean requestFocusFromTouch() {
         // Leave touch mode if we need to
         if (isInTouchMode()) {
-            View root = getRootView();
-            if (root != null) {
-               ViewRoot viewRoot = (ViewRoot)root.getParent();
-               if (viewRoot != null) {
-                   viewRoot.ensureTouchMode(false);
-               }
+            ViewRoot viewRoot = getViewRoot();
+            if (viewRoot != null) {
+                viewRoot.ensureTouchMode(false);
             }
         }
         return requestFocus(View.FOCUS_DOWN);
@@ -9833,40 +9835,99 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * !!! TODO: real docs
+     *
+     * The base class implementation makes the thumbnail the same size and appearance
+     * as the view itself, and positions it with its center at the touch point.
+     */
+    public class DragThumbnailBuilder {
+        private View mView;
+
+        /**
+         * Construct a thumbnail builder object for use with the given view.
+         * @param view
+         */
+        public DragThumbnailBuilder(View view) {
+            mView = view;
+        }
+
+        /**
+         * Provide the draggable-thumbnail metrics for the operation: the dimensions of
+         * the thumbnail image itself, and the point within that thumbnail that should
+         * be centered under the touch location while dragging.
+         * <p>
+         * The default implementation sets the dimensions of the thumbnail to be the
+         * same as the dimensions of the View itself and centers the thumbnail under
+         * the touch point.
+         *
+         * @param thumbnailSize The application should set the {@code x} member of this
+         *        parameter to the desired thumbnail width, and the {@code y} member to
+         *        the desired height.
+         * @param thumbnailTouchPoint The application should set this point to be the
+         *        location within the thumbnail that should track directly underneath
+         *        the touch point on the screen during a drag.
+         */
+        public void onProvideThumbnailMetrics(Point thumbnailSize, Point thumbnailTouchPoint) {
+            thumbnailSize.set(mView.getWidth(), mView.getHeight());
+            thumbnailTouchPoint.set(thumbnailSize.x / 2, thumbnailSize.y / 2);
+        }
+
+        /**
+         * Draw the thumbnail image for the upcoming drag.  The thumbnail canvas was
+         * created with the dimensions supplied by the onProvideThumbnailMetrics()
+         * callback.
+         *
+         * @param canvas
+         */
+        public void onDrawThumbnail(Canvas canvas) {
+            mView.draw(canvas);
+        }
+    }
+
+    /**
      * Drag and drop.  App calls startDrag(), then callbacks to onMeasureDragThumbnail()
      * and onDrawDragThumbnail() happen, then the drag operation is handed over to the
      * OS.
      * !!! TODO: real docs
      * @hide
      */
-    public final boolean startDrag(ClipData data, float touchX, float touchY,
-            float thumbnailTouchX, float thumbnailTouchY, boolean myWindowOnly) {
-        if (DEBUG_DRAG) {
-            Log.d(VIEW_LOG_TAG, "startDrag: touch=(" + touchX + "," + touchY
-                    + ") thumb=(" + thumbnailTouchX + "," + thumbnailTouchY
-                    + ") data=" + data + " local=" + myWindowOnly);
+    public final boolean startDrag(ClipData data, DragThumbnailBuilder thumbBuilder,
+            boolean myWindowOnly) {
+        if (ViewDebug.DEBUG_DRAG) {
+            Log.d(VIEW_LOG_TAG, "startDrag: data=" + data + " local=" + myWindowOnly);
         }
         boolean okay = false;
 
-        measureThumbnail();     // throws if the view fails to specify dimensions
+        Point thumbSize = new Point();
+        Point thumbTouchPoint = new Point();
+        thumbBuilder.onProvideThumbnailMetrics(thumbSize, thumbTouchPoint);
+
+        if ((thumbSize.x < 0) || (thumbSize.y < 0) ||
+                (thumbTouchPoint.x < 0) || (thumbTouchPoint.y < 0)) {
+            throw new IllegalStateException("Drag thumb dimensions must not be negative");
+        }
 
         Surface surface = new Surface();
         try {
             IBinder token = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
                     myWindowOnly, mThumbnailWidth, mThumbnailHeight, surface);
-            if (DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token=" + token
+            if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token=" + token
                     + " surface=" + surface);
             if (token != null) {
                 Canvas canvas = surface.lockCanvas(null);
                 try {
-                    onDrawDragThumbnail(canvas);
+                    thumbBuilder.onDrawThumbnail(canvas);
                 } finally {
                     surface.unlockCanvasAndPost(canvas);
                 }
 
+                // repurpose 'thumbSize' for the last touch point
+                getViewRoot().getLastTouchPoint(thumbSize);
+
                 okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, token,
-                        touchX, touchY, thumbnailTouchX, thumbnailTouchY, data);
-                if (DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
+                        (float) thumbSize.x, (float) thumbSize.y,
+                        (float) thumbTouchPoint.x, (float) thumbTouchPoint.y, data);
+                if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
             }
         } catch (Exception e) {
             Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
@@ -9888,7 +9949,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     + " measured dimension by calling setDragThumbnailDimension()");
         }
 
-        if (DEBUG_DRAG) {
+        if (ViewDebug.DEBUG_DRAG) {
             Log.d(VIEW_LOG_TAG, "Drag thumb measured: w=" + mThumbnailWidth
                     + " h=" + mThumbnailHeight);
         }
