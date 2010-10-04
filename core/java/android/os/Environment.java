@@ -18,6 +18,7 @@ package android.os;
 
 import java.io.File;
 
+import android.content.res.Resources;
 import android.os.storage.IMountService;
 
 /**
@@ -116,6 +117,19 @@ public class Environment {
      * happened.  You can determine its current state with
      * {@link #getExternalStorageState()}.
      * 
+     * <p><em>Note: don't be confused by the word "external" here.  This
+     * directory can better be thought as media/shared storage.  It is a
+     * filesystem that can hold a relatively large amount of data and that
+     * is shared across all applications (does not enforce permissions).
+     * Traditionally this is an SD card, but it may also be implemented as
+     * built-in storage in a device that is distinct from the protected
+     * internal storage and can be mounted as a filesystem on a computer.</em></p>
+     *
+     * <p>In devices with multiple "external" storage directories (such as
+     * both secure app storage and mountable shared storage), this directory
+     * represents the "primary" external storage that the user will interact
+     * with.</p>
+     *
      * <p>Applications should not directly use this top-level directory, in
      * order to avoid polluting the user's root namespace.  Any files that are
      * private to the application should be placed in a directory returned
@@ -130,6 +144,9 @@ public class Environment {
      * 
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * monitor_storage}
+     *
+     * @see #getExternalStorageState()
+     * @see #isExternalStorageRemovable()
      */
     public static File getExternalStorageDirectory() {
         return EXTERNAL_STORAGE_DIRECTORY;
@@ -359,11 +376,9 @@ public class Environment {
     public static final String MEDIA_UNMOUNTABLE = "unmountable";
 
     /**
-     * Gets the current state of the external storage device.
-     * Note: This call should be deprecated as it doesn't support
-     * multiple volumes.
+     * Gets the current state of the primary "external" storage device.
      * 
-     * <p>See {@link #getExternalStorageDirectory()} for an example of its use.
+     * <p>See {@link #getExternalStorageDirectory()} for more information.
      */
     public static String getExternalStorageState() {
         try {
@@ -375,6 +390,19 @@ public class Environment {
         } catch (Exception rex) {
             return Environment.MEDIA_REMOVED;
         }
+    }
+
+    /**
+     * Returns whether the primary "external" storage device is removable.
+     * If true is returned, this device is for example an SD card that the
+     * user can remove.  If false is returned, the storage is built into
+     * the device and can not be physically removed.
+     *
+     * <p>See {@link #getExternalStorageDirectory()} for more information.
+     */
+    public static boolean isExternalStorageRemovable() {
+        return Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_externalStorageRemovable);
     }
 
     static File getDirectory(String variableName, String defaultPath) {
