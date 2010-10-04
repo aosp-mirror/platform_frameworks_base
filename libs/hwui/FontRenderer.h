@@ -156,8 +156,16 @@ public:
     DropShadow renderDropShadow(SkPaint* paint, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, uint32_t radius);
 
-    GLuint getTexture() {
+    GLuint getTexture(bool linearFiltering = false) {
         checkInit();
+        if (linearFiltering != mLinearFiltering) {
+            mLinearFiltering = linearFiltering;
+            const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
+
+            glBindTexture(GL_TEXTURE_2D, mTextureId);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+        }
         return mTextureId;
     }
 
@@ -251,6 +259,8 @@ protected:
     const Rect* mClip;
 
     bool mInitialized;
+
+    bool mLinearFiltering;
 
     void computeGaussianWeights(float* weights, int32_t radius);
     void horizontalBlur(float* weights, int32_t radius, const uint8_t *source, uint8_t *dest,
