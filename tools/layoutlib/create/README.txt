@@ -195,5 +195,22 @@ example, the inner class Paint$Style in the Paint class should be discarded and 
 bridge will provide its own implementation.
 
 
+- References -
+--------------
+
+
+The JVM Specification 2nd edition:
+  http://java.sun.com/docs/books/jvms/second_edition/html/VMSpecTOC.doc.html
+
+Understanding bytecode:
+  http://www.ibm.com/developerworks/ibm/library/it-haggar_bytecode/
+
+Bytecode opcode list:
+  http://en.wikipedia.org/wiki/Java_bytecode_instruction_listings
+
+ASM user guide:
+  http://download.forge.objectweb.org/asm/asm-guide.pdf
+
+
 --
 end
