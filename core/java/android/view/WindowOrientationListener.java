@@ -28,6 +28,11 @@ import android.util.Log;
  * A special helper class used by the WindowManager
  *  for receiving notifications from the SensorManager when
  * the orientation of the device has changed.
+ *
+ * NOTE: If changing anything here, please run the API demo
+ * "App/Activity/Screen Orientation" to ensure that all orientation
+ * modes still work correctly.
+ *
  * @hide
  */
 public abstract class WindowOrientationListener {
@@ -103,6 +108,10 @@ public abstract class WindowOrientationListener {
         }
     }
 
+    public void setAllow180Rotation(boolean allowed) {
+        mSensorEventListener.setAllow180Rotation(allowed);
+    }
+
     public int getCurrentRotation(int lastRotation) {
         if (mEnabled) {
             return mSensorEventListener.getCurrentRotation(lastRotation);
@@ -151,19 +160,20 @@ public abstract class WindowOrientationListener {
         private static final int ROTATION_0 = 0;
         private static final int ROTATION_90 = 1;
         private static final int ROTATION_270 = 2;
+        private static final int ROTATION_180 = 3;
 
         // Mapping our internal aliases into actual Surface rotation values
         private static final int[] INTERNAL_TO_SURFACE_ROTATION = new int[] {
-            Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_270};
+            Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_270,
+            Surface.ROTATION_180};
 
         // Mapping Surface rotation values to internal aliases.
-        // We have no constant for Surface.ROTATION_180.  That should never happen, but if it
-        // does, we'll arbitrarily choose a mapping.
         private static final int[] SURFACE_TO_INTERNAL_ROTATION = new int[] {
-            ROTATION_0, ROTATION_90, ROTATION_90, ROTATION_270};
+            ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270};
 
         // Threshold ranges of orientation angle to transition into other orientation states.
-        // The first list is for transitions from ROTATION_0, the next for ROTATION_90, etc.
+        // The first list is for transitions from ROTATION_0, ROTATION_90, ROTATION_270,
+        // and then ROTATION_180.
         // ROTATE_TO defines the orientation each threshold range transitions to, and must be kept
         // in sync with this.
         // We generally transition about the halfway point between two states with a swing of 30
@@ -172,13 +182,32 @@ public abstract class WindowOrientationListener {
                 {{60, 180}, {180, 300}},
                 {{0, 30}, {195, 315}, {315, 360}},
                 {{0, 45}, {45, 165}, {330, 360}},
-        };
 
+                // Handle situation where we are currently doing 180 rotation
+                // but that is no longer allowed.
+                {{0, 45}, {45, 135}, {135, 225}, {225, 315}, {315, 360}},
+        };
         // See THRESHOLDS
         private static final int[][] ROTATE_TO = new int[][] {
                 {ROTATION_90, ROTATION_270},
                 {ROTATION_0, ROTATION_270, ROTATION_0},
                 {ROTATION_0, ROTATION_90, ROTATION_0},
+                {ROTATION_0, ROTATION_90, ROTATION_0, ROTATION_270, ROTATION_0},
+        };
+
+        // Thresholds that allow all 4 orientations.
+        private static final int[][][] THRESHOLDS_WITH_180 = new int[][][] {
+            {{60, 165}, {165, 195}, {195, 300}},
+            {{0, 30}, {165, 195}, {195, 315}, {315, 360}},
+            {{0, 45}, {45, 165}, {165, 195}, {330, 360}},
+            {{0, 45}, {45, 135}, {225, 315}, {315, 360}},
+        };
+        // See THRESHOLDS_WITH_180
+        private static final int[][] ROTATE_TO_WITH_180 = new int[][] {
+            {ROTATION_90, ROTATION_180, ROTATION_270},
+            {ROTATION_0, ROTATION_180, ROTATION_90, ROTATION_0},
+            {ROTATION_0, ROTATION_270, ROTATION_180, ROTATION_0},
+            {ROTATION_0, ROTATION_90, ROTATION_270, ROTATION_0},
         };
 
         // Maximum absolute tilt angle at which to consider orientation data.  Beyond this (i.e.
@@ -188,7 +217,7 @@ public abstract class WindowOrientationListener {
         // Additional limits on tilt angle to transition to each new orientation.  We ignore all
         // data with tilt beyond MAX_TILT, but we can set stricter limits on transitions to a
         // particular orientation here.
-        private static final int[] MAX_TRANSITION_TILT = new int[] {MAX_TILT, 65, 65};
+        private static final int[] MAX_TRANSITION_TILT = new int[] {MAX_TILT, 65, 65, 40};
 
         // Between this tilt angle and MAX_TILT, we'll allow orientation changes, but we'll filter
         // with a higher time constant, making us less sensitive to change.  This primarily helps
@@ -228,6 +257,8 @@ public abstract class WindowOrientationListener {
         private static final float ACCELERATING_LOWPASS_ALPHA =
             computeLowpassAlpha(ACCELERATING_TIME_CONSTANT_MS);
 
+        private boolean mAllow180Rotation = false;
+
         private WindowOrientationListener mOrientationListener;
         private int mRotation = ROTATION_0; // Current orientation state
         private float mTiltAngle = 0; // low-pass filtered
@@ -249,6 +280,10 @@ public abstract class WindowOrientationListener {
             return (float) SAMPLING_PERIOD_MS / (timeConstantMs + SAMPLING_PERIOD_MS);
         }
 
+        void setAllow180Rotation(boolean allowed) {
+            mAllow180Rotation = allowed;
+        }
+
         int getCurrentRotation(int lastRotation) {
             if (mTiltDistrust > 0) {
                 // we really don't know the current orientation, so trust what's currently displayed
@@ -259,7 +294,9 @@ public abstract class WindowOrientationListener {
 
         private void calculateNewRotation(float orientation, float tiltAngle) {
             if (localLOGV) Log.i(TAG, orientation + ", " + tiltAngle + ", " + mRotation);
-            int thresholdRanges[][] = THRESHOLDS[mRotation];
+            final boolean allow180Rotation = mAllow180Rotation;
+            int thresholdRanges[][] = allow180Rotation
+                    ? THRESHOLDS_WITH_180[mRotation] : THRESHOLDS[mRotation];
             int row = -1;
             for (int i = 0; i < thresholdRanges.length; i++) {
                 if (orientation >= thresholdRanges[i][0] && orientation < thresholdRanges[i][1]) {
@@ -269,13 +306,15 @@ public abstract class WindowOrientationListener {
             }
             if (row == -1) return; // no matching transition
 
-            int rotation = ROTATE_TO[mRotation][row];
+            int rotation = allow180Rotation
+                    ? ROTATE_TO_WITH_180[mRotation][row] : ROTATE_TO[mRotation][row];
             if (tiltAngle > MAX_TRANSITION_TILT[rotation]) {
                 // tilted too far flat to go to this rotation
                 return;
             }
 
-            if (localLOGV) Log.i(TAG, " new rotation = " + rotation);
+            if (localLOGV) Log.i(TAG, "orientation " + orientation + " gives new rotation = "
+                    + rotation);
             mRotation = rotation;
             mOrientationListener.onOrientationChanged(INTERNAL_TO_SURFACE_ROTATION[mRotation]);
         }
