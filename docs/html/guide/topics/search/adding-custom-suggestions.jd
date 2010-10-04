@@ -33,7 +33,7 @@ parent.link=index.html
 <li>{@link android.content.ContentProvider}</li>
 </ol>
 
-<h2>Related Samples</h2>
+<h2>Related samples</h2>
 <ol>
 <li><a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable
 Dictionary</a></li>

@@ -3,14 +3,13 @@ page.title=Bluetooth
 
 <div id="qv-wrapper">
 <div id="qv">
-  <h2>Key Classes</h2>
-  <ol>
-    <li>{@link android.bluetooth.BluetoothAdapter}</li>
-    <li>{@link android.bluetooth.BluetoothDevice}</li>
-    <li>{@link android.bluetooth.BluetoothSocket}</li>
-    <li>{@link android.bluetooth.BluetoothServerSocket}</li>
-  </ol>
 
+  <h2>Quickview</h2>
+  <ul>
+    <li>Android's bluetooth APIs allow your application to perform wireless data transactions with
+other devices</li>
+  </ul>
+  
   <h2>In this document</h2>
   <ol>
     <li><a href="#TheBasics">The Basics</a></li>
@@ -33,11 +32,18 @@ page.title=Bluetooth
     </li>
     <li><a href="#ManagingAConnection">Managing a Connection</a></li>
   </ol>
-
-  <h2>See also</h2>
+  
+  <h2>Key classes</h2>
   <ol>
-    <li><a href="{@docRoot}resources/samples/BluetoothChat/index.html">Bluetooth Chat sample
-      app</a></li>
+    <li>{@link android.bluetooth.BluetoothAdapter}</li>
+    <li>{@link android.bluetooth.BluetoothDevice}</li>
+    <li>{@link android.bluetooth.BluetoothSocket}</li>
+    <li>{@link android.bluetooth.BluetoothServerSocket}</li>
+  </ol>
+
+  <h2>Related samples</h2>
+  <ol>
+    <li><a href="{@docRoot}resources/samples/BluetoothChat/index.html">Bluetooth Chat</a></li>
   </ol>
 
 </div>

@@ -1,30 +1,36 @@
 page.title=Designing for Performance
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#intro">Introduction</a></li>
+  <li><a href="#optimize_judiciously">Optimize Judiciously</a></li>
+  <li><a href="#object_creation">Avoid Creating Objects</a></li>
+  <li><a href="#myths">Performance Myths</a></li>
+  <li><a href="#prefer_static">Prefer Static Over Virtual</a></li>
+  <li><a href="#internal_get_set">Avoid Internal Getters/Setters</a></li>
+  <li><a href="#use_final">Use Static Final For Constants</a></li>
+  <li><a href="#foreach">Use Enhanced For Loop Syntax</a></li>
+  <li><a href="#avoid_enums">Avoid Enums Where You Only Need Ints</a></li>
+  <li><a href="#package_inner">Use Package Scope with Inner Classes</a></li>
+  <li><a href="#avoidfloat">Use Floating-Point Judiciously</a> </li>
+  <li><a href="#library">Know And Use The Libraries</a></li>
+  <li><a href="#native_methods">Use Native Methods Judiciously</a></li>
+  <li><a href="#closing_notes">Closing Notes</a></li>
+</ol>
+
+</div>
+</div>
+
 <p>An Android application will run on a mobile device with limited computing
 power and storage, and constrained battery life. Because of
 this, it should be <em>efficient</em>. Battery life is one reason you might
 want to optimize your app even if it already seems to run "fast enough".
 Battery life is important to users, and Android's battery usage breakdown
 means users will know if your app is responsible draining their battery.</p>
-
-<p>This document covers these topics: </p>
-<ul>
-    <li><a href="#intro">Introduction</a></li>
-    <li><a href="#optimize_judiciously">Optimize Judiciously</a></li>
-    <li><a href="#object_creation">Avoid Creating Objects</a></li>
-    <li><a href="#myths">Performance Myths</a></li>
-    <li><a href="#prefer_static">Prefer Static Over Virtual</a></li>
-    <li><a href="#internal_get_set">Avoid Internal Getters/Setters</a></li>
-    <li><a href="#use_final">Use Static Final For Constants</a></li>
-    <li><a href="#foreach">Use Enhanced For Loop Syntax</a></li>
-    <li><a href="#avoid_enums">Avoid Enums Where You Only Need Ints</a></li>
-    <li><a href="#package_inner">Use Package Scope with Inner Classes</a></li>
-    <li><a href="#avoidfloat">Use Floating-Point Judiciously</a> </li>
-    <li><a href="#library">Know And Use The Libraries</a></li>
-    <li><a href="#native_methods">Use Native Methods Judiciously</a></li>
-    <li><a href="#closing_notes">Closing Notes</a></li>
-</ul>
 
 <p>Note that although this document primarily covers micro-optimizations,
 these will almost never make or break your software. Choosing the right

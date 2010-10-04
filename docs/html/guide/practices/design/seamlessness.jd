@@ -1,6 +1,26 @@
 page.title=Designing for Seamlessness
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#drop">Don't Drop Data</a></li>
+  <li><a href="#expose">Don't Expose Raw Data</a></li>
+  <li><a href="#interrupt">Don't Interrupt the User</a></li>
+  <li><a href="#threads">Got a Lot to Do? Do it in a Thread</a></li>
+  <li><a href="#multiple-activities">Don't Overload a Single Activity Screen</a></li>
+  <li><a href="#themes">Extend System Themes</a></li>
+  <li><a href="#flexui">Design Your UI to Work with Multiple Screen Resolutions</a></li>
+  <li><a href="#network">Assume the Network is Slow</a></li>
+  <li><a href="#keyboard">Don't Assume Touchscreen or Keyboard</a></li>
+  <li><a href="#battery">Do Conserve the Device Battery</a></li>
+</ol>
+
+</div>
+</div>
+
 <p>Even if your application is fast and responsive, certain design decisions can
 still cause problems for users &mdash; because of unplanned interactions with
 other applications or dialogs, inadvertent loss of data, unintended blocking,
@@ -42,20 +62,7 @@ system as just an even-larger federation of these components. This benefits you
 by allowing you to integrate cleanly and seamlessly with other applications, and
 so you should design your own code to return the favor.</p>
 
-<p>This document discusses common seamlessness problems and how to avoid them.
-It covers these topics: </p>
-<ul>
-    <li><a href="#drop">Don't Drop Data</a></li>
-    <li><a href="#expose">Don't Expose Raw Data</a></li>
-    <li><a href="#interrupt">Don't Interrupt the User</a></li>
-    <li><a href="#threads">Got a Lot to Do? Do it in a Thread</a></li>
-    <li><a href="#multiple-activities">Don't Overload a Single Activity Screen</a></li>
-    <li><a href="#themes">Extend System Themes</a></li>
-    <li><a href="#flexui">Design Your UI to Work with Multiple Screen Resolutions</a></li>
-    <li><a href="#network">Assume the Network is Slow</a></li>
-    <li><a href="#keyboard">Don't Assume Touchscreen or Keyboard</a></li>
-    <li><a href="#battery">Do Conserve the Device Battery</a></li>
-</ul>
+<p>This document discusses common seamlessness problems and how to avoid them.</p>
 
 <h2 id="drop">Don't Drop Data</h2>
 

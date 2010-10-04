@@ -4,21 +4,13 @@ page.title=Audio and Video
     <div id="qv-wrapper">
     <div id="qv">
 
-<h2>Audio/Video quickview</h2>
+<h2>Quickview</h2>
 <ul>
 <li>Audio playback and record</li>
 <li>Video playback</li>
 <li>Handles data from raw resources, files, streams</li>
 <li>Built-in codecs for a variety of media. See <a href="{@docRoot}guide/appendix/media-formats.html">Android Supported Media Formats</a></li>
 </ul>
-
-<h2>Key classes</h2>
-<ol>
-<li>{@link android.media.MediaPlayer MediaPlayer} (all available formats)</li>
-<li>{@link android.media.MediaRecorder MediaRecorder} (all available formats)</li>
-<li>{@link android.media.JetPlayer JetPlayer} (playback, JET content)</li>
-<li>{@link android.media.SoundPool SoundPool} (sound management)</li>
-</ol>
 
 <h2>In this document</h2>
 <ol>
@@ -30,6 +22,14 @@ page.title=Audio and Video
     </ol>
 </li>
 <li><a href="#capture">Audio Capture</a></li>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.media.MediaPlayer MediaPlayer}</li>
+<li>{@link android.media.MediaRecorder MediaRecorder}</li>
+<li>{@link android.media.JetPlayer JetPlayer}</li>
+<li>{@link android.media.SoundPool SoundPool}</li>
 </ol>
 
 <h2>See also</h2>
