@@ -16,29 +16,16 @@
 
 package com.android.internal.telephony.sip;
 
-import android.content.Context;
+import com.android.internal.telephony.Call;
+import com.android.internal.telephony.Connection;
+import com.android.internal.telephony.Phone;
+
 import android.net.sip.SipAudioCall;
-import android.os.Message;
-import android.os.Registrant;
 import android.os.SystemClock;
 import android.util.Log;
 import android.telephony.PhoneNumberUtils;
-import android.telephony.ServiceState;
-
-import com.android.internal.telephony.*;
 
 abstract class SipConnectionBase extends Connection {
-    //***** Event Constants
-    private static final int EVENT_DTMF_DONE = 1;
-    private static final int EVENT_PAUSE_DONE = 2;
-    private static final int EVENT_NEXT_POST_DIAL = 3;
-    private static final int EVENT_WAKE_LOCK_TIMEOUT = 4;
-
-    //***** Constants
-    private static final int PAUSE_DELAY_FIRST_MILLIS = 100;
-    private static final int PAUSE_DELAY_MILLIS = 3 * 1000;
-    private static final int WAKE_LOCK_TIMEOUT_MILLIS = 60*1000;
-
     private static final String LOG_TAG = "SIP_CONN";
 
     private SipAudioCall mSipAudioCall;
@@ -47,10 +34,6 @@ abstract class SipConnectionBase extends Connection {
     private String postDialString;      // outgoing calls only
     private int nextPostDialChar;       // index into postDialString
     private boolean isIncoming;
-    private boolean disconnected;
-
-    int index;          // index in SipCallTracker.connections[], -1 if unassigned
-                        // The Sip index is 1 + this
 
     /*
      * These time/timespan values are based on System.currentTimeMillis(),
@@ -167,55 +150,6 @@ abstract class SipConnectionBase extends Connection {
 
     protected abstract Phone getPhone();
 
-    DisconnectCause disconnectCauseFromCode(int causeCode) {
-        /**
-         * See 22.001 Annex F.4 for mapping of cause codes
-         * to local tones
-         */
-
-        switch (causeCode) {
-            case CallFailCause.USER_BUSY:
-                return DisconnectCause.BUSY;
-
-            case CallFailCause.NO_CIRCUIT_AVAIL:
-            case CallFailCause.TEMPORARY_FAILURE:
-            case CallFailCause.SWITCHING_CONGESTION:
-            case CallFailCause.CHANNEL_NOT_AVAIL:
-            case CallFailCause.QOS_NOT_AVAIL:
-            case CallFailCause.BEARER_NOT_AVAIL:
-                return DisconnectCause.CONGESTION;
-
-            case CallFailCause.ACM_LIMIT_EXCEEDED:
-                return DisconnectCause.LIMIT_EXCEEDED;
-
-            case CallFailCause.CALL_BARRED:
-                return DisconnectCause.CALL_BARRED;
-
-            case CallFailCause.FDN_BLOCKED:
-                return DisconnectCause.FDN_BLOCKED;
-
-            case CallFailCause.ERROR_UNSPECIFIED:
-            case CallFailCause.NORMAL_CLEARING:
-            default:
-                Phone phone = getPhone();
-                int serviceState = phone.getServiceState().getState();
-                if (serviceState == ServiceState.STATE_POWER_OFF) {
-                    return DisconnectCause.POWER_OFF;
-                } else if (serviceState == ServiceState.STATE_OUT_OF_SERVICE
-                        || serviceState == ServiceState.STATE_EMERGENCY_ONLY ) {
-                    return DisconnectCause.OUT_OF_SERVICE;
-                } else if (causeCode == CallFailCause.ERROR_UNSPECIFIED) {
-                    return DisconnectCause.ERROR_UNSPECIFIED;
-                } else if (causeCode == CallFailCause.NORMAL_CLEARING) {
-                    return DisconnectCause.NORMAL;
-                } else {
-                    // If nothing else matches, report unknown call drop reason
-                    // to app, not NORMAL call end.
-                    return DisconnectCause.ERROR_UNSPECIFIED;
-                }
-        }
-    }
-
     @Override
     public String getRemainingPostDialString() {
         if (postDialState == PostDialState.CANCELLED
@@ -237,12 +171,4 @@ abstract class SipConnectionBase extends Connection {
         // TODO: add PRESENTATION_URL
         return Connection.PRESENTATION_ALLOWED;
     }
-
-    /*
-    @Override
-    public UUSInfo getUUSInfo() {
-        // FIXME: what's this for SIP?
-        return null;
-    }
-    */
 }

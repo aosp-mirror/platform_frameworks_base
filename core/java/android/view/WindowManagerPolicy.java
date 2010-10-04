@@ -73,6 +73,7 @@ public interface WindowManagerPolicy {
     public final static int FLAG_ALT_GR = 0x00000020;
     public final static int FLAG_MENU = 0x00000040;
     public final static int FLAG_LAUNCHER = 0x00000080;
+    public final static int FLAG_VIRTUAL = 0x00000100;
 
     public final static int FLAG_INJECTED = 0x01000000;
 
@@ -259,24 +260,6 @@ public interface WindowManagerPolicy {
          * window manager lock held.
          */
         boolean isDisplayedLw();
-
-        /**
-         * Returns true if the window is both full screen and opaque.  Must be
-         * called with the window manager lock held.
-         * 
-         * @param width The width of the screen
-         * @param height The height of the screen 
-         * @param shownFrame If true, this is based on the actual shown frame of 
-         *                   the window (taking into account animations); if
-         *                   false, this is based on the currently requested
-         *                   frame, which any current animation will be moving
-         *                   towards.
-         * @param onlyOpaque If true, this will only pass if the window is
-         * also opaque.
-         * @return Returns true if the window is both full screen and opaque
-         */
-        public boolean fillsScreenLw(int width, int height, boolean shownFrame,
-                boolean onlyOpaque);
 
         /**
          * Returns true if this window has been shown on screen at some time in 

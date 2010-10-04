@@ -27,8 +27,6 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Environment;
-import android.os.StatFs;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
 
@@ -1388,11 +1386,18 @@ public abstract class PackageManager {
      * {@link Intent#resolveActivity} finds an activity if a class has not
      * been explicitly specified.
      *
+     * <p><em>Note: if using an implicit Intent (without an explicit ComponentName
+     * specified), be sure to consider whether to set the {@link #MATCH_DEFAULT_ONLY}
+     * only flag.  You need to do so to resolve the activity in the same way
+     * that {@link android.content.Context#startActivity(Intent)} and
+     * {@link android.content.Intent#resolveActivity(PackageManager)
+     * Intent.resolveActivity(PackageManager)} do.</p>
+     * 
      * @param intent An intent containing all of the desired specification
      *               (action, data, type, category, and/or component).
      * @param flags Additional option flags.  The most important is
-     *                    MATCH_DEFAULT_ONLY, to limit the resolution to only
-     *                    those activities that support the CATEGORY_DEFAULT.
+     * {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
+     * those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
      *
      * @return Returns a ResolveInfo containing the final activity intent that
      *         was determined to be the best action.  Returns null if no
@@ -1411,13 +1416,13 @@ public abstract class PackageManager {
      *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags.  The most important is
-     *                    MATCH_DEFAULT_ONLY, to limit the resolution to only
-     *                    those activities that support the CATEGORY_DEFAULT.
+     * {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
+     * those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
      *
-     * @return A List<ResolveInfo> containing one entry for each matching
+     * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
      *         Activity. These are ordered from best to worst match -- that
      *         is, the first item in the list is what is returned by
-     *         resolveActivity().  If there are no matching activities, an empty
+     *         {@link #resolveActivity}.  If there are no matching activities, an empty
      *         list is returned.
      *
      * @see #MATCH_DEFAULT_ONLY
@@ -1442,10 +1447,10 @@ public abstract class PackageManager {
      *                  first specific results.  Can be null.
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags.  The most important is
-     *                    MATCH_DEFAULT_ONLY, to limit the resolution to only
-     *                    those activities that support the CATEGORY_DEFAULT.
+     * {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
+     * those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
      *
-     * @return A List<ResolveInfo> containing one entry for each matching
+     * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
      *         Activity. These are ordered first by all of the intents resolved
      *         in <var>specifics</var> and then any additional activities that
      *         can handle <var>intent</var> but did not get included by one of
@@ -1463,11 +1468,9 @@ public abstract class PackageManager {
      * Retrieve all receivers that can handle a broadcast of the given intent.
      *
      * @param intent The desired intent as per resolveActivity().
-     * @param flags Additional option flags.  The most important is
-     *                    MATCH_DEFAULT_ONLY, to limit the resolution to only
-     *                    those activities that support the CATEGORY_DEFAULT.
+     * @param flags Additional option flags.
      *
-     * @return A List<ResolveInfo> containing one entry for each matching
+     * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
      *         Receiver. These are ordered from first to last in priority.  If
      *         there are no matching receivers, an empty list is returned.
      *
@@ -1500,7 +1503,7 @@ public abstract class PackageManager {
      * @param intent The desired intent as per resolveService().
      * @param flags Additional option flags.
      *
-     * @return A List<ResolveInfo> containing one entry for each matching
+     * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
      *         ServiceInfo. These are ordered from best to worst match -- that
      *         is, the first item in the list is what is returned by
      *         resolveService().  If there are no matching services, an empty
@@ -1537,7 +1540,7 @@ public abstract class PackageManager {
      *        uid owning the requested content providers.
      * @param flags Additional option flags.  Currently should always be 0.
      *
-     * @return A List<ContentProviderInfo> containing one entry for each
+     * @return A List&lt;ContentProviderInfo&gt; containing one entry for each
      *         content provider either patching <var>processName</var> or, if
      *         <var>processName</var> is null, all known content providers.
      *         <em>If there are no matching providers, null is returned.</em>
@@ -1573,7 +1576,7 @@ public abstract class PackageManager {
      *                      returned.
      * @param flags Additional option flags.  Currently should always be 0.
      *
-     * @return A List<InstrumentationInfo> containing one entry for each
+     * @return A List&lt;InstrumentationInfo&gt; containing one entry for each
      *         matching available Instrumentation.  Returns an empty list if
      *         there is no instrumentation available for the given package.
      */

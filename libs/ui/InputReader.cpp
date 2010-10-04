@@ -226,11 +226,15 @@ void InputReader::loopOnce() {
 void InputReader::process(const RawEvent* rawEvent) {
     switch (rawEvent->type) {
     case EventHubInterface::DEVICE_ADDED:
-        addDevice(rawEvent->when, rawEvent->deviceId);
+        addDevice(rawEvent->deviceId);
         break;
 
     case EventHubInterface::DEVICE_REMOVED:
-        removeDevice(rawEvent->when, rawEvent->deviceId);
+        removeDevice(rawEvent->deviceId);
+        break;
+
+    case EventHubInterface::FINISHED_DEVICE_SCAN:
+        handleConfigurationChanged();
         break;
 
     default:
@@ -239,7 +243,7 @@ void InputReader::process(const RawEvent* rawEvent) {
     }
 }
 
-void InputReader::addDevice(nsecs_t when, int32_t deviceId) {
+void InputReader::addDevice(int32_t deviceId) {
     String8 name = mEventHub->getDeviceName(deviceId);
     uint32_t classes = mEventHub->getDeviceClasses(deviceId);
 
@@ -269,11 +273,9 @@ void InputReader::addDevice(nsecs_t when, int32_t deviceId) {
         delete device;
         return;
     }
-
-    handleConfigurationChanged(when);
 }
 
-void InputReader::removeDevice(nsecs_t when, int32_t deviceId) {
+void InputReader::removeDevice(int32_t deviceId) {
     bool removed = false;
     InputDevice* device = NULL;
     { // acquire device registry writer lock
@@ -303,8 +305,6 @@ void InputReader::removeDevice(nsecs_t when, int32_t deviceId) {
     device->reset();
 
     delete device;
-
-    handleConfigurationChanged(when);
 }
 
 InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, uint32_t classes) {
@@ -372,7 +372,7 @@ void InputReader::consumeEvent(const RawEvent* rawEvent) {
     } // release device registry reader lock
 }
 
-void InputReader::handleConfigurationChanged(nsecs_t when) {
+void InputReader::handleConfigurationChanged() {
     // Reset global meta state because it depends on the list of all configured devices.
     updateGlobalMetaState();
 
@@ -380,6 +380,7 @@ void InputReader::handleConfigurationChanged(nsecs_t when) {
     updateInputConfiguration();
 
     // Enqueue configuration changed.
+    nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
     mDispatcher->notifyConfigurationChanged(when);
 }
 
@@ -575,6 +576,11 @@ bool InputReader::markSupportedKeyCodes(int32_t deviceId, uint32_t sourceMask, s
 }
 
 void InputReader::dump(String8& dump) {
+    mEventHub->dump(dump);
+    dump.append("\n");
+
+    dump.append("Input Reader State:\n");
+
     { // acquire device registry reader lock
         RWLock::AutoRLock _rl(mDeviceRegistryLock);
 
@@ -861,7 +867,6 @@ void KeyboardInputMapper::dump(String8& dump) {
         AutoMutex _l(mLock);
         dump.append(INDENT2 "Keyboard Input Mapper:\n");
         dump.appendFormat(INDENT3 "AssociatedDisplayId: %d\n", mAssociatedDisplayId);
-        dump.appendFormat(INDENT3 "Sources: 0x%x\n", mSources);
         dump.appendFormat(INDENT3 "KeyboardType: %d\n", mKeyboardType);
         dump.appendFormat(INDENT3 "KeyDowns: %d keys currently down\n", mLocked.keyDowns.size());
         dump.appendFormat(INDENT3 "MetaState: 0x%0x\n", mLocked.metaState);
@@ -993,7 +998,10 @@ void KeyboardInputMapper::applyPolicyAndDispatch(nsecs_t when, uint32_t policyFl
     int32_t keyEventAction = down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP;
     int32_t keyEventFlags = AKEY_EVENT_FLAG_FROM_SYSTEM;
     if (policyFlags & POLICY_FLAG_WOKE_HERE) {
-        keyEventFlags = keyEventFlags | AKEY_EVENT_FLAG_WOKE_HERE;
+        keyEventFlags |= AKEY_EVENT_FLAG_WOKE_HERE;
+    }
+    if (policyFlags & POLICY_FLAG_VIRTUAL) {
+        keyEventFlags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
     }
 
     getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
@@ -2162,10 +2170,7 @@ void TouchInputMapper::applyPolicyAndDispatchVirtualKey(nsecs_t when, uint32_t p
         int32_t keyCode, int32_t scanCode, nsecs_t downTime) {
     int32_t metaState = mContext->getGlobalMetaState();
 
-    if (keyEventAction == AKEY_EVENT_ACTION_DOWN) {
-        getPolicy()->virtualKeyDownFeedback();
-    }
-
+    policyFlags |= POLICY_FLAG_VIRTUAL;
     int32_t policyActions = getPolicy()->interceptKey(when, getDeviceId(),
             keyEventAction == AKEY_EVENT_ACTION_DOWN, keyCode, scanCode, policyFlags);
 

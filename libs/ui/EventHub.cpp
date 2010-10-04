@@ -73,6 +73,10 @@
 #define ABS_MT_POSITION_Y       0x36    /* Center Y ellipse position */
 #endif
 
+#define INDENT "  "
+#define INDENT2 "    "
+#define INDENT3 "      "
+
 namespace android {
 
 static const char *WAKE_LOCK_ID = "KeyEvents";
@@ -82,6 +86,10 @@ static const char *device_path = "/dev/input";
 static inline int max(int v1, int v2)
 {
     return (v1 > v2) ? v1 : v2;
+}
+
+static inline const char* toString(bool value) {
+    return value ? "true" : "false";
 }
 
 EventHub::device_t::device_t(int32_t _id, const char* _path, const char* name)
@@ -98,7 +106,7 @@ EventHub::EventHub(void)
     : mError(NO_INIT), mHaveFirstKeyboard(false), mFirstKeyboardId(0)
     , mDevicesById(0), mNumDevicesById(0)
     , mOpeningDevices(0), mClosingDevices(0)
-    , mDevices(0), mFDs(0), mFDCount(0), mOpened(false)
+    , mDevices(0), mFDs(0), mFDCount(0), mOpened(false), mNeedToSendFinishedDeviceScan(false)
     , mInputBufferIndex(0), mInputBufferCount(0), mInputDeviceIndex(0)
 {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
@@ -124,7 +132,7 @@ status_t EventHub::errorCheck() const
 String8 EventHub::getDeviceName(int32_t deviceId) const
 {
     AutoMutex _l(mLock);
-    device_t* device = getDevice(deviceId);
+    device_t* device = getDeviceLocked(deviceId);
     if (device == NULL) return String8();
     return device->name;
 }
@@ -132,7 +140,7 @@ String8 EventHub::getDeviceName(int32_t deviceId) const
 uint32_t EventHub::getDeviceClasses(int32_t deviceId) const
 {
     AutoMutex _l(mLock);
-    device_t* device = getDevice(deviceId);
+    device_t* device = getDeviceLocked(deviceId);
     if (device == NULL) return 0;
     return device->classes;
 }
@@ -142,7 +150,7 @@ status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
     outAxisInfo->clear();
 
     AutoMutex _l(mLock);
-    device_t* device = getDevice(deviceId);
+    device_t* device = getDeviceLocked(deviceId);
     if (device == NULL) return -1;
 
     struct input_absinfo info;
@@ -167,7 +175,7 @@ int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t scanCode) const {
     if (scanCode >= 0 && scanCode <= KEY_MAX) {
         AutoMutex _l(mLock);
 
-        device_t* device = getDevice(deviceId);
+        device_t* device = getDeviceLocked(deviceId);
         if (device != NULL) {
             return getScanCodeStateLocked(device, scanCode);
         }
@@ -188,7 +196,7 @@ int32_t EventHub::getScanCodeStateLocked(device_t* device, int32_t scanCode) con
 int32_t EventHub::getKeyCodeState(int32_t deviceId, int32_t keyCode) const {
     AutoMutex _l(mLock);
 
-    device_t* device = getDevice(deviceId);
+    device_t* device = getDeviceLocked(deviceId);
     if (device != NULL) {
         return getKeyCodeStateLocked(device, keyCode);
     }
@@ -225,7 +233,7 @@ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
     if (sw >= 0 && sw <= SW_MAX) {
         AutoMutex _l(mLock);
 
-        device_t* device = getDevice(deviceId);
+        device_t* device = getDeviceLocked(deviceId);
         if (device != NULL) {
             return getSwitchStateLocked(device, sw);
         }
@@ -248,7 +256,7 @@ bool EventHub::markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
         const int32_t* keyCodes, uint8_t* outFlags) const {
     AutoMutex _l(mLock);
 
-    device_t* device = getDevice(deviceId);
+    device_t* device = getDeviceLocked(deviceId);
     if (device != NULL) {
         return markSupportedKeyCodesLocked(device, numCodes, keyCodes, outFlags);
     }
@@ -284,7 +292,7 @@ status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
         int32_t* outKeycode, uint32_t* outFlags) const
 {
     AutoMutex _l(mLock);
-    device_t* device = getDevice(deviceId);
+    device_t* device = getDeviceLocked(deviceId);
     
     if (device != NULL && device->layoutMap != NULL) {
         status_t err = device->layoutMap->map(scancode, outKeycode, outFlags);
@@ -294,7 +302,7 @@ status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
     }
     
     if (mHaveFirstKeyboard) {
-        device = getDevice(mFirstKeyboardId);
+        device = getDeviceLocked(mFirstKeyboardId);
         
         if (device != NULL && device->layoutMap != NULL) {
             status_t err = device->layoutMap->map(scancode, outKeycode, outFlags);
@@ -311,11 +319,13 @@ status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
 
 void EventHub::addExcludedDevice(const char* deviceName)
 {
+    AutoMutex _l(mLock);
+
     String8 name(deviceName);
     mExcludedDevices.push_back(name);
 }
 
-EventHub::device_t* EventHub::getDevice(int32_t deviceId) const
+EventHub::device_t* EventHub::getDeviceLocked(int32_t deviceId) const
 {
     if (deviceId == 0) deviceId = mFirstKeyboardId;
     int32_t id = deviceId & ID_MASK;
@@ -344,6 +354,7 @@ bool EventHub::getEvent(RawEvent* outEvent)
     if (!mOpened) {
         mError = openPlatformInput() ? NO_ERROR : UNKNOWN_ERROR;
         mOpened = true;
+        mNeedToSendFinishedDeviceScan = true;
     }
 
     for (;;) {
@@ -360,6 +371,7 @@ bool EventHub::getEvent(RawEvent* outEvent)
             }
             outEvent->type = DEVICE_REMOVED;
             delete device;
+            mNeedToSendFinishedDeviceScan = true;
             return true;
         }
 
@@ -374,6 +386,13 @@ bool EventHub::getEvent(RawEvent* outEvent)
                 outEvent->deviceId = device->id;
             }
             outEvent->type = DEVICE_ADDED;
+            mNeedToSendFinishedDeviceScan = true;
+            return true;
+        }
+
+        if (mNeedToSendFinishedDeviceScan) {
+            mNeedToSendFinishedDeviceScan = false;
+            outEvent->type = FINISHED_DEVICE_SCAN;
             return true;
         }
 
@@ -441,10 +460,10 @@ bool EventHub::getEvent(RawEvent* outEvent)
             }
         }
 
-        // read_notify() will modify mFDs and mFDCount, so this must be done after
+        // readNotify() will modify mFDs and mFDCount, so this must be done after
         // processing all other events.
         if(mFDs[0].revents & POLLIN) {
-            read_notify(mFDs[0].fd);
+            readNotify(mFDs[0].fd);
         }
 
         // Poll for events.  Mind the wake lock dance!
@@ -500,10 +519,9 @@ bool EventHub::openPlatformInput(void)
     mFDs[0].fd = -1;
 #endif
 
-    res = scan_dir(device_path);
+    res = scanDir(device_path);
     if(res < 0) {
         LOGE("scan dir failed for %s\n", device_path);
-        //open_device("/dev/input/event0");
     }
 
     return true;
@@ -531,8 +549,7 @@ static const int32_t GAMEPAD_KEYCODES[] = {
         AKEYCODE_BUTTON_START, AKEYCODE_BUTTON_SELECT, AKEYCODE_BUTTON_MODE
 };
 
-int EventHub::open_device(const char *deviceName)
-{
+int EventHub::openDevice(const char *deviceName) {
     int version;
     int fd;
     struct pollfd *new_mFDs;
@@ -782,22 +799,22 @@ int EventHub::open_device(const char *deviceName)
         property_set(propName, name);
 
         // 'Q' key support = cheap test of whether this is an alpha-capable kbd
-        if (hasKeycode(device, AKEYCODE_Q)) {
+        if (hasKeycodeLocked(device, AKEYCODE_Q)) {
             device->classes |= INPUT_DEVICE_CLASS_ALPHAKEY;
         }
         
         // See if this device has a DPAD.
-        if (hasKeycode(device, AKEYCODE_DPAD_UP) &&
-                hasKeycode(device, AKEYCODE_DPAD_DOWN) &&
-                hasKeycode(device, AKEYCODE_DPAD_LEFT) &&
-                hasKeycode(device, AKEYCODE_DPAD_RIGHT) &&
-                hasKeycode(device, AKEYCODE_DPAD_CENTER)) {
+        if (hasKeycodeLocked(device, AKEYCODE_DPAD_UP) &&
+                hasKeycodeLocked(device, AKEYCODE_DPAD_DOWN) &&
+                hasKeycodeLocked(device, AKEYCODE_DPAD_LEFT) &&
+                hasKeycodeLocked(device, AKEYCODE_DPAD_RIGHT) &&
+                hasKeycodeLocked(device, AKEYCODE_DPAD_CENTER)) {
             device->classes |= INPUT_DEVICE_CLASS_DPAD;
         }
         
         // See if this device has a gamepad.
         for (size_t i = 0; i < sizeof(GAMEPAD_KEYCODES); i++) {
-            if (hasKeycode(device, GAMEPAD_KEYCODES[i])) {
+            if (hasKeycodeLocked(device, GAMEPAD_KEYCODES[i])) {
                 device->classes |= INPUT_DEVICE_CLASS_GAMEPAD;
                 break;
             }
@@ -830,7 +847,7 @@ int EventHub::open_device(const char *deviceName)
     return 0;
 }
 
-bool EventHub::hasKeycode(device_t* device, int keycode) const
+bool EventHub::hasKeycodeLocked(device_t* device, int keycode) const
 {
     if (device->keyBitmask == NULL || device->layoutMap == NULL) {
         return false;
@@ -849,10 +866,9 @@ bool EventHub::hasKeycode(device_t* device, int keycode) const
     return false;
 }
 
-int EventHub::close_device(const char *deviceName)
-{
+int EventHub::closeDevice(const char *deviceName) {
     AutoMutex _l(mLock);
-    
+
     int i;
     for(i = 1; i < mFDCount; i++) {
         if(strcmp(mDevices[i]->path.string(), deviceName) == 0) {
@@ -902,8 +918,7 @@ int EventHub::close_device(const char *deviceName)
     return -1;
 }
 
-int EventHub::read_notify(int nfd)
-{
+int EventHub::readNotify(int nfd) {
 #ifdef HAVE_INOTIFY
     int res;
     char devname[PATH_MAX];
@@ -913,7 +928,7 @@ int EventHub::read_notify(int nfd)
     int event_pos = 0;
     struct inotify_event *event;
 
-    LOGV("EventHub::read_notify nfd: %d\n", nfd);
+    LOGV("EventHub::readNotify nfd: %d\n", nfd);
     res = read(nfd, event_buf, sizeof(event_buf));
     if(res < (int)sizeof(*event)) {
         if(errno == EINTR)
@@ -933,10 +948,10 @@ int EventHub::read_notify(int nfd)
         if(event->len) {
             strcpy(filename, event->name);
             if(event->mask & IN_CREATE) {
-                open_device(devname);
+                openDevice(devname);
             }
             else {
-                close_device(devname);
+                closeDevice(devname);
             }
         }
         event_size = sizeof(*event) + event->len;
@@ -948,7 +963,7 @@ int EventHub::read_notify(int nfd)
 }
 
 
-int EventHub::scan_dir(const char *dirname)
+int EventHub::scanDir(const char *dirname)
 {
     char devname[PATH_MAX];
     char *filename;
@@ -966,10 +981,38 @@ int EventHub::scan_dir(const char *dirname)
             (de->d_name[1] == '.' && de->d_name[2] == '\0')))
             continue;
         strcpy(filename, de->d_name);
-        open_device(devname);
+        openDevice(devname);
     }
     closedir(dir);
     return 0;
+}
+
+void EventHub::dump(String8& dump) {
+    dump.append("Event Hub State:\n");
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        dump.appendFormat(INDENT "HaveFirstKeyboard: %s\n", toString(mHaveFirstKeyboard));
+        dump.appendFormat(INDENT "FirstKeyboardId: 0x%x\n", mFirstKeyboardId);
+
+        dump.append(INDENT "Devices:\n");
+
+        for (int i = 0; i < mNumDevicesById; i++) {
+            const device_t* device = mDevicesById[i].device;
+            if (device) {
+                if (mFirstKeyboardId == device->id) {
+                    dump.appendFormat(INDENT2 "0x%x: %s (aka device 0 - first keyboard)\n",
+                            device->id, device->name.string());
+                } else {
+                    dump.appendFormat(INDENT2 "0x%x: %s\n", device->id, device->name.string());
+                }
+                dump.appendFormat(INDENT3 "Classes: 0x%08x\n", device->classes);
+                dump.appendFormat(INDENT3 "Path: %s\n", device->path.string());
+                dump.appendFormat(INDENT3 "KeyLayoutFile: %s\n", device->keylayoutFilename.string());
+            }
+        }
+    } // release lock
 }
 
 }; // namespace android

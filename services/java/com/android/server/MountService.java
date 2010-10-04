@@ -1599,20 +1599,23 @@ class MountService extends IMountService.Stub
             addObbState(obbState);
         }
 
-        final MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            Slog.e(TAG, "Could not load MD5 algorithm", e);
+        String hashedKey = null;
+        if (key != null) {
+            final MessageDigest md;
             try {
-                token.onObbResult(filename, Environment.MEDIA_UNMOUNTED);
-            } catch (RemoteException e1) {
-                Slog.d(TAG, "Could not send unmount notification for: " + filename);
+                md = MessageDigest.getInstance("MD5");
+            } catch (NoSuchAlgorithmException e) {
+                Slog.e(TAG, "Could not load MD5 algorithm", e);
+                try {
+                    token.onObbResult(filename, Environment.MEDIA_UNMOUNTED);
+                } catch (RemoteException e1) {
+                    Slog.d(TAG, "Could not send unmount notification for: " + filename);
+                }
+                return;
             }
-            return;
-        }
 
-        String hashedKey = HexDump.toHexString(md.digest(key.getBytes()));
+            hashedKey = HexDump.toHexString(md.digest(key.getBytes()));
+        }
 
         ObbAction action = new MountObbAction(obbState, hashedKey);
         mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
@@ -1956,10 +1959,6 @@ class MountService extends IMountService.Stub
                 throw new IllegalArgumentException("Caller package does not match OBB file");
             }
 
-            if (mKey == null) {
-                mKey = "none";
-            }
-
             boolean mounted = false;
             int rc;
             synchronized (mObbState) {
@@ -1969,7 +1968,8 @@ class MountService extends IMountService.Stub
                 }
 
                 rc = StorageResultCode.OperationSucceeded;
-                String cmd = String.format("obb mount %s %s %d", mObbState.filename, mKey,
+                String cmd = String.format("obb mount %s %s %d", mObbState.filename,
+                        mKey != null ? mKey : "none",
                         mObbState.callerUid);
                 try {
                     mConnector.doCommand(cmd);

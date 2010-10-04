@@ -168,9 +168,6 @@ static jmethodID gBitmap_allocBufferMethodID;
 static jclass   gBitmapConfig_class;
 static jfieldID gBitmapConfig_nativeInstanceID;
 
-static jclass   gBitmapRegionDecoder_class;
-static jmethodID gBitmapRegionDecoder_constructorMethodID;
-
 static jclass   gCanvas_class;
 static jfieldID gCanvas_nativeInstanceID;
 
@@ -370,24 +367,6 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
     if (obj) {
         env->CallVoidMethod(obj, gBitmap_constructorMethodID,
                             (jint)bitmap, isMutable, ninepatch, density);
-        if (hasException(env)) {
-            obj = NULL;
-        }
-    }
-    return obj;
-}
-
-jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
-{
-    SkASSERT(bitmap != NULL);
-
-    jobject obj = env->AllocObject(gBitmapRegionDecoder_class);
-    if (hasException(env)) {
-        obj = NULL;
-        return obj;
-    }
-    if (obj) {
-        env->CallVoidMethod(obj, gBitmapRegionDecoder_constructorMethodID, (jint)bitmap);
         if (hasException(env)) {
             obj = NULL;
         }
@@ -612,9 +591,6 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");    
     gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>",
                                             "(IZ[BI)V");
-
-    gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
-    gBitmapRegionDecoder_constructorMethodID = env->GetMethodID(gBitmapRegionDecoder_class, "<init>", "(I)V");
 
     gBitmapConfig_class = make_globalref(env, "android/graphics/Bitmap$Config");
     gBitmapConfig_nativeInstanceID = getFieldIDCheck(env, gBitmapConfig_class,

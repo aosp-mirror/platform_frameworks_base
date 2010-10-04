@@ -6965,31 +6965,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 && (mOrientationChanging || (!mDrawPending && !mCommitDrawPending));
         }
 
-        public boolean fillsScreenLw(int screenWidth, int screenHeight,
-                                   boolean shownFrame, boolean onlyOpaque) {
-            if (mSurface == null) {
-                return false;
-            }
-            if (mAppToken != null && !mAppToken.appFullscreen) {
-                return false;
-            }
-            if (onlyOpaque && mAttrs.format != PixelFormat.OPAQUE) {
-                return false;
-            }
-            final Rect frame = shownFrame ? mShownFrame : mFrame;
-
-            if ((mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
-                return frame.left <= mCompatibleScreenFrame.left &&
-                        frame.top <= mCompatibleScreenFrame.top &&
-                        frame.right >= mCompatibleScreenFrame.right &&
-                        frame.bottom >= mCompatibleScreenFrame.bottom;
-            } else {
-                return frame.left <= 0 && frame.top <= 0
-                        && frame.right >= screenWidth
-                        && frame.bottom >= screenHeight;
-            }
-        }
-
         /**
          * Return true if the window is opaque and fully drawn.  This indicates
          * it may obscure windows behind it.
