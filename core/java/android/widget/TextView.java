@@ -63,7 +63,6 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.DateKeyListener;
 import android.text.method.DateTimeKeyListener;
 import android.text.method.DialerKeyListener;
@@ -92,7 +91,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewRoot;
@@ -1155,7 +1153,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         fixFocusableAndClickableSettings();
 
-        // SelectionModifierCursorController depends on canSelectText, which depends on mMovement
+        // SelectionModifierCursorController depends on textCanBeSelected, which depends on mMovement
         prepareCursorControllers();
     }
 
@@ -2725,7 +2723,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             sendAfterTextChanged((Editable) text);
         }
 
-        // SelectionModifierCursorController depends on canSelectText, which depends on text
+        // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
         prepareCursorControllers();
     }
 
@@ -6604,6 +6602,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 terminateTextSelectionMode();
             }
+
+            mLastTouchOffset = -1;
         }
 
         startStopMarquee(focused);
@@ -6836,7 +6836,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mInsertionPointCursorController = null;
         }
 
-        if (canSelectText() && mLayout != null) {
+        if (textCanBeSelected() && mLayout != null) {
             if (mSelectionModifierCursorController == null) {
                 mSelectionModifierCursorController = new SelectionModifierCursorController();
             }
@@ -7054,7 +7054,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onKeyShortcut(int keyCode, KeyEvent event) {
         switch (keyCode) {
         case KeyEvent.KEYCODE_A:
-            if (canSelectAll()) {
+            if (canSelectText()) {
                 return onTextContextMenuItem(ID_SELECT_ALL);
             }
 
@@ -7085,11 +7085,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return super.onKeyShortcut(keyCode, event);
     }
 
-    private boolean canSelectAll() {
-        return canSelectText() && mText.length() != 0;
+    private boolean canSelectText() {
+        return textCanBeSelected() && mText.length() != 0;
     }
 
-    private boolean canSelectText() {
+    private boolean textCanBeSelected() {
         // prepareCursorController() relies on this method.
         // If you change this condition, make sure prepareCursorController is called anywhere
         // the value of this condition might be changed.
@@ -7397,11 +7397,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (canSelectText()) {
                 menu.add(0, ID_START_SELECTING_TEXT, 0, com.android.internal.R.string.selectText).
-                setOnMenuItemClickListener(handler);
-                added = true;
-            }
-            
-            if (canSelectAll()) {
+                     setOnMenuItemClickListener(handler);
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                      setOnMenuItemClickListener(handler).
                      setAlphabeticShortcut('a');
@@ -7424,8 +7420,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
             
-            // Paste location is too imprecise. Only allow on empty text fields.
-            if (canPaste() && textIsOnlySpaces()) {
+            if (canPaste()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
                      setOnMenuItemClickListener(handler).
                      setAlphabeticShortcut('v');
@@ -7451,16 +7446,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (added) {
             menu.setHeaderTitle(com.android.internal.R.string.editTextMenuTitle);
         }
-    }
-
-    private boolean textIsOnlySpaces() {
-        final int length = mTransformed.length();
-        for (int i = 0; i < length; i++) {
-            if (!Character.isSpaceChar(mTransformed.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
