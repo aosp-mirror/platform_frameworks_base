@@ -521,6 +521,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mLastPositionDistanceGuess;
 
     /**
+     * Used for determining when to cancel out of overscroll.
+     */
+    private int mDirection = 0;
+
+    /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
      */
@@ -2238,6 +2243,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (overscrollMode == OVERSCROLL_ALWAYS ||
                                     (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS &&
                                             !contentFits())) {
+                                mDirection = 0; // Reset when entering overscroll.
                                 mTouchMode = TOUCH_MODE_OVERSCROLL;
                                 if (rawDeltaY > 0) {
                                     mEdgeGlowTop.onPull((float) overscroll / getHeight());
@@ -2261,9 +2267,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                     final int oldScroll = mScrollY;
                     final int newScroll = oldScroll - incrementalDeltaY;
+                    int newDirection = y > mLastY ? 1 : -1;
 
-                    if ((oldScroll >= 0 && newScroll <= 0) ||
-                            (oldScroll <= 0 && newScroll >= 0)) {
+                    if (mDirection == 0) {
+                        mDirection = newDirection;
+                    }
+
+                    if (mDirection != newDirection) {
                         // Coming back to 'real' list scrolling
                         incrementalDeltaY = -newScroll;
                         mScrollY = 0;
@@ -2308,6 +2318,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         }
                     }
                     mLastY = y;
+                    mDirection = newDirection;
                 }
                 break;
             }
