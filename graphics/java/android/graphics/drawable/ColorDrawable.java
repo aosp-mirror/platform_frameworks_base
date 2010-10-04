@@ -26,10 +26,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /**
- * A specialized Drawable that fills the Canvas with a specified color,
- * with respect to the clip region. Note that a ColorDrawable ignores the ColorFilter.
- * It also ignores the Bounds, meaning it will draw everywhere in the current clip,
- * even if setBounds(...) was called with a smaller area.
+ * A specialized Drawable that fills the Canvas with a specified color.
+ * Note that a ColorDrawable ignores the ColorFilter.
  *
  * <p>It can be defined in an XML file with the <code>&lt;color></code> element.</p>
  *
@@ -37,6 +35,7 @@ import java.io.IOException;
  */
 public class ColorDrawable extends Drawable {
     private ColorState mState;
+    private final Paint mPaint = new Paint();
 
     /**
      * Creates a new black ColorDrawable.
@@ -66,7 +65,10 @@ public class ColorDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        canvas.drawColor(mState.mUseColor);
+        if ((mState.mUseColor >>> 24) != 0) {
+            mPaint.setColor(mState.mUseColor);
+            canvas.drawRect(getBounds(), mPaint);
+        }
     }
 
     /**
