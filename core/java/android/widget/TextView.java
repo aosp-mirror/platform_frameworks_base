@@ -7237,50 +7237,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             ((SelectionModifierCursorController) mSelectionModifierCursorController);
         int minOffset = selectionModifierCursorController.getMinTouchOffset();
         int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
-
-        if (minOffset == maxOffset) {
-            int offset = Math.max(0, Math.min(minOffset, mTransformed.length()));
-
-            // Tolerance, number of charaters around tapped position
-            final int range = 1;
-            final int max = mTransformed.length() - 1;
-
-            // 'Smart' word selection: detect position between words
-            for (int i = -range; i <= range; i++) {
-                int index = offset + i;
-                if (index >= 0 && index <= max) {
-                    if (Character.isSpaceChar(mTransformed.charAt(index))) {
-                        // Select current space
-                        selectionStart = index;
-                        selectionEnd = selectionStart + 1;
-
-                        // Extend selection to maximum space range
-                        while (selectionStart > 0 &&
-                                Character.isSpaceChar(mTransformed.charAt(selectionStart - 1))) {
-                            selectionStart--;
-                        }
-                        while (selectionEnd < max &&
-                                Character.isSpaceChar(mTransformed.charAt(selectionEnd))) {
-                            selectionEnd++;
-                        }
-
-                        Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
-                        return;
-                    }
-                }
-            }
-
-            // 'Smart' word selection: detect position at beginning or end of text.
-            if (offset <= range) {
-                Selection.setSelection((Spannable) mText, 0, 0);
-                return;
-            }
-            if (offset >= (max - range)) {
-                Selection.setSelection((Spannable) mText, max + 1, max + 1);
-                return;
-            }
-        }
-
+        
         long wordLimits = getWordLimitsAt(minOffset);
         if (wordLimits >= 0) {
             selectionStart = (int) (wordLimits >>> 32);
