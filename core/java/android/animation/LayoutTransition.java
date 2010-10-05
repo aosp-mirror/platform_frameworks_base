@@ -459,21 +459,22 @@ public class LayoutTransition {
      * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is being set.
-     * @param animator The animation being assigned.
+     * @param animator The animation being assigned. A value of <code>null</code> means that no
+     * animation will be run for the specified transitionType.
      */
     public void setAnimator(int transitionType, Animator animator) {
         switch (transitionType) {
             case CHANGE_APPEARING:
-                mChangingAppearingAnim = (animator != null) ? animator : defaultChangeIn;
+                mChangingAppearingAnim = animator;
                 break;
             case CHANGE_DISAPPEARING:
-                mChangingDisappearingAnim = (animator != null) ? animator : defaultChangeOut;
+                mChangingDisappearingAnim = animator;
                 break;
             case APPEARING:
-                mAppearingAnim = (animator != null) ? animator : defaultFadeIn;
+                mAppearingAnim = animator;
                 break;
             case DISAPPEARING:
-                mDisappearingAnim = (animator != null) ? animator : defaultFadeOut;
+                mDisappearingAnim = animator;
                 break;
         }
     }
@@ -516,6 +517,14 @@ public class LayoutTransition {
      * transition is occuring because an item is being added to or removed from the parent.
      */
     private void runChangeTransition(final ViewGroup parent, View newView, final int changeReason) {
+
+        Animator baseAnimator = (changeReason == APPEARING) ?
+                mChangingAppearingAnim : mChangingDisappearingAnim;
+        // If the animation is null, there's nothing to do
+        if (baseAnimator == null) {
+            return;
+        }
+
         // reset the inter-animation delay, in case we use it later
         staggerDelay = 0;
 
@@ -540,9 +549,7 @@ public class LayoutTransition {
                 }
 
                 // Make a copy of the appropriate animation
-                final Animator anim = (changeReason == APPEARING) ?
-                        mChangingAppearingAnim.clone() :
-                        mChangingDisappearingAnim.clone();
+                final Animator anim = baseAnimator.clone();
 
                 // Cache the animation in case we need to cancel it later
                 currentAnimations.put(child, anim);
@@ -633,6 +640,14 @@ public class LayoutTransition {
      * @param child The View being added to the ViewGroup.
      */
     private void runAppearingTransition(final ViewGroup parent, final View child) {
+        if (mAppearingAnim == null) {
+            if (mListeners != null) {
+                for (TransitionListener listener : mListeners) {
+                    listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
+                }
+            }
+            return;
+        }
         Animator anim = mAppearingAnim.clone();
         anim.setTarget(child);
         anim.setStartDelay(mAppearingDelay);
@@ -659,6 +674,14 @@ public class LayoutTransition {
      * @param child The View being removed from the ViewGroup.
      */
     private void runDisappearingTransition(final ViewGroup parent, final View child) {
+        if (mDisappearingAnim == null) {
+            if (mListeners != null) {
+                for (TransitionListener listener : mListeners) {
+                    listener.endTransition(LayoutTransition.this, parent, child, DISAPPEARING);
+                }
+            }
+            return;
+        }
         Animator anim = mDisappearingAnim.clone();
         anim.setStartDelay(mDisappearingDelay);
         anim.setDuration(mDisappearingDuration);
