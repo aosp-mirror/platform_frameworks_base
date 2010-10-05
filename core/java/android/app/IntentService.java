@@ -113,6 +113,12 @@ public abstract class IntentService extends Service {
         mServiceHandler.sendMessage(msg);
     }
 
+    /**
+     * You should not override this method for your IntentService. Instead,
+     * override {@link #onHandleIntent}, which the system calls when the IntentService
+     * receives a start request.
+     * @see android.app.Service#onStartCommand
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         onStart(intent, startId);
@@ -124,6 +130,11 @@ public abstract class IntentService extends Service {
         mServiceLooper.quit();
     }
 
+    /**
+     * Unless you provide binding for your service, you don't need to implement this
+     * method, because the default implementation returns null. 
+     * @see android.app.Service#onBind
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -135,6 +146,8 @@ public abstract class IntentService extends Service {
      * worker thread that runs independently from other application logic.
      * So, if this code takes a long time, it will hold up other requests to
      * the same IntentService, but it will not hold up anything else.
+     * When all requests have been handled, the IntentService stops itself,
+     * so you should not call {@link #stopSelf}.
      *
      * @param intent The value passed to {@link
      *               android.content.Context#startService(Intent)}.
