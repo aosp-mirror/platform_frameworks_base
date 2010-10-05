@@ -787,7 +787,8 @@ public class PackageParser {
         pkg.installLocation = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_installLocation,
                 PARSE_DEFAULT_INSTALL_LOCATION);
-
+        pkg.applicationInfo.installLocation = pkg.installLocation;
+        
         // Resource boolean are -1, so 1 means we don't know the value.
         int supportsSmallScreens = 1;
         int supportsNormalScreens = 1;
@@ -1600,7 +1601,7 @@ public class PackageParser {
                 if (sa.getBoolean(
                         com.android.internal.R.styleable.AndroidManifestApplication_cantSaveState,
                         false)) {
-                    ai.flags |= ApplicationInfo.CANT_SAVE_STATE;
+                    ai.flags |= ApplicationInfo.FLAG_CANT_SAVE_STATE;
 
                     // A heavy-weight application can not be in a custom process.
                     // We can do direct compare because we intern all strings.
@@ -1897,7 +1898,7 @@ public class PackageParser {
 
         sa.recycle();
 
-        if (receiver && (owner.applicationInfo.flags&ApplicationInfo.CANT_SAVE_STATE) != 0) {
+        if (receiver && (owner.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
             // A heavy-weight application can not have receives in its main process
             // We can do direct compare because we intern all strings.
             if (a.info.processName == owner.packageName) {
@@ -2185,7 +2186,7 @@ public class PackageParser {
 
         sa.recycle();
 
-        if ((owner.applicationInfo.flags&ApplicationInfo.CANT_SAVE_STATE) != 0) {
+        if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
             // A heavy-weight application can not have providers in its main process
             // We can do direct compare because we intern all strings.
             if (p.info.processName == owner.packageName) {
@@ -2425,7 +2426,7 @@ public class PackageParser {
 
         sa.recycle();
 
-        if ((owner.applicationInfo.flags&ApplicationInfo.CANT_SAVE_STATE) != 0) {
+        if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
             // A heavy-weight application can not have services in its main process
             // We can do direct compare because we intern all strings.
             if (s.info.processName == owner.packageName) {
