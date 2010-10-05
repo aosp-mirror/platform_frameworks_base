@@ -101,6 +101,8 @@ public class LinesActivity extends Activity {
             mSmallPaint.setAntiAlias(false);
             canvas.drawLine(0.0f, 0.0f, 400.0f, 0.0f, mSmallPaint);
             mSmallPaint.setAntiAlias(true);
+            canvas.drawLine(0.0f, 0.0f, 0.0f, 400.0f, mSmallPaint);
+            canvas.drawLine(0.0f, 400.0f, 400.0f, 400.0f, mSmallPaint);
             
             canvas.translate(120.0f, 0.0f);
             mAlphaPaint.setShader(mShader);            
