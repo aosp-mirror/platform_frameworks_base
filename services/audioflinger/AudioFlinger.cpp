@@ -1715,7 +1715,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
         // The first time a track is added we wait
         // for all its buffers to be filled before processing it
         mAudioMixer->setActiveTrack(track->name());
-        if (cblk->framesReady() && (track->isReady() || track->isStopped()) &&
+        if (cblk->framesReady() && track->isReady() &&
                 !track->isPaused() && !track->isTerminated())
         {
             //LOGV("track %d u=%08x, s=%08x [OK] on thread %p", track->name(), cblk->user, cblk->server, this);
@@ -2231,7 +2231,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
 
                 // The first time a track is added we wait
                 // for all its buffers to be filled before processing it
-                if (cblk->framesReady() && (track->isReady() || track->isStopped()) &&
+                if (cblk->framesReady() && track->isReady() &&
                         !track->isPaused() && !track->isTerminated())
                 {
                     //LOGV("track %d u=%08x, s=%08x [OK]", track->name(), cblk->user, cblk->server);
@@ -3039,7 +3039,7 @@ getNextBuffer_exit:
 }
 
 bool AudioFlinger::PlaybackThread::Track::isReady() const {
-    if (mFillingUpStatus != FS_FILLING) return true;
+    if (mFillingUpStatus != FS_FILLING || isStopped() || isPausing()) return true;
 
     if (mCblk->framesReady() >= mCblk->frameCount ||
             (mCblk->flags & CBLK_FORCEREADY_MSK)) {
