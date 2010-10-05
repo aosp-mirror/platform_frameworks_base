@@ -134,16 +134,19 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
 
 // --- InputWindow ---
 
-bool InputWindow::visibleFrameIntersects(const InputWindow* other) const {
-    return visibleFrameRight > other->visibleFrameLeft
-        && visibleFrameLeft < other->visibleFrameRight
-        && visibleFrameBottom > other->visibleFrameTop
-        && visibleFrameTop < other->visibleFrameBottom;
-}
-
 bool InputWindow::touchableAreaContainsPoint(int32_t x, int32_t y) const {
     return x >= touchableAreaLeft && x <= touchableAreaRight
             && y >= touchableAreaTop && y <= touchableAreaBottom;
+}
+
+bool InputWindow::frameContainsPoint(int32_t x, int32_t y) const {
+    return x >= frameLeft && x <= frameRight
+            && y >= frameTop && y <= frameBottom;
+}
+
+bool InputWindow::isTrustedOverlay() const {
+    return layoutParamsType == TYPE_INPUT_METHOD
+            || layoutParamsType == TYPE_INPUT_METHOD_DIALOG;
 }
 
 
@@ -1053,8 +1056,12 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
                 if (maskedAction == AMOTION_EVENT_ACTION_DOWN
                         && (flags & InputWindow::FLAG_WATCH_OUTSIDE_TOUCH)) {
-                    mTempTouchState.addOrUpdateWindow(window,
-                            InputTarget::FLAG_OUTSIDE, BitSet32(0));
+                    int32_t outsideTargetFlags = InputTarget::FLAG_OUTSIDE;
+                    if (isWindowObscuredAtPointLocked(window, x, y)) {
+                        outsideTargetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
+                    }
+
+                    mTempTouchState.addOrUpdateWindow(window, outsideTargetFlags, BitSet32(0));
                 }
             }
         }
@@ -1083,10 +1090,6 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             // (May be NULL which is why we put this code block before the next check.)
             newTouchedWindow = mTempTouchState.getFirstForegroundWindow();
         }
-        int32_t targetFlags = InputTarget::FLAG_FOREGROUND;
-        if (isSplit) {
-            targetFlags |= InputTarget::FLAG_SPLIT;
-        }
 
         // If we did not find a touched window then fail.
         if (! newTouchedWindow) {
@@ -1104,6 +1107,15 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             LOGI("Dropping event because there is no touched window or focused application.");
             injectionResult = INPUT_EVENT_INJECTION_FAILED;
             goto Failed;
+        }
+
+        // Set target flags.
+        int32_t targetFlags = InputTarget::FLAG_FOREGROUND;
+        if (isSplit) {
+            targetFlags |= InputTarget::FLAG_SPLIT;
+        }
+        if (isWindowObscuredAtPointLocked(newTouchedWindow, x, y)) {
+            targetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
         }
 
         // Update the temporary touch state.
@@ -1186,19 +1198,9 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             for (size_t i = 0; i < mWindows.size(); i++) {
                 const InputWindow* window = & mWindows[i];
                 if (window->layoutParamsType == InputWindow::TYPE_WALLPAPER) {
-                    mTempTouchState.addOrUpdateWindow(window, 0, BitSet32(0));
+                    mTempTouchState.addOrUpdateWindow(window,
+                            InputTarget::FLAG_WINDOW_IS_OBSCURED, BitSet32(0));
                 }
-            }
-        }
-    }
-
-    // If a touched window has been obscured at any point during the touch gesture, set
-    // the appropriate flag so we remember it for the entire gesture.
-    for (size_t i = 0; i < mTempTouchState.windows.size(); i++) {
-        TouchedWindow& touchedWindow = mTempTouchState.windows.editItemAt(i);
-        if ((touchedWindow.targetFlags & InputTarget::FLAG_WINDOW_IS_OBSCURED) == 0) {
-            if (isWindowObscuredLocked(touchedWindow.window)) {
-                touchedWindow.targetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
             }
         }
     }
@@ -1326,14 +1328,15 @@ bool InputDispatcher::checkInjectionPermission(const InputWindow* window,
     return true;
 }
 
-bool InputDispatcher::isWindowObscuredLocked(const InputWindow* window) {
+bool InputDispatcher::isWindowObscuredAtPointLocked(
+        const InputWindow* window, int32_t x, int32_t y) const {
     size_t numWindows = mWindows.size();
     for (size_t i = 0; i < numWindows; i++) {
         const InputWindow* other = & mWindows.itemAt(i);
         if (other == window) {
             break;
         }
-        if (other->visible && window->visibleFrameIntersects(other)) {
+        if (other->visible && ! other->isTrustedOverlay() && other->frameContainsPoint(x, y)) {
             return true;
         }
     }
