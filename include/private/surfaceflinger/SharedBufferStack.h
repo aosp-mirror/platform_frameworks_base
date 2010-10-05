@@ -114,8 +114,9 @@ public:
 
     int32_t     identity;       // surface's identity (const)
     int32_t     token;          // surface's token (for debugging)
-    int32_t     reserved32[1];
     Statistics  stats;
+    int8_t      headBuf;        // last retired buffer
+    uint8_t     reservedBytes[3];
     int32_t     reserved;
     BufferData  buffers[NUM_BUFFER_MAX];     // 1024 bytes
 };
@@ -201,6 +202,7 @@ public:
     status_t undoDequeue(int buf);
     
     status_t lock(int buf);
+    status_t cancel(int buf);
     status_t queue(int buf);
     bool needNewBuffer(int buffer) const;
     status_t setDirtyRegion(int buffer, const Region& reg);
@@ -230,8 +232,9 @@ private:
         inline ssize_t operator()();
     };
 
-    struct UndoDequeueUpdate : public UpdateBase {
-        inline UndoDequeueUpdate(SharedBufferBase* sbb);
+    struct CancelUpdate : public UpdateBase {
+        int tail, buf;
+        inline CancelUpdate(SharedBufferBase* sbb, int tail, int buf);
         inline ssize_t operator()();
     };
 
@@ -256,7 +259,6 @@ private:
     int mNumBuffers;
 
     int32_t tail;
-    int32_t undoDequeueTail;
     int32_t queued_head;
     // statistics...
     nsecs_t mDequeueTime[SharedBufferStack::NUM_BUFFER_MAX];
