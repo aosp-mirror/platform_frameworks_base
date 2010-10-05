@@ -93,6 +93,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.view.ViewRoot;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
@@ -192,7 +193,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     
     private static int PRIORITY = 100;
 
-    private final int[] mTempCoords = new int[2];
+    final int[] mTempCoords = new int[2];
+    Rect mTempRect;
 
     private ColorStateList mTextColor;
     private int mCurTextColor;
@@ -7651,6 +7653,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private float mOffsetY;
         private float mHotspotX;
         private float mHotspotY;
+        private int mLastParentX;
+        private int mLastParentY;
 
         public HandleView(CursorController controller, Drawable handle) {
             super(TextView.this.mContext);
@@ -7660,8 +7664,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mContainer.setSplitTouchEnabled(true);
             mContainer.setClippingEnabled(false);
-            mHotspotX = mDrawable.getIntrinsicWidth() * 0.5f;
-            mHotspotY = -mDrawable.getIntrinsicHeight() * 0.2f;
+
+            final int handleWidth = mDrawable.getIntrinsicWidth();
+            final int handleHeight = mDrawable.getIntrinsicHeight();
+            mHotspotX = handleWidth * 0.5f;
+            mHotspotY = -handleHeight * 0.2f;
         }
 
         @Override
@@ -7671,7 +7678,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void show() {
-            if (!isPositionInBounds()) {
+            if (!isPositionVisible()) {
                 hide();
                 return;
             }
@@ -7692,7 +7699,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mContainer.isShowing();
         }
 
-        private boolean isPositionInBounds() {
+        private boolean isPositionVisible() {
+            // Always show a dragging handle.
+            if (mIsDragging) {
+                return true;
+            }
+
             final int extendedPaddingTop = getExtendedPaddingTop();
             final int extendedPaddingBottom = getExtendedPaddingBottom();
             final int compoundPaddingLeft = getCompoundPaddingLeft();
@@ -7704,27 +7716,54 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int top = 0;
             final int bottom = hostView.getHeight();
 
-            final int clipLeft = left + compoundPaddingLeft;
-            final int clipTop = top + extendedPaddingTop;
-            final int clipRight = right - compoundPaddingRight;
-            final int clipBottom = bottom - extendedPaddingBottom;
+            if (mTempRect == null) {
+                mTempRect = new Rect();
+            }
+            final Rect clip = mTempRect;
+            clip.left = left + compoundPaddingLeft;
+            clip.top = top + extendedPaddingTop;
+            clip.right = right - compoundPaddingRight;
+            clip.bottom = bottom - extendedPaddingBottom;
 
-            return mPositionX + mHotspotX >= clipLeft && mPositionX + mHotspotX <= clipRight &&
-                    mPositionY + mHotspotY >= clipTop && mPositionY + mHotspotY <= clipBottom;
+            final ViewParent parent = hostView.getParent();
+            if (parent == null || !parent.getChildVisibleRect(hostView, clip, null)) {
+                return false;
+            }
+
+            final int[] coords = mTempCoords;
+            hostView.getLocationInWindow(coords);
+            final int posX = coords[0] + mPositionX + (int) mHotspotX;
+            final int posY = coords[1] + mPositionY;
+
+            return posX >= clip.left && posX <= clip.right &&
+                    posY >= clip.top && posY + mHotspotY <= clip.bottom;
         }
 
         private void moveTo(int x, int y) {
             mPositionX = x - TextView.this.mScrollX;
             mPositionY = y - TextView.this.mScrollY;
-            if (isPositionInBounds()) {
+            if (isPositionVisible()) {
+                int[] coords = null;
                 if (mContainer.isShowing()){
-                    final int[] coords = mTempCoords;
+                    coords = mTempCoords;
                     TextView.this.getLocationInWindow(coords);
-                    coords[0] += mPositionX;
-                    coords[1] += mPositionY;
-                    mContainer.update(coords[0], coords[1], mRight - mLeft, mBottom - mTop);
+                    mContainer.update(coords[0] + mPositionX, coords[1] + mPositionY,
+                            mRight - mLeft, mBottom - mTop);
                 } else {
                     show();
+                }
+
+                if (mIsDragging) {
+                    if (coords == null) {
+                        coords = mTempCoords;
+                        TextView.this.getLocationInWindow(coords);
+                    }
+                    if (coords[0] != mLastParentX || coords[1] != mLastParentY) {
+                        mOffsetX += coords[0] - mLastParentX;
+                        mOffsetY += coords[1] - mLastParentY;
+                        mLastParentX = coords[0];
+                        mLastParentY = coords[1];
+                    }
                 }
             } else {
                 hide();
@@ -7752,6 +7791,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final float rawY = ev.getRawY();
                 mOffsetX = rawX - mPositionX;
                 mOffsetY = rawY - mPositionY;
+                final int[] coords = mTempCoords;
+                TextView.this.getLocationInWindow(coords);
+                mLastParentX = coords[0];
+                mLastParentY = coords[1];
                 mIsDragging = true;
                 break;
             }
