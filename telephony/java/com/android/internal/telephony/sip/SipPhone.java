@@ -875,6 +875,9 @@ public class SipPhone extends SipPhoneBase {
         public void onError(SipAudioCall call, int errorCode,
                 String errorMessage) {
             switch (errorCode) {
+                case SipErrorCode.SERVER_UNREACHABLE:
+                    onError(Connection.DisconnectCause.SERVER_UNREACHABLE);
+                    break;
                 case SipErrorCode.PEER_NOT_REACHABLE:
                     onError(Connection.DisconnectCause.NUMBER_UNREACHABLE);
                     break;

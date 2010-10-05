@@ -40,6 +40,7 @@ namespace android {
 static const int64_t kMax32BitFileSize = 0x007fffffffLL;
 static const uint8_t kNalUnitTypeSeqParamSet = 0x07;
 static const uint8_t kNalUnitTypePicParamSet = 0x08;
+static const int64_t kVideoMediaTimeAdjustPeriodTimeUs = 10000000LL;  // 10s
 
 class MPEG4Writer::Track {
 public:
@@ -148,6 +149,28 @@ private:
     int64_t mPreviousTrackTimeUs;
     int64_t mTrackEveryTimeDurationUs;
 
+    // Has the media time adjustment for video started?
+    bool    mIsMediaTimeAdjustmentOn;
+    // The time stamp when previous media time adjustment period starts
+    int64_t mPrevMediaTimeAdjustTimestampUs;
+    // Number of vidoe frames whose time stamp may be adjusted
+    int64_t mMediaTimeAdjustNumFrames;
+    // The sample number when previous meida time adjustmnet period starts
+    int64_t mPrevMediaTimeAdjustSample;
+    // The total accumulated drift time within a period of
+    // kVideoMediaTimeAdjustPeriodTimeUs.
+    int64_t mTotalDriftTimeToAdjustUs;
+    // The total accumalated drift time since the start of the recording
+    // excluding the current time adjustment period
+    int64_t mPrevTotalAccumDriftTimeUs;
+
+    // Update the audio track's drift information.
+    void updateDriftTime(const sp<MetaData>& meta);
+
+    // Adjust the time stamp of the video track according to
+    // the drift time information from the audio track.
+    void adjustMediaTime(int64_t *timestampUs);
+
     static void *ThreadWrapper(void *me);
     status_t threadEntry();
 
@@ -189,6 +212,7 @@ MPEG4Writer::MPEG4Writer(const char *filename)
     : mFile(fopen(filename, "wb")),
       mUse4ByteNalLength(true),
       mUse32BitOffset(true),
+      mIsFileSizeLimitExplicitlyRequested(false),
       mPaused(false),
       mStarted(false),
       mOffset(0),
@@ -202,6 +226,7 @@ MPEG4Writer::MPEG4Writer(int fd)
     : mFile(fdopen(fd, "wb")),
       mUse4ByteNalLength(true),
       mUse32BitOffset(true),
+      mIsFileSizeLimitExplicitlyRequested(false),
       mPaused(false),
       mStarted(false),
       mOffset(0),
@@ -299,7 +324,7 @@ int64_t MPEG4Writer::estimateMoovBoxSize(int32_t bitRate) {
     static const int64_t MAX_MOOV_BOX_SIZE = (180 * 3000000 * 6LL / 8000);
     int64_t size = MIN_MOOV_BOX_SIZE;
 
-    if (mMaxFileSizeLimitBytes != 0) {
+    if (mMaxFileSizeLimitBytes != 0 && mIsFileSizeLimitExplicitlyRequested) {
         size = mMaxFileSizeLimitBytes * 4 / 1000;
     } else if (mMaxFileDurationLimitUs != 0) {
         if (bitRate <= 0) {
@@ -330,6 +355,16 @@ status_t MPEG4Writer::start(MetaData *param) {
         return UNKNOWN_ERROR;
     }
 
+    /*
+     * Check mMaxFileSizeLimitBytes at the beginning
+     * since mMaxFileSizeLimitBytes may be implicitly
+     * changed later for 32-bit file offset even if
+     * user does not ask to set it explicitly.
+     */
+    if (mMaxFileSizeLimitBytes != 0) {
+        mIsFileSizeLimitExplicitlyRequested = true;
+    }
+
     int32_t use64BitOffset;
     if (param &&
         param->findInt32(kKey64BitFileOffset, &use64BitOffset) &&
@@ -346,7 +381,7 @@ status_t MPEG4Writer::start(MetaData *param) {
         // If file size is set to be larger than the 32 bit file
         // size limit, treat it as an error.
         if (mMaxFileSizeLimitBytes > kMax32BitFileSize) {
-            LOGW("32-bi file size limit (%lld bytes) too big. "
+            LOGW("32-bit file size limit (%lld bytes) too big. "
                  "It is changed to %lld bytes",
                 mMaxFileSizeLimitBytes, kMax32BitFileSize);
             mMaxFileSizeLimitBytes = kMax32BitFileSize;
@@ -1149,6 +1184,12 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     mNumStscTableEntries = 0;
     mNumSttsTableEntries = 0;
     mMdatSizeBytes = 0;
+    mIsMediaTimeAdjustmentOn = false;
+    mPrevMediaTimeAdjustTimestampUs = 0;
+    mMediaTimeAdjustNumFrames = 0;
+    mPrevMediaTimeAdjustSample = 0;
+    mTotalDriftTimeToAdjustUs = 0;
+    mPrevTotalAccumDriftTimeUs = 0;
 
     pthread_create(&mThread, &attr, ThreadWrapper, this);
     pthread_attr_destroy(&attr);
@@ -1437,6 +1478,145 @@ status_t MPEG4Writer::Track::makeAVCCodecSpecificData(
     return OK;
 }
 
+/*
+* The video track's media time adjustment for real-time applications
+* is described as follows:
+*
+* First, the media time adjustment is done for every period of
+* kVideoMediaTimeAdjustPeriodTimeUs. kVideoMediaTimeAdjustPeriodTimeUs
+* is currently a fixed value chosen heuristically. The value of
+* kVideoMediaTimeAdjustPeriodTimeUs should not be very large or very small
+* for two considerations: on one hand, a relatively large value
+* helps reduce large fluctuation of drift time in the audio encoding
+* path; while on the other hand, a relatively small value helps keep
+* restoring synchronization in audio/video more frequently. Note for the
+* very first period of kVideoMediaTimeAdjustPeriodTimeUs, there is
+* no media time adjustment for the video track.
+*
+* Second, the total accumulated audio track time drift found
+* in a period of kVideoMediaTimeAdjustPeriodTimeUs is distributed
+* over a stream of incoming video frames. The number of video frames
+* affected is determined based on the number of recorded video frames
+* within the past kVideoMediaTimeAdjustPeriodTimeUs period.
+* We choose to distribute the drift time over only a portion
+* (rather than all) of the total number of recorded video frames
+* in order to make sure that the video track media time adjustment is
+* completed for the current period before the next video track media
+* time adjustment period starts. Currently, the portion chosen is a
+* half (0.5).
+*
+* Last, various additional checks are performed to ensure that
+* the actual audio encoding path does not have too much drift.
+* In particular, 1) we want to limit the average incremental time
+* adjustment for each video frame to be less than a threshold
+* for a single period of kVideoMediaTimeAdjustPeriodTimeUs.
+* Currently, the threshold is set to 5 ms. If the average incremental
+* media time adjustment for a video frame is larger than the
+* threshold, the audio encoding path has too much time drift.
+* 2) We also want to limit the total time drift in the audio
+* encoding path to be less than a threshold for a period of
+* kVideoMediaTimeAdjustPeriodTimeUs. Currently, the threshold
+* is 0.5% of kVideoMediaTimeAdjustPeriodTimeUs. If the time drift of
+* the audio encoding path is larger than the threshold, the audio
+* encoding path has too much time drift. We treat the large time
+* drift of the audio encoding path as errors, since there is no
+* way to keep audio/video in synchronization for real-time
+* applications if the time drift is too large unless we drop some
+* video frames, which has its own problems that we don't want
+* to get into for the time being.
+*/
+void MPEG4Writer::Track::adjustMediaTime(int64_t *timestampUs) {
+    if (*timestampUs - mPrevMediaTimeAdjustTimestampUs >=
+        kVideoMediaTimeAdjustPeriodTimeUs) {
+
+        LOGV("New media time adjustment period at %lld us", *timestampUs);
+        mIsMediaTimeAdjustmentOn = true;
+        mMediaTimeAdjustNumFrames =
+                (mNumSamples - mPrevMediaTimeAdjustSample) >> 1;
+
+        mPrevMediaTimeAdjustTimestampUs = *timestampUs;
+        mPrevMediaTimeAdjustSample = mNumSamples;
+        int64_t totalAccumDriftTimeUs = mOwner->getDriftTimeUs();
+        mTotalDriftTimeToAdjustUs =
+                totalAccumDriftTimeUs - mPrevTotalAccumDriftTimeUs;
+
+        mPrevTotalAccumDriftTimeUs = totalAccumDriftTimeUs;
+
+        // Check on incremental adjusted time per frame
+        int64_t adjustTimePerFrameUs =
+                mTotalDriftTimeToAdjustUs / mMediaTimeAdjustNumFrames;
+
+        if (adjustTimePerFrameUs < 0) {
+            adjustTimePerFrameUs = -adjustTimePerFrameUs;
+        }
+        if (adjustTimePerFrameUs >= 5000) {
+            LOGE("Adjusted time per video frame is %lld us",
+                adjustTimePerFrameUs);
+            CHECK(!"Video frame time adjustment is too large!");
+        }
+
+        // Check on total accumulated time drift within a period of
+        // kVideoMediaTimeAdjustPeriodTimeUs.
+        int64_t driftPercentage = (mTotalDriftTimeToAdjustUs * 1000)
+                / kVideoMediaTimeAdjustPeriodTimeUs;
+
+        if (driftPercentage < 0) {
+            driftPercentage = -driftPercentage;
+        }
+        if (driftPercentage > 5) {
+            LOGE("Audio track has time drift %lld us over %lld us",
+                mTotalDriftTimeToAdjustUs,
+                kVideoMediaTimeAdjustPeriodTimeUs);
+
+            CHECK(!"The audio track media time drifts too much!");
+        }
+
+    }
+
+    if (mIsMediaTimeAdjustmentOn) {
+        if (mNumSamples - mPrevMediaTimeAdjustSample <=
+            mMediaTimeAdjustNumFrames) {
+
+            // Do media time incremental adjustment
+            int64_t incrementalAdjustTimeUs =
+                        (mTotalDriftTimeToAdjustUs *
+                            (mNumSamples - mPrevMediaTimeAdjustSample))
+                                / mMediaTimeAdjustNumFrames;
+
+            *timestampUs +=
+                (incrementalAdjustTimeUs + mPrevTotalAccumDriftTimeUs);
+
+            LOGV("Incremental video frame media time adjustment: %lld us",
+                (incrementalAdjustTimeUs + mPrevTotalAccumDriftTimeUs));
+        } else {
+            // Within the remaining adjustment period,
+            // no incremental adjustment is needed.
+            *timestampUs +=
+                (mTotalDriftTimeToAdjustUs + mPrevTotalAccumDriftTimeUs);
+
+            LOGV("Fixed video frame media time adjustment: %lld us",
+                (mTotalDriftTimeToAdjustUs + mPrevTotalAccumDriftTimeUs));
+        }
+    }
+}
+
+/*
+ * Updates the drift time from the audio track so that
+ * the video track can get the updated drift time information
+ * from the file writer. The fluctuation of the drift time of the audio
+ * encoding path is smoothed out with a simple filter by giving a larger
+ * weight to more recently drift time. The filter coefficients, 0.5 and 0.5,
+ * are heuristically determined.
+ */
+void MPEG4Writer::Track::updateDriftTime(const sp<MetaData>& meta) {
+    int64_t driftTimeUs = 0;
+    if (meta->findInt64(kKeyDriftTime, &driftTimeUs)) {
+        int64_t prevDriftTimeUs = mOwner->getDriftTimeUs();
+        int64_t timeUs = (driftTimeUs + prevDriftTimeUs) >> 1;
+        mOwner->setDriftTimeUs(timeUs);
+    }
+}
+
 status_t MPEG4Writer::Track::threadEntry() {
     int32_t count = 0;
     const int64_t interleaveDurationUs = mOwner->interleaveDuration();
@@ -1587,24 +1767,16 @@ status_t MPEG4Writer::Track::threadEntry() {
 
         timestampUs -= previousPausedDurationUs;
         CHECK(timestampUs >= 0);
-        if (mIsRealTimeRecording && !mIsAudio) {
-            // The minor adjustment on the timestamp is heuristic/experimental
-            // We are adjusting the timestamp to reduce the fluctuation of the duration
-            // of neighboring samples. This in turn helps reduce the track header size,
-            // especially, the number of entries in the "stts" box.
-            if (mNumSamples > 1) {
-                int64_t currDriftTimeUs = mOwner->getDriftTimeUs();
-                int64_t durationUs = timestampUs + currDriftTimeUs - lastTimestampUs;
-                int64_t diffUs = (durationUs > lastDurationUs)
-                            ? durationUs - lastDurationUs
-                            : lastDurationUs - durationUs;
-                if (diffUs <= 5000) {  // XXX: Magic number 5ms
-                    timestampUs = lastTimestampUs + lastDurationUs;
-                } else {
-                    timestampUs += currDriftTimeUs;
-                }
+
+        // Media time adjustment for real-time applications
+        if (mIsRealTimeRecording) {
+            if (mIsAudio) {
+                updateDriftTime(meta_data);
+            } else {
+                adjustMediaTime(&timestampUs);
             }
         }
+
         CHECK(timestampUs >= 0);
         if (mNumSamples > 1) {
             if (timestampUs <= lastTimestampUs) {
@@ -1656,12 +1828,6 @@ status_t MPEG4Writer::Track::threadEntry() {
         lastDurationUs = timestampUs - lastTimestampUs;
         lastDurationTicks = currDurationTicks;
         lastTimestampUs = timestampUs;
-        if (mIsRealTimeRecording && mIsAudio) {
-            int64_t driftTimeUs = 0;
-            if (meta_data->findInt64(kKeyDriftTime, &driftTimeUs)) {
-                mOwner->setDriftTimeUs(driftTimeUs);
-            }
-        }
 
         if (isSync != 0) {
             addOneStssTableEntry(mNumSamples);
@@ -1735,6 +1901,9 @@ status_t MPEG4Writer::Track::threadEntry() {
     mReachedEOS = true;
     LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames. - %s",
             count, nZeroLengthFrames, mNumSamples, mIsAudio? "audio": "video");
+    if (mIsAudio) {
+        LOGI("Audio track drift time: %lld us", mOwner->getDriftTimeUs());
+    }
 
     if (err == ERROR_END_OF_STREAM) {
         return OK;

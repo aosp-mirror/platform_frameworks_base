@@ -194,10 +194,41 @@ public class ActivityInfo extends ComponentInfo
     public static final int SCREEN_ORIENTATION_SENSOR = 4;
   
     /**
-     * Constant corresponding to <code>sensor</code> in
+     * Constant corresponding to <code>nosensor</code> in
      * the {@link android.R.attr#screenOrientation} attribute.
      */
     public static final int SCREEN_ORIENTATION_NOSENSOR = 5;
+
+    /**
+     * Constant corresponding to <code>sensorLandscape</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_SENSOR_LANDSCAPE = 6;
+
+    /**
+     * Constant corresponding to <code>sensorPortrait</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_SENSOR_PORTRAIT = 7;
+
+    /**
+     * Constant corresponding to <code>reverseLandscape</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_REVERSE_LANDSCAPE = 8;
+
+    /**
+     * Constant corresponding to <code>reversePortrait</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_REVERSE_PORTRAIT = 9;
+
+    /**
+     * Constant corresponding to <code>fullSensor</code> in
+     * the {@link android.R.attr#screenOrientation} attribute.
+     */
+    public static final int SCREEN_ORIENTATION_FULL_SENSOR = 10;
+
     /**
      * The preferred screen orientation this activity would like to run in.
      * From the {@link android.R.attr#screenOrientation} attribute, one of
@@ -207,7 +238,12 @@ public class ActivityInfo extends ComponentInfo
      * {@link #SCREEN_ORIENTATION_USER},
      * {@link #SCREEN_ORIENTATION_BEHIND},
      * {@link #SCREEN_ORIENTATION_SENSOR},
-     * {@link #SCREEN_ORIENTATION_NOSENSOR}.
+     * {@link #SCREEN_ORIENTATION_NOSENSOR},
+     * {@link #SCREEN_ORIENTATION_SENSOR_LANDSCAPE},
+     * {@link #SCREEN_ORIENTATION_SENSOR_PORTRAIT},
+     * {@link #SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
+     * {@link #SCREEN_ORIENTATION_REVERSE_PORTRAIT},
+     * {@link #SCREEN_ORIENTATION_FULL_SENSOR}.
      */
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
     

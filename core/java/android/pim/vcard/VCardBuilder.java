@@ -133,9 +133,11 @@ public class VCardBuilder {
     public VCardBuilder(final int vcardType, String charset) {
         mVCardType = vcardType;
 
-        Log.w(LOG_TAG,
-                "Should not use vCard 4.0 when building vCard. " +
-                "It is not officially published yet.");
+        if (VCardConfig.isVersion40(vcardType)) {
+            Log.w(LOG_TAG,
+                    "Should not use vCard 4.0 when building vCard. " +
+                    "It is not officially published yet.");
+        }
 
         mIsV30OrV40 = VCardConfig.isVersion30(vcardType) || VCardConfig.isVersion40(vcardType);
         mShouldUseQuotedPrintable = VCardConfig.shouldUseQuotedPrintable(vcardType);

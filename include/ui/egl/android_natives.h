@@ -218,7 +218,17 @@ struct ANativeWindow
     int     (*perform)(struct ANativeWindow* window,
                 int operation, ... );
     
-    void* reserved_proc[3];
+    /*
+     * hook used to cancel a buffer that has been dequeued.
+     * No synchronization is performed between dequeue() and cancel(), so
+     * either external synchronization is needed, or these functions must be
+     * called from the same thread.
+     */
+    int     (*cancelBuffer)(struct ANativeWindow* window,
+                struct android_native_buffer_t* buffer);
+
+
+    void* reserved_proc[2];
 };
 
 // Backwards compatibility...  please switch to ANativeWindow.

@@ -285,10 +285,12 @@ ssize_t SharedBufferClient::DequeueUpdate::operator()() {
     return NO_ERROR;
 }
 
-SharedBufferClient::UndoDequeueUpdate::UndoDequeueUpdate(SharedBufferBase* sbb)
-    : UpdateBase(sbb) {    
+SharedBufferClient::CancelUpdate::CancelUpdate(SharedBufferBase* sbb,
+        int tail, int buf)
+    : UpdateBase(sbb), tail(tail), buf(buf) {
 }
-ssize_t SharedBufferClient::UndoDequeueUpdate::operator()() {
+ssize_t SharedBufferClient::CancelUpdate::operator()() {
+    stack.index[tail] = buf;
     android_atomic_inc(&stack.available);
     return NO_ERROR;
 }
@@ -319,7 +321,7 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
         return BAD_VALUE;
 
     // Preventively lock the current buffer before updating queued.
-    android_atomic_write(stack.index[head], &stack.inUse);
+    android_atomic_write(stack.headBuf, &stack.inUse);
 
     // Decrement the number of queued buffers 
     int32_t queued;
@@ -334,7 +336,9 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
     // the buffer we preventively locked upon entering this function
 
     head = (head + 1) % numBuffers;
-    android_atomic_write(stack.index[head], &stack.inUse);
+    const int8_t headBuf = stack.index[head];
+    stack.headBuf = headBuf;
+    android_atomic_write(headBuf, &stack.inUse);
 
     // head is only modified here, so we don't need to use cmpxchg
     android_atomic_write(head, &stack.head);
@@ -359,7 +363,7 @@ ssize_t SharedBufferServer::StatusUpdate::operator()() {
 SharedBufferClient::SharedBufferClient(SharedClient* sharedClient,
         int surface, int num, int32_t identity)
     : SharedBufferBase(sharedClient, surface, identity),
-      mNumBuffers(num), tail(0), undoDequeueTail(0)
+      mNumBuffers(num), tail(0)
 {
     SharedBufferStack& stack( *mSharedStack );
     tail = computeTail();
@@ -395,7 +399,6 @@ ssize_t SharedBufferClient::dequeue()
     DequeueUpdate update(this);
     updateCondition( update );
 
-    undoDequeueTail = tail;
     int dequeued = stack.index[tail];
     tail = ((tail+1 >= mNumBuffers) ? 0 : tail+1);
     LOGD_IF(DEBUG_ATOMICS, "dequeued=%d, tail++=%d, %s",
@@ -408,14 +411,19 @@ ssize_t SharedBufferClient::dequeue()
 
 status_t SharedBufferClient::undoDequeue(int buf)
 {
+    return cancel(buf);
+}
+
+status_t SharedBufferClient::cancel(int buf)
+{
     RWLock::AutoRLock _rd(mLock);
 
-    // TODO: we can only undo the previous dequeue, we should
-    // enforce that in the api
-    UndoDequeueUpdate update(this);
+    // calculate the new position of the tail index (essentially tail--)
+    int localTail = (tail + mNumBuffers - 1) % mNumBuffers;
+    CancelUpdate update(this, localTail, buf);
     status_t err = updateCondition( update );
     if (err == NO_ERROR) {
-        tail = undoDequeueTail;
+        tail = localTail;
     }
     return err;
 }

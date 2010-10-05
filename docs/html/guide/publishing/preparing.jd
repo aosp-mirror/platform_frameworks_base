@@ -1,20 +1,6 @@
 page.title=Preparing to Publish: A Checklist
 @jd:body
 
-<!--
-<div id="qv-wrapper">
-<div id="qv">
-
-<h2>In this document</h2>
-
-<ol>
-<li><a href=""></a></li>
-</ol>
-
-</div>
-</div>
--->
-
 <p>Publishing an application means testing it, packaging it appropriately, and 
 making it available to users of Android-powered mobile devices.</p>
 
@@ -34,7 +20,7 @@ Applications</a> document. </p>
 
 <div class="special">
 
-<p>Before you consider your application ready for release:</p>
+<p><a href="#releaseready">Before you consider your application ready for release</a>:</p>
 
 <ol>
 <li>Test your application extensively on an actual device </li>
@@ -44,7 +30,7 @@ Applications</a> document. </p>
 <li>Turn off logging and debugging and clean up data/files</li>
 </ol>
 
-<p>Before you do the final compile of your application:</p>
+<p><a href="#finalcompile">Before you do the final compile of your application</a>:</p>
 
 <ol start="6">
 <li>Version your application</li>
@@ -52,8 +38,9 @@ Applications</a> document. </p>
 <li>Register for a Maps API Key, if your application is using MapView elements</li>
 </ol>
 
-<p><em>Compile your application...</em></p>
-<p>After compiling your application:</p>
+<p><a href="#compile">Compile your application</a></p>
+
+<p><a href="#post-compile">After you compile your application</a>:</p>
 <ol start="9">
 <li>Sign your application</li>
 <li>Test your compiled application</li>
@@ -242,7 +229,7 @@ to download Maps data. </li>
 you can compile your application for release.</p>
 
 
-<h2 id="post-compile">After compiling your application</h2>
+<h2 id="post-compile">After you compile your application</h2>
 
 <h3 id="signapp">9. Sign your application</h3>
 

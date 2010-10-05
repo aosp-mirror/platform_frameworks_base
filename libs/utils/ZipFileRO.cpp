@@ -86,6 +86,16 @@ using namespace android;
  */
 #define kZipEntryAdj        10000
 
+ZipFileRO::~ZipFileRO() {
+    free(mHashTable);
+    if (mDirectoryMap)
+        mDirectoryMap->release();
+    if (mFd >= 0)
+        TEMP_FAILURE_RETRY(close(mFd));
+    if (mFileName)
+        free(mFileName);
+}
+
 /*
  * Convert a ZipEntryRO to a hash table index, verifying that it's in a
  * valid range.
@@ -122,7 +132,7 @@ status_t ZipFileRO::open(const char* zipFileName)
 
     mFileLength = lseek(fd, 0, SEEK_END);
     if (mFileLength < kEOCDLen) {
-        close(fd);
+        TEMP_FAILURE_RETRY(close(fd));
         return UNKNOWN_ERROR;
     }
 
@@ -152,7 +162,7 @@ status_t ZipFileRO::open(const char* zipFileName)
 bail:
     free(mFileName);
     mFileName = NULL;
-    close(fd);
+    TEMP_FAILURE_RETRY(close(fd));
     return UNKNOWN_ERROR;
 }
 
@@ -498,6 +508,36 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
 
         unsigned char lfhBuf[kLFHLen];
 
+#ifdef HAVE_PREAD
+        /*
+         * This file descriptor might be from zygote's preloaded assets,
+         * so we need to do an pread() instead of a lseek() + read() to
+         * guarantee atomicity across the processes with the shared file
+         * descriptors.
+         */
+        ssize_t actual =
+                TEMP_FAILURE_RETRY(pread(mFd, lfhBuf, sizeof(lfhBuf), localHdrOffset));
+
+        if (actual != sizeof(lfhBuf)) {
+            LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
+            return false;
+        }
+
+        if (get4LE(lfhBuf) != kLFHSignature) {
+            LOGW("didn't find signature at start of lfh; wanted: offset=%ld data=0x%08x; "
+                    "got: data=0x%08lx\n",
+                    localHdrOffset, kLFHSignature, get4LE(lfhBuf));
+            return false;
+        }
+#else /* HAVE_PREAD */
+        /*
+         * For hosts don't have pread() we cannot guarantee atomic reads from
+         * an offset in a file. Android should never run on those platforms.
+         * File descriptors inherited from a fork() share file offsets and
+         * there would be nothing to protect from two different processes
+         * calling lseek() concurrently.
+         */
+
         {
             AutoMutex _l(mFdLock);
 
@@ -507,18 +547,21 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
             }
 
             ssize_t actual =
-                TEMP_FAILURE_RETRY(read(mFd, lfhBuf, sizeof(lfhBuf)));
+                    TEMP_FAILURE_RETRY(read(mFd, lfhBuf, sizeof(lfhBuf)));
             if (actual != sizeof(lfhBuf)) {
                 LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
                 return false;
             }
-        }
 
-        if (get4LE(lfhBuf) != kLFHSignature) {
-            LOGW("didn't find signature at start of lfh, offset=%ld (got 0x%08lx, expected 0x%08x)\n",
-                localHdrOffset, get4LE(lfhBuf), kLFHSignature);
-            return false;
+            if (get4LE(lfhBuf) != kLFHSignature) {
+                off_t actualOffset = lseek(mFd, 0, SEEK_CUR);
+                LOGW("didn't find signature at start of lfh; wanted: offset=%ld data=0x%08x; "
+                        "got: offset=%zd data=0x%08lx\n",
+                        localHdrOffset, kLFHSignature, (size_t)actualOffset, get4LE(lfhBuf));
+                return false;
+            }
         }
+#endif /* HAVE_PREAD */
 
         off_t dataOffset = localHdrOffset + kLFHLen
             + get2LE(lfhBuf + kLFHNameLen) + get2LE(lfhBuf + kLFHExtraLen);

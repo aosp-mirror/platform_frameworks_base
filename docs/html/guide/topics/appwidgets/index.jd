@@ -3,12 +3,14 @@ page.title=App Widgets
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>Key classes</h2>
-    <ol>
-      <li>{@link android.appwidget.AppWidgetProvider}</li>
-      <li>{@link android.appwidget.AppWidgetProviderInfo}</li>
-      <li>{@link android.appwidget.AppWidgetManager}</li>
-    </ol>
+    <h2>Quickview</h2>
+    <ul>
+      <li>App Widgets provide users access to some of your application features
+directly from the Home screen (without the need to launch an activity)</li>
+      <li>App Widgets are backed by a special kind of broadcast receiver that handles the App
+Widget lifecycle</li>
+    </ul>
+    
     <h2>In this document</h2>
     <ol>
       <li><a href="#Basics">The Basics</a></li>
@@ -28,6 +30,13 @@ page.title=App Widgets
       </li>
     </ol>
 
+    <h2>Key classes</h2>
+    <ol>
+      <li>{@link android.appwidget.AppWidgetProvider}</li>
+      <li>{@link android.appwidget.AppWidgetProviderInfo}</li>
+      <li>{@link android.appwidget.AppWidgetManager}</li>
+    </ol>
+    
     <h2>See also</h2>
     <ol>
       <li><a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">App Widget Design 
