@@ -79,6 +79,9 @@ public:
 
     bool isEqual(const Type *other) const;
 
+    Type * cloneAndResize1D(Context *rsc, uint32_t dimX) const;
+    Type * cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const;
+
 protected:
     struct LOD {
         size_t mX;

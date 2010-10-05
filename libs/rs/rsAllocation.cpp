@@ -488,12 +488,13 @@ void Allocation::sendDirty() const
     }
 }
 
-void Allocation::incRefs(const void *ptr, size_t ct) const
+void Allocation::incRefs(const void *ptr, size_t ct, size_t startOff) const
 {
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
     const Element *e = mType->getElement();
     uint32_t stride = e->getSizeBytes();
 
+    p += stride * startOff;
     while (ct > 0) {
         e->incRefs(p);
         ct --;
@@ -501,17 +502,49 @@ void Allocation::incRefs(const void *ptr, size_t ct) const
     }
 }
 
-void Allocation::decRefs(const void *ptr, size_t ct) const
+void Allocation::decRefs(const void *ptr, size_t ct, size_t startOff) const
 {
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
     const Element *e = mType->getElement();
     uint32_t stride = e->getSizeBytes();
 
+    p += stride * startOff;
     while (ct > 0) {
         e->decRefs(p);
         ct --;
         p += stride;
     }
+}
+
+void Allocation::copyRange1D(Context *rsc, const Allocation *src, int32_t srcOff, int32_t destOff, int32_t len)
+{
+}
+
+void Allocation::resize1D(Context *rsc, uint32_t dimX)
+{
+    Type *t = mType->cloneAndResize1D(rsc, dimX);
+
+    uint32_t oldDimX = mType->getDimX();
+    if (dimX == oldDimX) {
+        return;
+    }
+
+    if (dimX < oldDimX) {
+        decRefs(mPtr, oldDimX - dimX, dimX);
+    }
+    mPtr = realloc(mPtr, t->getSizeBytes());
+
+    if (dimX > oldDimX) {
+        const Element *e = mType->getElement();
+        uint32_t stride = e->getSizeBytes();
+        memset(((uint8_t *)mPtr) + stride * oldDimX, 0, stride * (dimX - oldDimX));
+    }
+    mType.set(t);
+}
+
+void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY)
+{
+    LOGE("not implemented");
 }
 
 /////////////////
@@ -820,6 +853,18 @@ void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data)
 {
     Allocation *a = static_cast<Allocation *>(va);
     a->read(data);
+}
+
+void rsi_AllocationResize1D(Context *rsc, RsAllocation va, uint32_t dimX)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->resize1D(rsc, dimX);
+}
+
+void rsi_AllocationResize2D(Context *rsc, RsAllocation va, uint32_t dimX, uint32_t dimY)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->resize2D(rsc, dimX, dimY);
 }
 
 const void* rsi_AllocationGetType(Context *rsc, RsAllocation va)

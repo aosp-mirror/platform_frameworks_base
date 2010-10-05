@@ -55,6 +55,10 @@ public:
     void uploadToBufferObject(const Context *rsc);
     uint32_t getBufferObjectID() const {return mBufferID;}
 
+    void copyRange1D(Context *rsc, const Allocation *src, int32_t srcOff, int32_t destOff, int32_t len);
+
+    void resize1D(Context *rsc, uint32_t dimX);
+    void resize2D(Context *rsc, uint32_t dimX, uint32_t dimY);
 
     void data(Context *rsc, const void *data, uint32_t sizeBytes);
     void subData(Context *rsc, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes);
@@ -86,8 +90,8 @@ public:
     bool getIsTexture() const {return mIsTexture;}
     bool getIsBufferObject() const {return mIsVertexBuffer;}
 
-    void incRefs(const void *ptr, size_t ct) const;
-    void decRefs(const void *ptr, size_t ct) const;
+    void incRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
+    void decRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
 
     void sendDirty() const;
     bool getHasGraphicsMipmaps() const {return mTextureGenMipmap;}
