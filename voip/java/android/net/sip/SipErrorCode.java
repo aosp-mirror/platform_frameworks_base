@@ -61,6 +61,9 @@ public class SipErrorCode {
     /** Cross-domain authentication required. */
     public static final int CROSS_DOMAIN_AUTHENTICATION = -11;
 
+    /** When the server is not reachable. */
+    public static final int SERVER_UNREACHABLE = -12;
+
     public static String toString(int errorCode) {
         switch (errorCode) {
             case NO_ERROR:
@@ -87,6 +90,8 @@ public class SipErrorCode {
                 return "DATA_CONNECTION_LOST";
             case CROSS_DOMAIN_AUTHENTICATION:
                 return "CROSS_DOMAIN_AUTHENTICATION";
+            case SERVER_UNREACHABLE:
+                return "SERVER_UNREACHABLE";
             default:
                 return "UNKNOWN";
         }
