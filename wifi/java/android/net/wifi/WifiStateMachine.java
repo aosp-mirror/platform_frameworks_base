@@ -1253,25 +1253,22 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     private void configureLinkProperties() {
-
+        if (WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
+            mLinkProperties = WifiConfigStore.getLinkProperties(mLastNetworkId);
+        } else {
+            // TODO - fix this for v6
+            synchronized (mDhcpInfo) {
+                mLinkProperties.addLinkAddress(new LinkAddress(
+                        NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress),
+                        NetworkUtils.intToInetAddress(mDhcpInfo.netmask)));
+                mLinkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
+                mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
+                mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
+            }
+            mLinkProperties.setHttpProxy(WifiConfigStore.getProxyProperties(mLastNetworkId));
+        }
         mLinkProperties.setInterfaceName(mInterfaceName);
-
-        // TODO - fix this for v6
-        synchronized (mDhcpInfo) {
-            mLinkProperties.addLinkAddress(new LinkAddress(
-                    NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress),
-                    NetworkUtils.intToInetAddress(mDhcpInfo.netmask)));
-            mLinkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
-            mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
-            mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
-        }
-
-        ProxyProperties proxyProperties = WifiConfigStore.getProxyProperties(mLastNetworkId);
-        if (proxyProperties != null) {
-            mLinkProperties.setHttpProxy(proxyProperties);
-            Log.d(TAG, "netId=" + mLastNetworkId  + " proxy configured: "
-                    + proxyProperties.toString());
-        }
+        Log.d(TAG, "netId=" + mLastNetworkId  + " Link configured: " + mLinkProperties.toString());
     }
 
     private int getMaxDhcpRetries() {
@@ -2571,7 +2568,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                   mLastSignalLevel = -1; // force update of signal strength
                   synchronized (mDhcpInfo) {
                       mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
-                      Log.d(TAG, "IP configuration: " + mDhcpInfo);
                   }
                   configureLinkProperties();
                   setDetailedState(DetailedState.CONNECTED);

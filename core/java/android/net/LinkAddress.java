@@ -34,26 +34,26 @@ public class LinkAddress implements Parcelable {
     private final InetAddress address;
 
     /**
-     * Network prefix
+     * Network prefix length
      */
-    private final int prefix;
+    private final int prefixLength;
 
     public LinkAddress(InetAddress address, InetAddress mask) {
         this.address = address;
-        this.prefix = computeprefix(mask);
+        this.prefixLength = computeprefixLength(mask);
     }
 
-    public LinkAddress(InetAddress address, int prefix) {
+    public LinkAddress(InetAddress address, int prefixLength) {
         this.address = address;
-        this.prefix = prefix;
+        this.prefixLength = prefixLength;
     }
 
     public LinkAddress(InterfaceAddress interfaceAddress) {
         this.address = interfaceAddress.getAddress();
-        this.prefix = interfaceAddress.getNetworkPrefixLength();
+        this.prefixLength = interfaceAddress.getNetworkPrefixLength();
     }
 
-    private static int computeprefix(InetAddress mask) {
+    private static int computeprefixLength(InetAddress mask) {
         int count = 0;
         for (byte b : mask.getAddress()) {
             for (int i = 0; i < 8; ++i) {
@@ -67,12 +67,12 @@ public class LinkAddress implements Parcelable {
 
     @Override
     public String toString() {
-        return (address == null ? "" : (address.getHostAddress() + "/" + prefix));
+        return (address == null ? "" : (address.getHostAddress() + "/" + prefixLength));
     }
 
     /**
      * Compares this {@code LinkAddress} instance against the specified address
-     * in {@code obj}. Two addresses are equal if their InetAddress and prefix
+     * in {@code obj}. Two addresses are equal if their InetAddress and prefixLength
      * are equal
      *
      * @param obj the object to be tested for equality.
@@ -85,7 +85,7 @@ public class LinkAddress implements Parcelable {
         }
         LinkAddress linkAddress = (LinkAddress) obj;
         return this.address.equals(linkAddress.address) &&
-            this.prefix == linkAddress.prefix;
+            this.prefixLength == linkAddress.prefixLength;
     }
 
     /**
@@ -98,8 +98,8 @@ public class LinkAddress implements Parcelable {
     /**
      * Get network prefix length
      */
-    public int getNetworkPrefix() {
-        return prefix;
+    public int getNetworkPrefixLength() {
+        return prefixLength;
     }
 
     /**
@@ -118,7 +118,7 @@ public class LinkAddress implements Parcelable {
         if (address != null) {
             dest.writeByte((byte)1);
             dest.writeByteArray(address.getAddress());
-            dest.writeInt(prefix);
+            dest.writeInt(prefixLength);
         } else {
             dest.writeByte((byte)0);
         }
@@ -132,14 +132,14 @@ public class LinkAddress implements Parcelable {
         new Creator<LinkAddress>() {
             public LinkAddress createFromParcel(Parcel in) {
                 InetAddress address = null;
-                int prefix = 0;
+                int prefixLength = 0;
                 if (in.readByte() == 1) {
                     try {
                         address = InetAddress.getByAddress(in.createByteArray());
-                        prefix = in.readInt();
+                        prefixLength = in.readInt();
                     } catch (UnknownHostException e) { }
                 }
-                return new LinkAddress(address, prefix);
+                return new LinkAddress(address, prefixLength);
             }
 
             public LinkAddress[] newArray(int size) {
