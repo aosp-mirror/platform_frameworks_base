@@ -258,14 +258,14 @@ void Context::displayDebugStats()
     sprintf(buffer, "Frame %i ms, Script %i ms", mTimeMSLastFrame, mTimeMSLastScript);
     float oldR, oldG, oldB, oldA;
     mStateFont.getFontColor(&oldR, &oldG, &oldB, &oldA);
+    uint32_t bufferLen = strlen(buffer);
 
-    float shadowCol = 0.2f;
+    float shadowCol = 0.1f;
     mStateFont.setFontColor(shadowCol, shadowCol, shadowCol, 1.0f);
-    mStateFont.renderText(buffer, 5, getHeight() - 5);
+    mStateFont.renderText(buffer, bufferLen, 5, getHeight() - 5);
 
-    float textCol = 0.9f;
-    mStateFont.setFontColor(textCol, textCol, textCol, 1.0f);
-    mStateFont.renderText(buffer, 4, getHeight() - 6);
+    mStateFont.setFontColor(1.0f, 0.7f, 0.0f, 1.0f);
+    mStateFont.renderText(buffer, bufferLen, 4, getHeight() - 6);
 
     mStateFont.setFontColor(oldR, oldG, oldB, oldA);
 }

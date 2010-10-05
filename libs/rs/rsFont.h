@@ -45,12 +45,26 @@ class FontState;
 class Font : public ObjectBase
 {
 public:
-    ~Font();
+    enum RenderMode {
+        FRAMEBUFFER,
+        BITMAP,
+        MEASURE,
+    };
 
-    // Pointer to the utf data, length of data, where to start, number of glyphs ot read
-    // (each glyph may be longer than a char because we are dealing with utf data)
-    // Last two variables are the initial pen position
-    void renderUTF(const char *text, uint32_t len, uint32_t start, int numGlyphs, int x, int y);
+    struct Rect {
+        int32_t left;
+        int32_t top;
+        int32_t right;
+        int32_t bottom;
+        void set(int32_t l, int32_t r, int32_t t, int32_t b) {
+            left = l;
+            right = r;
+            top = t;
+            bottom = b;
+        }
+    };
+
+    ~Font();
 
     // Currently files do not get serialized,
     // but we need to inherit from ObjectBase for ref tracking
@@ -65,6 +79,14 @@ public:
 protected:
 
     friend class FontState;
+
+    // Pointer to the utf data, length of data, where to start, number of glyphs ot read
+    // (each glyph may be longer than a char because we are dealing with utf data)
+    // Last two variables are the initial pen position
+    void renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
+                   uint32_t start, int32_t numGlyphs,
+                   RenderMode mode = FRAMEBUFFER, Rect *bounds = NULL,
+                   uint8_t *bitmap = NULL, uint32_t bitmapW = 0, uint32_t bitmapH = 0);
 
     void invalidateTextureCache();
     struct CachedGlyphInfo
@@ -106,7 +128,10 @@ protected:
 
     CachedGlyphInfo *cacheGlyph(uint32_t glyph);
     void updateGlyphCache(CachedGlyphInfo *glyph);
-    void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y);
+    void measureCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y, Rect *bounds);
+    void drawCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y);
+    void drawCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y,
+                         uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH);
 };
 
 class FontState
@@ -121,10 +146,13 @@ public:
     ObjectBaseRef<Font> mDefault;
     ObjectBaseRef<Font> mLast;
 
-    void renderText(const char *text, uint32_t len, uint32_t startIndex, int numGlyphs, int x, int y);
-    void renderText(const char *text, int x, int y);
-    void renderText(Allocation *alloc, int x, int y);
-    void renderText(Allocation *alloc, uint32_t start, int len, int x, int y);
+    void renderText(const char *text, uint32_t len, int32_t x, int32_t y,
+                    uint32_t startIndex = 0, int numGlyphs = -1,
+                    Font::RenderMode mode = Font::FRAMEBUFFER,
+                    Font::Rect *bounds = NULL,
+                    uint8_t *bitmap = NULL, uint32_t bitmapW = 0, uint32_t bitmapH = 0);
+
+    void measureText(const char *text, uint32_t len, Font::Rect *bounds);
 
     void setFontColor(float r, float g, float b, float a);
     void getFontColor(float *r, float *g, float *b, float *a) const;
@@ -198,6 +226,9 @@ protected:
     // Texture to cache glyph bitmaps
     ObjectBaseRef<Allocation> mTextTexture;
     void initTextTexture();
+    const uint8_t* getTextTextureData() const {
+        return (uint8_t*)mTextTexture->getPtr();
+    }
 
     bool cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY);
     const Type* getCacheTextureType() {

@@ -84,34 +84,95 @@ void Font::invalidateTextureCache()
     }
 }
 
-void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y)
+void Font::drawCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y)
 {
     FontState *state = &mRSC->mStateFont;
 
-    int nPenX = x + glyph->mBitmapLeft;
-    int nPenY = y - glyph->mBitmapTop + glyph->mBitmapHeight;
+    int32_t nPenX = x + glyph->mBitmapLeft;
+    int32_t nPenY = y - glyph->mBitmapTop + glyph->mBitmapHeight;
 
-    state->appendMeshQuad(nPenX, nPenY, 0,
-                            glyph->mBitmapMinU, glyph->mBitmapMaxV,
+    float u1 = glyph->mBitmapMinU;
+    float u2 = glyph->mBitmapMaxU;
+    float v1 = glyph->mBitmapMinV;
+    float v2 = glyph->mBitmapMaxV;
 
-                            nPenX + (int)glyph->mBitmapWidth, nPenY, 0,
-                            glyph->mBitmapMaxU, glyph->mBitmapMaxV,
+    int32_t width = (int32_t) glyph->mBitmapWidth;
+    int32_t height = (int32_t) glyph->mBitmapHeight;
 
-                            nPenX + (int)glyph->mBitmapWidth, nPenY - (int)glyph->mBitmapHeight, 0,
-                            glyph->mBitmapMaxU, glyph->mBitmapMinV,
-
-                            nPenX, nPenY - (int)glyph->mBitmapHeight, 0,
-                            glyph->mBitmapMinU, glyph->mBitmapMinV);
+    state->appendMeshQuad(nPenX, nPenY, 0, u1, v2,
+                          nPenX + width, nPenY, 0, u2, v2,
+                          nPenX + width, nPenY - height, 0, u2, v1,
+                          nPenX, nPenY - height, 0, u1, v1);
 }
 
-void Font::renderUTF(const char *text, uint32_t len, uint32_t start, int numGlyphs, int x, int y)
+void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int32_t x, int32_t y,
+                           uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH) {
+    int32_t nPenX = x + glyph->mBitmapLeft;
+    int32_t nPenY = y + glyph->mBitmapTop;
+
+    uint32_t endX = glyph->mBitmapMinX + glyph->mBitmapWidth;
+    uint32_t endY = glyph->mBitmapMinY + glyph->mBitmapHeight;
+
+    FontState *state = &mRSC->mStateFont;
+    uint32_t cacheWidth = state->getCacheTextureType()->getDimX();
+    const uint8_t* cacheBuffer = state->getTextTextureData();
+
+    uint32_t cacheX = 0, cacheY = 0;
+    int32_t bX = 0, bY = 0;
+    for (cacheX = glyph->mBitmapMinX, bX = nPenX; cacheX < endX; cacheX++, bX++) {
+        for (cacheY = glyph->mBitmapMinY, bY = nPenY; cacheY < endY; cacheY++, bY++) {
+            if (bX < 0 || bY < 0 || bX >= (int32_t) bitmapW || bY >= (int32_t) bitmapH) {
+                LOGE("Skipping invalid index");
+                continue;
+            }
+            uint8_t tempCol = cacheBuffer[cacheY * cacheWidth + cacheX];
+            bitmap[bY * bitmapW + bX] = tempCol;
+        }
+    }
+
+}
+
+void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int32_t x, int32_t y, Rect *bounds) {
+    int32_t nPenX = x + glyph->mBitmapLeft;
+    int32_t nPenY = y - glyph->mBitmapTop + glyph->mBitmapHeight;
+
+    int32_t width = (int32_t) glyph->mBitmapWidth;
+    int32_t height = (int32_t) glyph->mBitmapHeight;
+
+    if (bounds->bottom > nPenY) {
+        bounds->bottom = nPenY;
+    }
+    if (bounds->left > nPenX) {
+        bounds->left = nPenX;
+    }
+    if (bounds->right < nPenX + width) {
+        bounds->right = nPenX + width;
+    }
+    if (bounds->top < nPenY + height) {
+        bounds->top = nPenY + height;
+    }
+}
+
+void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
+                     uint32_t start, int32_t numGlyphs,
+                     RenderMode mode, Rect *bounds,
+                     uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH)
 {
     if(!mInitialized || numGlyphs == 0 || text == NULL || len == 0) {
         return;
     }
 
-    int penX = x, penY = y;
-    int glyphsLeft = 1;
+    if(mode == Font::MEASURE) {
+        if (bounds == NULL) {
+            LOGE("No return rectangle provided to measure text");
+            return;
+        }
+        // Reset min and max of the bounding box to something large
+        bounds->set(1e6, -1e6, -1e6, 1e6);
+    }
+
+    int32_t penX = x, penY = y;
+    int32_t glyphsLeft = 1;
     if(numGlyphs > 0) {
         glyphsLeft = numGlyphs;
     }
@@ -135,7 +196,17 @@ void Font::renderUTF(const char *text, uint32_t len, uint32_t start, int numGlyp
 
         // If it's still not valid, we couldn't cache it, so we shouldn't draw garbage
         if(cachedGlyph->mIsValid) {
-            drawCachedGlyph(cachedGlyph, penX, penY);
+            switch(mode) {
+            case FRAMEBUFFER:
+                drawCachedGlyph(cachedGlyph, penX, penY);
+                break;
+            case BITMAP:
+                drawCachedGlyph(cachedGlyph, penX, penY, bitmap, bitmapW, bitmapH);
+                break;
+            case MEASURE:
+                measureCachedGlyph(cachedGlyph, penX, penY, bounds);
+                break;
+            }
         }
 
         penX += (cachedGlyph->mAdvance.x >> 6);
@@ -283,7 +354,7 @@ FontState::FontState()
     }
 
     // Get the black gamma threshold
-    int blackThreshold = DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD;
+    int32_t blackThreshold = DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD;
     if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, NULL) > 0) {
         LOGD("  Setting text black gamma threshold to %s", property);
         blackThreshold = atoi(property);
@@ -294,7 +365,7 @@ FontState::FontState()
     mBlackThreshold = (float)(blackThreshold) / 255.0f;
 
     // Get the white gamma threshold
-    int whiteThreshold = DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD;
+    int32_t whiteThreshold = DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD;
     if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, NULL) > 0) {
         LOGD("  Setting text white gamma threshold to %s", property);
         whiteThreshold = atoi(property);
@@ -397,13 +468,13 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
     uint32_t cacheWidth = getCacheTextureType()->getDimX();
 
-    unsigned char *cacheBuffer = (unsigned char*)mTextTexture->getPtr();
-    unsigned char *bitmapBuffer = bitmap->buffer;
+    uint8_t *cacheBuffer = (uint8_t*)mTextTexture->getPtr();
+    uint8_t *bitmapBuffer = bitmap->buffer;
 
     uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
     for(cacheX = startX, bX = 0; cacheX < endX; cacheX ++, bX ++) {
         for(cacheY = startY, bY = 0; cacheY < endY; cacheY ++, bY ++) {
-            unsigned char tempCol = bitmapBuffer[bY * bitmap->width + bX];
+            uint8_t tempCol = bitmapBuffer[bY * bitmap->width + bX];
             cacheBuffer[cacheY*cacheWidth + cacheX] = tempCol;
         }
     }
@@ -487,7 +558,7 @@ void FontState::initTextTexture()
     mTextTexture->deferedUploadToTexture(mRSC, false, 0);
 
     // Split up our cache texture into lines of certain widths
-    int nextLine = 0;
+    int32_t nextLine = 0;
     mCacheLines.push(new CacheTextureLine(16, texType->getDimX(), nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
     mCacheLines.push(new CacheTextureLine(24, texType->getDimX(), nextLine, 0));
@@ -519,8 +590,8 @@ void FontState::initVertexArrayBuffers()
 
     // Four verts, two triangles , six indices per quad
     for(uint32_t i = 0; i < mMaxNumberOfQuads; i ++) {
-        int i6 = i * 6;
-        int i4 = i * 4;
+        int32_t i6 = i * 6;
+        int32_t i4 = i * 4;
 
         indexPtr[i6 + 0] = i4 + 0;
         indexPtr[i6 + 1] = i4 + 1;
@@ -713,7 +784,11 @@ void FontState::precacheLatin(Font *font) {
 }
 
 
-void FontState::renderText(const char *text, uint32_t len, uint32_t startIndex, int numGlyphs, int x, int y)
+void FontState::renderText(const char *text, uint32_t len, int32_t x, int32_t y,
+                           uint32_t startIndex, int32_t numGlyphs,
+                           Font::RenderMode mode,
+                           Font::Rect *bounds,
+                           uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH)
 {
     checkInit();
 
@@ -730,7 +805,8 @@ void FontState::renderText(const char *text, uint32_t len, uint32_t startIndex, 
         return;
     }
 
-    currentFont->renderUTF(text, len, startIndex, numGlyphs, x, y);
+    currentFont->renderUTF(text, len, x, y, startIndex, numGlyphs,
+                           mode, bounds, bitmap, bitmapW, bitmapH);
 
     if(mCurrentQuadIndex != 0) {
         issueDrawCommand();
@@ -738,32 +814,8 @@ void FontState::renderText(const char *text, uint32_t len, uint32_t startIndex, 
     }
 }
 
-void FontState::renderText(const char *text, int x, int y)
-{
-    size_t textLen = strlen(text);
-    renderText(text, textLen, 0, -1, x, y);
-}
-
-void FontState::renderText(Allocation *alloc, int x, int y)
-{
-    if(!alloc) {
-        return;
-    }
-
-    const char *text = (const char *)alloc->getPtr();
-    size_t allocSize = alloc->getType()->getSizeBytes();
-    renderText(text, allocSize, 0, -1, x, y);
-}
-
-void FontState::renderText(Allocation *alloc, uint32_t start, int len, int x, int y)
-{
-    if(!alloc) {
-        return;
-    }
-
-    const char *text = (const char *)alloc->getPtr();
-    size_t allocSize = alloc->getType()->getSizeBytes();
-    renderText(text, allocSize, start, len, x, y);
+void FontState::measureText(const char *text, uint32_t len, Font::Rect *bounds) {
+    renderText(text, len, 0, 0, 0, -1, Font::MEASURE, bounds);
 }
 
 void FontState::setFontColor(float r, float g, float b, float a) {
@@ -773,7 +825,7 @@ void FontState::setFontColor(float r, float g, float b, float a) {
     mConstants.mFontColor[3] = a;
 
     mConstants.mGamma = 1.0f;
-    const int luminance = (r * 2.0f + g * 5.0f + b) / 8.0f;
+    const int32_t luminance = (r * 2.0f + g * 5.0f + b) / 8.0f;
     if (luminance <= mBlackThreshold) {
         mConstants.mGamma = mBlackGamma;
     } else if (luminance >= mWhiteThreshold) {

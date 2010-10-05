@@ -351,13 +351,59 @@ static void SC_DrawTextAlloc(RsAllocation va, int x, int y)
     CHECK_OBJ(va);
     GET_TLS();
     Allocation *alloc = static_cast<Allocation *>(va);
-    rsc->mStateFont.renderText(alloc, x, y);
+    const char *text = (const char *)alloc->getPtr();
+    size_t allocSize = alloc->getType()->getSizeBytes();
+    rsc->mStateFont.renderText(text, allocSize, x, y);
 }
 
 static void SC_DrawText(const char *text, int x, int y)
 {
     GET_TLS();
-    rsc->mStateFont.renderText(text, x, y);
+    size_t textLen = strlen(text);
+    rsc->mStateFont.renderText(text, textLen, x, y);
+}
+
+static void SC_setMetrics(Font::Rect *metrics,
+                          int32_t *left, int32_t *right,
+                          int32_t *top, int32_t *bottom)
+{
+    if(left) {
+        *left = metrics->left;
+    }
+    if(right) {
+        *right = metrics->right;
+    }
+    if(top) {
+        *top = metrics->top;
+    }
+    if(bottom) {
+        *bottom = metrics->bottom;
+    }
+}
+
+static void SC_MeasureTextAlloc(RsAllocation va,
+                                int32_t *left, int32_t *right,
+                                int32_t *top, int32_t *bottom)
+{
+    CHECK_OBJ(va);
+    GET_TLS();
+    Allocation *alloc = static_cast<Allocation *>(va);
+    const char *text = (const char *)alloc->getPtr();
+    size_t textLen = alloc->getType()->getSizeBytes();
+    Font::Rect metrics;
+    rsc->mStateFont.measureText(text, textLen, &metrics);
+    SC_setMetrics(&metrics, left, right, top, bottom);
+}
+
+static void SC_MeasureText(const char *text,
+                           int32_t *left, int32_t *right,
+                           int32_t *top, int32_t *bottom)
+{
+    GET_TLS();
+    size_t textLen = strlen(text);
+    Font::Rect metrics;
+    rsc->mStateFont.measureText(text, textLen, &metrics);
+    SC_setMetrics(&metrics, left, right, top, bottom);
 }
 
 static void SC_BindFont(RsFont font)
@@ -432,6 +478,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
 
     { "_Z11rsgDrawTextPKcii", (void *)&SC_DrawText },
     { "_Z11rsgDrawText13rs_allocationii", (void *)&SC_DrawTextAlloc },
+    { "_Z14rsgMeasureTextPKcPiS1_S1_S1_", (void *)&SC_MeasureText },
+    { "_Z14rsgMeasureText13rs_allocationPiS0_S0_S0_", (void *)&SC_MeasureTextAlloc },
 
     { "_Z11rsgBindFont7rs_font", (void *)&SC_BindFont },
     { "_Z12rsgFontColorffff", (void *)&SC_FontColor },
