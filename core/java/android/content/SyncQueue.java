@@ -16,17 +16,18 @@
 
 package android.content;
 
-import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
+import android.os.SystemClock;
+import android.text.format.DateUtils;
 import android.util.Pair;
 import android.util.Log;
 import android.accounts.Account;
 
-import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -38,7 +39,7 @@ public class SyncQueue {
 
     // A Map of SyncOperations operationKey -> SyncOperation that is designed for
     // quick lookup of an enqueued SyncOperation.
-    private final HashMap<String, SyncOperation> mOperationsMap = Maps.newHashMap();
+    public final HashMap<String, SyncOperation> mOperationsMap = Maps.newHashMap();
 
     public SyncQueue(SyncStorageEngine syncStorageEngine) {
         mSyncStorageEngine = syncStorageEngine;
@@ -47,8 +48,11 @@ public class SyncQueue {
         final int N = ops.size();
         for (int i=0; i<N; i++) {
             SyncStorageEngine.PendingOperation op = ops.get(i);
+            final Pair<Long, Long> backoff = syncStorageEngine.getBackoff(op.account, op.authority);
             SyncOperation syncOperation = new SyncOperation(
-                    op.account, op.syncSource, op.authority, op.extras, 0 /* delay */);
+                    op.account, op.syncSource, op.authority, op.extras, 0 /* delay */,
+                    backoff != null ? backoff.first : 0,
+                    syncStorageEngine.getDelayUntilTime(op.account, op.authority));
             syncOperation.expedited = op.expedited;
             syncOperation.pendingOperation = op;
             add(syncOperation, op);
@@ -119,65 +123,26 @@ public class SyncQueue {
         }
     }
 
-    /**
-     * Find the operation that should run next. Operations are sorted by their earliestRunTime,
-     * prioritizing first those with a syncable state of "unknown" that aren't retries then
-     * expedited operations.
-     * The earliestRunTime is adjusted by the sync adapter's backoff and delayUntil times, if any.
-     * @return the operation that should run next and when it should run. The time may be in
-     * the future. It is expressed in milliseconds since boot.
-     */
-    public Pair<SyncOperation, Long> nextOperation() {
-        SyncOperation best = null;
-        long bestRunTime = 0;
-        boolean bestSyncableIsUnknownAndNotARetry = false;
+    public void onBackoffChanged(Account account, String providerName, long backoff) {
+        // for each op that matches the account and provider update its
+        // backoff and effectiveStartTime
         for (SyncOperation op : mOperationsMap.values()) {
-            long opRunTime = op.earliestRunTime;
-            if (!op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)) {
-                Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(op.account, op.authority);
-                long delayUntil = mSyncStorageEngine.getDelayUntilTime(op.account, op.authority);
-                opRunTime = Math.max(
-                        Math.max(opRunTime, delayUntil),
-                        backoff != null ? backoff.first : 0);
-            }
-            // we know a sync is a retry if the intialization flag is set, since that will only
-            // be set by the sync dispatching code, thus if it is set it must have already been
-            // dispatched
-            final boolean syncableIsUnknownAndNotARetry =
-                    !op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
-                    && mSyncStorageEngine.getIsSyncable(op.account, op.authority) < 0;
-            // if the unsyncable state differs, make the current the best if it is unsyncable
-            // else, if the expedited state differs, make the current the best if it is expedited
-            // else, make the current the best if it is earlier than the best
-            if (best == null
-                    || ((bestSyncableIsUnknownAndNotARetry == syncableIsUnknownAndNotARetry)
-                        ? (best.expedited == op.expedited
-                           ? opRunTime < bestRunTime
-                           : op.expedited)
-                        : syncableIsUnknownAndNotARetry)) {
-                best = op;
-                bestSyncableIsUnknownAndNotARetry = syncableIsUnknownAndNotARetry;
-                bestRunTime = opRunTime;
+            if (op.account.equals(account) && op.authority.equals(providerName)) {
+                op.backoff = backoff;
+                op.updateEffectiveRunTime();
             }
         }
-        if (best == null) {
-            return null;
-        }
-        return Pair.create(best, bestRunTime);
     }
 
-    /**
-     * Find and return the SyncOperation that should be run next and is ready to run.
-     * @param now the current {@link android.os.SystemClock#elapsedRealtime()}, used to
-     * decide if the sync operation is ready to run
-     * @return the SyncOperation that should be run next and is ready to run.
-     */
-    public Pair<SyncOperation, Long> nextReadyToRun(long now) {
-        Pair<SyncOperation, Long> nextOpAndRunTime = nextOperation();
-        if (nextOpAndRunTime == null || nextOpAndRunTime.second > now) {
-            return null;
+    public void onDelayUntilTimeChanged(Account account, String providerName, long delayUntil) {
+        // for each op that matches the account and provider update its
+        // delayUntilTime and effectiveStartTime
+        for (SyncOperation op : mOperationsMap.values()) {
+            if (op.account.equals(account) && op.authority.equals(providerName)) {
+                op.delayUntil = delayUntil;
+                op.updateEffectiveRunTime();
+            }
         }
-        return nextOpAndRunTime;
     }
 
     public void remove(Account account, String authority) {
@@ -200,9 +165,17 @@ public class SyncQueue {
     }
 
     public void dump(StringBuilder sb) {
+        final long now = SystemClock.elapsedRealtime();
         sb.append("SyncQueue: ").append(mOperationsMap.size()).append(" operation(s)\n");
         for (SyncOperation operation : mOperationsMap.values()) {
-            sb.append(operation).append("\n");
+            sb.append("  ");
+            if (operation.effectiveRunTime <= now) {
+                sb.append("READY");
+            } else {
+                sb.append(DateUtils.formatElapsedTime((operation.effectiveRunTime - now) / 1000));
+            }
+            sb.append(" - ");
+            sb.append(operation.dump(false)).append("\n");
         }
     }
 }

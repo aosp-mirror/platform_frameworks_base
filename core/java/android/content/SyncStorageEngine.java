@@ -229,7 +229,7 @@ public class SyncStorageEngine extends Handler {
     private final ArrayList<PendingOperation> mPendingOperations =
             new ArrayList<PendingOperation>();
 
-    private SyncInfo mCurrentSync;
+    private final ArrayList<SyncInfo> mCurrentSyncs = new ArrayList<SyncInfo>();
 
     private final SparseArray<SyncStatusInfo> mSyncStatus =
             new SparseArray<SyncStatusInfo>();
@@ -690,23 +690,12 @@ public class SyncStorageEngine extends Handler {
 
     /**
      * Returns true if there is currently a sync operation for the given
-     * account or authority in the pending list, or actively being processed.
+     * account or authority actively being processed.
      */
     public boolean isSyncActive(Account account, String authority) {
         synchronized (mAuthorities) {
-            int i = mPendingOperations.size();
-            while (i > 0) {
-                i--;
-                // TODO(fredq): this probably shouldn't be considering
-                // pending operations.
-                PendingOperation op = mPendingOperations.get(i);
-                if (op.account.equals(account) && op.authority.equals(authority)) {
-                    return true;
-                }
-            }
-
-            if (mCurrentSync != null) {
-                AuthorityInfo ainfo = getAuthority(mCurrentSync.authorityId);
+            for (SyncInfo syncInfo : mCurrentSyncs) {
+                AuthorityInfo ainfo = getAuthority(syncInfo.authorityId);
                 if (ainfo != null && ainfo.account.equals(account)
                         && ainfo.authority.equals(authority)) {
                     return true;
@@ -887,40 +876,47 @@ public class SyncStorageEngine extends Handler {
     }
 
     /**
-     * Called when the currently active sync is changing (there can only be
-     * one at a time).  Either supply a valid ActiveSyncContext with information
-     * about the sync, or null to stop the currently active sync.
+     * Called when a sync is starting. Supply a valid ActiveSyncContext with information
+     * about the sync.
      */
-    public void setActiveSync(SyncManager.ActiveSyncContext activeSyncContext) {
+    public SyncInfo addActiveSync(SyncManager.ActiveSyncContext activeSyncContext) {
+        final SyncInfo syncInfo;
         synchronized (mAuthorities) {
-            if (activeSyncContext != null) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "setActiveSync: account="
-                        + activeSyncContext.mSyncOperation.account
-                        + " auth=" + activeSyncContext.mSyncOperation.authority
-                        + " src=" + activeSyncContext.mSyncOperation.syncSource
-                        + " extras=" + activeSyncContext.mSyncOperation.extras);
-                }
-                if (mCurrentSync != null) {
-                    Log.w(TAG, "setActiveSync called with existing active sync!");
-                }
-                AuthorityInfo authority = getAuthorityLocked(
-                        activeSyncContext.mSyncOperation.account,
-                        activeSyncContext.mSyncOperation.authority,
-                        "setActiveSync");
-                if (authority == null) {
-                    return;
-                }
-                mCurrentSync = new SyncInfo(authority.ident,
-                        authority.account, authority.authority,
-                        activeSyncContext.mStartTime);
-            } else {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "setActiveSync: null");
-                mCurrentSync = null;
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "setActiveSync: account="
+                    + activeSyncContext.mSyncOperation.account
+                    + " auth=" + activeSyncContext.mSyncOperation.authority
+                    + " src=" + activeSyncContext.mSyncOperation.syncSource
+                    + " extras=" + activeSyncContext.mSyncOperation.extras);
             }
+            AuthorityInfo authority = getOrCreateAuthorityLocked(
+                    activeSyncContext.mSyncOperation.account,
+                    activeSyncContext.mSyncOperation.authority,
+                    -1 /* assign a new identifier if creating a new authority */,
+                    true /* write to storage if this results in a change */);
+            syncInfo = new SyncInfo(authority.ident,
+                    authority.account, authority.authority,
+                    activeSyncContext.mStartTime);
+            mCurrentSyncs.add(syncInfo);
         }
 
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE);
+        reportActiveChange();
+        return syncInfo;
+    }
+
+    /**
+     * Called to indicate that a previously active sync is no longer active.
+     */
+    public void removeActiveSync(SyncInfo syncInfo) {
+        synchronized (mAuthorities) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "removeActiveSync: account="
+                        + syncInfo.account + " auth=" + syncInfo.authority);
+            }
+            mCurrentSyncs.remove(syncInfo);
+        }
+
+        reportActiveChange();
     }
 
     /**
@@ -1095,10 +1091,26 @@ public class SyncStorageEngine extends Handler {
      * Return the currently active sync information, or null if there is no
      * active sync.  Note that the returned object is the real, live active
      * sync object, so be careful what you do with it.
+     * <p>
+     * Since multiple concurrent syncs are now supported you should use
+     * {@link #getCurrentSyncs()} to get the accurate list of current syncs.
+     * This method returns the first item from the list of current syncs
+     * or null if there are none.
+     * @deprecated use {@link #getCurrentSyncs()}
      */
     public SyncInfo getCurrentSync() {
         synchronized (mAuthorities) {
-            return mCurrentSync;
+            return !mCurrentSyncs.isEmpty() ? mCurrentSyncs.get(0) : null;
+        }
+    }
+
+    /**
+     * Return a list of the currently active syncs. Note that the returned items are the
+     * real, live active sync objects, so be careful what you do with it.
+     */
+    public List<SyncInfo> getCurrentSyncs() {
+        synchronized (mAuthorities) {
+            return new ArrayList<SyncInfo>(mCurrentSyncs);
         }
     }
 

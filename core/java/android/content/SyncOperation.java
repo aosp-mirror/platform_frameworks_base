@@ -33,9 +33,12 @@ public class SyncOperation implements Comparable {
     public long earliestRunTime;
     public boolean expedited;
     public SyncStorageEngine.PendingOperation pendingOperation;
+    public Long backoff;
+    public long delayUntil;
+    public long effectiveRunTime;
 
     public SyncOperation(Account account, int source, String authority, Bundle extras,
-            long delayInMs) {
+            long delayInMs, long backoff, long delayUntil) {
         this.account = account;
         this.syncSource = source;
         this.authority = authority;
@@ -48,6 +51,8 @@ public class SyncOperation implements Comparable {
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_EXPEDITED);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS);
+        this.delayUntil = delayUntil;
+        this.backoff = backoff;
         final long now = SystemClock.elapsedRealtime();
         if (delayInMs < 0) {
             this.expedited = true;
@@ -56,6 +61,7 @@ public class SyncOperation implements Comparable {
             this.expedited = false;
             this.earliestRunTime = now + delayInMs;
         }
+        updateEffectiveRunTime();
         this.key = toKey();
     }
 
@@ -72,49 +78,78 @@ public class SyncOperation implements Comparable {
         this.extras = new Bundle(other.extras);
         this.expedited = other.expedited;
         this.earliestRunTime = SystemClock.elapsedRealtime();
+        this.backoff = other.backoff;
+        this.delayUntil = other.delayUntil;
+        this.updateEffectiveRunTime();
         this.key = toKey();
     }
 
     public String toString() {
+        return dump(true);
+    }
+
+    public String dump(boolean useOneLine) {
         StringBuilder sb = new StringBuilder();
-        sb.append("authority: ").append(authority);
-        sb.append(" account: ").append(account);
-        sb.append(" extras: ");
-        extrasToStringBuilder(extras, sb, false /* asKey */);
-        sb.append(" syncSource: ").append(syncSource);
-        sb.append(" when: ").append(earliestRunTime);
-        sb.append(" expedited: ").append(expedited);
+        sb.append(account.name);
+        sb.append(" (" + account.type + ")");
+        sb.append(", " + authority);
+        sb.append(", ");
+        sb.append(SyncStorageEngine.SOURCES[syncSource]);
+        sb.append(", earliestRunTime " + earliestRunTime);
+        if (expedited) {
+            sb.append(", EXPEDITED");
+        }
+        if (!useOneLine && !extras.keySet().isEmpty()) {
+            sb.append("\n    ");
+            extrasToStringBuilder(extras, sb);
+        }
         return sb.toString();
+    }
+
+    public boolean isInitialization() {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false);
+    }
+
+    public boolean ignoreBackoff() {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false);
     }
 
     private String toKey() {
         StringBuilder sb = new StringBuilder();
         sb.append("authority: ").append(authority);
-	sb.append(" account {name=" + account.name + ", type=" + account.type + "}");
+    	sb.append(" account {name=" + account.name + ", type=" + account.type + "}");
         sb.append(" extras: ");
-        extrasToStringBuilder(extras, sb, true /* asKey */);
+        extrasToStringBuilder(extras, sb);
         return sb.toString();
     }
 
-    public static void extrasToStringBuilder(Bundle bundle, StringBuilder sb, boolean asKey) {
+    public static void extrasToStringBuilder(Bundle bundle, StringBuilder sb) {
         sb.append("[");
         for (String key : bundle.keySet()) {
-            // if we are writing this as a key don't consider whether this
-            // is an initialization sync or not when computing the key since
-            // we set this flag appropriately when dispatching the sync request.
-            if (asKey && ContentResolver.SYNC_EXTRAS_INITIALIZE.equals(key)) {
-                continue;
-            }
             sb.append(key).append("=").append(bundle.get(key)).append(" ");
         }
         sb.append("]");
     }
 
+    public void updateEffectiveRunTime() {
+        effectiveRunTime = ignoreBackoff()
+                ? earliestRunTime
+                : Math.max(
+                    Math.max(earliestRunTime, delayUntil),
+                    backoff);
+    }
+
     public int compareTo(Object o) {
         SyncOperation other = (SyncOperation)o;
-        if (earliestRunTime == other.earliestRunTime) {
+
+        if (expedited != other.expedited) {
+            return expedited ? -1 : 1;
+        }
+
+        if (effectiveRunTime == other.effectiveRunTime) {
             return 0;
         }
-        return (earliestRunTime < other.earliestRunTime) ? -1 : 1;
+
+        return effectiveRunTime < other.effectiveRunTime ? -1 : 1;
     }
 }
