@@ -317,6 +317,12 @@ void LayerBase::draw(const Region& clip) const
     onDraw(clip);
 }
 
+void LayerBase::drawForSreenShot() const
+{
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    onDraw( Region(hw.bounds()) );
+}
+
 void LayerBase::clearWithOpenGL(const Region& clip, GLclampf red,
                                 GLclampf green, GLclampf blue,
                                 GLclampf alpha) const

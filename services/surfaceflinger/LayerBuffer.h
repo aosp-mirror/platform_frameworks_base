@@ -64,6 +64,7 @@ public:
     virtual sp<LayerBaseClient::Surface> createSurface() const;
     virtual status_t ditch();
     virtual void onDraw(const Region& clip) const;
+    virtual void drawForSreenShot() const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
 

@@ -170,6 +170,36 @@ private:
 };
 
 // ---------------------------------------------------------------------------
+
+class ScreenshotClient
+{
+    sp<IMemoryHeap> mHeap;
+    uint32_t mWidth;
+    uint32_t mHeight;
+    PixelFormat mFormat;
+public:
+    ScreenshotClient();
+
+    // frees the previous screenshot and capture a new one
+    status_t update();
+    status_t update(uint32_t reqWidth, uint32_t reqHeight);
+
+    // release memory occupied by the screenshot
+    void release();
+
+    // pixels are valid until this object is freed or
+    // release() or update() is called
+    void const* getPixels() const;
+
+    uint32_t getWidth() const;
+    uint32_t getHeight() const;
+    PixelFormat getFormat() const;
+    uint32_t getStride() const;
+    // size of allocated memory in bytes
+    size_t getSize() const;
+};
+
+// ---------------------------------------------------------------------------
 }; // namespace android
 
 #endif // ANDROID_SF_SURFACE_COMPOSER_CLIENT_H
