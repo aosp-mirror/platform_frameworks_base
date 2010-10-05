@@ -23,28 +23,34 @@ import android.util.Slog;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.android.internal.statusbar.StatusBarIcon;
+
 import com.android.systemui.R;
 
 
 public class IconMerger extends LinearLayout {
     private static final String TAG = "IconMerger";
 
+    private int mIconSize;
     private StatusBarIconView mMoreView;
+    private StatusBarIcon mMoreIcon = new StatusBarIcon(null, R.drawable.stat_notify_more, 0);
 
     public IconMerger(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mIconSize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_icon_size);
+
+        mMoreView = new StatusBarIconView(context, "more");
+        mMoreView.set(mMoreIcon);
+        addView(mMoreView, 0, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
 
-    public void addMoreView(StatusBarIconView v, LinearLayout.LayoutParams lp) {
-        super.addView(v, lp);
-        mMoreView = v;
-    }
-
-    public void addView(StatusBarIconView v, int index, LinearLayout.LayoutParams lp) {
+    public void addView(StatusBarIconView v, int index) {
         if (index == 0) {
             throw new RuntimeException("Attempt to put view before the more view: " + v);
         }
-        super.addView(v, index, lp);
+        addView(v, index, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
 
     @Override
@@ -127,28 +133,8 @@ public class IconMerger extends LinearLayout {
                 }
             }
         }
-        
-        // BUG: Updating the text during the layout here doesn't seem to cause
-        // the view to be redrawn fully.  The text view gets resized correctly, but the
-        // text contents aren't drawn properly.  To work around this, we post a message
-        // and provide the value later.  We're the only one changing this value show it
-        // should be ordered correctly.
-        if (false) {
-            // TODO this.moreIcon.update(number);
-        } else {
-            mBugWorkaroundNumber = number;
-            mBugWorkaroundHandler.post(mBugWorkaroundRunnable);
-        }
-    }
 
-    private int mBugWorkaroundNumber;
-    private Handler mBugWorkaroundHandler = new Handler();
-    private Runnable mBugWorkaroundRunnable = new Runnable() {
-        public void run() {
-            /* TODO
-            IconMerger.this.moreIcon.update(mBugWorkaroundNumber);
-            IconMerger.this.moreIcon.view.invalidate();
-            */
-        }
-    };
+        mMoreIcon.number = number;
+        mMoreView.set(mMoreIcon);
+    }
 }
