@@ -1043,9 +1043,9 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    public void setOverscrollMode(int mode) {
-        super.setOverscrollMode(mode);
-        if (mode != OVERSCROLL_NEVER) {
+    public void setOverScrollMode(int mode) {
+        super.setOverScrollMode(mode);
+        if (mode != OVER_SCROLL_NEVER) {
             if (mEdgeGlowTop == null) {
                 final Resources res = getContext().getResources();
                 final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
@@ -2565,7 +2565,7 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    protected void onOverscrolled(int scrollX, int scrollY, boolean clampedX,
+    protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX,
             boolean clampedY) {
         mInOverScrollMode = false;
         int maxX = computeMaxScrollX();
@@ -2942,12 +2942,12 @@ public class WebView extends AbsoluteLayout
             if (oldX != x || oldY != y) {
                 final int rangeX = computeMaxScrollX();
                 final int rangeY = computeMaxScrollY();
-                overscrollBy(x - oldX, y - oldY, oldX, oldY,
+                overScrollBy(x - oldX, y - oldY, oldX, oldY,
                         rangeX, rangeY,
                         mOverflingDistance, mOverflingDistance, false);
 
                 if (mEdgeGlowTop != null) {
-                    if (rangeY > 0 || getOverscrollMode() == OVERSCROLL_ALWAYS) {
+                    if (rangeY > 0 || getOverScrollMode() == OVER_SCROLL_ALWAYS) {
                         if (y < 0 && oldY >= 0) {
                             mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
                             if (!mEdgeGlowBottom.isFinished()) {
@@ -5457,7 +5457,7 @@ public class WebView extends AbsoluteLayout
                             doFling();
                             break;
                         } else {
-                            if (mScroller.springback(mScrollX, mScrollY, 0,
+                            if (mScroller.springBack(mScrollX, mScrollY, 0,
                                     computeMaxScrollX(), 0,
                                     computeMaxScrollY())) {
                                 invalidate();
@@ -5481,7 +5481,7 @@ public class WebView extends AbsoluteLayout
             }
             case MotionEvent.ACTION_CANCEL: {
                 if (mTouchMode == TOUCH_DRAG_MODE) {
-                    mScroller.springback(mScrollX, mScrollY, 0,
+                    mScroller.springBack(mScrollX, mScrollY, 0,
                             computeMaxScrollX(), 0, computeMaxScrollY());
                     invalidate();
                 }
@@ -5550,7 +5550,7 @@ public class WebView extends AbsoluteLayout
             final int oldY = mScrollY;
             final int rangeX = computeMaxScrollX();
             final int rangeY = computeMaxScrollY();
-            overscrollBy(deltaX, deltaY, oldX, oldY,
+            overScrollBy(deltaX, deltaY, oldX, oldY,
                     rangeX, rangeY,
                     mOverscrollDistance, mOverscrollDistance, true);
 
@@ -5571,7 +5571,7 @@ public class WebView extends AbsoluteLayout
                     }
                 }
 
-                if (rangeY > 0 || getOverscrollMode() == OVERSCROLL_ALWAYS) {
+                if (rangeY > 0 || getOverScrollMode() == OVER_SCROLL_ALWAYS) {
                     final int pulledToY = oldY + deltaY;
                     if (pulledToY < 0) {
                         mEdgeGlowTop.onPull((float) deltaY / getHeight());
@@ -5990,7 +5990,7 @@ public class WebView extends AbsoluteLayout
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
             WebViewCore.resumePriority();
             WebViewCore.resumeUpdatePicture(mWebViewCore);
-            if (mScroller.springback(mScrollX, mScrollY, 0, computeMaxScrollX(),
+            if (mScroller.springBack(mScrollX, mScrollY, 0, computeMaxScrollX(),
                     0, computeMaxScrollY())) {
                 invalidate();
             }
@@ -7096,7 +7096,7 @@ public class WebView extends AbsoluteLayout
                             case MotionEvent.ACTION_CANCEL:
                                 if (mDeferTouchMode == TOUCH_DRAG_MODE) {
                                     // no fling in defer process
-                                    mScroller.springback(mScrollX, mScrollY, 0,
+                                    mScroller.springBack(mScrollX, mScrollY, 0,
                                             computeMaxScrollX(), 0,
                                             computeMaxScrollY());
                                     invalidate();
