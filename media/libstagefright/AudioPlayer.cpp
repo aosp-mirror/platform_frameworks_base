@@ -55,7 +55,7 @@ AudioPlayer::AudioPlayer(
 
 AudioPlayer::~AudioPlayer() {
     if (mStarted) {
-        stop();
+        reset();
     }
 }
 
@@ -165,13 +165,21 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
     return OK;
 }
 
-void AudioPlayer::pause() {
+void AudioPlayer::pause(bool playPendingSamples) {
     CHECK(mStarted);
 
-    if (mAudioSink.get() != NULL) {
-        mAudioSink->pause();
+    if (playPendingSamples) {
+        if (mAudioSink.get() != NULL) {
+            mAudioSink->stop();
+        } else {
+            mAudioTrack->stop();
+        }
     } else {
-        mAudioTrack->stop();
+        if (mAudioSink.get() != NULL) {
+            mAudioSink->pause();
+        } else {
+            mAudioTrack->pause();
+        }
     }
 }
 
@@ -185,7 +193,7 @@ void AudioPlayer::resume() {
     }
 }
 
-void AudioPlayer::stop() {
+void AudioPlayer::reset() {
     CHECK(mStarted);
 
     if (mAudioSink.get() != NULL) {
