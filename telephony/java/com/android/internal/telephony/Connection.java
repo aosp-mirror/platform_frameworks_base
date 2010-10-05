@@ -40,6 +40,7 @@ public abstract class Connection {
         MMI,                            /* not presently used; dial() returns null */
         INVALID_NUMBER,                 /* invalid dial string */
         NUMBER_UNREACHABLE,             /* cannot reach the peer */
+        SERVER_UNREACHABLE,             /* cannot reach the server */
         INVALID_CREDENTIALS,            /* invalid credentials */
         OUT_OF_NETWORK,                 /* calling from out of network is not allowed */
         SERVER_ERROR,                   /* server error */
