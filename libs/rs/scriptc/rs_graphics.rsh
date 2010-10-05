@@ -79,6 +79,12 @@ extern void __attribute__((overloadable))
     rsgBindFont(rs_font);
 extern void __attribute__((overloadable))
     rsgFontColor(float, float, float, float);
+// Returns the bounding box of the text relative to (0, 0)
+// Any of left, right, top, bottom could be NULL
+extern void __attribute__((overloadable))
+    rsgMeasureText(const char *, int *left, int *right, int *top, int *bottom);
+extern void __attribute__((overloadable))
+    rsgMeasureText(rs_allocation, int *left, int *right, int *top, int *bottom);
 
 extern void __attribute__((overloadable))
     rsgMeshComputeBoundingBox(rs_mesh mesh, float *minX, float *minY, float *minZ,
