@@ -32,14 +32,15 @@ public class AudioTrack {
     // Instance variables
     private final String mUniqueId;
     private final String mFilename;
-    private final long mDurationMs;
     private long mStartTimeMs;
     private long mTimelineDurationMs;
     private int mVolumePercent;
     private long mBeginBoundaryTimeMs;
     private long mEndBoundaryTimeMs;
     private boolean mLoop;
+    private boolean mMuted;
 
+    private final long mDurationMs;
     private final int mAudioChannels;
     private final int mAudioType;
     private final int mAudioBitrate;
@@ -217,6 +218,9 @@ public class AudioTrack {
         // By default loop is disabled
         mLoop = false;
 
+        // By default the audio track is not muted
+        mMuted = false;
+
         // Ducking is enabled by default
         mDuckingThreshold = 0;
         mDuckingLowVolume = 0;
@@ -239,12 +243,13 @@ public class AudioTrack {
      *            beginning of the audio track)
      * @param loop true to loop the audio track
      * @param volume The volume in percentage
+     * @param muted true if the audio track is muted
      * @param audioWaveformFilename The name of the waveform file
      *
      * @throws IOException if file is not found
      */
     AudioTrack(String audioTrackId, String filename, long startTimeMs, long beginMs, long endMs,
-            boolean loop, int volume, String audioWaveformFilename) throws IOException {
+            boolean loop, int volume, boolean muted, String audioWaveformFilename) throws IOException {
         mUniqueId = audioTrackId;
         mFilename = filename;
         mStartTimeMs = startTimeMs;
@@ -266,6 +271,7 @@ public class AudioTrack {
         mEndBoundaryTimeMs = endMs;
 
         mLoop = loop;
+        mMuted = muted;
 
         mAudioWaveformFilename = audioWaveformFilename;
     }
@@ -338,6 +344,20 @@ public class AudioTrack {
      */
     public int getVolume() {
         return mVolumePercent;
+    }
+
+    /**
+     * @param muted true to mute the audio track
+     */
+    public void setMute(boolean muted) {
+        mMuted = muted;
+    }
+
+    /**
+     * @return true if the audio track is muted
+     */
+    public boolean isMuted() {
+        return mMuted;
     }
 
     /**

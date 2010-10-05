@@ -89,6 +89,7 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String ATTR_END_RECT_R = "end_r";
     private static final String ATTR_END_RECT_B = "end_b";
     private static final String ATTR_LOOP = "loop";
+    private static final String ATTR_MUTED = "muted";
 
     // Instance variables
     private long mDurationMs;
@@ -582,6 +583,7 @@ public class VideoEditorTestImpl implements VideoEditor {
                         .attribute("", ATTR_BEGIN_TIME, Long.toString(mvi.getBoundaryBeginTime()));
                 serializer.attribute("", ATTR_END_TIME, Long.toString(mvi.getBoundaryEndTime()));
                 serializer.attribute("", ATTR_VOLUME, Integer.toString(mvi.getVolume()));
+                serializer.attribute("", ATTR_MUTED, Boolean.toString(mvi.isMuted()));
                 if (mvi.getAudioWaveformFilename() != null) {
                     serializer.attribute("", ATTR_AUDIO_WAVEFORM_FILENAME,
                             mvi.getAudioWaveformFilename());
@@ -713,6 +715,7 @@ public class VideoEditorTestImpl implements VideoEditor {
             serializer.attribute("", ATTR_BEGIN_TIME, Long.toString(at.getBoundaryBeginTime()));
             serializer.attribute("", ATTR_END_TIME, Long.toString(at.getBoundaryEndTime()));
             serializer.attribute("", ATTR_VOLUME, Integer.toString(at.getVolume()));
+            serializer.attribute("", ATTR_MUTED, Boolean.toString(at.isMuted()));
             serializer.attribute("", ATTR_LOOP, Boolean.toString(at.isLooping()));
             if (at.getAudioWaveformFilename() != null) {
                 serializer.attribute("", ATTR_AUDIO_WAVEFORM_FILENAME,
@@ -765,10 +768,19 @@ public class VideoEditorTestImpl implements VideoEditor {
                             currentMediaItem = new MediaImageItem(mediaItemId, filename,
                                     durationMs, renderingMode);
                         } else if (MediaVideoItem.class.getSimpleName().equals(type)) {
+                            final long beginMs = Long.parseLong(parser.getAttributeValue("",
+                                    ATTR_BEGIN_TIME));
+                            final long endMs = Long.parseLong(parser.getAttributeValue("",
+                                    ATTR_END_TIME));
+                            final int volume = Integer.parseInt(parser.getAttributeValue("",
+                                    ATTR_VOLUME));
+                            final boolean muted = Boolean.parseBoolean(parser.getAttributeValue("",
+                                    ATTR_MUTED));
                             final String audioWaveformFilename = parser.getAttributeValue("",
                                     ATTR_AUDIO_WAVEFORM_FILENAME);
                             currentMediaItem = new MediaVideoItem(mediaItemId, filename,
-                                    renderingMode, audioWaveformFilename);
+                                    renderingMode, beginMs, endMs, volume, muted,
+                                    audioWaveformFilename);
 
                             final long beginTimeMs = Long.parseLong(parser.getAttributeValue("",
                                     ATTR_BEGIN_TIME));
@@ -1001,11 +1013,12 @@ public class VideoEditorTestImpl implements VideoEditor {
         final long beginMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
         final long endMs = Long.parseLong(parser.getAttributeValue("", ATTR_END_TIME));
         final int volume = Integer.parseInt(parser.getAttributeValue("", ATTR_VOLUME));
+        final boolean muted = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_MUTED));
         final boolean loop = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_LOOP));
         final String waveformFilename = parser.getAttributeValue("", ATTR_AUDIO_WAVEFORM_FILENAME);
         try {
             final AudioTrack audioTrack = new AudioTrack(audioTrackId, filename, startTimeMs,
-                    beginMs, endMs, loop, volume, waveformFilename);
+                    beginMs, endMs, loop, volume, muted, waveformFilename);
 
             return audioTrack;
         } catch (IOException ex) {
