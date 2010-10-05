@@ -113,8 +113,6 @@ static const GLenum gTextureUnits[] = {
 ///////////////////////////////////////////////////////////////////////////////
 
 OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
-    LOGD("Create OpenGLRenderer");
-
     mShader = NULL;
     mColorFilter = NULL;
     mHasShadow = false;
@@ -133,7 +131,6 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
-    LOGD("Destroy OpenGLRenderer");
     // The context has already been destroyed at this point, do not call
     // GL APIs. All GL state should be kept in Caches.h
 }

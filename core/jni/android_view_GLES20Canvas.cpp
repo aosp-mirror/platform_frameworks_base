@@ -50,7 +50,20 @@ using namespace uirenderer;
  */
 #ifdef USE_OPENGL_RENDERER
 
+///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+// Debug
 #define DEBUG_RENDERER 0
+#define PROFILE_RENDERER 0
+
+// Debug
+#if DEBUG_RENDERER
+    #define RENDERER_LOGD(...) LOGD(__VA_ARGS__)
+#else
+    #define RENDERER_LOGD(...)
+#endif
 
 // ----------------------------------------------------------------------------
 // Java APIs
@@ -66,7 +79,8 @@ static struct {
 // ----------------------------------------------------------------------------
 
 static OpenGLRenderer* android_view_GLES20Canvas_createRenderer(JNIEnv* env, jobject canvas) {
-#if DEBUG_RENDERER
+    RENDERER_LOGD("Create OpenGLRenderer");
+#if PROFILE_RENDERER
     return new OpenGLDebugRenderer;
 #else
     return new OpenGLRenderer;
@@ -75,6 +89,7 @@ static OpenGLRenderer* android_view_GLES20Canvas_createRenderer(JNIEnv* env, job
 
 static void android_view_GLES20Canvas_destroyRenderer(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer) {
+    RENDERER_LOGD("Destroy OpenGLRenderer");
     delete renderer;
 }
 
