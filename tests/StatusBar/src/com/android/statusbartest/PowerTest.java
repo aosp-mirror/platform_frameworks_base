@@ -49,6 +49,8 @@ public class PowerTest extends TestActivity
     int mPokeState = 0;
     IBinder mPokeToken = new Binder();
     Handler mHandler = new Handler();
+    PowerManager mPm;
+    PowerManager.WakeLock mProx;
 
     @Override
     protected String tag() {
@@ -58,10 +60,27 @@ public class PowerTest extends TestActivity
     @Override
     protected Test[] tests() {
         mPowerManager = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
+        mPm = (PowerManager)getSystemService("power");
+        mProx = mPm.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "PowerTest-prox");
         
         return mTests;
     }
     private Test[] mTests = new Test[] {
+        new Test("Enable proximity") {
+            public void run() {
+                mProx.acquire();
+            }
+        },
+        new Test("Disable proximity") {
+            public void run() {
+                mProx.release();
+            }
+        },
+        new Test("Disable proximity (WAIT_FOR_PROXIMITY_NEGATIVE)") {
+            public void run() {
+                mProx.release(PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE);
+            }
+        },
         new Test("Cheek events don't poke") {
             public void run() {
                 mPokeState |= LocalPowerManager.POKE_LOCK_IGNORE_CHEEK_EVENTS;
@@ -72,6 +91,7 @@ public class PowerTest extends TestActivity
                 }
             }
         },
+
         new Test("Cheek events poke") {
             public void run() {
                 mPokeState &= ~LocalPowerManager.POKE_LOCK_IGNORE_CHEEK_EVENTS;
