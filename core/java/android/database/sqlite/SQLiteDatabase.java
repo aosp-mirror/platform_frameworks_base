@@ -410,8 +410,16 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @see #unlock()
      */
     /* package */ void lock() {
+        lock(false);
+    }
+    private void lock(boolean forced) {
+        // make sure this method is NOT being called from a 'synchronized' method
+        if (Thread.holdsLock(this)) {
+            // STOPSHIP change the following line to Log.w()
+            throw new IllegalStateException("don't lock() while in a synchronized method");
+        }
         verifyDbIsOpen();
-        if (!mLockingEnabled) return;
+        if (!forced && !mLockingEnabled) return;
         mLock.lock();
         if (SQLiteDebug.DEBUG_LOCK_TIME_TRACKING) {
             if (mLock.getHoldCount() == 1) {
@@ -421,7 +429,6 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
         }
     }
-
     /**
      * Locks the database for exclusive access. The database lock must be held when
      * touch the native sqlite3* object since it is single threaded and uses
@@ -431,15 +438,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @see #unlockForced()
      */
     private void lockForced() {
-        verifyDbIsOpen();
-        mLock.lock();
-        if (SQLiteDebug.DEBUG_LOCK_TIME_TRACKING) {
-            if (mLock.getHoldCount() == 1) {
-                // Use elapsed real-time since the CPU may sleep when waiting for IO
-                mLockAcquiredWallTime = SystemClock.elapsedRealtime();
-                mLockAcquiredThreadTime = Debug.threadCpuTimeNanos();
-            }
-        }
+        lock(true);
     }
 
     /**
