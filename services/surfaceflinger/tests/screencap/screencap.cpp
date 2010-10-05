@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     sp<IMemoryHeap> heap;
     uint32_t w, h;
     PixelFormat f;
-    status_t err = composer->captureScreen(0, &heap, &w, &h, &f);
+    status_t err = composer->captureScreen(0, &heap, &w, &h, &f, 0, 0);
     if (err != NO_ERROR) {
         fprintf(stderr, "screen capture failed: %s\n", strerror(-err));
         exit(0);

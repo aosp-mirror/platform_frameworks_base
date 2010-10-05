@@ -214,6 +214,17 @@ slowpath:
     }
 }
 
+void Layer::drawForSreenShot() const
+{
+    bool currentFixedSize = mFixedSize;
+    bool currentBlending = mNeedsBlending;
+    const_cast<Layer*>(this)->mFixedSize = false;
+    const_cast<Layer*>(this)->mFixedSize = true;
+    LayerBase::drawForSreenShot();
+    const_cast<Layer*>(this)->mFixedSize = currentFixedSize;
+    const_cast<Layer*>(this)->mNeedsBlending = currentBlending;
+}
+
 void Layer::onDraw(const Region& clip) const
 {
     Texture tex(mBufferManager.getActiveTexture());
