@@ -579,7 +579,6 @@ public class PackageManagerTests extends AndroidTestCase {
     private InstallParams installFromRawResource(String outFileName,
             int rawResId, int flags, boolean cleanUp, boolean fail, int result,
             int expInstallLocation) {
-        PackageManager pm = mContext.getPackageManager();
         InstallParams ip = new InstallParams(outFileName, rawResId);
         installFromRawResource(ip, flags, cleanUp, fail, result, expInstallLocation);
         return ip;

@@ -140,7 +140,6 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_PREFERRED = false;
     private static final boolean DEBUG_UPGRADE = false;
     private static final boolean DEBUG_INSTALL = false;
-    private static final boolean DEBUG_NATIVE = false;
 
     private static final boolean MULTIPLE_APPLICATION_UIDS = true;
     private static final int RADIO_UID = Process.PHONE_UID;
@@ -3276,10 +3275,23 @@ class PackageManagerService extends IPackageManager.Stub {
              *        In other words, we're going to unpack the binaries
              *        only for non-system apps and system app upgrades.
              */
-            if ((!isSystemApp(pkg) || isUpdatedSystemApp(pkg)) && !isExternal(pkg)) {
-                Log.i(TAG, path + " changed; unpacking");
-                File sharedLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
-                NativeLibraryHelper.copyNativeBinariesLI(scanFile, sharedLibraryDir);
+            if (pkg.applicationInfo.nativeLibraryDir != null) {
+                final File sharedLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
+                if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
+                    /*
+                     * Upgrading from a previous version of the OS sometimes
+                     * leaves native libraries in the /data/data/<app>/lib
+                     * directory for system apps even when they shouldn't be.
+                     * Recent changes in the JNI library search path
+                     * necessitates we remove those to match previous behavior.
+                     */
+                    if (NativeLibraryHelper.removeNativeBinariesFromDirLI(sharedLibraryDir)) {
+                        Log.i(TAG, "removed obsolete native libraries for system package " + path);
+                    }
+                } else if (!isExternal(pkg)) {
+                    Log.i(TAG, path + " changed; unpacking");
+                    NativeLibraryHelper.copyNativeBinariesLI(scanFile, sharedLibraryDir);
+                }
             }
             pkg.mScanPath = path;
 
