@@ -3,15 +3,6 @@ page.title=Intents and Intent Filters
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Key classes</h2>
-<ol>
-<li>{@link android.content.Intent}</li>
-<li>{@link android.content.IntentFilter}</li>
-<li>{@link android.app.Activity}</li>
-<li>{@link android.app.Service}</li>
-<li>{@link android.content.BroadcastReceiver}</li>
-<li>{@link android.content.pm.PackageManager}</li>
-</ol>
 
 <h2>In this document</h2>
 <ol>
@@ -22,6 +13,15 @@ page.title=Intents and Intent Filters
 <li style="margin-left: 2em"><a href="#imatch">Using intent matching</a></li>
 <li><a href="#npex">Note Pad Example</a></li>
 </ol>
+
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.content.Intent}</li>
+<li>{@link android.content.IntentFilter}</li>
+<li>{@link android.content.BroadcastReceiver}</li>
+<li>{@link android.content.pm.PackageManager}</li>
+</ol>
+
 </div>
 </div>
 

@@ -4,7 +4,7 @@ page.title=Market Filters
 <div id="qv-wrapper">
 <div id="qv">
 
-<h2 align="left">Market filters quickview</h2>
+<h2>Quickview</h2>
 <ul> <li>Android Market applies filters to that let you control whether your app is shown to a
 user who is browing or searching for apps.</li> 
 <li>Filtering is determined by elements in an app's manifest file,

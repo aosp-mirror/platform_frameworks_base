@@ -50,14 +50,14 @@ page.title=Testing Fundamentals
         <a href="#NextSteps">Next Steps</a>
     </li>
   </ol>
-  <h2>Key Classes and Packages</h2>
+  <h2>Key classes</h2>
     <ol>
       <li>{@link android.test.InstrumentationTestRunner}</li>
       <li>{@link android.test}</li>
       <li>{@link android.test.mock}</li>
       <li>{@link junit.framework}</li>
     </ol>
-  <h2>Related Tutorials</h2>
+  <h2>Related tutorials</h2>
     <ol>
         <li>
             <a href="{@docRoot}resources/tutorials/testing/helloandroid_test.html">
@@ -67,7 +67,7 @@ page.title=Testing Fundamentals
             <a href="{@docRoot}resources/tutorials/testing/activity_test.html">Activity Testing</a>
         </li>
     </ol>
-  <h2>See Also</h2>
+  <h2>See also</h2>
       <ol>
         <li>
           <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
