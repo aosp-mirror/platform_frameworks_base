@@ -1380,6 +1380,12 @@ final class FragmentManagerImpl implements FragmentManager {
             case FragmentTransaction.TRANSIT_FRAGMENT_CLOSE:
                 rev = FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
                 break;
+            case FragmentTransaction.TRANSIT_FRAGMENT_NEXT:
+                rev = FragmentTransaction.TRANSIT_FRAGMENT_PREV;
+                break;
+            case FragmentTransaction.TRANSIT_FRAGMENT_PREV:
+                rev = FragmentTransaction.TRANSIT_FRAGMENT_NEXT;
+                break;
         }
         return rev;
         
@@ -1397,6 +1403,16 @@ final class FragmentManagerImpl implements FragmentManager {
                 animAttr = enter
                     ? com.android.internal.R.styleable.FragmentAnimation_fragmentCloseEnterAnimation
                     : com.android.internal.R.styleable.FragmentAnimation_fragmentCloseExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_FRAGMENT_NEXT:
+                animAttr = enter
+                    ? com.android.internal.R.styleable.FragmentAnimation_fragmentNextEnterAnimation
+                    : com.android.internal.R.styleable.FragmentAnimation_fragmentNextExitAnimation;
+                break;
+            case FragmentTransaction.TRANSIT_FRAGMENT_PREV:
+                animAttr = enter
+                    ? com.android.internal.R.styleable.FragmentAnimation_fragmentPrevEnterAnimation
+                    : com.android.internal.R.styleable.FragmentAnimation_fragmentPrevExitAnimation;
                 break;
         }
         return animAttr;
