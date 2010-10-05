@@ -287,6 +287,7 @@ public class SurfaceView extends View {
         setMeasuredDimension(width, height);
     }
     
+    /** @hide */
     @Override
     protected boolean setFrame(int left, int top, int right, int bottom) {
         boolean result = super.setFrame(left, top, right, bottom);
