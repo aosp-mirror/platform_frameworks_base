@@ -77,7 +77,7 @@ static char *createStr(const char *path, short extra) {
 
 static void sqlLogger(void *databaseName, int iErrCode, const char *zMsg) {
     // skip printing this message if it is due to certain types of errors
-    if (iErrCode == SQLITE_CONSTRAINT) return;
+    if (iErrCode == 0 || iErrCode == SQLITE_CONSTRAINT) return;
     LOGI("sqlite returned: error code = %d, msg = %s\n", iErrCode, zMsg);
 }
 
