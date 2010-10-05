@@ -587,6 +587,20 @@ nAllocationGetType(JNIEnv *_env, jobject _this, RsContext con, jint a)
     return (jint) rsAllocationGetType(con, (RsAllocation)a);
 }
 
+static void
+nAllocationResize1D(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint dimX)
+{
+    LOG_API("nAllocationResize1D, con(%p), alloc(%p), sizeX(%i)", con, (RsAllocation)alloc, dimX);
+    rsAllocationResize1D(con, (RsAllocation)alloc, dimX);
+}
+
+static void
+nAllocationResize2D(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint dimX, jint dimY)
+{
+    LOG_API("nAllocationResize1D, con(%p), alloc(%p), sizeX(%i), sizeY(%i)", con, (RsAllocation)alloc, dimX, dimY);
+    rsAllocationResize2D(con, (RsAllocation)alloc, dimX, dimY);
+}
+
 // -----------------------------------
 
 static int
@@ -1252,6 +1266,8 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationRead",                "(II[I)V",                               (void*)nAllocationRead_i },
 {"rsnAllocationRead",                "(II[F)V",                               (void*)nAllocationRead_f },
 {"rsnAllocationGetType",             "(II)I",                                 (void*)nAllocationGetType},
+{"rsnAllocationResize1D",            "(III)V",                                (void*)nAllocationResize1D },
+{"rsnAllocationResize2D",            "(IIII)V",                               (void*)nAllocationResize2D },
 
 {"rsnAdapter1DBindAllocation",       "(III)V",                                (void*)nAdapter1DBindAllocation },
 {"rsnAdapter1DSetConstraint",        "(IIII)V",                               (void*)nAdapter1DSetConstraint },

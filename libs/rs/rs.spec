@@ -280,6 +280,17 @@ AllocationGetType {
 	ret const void*
 	}
 
+AllocationResize1D {
+	param RsAllocation va
+	param uint32_t dimX
+	}
+
+AllocationResize2D {
+	param RsAllocation va
+	param uint32_t dimX
+	param uint32_t dimY
+	}
+
 SamplerBegin {
 	}
 
