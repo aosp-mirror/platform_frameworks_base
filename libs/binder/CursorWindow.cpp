@@ -141,10 +141,12 @@ uint32_t CursorWindow::alloc(size_t requestedSize, bool aligned)
     size = requestedSize + padding;
 
     if (size > freeSpace()) {
-        LOGE("need to grow: mSize = %d, size = %d, freeSpace() = %d, numRows = %d", mSize, size, freeSpace(), mHeader->numRows);
+        LOGV("need to grow: mSize = %d, size = %d, freeSpace() = %d, numRows = %d", mSize, size,
+                freeSpace(), mHeader->numRows);
         // Only grow the window if the first row doesn't fit
         if (mHeader->numRows > 1) {
-LOGE("not growing since there are already %d row(s), max size %d", mHeader->numRows, mMaxSize);
+            LOGV("not growing since there are already %d row(s), max size %d", mHeader->numRows,
+                    mMaxSize);
             return 0;
         }
 
