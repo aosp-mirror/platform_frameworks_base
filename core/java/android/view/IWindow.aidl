@@ -17,8 +17,6 @@
 
 package android.view;
 
-import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;

@@ -136,6 +136,12 @@ public class ViewDebug {
     public static final boolean DEBUG_SHOW_FPS = false;
 
     /**
+     * Enables detailed logging of drag/drop operations.
+     * @hide
+     */
+    public static final boolean DEBUG_DRAG = true;
+
+    /**
      * <p>Enables or disables views consistency check. Even when this property is enabled,
      * view consistency checks happen only if {@link android.util.Config#DEBUG} is set
      * to true. The value of this property can be configured externally in one of the

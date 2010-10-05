@@ -50,10 +50,10 @@ public class DragEvent implements Parcelable {
     public static final int ACTION_DRAG_EXITED = 6;
 
     /* hide the constructor behind package scope */
-    DragEvent() {
+    private DragEvent() {
     }
 
-    public static DragEvent obtain() {
+    static DragEvent obtain() {
         return DragEvent.obtain(0, 0f, 0f, null, null);
     }
 
@@ -79,6 +79,11 @@ public class DragEvent implements Parcelable {
         ev.mClipData = data;
 
         return ev;
+    }
+
+    public static DragEvent obtain(DragEvent source) {
+        return obtain(source.mAction, source.mX, source.mY,
+                source.mClipDescription, source.mClipData);
     }
 
     public int getAction() {
