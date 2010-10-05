@@ -83,7 +83,6 @@ LOCAL_SRC_FILES:= \
 	rsElement.cpp \
 	rsFileA3D.cpp \
 	rsFont.cpp \
-	rsLight.cpp \
 	rsLocklessFifo.cpp \
 	rsObjectBase.cpp \
 	rsMatrix.cpp \
