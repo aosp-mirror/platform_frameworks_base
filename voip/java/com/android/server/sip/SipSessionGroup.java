@@ -480,7 +480,7 @@ class SipSessionGroup implements SipListener {
                     public void run() {
                         try {
                             processCommand(command);
-                        } catch (SipException e) {
+                        } catch (Throwable e) {
                             Log.w(TAG, "command error: " + command, e);
                             onError(e);
                         }
@@ -1218,7 +1218,7 @@ class SipSessionGroup implements SipListener {
         private int getErrorCode(Throwable exception) {
             String message = exception.getMessage();
             if (exception instanceof UnknownHostException) {
-                return SipErrorCode.INVALID_REMOTE_URI;
+                return SipErrorCode.SERVER_UNREACHABLE;
             } else if (exception instanceof IOException) {
                 return SipErrorCode.SOCKET_ERROR;
             } else {
