@@ -938,11 +938,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (ViewDebug.DEBUG_DRAG) Log.d(View.VIEW_LOG_TAG, "Drop event: " + event);
             View target = findFrontmostDroppableChildAt(event.mX, event.mY, mLocalPoint);
             if (target != null) {
+                if (ViewDebug.DEBUG_DRAG) Log.d(View.VIEW_LOG_TAG, "   dispatch drop to " + target);
                 event.mX = mLocalPoint.x;
                 event.mY = mLocalPoint.y;
                 retval = target.dispatchDragEvent(event);
                 event.mX = tx;
                 event.mY = ty;
+            } else {
+                if (ViewDebug.DEBUG_DRAG) {
+                    Log.d(View.VIEW_LOG_TAG, "   not dropped on an accepting view");
+                }
             }
         } break;
         }
