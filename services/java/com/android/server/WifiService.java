@@ -881,7 +881,6 @@ public class WifiService extends IWifiManager.Stub {
                  * the already-set timer.
                  */
                 int pluggedType = intent.getIntExtra("plugged", 0);
-                Slog.d(TAG, "ACTION_BATTERY_CHANGED pluggedType: " + pluggedType);
                 if (mScreenOff && shouldWifiStayAwake(stayAwakeConditions, mPluggedType) &&
                         !shouldWifiStayAwake(stayAwakeConditions, pluggedType)) {
                     long triggerTime = System.currentTimeMillis() + idleMillis;
