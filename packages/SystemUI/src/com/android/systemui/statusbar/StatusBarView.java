@@ -42,10 +42,6 @@ public class StatusBarView extends FrameLayout {
     View mDate;
     FixedSizeDrawable mBackground;
     
-    boolean mNightMode = false;
-    int mStartAlpha = 0, mEndAlpha = 0;
-    long mEndTime = 0;
-
     public StatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -66,29 +62,6 @@ public class StatusBarView extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mService.onBarViewAttached();
-    }
-    
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        boolean nightMode = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
-                == Configuration.UI_MODE_NIGHT_YES;
-        if (mNightMode != nightMode) {
-            mNightMode = nightMode;
-            mStartAlpha = getCurAlpha();
-            mEndAlpha = mNightMode ? 0x80 : 0x00;
-            mEndTime = SystemClock.uptimeMillis() + DIM_ANIM_TIME;
-            invalidate();
-        }
-    }
-
-    int getCurAlpha() {
-        long time = SystemClock.uptimeMillis();
-        if (time > mEndTime) {
-            return mEndAlpha;
-        }
-        return mEndAlpha
-                - (int)(((mEndAlpha-mStartAlpha) * (mEndTime-time) / DIM_ANIM_TIME));
     }
     
     @Override
@@ -125,18 +98,6 @@ public class StatusBarView extends FrameLayout {
 
         mDate.layout(mDate.getLeft(), mDate.getTop(), newDateRight, mDate.getBottom());
         mBackground.setFixedBounds(-mDate.getLeft(), -mDate.getTop(), (r-l), (b-t));
-    }
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-        int alpha = getCurAlpha();
-        if (alpha != 0) {
-            canvas.drawARGB(alpha, 0, 0, 0);
-        }
-        if (alpha != mEndAlpha) {
-            invalidate();
-        }
     }
 
     /**
