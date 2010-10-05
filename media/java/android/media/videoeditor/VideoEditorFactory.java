@@ -66,11 +66,11 @@ public class VideoEditorFactory {
             }
         }
 
-        Class<?> cls = Class.forName(className);
-        Class<?> partypes[] = new Class[1];
+        final Class<?> cls = Class.forName(className);
+        final Class<?> partypes[] = new Class[1];
         partypes[0] = String.class;
-        Constructor<?> ct = cls.getConstructor(partypes);
-        Object arglist[] = new Object[1];
+        final Constructor<?> ct = cls.getConstructor(partypes);
+        final Object arglist[] = new Object[1];
         arglist[0] = projectPath;
 
         return (VideoEditor)ct.newInstance(arglist);
@@ -84,6 +84,7 @@ public class VideoEditorFactory {
      * @param projectPath The path where all VideoEditor internal files
      *            are stored. When a project is deleted the application is
      *            responsible for deleting the path and its contents.
+     * @param className The implementation class name
      * @param generatePreview if set to true the
      *      {@link MediaEditor#generatePreview()} will be called internally to
      *      generate any needed transitions.
@@ -96,8 +97,17 @@ public class VideoEditorFactory {
      * @throws IllegalStateException if a previous VideoEditor instance has not
      *             been released
      */
-    public static VideoEditor load(String projectPath, boolean generatePreview) throws IOException {
-        final VideoEditorTestImpl videoEditor = new VideoEditorTestImpl(projectPath);
+    public static VideoEditor load(String projectPath, String className, boolean generatePreview)
+            throws IOException, ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException, InstantiationException {
+        final Class<?> cls = Class.forName(className);
+        final Class<?> partypes[] = new Class[1];
+        partypes[0] = String.class;
+        final Constructor<?> ct = cls.getConstructor(partypes);
+        final Object arglist[] = new Object[1];
+        arglist[0] = projectPath;
+
+        final VideoEditor videoEditor = (VideoEditor)ct.newInstance(arglist);
         if (generatePreview) {
             videoEditor.generatePreview();
         }

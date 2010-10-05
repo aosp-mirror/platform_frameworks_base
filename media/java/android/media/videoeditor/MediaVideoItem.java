@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 
 import android.graphics.Bitmap;
-import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -228,7 +227,7 @@ public class MediaVideoItem extends MediaItem {
         mHeight = 720;
         mAspectRatio = MediaProperties.ASPECT_RATIO_3_2;
         mFileType = MediaProperties.FILE_MP4;
-        mVideoType = MediaRecorder.VideoEncoder.H264;
+        mVideoType = MediaProperties.VCODEC_H264BP;
         // Do we have predefined values for this variable?
         mVideoProfile = 0;
         // Can video and audio duration be different?

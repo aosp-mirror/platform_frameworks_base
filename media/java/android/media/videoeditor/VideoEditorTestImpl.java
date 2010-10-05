@@ -57,6 +57,8 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String TAG_OVERLAY_USER_ATTRIBUTES = "overlay_user_attributes";
     private static final String TAG_EFFECTS = "effects";
     private static final String TAG_EFFECT = "effect";
+    private static final String TAG_AUDIO_TRACKS = "audio_tracks";
+    private static final String TAG_AUDIO_TRACK = "audio_track";
 
     private static final String ATTR_ID = "id";
     private static final String ATTR_FILENAME = "filename";
@@ -65,7 +67,8 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String ATTR_ASPECT_RATIO = "aspect_ratio";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_DURATION = "duration";
-    private static final String ATTR_BEGIN_TIME = "start_time";
+    private static final String ATTR_START_TIME = "start_time";
+    private static final String ATTR_BEGIN_TIME = "begin_time";
     private static final String ATTR_END_TIME = "end_time";
     private static final String ATTR_VOLUME = "volume";
     private static final String ATTR_BEHAVIOR = "behavior";
@@ -85,6 +88,7 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String ATTR_END_RECT_T = "end_t";
     private static final String ATTR_END_RECT_R = "end_r";
     private static final String ATTR_END_RECT_B = "end_b";
+    private static final String ATTR_LOOP = "loop";
 
     // Instance variables
     private long mDurationMs;
@@ -700,6 +704,25 @@ public class VideoEditorTestImpl implements VideoEditor {
         }
         serializer.endTag("", TAG_TRANSITIONS);
 
+        serializer.startTag("", TAG_AUDIO_TRACKS);
+        for (AudioTrack at : mAudioTracks) {
+            serializer.startTag("", TAG_AUDIO_TRACK);
+            serializer.attribute("", ATTR_ID, at.getId());
+            serializer.attribute("", ATTR_FILENAME, at.getFilename());
+            serializer.attribute("", ATTR_START_TIME, Long.toString(at.getStartTime()));
+            serializer.attribute("", ATTR_BEGIN_TIME, Long.toString(at.getBoundaryBeginTime()));
+            serializer.attribute("", ATTR_END_TIME, Long.toString(at.getBoundaryEndTime()));
+            serializer.attribute("", ATTR_VOLUME, Integer.toString(at.getVolume()));
+            serializer.attribute("", ATTR_LOOP, Boolean.toString(at.isLooping()));
+            if (at.getAudioWaveformFilename() != null) {
+                serializer.attribute("", ATTR_AUDIO_WAVEFORM_FILENAME,
+                at.getAudioWaveformFilename());
+            }
+
+            serializer.endTag("", TAG_AUDIO_TRACK);
+        }
+        serializer.endTag("", TAG_AUDIO_TRACKS);
+
         serializer.endTag("", TAG_PROJECT);
         serializer.endDocument();
 
@@ -791,6 +814,11 @@ public class VideoEditorTestImpl implements VideoEditor {
                             if (effect != null) {
                                 currentMediaItem.addEffect(effect);
                             }
+                        }
+                    } else if (TAG_AUDIO_TRACK.equals(name)) {
+                        final AudioTrack audioTrack = parseAudioTrack(parser);
+                        if (audioTrack != null) {
+                            addAudioTrack(audioTrack);
                         }
                     }
                     break;
@@ -957,6 +985,32 @@ public class VideoEditorTestImpl implements VideoEditor {
         }
 
         return effect;
+    }
+
+    /**
+     * Parse the audio track
+     *
+     * @param parser The parser
+     *
+     * @return The audio track
+     */
+    private AudioTrack parseAudioTrack(XmlPullParser parser) {
+        final String audioTrackId = parser.getAttributeValue("", ATTR_ID);
+        final String filename = parser.getAttributeValue("", ATTR_FILENAME);
+        final long startTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_START_TIME));
+        final long beginMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
+        final long endMs = Long.parseLong(parser.getAttributeValue("", ATTR_END_TIME));
+        final int volume = Integer.parseInt(parser.getAttributeValue("", ATTR_VOLUME));
+        final boolean loop = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_LOOP));
+        final String waveformFilename = parser.getAttributeValue("", ATTR_AUDIO_WAVEFORM_FILENAME);
+        try {
+            final AudioTrack audioTrack = new AudioTrack(audioTrackId, filename, startTimeMs,
+                    beginMs, endMs, loop, volume, waveformFilename);
+
+            return audioTrack;
+        } catch (IOException ex) {
+            return null;
+        }
     }
 
     public void cancelExport(String filename) {

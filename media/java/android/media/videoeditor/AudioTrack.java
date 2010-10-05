@@ -187,7 +187,7 @@ public class AudioTrack {
 
     /**
      * Constructor
-     * @param audioTrackId The AudioTrack id
+     * @param audioTrackId The audio track id
      * @param filename The absolute file name
      *
      * @throws IOException if file is not found
@@ -224,6 +224,50 @@ public class AudioTrack {
 
         // The audio waveform file is generated later
         mAudioWaveformFilename = null;
+    }
+
+    /**
+     * Constructor
+     *
+     * @param audioTrackId The audio track id
+     * @param filename The audio filename
+     * @param startTimeMs the start time in milliseconds (relative to the
+     *              timeline)
+     * @param beginMs start time in the audio track in milliseconds (relative to
+     *            the beginning of the audio track)
+     * @param endMs end time in the audio track in milliseconds (relative to the
+     *            beginning of the audio track)
+     * @param loop true to loop the audio track
+     * @param volume The volume in percentage
+     * @param audioWaveformFilename The name of the waveform file
+     *
+     * @throws IOException if file is not found
+     */
+    AudioTrack(String audioTrackId, String filename, long startTimeMs, long beginMs, long endMs,
+            boolean loop, int volume, String audioWaveformFilename) throws IOException {
+        mUniqueId = audioTrackId;
+        mFilename = filename;
+        mStartTimeMs = startTimeMs;
+
+        // TODO: This value represents to the duration of the audio file
+        mDurationMs = 300000;
+
+        // TODO: This value needs to be read from the audio track of the source
+        // file
+        mAudioChannels = 2;
+        mAudioType = MediaProperties.ACODEC_AAC_LC;
+        mAudioBitrate = 128000;
+        mAudioSamplingFrequency = 44100;
+
+        mTimelineDurationMs = endMs - beginMs;
+        mVolumePercent = volume;
+
+        mBeginBoundaryTimeMs = beginMs;
+        mEndBoundaryTimeMs = endMs;
+
+        mLoop = loop;
+
+        mAudioWaveformFilename = audioWaveformFilename;
     }
 
     /**
