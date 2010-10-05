@@ -19,6 +19,7 @@
     <item android:state_window_focused="false" android:color="@android:color/bright_foreground_dark"/>
     <item android:state_pressed="true" android:color="@android:color/bright_foreground_dark_inverse"/>
     <item android:state_selected="true" android:color="@android:color/bright_foreground_dark_inverse"/>
+    <item android:state_focused="true" android:color="@android:color/bright_foreground_dark_inverse"/>
     <item android:color="@android:color/bright_foreground_dark"/> <!-- not selected -->
 
 </selector>
