@@ -40,7 +40,6 @@ typedef void * RsSampler;
 typedef void * RsScript;
 typedef void * RsMesh;
 typedef void * RsType;
-typedef void * RsLight;
 typedef void * RsObjectBase;
 
 typedef void * RsProgram;
@@ -242,7 +241,6 @@ enum RsA3DClassID {
     RS_A3D_CLASS_ID_PROGRAM_STORE,
     RS_A3D_CLASS_ID_SAMPLER,
     RS_A3D_CLASS_ID_ANIMATION,
-    RS_A3D_CLASS_ID_LIGHT,
     RS_A3D_CLASS_ID_ADAPTER_1D,
     RS_A3D_CLASS_ID_ADAPTER_2D,
     RS_A3D_CLASS_ID_SCRIPT_C

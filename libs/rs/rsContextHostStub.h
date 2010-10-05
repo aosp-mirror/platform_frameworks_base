@@ -30,7 +30,6 @@
 #include "rsAllocation.h"
 #include "rsAdapter.h"
 #include "rsSampler.h"
-#include "rsLight.h"
 #include "rsProgramFragment.h"
 #include "rsProgramStore.h"
 #include "rsProgramRaster.h"
@@ -68,7 +67,6 @@ public:
     ProgramStoreState mStateFragmentStore;
     //ProgramRasterState mStateRaster;
     //ProgramVertexState mStateVertex;
-    LightState mStateLight;
     VertexArrayState mStateVertexArray;
 
     //ScriptCState mScriptC;

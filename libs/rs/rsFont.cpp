@@ -825,7 +825,7 @@ void FontState::setFontColor(float r, float g, float b, float a) {
     mConstants.mFontColor[3] = a;
 
     mConstants.mGamma = 1.0f;
-    const int32_t luminance = (r * 2.0f + g * 5.0f + b) / 8.0f;
+    const float luminance = (r * 2.0f + g * 5.0f + b) / 8.0f;
     if (luminance <= mBlackThreshold) {
         mConstants.mGamma = mBlackGamma;
     } else if (luminance >= mWhiteThreshold) {

@@ -30,7 +30,6 @@
 #include "rsAllocation.h"
 #include "rsAdapter.h"
 #include "rsSampler.h"
-#include "rsLight.h"
 #include "rsFont.h"
 #include "rsProgramFragment.h"
 #include "rsProgramStore.h"
@@ -94,7 +93,6 @@ public:
     ProgramStoreState mStateFragmentStore;
     ProgramRasterState mStateRaster;
     ProgramVertexState mStateVertex;
-    LightState mStateLight;
     VertexArrayState mStateVertexArray;
     FontState mStateFont;
 
@@ -296,6 +294,9 @@ private:
     uint32_t mTimeMSLastFrame;
     uint32_t mTimeMSLastScript;
     uint32_t mTimeMSLastSwap;
+    uint32_t mAverageFPSFrameCount;
+    uint64_t mAverageFPSStartTime;
+    uint32_t mAverageFPS;
 };
 
 }
