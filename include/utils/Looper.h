@@ -20,8 +20,21 @@
 #include <utils/threads.h>
 #include <utils/RefBase.h>
 #include <utils/KeyedVector.h>
+#include <utils/Timers.h>
 
 #include <android/looper.h>
+
+// Currently using poll() instead of epoll_wait() since it does a better job of meeting a
+// timeout deadline.  epoll_wait() typically causes additional delays of up to 10ms
+// beyond the requested timeout.
+//#define LOOPER_USES_EPOLL
+//#define LOOPER_STATISTICS
+
+#ifdef LOOPER_USES_EPOLL
+#include <sys/epoll.h>
+#else
+#include <sys/poll.h>
+#endif
 
 /*
  * Declare a concrete type for the NDK's looper forward declaration.
@@ -190,13 +203,54 @@ private:
 
     const bool mAllowNonCallbacks; // immutable
 
-    int mEpollFd; // immutable
     int mWakeReadPipeFd;  // immutable
     int mWakeWritePipeFd; // immutable
+    Mutex mLock;
+
+#ifdef LOOPER_USES_EPOLL
+    int mEpollFd; // immutable
 
     // Locked list of file descriptor monitoring requests.
-    Mutex mLock;
-    KeyedVector<int, Request> mRequests;
+    KeyedVector<int, Request> mRequests;  // guarded by mLock
+#else
+    // The lock guards state used to track whether there is a poll() in progress and whether
+    // there are any other threads waiting in wakeAndLock().  The condition variables
+    // are used to transfer control among these threads such that all waiters are
+    // serviced before a new poll can begin.
+    // The wakeAndLock() method increments mWaiters, wakes the poll, blocks on mAwake
+    // until mPolling becomes false, then decrements mWaiters again.
+    // The poll() method blocks on mResume until mWaiters becomes 0, then sets
+    // mPolling to true, blocks until the poll completes, then resets mPolling to false
+    // and signals mResume if there are waiters.
+    bool mPolling;      // guarded by mLock
+    uint32_t mWaiters;  // guarded by mLock
+    Condition mAwake;   // guarded by mLock
+    Condition mResume;  // guarded by mLock
+
+    Vector<struct pollfd> mRequestedFds;  // must hold mLock and mPolling must be false to modify
+    Vector<Request> mRequests;            // must hold mLock and mPolling must be false to modify
+
+    ssize_t getRequestIndexLocked(int fd);
+    void wakeAndLock();
+#endif
+
+#ifdef LOOPER_STATISTICS
+    static const int SAMPLED_WAKE_CYCLES_TO_AGGREGATE = 100;
+    static const int SAMPLED_POLLS_TO_AGGREGATE = 1000;
+
+    nsecs_t mPendingWakeTime;
+    int mPendingWakeCount;
+
+    int mSampledWakeCycles;
+    int mSampledWakeCountSum;
+    nsecs_t mSampledWakeLatencySum;
+
+    int mSampledPolls;
+    int mSampledZeroPollCount;
+    int mSampledZeroPollLatencySum;
+    int mSampledTimeoutPollCount;
+    int mSampledTimeoutPollLatencySum;
+#endif
 
     // This state is only used privately by pollOnce and does not require a lock since
     // it runs on a single thread.
@@ -204,6 +258,8 @@ private:
     size_t mResponseIndex;
 
     int pollInner(int timeoutMillis);
+    void awoken();
+    void pushResponse(int events, const Request& request);
 
     static void initTLSKey();
     static void threadDestructor(void *st);
