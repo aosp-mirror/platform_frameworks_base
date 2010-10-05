@@ -16,6 +16,7 @@
 
 package android.net.sip;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,7 +35,7 @@ import java.text.ParseException;
  * <li>open a {@link SipProfile} to get ready for making outbound calls or have
  *      the background SIP service listen to incoming calls and broadcast them
  *      with registered command string. See
- *      {@link #open(SipProfile, String, SipRegistrationListener)},
+ *      {@link #open(SipProfile, PendingIntent, SipRegistrationListener)},
  *      {@link #open(SipProfile)}, {@link #close}, {@link #isOpened} and
  *      {@link #isRegistered}. It also facilitates handling of the incoming call
  *      broadcast intent. See
@@ -50,6 +51,19 @@ import java.text.ParseException;
  * @hide
  */
 public class SipManager {
+    /**
+     * The result code to be sent back with the incoming call
+     * {@link PendingIntent}.
+     * @see #open(SipProfile, PendingIntent, SipRegistrationListener)
+     */
+    public static final int INCOMING_CALL_RESULT_CODE = 101;
+
+    /** Part of the incoming call intent. */
+    public static final String EXTRA_CALL_ID = "android:sipCallID";
+
+    /** Part of the incoming call intent. */
+    public static final String EXTRA_OFFER_SD = "android:sipOfferSD";
+
     /**
      * Action string for the incoming call intent for the Phone app.
      * Internal use only.
@@ -77,12 +91,6 @@ public class SipManager {
      * @hide
      */
     public static final String EXTRA_LOCAL_URI = "android:localSipUri";
-
-    /** Part of the incoming call intent. */
-    public static final String EXTRA_CALL_ID = "android:sipCallID";
-
-    /** Part of the incoming call intent. */
-    public static final String EXTRA_OFFER_SD = "android:sipOfferSD";
 
     private static final String TAG = "SipManager";
 
@@ -142,7 +150,8 @@ public class SipManager {
     /**
      * Opens the profile for making calls. The caller may make subsequent calls
      * through {@link #makeAudioCall}. If one also wants to receive calls on the
-     * profile, use {@link #open(SipProfile, String, SipRegistrationListener)}
+     * profile, use
+     * {@link #open(SipProfile, PendingIntent, SipRegistrationListener)}
      * instead.
      *
      * @param localProfile the SIP profile to make calls from
@@ -165,17 +174,29 @@ public class SipManager {
      * in order to receive calls from the provider.
      *
      * @param localProfile the SIP profile to receive incoming calls for
-     * @param incomingCallBroadcastAction the action to be broadcast when an
-     *      incoming call is received
+     * @param incomingCallPendingIntent When an incoming call is received, the
+     *      SIP service will call
+     *      {@link PendingIntent#send(Context, int, Intent)} to send back the
+     *      intent to the caller with {@link #INCOMING_CALL_RESULT_CODE} as the
+     *      result code and the intent to fill in the call ID and session
+     *      description information. It cannot be null.
      * @param listener to listen to registration events; can be null
+     * @see #getCallId
+     * @see #getOfferSessionDescription
+     * @see #takeAudioCall
+     * @throws NullPointerException if {@code incomingCallPendingIntent} is null
      * @throws SipException if the profile contains incorrect settings or
      *      calling the SIP service results in an error
      */
     public void open(SipProfile localProfile,
-            String incomingCallBroadcastAction,
+            PendingIntent incomingCallPendingIntent,
             SipRegistrationListener listener) throws SipException {
+        if (incomingCallPendingIntent == null) {
+            throw new NullPointerException(
+                    "incomingCallPendingIntent cannot be null");
+        }
         try {
-            mSipService.open3(localProfile, incomingCallBroadcastAction,
+            mSipService.open3(localProfile, incomingCallPendingIntent,
                     createRelay(listener, localProfile.getUriString()));
         } catch (RemoteException e) {
             throw new SipException("open()", e);
@@ -184,7 +205,8 @@ public class SipManager {
 
     /**
      * Sets the listener to listen to registration events. No effect if the
-     * profile has not been opened to receive calls (see {@link #open}).
+     * profile has not been opened to receive calls (see
+     * {@link #open(SipProfile, PendingIntent, SipRegistrationListener)}).
      *
      * @param localProfileUri the URI of the profile
      * @param listener to listen to registration events; can be null
@@ -282,9 +304,9 @@ public class SipManager {
     }
 
     /**
-     * Creates a {@link SipAudioCall} to make a call. To use this method, one
-     * must call {@link #open(SipProfile)} first. The attempt will be timed out
-     * if the call is not established within {@code timeout} seconds and
+     * Creates a {@link SipAudioCall} to make an audio call. The attempt will be
+     * timed out if the call is not established within {@code timeout} seconds
+     * and
      * {@code SipAudioCall.Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
      * will be called.
      *
@@ -416,9 +438,11 @@ public class SipManager {
 
     /**
      * Manually registers the profile to the corresponding SIP provider for
-     * receiving calls. {@link #open(SipProfile, String, SipRegistrationListener)}
-     * is still needed to be called at least once in order for the SIP service
-     * to broadcast an intent when an incoming call is received.
+     * receiving calls.
+     * {@link #open(SipProfile, PendingIntent, SipRegistrationListener)} is
+     * still needed to be called at least once in order for the SIP service to
+     * notify the caller with the {@code PendingIntent} when an incoming call is
+     * received.
      *
      * @param localProfile the SIP profile to register with
      * @param expiryTime registration expiration time (in seconds)

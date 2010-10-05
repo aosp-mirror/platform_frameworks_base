@@ -16,6 +16,7 @@
 
 package android.net.sip;
 
+import android.app.PendingIntent;
 import android.net.sip.ISipSession;
 import android.net.sip.ISipSessionListener;
 import android.net.sip.SipProfile;
@@ -26,7 +27,7 @@ import android.net.sip.SipProfile;
 interface ISipService {
     void open(in SipProfile localProfile);
     void open3(in SipProfile localProfile,
-            String incomingCallBroadcastAction,
+            in PendingIntent incomingCallPendingIntent,
             in ISipSessionListener listener);
     void close(in String localProfileUri);
     boolean isOpened(String localProfileUri);

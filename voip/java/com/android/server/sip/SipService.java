@@ -134,14 +134,6 @@ public final class SipService extends ISipService.Stub {
 
     public void open(SipProfile localProfile) {
         localProfile.setCallingUid(Binder.getCallingUid());
-        if (localProfile.getAutoRegistration() && isCallerRadio()) {
-            openToReceiveCalls(localProfile);
-        } else {
-            openToMakeCalls(localProfile);
-        }
-    }
-
-    private void openToMakeCalls(SipProfile localProfile) {
         try {
             createGroup(localProfile);
         } catch (SipException e) {
@@ -150,28 +142,20 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
-    private void openToReceiveCalls(SipProfile localProfile) {
-        open3(localProfile, SipManager.ACTION_SIP_INCOMING_CALL, null);
-    }
-
     public synchronized void open3(SipProfile localProfile,
-            String incomingCallBroadcastAction, ISipSessionListener listener) {
+            PendingIntent incomingCallPendingIntent,
+            ISipSessionListener listener) {
         localProfile.setCallingUid(Binder.getCallingUid());
-        if (TextUtils.isEmpty(incomingCallBroadcastAction)) {
-            Log.w(TAG, "empty broadcast action for incoming call");
-            return;
-        }
-        if (incomingCallBroadcastAction.equals(
-                SipManager.ACTION_SIP_INCOMING_CALL) && !isCallerRadio()) {
-            Log.w(TAG, "failed to open the profile; "
-                    + "the action string is reserved");
+        if (incomingCallPendingIntent == null) {
+            Log.w(TAG, "incomingCallPendingIntent cannot be null; "
+                    + "the profile is not opened");
             return;
         }
         if (DEBUG) Log.d(TAG, "open3: " + localProfile.getUriString() + ": "
-                + incomingCallBroadcastAction + ": " + listener);
+                + incomingCallPendingIntent + ": " + listener);
         try {
             SipSessionGroupExt group = createGroup(localProfile,
-                    incomingCallBroadcastAction, listener);
+                    incomingCallPendingIntent, listener);
             if (localProfile.getAutoRegistration()) {
                 group.openToReceiveCalls();
                 if (isWifiOn()) grabWifiLock();
@@ -287,20 +271,19 @@ public final class SipService extends ISipService.Stub {
     }
 
     private SipSessionGroupExt createGroup(SipProfile localProfile,
-            String incomingCallBroadcastAction, ISipSessionListener listener)
-            throws SipException {
+            PendingIntent incomingCallPendingIntent,
+            ISipSessionListener listener) throws SipException {
         String key = localProfile.getUriString();
         SipSessionGroupExt group = mSipGroups.get(key);
         if (group != null) {
             if (!isCallerCreator(group)) {
                 throw new SipException("only creator can access the profile");
             }
-            group.setIncomingCallBroadcastAction(
-                    incomingCallBroadcastAction);
+            group.setIncomingCallPendingIntent(incomingCallPendingIntent);
             group.setListener(listener);
         } else {
             group = new SipSessionGroupExt(localProfile,
-                    incomingCallBroadcastAction, listener);
+                    incomingCallPendingIntent, listener);
             mSipGroups.put(key, group);
             notifyProfileAdded(localProfile);
         }
@@ -405,19 +388,19 @@ public final class SipService extends ISipService.Stub {
 
     private class SipSessionGroupExt extends SipSessionAdapter {
         private SipSessionGroup mSipGroup;
-        private String mIncomingCallBroadcastAction;
+        private PendingIntent mIncomingCallPendingIntent;
         private boolean mOpened;
 
         private AutoRegistrationProcess mAutoRegistration =
                 new AutoRegistrationProcess();
 
         public SipSessionGroupExt(SipProfile localProfile,
-                String incomingCallBroadcastAction,
+                PendingIntent incomingCallPendingIntent,
                 ISipSessionListener listener) throws SipException {
             String password = localProfile.getPassword();
             SipProfile p = duplicate(localProfile);
             mSipGroup = createSipSessionGroup(mLocalIp, p, password);
-            mIncomingCallBroadcastAction = incomingCallBroadcastAction;
+            mIncomingCallPendingIntent = incomingCallPendingIntent;
             mAutoRegistration.setListener(listener);
         }
 
@@ -458,8 +441,8 @@ public final class SipService extends ISipService.Stub {
             mAutoRegistration.setListener(listener);
         }
 
-        public void setIncomingCallBroadcastAction(String action) {
-            mIncomingCallBroadcastAction = action;
+        public void setIncomingCallPendingIntent(PendingIntent pIntent) {
+            mIncomingCallPendingIntent = pIntent;
         }
 
         public void openToReceiveCalls() throws SipException {
@@ -469,7 +452,7 @@ public final class SipService extends ISipService.Stub {
                 mAutoRegistration.start(mSipGroup);
             }
             if (DEBUG) Log.d(TAG, "  openToReceiveCalls: " + getUri() + ": "
-                    + mIncomingCallBroadcastAction);
+                    + mIncomingCallPendingIntent);
         }
 
         public void onConnectivityChanged(boolean connected)
@@ -481,7 +464,7 @@ public final class SipService extends ISipService.Stub {
             } else {
                 // close mSipGroup but remember mOpened
                 if (DEBUG) Log.d(TAG, "  close auto reg temporarily: "
-                        + getUri() + ": " + mIncomingCallBroadcastAction);
+                        + getUri() + ": " + mIncomingCallPendingIntent);
                 mSipGroup.close();
                 mAutoRegistration.stop();
             }
@@ -508,7 +491,7 @@ public final class SipService extends ISipService.Stub {
             mSipGroup.close();
             mAutoRegistration.stop();
             if (DEBUG) Log.d(TAG, "   close: " + getUri() + ": "
-                    + mIncomingCallBroadcastAction);
+                    + mIncomingCallPendingIntent);
         }
 
         public ISipSession createSession(ISipSessionListener listener) {
@@ -516,8 +499,10 @@ public final class SipService extends ISipService.Stub {
         }
 
         @Override
-        public void onRinging(ISipSession session, SipProfile caller,
+        public void onRinging(ISipSession s, SipProfile caller,
                 String sessionDescription) {
+            SipSessionGroup.SipSessionImpl session =
+                    (SipSessionGroup.SipSessionImpl) s;
             synchronized (SipService.this) {
                 try {
                     if (!isRegistered()) {
@@ -528,15 +513,15 @@ public final class SipService extends ISipService.Stub {
                     // send out incoming call broadcast
                     addPendingSession(session);
                     Intent intent = SipManager.createIncomingCallBroadcast(
-                            session.getCallId(), sessionDescription)
-                            .setAction(mIncomingCallBroadcastAction);
+                            session.getCallId(), sessionDescription);
                     if (DEBUG) Log.d(TAG, " ringing~~ " + getUri() + ": "
                             + caller.getUri() + ": " + session.getCallId()
-                            + " " + mIncomingCallBroadcastAction);
-                    mContext.sendBroadcast(intent);
-                } catch (RemoteException e) {
-                    // should never happen with a local call
-                    Log.e(TAG, "processCall()", e);
+                            + " " + mIncomingCallPendingIntent);
+                    mIncomingCallPendingIntent.send(mContext,
+                            SipManager.INCOMING_CALL_RESULT_CODE, intent);
+                } catch (PendingIntent.CanceledException e) {
+                    Log.w(TAG, "pendingIntent is canceled, drop incoming call");
+                    session.endCall();
                 }
             }
         }
