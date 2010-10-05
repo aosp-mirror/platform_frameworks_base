@@ -65,8 +65,8 @@ public:
     PathCache pathCache;
     PatchCache patchCache;
     TextDropShadowCache dropShadowCache;
-    GammaFontRenderer fontRenderer;
     FboCache fboCache;
+    GammaFontRenderer fontRenderer;
 
     Line line;
 }; // class Caches
