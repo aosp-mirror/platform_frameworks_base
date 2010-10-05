@@ -121,8 +121,8 @@ public class ListView extends AbsListView {
     Drawable mDivider;
     int mDividerHeight;
     
-    Drawable mOverscrollHeader;
-    Drawable mOverscrollFooter;
+    Drawable mOverScrollHeader;
+    Drawable mOverScrollFooter;
 
     private boolean mIsCacheColorOpaque;
     private boolean mDividerIsOpaque;
@@ -178,12 +178,14 @@ public class ListView extends AbsListView {
             setDivider(d);
         }
         
-        final Drawable osHeader = a.getDrawable(com.android.internal.R.styleable.ListView_overscrollHeader);
+        final Drawable osHeader = a.getDrawable(
+                com.android.internal.R.styleable.ListView_overScrollHeader);
         if (osHeader != null) {
             setOverscrollHeader(osHeader);
         }
 
-        final Drawable osFooter = a.getDrawable(com.android.internal.R.styleable.ListView_overscrollFooter);
+        final Drawable osFooter = a.getDrawable(
+                com.android.internal.R.styleable.ListView_overScrollFooter);
         if (osFooter != null) {
             setOverscrollFooter(osFooter);
         }
@@ -2997,8 +2999,8 @@ public class ListView extends AbsListView {
     protected void dispatchDraw(Canvas canvas) {
         // Draw the dividers
         final int dividerHeight = mDividerHeight;
-        final Drawable overscrollHeader = mOverscrollHeader;
-        final Drawable overscrollFooter = mOverscrollFooter;
+        final Drawable overscrollHeader = mOverScrollHeader;
+        final Drawable overscrollFooter = mOverScrollFooter;
         final boolean drawOverscrollHeader = overscrollHeader != null;
         final boolean drawOverscrollFooter = overscrollFooter != null;
         final boolean drawDividers = dividerHeight > 0 && mDivider != null;
@@ -3243,7 +3245,7 @@ public class ListView extends AbsListView {
      * @param header The drawable to use
      */
     public void setOverscrollHeader(Drawable header) {
-        mOverscrollHeader = header;
+        mOverScrollHeader = header;
         if (mScrollY < 0) {
             invalidate();
         }
@@ -3253,7 +3255,7 @@ public class ListView extends AbsListView {
      * @return The drawable that will be drawn above all other list content
      */
     public Drawable getOverscrollHeader() {
-        return mOverscrollHeader;
+        return mOverScrollHeader;
     }
 
     /**
@@ -3264,7 +3266,7 @@ public class ListView extends AbsListView {
      * @param footer The drawable to use
      */
     public void setOverscrollFooter(Drawable footer) {
-        mOverscrollFooter = footer;
+        mOverScrollFooter = footer;
         invalidate();
     }
 
@@ -3272,7 +3274,7 @@ public class ListView extends AbsListView {
      * @return The drawable that will be drawn below all other list content
      */
     public Drawable getOverscrollFooter() {
-        return mOverscrollFooter;
+        return mOverScrollFooter;
     }
 
     @Override

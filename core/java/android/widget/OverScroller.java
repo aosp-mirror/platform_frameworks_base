@@ -338,7 +338,7 @@ public class OverScroller {
      * @return true if a springback was initiated, false if startX and startY were
      *          already within the valid range.
      */
-    public boolean springback(int startX, int startY, int minX, int maxX, int minY, int maxY) {
+    public boolean springBack(int startX, int startY, int minX, int maxX, int minY, int maxY) {
         mMode = FLING_MODE;
 
         // Make sure both methods are called.
@@ -433,7 +433,7 @@ public class OverScroller {
      * @return true when the current position is overscrolled and in the process of
      *         interpolating back to a valid value.
      */
-    public boolean isOverscrolled() {
+    public boolean isOverScrolled() {
         return ((!mScrollerX.mFinished &&
                 mScrollerX.mState != MagneticOverScroller.TO_EDGE) ||
                 (!mScrollerY.mFinished &&

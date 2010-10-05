@@ -32,4 +32,4 @@
     android:cacheColorHint="@null"
     android:divider="@android:drawable/divider_horizontal_bright"
     android:scrollbars="vertical"
-    android:overscrollMode="ifContentScrolls" />
+    android:overScrollMode="ifContentScrolls" />
