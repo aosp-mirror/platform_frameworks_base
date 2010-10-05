@@ -1251,9 +1251,9 @@
   <public type="attr" name="logo" id="0x010102be" />
   <public type="attr" name="xlargeScreens" id="0x010102bf" />
   <public type="attr" name="immersive" id="0x010102c0" />
-  <public type="attr" name="overscrollMode" id="0x010102c1" />
-  <public type="attr" name="overscrollHeader" id="0x010102c2" />
-  <public type="attr" name="overscrollFooter" id="0x010102c3" />
+  <public type="attr" name="overScrollMode" id="0x010102c1" />
+  <public type="attr" name="overScrollHeader" id="0x010102c2" />
+  <public type="attr" name="overScrollFooter" id="0x010102c3" />
   <public type="attr" name="filterTouchesWhenObscured" id="0x010102c4" />
   <public type="attr" name="textSelectHandleLeft" id="0x010102c5" />
   <public type="attr" name="textSelectHandleRight" id="0x010102c6" />

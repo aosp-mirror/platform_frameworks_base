@@ -71,7 +71,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fadingEdge="none"
-            android:overscrollMode="ifContentScrolls"
+            android:overScrollMode="ifContentScrolls"
             >
             <com.android.systemui.statusbar.NotificationLinearLayout
                 android:id="@+id/notificationLinearLayout"
