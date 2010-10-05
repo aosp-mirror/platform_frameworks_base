@@ -64,6 +64,7 @@ private:
     FILE *mFile;
     bool mUse4ByteNalLength;
     bool mUse32BitOffset;
+    bool mIsFileSizeLimitExplicitlyRequested;
     bool mPaused;
     bool mStarted;
     off_t mOffset;
