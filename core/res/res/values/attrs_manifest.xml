@@ -497,10 +497,10 @@
              orientation will changed based on how the user rotates the device -->
         <enum name="unspecified" value="-1" />
         <!-- Would like to have the screen in a landscape orientation: that
-             is, with the display wider than it is tall. -->
+             is, with the display wider than it is tall, ignoring sensor data. -->
         <enum name="landscape" value="0" />
         <!-- Would like to have the screen in a portrait orientation: that
-             is, with the display taller than it is wide. -->
+             is, with the display taller than it is wide, ignoring sensor data. -->
         <enum name="portrait" value="1" />
         <!-- Use the user's current preferred orientation of the handset. -->
         <enum name="user" value="2" />
@@ -513,6 +513,24 @@
         <!-- Always ignore orientation determined by orientation sensor:
              the display will not rotate when the user moves the device. -->
         <enum name="nosensor" value="5" />
+        <!-- Would like to have the screen in landscape orientation, but can
+             use the sensor to change which direction the screen is facing. -->
+        <enum name="sensorLandscape" value="6" />
+        <!-- Would like to have the screen in portrait orientation, but can
+             use the sensor to change which direction the screen is facing. -->
+        <enum name="sensorPortait" value="7" />
+        <!-- Would like to have the screen in landscape orientation, turned in
+             the opposite direction from normal landscape. -->
+        <enum name="reverseLandscape" value="8" />
+        <!-- Would like to have the screen in portrait orientation, turned in
+             the opposite direction from normal portrait. -->
+        <enum name="reversePortait" value="9" />
+        <!-- Orientation is determined by a physical orientation sensor:
+             the display will rotate based on how the user moves the device.
+             This allows any of the 4 possible rotations, regardless of what
+             the device will normally do (for example some devices won't
+             normally use 180 degree rotation). -->
+        <enum name="fullSensor" value="10" />
     </attr>
     
     <!-- Specify one or more configuration changes that the activity will
