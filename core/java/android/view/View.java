@@ -5152,7 +5152,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Recomputes the transform matrix if necessary.
      */
-    private final void updateMatrix() {
+    private void updateMatrix() {
         if (mMatrixDirty) {
             // transform-related properties have changed since the last time someone
             // asked for the matrix; recalculate it with the current values
@@ -6207,7 +6207,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
-        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
+        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
+                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
@@ -6238,7 +6239,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
-        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
+        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
+                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
@@ -6277,7 +6279,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
-        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS)) {
+        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
+                (invalidateCache && (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID)) {
             mPrivateFlags &= ~DRAWN;
             if (invalidateCache) {
                 mPrivateFlags &= ~DRAWING_CACHE_VALID;
@@ -7427,8 +7430,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                 final int restoreCount = canvas.save();
 
-                mPrivateFlags |= DRAWN;
-                mPrivateFlags |= DRAWING_CACHE_VALID;
+                mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
     
                 // Fast path for layouts with no backgrounds
                 if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
