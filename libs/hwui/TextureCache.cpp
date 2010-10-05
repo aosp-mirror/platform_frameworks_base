@@ -18,6 +18,8 @@
 
 #include <GLES2/gl2.h>
 
+#include <SkCanvas.h>
+
 #include <utils/threads.h>
 
 #include "TextureCache.h"
@@ -192,8 +194,12 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         // decoding happened
         texture->blend = !bitmap->isOpaque();
         break;
+    case SkBitmap::kIndex8_Config:
+        uploadPalettedTexture(resize, bitmap, texture->width, texture->height);
+        texture->blend = false;
+        break;
     default:
-        LOGW("Unsupported bitmap config");
+        LOGW("Unsupported bitmap config: %d", bitmap->getConfig());
         break;
     }
 
@@ -202,6 +208,20 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void TextureCache::uploadPalettedTexture(bool resize, SkBitmap* bitmap,
+        uint32_t width, uint32_t height) {
+    SkBitmap rgbaBitmap;
+    rgbaBitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height);
+    rgbaBitmap.allocPixels();
+    rgbaBitmap.eraseColor(0);
+
+    SkCanvas canvas(rgbaBitmap);
+    canvas.drawBitmap(*bitmap, 0.0f, 0.0f, NULL);
+
+    uploadToTexture(resize, GL_RGBA, rgbaBitmap.rowBytesAsPixels(), height,
+            GL_UNSIGNED_BYTE, rgbaBitmap.getPixels());
 }
 
 void TextureCache::uploadToTexture(bool resize, GLenum format, GLsizei width, GLsizei height,
