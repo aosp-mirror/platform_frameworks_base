@@ -144,6 +144,11 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
     }
 
+    @Override
+    public void sendAccessibilityEvent(int eventType) {
+        /* avoid super class behavior - TabWidget sends the right events */
+    }
+
     /**
      * If you are using {@link TabSpec#setContent(android.content.Intent)}, this
      * must be called since the activityGroup is needed to launch the local activity.

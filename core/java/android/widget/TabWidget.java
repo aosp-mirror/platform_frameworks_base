@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
+import android.view.accessibility.AccessibilityEvent;
 
 /**
  *
@@ -335,7 +336,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      *  @see #focusCurrentTab
      */
     public void setCurrentTab(int index) {
-        if (index < 0 || index >= getTabCount()) {
+        if (index < 0 || index >= getTabCount() || index == mSelectedTab) {
             return;
         }
 
@@ -343,6 +344,18 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         mSelectedTab = index;
         getChildTabViewAt(mSelectedTab).setSelected(true);
         mStripMoved = true;
+
+        if (isShown()) {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+        }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        event.setItemCount(getTabCount());
+        event.setCurrentItemIndex(mSelectedTab);
+        getChildTabViewAt(mSelectedTab).dispatchPopulateAccessibilityEvent(event);
+        return true;
     }
 
     /**
@@ -416,6 +429,15 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         child.setOnFocusChangeListener(this);
     }
 
+    @Override
+    public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
+        // this class fires events only when tabs are focused or selected
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && isFocused()) {
+            return;
+        }
+        super.sendAccessibilityEventUnchecked(event);
+    }
+
     /**
      * Provides a way for {@link TabHost} to be notified that the user clicked on a tab indicator.
      */
@@ -436,6 +458,10 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
                 if (getChildTabViewAt(i) == v) {
                     setCurrentTab(i);
                     mSelectionChangedListener.onTabSelectionChanged(i, false);
+                    if (isShown()) {
+                        // a tab is focused so send an event to announce the tab widget state
+                        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+                    }
                     break;
                 }
                 i++;
