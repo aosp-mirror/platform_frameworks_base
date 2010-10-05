@@ -1,13 +1,57 @@
 page.title=Designing for Responsiveness
 @jd:body
 
-<p>It's possible to write code that wins every performance test in the world, but still sends users in a fiery rage when they try to use the application. These are the applications that aren't <em>responsive</em> enough &mdash; the ones that feel
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#anr">What Triggers ANR?</a></li>
+  <li><a href="#avoiding">How to Avoid ANR</a></li>
+  <li><a href="#reinforcing">Reinforcing Responsiveness</a></li>
+</ol>
+
+</div>
+</div>
+
+<div class="figure">
+<img src="{@docRoot}images/anr.png" alt="Screenshot of ANR dialog box" width="240" height="320"/>
+<p><strong>Figure 1.</strong> An ANR dialog displayed to the user.</p>
+</div>
+
+<p>It's possible to write code that wins every performance test in the world, but still sends users
+in a fiery rage when they try to use the application. These are the applications that aren't
+<em>responsive</em> enough &mdash; the ones that feel
 sluggish, hang or freeze for significant periods, or take too long to process
 input. </p>
 
-<p>In Android, the system guards against applications that are insufficiently responsive for a period of time by displaying a dialog to the user, called the Application Not Responding (ANR) dialog. The user can choose to let the application continue, but the user won't appreciate having to act on this dialog every time he or she uses your application. So it's important to design responsiveness into your application, so that the system never has cause to display an ANR to the user. </p>
+<p>In Android, the system guards against applications that are insufficiently responsive for a
+period of time by displaying a dialog to the user, called the Application Not Responding (ANR)
+dialog. The user can choose to let the application continue, but the user won't appreciate having to
+act on this dialog every time he or she uses your application. So it's important to design
+responsiveness into your application, so that the system never has cause to display an ANR to the
+user. </p>
 
-<p>Generally, the system displays an ANR if an application cannot respond to user input. For example, if an  application blocks on some I/O operation (frequently a network access), then the main application thread won't be able to process incoming user input events. After a time, the system concludes that the application has hung, and displays the ANR to give the user the option to kill it. 
+<p>It's possible to write code that wins every performance test in the world,
+but still sends users in a fiery rage when they try to use the application.
+These are the applications that aren't <em>responsive</em> enough &mdash; the
+ones that feel sluggish, hang or freeze for significant periods, or take too
+long to process input. </p>
+
+<p>In Android, the system guards against applications that are insufficiently
+responsive for a period of time by displaying a dialog to the user, called the
+Application Not Responding (ANR) dialog, shown at right in Figure 1. The user
+can choose to let the application continue, but the user won't appreciate having
+to act on this dialog every time he or she uses your application. It's critical
+to design responsiveness into your application, so that the system never has
+cause to display an ANR dialog to the user. </p>
+
+<p>Generally, the system displays an ANR if an application cannot respond to
+user input. For example, if an  application blocks on some I/O operation
+(frequently a network access), then the main application thread won't be able to
+process incoming user input events. After a time, the system concludes that the
+application is frozen, and displays the ANR to give the user the option to kill
+it. </p>
 
 <p>Similarly, if your application spends too much time building an elaborate in-memory
 structure, or perhaps computing the next move in a game, the system will 
@@ -15,31 +59,17 @@ conclude that your application has hung. It's always important to make
 sure these computations are efficient using the techniques above, but even the
 most efficient code still takes time to run.</p>
 
-<p>In both of these cases, the fix is usually to create a child thread, and do
+<p>In both of these cases, the recommended approach is to create a child thread and do
 most of your work there. This keeps the main thread (which drives the user
-interface event loop) running, and prevents the system from concluding your code
+interface event loop) running and prevents the system from concluding that your code
 has frozen. Since such threading usually is accomplished at the class
 level, you can think of responsiveness as a <em>class</em> problem. (Compare
 this with basic performance, which was described above as a <em>method</em>-level
 concern.)</p>
 
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<img src="{@docRoot}images/anr.png" width="240" height="320" alt="Screenshot of ANR dialog box">
-<p style="margin-top:.5em;padding:.5em;">An ANR dialog displayed to the user.</p>
-</div>
-</div>
-
-<p>This document discusses how the Android system determines whether an application is
-not responding and provides guidelines for
-ensuring that your application is responsive. </p>
-
-<p>This document covers these topics: </p>
-<ul>
-    <li><a href="#anr">What Triggers ANR?</a></li>
-    <li><a href="#avoiding">How to Avoid ANR</a></li>
-    <li><a href="#reinforcing">Reinforcing Responsiveness</a></li>
-</ul>
+<p>This document describes how the Android system determines whether an
+application is not responding and provides guidelines for ensuring that your
+application stays responsive. </p>
 
 <h2 id="anr">What Triggers ANR?</h2>
 
@@ -48,8 +78,10 @@ and Window Manager system services. Android will display the ANR dialog
 for a particular application when it detects one of the following
 conditions:</p>
 <ul>  
-    <li>No response to an input event (e.g. key press, screen touch) within 5 seconds</li>
-    <li>A {@link android.content.BroadcastReceiver BroadcastReceiver} hasn't finished executing within 10 seconds</li>
+    <li>No response to an input event (e.g. key press, screen touch) 
+    within 5 seconds</li>
+    <li>A {@link android.content.BroadcastReceiver BroadcastReceiver} 
+    hasn't finished executing within 10 seconds</li>
 </ul>
 
 <h2 id="avoiding">How to Avoid ANR</h2>

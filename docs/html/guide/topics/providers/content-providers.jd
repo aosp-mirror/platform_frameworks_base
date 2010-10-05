@@ -3,12 +3,6 @@ page.title=Content Providers
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Key classes</h2>
-<ol>
-<li>{@link android.content.ContentProvider}</li>
-<li>{@link android.content.ContentResolver}</li>
-<li>{@link android.database.Cursor}</li>
-</ol>
 
 <h2>In this document</h2>
 <ol>
@@ -17,6 +11,13 @@ page.title=Content Providers
 <li><a href="#modifying">Modifying data in a provider</a></li>
 <li><a href="#creating">Creating a content provider</a></li>
 <li><a href="#urisum">Content URI summary</a></li>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.content.ContentProvider}</li>
+<li>{@link android.content.ContentResolver}</li>
+<li>{@link android.database.Cursor}</li>
 </ol>
 </div>
 </div>

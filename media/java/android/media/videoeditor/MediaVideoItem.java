@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 
 import android.graphics.Bitmap;
-import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -50,6 +49,7 @@ public class MediaVideoItem extends MediaItem {
     private long mBeginBoundaryTimeMs;
     private long mEndBoundaryTimeMs;
     private int mVolumePercentage;
+    private boolean mMuted;
     private String mAudioWaveformFilename;
     private PlaybackThread mPlaybackThread;
 
@@ -207,7 +207,7 @@ public class MediaVideoItem extends MediaItem {
      */
     public MediaVideoItem(String mediaItemId, String filename, int renderingMode)
         throws IOException {
-        this(mediaItemId, filename, renderingMode, null);
+        this(mediaItemId, filename, renderingMode, 0, END_OF_FILE, 100, false, null);
     }
 
     /**
@@ -216,11 +216,19 @@ public class MediaVideoItem extends MediaItem {
      * @param mediaItemId The MediaItem id
      * @param filename The image file name
      * @param renderingMode The rendering mode
+     * @param beginMs Start time in milliseconds. Set to 0 to extract from the
+     *           beginning
+     * @param endMs End time in milliseconds. Set to {@link #END_OF_FILE} to
+     *           extract until the end
+     * @param volumePercent in %/. 100% means no change; 50% means half value, 200%
+     *            means double, 0% means silent.
+     * @param muted true if the audio is muted
      * @param audioWaveformFilename The name of the audio waveform file
      *
      * @throws IOException if the file cannot be opened for reading
      */
     MediaVideoItem(String mediaItemId, String filename, int renderingMode,
+            long beginMs, long endMs, int volumePercent, boolean muted,
             String audioWaveformFilename)  throws IOException {
         super(mediaItemId, filename, renderingMode);
         // TODO: Set these variables correctly
@@ -228,7 +236,7 @@ public class MediaVideoItem extends MediaItem {
         mHeight = 720;
         mAspectRatio = MediaProperties.ASPECT_RATIO_3_2;
         mFileType = MediaProperties.FILE_MP4;
-        mVideoType = MediaRecorder.VideoEncoder.H264;
+        mVideoType = MediaProperties.VCODEC_H264BP;
         // Do we have predefined values for this variable?
         mVideoProfile = 0;
         // Can video and audio duration be different?
@@ -240,9 +248,10 @@ public class MediaVideoItem extends MediaItem {
         mAudioChannels = 2;
         mAudioSamplingFrequency = 16000;
 
-        mBeginBoundaryTimeMs = 0;
-        mEndBoundaryTimeMs = mDurationMs;
-        mVolumePercentage = 100;
+        mBeginBoundaryTimeMs = beginMs;
+        mEndBoundaryTimeMs = endMs == END_OF_FILE ? mDurationMs : endMs;
+        mVolumePercentage = volumePercent;
+        mMuted = muted;
         mAudioWaveformFilename = audioWaveformFilename;
     }
 
@@ -537,6 +546,20 @@ public class MediaVideoItem extends MediaItem {
      */
     public int getVolume() {
         return mVolumePercentage;
+    }
+
+    /**
+     * @param muted true to mute the media item
+     */
+    public void setMute(boolean muted) {
+        mMuted = muted;
+    }
+
+    /**
+     * @return true if the media item is muted
+     */
+    public boolean isMuted() {
+        return mMuted;
     }
 
     /**

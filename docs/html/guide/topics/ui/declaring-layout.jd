@@ -5,12 +5,6 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-  <h2>Key classes</h2>
-  <ol>
-    <li>{@link android.view.View}</li>
-    <li>{@link android.view.ViewGroup}</li>
-    <li>{@link android.view.ViewGroup.LayoutParams}</li>
-  </ol>
   <h2>In this document</h2>
   <ol>
     <li><a href="#write">Write the XML</a></li>
@@ -26,6 +20,12 @@ parent.link=index.html
     <li><a href="#example">Example Layout</a></li>
   </ol>
 
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.view.View}</li>
+    <li>{@link android.view.ViewGroup}</li>
+    <li>{@link android.view.ViewGroup.LayoutParams}</li>
+  </ol>
 </div>
 </div>
 

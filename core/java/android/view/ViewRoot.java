@@ -24,6 +24,7 @@ import com.android.internal.view.RootViewSurfaceTaker;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -205,6 +206,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     ClipDescription mDragDescription;
     View mCurrentDragView;
     final PointF mDragPoint = new PointF();
+    final PointF mLastTouchPoint = new PointF();
 
     /**
      * see {@link #playSoundEffect(int)}
@@ -2024,6 +2026,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             if (MEASURE_LATENCY) {
                 lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
             }
+            // cache for possible drag-initiation
+            mLastTouchPoint.x = event.getRawX();
+            mLastTouchPoint.y = event.getRawY();
             handled = mView.dispatchTouchEvent(event);
             if (MEASURE_LATENCY) {
                 lt.sample("B Dispatched TouchEvents ", System.nanoTime() - event.getEventTimeNano());
@@ -2507,6 +2512,11 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             }
         }
         event.recycle();
+    }
+
+    public void getLastTouchPoint(Point outLocation) {
+        outLocation.x = (int) mLastTouchPoint.x;
+        outLocation.y = (int) mLastTouchPoint.y;
     }
 
     public void setDragFocus(DragEvent event, View newDragTarget) {

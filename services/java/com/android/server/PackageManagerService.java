@@ -5466,7 +5466,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 deletePackageLI(
                         pkgName, false,
                         dataDirExists ? PackageManager.DONT_DELETE_DATA : 0,
-                                res.removedInfo);
+                                res.removedInfo, true);
             }
         }
     }
@@ -5511,7 +5511,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         // First delete the existing package while retaining the data directory
         if (!deletePackageLI(pkgName, true, PackageManager.DONT_DELETE_DATA,
-                res.removedInfo)) {
+                res.removedInfo, true)) {
             // If the existing package was'nt successfully deleted
             res.returnCode = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
             deletedPkg = false;
@@ -5541,7 +5541,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 deletePackageLI(
                         pkgName, true,
                         PackageManager.DONT_DELETE_DATA,
-                                res.removedInfo);
+                                res.removedInfo, true);
             }
             // Since we failed to install the new package we need to restore the old
             // package that we deleted.
@@ -6009,7 +6009,7 @@ class PackageManagerService extends IPackageManager.Stub {
         
         synchronized (mInstallLock) {
             res = deletePackageLI(packageName, deleteCodeAndResources,
-                    flags | REMOVE_CHATTY, info);
+                    flags | REMOVE_CHATTY, info, true);
         }
 
         if(res && sendBroadCast) {
@@ -6070,7 +6070,7 @@ class PackageManagerService extends IPackageManager.Stub {
      * delete a partially installed application.
      */
     private void removePackageDataLI(PackageParser.Package p, PackageRemovedInfo outInfo,
-            int flags) {
+            int flags, boolean writeSettings) {
         String packageName = p.packageName;
         if (outInfo != null) {
             outInfo.removedPackage = packageName;
@@ -6123,8 +6123,10 @@ class PackageManagerService extends IPackageManager.Stub {
                     mSettings.mPreferredActivities.removeFilter(pa);
                 }
             }
-            // Save settings now
-            mSettings.writeLP();
+            if (writeSettings) {
+                // Save settings now
+                mSettings.writeLP();
+            }
         }
     }
 
@@ -6132,7 +6134,7 @@ class PackageManagerService extends IPackageManager.Stub {
      * Tries to delete system package.
      */
     private boolean deleteSystemPackageLI(PackageParser.Package p,
-            int flags, PackageRemovedInfo outInfo) {
+            int flags, PackageRemovedInfo outInfo, boolean writeSettings) {
         ApplicationInfo applicationInfo = p.applicationInfo;
         //applicable for non-partially installed applications only
         if (applicationInfo == null) {
@@ -6164,7 +6166,8 @@ class PackageManagerService extends IPackageManager.Stub {
             deleteCodeAndResources = false;
             flags |= PackageManager.DONT_DELETE_DATA;
         }
-        boolean ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo);
+        boolean ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo,
+                writeSettings);
         if (!ret) {
             return false;
         }
@@ -6185,13 +6188,16 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         synchronized (mPackages) {
             updatePermissionsLP(newPkg.packageName, newPkg, true, true, false);
-            mSettings.writeLP();
+            if (writeSettings) {
+                mSettings.writeLP();
+            }
         }
         return true;
     }
 
     private boolean deleteInstalledPackageLI(PackageParser.Package p,
-            boolean deleteCodeAndResources, int flags, PackageRemovedInfo outInfo) {
+            boolean deleteCodeAndResources, int flags, PackageRemovedInfo outInfo,
+            boolean writeSettings) {
         ApplicationInfo applicationInfo = p.applicationInfo;
         if (applicationInfo == null) {
             Slog.w(TAG, "Package " + p.packageName + " has no applicationInfo.");
@@ -6202,7 +6208,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Delete package data from internal structures and also remove data if flag is set
-        removePackageDataLI(p, outInfo, flags);
+        removePackageDataLI(p, outInfo, flags, writeSettings);
 
         // Delete application code and resources
         if (deleteCodeAndResources) {
@@ -6219,7 +6225,8 @@ class PackageManagerService extends IPackageManager.Stub {
      * This method handles package deletion in general
      */
     private boolean deletePackageLI(String packageName,
-            boolean deleteCodeAndResources, int flags, PackageRemovedInfo outInfo) {
+            boolean deleteCodeAndResources, int flags, PackageRemovedInfo outInfo,
+            boolean writeSettings) {
         if (packageName == null) {
             Slog.w(TAG, "Attempt to delete null packageName.");
             return false;
@@ -6246,7 +6253,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         if (dataOnly) {
             // Delete application data first
-            removePackageDataLI(p, outInfo, flags);
+            removePackageDataLI(p, outInfo, flags, writeSettings);
             return true;
         }
         // At this point the package should have ApplicationInfo associated with it
@@ -6259,12 +6266,13 @@ class PackageManagerService extends IPackageManager.Stub {
             Log.i(TAG, "Removing system package:"+p.packageName);
             // When an updated system application is deleted we delete the existing resources as well and
             // fall back to existing code in system partition
-            ret = deleteSystemPackageLI(p, flags, outInfo);
+            ret = deleteSystemPackageLI(p, flags, outInfo, writeSettings);
         } else {
             Log.i(TAG, "Removing non-system package:"+p.packageName);
             // Kill application pre-emptively especially for apps on sd.
             killApplication(packageName, p.applicationInfo.uid);
-            ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo);
+            ret = deleteInstalledPackageLI(p, deleteCodeAndResources, flags, outInfo,
+                    writeSettings);
         }
         return ret;
     }
@@ -9739,7 +9747,7 @@ class PackageManagerService extends IPackageManager.Stub {
            PackageRemovedInfo outInfo = new PackageRemovedInfo();
            synchronized (mInstallLock) {
                boolean res = deletePackageLI(pkgName, false,
-                       PackageManager.DONT_DELETE_DATA, outInfo);
+                       PackageManager.DONT_DELETE_DATA, outInfo, false);
                if (res) {
                    pkgList.add(pkgName);
                } else {
@@ -9748,6 +9756,13 @@ class PackageManagerService extends IPackageManager.Stub {
                }
            }
        }
+
+       synchronized (mPackages) {
+           // We didn't update the settings after removing each package;
+           // write them now for all packages.
+           mSettings.writeLP();
+       }
+
        // We have to absolutely send UPDATED_MEDIA_STATUS only
        // after confirming that all the receivers processed the ordered
        // broadcast when packages get disabled, force a gc to clean things up.

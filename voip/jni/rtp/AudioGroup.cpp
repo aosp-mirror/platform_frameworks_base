@@ -44,6 +44,7 @@
 #include "JNIHelp.h"
 
 #include "AudioCodec.h"
+#include "EchoSuppressor.h"
 
 extern int parse(JNIEnv *env, jstring jAddress, int port, sockaddr_storage *ss);
 
@@ -766,7 +767,9 @@ bool AudioGroup::DeviceThread::threadLoop()
     }
     LOGD("latency: output %d, input %d", track.latency(), record.latency());
 
-    // TODO: initialize echo canceler here.
+    // Initialize echo canceler.
+    EchoSuppressor echo(sampleRate, sampleCount, sampleCount * 2 +
+        (track.latency() + record.latency()) * sampleRate / 1000);
 
     // Give device socket a reasonable buffer size.
     setsockopt(deviceSocket, SOL_SOCKET, SO_RCVBUF, &output, sizeof(output));
@@ -839,7 +842,7 @@ bool AudioGroup::DeviceThread::threadLoop()
             if (mode == NORMAL) {
                 send(deviceSocket, input, sizeof(input), MSG_DONTWAIT);
             } else {
-                // TODO: Echo canceller runs here.
+                echo.run(output, input);
                 send(deviceSocket, input, sizeof(input), MSG_DONTWAIT);
             }
         }

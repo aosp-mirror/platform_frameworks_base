@@ -53,6 +53,15 @@ void Matrix4::loadIdentity() {
     mSimpleMatrix = true;
 }
 
+#define EPSILON 0.00001f
+#define almost(u, v) (fabs((u) - (v)) < EPSILON)
+
+bool Matrix4::changesBounds() {
+    return !(almost(data[0], 1.0f) && almost(data[1], 0.0f) && almost(data[2], 0.0f) &&
+             almost(data[4], 0.0f) && almost(data[5], 1.0f) && almost(data[6], 0.0f) &&
+             almost(data[8], 0.0f) && almost(data[9], 0.0f) && almost(data[10], 1.0f));
+}
+
 void Matrix4::load(const float* v) {
     memcpy(data, v, sizeof(data));
     mSimpleMatrix = false;

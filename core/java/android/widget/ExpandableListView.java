@@ -185,7 +185,6 @@ public class ExpandableListView extends ListView {
     
     /** Drawable to be used as a divider when it is adjacent to any children */
     private Drawable mChildDivider;
-    private boolean mClipChildDivider;
 
     // Bounds of the indicator to be drawn
     private final Rect mIndicatorRect = new Rect();
@@ -379,7 +378,6 @@ public class ExpandableListView extends ListView {
      */
     public void setChildDivider(Drawable childDivider) {
         mChildDivider = childDivider;
-        mClipChildDivider = childDivider != null && childDivider instanceof ColorDrawable;
     }
 
     @Override
@@ -396,17 +394,8 @@ public class ExpandableListView extends ListView {
                     pos.groupMetadata.lastChildFlPos != pos.groupMetadata.flPos)) {
                 // These are the cases where we draw the child divider
                 final Drawable divider = mChildDivider;
-                final boolean clip = mClipChildDivider;
-                if (!clip) {
-                    divider.setBounds(bounds);
-                } else {
-                    canvas.save();
-                    canvas.clipRect(bounds);
-                }
+                divider.setBounds(bounds);
                 divider.draw(canvas);
-                if (clip) {
-                    canvas.restore();
-                }
                 pos.recycle();
                 return;
             }

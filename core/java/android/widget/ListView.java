@@ -107,7 +107,6 @@ public class ListView extends AbsListView {
     
     private boolean mIsCacheColorOpaque;
     private boolean mDividerIsOpaque;
-    private boolean mClipDivider;
 
     private boolean mHeaderDividersEnabled;
     private boolean mFooterDividersEnabled;
@@ -3057,20 +3056,9 @@ public class ListView extends AbsListView {
     void drawDivider(Canvas canvas, Rect bounds, int childIndex) {
         // This widget draws the same divider for all children
         final Drawable divider = mDivider;
-        final boolean clipDivider = mClipDivider;
 
-        if (!clipDivider) {
-            divider.setBounds(bounds);
-        } else {
-            canvas.save();
-            canvas.clipRect(bounds);
-        }
-
+        divider.setBounds(bounds);
         divider.draw(canvas);
-
-        if (clipDivider) {
-            canvas.restore();
-        }
     }
 
     /**
@@ -3091,10 +3079,8 @@ public class ListView extends AbsListView {
     public void setDivider(Drawable divider) {
         if (divider != null) {
             mDividerHeight = divider.getIntrinsicHeight();
-            mClipDivider = divider instanceof ColorDrawable;
         } else {
             mDividerHeight = 0;
-            mClipDivider = false;
         }
         mDivider = divider;
         mDividerIsOpaque = divider == null || divider.getOpacity() == PixelFormat.OPAQUE;

@@ -13,9 +13,9 @@ parent.link=index.html
     <li><a href="#HandlingFocus">Handling Focus</a></li>
   </ol>
 
-  <h2>See also</h2>
+  <h2>Related tutorials</h2>
   <ol>
-    <li><a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Hello Form Stuff tutorial</a></li>
+    <li><a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Form Stuff</a></li>
   </ol>
 </div>
 </div>

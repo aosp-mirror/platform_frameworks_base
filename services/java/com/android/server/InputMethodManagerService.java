@@ -117,6 +117,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     final Context mContext;
     final Handler mHandler;
+    final InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
     final StatusBarManagerService mStatusBar;
     final IWindowManager mIWindowManager;
@@ -126,13 +127,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
-    final ArrayList<InputMethodInfo> mMethodList
-            = new ArrayList<InputMethodInfo>();
-    final HashMap<String, InputMethodInfo> mMethodMap
-            = new HashMap<String, InputMethodInfo>();
-
-    final TextUtils.SimpleStringSplitter mStringColonSplitter
-            = new TextUtils.SimpleStringSplitter(':');
+    final ArrayList<InputMethodInfo> mMethodList = new ArrayList<InputMethodInfo>();
+    final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<String, InputMethodInfo>();
 
     class SessionState {
         final ClientState client;
@@ -483,27 +479,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mStatusBar = statusBar;
         statusBar.setIconVisibility("ime", false);
 
+        // mSettings should be created before buildInputMethodListLocked
+        mSettings = new InputMethodSettings(context.getContentResolver(), mMethodMap, mMethodList);
         buildInputMethodListLocked(mMethodList, mMethodMap);
+        mSettings.enableAllIMEsIfThereIsNoEnabledIME();
 
-        final String enabledStr = Settings.Secure.getString(
-                mContext.getContentResolver(),
-                Settings.Secure.ENABLED_INPUT_METHODS);
-        Slog.i(TAG, "Enabled input methods: " + enabledStr);
-        final String defaultIme = Settings.Secure.getString(mContext
-                .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (enabledStr == null || TextUtils.isEmpty(defaultIme)) {
-            Slog.i(TAG, "Enabled input methods or default IME has not been set, enabling all");
+        if (TextUtils.isEmpty(Settings.Secure.getString(
+                mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD))) {
             InputMethodInfo defIm = null;
-            StringBuilder sb = new StringBuilder(256);
-            final int N = mMethodList.size();
-            for (int i=0; i<N; i++) {
-                InputMethodInfo imi = mMethodList.get(i);
-                Slog.i(TAG, "Adding: " + imi.getId());
-                if (i > 0) sb.append(':');
-                sb.append(imi.getId());
+            for (InputMethodInfo imi: mMethodList) {
                 if (defIm == null && imi.getIsDefaultResourceId() != 0) {
                     try {
-                        Resources res = mContext.createPackageContext(
+                        Resources res = context.createPackageContext(
                                 imi.getPackageName(), 0).getResources();
                         if (res.getBoolean(imi.getIsDefaultResourceId())) {
                             defIm = imi;
@@ -514,12 +501,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
             }
-            if (defIm == null && N > 0) {
+            if (defIm == null && mMethodList.size() > 0) {
                 defIm = mMethodList.get(0);
                 Slog.i(TAG, "No default found, using " + defIm.getId());
             }
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.ENABLED_INPUT_METHODS, sb.toString());
             if (defIm != null) {
                 Settings.Secure.putString(mContext.getContentResolver(),
                         Settings.Secure.DEFAULT_INPUT_METHOD, defIm.getId());
@@ -567,29 +552,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     public List<InputMethodInfo> getEnabledInputMethodList() {
         synchronized (mMethodMap) {
-            return getEnabledInputMethodListLocked();
+            return mSettings.getEnabledInputMethodListLocked();
         }
-    }
-
-    List<InputMethodInfo> getEnabledInputMethodListLocked() {
-        final ArrayList<InputMethodInfo> res = new ArrayList<InputMethodInfo>();
-
-        final String enabledStr = Settings.Secure.getString(
-                mContext.getContentResolver(),
-                Settings.Secure.ENABLED_INPUT_METHODS);
-        if (enabledStr != null) {
-            final TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
-            splitter.setString(enabledStr);
-
-            while (splitter.hasNext()) {
-                InputMethodInfo info = mMethodMap.get(splitter.next());
-                if (info != null) {
-                    res.add(info);
-                }
-            }
-        }
-
-        return res;
     }
 
     public void addClient(IInputMethodClient client,
@@ -1471,7 +1435,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private boolean chooseNewDefaultIMELocked() {
-        List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
+        List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
         if (enabled != null && enabled.size() > 0) {
             // We'd prefer to fall back on a system IME, since that is safer.
             int i=enabled.size();
@@ -1650,7 +1614,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     hideInputMethodMenu();
                 }
             };
-    
+
             TypedArray a = context.obtainStyledAttributes(null,
                     com.android.internal.R.styleable.DialogPreference,
                     com.android.internal.R.attr.alertDialogStyle, 0);
@@ -1664,7 +1628,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     .setIcon(a.getDrawable(
                             com.android.internal.R.styleable.DialogPreference_dialogTitle));
             a.recycle();
-    
+
             mDialogBuilder.setSingleChoiceItems(mItems, checkedItem,
                     new AlertDialog.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -1738,81 +1702,45 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // Make sure this is a valid input method.
         InputMethodInfo imm = mMethodMap.get(id);
         if (imm == null) {
-            if (imm == null) {
-                throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
-            }
+            throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
         }
 
-        StringBuilder builder = new StringBuilder(256);
+        List<Pair<String, ArrayList<String>>> enabledInputMethodsList = mSettings
+                .getEnabledInputMethodsAndSubtypeListLocked();
 
-        boolean removed = false;
-        String firstId = null;
-
-        // Look through the currently enabled input methods.
-        String enabledStr = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.ENABLED_INPUT_METHODS);
-        if (enabledStr != null) {
-            final TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
-            splitter.setString(enabledStr);
-            while (splitter.hasNext()) {
-                String curId = splitter.next();
-                if (curId.equals(id)) {
-                    if (enabled) {
-                        // We are enabling this input method, but it is
-                        // already enabled.  Nothing to do.  The previous
-                        // state was enabled.
-                        return true;
-                    }
-                    // We are disabling this input method, and it is
-                    // currently enabled.  Skip it to remove from the
-                    // new list.
-                    removed = true;
-                } else if (!enabled) {
-                    // We are building a new list of input methods that
-                    // doesn't contain the given one.
-                    if (firstId == null) firstId = curId;
-                    if (builder.length() > 0) builder.append(':');
-                    builder.append(curId);
+        if (enabled) {
+            for (Pair<String, ArrayList<String>> pair: enabledInputMethodsList) {
+                if (pair.first.equals(id)) {
+                    // We are enabling this input method, but it is already enabled.
+                    // Nothing to do. The previous state was enabled.
+                    return true;
                 }
             }
-        }
-
-        if (!enabled) {
-            if (!removed) {
-                // We are disabling the input method but it is already
-                // disabled.  Nothing to do.  The previous state was
-                // disabled.
+            mSettings.appendAndPutEnabledInputMethodLocked(id, false);
+            // Previous state was disabled.
+            return false;
+        } else {
+            StringBuilder builder = new StringBuilder();
+            if (mSettings.buildAndPutEnabledInputMethodsStrRemovingIdLocked(
+                    builder, enabledInputMethodsList, id)) {
+                // Disabled input method is currently selected, switch to another one.
+                String selId = Settings.Secure.getString(mContext.getContentResolver(),
+                        Settings.Secure.DEFAULT_INPUT_METHOD);
+                if (id.equals(selId)) {
+                    Settings.Secure.putString(
+                            mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD,
+                            enabledInputMethodsList.size() > 0
+                                    ? enabledInputMethodsList.get(0).first : "");
+                    resetSelectedInputMethodSubtype();
+                }
+                // Previous state was enabled.
+                return true;
+            } else {
+                // We are disabling the input method but it is already disabled.
+                // Nothing to do.  The previous state was disabled.
                 return false;
             }
-            // Update the setting with the new list of input methods.
-            Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.ENABLED_INPUT_METHODS, builder.toString());
-            // We the disabled input method is currently selected, switch
-            // to another one.
-            String selId = Settings.Secure.getString(mContext.getContentResolver(),
-                    Settings.Secure.DEFAULT_INPUT_METHOD);
-            if (id.equals(selId)) {
-                Settings.Secure.putString(mContext.getContentResolver(),
-                        Settings.Secure.DEFAULT_INPUT_METHOD,
-                        firstId != null ? firstId : "");
-                resetSelectedInputMethodSubtype();
-            }
-            // Previous state was enabled.
-            return true;
         }
-
-        // Add in the newly enabled input method.
-        if (enabledStr == null || enabledStr.length() == 0) {
-            enabledStr = id;
-        } else {
-            enabledStr = enabledStr + ':' + id;
-        }
-
-        Settings.Secure.putString(mContext.getContentResolver(),
-                Settings.Secure.ENABLED_INPUT_METHODS, enabledStr);
-
-        // Previous state was disabled.
-        return false;
     }
 
     private void resetSelectedInputMethodSubtype() {
@@ -1860,6 +1788,161 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         return mCurrentSubtype;
+    }
+
+    /**
+     * Utility class for putting and getting settings for InputMethod
+     * TODO: Move all putters and getters of settings to this class.
+     */
+    private static class InputMethodSettings {
+        // The string for enabled input method is saved as follows:
+        // example: ("ime0;subtype0;subtype1;subtype2:ime1:ime2;subtype0")
+        private static final char INPUT_METHOD_SEPARATER = ':';
+        private static final char INPUT_METHOD_SUBTYPE_SEPARATER = ';';
+        private final TextUtils.SimpleStringSplitter mStringColonSplitter =
+                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATER);
+
+        private final TextUtils.SimpleStringSplitter mStringSemiColonSplitter =
+                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATER);
+
+        private final ContentResolver mResolver;
+        private final HashMap<String, InputMethodInfo> mMethodMap;
+        private final ArrayList<InputMethodInfo> mMethodList;
+
+        private String mEnabledInputMethodsStrCache;
+
+        private static void buildEnabledInputMethodsSettingString(
+                StringBuilder builder, Pair<String, ArrayList<String>> pair) {
+            String id = pair.first;
+            ArrayList<String> subtypes = pair.second;
+            builder.append(id);
+            if (subtypes.size() > 0) {
+                builder.append(subtypes.get(0));
+                for (int i = 1; i < subtypes.size(); ++i) {
+                    builder.append(INPUT_METHOD_SUBTYPE_SEPARATER).append(subtypes.get(i));
+                }
+            }
+        }
+
+        public InputMethodSettings(
+                ContentResolver resolver, HashMap<String, InputMethodInfo> methodMap,
+                ArrayList<InputMethodInfo> methodList) {
+            mResolver = resolver;
+            mMethodMap = methodMap;
+            mMethodList = methodList;
+        }
+
+        public List<InputMethodInfo> getEnabledInputMethodListLocked() {
+            return createEnabledInputMethodListLocked(
+                    getEnabledInputMethodsAndSubtypeListLocked());
+        }
+
+        // At the initial boot, the settings for input methods are not set,
+        // so we need to enable IME in that case.
+        public void enableAllIMEsIfThereIsNoEnabledIME() {
+            if (TextUtils.isEmpty(getEnabledInputMethodsStr())) {
+                StringBuilder sb = new StringBuilder();
+                final int N = mMethodList.size();
+                for (int i = 0; i < N; i++) {
+                    InputMethodInfo imi = mMethodList.get(i);
+                    Slog.i(TAG, "Adding: " + imi.getId());
+                    if (i > 0) sb.append(':');
+                    sb.append(imi.getId());
+                }
+                putEnabledInputMethodsStr(sb.toString());
+            }
+        }
+
+        public List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
+            ArrayList<Pair<String, ArrayList<String>>> imsList
+                    = new ArrayList<Pair<String, ArrayList<String>>>();
+            final String enabledInputMethodsStr = getEnabledInputMethodsStr();
+            if (TextUtils.isEmpty(enabledInputMethodsStr)) {
+                return imsList;
+            }
+            mStringColonSplitter.setString(enabledInputMethodsStr);
+            while (mStringColonSplitter.hasNext()) {
+                String nextImsStr = mStringColonSplitter.next();
+                mStringSemiColonSplitter.setString(nextImsStr);
+                if (mStringSemiColonSplitter.hasNext()) {
+                    ArrayList<String> subtypeHashes = new ArrayList<String>();
+                    // The first element is ime id.
+                    String imeId = mStringSemiColonSplitter.next();
+                    while (mStringSemiColonSplitter.hasNext()) {
+                        subtypeHashes.add(mStringSemiColonSplitter.next());
+                    }
+                    imsList.add(new Pair<String, ArrayList<String>>(imeId, subtypeHashes));
+                }
+            }
+            return imsList;
+        }
+
+        public void appendAndPutEnabledInputMethodLocked(String id, boolean reloadInputMethodStr) {
+            if (reloadInputMethodStr) {
+                getEnabledInputMethodsStr();
+            }
+            if (TextUtils.isEmpty(mEnabledInputMethodsStrCache)) {
+                // Add in the newly enabled input method.
+                putEnabledInputMethodsStr(id);
+            } else {
+                putEnabledInputMethodsStr(
+                        mEnabledInputMethodsStrCache + INPUT_METHOD_SEPARATER + id);
+            }
+        }
+
+        /**
+         * Build and put a string of EnabledInputMethods with removing specified Id.
+         * @return the specified id was removed or not.
+         */
+        public boolean buildAndPutEnabledInputMethodsStrRemovingIdLocked(
+                StringBuilder builder, List<Pair<String, ArrayList<String>>> imsList, String id) {
+            boolean isRemoved = false;
+            boolean needsAppendSeparator = false;
+            for (Pair<String, ArrayList<String>> ims: imsList) {
+                String curId = ims.first;
+                if (curId.equals(id)) {
+                    // We are disabling this input method, and it is
+                    // currently enabled.  Skip it to remove from the
+                    // new list.
+                    isRemoved = true;
+                } else {
+                    if (needsAppendSeparator) {
+                        builder.append(INPUT_METHOD_SEPARATER);
+                    } else {
+                        needsAppendSeparator = true;
+                    }
+                    buildEnabledInputMethodsSettingString(builder, ims);
+                }
+            }
+            if (isRemoved) {
+                // Update the setting with the new list of input methods.
+                putEnabledInputMethodsStr(builder.toString());
+            }
+            return isRemoved;
+        }
+
+        private List<InputMethodInfo> createEnabledInputMethodListLocked(
+                List<Pair<String, ArrayList<String>>> imsList) {
+            final ArrayList<InputMethodInfo> res = new ArrayList<InputMethodInfo>();
+            for (Pair<String, ArrayList<String>> ims: imsList) {
+                InputMethodInfo info = mMethodMap.get(ims.first);
+                if (info != null) {
+                    res.add(info);
+                }
+            }
+            return res;
+        }
+
+        private void putEnabledInputMethodsStr(String str) {
+            Settings.Secure.putString(mResolver, Settings.Secure.ENABLED_INPUT_METHODS, str);
+            mEnabledInputMethodsStrCache = str;
+        }
+
+        private String getEnabledInputMethodsStr() {
+            mEnabledInputMethodsStrCache = Settings.Secure.getString(
+                    mResolver, Settings.Secure.ENABLED_INPUT_METHODS);
+            return mEnabledInputMethodsStrCache;
+        }
     }
 
     // ----------------------------------------------------------------------

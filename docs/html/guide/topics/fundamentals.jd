@@ -3,14 +3,6 @@ page.title=Application Fundamentals
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Key classes</h2>
-<ol>
-<li>{@link android.app.Activity}</li>
-<li>{@link android.app.Service}</li>
-<li>{@link android.content.BroadcastReceiver}</li>
-<li>{@link android.content.ContentProvider}</li>
-<li>{@link android.content.Intent}</li>
-</ol>
 
 <h2>In this document</h2>
 <ol>
@@ -43,6 +35,16 @@ page.title=Application Fundamentals
     <li><a href="#proclife">Processes and lifecycles</a></li>
   </ol></li>
 </ol>
+
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.app.Activity}</li>
+<li>{@link android.app.Service}</li>
+<li>{@link android.content.BroadcastReceiver}</li>
+<li>{@link android.content.ContentProvider}</li>
+<li>{@link android.content.Intent}</li>
+</ol>
+
 </div>
 </div>
 

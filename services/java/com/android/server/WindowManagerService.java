@@ -569,8 +569,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED, 0, 0,
                     mDataDescription, null);
-            for (WindowState ws : mWindows) {
-                sendDragStartedLw(ws, evt);
+            final int N = mWindows.size();
+            for (int i = 0; i < N; i++) {
+                // sendDragStartedLw() clones evt for local-process dispatch
+                sendDragStartedLw(mWindows.get(i), evt);
             }
             evt.recycle();
         }
@@ -579,10 +581,17 @@ public class WindowManagerService extends IWindowManager.Stub
          * designated window is potentially a drop recipient.  There are race situations
          * around DRAG_ENDED broadcast, so we make sure that once we've declared that
          * the drag has ended, we never send out another DRAG_STARTED for this drag action.
+         *
+         * This method clones the 'event' parameter if it's being delivered to the same
+         * process, so it's safe for the caller to call recycle() on the event afterwards.
          */
-        private void sendDragStartedLw(WindowState newWin, final DragEvent event) {
+        private void sendDragStartedLw(WindowState newWin, DragEvent event) {
             if (!mDragEnded && newWin.isPotentialDragTarget()) {
                 try {
+                    // clone for local callees since dispatch will recycle the event
+                    if (Process.myPid() == newWin.mSession.mPid) {
+                        event = DragEvent.obtain(event);
+                    }
                     newWin.mClient.dispatchDragEvent(event);
                     // track each window that we've notified that the drag is starting
                     mNotifiedWindows.add(newWin);
@@ -608,6 +617,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED, 0, 0,
                     mDataDescription, null);
+            // sendDragStartedLw() clones 'event' if the window is process-local
             sendDragStartedLw(newWin, event);
             event.recycle();
         }
@@ -632,6 +642,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void notifyMoveLw(float x, float y) {
+            final int myPid = Process.myPid();
+
+            // Move the surface to the given touch
+            mSurface.openTransaction();
+            mSurface.setPosition((int)(x - mThumbOffsetX), (int)(y - mThumbOffsetY));
+            mSurface.closeTransaction();
+
+            // Tell the affected window
             WindowState touchedWin = getTouchedWinAtPointLw(x, y);
             try {
                 // have we dragged over a new window?
@@ -643,7 +661,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_EXITED,
                             0, 0, null, null);
                     mTargetWindow.mClient.dispatchDragEvent(evt);
-                    evt.recycle();
+                    if (myPid != mTargetWindow.mSession.mPid) {
+                        evt.recycle();
+                    }
                 }
                 if (touchedWin != null) {
                     if (DEBUG_DRAG) {
@@ -652,7 +672,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_LOCATION,
                             x, y, null, null);
                     touchedWin.mClient.dispatchDragEvent(evt);
-                    evt.recycle();
+                    if (myPid != touchedWin.mSession.mPid) {
+                        evt.recycle();
+                    }
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "can't send drag notification to windows");
@@ -667,13 +689,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_DRAG) {
                     Slog.d(TAG, "sending DROP to " + touchedWin);
                 }
+                final int myPid = Process.myPid();
                 DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DROP, x, y, null, mData);
                 try {
                     touchedWin.mClient.dispatchDragEvent(evt);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "can't send drop notification to win " + touchedWin);
                 }
-                evt.recycle();
+                if (myPid != touchedWin.mSession.mPid) {
+                    evt.recycle();
+                }
             }
         }
 
@@ -749,13 +774,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     case MotionEvent.ACTION_MOVE: {
                         synchronized (mWindowMap) {
-                            // move the surface to the latest touch point
-                            mDragState.mSurface.openTransaction();
-                            mDragState.mSurface.setPosition((int)(newX - mDragState.mThumbOffsetX),
-                                    (int)(newY - mDragState.mThumbOffsetY));
-                            mDragState.mSurface.closeTransaction();
-
-                            // tell the involved window(s) where we are
+                            // move the surface and tell the involved window(s) where we are
                             mDragState.notifyMoveLw(newX, newY);
                         }
                     } break;
@@ -5403,7 +5422,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         mDragState.reset();
                         mDragState = null;
                     }
-                    
                 }
             }
         } finally {
@@ -5535,7 +5553,7 @@ public class WindowManagerService extends IWindowManager.Stub
             inputWindow.frameTop = 0;
             inputWindow.frameRight = mDisplay.getWidth();
             inputWindow.frameBottom = mDisplay.getHeight();
-            
+
             inputWindow.visibleFrameLeft = inputWindow.frameLeft;
             inputWindow.visibleFrameTop = inputWindow.frameTop;
             inputWindow.visibleFrameRight = inputWindow.frameRight;
@@ -6195,9 +6213,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 mH.removeMessages(H.DRAG_START_TIMEOUT, window.asBinder());
 
-                // !!! TODO: call into the input monitor to sever the current touch event flow
-                // and redirect to the drag "window"; also extract the current touch (x, y)
-                // in screen coordinates
+                // !!! TODO: extract the current touch (x, y) in screen coordinates.  That
+                // will let us eliminate the (touchX,touchY) parameters from the API.
 
                 mDragState.register();
                 mInputMonitor.updateInputWindowsLw();

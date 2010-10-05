@@ -4,7 +4,7 @@ page.title=Widget Design Guidelines
 <div id="qv-wrapper">
 <div id="qv">
 
-<h2>Widget design quickview</h2>
+<h2>Quickview</h2>
 
 <ul>
 <li>Widgets have six standard sizes on the Home screen</li>
@@ -27,7 +27,7 @@ page.title=Widget Design Guidelines
 <h2>See also</h2>
 
 <ol>
-<li><a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a> topic in the <em>Dev Guide</em></li>
+<li><a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a></li>
 <li><a href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">AppWidgets blog post</a></li>
 </ol>
 

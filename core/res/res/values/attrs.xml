@@ -2363,7 +2363,7 @@
     </declare-styleable>
     <declare-styleable name="PopupWindow">
         <attr name="popupBackground" format="reference|color" />
-        <attr name="windowAnimationStyle" />
+        <attr name="popupAnimationStyle" format="reference" />
     </declare-styleable>
     <declare-styleable name="ViewAnimator">
         <!-- Identifier for the animation to use when a view is shown. -->

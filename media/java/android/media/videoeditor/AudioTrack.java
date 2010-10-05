@@ -18,23 +18,29 @@ package android.media.videoeditor;
 
 import java.io.IOException;
 
+import android.util.Log;
+
 /**
  * This class allows to handle an audio track. This audio file is mixed with the
  * audio samples of the MediaItems.
  * {@hide}
  */
 public class AudioTrack {
+    // Logging
+    private static final String TAG = "AudioTrack";
+
     // Instance variables
     private final String mUniqueId;
     private final String mFilename;
-    private final long mDurationMs;
     private long mStartTimeMs;
     private long mTimelineDurationMs;
     private int mVolumePercent;
     private long mBeginBoundaryTimeMs;
     private long mEndBoundaryTimeMs;
     private boolean mLoop;
+    private boolean mMuted;
 
+    private final long mDurationMs;
     private final int mAudioChannels;
     private final int mAudioType;
     private final int mAudioBitrate;
@@ -47,6 +53,129 @@ public class AudioTrack {
 
     // The audio waveform filename
     private String mAudioWaveformFilename;
+    private PlaybackThread mPlaybackThread;
+
+    /**
+     * This listener interface is used by the AudioTrack to emit playback
+     * progress notifications.
+     */
+    public interface PlaybackProgressListener {
+        /**
+         * This method notifies the listener of the current time position while
+         * playing an audio track
+         *
+         * @param audioTrack The audio track
+         * @param timeMs The current playback position (expressed in milliseconds
+         *            since the beginning of the audio track).
+         * @param end true if the end of the audio track was reached
+         */
+        public void onProgress(AudioTrack audioTrack, long timeMs, boolean end);
+    }
+
+    /**
+     * The playback thread
+     */
+    private class PlaybackThread extends Thread {
+        // Instance variables
+        private final PlaybackProgressListener mListener;
+        private final long mFromMs, mToMs;
+        private boolean mRun;
+        private final boolean mLoop;
+        private long mPositionMs;
+
+        /**
+         * Constructor
+         *
+         * @param fromMs The time (relative to the beginning of the audio track)
+         *            at which the playback will start
+         * @param toMs The time (relative to the beginning of the audio track) at
+         *            which the playback will stop. Use -1 to play to the end of
+         *            the audio track
+         * @param loop true if the playback should be looped once it reaches the
+         *            end
+         * @param listener The listener which will be notified of the playback
+         *            progress
+         */
+        public PlaybackThread(long fromMs, long toMs, boolean loop,
+                PlaybackProgressListener listener) {
+            mPositionMs = mFromMs = fromMs;
+            if (toMs < 0) {
+                mToMs = mDurationMs;
+            } else {
+                mToMs = toMs;
+            }
+            mLoop = loop;
+            mListener = listener;
+            mRun = true;
+        }
+
+        /*
+         * {@inheritDoc}
+         */
+        @Override
+        public void run() {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "===> PlaybackThread.run enter");
+            }
+
+            while (mRun) {
+                try {
+                    sleep(100);
+                } catch (InterruptedException ex) {
+                    break;
+                }
+
+                mPositionMs += 100;
+
+                if (mPositionMs >= mToMs) {
+                    if (!mLoop) {
+                        if (mListener != null) {
+                            mListener.onProgress(AudioTrack.this, mPositionMs, true);
+                        }
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
+                            Log.d(TAG, "PlaybackThread.run playback complete");
+                        }
+                        break;
+                    } else {
+                        // Fire a notification for the end of the clip
+                        if (mListener != null) {
+                            mListener.onProgress(AudioTrack.this, mToMs, false);
+                        }
+
+                        // Rewind
+                        mPositionMs = mFromMs;
+                        if (mListener != null) {
+                            mListener.onProgress(AudioTrack.this, mPositionMs, false);
+                        }
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
+                            Log.d(TAG, "PlaybackThread.run playback complete");
+                        }
+                    }
+                } else {
+                    if (mListener != null) {
+                        mListener.onProgress(AudioTrack.this, mPositionMs, false);
+                    }
+                }
+            }
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "===> PlaybackThread.run exit");
+            }
+        }
+
+        /**
+         * Stop the playback
+         *
+         * @return The stop position
+         */
+        public long stopPlayback() {
+            mRun = false;
+            try {
+                join();
+            } catch (InterruptedException ex) {
+            }
+            return mPositionMs;
+        }
+    };
 
     /**
      * An object of this type cannot be instantiated by using the default
@@ -59,7 +188,7 @@ public class AudioTrack {
 
     /**
      * Constructor
-     * @param audioTrackId The AudioTrack id
+     * @param audioTrackId The audio track id
      * @param filename The absolute file name
      *
      * @throws IOException if file is not found
@@ -89,6 +218,9 @@ public class AudioTrack {
         // By default loop is disabled
         mLoop = false;
 
+        // By default the audio track is not muted
+        mMuted = false;
+
         // Ducking is enabled by default
         mDuckingThreshold = 0;
         mDuckingLowVolume = 0;
@@ -99,7 +231,53 @@ public class AudioTrack {
     }
 
     /**
-     * @return The id of the media item
+     * Constructor
+     *
+     * @param audioTrackId The audio track id
+     * @param filename The audio filename
+     * @param startTimeMs the start time in milliseconds (relative to the
+     *              timeline)
+     * @param beginMs start time in the audio track in milliseconds (relative to
+     *            the beginning of the audio track)
+     * @param endMs end time in the audio track in milliseconds (relative to the
+     *            beginning of the audio track)
+     * @param loop true to loop the audio track
+     * @param volume The volume in percentage
+     * @param muted true if the audio track is muted
+     * @param audioWaveformFilename The name of the waveform file
+     *
+     * @throws IOException if file is not found
+     */
+    AudioTrack(String audioTrackId, String filename, long startTimeMs, long beginMs, long endMs,
+            boolean loop, int volume, boolean muted, String audioWaveformFilename) throws IOException {
+        mUniqueId = audioTrackId;
+        mFilename = filename;
+        mStartTimeMs = startTimeMs;
+
+        // TODO: This value represents to the duration of the audio file
+        mDurationMs = 300000;
+
+        // TODO: This value needs to be read from the audio track of the source
+        // file
+        mAudioChannels = 2;
+        mAudioType = MediaProperties.ACODEC_AAC_LC;
+        mAudioBitrate = 128000;
+        mAudioSamplingFrequency = 44100;
+
+        mTimelineDurationMs = endMs - beginMs;
+        mVolumePercent = volume;
+
+        mBeginBoundaryTimeMs = beginMs;
+        mEndBoundaryTimeMs = endMs;
+
+        mLoop = loop;
+        mMuted = muted;
+
+        mAudioWaveformFilename = audioWaveformFilename;
+    }
+
+    /**
+     * @return The id of the audio track
      */
     public String getId() {
         return mUniqueId;
@@ -166,6 +344,20 @@ public class AudioTrack {
      */
     public int getVolume() {
         return mVolumePercent;
+    }
+
+    /**
+     * @param muted true to mute the audio track
+     */
+    public void setMute(boolean muted) {
+        mMuted = muted;
+    }
+
+    /**
+     * @return true if the audio track is muted
+     */
+    public boolean isMuted() {
+        return mMuted;
     }
 
     /**
@@ -309,6 +501,50 @@ public class AudioTrack {
      */
     public int getDuckingLowVolume() {
         return mDuckingLowVolume;
+    }
+
+    /**
+     * Start the playback of this audio track. This method does not block (does
+     * not wait for the playback to complete).
+     *
+     * @param fromMs The time (relative to the beginning of the audio track) at
+     *            which the playback will start
+     * @param toMs The time (relative to the beginning of the audio track) at
+     *            which the playback will stop. Use -1 to play to the end of the
+     *            audio track
+     * @param loop true if the playback should be looped once it reaches the end
+     * @param listener The listener which will be notified of the playback
+     *            progress
+     * @throws IllegalArgumentException if fromMs or toMs is beyond the playback
+     *             duration
+     * @throws IllegalStateException if a playback, preview or an export is
+     *             already in progress
+     */
+    public void startPlayback(long fromMs, long toMs, boolean loop,
+            PlaybackProgressListener listener) {
+        if (fromMs >= mDurationMs) {
+            return;
+        }
+        mPlaybackThread = new PlaybackThread(fromMs, toMs, loop, listener);
+        mPlaybackThread.start();
+    }
+
+    /**
+     * Stop the audio track playback. This method blocks until the ongoing
+     * playback is stopped.
+     *
+     * @return The accurate current time when stop is effective expressed in
+     *         milliseconds
+     */
+    public long stopPlayback() {
+        final long stopTimeMs;
+        if (mPlaybackThread != null) {
+            stopTimeMs = mPlaybackThread.stopPlayback();
+            mPlaybackThread = null;
+        } else {
+            stopTimeMs = 0;
+        }
+        return stopTimeMs;
     }
 
     /**

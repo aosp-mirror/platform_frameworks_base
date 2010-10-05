@@ -64,15 +64,8 @@ public:
           mNumEntries(-1), mDirectoryOffset(-1),
           mHashTableSize(-1), mHashTable(NULL)
         {}
-    ~ZipFileRO() {
-        free(mHashTable);
-        if (mDirectoryMap)
-            mDirectoryMap->release();
-        if (mFd >= 0)
-            close(mFd);
-        if (mFileName)
-            free(mFileName);
-    }
+
+    ~ZipFileRO();
 
     /*
      * Open an archive.

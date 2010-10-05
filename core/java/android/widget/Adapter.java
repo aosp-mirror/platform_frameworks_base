@@ -72,7 +72,7 @@ public interface Adapter {
     long getItemId(int position);
     
     /**
-     * Indicated whether the item ids are stable across changes to the
+     * Indicates whether the item ids are stable across changes to the
      * underlying data.
      * 
      * @return True if the same id always refers to the same object.

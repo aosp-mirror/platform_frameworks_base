@@ -113,8 +113,6 @@ static const GLenum gTextureUnits[] = {
 ///////////////////////////////////////////////////////////////////////////////
 
 OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
-    LOGD("Create OpenGLRenderer");
-
     mShader = NULL;
     mColorFilter = NULL;
     mHasShadow = false;
@@ -133,7 +131,6 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
-    LOGD("Destroy OpenGLRenderer");
     // The context has already been destroyed at this point, do not call
     // GL APIs. All GL state should be kept in Caches.h
 }
@@ -767,8 +764,10 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 
-    setupTextureAlpha8(fontRenderer.getTexture(), 0, 0, textureUnit, x, y, r, g, b, a,
-            mode, false, true);
+    // Assume that the modelView matrix does not force scales, rotates, etc.
+    const bool linearFilter = mSnapshot->transform->changesBounds();
+    setupTextureAlpha8(fontRenderer.getTexture(linearFilter), 0, 0, textureUnit,
+            x, y, r, g, b, a, mode, false, true);
 
     const Rect& clip = mSnapshot->getLocalClip();
     clearLayerRegions();

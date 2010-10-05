@@ -36,7 +36,6 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
@@ -72,7 +71,6 @@ import java.util.ArrayList;
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
 
     private static final boolean DBG = false;
-    private static final String TAG = "ViewGroup";
 
     /**
      * Views which have been hidden or removed which need to be animated on
@@ -322,6 +320,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // being removed that should not actually be removed from the parent yet because they are
     // being animated.
     private ArrayList<View> mTransitioningViews;
+
+    // List of children changing visibility. This is used to potentially keep rendering
+    // views during a transition when they otherwise would have become gone/invisible
+    private ArrayList<View> mVisibilityChangingChildren;
 
     public ViewGroup(Context context) {
         super(context);
@@ -758,6 +760,32 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * @hide
+     * @param child
+     * @param visibility
+     */
+    void onChildVisibilityChanged(View child, int visibility) {
+        if (mTransition != null) {
+            if (visibility == VISIBLE) {
+                mTransition.showChild(this, child);
+            } else {
+                mTransition.hideChild(this, child);
+            }
+            if (visibility != VISIBLE) {
+                // Only track this on disappearing views - appearing views are already visible
+                // and don't need special handling during drawChild()
+                if (mVisibilityChangingChildren == null) {
+                    mVisibilityChangingChildren = new ArrayList<View>();
+                }
+                mVisibilityChangingChildren.add(child);
+                if (mTransitioningViews != null && mTransitioningViews.contains(child)) {
+                    addDisappearingView(child);
+                }
+            }
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -838,9 +866,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final float tx = event.mX;
         final float ty = event.mY;
 
-        // !!! BUGCHECK: If we have a ViewGroup, we must necessarily have a ViewRoot,
-        // so we don't need to check getRootView() for null here?
-        ViewRoot root = (ViewRoot)(getRootView().getParent());
+        ViewRoot root = getViewRoot();
 
         // Dispatch down the view hierarchy
         switch (event.mAction) {
@@ -853,10 +879,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int count = mChildrenCount;
             final View[] children = mChildren;
             for (int i = 0; i < count; i++) {
-                final boolean handled = children[i].dispatchDragEvent(event);
-                children[i].mCanAcceptDrop = handled;
-                if (handled) {
-                    mChildAcceptsDrag = true;
+                final View child = children[i];
+                if (child.getVisibility() == VISIBLE) {
+                    final boolean handled = children[i].dispatchDragEvent(event);
+                    children[i].mCanAcceptDrop = handled;
+                    if (handled) {
+                        mChildAcceptsDrag = true;
+                    }
                 }
             }
 
@@ -871,7 +900,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int count = mChildrenCount;
             final View[] children = mChildren;
             for (int i = 0; i < count; i++) {
-                children[i].dispatchDragEvent(event);
+                final View child = children[i];
+                if (child.getVisibility() == VISIBLE) {
+                    child.dispatchDragEvent(event);
+                }
             }
             // We consider drag-ended to have been handled if one of our children
             // had offered to handle the drag.
@@ -891,7 +923,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 root.setDragFocus(event, target);
                 mCurrentDragView = target;
             }
-            
+
             // Dispatch the actual drag location notice, localized into its coordinates
             if (target != null) {
                 event.mX = mLocalPoint.x;
@@ -905,7 +937,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         } break;
 
         case DragEvent.ACTION_DROP: {
-            if (View.DEBUG_DRAG) Slog.d(TAG, "Drop event: " + event);
+            if (ViewDebug.DEBUG_DRAG) Log.d(View.VIEW_LOG_TAG, "Drop event: " + event);
             View target = findFrontmostDroppableChildAt(event.mX, event.mY, mLocalPoint);
             if (target != null) {
                 event.mX = mLocalPoint.x;
@@ -927,8 +959,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // Find the frontmost child view that lies under the given point, and calculate
     // the position within its own local coordinate system.
     View findFrontmostDroppableChildAt(float x, float y, PointF outLocalPoint) {
-        final float scrolledX = x + mScrollX;
-        final float scrolledY = y + mScrollY;
         final int count = mChildrenCount;
         final View[] children = mChildren;
         for (int i = count - 1; i >= 0; i--) {
@@ -937,20 +967,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 continue;
             }
 
-            float localX = scrolledX - child.mLeft;
-            float localY = scrolledY - child.mTop;
-            if (!child.hasIdentityMatrix() && mAttachInfo != null) {
-                // non-identity matrix: transform the point into the view's coordinates
-                final float[] localXY = mAttachInfo.mTmpTransformLocation;
-                localXY[0] = localX;
-                localXY[1] = localY;
-                child.getInverseMatrix().mapPoints(localXY);
-                localX = localXY[0];
-                localY = localXY[1];
-            }
-            if (localX >= 0 && localY >= 0 && localX < (child.mRight - child.mLeft) &&
-                    localY < (child.mBottom - child.mTop)) {
-                outLocalPoint.set(localX, localY);
+            if (isTransformedTouchPointInView(x, y, child, outLocalPoint)) {
                 return child;
             }
         }
@@ -1078,7 +1095,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             continue;
                         }
 
-                        if (!isTransformedTouchPointInView(x, y, child)) {
+                        if (!isTransformedTouchPointInView(x, y, child, null)) {
                             // New pointer is out of child's bounds.
                             continue;
                         }
@@ -1262,7 +1279,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /* Returns true if a child view contains the specified point when transformed
      * into its coordinate space.
      * Child must not be null. */
-    private final boolean isTransformedTouchPointInView(float x, float y, View child) {
+    private final boolean isTransformedTouchPointInView(float x, float y, View child,
+            PointF outLocalPoint) {
         float localX = x + mScrollX - child.mLeft;
         float localY = y + mScrollY - child.mTop;
         if (! child.hasIdentityMatrix() && mAttachInfo != null) {
@@ -1273,7 +1291,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             localX = localXY[0];
             localY = localXY[1];
         }
-        return child.pointInView(localX, localY);
+        final boolean isInView = child.pointInView(localX, localY);
+        if (isInView && outLocalPoint != null) {
+            outLocalPoint.set(localX, localY);
+        }
+        return isInView;
     }
 
     /* Transforms a motion event into the coordinate space of a particular child view,
@@ -2598,7 +2620,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (mTransition != null) {
-            mTransition.childAdd(this, child);
+            mTransition.addChild(this, child);
         }
 
         if (!checkLayoutParams(params)) {
@@ -2817,7 +2839,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private void removeViewInternal(int index, View view) {
 
         if (mTransition != null) {
-            mTransition.childRemove(this, view);
+            mTransition.removeChild(this, view);
         }
 
         boolean clearChildFocus = false;
@@ -2893,7 +2915,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View view = children[i];
 
             if (mTransition != null) {
-                mTransition.childRemove(this, view);
+                mTransition.removeChild(this, view);
             }
 
             if (view == focused) {
@@ -2962,7 +2984,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View view = children[i];
 
             if (mTransition != null) {
-                mTransition.childRemove(this, view);
+                mTransition.removeChild(this, view);
             }
 
             if (view == focused) {
@@ -3005,7 +3027,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected void removeDetachedView(View child, boolean animate) {
         if (mTransition != null) {
-            mTransition.childRemove(this, child);
+            mTransition.removeChild(this, child);
         }
 
         if (child == mFocused) {
@@ -4025,11 +4047,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final ArrayList<View> disappearingChildren = mDisappearingChildren;
             if (disappearingChildren != null && disappearingChildren.contains(view)) {
                 disappearingChildren.remove(view);
-                if (view.mAttachInfo != null) {
-                    view.dispatchDetachedFromWindow();
-                }
-                if (view.mParent != null) {
-                    view.mParent = null;
+                if (mVisibilityChangingChildren != null &&
+                        mVisibilityChangingChildren.contains(view)) {
+                    mVisibilityChangingChildren.remove(view);
+                } else {
+                    if (view.mAttachInfo != null) {
+                        view.dispatchDetachedFromWindow();
+                    }
+                    if (view.mParent != null) {
+                        view.mParent = null;
+                    }
                 }
                 mGroupFlags |= FLAG_INVALIDATE_REQUIRED;
             }
