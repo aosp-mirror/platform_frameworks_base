@@ -116,7 +116,6 @@ public interface IActivityManager extends IInterface {
     public void unbroadcastIntent(IApplicationThread caller, Intent intent) throws RemoteException;
     /* oneway */
     public void finishReceiver(IBinder who, int resultCode, String resultData, Bundle map, boolean abortBroadcast) throws RemoteException;
-    public void setPersistent(IBinder token, boolean isPersistent) throws RemoteException;
     public void attachApplication(IApplicationThread app) throws RemoteException;
     /* oneway */
     public void activityIdle(IBinder token, Configuration config) throws RemoteException;
@@ -444,7 +443,7 @@ public interface IActivityManager extends IInterface {
     int REPORT_THUMBNAIL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+27;
     int GET_CONTENT_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
     int PUBLISH_CONTENT_PROVIDERS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
-    int SET_PERSISTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
+    
     int FINISH_SUB_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
     int GET_RUNNING_SERVICE_CONTROL_PANEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int START_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
