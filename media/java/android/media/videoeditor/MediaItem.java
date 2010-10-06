@@ -70,6 +70,7 @@ public abstract class MediaItem {
     /**
      * Constructor
      *
+     * @param editor The video editor reference
      * @param mediaItemId The MediaItem id
      * @param filename name of the media file.
      * @param renderingMode The rendering mode
@@ -79,7 +80,8 @@ public abstract class MediaItem {
      *             supported the exception object contains the unsupported
      *             capability
      */
-    protected MediaItem(String mediaItemId, String filename, int renderingMode) throws IOException {
+    protected MediaItem(VideoEditor editor, String mediaItemId, String filename,
+            int renderingMode) throws IOException {
         mUniqueId = mediaItemId;
         mFilename = filename;
         mRenderingMode = renderingMode;

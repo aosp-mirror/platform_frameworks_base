@@ -192,26 +192,29 @@ public class MediaVideoItem extends MediaItem {
      */
     @SuppressWarnings("unused")
     private MediaVideoItem() throws IOException {
-        this(null, null, RENDERING_MODE_BLACK_BORDER);
+        this(null, null, null, RENDERING_MODE_BLACK_BORDER);
     }
 
     /**
      * Constructor
      *
+     * @param editor The video editor reference
      * @param mediaItemId The MediaItem id
      * @param filename The image file name
      * @param renderingMode The rendering mode
      *
      * @throws IOException if the file cannot be opened for reading
      */
-    public MediaVideoItem(String mediaItemId, String filename, int renderingMode)
+    public MediaVideoItem(VideoEditor editor, String mediaItemId, String filename,
+            int renderingMode)
         throws IOException {
-        this(mediaItemId, filename, renderingMode, 0, END_OF_FILE, 100, false, null);
+        this(editor, mediaItemId, filename, renderingMode, 0, END_OF_FILE, 100, false, null);
     }
 
     /**
      * Constructor
      *
+     * @param editor The video editor reference
      * @param mediaItemId The MediaItem id
      * @param filename The image file name
      * @param renderingMode The rendering mode
@@ -226,10 +229,10 @@ public class MediaVideoItem extends MediaItem {
      *
      * @throws IOException if the file cannot be opened for reading
      */
-    MediaVideoItem(String mediaItemId, String filename, int renderingMode,
+    MediaVideoItem(VideoEditor editor, String mediaItemId, String filename, int renderingMode,
             long beginMs, long endMs, int volumePercent, boolean muted,
             String audioWaveformFilename)  throws IOException {
-        super(mediaItemId, filename, renderingMode);
+        super(editor, mediaItemId, filename, renderingMode);
         // TODO: Set these variables correctly
         mWidth = 1080;
         mHeight = 720;
