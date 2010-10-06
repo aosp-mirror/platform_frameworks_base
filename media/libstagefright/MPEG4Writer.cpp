@@ -212,6 +212,7 @@ MPEG4Writer::MPEG4Writer(const char *filename)
     : mFile(fopen(filename, "wb")),
       mUse4ByteNalLength(true),
       mUse32BitOffset(true),
+      mIsFileSizeLimitExplicitlyRequested(false),
       mPaused(false),
       mStarted(false),
       mOffset(0),
@@ -225,6 +226,7 @@ MPEG4Writer::MPEG4Writer(int fd)
     : mFile(fdopen(fd, "wb")),
       mUse4ByteNalLength(true),
       mUse32BitOffset(true),
+      mIsFileSizeLimitExplicitlyRequested(false),
       mPaused(false),
       mStarted(false),
       mOffset(0),
@@ -322,7 +324,7 @@ int64_t MPEG4Writer::estimateMoovBoxSize(int32_t bitRate) {
     static const int64_t MAX_MOOV_BOX_SIZE = (180 * 3000000 * 6LL / 8000);
     int64_t size = MIN_MOOV_BOX_SIZE;
 
-    if (mMaxFileSizeLimitBytes != 0) {
+    if (mMaxFileSizeLimitBytes != 0 && mIsFileSizeLimitExplicitlyRequested) {
         size = mMaxFileSizeLimitBytes * 4 / 1000;
     } else if (mMaxFileDurationLimitUs != 0) {
         if (bitRate <= 0) {
@@ -342,7 +344,7 @@ int64_t MPEG4Writer::estimateMoovBoxSize(int32_t bitRate) {
         size = MAX_MOOV_BOX_SIZE;
     }
 
-    LOGV("limits: %lld/%lld bytes/us, bit rate: %d bps and the estimated"
+    LOGI("limits: %lld/%lld bytes/us, bit rate: %d bps and the estimated"
          " moov size %lld bytes",
          mMaxFileSizeLimitBytes, mMaxFileDurationLimitUs, bitRate, size);
     return factor * size;
@@ -351,6 +353,16 @@ int64_t MPEG4Writer::estimateMoovBoxSize(int32_t bitRate) {
 status_t MPEG4Writer::start(MetaData *param) {
     if (mFile == NULL) {
         return UNKNOWN_ERROR;
+    }
+
+    /*
+     * Check mMaxFileSizeLimitBytes at the beginning
+     * since mMaxFileSizeLimitBytes may be implicitly
+     * changed later for 32-bit file offset even if
+     * user does not ask to set it explicitly.
+     */
+    if (mMaxFileSizeLimitBytes != 0) {
+        mIsFileSizeLimitExplicitlyRequested = true;
     }
 
     int32_t use64BitOffset;
