@@ -19,6 +19,7 @@
 #define STAGEFRIGHT_RECORDER_H_
 
 #include <media/MediaRecorderBase.h>
+#include <camera/CameraParameters.h>
 #include <utils/String8.h>
 
 namespace android {
@@ -125,6 +126,9 @@ private:
     status_t startRTPRecording();
     sp<MediaSource> createAudioSource();
     status_t setupCamera();
+    bool     isVideoSizeSupported(const Vector<Size>& supportedSizes) const;
+    status_t setCameraVideoSize(CameraParameters* params,
+                bool *isSetVideoSizeSupported);
     status_t setupCameraSource(sp<CameraSource> *cameraSource);
     status_t setupAudioEncoder(const sp<MediaWriter>& writer);
     status_t setupVideoEncoder(

@@ -966,6 +966,65 @@ void StagefrightRecorder::clipVideoFrameWidth() {
     }
 }
 
+/*
+ * Check to see whether the requested video width and height is one
+ * of the supported sizes. It returns true if so; otherwise, it
+ * returns false.
+ */
+bool StagefrightRecorder::isVideoSizeSupported(
+    const Vector<Size>& supportedSizes) const {
+
+    LOGV("isVideoSizeSupported");
+    for (size_t i = 0; i < supportedSizes.size(); ++i) {
+        if (mVideoWidth  == supportedSizes[i].width &&
+            mVideoHeight == supportedSizes[i].height) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
+ * If the preview and video output is separate, we only set the
+ * the video size, and applications should set the preview size
+ * to some proper value, and the recording framework will not
+ * change the preview size; otherwise, if the video and preview
+ * output is the same, we need to set the preview to be the same
+ * as the requested video size.
+ *
+ * On return, it also returns whether the setVideoSize() is
+ * supported.
+ */
+status_t StagefrightRecorder::setCameraVideoSize(
+    CameraParameters* params,
+    bool* isSetVideoSizeSupported) {
+    LOGV("setCameraVideoSize: %dx%d", mVideoWidth, mVideoHeight);
+
+    // Check whether the requested video size is supported
+    Vector<Size> sizes;
+    params->getSupportedVideoSizes(sizes);
+    *isSetVideoSizeSupported = true;
+    if (sizes.size() == 0) {
+        LOGD("Camera does not support setVideoSize()");
+        params->getSupportedPreviewSizes(sizes);
+        *isSetVideoSizeSupported = false;
+    }
+    if (!isVideoSizeSupported(sizes)) {
+        LOGE("Camera does not support video size (%dx%d)!",
+            mVideoWidth, mVideoHeight);
+        return BAD_VALUE;
+    }
+
+    // Actually set the video size
+    if (isSetVideoSizeSupported) {
+        params->setVideoSize(mVideoWidth, mVideoHeight);
+    } else {
+        params->setPreviewSize(mVideoWidth, mVideoHeight);
+    }
+
+    return OK;
+}
+
 status_t StagefrightRecorder::setupCamera() {
     if (!mCaptureTimeLapse) {
         // Dont clip for time lapse capture as encoder will have enough
@@ -993,8 +1052,11 @@ status_t StagefrightRecorder::setupCamera() {
     // dont change the preview size because time lapse may be using still camera
     // as mVideoWidth, mVideoHeight may correspond to HD resolution not
     // supported by the video camera.
+    bool isSetVideoSizeSupported = false;
     if (!mCaptureTimeLapse) {
-        params.setPreviewSize(mVideoWidth, mVideoHeight);
+        if (OK != setCameraVideoSize(&params, &isSetVideoSizeSupported)) {
+            return BAD_VALUE;
+        }
     }
 
     params.setPreviewFrameRate(mFrameRate);
@@ -1008,7 +1070,11 @@ status_t StagefrightRecorder::setupCamera() {
 
     // Check on video frame size
     int frameWidth = 0, frameHeight = 0;
-    newCameraParams.getPreviewSize(&frameWidth, &frameHeight);
+    if (isSetVideoSizeSupported) {
+        newCameraParams.getVideoSize(&frameWidth, &frameHeight);
+    } else {
+        newCameraParams.getPreviewSize(&frameWidth, &frameHeight);
+    }
     if (!mCaptureTimeLapse &&
         (frameWidth  < 0 || frameWidth  != mVideoWidth ||
         frameHeight < 0 || frameHeight != mVideoHeight)) {
