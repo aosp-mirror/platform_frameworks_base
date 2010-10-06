@@ -167,11 +167,12 @@ private:
      * @param alpha The translucency of the layer
      * @param mode The blending mode of the layer
      * @param flags The layer save flags
+     * @param previousFbo The name of the current framebuffer
      *
      * @return True if the layer was successfully created, false otherwise
      */
     bool createLayer(sp<Snapshot> snapshot, float left, float top, float right, float bottom,
-            int alpha, SkXfermode::Mode mode, int flags);
+            int alpha, SkXfermode::Mode mode, int flags, GLuint previousFbo);
 
     /**
      * Clears all the regions corresponding to the current list of layers.

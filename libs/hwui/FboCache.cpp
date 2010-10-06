@@ -16,6 +16,8 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include <stdlib.h>
+
 #include "FboCache.h"
 #include "Properties.h"
 
@@ -57,14 +59,31 @@ uint32_t FboCache::getMaxSize() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void FboCache::clear() {
-
+    for (size_t i = 0; i < mCache.size(); i++) {
+        const GLuint fbo = mCache.itemAt(i);
+        glDeleteFramebuffers(1, &fbo);
+    }
+    mCache.clear();
 }
 
 GLuint FboCache::get() {
-    return 0;
+    GLuint fbo;
+    if (mCache.size() > 0) {
+        fbo = mCache.itemAt(mCache.size() - 1);
+        mCache.removeAt(mCache.size() - 1);
+    } else {
+        glGenFramebuffers(1, &fbo);
+    }
+    return fbo;
 }
 
 bool FboCache::put(GLuint fbo) {
+    if (mCache.size() < mMaxSize) {
+        mCache.add(fbo);
+        return true;
+    }
+
+    glDeleteFramebuffers(1, &fbo);
     return false;
 }
 

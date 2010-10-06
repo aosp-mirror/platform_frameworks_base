@@ -145,6 +145,9 @@ void OpenGLRenderer::setViewport(int width, int height) {
 
     mWidth = width;
     mHeight = height;
+
+    mFirstSnapshot->height = height;
+    mFirstSnapshot->viewport.set(0, 0, width, height);
 }
 
 void OpenGLRenderer::prepare() {
@@ -185,7 +188,7 @@ void OpenGLRenderer::acquireContext() {
 }
 
 void OpenGLRenderer::releaseContext() {
-    glViewport(0, 0, mWidth, mHeight);
+    glViewport(0, 0, mSnapshot->viewport.getWidth(), mSnapshot->viewport.getHeight());
 
     glEnable(GL_SCISSOR_TEST);
     setScissorFromClip();
@@ -237,9 +240,16 @@ int OpenGLRenderer::saveSnapshot(int flags) {
 bool OpenGLRenderer::restoreSnapshot() {
     bool restoreClip = mSnapshot->flags & Snapshot::kFlagClipSet;
     bool restoreLayer = mSnapshot->flags & Snapshot::kFlagIsLayer;
+    bool restoreOrtho = mSnapshot->flags & Snapshot::kFlagDirtyOrtho;
 
     sp<Snapshot> current = mSnapshot;
     sp<Snapshot> previous = mSnapshot->previous;
+
+    if (restoreOrtho) {
+        Rect& r = previous->viewport;
+        glViewport(r.left, r.top, r.right, r.bottom);
+        mOrthoMatrix.load(current->orthoMatrix);
+    }
 
     mSaveCount--;
     mSnapshot = previous;
@@ -261,7 +271,8 @@ bool OpenGLRenderer::restoreSnapshot() {
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         const SkPaint* p, int flags) {
-    int count = saveSnapshot(flags);
+    const GLuint previousFbo = mSnapshot->fbo;
+    const int count = saveSnapshot(flags);
 
     int alpha = 255;
     SkXfermode::Mode mode;
@@ -281,7 +292,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         mode = SkXfermode::kSrcOver_Mode;
     }
 
-    createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags);
+    createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags, previousFbo);
 
     return count;
 }
@@ -346,17 +357,21 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
  *     something actually gets drawn are the layers regions cleared.
  */
 bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
-        float right, float bottom, int alpha, SkXfermode::Mode mode,int flags) {
-    LAYER_LOGD("Requesting layer %fx%f", right - left, bottom - top);
+        float right, float bottom, int alpha, SkXfermode::Mode mode,
+        int flags, GLuint previousFbo) {
+    LAYER_LOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
+
+    const bool fboLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
 
     // Window coordinates of the layer
     Rect bounds(left, top, right, bottom);
-    mSnapshot->transform->mapRect(bounds);
-
-    // Layers only make sense if they are in the framebuffer's bounds
-    bounds.intersect(*mSnapshot->clipRect);
-    bounds.snapToPixelBoundaries();
+    if (!fboLayer) {
+        mSnapshot->transform->mapRect(bounds);
+        // Layers only make sense if they are in the framebuffer's bounds
+        bounds.intersect(*mSnapshot->clipRect);
+        bounds.snapToPixelBoundaries();
+    }
 
     if (bounds.isEmpty() || bounds.getWidth() > mMaxTextureSize ||
             bounds.getHeight() > mMaxTextureSize) {
@@ -379,29 +394,77 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     snapshot->flags |= Snapshot::kFlagIsLayer;
     snapshot->layer = layer;
 
-    // Copy the framebuffer into the layer
-    glBindTexture(GL_TEXTURE_2D, layer->texture);
+    if (fboLayer) {
+        layer->fbo = mCaches.fboCache.get();
 
-    // TODO: Workaround for b/3054204
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-            bounds.getWidth(), bounds.getHeight(), 0);
+        snapshot->flags |= Snapshot::kFlagIsFboLayer;
+        snapshot->fbo = layer->fbo;
+        snapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
+        snapshot->resetClip(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
+        snapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
+        snapshot->height = bounds.getHeight();
+        snapshot->flags |= Snapshot::kFlagDirtyOrtho;
+        snapshot->orthoMatrix.load(mOrthoMatrix);
 
-    // TODO: Waiting for b/3054204 to be fixed
-//    if (layer->empty) {
-//        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-//                bounds.getWidth(), bounds.getHeight(), 0);
-//        layer->empty = false;
-//    } else {
-//        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
-//                bounds.getWidth(), bounds.getHeight());
-//    }
-
-    if (flags & SkCanvas::kClipToLayer_SaveFlag && mSnapshot->clipTransformed(bounds)) {
         setScissorFromClip();
-    }
 
-    // Enqueue the buffer coordinates to clear the corresponding region later
-    mLayers.push(new Rect(bounds));
+        // Bind texture to FBO
+        glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
+        glBindTexture(GL_TEXTURE_2D, layer->texture);
+
+        // Initialize the texture if needed
+        if (layer->empty) {
+            layer->empty = false;
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.width, size.height, 0,
+                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        }
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                layer->texture, 0);
+
+        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LOGE("Framebuffer incomplete (GL error code 0x%x)", status);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+            glDeleteTextures(1, &layer->texture);
+            mCaches.fboCache.put(layer->fbo);
+
+            delete layer;
+
+            return false;
+        }
+
+        // Clear the FBO
+        glDisable(GL_SCISSOR_TEST);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glEnable(GL_SCISSOR_TEST);
+
+        // Change the ortho projection
+        glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
+        mOrthoMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
+    } else {
+        // Copy the framebuffer into the layer
+        glBindTexture(GL_TEXTURE_2D, layer->texture);
+
+        // TODO: Workaround for b/3054204
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
+                bounds.getWidth(), bounds.getHeight(), 0);
+
+        // TODO: Waiting for b/3054204 to be fixed
+        // if (layer->empty) {
+        //     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
+        //             bounds.getWidth(), bounds.getHeight(), 0);
+        //     layer->empty = false;
+        // } else {
+        //     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
+        //             bounds.getWidth(), bounds.getHeight());
+        //  }
+
+        // Enqueue the buffer coordinates to clear the corresponding region later
+        mLayers.push(new Rect(bounds));
+    }
 
     return true;
 }
@@ -415,14 +478,21 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         return;
     }
 
+    const bool fboLayer = current->flags & SkCanvas::kClipToLayer_SaveFlag;
+
+    if (fboLayer) {
+        // Unbind current FBO and restore previous one
+        glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
+    }
+
     // Restore the clip from the previous snapshot
     const Rect& clip = *previous->clipRect;
-    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
+    glScissor(clip.left, previous->height - clip.bottom, clip.getWidth(), clip.getHeight());
 
     Layer* layer = current->layer;
     const Rect& rect = layer->layer;
 
-    if (layer->alpha < 255) {
+    if (!fboLayer && layer->alpha < 255) {
         drawColorRect(rect.left, rect.top, rect.right, rect.bottom,
                 layer->alpha << 24, SkXfermode::kDstIn_Mode, true);
     }
@@ -430,20 +500,32 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     // Layers are already drawn with a top-left origin, don't flip the texture
     resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
 
-    drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
-            1.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
-            &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount, true, true);
+    if (fboLayer) {
+        drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
+                layer->texture, layer->alpha / 255.0f, layer->mode, layer->blend);
+    } else {
+        drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
+                1.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
+                &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount, true, true);
+    }
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 
+    if (fboLayer) {
+        // Detach the texture from the FBO
+        glBindFramebuffer(GL_FRAMEBUFFER, current->fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
+
+        // Put the FBO name back in the cache, if it doesn't fit, it will be destroyed
+        mCaches.fboCache.put(current->fbo);
+    }
+
     LayerSize size(rect.getWidth(), rect.getHeight());
-    // Failing to add the layer to the cache should happen only if the
-    // layer is too large
+    // Failing to add the layer to the cache should happen only if the layer is too large
     if (!mCaches.layerCache.put(size, layer)) {
         LAYER_LOGD("Deleting layer");
-
         glDeleteTextures(1, &layer->texture);
-
         delete layer;
     }
 }
@@ -503,7 +585,7 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 
 void OpenGLRenderer::setScissorFromClip() {
     const Rect& clip = *mSnapshot->clipRect;
-    glScissor(clip.left, mHeight - clip.bottom, clip.getWidth(), clip.getHeight());
+    glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 
 const Rect& OpenGLRenderer::getClipBounds() {

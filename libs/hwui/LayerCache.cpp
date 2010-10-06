@@ -32,7 +32,7 @@ namespace uirenderer {
 
 LayerCache::LayerCache():
         mCache(GenerationCache<LayerSize, Layer*>::kUnlimitedCapacity),
-        mIdGenerator(1), mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
+        mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, NULL) > 0) {
         LOGD("  Setting layer cache size to %sMB", property);
@@ -44,7 +44,7 @@ LayerCache::LayerCache():
 
 LayerCache::LayerCache(uint32_t maxByteSize):
         mCache(GenerationCache<LayerSize, Layer*>::kUnlimitedCapacity),
-        mIdGenerator(1), mSize(0), mMaxSize(maxByteSize) {
+        mSize(0), mMaxSize(maxByteSize) {
 }
 
 LayerCache::~LayerCache() {
@@ -110,6 +110,7 @@ Layer* LayerCache::get(LayerSize& size) {
         layer = new Layer;
         layer->blend = true;
         layer->empty = true;
+        layer->fbo = 0;
 
         glGenTextures(1, &layer->texture);
         glBindTexture(GL_TEXTURE_2D, layer->texture);
@@ -121,6 +122,14 @@ Layer* LayerCache::get(LayerSize& size) {
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+#if DEBUG_LAYERS
+        uint32_t size = mCache.size();
+        for (uint32_t i = 0; i < size; i++) {
+            LayerSize ls = mCache.getKeyAt(i);
+            LAYER_LOGD("  Layer size %dx%d", ls.width, ls.height);
+        }
+#endif
     }
 
     return layer;
@@ -133,9 +142,10 @@ bool LayerCache::put(LayerSize& layerSize, Layer* layer) {
         while (mSize + size > mMaxSize) {
             Layer* oldest = mCache.removeOldest();
             deleteLayer(oldest);
+            LAYER_LOGD("  Deleting layer %.2fx%.2f", oldest->layer.getWidth(),
+                    oldest->layer.getHeight());
         }
 
-        layerSize.id = mIdGenerator++;
         mCache.put(layerSize, layer);
         mSize += size;
 
