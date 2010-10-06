@@ -190,7 +190,7 @@ void ProgramFragmentState::init(Context *rsc)
 {
     String8 shaderString(RS_SHADER_INTERNAL);
     shaderString.append("varying lowp vec4 varColor;\n");
-    shaderString.append("varying vec4 varTex0;\n");
+    shaderString.append("varying vec2 varTex0;\n");
     shaderString.append("void main() {\n");
     shaderString.append("  lowp vec4 col = UNI_Color;\n");
     shaderString.append("  gl_FragColor = col;\n");

@@ -101,7 +101,7 @@ public class ProgramVertex extends Program {
 
             mShader  = "//rs_shader_internal\n";
             mShader += "varying vec4 varColor;\n";
-            mShader += "varying vec4 varTex0;\n";
+            mShader += "varying vec2 varTex0;\n";
 
             mShader += "void main() {\n";
             mShader += "  gl_Position = UNI_MVP * ATTRIB_position;\n";
@@ -109,7 +109,7 @@ public class ProgramVertex extends Program {
 
             mShader += "  varColor = ATTRIB_color;\n";
             if (mTextureMatrixEnable) {
-                mShader += "  varTex0 = UNI_TexMatrix * ATTRIB_texture0;\n";
+                mShader += "  varTex0 = (UNI_TexMatrix * vec4(ATTRIB_texture0, 0.0, 1.0)).xy;\n";
             } else {
                 mShader += "  varTex0 = ATTRIB_texture0;\n";
             }
@@ -126,7 +126,7 @@ public class ProgramVertex extends Program {
             b.add(Element.F32_4(mRS), "position");
             b.add(Element.F32_4(mRS), "color");
             b.add(Element.F32_3(mRS), "normal");
-            b.add(Element.F32_4(mRS), "texture0");
+            b.add(Element.F32_2(mRS), "texture0");
             addInput(b.create());
 
             return super.create();
