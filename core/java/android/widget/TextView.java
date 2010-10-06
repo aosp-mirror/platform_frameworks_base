@@ -7485,16 +7485,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (Character.isSpaceChar(paste.charAt(0))) {
                         if (min > 0 && Character.isSpaceChar(mTransformed.charAt(min - 1))) {
                             // Two spaces at beginning of paste: remove one
+                            final int originalLength = mText.length();
                             ((Editable) mText).replace(min - 1, min, "");
-                            min = min - 1;
-                            max = max - 1;
+                            // Due to filters, there is no garantee that exactly one character was
+                            // removed. Count instead.
+                            final int delta = mText.length() - originalLength;
+                            min += delta;
+                            max += delta;
                         }
                     } else {
                         if (min > 0 && !Character.isSpaceChar(mTransformed.charAt(min - 1))) {
                             // No space at beginning of paste: add one
+                            final int originalLength = mText.length();
                             ((Editable) mText).replace(min, min, " ");
-                            min = min + 1;
-                            max = max + 1;
+                            // Taking possible filters into account as above.
+                            final int delta = mText.length() - originalLength;
+                            min += delta;
+                            max += delta;
                         }
                     }
 
