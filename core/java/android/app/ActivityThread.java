@@ -77,7 +77,6 @@ import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
 
-import dalvik.system.VMDebug;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 
 import java.io.File;
@@ -710,14 +709,14 @@ public final class ActivityThread {
             long dalvikAllocated = dalvikMax - dalvikFree;
             long viewInstanceCount = ViewDebug.getViewInstanceCount();
             long viewRootInstanceCount = ViewDebug.getViewRootInstanceCount();
-            long appContextInstanceCount = VMDebug.countInstancesOfClass(ContextImpl.class);
-            long activityInstanceCount = VMDebug.countInstancesOfClass(Activity.class);
+            long appContextInstanceCount = Debug.countInstancesOfClass(ContextImpl.class);
+            long activityInstanceCount = Debug.countInstancesOfClass(Activity.class);
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
             int binderLocalObjectCount = Debug.getBinderLocalObjectCount();
             int binderProxyObjectCount = Debug.getBinderProxyObjectCount();
             int binderDeathObjectCount = Debug.getBinderDeathObjectCount();
-            int openSslSocketCount = OpenSSLSocketImpl.getInstanceCount();
+            int openSslSocketCount = Debug.countInstancesOfClass(OpenSSLSocketImpl.class);
             long sqliteAllocated = SQLiteDebug.getHeapAllocatedSize() / 1024;
             SQLiteDebug.PagerStats stats = SQLiteDebug.getDatabaseInfo();
 

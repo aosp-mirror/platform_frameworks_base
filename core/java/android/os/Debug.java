@@ -775,6 +775,15 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static native void dumpNativeHeap(FileDescriptor fd);
 
     /**
+      * Returns a count of the extant instances of a class.
+     *
+     * @hide
+     */
+    public static long countInstancesOfClass(Class cls) {
+        return VMDebug.countInstancesOfClass(cls);
+    }
+
+    /**
      * Returns the number of sent transactions from this process.
      * @return The number of sent transactions or -1 if it could not read t.
      */
