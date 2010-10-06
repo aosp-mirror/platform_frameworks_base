@@ -79,8 +79,6 @@ class MountService extends IMountService.Stub
 
     private static final String VOLD_TAG = "VoldConnector";
 
-    protected static final int MAX_OBBS = 8;
-
     /*
      * Internal vold volume state constants
      */
@@ -159,7 +157,6 @@ class MountService extends IMountService.Stub
      * Mounted OBB tracking information. Used to track the current state of all
      * OBBs.
      */
-    final private Map<Integer, Integer> mObbUidUsage = new HashMap<Integer, Integer>();
     final private Map<IBinder, List<ObbState>> mObbMounts = new HashMap<IBinder, List<ObbState>>();
     final private Map<String, ObbState> mObbPathToStateMap = new HashMap<String, ObbState>();
 
@@ -1591,12 +1588,6 @@ class MountService extends IMountService.Stub
             }
 
             final int callerUid = Binder.getCallingUid();
-
-            final Integer uidUsage = mObbUidUsage.get(callerUid);
-            if (uidUsage != null && uidUsage > MAX_OBBS) {
-                throw new IllegalStateException("Maximum number of OBBs mounted!");
-            }
-
             obbState = new ObbState(filename, token, callerUid);
             addObbState(obbState);
         }
@@ -1695,15 +1686,6 @@ class MountService extends IMountService.Stub
             }
 
             mObbPathToStateMap.put(obbState.filename, obbState);
-
-            // Track the number of OBBs used by this UID.
-            final int uid = obbState.callerUid;
-            final Integer uidUsage = mObbUidUsage.get(uid);
-            if (uidUsage == null) {
-                mObbUidUsage.put(uid, 1);
-            } else {
-                mObbUidUsage.put(uid, uidUsage + 1);
-            }
         }
     }
 
@@ -1721,20 +1703,6 @@ class MountService extends IMountService.Stub
             }
 
             mObbPathToStateMap.remove(obbState.filename);
-
-            // Track the number of OBBs used by this UID.
-            final int uid = obbState.callerUid;
-            final Integer uidUsage = mObbUidUsage.get(uid);
-            if (uidUsage == null) {
-                Slog.e(TAG, "Called removeObbState for UID that isn't in map: " + uid);
-            } else {
-                final int newUsage = uidUsage - 1;
-                if (newUsage == 0) {
-                    mObbUidUsage.remove(uid);
-                } else {
-                    mObbUidUsage.put(uid, newUsage);
-                }
-            }
         }
     }
 
