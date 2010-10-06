@@ -376,9 +376,14 @@ public final class ObjectAnimator extends ValueAnimator {
      */
     @Override
     public void setTarget(Object target) {
-        mTarget = target;
-        // New property/values/target should cause re-initialization prior to starting
-        mInitialized = false;
+        if (mTarget != target) {
+            mTarget = target;
+            if (mTarget  != null && target != null && mTarget.getClass() == target.getClass()) {
+                return;
+            }
+            // New target type should cause re-initialization prior to starting
+            mInitialized = false;
+        }
     }
 
     @Override

@@ -543,6 +543,11 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     public void invalidateChild(View child, Rect dirty) {
         checkThread();
         if (DEBUG_DRAW) Log.v(TAG, "Invalidate child: " + dirty);
+        if (dirty == null) {
+            // Fast invalidation for GL-enabled applications; GL must redraw everything
+            invalidate();
+            return;
+        }
         if (mCurScrollY != 0 || mTranslator != null) {
             mTempRect.set(dirty);
             dirty = mTempRect;
