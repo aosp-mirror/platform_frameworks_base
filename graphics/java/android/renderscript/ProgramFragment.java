@@ -104,7 +104,7 @@ public class ProgramFragment extends Program {
         private void buildShaderString() {
             mShader  = "//rs_shader_internal\n";
             mShader += "varying lowp vec4 varColor;\n";
-            mShader += "varying vec4 varTex0;\n";
+            mShader += "varying vec2 varTex0;\n";
 
             mShader += "void main() {\n";
             if (mVaryingColorEnable) {

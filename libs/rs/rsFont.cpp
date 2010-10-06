@@ -497,7 +497,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
 void FontState::initRenderState()
 {
-    String8 shaderString("varying vec4 varTex0;\n");
+    String8 shaderString("varying vec2 varTex0;\n");
     shaderString.append("void main() {\n");
     shaderString.append("  lowp vec4 col = UNI_Color;\n");
     shaderString.append("  col.a = texture2D(UNI_Tex0, varTex0.xy).a;\n");

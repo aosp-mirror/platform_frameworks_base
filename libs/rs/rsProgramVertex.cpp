@@ -242,6 +242,7 @@ ProgramVertexState::~ProgramVertexState()
 void ProgramVertexState::init(Context *rsc)
 {
     const Element *matrixElem = Element::create(rsc, RS_TYPE_MATRIX_4X4, RS_KIND_USER, false, 1);
+    const Element *f2Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 2);
     const Element *f3Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
     const Element *f4Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
 
@@ -256,7 +257,7 @@ void ProgramVertexState::init(Context *rsc)
     rsc->mStateElement.elementBuilderAdd(f4Elem, "position", 1);
     rsc->mStateElement.elementBuilderAdd(f4Elem, "color", 1);
     rsc->mStateElement.elementBuilderAdd(f3Elem, "normal", 1);
-    rsc->mStateElement.elementBuilderAdd(f4Elem, "texture0", 1);
+    rsc->mStateElement.elementBuilderAdd(f2Elem, "texture0", 1);
     const Element *attrElem = rsc->mStateElement.elementBuilderCreate(rsc);
 
     Type *inputType = new Type(rsc);
@@ -266,7 +267,7 @@ void ProgramVertexState::init(Context *rsc)
 
     String8 shaderString(RS_SHADER_INTERNAL);
     shaderString.append("varying vec4 varColor;\n");
-    shaderString.append("varying vec4 varTex0;\n");
+    shaderString.append("varying vec2 varTex0;\n");
     shaderString.append("void main() {\n");
     shaderString.append("  gl_Position = UNI_MVP * ATTRIB_position;\n");
     shaderString.append("  gl_PointSize = 1.0;\n");
