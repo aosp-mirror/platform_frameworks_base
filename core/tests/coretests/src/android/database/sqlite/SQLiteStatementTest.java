@@ -128,7 +128,7 @@ public class SQLiteStatementTest extends AndroidTestCase {
      * pre-compiled SQL statement id except in during the period of binding the arguments
      * and executing the SQL statement.
      */
-    @SmallTest
+    @LargeTest
     public void testReferenceToPrecompiledStatementId() {
         mDatabase.execSQL("create table t (i int, j text);");
         verifyReferenceToPrecompiledStatementId(false);
