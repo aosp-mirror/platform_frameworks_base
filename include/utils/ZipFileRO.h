@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-//
-// Read-only access to Zip archives, with minimal heap allocation.
-//
-// This is similar to the more-complete ZipFile class, but no attempt
-// has been made to make them interchangeable.  This class operates under
-// a very different set of assumptions and constraints.
-//
+/*
+ * Read-only access to Zip archives, with minimal heap allocation.
+ *
+ * This is similar to the more-complete ZipFile class, but no attempt
+ * has been made to make them interchangeable.  This class operates under
+ * a very different set of assumptions and constraints.
+ *
+ * One such assumption is that if you're getting file descriptors for
+ * use with this class as a child of a fork() operation, you must be on
+ * a pread() to guarantee correct operation. This is because pread() can
+ * atomically read at a file offset without worrying about a lock around an
+ * lseek() + read() pair.
+ */
 #ifndef __LIBS_ZIPFILERO_H
 #define __LIBS_ZIPFILERO_H
 
@@ -55,6 +61,10 @@ typedef void* ZipEntryRO;
  * the record structure.  However, this requires a private mapping of
  * every page that the Central Directory touches.  Easier to tuck a copy
  * of the string length into the hash table entry.
+ *
+ * NOTE: If this is used on file descriptors inherited from a fork() operation,
+ * you must be on a platform that implements pread() to guarantee correctness
+ * on the shared file descriptors.
  */
 class ZipFileRO {
 public:
