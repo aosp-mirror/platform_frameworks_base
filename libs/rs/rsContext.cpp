@@ -188,6 +188,9 @@ void Context::timerInit()
     mTimeFrame = mTimeLast;
     mTimeLastFrame = mTimeLast;
     mTimerActive = RS_TIMER_INTERNAL;
+    mAverageFPSFrameCount = 0;
+    mAverageFPSStartTime = mTimeLast;
+    mAverageFPS = 0;
     timerReset();
 }
 
@@ -195,6 +198,16 @@ void Context::timerFrame()
 {
     mTimeLastFrame = mTimeFrame;
     mTimeFrame = getTime();
+    // Update average fps
+    const uint64_t averageFramerateInterval = 1000 * 1000000;
+    mAverageFPSFrameCount ++;
+    uint64_t inverval = mTimeFrame - mAverageFPSStartTime;
+    if(inverval >= averageFramerateInterval) {
+        inverval = inverval / 1000000;
+        mAverageFPS = (mAverageFPSFrameCount * 1000) / inverval;
+        mAverageFPSFrameCount = 0;
+        mAverageFPSStartTime = mTimeFrame;
+    }
 }
 
 void Context::timerSet(Timers tm)
@@ -218,12 +231,13 @@ void Context::timerPrint()
 
 
     if (props.mLogTimes) {
-        LOGV("RS: Frame (%i),   Script %2.1f (%i),  Clear & Swap %2.1f (%i),  Idle %2.1f (%lli),  Internal %2.1f (%lli)",
+        LOGV("RS: Frame (%i),   Script %2.1f (%i),  Clear & Swap %2.1f (%i),  Idle %2.1f (%lli),  Internal %2.1f (%lli), Avg fps: %u",
              mTimeMSLastFrame,
              100.0 * mTimers[RS_TIMER_SCRIPT] / total, mTimeMSLastScript,
              100.0 * mTimers[RS_TIMER_CLEAR_SWAP] / total, mTimeMSLastSwap,
              100.0 * mTimers[RS_TIMER_IDLE] / total, mTimers[RS_TIMER_IDLE] / 1000000,
-             100.0 * mTimers[RS_TIMER_INTERNAL] / total, mTimers[RS_TIMER_INTERNAL] / 1000000);
+             100.0 * mTimers[RS_TIMER_INTERNAL] / total, mTimers[RS_TIMER_INTERNAL] / 1000000,
+             mAverageFPS);
     }
 }
 
@@ -255,17 +269,17 @@ static bool getProp(const char *str)
 void Context::displayDebugStats()
 {
     char buffer[128];
-    sprintf(buffer, "Frame %i ms, Script %i ms", mTimeMSLastFrame, mTimeMSLastScript);
+    sprintf(buffer, "Avg fps %u, Frame %i ms, Script %i ms", mAverageFPS, mTimeMSLastFrame, mTimeMSLastScript);
     float oldR, oldG, oldB, oldA;
     mStateFont.getFontColor(&oldR, &oldG, &oldB, &oldA);
+    uint32_t bufferLen = strlen(buffer);
 
-    float shadowCol = 0.2f;
+    float shadowCol = 0.1f;
     mStateFont.setFontColor(shadowCol, shadowCol, shadowCol, 1.0f);
-    mStateFont.renderText(buffer, 5, getHeight() - 5);
+    mStateFont.renderText(buffer, bufferLen, 5, getHeight() - 6);
 
-    float textCol = 0.9f;
-    mStateFont.setFontColor(textCol, textCol, textCol, 1.0f);
-    mStateFont.renderText(buffer, 4, getHeight() - 6);
+    mStateFont.setFontColor(1.0f, 0.7f, 0.0f, 1.0f);
+    mStateFont.renderText(buffer, bufferLen, 4, getHeight() - 7);
 
     mStateFont.setFontColor(oldR, oldG, oldB, oldA);
 }

@@ -64,6 +64,7 @@ public:
      * @param size The dimensions of the desired layer
      */
     Layer* get(LayerSize& size);
+
     /**
      * Adds the layer to the cache. The layer will not be added if there is
      * not enough space available.
@@ -96,7 +97,6 @@ private:
     void deleteLayer(Layer* layer);
 
     GenerationCache<LayerSize, Layer*> mCache;
-    uint32_t mIdGenerator;
 
     uint32_t mSize;
     uint32_t mMaxSize;

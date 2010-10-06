@@ -106,10 +106,14 @@ public interface FragmentTransaction {
     public final int TRANSIT_UNSET = -1;
     /** No animation for transition. */
     public final int TRANSIT_NONE = 0;
-    /** Fragment is being added */
+    /** Fragment is being added onto the stack */
     public final int TRANSIT_FRAGMENT_OPEN = 1 | TRANSIT_ENTER_MASK;
-    /** Fragment is being removed */
+    /** Fragment is being removed from the stack */
     public final int TRANSIT_FRAGMENT_CLOSE = 2 | TRANSIT_EXIT_MASK;
+    /** Fragment is being added in a 'next' operation*/
+    public final int TRANSIT_FRAGMENT_NEXT = 3 | TRANSIT_ENTER_MASK;
+    /** Fragment is being removed in a 'previous' operation */
+    public final int TRANSIT_FRAGMENT_PREV = 4 | TRANSIT_EXIT_MASK;
 
     /**
      * Set specific animation resources to run for the fragments that are

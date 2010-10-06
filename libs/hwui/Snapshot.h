@@ -43,7 +43,7 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot(): flags(0), previous(NULL), layer(NULL) {
+    Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0) {
         transform = &mTransformRoot;
         clipRect = &mClipRectRoot;
     }
@@ -53,7 +53,8 @@ public:
      * the previous snapshot.
      */
     Snapshot(const sp<Snapshot>& s, int saveFlags):
-            flags(0), previous(s), layer(NULL) {
+            flags(0), previous(s), layer(NULL),
+            fbo(s->fbo), viewport(s->viewport), height(s->height) {
         if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
             mTransformRoot.load(*s->transform);
             transform = &mTransformRoot;
@@ -91,9 +92,19 @@ public:
          */
         kFlagIsLayer = 0x2,
         /**
+         * Indicates that this snapshot is a special type of layer
+         * backed by an FBO. This flag only makes sense when the
+         * flag kFlagIsLayer is also set.
+         */
+        kFlagIsFboLayer = 0x4,
+        /**
          * Indicates that the local clip should be recomputed.
          */
-        kFlagDirtyLocalClip = 0x4,
+        kFlagDirtyLocalClip = 0x8,
+        /**
+         * Indicates that this snapshot has changed the ortho matrix.
+         */
+        kFlagDirtyOrtho = 0x10,
     };
 
     /**
@@ -169,6 +180,17 @@ public:
         return mLocalClip;
     }
 
+    void resetTransform(float x, float y, float z) {
+        transform = &mTransformRoot;
+        transform->loadTranslate(x, y, z);
+    }
+
+    void resetClip(float left, float top, float right, float bottom) {
+        clipRect = &mClipRectRoot;
+        clipRect->set(left, top, right, bottom);
+        flags |= Snapshot::kFlagClipSet | Snapshot::kFlagDirtyLocalClip;
+    }
+
     /**
      * Dirty flags.
      */
@@ -183,6 +205,26 @@ public:
      * Only set when the flag kFlagIsLayer is set.
      */
     Layer* layer;
+
+    /**
+     * Only set when the flag kFlagIsFboLayer is set.
+     */
+    GLuint fbo;
+
+    /**
+     * Current viewport.
+     */
+    Rect viewport;
+
+    /**
+     * Height of the framebuffer the snapshot is rendering into.
+     */
+    int height;
+
+    /**
+     * Contains the previous ortho matrix.
+     */
+    mat4 orthoMatrix;
 
     /**
      * Local transformation. Holds the current translation, scale and

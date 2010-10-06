@@ -182,6 +182,24 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(mID, d);
     }
 
+    public void resize(int dimX) {
+        if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.getFaces() || mType.getLOD()) {
+            throw new IllegalStateException("Resize only support for 1D allocations at this time.");
+        }
+        mRS.nAllocationResize1D(mID, dimX);
+    }
+
+    /*
+    public void resize(int dimX, int dimY) {
+        if ((mType.getZ() > 0) || mType.getFaces() || mType.getLOD()) {
+            throw new IllegalStateException("Resize only support for 2D allocations at this time.");
+        }
+        if (mType.getY() == 0) {
+            throw new IllegalStateException("Resize only support for 2D allocations at this time.");
+        }
+        mRS.nAllocationResize2D(mID, dimX, dimY);
+    }
+    */
 
     public class Adapter1D extends BaseObj {
         Adapter1D(int id, RenderScript rs) {

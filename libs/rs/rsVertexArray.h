@@ -62,7 +62,6 @@ public:
     }
 
     void add(const Attrib &, uint32_t stride);
-    //void addLegacy(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset);
     void add(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name);
 
     void setupGL2(const Context *rsc, class VertexArrayState *, ShaderCache *) const;
@@ -89,7 +88,7 @@ public:
 
 }
 }
-#endif //ANDROID_LIGHT_H
+#endif //ANDROID_VERTEX_ARRAY_H
 
 
 

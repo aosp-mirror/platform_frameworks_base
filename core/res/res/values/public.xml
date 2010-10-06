@@ -1332,6 +1332,10 @@
   <public type="attr" name="fragmentOpenExitAnimation" />
   <public type="attr" name="fragmentCloseEnterAnimation" />
   <public type="attr" name="fragmentCloseExitAnimation" />
+  <public type="attr" name="fragmentNextEnterAnimation" />
+  <public type="attr" name="fragmentNextExitAnimation" />
+  <public type="attr" name="fragmentPrevEnterAnimation" />
+  <public type="attr" name="fragmentPrevExitAnimation" />
   <public type="attr" name="actionBarSize" />
   <public type="attr" name="imeSubtypeLocale" />
   <public type="attr" name="imeSubtypeMode" />

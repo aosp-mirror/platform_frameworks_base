@@ -278,9 +278,6 @@ ObjectBase *FileA3D::initializeFromEntry(size_t index) {
         case RS_A3D_CLASS_ID_ANIMATION:
             entry->mRsObj = Animation::createFromStream(mRSC, mReadStream);
             break;
-        case RS_A3D_CLASS_ID_LIGHT:
-            entry->mRsObj = Light::createFromStream(mRSC, mReadStream);
-            break;
         case RS_A3D_CLASS_ID_ADAPTER_1D:
             entry->mRsObj = Adapter1D::createFromStream(mRSC, mReadStream);
             break;

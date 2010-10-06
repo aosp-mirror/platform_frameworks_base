@@ -727,7 +727,7 @@ public class NotificationTestList extends TestActivity
             }
         },
 
-        new Test("Persistent with numbers 222") {
+        new Test("Persistent with numbers 22") {
             public void run() {
                 mNM.notify(1, notificationWithNumbers(22));
             }

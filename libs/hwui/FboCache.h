@@ -21,8 +21,6 @@
 
 #include <utils/SortedVector.h>
 
-#include "GenerationCache.h"
-
 namespace android {
 namespace uirenderer {
 

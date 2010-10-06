@@ -893,11 +893,15 @@ public abstract class PreferenceActivity extends ListActivity implements
         }
     }
 
-    public void switchToHeaderInner(String fragmentName, Bundle args) {
+    public void switchToHeaderInner(String fragmentName, Bundle args, boolean next) {
         getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
         Fragment f = Fragment.instantiate(this, fragmentName, args);
-        getFragmentManager().openTransaction().replace(
-                com.android.internal.R.id.prefs, f).commit();
+        FragmentTransaction transaction = getFragmentManager().openTransaction();
+        transaction.setTransition(next ?
+                FragmentTransaction.TRANSIT_FRAGMENT_NEXT :
+                FragmentTransaction.TRANSIT_FRAGMENT_PREV);
+        transaction.replace(com.android.internal.R.id.prefs, f);
+        transaction.commit();
     }
 
     /**
@@ -909,7 +913,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void switchToHeader(String fragmentName, Bundle args) {
         setSelectedHeader(null);
-        switchToHeaderInner(fragmentName, args);
+        switchToHeaderInner(fragmentName, args, true);
     }
 
     /**
@@ -919,7 +923,8 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param header The new header to display.
      */
     public void switchToHeader(Header header) {
-        switchToHeaderInner(header.fragment, header.fragmentArguments);
+        switchToHeaderInner(header.fragment, header.fragmentArguments,
+                mHeaders.indexOf(header) > mHeaders.indexOf(mCurHeader));
         setSelectedHeader(header);
     }
 
@@ -979,7 +984,10 @@ public abstract class PreferenceActivity extends ListActivity implements
         FragmentTransaction transaction = getFragmentManager().openTransaction();
         startPreferenceFragment(fragment, transaction);
         if (push) {
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             transaction.addToBackStack(BACK_STACK_PREFS);
+        } else {
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_NEXT);
         }
         transaction.commit();
     }
@@ -1001,6 +1009,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         FragmentTransaction transaction = getFragmentManager().openTransaction();
         startPreferenceFragment(f, transaction);
         transaction.setBreadCrumbTitle(pref.getTitle());
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.addToBackStack(BACK_STACK_PREFS);
         transaction.commit();
         return true;

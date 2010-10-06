@@ -27,7 +27,6 @@ import android.graphics.Rect;
 import android.os.Environment;
 import android.os.Debug;
 import android.os.RemoteException;
-import dalvik.system.VMDebug;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -431,7 +430,7 @@ public class ViewDebug {
      * @hide
      */
     public static long getViewInstanceCount() {
-        return VMDebug.countInstancesOfClass(View.class);
+        return Debug.countInstancesOfClass(View.class);
     }
 
     /**
@@ -442,7 +441,7 @@ public class ViewDebug {
      * @hide
      */
     public static long getViewRootInstanceCount() {
-        return VMDebug.countInstancesOfClass(ViewRoot.class);
+        return Debug.countInstancesOfClass(ViewRoot.class);
     }
 
     /**

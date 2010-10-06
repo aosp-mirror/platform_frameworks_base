@@ -13,8 +13,6 @@ typedef void * RsMesh;
 typedef void * RsType;
 typedef void * RsProgramFragment;
 typedef void * RsProgramStore;
-typedef void * RsLight;
-
 
 typedef struct {
     float m[16];

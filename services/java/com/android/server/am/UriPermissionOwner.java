@@ -45,7 +45,7 @@ class UriPermissionOwner {
     }
 
     Binder getExternalTokenLocked() {
-        if (externalToken != null) {
+        if (externalToken == null) {
             externalToken = new ExternalToken();
         }
         return externalToken;

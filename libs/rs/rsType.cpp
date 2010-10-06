@@ -274,6 +274,59 @@ bool Type::isEqual(const Type *other) const {
     return false;
 }
 
+Type * Type::cloneAndResize1D(Context *rsc, uint32_t dimX) const
+{
+    TypeState * stc = &rsc->mStateType;
+    for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
+        Type *t = stc->mTypes[ct];
+        if (t->getElement() != mElement.get()) continue;
+        if (t->getDimX() != dimX) continue;
+        if (t->getDimY() != mDimY) continue;
+        if (t->getDimZ() != mDimZ) continue;
+        if (t->getDimLOD() != mDimLOD) continue;
+        if (t->getDimFaces() != mFaces) continue;
+        t->incUserRef();
+        return t;
+    }
+
+    Type *nt = new Type(rsc);
+    nt->mElement.set(mElement);
+    nt->mDimX = dimX;
+    nt->mDimY = mDimY;
+    nt->mDimZ = mDimZ;
+    nt->mDimLOD = mDimLOD;
+    nt->mFaces = mFaces;
+    nt->compute();
+    return nt;
+}
+
+Type * Type::cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const
+{
+    TypeState * stc = &rsc->mStateType;
+    for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
+        Type *t = stc->mTypes[ct];
+        if (t->getElement() != mElement.get()) continue;
+        if (t->getDimX() != dimX) continue;
+        if (t->getDimY() != dimY) continue;
+        if (t->getDimZ() != mDimZ) continue;
+        if (t->getDimLOD() != mDimLOD) continue;
+        if (t->getDimFaces() != mFaces) continue;
+        t->incUserRef();
+        return t;
+    }
+
+    Type *nt = new Type(rsc);
+    nt->mElement.set(mElement);
+    nt->mDimX = dimX;
+    nt->mDimY = dimY;
+    nt->mDimZ = mDimZ;
+    nt->mDimLOD = mDimLOD;
+    nt->mFaces = mFaces;
+    nt->compute();
+    return nt;
+}
+
+
 //////////////////////////////////////////////////
 //
 namespace android {

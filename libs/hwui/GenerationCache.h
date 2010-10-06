@@ -65,6 +65,7 @@ public:
     void put(K key, V value);
     V remove(K key);
     V removeOldest();
+    V getValueAt(uint32_t index) const;
 
     uint32_t size() const;
 
@@ -125,6 +126,11 @@ bool GenerationCache<K, V>::contains(K key) const {
 template<typename K, typename V>
 K GenerationCache<K, V>::getKeyAt(uint32_t index) const {
     return mCache.keyAt(index);
+}
+
+template<typename K, typename V>
+V GenerationCache<K, V>::getValueAt(uint32_t index) const {
+    return mCache.valueAt(index);
 }
 
 template<typename K, typename V>

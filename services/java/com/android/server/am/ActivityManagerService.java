@@ -4350,8 +4350,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             return -1;
         }
 
-        if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
-                "Checking grant " + targetPkg + " permission to " + uri);
+        if (targetPkg != null) {
+            if (DEBUG_URI_PERMISSION) Slog.v(TAG,
+                    "Checking grant " + targetPkg + " permission to " + uri);
+        }
         
         final IPackageManager pm = AppGlobals.getPackageManager();
 
@@ -4380,23 +4382,45 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         int targetUid;
-        try {
-            targetUid = pm.getPackageUid(targetPkg);
-            if (targetUid < 0) {
-                if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
-                        "Can't grant URI permission no uid for: " + targetPkg);
+        if (targetPkg != null) {
+            try {
+                targetUid = pm.getPackageUid(targetPkg);
+                if (targetUid < 0) {
+                    if (DEBUG_URI_PERMISSION) Slog.v(TAG,
+                            "Can't grant URI permission no uid for: " + targetPkg);
+                    return -1;
+                }
+            } catch (RemoteException ex) {
                 return -1;
             }
-        } catch (RemoteException ex) {
-            return -1;
+        } else {
+            targetUid = -1;
         }
 
-        // First...  does the target actually need this permission?
-        if (checkHoldingPermissionsLocked(pm, pi, uri, targetUid, modeFlags)) {
-            // No need to grant the target this permission.
-            if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
-                    "Target " + targetPkg + " already has full permission to " + uri);
-            return -1;
+        if (targetUid >= 0) {
+            // First...  does the target actually need this permission?
+            if (checkHoldingPermissionsLocked(pm, pi, uri, targetUid, modeFlags)) {
+                // No need to grant the target this permission.
+                if (DEBUG_URI_PERMISSION) Slog.v(TAG,
+                        "Target " + targetPkg + " already has full permission to " + uri);
+                return -1;
+            }
+        } else {
+            // First...  there is no target package, so can anyone access it?
+            boolean allowed = pi.exported;
+            if ((modeFlags&Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+                if (pi.readPermission != null) {
+                    allowed = false;
+                }
+            }
+            if ((modeFlags&Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
+                if (pi.writePermission != null) {
+                    allowed = false;
+                }
+            }
+            if (allowed) {
+                return -1;
+            }
         }
 
         // Second...  is the provider allowing granting of URI permissions?
@@ -4426,14 +4450,23 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Third...  does the caller itself have permission to access
         // this uri?
-        if (!checkHoldingPermissionsLocked(pm, pi, uri, callingUid, modeFlags)) {
-            if (!checkUriPermissionLocked(uri, callingUid, modeFlags)) {
-                throw new SecurityException("Uid " + callingUid
-                        + " does not have permission to uri " + uri);
+        if (callingUid != Process.myUid()) {
+            if (!checkHoldingPermissionsLocked(pm, pi, uri, callingUid, modeFlags)) {
+                if (!checkUriPermissionLocked(uri, callingUid, modeFlags)) {
+                    throw new SecurityException("Uid " + callingUid
+                            + " does not have permission to uri " + uri);
+                }
             }
         }
 
         return targetUid;
+    }
+
+    public int checkGrantUriPermission(int callingUid, String targetPkg,
+            Uri uri, int modeFlags) {
+        synchronized(this) {
+            return checkGrantUriPermissionLocked(callingUid, targetPkg, uri, modeFlags);
+        }
     }
 
     void grantUriPermissionUncheckedLocked(int targetUid, String targetPkg,
@@ -4478,6 +4511,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void grantUriPermissionLocked(int callingUid,
             String targetPkg, Uri uri, int modeFlags, UriPermissionOwner owner) {
+        if (targetPkg == null) {
+            throw new NullPointerException("targetPkg");
+        }
+
         int targetUid = checkGrantUriPermissionLocked(callingUid, targetPkg, uri, modeFlags);
         if (targetUid < 0) {
             return;
@@ -4495,6 +4532,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "Checking URI perm to " + (intent != null ? intent.getData() : null)
                 + " from " + intent + "; flags=0x"
                 + Integer.toHexString(intent != null ? intent.getFlags() : 0));
+
+        if (targetPkg == null) {
+            throw new NullPointerException("targetPkg");
+        }
 
         if (intent == null) {
             return -1;

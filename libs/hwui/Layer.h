@@ -32,21 +32,14 @@ namespace uirenderer {
  * Dimensions of a layer.
  */
 struct LayerSize {
-    LayerSize(): width(0), height(0), id(0) { }
-    LayerSize(const uint32_t width, const uint32_t height): width(width), height(height), id(0) { }
-    LayerSize(const LayerSize& size): width(size.width), height(size.height), id(size.id) { }
+    LayerSize(): width(0), height(0) { }
+    LayerSize(const uint32_t width, const uint32_t height): width(width), height(height) { }
+    LayerSize(const LayerSize& size): width(size.width), height(size.height) { }
 
     uint32_t width;
     uint32_t height;
 
-    // Incremental id used by the layer cache to store multiple
-    // LayerSize with the same dimensions
-    uint32_t id;
-
     bool operator<(const LayerSize& rhs) const {
-        if (id != 0 && rhs.id != 0 && id != rhs.id) {
-            return id < rhs.id;
-        }
         if (width == rhs.width) {
             return height < rhs.height;
         }
@@ -54,12 +47,12 @@ struct LayerSize {
     }
 
     bool operator==(const LayerSize& rhs) const {
-        return id == rhs.id && width == rhs.width && height == rhs.height;
+        return width == rhs.width && height == rhs.height;
     }
 }; // struct LayerSize
 
 /**
- * A layer has dimensions and is backed by an OpenGL texture.
+ * A layer has dimensions and is backed by an OpenGL texture or FBO.
  */
 struct Layer {
     /**
@@ -70,6 +63,11 @@ struct Layer {
      * Name of the texture used to render the layer.
      */
     GLuint texture;
+    /**
+     * Name of the FBO used to render the layer. If the name is 0
+     * this layer is not backed by an FBO, but a simple texture.
+     */
+    GLuint fbo;
     /**
      * Opacity of the layer.
      */

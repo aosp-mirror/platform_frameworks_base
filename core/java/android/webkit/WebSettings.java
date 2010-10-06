@@ -1081,6 +1081,7 @@ public class WebSettings {
         if (mBlockNetworkLoads != flag) {
             mBlockNetworkLoads = flag;
             verifyNetworkAccess();
+            postSync();
         }
     }
 

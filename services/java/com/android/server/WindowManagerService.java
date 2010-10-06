@@ -3387,11 +3387,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             // If this application has requested an explicit orientation,
             // then use it.
-            if (or == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ||
-                    or == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ||
-                    or == ActivityInfo.SCREEN_ORIENTATION_SENSOR ||
-                    or == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR ||
-                    or == ActivityInfo.SCREEN_ORIENTATION_USER) {
+            if (or != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
                 return or;
             }
             findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);

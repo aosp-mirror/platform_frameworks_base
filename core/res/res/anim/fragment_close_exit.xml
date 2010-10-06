@@ -20,20 +20,6 @@
     <objectAnimator
         android:interpolator="@anim/accelerate_interpolator"
         android:valueFrom="1"
-        android:valueTo=".5"
-        android:valueType="floatType"
-        android:propertyName="scaleX"
-        android:duration="@android:integer/config_mediumAnimTime"/>
-    <objectAnimator
-        android:interpolator="@anim/accelerate_interpolator"
-        android:valueFrom="1"
-        android:valueTo=".5"
-        android:valueType="floatType"
-        android:propertyName="scaleY"
-        android:duration="@android:integer/config_mediumAnimTime"/>
-    <objectAnimator
-        android:interpolator="@anim/accelerate_interpolator"
-        android:valueFrom="1"
         android:valueTo="0"
         android:valueType="floatType"
         android:propertyName="alpha"

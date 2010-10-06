@@ -274,12 +274,6 @@ public class PhoneStatusBarService extends StatusBarService {
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
-        // the more notifications icon
-        StatusBarIconView moreView = new StatusBarIconView(this, "more");
-        moreView.set(new StatusBarIcon(null, R.drawable.stat_notify_more, 0));
-        mNotificationIcons.addMoreView(moreView,
-                new LinearLayout.LayoutParams(mIconSize, mIconSize));
-
         // set the inital view visibility
         setAreThereNotifications();
         mDateView.setVisibility(View.INVISIBLE);
@@ -579,8 +573,7 @@ public class PhoneStatusBarService extends StatusBarService {
         parent.addView(row, viewIndex);
         // Add the icon.
         final int iconIndex = chooseIconIndex(isOngoing, viewIndex);
-        mNotificationIcons.addView(iconView, iconIndex,
-                new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        mNotificationIcons.addView(iconView, iconIndex);
         return iconView;
     }
 

@@ -19,8 +19,6 @@ package android.view;
 import android.animation.LayoutTransition;
 import com.android.internal.R;
 
-import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -963,7 +961,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = count - 1; i >= 0; i--) {
             final View child = children[i];
-            if (child.mCanAcceptDrop == false) {
+            if (!child.mCanAcceptDrop) {
                 continue;
             }
 
@@ -1179,16 +1177,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return handled;
     }
 
-    /* Resets all touch state in preparation for a new cycle. */
-    private final void resetTouchState() {
+    /**
+     * Resets all touch state in preparation for a new cycle.
+     */
+    private void resetTouchState() {
         clearTouchTargets();
         resetCancelNextUpFlag(this);
         mGroupFlags &= ~FLAG_DISALLOW_INTERCEPT;
     }
 
-    /* Resets the cancel next up flag.
-     * Returns true if the flag was previously set. */
-    private final boolean resetCancelNextUpFlag(View view) {
+    /**
+     * Resets the cancel next up flag.
+     * Returns true if the flag was previously set.
+     */
+    private boolean resetCancelNextUpFlag(View view) {
         if ((view.mPrivateFlags & CANCEL_NEXT_UP_EVENT) != 0) {
             view.mPrivateFlags &= ~CANCEL_NEXT_UP_EVENT;
             return true;
@@ -1196,8 +1198,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
-    /* Clears all touch targets. */
-    private final void clearTouchTargets() {
+    /**
+     * Clears all touch targets.
+     */
+    private void clearTouchTargets() {
         TouchTarget target = mFirstTouchTarget;
         if (target != null) {
             do {
@@ -1209,8 +1213,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /* Cancels and clears all touch targets. */
-    private final void cancelAndClearTouchTargets(MotionEvent event) {
+    /**
+     * Cancels and clears all touch targets.
+     */
+    private void cancelAndClearTouchTargets(MotionEvent event) {
         if (mFirstTouchTarget != null) {
             boolean syntheticEvent = false;
             if (event == null) {
@@ -1232,9 +1238,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /* Gets the touch target for specified child view.
-     * Returns null if not found. */
-    private final TouchTarget getTouchTarget(View child) {
+    /**
+     * Gets the touch target for specified child view.
+     * Returns null if not found.
+     */
+    private TouchTarget getTouchTarget(View child) {
         for (TouchTarget target = mFirstTouchTarget; target != null; target = target.next) {
             if (target.child == child) {
                 return target;
@@ -1243,17 +1251,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return null;
     }
 
-    /* Adds a touch target for specified child to the beginning of the list.
-     * Assumes the target child is not already present. */
-    private final TouchTarget addTouchTarget(View child, int pointerIdBits) {
+    /**
+     * Adds a touch target for specified child to the beginning of the list.
+     * Assumes the target child is not already present.
+     */
+    private TouchTarget addTouchTarget(View child, int pointerIdBits) {
         TouchTarget target = TouchTarget.obtain(child, pointerIdBits);
         target.next = mFirstTouchTarget;
         mFirstTouchTarget = target;
         return target;
     }
 
-    /* Removes the pointer ids from consideration. */
-    private final void removePointersFromTouchTargets(int pointerIdBits) {
+    /**
+     * Removes the pointer ids from consideration.
+     */
+    private void removePointersFromTouchTargets(int pointerIdBits) {
         TouchTarget predecessor = null;
         TouchTarget target = mFirstTouchTarget;
         while (target != null) {
@@ -1276,10 +1288,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /* Returns true if a child view contains the specified point when transformed
+    /**
+     * Returns true if a child view contains the specified point when transformed
      * into its coordinate space.
-     * Child must not be null. */
-    private final boolean isTransformedTouchPointInView(float x, float y, View child,
+     * Child must not be null.
+     */
+    private boolean isTransformedTouchPointInView(float x, float y, View child,
             PointF outLocalPoint) {
         float localX = x + mScrollX - child.mLeft;
         float localY = y + mScrollY - child.mTop;
@@ -1298,10 +1312,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return isInView;
     }
 
-    /* Transforms a motion event into the coordinate space of a particular child view,
+    /**
+     * Transforms a motion event into the coordinate space of a particular child view,
      * filters out irrelevant pointer ids, and overrides its action if necessary.
-     * If child is null, assumes the MotionEvent will be sent to this ViewGroup instead. */
-    private final boolean dispatchTransformedTouchEvent(MotionEvent event, boolean cancel,
+     * If child is null, assumes the MotionEvent will be sent to this ViewGroup instead.
+     */
+    private boolean dispatchTransformedTouchEvent(MotionEvent event, boolean cancel,
             View child, int desiredPointerIdBits) {
         final boolean handled;
 
@@ -1476,9 +1492,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return handled;
     }
 
-    /* Enlarge the temporary pointer arrays for splitting pointers.
-     * May discard contents (but keeps PointerCoords objects to avoid reallocating them). */
-    private final void growTmpPointerArrays(int desiredCapacity) {
+    /**
+     * Enlarge the temporary pointer arrays for splitting pointers.
+     * May discard contents (but keeps PointerCoords objects to avoid reallocating them).
+     */
+    private void growTmpPointerArrays(int desiredCapacity) {
         final MotionEvent.PointerCoords[] oldTmpPointerCoords = mTmpPointerCoords;
         int capacity;
         if (oldTmpPointerCoords != null) {
@@ -2174,7 +2192,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (!canvas.isHardwareAccelerated()) {
                 cache = child.getDrawingCache(true);
             } else {
-                displayList = child.getDisplayList();
+                // TODO: bring back
+                // displayList = child.getDisplayList();
             }
         }
 

@@ -19,6 +19,7 @@ package android.widget;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
@@ -135,11 +136,14 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     int mReferenceChildHeight = -1;
 
     /**
-     * TODO: Animation stuff is still in flux, waiting on the new framework to settle a bit.
+     * In and out animations.
      */
-    Animation mInAnimation;
-    Animation mOutAnimation;
+    ObjectAnimator<?> mInAnimation;
+    ObjectAnimator<?> mOutAnimation;
+
     private  ArrayList<View> mViewsToBringToFront;
+
+    private static final int DEFAULT_ANIMATION_DURATION = 200;
 
     public AdapterViewAnimator(Context context) {
         super(context);
@@ -155,11 +159,15 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                 com.android.internal.R.styleable.AdapterViewAnimator_inAnimation, 0);
         if (resource > 0) {
             setInAnimation(context, resource);
+        } else {
+            setInAnimation(getDefaultInAnimation());
         }
 
         resource = a.getResourceId(com.android.internal.R.styleable.AdapterViewAnimator_outAnimation, 0);
         if (resource > 0) {
             setOutAnimation(context, resource);
+        } else {
+            setOutAnimation(getDefaultOutAnimation());
         }
 
         boolean flag = a.getBoolean(
@@ -229,15 +237,21 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @param view The view that is being animated
      */
     void animateViewForTransition(int fromIndex, int toIndex, View view) {
-        ObjectAnimator pa;
         if (fromIndex == -1) {
-            view.setAlpha(0.0f);
-            pa = new ObjectAnimator(400, view, "alpha", 0.0f, 1.0f);
-            pa.start();
+            mInAnimation.setTarget(view);
+            mInAnimation.start();
         } else if (toIndex == -1) {
-            pa = new ObjectAnimator(400, view, "alpha", 1.0f, 0.0f);
-            pa.start();
+            mOutAnimation.setTarget(view);
+            mOutAnimation.start();
         }
+    }
+
+    ObjectAnimator<?> getDefaultInAnimation() {
+        return new ObjectAnimator<Float>(DEFAULT_ANIMATION_DURATION, null, "alpha", 0.0f, 1.0f);
+    }
+
+    ObjectAnimator<?> getDefaultOutAnimation() {
+        return new ObjectAnimator<Float>(DEFAULT_ANIMATION_DURATION, null, "alpha", 1.0f, 0.0f);
     }
 
     /**
@@ -262,20 +276,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                 requestFocus(FOCUS_FORWARD);
             }
         }
-    }
-
-    /**
-     * Return default inAnimation. To be overriden by subclasses.
-     */
-    Animation getDefaultInAnimation() {
-        return null;
-    }
-
-    /**
-     * Return default outAnimation. To be overridden by subclasses.
-     */
-    Animation getDefaultOutAnimation() {
-        return null;
     }
 
     /**
@@ -690,7 +690,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @see #setInAnimation(android.view.animation.Animation)
      * @see #setInAnimation(android.content.Context, int)
      */
-    public Animation getInAnimation() {
+    public ObjectAnimator<?> getInAnimation() {
         return mInAnimation;
     }
 
@@ -702,7 +702,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @see #getInAnimation()
      * @see #setInAnimation(android.content.Context, int)
      */
-    public void setInAnimation(Animation inAnimation) {
+    public void setInAnimation(ObjectAnimator<?> inAnimation) {
         mInAnimation = inAnimation;
     }
 
@@ -714,7 +714,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @see #setOutAnimation(android.view.animation.Animation)
      * @see #setOutAnimation(android.content.Context, int)
      */
-    public Animation getOutAnimation() {
+    public ObjectAnimator<?> getOutAnimation() {
         return mOutAnimation;
     }
 
@@ -726,7 +726,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @see #getOutAnimation()
      * @see #setOutAnimation(android.content.Context, int)
      */
-    public void setOutAnimation(Animation outAnimation) {
+    public void setOutAnimation(ObjectAnimator<?> outAnimation) {
         mOutAnimation = outAnimation;
     }
 
@@ -740,7 +740,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @see #setInAnimation(android.view.animation.Animation)
      */
     public void setInAnimation(Context context, int resourceID) {
-        setInAnimation(AnimationUtils.loadAnimation(context, resourceID));
+        setInAnimation((ObjectAnimator<?>) AnimatorInflater.loadAnimator(context, resourceID));
     }
 
     /**
@@ -753,7 +753,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @see #setOutAnimation(android.view.animation.Animation)
      */
     public void setOutAnimation(Context context, int resourceID) {
-        setOutAnimation(AnimationUtils.loadAnimation(context, resourceID));
+        setOutAnimation((ObjectAnimator<?>) AnimatorInflater.loadAnimator(context, resourceID));
     }
 
     /**

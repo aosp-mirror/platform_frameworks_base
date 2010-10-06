@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
@@ -97,7 +98,10 @@ public class SQLiteCursorTest extends AndroidTestCase {
         assertTrue(db.isOpen());
     }
 
-    @SmallTest
+    /**
+     * this test could take a while to execute. so, designate it as LargetTest
+     */
+    @LargeTest
     public void testFillWindow() {
         // create schema
         final String testTable = "testV";

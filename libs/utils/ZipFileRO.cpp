@@ -508,6 +508,36 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
 
         unsigned char lfhBuf[kLFHLen];
 
+#ifdef HAVE_PREAD
+        /*
+         * This file descriptor might be from zygote's preloaded assets,
+         * so we need to do an pread() instead of a lseek() + read() to
+         * guarantee atomicity across the processes with the shared file
+         * descriptors.
+         */
+        ssize_t actual =
+                TEMP_FAILURE_RETRY(pread(mFd, lfhBuf, sizeof(lfhBuf), localHdrOffset));
+
+        if (actual != sizeof(lfhBuf)) {
+            LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
+            return false;
+        }
+
+        if (get4LE(lfhBuf) != kLFHSignature) {
+            LOGW("didn't find signature at start of lfh; wanted: offset=%ld data=0x%08x; "
+                    "got: data=0x%08lx\n",
+                    localHdrOffset, kLFHSignature, get4LE(lfhBuf));
+            return false;
+        }
+#else /* HAVE_PREAD */
+        /*
+         * For hosts don't have pread() we cannot guarantee atomic reads from
+         * an offset in a file. Android should never run on those platforms.
+         * File descriptors inherited from a fork() share file offsets and
+         * there would be nothing to protect from two different processes
+         * calling lseek() concurrently.
+         */
+
         {
             AutoMutex _l(mFdLock);
 
@@ -517,7 +547,7 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
             }
 
             ssize_t actual =
-                TEMP_FAILURE_RETRY(read(mFd, lfhBuf, sizeof(lfhBuf)));
+                    TEMP_FAILURE_RETRY(read(mFd, lfhBuf, sizeof(lfhBuf)));
             if (actual != sizeof(lfhBuf)) {
                 LOGW("failed reading lfh from offset %ld\n", localHdrOffset);
                 return false;
@@ -531,6 +561,7 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
                 return false;
             }
         }
+#endif /* HAVE_PREAD */
 
         off_t dataOffset = localHdrOffset + kLFHLen
             + get2LE(lfhBuf + kLFHNameLen) + get2LE(lfhBuf + kLFHExtraLen);

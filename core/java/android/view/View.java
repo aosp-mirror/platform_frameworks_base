@@ -66,6 +66,7 @@ import android.widget.ScrollBarDrawable;
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -9842,15 +9843,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * The base class implementation makes the thumbnail the same size and appearance
      * as the view itself, and positions it with its center at the touch point.
      */
-    public class DragThumbnailBuilder {
-        private View mView;
+    public static class DragThumbnailBuilder {
+        private final WeakReference<View> mView;
 
         /**
          * Construct a thumbnail builder object for use with the given view.
          * @param view
          */
         public DragThumbnailBuilder(View view) {
-            mView = view;
+            mView = new WeakReference<View>(view);
         }
 
         /**
@@ -9870,8 +9871,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          *        the touch point on the screen during a drag.
          */
         public void onProvideThumbnailMetrics(Point thumbnailSize, Point thumbnailTouchPoint) {
-            thumbnailSize.set(mView.getWidth(), mView.getHeight());
-            thumbnailTouchPoint.set(thumbnailSize.x / 2, thumbnailSize.y / 2);
+            final View view = mView.get();
+            if (view != null) {
+                thumbnailSize.set(view.getWidth(), view.getHeight());
+                thumbnailTouchPoint.set(thumbnailSize.x / 2, thumbnailSize.y / 2);
+            } else {
+                Log.e(View.VIEW_LOG_TAG, "Asked for drag thumb metrics but no view");
+            }
         }
 
         /**
@@ -9882,7 +9888,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * @param canvas
          */
         public void onDrawThumbnail(Canvas canvas) {
-            mView.draw(canvas);
+            final View view = mView.get();
+            if (view != null) {
+                view.draw(canvas);
+            } else {
+                Log.e(View.VIEW_LOG_TAG, "Asked to draw drag thumb but no view");
+            }
         }
     }
 

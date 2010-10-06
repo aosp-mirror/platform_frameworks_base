@@ -1088,6 +1088,10 @@
         <attr name="fragmentOpenExitAnimation" format="reference" />
         <attr name="fragmentCloseEnterAnimation" format="reference" />
         <attr name="fragmentCloseExitAnimation" format="reference" />
+        <attr name="fragmentNextEnterAnimation" format="reference" />
+        <attr name="fragmentNextExitAnimation" format="reference" />
+        <attr name="fragmentPrevEnterAnimation" format="reference" />
+        <attr name="fragmentPrevExitAnimation" format="reference" />
     </declare-styleable>
 
     <!-- Window animation class attributes. -->

@@ -254,6 +254,15 @@ public class RenderScript {
         return rsnAllocationGetType(mContext, id);
     }
 
+    native void rsnAllocationResize1D(int con, int id, int dimX);
+    synchronized void nAllocationResize1D(int id, int dimX) {
+        rsnAllocationResize1D(mContext, id, dimX);
+    }
+    native void rsnAllocationResize2D(int con, int id, int dimX, int dimY);
+    synchronized void nAllocationResize2D(int id, int dimX, int dimY) {
+        rsnAllocationResize2D(mContext, id, dimX, dimY);
+    }
+
     native int  rsnFileA3DCreateFromAssetStream(int con, int assetStream);
     synchronized int nFileA3DCreateFromAssetStream(int assetStream) {
         return rsnFileA3DCreateFromAssetStream(mContext, assetStream);

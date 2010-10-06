@@ -84,8 +84,6 @@ public class RsRenderStatesRS {
     private Allocation mTexTransparent;
     private Allocation mTexChecker;
 
-    private Allocation mAllocPV;
-
     private Mesh mMbyNMesh;
     private Mesh mTorus;
 
@@ -95,7 +93,6 @@ public class RsRenderStatesRS {
     Font mFontSerifItalic;
     Font mFontSerifBoldItalic;
     Font mFontMono;
-
     private Allocation mTextAlloc;
 
     private ScriptC_rsrenderstates mScript;
@@ -267,12 +264,15 @@ public class RsRenderStatesRS {
         mFontSerifBoldItalic = Font.createFromFamily(mRS, mRes, "serif", Font.Style.BOLD_ITALIC, 8);
         mFontMono = Font.createFromFamily(mRS, mRes, "mono", Font.Style.NORMAL, 8);
 
+        mTextAlloc = Allocation.createFromString(mRS, "String from allocation");
+
         mScript.set_gFontSans(mFontSans);
         mScript.set_gFontSerif(mFontSerif);
         mScript.set_gFontSerifBold(mFontSerifBold);
         mScript.set_gFontSerifItalic(mFontSerifItalic);
         mScript.set_gFontSerifBoldItalic(mFontSerifBoldItalic);
         mScript.set_gFontMono(mFontMono);
+        mScript.set_gTextAlloc(mTextAlloc);
     }
 
     private void initMesh() {

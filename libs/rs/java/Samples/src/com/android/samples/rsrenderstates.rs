@@ -42,6 +42,7 @@ rs_font gFontSerifBold;
 rs_font gFontSerifItalic;
 rs_font gFontSerifBoldItalic;
 rs_font gFontMono;
+rs_allocation gTextAlloc;
 
 int gDisplayMode;
 
@@ -70,7 +71,7 @@ rs_program_fragment gProgFragmentMultitex;
 #pragma rs export_var(gProgStoreBlendNoneDepth, gProgStoreBlendNone, gProgStoreBlendAlpha, gProgStoreBlendAdd)
 #pragma rs export_var(gTexOpaque, gTexTorus, gTexTransparent, gTexChecker)
 #pragma rs export_var(gMbyNMesh, gTorusMesh)
-#pragma rs export_var(gFontSans, gFontSerif, gFontSerifBold, gFontSerifItalic, gFontSerifBoldItalic, gFontMono)
+#pragma rs export_var(gFontSans, gFontSerif, gFontSerifBold, gFontSerifItalic, gFontSerifBoldItalic, gFontMono, gTextAlloc)
 #pragma rs export_var(gLinearClamp, gLinearWrap, gMipLinearWrap, gMipLinearAniso8, gMipLinearAniso15, gNearestClamp)
 #pragma rs export_var(gCullBack, gCullFront, gCullNone)
 #pragma rs export_var(gVSConstants, gFSConstants, gVSInputs, gProgVertexCustom, gProgFragmentCustom, gProgFragmentMultitex)
@@ -85,7 +86,7 @@ void init() {
 
 void displayFontSamples() {
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
-    int yPos = 30;
+    int yPos = 100;
     rsgBindFont(gFontSans);
     rsgDrawText("Sans font sample", 30, yPos);
     yPos += 30;
@@ -107,6 +108,47 @@ void displayFontSamples() {
     yPos += 30;
     rsgBindFont(gFontMono);
     rsgDrawText("Monospace font sample", 30, yPos);
+    yPos += 50;
+
+    // Now use text metrics to center the text
+    uint width = rsgGetWidth();
+    uint height = rsgGetHeight();
+    int left = 0, right = 0, top = 0, bottom = 0;
+
+    rsgFontColor(0.9f, 0.9f, 0.95f, 1.0f);
+    rsgBindFont(gFontSerifBoldItalic);
+
+    rsgMeasureText(gTextAlloc, &left, &right, &top, &bottom);
+    int centeredPos = width / 2 - (right - left) / 2;
+    rsgDrawText(gTextAlloc, centeredPos, yPos);
+    yPos += 30;
+
+    const char* text = "Centered Text Sample";
+    rsgMeasureText(text, &left, &right, &top, &bottom);
+    centeredPos = width / 2 - (right - left) / 2;
+    rsgDrawText(text, centeredPos, yPos);
+    yPos += 30;
+
+    rsgBindFont(gFontSans);
+    text = "More Centered Text Samples";
+    rsgMeasureText(text, &left, &right, &top, &bottom);
+    centeredPos = width / 2 - (right - left) / 2;
+    rsgDrawText(text, centeredPos, yPos);
+    yPos += 30;
+
+    // Now draw bottom and top right aligned text
+    text = "Top-right aligned text";
+    rsgMeasureText(text, &left, &right, &top, &bottom);
+    rsgDrawText(text, width - right, top);
+
+    text = "Top-left";
+    rsgMeasureText(text, &left, &right, &top, &bottom);
+    rsgDrawText(text, -left, top);
+
+    text = "Bottom-right aligned text";
+    rsgMeasureText(text, &left, &right, &top, &bottom);
+    rsgDrawText(text, width - right, height + bottom);
+
 }
 
 void bindProgramVertexOrtho() {
