@@ -35,9 +35,6 @@ const char* gVS_Header_Uniforms =
         "uniform mat4 transform;\n";
 const char* gVS_Header_Uniforms_HasGradient[3] = {
         // Linear
-        "uniform float gradientLength;\n"
-        "uniform vec2 gradient;\n"
-        "uniform vec2 gradientStart;\n"
         "uniform mat4 screenSpace;\n",
         // Circular
         "uniform vec2 gradientStart;\n"
@@ -69,8 +66,7 @@ const char* gVS_Main_OutTexCoords =
         "    outTexCoords = texCoords;\n";
 const char* gVS_Main_OutGradient[3] = {
         // Linear
-        "    vec4 location = screenSpace * position;\n"
-        "    index = dot(location.xy - gradientStart, gradient) * gradientLength;\n",
+        "    index = (screenSpace * position).x;\n",
         // Circular
         "    vec4 location = screenSpace * position;\n"
         "    circular = (gradientMatrix * vec4(location.xy - gradientStart, 0.0, 0.0)).xy;\n",
