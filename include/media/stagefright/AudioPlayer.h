@@ -49,10 +49,8 @@ public:
 
     status_t start(bool sourceAlreadyStarted = false);
 
-    void pause();
+    void pause(bool playPendingSamples = false);
     void resume();
-
-    void stop();
 
     // Returns the timestamp of the last buffer played (in us).
     int64_t getMediaTimeUs();
@@ -106,6 +104,8 @@ private:
     size_t fillBuffer(void *data, size_t size);
 
     int64_t getRealTimeUsLocked() const;
+
+    void reset();
 
     AudioPlayer(const AudioPlayer &);
     AudioPlayer &operator=(const AudioPlayer &);

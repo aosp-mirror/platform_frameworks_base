@@ -576,7 +576,7 @@ void AwesomePlayer::onStreamDone() {
         notifyListener_l(
                 MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, mStreamDoneStatus);
 
-        pause_l();
+        pause_l(true /* at eos */);
 
         mFlags |= AT_EOS;
         return;
@@ -600,7 +600,7 @@ void AwesomePlayer::onStreamDone() {
         LOGV("MEDIA_PLAYBACK_COMPLETE");
         notifyListener_l(MEDIA_PLAYBACK_COMPLETE);
 
-        pause_l();
+        pause_l(true /* at eos */);
 
         mFlags |= AT_EOS;
     }
@@ -738,7 +738,7 @@ status_t AwesomePlayer::pause() {
     return pause_l();
 }
 
-status_t AwesomePlayer::pause_l() {
+status_t AwesomePlayer::pause_l(bool at_eos) {
     if (!(mFlags & PLAYING)) {
         return OK;
     }
@@ -746,7 +746,14 @@ status_t AwesomePlayer::pause_l() {
     cancelPlayerEvents(true /* keepBufferingGoing */);
 
     if (mAudioPlayer != NULL) {
-        mAudioPlayer->pause();
+        if (at_eos) {
+            // If we played the audio stream to completion we
+            // want to make sure that all samples remaining in the audio
+            // track's queue are played out.
+            mAudioPlayer->pause(true /* playPendingSamples */);
+        } else {
+            mAudioPlayer->pause();
+        }
     }
 
     mFlags &= ~PLAYING;

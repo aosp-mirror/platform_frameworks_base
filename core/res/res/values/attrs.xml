@@ -1351,16 +1351,17 @@
              (typically, your Activity). -->
         <attr name="onClick" format="string" />
 
-        <!-- Defines overscrolling behavior. This property is used only if the
-             View is scrollable. Overscrolling is the ability for the user to
-             scroll a View beyond its content boundaries into empty space. -->
-        <attr name="overscrollMode">
-            <!-- Always allow the user to overscroll the content. -->
+        <!-- Defines over-scrolling behavior. This property is used only if the
+             View is scrollable. Over-scrolling is the ability for the user to
+             receive feedback when attempting to scroll beyond meaningful content. -->
+        <attr name="overScrollMode">
+            <!-- Always show over-scroll effects, even if the content fits entirely
+                 within the available space. -->
             <enum name="always" value="0" />
-            <!-- Only allow the user to overscroll content if the content is large
+            <!-- Only show over-scroll effects if the content is large
                  enough to meaningfully scroll. -->
             <enum name="ifContentScrolls" value="1" />
-            <!-- Never overscroll. -->
+            <!-- Never show over-scroll effects. -->
             <enum name="never" value="2" />
         </attr>
     </declare-styleable>
@@ -1797,9 +1798,9 @@
              The default value is true. -->
         <attr name="footerDividersEnabled" format="boolean" />
         <!-- Drawable to draw above list content. -->
-        <attr name="overscrollHeader" format="reference|color" />
+        <attr name="overScrollHeader" format="reference|color" />
         <!-- Drawable to draw below list content. -->
-        <attr name="overscrollFooter" format="reference|color" />
+        <attr name="overScrollFooter" format="reference|color" />
     </declare-styleable>
     <declare-styleable name="MenuView">
         <!-- Default appearance of menu item text. -->

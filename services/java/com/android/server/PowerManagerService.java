@@ -220,6 +220,7 @@ class PowerManagerService extends IPowerManager.Stub
     private Sensor mLightSensor;
     private boolean mLightSensorEnabled;
     private float mLightSensorValue = -1;
+    private boolean mProxIgnoredBecauseScreenTurnedOff = false;
     private int mHighestLightSensorValue = -1;
     private float mLightSensorPendingValue = -1;
     private int mLightSensorScreenBrightness = -1;
@@ -252,7 +253,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     // could be either static or controllable at runtime
     private static final boolean mSpew = false;
-    private static final boolean mDebugProximitySensor = (true || mSpew);
+    private static final boolean mDebugProximitySensor = (false || mSpew);
     private static final boolean mDebugLightSensor = (false || mSpew);
     
     private native void nativeInit();
@@ -638,7 +639,8 @@ class PowerManagerService extends IPowerManager.Stub
         int n = flags & LOCK_MASK;
         return n == PowerManager.FULL_WAKE_LOCK
                 || n == PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                || n == PowerManager.SCREEN_DIM_WAKE_LOCK;
+                || n == PowerManager.SCREEN_DIM_WAKE_LOCK
+                || n == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK;
     }
 
     void enforceWakeSourcePermission(int uid, int pid) {
@@ -778,25 +780,33 @@ class PowerManagerService extends IPowerManager.Stub
             // set it to whatever they want.  otherwise, we modulate that
             // by the current state so we never turn it more on than
             // it already is.
-            if ((wl.flags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0) {
-                int oldWakeLockState = mWakeLockState;
-                mWakeLockState = mLocks.reactivateScreenLocksLocked();
-                if (mSpew) {
-                    Slog.d(TAG, "wakeup here mUserState=0x" + Integer.toHexString(mUserState)
-                            + " mWakeLockState=0x"
-                            + Integer.toHexString(mWakeLockState)
-                            + " previous wakeLockState=0x" + Integer.toHexString(oldWakeLockState));
+            if ((flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
+                mProximityWakeLockCount++;
+                if (mProximityWakeLockCount == 1) {
+                    enableProximityLockLocked();
                 }
             } else {
-                if (mSpew) {
-                    Slog.d(TAG, "here mUserState=0x" + Integer.toHexString(mUserState)
-                            + " mLocks.gatherState()=0x"
-                            + Integer.toHexString(mLocks.gatherState())
-                            + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState));
+                if ((wl.flags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0) {
+                    int oldWakeLockState = mWakeLockState;
+                    mWakeLockState = mLocks.reactivateScreenLocksLocked();
+                    if (mSpew) {
+                        Slog.d(TAG, "wakeup here mUserState=0x" + Integer.toHexString(mUserState)
+                                + " mWakeLockState=0x"
+                                + Integer.toHexString(mWakeLockState)
+                                + " previous wakeLockState=0x"
+                                + Integer.toHexString(oldWakeLockState));
+                    }
+                } else {
+                    if (mSpew) {
+                        Slog.d(TAG, "here mUserState=0x" + Integer.toHexString(mUserState)
+                                + " mLocks.gatherState()=0x"
+                                + Integer.toHexString(mLocks.gatherState())
+                                + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState));
+                    }
+                    mWakeLockState = (mUserState | mWakeLockState) & mLocks.gatherState();
                 }
-                mWakeLockState = (mUserState | mWakeLockState) & mLocks.gatherState();
+                setPowerState(mWakeLockState | mUserState);
             }
-            setPowerState(mWakeLockState | mUserState);
         }
         else if ((flags & LOCK_MASK) == PowerManager.PARTIAL_WAKE_LOCK) {
             if (newlock) {
@@ -806,11 +816,6 @@ class PowerManagerService extends IPowerManager.Stub
                 }
             }
             Power.acquireWakeLock(Power.PARTIAL_WAKE_LOCK,PARTIAL_NAME);
-        } else if ((flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
-            mProximityWakeLockCount++;
-            if (mProximityWakeLockCount == 1) {
-                enableProximityLockLocked();
-            }
         }
 
         if (diffsource) {
@@ -868,31 +873,33 @@ class PowerManagerService extends IPowerManager.Stub
         }
 
         if (isScreenLock(wl.flags)) {
-            mWakeLockState = mLocks.gatherState();
-            // goes in the middle to reduce flicker
-            if ((wl.flags & PowerManager.ON_AFTER_RELEASE) != 0) {
-                userActivity(SystemClock.uptimeMillis(), -1, false, OTHER_EVENT, false);
+            if ((wl.flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
+                mProximityWakeLockCount--;
+                if (mProximityWakeLockCount == 0) {
+                    if (mProximitySensorActive &&
+                            ((flags & PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE) != 0)) {
+                        // wait for proximity sensor to go negative before disabling sensor
+                        if (mDebugProximitySensor) {
+                            Slog.d(TAG, "waiting for proximity sensor to go negative");
+                        }
+                    } else {
+                        disableProximityLockLocked();
+                    }
+                }
+            } else {
+                mWakeLockState = mLocks.gatherState();
+                // goes in the middle to reduce flicker
+                if ((wl.flags & PowerManager.ON_AFTER_RELEASE) != 0) {
+                    userActivity(SystemClock.uptimeMillis(), -1, false, OTHER_EVENT, false);
+                }
+                setPowerState(mWakeLockState | mUserState);
             }
-            setPowerState(mWakeLockState | mUserState);
         }
         else if ((wl.flags & LOCK_MASK) == PowerManager.PARTIAL_WAKE_LOCK) {
             mPartialCount--;
             if (mPartialCount == 0) {
                 if (LOG_PARTIAL_WL) EventLog.writeEvent(EventLogTags.POWER_PARTIAL_WAKE_STATE, 0, wl.tag);
                 Power.releaseWakeLock(PARTIAL_NAME);
-            }
-        } else if ((wl.flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
-            mProximityWakeLockCount--;
-            if (mProximityWakeLockCount == 0) {
-                if (mProximitySensorActive &&
-                        ((flags & PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE) != 0)) {
-                    // wait for proximity sensor to go negative before disabling sensor
-                    if (mDebugProximitySensor) {
-                        Slog.d(TAG, "waiting for proximity sensor to go negative");
-                    }
-                } else {
-                    disableProximityLockLocked();
-                }
             }
         }
         // Unlink the lock from the binder.
@@ -2433,11 +2440,23 @@ class PowerManagerService extends IPowerManager.Stub
             mWakeLockState = SCREEN_OFF;
             int N = mLocks.size();
             int numCleared = 0;
+            boolean proxLock = false;
             for (int i=0; i<N; i++) {
                 WakeLock wl = mLocks.get(i);
                 if (isScreenLock(wl.flags)) {
-                    mLocks.get(i).activated = false;
-                    numCleared++;
+                    if (((wl.flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)
+                            && reason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
+                        proxLock = true;
+                    } else {
+                        mLocks.get(i).activated = false;
+                        numCleared++;
+                    }
+                }
+            }
+            if (!proxLock) {
+                mProxIgnoredBecauseScreenTurnedOff = true;
+                if (mDebugProximitySensor) {
+                    Slog.d(TAG, "setting mProxIgnoredBecauseScreenTurnedOff");
                 }
             }
             EventLog.writeEvent(EventLogTags.POWER_SLEEP_REQUESTED, numCleared);
@@ -2628,6 +2647,11 @@ class PowerManagerService extends IPowerManager.Stub
                     result |= wl.minState;
                 }
             }
+            if (mDebugProximitySensor) {
+                Slog.d(TAG, "reactivateScreenLocksLocked mProxIgnoredBecauseScreenTurnedOff="
+                        + mProxIgnoredBecauseScreenTurnedOff);
+            }
+            mProxIgnoredBecauseScreenTurnedOff = false;
             return result;
         }
     }
@@ -2787,7 +2811,13 @@ class PowerManagerService extends IPowerManager.Stub
             }
             if (mProximitySensorActive) {
                 mProximitySensorActive = false;
-                forceUserActivityLocked();
+                if (mDebugProximitySensor) {
+                    Slog.d(TAG, "disableProximityLockLocked mProxIgnoredBecauseScreenTurnedOff="
+                            + mProxIgnoredBecauseScreenTurnedOff);
+                }
+                if (!mProxIgnoredBecauseScreenTurnedOff) {
+                    forceUserActivityLocked();
+                }
             }
         }
     }
@@ -2801,15 +2831,27 @@ class PowerManagerService extends IPowerManager.Stub
             return;
         }
         if (active) {
-            goToSleepLocked(SystemClock.uptimeMillis(),
-                    WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR);
+            if (mDebugProximitySensor) {
+                Slog.d(TAG, "b mProxIgnoredBecauseScreenTurnedOff="
+                        + mProxIgnoredBecauseScreenTurnedOff);
+            }
+            if (!mProxIgnoredBecauseScreenTurnedOff) {
+                goToSleepLocked(SystemClock.uptimeMillis(),
+                        WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR);
+            }
             mProximitySensorActive = true;
         } else {
             // proximity sensor negative events trigger as user activity.
             // temporarily set mUserActivityAllowed to true so this will work
             // even when the keyguard is on.
             mProximitySensorActive = false;
-            forceUserActivityLocked();
+            if (mDebugProximitySensor) {
+                Slog.d(TAG, "b mProxIgnoredBecauseScreenTurnedOff="
+                        + mProxIgnoredBecauseScreenTurnedOff);
+            }
+            if (!mProxIgnoredBecauseScreenTurnedOff) {
+                forceUserActivityLocked();
+            }
 
             if (mProximityWakeLockCount == 0) {
                 // disable sensor if we have no listeners left after proximity negative

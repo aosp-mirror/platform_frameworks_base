@@ -81,7 +81,7 @@
             android:paddingBottom="12dip"
             android:paddingLeft="14dip"
             android:paddingRight="10dip"
-            android:overscrollMode="ifContentScrolls">
+            android:overScrollMode="ifContentScrolls">
             <TextView android:id="@+id/message"
                 style="?android:attr/textAppearanceMedium"
                 android:layout_width="match_parent"

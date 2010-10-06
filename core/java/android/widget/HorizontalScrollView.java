@@ -468,7 +468,7 @@ public class HorizontalScrollView extends FrameLayout {
                 /* Release the drag */
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
-                if (mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
+                if (mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
                     invalidate();
                 }
                 break;
@@ -529,16 +529,16 @@ public class HorizontalScrollView extends FrameLayout {
                     final int oldX = mScrollX;
                     final int oldY = mScrollY;
                     final int range = getScrollRange();
-                    if (overscrollBy(deltaX, 0, mScrollX, 0, range, 0,
+                    if (overScrollBy(deltaX, 0, mScrollX, 0, range, 0,
                             mOverscrollDistance, 0, true)) {
                         // Break our velocity if we hit a scroll barrier.
                         mVelocityTracker.clear();
                     }
                     onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
-                    final int overscrollMode = getOverscrollMode();
-                    if (overscrollMode == OVERSCROLL_ALWAYS ||
-                            (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                    final int overscrollMode = getOverScrollMode();
+                    if (overscrollMode == OVER_SCROLL_ALWAYS ||
+                            (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
                         final int pulledToX = oldX + deltaX;
                         if (pulledToX < 0) {
                             mEdgeGlowLeft.onPull((float) deltaX / getWidth());
@@ -559,7 +559,7 @@ public class HorizontalScrollView extends FrameLayout {
                             fling(-initialVelocity);
                         } else {
                             final int right = getScrollRange();
-                            if (mScroller.springback(mScrollX, mScrollY, 0, right, 0, 0)) {
+                            if (mScroller.springBack(mScrollX, mScrollY, 0, right, 0, 0)) {
                                 invalidate();
                             }
                         }
@@ -580,7 +580,7 @@ public class HorizontalScrollView extends FrameLayout {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
-                    if (mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
+                    if (mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0)) {
                         invalidate();
                     }
                     mActivePointerId = INVALID_POINTER;
@@ -620,14 +620,14 @@ public class HorizontalScrollView extends FrameLayout {
     }
     
     @Override
-    protected void onOverscrolled(int scrollX, int scrollY,
+    protected void onOverScrolled(int scrollX, int scrollY,
             boolean clampedX, boolean clampedY) {
         // Treat animating scrolls differently; see #computeScroll() for why.
         if (!mScroller.isFinished()) {
             mScrollX = scrollX;
             mScrollY = scrollY;
             if (clampedX) {
-                mScroller.springback(mScrollX, mScrollY, 0, getScrollRange(), 0, 0);
+                mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0);
             }
         } else {
             super.scrollTo(scrollX, scrollY);
@@ -1088,14 +1088,14 @@ public class HorizontalScrollView extends FrameLayout {
             int y = mScroller.getCurrY();
 
             if (oldX != x || oldY != y) {
-                overscrollBy(x - oldX, y - oldY, oldX, oldY, getScrollRange(), 0,
+                overScrollBy(x - oldX, y - oldY, oldX, oldY, getScrollRange(), 0,
                         mOverflingDistance, 0, false);
                 onScrollChanged(mScrollX, mScrollY, oldX, oldY);
 
                 final int range = getScrollRange();
-                final int overscrollMode = getOverscrollMode();
-                if (overscrollMode == OVERSCROLL_ALWAYS ||
-                        (overscrollMode == OVERSCROLL_IF_CONTENT_SCROLLS && range > 0)) {
+                final int overscrollMode = getOverScrollMode();
+                if (overscrollMode == OVER_SCROLL_ALWAYS ||
+                        (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0)) {
                     if (x < 0 && oldX >= 0) {
                         mEdgeGlowLeft.onAbsorb((int) mScroller.getCurrVelocity());
                     } else if (x > range && oldX <= range) {
@@ -1376,8 +1376,8 @@ public class HorizontalScrollView extends FrameLayout {
     }
 
     @Override
-    public void setOverscrollMode(int mode) {
-        if (mode != OVERSCROLL_NEVER) {
+    public void setOverScrollMode(int mode) {
+        if (mode != OVER_SCROLL_NEVER) {
             if (mEdgeGlowLeft == null) {
                 final Resources res = getContext().getResources();
                 final Drawable edge = res.getDrawable(R.drawable.overscroll_edge);
@@ -1389,7 +1389,7 @@ public class HorizontalScrollView extends FrameLayout {
             mEdgeGlowLeft = null;
             mEdgeGlowRight = null;
         }
-        super.setOverscrollMode(mode);
+        super.setOverScrollMode(mode);
     }
 
     @Override
