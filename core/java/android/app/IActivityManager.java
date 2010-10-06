@@ -326,6 +326,9 @@ public interface IActivityManager extends IInterface {
     public void revokeUriPermissionFromOwner(IBinder owner, Uri uri,
             int mode) throws RemoteException;
 
+    public int checkGrantUriPermission(int callingUid, String targetPkg,
+            Uri uri, int modeFlags) throws RemoteException;
+
     // Cause the specified process to dump the specified heap.
     public boolean dumpHeap(String process, boolean managed, String path,
         ParcelFileDescriptor fd) throws RemoteException;
@@ -540,5 +543,6 @@ public interface IActivityManager extends IInterface {
     int NEW_URI_PERMISSION_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+115;
     int GRANT_URI_PERMISSION_FROM_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+116;
     int REVOKE_URI_PERMISSION_FROM_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+117;
-    int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+118;
+    int CHECK_GRANT_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+118;
+    int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+119;
 }
