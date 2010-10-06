@@ -45,7 +45,7 @@ import android.text.TextUtils;
 public class MobileDataStateTracker implements NetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     private Phone.DataState mMobileDataState;
     private ITelephony mPhoneService;
