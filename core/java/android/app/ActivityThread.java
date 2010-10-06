@@ -716,7 +716,7 @@ public final class ActivityThread {
             int binderLocalObjectCount = Debug.getBinderLocalObjectCount();
             int binderProxyObjectCount = Debug.getBinderProxyObjectCount();
             int binderDeathObjectCount = Debug.getBinderDeathObjectCount();
-            int openSslSocketCount = Debug.countInstancesOfClass(OpenSSLSocketImpl.class);
+            long openSslSocketCount = Debug.countInstancesOfClass(OpenSSLSocketImpl.class);
             long sqliteAllocated = SQLiteDebug.getHeapAllocatedSize() / 1024;
             SQLiteDebug.PagerStats stats = SQLiteDebug.getDatabaseInfo();
 
