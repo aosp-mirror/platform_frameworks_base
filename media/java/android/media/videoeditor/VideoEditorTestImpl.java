@@ -1017,7 +1017,7 @@ public class VideoEditorTestImpl implements VideoEditor {
         final boolean loop = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_LOOP));
         final String waveformFilename = parser.getAttributeValue("", ATTR_AUDIO_WAVEFORM_FILENAME);
         try {
-            final AudioTrack audioTrack = new AudioTrack(audioTrackId, filename, startTimeMs,
+            final AudioTrack audioTrack = new AudioTrack(this, audioTrackId, filename, startTimeMs,
                     beginMs, endMs, loop, volume, muted, waveformFilename);
 
             return audioTrack;
