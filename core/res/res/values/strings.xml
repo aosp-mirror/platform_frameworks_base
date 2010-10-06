@@ -2385,5 +2385,9 @@
         <item quantity="other"><xliff:g id="index" example="2">%d</xliff:g> of <xliff:g id="total" example="137">%d</xliff:g></item>
     </plurals>
 
+    <!-- Warning message about security implications of enabling an input method, displayed as a dialog message when the user selects to enable an IME. -->
+    <string name="ime_enabler_security_warning">This input method may be able to collect all the text you type, including personal data like passwords and credit card numbers. It comes from the application <xliff:g id="ime_application_name">%1$s</xliff:g>. Use this input method?</string>
+    <!-- Label for selecting the input method to use -->
+    <string name="ime_enabler_subtype_title">Select inputmethods in <xliff:g id="ime_application_name">%1$s</xliff:g></string>
 
 </resources>

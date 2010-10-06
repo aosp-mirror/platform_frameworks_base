@@ -1373,6 +1373,11 @@
                 android:permission="android.permission.BIND_WALLPAPER">
         </service>
 
+        <activity android:name="com.android.internal.view.InputMethodAndSubtypeEnabler"
+                android:excludeFromRecents="true"
+                android:exported="true">
+        </activity>
+
         <receiver android:name="com.android.server.BootReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
