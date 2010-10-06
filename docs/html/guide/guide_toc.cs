@@ -257,6 +257,9 @@
       <li><a href="<?cs var:toroot?>guide/topics/testing/testing_android.html">
             <span class="en">Testing and Instrumentation</span></a>
             <span class="new">new!</span></li>
+     <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
+            <span class="en">Device Administration</span></a>
+            <span class="new">new!</span></li>
     </ul>
   </li>
 
