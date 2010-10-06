@@ -26,7 +26,6 @@ package android.webkit;
  */
 public final class DeviceOrientationManager {
     private WebViewCore mWebViewCore;
-    private DeviceOrientationService mService;
 
     public DeviceOrientationManager(WebViewCore webViewCore) {
         mWebViewCore = webViewCore;
@@ -51,6 +50,14 @@ public final class DeviceOrientationManager {
                 canProvideGamma, gamma);
     }
 
+    // We only provide accelerationIncludingGravity.
+    public void onMotionChange(Double x, Double y, Double z, double interval) {
+        nativeOnMotionChange(mWebViewCore,
+                x != null, x != null ? x.doubleValue() : 0.0,
+                y != null, y != null ? y.doubleValue() : 0.0,
+                z != null, z != null ? z.doubleValue() : 0.0,
+                interval);
+    }
     public void onOrientationChange(Double alpha, Double beta, Double gamma) {
         nativeOnOrientationChange(mWebViewCore,
                 alpha != null, alpha != null ? alpha.doubleValue() : 0.0,
@@ -63,6 +70,9 @@ public final class DeviceOrientationManager {
     private static native void nativeSetMockOrientation(WebViewCore webViewCore,
             boolean canProvideAlpha, double alpha, boolean canProvideBeta, double beta,
             boolean canProvideGamma, double gamma);
+    private static native void nativeOnMotionChange(WebViewCore webViewCore,
+            boolean canProvideX, double x, boolean canProvideY, double y,
+            boolean canProvideZ, double z, double interval);
     private static native void nativeOnOrientationChange(WebViewCore webViewCore,
             boolean canProvideAlpha, double alpha, boolean canProvideBeta, double beta,
             boolean canProvideGamma, double gamma);
