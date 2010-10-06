@@ -356,7 +356,9 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
         break;
     case AudioSystem::FOR_MEDIA:
         if (config != AudioSystem::FORCE_HEADPHONES && config != AudioSystem::FORCE_BT_A2DP &&
-            config != AudioSystem::FORCE_WIRED_ACCESSORY && config != AudioSystem::FORCE_NONE) {
+            config != AudioSystem::FORCE_WIRED_ACCESSORY &&
+            config != AudioSystem::FORCE_ANALOG_DOCK &&
+            config != AudioSystem::FORCE_DIGITAL_DOCK && config != AudioSystem::FORCE_NONE) {
             LOGW("setForceUse() invalid config %d for FOR_MEDIA", config);
             return;
         }
@@ -372,7 +374,10 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
         break;
     case AudioSystem::FOR_DOCK:
         if (config != AudioSystem::FORCE_NONE && config != AudioSystem::FORCE_BT_CAR_DOCK &&
-            config != AudioSystem::FORCE_BT_DESK_DOCK && config != AudioSystem::FORCE_WIRED_ACCESSORY) {
+            config != AudioSystem::FORCE_BT_DESK_DOCK &&
+            config != AudioSystem::FORCE_WIRED_ACCESSORY &&
+            config != AudioSystem::FORCE_ANALOG_DOCK &&
+            config != AudioSystem::FORCE_DIGITAL_DOCK) {
             LOGW("setForceUse() invalid config %d for FOR_DOCK", config);
         }
         forceVolumeReeval = true;
@@ -1366,6 +1371,7 @@ status_t AudioPolicyManagerBase::handleA2dpDisconnection(AudioSystem::audio_devi
 
 void AudioPolicyManagerBase::closeA2dpOutputs()
 {
+
     LOGV("setDeviceConnectionState() closing A2DP and duplicated output!");
 
     if (mDuplicatedOutput != 0) {
@@ -1558,6 +1564,8 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             if (device) break;
             device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
             if (device) break;
+            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET;
+            if (device) break;
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to A2DP
             if (mPhoneState != AudioSystem::MODE_IN_CALL) {
@@ -1616,6 +1624,12 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
         }
         if (device2 == 0) {
             device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
+        }
+        if (device2 == 0) {
+            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET;
+        }
+        if (device2 == 0) {
+            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET;
         }
 #ifdef WITH_A2DP
         if (mA2dpOutput != 0) {
@@ -1797,7 +1811,9 @@ float AudioPolicyManagerBase::computeVolume(int stream, int index, audio_io_hand
         (AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP |
         AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
         AudioSystem::DEVICE_OUT_WIRED_HEADSET |
-        AudioSystem::DEVICE_OUT_WIRED_HEADPHONE)) &&
+        AudioSystem::DEVICE_OUT_WIRED_HEADPHONE |
+        AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET |
+        AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET)) &&
         (getStrategy((AudioSystem::stream_type)stream) == STRATEGY_SONIFICATION) &&
         streamDesc.mCanBeMuted) {
         volume *= SONIFICATION_HEADSET_VOLUME_FACTOR;

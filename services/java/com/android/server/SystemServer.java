@@ -121,7 +121,7 @@ class ServerThread extends Thread {
         WindowManagerService wm = null;
         BluetoothService bluetooth = null;
         BluetoothA2dpService bluetoothA2dp = null;
-        HeadsetObserver headset = null;
+        WiredAccessoryObserver wiredAccessory = null;
         DockObserver dock = null;
         UsbObserver usb = null;
         UiModeManagerService uiMode = null;
@@ -388,19 +388,19 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "Headset Observer");
-                // Listen for wired headset changes
-                headset = new HeadsetObserver(context);
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting HeadsetObserver", e);
-            }
-
-            try {
                 Slog.i(TAG, "Dock Observer");
                 // Listen for dock station changes
                 dock = new DockObserver(context, power);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting DockObserver", e);
+            }
+
+            try {
+                Slog.i(TAG, "Wired Accessory Observer");
+                // Listen for wired headset changes
+                wiredAccessory = new WiredAccessoryObserver(context);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting WiredAccessoryObserver", e);
             }
 
             try {

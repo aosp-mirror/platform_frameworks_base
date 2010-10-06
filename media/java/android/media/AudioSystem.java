@@ -243,6 +243,8 @@ public class AudioSystem
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES = 0x100;
     public static final int DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER = 0x200;
     public static final int DEVICE_OUT_AUX_DIGITAL = 0x400;
+    public static final int DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800;
+    public static final int DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000;
     public static final int DEVICE_OUT_DEFAULT = 0x8000;
     // input devices
     public static final int DEVICE_IN_COMMUNICATION = 0x10000;
@@ -273,6 +275,8 @@ public class AudioSystem
     public static final int FORCE_WIRED_ACCESSORY = 5;
     public static final int FORCE_BT_CAR_DOCK = 6;
     public static final int FORCE_BT_DESK_DOCK = 7;
+    public static final int FORCE_ANALOG_DOCK = 8;
+    public static final int FORCE_DIGITAL_DOCK = 9;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for serForceUse
