@@ -2993,84 +2993,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
-    final void decPersistentCountLocked(ProcessRecord app) {
-        app.persistentActivities--;
-        if (app.persistentActivities > 0) {
-            // Still more of 'em...
-            return;
-        }
-        if (app.persistent) {
-            // Ah, but the application itself is persistent.  Whatever!
-            return;
-        }
-
-        // App is no longer persistent...  make sure it and the ones
-        // following it in the LRU list have the correc oom_adj.
-        updateOomAdjLocked();
-    }
-
-    public void setPersistent(IBinder token, boolean isPersistent) {
-        if (checkCallingPermission(android.Manifest.permission.PERSISTENT_ACTIVITY)
-                != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: setPersistent() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " requires " + android.Manifest.permission.PERSISTENT_ACTIVITY;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-
-        synchronized(this) {
-            int index = mMainStack.indexOfTokenLocked(token);
-            if (index < 0) {
-                return;
-            }
-            ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(index);
-            ProcessRecord app = r.app;
-
-            if (localLOGV) Slog.v(
-                TAG, "Setting persistence " + isPersistent + ": " + r);
-
-            if (isPersistent) {
-                if (r.persistent) {
-                    // Okay okay, I heard you already!
-                    if (localLOGV) Slog.v(TAG, "Already persistent!");
-                    return;
-                }
-                r.persistent = true;
-                app.persistentActivities++;
-                if (localLOGV) Slog.v(TAG, "Num persistent now: " + app.persistentActivities);
-                if (app.persistentActivities > 1) {
-                    // We aren't the first...
-                    if (localLOGV) Slog.v(TAG, "Not the first!");
-                    return;
-                }
-                if (app.persistent) {
-                    // This would be redundant.
-                    if (localLOGV) Slog.v(TAG, "App is persistent!");
-                    return;
-                }
-
-                // App is now persistent...  make sure it and the ones
-                // following it now have the correct oom_adj.
-                final long origId = Binder.clearCallingIdentity();
-                updateOomAdjLocked();
-                Binder.restoreCallingIdentity(origId);
-
-            } else {
-                if (!r.persistent) {
-                    // Okay okay, I heard you already!
-                    return;
-                }
-                r.persistent = false;
-                final long origId = Binder.clearCallingIdentity();
-                decPersistentCountLocked(app);
-                Binder.restoreCallingIdentity(origId);
-
-            }
-        }
-    }
-    
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer) {
         int uid = Binder.getCallingUid();
@@ -11585,11 +11507,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             adj = FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "instrumentation";
-        } else if (app.persistentActivities > 0) {
-            // Special persistent activities...  shouldn't be used these days.
-            adj = FOREGROUND_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_DEFAULT;
-            app.adjType = "persistent";
         } else if (app.curReceiver != null ||
                 (mPendingBroadcast != null && mPendingBroadcast.curApp == app)) {
             // An app that is currently receiving a broadcast also
@@ -12313,8 +12230,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     final ProcessRecord app = mLruProcesses.get(i);
 
                     if (app.persistent || app.services.size() != 0
-                            || app.curReceiver != null
-                            || app.persistentActivities > 0) {
+                            || app.curReceiver != null) {
                         // Don't count processes holding services against our
                         // maximum process count.
                         if (localLOGV) Slog.v(
@@ -12379,8 +12295,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Quit the application only if we have a state saved for
                     // all of its activities.
                     boolean canQuit = !app.persistent && app.curReceiver == null
-                        && app.services.size() == 0
-                        && app.persistentActivities == 0;
+                        && app.services.size() == 0;
                     int NUMA = app.activities.size();
                     int j;
                     if (Config.LOGV) Slog.v(
@@ -12444,7 +12359,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // We can finish this one if we have its icicle saved and
                 // it is not persistent.
                 if ((r.haveState || !r.stateNotNeeded) && !r.visible
-                        && r.stopped && !r.persistent && !r.finishing) {
+                        && r.stopped && !r.finishing) {
                     final int origSize = mMainStack.mLRUActivities.size();
                     r.stack.destroyActivityLocked(r, true);
 
