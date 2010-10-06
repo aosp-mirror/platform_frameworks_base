@@ -324,7 +324,11 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     }
 
     private int modulo(int pos, int size) {
-        return (size + (pos % size)) % size;
+        if (size > 0) {
+            return (size + (pos % size)) % size;
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -383,6 +387,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     void showOnly(int childIndex, boolean animate, boolean onLayout) {
         if (mAdapter == null) return;
+        final int adapterCount = mAdapter.getCount();
+        if (adapterCount == 0) return;
 
         for (int i = 0; i < mPreviousViews.size(); i++) {
             View viewToRemove = mViewsMap.get(mPreviousViews.get(i)).view;
@@ -399,7 +405,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             removeViewInLayout(viewToRemove);
         }
         mPreviousViews.clear();
-        int adapterCount = mAdapter.getCount();
         int newWindowStartUnbounded = childIndex - mActiveOffset;
         int newWindowEndUnbounded = newWindowStartUnbounded + mNumActiveViews - 1;
         int newWindowStart = Math.max(0, newWindowStartUnbounded);
