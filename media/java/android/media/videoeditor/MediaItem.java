@@ -472,4 +472,73 @@ public abstract class MediaItem {
             }
         }
     }
+
+    /**
+     * Adjust the duration of effects, overlays and transitions.
+     * This method will be called after a media item duration is changed.
+     */
+    protected void adjustElementsDuration() {
+        // Check if the duration of transitions need to be adjusted
+        if (mBeginTransition != null) {
+            final long maxDurationMs = mBeginTransition.getMaximumDuration();
+            if (mBeginTransition.getDuration() > maxDurationMs) {
+                mBeginTransition.setDuration(maxDurationMs);
+            }
+        }
+
+        if (mEndTransition != null) {
+            final long maxDurationMs = mEndTransition.getMaximumDuration();
+            if (mEndTransition.getDuration() > maxDurationMs) {
+                mEndTransition.setDuration(maxDurationMs);
+            }
+        }
+
+        final List<Overlay> overlays = getAllOverlays();
+        for (Overlay overlay : overlays) {
+            // Adjust the start time if necessary
+            final long overlayStartTimeMs;
+            if (overlay.getStartTime() > getTimelineDuration()) {
+                overlayStartTimeMs = 0;
+            } else {
+                overlayStartTimeMs = overlay.getStartTime();
+            }
+
+            // Adjust the duration if necessary
+            final long overlayDurationMs;
+            if (overlayStartTimeMs + overlay.getDuration() > getTimelineDuration()) {
+                overlayDurationMs = getTimelineDuration() - overlayStartTimeMs;
+            } else {
+                overlayDurationMs = overlay.getDuration();
+            }
+
+            if (overlayStartTimeMs != overlay.getStartTime() ||
+                    overlayDurationMs != overlay.getDuration()) {
+                overlay.setStartTimeAndDuration(overlayStartTimeMs, overlayDurationMs);
+            }
+        }
+
+        final List<Effect> effects = getAllEffects();
+        for (Effect effect : effects) {
+            // Adjust the start time if necessary
+            final long effectStartTimeMs;
+            if (effect.getStartTime() > getTimelineDuration()) {
+                effectStartTimeMs = 0;
+            } else {
+                effectStartTimeMs = effect.getStartTime();
+            }
+
+            // Adjust the duration if necessary
+            final long effectDurationMs;
+            if (effectStartTimeMs + effect.getDuration() > getTimelineDuration()) {
+                effectDurationMs = getTimelineDuration() - effectStartTimeMs;
+            } else {
+                effectDurationMs = effect.getDuration();
+            }
+
+            if (effectStartTimeMs != effect.getStartTime() ||
+                    effectDurationMs != effect.getDuration()) {
+                effect.setStartTimeAndDuration(effectStartTimeMs, effectDurationMs);
+            }
+        }
+    }
 }
