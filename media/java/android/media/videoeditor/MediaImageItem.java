@@ -53,12 +53,13 @@ public class MediaImageItem extends MediaItem {
      */
     @SuppressWarnings("unused")
     private MediaImageItem() throws IOException {
-        this(null, null, 0, RENDERING_MODE_BLACK_BORDER);
+        this(null, null, null, 0, RENDERING_MODE_BLACK_BORDER);
     }
 
     /**
      * Constructor
      *
+     * @param editor The video editor reference
      * @param mediaItemId The media item id
      * @param filename The image file name
      * @param durationMs The duration of the image on the storyboard
@@ -66,9 +67,10 @@ public class MediaImageItem extends MediaItem {
      *
      * @throws IOException
      */
-    public MediaImageItem(String mediaItemId, String filename, long durationMs, int renderingMode)
+    public MediaImageItem(VideoEditor editor, String mediaItemId, String filename, long durationMs,
+            int renderingMode)
             throws IOException {
-        super(mediaItemId, filename, renderingMode);
+        super(editor, mediaItemId, filename, renderingMode);
 
         // Determine the dimensions of the image
         final BitmapFactory.Options dbo = new BitmapFactory.Options();

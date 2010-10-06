@@ -765,7 +765,7 @@ public class VideoEditorTestImpl implements VideoEditor {
                         if (MediaImageItem.class.getSimpleName().equals(type)) {
                             final long durationMs = Long.parseLong(parser.getAttributeValue("",
                                     ATTR_DURATION));
-                            currentMediaItem = new MediaImageItem(mediaItemId, filename,
+                            currentMediaItem = new MediaImageItem(this, mediaItemId, filename,
                                     durationMs, renderingMode);
                         } else if (MediaVideoItem.class.getSimpleName().equals(type)) {
                             final long beginMs = Long.parseLong(parser.getAttributeValue("",
@@ -778,7 +778,7 @@ public class VideoEditorTestImpl implements VideoEditor {
                                     ATTR_MUTED));
                             final String audioWaveformFilename = parser.getAttributeValue("",
                                     ATTR_AUDIO_WAVEFORM_FILENAME);
-                            currentMediaItem = new MediaVideoItem(mediaItemId, filename,
+                            currentMediaItem = new MediaVideoItem(this, mediaItemId, filename,
                                     renderingMode, beginMs, endMs, volume, muted,
                                     audioWaveformFilename);
 
