@@ -1743,15 +1743,9 @@ class MountService extends IMountService.Stub
                             action.handleError();
                             return;
                         }
-
-                        mActions.add(action);
-                        break;
                     }
 
-                    // Once we bind to the service, the first
-                    // pending request will be processed.
                     mActions.add(action);
-                    mObbActionHandler.sendEmptyMessage(OBB_MCS_BOUND);
                     break;
                 }
                 case OBB_MCS_BOUND: {
@@ -1821,6 +1815,7 @@ class MountService extends IMountService.Stub
                     if (DEBUG_OBB)
                         Slog.i(TAG, "OBB_MCS_GIVE_UP");
                     mActions.remove(0);
+                    mObbActionHandler.sendEmptyMessage(OBB_MCS_BOUND);
                     break;
                 }
             }
@@ -1879,6 +1874,7 @@ class MountService extends IMountService.Stub
                 if (DEBUG_OBB)
                     Slog.d(TAG, "Error handling OBB action", e);
                 handleError();
+                mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
             }
         }
 
