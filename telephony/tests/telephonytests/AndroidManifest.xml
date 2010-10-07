@@ -32,6 +32,13 @@
         android:targetPackage="com.android.frameworks.telephonytests"
         android:label="Frameworks Telephony Tests">
     </instrumentation>
+
+    <instrumentation android:name=".TelephonyMockRilTestRunner"
+        android:targetPackage="com.android.frameworks.telephonytests"
+        android:label="Test Runner for Mock Ril Tests"
+    />
+
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>
