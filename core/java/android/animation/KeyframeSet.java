@@ -18,8 +18,6 @@ package android.animation;
 
 import java.util.ArrayList;
 
-import android.view.animation.Interpolator;
-
 /**
  * This class holds a collection of Keyframe objects and is called by ValueAnimator to calculate
  * values between those keyframes for a given animation. The class internal to the animation
@@ -58,7 +56,7 @@ class KeyframeSet {
         if (fraction <= 0f) {
             final Keyframe prevKeyframe = mKeyframes.get(0);
             final Keyframe nextKeyframe = mKeyframes.get(1);
-            final Interpolator interpolator = nextKeyframe.getInterpolator();
+            final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
             if (interpolator != null) {
                 fraction = interpolator.getInterpolation(fraction);
             }
@@ -69,7 +67,7 @@ class KeyframeSet {
         } else if (fraction >= 1f) {
             final Keyframe prevKeyframe = mKeyframes.get(mNumKeyframes - 2);
             final Keyframe nextKeyframe = mKeyframes.get(mNumKeyframes - 1);
-            final Interpolator interpolator = nextKeyframe.getInterpolator();
+            final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
             if (interpolator != null) {
                 fraction = interpolator.getInterpolation(fraction);
             }
@@ -82,7 +80,7 @@ class KeyframeSet {
         for (int i = 1; i < mNumKeyframes; ++i) {
             Keyframe nextKeyframe = mKeyframes.get(i);
             if (fraction < nextKeyframe.getFraction()) {
-                final Interpolator interpolator = nextKeyframe.getInterpolator();
+                final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
                 if (interpolator != null) {
                     fraction = interpolator.getInterpolation(fraction);
                 }
