@@ -40,7 +40,7 @@ protected:
 
     DrmInfoStatus* onProcessDrmInfo(int uniqueId, const DrmInfo* drmInfo);
 
-    void onSaveRights(int uniqueId, const DrmRights& drmRights,
+    status_t onSaveRights(int uniqueId, const DrmRights& drmRights,
             const String8& rightsPath, const String8& contentPath);
 
     DrmInfo* onAcquireDrmInfo(int uniqueId, const DrmInfoRequest* drmInfoRequest);
@@ -51,19 +51,19 @@ protected:
 
     int onCheckRightsStatus(int uniqueId, const String8& path, int action);
 
-    void onConsumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
+    status_t onConsumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
 
-    void onSetPlaybackStatus(
+    status_t onSetPlaybackStatus(
             int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position);
 
     bool onValidateAction(
             int uniqueId, const String8& path, int action, const ActionDescription& description);
 
-    void onRemoveRights(int uniqueId, const String8& path);
+    status_t onRemoveRights(int uniqueId, const String8& path);
 
-    void onRemoveAllRights(int uniqueId);
+    status_t onRemoveAllRights(int uniqueId);
 
-    void onOpenConvertSession(int uniqueId, int convertId);
+    status_t onOpenConvertSession(int uniqueId, int convertId);
 
     DrmConvertedStatus* onConvertData(int uniqueId, int convertId, const DrmBuffer* inputData);
 
@@ -74,15 +74,15 @@ protected:
     status_t onOpenDecryptSession(
             int uniqueId, DecryptHandle* decryptHandle, int fd, int offset, int length);
 
-    void onCloseDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
+    status_t onCloseDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 
-     void onInitializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
+    status_t onInitializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
             int decryptUnitId, const DrmBuffer* headerInfo);
 
-     status_t onDecrypt(int uniqueId, DecryptHandle* decryptHandle,
-            int decryptUnitId, const DrmBuffer* encBuffer, DrmBuffer** decBuffer);
+    status_t onDecrypt(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId,
+            const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV);
 
-     void onFinalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
+    status_t onFinalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
 
     ssize_t onPread(int uniqueId, DecryptHandle* decryptHandle,
             void* buffer, ssize_t numBytes, off_t offset);

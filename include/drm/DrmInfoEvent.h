@@ -27,28 +27,40 @@ class String8;
  */
 class DrmInfoEvent {
 public:
+    /**
+     * The following constant values should be in sync with DrmInfoEvent.java
+     */
     //! TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT, when registration has been
     //! already done by another account ID.
-    static const int TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT = 0x0000001;
+    static const int TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT = 1;
     //! TYPE_REMOVE_RIGHTS, when the rights needs to be removed completely.
-    static const int TYPE_REMOVE_RIGHTS = 0x0000002;
+    static const int TYPE_REMOVE_RIGHTS = 2;
     //! TYPE_RIGHTS_INSTALLED, when the rights are downloaded and installed ok.
-    static const int TYPE_RIGHTS_INSTALLED = 0x0000003;
-    //! TYPE_RIGHTS_NOT_INSTALLED, when something went wrong installing the rights
-    static const int TYPE_RIGHTS_NOT_INSTALLED = 0x0000004;
-    //! TYPE_RIGHTS_RENEWAL_NOT_ALLOWED, when the server rejects renewal of rights
-    static const int TYPE_RIGHTS_RENEWAL_NOT_ALLOWED = 0x0000005;
-    //! TYPE_NOT_SUPPORTED, when answer from server can not be handled by the native agent
-    static const int TYPE_NOT_SUPPORTED = 0x0000006;
+    static const int TYPE_RIGHTS_INSTALLED = 3;
     //! TYPE_WAIT_FOR_RIGHTS, rights object is on it's way to phone,
     //! wait before calling checkRights again
-    static const int TYPE_WAIT_FOR_RIGHTS = 0x0000007;
+    static const int TYPE_WAIT_FOR_RIGHTS = 4;
+    //! TYPE_ACCOUNT_ALREADY_REGISTERED, when registration has been
+    //! already done for the given account.
+    static const int TYPE_ACCOUNT_ALREADY_REGISTERED = 5;
+
+    /**
+     * The following constant values should be in sync with DrmErrorEvent.java
+     */
+    //! TYPE_RIGHTS_NOT_INSTALLED, when something went wrong installing the rights
+    static const int TYPE_RIGHTS_NOT_INSTALLED = 2001;
+    //! TYPE_RIGHTS_RENEWAL_NOT_ALLOWED, when the server rejects renewal of rights
+    static const int TYPE_RIGHTS_RENEWAL_NOT_ALLOWED = 2002;
+    //! TYPE_NOT_SUPPORTED, when answer from server can not be handled by the native agent
+    static const int TYPE_NOT_SUPPORTED = 2003;
     //! TYPE_OUT_OF_MEMORY, when memory allocation fail during renewal.
     //! Can in the future perhaps be used to trigger garbage collector
-    static const int TYPE_OUT_OF_MEMORY = 0x0000008;
+    static const int TYPE_OUT_OF_MEMORY = 2004;
     //! TYPE_NO_INTERNET_CONNECTION, when the Internet connection is missing and no attempt
     //! can be made to renew rights
-    static const int TYPE_NO_INTERNET_CONNECTION = 0x0000009;
+    static const int TYPE_NO_INTERNET_CONNECTION = 2005;
+    //! TYPE_REGISTRATION_FAILED, when registration with server failed.
+    static const int TYPE_REGISTRATION_FAILED = 2006;
 
 public:
     /**

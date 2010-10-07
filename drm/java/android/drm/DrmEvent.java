@@ -22,6 +22,40 @@ package android.drm;
  *
  */
 public class DrmEvent {
+    /**
+     * Constant field signifies that unload and finalize the loaded plugins successfully
+     */
+    public static final int TYPE_FINALIZED = 1001;
+    /**
+     * Constant field signifies that register with the service successfully
+     */
+    public static final int TYPE_REGISTERED = 1002;
+    /**
+     * Constant field signifies that load and initialized the available plugins successfully
+     */
+    public static final int TYPE_INITIALIZED = 1003;
+    /**
+     * Constant field signifies that unregister with the service successfully
+     */
+    public static final int TYPE_UNREGISTERED = 1004;
+    /**
+     * Constant field signifies that rights information is acquired successfully
+     */
+    public static final int TYPE_RIGHTS_ACQUIRED = 1005;
+    /**
+     * Constant field signifies that all the rights information associated with
+     * all DRM schemes are removed successfully
+     */
+    public static final int TYPE_ALL_RIGHTS_REMOVED = 1006;
+    /**
+     * Constant field signifies that the required information to communicate with
+     * the service is acquired sucessfully
+     */
+    public static final int TYPE_DRM_INFO_ACQUIRED = 1007;
+
+    public static final String DRM_INFO_STATUS_OBJECT = "drm_info_status_object";
+    public static final String DRM_INFO_OBJECT = "drm_info_object";
+
     private final int mUniqueId;
     private final int mType;
     private String mMessage = "";

@@ -46,7 +46,7 @@ public:
 
     DrmInfoStatus* processDrmInfo(int uniqueId, const DrmInfo* drmInfo);
 
-    void saveRights(int uniqueId, const DrmRights& drmRights,
+    status_t saveRights(int uniqueId, const DrmRights& drmRights,
             const String8& rightsPath, const String8& contentPath);
 
     DrmInfo* acquireDrmInfo(int uniqueId, const DrmInfoRequest* drmInfoRequest);
@@ -57,19 +57,19 @@ public:
 
     int checkRightsStatus(int uniqueId, const String8& path, int action);
 
-    void consumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
+    status_t consumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
 
-    void setPlaybackStatus(
+    status_t setPlaybackStatus(
             int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position);
 
     bool validateAction(
             int uniqueId, const String8& path, int action, const ActionDescription& description);
 
-    void removeRights(int uniqueId, const String8& path);
+    status_t removeRights(int uniqueId, const String8& path);
 
-    void removeAllRights(int uniqueId);
+    status_t removeAllRights(int uniqueId);
 
-    void openConvertSession(int uniqueId, int convertId);
+    status_t openConvertSession(int uniqueId, int convertId);
 
     DrmConvertedStatus* convertData(int uniqueId, int convertId, const DrmBuffer* inputData);
 
@@ -80,15 +80,15 @@ public:
     status_t openDecryptSession(
             int uniqueId, DecryptHandle* decryptHandle, int fd, int offset, int length);
 
-    void closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
+    status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 
-    void initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
+    status_t initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
             int decryptUnitId, const DrmBuffer* headerInfo);
 
-    status_t decrypt(int uniqueId, DecryptHandle* decryptHandle,
-            int decryptUnitId, const DrmBuffer* encBuffer, DrmBuffer** decBuffer);
+    status_t decrypt(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId,
+            const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV);
 
-    void finalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
+    status_t finalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
 
     ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
             void* buffer, ssize_t numBytes, off_t offset);
@@ -172,8 +172,10 @@ protected:
      * @param[in] drmRights DrmRights to be saved
      * @param[in] rightsPath File path where rights to be saved
      * @param[in] contentPath File path where content was saved
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onSaveRights(int uniqueId, const DrmRights& drmRights,
+    virtual status_t onSaveRights(int uniqueId, const DrmRights& drmRights,
             const String8& rightspath, const String8& contentPath) = 0;
 
     /**
@@ -231,8 +233,10 @@ protected:
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] action Action to perform. (Action::DEFAULT, Action::PLAY, etc)
      * @param[in] reserve True if the rights should be reserved.
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onConsumeRights(int uniqueId, DecryptHandle* decryptHandle,
+    virtual status_t onConsumeRights(int uniqueId, DecryptHandle* decryptHandle,
             int action, bool reserve) = 0;
 
     /**
@@ -243,8 +247,10 @@ protected:
      * @param[in] playbackStatus Playback action (Playback::START, Playback::STOP, Playback::PAUSE)
      * @param[in] position Position in the file (in milliseconds) where the start occurs.
      *     Only valid together with Playback::START.
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onSetPlaybackStatus(
+    virtual status_t onSetPlaybackStatus(
             int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position) = 0;
 
     /**
@@ -264,16 +270,20 @@ protected:
      *
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] path Path of the protected content
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onRemoveRights(int uniqueId, const String8& path) = 0;
+    virtual status_t onRemoveRights(int uniqueId, const String8& path) = 0;
 
     /**
      * Removes all the rights information of each plug-in associated with
      * DRM framework. Will be used in master reset
      *
      * @param[in] uniqueId Unique identifier for a session
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onRemoveAllRights(int uniqueId) = 0;
+    virtual status_t onRemoveAllRights(int uniqueId) = 0;
 
     /**
      * This API is for Forward Lock based DRM scheme.
@@ -283,8 +293,10 @@ protected:
      *
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] convertId Handle for the convert session
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onOpenConvertSession(int uniqueId, int convertId) = 0;
+    virtual status_t onOpenConvertSession(int uniqueId, int convertId) = 0;
 
     /**
      * Accepts and converts the input data which is part of DRM file.
@@ -347,8 +359,10 @@ protected:
      *
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] decryptHandle Handle for the decryption session
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onCloseDecryptSession(int uniqueId, DecryptHandle* decryptHandle) = 0;
+    virtual status_t onCloseDecryptSession(int uniqueId, DecryptHandle* decryptHandle) = 0;
 
     /**
      * Initialize decryption for the given unit of the protected content
@@ -357,8 +371,10 @@ protected:
      * @param[in] decryptId Handle for the decryption session
      * @param[in] decryptUnitId ID Specifies decryption unit, such as track ID
      * @param[in] headerInfo Information for initializing decryption of this decrypUnit
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onInitializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
+    virtual status_t onInitializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
             int decryptUnitId, const DrmBuffer* headerInfo) = 0;
 
     /**
@@ -371,14 +387,15 @@ protected:
      * @param[in] decryptUnitId ID Specifies decryption unit, such as track ID
      * @param[in] encBuffer Encrypted data block
      * @param[out] decBuffer Decrypted data block
+     * @param[in] IV Optional buffer
      * @return status_t
      *     Returns the error code for this API
      *     DRM_NO_ERROR for success, and one of DRM_ERROR_UNKNOWN, DRM_ERROR_LICENSE_EXPIRED
      *     DRM_ERROR_SESSION_NOT_OPENED, DRM_ERROR_DECRYPT_UNIT_NOT_INITIALIZED,
      *     DRM_ERROR_DECRYPT for failure.
      */
-    virtual status_t onDecrypt(int uniqueId, DecryptHandle* decryptHandle,
-            int decryptUnitId, const DrmBuffer* encBuffer, DrmBuffer** decBuffer) = 0;
+    virtual status_t onDecrypt(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId,
+            const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV) = 0;
 
     /**
      * Finalize decryption for the given unit of the protected content
@@ -386,8 +403,10 @@ protected:
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] decryptUnitId ID Specifies decryption unit, such as track ID
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void onFinalizeDecryptUnit(
+    virtual status_t onFinalizeDecryptUnit(
             int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId) = 0;
 
     /**

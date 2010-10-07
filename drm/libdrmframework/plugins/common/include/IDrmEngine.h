@@ -143,8 +143,10 @@ public:
      * @param[in] drmRights DrmRights to be saved
      * @param[in] rightsPath File path where rights to be saved
      * @param[in] contentPath File path where content was saved
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void saveRights(int uniqueId, const DrmRights& drmRights,
+    virtual status_t saveRights(int uniqueId, const DrmRights& drmRights,
             const String8& rightsPath, const String8& contentPath) = 0;
 
     /**
@@ -191,8 +193,10 @@ public:
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] action Action to perform. (Action::DEFAULT, Action::PLAY, etc)
      * @param[in] reserve True if the rights should be reserved.
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void consumeRights(
+    virtual status_t consumeRights(
             int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve) = 0;
 
     /**
@@ -203,8 +207,10 @@ public:
      * @param[in] playbackStatus Playback action (Playback::START, Playback::STOP, Playback::PAUSE)
      * @param[in] position Position in the file (in milliseconds) where the start occurs.
      *     Only valid together with Playback::START.
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void setPlaybackStatus(int uniqueId, DecryptHandle* decryptHandle,
+    virtual status_t setPlaybackStatus(int uniqueId, DecryptHandle* decryptHandle,
             int playbackStatus, int position) = 0;
 
     /**
@@ -224,16 +230,20 @@ public:
      *
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] path Path of the protected content
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void removeRights(int uniqueId, const String8& path) = 0;
+    virtual status_t removeRights(int uniqueId, const String8& path) = 0;
 
     /**
      * Removes all the rights information of each plug-in associated with
      * DRM framework. Will be used in master reset
      *
      * @param[in] uniqueId Unique identifier for a session
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void removeAllRights(int uniqueId) = 0;
+    virtual status_t removeAllRights(int uniqueId) = 0;
 
     /**
      * This API is for Forward Lock based DRM scheme.
@@ -243,8 +253,10 @@ public:
      *
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] convertId Handle for the convert session
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void openConvertSession(int uniqueId, int convertId) = 0;
+    virtual status_t openConvertSession(int uniqueId, int convertId) = 0;
 
     /**
      * Accepts and converts the input data which is part of DRM file.
@@ -307,8 +319,10 @@ public:
      *
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] decryptHandle Handle for the decryption session
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) = 0;
+    virtual status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) = 0;
 
     /**
      * Initialize decryption for the given unit of the protected content
@@ -317,8 +331,10 @@ public:
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] decryptUnitId ID which specifies decryption unit, such as track ID
      * @param[in] headerInfo Information for initializing decryption of this decrypUnit
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
+    virtual status_t initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
             int decryptUnitId, const DrmBuffer* headerInfo) = 0;
 
     /**
@@ -331,14 +347,15 @@ public:
      * @param[in] decryptUnitId ID which specifies decryption unit, such as track ID
      * @param[in] encBuffer Encrypted data block
      * @param[out] decBuffer Decrypted data block
+     * @param[in] IV Optional buffer
      * @return status_t
      *     Returns the error code for this API
      *     DRM_NO_ERROR for success, and one of DRM_ERROR_UNKNOWN, DRM_ERROR_LICENSE_EXPIRED
      *     DRM_ERROR_SESSION_NOT_OPENED, DRM_ERROR_DECRYPT_UNIT_NOT_INITIALIZED,
      *     DRM_ERROR_DECRYPT for failure.
      */
-    virtual status_t decrypt(int uniqueId, DecryptHandle* decryptHandle,
-            int decryptUnitId, const DrmBuffer* encBuffer, DrmBuffer** decBuffer) = 0;
+    virtual status_t decrypt(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId,
+            const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV) = 0;
 
     /**
      * Finalize decryption for the given unit of the protected content
@@ -346,8 +363,10 @@ public:
      * @param[in] uniqueId Unique identifier for a session
      * @param[in] decryptHandle Handle for the decryption session
      * @param[in] decryptUnitId ID which specifies decryption unit, such as track ID
+     * @return status_t
+     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    virtual void finalizeDecryptUnit(
+    virtual status_t finalizeDecryptUnit(
             int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId) = 0;
 
     /**
