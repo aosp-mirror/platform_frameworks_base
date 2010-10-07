@@ -267,8 +267,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Tillåter att ett program frigör lagringsutrymme i telefonen genom att ta bort filer i programmets katalog för cachelagring. Åtkomst är mycket begränsad, vanligtvis till systemprocesser."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Flytta programresurser"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Tillåter att ett program flyttar programresurser från interna till externa medier och tvärt om."</string>
-    <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"läsa systemets loggfiler"</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" msgid="8896449437464867766">"Tillåter att ett program läser från systemets olika loggfiler. Det innebär att programmet kan upptäcka allmän information om vad du gör med telefonen, men den bör inte innehålla personlig eller privat information."</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"läsa känsliga loggdata"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Tillåter att ett program läser från systemets olika loggfiler. Det innebär att programmet kan upptäcka allmän information om vad du gör med telefonen, vilket kan inkludera personlig eller privat information."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"läsa/skriva till resurser som ägs av diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Tillåter att ett program läser och skriver till en resurs som ägs av diag-gruppen; till exempel filer i /dev. Detta kan eventuellt påverka systemets stabilitet och säkerhet. Detta bör ENDAST används av tillverkaren eller operatören för maskinvaruspecifik diagnostik."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivera eller inaktivera programkomponenter"</string>
@@ -544,14 +544,10 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Arbete"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Övrigt"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Anpassad"</string>
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Anpassad"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Startsida"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbete"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Övrigt"</string>
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"via <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> via <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ange PIN-kod"</string>

@@ -267,8 +267,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"애플리케이션이 애플리케이션 캐시 디렉토리에 있는 파일을 삭제하여 휴대전화의 저장공간을 늘릴 수 있도록 합니다. 액세스는 일반적으로 시스템 프로세스로 제한됩니다."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"애플리케이션 리소스 이동"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"애플리케이션이 애플리케이션 리소스를 내부에서 외부 미디어로 또는 그 반대로 이동할 수 있도록 합니다."</string>
-    <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"시스템 로그 파일 읽기"</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" msgid="8896449437464867766">"애플리케이션이 시스템의 다양한 로그 파일을 읽을 수 있도록 합니다. 이 경우 애플리케이션은 사용자가 휴대전화로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있습니다. 하지만 로그 파일에 어떠한 개인정보도 포함되어서는 안 됩니다."</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"중요한 로그 데이터 읽기"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"애플리케이션이 시스템의 다양한 로그 파일을 읽을 수 있도록 합니다. 이렇게 되면 애플리케이션은 개인정보 또는 비공개 정보를 포함하여 휴대전화로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있습니다."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"진단 그룹 소유의 리소스 읽기/쓰기"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"애플리케이션이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"애플리케이션 구성 요소 사용 또는 사용 안함"</string>
@@ -544,14 +544,10 @@
     <string name="orgTypeWork" msgid="29268870505363872">"직장"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"기타"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"맞춤설정"</string>
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"맞춤설정"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"홈"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"직장"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"기타"</string>
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"<xliff:g id="SOURCE">%1$s</xliff:g>을(를) 통해"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g>(<xliff:g id="SOURCE">%2$s</xliff:g> 사용)"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN 코드 입력"</string>
