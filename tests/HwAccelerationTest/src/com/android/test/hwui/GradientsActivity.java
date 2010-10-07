@@ -18,11 +18,16 @@ package com.android.test.hwui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
+import android.graphics.RadialGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Shader;
+import android.graphics.SweepGradient;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -36,8 +41,13 @@ public class GradientsActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         final FrameLayout layout = new FrameLayout(this);
+
         final ShadersView shadersView = new ShadersView(this);
         final GradientView gradientView = new GradientView(this);
+        final RadialGradientView radialGradientView = new RadialGradientView(this);
+        final SweepGradientView sweepGradientView = new SweepGradientView(this);
+        final BitmapView bitmapView = new BitmapView(this);
+
         final SeekBar rotateView = new SeekBar(this);
         rotateView.setMax(360);
         rotateView.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -51,18 +61,60 @@ public class GradientsActivity extends Activity {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                gradientView.setRotationY((float)progress);
+                gradientView.setRotationY((float) progress);
+                radialGradientView.setRotationX((float) progress);
+                sweepGradientView.setRotationY((float) progress);
+                bitmapView.setRotationX((float) progress);
             }
         });
         
         layout.addView(shadersView);
         layout.addView(gradientView, new FrameLayout.LayoutParams(
                 200, 200, Gravity.CENTER));
+
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(200, 200, Gravity.CENTER);
+        lp.setMargins(220, 0, 0, 0);
+        layout.addView(radialGradientView, lp);
+
+        lp = new FrameLayout.LayoutParams(200, 200, Gravity.CENTER);
+        lp.setMargins(440, 0, 0, 0);
+        layout.addView(sweepGradientView, lp);
+
+        lp = new FrameLayout.LayoutParams(200, 200, Gravity.CENTER);
+        lp.setMargins(220, -220, 0, 0);
+        layout.addView(bitmapView, lp);
+
         layout.addView(rotateView, new FrameLayout.LayoutParams(
                 300, FrameLayout.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM));
 
         setContentView(layout);
+    }
+    
+    static class BitmapView extends View {
+        private final Paint mPaint;
+
+        BitmapView(Context c) {
+            super(c);
+
+            Bitmap texture = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
+            BitmapShader shader = new BitmapShader(texture, Shader.TileMode.REPEAT,
+                    Shader.TileMode.REPEAT);
+            mPaint = new Paint();
+            mPaint.setShader(shader);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            setMeasuredDimension(200, 200);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawRect(0.0f, 0.0f, getWidth(), getHeight(), mPaint);
+        }
     }
     
     static class GradientView extends View {
@@ -90,6 +142,55 @@ public class GradientsActivity extends Activity {
         }
     }
 
+    static class RadialGradientView extends View {
+        private final Paint mPaint;
+
+        RadialGradientView(Context c) {
+            super(c);
+
+            RadialGradient gradient = new RadialGradient(0.0f, 0.0f, 100.0f, 0xff000000, 0xffffffff,
+                    Shader.TileMode.MIRROR);
+            mPaint = new Paint();
+            mPaint.setShader(gradient);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            setMeasuredDimension(200, 200);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawRect(0.0f, 0.0f, getWidth(), getHeight(), mPaint);
+        }
+    }
+    
+    static class SweepGradientView extends View {
+        private final Paint mPaint;
+
+        SweepGradientView(Context c) {
+            super(c);
+
+            SweepGradient gradient = new SweepGradient(100.0f, 100.0f, 0xff000000, 0xffffffff);                
+            mPaint = new Paint();
+            mPaint.setShader(gradient);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            setMeasuredDimension(200, 200);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawRect(0.0f, 0.0f, getWidth(), getHeight(), mPaint);
+        }
+    }
+        
     static class ShadersView extends View {
         private final Paint mPaint;
         private final float mDrawWidth;

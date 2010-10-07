@@ -37,12 +37,8 @@ const char* gVS_Header_Uniforms_HasGradient[3] = {
         // Linear
         "uniform mat4 screenSpace;\n",
         // Circular
-        "uniform vec2 gradientStart;\n"
-        "uniform mat4 gradientMatrix;\n"
         "uniform mat4 screenSpace;\n",
         // Sweep
-        "uniform vec2 gradientStart;\n"
-        "uniform mat4 gradientMatrix;\n"
         "uniform mat4 screenSpace;\n"
 };
 const char* gVS_Header_Uniforms_HasBitmap =
@@ -68,11 +64,9 @@ const char* gVS_Main_OutGradient[3] = {
         // Linear
         "    index = (screenSpace * position).x;\n",
         // Circular
-        "    vec4 location = screenSpace * position;\n"
-        "    circular = (gradientMatrix * vec4(location.xy - gradientStart, 0.0, 0.0)).xy;\n",
+        "    circular = (screenSpace * position).xy;\n",
         // Sweep
-        "    vec4 location = screenSpace * position;\n"
-        "    sweep = (gradientMatrix * vec4(location.xy - gradientStart, 0.0, 0.0)).xy;\n"
+        "    sweep = (screenSpace * position).xy;\n"
 };
 const char* gVS_Main_OutBitmapTexCoords =
         "    vec4 bitmapCoords = textureTransform * position;\n"
@@ -98,7 +92,6 @@ const char* gFS_Uniforms_GradientSampler[3] = {
         // Linear
         "uniform sampler2D gradientSampler;\n",
         // Circular
-        "uniform float gradientRadius;\n"
         "uniform sampler2D gradientSampler;\n",
         // Sweep
         "uniform sampler2D gradientSampler;\n"
@@ -130,7 +123,7 @@ const char* gFS_Main_FetchGradient[3] = {
         // Linear
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n",
         // Circular
-        "    float index = length(circular) * gradientRadius;\n"
+        "    float index = length(circular);\n"
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n",
         // Sweep
         "    float index = atan(sweep.y, sweep.x) * 0.15915494309; // inv(2 * PI)\n"
