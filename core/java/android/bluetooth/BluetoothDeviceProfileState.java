@@ -67,10 +67,11 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     private static final int DISCONNECT_HFP_INCOMING = 6;
     public static final int DISCONNECT_A2DP_OUTGOING = 7;
     public static final int DISCONNECT_A2DP_INCOMING = 8;
+    public static final int DISCONNECT_PBAP_OUTGOING = 9;
 
-    public static final int UNPAIR = 9;
-    public static final int AUTO_CONNECT_PROFILES = 10;
-    public static final int TRANSITION_TO_STABLE = 11;
+    public static final int UNPAIR = 100;
+    public static final int AUTO_CONNECT_PROFILES = 101;
+    public static final int TRANSITION_TO_STABLE = 102;
 
     private static final int AUTO_CONNECT_DELAY = 6000; // 6 secs
 
@@ -84,7 +85,9 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     private BluetoothService mService;
     private BluetoothA2dpService mA2dpService;
     private BluetoothHeadset  mHeadsetService;
+    private BluetoothPbap     mPbapService;
     private boolean mHeadsetServiceConnected;
+    private boolean mPbapServiceConnected;
 
     private BluetoothDevice mDevice;
     private int mHeadsetState;
@@ -176,6 +179,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         HeadsetServiceListener l = new HeadsetServiceListener();
+        PbapServiceListener p = new PbapServiceListener();
     }
 
     private class HeadsetServiceListener implements BluetoothHeadset.ServiceListener {
@@ -190,6 +194,22 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         public void onServiceDisconnected() {
             synchronized(BluetoothDeviceProfileState.this) {
                 mHeadsetServiceConnected = false;
+            }
+        }
+    }
+
+    private class PbapServiceListener implements BluetoothPbap.ServiceListener {
+        public PbapServiceListener() {
+            mPbapService = new BluetoothPbap(mContext, this);
+        }
+        public void onServiceConnected() {
+            synchronized(BluetoothDeviceProfileState.this) {
+                mPbapServiceConnected = true;
+            }
+        }
+        public void onServiceDisconnected() {
+            synchronized(BluetoothDeviceProfileState.this) {
+                mPbapServiceConnected = false;
             }
         }
     }
@@ -223,6 +243,9 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case CONNECT_A2DP_INCOMING:
                 case DISCONNECT_A2DP_INCOMING:
                     transitionTo(mIncomingA2dp);
+                    break;
+                case DISCONNECT_PBAP_OUTGOING:
+                    processCommand(DISCONNECT_PBAP_OUTGOING);
                     break;
                 case UNPAIR:
                     if (mHeadsetState != BluetoothHeadset.STATE_DISCONNECTED) {
@@ -342,6 +365,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                        deferMessage(deferMsg);
                     }
                     break;
+                case DISCONNECT_PBAP_OUTGOING:
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
                     deferMessage(message);
@@ -409,6 +433,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     // If this causes incoming HFP to fail, it is more of a headset problem
                     // since both connections are incoming ones.
                     break;
+                case DISCONNECT_PBAP_OUTGOING:
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
                     deferMessage(message);
@@ -496,6 +521,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_A2DP_INCOMING:
                     // Ignore, will be handled by Bluez
                     break;
+                case DISCONNECT_PBAP_OUTGOING:
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
                     deferMessage(message);
@@ -561,6 +587,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_A2DP_INCOMING:
                     // Ignore, will be handled by Bluez
                     break;
+                case DISCONNECT_PBAP_OUTGOING:
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
                     deferMessage(message);
@@ -588,7 +615,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
     }
 
-    synchronized void deferHeadsetMessage(int command) {
+    synchronized void deferProfileServiceMessage(int command) {
         Message msg = new Message();
         msg.what = command;
         deferMessage(msg);
@@ -604,7 +631,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 break;
             case CONNECT_HFP_INCOMING:
                 if (!mHeadsetServiceConnected) {
-                    deferHeadsetMessage(command);
+                    deferProfileServiceMessage(command);
                 } else if (mHeadsetState == BluetoothHeadset.STATE_CONNECTING) {
                     return mHeadsetService.acceptIncomingConnect(mDevice);
                 } else if (mHeadsetState == BluetoothHeadset.STATE_DISCONNECTED) {
@@ -621,8 +648,13 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 return true;
             case DISCONNECT_HFP_OUTGOING:
                 if (!mHeadsetServiceConnected) {
-                    deferHeadsetMessage(command);
+                    deferProfileServiceMessage(command);
                 } else {
+                    // Disconnect PBAP
+                    // TODO(): Add PBAP to the state machine.
+                    Message m = new Message();
+                    m.what = DISCONNECT_PBAP_OUTGOING;
+                    deferMessage(m);
                     if (mHeadsetService.getPriority(mDevice) ==
                         BluetoothHeadset.PRIORITY_AUTO_CONNECT) {
                         mHeadsetService.setPriority(mDevice, BluetoothHeadset.PRIORITY_ON);
@@ -643,6 +675,13 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                         mA2dpService.setSinkPriority(mDevice, BluetoothHeadset.PRIORITY_ON);
                     }
                     return mA2dpService.disconnectSinkInternal(mDevice);
+                }
+                break;
+            case DISCONNECT_PBAP_OUTGOING:
+                if (!mPbapServiceConnected) {
+                    deferProfileServiceMessage(command);
+                } else {
+                    return mPbapService.disconnect();
                 }
                 break;
             case UNPAIR:
