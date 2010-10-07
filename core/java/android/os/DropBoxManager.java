@@ -152,7 +152,7 @@ public class DropBoxManager {
         /** @return time when the entry was originally created. */
         public long getTimeMillis() { return mTimeMillis; }
 
-        /** @return flags describing the content returned by @{link #getInputStream()}. */
+        /** @return flags describing the content returned by {@link #getInputStream()}. */
         public int getFlags() { return mFlags & ~IS_GZIPPED; }  // getInputStream() decompresses.
 
         /**
