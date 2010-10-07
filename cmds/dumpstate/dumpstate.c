@@ -84,7 +84,7 @@ static void dumpstate() {
         LOGI("wrote screenshot: %s\n", screenshot_path);
     }
 
-    run_command("SYSTEM LOG", 20, "logcat", "-v", "time", "-d", "*:v", NULL);
+    run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
 
     /* show the traces we collected in main(), if that was done */
     if (dump_traces_path != NULL) {
@@ -104,8 +104,8 @@ static void dumpstate() {
     }
 
     // dump_file("EVENT LOG TAGS", "/etc/event-log-tags");
-    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "time", "-d", "*:v", NULL);
-    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "time", "-d", "*:v", NULL);
+    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "threadtime", "-d", "*:v", NULL);
+    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
 
     run_command("NETWORK INTERFACES", 10, "netcfg", NULL);
     dump_file("NETWORK ROUTES", "/proc/net/route");
