@@ -170,8 +170,6 @@ class MountService extends IMountService.Stub
             this.token = token;
             this.callerUid = callerUid;
             mounted = false;
-
-            getBinder().linkToDeath(this, 0);
         }
 
         // OBB source filename
@@ -196,7 +194,11 @@ class MountService extends IMountService.Stub
             mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_RUN_ACTION, action));
         }
 
-        public void cleanUp() {
+        public void link() throws RemoteException {
+            getBinder().linkToDeath(this, 0);
+        }
+
+        public void unlink() {
             getBinder().unlinkToDeath(this, 0);
         }
 
@@ -1659,14 +1661,39 @@ class MountService extends IMountService.Stub
             Slog.i(TAG, "Send to OBB handler: " + action.toString());
     }
 
-    private void addObbState(ObbState obbState) {
+    private void addObbState(ObbState obbState) throws RemoteException {
         synchronized (mObbMounts) {
-            List<ObbState> obbStates = mObbMounts.get(obbState.getBinder());
+            final IBinder binder = obbState.getBinder();
+            List<ObbState> obbStates = mObbMounts.get(binder);
+            final boolean unique;
+
             if (obbStates == null) {
                 obbStates = new ArrayList<ObbState>();
-                mObbMounts.put(obbState.getBinder(), obbStates);
+                mObbMounts.put(binder, obbStates);
+                unique = true;
+            } else {
+                unique = obbStates.contains(obbState);
             }
-            obbStates.add(obbState);
+
+            if (unique) {
+                obbStates.add(obbState);
+                try {
+                    obbState.link();
+                } catch (RemoteException e) {
+                    /*
+                     * The binder died before we could link it, so clean up our
+                     * state and return failure.
+                     */
+                    obbStates.remove(obbState);
+                    if (obbStates.isEmpty()) {
+                        mObbMounts.remove(binder);
+                    }
+
+                    // Rethrow the error so mountObb can get it
+                    throw e;
+                }
+            }
+
             mObbPathToStateMap.put(obbState.filename, obbState);
 
             // Track the number of OBBs used by this UID.
@@ -1682,14 +1709,17 @@ class MountService extends IMountService.Stub
 
     private void removeObbState(ObbState obbState) {
         synchronized (mObbMounts) {
-            final List<ObbState> obbStates = mObbMounts.get(obbState.getBinder());
+            final IBinder binder = obbState.getBinder();
+            final List<ObbState> obbStates = mObbMounts.get(binder);
             if (obbStates != null) {
-                obbStates.remove(obbState);
+                if (obbStates.remove(obbState)) {
+                    obbState.unlink();
+                }
+                if (obbStates.isEmpty()) {
+                    mObbMounts.remove(binder);
+                }
             }
-            if (obbStates == null || obbStates.isEmpty()) {
-                mObbMounts.remove(obbState.getBinder());
-                obbState.cleanUp();
-            }
+
             mObbPathToStateMap.remove(obbState.filename);
 
             // Track the number of OBBs used by this UID.
@@ -1708,7 +1738,7 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private void replaceObbState(ObbState oldObbState, ObbState newObbState) {
+    private void replaceObbState(ObbState oldObbState, ObbState newObbState) throws RemoteException {
         synchronized (mObbMounts) {
             removeObbState(oldObbState);
             addObbState(newObbState);
