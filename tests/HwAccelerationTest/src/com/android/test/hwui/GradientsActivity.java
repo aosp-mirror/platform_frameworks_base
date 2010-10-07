@@ -24,7 +24,10 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.SeekBar;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class GradientsActivity extends Activity {
@@ -32,7 +35,59 @@ public class GradientsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(new ShadersView(this));
+        final FrameLayout layout = new FrameLayout(this);
+        final ShadersView shadersView = new ShadersView(this);
+        final GradientView gradientView = new GradientView(this);
+        final SeekBar rotateView = new SeekBar(this);
+        rotateView.setMax(360);
+        rotateView.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                gradientView.setRotationY((float)progress);
+            }
+        });
+        
+        layout.addView(shadersView);
+        layout.addView(gradientView, new FrameLayout.LayoutParams(
+                200, 200, Gravity.CENTER));
+        layout.addView(rotateView, new FrameLayout.LayoutParams(
+                300, FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM));
+
+        setContentView(layout);
+    }
+    
+    static class GradientView extends View {
+        private final Paint mPaint;
+
+        GradientView(Context c) {
+            super(c);
+
+            LinearGradient gradient = new LinearGradient(0, 0, 200, 0, 0xFF000000, 0,
+                    Shader.TileMode.CLAMP);
+            mPaint = new Paint();
+            mPaint.setShader(gradient);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            setMeasuredDimension(200, 200);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawRect(0.0f, 0.0f, getWidth(), getHeight(), mPaint);
+        }
     }
 
     static class ShadersView extends View {

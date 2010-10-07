@@ -77,7 +77,7 @@ struct SkiaShader {
             const Snapshot& snapshot) {
     }
 
-    void setMatrix(SkMatrix* matrix) {
+    virtual void setMatrix(SkMatrix* matrix) {
         mMatrix = matrix;
     }
 
@@ -139,7 +139,15 @@ struct SkiaLinearGradientShader: public SkiaShader {
             GLuint* textureUnit);
     void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
 
+    void setMatrix(SkMatrix* matrix);
+
 private:
+    void updateLocalMatrix(const SkMatrix* matrix);
+    void computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView);
+
+    mat4 mUnitMatrix;
+    mat4 mShaderMatrix;
+
     float* mBounds;
     uint32_t* mColors;
     float* mPositions;
