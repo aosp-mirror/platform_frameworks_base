@@ -133,14 +133,12 @@ public class BluetoothTestUtils extends Assert {
     private class HeadsetServiceListener implements ServiceListener {
         private boolean mConnected = false;
 
-        @Override
         public void onServiceConnected() {
             synchronized (this) {
                 mConnected = true;
             }
         }
 
-        @Override
         public void onServiceDisconnected() {
             synchronized (this) {
                 mConnected = false;
@@ -321,6 +319,9 @@ public class BluetoothTestUtils extends Assert {
         filter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
+
+        mA2dp = new BluetoothA2dp(mContext);
+        mHeadset = new BluetoothHeadset(mContext, mHeadsetServiceListener);
     }
 
     public void close() {
