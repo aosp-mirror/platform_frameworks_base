@@ -41,7 +41,7 @@ public:
 
     inline sp<Looper> getLooper() { return mLooper; }
 
-    bool pollOnce(int timeoutMillis);
+    void pollOnce(int timeoutMillis);
     void wake();
 
 private:
@@ -61,8 +61,8 @@ NativeMessageQueue::NativeMessageQueue() {
 NativeMessageQueue::~NativeMessageQueue() {
 }
 
-bool NativeMessageQueue::pollOnce(int timeoutMillis) {
-    return mLooper->pollOnce(timeoutMillis) != ALOOPER_POLL_TIMEOUT;
+void NativeMessageQueue::pollOnce(int timeoutMillis) {
+    mLooper->pollOnce(timeoutMillis);
 }
 
 void NativeMessageQueue::wake() {
@@ -112,24 +112,14 @@ static void throwQueueNotInitialized(JNIEnv* env) {
     jniThrowException(env, "java/lang/IllegalStateException", "Message queue not initialized");
 }
 
-static jboolean android_os_MessageQueue_nativePollOnce(JNIEnv* env, jobject obj,
-        jint timeoutMillis) {
-    NativeMessageQueue* nativeMessageQueue =
-            android_os_MessageQueue_getNativeMessageQueue(env, obj);
-    if (! nativeMessageQueue) {
-        throwQueueNotInitialized(env);
-        return false;
-    }
-    return nativeMessageQueue->pollOnce(timeoutMillis);
+static void android_os_MessageQueue_nativePollOnce(JNIEnv* env, jobject obj,
+        jint ptr, jint timeoutMillis) {
+    NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
+    nativeMessageQueue->pollOnce(timeoutMillis);
 }
 
-static void android_os_MessageQueue_nativeWake(JNIEnv* env, jobject obj) {
-    NativeMessageQueue* nativeMessageQueue =
-            android_os_MessageQueue_getNativeMessageQueue(env, obj);
-    if (! nativeMessageQueue) {
-        throwQueueNotInitialized(env);
-        return;
-    }
+static void android_os_MessageQueue_nativeWake(JNIEnv* env, jobject obj, jint ptr) {
+    NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
     return nativeMessageQueue->wake();
 }
 
@@ -139,8 +129,8 @@ static JNINativeMethod gMessageQueueMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "()V", (void*)android_os_MessageQueue_nativeInit },
     { "nativeDestroy", "()V", (void*)android_os_MessageQueue_nativeDestroy },
-    { "nativePollOnce", "(I)Z", (void*)android_os_MessageQueue_nativePollOnce },
-    { "nativeWake", "()V", (void*)android_os_MessageQueue_nativeWake }
+    { "nativePollOnce", "(II)V", (void*)android_os_MessageQueue_nativePollOnce },
+    { "nativeWake", "(I)V", (void*)android_os_MessageQueue_nativeWake }
 };
 
 #define FIND_CLASS(var, className) \
