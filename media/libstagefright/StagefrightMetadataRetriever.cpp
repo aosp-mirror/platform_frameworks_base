@@ -159,6 +159,20 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
 
     LOGV("successfully decoded video frame.");
 
+    int32_t unreadable;
+    if (buffer->meta_data()->findInt32(kKeyIsUnreadable, &unreadable)
+            && unreadable != 0) {
+        LOGV("video frame is unreadable, decoder does not give us access "
+             "to the video data.");
+
+        buffer->release();
+        buffer = NULL;
+
+        decoder->stop();
+
+        return NULL;
+    }
+
     int64_t timeUs;
     CHECK(buffer->meta_data()->findInt64(kKeyTime, &timeUs));
     if (thumbNailTime >= 0) {
