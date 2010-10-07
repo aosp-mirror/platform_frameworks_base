@@ -84,6 +84,7 @@ import java.io.PrintWriter;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -1567,14 +1568,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         int lastInputMethodSubtypeId = getSelectedInputMethodSubtypeId(lastInputMethodId);
         if (DEBUG) Slog.v(TAG, "Current IME: " + lastInputMethodId);
 
-        final List<InputMethodInfo> immis = getEnabledInputMethodList();
-        ArrayList<Integer> subtypeIds = new ArrayList<Integer>();
-
-        if (immis == null) {
-            return;
-        }
-
         synchronized (mMethodMap) {
+            final List<Pair<InputMethodInfo, ArrayList<String>>> immis =
+                    mSettings.getEnabledInputMethodAndSubtypeListLocked();
+            ArrayList<Integer> subtypeIds = new ArrayList<Integer>();
+
+            if (immis == null || immis.size() == 0) {
+                return;
+            }
+
             hideInputMethodMenuLocked();
 
             int N = immis.size();
@@ -1583,32 +1585,38 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 new TreeMap<CharSequence, Pair<InputMethodInfo, Integer>>(Collator.getInstance());
 
             for (int i = 0; i < N; ++i) {
-                InputMethodInfo property = immis.get(i);
+                InputMethodInfo property = immis.get(i).first;
+                final ArrayList<String> enabledSubtypeIds = immis.get(i).second;
+                HashSet<String> enabledSubtypeSet = new HashSet<String>();
+                for (String s : enabledSubtypeIds) {
+                    enabledSubtypeSet.add(s);
+                }
                 if (property == null) {
                     continue;
                 }
-                // TODO: Show only enabled subtypes
                 ArrayList<InputMethodSubtype> subtypes = property.getSubtypes();
                 CharSequence label = property.loadLabel(pm);
-                if (showSubtypes && subtypes.size() > 0) {
+                if (showSubtypes && enabledSubtypeSet.size() > 0) {
                     for (int j = 0; j < subtypes.size(); ++j) {
                         InputMethodSubtype subtype = subtypes.get(j);
-                        CharSequence title;
-                        int nameResId = subtype.getNameResId();
-                        int modeResId = subtype.getModeResId();
-                        if (nameResId != 0) {
-                            title = pm.getText(property.getPackageName(), nameResId,
-                                    property.getServiceInfo().applicationInfo);
-                        } else {
-                            CharSequence language = subtype.getLocale();
-                            CharSequence mode = modeResId == 0 ? null
-                                    : pm.getText(property.getPackageName(), modeResId,
-                                            property.getServiceInfo().applicationInfo);
-                            // TODO: Use more friendly Title and UI
-                            title = label + "," + (mode == null ? "" : mode) + ","
-                                    + (language == null ? "" : language);
+                        if (enabledSubtypeSet.contains(String.valueOf(subtype.hashCode()))) {
+                            CharSequence title;
+                            int nameResId = subtype.getNameResId();
+                            int modeResId = subtype.getModeResId();
+                            if (nameResId != 0) {
+                                title = pm.getText(property.getPackageName(), nameResId,
+                                        property.getServiceInfo().applicationInfo);
+                            } else {
+                                CharSequence language = subtype.getLocale();
+                                CharSequence mode = modeResId == 0 ? null
+                                        : pm.getText(property.getPackageName(), modeResId,
+                                                property.getServiceInfo().applicationInfo);
+                                // TODO: Use more friendly Title and UI
+                                title = label + "," + (mode == null ? "" : mode) + ","
+                                        + (language == null ? "" : language);
+                            }
+                            imMap.put(title, new Pair<InputMethodInfo, Integer>(property, j));
                         }
-                        imMap.put(title, new Pair<InputMethodInfo, Integer>(property, j));
                     }
                 } else {
                     imMap.put(label,
@@ -1678,6 +1686,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     });
 
+            if (showSubtypes) {
+                mDialogBuilder.setPositiveButton(com.android.internal.R.string.more_item_label,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                showInputMethodAndSubtypeEnabler();
+                            }
+                        });
+            }
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.getWindow().setType(
                     WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
@@ -1864,6 +1880,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     getEnabledInputMethodsAndSubtypeListLocked());
         }
 
+        public List<Pair<InputMethodInfo, ArrayList<String>>>
+                getEnabledInputMethodAndSubtypeListLocked() {
+            return createEnabledInputMethodAndSubtypeListLocked(
+                    getEnabledInputMethodsAndSubtypeListLocked());
+        }
+
         // At the initial boot, the settings for input methods are not set,
         // so we need to enable IME in that case.
         public void enableAllIMEsIfThereIsNoEnabledIME() {
@@ -1955,6 +1977,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 InputMethodInfo info = mMethodMap.get(ims.first);
                 if (info != null) {
                     res.add(info);
+                }
+            }
+            return res;
+        }
+
+        private List<Pair<InputMethodInfo, ArrayList<String>>>
+                createEnabledInputMethodAndSubtypeListLocked(
+                        List<Pair<String, ArrayList<String>>> imsList) {
+            final ArrayList<Pair<InputMethodInfo, ArrayList<String>>> res
+                    = new ArrayList<Pair<InputMethodInfo, ArrayList<String>>>();
+            for (Pair<String, ArrayList<String>> ims : imsList) {
+                InputMethodInfo info = mMethodMap.get(ims.first);
+                if (info != null) {
+                    res.add(new Pair<InputMethodInfo, ArrayList<String>>(info, ims.second));
                 }
             }
             return res;
