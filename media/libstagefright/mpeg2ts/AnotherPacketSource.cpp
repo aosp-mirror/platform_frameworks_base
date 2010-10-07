@@ -59,21 +59,26 @@ status_t AnotherPacketSource::read(
 
     if (!mBuffers.empty()) {
         const sp<ABuffer> buffer = *mBuffers.begin();
-
-        uint64_t timeUs;
-        CHECK(buffer->meta()->findInt64(
-                    "time", (int64_t *)&timeUs));
-
-        MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
-        mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
-
-        // hexdump(buffer->data(), buffer->size());
-
-        memcpy(mediaBuffer->data(), buffer->data(), buffer->size());
-        *out = mediaBuffer;
-
         mBuffers.erase(mBuffers.begin());
-        return OK;
+
+        int32_t discontinuity;
+        if (buffer->meta()->findInt32("discontinuity", &discontinuity)
+                && discontinuity) {
+            return INFO_DISCONTINUITY;
+        } else {
+            uint64_t timeUs;
+            CHECK(buffer->meta()->findInt64(
+                        "time", (int64_t *)&timeUs));
+
+            MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
+            mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
+
+            // hexdump(buffer->data(), buffer->size());
+
+            memcpy(mediaBuffer->data(), buffer->data(), buffer->size());
+            *out = mediaBuffer;
+            return OK;
+        }
     }
 
     return mEOSResult;
@@ -85,6 +90,15 @@ void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
         // LOG(VERBOSE) << "discarding damaged AU";
         return;
     }
+
+    Mutex::Autolock autoLock(mLock);
+    mBuffers.push_back(buffer);
+    mCondition.signal();
+}
+
+void AnotherPacketSource::queueDiscontinuity() {
+    sp<ABuffer> buffer = new ABuffer(0);
+    buffer->meta()->setInt32("discontinuity", true);
 
     Mutex::Autolock autoLock(mLock);
     mBuffers.push_back(buffer);
