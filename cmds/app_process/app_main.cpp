@@ -171,9 +171,9 @@ int main(int argc, const char* const argv[])
             runtime.start();
         }
     } else {
-        LOG_ALWAYS_FATAL("app_process: no class name or --zygote supplied.");
         fprintf(stderr, "Error: no class name or --zygote supplied.\n");
         app_usage();
+        LOG_ALWAYS_FATAL("app_process: no class name or --zygote supplied.");
         return 10;
     }
 
