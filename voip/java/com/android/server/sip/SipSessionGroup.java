@@ -96,8 +96,6 @@ class SipSessionGroup implements SipListener {
 
     private SipStack mSipStack;
     private SipHelper mSipHelper;
-    private String mLastNonce;
-    private int mRPort;
 
     // session that processes INVITE requests
     private SipSessionImpl mCallReceiverSession;
@@ -150,7 +148,6 @@ class SipSessionGroup implements SipListener {
         Log.d(TAG, " start stack for " + myself.getUriString());
         stack.start();
 
-        mLastNonce = null;
         mCallReceiverSession = null;
         mSessionMap.clear();
     }
@@ -366,8 +363,12 @@ class SipSessionGroup implements SipListener {
         ClientTransaction mClientTransaction;
         String mPeerSessionDescription;
         boolean mInCall;
-        boolean mReRegisterFlag = false;
         SessionTimer mTimer;
+        int mAuthenticationRetryCount;
+
+        // for registration
+        boolean mReRegisterFlag = false;
+        int mRPort;
 
         // lightweight timer
         class SessionTimer {
@@ -417,6 +418,8 @@ class SipSessionGroup implements SipListener {
             mState = SipSession.State.READY_TO_CALL;
             mInviteReceived = null;
             mPeerSessionDescription = null;
+            mRPort = 0;
+            mAuthenticationRetryCount = 0;
 
             if (mDialog != null) mDialog.delete();
             mDialog = null;
@@ -799,22 +802,10 @@ class SipSessionGroup implements SipListener {
                     onRegistrationDone((state == SipSession.State.REGISTERING)
                             ? getExpiryTime(((ResponseEvent) evt).getResponse())
                             : -1);
-                    mLastNonce = null;
-                    mRPort = 0;
                     return true;
                 case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
-                    if (!handleAuthentication(event)) {
-                        if (mLastNonce == null) {
-                            onRegistrationFailed(SipErrorCode.SERVER_ERROR,
-                                    "server does not provide challenge");
-                        } else {
-                            Log.v(TAG, "Incorrect username/password");
-                            onRegistrationFailed(
-                                    SipErrorCode.INVALID_CREDENTIALS,
-                                    "incorrect username or password");
-                        }
-                    }
+                    handleAuthentication(event);
                     return true;
                 default:
                     if (statusCode >= 500) {
@@ -830,16 +821,24 @@ class SipSessionGroup implements SipListener {
                 throws SipException {
             Response response = event.getResponse();
             String nonce = getNonceFromResponse(response);
-            if (((nonce != null) && nonce.equals(mLastNonce)) ||
-                    (nonce == null)) {
-                mLastNonce = nonce;
+            if (nonce == null) {
+                onError(SipErrorCode.SERVER_ERROR,
+                        "server does not provide challenge");
                 return false;
-            } else {
+            } else if (mAuthenticationRetryCount < 2) {
                 mClientTransaction = mSipHelper.handleChallenge(
                         event, getAccountManager());
                 mDialog = mClientTransaction.getDialog();
-                mLastNonce = nonce;
+                mAuthenticationRetryCount++;
+                if (isLoggable(this, event)) {
+                    Log.d(TAG, "   authentication retry count="
+                            + mAuthenticationRetryCount);
+                }
                 return true;
+            } else {
+                onError(SipErrorCode.INVALID_CREDENTIALS,
+                        "incorrect username or password");
+                return false;
             }
         }
 
@@ -995,12 +994,6 @@ class SipSessionGroup implements SipListener {
                                 getRealmFromResponse(response));
                     } else if (handleAuthentication(event)) {
                         addSipSession(this);
-                    } else if (mLastNonce == null) {
-                        onError(SipErrorCode.SERVER_ERROR,
-                                "server does not provide challenge");
-                    } else {
-                        onError(SipErrorCode.INVALID_CREDENTIALS,
-                                "incorrect username or password");
                     }
                     return true;
                 case Response.REQUEST_PENDING:

@@ -95,7 +95,7 @@ public class SyncStorageEngine extends Handler {
 
     public static final long NOT_IN_BACKOFF_MODE = -1;
 
-    private static final Intent SYNC_CONNECTION_SETTING_CHANGED_INTENT =
+    public static final Intent SYNC_CONNECTION_SETTING_CHANGED_INTENT =
             new Intent("com.android.sync.SYNC_CONN_STATUS_CHANGED");
 
     // TODO: i18n -- grab these out of resources.

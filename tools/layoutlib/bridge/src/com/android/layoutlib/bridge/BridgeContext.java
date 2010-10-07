@@ -245,8 +245,8 @@ public final class BridgeContext extends Context {
         BridgeXmlBlockParser parser = null;
         if (set instanceof BridgeXmlBlockParser) {
             parser = (BridgeXmlBlockParser)set;
-        } else {
-            // reall this should not be happening since its instantiated in Bridge
+        } else if (set != null) { // null parser is ok
+            // really this should not be happening since its instantiated in Bridge
             mLogger.error("Parser is not a BridgeXmlBlockParser!");
             return null;
         }
@@ -255,13 +255,16 @@ public final class BridgeContext extends Context {
         TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes);
 
         BridgeTypedArray ta = ((BridgeResources) mResources).newTypeArray(attrs.length,
-                parser.isPlatformFile());
+                parser != null ? parser.isPlatformFile() : true);
 
         // resolve the defStyleAttr value into a IStyleResourceValue
         IStyleResourceValue defStyleValues = null;
 
         // look for a custom style.
-        String customStyle = parser.getAttributeValue(null /* namespace*/, "style");
+        String customStyle = null;
+        if (parser != null) {
+            customStyle = parser.getAttributeValue(null /* namespace*/, "style");
+        }
         if (customStyle != null) {
             IResourceValue item = findResValue(customStyle);
 
@@ -308,7 +311,10 @@ public final class BridgeContext extends Context {
                 int index = styleAttribute.getKey().intValue();
 
                 String name = styleAttribute.getValue();
-                String value = parser.getAttributeValue(namespace, name);
+                String value = null;
+                if (parser != null) {
+                    value = parser.getAttributeValue(namespace, name);
+                }
 
                 // if there's no direct value for this attribute in the XML, we look for default
                 // values in the widget defStyle, and then in the theme.
