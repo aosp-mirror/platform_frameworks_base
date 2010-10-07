@@ -1139,13 +1139,13 @@
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Holo.Light.Large">
+    <style name="TextAppearance.Holo.Light.Large" parent="TextAppearance.Large">
     </style>
 
-    <style name="TextAppearance.Holo.Light.Medium">
+    <style name="TextAppearance.Holo.Light.Medium" parent="TextAppearance.Medium">
     </style>
 
-    <style name="TextAppearance.Holo.Light.Small">
+    <style name="TextAppearance.Holo.Light.Small" parent="TextAppearance.Small">
     </style>
  
    <style name="TextAppearance.Holo.Light.Large.Inverse">
