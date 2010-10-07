@@ -1838,8 +1838,31 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
 
         case OMX_EventPortSettingsChanged:
         {
+            CODEC_LOGV("OMX_EventPortSettingsChanged(port=%ld, data2=0x%08lx)",
+                       data1, data2);
+
             if (data2 == 0 || data2 == OMX_IndexParamPortDefinition) {
                 onPortSettingsChanged(data1);
+            } else if (data1 == kPortIndexOutput
+                    && data2 == OMX_IndexConfigCommonOutputCrop) {
+
+                OMX_CONFIG_RECTTYPE rect;
+                rect.nPortIndex = kPortIndexOutput;
+                InitOMXParams(&rect);
+
+                status_t err =
+                         mOMX->getConfig(
+                             mNode, OMX_IndexConfigCommonOutputCrop,
+                             &rect, sizeof(rect));
+
+                if (err == OK) {
+                    CODEC_LOGV(
+                            "output crop (%ld, %ld, %ld, %ld)",
+                            rect.nLeft, rect.nTop, rect.nWidth, rect.nHeight);
+                } else {
+                    CODEC_LOGE("getConfig(OMX_IndexConfigCommonOutputCrop) "
+                               "returned error 0x%08x", err);
+                }
             }
             break;
         }
