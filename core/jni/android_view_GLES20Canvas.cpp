@@ -103,8 +103,8 @@ static void android_view_GLES20Canvas_setViewport(JNIEnv* env, jobject canvas,
 }
 
 static void android_view_GLES20Canvas_prepare(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer) {
-    renderer->prepare();
+        OpenGLRenderer* renderer, jboolean opaque) {
+    renderer->prepare(opaque);
 }
 
 static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject canvas,
@@ -445,7 +445,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
     { "nSetViewport",       "(III)V",          (void*) android_view_GLES20Canvas_setViewport },
-    { "nPrepare",           "(I)V",            (void*) android_view_GLES20Canvas_prepare },
+    { "nPrepare",           "(IZ)V",           (void*) android_view_GLES20Canvas_prepare },
     { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
     { "nAcquireContext",    "(I)V",            (void*) android_view_GLES20Canvas_acquireContext },
     { "nReleaseContext",    "(I)V",            (void*) android_view_GLES20Canvas_releaseContext },

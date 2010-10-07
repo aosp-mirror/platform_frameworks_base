@@ -135,10 +135,10 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     void onPreDraw() {
-        nPrepare(mRenderer);
+        nPrepare(mRenderer, mOpaque);
     }
 
-    private native void nPrepare(int renderer);
+    private native void nPrepare(int renderer, boolean opaque);
 
     @Override
     void onPostDraw() {

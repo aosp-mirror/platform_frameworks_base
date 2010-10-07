@@ -209,7 +209,7 @@ public:
     ~DisplayListRenderer();
 
     void setViewport(int width, int height);
-    void prepare();
+    void prepare(bool opaque);
 
     void acquireContext();
     void releaseContext();

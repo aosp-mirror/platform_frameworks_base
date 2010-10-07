@@ -150,7 +150,7 @@ void OpenGLRenderer::setViewport(int width, int height) {
     mFirstSnapshot->viewport.set(0, 0, width, height);
 }
 
-void OpenGLRenderer::prepare() {
+void OpenGLRenderer::prepare(bool opaque) {
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;
@@ -160,8 +160,10 @@ void OpenGLRenderer::prepare() {
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    if (!opaque) {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
 
     glEnable(GL_SCISSOR_TEST);
     glScissor(0, 0, mWidth, mHeight);
@@ -325,7 +327,10 @@ int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bot
  *   - Issue the drawing
  *
  * Switching rendering target n + 1 times per drawn primitive is extremely costly.
- * To avoid this, layers are implemented in a different way here.
+ * To avoid this, layers are implemented in a different way here, at least in the
+ * general case. FBOs are used, as an optimization, when the "clip to layer" flag
+ * is set. When this flag is set we can redirect all drawing operations into a
+ * single FBO.
  *
  * This implementation relies on the frame buffer being at least RGBA 8888. When
  * a layer is created, only a texture is created, not an FBO. The content of the
