@@ -3241,8 +3241,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            pkg.applicationInfo.nativeLibraryDir = pkgSetting.nativeLibraryPathString;
-
             /*
              * Set the data dir to the default "/data/data/<package name>/lib"
              * if we got here without anyone telling us different (e.g., apps
@@ -3252,10 +3250,14 @@ class PackageManagerService extends IPackageManager.Stub {
              * This happens during an upgrade from a package settings file that
              * doesn't have a native library path attribute at all.
              */
-            if (pkgSetting.nativeLibraryPathString == null && pkg.applicationInfo.dataDir != null) {
-                final String nativeLibraryPath = new File(dataPath, LIB_DIR_NAME).getPath();
-                pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
-                pkgSetting.nativeLibraryPathString = nativeLibraryPath;
+            if (pkg.applicationInfo.nativeLibraryDir == null && pkg.applicationInfo.dataDir != null) {
+                if (pkgSetting.nativeLibraryPathString == null) {
+                    final String nativeLibraryPath = new File(dataPath, LIB_DIR_NAME).getPath();
+                    pkg.applicationInfo.nativeLibraryDir = nativeLibraryPath;
+                    pkgSetting.nativeLibraryPathString = nativeLibraryPath;
+                } else {
+                    pkg.applicationInfo.nativeLibraryDir = pkgSetting.nativeLibraryPathString;
+                }
             }
 
             pkgSetting.uidError = uidError;
@@ -8051,7 +8053,7 @@ class PackageManagerService extends IPackageManager.Stub {
             if (p != null) {
                 if (!p.codePath.equals(codePath)) {
                     // Check to see if its a disabled system app
-                    if((p != null) && ((p.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
+                    if ((p.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                         // This is an updated system app with versions in both system
                         // and data partition. Just let the most recent version
                         // take precedence.
@@ -8062,6 +8064,13 @@ class PackageManagerService extends IPackageManager.Stub {
                         // let's log a message about it.
                         Slog.i(TAG, "Package " + name + " codePath changed from " + p.codePath
                                 + " to " + codePath + "; Retaining data and using new");
+                        /*
+                         * Since we've changed paths, we need to prefer the new
+                         * native library path over the one stored in the
+                         * package settings since we might have moved from
+                         * internal to external storage or vice versa.
+                         */
+                        p.nativeLibraryPathString = nativeLibraryPathString;
                     }
                 }
                 if (p.sharedUser != sharedUser) {
