@@ -65,6 +65,13 @@ public class SipManager {
     public static final String EXTRA_OFFER_SD = "android:sipOfferSD";
 
     /**
+     * Action to broadcast when SipService is up.
+     * Internal use only.
+     * @hide
+     */
+    public static final String ACTION_SIP_SERVICE_UP =
+            "android.net.sip.SIP_SERVICE_UP";
+    /**
      * Action string for the incoming call intent for the Phone app.
      * Internal use only.
      * @hide
