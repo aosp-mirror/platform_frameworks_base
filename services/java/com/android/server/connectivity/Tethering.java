@@ -113,7 +113,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private String[] mDnsServers;
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
-    private static final String DNS_DEFAULT_SERVER2 = "4.2.2.2";
+    private static final String DNS_DEFAULT_SERVER2 = "8.8.4.4";
 
     // resampled each time we turn on tethering - used as cache for settings/config-val
     private boolean mDunRequired;  // configuration info - must use DUN apn on 3g
