@@ -399,7 +399,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "uid=" + uid + " flags=0x" + Integer.toHexString(flags)
                 + " theme=0x" + Integer.toHexString(theme));
         pw.println(prefix + "sourceDir=" + sourceDir);
-        if (!sourceDir.equals(publicSourceDir)) {
+        if (sourceDir == null) {
+            if (publicSourceDir != null) {
+                pw.println(prefix + "publicSourceDir=" + publicSourceDir);
+            }
+        } else if (!sourceDir.equals(publicSourceDir)) {
             pw.println(prefix + "publicSourceDir=" + publicSourceDir);
         }
         if (resourceDirs != null) {
