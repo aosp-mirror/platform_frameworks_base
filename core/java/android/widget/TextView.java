@@ -92,11 +92,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
-import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.view.ViewRoot;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
@@ -7227,9 +7227,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Two ints packed in a long
-        return (((long) start) << 32) | end;
+        return packRangeInLong(start, end);
     }
     
+    private static long packRangeInLong(int start, int end) {
+        return (((long) start) << 32) | end;
+    }
+
+    private static int extractRangeStartFromLong(long range) {
+        return (int) (range >>> 32);
+    }
+
+    private static int extractRangeEndFromLong(long range) {
+        return (int) (range & 0x00000000FFFFFFFFL);
+    }
+
     private void selectCurrentWord() {
         // In case selection mode is started after an orientation change or after a select all,
         // use the current selection instead of creating one
@@ -7247,14 +7259,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         
         long wordLimits = getWordLimitsAt(minOffset);
         if (wordLimits >= 0) {
-            selectionStart = (int) (wordLimits >>> 32);
+            selectionStart = extractRangeStartFromLong(wordLimits);
         } else {
             selectionStart = Math.max(minOffset - 5, 0);
         }
 
         wordLimits = getWordLimitsAt(maxOffset);
         if (wordLimits >= 0) {
-            selectionEnd = (int) (wordLimits & 0x00000000FFFFFFFFL);
+            selectionEnd = extractRangeEndFromLong(wordLimits);
         } else {
             selectionEnd = Math.min(maxOffset + 5, mText.length());
         }
@@ -7269,8 +7281,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         long wordLimits = getWordLimitsAt(mLastTouchOffset);
         if (wordLimits >= 0) {
-            int start = (int) (wordLimits >>> 32);
-            int end = (int) (wordLimits & 0x00000000FFFFFFFFL);
+            int start = extractRangeStartFromLong(wordLimits);
+            int end = extractRangeEndFromLong(wordLimits);
             return mTransformed.subSequence(start, end).toString();
         } else {
             return null;
@@ -7485,43 +7497,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 CharSequence paste = clip.getText();
 
                 if (paste != null && paste.length() > 0) {
-                    // Paste adds/removes spaces before or after insertion as needed.
-
-                    if (Character.isSpaceChar(paste.charAt(0))) {
-                        if (min > 0 && Character.isSpaceChar(mTransformed.charAt(min - 1))) {
-                            // Two spaces at beginning of paste: remove one
-                            final int originalLength = mText.length();
-                            ((Editable) mText).replace(min - 1, min, "");
-                            // Due to filters, there is no garantee that exactly one character was
-                            // removed. Count instead.
-                            final int delta = mText.length() - originalLength;
-                            min += delta;
-                            max += delta;
-                        }
-                    } else {
-                        if (min > 0 && !Character.isSpaceChar(mTransformed.charAt(min - 1))) {
-                            // No space at beginning of paste: add one
-                            final int originalLength = mText.length();
-                            ((Editable) mText).replace(min, min, " ");
-                            // Taking possible filters into account as above.
-                            final int delta = mText.length() - originalLength;
-                            min += delta;
-                            max += delta;
-                        }
-                    }
-
-                    if (Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
-                        if (max < mText.length() && Character.isSpaceChar(mTransformed.charAt(max))) {
-                            // Two spaces at end of paste: remove one
-                            ((Editable) mText).replace(max, max + 1, "");
-                        }
-                    } else {
-                        if (max < mText.length() && !Character.isSpaceChar(mTransformed.charAt(max))) {
-                            // No space at end of paste: add one
-                            ((Editable) mText).replace(max, max, " ");
-                        }
-                    }
-
+                    long minMax = prepareSpacesAroundPaste(min, max, paste);
+                    min = extractRangeStartFromLong(minMax);
+                    max = extractRangeEndFromLong(minMax);
                     Selection.setSelection((Spannable) mText, max);
                     ((Editable) mText).replace(min, max, paste);
                     stopTextSelectionMode();
@@ -7555,6 +7533,49 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
         return false;
+    }
+
+    /**
+     * Prepare text so that there are not zero or two spaces at beginning and end of region defined
+     * by [min, max] when replacing this region by paste.
+     */
+    private long prepareSpacesAroundPaste(int min, int max, CharSequence paste) {
+        // Paste adds/removes spaces before or after insertion as needed.
+        if (Character.isSpaceChar(paste.charAt(0))) {
+            if (min > 0 && Character.isSpaceChar(mTransformed.charAt(min - 1))) {
+                // Two spaces at beginning of paste: remove one
+                final int originalLength = mText.length();
+                ((Editable) mText).replace(min - 1, min, "");
+                // Due to filters, there is no garantee that exactly one character was
+                // removed. Count instead.
+                final int delta = mText.length() - originalLength;
+                min += delta;
+                max += delta;
+            }
+        } else {
+            if (min > 0 && !Character.isSpaceChar(mTransformed.charAt(min - 1))) {
+                // No space at beginning of paste: add one
+                final int originalLength = mText.length();
+                ((Editable) mText).replace(min, min, " ");
+                // Taking possible filters into account as above.
+                final int delta = mText.length() - originalLength;
+                min += delta;
+                max += delta;
+            }
+        }
+
+        if (Character.isSpaceChar(paste.charAt(paste.length() - 1))) {
+            if (max < mText.length() && Character.isSpaceChar(mTransformed.charAt(max))) {
+                // Two spaces at end of paste: remove one
+                ((Editable) mText).replace(max, max + 1, "");
+            }
+        } else {
+            if (max < mText.length() && !Character.isSpaceChar(mTransformed.charAt(max))) {
+                // No space at end of paste: add one
+                ((Editable) mText).replace(max, max, " ");
+            }
+        }
+        return packRangeInLong(min, max);
     }
 
     @Override
