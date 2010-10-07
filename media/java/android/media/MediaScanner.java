@@ -117,6 +117,10 @@ public class MediaScanner
             Files.FileColumns.DATE_MODIFIED, // 3
     };
 
+    private static final String[] ID_PROJECTION = new String[] {
+            Files.FileColumns._ID,
+    };
+
     private static final int FILES_PRESCAN_ID_COLUMN_INDEX = 0;
     private static final int FILES_PRESCAN_PATH_COLUMN_INDEX = 1;
     private static final int FILES_PRESCAN_FORMAT_COLUMN_INDEX = 2;
@@ -932,6 +936,14 @@ public class MediaScanner
             if (c != null) {
                 c.close();
             }
+        }
+
+        // compute original size of images
+        mOriginalCount = 0;
+        c = mMediaProvider.query(mImagesUri, ID_PROJECTION, null, null, null);
+        if (c != null) {
+            mOriginalCount = c.getCount();
+            c.close();
         }
     }
 
