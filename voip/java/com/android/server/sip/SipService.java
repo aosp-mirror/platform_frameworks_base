@@ -100,6 +100,7 @@ public final class SipService extends ISipService.Stub {
     public static void start(Context context) {
         if (SipManager.isApiSupported(context)) {
             ServiceManager.addService("sip", new SipService(context));
+            context.sendBroadcast(new Intent(SipManager.ACTION_SIP_SERVICE_UP));
             Log.i(TAG, "SIP service started");
         }
     }
