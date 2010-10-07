@@ -2775,7 +2775,7 @@ class ContextImpl extends Context {
             synchronized (this) {
                 if (mDiskWritesInFlight > 0) {
                     // If we know we caused it, it's not unexpected.
-                    Log.d(TAG, "disk write in flight, not unexpected.");
+                    if (DEBUG) Log.d(TAG, "disk write in flight, not unexpected.");
                     return false;
                 }
             }
