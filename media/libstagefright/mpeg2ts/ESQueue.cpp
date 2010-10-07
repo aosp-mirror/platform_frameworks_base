@@ -115,6 +115,11 @@ static status_t getNextNALUnit(
     return OK;
 }
 
+void ElementaryStreamQueue::clear() {
+    mBuffer->setRange(0, 0);
+    mFormat.clear();
+}
+
 status_t ElementaryStreamQueue::appendData(
         const void *data, size_t size, int64_t timeUs) {
     if (mBuffer == NULL || mBuffer->size() == 0) {
@@ -147,7 +152,7 @@ status_t ElementaryStreamQueue::appendData(
     if (mBuffer == NULL || neededSize > mBuffer->capacity()) {
         neededSize = (neededSize + 65535) & ~65535;
 
-        LOGI("resizing buffer to size %d", neededSize);
+        LOGV("resizing buffer to size %d", neededSize);
 
         sp<ABuffer> buffer = new ABuffer(neededSize);
         if (mBuffer != NULL) {
@@ -497,6 +502,8 @@ sp<MetaData> ElementaryStreamQueue::MakeAVCCodecSpecificData(
     meta->setData(kKeyAVCC, 0, csd->data(), csd->size());
     meta->setInt32(kKeyWidth, width);
     meta->setInt32(kKeyHeight, height);
+
+    LOGI("found AVC codec config (%d x %d)", width, height);
 
     return meta;
 }

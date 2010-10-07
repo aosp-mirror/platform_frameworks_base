@@ -40,6 +40,7 @@ struct AnotherPacketSource : public MediaSource {
     bool hasBufferAvailable(status_t *finalResult);
 
     void queueAccessUnit(const sp<ABuffer> &buffer);
+    void queueDiscontinuity();
     void signalEOS(status_t result);
 
 protected:

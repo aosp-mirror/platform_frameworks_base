@@ -504,7 +504,7 @@ sp<MediaSource> OMXCodec::Create(
 
             observer->setCodec(codec);
 
-            err = codec->configureCodec(meta);
+            err = codec->configureCodec(meta, flags);
 
             if (err == OK) {
                 return codec;
@@ -517,93 +517,95 @@ sp<MediaSource> OMXCodec::Create(
     return NULL;
 }
 
-status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
-    uint32_t type;
-    const void *data;
-    size_t size;
-    if (meta->findData(kKeyESDS, &type, &data, &size)) {
-        ESDS esds((const char *)data, size);
-        CHECK_EQ(esds.InitCheck(), OK);
+status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
+    if (!(flags & kIgnoreCodecSpecificData)) {
+        uint32_t type;
+        const void *data;
+        size_t size;
+        if (meta->findData(kKeyESDS, &type, &data, &size)) {
+            ESDS esds((const char *)data, size);
+            CHECK_EQ(esds.InitCheck(), OK);
 
-        const void *codec_specific_data;
-        size_t codec_specific_data_size;
-        esds.getCodecSpecificInfo(
-                &codec_specific_data, &codec_specific_data_size);
+            const void *codec_specific_data;
+            size_t codec_specific_data_size;
+            esds.getCodecSpecificInfo(
+                    &codec_specific_data, &codec_specific_data_size);
 
-        addCodecSpecificData(
-                codec_specific_data, codec_specific_data_size);
-    } else if (meta->findData(kKeyAVCC, &type, &data, &size)) {
-        // Parse the AVCDecoderConfigurationRecord
+            addCodecSpecificData(
+                    codec_specific_data, codec_specific_data_size);
+        } else if (meta->findData(kKeyAVCC, &type, &data, &size)) {
+            // Parse the AVCDecoderConfigurationRecord
 
-        const uint8_t *ptr = (const uint8_t *)data;
+            const uint8_t *ptr = (const uint8_t *)data;
 
-        CHECK(size >= 7);
-        CHECK_EQ(ptr[0], 1);  // configurationVersion == 1
-        uint8_t profile = ptr[1];
-        uint8_t level = ptr[3];
+            CHECK(size >= 7);
+            CHECK_EQ(ptr[0], 1);  // configurationVersion == 1
+            uint8_t profile = ptr[1];
+            uint8_t level = ptr[3];
 
-        // There is decodable content out there that fails the following
-        // assertion, let's be lenient for now...
-        // CHECK((ptr[4] >> 2) == 0x3f);  // reserved
+            // There is decodable content out there that fails the following
+            // assertion, let's be lenient for now...
+            // CHECK((ptr[4] >> 2) == 0x3f);  // reserved
 
-        size_t lengthSize = 1 + (ptr[4] & 3);
+            size_t lengthSize = 1 + (ptr[4] & 3);
 
-        // commented out check below as H264_QVGA_500_NO_AUDIO.3gp
-        // violates it...
-        // CHECK((ptr[5] >> 5) == 7);  // reserved
+            // commented out check below as H264_QVGA_500_NO_AUDIO.3gp
+            // violates it...
+            // CHECK((ptr[5] >> 5) == 7);  // reserved
 
-        size_t numSeqParameterSets = ptr[5] & 31;
+            size_t numSeqParameterSets = ptr[5] & 31;
 
-        ptr += 6;
-        size -= 6;
+            ptr += 6;
+            size -= 6;
 
-        for (size_t i = 0; i < numSeqParameterSets; ++i) {
-            CHECK(size >= 2);
-            size_t length = U16_AT(ptr);
+            for (size_t i = 0; i < numSeqParameterSets; ++i) {
+                CHECK(size >= 2);
+                size_t length = U16_AT(ptr);
 
-            ptr += 2;
-            size -= 2;
+                ptr += 2;
+                size -= 2;
 
-            CHECK(size >= length);
+                CHECK(size >= length);
 
-            addCodecSpecificData(ptr, length);
+                addCodecSpecificData(ptr, length);
 
-            ptr += length;
-            size -= length;
-        }
+                ptr += length;
+                size -= length;
+            }
 
-        CHECK(size >= 1);
-        size_t numPictureParameterSets = *ptr;
-        ++ptr;
-        --size;
+            CHECK(size >= 1);
+            size_t numPictureParameterSets = *ptr;
+            ++ptr;
+            --size;
 
-        for (size_t i = 0; i < numPictureParameterSets; ++i) {
-            CHECK(size >= 2);
-            size_t length = U16_AT(ptr);
+            for (size_t i = 0; i < numPictureParameterSets; ++i) {
+                CHECK(size >= 2);
+                size_t length = U16_AT(ptr);
 
-            ptr += 2;
-            size -= 2;
+                ptr += 2;
+                size -= 2;
 
-            CHECK(size >= length);
+                CHECK(size >= length);
 
-            addCodecSpecificData(ptr, length);
+                addCodecSpecificData(ptr, length);
 
-            ptr += length;
-            size -= length;
-        }
+                ptr += length;
+                size -= length;
+            }
 
-        CODEC_LOGV(
-                "AVC profile = %d (%s), level = %d",
-                (int)profile, AVCProfileToString(profile), level);
+            CODEC_LOGV(
+                    "AVC profile = %d (%s), level = %d",
+                    (int)profile, AVCProfileToString(profile), level);
 
-        if (!strcmp(mComponentName, "OMX.TI.Video.Decoder")
-            && (profile != kAVCProfileBaseline || level > 30)) {
-            // This stream exceeds the decoder's capabilities. The decoder
-            // does not handle this gracefully and would clobber the heap
-            // and wreak havoc instead...
+            if (!strcmp(mComponentName, "OMX.TI.Video.Decoder")
+                && (profile != kAVCProfileBaseline || level > 30)) {
+                // This stream exceeds the decoder's capabilities. The decoder
+                // does not handle this gracefully and would clobber the heap
+                // and wreak havoc instead...
 
-            LOGE("Profile and/or level exceed the decoder's capabilities.");
-            return ERROR_UNSUPPORTED;
+                LOGE("Profile and/or level exceed the decoder's capabilities.");
+                return ERROR_UNSUPPORTED;
+            }
         }
     }
 

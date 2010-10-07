@@ -220,6 +220,7 @@ private:
     status_t setDataSource_l(const sp<DataSource> &dataSource);
     status_t setDataSource_l(const sp<MediaExtractor> &extractor);
     void reset_l();
+    void partial_reset_l();
     status_t seekTo_l(int64_t timeUs);
     status_t pause_l(bool at_eos = false);
     void initRenderer_l();
@@ -231,7 +232,7 @@ private:
     status_t initAudioDecoder();
 
     void setVideoSource(sp<MediaSource> source);
-    status_t initVideoDecoder();
+    status_t initVideoDecoder(uint32_t flags = 0);
 
     void onStreamDone();
 
