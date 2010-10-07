@@ -537,8 +537,14 @@ public class ScrollView extends FrameLayout {
                         final int pulledToY = oldY + deltaY;
                         if (pulledToY < 0) {
                             mEdgeGlowTop.onPull((float) deltaY / getHeight());
+                            if (!mEdgeGlowBottom.isFinished()) {
+                                mEdgeGlowBottom.onRelease();
+                            }
                         } else if (pulledToY > range) {
                             mEdgeGlowBottom.onPull((float) deltaY / getHeight());
+                            if (!mEdgeGlowTop.isFinished()) {
+                                mEdgeGlowTop.onRelease();
+                            }
                         }
                     }
                 }
