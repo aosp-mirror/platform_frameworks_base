@@ -212,8 +212,15 @@ struct InputWindow {
     int32_t ownerPid;
     int32_t ownerUid;
 
-    bool visibleFrameIntersects(const InputWindow* other) const;
     bool touchableAreaContainsPoint(int32_t x, int32_t y) const;
+    bool frameContainsPoint(int32_t x, int32_t y) const;
+
+    /* Returns true if the window is of a trusted type that is allowed to silently
+     * overlay other windows for the purpose of implementing the secure views feature.
+     * Trusted overlays, such as IME windows, can partly obscure other windows without causing
+     * motion events to be delivered to them with AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED.
+     */
+    bool isTrustedOverlay() const;
 };
 
 
@@ -973,7 +980,7 @@ private:
     bool shouldPokeUserActivityForCurrentInputTargetsLocked();
     void pokeUserActivityLocked(nsecs_t eventTime, int32_t eventType);
     bool checkInjectionPermission(const InputWindow* window, const InjectionState* injectionState);
-    bool isWindowObscuredLocked(const InputWindow* window);
+    bool isWindowObscuredAtPointLocked(const InputWindow* window, int32_t x, int32_t y) const;
     bool isWindowFinishedWithPreviousInputLocked(const InputWindow* window);
     String8 getApplicationWindowLabelLocked(const InputApplication* application,
             const InputWindow* window);
