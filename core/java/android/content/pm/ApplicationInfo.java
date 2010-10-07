@@ -296,12 +296,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * the normal application lifecycle.
      *
      * <p>Comes from the
-     * {@link android.R.styleable#AndroidManifestApplication_heavyWeight android:heavyWeight}
+     * {@link android.R.styleable#AndroidManifestApplication_cantSaveState android:cantSaveState}
      * attribute of the &lt;application&gt; tag.
      *
      * {@hide}
      */
-    public static final int CANT_SAVE_STATE = 1<<27;
+    public static final int FLAG_CANT_SAVE_STATE = 1<<27;
 
     /**
      * Flags associated with the application.  Any combination of
@@ -380,6 +380,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean enabled = true;
 
+    /**
+     * For convenient access to package's install location.
+     * @hide
+     */
+    public int installLocation = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+    
     public void dump(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
         if (className != null) {
@@ -456,6 +462,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uid = orig.uid;
         targetSdkVersion = orig.targetSdkVersion;
         enabled = orig.enabled;
+        installLocation = orig.installLocation;
         manageSpaceActivityName = orig.manageSpaceActivityName;
         descriptionRes = orig.descriptionRes;
     }
@@ -488,6 +495,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(uid);
         dest.writeInt(targetSdkVersion);
         dest.writeInt(enabled ? 1 : 0);
+        dest.writeInt(installLocation);
         dest.writeString(manageSpaceActivityName);
         dest.writeString(backupAgentName);
         dest.writeInt(descriptionRes);
@@ -520,6 +528,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uid = source.readInt();
         targetSdkVersion = source.readInt();
         enabled = source.readInt() != 0;
+        installLocation = source.readInt();
         manageSpaceActivityName = source.readString();
         backupAgentName = source.readString();
         descriptionRes = source.readInt();
