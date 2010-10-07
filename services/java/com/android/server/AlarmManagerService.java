@@ -38,9 +38,11 @@ import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -456,25 +458,28 @@ class AlarmManagerService extends IAlarmManager.Stub {
         synchronized (mLock) {
             pw.println("Current Alarm Manager state:");
             if (mRtcWakeupAlarms.size() > 0 || mRtcAlarms.size() > 0) {
+                final long now = System.currentTimeMillis();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 pw.println(" ");
                 pw.print("  Realtime wakeup (now=");
-                        pw.print(System.currentTimeMillis()); pw.println("):");
+                        pw.print(sdf.format(new Date(now))); pw.println("):");
                 if (mRtcWakeupAlarms.size() > 0) {
-                    dumpAlarmList(pw, mRtcWakeupAlarms, "  ", "RTC_WAKEUP");
+                    dumpAlarmList(pw, mRtcWakeupAlarms, "  ", "RTC_WAKEUP", now);
                 }
                 if (mRtcAlarms.size() > 0) {
-                    dumpAlarmList(pw, mRtcAlarms, "  ", "RTC");
+                    dumpAlarmList(pw, mRtcAlarms, "  ", "RTC", now);
                 }
             }
             if (mElapsedRealtimeWakeupAlarms.size() > 0 || mElapsedRealtimeAlarms.size() > 0) {
+                final long now = SystemClock.elapsedRealtime();
                 pw.println(" ");
                 pw.print("  Elapsed realtime wakeup (now=");
-                        pw.print(SystemClock.elapsedRealtime()); pw.println("):");
+                        TimeUtils.formatDuration(now, pw); pw.println("):");
                 if (mElapsedRealtimeWakeupAlarms.size() > 0) {
-                    dumpAlarmList(pw, mElapsedRealtimeWakeupAlarms, "  ", "ELAPSED_WAKEUP");
+                    dumpAlarmList(pw, mElapsedRealtimeWakeupAlarms, "  ", "ELAPSED_WAKEUP", now);
                 }
                 if (mElapsedRealtimeAlarms.size() > 0) {
-                    dumpAlarmList(pw, mElapsedRealtimeAlarms, "  ", "ELAPSED");
+                    dumpAlarmList(pw, mElapsedRealtimeAlarms, "  ", "ELAPSED", now);
                 }
             }
             
@@ -499,12 +504,13 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
 
-    private static final void dumpAlarmList(PrintWriter pw, ArrayList<Alarm> list, String prefix, String label) {
+    private static final void dumpAlarmList(PrintWriter pw, ArrayList<Alarm> list,
+            String prefix, String label, long now) {
         for (int i=list.size()-1; i>=0; i--) {
             Alarm a = list.get(i);
             pw.print(prefix); pw.print(label); pw.print(" #"); pw.print(i);
                     pw.print(": "); pw.println(a);
-            a.dump(pw, prefix + "  ");
+            a.dump(pw, prefix + "  ", now);
         }
     }
     
@@ -619,10 +625,9 @@ class AlarmManagerService extends IAlarmManager.Stub {
             return sb.toString();
         }
 
-        public void dump(PrintWriter pw, String prefix)
-        {
+        public void dump(PrintWriter pw, String prefix, long now) {
             pw.print(prefix); pw.print("type="); pw.print(type);
-                    pw.print(" when="); pw.print(when);
+                    pw.print(" when="); TimeUtils.formatDuration(when, now, pw);
                     pw.print(" repeatInterval="); pw.print(repeatInterval);
                     pw.print(" count="); pw.println(count);
             pw.print(prefix); pw.print("operation="); pw.println(operation);
