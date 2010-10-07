@@ -61,7 +61,6 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
             Environment.getRootDirectory().getAbsolutePath();
     private final static String CACHE_DIR =
             Environment.getDownloadCacheDirectory().getAbsolutePath();
-    protected MultipleDownloadsCompletedReceiver mReceiver = null;
 
     /**
      * {@inheritDoc}
@@ -72,7 +71,6 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
         setWiFiStateOn(true);
         mServer.play();
         removeAllCurrentDownloads();
-        mReceiver = registerNewMultipleDownloadsReceiver();
     }
 
     /**
@@ -270,7 +268,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
             try {
                 verifyInt(cursor, DownloadManager.COLUMN_STATUS, DownloadManager.STATUS_FAILED);
                 verifyInt(cursor, DownloadManager.COLUMN_REASON,
-                        DownloadManager.ERROR_FILE_ERROR);
+                        DownloadManager.ERROR_FILE_ALREADY_EXISTS);
             } finally {
                 cursor.close();
             }
@@ -429,6 +427,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
                 }
             }
 
+            Log.i(LOG_TAG, "Done creating filler file.");
             assertTrue(DOWNLOAD_FILE_SIZE > (fs.getAvailableBlocks() * blockSize));
             byte[] blobData = generateData(DOWNLOAD_FILE_SIZE, DataType.TEXT);
             long dlRequest = doBasicDownload(blobData);
