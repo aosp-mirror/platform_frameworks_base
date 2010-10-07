@@ -267,8 +267,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Uygulamaların uygulama önbelleği dizinindeki dosyaları silerek telefonda yer açmasına izin verir. Erişim genellikle sistem işlemlerine ve yüksek düzeyde kısıtlı olarak verilir."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Uygulama kaynaklarını taşı"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Bir uygulamanın, uygulama kaynaklarını dahili ve harici ortamlar arasında taşımasına olanak tanır."</string>
-    <!-- outdated translation 4811921703882532070 -->     <string name="permlab_readLogs" msgid="6615778543198967614">"sistem günlük dosyalarını oku"</string>
-    <!-- outdated translation 2257937955580475902 -->     <string name="permdesc_readLogs" msgid="8896449437464867766">"Uygulamaların sistemin çeşitli günlük dosyalarından okumalarına izin verir. Bu, uygulamaların telefon ile neler yaptığınız ile ilgili genel bilgi bulmasına izin verir, ancak bunlar kişisel veya özel bir bilgi içermemelidir."</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"hassas günlük verilerini okuma"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Bir uygulamanın, sistemin çeşitli günlük dosyalarındaki bilgileri okumasına izin verir. Bu izin, uygulamanın, telefonda yaptıklarınızla ilgili genel bilgileri bulmasına olanak sağlar ve bunlar kişisel ve gizli bilgilerinizi de içerebilir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Uygulamanın tanılama grubundaki bir kaynağa ait herhangi bir kaynağı; örneğin /dev içindeki dosyaları okumasına ve bunlara yazmasına izin verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"uygulama bileşenlerini etkinleştir veya devre dışı bırak"</string>
@@ -544,14 +544,10 @@
     <string name="orgTypeWork" msgid="29268870505363872">"İş"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Diğer"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Özel"</string>
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Özel"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Ev"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"İş"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Diğer"</string>
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"<xliff:g id="SOURCE">%1$s</xliff:g> aracılığıyla"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="SOURCE">%2$s</xliff:g> ile <xliff:g id="DATE">%1$s</xliff:g> tarihinde"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN kodunu gir"</string>
