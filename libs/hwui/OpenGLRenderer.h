@@ -67,7 +67,7 @@ public:
 
     virtual void setViewport(int width, int height);
 
-    virtual void prepare();
+    virtual void prepare(bool opaque);
     virtual void finish();
 
     virtual void acquireContext();

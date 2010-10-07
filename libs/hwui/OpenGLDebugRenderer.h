@@ -34,7 +34,7 @@ public:
     ~OpenGLDebugRenderer() {
     }
 
-    void prepare();
+    void prepare(bool opaque);
     void finish();
 
     int saveLayer(float left, float top, float right, float bottom,

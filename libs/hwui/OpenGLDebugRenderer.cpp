@@ -23,10 +23,10 @@
 namespace android {
 namespace uirenderer {
 
-void OpenGLDebugRenderer::prepare() {
+void OpenGLDebugRenderer::prepare(bool opaque) {
     mPrimitivesCount = 0;
     LOGD("========= Frame start =========");
-    OpenGLRenderer::prepare();
+    OpenGLRenderer::prepare(opaque);
 }
 
 void OpenGLDebugRenderer::finish() {
