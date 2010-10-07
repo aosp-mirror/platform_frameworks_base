@@ -287,10 +287,12 @@ public class SurfaceView extends View {
         setMeasuredDimension(width, height);
     }
     
+    /** @hide */
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    protected boolean setFrame(int left, int top, int right, int bottom) {
+        boolean result = super.setFrame(left, top, right, bottom);
         updateWindow(false, false);
+        return result;
     }
 
     @Override

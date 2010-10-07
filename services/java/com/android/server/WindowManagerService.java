@@ -505,7 +505,7 @@ public class WindowManagerService extends IWindowManager.Stub
         InputChannel mServerChannel, mClientChannel;
         WindowState mTargetWindow;
         ArrayList<WindowState> mNotifiedWindows;
-        boolean mDragEnded;
+        boolean mDragInProgress;
 
         private final Rect tmpRect = new Rect();
 
@@ -562,6 +562,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // works correctly in calling out to the apps.
             mDataDescription = new ClipDescription(mData);
             mNotifiedWindows.clear();
+            mDragInProgress = true;
 
             if (DEBUG_DRAG) {
                 Slog.d(TAG, "broadcasting DRAG_STARTED of " + mDataDescription);
@@ -586,7 +587,7 @@ public class WindowManagerService extends IWindowManager.Stub
          * process, so it's safe for the caller to call recycle() on the event afterwards.
          */
         private void sendDragStartedLw(WindowState newWin, DragEvent event) {
-            if (!mDragEnded && newWin.isPotentialDragTarget()) {
+            if (mDragInProgress && newWin.isPotentialDragTarget()) {
                 try {
                     // clone for local callees since dispatch will recycle the event
                     if (Process.myPid() == newWin.mSession.mPid) {
@@ -606,20 +607,22 @@ public class WindowManagerService extends IWindowManager.Stub
          * was begun.  This is a rare case.
          */
         private void sendDragStartedIfNeededLw(WindowState newWin) {
-            // If we have sent the drag-started, we needn't do so again
-            for (WindowState ws : mNotifiedWindows) {
-                if (ws == newWin) {
-                    return;
+            if (mDragInProgress) {
+                // If we have sent the drag-started, we needn't do so again
+                for (WindowState ws : mNotifiedWindows) {
+                    if (ws == newWin) {
+                        return;
+                    }
                 }
+                if (DEBUG_DRAG) {
+                    Slog.d(TAG, "sending DRAG_STARTED to new window " + newWin);
+                }
+                DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED, 0, 0,
+                        mDataDescription, null);
+                // sendDragStartedLw() clones 'event' if the window is process-local
+                sendDragStartedLw(newWin, event);
+                event.recycle();
             }
-            if (DEBUG_DRAG) {
-                Slog.d(TAG, "sending DRAG_STARTED to new window " + newWin);
-            }
-            DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED, 0, 0,
-                    mDataDescription, null);
-            // sendDragStartedLw() clones 'event' if the window is process-local
-            sendDragStartedLw(newWin, event);
-            event.recycle();
         }
 
         void broadcastDragEnded() {
@@ -636,7 +639,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 mNotifiedWindows.clear();
-                mDragEnded = true;
+                mDragInProgress = false;
             }
             evt.recycle();
         }

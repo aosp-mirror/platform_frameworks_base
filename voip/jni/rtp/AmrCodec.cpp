@@ -73,7 +73,7 @@ int AmrCodec::set(int sampleRate, const char *fmtp)
     }
 
     // Handle mode-set and octet-align.
-    char *modes = strcasestr(fmtp, "mode-set=");
+    const char *modes = strcasestr(fmtp, "mode-set=");
     if (modes) {
         mMode = 0;
         mModeSet = 0;

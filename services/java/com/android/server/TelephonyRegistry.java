@@ -584,9 +584,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         if (linkProperties != null) {
             intent.putExtra(Phone.DATA_LINK_PROPERTIES_KEY, linkProperties);
-            NetworkInterface iface = linkProperties.getInterface();
+            String iface = linkProperties.getInterfaceName();
             if (iface != null) {
-                intent.putExtra(Phone.DATA_IFACE_NAME_KEY, iface.getName());
+                intent.putExtra(Phone.DATA_IFACE_NAME_KEY, iface);
             }
         }
         if (linkCapabilities != null) {

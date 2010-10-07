@@ -17,6 +17,7 @@
 package android.net.wifi;
 
 import android.net.DhcpInfo;
+import android.net.ProxyProperties;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -301,8 +302,13 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public enum IpAssignment {
+        /* Use statically configured IP settings. Configuration can be accessed
+         * with ipConfig */
         STATIC,
+        /* Use dynamically configured IP settigns */
         DHCP,
+        /* no IP details are assigned, this is used to indicate
+         * that any existing IP settings should be retained */
         UNASSIGNED
     }
     /**
@@ -313,6 +319,29 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public DhcpInfo ipConfig;
+
+    /**
+     * @hide
+     */
+    public enum ProxySettings {
+        /* No proxy is to be used. Any existing proxy settings
+         * should be cleared. */
+        NONE,
+        /* Use statically configured proxy. Configuration can be accessed
+         * with proxyProperties */
+        STATIC,
+        /* no proxy details are assigned, this is used to indicate
+         * that any existing proxy settings should be retained */
+        UNASSIGNED
+    }
+    /**
+     * @hide
+     */
+    public ProxySettings proxySettings;
+    /**
+     * @hide
+     */
+    public ProxyProperties proxyProperties;
 
     public WifiConfiguration() {
         networkId = INVALID_NETWORK_ID;
@@ -333,6 +362,8 @@ public class WifiConfiguration implements Parcelable {
         }
         ipAssignment = IpAssignment.UNASSIGNED;
         ipConfig = new DhcpInfo();
+        proxySettings = ProxySettings.UNASSIGNED;
+        proxyProperties = new ProxyProperties();
     }
 
     public String toString() {
@@ -419,6 +450,12 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append(" ").append(ipConfig);
         }
         sbuf.append('\n');
+
+        if (proxySettings == ProxySettings.STATIC) {
+            sbuf.append(" ").append("Proxy configuration:").append('\n');
+            sbuf.append(" ").append(proxyProperties);
+        }
+        sbuf.append('\n');
         return sbuf.toString();
     }
 
@@ -458,38 +495,36 @@ public class WifiConfiguration implements Parcelable {
         return 0;
     }
 
-    /**
-     * Returns a copy of this WifiConfiguration.
-     *
-     * @return a copy of this WifiConfiguration.
-     * @hide
-     */
-    public WifiConfiguration clone() {
-        WifiConfiguration config = new WifiConfiguration();
-        config.networkId = networkId;
-        config.status = status;
-        config.SSID = SSID;
-        config.BSSID = BSSID;
-        config.preSharedKey = preSharedKey;
+    /** copy constructor {@hide} */
+    public WifiConfiguration(WifiConfiguration source) {
+        if (source != null) {
+            networkId = source.networkId;
+            status = source.status;
+            SSID = source.SSID;
+            BSSID = source.BSSID;
+            preSharedKey = source.preSharedKey;
 
-        for (int i = 0; i < wepKeys.length; i++)
-            config.wepKeys[i] = wepKeys[i];
+            wepKeys = new String[4];
+            for (int i = 0; i < wepKeys.length; i++)
+                wepKeys[i] = source.wepKeys[i];
 
-        config.wepTxKeyIndex = wepTxKeyIndex;
-        config.priority = priority;
-        config.hiddenSSID = hiddenSSID;
-        config.allowedKeyManagement   = (BitSet) allowedKeyManagement.clone();
-        config.allowedProtocols       = (BitSet) allowedProtocols.clone();
-        config.allowedAuthAlgorithms  = (BitSet) allowedAuthAlgorithms.clone();
-        config.allowedPairwiseCiphers = (BitSet) allowedPairwiseCiphers.clone();
-        config.allowedGroupCiphers    = (BitSet) allowedGroupCiphers.clone();
+            wepTxKeyIndex = source.wepTxKeyIndex;
+            priority = source.priority;
+            hiddenSSID = source.hiddenSSID;
+            allowedKeyManagement   = (BitSet) source.allowedKeyManagement.clone();
+            allowedProtocols       = (BitSet) source.allowedProtocols.clone();
+            allowedAuthAlgorithms  = (BitSet) source.allowedAuthAlgorithms.clone();
+            allowedPairwiseCiphers = (BitSet) source.allowedPairwiseCiphers.clone();
+            allowedGroupCiphers    = (BitSet) source.allowedGroupCiphers.clone();
 
-        for (int i = 0; i < enterpriseFields.length; i++) {
-            config.enterpriseFields[i].setValue(enterpriseFields[i].value());
+            for (int i = 0; i < source.enterpriseFields.length; i++) {
+                enterpriseFields[i].setValue(source.enterpriseFields[i].value());
+            }
+            ipAssignment = source.ipAssignment;
+            ipConfig = new DhcpInfo(source.ipConfig);
+            proxySettings = source.proxySettings;
+            proxyProperties = new ProxyProperties(source.proxyProperties);
         }
-        config.ipAssignment = ipAssignment;
-        config.ipConfig = new DhcpInfo(ipConfig);
-        return config;
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -522,6 +557,8 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(ipConfig.dns2);
         dest.writeInt(ipConfig.serverAddress);
         dest.writeInt(ipConfig.leaseDuration);
+        dest.writeString(proxySettings.name());
+        dest.writeParcelable(proxyProperties, flags);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -557,6 +594,8 @@ public class WifiConfiguration implements Parcelable {
                 config.ipConfig.dns2 = in.readInt();
                 config.ipConfig.serverAddress = in.readInt();
                 config.ipConfig.leaseDuration = in.readInt();
+                config.proxySettings = ProxySettings.valueOf(in.readString());
+                config.proxyProperties = in.readParcelable(null);
                 return config;
             }
 

@@ -1,4 +1,4 @@
-varying vec4 varTex0;
+varying vec2 varTex0;
 
 void main() {
    vec2 t0 = varTex0.xy;

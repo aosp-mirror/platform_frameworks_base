@@ -16,25 +16,41 @@
 
 package android.view;
 
-import com.android.internal.view.BaseSurfaceHolder;
-import com.android.internal.view.IInputMethodCallback;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.RootViewSurfaceTaker;
-
+import android.Manifest;
+import android.app.ActivityManagerNative;
+import android.content.ClipDescription;
+import android.content.ComponentCallbacks;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.*;
+import android.media.AudioManager;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Debug;
+import android.os.Handler;
+import android.os.LatencyTimer;
+import android.os.Looper;
+import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.View.MeasureSpec;
@@ -43,21 +59,14 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
-import android.content.pm.PackageManager;
-import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.ClipData;
-import android.content.ClipDescription;
-import android.content.ComponentCallbacks;
-import android.content.Context;
-import android.app.ActivityManagerNative;
-import android.Manifest;
-import android.media.AudioManager;
+import com.android.internal.view.BaseSurfaceHolder;
+import com.android.internal.view.IInputMethodCallback;
+import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.RootViewSurfaceTaker;
 
-import java.lang.ref.WeakReference;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**

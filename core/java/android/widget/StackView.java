@@ -749,7 +749,9 @@ public class StackView extends AdapterViewAnimator {
         if (mAdapter != null && mWhichChild == -1) {
             mWhichChild = mAdapter.getCount() - 1;
         }
-        setDisplayedChild(mWhichChild);
+        if (mWhichChild >= 0) {
+            setDisplayedChild(mWhichChild);
+        }
     }
 
     LayoutParams createOrReuseLayoutParams(View v) {

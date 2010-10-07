@@ -17,7 +17,6 @@
 package android.media.videoeditor;
 
 import java.io.IOException;
-import java.util.List;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,12 +53,13 @@ public class MediaImageItem extends MediaItem {
      */
     @SuppressWarnings("unused")
     private MediaImageItem() throws IOException {
-        this(null, null, 0, RENDERING_MODE_BLACK_BORDER);
+        this(null, null, null, 0, RENDERING_MODE_BLACK_BORDER);
     }
 
     /**
      * Constructor
      *
+     * @param editor The video editor reference
      * @param mediaItemId The media item id
      * @param filename The image file name
      * @param durationMs The duration of the image on the storyboard
@@ -67,9 +67,10 @@ public class MediaImageItem extends MediaItem {
      *
      * @throws IOException
      */
-    public MediaImageItem(String mediaItemId, String filename, long durationMs, int renderingMode)
+    public MediaImageItem(VideoEditor editor, String mediaItemId, String filename, long durationMs,
+            int renderingMode)
             throws IOException {
-        super(mediaItemId, filename, renderingMode);
+        super(editor, mediaItemId, filename, renderingMode);
 
         // Determine the dimensions of the image
         final BitmapFactory.Options dbo = new BitmapFactory.Options();
@@ -153,55 +154,16 @@ public class MediaImageItem extends MediaItem {
     }
 
     /**
-     * This method will adjust the duration of bounding transitions if the
-     * current duration of the transactions become greater than the maximum
-     * allowable duration.
+     * This method will adjust the duration of bounding transitions, effects
+     * and overlays if the current duration of the transactions become greater
+     * than the maximum allowable duration.
      *
      * @param durationMs The duration of the image in the storyboard timeline
      */
     public void setDuration(long durationMs) {
         mDurationMs = durationMs;
 
-        // Check if the duration of transitions need to be adjusted
-        if (mBeginTransition != null) {
-            final long maxDurationMs = mBeginTransition.getMaximumDuration();
-            if (mBeginTransition.getDuration() > maxDurationMs) {
-                mBeginTransition.setDuration(maxDurationMs);
-            }
-        }
-
-        if (mEndTransition != null) {
-            final long maxDurationMs = mEndTransition.getMaximumDuration();
-            if (mEndTransition.getDuration() > maxDurationMs) {
-                mEndTransition.setDuration(maxDurationMs);
-            }
-        }
-
-        final List<Overlay> overlays = getAllOverlays();
-        for (Overlay overlay : overlays) {
-            // Adjust the start time if necessary
-            if (overlay.getStartTime() < getTimelineDuration()) {
-                overlay.setStartTime(0);
-            }
-
-            // Adjust the duration if necessary
-            if (overlay.getStartTime() + overlay.getDuration() > getTimelineDuration()) {
-                overlay.setDuration(getTimelineDuration() - overlay.getStartTime());
-            }
-        }
-
-        final List<Effect> effects = getAllEffects();
-        for (Effect effect : effects) {
-            // Adjust the start time if necessary
-            if (effect.getStartTime() < getTimelineDuration()) {
-                effect.setStartTime(0);
-            }
-
-            // Adjust the duration if necessary
-            if (effect.getStartTime() + effect.getDuration() > getTimelineDuration()) {
-                effect.setDuration(getTimelineDuration() - effect.getStartTime());
-            }
-        }
+        adjustElementsDuration();
     }
 
     /*

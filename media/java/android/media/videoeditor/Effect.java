@@ -124,6 +124,23 @@ public abstract class Effect {
     }
 
     /**
+     * Set the start time and duration
+     *
+     * @param startTimeMs start time in milliseconds
+     * @param durationMs The duration in milliseconds
+     */
+    public void setStartTimeAndDuration(long startTimeMs, long durationMs) {
+        if (startTimeMs + durationMs > mMediaItem.getTimelineDuration()) {
+            throw new IllegalArgumentException("Invalid start time or duration");
+        }
+
+        mStartTimeMs = startTimeMs;
+        mDurationMs = durationMs;
+
+        mMediaItem.invalidateTransitions(this);
+    }
+
+    /**
      * @return The media item owner
      */
     public MediaItem getMediaItem() {

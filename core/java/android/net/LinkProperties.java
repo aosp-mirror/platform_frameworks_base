@@ -36,8 +36,8 @@ import java.util.Collections;
  */
 public class LinkProperties implements Parcelable {
 
-    private NetworkInterface mIface;
-    private Collection<InetAddress> mAddresses;
+    String mIfaceName;
+    private Collection<LinkAddress> mLinkAddresses;
     private Collection<InetAddress> mDnses;
     private InetAddress mGateway;
     private ProxyProperties mHttpProxy;
@@ -49,34 +49,42 @@ public class LinkProperties implements Parcelable {
     // copy constructor instead of clone
     public LinkProperties(LinkProperties source) {
         if (source != null) {
-            mIface = source.getInterface();
-            mAddresses = source.getAddresses();
+            mIfaceName = source.getInterfaceName();
+            mLinkAddresses = source.getLinkAddresses();
             mDnses = source.getDnses();
             mGateway = source.getGateway();
             mHttpProxy = new ProxyProperties(source.getHttpProxy());
         }
     }
 
-    public void setInterface(NetworkInterface iface) {
-        mIface = iface;
-    }
-    public NetworkInterface getInterface() {
-        return mIface;
-    }
-    public String getInterfaceName() {
-        return (mIface == null ? null : mIface.getName());
+    public void setInterfaceName(String iface) {
+        mIfaceName = iface;
     }
 
-    public void addAddress(InetAddress address) {
-        mAddresses.add(address);
+    public String getInterfaceName() {
+        return mIfaceName;
     }
+
     public Collection<InetAddress> getAddresses() {
-        return Collections.unmodifiableCollection(mAddresses);
+        Collection<InetAddress> addresses = new ArrayList<InetAddress>();
+        for (LinkAddress linkAddress : mLinkAddresses) {
+            addresses.add(linkAddress.getAddress());
+        }
+        return Collections.unmodifiableCollection(addresses);
+    }
+
+    public void addLinkAddress(LinkAddress address) {
+        mLinkAddresses.add(address);
+    }
+
+    public Collection<LinkAddress> getLinkAddresses() {
+        return Collections.unmodifiableCollection(mLinkAddresses);
     }
 
     public void addDns(InetAddress dns) {
         mDnses.add(dns);
     }
+
     public Collection<InetAddress> getDnses() {
         return Collections.unmodifiableCollection(mDnses);
     }
@@ -96,8 +104,8 @@ public class LinkProperties implements Parcelable {
     }
 
     public void clear() {
-        mIface = null;
-        mAddresses = new ArrayList<InetAddress>();
+        mIfaceName = null;
+        mLinkAddresses = new ArrayList<LinkAddress>();
         mDnses = new ArrayList<InetAddress>();
         mGateway = null;
         mHttpProxy = null;
@@ -113,11 +121,11 @@ public class LinkProperties implements Parcelable {
 
     @Override
     public String toString() {
-        String ifaceName = (mIface == null ? "" : "InterfaceName: " + mIface.getName() + " ");
+        String ifaceName = (mIfaceName == null ? "" : "InterfaceName: " + mIfaceName + " ");
 
-        String ip = "IpAddresses: [";
-        for (InetAddress addr : mAddresses) ip +=  addr.getHostAddress() + ",";
-        ip += "] ";
+        String linkAddresses = "LinkAddresses: [";
+        for (LinkAddress addr : mLinkAddresses) linkAddresses += addr.toString();
+        linkAddresses += "] ";
 
         String dns = "DnsAddresses: [";
         for (InetAddress addr : mDnses) dns += addr.getHostAddress() + ",";
@@ -126,7 +134,7 @@ public class LinkProperties implements Parcelable {
         String proxy = (mHttpProxy == null ? "" : "HttpProxy: " + mHttpProxy.toString() + " ");
         String gateway = (mGateway == null ? "" : "Gateway: " + mGateway.getHostAddress() + " ");
 
-        return ifaceName + ip + gateway + dns + proxy;
+        return ifaceName + linkAddresses + gateway + dns + proxy;
     }
 
     /**
@@ -135,12 +143,11 @@ public class LinkProperties implements Parcelable {
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getInterfaceName());
-        dest.writeInt(mAddresses.size());
-        //TODO: explore an easy alternative to preserve hostname
-        // without doing a lookup
-        for(InetAddress a : mAddresses) {
-            dest.writeByteArray(a.getAddress());
+        dest.writeInt(mLinkAddresses.size());
+        for(LinkAddress linkAddress : mLinkAddresses) {
+            dest.writeParcelable(linkAddress, flags);
         }
+
         dest.writeInt(mDnses.size());
         for(InetAddress d : mDnses) {
             dest.writeByteArray(d.getAddress());
@@ -170,16 +177,14 @@ public class LinkProperties implements Parcelable {
                 String iface = in.readString();
                 if (iface != null) {
                     try {
-                        netProp.setInterface(NetworkInterface.getByName(iface));
+                        netProp.setInterfaceName(iface);
                     } catch (Exception e) {
                         return null;
                     }
                 }
                 int addressCount = in.readInt();
                 for (int i=0; i<addressCount; i++) {
-                    try {
-                        netProp.addAddress(InetAddress.getByAddress(in.createByteArray()));
-                    } catch (UnknownHostException e) { }
+                    netProp.addLinkAddress((LinkAddress)in.readParcelable(null));
                 }
                 addressCount = in.readInt();
                 for (int i=0; i<addressCount; i++) {

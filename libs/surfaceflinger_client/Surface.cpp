@@ -416,6 +416,7 @@ void Surface::init()
 {
     ANativeWindow::setSwapInterval  = setSwapInterval;
     ANativeWindow::dequeueBuffer    = dequeueBuffer;
+    ANativeWindow::cancelBuffer     = cancelBuffer;
     ANativeWindow::lockBuffer       = lockBuffer;
     ANativeWindow::queueBuffer      = queueBuffer;
     ANativeWindow::query            = query;
@@ -527,6 +528,12 @@ int Surface::dequeueBuffer(ANativeWindow* window,
     return self->dequeueBuffer(buffer);
 }
 
+int Surface::cancelBuffer(ANativeWindow* window,
+        android_native_buffer_t* buffer) {
+    Surface* self = getSelf(window);
+    return self->cancelBuffer(buffer);
+}
+
 int Surface::lockBuffer(ANativeWindow* window, 
         android_native_buffer_t* buffer) {
     Surface* self = getSelf(window);
@@ -626,6 +633,33 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
     return err;
 }
+
+int Surface::cancelBuffer(android_native_buffer_t* buffer)
+{
+    status_t err = validate();
+    switch (err) {
+    case NO_ERROR:
+        // no error, common case
+        break;
+    case INVALID_OPERATION:
+        // legitimate errors here
+        return err;
+    default:
+        // other errors happen because the surface is now invalid,
+        // for instance because it has been destroyed. In this case,
+        // we just fail silently (canceling a buffer is not technically
+        // an error at this point)
+        return NO_ERROR;
+    }
+
+    int32_t bufIdx = getBufferIndex(GraphicBuffer::getSelf(buffer));
+
+    err = mSharedBufferClient->cancel(bufIdx);
+
+    LOGE_IF(err, "error canceling buffer %d (%s)", bufIdx, strerror(-err));
+    return err;
+}
+
 
 int Surface::lockBuffer(android_native_buffer_t* buffer)
 {

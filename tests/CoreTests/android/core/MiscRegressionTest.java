@@ -66,37 +66,6 @@ public class MiscRegressionTest extends TestCase {
         }
     }
 
-    // Regression test for #1061945: negative Shorts do not
-    // serialize/deserialize correctly
-    @SmallTest
-    public void testShortSerialization() throws Exception {
-        // create an instance of ObjectInputStream
-        String x = new String("serialize_foobar");
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        (new java.io.ObjectOutputStream(baos)).writeObject(x);
-        ObjectInputStream ois = new java.io.ObjectInputStream(
-                new java.io.ByteArrayInputStream(baos.toByteArray()));
-
-        // get the setField(...,, short val) method in question
-        Class<ObjectInputStream> oClass = ObjectInputStream.class;
-        Method m = oClass.getDeclaredMethod("setField", new Class[] { Object.class, Class.class, String.class, short.class});
-        // compose args
-        short start = 123;
-        short origval = -1; // 0xffff
-        Short obj = new Short(start);
-        Class<Short> declaringClass = Short.class;
-        String fieldDescName = "value";
-
-        // test the initial value
-        assertEquals(obj.shortValue(), start);
-        // invoke native method to set the field "value" of type short to the newval
-        m.setAccessible(true); // since the method is private
-        m.invoke(ois, new Object[]{ obj, declaringClass, fieldDescName, new Short(origval)} );
-        // test the set value
-        short res = obj.shortValue();
-        assertEquals("Read and written values must be equal", origval, res);
-    }
-    
     // Regression test for #951285: Suitable LogHandler should be chosen
     // depending on the environment.
     @MediumTest

@@ -21,6 +21,7 @@ import com.android.internal.telephony.gsm.ApnSetting;
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
 
+import android.net.LinkAddress;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.os.AsyncResult;
@@ -29,10 +30,10 @@ import android.os.SystemProperties;
 import android.util.EventLog;
 
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 
 /**
  * {@hide}
@@ -68,7 +69,7 @@ import java.util.HashMap;
  *        EVENT_GET_LAST_FAIL_DONE,
  *        EVENT_DEACTIVATE_DONE.
  *     }
- *   ++ # mInactiveState 
+ *   ++ # mInactiveState
  *        e(doNotifications)
  *        x(clearNotifications) {
  *            EVENT_RESET { notifiyDisconnectCompleted }.
@@ -428,26 +429,25 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                 try {
                     String prefix = "net." + interfaceName + ".";
 
-                    linkProperties.setInterface(NetworkInterface.getByName(interfaceName));
+                    NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
+                    linkProperties.setInterfaceName(interfaceName);
 
                     // TODO: Get gateway and dns via RIL interface not property?
                     String gatewayAddress = SystemProperties.get(prefix + "gw");
                     linkProperties.setGateway(InetAddress.getByName(gatewayAddress));
 
-                    if (response.length > 2) {
-                        String ipAddress = response[2];
-                        linkProperties.addAddress(InetAddress.getByName(ipAddress));
-
-                        // TODO: Get gateway and dns via RIL interface not property?
-                        String dnsServers[] = new String[2];
-                        dnsServers[0] = SystemProperties.get(prefix + "dns1");
-                        dnsServers[1] = SystemProperties.get(prefix + "dns2");
-                        if (isDnsOk(dnsServers)) {
-                            linkProperties.addDns(InetAddress.getByName(dnsServers[0]));
-                            linkProperties.addDns(InetAddress.getByName(dnsServers[1]));
-                        } else {
-                            result = SetupResult.ERR_BadDns;
-                        }
+                    for (InterfaceAddress addr : networkInterface.getInterfaceAddresses()) {
+                        linkProperties.addLinkAddress(new LinkAddress(addr));
+                    }
+                    // TODO: Get gateway and dns via RIL interface not property?
+                    String dnsServers[] = new String[2];
+                    dnsServers[0] = SystemProperties.get(prefix + "dns1");
+                    dnsServers[1] = SystemProperties.get(prefix + "dns2");
+                    if (isDnsOk(dnsServers)) {
+                        linkProperties.addDns(InetAddress.getByName(dnsServers[0]));
+                        linkProperties.addDns(InetAddress.getByName(dnsServers[1]));
+                    } else {
+                        result = SetupResult.ERR_BadDns;
                     }
                 } catch (UnknownHostException e1) {
                     log("onSetupCompleted: UnknowHostException " + e1);

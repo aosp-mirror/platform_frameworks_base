@@ -342,7 +342,7 @@ void DisplayListRenderer::setViewport(int width, int height) {
     mHeight = height;
 }
 
-void DisplayListRenderer::prepare() {
+void DisplayListRenderer::prepare(bool opaque) {
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;

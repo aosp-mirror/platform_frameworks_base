@@ -38,12 +38,14 @@ import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
 
 import android.app.ActivityManagerNative;
+import android.net.LinkAddress;
 import android.net.NetworkInfo;
 import android.net.DhcpInfo;
 import android.net.NetworkUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.LinkProperties;
+import android.net.ProxyProperties;
 import android.net.wifi.WifiConfiguration.Status;
 import android.os.Binder;
 import android.os.Message;
@@ -1251,24 +1253,25 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     private void configureLinkProperties() {
-        try {
-            mLinkProperties.setInterface(NetworkInterface.getByName(mInterfaceName));
-        } catch (SocketException e) {
-            Log.e(TAG, "SocketException creating NetworkInterface from " + mInterfaceName +
-                    ". e=" + e);
-            return;
-        } catch (NullPointerException e) {
-            Log.e(TAG, "NPE creating NetworkInterface. e=" + e);
-            return;
-        }
+
+        mLinkProperties.setInterfaceName(mInterfaceName);
+
         // TODO - fix this for v6
         synchronized (mDhcpInfo) {
-            mLinkProperties.addAddress(NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress));
+            mLinkProperties.addLinkAddress(new LinkAddress(
+                    NetworkUtils.intToInetAddress(mDhcpInfo.ipAddress),
+                    NetworkUtils.intToInetAddress(mDhcpInfo.netmask)));
             mLinkProperties.setGateway(NetworkUtils.intToInetAddress(mDhcpInfo.gateway));
             mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns1));
             mLinkProperties.addDns(NetworkUtils.intToInetAddress(mDhcpInfo.dns2));
         }
-        // TODO - add proxy info
+
+        ProxyProperties proxyProperties = WifiConfigStore.getProxyProperties(mLastNetworkId);
+        if (proxyProperties != null) {
+            mLinkProperties.setHttpProxy(proxyProperties);
+            Log.d(TAG, "netId=" + mLastNetworkId  + " proxy configured: "
+                    + proxyProperties.toString());
+        }
     }
 
     private int getMaxDhcpRetries() {

@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.media.MediaFile;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -252,6 +253,13 @@ final class WebViewCore {
         return mSettings;
     }
 
+    /*
+     * Given mimeType, check whether it's supported in Android media framework.
+     * mimeType could be such as "audio/ogg" and "video/mp4".
+     */
+    /* package */ static boolean supportsMimeType(String mimeType) {
+        return MediaFile.getFileTypeForMimeType(mimeType) > 0;
+    }
     /**
      * Add an error message to the client's console.
      * @param message The message to add

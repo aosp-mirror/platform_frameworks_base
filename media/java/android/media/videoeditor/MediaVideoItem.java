@@ -17,7 +17,6 @@
 package android.media.videoeditor;
 
 import java.io.IOException;
-import java.util.List;
 
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -193,26 +192,29 @@ public class MediaVideoItem extends MediaItem {
      */
     @SuppressWarnings("unused")
     private MediaVideoItem() throws IOException {
-        this(null, null, RENDERING_MODE_BLACK_BORDER);
+        this(null, null, null, RENDERING_MODE_BLACK_BORDER);
     }
 
     /**
      * Constructor
      *
+     * @param editor The video editor reference
      * @param mediaItemId The MediaItem id
      * @param filename The image file name
      * @param renderingMode The rendering mode
      *
      * @throws IOException if the file cannot be opened for reading
      */
-    public MediaVideoItem(String mediaItemId, String filename, int renderingMode)
+    public MediaVideoItem(VideoEditor editor, String mediaItemId, String filename,
+            int renderingMode)
         throws IOException {
-        this(mediaItemId, filename, renderingMode, 0, END_OF_FILE, 100, false, null);
+        this(editor, mediaItemId, filename, renderingMode, 0, END_OF_FILE, 100, false, null);
     }
 
     /**
      * Constructor
      *
+     * @param editor The video editor reference
      * @param mediaItemId The MediaItem id
      * @param filename The image file name
      * @param renderingMode The rendering mode
@@ -227,10 +229,10 @@ public class MediaVideoItem extends MediaItem {
      *
      * @throws IOException if the file cannot be opened for reading
      */
-    MediaVideoItem(String mediaItemId, String filename, int renderingMode,
+    MediaVideoItem(VideoEditor editor, String mediaItemId, String filename, int renderingMode,
             long beginMs, long endMs, int volumePercent, boolean muted,
             String audioWaveformFilename)  throws IOException {
-        super(mediaItemId, filename, renderingMode);
+        super(editor, mediaItemId, filename, renderingMode);
         // TODO: Set these variables correctly
         mWidth = 1080;
         mHeight = 720;
@@ -257,9 +259,9 @@ public class MediaVideoItem extends MediaItem {
 
     /**
      * Sets the start and end marks for trimming a video media item.
-     * This method will adjust the duration of bounding transitions if the
-     * current duration of the transactions become greater than the maximum
-     * allowable duration.
+     * This method will adjust the duration of bounding transitions, effects
+     * and overlays if the current duration of the transactions become greater
+     * than the maximum allowable duration.
      *
      * @param beginMs Start time in milliseconds. Set to 0 to extract from the
      *           beginning
@@ -293,46 +295,7 @@ public class MediaVideoItem extends MediaItem {
         mBeginBoundaryTimeMs = beginMs;
         mEndBoundaryTimeMs = endMs;
 
-        // Check if the duration of transitions need to be adjusted
-        if (mBeginTransition != null) {
-            final long maxDurationMs = mBeginTransition.getMaximumDuration();
-            if (mBeginTransition.getDuration() > maxDurationMs) {
-                mBeginTransition.setDuration(maxDurationMs);
-            }
-        }
-
-        if (mEndTransition != null) {
-            final long maxDurationMs = mEndTransition.getMaximumDuration();
-            if (mEndTransition.getDuration() > maxDurationMs) {
-                mEndTransition.setDuration(maxDurationMs);
-            }
-        }
-
-        final List<Overlay> overlays = getAllOverlays();
-        for (Overlay overlay : overlays) {
-            // Adjust the start time if necessary
-            if (overlay.getStartTime() < mBeginBoundaryTimeMs) {
-                overlay.setStartTime(mBeginBoundaryTimeMs);
-            }
-
-            // Adjust the duration if necessary
-            if (overlay.getStartTime() + overlay.getDuration() > getTimelineDuration()) {
-                overlay.setDuration(getTimelineDuration() - overlay.getStartTime());
-            }
-        }
-
-        final List<Effect> effects = getAllEffects();
-        for (Effect effect : effects) {
-            // Adjust the start time if necessary
-            if (effect.getStartTime() < mBeginBoundaryTimeMs) {
-                effect.setStartTime(mBeginBoundaryTimeMs);
-            }
-
-            // Adjust the duration if necessary
-            if (effect.getStartTime() + effect.getDuration() > getTimelineDuration()) {
-                effect.setDuration(getTimelineDuration() - effect.getStartTime());
-            }
-        }
+        adjustElementsDuration();
     }
 
     /**

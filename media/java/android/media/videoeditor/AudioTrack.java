@@ -183,11 +183,13 @@ public class AudioTrack {
      */
     @SuppressWarnings("unused")
     private AudioTrack() throws IOException {
-        this(null, null);
+        this(null, null, null);
     }
 
     /**
      * Constructor
+     *
+     * @param editor The video editor reference
      * @param audioTrackId The audio track id
      * @param filename The absolute file name
      *
@@ -195,7 +197,8 @@ public class AudioTrack {
      * @throws IllegalArgumentException if file format is not supported or if
      *             the codec is not supported
      */
-    public AudioTrack(String audioTrackId, String filename) throws IOException {
+    public AudioTrack(VideoEditor editor, String audioTrackId, String filename)
+            throws IOException {
         mUniqueId = audioTrackId;
         mFilename = filename;
         mStartTimeMs = 0;
@@ -233,6 +236,7 @@ public class AudioTrack {
     /**
      * Constructor
      *
+     * @param editor The video editor reference
      * @param audioTrackId The audio track id
      * @param filename The audio filename
      * @param startTimeMs the start time in milliseconds (relative to the
@@ -248,8 +252,9 @@ public class AudioTrack {
      *
      * @throws IOException if file is not found
      */
-    AudioTrack(String audioTrackId, String filename, long startTimeMs, long beginMs, long endMs,
-            boolean loop, int volume, boolean muted, String audioWaveformFilename) throws IOException {
+    AudioTrack(VideoEditor editor, String audioTrackId, String filename, long startTimeMs,
+            long beginMs, long endMs, boolean loop, int volume, boolean muted,
+            String audioWaveformFilename) throws IOException {
         mUniqueId = audioTrackId;
         mFilename = filename;
         mStartTimeMs = startTimeMs;

@@ -585,7 +585,7 @@ public abstract class HardwareRenderer {
 
         @Override
         GLES20Canvas createCanvas() {
-            return mGlCanvas = new GLES20Canvas(true);
+            return mGlCanvas = new GLES20Canvas(mTranslucent);
         }
 
         @Override

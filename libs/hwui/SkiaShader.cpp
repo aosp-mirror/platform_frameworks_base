@@ -153,11 +153,31 @@ void SkiaBitmapShader::updateTransforms(Program* program, const mat4& modelView,
 // Linear gradient shader
 ///////////////////////////////////////////////////////////////////////////////
 
+static void toUnitMatrix(const SkPoint pts[2], SkMatrix* matrix) {
+    SkVector vec = pts[1] - pts[0];
+    const float mag = vec.length();
+    const float inv = mag ? 1.0f / mag : 0;
+
+    vec.scale(inv);
+    matrix->setSinCos(-vec.fY, vec.fX, pts[0].fX, pts[0].fY);
+    matrix->postTranslate(-pts[0].fX, -pts[0].fY);
+    matrix->postScale(inv, inv);
+}
+
 SkiaLinearGradientShader::SkiaLinearGradientShader(float* bounds, uint32_t* colors,
         float* positions, int count, SkShader* key, SkShader::TileMode tileMode,
         SkMatrix* matrix, bool blend):
         SkiaShader(kLinearGradient, key, tileMode, tileMode, matrix, blend),
         mBounds(bounds), mColors(colors), mPositions(positions), mCount(count) {
+    SkPoint points[2];
+    points[0].set(bounds[0], bounds[1]);
+    points[1].set(bounds[2], bounds[3]);
+
+    SkMatrix unitMatrix;
+    toUnitMatrix(points, &unitMatrix);
+    mUnitMatrix.load(unitMatrix);
+
+    updateLocalMatrix(matrix);
 }
 
 SkiaLinearGradientShader::~SkiaLinearGradientShader() {
@@ -172,6 +192,23 @@ void SkiaLinearGradientShader::describe(ProgramDescription& description,
     description.gradientType = ProgramDescription::kGradientLinear;
 }
 
+void SkiaLinearGradientShader::computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView) {
+    screenSpace.loadMultiply(mUnitMatrix, mShaderMatrix);
+    screenSpace.multiply(modelView);
+}
+
+void SkiaLinearGradientShader::updateLocalMatrix(const SkMatrix* matrix) {
+    if (matrix) {
+        mat4 localMatrix(*matrix);
+        mShaderMatrix.loadInverse(localMatrix);
+    }
+}
+
+void SkiaLinearGradientShader::setMatrix(SkMatrix* matrix) {
+    SkiaShader::setMatrix(matrix);
+    updateLocalMatrix(matrix);
+}
+
 void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelView,
         const Snapshot& snapshot, GLuint* textureUnit) {
     GLuint textureSlot = (*textureUnit)++;
@@ -182,34 +219,19 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
         texture = mGradientCache->addLinearGradient(mKey, mColors, mPositions, mCount, mTileX);
     }
 
-    Rect start(mBounds[0], mBounds[1], mBounds[2], mBounds[3]);
-    if (mMatrix) {
-        mat4 shaderMatrix(*mMatrix);
-        shaderMatrix.mapPoint(start.left, start.top);
-        shaderMatrix.mapPoint(start.right, start.bottom);
-    }
-    snapshot.transform->mapRect(start);
-
-    const float gradientX = start.right - start.left;
-    const float gradientY = start.bottom - start.top;
-
-    mat4 screenSpace(*snapshot.transform);
-    screenSpace.multiply(modelView);
+    mat4 screenSpace;
+    computeScreenSpaceMatrix(screenSpace, modelView);
 
     // Uniforms
     bindTexture(texture->id, gTileModes[mTileX], gTileModes[mTileY], textureSlot);
     glUniform1i(program->getUniform("gradientSampler"), textureSlot);
-    glUniform2f(program->getUniform("gradientStart"), start.left, start.top);
-    glUniform2f(program->getUniform("gradient"), gradientX, gradientY);
-    glUniform1f(program->getUniform("gradientLength"),
-            1.0f / (gradientX * gradientX + gradientY * gradientY));
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }
 
 void SkiaLinearGradientShader::updateTransforms(Program* program, const mat4& modelView,
         const Snapshot& snapshot) {
-    mat4 screenSpace(*snapshot.transform);
-    screenSpace.multiply(modelView);
+    mat4 screenSpace;
+    computeScreenSpaceMatrix(screenSpace, modelView);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }
 
