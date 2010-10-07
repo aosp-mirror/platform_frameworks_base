@@ -87,7 +87,7 @@ extern "C"
         int32           num_channels;
         int32           predicted_frame_size;
         int32           frame_start;
-        int32           Scratch_mem[168];
+        int32           Scratch_mem[198];
         tmp3dec_chan    perChan[CHAN];
         mp3ScaleFactors scaleFactors[CHAN];
         mp3SideInfo     sideInfo;
