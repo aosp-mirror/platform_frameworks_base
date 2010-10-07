@@ -16,8 +16,6 @@
 
 package android.animation;
 
-import android.view.animation.Interpolator;
-
 import java.util.ArrayList;
 
 /**
@@ -97,7 +95,7 @@ public abstract class Animator implements Cloneable {
      *
      * @param value the interpolator to be used by this animation
      */
-    public abstract void setInterpolator(Interpolator value);
+    public abstract void setInterpolator(TimeInterpolator value);
 
     /**
      * Returns whether this Animator is currently running (having been started and not yet ended).

@@ -16,14 +16,12 @@
 
 package android.animation;
 
-import android.view.animation.Interpolator;
-
 /**
  * This class holds a time/value pair for an animation. The Keyframe class is used
  * by {@link ValueAnimator} to define the values that the animation target will have over the course
  * of the animation. As the time proceeds from one keyframe to the other, the value of the
  * target object will animate between the value at the previous keyframe and the value at the
- * next keyframe. Each keyframe also holds an option {@link android.view.animation.Interpolator}
+ * next keyframe. Each keyframe also holds an optional {@link TimeInterpolator}
  * object, which defines the time interpolation over the intervalue preceding the keyframe.
  */
 public class Keyframe implements Cloneable {
@@ -47,7 +45,7 @@ public class Keyframe implements Cloneable {
      * The optional time interpolator for the interval preceding this keyframe. A null interpolator
      * (the default) results in linear interpolation over the interval.
      */
-    private Interpolator mInterpolator = null;
+    private TimeInterpolator mInterpolator = null;
 
     /**
      * Private constructor, called from the public constructors with the additional
@@ -224,7 +222,7 @@ public class Keyframe implements Cloneable {
      *
      * @return The optional interpolator for this Keyframe.
      */
-    public Interpolator getInterpolator() {
+    public TimeInterpolator getInterpolator() {
         return mInterpolator;
     }
 
@@ -234,7 +232,7 @@ public class Keyframe implements Cloneable {
      *
      * @return The optional interpolator for this Keyframe.
      */
-    public void setInterpolator(Interpolator interpolator) {
+    public void setInterpolator(TimeInterpolator interpolator) {
         mInterpolator = interpolator;
     }
 

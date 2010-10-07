@@ -16,8 +16,6 @@
 
 package android.animation;
 
-import android.view.animation.Interpolator;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -173,13 +171,13 @@ public final class AnimatorSet extends Animator {
     }
 
     /**
-     * Sets the Interpolator for all current {@link #getChildAnimations() child animations}
+     * Sets the TimeInterpolator for all current {@link #getChildAnimations() child animations}
      * of this AnimatorSet.
      *
      * @param interpolator the interpolator to be used by each child animation of this AnimatorSet
      */
     @Override
-    public void setInterpolator(Interpolator interpolator) {
+    public void setInterpolator(TimeInterpolator interpolator) {
         for (Node node : mNodes) {
             node.animation.setInterpolator(interpolator);
         }
