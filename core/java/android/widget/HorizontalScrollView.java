@@ -542,8 +542,14 @@ public class HorizontalScrollView extends FrameLayout {
                         final int pulledToX = oldX + deltaX;
                         if (pulledToX < 0) {
                             mEdgeGlowLeft.onPull((float) deltaX / getWidth());
+                            if (!mEdgeGlowRight.isFinished()) {
+                                mEdgeGlowRight.onRelease();
+                            }
                         } else if (pulledToX > range) {
                             mEdgeGlowRight.onPull((float) deltaX / getWidth());
+                            if (!mEdgeGlowLeft.isFinished()) {
+                                mEdgeGlowLeft.onRelease();
+                            }
                         }
                     }
                 }
