@@ -84,7 +84,9 @@ status_t HWComposer::prepare() const {
 
 status_t HWComposer::commit() const {
     int err = mHwc->set(mHwc, mDpy, mSur, mList);
-    mList->flags &= ~HWC_GEOMETRY_CHANGED;
+    if (mList) {
+        mList->flags &= ~HWC_GEOMETRY_CHANGED;
+    }
     return (status_t)err;
 }
 
