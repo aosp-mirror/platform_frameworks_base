@@ -19,7 +19,6 @@ package android.media.videoeditor;
 import java.io.IOException;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 /**
@@ -27,9 +26,6 @@ import android.view.SurfaceHolder;
  * {@hide}
  */
 public class MediaVideoItem extends MediaItem {
-    // Logging
-    private static final String TAG = "MediaVideoItem";
-
     // Instance variables
     private final int mWidth;
     private final int mHeight;
@@ -50,142 +46,6 @@ public class MediaVideoItem extends MediaItem {
     private int mVolumePercentage;
     private boolean mMuted;
     private String mAudioWaveformFilename;
-    private PlaybackThread mPlaybackThread;
-
-    /**
-     * This listener interface is used by the MediaVideoItem to emit playback
-     * progress notifications. This callback should be invoked after the
-     * number of frames specified by
-     * {@link #startPlayback(SurfaceHolder surfaceHolder, long fromMs,
-     *           int callbackAfterFrameCount, PlaybackProgressListener listener)}
-     */
-    public interface PlaybackProgressListener {
-        /**
-         * This method notifies the listener of the current time position while
-         * playing a media item
-         *
-         * @param mediaItem The media item
-         * @param timeMs The current playback position (expressed in milliseconds
-         *            since the beginning of the media item).
-         * @param end true if the end of the media item was reached
-         */
-        public void onProgress(MediaVideoItem mediaItem, long timeMs, boolean end);
-    }
-
-    /**
-     * The playback thread
-     */
-    private class PlaybackThread extends Thread {
-        // Instance variables
-        private final static long FRAME_DURATION = 33;
-        private final PlaybackProgressListener mListener;
-        private final int mCallbackAfterFrameCount;
-        private final long mFromMs, mToMs;
-        private boolean mRun;
-        private final boolean mLoop;
-        private long mPositionMs;
-
-        /**
-         * Constructor
-         *
-         * @param fromMs The time (relative to the beginning of the media item)
-         *            at which the playback will start
-         * @param toMs The time (relative to the beginning of the media item) at
-         *            which the playback will stop. Use -1 to play to the end of
-         *            the media item
-         * @param loop true if the playback should be looped once it reaches the
-         *            end
-         * @param callbackAfterFrameCount The listener interface should be
-         *            invoked after the number of frames specified by this
-         *            parameter.
-         * @param listener The listener which will be notified of the playback
-         *            progress
-         */
-        public PlaybackThread(long fromMs, long toMs, boolean loop, int callbackAfterFrameCount,
-                PlaybackProgressListener listener) {
-            mPositionMs = mFromMs = fromMs;
-            if (toMs < 0) {
-                mToMs = mDurationMs;
-            } else {
-                mToMs = toMs;
-            }
-            mLoop = loop;
-            mCallbackAfterFrameCount = callbackAfterFrameCount;
-            mListener = listener;
-            mRun = true;
-        }
-
-        /*
-         * {@inheritDoc}
-         */
-        @Override
-        public void run() {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "===> PlaybackThread.run enter");
-            }
-            int frameCount = 0;
-            while (mRun) {
-                try {
-                    sleep(FRAME_DURATION);
-                } catch (InterruptedException ex) {
-                    break;
-                }
-                frameCount++;
-                mPositionMs += FRAME_DURATION;
-
-                if (mPositionMs >= mToMs) {
-                    if (!mLoop) {
-                        if (mListener != null) {
-                            mListener.onProgress(MediaVideoItem.this, mPositionMs, true);
-                        }
-                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-                            Log.d(TAG, "PlaybackThread.run playback complete");
-                        }
-                        break;
-                    } else {
-                        // Fire a notification for the end of the clip
-                        if (mListener != null) {
-                            mListener.onProgress(MediaVideoItem.this, mToMs, false);
-                        }
-
-                        // Rewind
-                        mPositionMs = mFromMs;
-                        if (mListener != null) {
-                            mListener.onProgress(MediaVideoItem.this, mPositionMs, false);
-                        }
-                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-                            Log.d(TAG, "PlaybackThread.run playback complete");
-                        }
-                        frameCount = 0;
-                    }
-                } else {
-                    if (frameCount == mCallbackAfterFrameCount) {
-                        if (mListener != null) {
-                            mListener.onProgress(MediaVideoItem.this, mPositionMs, false);
-                        }
-                        frameCount = 0;
-                    }
-                }
-            }
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "===> PlaybackThread.run exit");
-            }
-        }
-
-        /**
-         * Stop the playback
-         *
-         * @return The stop position
-         */
-        public long stopPlayback() {
-            mRun = false;
-            try {
-                join();
-            } catch (InterruptedException ex) {
-            }
-            return mPositionMs;
-        }
-    };
 
     /**
      * An object of this type cannot be instantiated with a default constructor
@@ -405,57 +265,6 @@ public class MediaVideoItem extends MediaItem {
      */
     public long renderFrame(SurfaceHolder surfaceHolder, long timeMs) {
         return timeMs;
-    }
-
-    /**
-     * Start the playback of this media item. This method does not block (does
-     * not wait for the playback to complete). The PlaybackProgressListener
-     * allows to track the progress at the time interval determined by the
-     * callbackAfterFrameCount parameter. The SurfaceHolder has to be created
-     * and ready for use before calling this method.
-     *
-     * @param surfaceHolder SurfaceHolder where the frames are rendered.
-     * @param fromMs The time (relative to the beginning of the media item) at
-     *            which the playback will start
-     * @param toMs The time (relative to the beginning of the media item) at
-     *            which the playback will stop. Use -1 to play to the end of the
-     *            media item
-     * @param loop true if the playback should be looped once it reaches the end
-     * @param callbackAfterFrameCount The listener interface should be invoked
-     *            after the number of frames specified by this parameter.
-     * @param listener The listener which will be notified of the playback
-     *            progress
-     * @throws IllegalArgumentException if fromMs or toMs is beyond the playback
-     *             duration
-     * @throws IllegalStateException if a playback, preview or an export is
-     *             already in progress
-     */
-    public void startPlayback(SurfaceHolder surfaceHolder, long fromMs, long toMs, boolean loop,
-            int callbackAfterFrameCount, PlaybackProgressListener listener) {
-        if (fromMs >= mDurationMs) {
-            return;
-        }
-        mPlaybackThread = new PlaybackThread(fromMs, toMs, loop, callbackAfterFrameCount,
-                listener);
-        mPlaybackThread.start();
-    }
-
-    /**
-     * Stop the media item playback. This method blocks until the ongoing
-     * playback is stopped.
-     *
-     * @return The accurate current time when stop is effective expressed in
-     *         milliseconds
-     */
-    public long stopPlayback() {
-        final long stopTimeMs;
-        if (mPlaybackThread != null) {
-            stopTimeMs = mPlaybackThread.stopPlayback();
-            mPlaybackThread = null;
-        } else {
-            stopTimeMs = 0;
-        }
-        return stopTimeMs;
     }
 
     /**
