@@ -25,6 +25,7 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
+import com.android.internal.view.InputMethodAndSubtypeEnabler;
 
 import com.android.server.StatusBarManagerService;
 
@@ -97,6 +98,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static final int MSG_SHOW_IM_PICKER = 1;
     static final int MSG_SHOW_IM_SUBTYPE_PICKER = 2;
+    static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 3;
 
     static final int MSG_UNBIND_INPUT = 1000;
     static final int MSG_BIND_INPUT = 1010;
@@ -1225,7 +1227,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             if (mCurClient == null || client == null
                     || mCurClient.client.asBinder() != client.asBinder()) {
-                Slog.w(TAG, "Ignoring showInputMethodDialogFromClient of uid "
+                Slog.w(TAG, "Ignoring showInputMethodPickerFromClient of uid "
                         + Binder.getCallingUid() + ": " + client);
             }
 
@@ -1237,10 +1239,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             if (mCurClient == null || client == null
                     || mCurClient.client.asBinder() != client.asBinder()) {
-                Slog.w(TAG, "Ignoring showInputSubtypeMethodDialogFromClient of: " + client);
+                Slog.w(TAG, "Ignoring showInputMethodSubtypePickerFromClient of: " + client);
             }
 
             mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_PICKER);
+        }
+    }
+
+    public void showInputMethodAndSubtypeEnablerFromClient(
+            IInputMethodClient client, String topId) {
+        // TODO: Handle topId for setting the top position of the list activity
+        synchronized (mMethodMap) {
+            if (mCurClient == null || client == null
+                    || mCurClient.client.asBinder() != client.asBinder()) {
+                Slog.w(TAG, "Ignoring showInputMethodAndSubtypeEnablerFromClient of: " + client);
+            }
+
+            mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_ENABLER);
         }
     }
 
@@ -1334,6 +1349,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             case MSG_SHOW_IM_SUBTYPE_PICKER:
                 showInputMethodSubtypeMenu();
+                return true;
+
+            case MSG_SHOW_IM_SUBTYPE_ENABLER:
+                showInputMethodAndSubtypeEnabler();
                 return true;
 
             // ---------------------------------------------------------
@@ -1526,6 +1545,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void showInputMethodSubtypeMenu() {
         showInputMethodMenuInternal(true);
+    }
+
+    private void showInputMethodAndSubtypeEnabler() {
+        Intent intent = new Intent();
+        intent.setClassName("android", InputMethodAndSubtypeEnabler.class.getCanonicalName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mContext.startActivity(intent);
     }
 
     private void showInputMethodMenuInternal(boolean showSubtypes) {
