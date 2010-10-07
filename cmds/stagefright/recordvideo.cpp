@@ -18,12 +18,10 @@
 
 #include <binder/ProcessState.h>
 #include <media/stagefright/AudioPlayer.h>
-#include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
-#include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
@@ -31,18 +29,21 @@
 
 using namespace android;
 
-// print usage showing how to use this utility to record videos
+// Print usage showing how to use this utility to record videos
 static void usage(const char *me) {
     fprintf(stderr, "usage: %s\n", me);
     fprintf(stderr, "       -h(elp)\n");
-    fprintf(stderr, "       -b bit rate in bits per second (default 300000)\n");
-    fprintf(stderr, "       -c YUV420 color format: [0] semi planar or [1] planar (default 1)\n");
-    fprintf(stderr, "       -f frame rate in frames per second (default 30)\n");
-    fprintf(stderr, "       -i I frame interval in seconds (default 1)\n");
-    fprintf(stderr, "       -n number of frames to be recorded (default 300)\n");
-    fprintf(stderr, "       -w width in pixels (default 176)\n");
-    fprintf(stderr, "       -t height in pixels (default 144)\n");
-    fprintf(stderr, "       -v video codec: [0] AVC [1] M4V [2] H263 (default 0)\n");
+    fprintf(stderr, "       -b bit rate in bits per second (default: 300000)\n");
+    fprintf(stderr, "       -c YUV420 color format: [0] semi planar or [1] planar (default: 1)\n");
+    fprintf(stderr, "       -f frame rate in frames per second (default: 30)\n");
+    fprintf(stderr, "       -i I frame interval in seconds (default: 1)\n");
+    fprintf(stderr, "       -n number of frames to be recorded (default: 300)\n");
+    fprintf(stderr, "       -w width in pixels (default: 176)\n");
+    fprintf(stderr, "       -t height in pixels (default: 144)\n");
+    fprintf(stderr, "       -l encoder level. see omx il header (default: encoder specific)\n");
+    fprintf(stderr, "       -p encoder profile. see omx il header (default: encoder specific)\n");
+    fprintf(stderr, "       -v video codec: [0] AVC [1] M4V [2] H263 (default: 0)\n");
+    fprintf(stderr, "The output file is /sdcard/output.mp4\n");
     exit(1);
 }
 
@@ -56,6 +57,7 @@ public:
           mFrameRate(fps),
           mColorFormat(colorFormat),
           mSize((width * height * 3) / 2) {
+
         mGroup.add_buffer(new MediaBuffer(mSize));
 
         // Check the color format to make sure
@@ -98,8 +100,11 @@ public:
             return err;
         }
 
-        char x = (char)((double)rand() / RAND_MAX * 255);
-        memset((*buffer)->data(), x, mSize);
+        // We don't care about the contents. we just test video encoder
+        // Also, by skipping the content generation, we can return from
+        // read() much faster.
+        //char x = (char)((double)rand() / RAND_MAX * 255);
+        //memset((*buffer)->data(), x, mSize);
         (*buffer)->set_range(0, mSize);
         (*buffer)->meta_data()->clear();
         (*buffer)->meta_data()->setInt64(
@@ -124,38 +129,6 @@ private:
     DummySource(const DummySource &);
     DummySource &operator=(const DummySource &);
 };
-
-sp<MediaSource> createSource(const char *filename) {
-    sp<MediaSource> source;
-
-    sp<MediaExtractor> extractor =
-        MediaExtractor::Create(new FileSource(filename));
-    if (extractor == NULL) {
-        return NULL;
-    }
-
-    size_t num_tracks = extractor->countTracks();
-
-    sp<MetaData> meta;
-    for (size_t i = 0; i < num_tracks; ++i) {
-        meta = extractor->getTrackMetaData(i);
-        CHECK(meta.get() != NULL);
-
-        const char *mime;
-        if (!meta->findCString(kKeyMIMEType, &mime)) {
-            continue;
-        }
-
-        if (strncasecmp(mime, "video/", 6)) {
-            continue;
-        }
-
-        source = extractor->getTrack(i);
-        break;
-    }
-
-    return source;
-}
 
 enum {
     kYUV420SP = 0,
@@ -186,12 +159,14 @@ int main(int argc, char **argv) {
     int iFramesIntervalSeconds = 1;
     int colorFormat = OMX_COLOR_FormatYUV420Planar;
     int nFrames = 300;
+    int level = -1;        // Encoder specific default
+    int profile = -1;      // Encoder specific default
     int codec = 0;
     const char *fileName = "/sdcard/output.mp4";
 
     android::ProcessState::self()->startThreadPool();
     int res;
-    while ((res = getopt(argc, argv, "b:c:f:i:n:w:t:v:o:h")) >= 0) {
+    while ((res = getopt(argc, argv, "b:c:f:i:n:w:t:l:p:v:h")) >= 0) {
         switch (res) {
             case 'b':
             {
@@ -238,6 +213,18 @@ int main(int argc, char **argv) {
                 break;
             }
 
+            case 'l':
+            {
+                level = atoi(optarg);
+                break;
+            }
+
+            case 'p':
+            {
+                profile = atoi(optarg);
+                break;
+            }
+
             case 'v':
             {
                 codec = atoi(optarg);
@@ -260,7 +247,8 @@ int main(int argc, char **argv) {
     CHECK_EQ(client.connect(), OK);
 
     status_t err = OK;
-    sp<MediaSource> decoder = new DummySource(width, height, nFrames, frameRateFps, colorFormat);
+    sp<MediaSource> source =
+        new DummySource(width, height, nFrames, frameRateFps, colorFormat);
 
     sp<MetaData> enc_meta = new MetaData;
     switch (codec) {
@@ -282,10 +270,16 @@ int main(int argc, char **argv) {
     enc_meta->setInt32(kKeySliceHeight, height);
     enc_meta->setInt32(kKeyIFramesInterval, iFramesIntervalSeconds);
     enc_meta->setInt32(kKeyColorFormat, colorFormat);
+    if (level != -1) {
+        enc_meta->setInt32(kKeyVideoLevel, level);
+    }
+    if (profile != -1) {
+        enc_meta->setInt32(kKeyVideoProfile, profile);
+    }
 
     sp<MediaSource> encoder =
         OMXCodec::Create(
-                client.interface(), enc_meta, true /* createEncoder */, decoder);
+                client.interface(), enc_meta, true /* createEncoder */, source);
 
     sp<MPEG4Writer> writer = new MPEG4Writer(fileName);
     writer->addSource(encoder);
@@ -296,7 +290,7 @@ int main(int argc, char **argv) {
     err = writer->stop();
     int64_t end = systemTime();
 
-    printf("$\n");
+    fprintf(stderr, "$\n");
     client.disconnect();
 
     if (err != OK && err != ERROR_END_OF_STREAM) {
