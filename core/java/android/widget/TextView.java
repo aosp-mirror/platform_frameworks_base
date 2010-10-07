@@ -287,9 +287,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     InputMethodState mInputMethodState;
 
-    private int mTextSelectHandleLeftRes;
-    private int mTextSelectHandleRightRes;
-    private int mTextSelectHandleRes;
+    int mTextSelectHandleLeftRes;
+    int mTextSelectHandleRightRes;
+    int mTextSelectHandleRes;
+
+    Drawable mSelectHandleLeft;
+    Drawable mSelectHandleRight;
+    Drawable mSelectHandleCenter;
 
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -7651,26 +7655,74 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mPositionY;
         private CursorController mController;
         private boolean mIsDragging;
-        private float mOffsetX;
-        private float mOffsetY;
+        private float mTouchToWindowOffsetX;
+        private float mTouchToWindowOffsetY;
         private float mHotspotX;
         private float mHotspotY;
+        private int mHeight;
+        private float mTouchOffsetY;
         private int mLastParentX;
         private int mLastParentY;
 
-        public HandleView(CursorController controller, Drawable handle) {
+        public static final int LEFT = 0;
+        public static final int CENTER = 1;
+        public static final int RIGHT = 2;
+
+        public HandleView(CursorController controller, int pos) {
             super(TextView.this.mContext);
             mController = controller;
-            mDrawable = handle;
             mContainer = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mContainer.setSplitTouchEnabled(true);
             mContainer.setClippingEnabled(false);
 
-            final int handleWidth = mDrawable.getIntrinsicWidth();
+            setOrientation(pos);
+        }
+
+        public void setOrientation(int pos) {
+            int handleWidth;
+            switch (pos) {
+            case LEFT: {
+                if (mSelectHandleLeft == null) {
+                    mSelectHandleLeft = mContext.getResources().getDrawable(
+                            mTextSelectHandleLeftRes);
+                }
+                mDrawable = mSelectHandleLeft;
+                handleWidth = mDrawable.getIntrinsicWidth();
+                mHotspotX = handleWidth / 4 * 3;
+                break;
+            }
+
+            case RIGHT: {
+                if (mSelectHandleRight == null) {
+                    mSelectHandleRight = mContext.getResources().getDrawable(
+                            mTextSelectHandleRightRes);
+                }
+                mDrawable = mSelectHandleRight;
+                handleWidth = mDrawable.getIntrinsicWidth();
+                mHotspotX = handleWidth / 4;
+                break;
+            }
+
+            case CENTER:
+            default: {
+                if (mSelectHandleCenter == null) {
+                    mSelectHandleCenter = mContext.getResources().getDrawable(
+                            mTextSelectHandleRes);
+                }
+                mDrawable = mSelectHandleCenter;
+                handleWidth = mDrawable.getIntrinsicWidth();
+                mHotspotX = handleWidth / 2;
+                break;
+            }
+            }
+
             final int handleHeight = mDrawable.getIntrinsicHeight();
-            mHotspotX = handleWidth * 0.5f;
-            mHotspotY = -handleHeight * 0.2f;
+
+            mTouchOffsetY = -handleHeight * 0.3f;
+            mHotspotY = 0;
+            mHeight = handleHeight;
+            invalidate();
         }
 
         @Override
@@ -7735,10 +7787,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int[] coords = mTempCoords;
             hostView.getLocationInWindow(coords);
             final int posX = coords[0] + mPositionX + (int) mHotspotX;
-            final int posY = coords[1] + mPositionY;
+            final int posY = coords[1] + mPositionY + (int) mHotspotY;
 
             return posX >= clip.left && posX <= clip.right &&
-                    posY >= clip.top && posY + mHotspotY <= clip.bottom;
+                    posY >= clip.top && posY <= clip.bottom;
         }
 
         private void moveTo(int x, int y) {
@@ -7761,8 +7813,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         TextView.this.getLocationInWindow(coords);
                     }
                     if (coords[0] != mLastParentX || coords[1] != mLastParentY) {
-                        mOffsetX += coords[0] - mLastParentX;
-                        mOffsetY += coords[1] - mLastParentY;
+                        mTouchToWindowOffsetX += coords[0] - mLastParentX;
+                        mTouchToWindowOffsetY += coords[1] - mLastParentY;
                         mLastParentX = coords[0];
                         mLastParentY = coords[1];
                     }
@@ -7791,8 +7843,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case MotionEvent.ACTION_DOWN: {
                 final float rawX = ev.getRawX();
                 final float rawY = ev.getRawY();
-                mOffsetX = rawX - mPositionX;
-                mOffsetY = rawY - mPositionY;
+                mTouchToWindowOffsetX = rawX - mPositionX;
+                mTouchToWindowOffsetY = rawY - mPositionY;
                 final int[] coords = mTempCoords;
                 TextView.this.getLocationInWindow(coords);
                 mLastParentX = coords[0];
@@ -7803,8 +7855,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case MotionEvent.ACTION_MOVE: {
                 final float rawX = ev.getRawX();
                 final float rawY = ev.getRawY();
-                final float newPosX = rawX - mOffsetX + mHotspotX;
-                final float newPosY = rawY - mOffsetY + mHotspotY;
+                final float newPosX = rawX - mTouchToWindowOffsetX + mHotspotX;
+                final float newPosY = rawY - mTouchToWindowOffsetY + mHotspotY + mTouchOffsetY;
 
                 mController.updatePosition(this, (int) Math.round(newPosX),
                         (int) Math.round(newPosY));
@@ -7830,9 +7882,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int lineBottom = mLayout.getLineBottom(line);
 
             final Rect bounds = sCursorControllerTempRect;
-            bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - width / 2.0)
+            bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - mHotspotX)
                 + TextView.this.mScrollX;
-            bounds.top = (bottom ? lineBottom : lineTop) + TextView.this.mScrollY;
+            bounds.top = (bottom ? lineBottom : lineTop - mHeight) + TextView.this.mScrollY;
 
             bounds.right = bounds.left + width;
             bounds.bottom = bounds.top + height;
@@ -7855,8 +7907,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         };
 
         InsertionPointCursorController() {
-            Resources res = mContext.getResources();
-            mHandle = new HandleView(this, res.getDrawable(mTextSelectHandleRes));
+            mHandle = new HandleView(this, HandleView.CENTER);
         }
 
         public void show() {
@@ -7931,9 +7982,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         };
 
         SelectionModifierCursorController() {
-            Resources res = mContext.getResources();
-            mStartHandle = new HandleView(this, res.getDrawable(mTextSelectHandleLeftRes));
-            mEndHandle = new HandleView(this, res.getDrawable(mTextSelectHandleRightRes));
+            mStartHandle = new HandleView(this, HandleView.LEFT);
+            mEndHandle = new HandleView(this, HandleView.RIGHT);
         }
 
         public void show() {
@@ -7974,31 +8024,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             // Handle the case where start and end are swapped, making sure start <= end
             if (handle == mStartHandle) {
-                if (offset <= selectionEnd) {
-                    if (selectionStart == offset) {
-                        return; // no change, no need to redraw;
-                    }
-                    selectionStart = offset;
-                } else {
-                    selectionStart = selectionEnd;
-                    selectionEnd = offset;
-                    HandleView temp = mStartHandle;
-                    mStartHandle = mEndHandle;
-                    mEndHandle = temp;
+                if (selectionStart == offset || offset > selectionEnd) {
+                    return; // no change, no need to redraw;
                 }
+                // If the user "closes" the selection entirely they were probably trying to
+                // select a single character. Help them out.
+                if (offset == selectionEnd) {
+                    offset = selectionEnd - 1;
+                }
+                selectionStart = offset;
             } else {
-                if (offset >= selectionStart) {
-                    if (selectionEnd == offset) {
-                        return; // no change, no need to redraw;
-                    }
-                    selectionEnd = offset;
-                } else {
-                    selectionEnd = selectionStart;
-                    selectionStart = offset;
-                    HandleView temp = mStartHandle;
-                    mStartHandle = mEndHandle;
-                    mEndHandle = temp;
+                if (selectionEnd == offset || offset < selectionStart) {
+                    return; // no change, no need to redraw;
                 }
+                // If the user "closes" the selection entirely they were probably trying to
+                // select a single character. Help them out.
+                if (offset == selectionStart) {
+                    offset = selectionStart + 1;
+                }
+                selectionEnd = offset;
             }
 
             Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
@@ -8016,9 +8060,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            boolean oneLineSelection = mLayout.getLineForOffset(selectionStart) ==
-                    mLayout.getLineForOffset(selectionEnd);
-            mStartHandle.positionAtCursor(selectionStart, oneLineSelection);
+            mStartHandle.positionAtCursor(selectionStart, true);
             mEndHandle.positionAtCursor(selectionEnd, true);
             hideDelayed(DELAY_BEFORE_FADE_OUT);
         }
@@ -8144,7 +8186,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int previousLine = layout.getLineForOffset(previousOffset);
         final int previousLineTop = layout.getLineTop(previousLine);
         final int previousLineBottom = layout.getLineBottom(previousLine);
-        final int hysteresisThreshold = (previousLineBottom - previousLineTop) / 6;
+        final int hysteresisThreshold = (previousLineBottom - previousLineTop) / 8;
 
         // If new line is just before or after previous line and y position is less than
         // hysteresisThreshold away from previous line, keep cursor on previous line.
