@@ -1504,7 +1504,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         sendCloseSystemWindows();
         Intent intent = new Intent(Intent.ACTION_CALL_BUTTON);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getContext().startActivity(intent);
+        try {
+            getContext().startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "No activity found for android.intent.action.CALL_BUTTON.");
+        }
     }
 
     @Override
