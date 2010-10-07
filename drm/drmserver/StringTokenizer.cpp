@@ -45,12 +45,10 @@ StringTokenizer::Iterator StringTokenizer::iterator() {
 StringTokenizer::Iterator::Iterator(const StringTokenizer::Iterator& iterator) :
     mStringTokenizer(iterator.mStringTokenizer),
     mIndex(iterator.mIndex) {
-    LOGV("StringTokenizer::Iterator::Iterator");
 }
 
 StringTokenizer::Iterator& StringTokenizer::Iterator::operator=(
             const StringTokenizer::Iterator& iterator) {
-    LOGV("StringTokenizer::Iterator::operator=");
     mStringTokenizer = iterator.mStringTokenizer;
     mIndex = iterator.mIndex;
     return *this;

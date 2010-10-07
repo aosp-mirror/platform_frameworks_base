@@ -47,6 +47,14 @@ public:
      */
     static String8 readBytes(const String8& filePath);
     /**
+     * Reads the data into the given buffer from the file path provided
+     *
+     * @param[in] filePath Path of the file
+     * @param[out] buffer Data read from the file
+     * @return Length of the data read from the file
+     */
+    static int readBytes(const String8& filePath, char** buffer);
+    /**
      * Writes the data into the file path provided
      *
      * @param[in] filePath Path of the file

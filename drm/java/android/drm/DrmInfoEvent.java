@@ -26,42 +26,25 @@ public class DrmInfoEvent extends DrmEvent {
      * TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT, when registration has been already done
      * by another account ID.
      */
-    public static final int TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT = 0x0000001;
+    public static final int TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT = 1;
     /**
      * TYPE_REMOVE_RIGHTS, when the rights needs to be removed completely.
      */
-    public static final int TYPE_REMOVE_RIGHTS = 0x0000002;
+    public static final int TYPE_REMOVE_RIGHTS = 2;
     /**
      * TYPE_RIGHTS_INSTALLED, when the rights are downloaded and installed ok.
      */
-    public static final int TYPE_RIGHTS_INSTALLED = 0x0000003;
-    /**
-     * TYPE_RIGHTS_NOT_INSTALLED, when something went wrong installing the rights.
-     */
-    public static final int TYPE_RIGHTS_NOT_INSTALLED = 0x0000004;
-    /**
-     * TYPE_RIGHTS_RENEWAL_NOT_ALLOWED, when the server rejects renewal of rights.
-     */
-    public static final int TYPE_RIGHTS_RENEWAL_NOT_ALLOWED = 0x0000005;
-    /**
-     * TYPE_NOT_SUPPORTED, when answer from server can not be handled by the native agent.
-     */
-    public static final int TYPE_NOT_SUPPORTED = 0x0000006;
+    public static final int TYPE_RIGHTS_INSTALLED = 3;
     /**
      * TYPE_WAIT_FOR_RIGHTS, rights object is on it's way to phone,
      * wait before calling checkRights again.
      */
-    public static final int TYPE_WAIT_FOR_RIGHTS = 0x0000007;
+    public static final int TYPE_WAIT_FOR_RIGHTS = 4;
     /**
-     * TYPE_OUT_OF_MEMORY, when memory allocation fail during renewal.
-     * Can in the future perhaps be used to trigger garbage collector.
+     * TYPE_ACCOUNT_ALREADY_REGISTERED, when registration has been
+     * already done for the given account.
      */
-    public static final int TYPE_OUT_OF_MEMORY = 0x0000008;
-    /**
-     * TYPE_NO_INTERNET_CONNECTION, when the Internet connection is missing and no attempt
-     * can be made to renew rights.
-     */
-    public static final int TYPE_NO_INTERNET_CONNECTION = 0x0000009;
+    public static final int TYPE_ACCOUNT_ALREADY_REGISTERED = 5;
 
     /**
      * constructor to create DrmInfoEvent object with given parameters

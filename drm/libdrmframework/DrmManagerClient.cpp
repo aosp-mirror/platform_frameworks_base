@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
-#define LOG_TAG "DrmManagerClient(Native)"
-#include <utils/Log.h>
-
 #include <utils/String8.h>
 #include <binder/IServiceManager.h>
 #include <drm/DrmManagerClient.h>
@@ -37,8 +33,8 @@ DrmManagerClient::DrmManagerClient() {
 }
 
 DrmManagerClient::~DrmManagerClient() {
-    unloadPlugIns();
     DrmManagerClientImpl::remove(mUniqueId);
+    unloadPlugIns();
 
     delete mDrmManagerClientImpl; mDrmManagerClientImpl = NULL;
 }
@@ -72,7 +68,7 @@ DrmInfo* DrmManagerClient::acquireDrmInfo(const DrmInfoRequest* drmInfoRequest) 
     return mDrmManagerClientImpl->acquireDrmInfo(mUniqueId, drmInfoRequest);
 }
 
-void DrmManagerClient::saveRights(
+status_t DrmManagerClient::saveRights(
         const DrmRights& drmRights, const String8& rightsPath, const String8& contentPath) {
     return mDrmManagerClientImpl->saveRights(mUniqueId, drmRights, rightsPath, contentPath);
 }
@@ -89,13 +85,14 @@ int DrmManagerClient::checkRightsStatus(const String8& path, int action) {
     return mDrmManagerClientImpl->checkRightsStatus(mUniqueId, path, action);
 }
 
-void DrmManagerClient::consumeRights(DecryptHandle* decryptHandle, int action, bool reserve) {
-    mDrmManagerClientImpl->consumeRights(mUniqueId, decryptHandle, action, reserve);
+status_t DrmManagerClient::consumeRights(DecryptHandle* decryptHandle, int action, bool reserve) {
+    return mDrmManagerClientImpl->consumeRights(mUniqueId, decryptHandle, action, reserve);
 }
 
-void DrmManagerClient::setPlaybackStatus(
+status_t DrmManagerClient::setPlaybackStatus(
             DecryptHandle* decryptHandle, int playbackStatus, int position) {
-    mDrmManagerClientImpl->setPlaybackStatus(mUniqueId, decryptHandle, playbackStatus, position);
+    return mDrmManagerClientImpl
+            ->setPlaybackStatus(mUniqueId, decryptHandle, playbackStatus, position);
 }
 
 bool DrmManagerClient::validateAction(
@@ -103,12 +100,12 @@ bool DrmManagerClient::validateAction(
     return mDrmManagerClientImpl->validateAction(mUniqueId, path, action, description);
 }
 
-void DrmManagerClient::removeRights(const String8& path) {
-    mDrmManagerClientImpl->removeRights(mUniqueId, path);
+status_t DrmManagerClient::removeRights(const String8& path) {
+    return mDrmManagerClientImpl->removeRights(mUniqueId, path);
 }
 
-void DrmManagerClient::removeAllRights() {
-    mDrmManagerClientImpl->removeAllRights(mUniqueId);
+status_t DrmManagerClient::removeAllRights() {
+    return mDrmManagerClientImpl->removeAllRights(mUniqueId);
 }
 
 int DrmManagerClient::openConvertSession(const String8& mimeType) {
@@ -131,25 +128,25 @@ DecryptHandle* DrmManagerClient::openDecryptSession(int fd, int offset, int leng
     return mDrmManagerClientImpl->openDecryptSession(mUniqueId, fd, offset, length);
 }
 
-void DrmManagerClient::closeDecryptSession(DecryptHandle* decryptHandle) {
-    mDrmManagerClientImpl->closeDecryptSession(mUniqueId, decryptHandle);
+status_t DrmManagerClient::closeDecryptSession(DecryptHandle* decryptHandle) {
+    return mDrmManagerClientImpl->closeDecryptSession(mUniqueId, decryptHandle);
 }
 
-void DrmManagerClient::initializeDecryptUnit(
+status_t DrmManagerClient::initializeDecryptUnit(
             DecryptHandle* decryptHandle, int decryptUnitId, const DrmBuffer* headerInfo) {
-    mDrmManagerClientImpl->initializeDecryptUnit(
-        mUniqueId, decryptHandle, decryptUnitId, headerInfo);
+    return mDrmManagerClientImpl->initializeDecryptUnit(
+            mUniqueId, decryptHandle, decryptUnitId, headerInfo);
 }
 
 status_t DrmManagerClient::decrypt(
     DecryptHandle* decryptHandle, int decryptUnitId,
-    const DrmBuffer* encBuffer, DrmBuffer** decBuffer) {
+    const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV) {
     return mDrmManagerClientImpl->decrypt(
-            mUniqueId, decryptHandle, decryptUnitId, encBuffer, decBuffer);
+            mUniqueId, decryptHandle, decryptUnitId, encBuffer, decBuffer, IV);
 }
 
-void DrmManagerClient::finalizeDecryptUnit(DecryptHandle* decryptHandle, int decryptUnitId) {
-    mDrmManagerClientImpl->finalizeDecryptUnit(mUniqueId, decryptHandle, decryptUnitId);
+status_t DrmManagerClient::finalizeDecryptUnit(DecryptHandle* decryptHandle, int decryptUnitId) {
+    return mDrmManagerClientImpl->finalizeDecryptUnit(mUniqueId, decryptHandle, decryptUnitId);
 }
 
 ssize_t DrmManagerClient::pread(
