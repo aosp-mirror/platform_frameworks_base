@@ -223,7 +223,7 @@ private:
     status_t setDataSource_l(const sp<MediaExtractor> &extractor);
     void reset_l();
     status_t seekTo_l(int64_t timeUs);
-    status_t pause_l();
+    status_t pause_l(bool at_eos = false);
     void initRenderer_l();
     void notifyVideoSize_l();
     void seekAudioIfNecessary_l();
