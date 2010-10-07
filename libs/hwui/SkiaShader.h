@@ -77,9 +77,20 @@ struct SkiaShader {
             const Snapshot& snapshot) {
     }
 
-    virtual void setMatrix(SkMatrix* matrix) {
-        mMatrix = matrix;
+    void setMatrix(SkMatrix* matrix) {
+        updateLocalMatrix(matrix);
     }
+
+    void updateLocalMatrix(const SkMatrix* matrix) {
+        if (matrix) {
+            mat4 localMatrix(*matrix);
+            mShaderMatrix.loadInverse(localMatrix);
+        } else {
+            mShaderMatrix.loadIdentity();
+        }
+    }
+
+    void computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView);
 
 protected:
     inline void bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit);
@@ -88,11 +99,13 @@ protected:
     SkShader* mKey;
     SkShader::TileMode mTileX;
     SkShader::TileMode mTileY;
-    SkMatrix* mMatrix;
     bool mBlend;
 
     TextureCache* mTextureCache;
     GradientCache* mGradientCache;
+
+    mat4 mUnitMatrix;
+    mat4 mShaderMatrix;
 }; // struct SkiaShader
 
 
@@ -139,15 +152,7 @@ struct SkiaLinearGradientShader: public SkiaShader {
             GLuint* textureUnit);
     void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
 
-    void setMatrix(SkMatrix* matrix);
-
 private:
-    void updateLocalMatrix(const SkMatrix* matrix);
-    void computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView);
-
-    mat4 mUnitMatrix;
-    mat4 mShaderMatrix;
-
     float* mBounds;
     uint32_t* mColors;
     float* mPositions;
@@ -163,7 +168,7 @@ struct SkiaSweepGradientShader: public SkiaShader {
     ~SkiaSweepGradientShader();
 
     virtual void describe(ProgramDescription& description, const Extensions& extensions);
-    virtual void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
+    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
             GLuint* textureUnit);
     void updateTransforms(Program* program, const mat4& modelView, const Snapshot& snapshot);
 
@@ -171,7 +176,6 @@ protected:
     SkiaSweepGradientShader(Type type, float x, float y, uint32_t* colors, float* positions,
             int count, SkShader* key, SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
 
-    float mX, mY;
     uint32_t* mColors;
     float* mPositions;
     int mCount;
@@ -185,11 +189,6 @@ struct SkiaCircularGradientShader: public SkiaSweepGradientShader {
             int count, SkShader* key,SkShader::TileMode tileMode, SkMatrix* matrix, bool blend);
 
     void describe(ProgramDescription& description, const Extensions& extensions);
-    void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
-            GLuint* textureUnit);
-
-private:
-    float mRadius;
 }; // struct SkiaCircularGradientShader
 
 /**
