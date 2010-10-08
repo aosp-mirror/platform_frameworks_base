@@ -2,7 +2,6 @@
 
 const int TEST_COUNT = 1;
 
-#pragma rs export_var(g_results)
 #pragma rs export_func(fp_mad_test)
 
 static float data_f1[1025];
