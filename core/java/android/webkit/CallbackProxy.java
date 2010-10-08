@@ -710,6 +710,9 @@ class CallbackProxy extends Handler {
                 break;
 
             case ADD_MESSAGE_TO_CONSOLE:
+                if (mWebChromeClient == null) {
+                    break;
+                }
                 String message = msg.getData().getString("message");
                 String sourceID = msg.getData().getString("sourceID");
                 int lineNumber = msg.getData().getInt("lineNumber");
@@ -786,7 +789,9 @@ class CallbackProxy extends Handler {
                         host, realm, username, password);
                 break;
             case SET_INSTALLABLE_WEBAPP:
-                mWebChromeClient.setInstallableWebApp();
+                if (mWebChromeClient != null) {
+                    mWebChromeClient.setInstallableWebApp();
+                }
                 break;
         }
     }
