@@ -81,11 +81,6 @@ public:
 
     ObjectBaseRef<ScriptC> mScript;
 
-    ObjectBaseRef<const Type> mConstantBufferTypes[MAX_SCRIPT_BANKS];
-    //String8 mSlotNames[MAX_SCRIPT_BANKS];
-    bool mSlotWritable[MAX_SCRIPT_BANKS];
-    //String8 mInvokableNames[MAX_SCRIPT_BANKS];
-
     void init(Context *rsc);
 
     void clear(Context *rsc);

@@ -24,10 +24,37 @@ Script::Script(Context *rsc) : ObjectBase(rsc)
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
     memset(&mEnviroment, 0, sizeof(mEnviroment));
+
+    mSlots = NULL;
+    mTypes = NULL;
 }
 
 Script::~Script()
 {
+    if(mSlots) {
+        delete [] mSlots;
+        mSlots = NULL;
+    }
+    if(mTypes) {
+        delete [] mTypes;
+        mTypes = NULL;
+    }
+}
+
+void Script::initSlots() {
+    if(mEnviroment.mFieldCount > 0) {
+        mSlots = new ObjectBaseRef<Allocation>[mEnviroment.mFieldCount];
+        mTypes = new ObjectBaseRef<const Type>[mEnviroment.mFieldCount];
+    }
+}
+
+void Script::setSlot(uint32_t slot, Allocation *a) {
+    if(slot >= mEnviroment.mFieldCount) {
+        LOGE("Script::setSlot unable to set allocation, invalid slot index");
+        return;
+    }
+
+    mSlots[slot].set(a);
 }
 
 void Script::setVar(uint32_t slot, const void *val, uint32_t len)
@@ -51,7 +78,7 @@ void rsi_ScriptBindAllocation(Context * rsc, RsScript vs, RsAllocation va, uint3
 {
     Script *s = static_cast<Script *>(vs);
     Allocation *a = static_cast<Allocation *>(va);
-    s->mSlots[slot].set(a);
+    s->setSlot(slot, a);
     //LOGE("rsi_ScriptBindAllocation %i  %p  %p", slot, a, a->getPtr());
 }
 
@@ -59,15 +86,6 @@ void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, ui
 {
     Script *s = static_cast<Script *>(vs);
     s->mEnviroment.mTimeZone = timeZone;
-}
-
-void rsi_ScriptSetType(Context * rsc, RsType vt, uint32_t slot, bool writable, const char *name)
-{
-    ScriptCState *ss = &rsc->mScriptC;
-    const Type *t = static_cast<const Type *>(vt);
-    ss->mConstantBufferTypes[slot].set(t);
-    ss->mSlotWritable[slot] = writable;
-    LOGE("rsi_ScriptSetType");
 }
 
 void rsi_ScriptInvoke(Context *rsc, RsScript vs, uint32_t slot)

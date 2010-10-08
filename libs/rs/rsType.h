@@ -119,7 +119,8 @@ protected:
     LOD *mLODs;
     uint32_t mLODCount;
 
-    VertexArray::Attrib mAttribs[RS_MAX_ATTRIBS];
+    VertexArray::Attrib *mAttribs;
+    uint32_t mAttribsSize;
     void makeGLComponents();
 
 private:

@@ -29,8 +29,6 @@ class ProgramFragment;
 class ProgramRaster;
 class ProgramStore;
 
-#define MAX_SCRIPT_BANKS 32
-
 class Script : public ObjectBase
 {
 public:
@@ -61,10 +59,8 @@ public:
     };
     Enviroment_t mEnviroment;
 
-    ObjectBaseRef<Allocation> mSlots[MAX_SCRIPT_BANKS];
-    ObjectBaseRef<const Type> mTypes[MAX_SCRIPT_BANKS];
-    bool mSlotWritable[MAX_SCRIPT_BANKS];
-
+    void initSlots();
+    void setSlot(uint32_t slot, Allocation *a);
     void setVar(uint32_t slot, const void *val, uint32_t len);
 
     virtual void runForEach(Context *rsc,
@@ -76,6 +72,10 @@ public:
     virtual void Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) = 0;
     virtual void setupScript(Context *rsc) = 0;
     virtual uint32_t run(Context *) = 0;
+protected:
+    ObjectBaseRef<Allocation> *mSlots;
+    ObjectBaseRef<const Type> *mTypes;
+
 };
 
 
