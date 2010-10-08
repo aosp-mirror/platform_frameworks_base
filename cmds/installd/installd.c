@@ -101,6 +101,16 @@ static int do_movefiles(char **arg, char reply[REPLY_MAX])
     return movefiles();
 }
 
+static int do_linklib(char **arg, char reply[REPLY_MAX])
+{
+    return linklib(arg[0], arg[1]);
+}
+
+static int do_unlinklib(char **arg, char reply[REPLY_MAX])
+{
+    return unlinklib(arg[0]);
+}
+
 struct cmdinfo {
     const char *name;
     unsigned numargs;
@@ -121,6 +131,8 @@ struct cmdinfo cmds[] = {
     { "getsize",              4, do_get_size },
     { "rmuserdata",           2, do_rm_user_data },
     { "movefiles",            0, do_movefiles },
+    { "linklib",              2, do_linklib },
+    { "unlinklib",            1, do_unlinklib },
 };
 
 static int readx(int s, void *_buf, int count)

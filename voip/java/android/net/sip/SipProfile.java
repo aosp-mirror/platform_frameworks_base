@@ -33,7 +33,6 @@ import javax.sip.address.URI;
 
 /**
  * Class containing a SIP account, domain and server information.
- * @hide
  */
 public class SipProfile implements Parcelable, Serializable, Cloneable {
     private static final long serialVersionUID = 1L;

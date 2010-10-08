@@ -40,7 +40,7 @@
     int32 xr[ ],                rescaled data
     struct gr_info_s *gr_info,  granule structure
     mp3Header *info,            mp3 header info
-    int32  Scratch_mem[168]     for temporary usage
+    int32  Scratch_mem[198]     for temporary usage
 
  Outputs:
 
@@ -120,7 +120,7 @@ void pvmp3_reorder(int32 xr[SUBBANDS_NUMBER*FILTERBANK_BANDS],
                    granuleInfo *gr_info,
                    int32  *used_freq_lines,
                    mp3Header *info,
-                   int32  Scratch_mem[168])
+                   int32  Scratch_mem[198])
 {
     int32 sfreq =  info->version_x + (info->version_x << 1);
     sfreq += info->sampling_frequency;

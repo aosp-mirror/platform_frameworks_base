@@ -2247,8 +2247,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                 mTouchMode = TOUCH_MODE_OVERSCROLL;
                                 if (rawDeltaY > 0) {
                                     mEdgeGlowTop.onPull((float) overscroll / getHeight());
+                                    if (!mEdgeGlowBottom.isFinished()) {
+                                        mEdgeGlowBottom.onRelease();
+                                    }
                                 } else if (rawDeltaY < 0) {
                                     mEdgeGlowBottom.onPull((float) overscroll / getHeight());
+                                    if (!mEdgeGlowTop.isFinished()) {
+                                        mEdgeGlowTop.onRelease();
+                                    }
                                 }
                             }
                         }
@@ -2307,8 +2313,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                         !contentFits())) {
                             if (rawDeltaY > 0) {
                                 mEdgeGlowTop.onPull((float) -incrementalDeltaY / getHeight());
+                                if (!mEdgeGlowBottom.isFinished()) {
+                                    mEdgeGlowBottom.onRelease();
+                                }
                             } else if (rawDeltaY < 0) {
                                 mEdgeGlowBottom.onPull((float) -incrementalDeltaY / getHeight());
+                                if (!mEdgeGlowTop.isFinished()) {
+                                    mEdgeGlowTop.onRelease();
+                                }
                             }
                             invalidate();
                         }

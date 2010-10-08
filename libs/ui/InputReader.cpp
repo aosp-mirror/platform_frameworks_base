@@ -2447,7 +2447,7 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
         yPrecision = mLocked.orientedYPrecision;
     } // release lock
 
-    getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_TOUCHSCREEN, policyFlags,
+    getDispatcher()->notifyMotion(when, getDeviceId(), getSources(), policyFlags,
             motionEventAction, 0, getContext()->getGlobalMetaState(), motionEventEdgeFlags,
             pointerCount, pointerIds, pointerCoords,
             xPrecision, yPrecision, mDownTime);

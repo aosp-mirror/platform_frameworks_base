@@ -152,7 +152,7 @@ public class DropBoxManager {
         /** @return time when the entry was originally created. */
         public long getTimeMillis() { return mTimeMillis; }
 
-        /** @return flags describing the content returned by @{link #getInputStream()}. */
+        /** @return flags describing the content returned by {@link #getInputStream()}. */
         public int getFlags() { return mFlags & ~IS_GZIPPED; }  // getInputStream() decompresses.
 
         /**
@@ -288,8 +288,8 @@ public class DropBoxManager {
     }
 
     /**
-     * Gets the next entry from the drop box *after* the specified time.
-     * Requires android.permission.READ_LOGS.  You must always call
+     * Gets the next entry from the drop box <em>after</em> the specified time.
+     * Requires <code>android.permission.READ_LOGS</code>.  You must always call
      * {@link Entry#close()} on the return value!
      *
      * @param tag of entry to look for, null for all tags

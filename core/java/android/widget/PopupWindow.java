@@ -109,6 +109,7 @@ public class PopupWindow {
     private Drawable mBelowAnchorBackgroundDrawable;
 
     private boolean mAboveAnchor;
+    private int mWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
     
     private OnDismissListener mOnDismissListener;
     private boolean mIgnoreCheekPress = false;
@@ -623,6 +624,25 @@ public class PopupWindow {
     }
 
     /**
+     * Set the layout type for this window. Should be one of the TYPE constants defined in
+     * {@link WindowManager.LayoutParams}.
+     *
+     * @param layoutType Layout type for this window.
+     * @hide
+     */
+    public void setWindowLayoutType(int layoutType) {
+        mWindowLayoutType = layoutType;
+    }
+
+    /**
+     * @return The layout type for this window.
+     * @hide
+     */
+    public int getWindowLayoutType() {
+        return mWindowLayoutType;
+    }
+
+    /**
      * <p>Change the width and height measure specs that are given to the
      * window manager by the popup.  By default these are 0, meaning that
      * the current width or height is requested as an explicit size from
@@ -911,7 +931,7 @@ public class PopupWindow {
             p.format = PixelFormat.TRANSLUCENT;
         }
         p.flags = computeFlags(p.flags);
-        p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+        p.type = mWindowLayoutType;
         p.token = token;
         p.softInputMode = mSoftInputMode;
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));

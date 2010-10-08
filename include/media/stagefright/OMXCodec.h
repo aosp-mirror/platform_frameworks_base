@@ -32,7 +32,8 @@ struct CodecProfileLevel;
 struct OMXCodec : public MediaSource,
                   public MediaBufferObserver {
     enum CreationFlags {
-        kPreferSoftwareCodecs = 1,
+        kPreferSoftwareCodecs    = 1,
+        kIgnoreCodecSpecificData = 2
     };
     static sp<MediaSource> Create(
             const sp<IOMX> &omx,
@@ -103,6 +104,7 @@ private:
         kSupportsMultipleFramesPerInputBuffer = 1024,
         kAvoidMemcopyInputRecordingFrames     = 2048,
         kRequiresLargerEncoderOutputBuffer    = 4096,
+        kOutputBuffersAreUnreadable           = 8192,
     };
 
     struct BufferInfo {
@@ -247,9 +249,10 @@ private:
 
     void dumpPortStatus(OMX_U32 portIndex);
 
-    status_t configureCodec(const sp<MetaData> &meta);
+    status_t configureCodec(const sp<MetaData> &meta, uint32_t flags);
 
-    static uint32_t getComponentQuirks(const char *componentName);
+    static uint32_t getComponentQuirks(
+            const char *componentName, bool isEncoder);
 
     static void findMatchingCodecs(
             const char *mime,

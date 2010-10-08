@@ -561,6 +561,39 @@ void AwesomePlayer::onBufferingUpdate() {
     postBufferingEvent_l();
 }
 
+void AwesomePlayer::partial_reset_l() {
+    // Only reset the video renderer and shut down the video decoder.
+    // Then instantiate a new video decoder and resume video playback.
+
+    mVideoRenderer.clear();
+
+    if (mLastVideoBuffer) {
+        mLastVideoBuffer->release();
+        mLastVideoBuffer = NULL;
+    }
+
+    if (mVideoBuffer) {
+        mVideoBuffer->release();
+        mVideoBuffer = NULL;
+    }
+
+    {
+        mVideoSource->stop();
+
+        // The following hack is necessary to ensure that the OMX
+        // component is completely released by the time we may try
+        // to instantiate it again.
+        wp<MediaSource> tmp = mVideoSource;
+        mVideoSource.clear();
+        while (tmp.promote() != NULL) {
+            usleep(1000);
+        }
+        IPCThreadState::self()->flushCommands();
+    }
+
+    CHECK_EQ(OK, initVideoDecoder(OMXCodec::kIgnoreCodecSpecificData));
+}
+
 void AwesomePlayer::onStreamDone() {
     // Posted whenever any stream finishes playing.
 
@@ -570,7 +603,21 @@ void AwesomePlayer::onStreamDone() {
     }
     mStreamDoneEventPending = false;
 
-    if (mStreamDoneStatus != ERROR_END_OF_STREAM) {
+    if (mStreamDoneStatus == INFO_DISCONTINUITY) {
+        // This special status is returned because an http live stream's
+        // video stream switched to a different bandwidth at this point
+        // and future data may have been encoded using different parameters.
+        // This requires us to shutdown the video decoder and reinstantiate
+        // a fresh one.
+
+        LOGV("INFO_DISCONTINUITY");
+
+        CHECK(mVideoSource != NULL);
+
+        partial_reset_l();
+        postVideoEvent_l();
+        return;
+    } else if (mStreamDoneStatus != ERROR_END_OF_STREAM) {
         LOGV("MEDIA_ERROR %d", mStreamDoneStatus);
 
         notifyListener_l(
@@ -939,8 +986,7 @@ void AwesomePlayer::setVideoSource(sp<MediaSource> source) {
     mVideoTrack = source;
 }
 
-status_t AwesomePlayer::initVideoDecoder() {
-    uint32_t flags = 0;
+status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
     mVideoSource = OMXCodec::Create(
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
@@ -1571,21 +1617,30 @@ status_t AwesomePlayer::suspend() {
 
     if (mLastVideoBuffer) {
         size_t size = mLastVideoBuffer->range_length();
+
         if (size) {
-            state->mLastVideoFrameSize = size;
-            state->mLastVideoFrame = malloc(size);
-            memcpy(state->mLastVideoFrame,
-                   (const uint8_t *)mLastVideoBuffer->data()
-                        + mLastVideoBuffer->range_offset(),
-                   size);
+            int32_t unreadable;
+            if (!mLastVideoBuffer->meta_data()->findInt32(
+                        kKeyIsUnreadable, &unreadable)
+                    || unreadable == 0) {
+                state->mLastVideoFrameSize = size;
+                state->mLastVideoFrame = malloc(size);
+                memcpy(state->mLastVideoFrame,
+                       (const uint8_t *)mLastVideoBuffer->data()
+                            + mLastVideoBuffer->range_offset(),
+                       size);
 
-            state->mVideoWidth = mVideoWidth;
-            state->mVideoHeight = mVideoHeight;
+                state->mVideoWidth = mVideoWidth;
+                state->mVideoHeight = mVideoHeight;
 
-            sp<MetaData> meta = mVideoSource->getFormat();
-            CHECK(meta->findInt32(kKeyColorFormat, &state->mColorFormat));
-            CHECK(meta->findInt32(kKeyWidth, &state->mDecodedWidth));
-            CHECK(meta->findInt32(kKeyHeight, &state->mDecodedHeight));
+                sp<MetaData> meta = mVideoSource->getFormat();
+                CHECK(meta->findInt32(kKeyColorFormat, &state->mColorFormat));
+                CHECK(meta->findInt32(kKeyWidth, &state->mDecodedWidth));
+                CHECK(meta->findInt32(kKeyHeight, &state->mDecodedHeight));
+            } else {
+                LOGV("Unable to save last video frame, we have no access to "
+                     "the decoded video data.");
+            }
         }
     }
 

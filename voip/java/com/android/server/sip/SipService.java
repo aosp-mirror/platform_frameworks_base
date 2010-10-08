@@ -123,6 +123,8 @@ public final class SipService extends ISipService.Stub {
     }
 
     public synchronized SipProfile[] getListOfProfiles() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         boolean isCallerRadio = isCallerRadio();
         ArrayList<SipProfile> profiles = new ArrayList<SipProfile>();
         for (SipSessionGroupExt group : mSipGroups.values()) {
@@ -134,6 +136,8 @@ public final class SipService extends ISipService.Stub {
     }
 
     public void open(SipProfile localProfile) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         localProfile.setCallingUid(Binder.getCallingUid());
         try {
             createGroup(localProfile);
@@ -146,6 +150,8 @@ public final class SipService extends ISipService.Stub {
     public synchronized void open3(SipProfile localProfile,
             PendingIntent incomingCallPendingIntent,
             ISipSessionListener listener) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         localProfile.setCallingUid(Binder.getCallingUid());
         if (incomingCallPendingIntent == null) {
             Log.w(TAG, "incomingCallPendingIntent cannot be null; "
@@ -159,7 +165,7 @@ public final class SipService extends ISipService.Stub {
                     incomingCallPendingIntent, listener);
             if (localProfile.getAutoRegistration()) {
                 group.openToReceiveCalls();
-                if (isWifiOn()) grabWifiLock();
+                if (isWifiActive()) grabWifiLock();
             }
         } catch (SipException e) {
             Log.e(TAG, "openToReceiveCalls()", e);
@@ -181,6 +187,8 @@ public final class SipService extends ISipService.Stub {
     }
 
     public synchronized void close(String localProfileUri) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
         if (group == null) return;
         if (!isCallerCreatorOrRadio(group)) {
@@ -191,10 +199,12 @@ public final class SipService extends ISipService.Stub {
         group = mSipGroups.remove(localProfileUri);
         notifyProfileRemoved(group.getLocalProfile());
         group.close();
-        if (isWifiOn() && !anyOpened()) releaseWifiLock();
+        if (isWifiActive() && !anyOpened()) releaseWifiLock();
     }
 
     public synchronized boolean isOpened(String localProfileUri) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
         if (group == null) return false;
         if (isCallerCreatorOrRadio(group)) {
@@ -206,6 +216,8 @@ public final class SipService extends ISipService.Stub {
     }
 
     public synchronized boolean isRegistered(String localProfileUri) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
         if (group == null) return false;
         if (isCallerCreatorOrRadio(group)) {
@@ -218,6 +230,8 @@ public final class SipService extends ISipService.Stub {
 
     public synchronized void setRegistrationListener(String localProfileUri,
             ISipSessionListener listener) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
         if (group == null) return;
         if (isCallerCreator(group)) {
@@ -229,6 +243,8 @@ public final class SipService extends ISipService.Stub {
 
     public synchronized ISipSession createSession(SipProfile localProfile,
             ISipSessionListener listener) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         localProfile.setCallingUid(Binder.getCallingUid());
         if (!mConnected) return null;
         try {
@@ -241,6 +257,8 @@ public final class SipService extends ISipService.Stub {
     }
 
     public synchronized ISipSession getPendingSession(String callId) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.USE_SIP, null);
         if (callId == null) return null;
         return mPendingSessions.get(callId);
     }
@@ -330,9 +348,8 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
-    private boolean isWifiOn() {
+    private boolean isWifiActive() {
         return "WIFI".equalsIgnoreCase(mNetworkType);
-        //return (mConnected && "WIFI".equalsIgnoreCase(mNetworkType));
     }
 
     private synchronized void onConnectivityChanged(

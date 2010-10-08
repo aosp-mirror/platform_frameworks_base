@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
 #define LOG_TAG "LiveSource"
 #include <utils/Log.h>
 
@@ -22,18 +23,21 @@
 #include "include/NuHTTPDataSource.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
+#include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaDebug.h>
 
 namespace android {
 
 LiveSource::LiveSource(const char *url)
-    : mURL(url),
+    : mMasterURL(url),
       mInitCheck(NO_INIT),
       mPlaylistIndex(0),
       mLastFetchTimeUs(-1),
       mSource(new NuHTTPDataSource),
       mSourceSize(0),
-      mOffsetBias(0) {
+      mOffsetBias(0),
+      mSignalDiscontinuity(false),
+      mPrevBandwidthIndex(-1) {
     if (switchToNext()) {
         mInitCheck = OK;
     }
@@ -46,21 +50,129 @@ status_t LiveSource::initCheck() const {
     return mInitCheck;
 }
 
-bool LiveSource::loadPlaylist() {
+// static
+int LiveSource::SortByBandwidth(const BandwidthItem *a, const BandwidthItem *b) {
+    if (a->mBandwidth < b->mBandwidth) {
+        return -1;
+    } else if (a->mBandwidth == b->mBandwidth) {
+        return 0;
+    }
+
+    return 1;
+}
+
+static double uniformRand() {
+    return (double)rand() / RAND_MAX;
+}
+
+bool LiveSource::loadPlaylist(bool fetchMaster) {
+    mSignalDiscontinuity = false;
+
     mPlaylist.clear();
     mPlaylistIndex = 0;
 
-    sp<ABuffer> buffer;
-    status_t err = fetchM3U(mURL.c_str(), &buffer);
+    if (fetchMaster) {
+        mPrevBandwidthIndex = -1;
 
-    if (err != OK) {
-        return false;
+        sp<ABuffer> buffer;
+        status_t err = fetchM3U(mMasterURL.c_str(), &buffer);
+
+        if (err != OK) {
+            return false;
+        }
+
+        mPlaylist = new M3UParser(
+                mMasterURL.c_str(), buffer->data(), buffer->size());
+
+        if (mPlaylist->initCheck() != OK) {
+            return false;
+        }
+
+        if (mPlaylist->isVariantPlaylist()) {
+            for (size_t i = 0; i < mPlaylist->size(); ++i) {
+                BandwidthItem item;
+
+                sp<AMessage> meta;
+                mPlaylist->itemAt(i, &item.mURI, &meta);
+
+                unsigned long bandwidth;
+                CHECK(meta->findInt32("bandwidth", (int32_t *)&item.mBandwidth));
+
+                mBandwidthItems.push(item);
+            }
+            mPlaylist.clear();
+
+            // fall through
+            if (mBandwidthItems.size() == 0) {
+                return false;
+            }
+
+            mBandwidthItems.sort(SortByBandwidth);
+
+            for (size_t i = 0; i < mBandwidthItems.size(); ++i) {
+                const BandwidthItem &item = mBandwidthItems.itemAt(i);
+                LOGV("item #%d: %s", i, item.mURI.c_str());
+            }
+        }
     }
 
-    mPlaylist = new M3UParser(mURL.c_str(), buffer->data(), buffer->size());
+    if (mBandwidthItems.size() > 0) {
+#if 0
+        // Change bandwidth at random()
+        size_t index = uniformRand() * mBandwidthItems.size();
+#elif 0
+        // There's a 50% chance to stay on the current bandwidth and
+        // a 50% chance to switch to the next higher bandwidth (wrapping around
+        // to lowest)
+        size_t index;
+        if (uniformRand() < 0.5) {
+            index = mPrevBandwidthIndex < 0 ? 0 : (size_t)mPrevBandwidthIndex;
+        } else {
+            if (mPrevBandwidthIndex < 0) {
+                index = 0;
+            } else {
+                index = mPrevBandwidthIndex + 1;
+                if (index == mBandwidthItems.size()) {
+                    index = 0;
+                }
+            }
+        }
+#else
+        // Stay on the lowest bandwidth available.
+        size_t index = 0;  // Lowest bandwidth stream
+#endif
 
-    if (mPlaylist->initCheck() != OK) {
-        return false;
+        mURL = mBandwidthItems.editItemAt(index).mURI;
+
+        if (mPrevBandwidthIndex >= 0 && (size_t)mPrevBandwidthIndex != index) {
+            // If we switched streams because of bandwidth changes,
+            // we'll signal this discontinuity by inserting a
+            // special transport stream packet into the stream.
+            mSignalDiscontinuity = true;
+        }
+
+        mPrevBandwidthIndex = index;
+    } else {
+        mURL = mMasterURL;
+    }
+
+    if (mPlaylist == NULL) {
+        sp<ABuffer> buffer;
+        status_t err = fetchM3U(mURL.c_str(), &buffer);
+
+        if (err != OK) {
+            return false;
+        }
+
+        mPlaylist = new M3UParser(mURL.c_str(), buffer->data(), buffer->size());
+
+        if (mPlaylist->initCheck() != OK) {
+            return false;
+        }
+
+        if (mPlaylist->isVariantPlaylist()) {
+            return false;
+        }
     }
 
     if (!mPlaylist->meta()->findInt32(
@@ -79,6 +191,8 @@ static int64_t getNowUs() {
 }
 
 bool LiveSource::switchToNext() {
+    mSignalDiscontinuity = false;
+
     mOffsetBias += mSourceSize;
     mSourceSize = 0;
 
@@ -87,7 +201,7 @@ bool LiveSource::switchToNext() {
         int32_t nextSequenceNumber =
             mPlaylistIndex + mFirstItemSequenceNumber;
 
-        if (!loadPlaylist()) {
+        if (!loadPlaylist(mLastFetchTimeUs < 0)) {
             LOGE("failed to reload playlist");
             return false;
         }
@@ -111,35 +225,62 @@ bool LiveSource::switchToNext() {
     }
 
     AString uri;
-    CHECK(mPlaylist->itemAt(mPlaylistIndex, &uri));
-    LOGI("switching to %s", uri.c_str());
+    sp<AMessage> itemMeta;
+    CHECK(mPlaylist->itemAt(mPlaylistIndex, &uri, &itemMeta));
+    LOGV("switching to %s", uri.c_str());
 
     if (mSource->connect(uri.c_str()) != OK
             || mSource->getSize(&mSourceSize) != OK) {
         return false;
     }
 
+    int32_t val;
+    if (itemMeta->findInt32("discontinuity", &val) && val != 0) {
+        mSignalDiscontinuity = true;
+    }
+
     mPlaylistIndex++;
     return true;
 }
+
+static const ssize_t kHeaderSize = 188;
 
 ssize_t LiveSource::readAt(off_t offset, void *data, size_t size) {
     CHECK(offset >= mOffsetBias);
     offset -= mOffsetBias;
 
-    if (offset >= mSourceSize) {
-        CHECK_EQ(offset, mSourceSize);
+    off_t delta = mSignalDiscontinuity ? kHeaderSize : 0;
 
-        offset -= mSourceSize;
+    if (offset >= mSourceSize + delta) {
+        CHECK_EQ(offset, mSourceSize + delta);
+
+        offset -= mSourceSize + delta;
         if (!switchToNext()) {
             return ERROR_END_OF_STREAM;
         }
+
+        if (mSignalDiscontinuity) {
+            LOGV("switchToNext changed streams");
+        } else {
+            LOGV("switchToNext stayed within the same stream");
+        }
+
+        mOffsetBias += delta;
+
+        delta = mSignalDiscontinuity ? kHeaderSize : 0;
+    }
+
+    if (offset < delta) {
+        size_t avail = delta - offset;
+        memset(data, 0, avail);
+        return avail;
     }
 
     size_t numRead = 0;
     while (numRead < size) {
         ssize_t n = mSource->readAt(
-                offset + numRead, (uint8_t *)data + numRead, size - numRead);
+                offset + numRead - delta,
+                (uint8_t *)data + numRead, size - numRead);
 
         if (n <= 0) {
             break;
@@ -154,14 +295,24 @@ ssize_t LiveSource::readAt(off_t offset, void *data, size_t size) {
 status_t LiveSource::fetchM3U(const char *url, sp<ABuffer> *out) {
     *out = NULL;
 
-    status_t err = mSource->connect(url);
+    sp<DataSource> source;
 
-    if (err != OK) {
-        return err;
+    if (!strncasecmp(url, "file://", 7)) {
+        source = new FileSource(url + 7);
+    } else {
+        CHECK(!strncasecmp(url, "http://", 7));
+
+        status_t err = mSource->connect(url);
+
+        if (err != OK) {
+            return err;
+        }
+
+        source = mSource;
     }
 
     off_t size;
-    err = mSource->getSize(&size);
+    status_t err = source->getSize(&size);
 
     if (err != OK) {
         return err;
@@ -170,7 +321,7 @@ status_t LiveSource::fetchM3U(const char *url, sp<ABuffer> *out) {
     sp<ABuffer> buffer = new ABuffer(size);
     size_t offset = 0;
     while (offset < (size_t)size) {
-        ssize_t n = mSource->readAt(
+        ssize_t n = source->readAt(
                 offset, buffer->data() + offset, size - offset);
 
         if (n <= 0) {
