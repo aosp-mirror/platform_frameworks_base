@@ -63,6 +63,12 @@ public class VideoEditorFactory {
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 throw new FileNotFoundException("Cannot create project path: " + projectPath);
+            } else {
+                // Create the file which hides the media files
+                // from the media scanner
+                if (!new File(dir, ".nomedia").createNewFile()) {
+                    throw new FileNotFoundException("Cannot create file .nomedia");
+                }
             }
         }
 
