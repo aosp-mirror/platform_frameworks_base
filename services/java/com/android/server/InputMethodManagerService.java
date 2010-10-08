@@ -1694,6 +1694,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             }
                         });
             }
+            mDialogBuilder.setNegativeButton(com.android.internal.R.string.cancel,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            hideInputMethodMenu();
+                        }
+                    });
             mSwitchingDialog = mDialogBuilder.create();
             mSwitchingDialog.getWindow().setType(
                     WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG);
