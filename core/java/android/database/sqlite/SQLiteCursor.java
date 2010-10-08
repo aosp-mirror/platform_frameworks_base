@@ -416,8 +416,10 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 // BEGIN STOPSHIP remove the following line
                 t = new RequeryOnUiThreadException(packageName);
                 // END STOPSHIP
-                Log.w(TAG, "should not attempt requery on main (UI) thread: app = " +
-                        packageName == null ? "'unknown'" : packageName, t);
+                String s = packageName == null ? "'unknown'" : packageName;
+                Log.w(TAG, "should not attempt requery on main (UI) thread: app = " + s +
+                        " (database: " + mQuery.mDatabase.getPath() +
+                        ", query: " + mQuery.mSql + ")", t);
             }
         }
     }
