@@ -449,6 +449,10 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_WAKE_LOCK_FLAG = 1<<17;
         public static final int STATE_SENSOR_ON_FLAG = 1<<16;
         
+        public static final int MOST_INTERESTING_STATES =
+            STATE_BATTERY_PLUGGED_FLAG | STATE_SCREEN_ON_FLAG
+            | STATE_GPS_ON_FLAG | STATE_PHONE_IN_CALL_FLAG;
+
         public int states;
 
         public HistoryItem() {
