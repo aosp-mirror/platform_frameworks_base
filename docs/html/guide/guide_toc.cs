@@ -451,6 +451,25 @@
   </li>
 
   <li>
+    <h2><span class="en">Web Applications</span>
+    </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>guide/webapps/targetting.html">
+            <span class="en">Targetting Android Devices</span>
+          </a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>guide/webapps/webview.html">
+            <span class="en">Building Web Apps in WebView</span>
+          </a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>guide/webapps/debugging.html">
+            <span class="en">Debugging Web Apps</span>
+          </a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>guide/webapps/best-practices.html">
+            <span class="en">Best Practices for Web Apps</span>
+          </a> <span class="new">new!</span></li>
+    </ul>
+  </li>
+
+  <li>
     <h2><span class="en">Appendix</span>
                <span class="de" style="display:none">Anhang</span>
                <span class="es" style="display:none">Apéndice</span>
