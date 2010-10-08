@@ -46,6 +46,14 @@ struct ARTSPController : public MediaExtractor {
 
     void onMessageReceived(const sp<AMessage> &msg);
 
+    virtual uint32_t flags() const {
+        // Seeking 10secs forward or backward is a very expensive operation
+        // for rtsp, so let's not enable that.
+        // The user can always use the seek bar.
+
+        return CAN_PAUSE | CAN_SEEK;
+    }
+
 protected:
     virtual ~ARTSPController();
 
