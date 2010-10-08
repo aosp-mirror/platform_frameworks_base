@@ -15,11 +15,6 @@
 ** limitations under the License.
 */
 
-// This file was generated from the C++ include file: SkMatrix.h
-// Any changes made to this file will be discarded by the build.
-// To change this file, either edit the include, or device/tools/gluemaker/main.cpp, 
-// or one of the auxilary file specifications in device/tools/gluemaker.
-
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <android_runtime/AndroidRuntime.h>
@@ -29,13 +24,21 @@
 
 #include "Matrix.h"
 
+#include <Caches.h>
+
 namespace android {
 
 class SkMatrixGlue {
 public:
 
     static void finalizer(JNIEnv* env, jobject clazz, SkMatrix* obj) {
+#ifdef USE_OPENGL_RENDERER
+        if (android::uirenderer::Caches::hasInstance()) {
+            android::uirenderer::Caches::getInstance().resourceCache.destructor(obj);
+        }
+#else // !USE_OPENGL_RENDERER
         delete obj;
+#endif
     }
 
     static SkMatrix* create(JNIEnv* env, jobject clazz, const SkMatrix* src) {

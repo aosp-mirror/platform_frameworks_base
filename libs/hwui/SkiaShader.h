@@ -60,6 +60,10 @@ struct SkiaShader {
     virtual void setupProgram(Program* program, const mat4& modelView, const Snapshot& snapshot,
             GLuint* textureUnit);
 
+    inline SkShader *getSkShader() {
+        return mKey;
+    }
+
     inline bool blend() const {
         return mBlend;
     }

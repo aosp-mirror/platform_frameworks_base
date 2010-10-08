@@ -34,6 +34,7 @@
 #include "TextDropShadowCache.h"
 #include "FboCache.h"
 #include "Line.h"
+#include "ResourceCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -138,6 +139,7 @@ public:
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
     GammaFontRenderer fontRenderer;
+    ResourceCache resourceCache;
 
     Line line;
 }; // class Caches

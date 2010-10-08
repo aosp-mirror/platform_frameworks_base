@@ -20,6 +20,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		PathCache.cpp \
 		Program.cpp \
 		ProgramCache.cpp \
+		ResourceCache.cpp \
 		SkiaColorFilter.cpp \
 		SkiaShader.cpp \
 		TextureCache.cpp \

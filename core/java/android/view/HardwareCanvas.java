@@ -34,14 +34,6 @@ abstract class HardwareCanvas extends Canvas {
     }
     
     /**
-     * This method <strong>must</strong> be called before releasing a
-     * reference to a hardware canvas. This method is responsible for
-     * freeing native resources associated with the hardware. Not
-     * invoking this method properly can result in memory leaks.
-     */    
-    public abstract void destroy();
-
-    /**
      * Invoked before any drawing operation is performed in this canvas.
      */
     abstract void onPreDraw();
