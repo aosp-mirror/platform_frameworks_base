@@ -28,11 +28,11 @@
         >
 
         <ImageView
-            class="com.android.systemui.statusbar.tablet.NotificationIconArea$MoreView"
             android:id="@+id/expand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_sysbar_open"
+            android:background="@drawable/ic_sysbar_icon_bg"
             android:paddingLeft="6dip"
             android:onClick="notificationIconsClicked"
             />
@@ -100,7 +100,17 @@
                 android:background="@drawable/sysbar_hidenotification_handle"
                 android:layout_marginLeft="8dip"
                 />
+            <com.android.systemui.statusbar.tablet.InputMethodButton
+                android:id="@+id/imeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="8dip"
+                android:src="@drawable/ic_sysbar_ime_default"
+                android:background="@drawable/ic_sysbar_icon_bg"
+                android:visibility="visible"
+                />
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
+
 
         <FrameLayout
             android:id="@+id/ticker"
