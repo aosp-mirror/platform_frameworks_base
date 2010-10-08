@@ -4321,6 +4321,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
+                mEnterKeyIsDown = true;
                 // If ALT modifier is held, then we always insert a
                 // newline character.
                 if ((event.getMetaState()&KeyEvent.META_ALT_ON) == 0) {
@@ -4353,6 +4354,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
                 
             case KeyEvent.KEYCODE_DPAD_CENTER:
+                mDPadCenterIsDown = true;
                 if (shouldAdvanceFocusOnEnter()) {
                     return 0;
                 }
@@ -4447,6 +4449,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
+                mDPadCenterIsDown = false;
                 /*
                  * If there is a click listener, just call through to
                  * super, which will invoke it.
@@ -4467,6 +4470,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return super.onKeyUp(keyCode, event);
                 
             case KeyEvent.KEYCODE_ENTER:
+                mEnterKeyIsDown = false;
                 if (mInputContentType != null
                         && mInputContentType.onEditorActionListener != null
                         && mInputContentType.enterDown) {
@@ -7254,13 +7258,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
-        int selectionStart, selectionEnd;
+        int minOffset, maxOffset;
 
-        // selectionModifierCursorController is not null at that point
-        SelectionModifierCursorController selectionModifierCursorController =
-            ((SelectionModifierCursorController) mSelectionModifierCursorController);
-        int minOffset = selectionModifierCursorController.getMinTouchOffset();
-        int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
+        if (mDPadCenterIsDown || mEnterKeyIsDown) {
+            minOffset = getSelectionStart();
+            maxOffset = getSelectionEnd();
+        } else {
+            // selectionModifierCursorController is not null at that point
+            SelectionModifierCursorController selectionModifierCursorController =
+                ((SelectionModifierCursorController) mSelectionModifierCursorController);
+            minOffset = selectionModifierCursorController.getMinTouchOffset();
+            maxOffset = selectionModifierCursorController.getMaxTouchOffset();
+        }
+
+        int selectionStart, selectionEnd;
         
         long wordLimits = getWordLimitsAt(minOffset);
         if (wordLimits >= 0) {
@@ -7280,11 +7291,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     
     private String getWordForDictionary() {
-        if (mLastTouchOffset < 0) {
-            return null;
-        }
-
-        long wordLimits = getWordLimitsAt(mLastTouchOffset);
+        long wordLimits = getWordLimitsAt(getSelectionStart());
         if (wordLimits >= 0) {
             int start = extractRangeStartFromLong(wordLimits);
             int end = extractRangeEndFromLong(wordLimits);
@@ -7886,8 +7893,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final float newPosX = rawX - mTouchToWindowOffsetX + mHotspotX;
                 final float newPosY = rawY - mTouchToWindowOffsetY + mHotspotY + mTouchOffsetY;
 
-                mController.updatePosition(this, (int) Math.round(newPosX),
-                        (int) Math.round(newPosY));
+                mController.updatePosition(this, Math.round(newPosX), Math.round(newPosY));
 
                 break;
             }
@@ -8259,6 +8265,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CursorController        mSelectionModifierCursorController;
     private boolean                 mIsInTextSelectionMode = false;
     private int                     mLastTouchOffset = -1;
+    // These are needed to desambiguate a long click. If the long click comes from ones of these, we
+    // select from the current cursor position. Otherwise, select from long pressed position.
+    private boolean                 mDPadCenterIsDown = false;
+    private boolean                 mEnterKeyIsDown = false;
     // Created once and shared by different CursorController helper methods.
     // Only one cursor controller is active at any time which prevent race conditions.
     private static Rect             sCursorControllerTempRect = new Rect();
