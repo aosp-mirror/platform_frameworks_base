@@ -88,7 +88,8 @@ struct MyHandler : public AHandler {
           mCheckPending(false),
           mCheckGeneration(0),
           mTryTCPInterleaving(false),
-          mReceivedFirstRTCPPacket(false) {
+          mReceivedFirstRTCPPacket(false),
+          mSeekable(false) {
         mNetLooper->setName("rtsp net");
         mNetLooper->start(false /* runOnCallingThread */,
                           false /* canCallJava */,
@@ -115,9 +116,10 @@ struct MyHandler : public AHandler {
         (new AMessage('abor', id()))->post();
     }
 
-    void seek(int64_t timeUs) {
+    void seek(int64_t timeUs, const sp<AMessage> &doneMsg) {
         sp<AMessage> msg = new AMessage('seek', id());
         msg->setInt64("time", timeUs);
+        msg->setMessage("doneMsg", doneMsg);
         msg->post();
     }
 
@@ -379,6 +381,7 @@ struct MyHandler : public AHandler {
                 mFirstAccessUnitNTP = 0;
                 mNumAccessUnitsReceived = 0;
                 mReceivedFirstRTCPPacket = false;
+                mSeekable = false;
 
                 sp<AMessage> reply = new AMessage('tear', id());
 
@@ -551,7 +554,17 @@ struct MyHandler : public AHandler {
 
             case 'seek':
             {
+                sp<AMessage> doneMsg;
+                CHECK(msg->findMessage("doneMsg", &doneMsg));
+
                 if (mSeekPending) {
+                    doneMsg->post();
+                    break;
+                }
+
+                if (!mSeekable) {
+                    LOGW("This is a live stream, ignoring seek request.");
+                    doneMsg->post();
                     break;
                 }
 
@@ -577,6 +590,7 @@ struct MyHandler : public AHandler {
 
                 sp<AMessage> reply = new AMessage('see1', id());
                 reply->setInt64("time", timeUs);
+                reply->setMessage("doneMsg", doneMsg);
                 mConn->sendRequest(request.c_str(), reply);
                 break;
             }
@@ -605,7 +619,11 @@ struct MyHandler : public AHandler {
 
                 request.append("\r\n");
 
+                sp<AMessage> doneMsg;
+                CHECK(msg->findMessage("doneMsg", &doneMsg));
+
                 sp<AMessage> reply = new AMessage('see2', id());
+                reply->setMessage("doneMsg", doneMsg);
                 mConn->sendRequest(request.c_str(), reply);
                 break;
             }
@@ -644,6 +662,11 @@ struct MyHandler : public AHandler {
                 }
 
                 mSeekPending = false;
+
+                sp<AMessage> doneMsg;
+                CHECK(msg->findMessage("doneMsg", &doneMsg));
+
+                doneMsg->post();
                 break;
             }
 
@@ -714,6 +737,8 @@ struct MyHandler : public AHandler {
     }
 
     void parsePlayResponse(const sp<ARTSPResponse> &response) {
+        mSeekable = false;
+
         ssize_t i = response->mHeaders.indexOfKey("range");
         if (i < 0) {
             // Server doesn't even tell use what range it is going to
@@ -777,6 +802,8 @@ struct MyHandler : public AHandler {
 
             ++n;
         }
+
+        mSeekable = true;
     }
 
     sp<APacketSource> getPacketSource(size_t index) {
@@ -808,6 +835,7 @@ private:
     int32_t mCheckGeneration;
     bool mTryTCPInterleaving;
     bool mReceivedFirstRTCPPacket;
+    bool mSeekable;
 
     struct TrackInfo {
         AString mURL;
