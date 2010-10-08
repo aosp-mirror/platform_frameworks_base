@@ -1891,7 +1891,7 @@ public abstract class PackageManager {
         if (pkg == null) {
             return null;
         }
-        return PackageParser.generatePackageInfo(pkg, null, flags);
+        return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0);
     }
 
     /**
