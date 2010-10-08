@@ -22,9 +22,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.View;
@@ -58,25 +59,27 @@ public class AlertDialog extends Dialog implements DialogInterface {
     private AlertController mAlert;
 
     protected AlertDialog(Context context) {
-        this(context,
-                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
-                        ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
-                        : com.android.internal.R.style.Theme_Dialog_Alert);
+        this(context, getDefaultDialogTheme(context));
     }
 
     protected AlertDialog(Context context, int theme) {
-        super(context, theme);
+        super(context, theme == 0 ? getDefaultDialogTheme(context) : theme);
         mAlert = new AlertController(context, this, getWindow());
     }
 
     protected AlertDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
-        super(context,
-                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
-                ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
-                : com.android.internal.R.style.Theme_Dialog_Alert);
+        super(context, getDefaultDialogTheme(context));
         setCancelable(cancelable);
         setOnCancelListener(cancelListener);
         mAlert = new AlertController(context, this, getWindow());
+    }
+
+    private static int getDefaultDialogTheme(Context context) {
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
+                outValue, true);
+        Log.d("AlertDialog", "getDefaultDialogTheme data " + outValue.data + " id " + outValue.resourceId);
+        return outValue.resourceId;
     }
 
     /**
@@ -280,10 +283,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * Constructor using a context for this builder and the {@link AlertDialog} it creates.
          */
         public Builder(Context context) {
-            this(context,
-                    context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
-                    ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
-                    : com.android.internal.R.style.Theme_Dialog_Alert);
+            this(context, getDefaultDialogTheme(context));
         }
 
         /**

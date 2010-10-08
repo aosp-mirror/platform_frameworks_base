@@ -1366,6 +1366,8 @@
   <public type="attr" name="listDividerAlertDialog" />
   <public type="attr" name="textColorAlertDialogListItem" />
   <public type="attr" name="loopViews" />
+  <public type="attr" name="dialogTheme" />
+  <public type="attr" name="alertDialogTheme" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

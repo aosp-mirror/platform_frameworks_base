@@ -1091,12 +1091,15 @@
     </style>
 
     <style name="TextAppearance.Holo.Widget.PopupMenu" parent="TextAppearance.Widget.PopupMenu">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.Holo.Widget.PopupMenu.Large" parent="TextAppearance.Widget.PopupMenu.Large">
+    <style name="TextAppearance.Holo.Widget.PopupMenu.Large">
+        <item name="android:textSize">22sp</item>
     </style>
 
-    <style name="TextAppearance.Holo.Widget.PopupMenu.Small" parent="TextAppearance.Widget.PopupMenu.Small">
+    <style name="TextAppearance.Holo.Widget.PopupMenu.Small">
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget.ActionBar.Title"
@@ -1261,6 +1264,7 @@
     </style>
 
     <style name="Widget.Holo.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
+        <item name="android:background">@android:drawable/list_section_header_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.TextSelectHandle" parent="Widget.TextSelectHandle">
@@ -1335,7 +1339,15 @@
     <style name="Widget.Holo.ProgressBar.Large.Inverse" parent="Widget.ProgressBar.Large.Inverse">
     </style>
 
-    <style name="Widget.Holo.SeekBar" parent="Widget.SeekBar">
+    <style name="Widget.Holo.SeekBar">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:progressDrawable">@android:drawable/scrubber_progress_horizontal_holo_dark</item>
+        <item name="android:indeterminateDrawable">@android:drawable/scrubber_progress_horizontal_holo_dark</item>
+        <item name="android:minHeight">16dip</item>
+        <item name="android:maxHeight">16dip</item>
+        <item name="android:thumb">@android:drawable/scrubber_control_holo</item>
+        <item name="android:thumbOffset">16dip</item>
+        <item name="android:focusable">true</item>
     </style>
 
     <style name="Widget.Holo.RatingBar" parent="Widget.RatingBar">
@@ -1357,6 +1369,12 @@
     </style>
 
     <style name="Widget.Holo.Spinner" parent="Widget.Spinner.DropDown">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
+        <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
+        <item name="android:dropDownVerticalOffset">0dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+        <item name="android:popupPromptView">@android:layout/simple_dropdown_hint</item>
     </style>
 
     <style name="Widget.Holo.Spinner.DropDown">
@@ -1405,15 +1423,21 @@
     </style>
 
     <style name="Widget.Holo.ListPopupWindow" parent="Widget.ListPopupWindow">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
+        <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
+        <item name="android:dropDownVerticalOffset">0dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
-    <style name="Widget.Holo.PopupMenu" parent="Widget.PopupMenu">
+    <style name="Widget.Holo.PopupMenu" parent="Widget.Holo.ListPopupWindow">
     </style>
 
     <style name="Widget.Holo.ActionButton" parent="Widget.ActionButton">
     </style>
 
     <style name="Widget.Holo.ActionButton.Overflow" parent="Widget.ActionButton.Overflow">
+        <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
@@ -1441,6 +1465,7 @@
     <style name="Widget.Holo.ActionBar" parent="Widget.ActionBar">
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
+        <item name="android:background">@null</item>
     </style>
 
     <!-- Light widget styles -->
@@ -1472,6 +1497,7 @@
     </style>
 
     <style name="Widget.Holo.Light.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
+        <item name="android:background">@android:drawable/list_section_header_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.TextSelectHandle" parent="Widget.TextSelectHandle">
@@ -1546,7 +1572,9 @@
     <style name="Widget.Holo.Light.ProgressBar.Large.Inverse" parent="Widget.ProgressBar.Large.Inverse">
     </style>
 
-    <style name="Widget.Holo.Light.SeekBar" parent="Widget.SeekBar">
+    <style name="Widget.Holo.Light.SeekBar" parent="Widget.Holo.SeekBar">
+        <item name="android:progressDrawable">@android:drawable/scrubber_progress_horizontal_holo_light</item>
+        <item name="android:indeterminateDrawable">@android:drawable/scrubber_progress_horizontal_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.RatingBar" parent="Widget.RatingBar">
@@ -1568,6 +1596,12 @@
     </style>
 
     <style name="Widget.Holo.Light.Spinner" parent="Widget.Spinner.DropDown">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_light</item>
+        <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
+        <item name="android:dropDownVerticalOffset">0dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+        <item name="android:dropDownWidth">wrap_content</item>
+        <item name="android:popupPromptView">@android:layout/simple_dropdown_hint</item>
     </style>
 
     <style name="Widget.Holo.Light.Spinner.DropDown">
@@ -1616,15 +1650,21 @@
     </style>
 
     <style name="Widget.Holo.Light.ListPopupWindow" parent="Widget.ListPopupWindow">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_holo_light</item>
+        <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
+        <item name="android:dropDownVerticalOffset">0dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
-    <style name="Widget.Holo.Light.PopupMenu" parent="Widget.PopupMenu">
+    <style name="Widget.Holo.Light.PopupMenu" parent="Widget.Holo.Light.ListPopupWindow">
     </style>
 
     <style name="Widget.Holo.Light.ActionButton" parent="Widget.ActionButton">
     </style>
 
     <style name="Widget.Holo.Light.ActionButton.Overflow" parent="Widget.ActionButton.Overflow">
+        <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
@@ -1648,6 +1688,7 @@
     <style name="Widget.Holo.Light.ActionBar" parent="Widget.ActionBar">
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
+        <item name="android:background">@null</item>
     </style>
 
     <!-- Animation Styles -->
@@ -1664,16 +1705,29 @@
     <!-- Dialog styles -->
 
     <style name="AlertDialog.Holo" parent="AlertDialog">
-        <item name="fullDark">@android:drawable/dialog_full_holo</item>
-        <item name="topDark">@android:drawable/dialog_top_holo</item>
-        <item name="centerDark">@android:drawable/dialog_middle_holo</item>
-        <item name="bottomDark">@android:drawable/dialog_bottom_holo</item>
-        <item name="fullBright">@android:drawable/dialog_full_holo</item>
-        <item name="topBright">@android:drawable/dialog_top_holo</item>
-        <item name="centerBright">@android:drawable/dialog_middle_holo</item>
-        <item name="bottomBright">@android:drawable/dialog_bottom_holo</item>
-        <item name="bottomMedium">@android:drawable/dialog_bottom_holo</item>
-        <item name="centerMedium">@android:drawable/dialog_middle_holo</item>
+        <item name="fullDark">@android:drawable/dialog_full_holo_dark</item>
+        <item name="topDark">@android:drawable/dialog_top_holo_dark</item>
+        <item name="centerDark">@android:drawable/dialog_middle_holo_dark</item>
+        <item name="bottomDark">@android:drawable/dialog_bottom_holo_dark</item>
+        <item name="fullBright">@android:drawable/dialog_full_holo_dark</item>
+        <item name="topBright">@android:drawable/dialog_top_holo_dark</item>
+        <item name="centerBright">@android:drawable/dialog_middle_holo_dark</item>
+        <item name="bottomBright">@android:drawable/dialog_bottom_holo_dark</item>
+        <item name="bottomMedium">@android:drawable/dialog_bottom_holo_dark</item>
+        <item name="centerMedium">@android:drawable/dialog_middle_holo_dark</item>
+    </style>
+
+    <style name="AlertDialog.Holo.Light">
+        <item name="fullDark">@android:drawable/dialog_full_holo_light</item>
+        <item name="topDark">@android:drawable/dialog_top_holo_light</item>
+        <item name="centerDark">@android:drawable/dialog_middle_holo_light</item>
+        <item name="bottomDark">@android:drawable/dialog_bottom_holo_light</item>
+        <item name="fullBright">@android:drawable/dialog_full_holo_light</item>
+        <item name="topBright">@android:drawable/dialog_top_holo_light</item>
+        <item name="centerBright">@android:drawable/dialog_middle_holo_light</item>
+        <item name="bottomBright">@android:drawable/dialog_bottom_holo_light</item>
+        <item name="bottomMedium">@android:drawable/dialog_bottom_holo_light</item>
+        <item name="centerMedium">@android:drawable/dialog_middle_holo_light</item>
     </style>
 
     <!-- Window title -->
@@ -1692,6 +1746,12 @@
         <item name="android:maxLines">1</item>
         <item name="android:scrollHorizontally">true</item>
         <item name="android:textAppearance">@style/TextAppearance.Holo.DialogWindowTitle</item>
+    </style>
+
+    <style name="DialogWindowTitle.Holo.Light">
+        <item name="android:maxLines">1</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:textAppearance">@style/TextAppearance.Holo.Light.DialogWindowTitle</item>
     </style>
 
 </resources>

@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -77,16 +78,17 @@ public class MenuBuilder implements Menu {
 
     private static final String VIEWS_TAG = "android:views";
 
+    private static final int THEME_SYSTEM_DEFAULT = 0;
+    private static final int THEME_APPLICATION = -1;
+    private static final int THEME_ALERT_DIALOG = -2;
+
     // Order must be the same order as the TYPE_*
-    // Special values:
-    // 0: Use the system default theme
-    // -1: Use the app's own theme
     static final int THEME_RES_FOR_TYPE[] = new int[] {
         com.android.internal.R.style.Theme_IconMenu,
         com.android.internal.R.style.Theme_ExpandedMenu,
-        com.android.internal.R.style.Theme_Light,
-        -1,
-        -1,
+        THEME_ALERT_DIALOG,
+        THEME_APPLICATION,
+        THEME_APPLICATION,
     };
     
     // Order must be the same order as the TYPE_*
@@ -205,7 +207,14 @@ public class MenuBuilder implements Menu {
     private boolean mPreventDispatchingItemsChanged = false;
     
     private boolean mOptionalIconsVisible = false;
-    
+
+    private static int getAlertDialogTheme(Context context) {
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
+                outValue, true);
+        return outValue.resourceId;
+    }
+
     private MenuType[] mMenuTypes;
     class MenuType {
         private int mMenuType;
@@ -223,9 +232,20 @@ public class MenuBuilder implements Menu {
         LayoutInflater getInflater() {
             // Create an inflater that uses the given theme for the Views it inflates
             if (mInflater == null) {
+                Context wrappedContext;
                 int themeResForType = THEME_RES_FOR_TYPE[mMenuType];
-                Context wrappedContext = themeResForType < 0 ? mContext :
-                        new ContextThemeWrapper(mContext, themeResForType);
+                switch (themeResForType) {
+                    case THEME_APPLICATION:
+                        wrappedContext = new ContextThemeWrapper(mContext, themeResForType);
+                        break;
+                    case THEME_ALERT_DIALOG:
+                        wrappedContext = new ContextThemeWrapper(mContext,
+                                getAlertDialogTheme(mContext));
+                        break;
+                    default:
+                        wrappedContext = mContext;
+                        break;
+                }
                 mInflater = (LayoutInflater) wrappedContext
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             }
