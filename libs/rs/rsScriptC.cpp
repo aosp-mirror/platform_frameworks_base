@@ -365,11 +365,6 @@ void ScriptCState::init(Context *rsc)
 void ScriptCState::clear(Context *rsc)
 {
     rsAssert(rsc);
-    for (uint32_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
-        mConstantBufferTypes[ct].clear();
-        mSlotWritable[ct] = false;
-    }
-
     mScript.clear();
     mScript.set(new ScriptC(rsc));
 }
@@ -428,6 +423,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     else {
         s->mEnviroment.mFieldAddress = (void **) calloc(s->mEnviroment.mFieldCount, sizeof(void *));
         bccGetExportVars(s->mBccScript, NULL, s->mEnviroment.mFieldCount, (BCCvoid **) s->mEnviroment.mFieldAddress);
+        s->initSlots();
     }
 
     s->mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
@@ -532,10 +528,6 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     ss->runCompiler(rsc, s.get());
     s->incUserRef();
     s->setContext(rsc);
-    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
-        s->mTypes[ct].set(ss->mConstantBufferTypes[ct].get());
-        s->mSlotWritable[ct] = ss->mSlotWritable[ct];
-    }
 
     ss->clear(rsc);
     return s.get();

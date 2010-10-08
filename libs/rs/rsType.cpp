@@ -31,6 +31,8 @@ Type::Type(Context *rsc) : ObjectBase(rsc)
     mAllocLine = __LINE__;
     mLODs = 0;
     mLODCount = 0;
+    mAttribs = NULL;
+    mAttribsSize = 0;
     clear();
 }
 
@@ -44,6 +46,11 @@ Type::~Type()
     }
     if (mLODs) {
         delete [] mLODs;
+        mLODs = NULL;
+    }
+    if(mAttribs) {
+        delete [] mAttribs;
+        mAttribs = NULL;
     }
 }
 
@@ -145,6 +152,21 @@ uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) co
 
 void Type::makeGLComponents()
 {
+    // Count the number of gl attrs to initialize
+    mAttribsSize = 0;
+    for (uint32_t ct=0; ct < getElement()->getFieldCount(); ct++) {
+        if(getElement()->getFieldName(ct)[0] != '#') {
+            mAttribsSize ++;
+        }
+    }
+    if(mAttribs) {
+        delete [] mAttribs;
+        mAttribs = NULL;
+    }
+    if(mAttribsSize) {
+        mAttribs = new VertexArray::Attrib[mAttribsSize];
+    }
+
     uint32_t userNum = 0;
     for (uint32_t ct=0; ct < getElement()->getFieldCount(); ct++) {
         const Component &c = getElement()->getField(ct)->getComponent();
@@ -160,11 +182,8 @@ void Type::makeGLComponents()
         String8 tmp(RS_SHADER_ATTR);
         tmp.append(getElement()->getFieldName(ct));
         mAttribs[userNum].name.setTo(tmp.string());
-        userNum ++;
 
-        if(userNum == RS_MAX_ATTRIBS) {
-            return;
-        }
+        userNum ++;
     }
 }
 
@@ -172,7 +191,13 @@ void Type::makeGLComponents()
 void Type::enableGLVertexBuffer(VertexArray *va) const
 {
     uint32_t stride = mElement->getSizeBytes();
-    for (uint32_t ct=0; ct < RS_MAX_ATTRIBS; ct++) {
+    for (uint32_t ct=0; ct < mAttribsSize; ct++) {
+        // Load up to RS_MAX_ATTRIBS inputs
+        // TODO: grow vertexarray dynamically
+        if(ct >= RS_MAX_ATTRIBS) {
+            LOGE("More GL attributes than we can handle");
+            break;
+        }
         if (mAttribs[ct].size) {
             va->add(mAttribs[ct], stride);
         }
