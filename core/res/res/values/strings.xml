@@ -280,8 +280,15 @@
     <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. -->
     <string name="shutdown_progress">Shutting down\u2026</string>
 
-    <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will be a confirmation dialog.  This is the message. -->
+    <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
+         be a confirmation dialog.  This is the message. -->
     <string name="shutdown_confirm">Your phone will shut down.</string>
+
+    <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, it asks
+         the user if they'd like to shut down.  This is the message.  This is used instead of
+         shutdown_confirm when the system is configured to use long press to go directly to the
+         power off dialog instead of the global actions menu. -->
+    <string name="shutdown_confirm_question">Would you like to shut down?</string>
 
     <!-- Recent Tasks dialog: title
      TODO: this should move to SystemUI.apk, but the code for the old 

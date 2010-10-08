@@ -47,6 +47,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 
 import com.android.internal.R;
+import com.android.internal.app.ShutdownThread;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
@@ -128,6 +129,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG_LAYOUT = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
+
+    static final int LONG_PRESS_POWER_NOTHING = 0;
+    static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
+    static final int LONG_PRESS_POWER_SHUT_OFF = 2;
     
     // wallpaper is at the bottom, though the window manager may move it.
     static final int WALLPAPER_LAYER = 2;
@@ -224,6 +229,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
+    int mLongPressOnPowerBehavior = -1;
     boolean mScreenOn = false;
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -467,10 +473,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     Runnable mPowerLongPress = new Runnable() {
         public void run() {
-            mShouldTurnOffOnKeyUp = false;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
-            showGlobalActionsDialog();
+            // The context isn't read
+            if (mLongPressOnPowerBehavior < 0) {
+                mLongPressOnPowerBehavior = mContext.getResources().getInteger(
+                        com.android.internal.R.integer.config_longPressOnPowerBehavior);
+            }
+            switch (mLongPressOnPowerBehavior) {
+            case LONG_PRESS_POWER_NOTHING:
+                break;
+            case LONG_PRESS_POWER_GLOBAL_ACTIONS:
+                mShouldTurnOffOnKeyUp = false;
+                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
+                showGlobalActionsDialog();
+                break;
+            case LONG_PRESS_POWER_SHUT_OFF:
+                mShouldTurnOffOnKeyUp = false;
+                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
+                ShutdownThread.shutdown(mContext, true);
+                break;
+            }
         }
     };
 

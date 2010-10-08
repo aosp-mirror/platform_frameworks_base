@@ -221,6 +221,13 @@
          closed.  The default is 0. -->
     <integer name="config_lidNavigationAccessibility">0</integer>
 
+    <!-- Control the behavior when the user long presses the power button.
+            0 - Nothing
+            1 - Global actions menu
+            2 - Power off (with confirmation)
+    -->
+    <integer name="config_longPressOnPowerBehavior">1</integer>
+
     <!-- Indicate whether the SD card is accessible without removing the battery. -->
     <bool name="config_batterySdCardAccessibility">false</bool>
 

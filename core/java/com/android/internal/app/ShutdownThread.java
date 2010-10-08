@@ -18,15 +18,17 @@
 package com.android.internal.app;
 
 import android.app.ActivityManagerNative;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.IActivityManager;
 import android.app.ProgressDialog;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.IBluetooth;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Power;
 import android.os.PowerManager;
@@ -91,13 +93,20 @@ public final class ShutdownThread extends Thread {
             }
         }
 
-        Log.d(TAG, "Notifying thread to start radio shutdown");
+        final int longPressBehavior = context.getResources().getInteger(
+                        com.android.internal.R.integer.config_longPressOnPowerBehavior);
+        final int resourceId = longPressBehavior == 2
+                ? com.android.internal.R.string.shutdown_confirm_question
+                : com.android.internal.R.string.shutdown_confirm;
+
+        Log.d(TAG, "Notifying thread to start shutdown longPressBehavior=" + longPressBehavior);
 
         if (confirm) {
+            final CloseDialogReceiver closer = new CloseDialogReceiver(context);
             final AlertDialog dialog = new AlertDialog.Builder(context)
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle(com.android.internal.R.string.power_off)
-                    .setMessage(com.android.internal.R.string.shutdown_confirm)
+                    .setMessage(resourceId)
                     .setPositiveButton(com.android.internal.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             beginShutdownSequence(context);
@@ -105,6 +114,8 @@ public final class ShutdownThread extends Thread {
                     })
                     .setNegativeButton(com.android.internal.R.string.no, null)
                     .create();
+            closer.dialog = dialog;
+            dialog.setOnDismissListener(closer);
             dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             if (!context.getResources().getBoolean(
                     com.android.internal.R.bool.config_sf_slowBlur)) {
@@ -113,6 +124,27 @@ public final class ShutdownThread extends Thread {
             dialog.show();
         } else {
             beginShutdownSequence(context);
+        }
+    }
+
+    private static class CloseDialogReceiver extends BroadcastReceiver
+            implements DialogInterface.OnDismissListener {
+        private Context mContext;
+        public Dialog dialog;
+
+        CloseDialogReceiver(Context context) {
+            mContext = context;
+            IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            context.registerReceiver(this, filter);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            dialog.cancel();
+        }
+
+        public void onDismiss(DialogInterface unused) {
+            mContext.unregisterReceiver(this);
         }
     }
 
