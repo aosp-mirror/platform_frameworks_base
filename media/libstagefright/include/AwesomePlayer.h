@@ -251,6 +251,9 @@ private:
 
     static bool ContinuePreparation(void *cookie);
 
+    static void OnRTSPSeekDoneWrapper(void *cookie);
+    void onRTSPSeekDone();
+
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
 };
