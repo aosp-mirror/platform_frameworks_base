@@ -20,7 +20,6 @@
 
 #include "StagefrightRecorder.h"
 
-#include <binder/IPCThreadState.h>
 #include <media/stagefright/AudioSource.h>
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/CameraSource.h>
@@ -35,7 +34,6 @@
 #include <media/stagefright/OMXCodec.h>
 #include <media/MediaProfiles.h>
 #include <camera/ICamera.h>
-#include <camera/Camera.h>
 #include <camera/CameraParameters.h>
 #include <surfaceflinger/Surface.h>
 #include <utils/Errors.h>
@@ -184,22 +182,7 @@ status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera) {
         return BAD_VALUE;
     }
 
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    mFlags &= ~FLAGS_HOT_CAMERA;
-    mCamera = Camera::create(camera);
-    if (mCamera == 0) {
-        LOGE("Unable to connect to camera");
-        IPCThreadState::self()->restoreCallingIdentity(token);
-        return -EBUSY;
-    }
-
-    LOGV("Connected to camera");
-    if (mCamera->previewEnabled()) {
-        LOGV("camera is hot");
-        mFlags |= FLAGS_HOT_CAMERA;
-    }
-    IPCThreadState::self()->restoreCallingIdentity(token);
-
+    mCamera = camera;
     return OK;
 }
 
@@ -966,66 +949,7 @@ void StagefrightRecorder::clipVideoFrameWidth() {
     }
 }
 
-/*
- * Check to see whether the requested video width and height is one
- * of the supported sizes. It returns true if so; otherwise, it
- * returns false.
- */
-bool StagefrightRecorder::isVideoSizeSupported(
-    const Vector<Size>& supportedSizes) const {
-
-    LOGV("isVideoSizeSupported");
-    for (size_t i = 0; i < supportedSizes.size(); ++i) {
-        if (mVideoWidth  == supportedSizes[i].width &&
-            mVideoHeight == supportedSizes[i].height) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/*
- * If the preview and video output is separate, we only set the
- * the video size, and applications should set the preview size
- * to some proper value, and the recording framework will not
- * change the preview size; otherwise, if the video and preview
- * output is the same, we need to set the preview to be the same
- * as the requested video size.
- *
- * On return, it also returns whether the setVideoSize() is
- * supported.
- */
-status_t StagefrightRecorder::setCameraVideoSize(
-    CameraParameters* params,
-    bool* isSetVideoSizeSupported) {
-    LOGV("setCameraVideoSize: %dx%d", mVideoWidth, mVideoHeight);
-
-    // Check whether the requested video size is supported
-    Vector<Size> sizes;
-    params->getSupportedVideoSizes(sizes);
-    *isSetVideoSizeSupported = true;
-    if (sizes.size() == 0) {
-        LOGD("Camera does not support setVideoSize()");
-        params->getSupportedPreviewSizes(sizes);
-        *isSetVideoSizeSupported = false;
-    }
-    if (!isVideoSizeSupported(sizes)) {
-        LOGE("Camera does not support video size (%dx%d)!",
-            mVideoWidth, mVideoHeight);
-        return BAD_VALUE;
-    }
-
-    // Actually set the video size
-    if (isSetVideoSizeSupported) {
-        params->setVideoSize(mVideoWidth, mVideoHeight);
-    } else {
-        params->setPreviewSize(mVideoWidth, mVideoHeight);
-    }
-
-    return OK;
-}
-
-status_t StagefrightRecorder::setupCamera() {
+status_t StagefrightRecorder::checkVideoEncoderCapabilities() {
     if (!mCaptureTimeLapse) {
         // Dont clip for time lapse capture as encoder will have enough
         // time to encode because of slow capture rate of time lapse.
@@ -1034,67 +958,6 @@ status_t StagefrightRecorder::setupCamera() {
         clipVideoFrameWidth();
         clipVideoFrameHeight();
     }
-
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    if (mCamera == 0) {
-        mCamera = Camera::connect(mCameraId);
-        if (mCamera == 0) {
-            LOGE("Camera connection could not be established.");
-            return -EBUSY;
-        }
-        mFlags &= ~FLAGS_HOT_CAMERA;
-        mCamera->lock();
-    }
-
-    // Set the actual video recording frame size
-    CameraParameters params(mCamera->getParameters());
-
-    // dont change the preview size because time lapse may be using still camera
-    // as mVideoWidth, mVideoHeight may correspond to HD resolution not
-    // supported by the video camera.
-    bool isSetVideoSizeSupported = false;
-    if (!mCaptureTimeLapse) {
-        if (OK != setCameraVideoSize(&params, &isSetVideoSizeSupported)) {
-            return BAD_VALUE;
-        }
-    }
-
-    params.setPreviewFrameRate(mFrameRate);
-    String8 s = params.flatten();
-    if (OK != mCamera->setParameters(s)) {
-        LOGE("Could not change settings."
-             " Someone else is using camera %d?", mCameraId);
-        return -EBUSY;
-    }
-    CameraParameters newCameraParams(mCamera->getParameters());
-
-    // Check on video frame size
-    int frameWidth = 0, frameHeight = 0;
-    if (isSetVideoSizeSupported) {
-        newCameraParams.getVideoSize(&frameWidth, &frameHeight);
-    } else {
-        newCameraParams.getPreviewSize(&frameWidth, &frameHeight);
-    }
-    if (!mCaptureTimeLapse &&
-        (frameWidth  < 0 || frameWidth  != mVideoWidth ||
-        frameHeight < 0 || frameHeight != mVideoHeight)) {
-        LOGE("Failed to set the video frame size to %dx%d",
-                mVideoWidth, mVideoHeight);
-        IPCThreadState::self()->restoreCallingIdentity(token);
-        return UNKNOWN_ERROR;
-    }
-
-    // Check on video frame rate
-    int frameRate = newCameraParams.getPreviewFrameRate();
-    if (frameRate < 0 || (frameRate - mFrameRate) != 0) {
-        LOGE("Failed to set frame rate to %d fps. The actual "
-             "frame rate is %d", mFrameRate, frameRate);
-    }
-
-    // This CHECK is good, since we just passed the lock/unlock
-    // check earlier by calling mCamera->setParameters().
-    CHECK_EQ(OK, mCamera->setPreviewDisplay(mPreviewSurface));
-    IPCThreadState::self()->restoreCallingIdentity(token);
     return OK;
 }
 
@@ -1116,15 +979,18 @@ void StagefrightRecorder::clipVideoFrameHeight() {
 }
 
 status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) {
-    status_t err = setupCamera();
-    if (err != OK) return err;
-
+    Size videoSize;
+    videoSize.width = mVideoWidth;
+    videoSize.height = mVideoHeight;
     if (mCaptureTimeLapse) {
-        mCameraSourceTimeLapse = CameraSourceTimeLapse::CreateFromCamera(mCamera,
-                mTimeBetweenTimeLapseFrameCaptureUs, mVideoWidth, mVideoHeight, mFrameRate);
+        mCameraSourceTimeLapse = CameraSourceTimeLapse::CreateFromCamera(
+                mCamera, mCameraId,
+                videoSize, mFrameRate, mPreviewSurface,
+                mTimeBetweenTimeLapseFrameCaptureUs);
         *cameraSource = mCameraSourceTimeLapse;
     } else {
-        *cameraSource = CameraSource::CreateFromCamera(mCamera);
+        *cameraSource = CameraSource::CreateFromCamera(
+                mCamera, mCameraId, videoSize, mFrameRate, mPreviewSurface);
     }
     CHECK(*cameraSource != NULL);
 
@@ -1411,19 +1277,6 @@ status_t StagefrightRecorder::stop() {
         mWriter.clear();
     }
 
-    if (mCamera != 0) {
-        LOGV("Disconnect camera");
-        int64_t token = IPCThreadState::self()->clearCallingIdentity();
-        if ((mFlags & FLAGS_HOT_CAMERA) == 0) {
-            LOGV("Camera was cold when we started, stopping preview");
-            mCamera->stopPreview();
-        }
-        mCamera->unlock();
-        mCamera.clear();
-        IPCThreadState::self()->restoreCallingIdentity(token);
-        mFlags = 0;
-    }
-
     if (mOutputFd >= 0) {
         ::close(mOutputFd);
         mOutputFd = -1;
@@ -1490,7 +1343,6 @@ status_t StagefrightRecorder::reset() {
 
     mOutputFd = -1;
     mOutputFdAux = -1;
-    mFlags = 0;
 
     return OK;
 }
@@ -1560,8 +1412,6 @@ status_t StagefrightRecorder::dump(
     snprintf(buffer, SIZE, "     Source: %d\n", mVideoSource);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Camera Id: %d\n", mCameraId);
-    result.append(buffer);
-    snprintf(buffer, SIZE, "     Camera flags: %d\n", mFlags);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Encoder: %d\n", mVideoEncoder);
     result.append(buffer);

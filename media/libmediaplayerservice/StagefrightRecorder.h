@@ -63,12 +63,7 @@ struct StagefrightRecorder : public MediaRecorderBase {
     virtual status_t dump(int fd, const Vector<String16>& args) const;
 
 private:
-    enum CameraFlags {
-        FLAGS_SET_CAMERA = 1L << 0,
-        FLAGS_HOT_CAMERA = 1L << 1,
-    };
-
-    sp<Camera> mCamera;
+    sp<ICamera> mCamera;
     sp<Surface> mPreviewSurface;
     sp<IMediaRecorderClient> mListener;
     sp<MediaWriter> mWriter, mWriterAux;
@@ -107,7 +102,6 @@ private:
 
     String8 mParams;
     int mOutputFd, mOutputFdAux;
-    int32_t mFlags;
 
     MediaProfiles *mEncoderProfiles;
 
@@ -125,10 +119,7 @@ private:
     status_t startAACRecording();
     status_t startRTPRecording();
     sp<MediaSource> createAudioSource();
-    status_t setupCamera();
-    bool     isVideoSizeSupported(const Vector<Size>& supportedSizes) const;
-    status_t setCameraVideoSize(CameraParameters* params,
-                bool *isSetVideoSizeSupported);
+    status_t checkVideoEncoderCapabilities();
     status_t setupCameraSource(sp<CameraSource> *cameraSource);
     status_t setupAudioEncoder(const sp<MediaWriter>& writer);
     status_t setupVideoEncoder(
