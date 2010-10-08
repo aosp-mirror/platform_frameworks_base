@@ -214,6 +214,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     }
 
     class WaveViewMethods implements WaveView.OnTriggerListener {
+        private static final int WAIT_FOR_ANIMATION_TIMEOUT = 500;
+        private static final int STAY_ON_WHILE_GRABBED_TIMEOUT = 30000;
+
         /** {@inheritDoc} */
         public void onTrigger(View v, int whichHandle) {
             if (whichHandle == WaveView.OnTriggerListener.CENTER_HANDLE) {
@@ -222,13 +225,17 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                     public void run() {
                         mCallback.goToUnlockScreen();
                     }
-                }, 500);
+                }, WAIT_FOR_ANIMATION_TIMEOUT);
             }
         }
 
         /** {@inheritDoc} */
         public void onGrabbedStateChange(View v, int grabbedState) {
-            mCallback.pokeWakelock();
+            if (grabbedState == WaveView.OnTriggerListener.CENTER_HANDLE) {
+                mCallback.pokeWakelock(STAY_ON_WHILE_GRABBED_TIMEOUT);
+            } else {
+                mCallback.pokeWakelock();
+            }
         }
     }
 
