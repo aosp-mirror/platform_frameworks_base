@@ -51,7 +51,6 @@ import android.graphics.Bitmap.Config;
 import android.graphics.drawable.Drawable;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -176,7 +175,6 @@ public class RecentApplicationsActivity extends Activity {
     }
 
     private class LocalCarouselViewHelper extends CarouselViewHelper {
-        private Paint mPaint = new Paint();
         private DetailTextureParameters mDetailParams = new DetailTextureParameters(10.0f, 20.0f);
 
         public LocalCarouselViewHelper(Context context) {
@@ -315,7 +313,9 @@ public class RecentApplicationsActivity extends Activity {
                 } else {
                     info.matrix = null;
                 }
-                mCarouselView.setTextureForItem(info.position, compositeBitmap(info));
+                // Force Carousel to request new textures for this item.
+                mCarouselView.setTextureForItem(info.position, null);
+                mCarouselView.setDetailTextureForItem(info.position, 0, 0, 0, 0, null);
             } else {
                 if (DBG) Log.v(TAG, "Can't find view for id " + id);
             }
@@ -351,10 +351,12 @@ public class RecentApplicationsActivity extends Activity {
         final View decorView = getWindow().getDecorView();
 
         getWindow().getDecorView().setBackgroundColor(0x80000000);
-        setContentView(R.layout.recent_apps_activity);
-
 
         if (mCarouselView == null) {
+            long t = System.currentTimeMillis();
+            setContentView(R.layout.recent_apps_activity);
+            long elapsed = System.currentTimeMillis() - t;
+            Log.v(TAG, "Recents layout took " + elapsed + "ms to load");
             mLoadingBitmap = BitmapFactory.decodeResource(res, R.drawable.recent_rez_border);
             mCarouselView = (CarouselView)findViewById(R.id.carousel);
             mHelper = new LocalCarouselViewHelper(this);
@@ -423,7 +425,6 @@ public class RecentApplicationsActivity extends Activity {
                 if (DBG) Log.v(TAG, "*** RUNNING THUMBNAIL WAS NULL ***");
             }
         }
-        mCarouselView.createCards(mActivityDescriptions.size());
     }
 
     private void updateRecentTasks() {
@@ -491,6 +492,14 @@ public class RecentApplicationsActivity extends Activity {
 
     private void showCarousel(boolean show) {
         if (show) {
+            mCarouselView.createCards(mActivityDescriptions.size());
+            for (int i = 1; i < mActivityDescriptions.size(); i++) {
+                // Force Carousel to update textures. Note we don't do this for the first item,
+                // since it will be updated when mThumbnailReceiver returns a thumbnail.
+                // TODO: only do this for apps that have changed.
+                mCarouselView.setTextureForItem(i, null);
+                mCarouselView.setDetailTextureForItem(i, 0, 0, 0, 0, null);
+            }
             // Make carousel visible
             mNoRecentsView.setVisibility(View.GONE);
             mCarouselView.setVisibility(View.VISIBLE);
