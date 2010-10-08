@@ -109,7 +109,9 @@ public abstract class WindowOrientationListener {
     }
 
     public void setAllow180Rotation(boolean allowed) {
-        mSensorEventListener.setAllow180Rotation(allowed);
+        if (mSensorEventListener != null) {
+            mSensorEventListener.setAllow180Rotation(allowed);
+        }
     }
 
     public int getCurrentRotation(int lastRotation) {
