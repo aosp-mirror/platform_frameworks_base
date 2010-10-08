@@ -130,6 +130,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     // Handler messages
     private static final int MESSAGE_LOCATION_CHANGED = 1;
+    private static final int MESSAGE_PACKAGE_UPDATED = 2;
 
     // wakelock variables
     private final static String WAKELOCK_KEY = "LocationManagerService";
@@ -1826,6 +1827,19 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                             handleLocationChangedLocked(location, passive);
                         }
                     }
+                } else if (msg.what == MESSAGE_PACKAGE_UPDATED) {
+                    String packageName = (String) msg.obj;
+                    String packageDot = packageName + ".";
+
+                    // reconnect to external providers after their packages have been updated
+                    if (mNetworkLocationProvider != null &&
+                        mNetworkLocationProviderPackageName.startsWith(packageDot)) {
+                        mNetworkLocationProvider.reconnect();
+                    }
+                    if (mGeocodeProvider != null &&
+                        mGeocodeProviderPackageName.startsWith(packageDot)) {
+                        mGeocodeProvider.reconnect();
+                    }
                 }
             } catch (Exception e) {
                 // Log, don't crash!
@@ -1928,17 +1942,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
         public void onPackageUpdateFinished(String packageName, int uid) {
-            String packageDot = packageName + ".";
-
-            // reconnect to external providers after their packages have been updated
-            if (mNetworkLocationProvider != null &&
-                    mNetworkLocationProviderPackageName.startsWith(packageDot)) {
-                mNetworkLocationProvider.reconnect();
-            }
-            if (mGeocodeProvider != null &&
-                    mGeocodeProviderPackageName.startsWith(packageDot)) {
-                mGeocodeProvider.reconnect();
-            }
+            // Called by main thread; divert work to LocationWorker.
+            Message.obtain(mLocationHandler, MESSAGE_PACKAGE_UPDATED, packageName).sendToTarget();
         }
     };
 
