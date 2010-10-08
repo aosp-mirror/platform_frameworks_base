@@ -1,6 +1,30 @@
 #ifndef __RS_CORE_RSH__
 #define __RS_CORE_RSH__
 
+// Debugging, print to the LOG a description string and a value.
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, float, float, float, float);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix4x4 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix3x3 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const rs_matrix2x2 *);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, int);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, uint);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, const void *);
+#define RS_DEBUG(a) rsDebug(#a, a)
+#define RS_DEBUG_MARKER rsDebug(__FILE__, __LINE__)
+
 static void __attribute__((overloadable)) rsDebug(const char *s, float2 v) {
     rsDebug(s, v.x, v.y);
 }
