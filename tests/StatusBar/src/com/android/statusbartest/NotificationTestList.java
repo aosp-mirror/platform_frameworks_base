@@ -86,18 +86,6 @@ public class NotificationTestList extends TestActivity
             }
         },
 
-        new Test("custom intent on text view") {
-            public void run() {
-                Notification n = new Notification(R.drawable.icon1, null,
-                        mActivityCreateTime);
-                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
-                            "This is a notification!!!", null);
-                n.contentView.setOnClickPendingIntent(com.android.internal.R.id.text,
-                        makeIntent2());
-                mNM.notify(1, n);
-            }
-        },
-
         new Test("Ticker 1 line") {
             public void run() {
                 Notification n = new Notification(R.drawable.icon1, "tick tick tick",
@@ -787,12 +775,6 @@ public class NotificationTestList extends TestActivity
         intent.addCategory(Intent.CATEGORY_HOME);
         return PendingIntent.getActivity(this, 0, intent, 0);
     }
-
-    private PendingIntent makeIntent2() {
-        Intent intent = new Intent(this, StatusBarTest.class);
-        return PendingIntent.getActivity(this, 0, intent, 0);
-    }
-
 
     class StateStress extends Test {
         StateStress(String name, int pause, int iterations, Runnable[] tasks) {

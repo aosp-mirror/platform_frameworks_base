@@ -741,6 +741,10 @@ public class NotificationManagerService extends INotificationManager.Stub
                 throw new IllegalArgumentException("contentView required: pkg=" + pkg
                         + " id=" + id + " notification=" + notification);
             }
+            if (notification.contentIntent == null) {
+                throw new IllegalArgumentException("contentIntent required: pkg=" + pkg
+                        + " id=" + id + " notification=" + notification);
+            }
         }
 
         synchronized (mNotificationList) {

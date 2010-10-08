@@ -440,8 +440,6 @@ public class PhoneStatusBarService extends StatusBarService {
                 if (contentIntent != null) {
                     oldEntry.content.setOnClickListener(new Launcher(contentIntent,
                                 notification.pkg, notification.tag, notification.id));
-                } else {
-                    oldEntry.content.setOnClickListener(null);
                 }
                 // Update the icon.
                 final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
@@ -518,8 +516,6 @@ public class PhoneStatusBarService extends StatusBarService {
         if (contentIntent != null) {
             content.setOnClickListener(new Launcher(contentIntent, notification.pkg,
                         notification.tag, notification.id));
-        } else {
-            oldEntry.content.setOnClickListener(null);
         }
 
         View expanded = null;
