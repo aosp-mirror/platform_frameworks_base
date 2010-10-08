@@ -146,6 +146,57 @@ public class NetworkUtils {
     }
 
     /**
+     * Convert a IPv4 address from an InetAddress to an integer
+     * @param inetAddr is an InetAddress corresponding to the IPv4 address
+     * @return the IP address as an integer in network byte order
+     */
+    public static int inetAddressToInt(InetAddress inetAddr)
+            throws IllegalArgumentException {
+        byte [] addr = inetAddr.getAddress();
+        if (addr.length != 4) {
+            throw new IllegalArgumentException("Not an IPv4 address");
+        }
+        return ((addr[3] & 0xff) << 24) | ((addr[2] & 0xff) << 16) |
+                ((addr[1] & 0xff) << 8) | (addr[0] & 0xff);
+    }
+
+    /**
+     * Convert a network prefix length to an IPv4 netmask integer
+     * @param prefixLength
+     * @return the IPv4 netmask as an integer in network byte order
+     */
+    public static int prefixLengthToNetmaskInt(int prefixLength)
+            throws IllegalArgumentException {
+        if (prefixLength < 0 || prefixLength > 32) {
+            throw new IllegalArgumentException("Invalid prefix length (0 <= prefix <= 32)");
+        }
+        int value = 0xffffffff << (32 - prefixLength);
+        return Integer.reverseBytes(value);
+    }
+
+    public static boolean isIpAddress(String address) {
+        //TODO: Add NetworkUtils support for IPv6 configuration and
+        //remove IPv4 validation and use a generic InetAddress validation
+        try {
+            String[] parts = address.split("\\.");
+            if (parts.length != 4) {
+                return false;
+            }
+            int a = Integer.parseInt(parts[0]);
+            if (a < 0 || a > 255) return false;
+            a = Integer.parseInt(parts[1]);
+            if (a < 0 || a > 255) return false;
+            a = Integer.parseInt(parts[2]);
+            if (a < 0 || a > 255) return false;
+            a = Integer.parseInt(parts[3]);
+            if (a < 0 || a > 255) return false;
+        } catch (NumberFormatException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Add a default route through the specified gateway.
      * @param interfaceName interface on which the route should be added
      * @param gw the IP address of the gateway to which the route is desired,
