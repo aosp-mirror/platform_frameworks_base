@@ -2163,11 +2163,11 @@ public class WifiService extends IWifiManager.Stub {
             if (DBG) throw new IllegalArgumentException("lockMode=" + lockMode);
             return false;
         }
-        if (ws != null) {
-            enforceWakeSourcePermission(Binder.getCallingUid(), Binder.getCallingPid());
-        }
         if (ws != null && ws.size() == 0) {
             ws = null;
+        }
+        if (ws != null) {
+            enforceWakeSourcePermission(Binder.getCallingUid(), Binder.getCallingPid());
         }
         if (ws == null) {
             ws = new WorkSource(Binder.getCallingUid());
@@ -2227,17 +2227,18 @@ public class WifiService extends IWifiManager.Stub {
                 ++mScanLocksAcquired;
                 break;
             }
+
+            // Be aggressive about adding new locks into the accounted state...
+            // we want to over-report rather than under-report.
+            reportStartWorkSource();
+
+            updateWifiState();
+            return true;
         } catch (RemoteException e) {
+            return false;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-
-        // Be aggressive about adding new locks into the accounted state...
-        // we want to over-report rather than under-report.
-        reportStartWorkSource();
-
-        updateWifiState();
-        return true;
     }
 
     public void updateWifiLockWorkSource(IBinder lock, WorkSource ws) {
@@ -2283,9 +2284,9 @@ public class WifiService extends IWifiManager.Stub {
 
         hadLock = (wifiLock != null);
 
-        if (hadLock) {
-            long ident = Binder.clearCallingIdentity();
-            try {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            if (hadLock) {
                 noteAcquireWifiLock(wifiLock);
                 switch(wifiLock.mMode) {
                     case WifiManager.WIFI_MODE_FULL:
@@ -2298,13 +2299,16 @@ public class WifiService extends IWifiManager.Stub {
                         ++mScanLocksReleased;
                         break;
                 }
-            } catch (RemoteException e) {
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
+
+            // TODO - should this only happen if you hadLock?
+            updateWifiState();
+
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-        // TODO - should this only happen if you hadLock?
-        updateWifiState();
+
         return hadLock;
     }
 
