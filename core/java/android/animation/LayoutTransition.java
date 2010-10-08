@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -142,10 +141,10 @@ public class LayoutTransition {
     /**
      * The default interpolators used for the animations
      */
-    private Interpolator mAppearingInterpolator = new AccelerateDecelerateInterpolator();
-    private Interpolator mDisappearingInterpolator = new AccelerateDecelerateInterpolator();
-    private Interpolator mChangingAppearingInterpolator = new DecelerateInterpolator();
-    private Interpolator mChangingDisappearingInterpolator = new DecelerateInterpolator();
+    private TimeInterpolator mAppearingInterpolator = new AccelerateDecelerateInterpolator();
+    private TimeInterpolator mDisappearingInterpolator = new AccelerateDecelerateInterpolator();
+    private TimeInterpolator mChangingAppearingInterpolator = new DecelerateInterpolator();
+    private TimeInterpolator mChangingDisappearingInterpolator = new DecelerateInterpolator();
 
     /**
      * This hashmap is used to store the animations that are currently running as part of
@@ -387,9 +386,9 @@ public class LayoutTransition {
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is being set.
      * @param interpolator The interpolator that the specified animation should use.
-     * @see Animator#setInterpolator(android.view.animation.Interpolator)
+     * @see Animator#setInterpolator(TimeInterpolator)
      */
-    public void setInterpolator(int transitionType, Interpolator interpolator) {
+    public void setInterpolator(int transitionType, TimeInterpolator interpolator) {
         switch (transitionType) {
             case CHANGE_APPEARING:
                 mChangingAppearingInterpolator = interpolator;
@@ -414,10 +413,10 @@ public class LayoutTransition {
      * @param transitionType one of {@link #CHANGE_APPEARING}, {@link #CHANGE_DISAPPEARING},
      * {@link #APPEARING}, or {@link #DISAPPEARING}, which determines the animation whose
      * duration is being set.
-     * @return Interpolator The interpolator that the specified animation uses.
-     * @see Animator#setInterpolator(android.view.animation.Interpolator)
+     * @return TimeInterpolator The interpolator that the specified animation uses.
+     * @see Animator#setInterpolator(TimeInterpolator)
      */
-    public Interpolator getInterpolator(int transitionType) {
+    public TimeInterpolator getInterpolator(int transitionType) {
         switch (transitionType) {
             case CHANGE_APPEARING:
                 return mChangingAppearingInterpolator;

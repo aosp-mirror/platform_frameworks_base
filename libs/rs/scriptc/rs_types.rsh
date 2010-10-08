@@ -1,3 +1,5 @@
+#ifndef __RS_TYPES_RSH__
+#define __RS_TYPES_RSH__
 
 typedef char int8_t;
 typedef short int16_t;
@@ -72,3 +74,4 @@ typedef float4 rs_quaternion;
 
 #define RS_PACKED __attribute__((packed, aligned(4)))
 
+#endif

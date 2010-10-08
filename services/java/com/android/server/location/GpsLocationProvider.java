@@ -46,6 +46,10 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.provider.Telephony.Sms.Intents;
+import android.telephony.TelephonyManager;
+import android.telephony.gsm.GsmCellLocation;
+import android.telephony.SmsMessage;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -53,6 +57,9 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.Phone;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
+import com.android.internal.telephony.GsmAlphabet;
+import com.android.internal.telephony.SmsHeader;
+import com.android.internal.util.HexDump;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -152,6 +159,24 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int ADD_LISTENER = 8;
     private static final int REMOVE_LISTENER = 9;
     private static final int REQUEST_SINGLE_SHOT = 10;
+
+    // Request setid
+    private static final int AGPS_RIL_REQUEST_SETID_IMSI = 1;
+    private static final int AGPS_RIL_REQUEST_SETID_MSISDN = 2;
+
+    // Request ref location
+    private static final int AGPS_RIL_REQUEST_REFLOC_CELLID = 1;
+    private static final int AGPS_RIL_REQUEST_REFLOC_MAC = 2;
+
+    // ref. location info
+    private static final int AGPS_REF_LOCATION_TYPE_GSM_CELLID = 1;
+    private static final int AGPS_REF_LOCATION_TYPE_UMTS_CELLID = 2;
+    private static final int AGPS_REG_LOCATION_TYPE_MAC        = 3;
+
+    // set id info
+    private static final int AGPS_SETID_TYPE_NONE = 0;
+    private static final int AGPS_SETID_TYPE_IMSI = 1;
+    private static final int AGPS_SETID_TYPE_MSISDN = 2;
 
     private static final String PROPERTIES_FILE = "/etc/gps.conf";
 
@@ -328,9 +353,26 @@ public class GpsLocationProvider implements LocationProviderInterface {
             } else if (action.equals(ALARM_TIMEOUT)) {
                 if (DEBUG) Log.d(TAG, "ALARM_TIMEOUT");
                 hibernate();
-            }
+            } else if (action.equals(Intents.DATA_SMS_RECEIVED_ACTION)) {
+                checkSmsSuplInit(intent);
+            } else if (action.equals(Intents.WAP_PUSH_RECEIVED_ACTION)) {
+                checkWapSuplInit(intent);
+             }
         }
     };
+
+    private void checkSmsSuplInit(Intent intent) {
+        SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
+        for (int i=0; i <messages.length; i++) {
+            byte[] supl_init = messages[i].getUserData();
+            native_agps_ni_message(supl_init,supl_init.length);
+        }
+    }
+
+    private void checkWapSuplInit(Intent intent) {
+        byte[] supl_init = (byte[]) intent.getExtra("data");
+        native_agps_ni_message(supl_init,supl_init.length);
+    }
 
     public static boolean isSupported() {
         return native_is_supported();
@@ -351,6 +393,21 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
         mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
+        intentFilter.addDataScheme("sms");
+        intentFilter.addDataAuthority("localhost","7275");
+        context.registerReceiver(mBroadcastReciever, intentFilter);
+
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
+        try {
+            intentFilter.addDataType("application/vnd.omaloc-supl-init");
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            Log.w(TAG, "Malformed SUPL init mime type");
+        }
+        context.registerReceiver(mBroadcastReciever, intentFilter);
 
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -1255,22 +1312,20 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     //=============================================================
     // NI Client support
-	//=============================================================
+    //=============================================================
     private final INetInitiatedListener mNetInitiatedListener = new INetInitiatedListener.Stub() {
-    	// Sends a response for an NI reqeust to HAL.
-    	public boolean sendNiResponse(int notificationId, int userResponse)
-    	{
-        	// TODO Add Permission check
-    		
-    		StringBuilder extrasBuf = new StringBuilder();
+        // Sends a response for an NI reqeust to HAL.
+        public boolean sendNiResponse(int notificationId, int userResponse)
+        {
+            // TODO Add Permission check
 
-    		if (DEBUG) Log.d(TAG, "sendNiResponse, notifId: " + notificationId +
-    				", response: " + userResponse);
-    		
-    		native_send_ni_response(notificationId, userResponse);
-    		
-    		return true;
-    	}        
+            StringBuilder extrasBuf = new StringBuilder();
+
+            if (DEBUG) Log.d(TAG, "sendNiResponse, notifId: " + notificationId +
+                    ", response: " + userResponse);
+            native_send_ni_response(notificationId, userResponse);
+            return true;
+        }
     };
         
     public INetInitiatedListener getNetInitiatedListener() {
@@ -1278,70 +1333,132 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     // Called by JNI function to report an NI request.
-	@SuppressWarnings("deprecation")
-	public void reportNiNotification(
-        	int notificationId,
-        	int niType,
-        	int notifyFlags,
-        	int timeout,
-        	int defaultResponse,
-        	String requestorId,
-        	String text,
-        	int requestorIdEncoding,
-        	int textEncoding,
-        	String extras  // Encoded extra data
+    public void reportNiNotification(
+            int notificationId,
+            int niType,
+            int notifyFlags,
+            int timeout,
+            int defaultResponse,
+            String requestorId,
+            String text,
+            int requestorIdEncoding,
+            int textEncoding,
+            String extras  // Encoded extra data
         )
-	{
-		Log.i(TAG, "reportNiNotification: entered");
-		Log.i(TAG, "notificationId: " + notificationId +
-				", niType: " + niType +
-				", notifyFlags: " + notifyFlags +
-				", timeout: " + timeout +
-				", defaultResponse: " + defaultResponse);
-		
-		Log.i(TAG, "requestorId: " + requestorId +
-				", text: " + text +
-				", requestorIdEncoding: " + requestorIdEncoding +
-				", textEncoding: " + textEncoding);
-		
-		GpsNiNotification notification = new GpsNiNotification();
-		
-		notification.notificationId = notificationId;
-		notification.niType = niType;
-		notification.needNotify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_NOTIFY) != 0;
-		notification.needVerify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_VERIFY) != 0;
-		notification.privacyOverride = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_PRIVACY_OVERRIDE) != 0;
-		notification.timeout = timeout;
-		notification.defaultResponse = defaultResponse;
-		notification.requestorId = requestorId;
-		notification.text = text;
-		notification.requestorIdEncoding = requestorIdEncoding;
-		notification.textEncoding = textEncoding;
-		
-		// Process extras, assuming the format is
-		// one of more lines of "key = value"
-		Bundle bundle = new Bundle();
-		
-		if (extras == null) extras = "";
-		Properties extraProp = new Properties();
-		
-		try {
-			extraProp.load(new StringBufferInputStream(extras));
-		}
-		catch (IOException e)
-		{
-			Log.e(TAG, "reportNiNotification cannot parse extras data: " + extras);
-		}
-		
-		for (Entry<Object, Object> ent : extraProp.entrySet())
-		{
-			bundle.putString((String) ent.getKey(), (String) ent.getValue());
-		}		
-		
-		notification.extras = bundle;
-		
-		mNIHandler.handleNiNotification(notification);		
-	}
+    {
+        Log.i(TAG, "reportNiNotification: entered");
+        Log.i(TAG, "notificationId: " + notificationId +
+                ", niType: " + niType +
+                ", notifyFlags: " + notifyFlags +
+                ", timeout: " + timeout +
+                ", defaultResponse: " + defaultResponse);
+
+        Log.i(TAG, "requestorId: " + requestorId +
+                ", text: " + text +
+                ", requestorIdEncoding: " + requestorIdEncoding +
+                ", textEncoding: " + textEncoding);
+
+        GpsNiNotification notification = new GpsNiNotification();
+
+        notification.notificationId = notificationId;
+        notification.niType = niType;
+        notification.needNotify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_NOTIFY) != 0;
+        notification.needVerify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_VERIFY) != 0;
+        notification.privacyOverride = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_PRIVACY_OVERRIDE) != 0;
+        notification.timeout = timeout;
+        notification.defaultResponse = defaultResponse;
+        notification.requestorId = requestorId;
+        notification.text = text;
+        notification.requestorIdEncoding = requestorIdEncoding;
+        notification.textEncoding = textEncoding;
+
+        // Process extras, assuming the format is
+        // one of more lines of "key = value"
+        Bundle bundle = new Bundle();
+
+        if (extras == null) extras = "";
+        Properties extraProp = new Properties();
+
+        try {
+            extraProp.load(new StringBufferInputStream(extras));
+        }
+        catch (IOException e)
+        {
+            Log.e(TAG, "reportNiNotification cannot parse extras data: " + extras);
+        }
+
+        for (Entry<Object, Object> ent : extraProp.entrySet())
+        {
+            bundle.putString((String) ent.getKey(), (String) ent.getValue());
+        }
+
+        notification.extras = bundle;
+
+        mNIHandler.handleNiNotification(notification);
+    }
+
+    /**
+     * Called from native code to request set id info.
+     * We should be careful about receiving null string from the TelephonyManager,
+     * because sending null String to JNI function would cause a crash.
+     */
+
+    private void requestSetID(int flags) {
+        TelephonyManager phone = (TelephonyManager)
+                mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        int    type = AGPS_SETID_TYPE_NONE;
+        String data = "";
+
+        if ((flags & AGPS_RIL_REQUEST_SETID_IMSI) == AGPS_RIL_REQUEST_SETID_IMSI) {
+            String data_temp = phone.getSubscriberId();
+            if (data_temp == null) {
+                // This means the framework does not have the SIM card ready.
+            } else {
+                // This means the framework has the SIM card.
+                data = data_temp;
+                type = AGPS_SETID_TYPE_IMSI;
+            }
+        }
+        else if ((flags & AGPS_RIL_REQUEST_SETID_MSISDN) == AGPS_RIL_REQUEST_SETID_MSISDN) {
+            String data_temp = phone.getLine1Number();
+            if (data_temp == null) {
+                // This means the framework does not have the SIM card ready.
+            } else {
+                // This means the framework has the SIM card.
+                data = data_temp;
+                type = AGPS_SETID_TYPE_MSISDN;
+            }
+        }
+        native_agps_set_id(type, data);
+    }
+
+    /**
+     * Called from native code to request reference location info
+     */
+
+    private void requestRefLocation(int flags) {
+        TelephonyManager phone = (TelephonyManager)
+                mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+            GsmCellLocation gsm_cell = (GsmCellLocation) phone.getCellLocation();
+            if ((gsm_cell != null) && (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM)
+                    && (phone.getNetworkOperator().length() > 3)) {
+                int type;
+                int mcc = Integer.parseInt(phone.getNetworkOperator().substring(0,3));
+                int mnc = Integer.parseInt(phone.getNetworkOperator().substring(3));
+                if (phone.getNetworkType() == TelephonyManager.NETWORK_TYPE_UMTS)
+                    type = AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
+                else
+                    type = AGPS_REF_LOCATION_TYPE_GSM_CELLID;
+                native_agps_set_ref_location_cellid(type, mcc, mnc,
+                        gsm_cell.getLac(), gsm_cell.getCid());
+            }
+            else
+                Log.e(TAG,"Error getting cell location info.");
+        }
+        else
+            Log.e(TAG,"CDMA not supported.");
+    }
 
     private void sendMessage(int message, int arg, Object obj) {
         // hold a wake lock while messages are pending
@@ -1472,8 +1589,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private native void native_agps_data_conn_open(String apn);
     private native void native_agps_data_conn_closed();
     private native void native_agps_data_conn_failed();
+    private native void native_agps_ni_message(byte [] msg, int length);
     private native void native_set_agps_server(int type, String hostname, int port);
 
     // Network-initiated (NI) Support
     private native void native_send_ni_response(int notificationId, int userResponse);
+
+    // AGPS ril suport
+    private native void native_agps_set_ref_location_cellid(int type, int mcc, int mnc,
+            int lac, int cid);
+    private native void native_agps_set_id(int type, String setid);
 }

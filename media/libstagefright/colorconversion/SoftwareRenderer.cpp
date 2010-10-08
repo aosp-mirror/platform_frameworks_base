@@ -48,6 +48,9 @@ SoftwareRenderer::SoftwareRenderer(
     LOGI("display = %d x %d, decoded = %d x %d",
             mDisplayWidth, mDisplayHeight, mDecodedWidth, mDecodedHeight);
 
+    mDecodedWidth = mDisplayWidth;
+    mDecodedHeight = mDisplayHeight;
+
     int halFormat;
     switch (mColorFormat) {
 #if HAS_YCBCR420_SP_ADRENO
