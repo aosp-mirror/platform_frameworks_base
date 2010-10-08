@@ -80,9 +80,16 @@ public class Credentials {
         }
     }
 
+    private Intent createInstallIntent() {
+        Intent intent = new Intent(INSTALL_ACTION);
+        intent.setClassName("com.android.certinstaller",
+                "com.android.certinstaller.CertInstallerMain");
+        return intent;
+    }
+
     public void install(Context context, KeyPair pair) {
         try {
-            Intent intent = new Intent(INSTALL_ACTION);
+            Intent intent = createInstallIntent();
             intent.putExtra(PRIVATE_KEY, pair.getPrivate().getEncoded());
             intent.putExtra(PUBLIC_KEY, pair.getPublic().getEncoded());
             context.startActivity(intent);
@@ -93,7 +100,7 @@ public class Credentials {
 
     public void install(Context context, String type, byte[] value) {
         try {
-            Intent intent = new Intent(INSTALL_ACTION);
+            Intent intent = createInstallIntent();
             intent.putExtra(type, value);
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
@@ -103,7 +110,7 @@ public class Credentials {
 
     public void installFromSdCard(Context context) {
         try {
-            context.startActivity(new Intent(INSTALL_ACTION));
+            context.startActivity(createInstallIntent());
         } catch (ActivityNotFoundException e) {
             Log.w(LOGTAG, e.toString());
         }
