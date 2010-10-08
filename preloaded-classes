@@ -626,7 +626,6 @@ com.android.internal.app.ChooserActivity
 com.android.internal.app.ResolverActivity
 com.android.internal.app.ResolverActivity$ResolveListAdapter
 com.android.internal.appwidget.IAppWidgetService$Stub
-com.android.internal.content.SyncStateContentProviderHelper
 com.android.internal.graphics.NativeUtils
 com.android.internal.location.DummyLocationProvider
 com.android.internal.logging.AndroidHandler
