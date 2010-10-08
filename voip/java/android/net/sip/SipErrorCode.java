@@ -19,10 +19,9 @@ package android.net.sip;
 /**
  * Defines error code returned in
  * {@link SipRegistrationListener#onRegistrationFailed},
- * {@link ISipSessionListener#onError},
- * {@link ISipSessionListener#onCallChangeFailed} and
- * {@link ISipSessionListener#onRegistrationFailed}.
- * @hide
+ * {@link SipSession.Listener#onError},
+ * {@link SipSession.Listener#onCallChangeFailed} and
+ * {@link SipSession.Listener#onRegistrationFailed}.
  */
 public class SipErrorCode {
     /** Not an error. */

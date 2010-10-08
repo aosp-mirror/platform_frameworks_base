@@ -18,7 +18,6 @@ package android.net.sip;
 
 /**
  * Listener class to listen to SIP registration events.
- * @hide
  */
 public interface SipRegistrationListener {
     /**

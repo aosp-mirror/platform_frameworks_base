@@ -22,14 +22,12 @@ import android.util.Log;
 /**
  * A SIP session that is associated with a SIP dialog or a standalone
  * transaction not within a dialog.
- * @hide
  */
 public final class SipSession {
     private static final String TAG = "SipSession";
 
     /**
      * Defines {@link SipSession} states.
-     * @hide
      */
     public static class State {
         /** When session is ready to initiate a call or transaction. */
@@ -101,7 +99,6 @@ public final class SipSession {
 
     /**
      * Listener class that listens to {@link SipSession} events.
-     * @hide
      */
     public static class Listener {
         /**
@@ -281,7 +278,7 @@ public final class SipSession {
 
     /**
      * Gets the session state. The value returned must be one of the states in
-     * {@link SipSessionState}.
+     * {@link State}.
      *
      * @return the session state
      */
@@ -339,7 +336,7 @@ public final class SipSession {
      * Performs registration to the server specified by the associated local
      * profile. The session listener is called back upon success or failure of
      * registration. The method is only valid to call when the session state is
-     * in {@link SipSessionState#READY_TO_CALL}.
+     * in {@link State#READY_TO_CALL}.
      *
      * @param duration duration in second before the registration expires
      * @see Listener
@@ -357,7 +354,7 @@ public final class SipSession {
      * profile. Unregistration is technically the same as registration with zero
      * expiration duration. The session listener is called back upon success or
      * failure of unregistration. The method is only valid to call when the
-     * session state is in {@link SipSessionState#READY_TO_CALL}.
+     * session state is in {@link State#READY_TO_CALL}.
      *
      * @see Listener
      */
@@ -372,7 +369,7 @@ public final class SipSession {
     /**
      * Initiates a call to the specified profile. The session listener is called
      * back upon defined session events. The method is only valid to call when
-     * the session state is in {@link SipSessionState#READY_TO_CALL}.
+     * the session state is in {@link State#READY_TO_CALL}.
      *
      * @param callee the SIP profile to make the call to
      * @param sessionDescription the session description of this call
@@ -393,7 +390,7 @@ public final class SipSession {
     /**
      * Answers an incoming call with the specified session description. The
      * method is only valid to call when the session state is in
-     * {@link SipSessionState#INCOMING_CALL}.
+     * {@link State#INCOMING_CALL}.
      *
      * @param sessionDescription the session description to answer this call
      * @param timeout the session will be timed out if the call is not
@@ -411,10 +408,10 @@ public final class SipSession {
     /**
      * Ends an established call, terminates an outgoing call or rejects an
      * incoming call. The method is only valid to call when the session state is
-     * in {@link SipSessionState#IN_CALL},
-     * {@link SipSessionState#INCOMING_CALL},
-     * {@link SipSessionState#OUTGOING_CALL} or
-     * {@link SipSessionState#OUTGOING_CALL_RING_BACK}.
+     * in {@link State#IN_CALL},
+     * {@link State#INCOMING_CALL},
+     * {@link State#OUTGOING_CALL} or
+     * {@link State#OUTGOING_CALL_RING_BACK}.
      */
     public void endCall() {
         try {
@@ -426,7 +423,7 @@ public final class SipSession {
 
     /**
      * Changes the session description during a call. The method is only valid
-     * to call when the session state is in {@link SipSessionState#IN_CALL}.
+     * to call when the session state is in {@link State#IN_CALL}.
      *
      * @param sessionDescription the new session description
      * @param timeout the session will be timed out if the call is not
