@@ -41,10 +41,12 @@ void FindAVCDimensions(
     br.skipBits(16);
     parseUE(&br);  // seq_parameter_set_id
 
+    unsigned chroma_format_idc = 1;  // 4:2:0 chroma format
+
     if (profile_idc == 100 || profile_idc == 110
             || profile_idc == 122 || profile_idc == 244
             || profile_idc == 44 || profile_idc == 83 || profile_idc == 86) {
-        unsigned chroma_format_idc = parseUE(&br);
+        chroma_format_idc = parseUE(&br);
         if (chroma_format_idc == 3) {
             br.skipBits(1);  // residual_colour_transform_flag
         }
@@ -85,6 +87,41 @@ void FindAVCDimensions(
 
     *height = (2 - frame_mbs_only_flag)
         * (pic_height_in_map_units_minus1 * 16 + 16);
+
+    if (!frame_mbs_only_flag) {
+        br.getBits(1);  // mb_adaptive_frame_field_flag
+    }
+
+    br.getBits(1);  // direct_8x8_inference_flag
+
+    if (br.getBits(1)) {  // frame_cropping_flag
+        unsigned frame_crop_left_offset = parseUE(&br);
+        unsigned frame_crop_right_offset = parseUE(&br);
+        unsigned frame_crop_top_offset = parseUE(&br);
+        unsigned frame_crop_bottom_offset = parseUE(&br);
+
+        unsigned cropUnitX, cropUnitY;
+        if (chroma_format_idc == 0  /* monochrome */) {
+            cropUnitX = 1;
+            cropUnitY = 2 - frame_mbs_only_flag;
+        } else {
+            unsigned subWidthC = (chroma_format_idc == 3) ? 1 : 2;
+            unsigned subHeightC = (chroma_format_idc == 1) ? 2 : 1;
+
+            cropUnitX = subWidthC;
+            cropUnitY = subHeightC * (2 - frame_mbs_only_flag);
+        }
+
+        LOGV("frame_crop = (%u, %u, %u, %u), cropUnitX = %u, cropUnitY = %u",
+             frame_crop_left_offset, frame_crop_right_offset,
+             frame_crop_top_offset, frame_crop_bottom_offset,
+             cropUnitX, cropUnitY);
+
+        *width -=
+            (frame_crop_left_offset + frame_crop_right_offset) * cropUnitX;
+        *height -=
+            (frame_crop_top_offset + frame_crop_bottom_offset) * cropUnitY;
+    }
 }
 
 }  // namespace android
