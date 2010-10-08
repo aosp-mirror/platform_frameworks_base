@@ -23,12 +23,22 @@ import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 public class LatestItemView extends FrameLayout {
+    private boolean mDispatchTorches;
 
     public LatestItemView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        return onTouchEvent(ev);
+        if (mDispatchTorches) {
+            return super.dispatchTouchEvent(ev);
+        } else {
+            return onTouchEvent(ev);
+        }
+    }
+
+    public void setOnClickListener(OnClickListener l) {
+        mDispatchTorches = l == null;
+        super.setOnClickListener(l);
     }
 }
