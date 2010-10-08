@@ -3290,7 +3290,11 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                 } else if (!isExternal(pkg)) {
                     Log.i(TAG, path + " changed; unpacking");
+                    mInstaller.unlinkNativeLibraryDirectory(dataPath.getPath());
                     NativeLibraryHelper.copyNativeBinariesLI(scanFile, sharedLibraryDir);
+                } else {
+                    mInstaller.linkNativeLibraryDirectory(dataPath.getPath(),
+                            pkg.applicationInfo.nativeLibraryDir);
                 }
             }
             pkg.mScanPath = path;
@@ -5008,10 +5012,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             } finally {
                 try { if (out != null) out.close(); } catch (IOException e) {}
-            }
-
-            if (!temp) {
-                NativeLibraryHelper.copyNativeBinariesLI(codeFile, new File(libraryPath));
             }
 
             return ret;
@@ -9894,10 +9894,10 @@ class PackageManagerService extends IPackageManager.Stub {
                            synchronized (mPackages) {
                                PackageParser.Package pkg = mPackages.get(mp.packageName);
                                // Recheck for package again.
-                               if (pkg == null ) {
-                                   Slog.w(TAG, " Package " + mp.packageName +
-                                   " doesn't exist. Aborting move");
-                                   returnCode = PackageManager.MOVE_FAILED_DOESNT_EXIST;
+                                if (pkg == null) {
+                                    Slog.w(TAG, " Package " + mp.packageName
+                                            + " doesn't exist. Aborting move");
+                                    returnCode = PackageManager.MOVE_FAILED_DOESNT_EXIST;
                                } else if (!mp.srcArgs.getCodePath().equals(pkg.applicationInfo.sourceDir)) {
                                    Slog.w(TAG, "Package " + mp.packageName + " code path changed from " +
                                            mp.srcArgs.getCodePath() + " to " + pkg.applicationInfo.sourceDir +
@@ -9908,15 +9908,34 @@ class PackageManagerService extends IPackageManager.Stub {
                                    final String newCodePath = mp.targetArgs.getCodePath();
                                    final String newResPath = mp.targetArgs.getResourcePath();
                                    final String newNativePath = mp.targetArgs.getNativeLibraryPath();
-                                   pkg.mPath = newCodePath;
-                                   // Move dex files around
-                                   if (moveDexFilesLI(pkg)
-                                           != PackageManager.INSTALL_SUCCEEDED) {
-                                       // Moving of dex files failed. Set
-                                       // error code and abort move.
-                                       pkg.mPath = pkg.mScanPath;
-                                       returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
-                                   } else {
+
+                                    if ((mp.flags & PackageManager.INSTALL_EXTERNAL) == 0) {
+                                        if (mInstaller
+                                                .unlinkNativeLibraryDirectory(pkg.applicationInfo.dataDir) < 0) {
+                                            returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                        } else {
+                                            NativeLibraryHelper.copyNativeBinariesLI(
+                                                    new File(newCodePath), new File(newNativePath));
+                                        }
+                                    } else {
+                                        if (mInstaller.linkNativeLibraryDirectory(
+                                                pkg.applicationInfo.dataDir, newNativePath) < 0) {
+                                            returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                        }
+                                    }
+
+                                    if (returnCode == PackageManager.MOVE_SUCCEEDED) {
+                                        pkg.mPath = newCodePath;
+                                        // Move dex files around
+                                        if (moveDexFilesLI(pkg) != PackageManager.INSTALL_SUCCEEDED) {
+                                            // Moving of dex files failed. Set
+                                            // error code and abort move.
+                                            pkg.mPath = pkg.mScanPath;
+                                            returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
+                                        }
+                                    }
+
+                                    if (returnCode == PackageManager.MOVE_SUCCEEDED) {
                                        pkg.mScanPath = newCodePath;
                                        pkg.applicationInfo.sourceDir = newCodePath;
                                        pkg.applicationInfo.publicSourceDir = newResPath;
