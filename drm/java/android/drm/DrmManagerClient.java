@@ -16,9 +16,11 @@
 
 package android.drm;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -99,14 +101,9 @@ public class DrmManagerClient {
         public void onError(DrmManagerClient client, DrmErrorEvent event);
     }
 
-    private static final int STATE_UNINITIALIZED = 0;
-    private static final int STATE_INITIALIZED = 1;
-
-    private static final int ACTION_INITIALIZE = 1000;
-    private static final int ACTION_FINALIZE = 1001;
-    private static final int ACTION_REMOVE_ALL_RIGHTS = 1002;
-    private static final int ACTION_ACQUIRE_DRM_INFO = 1003;
-    private static final int ACTION_PROCESS_DRM_INFO = 1004;
+    private static final int ACTION_REMOVE_ALL_RIGHTS = 1001;
+    private static final int ACTION_ACQUIRE_DRM_INFO = 1002;
+    private static final int ACTION_PROCESS_DRM_INFO = 1003;
 
     private int mUniqueId;
     private int mNativeContext;
@@ -116,7 +113,6 @@ public class DrmManagerClient {
     private OnInfoListener mOnInfoListener;
     private OnEventListener mOnEventListener;
     private OnErrorListener mOnErrorListener;
-    private int mCurrentState = STATE_UNINITIALIZED;
 
     private class EventHandler extends Handler {
 
@@ -130,16 +126,6 @@ public class DrmManagerClient {
             HashMap<String, Object> attributes = new HashMap<String, Object>();
 
             switch(msg.what) {
-            case ACTION_INITIALIZE: {
-                if (ERROR_NONE == _loadPlugIns(mUniqueId, msg.obj)) {
-                    mCurrentState = STATE_INITIALIZED;
-                    event = new DrmEvent(mUniqueId, DrmEvent.TYPE_INITIALIZED, null);
-                } else {
-                    error = new DrmErrorEvent(mUniqueId,
-                            DrmErrorEvent.TYPE_INITIALIZE_FAILED, null);
-                }
-                break;
-            }
             case ACTION_ACQUIRE_DRM_INFO: {
                 final DrmInfoRequest request = (DrmInfoRequest) msg.obj;
                 DrmInfo drmInfo = _acquireDrmInfo(mUniqueId, request);
@@ -157,10 +143,10 @@ public class DrmManagerClient {
                 DrmInfoStatus status = _processDrmInfo(mUniqueId, drmInfo);
                 if (null != status && DrmInfoStatus.STATUS_OK == status.statusCode) {
                     attributes.put(DrmEvent.DRM_INFO_STATUS_OBJECT, status);
-                    event = new DrmEvent(mUniqueId, getEventType(drmInfo.getInfoType()), null);
+                    event = new DrmEvent(mUniqueId, getEventType(status.infoType), null);
                 } else {
-                    error = new DrmErrorEvent(mUniqueId,
-                            getErrorType(drmInfo.getInfoType()), null);
+                    int infoType = (null != status) ? status.infoType : drmInfo.getInfoType();
+                    error = new DrmErrorEvent(mUniqueId, getErrorType(infoType), null);
                 }
                 break;
             }
@@ -170,16 +156,6 @@ public class DrmManagerClient {
                 } else {
                     error = new DrmErrorEvent(mUniqueId,
                             DrmErrorEvent.TYPE_REMOVE_ALL_RIGHTS_FAILED, null);
-                }
-                break;
-            }
-            case ACTION_FINALIZE: {
-                if (ERROR_NONE == _unloadPlugIns(mUniqueId)) {
-                    mCurrentState = STATE_UNINITIALIZED;
-                    event = new DrmEvent(mUniqueId, DrmEvent.TYPE_FINALIZED, null);
-                } else {
-                    error = new DrmErrorEvent(mUniqueId,
-                            DrmErrorEvent.TYPE_FINALIZE_FAILED, null);
                 }
                 break;
             }
@@ -283,6 +259,12 @@ public class DrmManagerClient {
 
         // save the unique id
         mUniqueId = hashCode();
+
+        _initialize(mUniqueId, new WeakReference<DrmManagerClient>(this));
+    }
+
+    protected void finalize() {
+        _finalize(mUniqueId);
     }
 
     /**
@@ -322,58 +304,11 @@ public class DrmManagerClient {
     }
 
     /**
-     * Initializes DrmFramework, which loads all available plug-ins
-     * in the default plug-in directory path
-     *
-     * @return
-     *     ERROR_NONE for success
-     *     ERROR_UNKNOWN for failure
-     */
-    public int loadPlugIns() {
-        int result = ERROR_UNKNOWN;
-        if (STATE_UNINITIALIZED == getState()) {
-            if (null != mEventHandler) {
-                Message msg = mEventHandler.obtainMessage(
-                        ACTION_INITIALIZE, new WeakReference<DrmManagerClient>(this));
-                result = (mEventHandler.sendMessage(msg)) ? ERROR_NONE : result;
-            }
-        } else {
-            result = ERROR_NONE;
-        }
-        return result;
-    }
-
-    /**
-     * Finalize DrmFramework, which release resources associated with each plug-in
-     * and unload all plug-ins.
-     *
-     * @return
-     *     ERROR_NONE for success
-     *     ERROR_UNKNOWN for failure
-     */
-    public int unloadPlugIns() {
-        int result = ERROR_UNKNOWN;
-        if (STATE_INITIALIZED == getState()) {
-            if (null != mEventHandler) {
-                Message msg = mEventHandler.obtainMessage(ACTION_FINALIZE);
-                result = (mEventHandler.sendMessage(msg)) ? ERROR_NONE : result;
-            }
-        } else {
-            result = ERROR_NONE;
-        }
-        return result;
-    }
-
-    /**
      * Retrieves informations about all the plug-ins registered with DrmFramework.
      *
      * @return Array of DrmEngine plug-in strings
      */
     public String[] getAvailableDrmEngines() {
-        if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
-        }
-
         DrmSupportInfo[] supportInfos = _getAllSupportInfo(mUniqueId);
         ArrayList<String> descriptions = new ArrayList<String>();
 
@@ -396,8 +331,6 @@ public class DrmManagerClient {
     public ContentValues getConstraints(String path, int action) {
         if (null == path || path.equals("") || !DrmStore.Action.isValid(action)) {
             throw new IllegalArgumentException("Given usage or path is invalid/null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         return _getConstraints(mUniqueId, path, action);
     }
@@ -411,6 +344,9 @@ public class DrmManagerClient {
      *         or null in case of failure
      */
     public ContentValues getConstraints(Uri uri, int action) {
+        if (null == uri || Uri.EMPTY == uri) {
+            throw new IllegalArgumentException("Uri should be non null");
+        }
         return getConstraints(convertUriToPath(uri), action);
     }
 
@@ -432,8 +368,6 @@ public class DrmManagerClient {
             DrmRights drmRights, String rightsPath, String contentPath) throws IOException {
         if (null == drmRights || !drmRights.isValid()) {
             throw new IllegalArgumentException("Given drmRights or contentPath is not valid");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         if (null != rightsPath && !rightsPath.equals("")) {
             DrmUtils.writeToFile(rightsPath, drmRights.getData());
@@ -451,8 +385,6 @@ public class DrmManagerClient {
         if (null == engineFilePath || engineFilePath.equals("")) {
             throw new IllegalArgumentException(
                 "Given engineFilePath: "+ engineFilePath + "is not valid");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         _installDrmEngine(mUniqueId, engineFilePath);
     }
@@ -464,14 +396,11 @@ public class DrmManagerClient {
      * @param mimeType Mimetype of the object to be handled
      * @return
      *        true - if the given mimeType or path can be handled
-     *        false - cannot be handled. false will be return in case
-     *        the state is uninitialized
+     *        false - cannot be handled.
      */
     public boolean canHandle(String path, String mimeType) {
         if ((null == path || path.equals("")) && (null == mimeType || mimeType.equals(""))) {
             throw new IllegalArgumentException("Path or the mimetype should be non null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         return _canHandle(mUniqueId, path, mimeType);
     }
@@ -483,8 +412,7 @@ public class DrmManagerClient {
      * @param mimeType Mimetype of the object to be handled
      * @return
      *        true - if the given mimeType or path can be handled
-     *        false - cannot be handled. false will be return in case
-     *        the state is uninitialized
+     *        false - cannot be handled.
      */
     public boolean canHandle(Uri uri, String mimeType) {
         if ((null == uri || Uri.EMPTY == uri) && (null == mimeType || mimeType.equals(""))) {
@@ -504,8 +432,6 @@ public class DrmManagerClient {
     public int processDrmInfo(DrmInfo drmInfo) {
         if (null == drmInfo || !drmInfo.isValid()) {
             throw new IllegalArgumentException("Given drmInfo is invalid/null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         int result = ERROR_UNKNOWN;
         if (null != mEventHandler) {
@@ -526,8 +452,6 @@ public class DrmManagerClient {
     public int acquireDrmInfo(DrmInfoRequest drmInfoRequest) {
         if (null == drmInfoRequest || !drmInfoRequest.isValid()) {
             throw new IllegalArgumentException("Given drmInfoRequest is invalid/null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         int result = ERROR_UNKNOWN;
         if (null != mEventHandler) {
@@ -550,8 +474,6 @@ public class DrmManagerClient {
     public int getDrmObjectType(String path, String mimeType) {
         if ((null == path || path.equals("")) && (null == mimeType || mimeType.equals(""))) {
             throw new IllegalArgumentException("Path or the mimetype should be non null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         return _getDrmObjectType(mUniqueId, path, mimeType);
     }
@@ -589,8 +511,6 @@ public class DrmManagerClient {
     public String getOriginalMimeType(String path) {
         if (null == path || path.equals("")) {
             throw new IllegalArgumentException("Given path should be non null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         return _getOriginalMimeType(mUniqueId, path);
     }
@@ -644,8 +564,6 @@ public class DrmManagerClient {
     public int checkRightsStatus(String path, int action) {
         if (null == path || path.equals("") || !DrmStore.Action.isValid(action)) {
             throw new IllegalArgumentException("Given path or action is not valid");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         return _checkRightsStatus(mUniqueId, path, action);
     }
@@ -676,8 +594,6 @@ public class DrmManagerClient {
     public int removeRights(String path) {
         if (null == path || path.equals("")) {
             throw new IllegalArgumentException("Given path should be non null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         return _removeRights(mUniqueId, path);
     }
@@ -706,9 +622,6 @@ public class DrmManagerClient {
      *     ERROR_UNKNOWN for failure
      */
     public int removeAllRights() {
-        if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
-        }
         int result = ERROR_UNKNOWN;
         if (null != mEventHandler) {
             Message msg = mEventHandler.obtainMessage(ACTION_REMOVE_ALL_RIGHTS);
@@ -729,8 +642,6 @@ public class DrmManagerClient {
     public int openConvertSession(String mimeType) {
         if (null == mimeType || mimeType.equals("")) {
             throw new IllegalArgumentException("Path or the mimeType should be non null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         return _openConvertSession(mUniqueId, mimeType);
     }
@@ -750,8 +661,6 @@ public class DrmManagerClient {
     public DrmConvertedStatus convertData(int convertId, byte[] inputData) {
         if (null == inputData || 0 >= inputData.length) {
             throw new IllegalArgumentException("Given inputData should be non null");
-        } else if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
         }
         return _convertData(mUniqueId, convertId, inputData);
     }
@@ -769,14 +678,7 @@ public class DrmManagerClient {
      *     the application on which offset these signature data should be appended.
      */
     public DrmConvertedStatus closeConvertSession(int convertId) {
-        if (STATE_UNINITIALIZED == getState()) {
-            throw new IllegalStateException("Not Initialized yet");
-        }
         return _closeConvertSession(mUniqueId, convertId);
-    }
-
-    private int getState() {
-        return mCurrentState;
     }
 
     private int getEventType(int infoType) {
@@ -784,13 +686,9 @@ public class DrmManagerClient {
 
         switch (infoType) {
         case DrmInfoRequest.TYPE_REGISTRATION_INFO:
-            eventType = DrmEvent.TYPE_REGISTERED;
-            break;
         case DrmInfoRequest.TYPE_UNREGISTRATION_INFO:
-            eventType = DrmEvent.TYPE_UNREGISTERED;
-            break;
         case DrmInfoRequest.TYPE_RIGHTS_ACQUISITION_INFO:
-            eventType = DrmEvent.TYPE_RIGHTS_ACQUIRED;
+            eventType = DrmEvent.TYPE_DRM_INFO_PROCESSED;
             break;
         }
         return eventType;
@@ -801,13 +699,9 @@ public class DrmManagerClient {
 
         switch (infoType) {
         case DrmInfoRequest.TYPE_REGISTRATION_INFO:
-            error = DrmErrorEvent.TYPE_REGISTRATION_FAILED;
-            break;
         case DrmInfoRequest.TYPE_UNREGISTRATION_INFO:
-            error = DrmErrorEvent.TYPE_UNREGISTRATION_FAILED;
-            break;
         case DrmInfoRequest.TYPE_RIGHTS_ACQUISITION_INFO:
-            error = DrmErrorEvent.TYPE_RIGHTS_ACQUISITION_FAILED;
+            error = DrmErrorEvent.TYPE_PROCESS_DRM_INFO_FAILED;
             break;
         }
         return error;
@@ -822,25 +716,35 @@ public class DrmManagerClient {
      * <row_index> the index of the content in given table
      */
     private String convertUriToPath(Uri uri) {
+        String path = null;
         String scheme = uri.getScheme();
-        if (null == scheme || scheme.equals("file")) {
-            return uri.getPath();
+        if (null == scheme || scheme.equals("") || scheme.equals(ContentResolver.SCHEME_FILE)) {
+            path = uri.getPath();
+        } else if (scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+            String[] projection = new String[] {MediaStore.MediaColumns.DATA};
+            Cursor cursor = null;
+            try {
+                cursor = mContext.getContentResolver().query(uri, projection, null, null, null);
+            } catch (SQLiteException e) {
+                throw new IllegalArgumentException("Given Uri is not formatted in a way " +
+                        "so that it can be found in media store.");
+            }
+            if (null == cursor || 0 == cursor.getCount() || !cursor.moveToFirst()) {
+                throw new IllegalArgumentException("Given Uri could not be found in media store");
+            }
+            int pathIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+            path = cursor.getString(pathIndex);
+            cursor.close();
+        } else {
+            throw new IllegalArgumentException("Given Uri scheme is not supported");
         }
-        String[] projection = new String[] {MediaStore.MediaColumns.DATA};
-        Cursor cursor = mContext.getContentResolver().query(uri, projection, null, null, null);
-        if (null == cursor || 0 == cursor.getCount() || !cursor.moveToFirst()) {
-            throw new IllegalArgumentException("Given Uri could not be found in media store");
-        }
-        int pathIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-        String path = cursor.getString(pathIndex);
-        cursor.close();
         return path;
     }
 
     // private native interfaces
-    private native int _loadPlugIns(int uniqueId, Object weak_this);
+    private native void _initialize(int uniqueId, Object weak_this);
 
-    private native int _unloadPlugIns(int uniqueId);
+    private native void _finalize(int uniqueId);
 
     private native void _installDrmEngine(int uniqueId, String engineFilepath);
 

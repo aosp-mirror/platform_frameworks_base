@@ -57,14 +57,18 @@ public:
 
     void removeUniqueId(int uniqueId);
 
-    status_t loadPlugIns(int uniqueId);
+    void addClient(int uniqueId);
 
-    status_t loadPlugIns(int uniqueId, const String8& plugInDirPath);
+    void removeClient(int uniqueId);
+
+    status_t loadPlugIns();
+
+    status_t loadPlugIns(const String8& plugInDirPath);
+
+    status_t unloadPlugIns();
 
     status_t setDrmServiceListener(
             int uniqueId, const sp<IDrmServiceListener>& drmServiceListener);
-
-    status_t unloadPlugIns(int uniqueId);
 
     status_t installDrmEngine(int uniqueId, const String8& drmEngineFile);
 
@@ -107,6 +111,8 @@ public:
 
     DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length);
 
+    DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
+
     status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 
     status_t initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
@@ -129,11 +135,7 @@ private:
 
     String8 getSupportedPlugInIdFromPath(int uniqueId, const String8& path);
 
-    void populate(int uniqueId);
-
     bool canHandle(int uniqueId, const String8& path);
-
-    void initializePlugIns(int uniqueId);
 
 private:
     static Vector<int> mUniqueIdVector;

@@ -31,6 +31,7 @@ public class DrmInfoStatus {
     public static final int STATUS_ERROR = 2;
 
     public final int statusCode;
+    public final int infoType;
     public final String mimeType;
     public final ProcessedData data;
 
@@ -38,11 +39,13 @@ public class DrmInfoStatus {
      * constructor to create DrmInfoStatus object with given parameters
      *
      * @param _statusCode Status of the communication
+     * @param _infoType Type of the DRM information processed
      * @param _data The processed data
      * @param _mimeType MIME type
      */
-    public DrmInfoStatus(int _statusCode, ProcessedData _data, String _mimeType) {
+    public DrmInfoStatus(int _statusCode, int _infoType, ProcessedData _data, String _mimeType) {
         statusCode = _statusCode;
+        infoType = _infoType;
         data = _data;
         mimeType = _mimeType;
     }

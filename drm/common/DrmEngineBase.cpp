@@ -120,6 +120,11 @@ status_t DrmEngineBase::openDecryptSession(
     return onOpenDecryptSession(uniqueId, decryptHandle, fd, offset, length);
 }
 
+status_t DrmEngineBase::openDecryptSession(
+    int uniqueId, DecryptHandle* decryptHandle, const char* uri) {
+    return onOpenDecryptSession(uniqueId, decryptHandle, uri);
+}
+
 status_t DrmEngineBase::closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {
     return onCloseDecryptSession(uniqueId, decryptHandle);
 }

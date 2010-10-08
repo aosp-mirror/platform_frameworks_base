@@ -59,8 +59,8 @@ public:
     //! TYPE_NO_INTERNET_CONNECTION, when the Internet connection is missing and no attempt
     //! can be made to renew rights
     static const int TYPE_NO_INTERNET_CONNECTION = 2005;
-    //! TYPE_REGISTRATION_FAILED, when registration with server failed.
-    static const int TYPE_REGISTRATION_FAILED = 2006;
+    //! TYPE_PROCESS_DRM_INFO_FAILED, when failed to process DrmInfo.
+    static const int TYPE_PROCESS_DRM_INFO_FAILED = 2006;
 
 public:
     /**
