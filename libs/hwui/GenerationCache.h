@@ -62,7 +62,7 @@ public:
     bool contains(K key) const;
     V get(K key);
     K getKeyAt(uint32_t index) const;
-    void put(K key, V value);
+    bool put(K key, V value);
     V remove(K key);
     V removeOldest();
     V getValueAt(uint32_t index) const;
@@ -149,7 +149,7 @@ V GenerationCache<K, V>::get(K key) {
 }
 
 template<typename K, typename V>
-void GenerationCache<K, V>::put(K key, V value) {
+bool GenerationCache<K, V>::put(K key, V value) {
     if (mMaxCapacity != kUnlimitedCapacity && mCache.size() >= mMaxCapacity) {
         removeOldest();
     }
@@ -158,7 +158,10 @@ void GenerationCache<K, V>::put(K key, V value) {
     if (index < 0) {
         sp<Entry<K, V> > entry = new Entry<K, V>;
         addToCache(entry, key, value);
+        return true;
     }
+
+    return false;
 }
 
 template<typename K, typename V>

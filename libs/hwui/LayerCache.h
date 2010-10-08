@@ -18,7 +18,7 @@
 #define ANDROID_UI_LAYER_CACHE_H
 
 #include "Layer.h"
-#include "GenerationCache.h"
+#include "utils/SortedList.h"
 
 namespace android {
 namespace uirenderer {
@@ -29,6 +29,9 @@ namespace uirenderer {
 
 // Debug
 #define DEBUG_LAYERS 0
+
+// Textures used by layers must have dimensions multiples of this number
+#define LAYER_SIZE 64
 
 // Debug
 #if DEBUG_LAYERS
@@ -41,40 +44,34 @@ namespace uirenderer {
 // Cache
 ///////////////////////////////////////////////////////////////////////////////
 
-class LayerCache: public OnEntryRemoved<LayerSize, Layer*> {
+class LayerCache {
 public:
     LayerCache();
-    LayerCache(uint32_t maxByteSize);
     ~LayerCache();
 
     /**
-     * Used as a callback when an entry is removed from the cache.
-     * Do not invoke directly.
-     */
-    void operator()(LayerSize& size, Layer*& layer);
-
-    /**
-     * Returns the layer of specified dimensions. If not suitable layer
-     * can be found, a new one is created and returned. If creating a new
+     * Returns a layer large enough for the specified dimensions. If no suitable
+     * layer can be found, a new one is created and returned. If creating a new
      * layer fails, NULL is returned.
      *
      * When a layer is obtained from the cache, it is removed and the total
      * size of the cache goes down.
      *
-     * @param size The dimensions of the desired layer
+     * @param width The desired width of the layer
+     * @param width The desired height of the layer
      */
-    Layer* get(LayerSize& size);
+    Layer* get(const uint32_t width, const uint32_t height);
 
     /**
      * Adds the layer to the cache. The layer will not be added if there is
-     * not enough space available.
+     * not enough space available. Adding a layer can cause other layers to
+     * be removed from the cache.
      *
-     * @param size The dimensions of the layer
      * @param layer The layer to add to the cache
      *
      * @return True if the layer was added, false otherwise.
      */
-    bool put(LayerSize& size, Layer* layer);
+    bool put(Layer* layer);
     /**
      * Clears the cache. This causes all layers to be deleted.
      */
@@ -96,7 +93,41 @@ public:
 private:
     void deleteLayer(Layer* layer);
 
-    GenerationCache<LayerSize, Layer*> mCache;
+    struct LayerEntry {
+        LayerEntry():
+            mLayer(NULL), mWidth(0), mHeight(0) {
+        }
+
+        LayerEntry(const uint32_t layerWidth, const uint32_t layerHeight): mLayer(NULL) {
+            mWidth = uint32_t(ceilf(layerWidth / float(LAYER_SIZE)) * LAYER_SIZE);
+            mHeight = uint32_t(ceilf(layerHeight / float(LAYER_SIZE)) * LAYER_SIZE);
+        }
+
+        LayerEntry(const LayerEntry& entry):
+            mLayer(entry.mLayer), mWidth(entry.mWidth), mHeight(entry.mHeight) {
+        }
+
+        LayerEntry(Layer* layer):
+            mLayer(layer), mWidth(layer->width), mHeight(layer->height) {
+        }
+
+        bool operator<(const LayerEntry& rhs) const {
+            if (mWidth == rhs.mWidth) {
+                return mHeight < rhs.mHeight;
+            }
+            return mWidth < rhs.mWidth;
+        }
+
+        bool operator==(const LayerEntry& rhs) const {
+            return mWidth == rhs.mWidth && mHeight == rhs.mHeight;
+        }
+
+        Layer* mLayer;
+        uint32_t mWidth;
+        uint32_t mHeight;
+    }; // struct LayerEntry
+
+    SortedList<LayerEntry> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

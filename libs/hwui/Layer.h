@@ -28,46 +28,33 @@
 namespace android {
 namespace uirenderer {
 
-/**
- * Dimensions of a layer.
- */
-struct LayerSize {
-    LayerSize(): width(0), height(0) { }
-    LayerSize(const uint32_t width, const uint32_t height): width(width), height(height) { }
-    LayerSize(const LayerSize& size): width(size.width), height(size.height) { }
-
-    uint32_t width;
-    uint32_t height;
-
-    bool operator<(const LayerSize& rhs) const {
-        if (width == rhs.width) {
-            return height < rhs.height;
-        }
-        return width < rhs.width;
-    }
-
-    bool operator==(const LayerSize& rhs) const {
-        return width == rhs.width && height == rhs.height;
-    }
-}; // struct LayerSize
+///////////////////////////////////////////////////////////////////////////////
+// Layers
+///////////////////////////////////////////////////////////////////////////////
 
 /**
  * A layer has dimensions and is backed by an OpenGL texture or FBO.
  */
 struct Layer {
+    Layer(const uint32_t layerWidth, const uint32_t layerHeight):
+            width(layerWidth), height(layerHeight) {
+    }
+
     /**
-     * Coordinates of the layer.
+     * Bounds of the layer.
      */
     Rect layer;
     /**
-     * Name of the texture used to render the layer.
+     * Texture coordinates of the layer.
      */
-    GLuint texture;
+    Rect texCoords;
+
     /**
      * Name of the FBO used to render the layer. If the name is 0
      * this layer is not backed by an FBO, but a simple texture.
      */
     GLuint fbo;
+
     /**
      * Opacity of the layer.
      */
@@ -80,10 +67,24 @@ struct Layer {
      * Indicates whether this layer should be blended.
      */
     bool blend;
+
     /**
      * Indicates whether this layer has been used already.
      */
     bool empty;
+
+    /**
+     * Name of the texture used to render the layer.
+     */
+    GLuint texture;
+    /**
+     * Width of the layer texture.
+     */
+    uint32_t width;
+    /**
+     * Height of the layer texture.
+     */
+    uint32_t height;
 }; // struct Layer
 
 }; // namespace uirenderer
