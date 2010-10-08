@@ -56,6 +56,7 @@ MediaPlayer::MediaPlayer()
     mVideoWidth = mVideoHeight = 0;
     mLockThreadId = 0;
     mAudioSessionId = AudioSystem::newAudioSessionId();
+    mSendLevel = 0;
 }
 
 MediaPlayer::~MediaPlayer()

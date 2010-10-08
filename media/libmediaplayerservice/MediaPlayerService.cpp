@@ -1546,6 +1546,11 @@ void MediaPlayerService::AudioOutput::CallbackWrapper(
 
 }
 
+int MediaPlayerService::AudioOutput::getSessionId()
+{
+    return mSessionId;
+}
+
 #undef LOG_TAG
 #define LOG_TAG "AudioCache"
 MediaPlayerService::AudioCache::AudioCache(const char* name) :
@@ -1731,6 +1736,11 @@ void MediaPlayerService::AudioCache::notify(void* cookie, int msg, int ext1, int
     Mutex::Autolock lock(p->mLock);
     p->mCommandComplete = true;
     p->mSignal.signal();
+}
+
+int MediaPlayerService::AudioCache::getSessionId()
+{
+    return 0;
 }
 
 } // namespace android
