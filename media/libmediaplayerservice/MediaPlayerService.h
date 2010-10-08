@@ -77,6 +77,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual uint32_t        latency() const;
         virtual float           msecsPerFrame() const;
         virtual status_t        getPosition(uint32_t *position);
+        virtual int             getSessionId();
 
         virtual status_t        open(
                 uint32_t sampleRate, int channelCount,
@@ -133,6 +134,7 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual uint32_t        latency() const;
         virtual float           msecsPerFrame() const;
         virtual status_t        getPosition(uint32_t *position);
+        virtual int             getSessionId();
 
         virtual status_t        open(
                 uint32_t sampleRate, int channelCount, int format,
