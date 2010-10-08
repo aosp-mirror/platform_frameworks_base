@@ -91,17 +91,21 @@ sp<MessageBase> MessageQueue::waitMessage(nsecs_t timeout)
                     mMessages.remove(cur);
                     break;
                 }
-                if (timeout>=0 && timeoutTime < now) {
-                    // we timed-out, return a NULL message
-                    result = 0;
-                    break;
-                }
                 nextEventTime = result->when;
                 result = 0;
             }
 
-            if (timeout >= 0 && nextEventTime > 0) {
-                if (nextEventTime > timeoutTime) {
+            if (timeout >= 0) {
+                if (timeoutTime < now) {
+                    // we timed-out, return a NULL message
+                    result = 0;
+                    break;
+                }
+                if (nextEventTime > 0) {
+                    if (nextEventTime > timeoutTime) {
+                        nextEventTime = timeoutTime;
+                    }
+                } else {
                     nextEventTime = timeoutTime;
                 }
             }
