@@ -40,27 +40,31 @@ public class NIOTest extends TestCase {
     }
 
     @SmallTest
-    public void testNIO() throws Exception {
-        ByteBuffer b;
-
+    public void testNIO_byte_array() throws Exception {
         // Test byte array-based buffer
-        b = ByteBuffer.allocate(12);
-        byteBufferTest(b);
+        byteBufferTest(ByteBuffer.allocate(12));
+    }
 
+    public void testNIO_direct() throws Exception {
         // Test native heap-allocated buffer
-        b = ByteBuffer.allocateDirect(12);
-        byteBufferTest(b);
+        byteBufferTest(ByteBuffer.allocateDirect(12));
+    }
 
+    public void testNIO_short_array() throws Exception {
         // Test short array-based buffer
         short[] shortArray = new short[8];
         ShortBuffer sb = ShortBuffer.wrap(shortArray);
         shortBufferTest(sb);
+    }
 
+    public void testNIO_int_array() throws Exception {
         // Test int array-based buffer
         int[] intArray = new int[8];
         IntBuffer ib = IntBuffer.wrap(intArray);
         intBufferTest(ib);
+    }
 
+    public void testNIO_float_array() throws Exception {
         // Test float array-based buffer
         float[] floatArray = new float[8];
         FloatBuffer fb = FloatBuffer.wrap(floatArray);
@@ -69,6 +73,12 @@ public class NIOTest extends TestCase {
 
     private void byteBufferTest(ByteBuffer b) {
         checkBuffer(b);
+
+        // Duplicate buffers revert to big-endian.
+        b.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer dupe = b.duplicate();
+        assertEquals(ByteOrder.BIG_ENDIAN, dupe.order());
+        b.order(ByteOrder.BIG_ENDIAN);
 
         // Bounds checks
         try {
@@ -272,9 +282,9 @@ public class NIOTest extends TestCase {
         // Check 'getFloat'
         b.order(ByteOrder.LITTLE_ENDIAN);
         b.position(0);
-        assertEquals(0xA3A2A1A0, Float.floatToIntBits(b.getFloat()));
-        assertEquals(0xA7A6A5A4, Float.floatToIntBits(b.getFloat()));
-        assertEquals(0xABAAA9A8, Float.floatToIntBits(b.getFloat()));
+        assertEquals(0xA3A2A1A0, Float.floatToRawIntBits(b.getFloat()));
+        assertEquals(0xA7A6A5A4, Float.floatToRawIntBits(b.getFloat()));
+        assertEquals(0xABAAA9A8, Float.floatToRawIntBits(b.getFloat()));
         try {
             b.getFloat();
             fail("expected exception not thrown");
@@ -284,9 +294,9 @@ public class NIOTest extends TestCase {
 
         b.order(ByteOrder.BIG_ENDIAN);
         b.position(0);
-        assertEquals(0xA0A1A2A3, Float.floatToIntBits(b.getFloat()));
-        assertEquals(0xA4A5A6A7, Float.floatToIntBits(b.getFloat()));
-        assertEquals(0xA8A9AAAB, Float.floatToIntBits(b.getFloat()));
+        assertEquals(0xA0A1A2A3, Float.floatToRawIntBits(b.getFloat()));
+        assertEquals(0xA4A5A6A7, Float.floatToRawIntBits(b.getFloat()));
+        assertEquals(0xA8A9AAAB, Float.floatToRawIntBits(b.getFloat()));
         try {
             b.getFloat();
             fail("expected exception not thrown");
@@ -296,8 +306,8 @@ public class NIOTest extends TestCase {
 
         // Check 'getDouble(int position)'
         b.order(ByteOrder.LITTLE_ENDIAN);
-        assertEquals(0xA7A6A5A4A3A2A1A0L, Double.doubleToLongBits(b.getDouble(0)));
-        assertEquals(0xA8A7A6A5A4A3A2A1L, Double.doubleToLongBits(b.getDouble(1)));
+        assertEquals(0xA7A6A5A4A3A2A1A0L, Double.doubleToRawLongBits(b.getDouble(0)));
+        assertEquals(0xA8A7A6A5A4A3A2A1L, Double.doubleToRawLongBits(b.getDouble(1)));
         try {
             b.getDouble(-1);
             fail("expected exception not thrown");
@@ -312,8 +322,8 @@ public class NIOTest extends TestCase {
         }
 
         b.order(ByteOrder.BIG_ENDIAN);
-        assertEquals(0xA0A1A2A3A4A5A6A7L, Double.doubleToLongBits(b.getDouble(0)));
-        assertEquals(0xA1A2A3A4A5A6A7A8L, Double.doubleToLongBits(b.getDouble(1)));
+        assertEquals(0xA0A1A2A3A4A5A6A7L, Double.doubleToRawLongBits(b.getDouble(0)));
+        assertEquals(0xA1A2A3A4A5A6A7A8L, Double.doubleToRawLongBits(b.getDouble(1)));
         try {
             b.getDouble(-1);
             fail("expected exception not thrown");
@@ -333,6 +343,9 @@ public class NIOTest extends TestCase {
         b.order(ByteOrder.LITTLE_ENDIAN);
         bb = b.slice();
         assertEquals(4, bb.capacity());
+        assertEquals(ByteOrder.BIG_ENDIAN, bb.order());
+        assertEquals(0xA1A2A3A4, bb.getInt(0));
+        bb.order(ByteOrder.LITTLE_ENDIAN);
         assertEquals(0xA4A3A2A1, bb.getInt(0));
 
         bb.order(ByteOrder.LITTLE_ENDIAN);
@@ -370,14 +383,14 @@ public class NIOTest extends TestCase {
 
         checkBuffer(fb);
         assertEquals(1, fb.capacity());
-        assertEquals(0xA4A3A2A1, Float.floatToIntBits(fb.get()));
+        assertEquals(0xA4A3A2A1, Float.floatToRawIntBits(fb.get()));
 
         bb.order(ByteOrder.BIG_ENDIAN);
         fb = bb.asFloatBuffer();
 
         checkBuffer(fb);
         assertEquals(1, fb.capacity());
-        assertEquals(0xA1A2A3A4, Float.floatToIntBits(fb.get()));
+        assertEquals(0xA1A2A3A4, Float.floatToRawIntBits(fb.get()));
     }
 
     private void shortBufferTest(ShortBuffer sb) {
