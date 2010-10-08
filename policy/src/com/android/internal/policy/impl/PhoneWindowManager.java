@@ -287,6 +287,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mDeskDockIntent;
     boolean mSearchKeyPressed;
     boolean mConsumeSearchKeyUp;
+    boolean mShowMenuKey = false; // track FLAG_NEEDS_MENU_KEY on frontmost window
 
     // support for activating the lock screen while the screen is on
     boolean mAllowLockscreenWhenOn;
@@ -1603,8 +1604,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public int finishAnimationLw() {
         int changes = 0;
-
         boolean topIsFullscreen = false;
+
+        final WindowManager.LayoutParams lp = (mTopFullscreenOpaqueWindowState != null)
+                ? mTopFullscreenOpaqueWindowState.getAttrs()
+                : null;
+
         if (mStatusBar != null) {
             if (localLOGV) Log.i(TAG, "force=" + mForceStatusBar
                     + " top=" + mTopFullscreenOpaqueWindowState);
@@ -1612,7 +1617,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                 if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
             } else if (mTopFullscreenOpaqueWindowState != null) {
-                final WindowManager.LayoutParams lp = mTopFullscreenOpaqueWindowState.getAttrs();
                 if (localLOGV) {
                     Log.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
                             + " shown frame: " + mTopFullscreenOpaqueWindowState.getShownFrameLw());
@@ -1637,10 +1641,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
-        
-        if (topIsFullscreen != mTopIsFullscreen) {
+
+        boolean topNeedsMenu = mShowMenuKey;
+        if (lp != null) {
+            topNeedsMenu = (lp.flags & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
+        }
+
+        if (DEBUG_LAYOUT) Log.v(TAG, "Top window " 
+                + (topNeedsMenu ? "needs" : "does not need")
+                + " the MENU key");
+
+        final boolean changedFullscreen = (mTopIsFullscreen != topIsFullscreen);
+        final boolean changedMenu = (topNeedsMenu != mShowMenuKey);
+
+        if (changedFullscreen || changedMenu) {
             final boolean topIsFullscreenF = topIsFullscreen;
+            final boolean topNeedsMenuF = topNeedsMenu;
+
             mTopIsFullscreen = topIsFullscreen;
+            mShowMenuKey = topNeedsMenu;
+
             mHandler.post(new Runnable() {
                     public void run() {
                         if (mStatusBarService == null) {
@@ -1654,7 +1674,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         final IStatusBarService sbs = mStatusBarService;
                         if (mStatusBarService != null) {
                             try {
-                                sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
+                                if (changedFullscreen) {
+                                    sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
+                                }
+                                if (changedMenu) {
+                                    sbs.setMenuKeyVisible(topNeedsMenuF);
+                                }
                             } catch (RemoteException e) {
                                 // This should be impossible because we're in the same process.
                                 mStatusBarService = null;

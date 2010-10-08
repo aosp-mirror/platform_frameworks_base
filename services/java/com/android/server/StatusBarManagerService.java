@@ -72,6 +72,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // We usually call it lights out mode, but double negatives are annoying
     boolean mLightsOn = true;
 
+    boolean mMenuVisible = false;
+
     private class DisableRecord implements IBinder.DeathRecipient {
         String pkg;
         int what;
@@ -246,6 +248,32 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    /** 
+     * Hide or show the on-screen Menu key. Only call this from the window manager, typically in
+     * response to a window with FLAG_NEEDS_MENU_KEY set.
+     */
+    public void setMenuKeyVisible(final boolean visible) {
+        enforceStatusBar();
+
+        if (SPEW) Slog.d(TAG, (visible?"showing":"hiding") + " MENU key");
+
+        synchronized(mLock) {
+            if (mMenuVisible != visible) {
+                mMenuVisible = visible;
+                mHandler.post(new Runnable() {
+                        public void run() {
+                            if (mBar != null) {
+                                try {
+                                    mBar.setMenuKeyVisible(visible);
+                                } catch (RemoteException ex) {
+                                }
+                            }
+                        }
+                    });
+            }
+        }
+    }
+
     /**
      * This is used for the automatic version of lights-out mode.  Only call this from
      * the window manager.
@@ -317,7 +345,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
             List<IBinder> notificationKeys, List<StatusBarNotification> notifications,
-            boolean lightsOn[]) {
+            boolean switches[]) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
@@ -332,7 +360,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             }
         }
         synchronized (mLock) {
-            lightsOn[0] = mLightsOn;
+            switches[0] = mLightsOn;
+            switches[1] = mMenuVisible;
         }
     }
 
