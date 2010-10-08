@@ -91,6 +91,7 @@ class Metadata {
     static const Type kPauseAvailable = 29;        // Boolean
     static const Type kSeekBackwardAvailable = 30; // Boolean
     static const Type kSeekForwardAvailable = 31;  // Boolean
+    static const Type kSeekAvailable = 32;         // Boolean
 
     // @param p[inout] The parcel to append the metadata records
     // to. The global metadata header should have been set already.

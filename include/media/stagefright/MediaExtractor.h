@@ -45,13 +45,14 @@ public:
     virtual sp<MetaData> getMetaData();
 
     enum Flags {
-        CAN_SEEK_BACKWARD  = 1,
-        CAN_SEEK_FORWARD   = 2,
+        CAN_SEEK_BACKWARD  = 1,  // the "seek 10secs back button"
+        CAN_SEEK_FORWARD   = 2,  // the "seek 10secs forward button"
         CAN_PAUSE          = 4,
+        CAN_SEEK           = 8,  // the "seek bar"
     };
 
     // If subclasses do _not_ override this, the default is
-    // CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD | CAN_PAUSE
+    // CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD | CAN_SEEK | CAN_PAUSE
     virtual uint32_t flags() const;
 
 protected:
