@@ -810,7 +810,10 @@ public class SipPhone extends SipPhoneBase {
                 } catch (SipException e) {
                     throw new CallStateException("hangup(): " + e);
                 } finally {
-                    mAdapter.onCallEnded(DisconnectCause.LOCAL);
+                    mAdapter.onCallEnded(((mState == Call.State.INCOMING)
+                            || (mState == Call.State.WAITING))
+                            ? DisconnectCause.INCOMING_REJECTED
+                            : DisconnectCause.LOCAL);
                 }
             }
         }

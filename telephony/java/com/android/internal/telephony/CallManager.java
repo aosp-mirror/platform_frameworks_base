@@ -1468,13 +1468,27 @@ public final class CallManager {
      *
      */
     public Call getActiveFgCall() {
-        for (Call call : mForegroundCalls) {
-            if (call.getState() != Call.State.IDLE) {
+        Call call = getFirstNonIdleCall(mForegroundCalls);
+        if (call == null) {
+            call = (mDefaultPhone == null)
+                    ? null
+                    : mDefaultPhone.getForegroundCall();
+        }
+        return call;
+    }
+
+    // Returns the first call that is not in IDLE state. If both active calls
+    // and disconnecting/disconnected calls exist, return the first active call.
+    private Call getFirstNonIdleCall(List<Call> calls) {
+        Call result = null;
+        for (Call call : calls) {
+            if (!call.isIdle()) {
                 return call;
+            } else if (call.getState() != Call.State.IDLE) {
+                if (result == null) result = call;
             }
         }
-        return (mDefaultPhone == null) ?
-                null : mDefaultPhone.getForegroundCall();
+        return result;
     }
 
     /**
@@ -1491,13 +1505,13 @@ public final class CallManager {
      * Complete background calls list can be get by getBackgroundCalls()
      */
     public Call getFirstActiveBgCall() {
-        for (Call call : mBackgroundCalls) {
-            if (call.getState() != Call.State.IDLE) {
-                return call;
-            }
+        Call call = getFirstNonIdleCall(mBackgroundCalls);
+        if (call == null) {
+            call = (mDefaultPhone == null)
+                    ? null
+                    : mDefaultPhone.getBackgroundCall();
         }
-        return (mDefaultPhone == null) ?
-                null : mDefaultPhone.getBackgroundCall();
+        return call;
     }
 
     /**
@@ -1514,13 +1528,13 @@ public final class CallManager {
      * Complete ringing calls list can be get by getRingingCalls()
      */
     public Call getFirstActiveRingingCall() {
-        for (Call call : mRingingCalls) {
-            if (!call.isIdle()) {
-                return call;
-            }
+        Call call = getFirstNonIdleCall(mRingingCalls);
+        if (call == null) {
+            call = (mDefaultPhone == null)
+                    ? null
+                    : mDefaultPhone.getRingingCall();
         }
-        return (mDefaultPhone == null) ?
-                null : mDefaultPhone.getRingingCall();
+        return call;
     }
 
     /**
