@@ -15,7 +15,6 @@
  */
 
 #include <media/stagefright/AMRWriter.h>
-
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
@@ -23,6 +22,8 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 #include <media/mediarecorder.h>
+#include <sys/prctl.h>
+#include <sys/resource.h>
 
 namespace android {
 
@@ -194,6 +195,7 @@ status_t AMRWriter::threadFunc() {
     int64_t maxTimestampUs = 0;
     status_t err = OK;
 
+    prctl(PR_SET_NAME, (unsigned long)"AMRWriter", 0, 0, 0);
     while (!mDone) {
         MediaBuffer *buffer;
         err = mSource->read(&buffer);
