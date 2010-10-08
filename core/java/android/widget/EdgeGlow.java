@@ -91,6 +91,7 @@ public class EdgeGlow {
     // How much dragging should effect the height of the glow image.
     // Number determined by user testing.
     private static final int PULL_DISTANCE_GLOW_FACTOR = 5;
+    private static final float PULL_DISTANCE_ALPHA_GLOW_FACTOR = 0.8f;
 
     private static final int VELOCITY_EDGE_FACTOR = 8;
     private static final int VELOCITY_GLOW_FACTOR = 16;
@@ -144,8 +145,10 @@ public class EdgeGlow {
         mEdgeScaleY = mEdgeScaleYStart = Math.max(
                 HELD_EDGE_SCALE_Y, Math.min(distance * PULL_DISTANCE_EDGE_FACTOR, 1.f));
 
-        mGlowAlpha = mGlowAlphaStart = Math.max(
-                0.5f, Math.min(mGlowAlpha + Math.abs(deltaDistance), MAX_ALPHA));
+        mGlowAlpha = mGlowAlphaStart = Math.min(
+                mGlowAlpha +
+                (Math.abs(deltaDistance) * PULL_DISTANCE_ALPHA_GLOW_FACTOR),
+                MAX_ALPHA);
 
         float glowChange = Math.abs(deltaDistance);
         if (deltaDistance > 0 && mPullDistance < 0) {
@@ -202,8 +205,8 @@ public class EdgeGlow {
 
         // The edge should always be at least partially visible, regardless
         // of velocity.
-        mEdgeAlphaStart = 0.5f;
-        mEdgeScaleYStart = 0.2f;
+        mEdgeAlphaStart = 0.f;
+        mEdgeScaleY = mEdgeScaleYStart = 0.f;
         // The glow depends more on the velocity, and therefore starts out
         // nearly invisible.
         mGlowAlphaStart = 0.5f;
@@ -213,7 +216,8 @@ public class EdgeGlow {
         // reflect the strength of the user's scrolling.
         mEdgeAlphaFinish = Math.max(0, Math.min(velocity * VELOCITY_EDGE_FACTOR, 1));
         // Edge should never get larger than the size of its asset.
-        mEdgeScaleYFinish = 1.f;
+        mEdgeScaleYFinish = Math.max(
+                HELD_EDGE_SCALE_Y, Math.min(velocity * VELOCITY_EDGE_FACTOR, 1.f));
 
         // Growth for the size of the glow should be quadratic to properly
         // respond
@@ -281,10 +285,11 @@ public class EdgeGlow {
                     mGlowAlphaStart = mGlowAlpha;
                     mGlowScaleYStart = mGlowScaleY;
 
+                    // After absorb, the glow and edge should fade to nothing.
                     mEdgeAlphaFinish = 0.f;
-                    mEdgeScaleYFinish = mEdgeScaleY;
+                    mEdgeScaleYFinish = 0.f;
                     mGlowAlphaFinish = 0.f;
-                    mGlowScaleYFinish = mGlowScaleY;
+                    mGlowScaleYFinish = 0.f;
                     break;
                 case STATE_PULL:
                     mState = STATE_PULL_DECAY;
@@ -296,14 +301,21 @@ public class EdgeGlow {
                     mGlowAlphaStart = mGlowAlpha;
                     mGlowScaleYStart = mGlowScaleY;
 
-                    // After a pull, the glow should fade to nothing.
+                    // After pull, the glow and edge should fade to nothing.
                     mEdgeAlphaFinish = 0.f;
                     mEdgeScaleYFinish = 0.f;
                     mGlowAlphaFinish = 0.f;
                     mGlowScaleYFinish = 0.f;
                     break;
                 case STATE_PULL_DECAY:
-                    // Do nothing; wait for release
+                    // When receding, we want edge to decrease more slowly
+                    // than the glow.
+                    float factor = mGlowScaleYFinish != 0 ? 1
+                            / (mGlowScaleYFinish * mGlowScaleYFinish)
+                            : Float.MAX_VALUE;
+                    mEdgeScaleY = mEdgeScaleYStart +
+                        (mEdgeScaleYFinish - mEdgeScaleYStart) *
+                            interp * factor;
                     break;
                 case STATE_RECEDE:
                     mState = STATE_IDLE;
