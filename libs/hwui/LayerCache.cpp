@@ -30,9 +30,7 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-LayerCache::LayerCache():
-        mCache(GenerationCache<LayerSize, Layer*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
+LayerCache::LayerCache(): mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, NULL) > 0) {
         LOGD("  Setting layer cache size to %sMB", property);
@@ -40,11 +38,6 @@ LayerCache::LayerCache():
     } else {
         LOGD("  Using default layer cache size of %.2fMB", DEFAULT_LAYER_CACHE_SIZE);
     }
-}
-
-LayerCache::LayerCache(uint32_t maxByteSize):
-        mCache(GenerationCache<LayerSize, Layer*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize) {
 }
 
 LayerCache::~LayerCache() {
@@ -64,19 +57,8 @@ uint32_t LayerCache::getMaxSize() {
 }
 
 void LayerCache::setMaxSize(uint32_t maxSize) {
+    clear();
     mMaxSize = maxSize;
-    while (mSize > mMaxSize) {
-        Layer* oldest = mCache.removeOldest();
-        deleteLayer(oldest);
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Callbacks
-///////////////////////////////////////////////////////////////////////////////
-
-void LayerCache::operator()(LayerSize& size, Layer*& layer) {
-    deleteLayer(layer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +67,7 @@ void LayerCache::operator()(LayerSize& size, Layer*& layer) {
 
 void LayerCache::deleteLayer(Layer* layer) {
     if (layer) {
-        mSize -= layer->layer.getWidth() * layer->layer.getHeight() * 4;
+        mSize -= layer->width * layer->height * 4;
 
         glDeleteTextures(1, &layer->texture);
         delete layer;
@@ -93,21 +75,31 @@ void LayerCache::deleteLayer(Layer* layer) {
 }
 
 void LayerCache::clear() {
-    mCache.setOnEntryRemovedListener(this);
+    size_t count = mCache.size();
+    for (size_t i = 0; i < count; i++) {
+        deleteLayer(mCache.itemAt(i).mLayer);
+    }
     mCache.clear();
-    mCache.setOnEntryRemovedListener(NULL);
 }
 
-Layer* LayerCache::get(LayerSize& size) {
-    Layer* layer = mCache.remove(size);
-    if (layer) {
-        LAYER_LOGD("Reusing layer");
+Layer* LayerCache::get(const uint32_t width, const uint32_t height) {
+    Layer* layer = NULL;
 
-        mSize -= layer->layer.getWidth() * layer->layer.getHeight() * 4;
+    LayerEntry entry(width, height);
+    ssize_t index = mCache.indexOf(entry);
+
+    if (index >= 0) {
+        entry = mCache.itemAt(index);
+        mCache.removeAt(index);
+
+        layer = entry.mLayer;
+        mSize -= layer->width * layer->height * 4;
+
+        LAYER_LOGD("Reusing layer %dx%d", layer->width, layer->height);
     } else {
-        LAYER_LOGD("Creating new layer");
+        LAYER_LOGD("Creating new layer %dx%d", entry.mWidth, entry.mHeight);
 
-        layer = new Layer;
+        layer = new Layer(entry.mWidth, entry.mHeight);
         layer->blend = true;
         layer->empty = true;
         layer->fbo = 0;
@@ -124,10 +116,10 @@ Layer* LayerCache::get(LayerSize& size) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 #if DEBUG_LAYERS
-        uint32_t size = mCache.size();
-        for (uint32_t i = 0; i < size; i++) {
-            LayerSize ls = mCache.getKeyAt(i);
-            LAYER_LOGD("  Layer size %dx%d", ls.width, ls.height);
+        size_t size = mCache.size();
+        for (size_t i = 0; i < size; i++) {
+            const LayerEntry& entry = mCache.itemAt(i);
+            LAYER_LOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
         }
 #endif
     }
@@ -135,18 +127,23 @@ Layer* LayerCache::get(LayerSize& size) {
     return layer;
 }
 
-bool LayerCache::put(LayerSize& layerSize, Layer* layer) {
-    const uint32_t size = layerSize.width * layerSize.height * 4;
+bool LayerCache::put(Layer* layer) {
+    const uint32_t size = layer->width * layer->height * 4;
     // Don't even try to cache a layer that's bigger than the cache
     if (size < mMaxSize) {
+        // TODO: Use an LRU
         while (mSize + size > mMaxSize) {
-            Layer* oldest = mCache.removeOldest();
-            deleteLayer(oldest);
-            LAYER_LOGD("  Deleting layer %.2fx%.2f", oldest->layer.getWidth(),
-                    oldest->layer.getHeight());
+            Layer* biggest = mCache.top().mLayer;
+            deleteLayer(biggest);
+            mCache.removeAt(mCache.size() - 1);
+
+            LAYER_LOGD("  Deleting layer %.2fx%.2f", biggest->layer.getWidth(),
+                    biggest->layer.getHeight());
         }
 
-        mCache.put(layerSize, layer);
+        LayerEntry entry(layer);
+
+        mCache.add(entry);
         mSize += size;
 
         return true;
