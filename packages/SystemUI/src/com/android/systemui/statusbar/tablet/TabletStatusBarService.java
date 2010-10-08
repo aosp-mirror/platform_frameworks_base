@@ -370,6 +370,8 @@ public class TabletStatusBarService extends StatusBarService {
                 if (contentIntent != null) {
                     oldEntry.content.setOnClickListener(new NotificationClicker(contentIntent,
                                 notification.pkg, notification.tag, notification.id));
+                } else {
+                    oldEntry.content.setOnClickListener(null);
                 }
                 // Update the icon.
                 final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
@@ -760,6 +762,8 @@ public class TabletStatusBarService extends StatusBarService {
         if (contentIntent != null) {
             content.setOnClickListener(new NotificationClicker(contentIntent,
                         sbn.pkg, sbn.tag, sbn.id));
+        } else {
+            content.setOnClickListener(null);
         }
 
         View expanded = null;
