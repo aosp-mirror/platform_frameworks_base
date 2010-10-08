@@ -345,17 +345,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case SET_PERSISTENT_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            IBinder token = data.readStrongBinder();
-            boolean isPersistent = data.readInt() != 0;
-            if (token != null) {
-                setPersistent(token, isPersistent);
-            }
-            reply.writeNoException();
-            return true;
-        }
-
         case ATTACH_APPLICATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IApplicationThread app = ApplicationThreadNative.asInterface(
@@ -1636,18 +1625,6 @@ class ActivityManagerProxy implements IActivityManager
         data.writeBundle(map);
         data.writeInt(abortBroadcast ? 1 : 0);
         mRemote.transact(FINISH_RECEIVER_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-    public void setPersistent(IBinder token, boolean isPersistent) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeStrongBinder(token);
-        data.writeInt(isPersistent ? 1 : 0);
-        mRemote.transact(SET_PERSISTENT_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

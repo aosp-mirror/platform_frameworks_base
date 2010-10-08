@@ -115,7 +115,6 @@ class ProcessRecord {
     Dialog anrDialog;           // dialog being displayed due to app not resp.
     boolean removed;            // has app package been removed from device?
     boolean debugging;          // was app launched for debugging?
-    int persistentActivities;   // number of activities that are persistent
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
     Dialog waitDialog;          // current wait for debugger dialog
     
@@ -181,8 +180,7 @@ class ProcessRecord {
                 pw.print(" foregroundServices="); pw.print(foregroundServices);
                 pw.print(" forcingToForeground="); pw.println(forcingToForeground);
         pw.print(prefix); pw.print("persistent="); pw.print(persistent);
-                pw.print(" removed="); pw.print(removed);
-                pw.print(" persistentActivities="); pw.println(persistentActivities);
+                pw.print(" removed="); pw.println(removed);
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.println(lruSeq);
         if (!keeping) {
@@ -259,7 +257,6 @@ class ProcessRecord {
         curAdj = setAdj = -100;
         persistent = false;
         removed = false;
-        persistentActivities = 0;
     }
 
     public void setPid(int _pid) {

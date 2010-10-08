@@ -1745,35 +1745,11 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated This functionality will be removed in the future; please do
-     * not use.
-     *
-     * Control whether this activity is required to be persistent.  By default
-     * activities are not persistent; setting this to true will prevent the
-     * system from stopping this activity or its process when running low on
-     * resources.
-     * 
-     * <p><em>You should avoid using this method</em>, it has severe negative
-     * consequences on how well the system can manage its resources.  A better
-     * approach is to implement an application service that you control with
-     * {@link Context#startService} and {@link Context#stopService}.
-     * 
-     * @param isPersistent Control whether the current activity must be
-     *                     persistent, true if so, false for the normal
-     *                     behavior.
+     * @deprecated As of {@link android.os.Build.VERSION_CODES#GINGERBREAD}
+     * this is a no-op.
      */
     @Deprecated
     public void setPersistent(boolean isPersistent) {
-        if (mParent == null) {
-            try {
-                ActivityManagerNative.getDefault()
-                    .setPersistent(mToken, isPersistent);
-            } catch (RemoteException e) {
-                // Empty
-            }
-        } else {
-            throw new RuntimeException("setPersistent() not yet supported for embedded activities");
-        }
     }
 
     /**

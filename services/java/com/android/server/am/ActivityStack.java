@@ -3151,9 +3151,6 @@ public class ActivityStack {
                     mService.mHandler.sendEmptyMessage(
                             ActivityManagerService.CANCEL_HEAVY_NOTIFICATION_MSG);
                 }
-                if (r.persistent) {
-                    mService.decPersistentCountLocked(r.app);
-                }
                 if (r.app.activities.size() == 0) {
                     // No longer have activities, so update location in
                     // LRU list.
@@ -3452,54 +3449,49 @@ public class ActivityStack {
             return true;
         }
         
-        // If the activity isn't persistent, there is a chance we will
-        // need to restart it.
-        if (!r.persistent) {
-
-            // Figure out what has changed between the two configurations.
-            int changes = oldConfig.diff(newConfig);
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
-                Slog.v(TAG, "Checking to restart " + r.info.name + ": changed=0x"
-                        + Integer.toHexString(changes) + ", handles=0x"
-                        + Integer.toHexString(r.info.configChanges)
-                        + ", newConfig=" + newConfig);
+        // Figure out what has changed between the two configurations.
+        int changes = oldConfig.diff(newConfig);
+        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
+            Slog.v(TAG, "Checking to restart " + r.info.name + ": changed=0x"
+                    + Integer.toHexString(changes) + ", handles=0x"
+                    + Integer.toHexString(r.info.configChanges)
+                    + ", newConfig=" + newConfig);
+        }
+        if ((changes&(~r.info.configChanges)) != 0) {
+            // Aha, the activity isn't handling the change, so DIE DIE DIE.
+            r.configChangeFlags |= changes;
+            r.startFreezingScreenLocked(r.app, globalChanges);
+            if (r.app == null || r.app.thread == null) {
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                        "Switch is destroying non-running " + r);
+                destroyActivityLocked(r, true);
+            } else if (r.state == ActivityState.PAUSING) {
+                // A little annoying: we are waiting for this activity to
+                // finish pausing.  Let's not do anything now, but just
+                // flag that it needs to be restarted when done pausing.
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                        "Switch is skipping already pausing " + r);
+                r.configDestroy = true;
+                return true;
+            } else if (r.state == ActivityState.RESUMED) {
+                // Try to optimize this case: the configuration is changing
+                // and we need to restart the top, resumed activity.
+                // Instead of doing the normal handshaking, just say
+                // "restart!".
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                        "Switch is restarting resumed " + r);
+                relaunchActivityLocked(r, r.configChangeFlags, true);
+                r.configChangeFlags = 0;
+            } else {
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                        "Switch is restarting non-resumed " + r);
+                relaunchActivityLocked(r, r.configChangeFlags, false);
+                r.configChangeFlags = 0;
             }
-            if ((changes&(~r.info.configChanges)) != 0) {
-                // Aha, the activity isn't handling the change, so DIE DIE DIE.
-                r.configChangeFlags |= changes;
-                r.startFreezingScreenLocked(r.app, globalChanges);
-                if (r.app == null || r.app.thread == null) {
-                    if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                            "Switch is destroying non-running " + r);
-                    destroyActivityLocked(r, true);
-                } else if (r.state == ActivityState.PAUSING) {
-                    // A little annoying: we are waiting for this activity to
-                    // finish pausing.  Let's not do anything now, but just
-                    // flag that it needs to be restarted when done pausing.
-                    if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                            "Switch is skipping already pausing " + r);
-                    r.configDestroy = true;
-                    return true;
-                } else if (r.state == ActivityState.RESUMED) {
-                    // Try to optimize this case: the configuration is changing
-                    // and we need to restart the top, resumed activity.
-                    // Instead of doing the normal handshaking, just say
-                    // "restart!".
-                    if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                            "Switch is restarting resumed " + r);
-                    relaunchActivityLocked(r, r.configChangeFlags, true);
-                    r.configChangeFlags = 0;
-                } else {
-                    if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
-                            "Switch is restarting non-resumed " + r);
-                    relaunchActivityLocked(r, r.configChangeFlags, false);
-                    r.configChangeFlags = 0;
-                }
-                
-                // All done...  tell the caller we weren't able to keep this
-                // activity around.
-                return false;
-            }
+            
+            // All done...  tell the caller we weren't able to keep this
+            // activity around.
+            return false;
         }
         
         // Default case: the activity can handle this new configuration, so
