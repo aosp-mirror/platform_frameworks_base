@@ -1649,12 +1649,19 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Determines if the specified number is actually a URI
+     * (i.e. a SIP address) rather than a regular PSTN phone number,
+     * based on whether or not the number contains an "@" character.
+     *
      * @hide
      * @param number
      * @return true if number contains @
      */
     public static boolean isUriNumber(String number) {
-        return number != null && number.contains("@");
+        // Note we allow either "@" or "%40" to indicate a URI, in case
+        // the passed-in string is URI-escaped.  (Neither "@" nor "%40"
+        // will ever be found in a legal PSTN number.)
+        return number != null && (number.contains("@") || number.contains("%40"));
     }
 
     /**
