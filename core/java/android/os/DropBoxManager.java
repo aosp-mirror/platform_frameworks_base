@@ -21,6 +21,7 @@ import android.util.Log;
 import com.android.internal.os.IDropBoxManagerService;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -61,7 +62,7 @@ public class DropBoxManager {
      * This may include a reference to a stream, so you must call
      * {@link #close()} when you are done using it.
      */
-    public static class Entry implements Parcelable {
+    public static class Entry implements Parcelable, Closeable {
         private final String mTag;
         private final long mTimeMillis;
 

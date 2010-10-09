@@ -45,10 +45,10 @@ public class LocationProviderProxy implements LocationProviderInterface {
 
     private final Context mContext;
     private final String mName;
-    private final String mServiceName;
-    private ILocationProvider mProvider;
-    private Handler mHandler;
-    private final Connection mServiceConnection = new Connection();
+    private final Intent mIntent;
+    private final Handler mHandler;
+    private final Object mMutex = new Object();  // synchronizes access to non-final members
+    private Connection mServiceConnection = new Connection();  // never null
 
     // cached values set by the location manager
     private boolean mLocationTracking = false;
@@ -58,89 +58,105 @@ public class LocationProviderProxy implements LocationProviderInterface {
     private int mNetworkState;
     private NetworkInfo mNetworkInfo;
 
-    // for caching requiresNetwork, requiresSatellite, etc.
-    private DummyLocationProvider mCachedAttributes;
-
     // constructor for proxying location providers implemented in a separate service
     public LocationProviderProxy(Context context, String name, String serviceName,
             Handler handler) {
         mContext = context;
         mName = name;
-        mServiceName = serviceName;
+        mIntent = new Intent(serviceName);
         mHandler = handler;
-        mContext.bindService(new Intent(serviceName), mServiceConnection, Context.BIND_AUTO_CREATE);
+        mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    /**
+     * When unbundled NetworkLocationService package is updated, we
+     * need to unbind from the old version and re-bind to the new one.
+     */
     public void reconnect() {
-        synchronized (mServiceConnection) {
-            // unbind first
+        synchronized (mMutex) {
             mContext.unbindService(mServiceConnection);
-            mContext.bindService(new Intent(mServiceName), mServiceConnection,
-                Context.BIND_AUTO_CREATE);
+            mServiceConnection = new Connection();
+            mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
-    private class Connection implements ServiceConnection {
+    private class Connection implements ServiceConnection, Runnable {
+
+        private ILocationProvider mProvider;
+
+        // for caching requiresNetwork, requiresSatellite, etc.
+        private DummyLocationProvider mCachedAttributes;  // synchronized by mMutex
+
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "LocationProviderProxy.onServiceConnected " + className);
-            synchronized (mServiceConnection) {
+            synchronized (this) {
                 mProvider = ILocationProvider.Stub.asInterface(service);
                 if (mProvider != null) {
-                    mHandler.post(mServiceConnectedTask);
+                    mHandler.post(this);
                 }
             }
         }
 
         public void onServiceDisconnected(ComponentName className) {
             Log.d(TAG, "LocationProviderProxy.onServiceDisconnected " + className);
-            synchronized (mServiceConnection) {
+            synchronized (this) {
                 mProvider = null;
             }
         }
-    }
 
-    private Runnable mServiceConnectedTask = new Runnable() {
+        public synchronized ILocationProvider getProvider() {
+            return mProvider;
+        }
+
+        public synchronized DummyLocationProvider getCachedAttributes() {
+            return mCachedAttributes;
+        }
+
         public void run() {
-            ILocationProvider provider;
-            synchronized (mServiceConnection) {
-                provider = mProvider;
+            synchronized (mMutex) {
+                if (mServiceConnection != this) {
+                    // This ServiceConnection no longer the one we want to bind to.
+                    return;
+                }
+                ILocationProvider provider = getProvider();
                 if (provider == null) {
                     return;
                 }
-            }
 
-            if (mCachedAttributes == null) {
+                // resend previous values from the location manager if the service has restarted
                 try {
-                    mCachedAttributes = new DummyLocationProvider(mName, null);
-                    mCachedAttributes.setRequiresNetwork(provider.requiresNetwork());
-                    mCachedAttributes.setRequiresSatellite(provider.requiresSatellite());
-                    mCachedAttributes.setRequiresCell(provider.requiresCell());
-                    mCachedAttributes.setHasMonetaryCost(provider.hasMonetaryCost());
-                    mCachedAttributes.setSupportsAltitude(provider.supportsAltitude());
-                    mCachedAttributes.setSupportsSpeed(provider.supportsSpeed());
-                    mCachedAttributes.setSupportsBearing(provider.supportsBearing());
-                    mCachedAttributes.setPowerRequirement(provider.getPowerRequirement());
-                    mCachedAttributes.setAccuracy(provider.getAccuracy());
+                    if (mEnabled) {
+                        provider.enable();
+                    }
+                    if (mLocationTracking) {
+                        provider.enableLocationTracking(true);
+                    }
+                    if (mMinTime >= 0) {
+                        provider.setMinTime(mMinTime, mMinTimeSource);
+                    }
+                    if (mNetworkInfo != null) {
+                        provider.updateNetworkState(mNetworkState, mNetworkInfo);
+                    }
                 } catch (RemoteException e) {
-                    mCachedAttributes = null;
                 }
-            }
 
-            // resend previous values from the location manager if the service has restarted
-            try {
-                if (mEnabled) {
-                    provider.enable();
+                // init cache of parameters
+                if (mCachedAttributes == null) {
+                    try {
+                        mCachedAttributes = new DummyLocationProvider(mName, null);
+                        mCachedAttributes.setRequiresNetwork(provider.requiresNetwork());
+                        mCachedAttributes.setRequiresSatellite(provider.requiresSatellite());
+                        mCachedAttributes.setRequiresCell(provider.requiresCell());
+                        mCachedAttributes.setHasMonetaryCost(provider.hasMonetaryCost());
+                        mCachedAttributes.setSupportsAltitude(provider.supportsAltitude());
+                        mCachedAttributes.setSupportsSpeed(provider.supportsSpeed());
+                        mCachedAttributes.setSupportsBearing(provider.supportsBearing());
+                        mCachedAttributes.setPowerRequirement(provider.getPowerRequirement());
+                        mCachedAttributes.setAccuracy(provider.getAccuracy());
+                    } catch (RemoteException e) {
+                        mCachedAttributes = null;
+                    }
                 }
-                if (mLocationTracking) {
-                    provider.enableLocationTracking(true);
-                }
-                if (mMinTime >= 0) {
-                    provider.setMinTime(mMinTime, mMinTimeSource);
-                }
-                if (mNetworkInfo != null) {
-                    provider.updateNetworkState(mNetworkState, mNetworkInfo);
-                }
-            } catch (RemoteException e) {
             }
         }
     };
@@ -149,79 +165,101 @@ public class LocationProviderProxy implements LocationProviderInterface {
         return mName;
     }
 
+    private DummyLocationProvider getCachedAttributes() {
+        synchronized (mMutex) {
+            return mServiceConnection.getCachedAttributes();
+        }
+    }
+
     public boolean requiresNetwork() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.requiresNetwork();
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.requiresNetwork();
         } else {
             return false;
         }
     }
 
     public boolean requiresSatellite() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.requiresSatellite();
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.requiresSatellite();
         } else {
             return false;
         }
     }
 
     public boolean requiresCell() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.requiresCell();
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.requiresCell();
         } else {
             return false;
         }
     }
 
     public boolean hasMonetaryCost() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.hasMonetaryCost();
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.hasMonetaryCost();
         } else {
             return false;
         }
     }
 
     public boolean supportsAltitude() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.supportsAltitude();
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.supportsAltitude();
         } else {
             return false;
         }
     }
 
     public boolean supportsSpeed() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.supportsSpeed();
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.supportsSpeed();
         } else {
             return false;
         }
     }
 
      public boolean supportsBearing() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.supportsBearing();
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.supportsBearing();
         } else {
             return false;
         }
     }
 
     public int getPowerRequirement() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.getPowerRequirement();
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.getPowerRequirement();
+        } else {
+            return -1;
+        }
+    }
+
+    public int getAccuracy() {
+        DummyLocationProvider cachedAttributes = getCachedAttributes();
+        if (cachedAttributes != null) {
+            return cachedAttributes.getAccuracy();
         } else {
             return -1;
         }
     }
 
     public boolean meetsCriteria(Criteria criteria) {
-       ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                return provider.meetsCriteria(criteria);
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    return provider.meetsCriteria(criteria);
+                } catch (RemoteException e) {
+                }
             }
         }
         // default implementation if we lost connection to the provider
@@ -246,50 +284,42 @@ public class LocationProviderProxy implements LocationProviderInterface {
         return true;
     }
 
-    public int getAccuracy() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes.getAccuracy();
-        } else {
-            return -1;
-        }
-    }
-
     public void enable() {
-        mEnabled = true;
-        ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                provider.enable();
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            mEnabled = true;
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    provider.enable();
+                } catch (RemoteException e) {
+                }
             }
         }
     }
 
     public void disable() {
-        mEnabled = false;
-        ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                provider.disable();
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            mEnabled = false;
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    provider.disable();
+                } catch (RemoteException e) {
+                }
             }
         }
     }
 
     public boolean isEnabled() {
-        return mEnabled;
+        synchronized (mMutex) {
+            return mEnabled;
+        }
     }
 
     public int getStatus(Bundle extras) {
         ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
+        synchronized (mMutex) {
+            provider = mServiceConnection.getProvider();
         }
         if (provider != null) {
             try {
@@ -301,9 +331,9 @@ public class LocationProviderProxy implements LocationProviderInterface {
     }
 
     public long getStatusUpdateTime() {
-         ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
+        ILocationProvider provider;
+        synchronized (mMutex) {
+            provider = mServiceConnection.getProvider();
         }
         if (provider != null) {
             try {
@@ -315,32 +345,39 @@ public class LocationProviderProxy implements LocationProviderInterface {
      }
 
     public String getInternalState() {
-        try {
-            return mProvider.getInternalState();
-        } catch (RemoteException e) {
-            Log.e(TAG, "getInternalState failed", e);
-            return null;
-        }
-    }
-
-    public boolean isLocationTracking() {
-        return mLocationTracking;
-    }
-
-    public void enableLocationTracking(boolean enable) {
-        mLocationTracking = enable;
-        if (!enable) {
-            mMinTime = -1;
-            mMinTimeSource.clear();
-        }
         ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
+        synchronized (mMutex) {
+            provider = mServiceConnection.getProvider();
         }
         if (provider != null) {
             try {
-                provider.enableLocationTracking(enable);
+                return provider.getInternalState();
             } catch (RemoteException e) {
+                Log.e(TAG, "getInternalState failed", e);
+            }
+        }
+        return null;
+    }
+
+    public boolean isLocationTracking() {
+        synchronized (mMutex) {
+            return mLocationTracking;
+        }
+    }
+
+    public void enableLocationTracking(boolean enable) {
+        synchronized (mMutex) {
+            mLocationTracking = enable;
+            if (!enable) {
+                mMinTime = -1;
+                mMinTimeSource.clear();
+            }
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    provider.enableLocationTracking(enable);
+                } catch (RemoteException e) {
+                }
             }
         }
     }
@@ -350,88 +387,84 @@ public class LocationProviderProxy implements LocationProviderInterface {
     }
 
     public long getMinTime() {
-        return mMinTime;
+        synchronized (mMutex) {
+            return mMinTime;
+        }
     }
 
     public void setMinTime(long minTime, WorkSource ws) {
-        mMinTime = minTime;
-        mMinTimeSource.set(ws);
-        ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                provider.setMinTime(minTime, ws);
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            mMinTime = minTime;
+            mMinTimeSource.set(ws);
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    provider.setMinTime(minTime, ws);
+                } catch (RemoteException e) {
+                }
             }
         }
     }
 
     public void updateNetworkState(int state, NetworkInfo info) {
-        mNetworkState = state;
-        mNetworkInfo = info;
-        ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                provider.updateNetworkState(state, info);
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            mNetworkState = state;
+            mNetworkInfo = info;
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    provider.updateNetworkState(state, info);
+                } catch (RemoteException e) {
+                }
             }
         }
     }
 
     public void updateLocation(Location location) {
-        ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                provider.updateLocation(location);
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    provider.updateLocation(location);
+                } catch (RemoteException e) {
+                }
             }
         }
     }
 
     public boolean sendExtraCommand(String command, Bundle extras) {
-        ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                provider.sendExtraCommand(command, extras);
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    return provider.sendExtraCommand(command, extras);
+                } catch (RemoteException e) {
+                }
             }
         }
         return false;
     }
 
     public void addListener(int uid) {
-        ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                provider.addListener(uid);
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    provider.addListener(uid);
+                } catch (RemoteException e) {
+                }
             }
         }
     }
 
     public void removeListener(int uid) {
-        ILocationProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
-        }
-        if (provider != null) {
-            try {
-                provider.removeListener(uid);
-            } catch (RemoteException e) {
+        synchronized (mMutex) {
+            ILocationProvider provider = mServiceConnection.getProvider();
+            if (provider != null) {
+                try {
+                    provider.removeListener(uid);
+                } catch (RemoteException e) {
+                }
             }
         }
     }

@@ -76,6 +76,7 @@ public:
         virtual uint32_t    latency() const = 0;
         virtual float       msecsPerFrame() const = 0;
         virtual status_t    getPosition(uint32_t *position) = 0;
+        virtual int         getSessionId() = 0;
 
         // If no callback is specified, use the "write" API below to submit
         // audio data.

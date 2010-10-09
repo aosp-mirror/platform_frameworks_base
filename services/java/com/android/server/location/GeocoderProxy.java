@@ -41,8 +41,8 @@ public class GeocoderProxy {
 
     private final Context mContext;
     private final Intent mIntent;
-    private final Connection mServiceConnection = new Connection();
-    private IGeocodeProvider mProvider;
+    private final Object mMutex = new Object();  // synchronizes access to mServiceConnection
+    private Connection mServiceConnection = new Connection();  // never null
 
     public GeocoderProxy(Context context, String serviceName) {
         mContext = context;
@@ -50,25 +50,39 @@ public class GeocoderProxy {
         mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    /**
+     * When unbundled NetworkLocationService package is updated, we
+     * need to unbind from the old version and re-bind to the new one.
+     */
     public void reconnect() {
-        synchronized (mServiceConnection) {
+        synchronized (mMutex) {
             mContext.unbindService(mServiceConnection);
+            mServiceConnection = new Connection();
             mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
     private class Connection implements ServiceConnection {
+
+        private IGeocodeProvider mProvider;
+
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "onServiceConnected " + className);
-            synchronized (mServiceConnection) {
+            synchronized (this) {
                 mProvider = IGeocodeProvider.Stub.asInterface(service);
             }
         }
 
         public void onServiceDisconnected(ComponentName className) {
             Log.d(TAG, "onServiceDisconnected " + className);
-            synchronized (mServiceConnection) {
+            synchronized (this) {
                 mProvider = null;
+            }
+        }
+
+        public IGeocodeProvider getProvider() {
+            synchronized (this) {
+                return mProvider;
             }
         }
     }
@@ -76,8 +90,8 @@ public class GeocoderProxy {
     public String getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
         IGeocodeProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
+        synchronized (mMutex) {
+            provider = mServiceConnection.getProvider();
         }
         if (provider != null) {
             try {
@@ -95,8 +109,8 @@ public class GeocoderProxy {
             double upperRightLatitude, double upperRightLongitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
         IGeocodeProvider provider;
-        synchronized (mServiceConnection) {
-            provider = mProvider;
+        synchronized (mMutex) {
+            provider = mServiceConnection.getProvider();
         }
         if (provider != null) {
             try {

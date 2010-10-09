@@ -4321,6 +4321,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
+                mEnterKeyIsDown = true;
                 // If ALT modifier is held, then we always insert a
                 // newline character.
                 if ((event.getMetaState()&KeyEvent.META_ALT_ON) == 0) {
@@ -4353,6 +4354,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
                 
             case KeyEvent.KEYCODE_DPAD_CENTER:
+                mDPadCenterIsDown = true;
                 if (shouldAdvanceFocusOnEnter()) {
                     return 0;
                 }
@@ -4447,6 +4449,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
+                mDPadCenterIsDown = false;
                 /*
                  * If there is a click listener, just call through to
                  * super, which will invoke it.
@@ -4467,6 +4470,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return super.onKeyUp(keyCode, event);
                 
             case KeyEvent.KEYCODE_ENTER:
+                mEnterKeyIsDown = false;
                 if (mInputContentType != null
                         && mInputContentType.onEditorActionListener != null
                         && mInputContentType.enterDown) {
@@ -6545,12 +6549,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int selEnd = getSelectionEnd();
 
             if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
+                // If a tap was used to give focus to that view, move cursor at tap position.
                 // Has to be done before onTakeFocus, which can be overloaded.
-                if (mLastTouchOffset >= 0) {
-                    // Can happen when a TextView is displayed after its content has been deleted.
-                    mLastTouchOffset = Math.min(mLastTouchOffset, mText.length());
-                    Selection.setSelection((Spannable) mText, mLastTouchOffset);
-                }
+                moveCursorToLastTapPosition();
 
                 if (mMovement != null) {
                     mMovement.onTakeFocus(this, (Spannable) mText, direction);
@@ -6609,8 +6610,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 terminateTextSelectionMode();
             }
-
-            mLastTouchOffset = -1;
         }
 
         startStopMarquee(focused);
@@ -6620,6 +6619,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
+    }
+
+    private void moveCursorToLastTapPosition() {
+        if (mSelectionModifierCursorController != null) {
+            int mTapToFocusPosition = ((SelectionModifierCursorController)
+                    mSelectionModifierCursorController).getMinTouchOffset();
+            if (mTapToFocusPosition >= 0) {
+                // Safety check, should not be possible.
+                if (mTapToFocusPosition > mText.length()) {
+                    Log.e(LOG_TAG, "Invalid tap focus position (" + mTapToFocusPosition + " vs "
+                            + mText.length() + ")");
+                    mTapToFocusPosition = mText.length();
+                }
+                Selection.setSelection((Spannable) mText, mTapToFocusPosition);
+            }
+        }
     }
 
     @Override
@@ -6713,7 +6728,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Tapping outside stops selection mode, if any
                 stopTextSelectionMode();
 
-                if (mInsertionPointCursorController != null) {
+                if (mInsertionPointCursorController != null && mText.length() > 0) {
                     mInsertionPointCursorController.show();
                 }
             }
@@ -7249,13 +7264,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
-        int selectionStart, selectionEnd;
+        int minOffset, maxOffset;
 
-        // selectionModifierCursorController is not null at that point
-        SelectionModifierCursorController selectionModifierCursorController =
-            ((SelectionModifierCursorController) mSelectionModifierCursorController);
-        int minOffset = selectionModifierCursorController.getMinTouchOffset();
-        int maxOffset = selectionModifierCursorController.getMaxTouchOffset();
+        if (mContextMenuTriggeredByKey) {
+            minOffset = getSelectionStart();
+            maxOffset = getSelectionEnd();
+        } else {
+            // selectionModifierCursorController is not null at that point
+            SelectionModifierCursorController selectionModifierCursorController =
+                ((SelectionModifierCursorController) mSelectionModifierCursorController);
+            minOffset = selectionModifierCursorController.getMinTouchOffset();
+            maxOffset = selectionModifierCursorController.getMaxTouchOffset();
+        }
+
+        int selectionStart, selectionEnd;
         
         long wordLimits = getWordLimitsAt(minOffset);
         if (wordLimits >= 0) {
@@ -7275,11 +7297,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     
     private String getWordForDictionary() {
-        if (mLastTouchOffset < 0) {
-            return null;
+        if (!mContextMenuTriggeredByKey) {
+            moveCursorToLastTapPosition();
         }
-
-        long wordLimits = getWordLimitsAt(mLastTouchOffset);
+        long wordLimits = getWordLimitsAt(getSelectionStart());
         if (wordLimits >= 0) {
             int start = extractRangeStartFromLong(wordLimits);
             int end = extractRangeEndFromLong(wordLimits);
@@ -7329,6 +7350,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onCreateContextMenu(ContextMenu menu) {
         super.onCreateContextMenu(menu);
         boolean added = false;
+        mContextMenuTriggeredByKey = mDPadCenterIsDown || mEnterKeyIsDown;
+        // Problem with context menu on long press: the menu appears while the key in down and when
+        // the key is released, the view does not receive the key_up event. This ensures that the
+        // state is reset whenever the context menu action is displayed.
+        // mContextMenuTriggeredByKey saved that state so that it is available in
+        // onTextContextMenuItem. We cannot simply clear these flags in onTextContextMenuItem since
+        // it may not be called (if the user/ discards the context menu with the back key).
+        mDPadCenterIsDown = mEnterKeyIsDown = false;
 
         if (mIsInTextSelectionMode) {
             MenuHandler handler = new MenuHandler();
@@ -7354,21 +7383,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 added = true;
             }
         } else {
-            /*
-            if (!isFocused()) {
-                if (isFocusable() && mInput != null) {
-                    if (canCopy()) {
-                        MenuHandler handler = new MenuHandler();
-                        menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
-                             setOnMenuItemClickListener(handler).
-                             setAlphabeticShortcut('c');
-                        menu.setHeaderTitle(com.android.internal.R.string.editTextMenuTitle);
-                    }
-                }
-
-                //return;
-            }
-             */
             MenuHandler handler = new MenuHandler();
 
             if (canSelectText()) {
@@ -7522,7 +7536,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case ID_ADD_TO_DICTIONARY:
                 String word = getWordForDictionary();
-
                 if (word != null) {
                     Intent i = new Intent("com.android.settings.USER_DICTIONARY_INSERT");
                     i.putExtra("word", word);
@@ -7881,8 +7894,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final float newPosX = rawX - mTouchToWindowOffsetX + mHotspotX;
                 final float newPosY = rawY - mTouchToWindowOffsetY + mHotspotY + mTouchOffsetY;
 
-                mController.updatePosition(this, (int) Math.round(newPosX),
-                        (int) Math.round(newPosY));
+                mController.updatePosition(this, Math.round(newPosX), Math.round(newPosY));
 
                 break;
             }
@@ -8007,6 +8019,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         SelectionModifierCursorController() {
             mStartHandle = new HandleView(this, HandleView.LEFT);
             mEndHandle = new HandleView(this, HandleView.RIGHT);
+            mMinTouchOffset = mMaxTouchOffset = -1;
         }
 
         public void show() {
@@ -8089,14 +8102,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public boolean onTouchEvent(MotionEvent event) {
-            if (isFocused() && isTextEditable()) {
+            // This is done even when the View does not have focus, so that long presses can start
+            // selection and tap can move cursor from this tap position.
+            if (isTextEditable()) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         final int x = (int) event.getX();
                         final int y = (int) event.getY();
 
                         // Remember finger down position, to be able to start selection from there
-                        mMinTouchOffset = mMaxTouchOffset = mLastTouchOffset = getOffset(x, y);
+                        mMinTouchOffset = mMaxTouchOffset = getOffset(x, y);
 
                         break;
 
@@ -8253,7 +8268,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CursorController        mInsertionPointCursorController;
     private CursorController        mSelectionModifierCursorController;
     private boolean                 mIsInTextSelectionMode = false;
-    private int                     mLastTouchOffset = -1;
+    // These are needed to desambiguate a long click. If the long click comes from ones of these, we
+    // select from the current cursor position. Otherwise, select from long pressed position.
+    private boolean                 mDPadCenterIsDown = false;
+    private boolean                 mEnterKeyIsDown = false;
+    private boolean                 mContextMenuTriggeredByKey = false;
     // Created once and shared by different CursorController helper methods.
     // Only one cursor controller is active at any time which prevent race conditions.
     private static Rect             sCursorControllerTempRect = new Rect();

@@ -65,6 +65,9 @@ private:
     List<sp<ABuffer> > mBuffers;
     status_t mEOSResult;
 
+    bool mIsAVC;
+    bool mScanForIDR;
+
     uint32_t mClockRate;
 
     uint32_t mRTPTimeBase;
