@@ -37,57 +37,55 @@
 namespace android {
 
 // static
-CameraSourceTimeLapse *CameraSourceTimeLapse::Create(
-        int64_t timeBetweenTimeLapseFrameCaptureUs,
-        int32_t width, int32_t height,
-        int32_t videoFrameRate) {
-    sp<Camera> camera = Camera::connect(0);
+CameraSourceTimeLapse *CameraSourceTimeLapse::CreateFromCamera(
+        const sp<ICamera> &camera,
+        int32_t cameraId,
+        Size videoSize,
+        int32_t videoFrameRate,
+        const sp<Surface>& surface,
+        int64_t timeBetweenTimeLapseFrameCaptureUs) {
 
-    if (camera.get() == NULL) {
-        return NULL;
+    CameraSourceTimeLapse *source = new
+            CameraSourceTimeLapse(camera, cameraId,
+                videoSize, videoFrameRate, surface,
+                timeBetweenTimeLapseFrameCaptureUs);
+
+    if (source != NULL) {
+        if (source->initCheck() != OK) {
+            delete source;
+            return NULL;
+        }
     }
-
-    return new CameraSourceTimeLapse(camera, timeBetweenTimeLapseFrameCaptureUs,
-            width, height, videoFrameRate);
+    return source;
 }
 
-// static
-CameraSourceTimeLapse *CameraSourceTimeLapse::CreateFromCamera(const sp<Camera> &camera,
-        int64_t timeBetweenTimeLapseFrameCaptureUs,
-        int32_t width, int32_t height,
-        int32_t videoFrameRate) {
-    if (camera.get() == NULL) {
-        return NULL;
-    }
-
-    return new CameraSourceTimeLapse(camera, timeBetweenTimeLapseFrameCaptureUs,
-            width, height, videoFrameRate);
-}
-
-CameraSourceTimeLapse::CameraSourceTimeLapse(const sp<Camera> &camera,
-        int64_t timeBetweenTimeLapseFrameCaptureUs,
-        int32_t width, int32_t height,
-        int32_t videoFrameRate)
-    : CameraSource(camera),
+CameraSourceTimeLapse::CameraSourceTimeLapse(
+        const sp<ICamera>& camera,
+        int32_t cameraId,
+        Size videoSize,
+        int32_t videoFrameRate,
+        const sp<Surface>& surface,
+        int64_t timeBetweenTimeLapseFrameCaptureUs)
+    : CameraSource(camera, cameraId, videoSize, videoFrameRate, surface),
       mTimeBetweenTimeLapseFrameCaptureUs(timeBetweenTimeLapseFrameCaptureUs),
       mTimeBetweenTimeLapseVideoFramesUs(1E6/videoFrameRate),
       mLastTimeLapseFrameRealTimestampUs(0),
       mSkipCurrentFrame(false) {
 
     LOGV("starting time lapse mode");
-    mVideoWidth = width;
-    mVideoHeight = height;
+    mVideoWidth = videoSize.width;
+    mVideoHeight = videoSize.height;
 
-    if (trySettingPreviewSize(width, height)) {
+    if (trySettingPreviewSize(videoSize.width, videoSize.height)) {
         mUseStillCameraForTimeLapse = false;
     } else {
         // TODO: Add a check to see that mTimeBetweenTimeLapseFrameCaptureUs is greater
         // than the fastest rate at which the still camera can take pictures.
         mUseStillCameraForTimeLapse = true;
-        CHECK(setPictureSizeToClosestSupported(width, height));
+        CHECK(setPictureSizeToClosestSupported(videoSize.width, videoSize.height));
         mNeedCropping = computeCropRectangleOffset();
-        mMeta->setInt32(kKeyWidth, width);
-        mMeta->setInt32(kKeyHeight, height);
+        mMeta->setInt32(kKeyWidth, videoSize.width);
+        mMeta->setInt32(kKeyHeight, videoSize.height);
     }
 
     // Initialize quick stop variables.

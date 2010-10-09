@@ -20,25 +20,71 @@
 
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaSource.h>
+#include <camera/ICamera.h>
+#include <camera/CameraParameters.h>
 #include <utils/List.h>
 #include <utils/RefBase.h>
 
 namespace android {
 
-class ICamera;
 class IMemory;
 class Camera;
+class Surface;
 
 class CameraSource : public MediaSource, public MediaBufferObserver {
 public:
+    /**
+     * Factory method to create a new CameraSource using the current
+     * settings (such as video size, frame rate, color format, etc)
+     * from the default camera.
+     *
+     * @return NULL on error.
+     */
     static CameraSource *Create();
-    static CameraSource *CreateFromCamera(const sp<Camera> &camera);
+
+    /**
+     * Factory method to create a new CameraSource.
+     *
+     * @param camera the video input frame data source. If it is NULL,
+     *          we will try to connect to the camera with the given
+     *          cameraId.
+     *
+     * @param cameraId the id of the camera that the source will connect
+     *          to if camera is NULL; otherwise ignored.
+     *
+     * @param videoSize the dimension (in pixels) of the video frame
+     * @param frameRate the target frames per second
+     * @param surface the preview surface for display where preview
+     *          frames are sent to
+     *
+     * @return NULL on error.
+     */
+    static CameraSource *CreateFromCamera(const sp<ICamera> &camera,
+                                          int32_t cameraId,
+                                          Size videoSize,
+                                          int32_t frameRate,
+                                          const sp<Surface>& surface);
 
     virtual ~CameraSource();
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
 
+    /**
+     * Check whether a CameraSource object is properly initialized.
+     * Must call this method before stop().
+     * @return OK if initialization has successfully completed.
+     */
+    virtual status_t initCheck() const;
+
+    /**
+     * Returns the MetaData associated with the CameraSource,
+     * including:
+     * kKeyColorFormat: YUV color format of the video frames
+     * kKeyWidth, kKeyHeight: dimension (in pixels) of the video frames
+     * kKeySampleRate: frame rate in frames per second
+     * kKeyMimeType: always fixed
+     */
     virtual sp<MetaData> getFormat();
 
     virtual status_t read(
@@ -47,7 +93,19 @@ public:
     virtual void signalBufferReturned(MediaBuffer* buffer);
 
 protected:
-    sp<Camera> mCamera;
+    enum CameraFlags {
+        FLAGS_SET_CAMERA = 1L << 0,
+        FLAGS_HOT_CAMERA = 1L << 1,
+    };
+
+    int32_t  mCameraFlags;
+    Size     mVideoSize;
+    int32_t  mVideoFrameRate;
+    int32_t  mColorFormat;
+    status_t mInitCheck;
+
+    sp<Camera>   mCamera;
+    sp<Surface>  mSurface;
     sp<MetaData> mMeta;
 
     int64_t mStartTimeUs;
@@ -55,7 +113,9 @@ protected:
     int64_t mLastFrameTimestampUs;
     bool mStarted;
 
-    CameraSource(const sp<Camera> &camera);
+    CameraSource(const sp<ICamera>& camera, int32_t cameraId,
+                 Size videoSize, int32_t frameRate,
+                 const sp<Surface>& surface);
 
     virtual void startCameraRecording();
     virtual void stopCameraRecording();
@@ -90,6 +150,21 @@ private:
 
     void releaseQueuedFrames();
     void releaseOneRecordingFrame(const sp<IMemory>& frame);
+
+
+    status_t init(const sp<ICamera>& camera, int32_t cameraId,
+                Size videoSize, int32_t frameRate);
+    status_t isCameraAvailable(const sp<ICamera>& camera, int32_t cameraId);
+    status_t isCameraColorFormatSupported(const CameraParameters& params);
+    status_t configureCamera(CameraParameters* params,
+                    int32_t width, int32_t height,
+                    int32_t frameRate);
+
+    status_t checkVideoSize(const CameraParameters& params,
+                    int32_t width, int32_t height);
+
+    status_t checkFrameRate(const CameraParameters& params,
+                    int32_t frameRate);
 
     CameraSource(const CameraSource &);
     CameraSource &operator=(const CameraSource &);
