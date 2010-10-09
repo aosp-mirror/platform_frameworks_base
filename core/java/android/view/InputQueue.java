@@ -28,8 +28,21 @@ public final class InputQueue {
     
     private static final boolean DEBUG = false;
     
+    /**
+     * Interface to receive notification of when an InputQueue is associated
+     * and dissociated with a thread.
+     */
     public static interface Callback {
+        /**
+         * Called when the given InputQueue is now associated with the
+         * thread making this call, so it can start receiving events from it.
+         */
         void onInputQueueCreated(InputQueue queue);
+        
+        /**
+         * Called when the given InputQueue is no longer associated with
+         * the thread and thus not dispatching events.
+         */
         void onInputQueueDestroyed(InputQueue queue);
     }
 
