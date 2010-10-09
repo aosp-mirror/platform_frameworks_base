@@ -17,8 +17,9 @@
 #ifndef ANDROID_UI_PATCH_CACHE_H
 #define ANDROID_UI_PATCH_CACHE_H
 
+#include <utils/KeyedVector.h>
+
 #include "Patch.h"
-#include "GenerationCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -41,23 +42,21 @@ namespace uirenderer {
 // Cache
 ///////////////////////////////////////////////////////////////////////////////
 
-class PatchCache: public OnEntryRemoved<PatchDescription, Patch*> {
+class PatchCache {
 public:
     PatchCache();
     PatchCache(uint32_t maxCapacity);
     ~PatchCache();
 
-    /**
-     * Used as a callback when an entry is removed from the cache.
-     * Do not invoke directly.
-     */
-    void operator()(PatchDescription& description, Patch*& mesh);
-
-    Patch* get(uint32_t width, uint32_t height);
+    Patch* get(const float bitmapWidth, const float bitmapHeight,
+            const float pixelWidth, const float pixelHeight,
+            const int32_t* xDivs, const int32_t* yDivs,
+            const uint32_t width, const uint32_t height);
     void clear();
 
 private:
-    GenerationCache<PatchDescription, Patch*> mCache;
+    uint32_t mMaxEntries;
+    KeyedVector<PatchDescription, Patch*> mCache;
 }; // class PatchCache
 
 }; // namespace uirenderer

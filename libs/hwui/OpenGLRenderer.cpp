@@ -692,9 +692,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    Patch* mesh = mCaches.patchCache.get(width, height);
-    mesh->updateVertices(bitmap->width(), bitmap->height(),left, top, right, bottom,
-            xDivs, yDivs, width, height);
+    const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
+            right - left, bottom - top, xDivs, yDivs, width, height);
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size
