@@ -2,21 +2,19 @@
 
 #pragma rs export_func(primitives_test)
 
-#pragma rs export_var(floatTest, doubleTest, charTest, shortTest, intTest, longTest, longlongTest)
-
 // Testing primitive types
-static float floatTest = 1.99f;
-static double doubleTest = 2.05;
-static char charTest = -8;
-static short shortTest = -16;
-static int intTest = -32;
-static long longTest = 17179869184l; // 1 << 34
-static long long longlongTest = 68719476736l; // 1 << 36
+float floatTest = 1.99f;
+double doubleTest = 2.05;
+char charTest = -8;
+short shortTest = -16;
+int intTest = -32;
+long longTest = 17179869184l; // 1 << 34
+long long longlongTest = 68719476736l; // 1 << 36
 
-static uchar ucharTest = 8;
-static ushort ushortTest = 16;
-static uint uintTest = 32;
-static int64_t int64_tTest = -17179869184l; // - 1 << 34
+uchar ucharTest = 8;
+ushort ushortTest = 16;
+uint uintTest = 32;
+int64_t int64_tTest = -17179869184l; // - 1 << 34
 
 static bool test_primitive_types(uint32_t index) {
     bool failed = false;

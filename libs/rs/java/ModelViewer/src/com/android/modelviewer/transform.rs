@@ -20,8 +20,6 @@
 
 rs_script transformScript;
 
-#pragma rs export_var(transformScript)
-
 typedef struct {
     int changed;
     rs_matrix4x4 *mat;

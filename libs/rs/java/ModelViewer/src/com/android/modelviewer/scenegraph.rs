@@ -42,11 +42,6 @@ int gRobot2Index;
 
 SgTransform *gRootNode;
 
-#pragma rs export_var(gPVBackground, gPFBackground, gTGrid, gTestMesh, gPFSBackground, gRotate, gItalic, gTextAlloc, gTransformRS, gGroup, gRobot1, gRobot1Index, gRobot2, gRobot2Index, gRootNode)
-
-float gDT;
-int64_t gLastTime;
-
 void init() {
     gRotate = 0.0f;
 }

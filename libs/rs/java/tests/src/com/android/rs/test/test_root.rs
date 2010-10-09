@@ -15,9 +15,6 @@ typedef struct TestResult {
 } TestResult_t;
 TestResult_t *results;
 
-#pragma rs export_var(results)
-//#pragma rs export_func(addParticles)
-
 int root() {
 
     return 0;

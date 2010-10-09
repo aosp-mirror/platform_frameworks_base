@@ -11,7 +11,6 @@ uchar4 * OutPixel;
 float4 * ScratchPixel1;
 float4 * ScratchPixel2;
 
-#pragma rs export_var(height, width, radius, InPixel, OutPixel, ScratchPixel1, ScratchPixel2, vBlurScript, hBlurScript)
 #pragma rs export_func(filter);
 
 rs_script vBlurScript;
