@@ -158,8 +158,8 @@
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_middle</item>
-        <item name="textSelectHandleRight">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_left</item>
+        <item name="textSelectHandleRight">@android:drawable/text_select_handle_right</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@android:style/Widget.TextSelectHandle</item>
 
