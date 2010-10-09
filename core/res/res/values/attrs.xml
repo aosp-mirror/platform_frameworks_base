@@ -2609,8 +2609,10 @@
 
     <!-- @hide -->
     <declare-styleable name="WeightedLinearLayout">
-        <attr name="majorWeight" format="float" />
-        <attr name="minorWeight" format="float" />
+        <attr name="majorWeightMin" format="float" />
+        <attr name="minorWeightMin" format="float" />
+        <attr name="majorWeightMax" format="float" />
+        <attr name="minorWeightMax" format="float" />
     </declare-styleable>
 
     <!-- ========================= -->

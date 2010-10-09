@@ -28,9 +28,10 @@
     android:paddingBottom="3dip"
     android:paddingLeft="3dip"
     android:paddingRight="1dip"
-    android:majorWeightMin="0.65"
-    android:minorWeightMin="0.9"
-    android:majorWeightMax="0.65">
+    android:majorWeightMin="0.45"
+    android:minorWeightMin="0.72"
+    android:majorWeightMax="0.45"
+    android:minorWeightMax="0.72">
 
     <LinearLayout android:id="@+id/topPanel"
         android:layout_width="match_parent"
