@@ -451,6 +451,27 @@ status_t CameraSource::init(
     // This CHECK is good, since we just passed the lock/unlock
     // check earlier by calling mCamera->setParameters().
     CHECK_EQ(OK, mCamera->setPreviewDisplay(mSurface));
+
+    /*
+     * mCamera->startRecording() signals camera hal to make
+     * available the video buffers (for instance, allocation
+     * of the video buffers may be triggered when camera hal's
+     * startRecording() method is called). Making available these
+     * video buffers earlier (before calling start()) is critical,
+     * if one wants to configure omx video encoders to use these
+     * buffers for passing video frame data during video recording
+     * without the need to memcpy the video frame data stored
+     * in these buffers. Eliminating memcpy for video frame data
+     * is crucial in performance for HD quality video recording
+     * applications.
+     *
+     * Based on OMX IL spec, configuring the omx video encoders
+     * must occur in loaded state. When start() is called, omx
+     * video encoders are already in idle state, which is too
+     * late. Thus, we must call mCamera->startRecording() earlier.
+     */
+    startCameraRecording();
+
     IPCThreadState::self()->restoreCallingIdentity(token);
 
     int64_t glitchDurationUs = (1000000LL / mVideoFrameRate);
@@ -478,6 +499,7 @@ CameraSource::~CameraSource() {
 
 void CameraSource::startCameraRecording() {
     CHECK_EQ(OK, mCamera->startRecording());
+    CHECK(mCamera->recordingEnabled());
 }
 
 status_t CameraSource::start(MetaData *meta) {
@@ -501,7 +523,6 @@ status_t CameraSource::start(MetaData *meta) {
 
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     mCamera->setListener(new CameraSourceListener(this));
-    startCameraRecording();
     IPCThreadState::self()->restoreCallingIdentity(token);
 
     mStarted = true;
