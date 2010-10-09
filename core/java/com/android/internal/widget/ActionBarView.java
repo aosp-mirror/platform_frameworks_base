@@ -53,12 +53,7 @@ import android.widget.TextView;
  */
 public class ActionBarView extends ViewGroup {
     private static final String TAG = "ActionBarView";
-    
-    // TODO: This must be defined in the default theme
-    private static final int CONTENT_PADDING_DIP = 3;
-    private static final int CONTENT_SPACING_DIP = 6;
-    private static final int CONTENT_ACTION_SPACING_DIP = 12;
-    
+
     /**
      * Display options applied by default
      */
@@ -75,12 +70,11 @@ public class ActionBarView extends ViewGroup {
 
     private int mNavigationMode;
     private int mDisplayOptions;
-    private int mSpacing;
-    private int mActionSpacing;
     private CharSequence mTitle;
     private CharSequence mSubtitle;
     private Drawable mIcon;
     private Drawable mLogo;
+    private Drawable mDivider;
 
     private ImageView mIconView;
     private ImageView mLogoView;
@@ -126,8 +120,6 @@ public class ActionBarView extends ViewGroup {
     public ActionBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar);
 
         final int colorFilter = a.getColor(R.styleable.ActionBar_colorFilter, 0);
@@ -171,12 +163,10 @@ public class ActionBarView extends ViewGroup {
         }
 
         mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
+        
+        mDivider = a.getDrawable(R.styleable.ActionBar_divider);
 
         a.recycle();
-
-        // TODO: Set this in the theme
-        mSpacing = (int) (CONTENT_SPACING_DIP * metrics.density + 0.5f);
-        mActionSpacing = (int) (CONTENT_ACTION_SPACING_DIP * metrics.density + 0.5f);
         
         if (mLogo != null || mIcon != null || mTitle != null) {
             mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
@@ -210,7 +200,6 @@ public class ActionBarView extends ViewGroup {
         }
         final ActionMenuView menuView = (ActionMenuView) builder.getMenuView(
                 MenuBuilder.TYPE_ACTION_BUTTON, null);
-        mActionSpacing = menuView.getItemMargin();
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         menuView.setLayoutParams(layoutParams);
@@ -452,7 +441,8 @@ public class ActionBarView extends ViewGroup {
 
         if ((mDisplayOptions & ActionBar.DISPLAY_HIDE_HOME) == 0) {
             if (mLogo != null && (mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) != 0) {
-                mLogoView = new ImageView(getContext());
+                mLogoView = new ImageView(getContext(), null,
+                        com.android.internal.R.attr.actionButtonStyle);
                 mLogoView.setAdjustViewBounds(true);
                 mLogoView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
                         LayoutParams.MATCH_PARENT));
@@ -462,7 +452,8 @@ public class ActionBarView extends ViewGroup {
                 mLogoView.setOnClickListener(mHomeClickListener);
                 addView(mLogoView);
             } else if (mIcon != null) {
-                mIconView = new ImageView(getContext());
+                mIconView = new ImageView(getContext(), null,
+                        com.android.internal.R.attr.actionButtonStyle);
                 mIconView.setAdjustViewBounds(true);
                 mIconView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
                         LayoutParams.MATCH_PARENT));
@@ -558,10 +549,10 @@ public class ActionBarView extends ViewGroup {
         final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
 
         if (mLogoView != null && mLogoView.getVisibility() != GONE) {
-            availableWidth = measureChildView(mLogoView, availableWidth, childSpecHeight, mSpacing);
+            availableWidth = measureChildView(mLogoView, availableWidth, childSpecHeight, 0);
         }
         if (mIconView != null && mIconView.getVisibility() != GONE) {
-            availableWidth = measureChildView(mIconView, availableWidth, childSpecHeight, mSpacing);
+            availableWidth = measureChildView(mIconView, availableWidth, childSpecHeight, 0);
         }
         
         if (mMenuView != null) {
@@ -572,7 +563,7 @@ public class ActionBarView extends ViewGroup {
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_STANDARD:
             if (mTitleLayout != null) {
-                measureChildView(mTitleLayout, availableWidth, childSpecHeight, mSpacing);
+                measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
             }
             break;
         case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
@@ -652,39 +643,38 @@ public class ActionBarView extends ViewGroup {
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
 
         if (mLogoView != null && mLogoView.getVisibility() != GONE) {
-            x += positionChild(mLogoView, x, y, contentHeight) + mSpacing;
+            x += positionChild(mLogoView, x, y, contentHeight);
         }
         if (mIconView != null && mIconView.getVisibility() != GONE) {
-            x += positionChild(mIconView, x, y, contentHeight) + mSpacing;
+            x += positionChild(mIconView, x, y, contentHeight);
         }
         
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_STANDARD:
             if (mTitleLayout != null) {
-                x += positionChild(mTitleLayout, x, y, contentHeight) + mSpacing;
+                x += positionChild(mTitleLayout, x, y, contentHeight);
             }
             break;
         case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
             if (mSpinner != null) {
-                x += positionChild(mSpinner, x, y, contentHeight) + mSpacing;
+                x += positionChild(mSpinner, x, y, contentHeight);
             }
             break;
         case ActionBar.NAVIGATION_MODE_CUSTOM:
             if (mCustomNavView != null) {
-                x += positionChild(mCustomNavView, x, y, contentHeight) + mSpacing;
+                x += positionChild(mCustomNavView, x, y, contentHeight);
             }
             break;
         case ActionBar.NAVIGATION_MODE_TABS:
             if (mTabScrollView != null) {
-                x += positionChild(mTabScrollView, x, y, contentHeight) + mSpacing;
+                x += positionChild(mTabScrollView, x, y, contentHeight);
             }
         }
 
         x = r - l - getPaddingRight();
 
         if (mMenuView != null) {
-            x -= positionChildInverse(mMenuView, x + mActionSpacing, y, contentHeight)
-                    - mActionSpacing;
+            x -= positionChildInverse(mMenuView, x, y, contentHeight);
         }
     }
 

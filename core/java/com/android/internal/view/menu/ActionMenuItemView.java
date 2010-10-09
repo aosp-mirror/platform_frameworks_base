@@ -43,7 +43,7 @@ public class ActionMenuItemView extends FrameLayout
     }
 
     public ActionMenuItemView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.actionButtonStyle);
+        super(context, attrs);
     }
 
     public ActionMenuItemView(Context context, AttributeSet attrs, int defStyle) {
@@ -112,6 +112,10 @@ public class ActionMenuItemView extends FrameLayout
         } else {
             mImageButton.setVisibility(GONE);
         }
+    }
+    
+    public boolean hasText() {
+        return mTextButton.getVisibility() != GONE;
     }
 
     public void setShortcut(boolean showShortcut, char shortcutKey) {

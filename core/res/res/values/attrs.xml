@@ -483,8 +483,6 @@
         <!-- Action bar styles   -->
         <!-- =================== -->
         <eat-comment />
-        <!-- Default amount of padding to use between action buttons. -->
-        <attr name="actionButtonPadding" format="dimension" />
         <!-- Default style for tabs within an action bar -->
         <attr name="actionBarTabStyle" format="reference" />
         <attr name="actionBarTabBarStyle" format="reference" />
@@ -555,6 +553,12 @@
         <attr name="dialogTheme" format="reference" />
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />
+
+        <!-- Drawable to use for vertical dividers. -->
+        <attr name="dividerVertical" format="reference" />
+
+        <!-- Style for button groups -->
+        <attr name="buttonGroupStyle" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -599,6 +603,9 @@
 
     <!-- Color of link text (URLs). -->
     <attr name="textColorLink" format="reference|color" />
+
+    <!-- Height of a line of text. -->
+    <attr name="textLineHeight" format="dimension" />
 
     <!-- Where to ellipsize text. -->
     <attr name="ellipsize">
@@ -2076,6 +2083,8 @@
         <attr name="textColorHint" />
         <!-- Color of the links. -->
         <attr name="textColorLink" />
+        <!-- Height of a single line of text. -->
+        <attr name="textLineHeight" />
     </declare-styleable>
     <declare-styleable name="TextSwitcher">
     </declare-styleable>
@@ -2312,6 +2321,9 @@
         <!-- Reference to a drawable that will be used to display a text selection
              anchor for positioning the cursor within text. -->
         <attr name="textSelectHandle" />
+
+        <!-- Height of a line of text. -->
+        <attr name="textLineHeight" />
     </declare-styleable>
     <!-- An <code>input-extras</code> is a container for extra data to supply to
          an input method.  Contains
@@ -4177,13 +4189,18 @@
         <attr name="background" />
         <!-- Specifies a fixed height for the action mode bar. -->
         <attr name="height" />
-        <!-- Specifies a padding to use between elements on the bar. -->
-        <attr name="itemPadding" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="SearchView">
         <!-- The default state of the SearchView. If true, it will be iconified when not in
              use and expanded when clicked. -->
         <attr name="iconifiedByDefault" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="ButtonGroup">
+        <!-- Drawable to use as a vertical divider between buttons. -->
+        <attr name="divider" />
+        <!-- Drawable to use as a background for buttons added to this group. -->
+        <attr name="buttonBackground" format="reference" />
     </declare-styleable>
 </resources>

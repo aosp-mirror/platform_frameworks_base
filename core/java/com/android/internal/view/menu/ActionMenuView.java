@@ -19,12 +19,15 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 
 import java.util.ArrayList;
 
@@ -33,15 +36,22 @@ import java.util.ArrayList;
  */
 public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvoker, MenuView {
     private static final String TAG = "ActionMenuView";
+
+    // TODO Theme/style this.
+    private static final int DIVIDER_PADDING = 12; // dips
     
     private MenuBuilder mMenu;
 
-    private int mItemPadding;
-    private int mItemMargin;
     private int mMaxItems;
     private boolean mReserveOverflow;
     private OverflowMenuButton mOverflowButton;
     private MenuPopupHelper mOverflowPopup;
+    
+    private float mButtonPaddingLeft;
+    private float mButtonPaddingRight;
+    private float mDividerPadding;
+    
+    private Drawable mDivider;
 
     private Runnable mShowOverflow = new Runnable() {
         public void run() {
@@ -56,20 +66,34 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     public ActionMenuView(Context context, AttributeSet attrs) {
         super(context, attrs);
         
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Theme);
-        mItemPadding = a.getDimensionPixelOffset(
-                com.android.internal.R.styleable.Theme_actionButtonPadding, 0);
-        mItemMargin = mItemPadding / 2;
-        a.recycle();
+        final Resources res = getResources();
 
         // Measure for initial configuration
-        mMaxItems = measureMaxActionButtons();
+        mMaxItems = getMaxActionButtons();
 
         // TODO There has to be a better way to indicate that we don't have a hard menu key.
-        final int screen = getResources().getConfiguration().screenLayout;
+        final int screen = res.getConfiguration().screenLayout;
         mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
                 Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        
+        TypedArray a = context.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
+        final int buttonStyle = a.getResourceId(
+                com.android.internal.R.styleable.Theme_actionButtonStyle, 0);
+        final int groupStyle = a.getResourceId(
+                com.android.internal.R.styleable.Theme_buttonGroupStyle, 0);
+        a.recycle();
+        
+        a = context.obtainStyledAttributes(buttonStyle, com.android.internal.R.styleable.View);
+        mButtonPaddingLeft = a.getDimension(com.android.internal.R.styleable.View_paddingLeft, 0);
+        mButtonPaddingRight = a.getDimension(com.android.internal.R.styleable.View_paddingRight, 0);
+        a.recycle();
+        
+        a = context.obtainStyledAttributes(groupStyle,
+                com.android.internal.R.styleable.ButtonGroup);
+        mDivider = a.getDrawable(com.android.internal.R.styleable.ButtonGroup_divider);
+        a.recycle();
+        
+        mDividerPadding = DIVIDER_PADDING * res.getDisplayMetrics().density;
     }
 
     @Override
@@ -77,7 +101,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final int screen = newConfig.screenLayout;
         mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
                 Configuration.SCREENLAYOUT_SIZE_XLARGE;
-        mMaxItems = measureMaxActionButtons();
+        mMaxItems = getMaxActionButtons();
         if (mMenu != null) {
             mMenu.setMaxActionItems(mMaxItems);
             updateChildren(false);
@@ -89,13 +113,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         }
     }
 
-    private int measureMaxActionButtons() {
-        final Resources res = getResources();
-        final int size = res.getDimensionPixelSize(com.android.internal.R.dimen.action_icon_size);
-        final int spaceAvailable = res.getDisplayMetrics().widthPixels / 2;
-        final int itemSpace = size + mItemPadding;
-        
-        return spaceAvailable / (itemSpace > 0 ? itemSpace : 1);
+    private int getMaxActionButtons() {
+        return getResources().getInteger(com.android.internal.R.integer.max_action_buttons);
     }
 
     public boolean isOverflowReserved() {
@@ -105,24 +124,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     public void setOverflowReserved(boolean reserveOverflow) {
         mReserveOverflow = reserveOverflow;
     }
-
-    @Override
-    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-        if (p instanceof LayoutParams) {
-            LayoutParams lp = (LayoutParams) p;
-            return lp.leftMargin == mItemMargin && lp.rightMargin == mItemMargin &&
-                    lp.gravity == Gravity.CENTER_VERTICAL &&
-                    lp.width == LayoutParams.WRAP_CONTENT && lp.height == LayoutParams.WRAP_CONTENT;
-        }
-        return false;
-    }
     
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
         LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
-        params.leftMargin = mItemMargin;
-        params.rightMargin = mItemMargin;
         params.gravity = Gravity.CENTER_VERTICAL;
         return params;
     }
@@ -130,10 +136,6 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     @Override
     protected LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         return generateDefaultLayoutParams();
-    }
-    
-    public int getItemMargin() {
-        return mItemMargin;
     }
 
     public boolean invokeItem(MenuItemImpl item) {
@@ -157,14 +159,19 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final ArrayList<MenuItemImpl> itemsToShow = mMenu.getActionItems(reserveOverflow);
         final int itemCount = itemsToShow.size();
         
+        boolean needsDivider = false;
         for (int i = 0; i < itemCount; i++) {
+            if (needsDivider) {
+                addView(makeDividerView(), makeDividerLayoutParams());
+            }
             final MenuItemImpl itemData = itemsToShow.get(i);
             final View actionView = itemData.getActionView();
             if (actionView != null) {
-                addView(actionView);
+                addView(actionView, makeActionViewLayoutParams());
             } else {
-                addItemView((ActionMenuItemView) itemData.getItemView(
-                        MenuBuilder.TYPE_ACTION_BUTTON, this));
+                needsDivider = addItemView(i == 0 || !needsDivider,
+                        (ActionMenuItemView) itemData.getItemView(
+                                MenuBuilder.TYPE_ACTION_BUTTON, this));
             }
         }
 
@@ -212,16 +219,43 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         return false;
     }
 
-    private void addItemView(ActionMenuItemView view) {
+    private boolean addItemView(boolean needsDivider, ActionMenuItemView view) {
         view.setItemInvoker(this);
+        boolean hasText = view.hasText();
+        
+        if (hasText && needsDivider) {
+            addView(makeDividerView(), makeDividerLayoutParams());
+        }
         addView(view);
+        return hasText;
+    }
+
+    private ImageView makeDividerView() {
+        ImageView result = new ImageView(mContext);
+        result.setImageDrawable(mDivider);
+        result.setScaleType(ImageView.ScaleType.FIT_XY);
+        return result;
+    }
+
+    private LayoutParams makeDividerLayoutParams() {
+        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT);
+        params.topMargin = (int) mDividerPadding;
+        params.bottomMargin = (int) mDividerPadding;
+        return params;
+    }
+
+    private LayoutParams makeActionViewLayoutParams() {
+        LayoutParams params = generateDefaultLayoutParams();
+        params.leftMargin = (int) mButtonPaddingLeft;
+        params.rightMargin = (int) mButtonPaddingRight;
+        return params;
     }
 
     private class OverflowMenuButton extends ImageButton {
         public OverflowMenuButton(Context context) {
             super(context, null, com.android.internal.R.attr.actionOverflowButtonStyle);
 
-            final Resources res = context.getResources();
             setClickable(true);
             setFocusable(true);
             setVisibility(VISIBLE);
