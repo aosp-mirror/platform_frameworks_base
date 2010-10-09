@@ -2852,6 +2852,10 @@ public class Activity extends ContextThemeWrapper
      * <p>This can be useful if you know that you will never show a dialog again and
      * want to avoid the overhead of saving and restoring it in the future.
      *
+     * <p>As of {@link android.os.Build.VERSION_CODES#GINGERBREAD}, this function
+     * will not throw an exception if you try to remove an ID that does not
+     * currently have an associated dialog.</p>
+     * 
      * @param id The id of the managed dialog.
      *
      * @see #onCreateDialog(int, Bundle)
@@ -2860,17 +2864,13 @@ public class Activity extends ContextThemeWrapper
      * @see #dismissDialog(int)
      */
     public final void removeDialog(int id) {
-        if (mManagedDialogs == null) {
-            return;
+        if (mManagedDialogs != null) {
+            final ManagedDialog md = mManagedDialogs.get(id);
+            if (md != null) {
+                md.mDialog.dismiss();
+                mManagedDialogs.remove(id);
+            }
         }
-
-        final ManagedDialog md = mManagedDialogs.get(id);
-        if (md == null) {
-            return;
-        }
-
-        md.mDialog.dismiss();
-        mManagedDialogs.remove(id);
     }
 
     /**
