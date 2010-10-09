@@ -18,6 +18,7 @@
 #define ANDROID_UI_PATCH_H
 
 #include <sys/types.h>
+#include <cstring>
 
 #include "Vertex.h"
 
@@ -28,24 +29,28 @@ namespace uirenderer {
  * Description of a patch.
  */
 struct PatchDescription {
-    PatchDescription(): xCount(0), yCount(0) { }
-    PatchDescription(const uint32_t xCount, const uint32_t yCount):
+    PatchDescription(): bitmapWidth(0), bitmapHeight(0),
+            pixelWidth(0), pixelHeight(0), xCount(0), yCount(0) { }
+    PatchDescription(const float bitmapWidth, const float bitmapHeight,
+            const float pixelWidth, const float pixelHeight,
+            const uint32_t xCount, const uint32_t yCount):
+            bitmapWidth(bitmapWidth), bitmapHeight(bitmapHeight),
+            pixelWidth(pixelWidth), pixelHeight(pixelHeight),
             xCount(xCount), yCount(yCount) { }
     PatchDescription(const PatchDescription& description):
+            bitmapWidth(description.bitmapWidth), bitmapHeight(description.bitmapHeight),
+            pixelWidth(description.pixelWidth), pixelHeight(description.pixelHeight),
             xCount(description.xCount), yCount(description.yCount) { }
 
+    float bitmapWidth;
+    float bitmapHeight;
+    float pixelWidth;
+    float pixelHeight;
     uint32_t xCount;
     uint32_t yCount;
 
     bool operator<(const PatchDescription& rhs) const {
-        if (xCount == rhs.xCount) {
-            return yCount < rhs.yCount;
-        }
-        return xCount < rhs.xCount;
-    }
-
-    bool operator==(const PatchDescription& rhs) const {
-        return xCount == rhs.xCount && yCount == rhs.yCount;
+        return memcmp(this, &rhs, sizeof(PatchDescription)) < 0;
     }
 }; // struct PatchDescription
 

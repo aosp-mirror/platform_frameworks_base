@@ -29,10 +29,10 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-PatchCache::PatchCache(): mCache(DEFAULT_PATCH_CACHE_SIZE) {
+PatchCache::PatchCache(): mMaxEntries(DEFAULT_PATCH_CACHE_SIZE) {
 }
 
-PatchCache::PatchCache(uint32_t maxEntries): mCache(maxEntries) {
+PatchCache::PatchCache(uint32_t maxEntries): mMaxEntries(maxEntries) {
 }
 
 PatchCache::~PatchCache() {
@@ -40,31 +40,44 @@ PatchCache::~PatchCache() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Callbacks
-///////////////////////////////////////////////////////////////////////////////
-
-void PatchCache::operator()(PatchDescription& description, Patch*& mesh) {
-    if (mesh) delete mesh;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
 void PatchCache::clear() {
-    mCache.setOnEntryRemovedListener(this);
+    size_t count = mCache.size();
+    for (int i = 0; i < count; i++) {
+        delete mCache.valueAt(i);
+    }
     mCache.clear();
-    mCache.setOnEntryRemovedListener(NULL);
 }
 
-Patch* PatchCache::get(uint32_t width, uint32_t height) {
-    const PatchDescription description(width, height);
+Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
+        const float pixelWidth, const float pixelHeight,
+        const int32_t* xDivs, const int32_t* yDivs,
+        const uint32_t width, const uint32_t height) {
 
-    Patch* mesh = mCache.get(description);
+    const PatchDescription description(bitmapWidth, bitmapHeight,
+            pixelWidth, pixelHeight, width, height);
+
+    ssize_t index = mCache.indexOfKey(description);
+    Patch* mesh = NULL;
+    if (index >= 0) {
+        mesh = mCache.valueAt(index);
+    }
+
     if (!mesh) {
         PATCH_LOGD("Creating new patch mesh, w=%d h=%d", width, height);
+
         mesh = new Patch(width, height);
-        mCache.put(description, mesh);
+        mesh->updateVertices(bitmapWidth, bitmapHeight, 0.0f, 0.0f,
+                pixelWidth, pixelHeight, xDivs, yDivs, width, height);
+
+        if (mCache.size() >= mMaxEntries) {
+            delete mCache.valueAt(0);
+            mCache.removeItemsAt(0, 1);
+        }
+
+        mCache.add(description, mesh);
     }
 
     return mesh;
