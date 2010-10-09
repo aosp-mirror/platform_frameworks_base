@@ -164,6 +164,11 @@ http://developer.android.com/guide/practices/ui_guidelines/menu_design.html
 http://developer.android.com/guide/practices/design/performance.html
 http://developer.android.com/guide/practices/design/responsiveness.html
 http://developer.android.com/guide/practices/design/seamlessness.html
+http://developer.android.com/guide/webapps/targetting.html
+http://developer.android.com/guide/webapps/webview.html
+http://developer.android.com/guide/webapps/debugging.html
+http://developer.android.com/guide/webapps/best-practices.html
+http://developer.android.com/guide/topics/admin/device-admin.html
 http://developer.android.com/guide/appendix/api-levels.html
 http://developer.android.com/guide/appendix/media-formats.html
 http://developer.android.com/guide/appendix/g-app-intents.html
