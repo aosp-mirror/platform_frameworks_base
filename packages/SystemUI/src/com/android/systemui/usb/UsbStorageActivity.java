@@ -46,6 +46,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.util.Log;
 
 import java.util.List;
@@ -101,6 +102,11 @@ public class UsbStorageActivity extends Activity
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setProgressBarIndeterminateVisibility(true);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        if (Environment.isExternalStorageRemovable()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        }
 
         setTitle(getString(com.android.internal.R.string.usb_storage_activity_title));
 
