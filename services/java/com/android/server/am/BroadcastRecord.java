@@ -84,8 +84,8 @@ class BroadcastRecord extends Binder {
                 pw.print(prefix); pw.print("extras: "); pw.println(bundle.toString());
             }
         }
-        pw.print(prefix); pw.print("caller="); pw.print(callerPackage); pw.println(" ");
-                pw.println(callerApp != null ? callerApp.toShortString() : "null");
+        pw.print(prefix); pw.print("caller="); pw.print(callerPackage); pw.print(" ");
+                pw.print(callerApp != null ? callerApp.toShortString() : "null");
                 pw.print(" pid="); pw.print(callingPid);
                 pw.print(" uid="); pw.println(callingUid);
         if (requiredPermission != null) {
