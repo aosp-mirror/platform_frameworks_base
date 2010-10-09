@@ -73,8 +73,8 @@ Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
                 pixelWidth, pixelHeight, xDivs, yDivs, width, height);
 
         if (mCache.size() >= mMaxEntries) {
-            delete mCache.valueAt(0);
-            mCache.removeItemsAt(0, 1);
+            delete mCache.valueAt(mCache.size() - 1);
+            mCache.removeItemsAt(mCache.size() - 1, 1);
         }
 
         mCache.add(description, mesh);
