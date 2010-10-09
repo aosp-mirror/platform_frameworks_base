@@ -71,6 +71,8 @@ namespace android {
 /*
  * Flags that flow alongside events in the input dispatch system to help with certain
  * policy decisions such as waking from device sleep.
+ *
+ * These flags are also defined in frameworks/base/core/java/android/view/WindowManagerPolicy.java.
  */
 enum {
     /* These flags originate in RawEvents and are generally set in the key map.
@@ -102,6 +104,11 @@ enum {
     // Indicates that the screen was dim when the event was received and the event
     // should brighten the device.
     POLICY_FLAG_BRIGHT_HERE = 0x20000000,
+
+    // Indicates that the event should be dispatched to applications.
+    // The input event should still be sent to the InputDispatcher so that it can see all
+    // input events received include those that it will not deliver.
+    POLICY_FLAG_PASS_TO_USER = 0x40000000,
 };
 
 /*

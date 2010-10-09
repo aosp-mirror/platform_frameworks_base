@@ -282,9 +282,34 @@ public:
      */
     virtual int32_t getMaxEventsPerSecond() = 0;
 
+    /* Intercepts a key event immediately before queueing it.
+     * The policy can use this method as an opportunity to perform power management functions
+     * and early event preprocessing such as updating policy flags.
+     *
+     * This method is expected to set the POLICY_FLAG_PASS_TO_USER policy flag if the event
+     * should be dispatched to applications.
+     */
+    virtual void interceptKeyBeforeQueueing(nsecs_t when, int32_t deviceId,
+            int32_t action, int32_t& flags, int32_t keyCode, int32_t scanCode,
+            uint32_t& policyFlags) = 0;
+
+    /* Intercepts a generic touch, trackball or other event before queueing it.
+     * The policy can use this method as an opportunity to perform power management functions
+     * and early event preprocessing such as updating policy flags.
+     *
+     * This method is expected to set the POLICY_FLAG_PASS_TO_USER policy flag if the event
+     * should be dispatched to applications.
+     */
+    virtual void interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags) = 0;
+
     /* Allows the policy a chance to intercept a key before dispatching. */
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
+
+    /* Notifies the policy about switch events.
+     */
+    virtual void notifySwitch(nsecs_t when,
+            int32_t switchCode, int32_t switchValue, uint32_t policyFlags) = 0;
 
     /* Poke user activity for an event dispatched to a window. */
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType) = 0;
@@ -333,6 +358,8 @@ public:
             int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime) = 0;
+    virtual void notifySwitch(nsecs_t when,
+            int32_t switchCode, int32_t switchValue, uint32_t policyFlags) = 0;
 
     /* Injects an input event and optionally waits for sync.
      * The synchronization mode determines whether the method blocks while waiting for
@@ -408,6 +435,8 @@ public:
             int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime);
+    virtual void notifySwitch(nsecs_t when,
+            int32_t switchCode, int32_t switchValue, uint32_t policyFlags) ;
 
     virtual int32_t injectInputEvent(const InputEvent* event,
             int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis);
@@ -447,6 +476,7 @@ private:
         mutable int32_t refCount;
         int32_t type;
         nsecs_t eventTime;
+        uint32_t policyFlags;
         InjectionState* injectionState;
 
         bool dispatchInProgress; // initially false, set to true while dispatching
@@ -460,7 +490,6 @@ private:
     struct KeyEntry : EventEntry {
         int32_t deviceId;
         int32_t source;
-        uint32_t policyFlags;
         int32_t action;
         int32_t flags;
         int32_t keyCode;
@@ -489,7 +518,6 @@ private:
     struct MotionEntry : EventEntry {
         int32_t deviceId;
         int32_t source;
-        uint32_t policyFlags;
         int32_t action;
         int32_t flags;
         int32_t metaState;
@@ -664,7 +692,8 @@ private:
         Pool<DispatchEntry> mDispatchEntryPool;
         Pool<CommandEntry> mCommandEntryPool;
 
-        void initializeEventEntry(EventEntry* entry, int32_t type, nsecs_t eventTime);
+        void initializeEventEntry(EventEntry* entry, int32_t type, nsecs_t eventTime,
+                uint32_t policyFlags);
         void releaseEventEntryInjectionState(EventEntry* entry);
     };
 
@@ -685,20 +714,18 @@ private:
             BROKEN
         };
 
+        // Specifies the sources to cancel.
+        enum CancelationOptions {
+            CANCEL_ALL_EVENTS = 0,
+            CANCEL_POINTER_EVENTS = 1,
+            CANCEL_NON_POINTER_EVENTS = 2,
+        };
+
         InputState();
         ~InputState();
 
         // Returns true if there is no state to be canceled.
         bool isNeutral() const;
-
-        // Returns true if the input state believes it is out of sync.
-        bool isOutOfSync() const;
-
-        // Sets the input state to be out of sync if it is not neutral.
-        void setOutOfSync();
-
-        // Resets the input state out of sync flag.
-        void resetOutOfSync();
 
         // Records tracking information for an event that has just been published.
         // Returns whether the event is consistent with the current input state.
@@ -712,16 +739,14 @@ private:
         // Returns whether the event is consistent with the current input state.
         Consistency trackMotion(const MotionEntry* entry);
 
-        // Synthesizes cancelation events for the current state.
-        void synthesizeCancelationEvents(Allocator* allocator,
-                Vector<EventEntry*>& outEvents) const;
+        // Synthesizes cancelation events for the current state and resets the tracked state.
+        void synthesizeCancelationEvents(nsecs_t currentTime, Allocator* allocator,
+                Vector<EventEntry*>& outEvents, CancelationOptions options);
 
         // Clears the current state.
         void clear();
 
     private:
-        bool mIsOutOfSync;
-
         struct KeyMemento {
             int32_t deviceId;
             int32_t source;
@@ -745,6 +770,8 @@ private:
 
         Vector<KeyMemento> mKeyMementos;
         Vector<MotionMemento> mMotionMementos;
+
+        static bool shouldCancelEvent(int32_t eventSource, CancelationOptions options);
     };
 
     /* Manages the dispatch state associated with a single input channel. */
@@ -794,6 +821,13 @@ private:
         status_t initialize();
     };
 
+    enum DropReason {
+        DROP_REASON_NOT_DROPPED = 0,
+        DROP_REASON_POLICY = 1,
+        DROP_REASON_APP_SWITCH = 2,
+        DROP_REASON_DISABLED = 3,
+    };
+
     sp<InputDispatcherPolicyInterface> mPolicy;
 
     Mutex mLock;
@@ -813,12 +847,16 @@ private:
     // Enqueues an inbound event.  Returns true if mLooper->wake() should be called.
     bool enqueueInboundEventLocked(EventEntry* entry);
 
+    // Cleans up input state when dropping an inbound event.
+    void dropInboundEventLocked(EventEntry* entry, DropReason dropReason);
+
     // App switch latency optimization.
+    bool mAppSwitchSawKeyDown;
     nsecs_t mAppSwitchDueTime;
 
-    static bool isAppSwitchKey(int32_t keyCode);
+    static bool isAppSwitchKeyCode(int32_t keyCode);
+    bool isAppSwitchKeyEventLocked(KeyEntry* keyEntry);
     bool isAppSwitchPendingLocked();
-    bool detectPendingAppSwitchLocked(KeyEntry* inboundKeyEntry);
     void resetPendingAppSwitchLocked(bool handled);
 
     // All registered connections mapped by receive pipe file descriptor.
@@ -840,7 +878,7 @@ private:
 
     // Event injection and synchronization.
     Condition mInjectionResultAvailableCondition;
-    EventEntry* createEntryFromInjectedInputEventLocked(const InputEvent* event);
+    bool hasInjectionPermission(int32_t injectorPid, int32_t injectorUid);
     void setInjectionResultLocked(EventEntry* entry, int32_t injectionResult);
 
     Condition mInjectionSyncFinishedCondition;
@@ -875,7 +913,7 @@ private:
     void drainInboundQueueLocked();
     void releasePendingEventLocked();
     void releaseInboundEventLocked(EventEntry* entry);
-    bool isEventFromReliableSourceLocked(EventEntry* entry);
+    bool isEventFromTrustedSourceLocked(EventEntry* entry);
 
     // Dispatch state.
     bool mDispatchEnabled;
@@ -984,10 +1022,16 @@ private:
     void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void startNextDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
-    void abortDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
-            bool broken);
+    void abortBrokenDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void drainOutboundQueueLocked(Connection* connection);
     static int handleReceiveCallback(int receiveFd, int events, void* data);
+
+    void synthesizeCancelationEventsForAllConnectionsLocked(
+            InputState::CancelationOptions options, const char* reason);
+    void synthesizeCancelationEventsForInputChannelLocked(const sp<InputChannel>& channel,
+            InputState::CancelationOptions options, const char* reason);
+    void synthesizeCancelationEventsForConnectionLocked(const sp<Connection>& connection,
+            InputState::CancelationOptions options, const char* reason);
 
     // Splitting motion events across windows.
     MotionEntry* splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet32 pointerIds);
