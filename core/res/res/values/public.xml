@@ -1316,7 +1316,6 @@
   <public type="attr" name="actionDropDownStyle" />
   <public type="attr" name="actionButtonStyle" />
   <public type="attr" name="showAsAction" />
-  <public type="attr" name="actionButtonPadding" />
   <public type="attr" name="previewImage" />
   <public type="attr" name="actionModeBackground" />
   <public type="attr" name="actionModeCloseDrawable" />
@@ -1348,7 +1347,6 @@
   <public type="attr" name="actionBarTabBarStyle" />
   <public type="attr" name="actionBarTabTextStyle" />
   <public type="attr" name="actionOverflowButtonStyle" />
-  <public type="attr" name="itemPadding" />
   <public type="attr" name="actionModeCloseButtonStyle" />
   <public type="attr" name="titleTextStyle" />
   <public type="attr" name="subtitleTextStyle" />
@@ -1368,6 +1366,9 @@
   <public type="attr" name="loopViews" />
   <public type="attr" name="dialogTheme" />
   <public type="attr" name="alertDialogTheme" />
+  <public type="attr" name="textLineHeight" />
+  <public type="attr" name="dividerVertical" />
+  <public type="attr" name="buttonGroupStyle" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1409,6 +1410,9 @@
   <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" />
   <public type="style" name="Theme.Light.Holo.NoActionBar" />
   <public type="style" name="Theme.Light.Holo.NoActionBar.Fullscreen" />
+  <public type="style" name="Theme.Holo.Light" />
+  <public type="style" name="Theme.Holo.Dialog" />
+  <public type="style" name="Theme.Holo.Light.Dialog" />
 
   <public type="style" name="Widget.ListPopupWindow" />
   <public type="style" name="Widget.PopupMenu" />

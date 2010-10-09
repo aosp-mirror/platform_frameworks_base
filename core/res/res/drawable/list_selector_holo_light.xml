@@ -24,6 +24,6 @@
     <item android:state_focused="true"                                android:state_pressed="true" android:drawable="@drawable/list_selector_background_transition" />
     <item android:state_focused="false"                               android:state_pressed="true" android:drawable="@drawable/list_selector_background_transition" />
     <item android:state_focused="true"                                                             android:drawable="@drawable/list_selector_focused_holo_light" />
-    <item                                                                                          android:drawable="@drawable/list_selector_focused_holo_light" />
+    <item                                                                                          android:drawable="@color/transparent" />
 
 </selector>

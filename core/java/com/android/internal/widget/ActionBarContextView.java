@@ -36,8 +36,6 @@ import android.widget.TextView;
  * @hide
  */
 public class ActionBarContextView extends ViewGroup {
-    private int mItemPadding;
-    private int mActionSpacing;
     private int mContentHeight;
     
     private CharSequence mTitle;
@@ -64,8 +62,6 @@ public class ActionBarContextView extends ViewGroup {
         super(context, attrs, defStyle);
         
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionMode, defStyle, 0);
-        mItemPadding = a.getDimensionPixelOffset(
-                com.android.internal.R.styleable.ActionMode_itemPadding, 0);
         setBackgroundDrawable(a.getDrawable(
                 com.android.internal.R.styleable.ActionMode_background));
         mTitleStyleRes = a.getResourceId(
@@ -219,7 +215,6 @@ public class ActionBarContextView extends ViewGroup {
         }
         
         final int contentWidth = MeasureSpec.getSize(widthMeasureSpec);
-        final int itemMargin = mItemPadding;
 
         int maxHeight = mContentHeight > 0 ?
                 mContentHeight : MeasureSpec.getSize(heightMeasureSpec);
@@ -230,13 +225,11 @@ public class ActionBarContextView extends ViewGroup {
         final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
         
         if (mCloseButton != null) {
-            availableWidth = measureChildView(mCloseButton, availableWidth,
-                    childSpecHeight, itemMargin);
+            availableWidth = measureChildView(mCloseButton, availableWidth, childSpecHeight, 0);
         }
 
         if (mTitleLayout != null && mCustomView == null) {
-            availableWidth = measureChildView(mTitleLayout, availableWidth,
-                    childSpecHeight, itemMargin);
+            availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
         }
 
         final int childCount = getChildCount();
@@ -246,7 +239,7 @@ public class ActionBarContextView extends ViewGroup {
                 continue;
             }
             
-            availableWidth = measureChildView(child, availableWidth, childSpecHeight, itemMargin);
+            availableWidth = measureChildView(child, availableWidth, childSpecHeight, 0);
         }
 
         if (mCustomView != null) {
@@ -284,25 +277,23 @@ public class ActionBarContextView extends ViewGroup {
         int x = getPaddingLeft();
         final int y = getPaddingTop();
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
-        final int itemMargin = mItemPadding;
         
         if (mCloseButton != null && mCloseButton.getVisibility() != GONE) {
             x += positionChild(mCloseButton, x, y, contentHeight);
         }
         
         if (mTitleLayout != null && mCustomView == null) {
-            x += positionChild(mTitleLayout, x, y, contentHeight) + itemMargin;
+            x += positionChild(mTitleLayout, x, y, contentHeight);
         }
         
         if (mCustomView != null) {
-            x += positionChild(mCustomView, x, y, contentHeight) + itemMargin;
+            x += positionChild(mCustomView, x, y, contentHeight);
         }
         
         x = r - l - getPaddingRight();
 
         if (mMenuView != null) {
-            x -= positionChildInverse(mMenuView, x + mActionSpacing, y, contentHeight)
-                    - mActionSpacing;
+            x -= positionChildInverse(mMenuView, x, y, contentHeight);
         }
     }
 
