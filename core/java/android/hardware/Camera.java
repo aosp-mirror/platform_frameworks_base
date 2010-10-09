@@ -1354,8 +1354,23 @@ public class Camera {
         /**
          * Sets the dimensions for preview pictures.
          *
+         * The sides of width and height are based on camera orientation. That
+         * is, the preview size is the size before it is rotated by display
+         * orientation. So applications need to consider the display orientation
+         * while setting preview size. For example, suppose the camera supports
+         * both 480x320 and 320x480 preview sizes. The application wants a 3:2
+         * preview ratio. If the display orientation is set to 0 or 180, preview
+         * size should be set to 480x320. If the display orientation is set to
+         * 90 or 270, preview size should be set to 320x480. The display
+         * orientation should also be considered while setting picture size and
+         * thumbnail size.
+         *
          * @param width  the width of the pictures, in pixels
          * @param height the height of the pictures, in pixels
+         * @see #setDisplayOrientation(int)
+         * @see #getCameraInfo(int, CameraInfo)
+         * @see #setPictureSize(int, int)
+         * @see #setJpegThumbnailSize(int, int)
          */
         public void setPreviewSize(int width, int height) {
             String v = Integer.toString(width) + "x" + Integer.toString(height);
@@ -1389,8 +1404,12 @@ public class Camera {
          * applications set both width and height to 0, EXIF will not contain
          * thumbnail.
          *
+         * Applications need to consider the display orientation. See {@link
+         * #setPreviewSize(int,int)} for reference.
+         *
          * @param width  the width of the thumbnail, in pixels
          * @param height the height of the thumbnail, in pixels
+         * @see #setPreviewSize(int,int)
          */
         public void setJpegThumbnailSize(int width, int height) {
             set(KEY_JPEG_THUMBNAIL_WIDTH, width);
@@ -1606,8 +1625,13 @@ public class Camera {
         /**
          * Sets the dimensions for pictures.
          *
+         * Applications need to consider the display orientation. See {@link
+         * #setPreviewSize(int,int)} for reference.
+         *
          * @param width  the width for pictures, in pixels
          * @param height the height for pictures, in pixels
+         * @see #setPreviewSize(int,int)
+         *
          */
         public void setPictureSize(int width, int height) {
             String v = Integer.toString(width) + "x" + Integer.toString(height);
