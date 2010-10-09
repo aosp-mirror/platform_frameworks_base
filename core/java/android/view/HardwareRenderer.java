@@ -103,10 +103,10 @@ public abstract class HardwareRenderer {
     abstract void draw(View view, View.AttachInfo attachInfo, int yOffset);
 
     /**
-     * Creates a new canvas that can be used to record drawing operations
-     * in the specified display list.
+     * Creates a new display list that can be used to record batches of
+     * drawing operations.
      * 
-     * @return A new recording canvas.
+     * @return A new display list.
      */
     abstract DisplayList createDisplayList();
 

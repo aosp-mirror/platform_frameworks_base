@@ -472,7 +472,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     mAttachInfo.mHardwareRenderer.destroy(true);
                 }                
                 mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
-                mAttachInfo.mHardwareAccelerated = true;
+                mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareRenderer != null;
             }
         }
     }
