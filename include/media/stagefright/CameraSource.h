@@ -83,7 +83,7 @@ public:
      * kKeyColorFormat: YUV color format of the video frames
      * kKeyWidth, kKeyHeight: dimension (in pixels) of the video frames
      * kKeySampleRate: frame rate in frames per second
-     * kKeyMimeType: always fixed
+     * kKeyMIMEType: always fixed to be MEDIA_MIMETYPE_VIDEO_RAW
      */
     virtual sp<MetaData> getFormat();
 
