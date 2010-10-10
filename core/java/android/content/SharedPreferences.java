@@ -186,9 +186,21 @@ public interface SharedPreferences {
          * {@link #commit} will block until all async commits are
          * completed as well as the commit itself.
          *
-         * <p>If you call this from an {@link android.app.Activity},
-         * the base class will wait for any async commits to finish in
-         * its {@link android.app.Activity#onPause}.</p>
+         * <p>As {@link SharedPreferences} instances are singletons within
+         * a process, it's safe to replace any instance of {@link #commit} with
+         * {@link #apply} if you were already ignoring the return value.
+         *
+         * <p>You don't need to worry about Android component
+         * lifecycles and their interaction with <code>apply()</code>
+         * writing to disk.  The framework makes sure in-flight disk
+         * writes from <code>apply()</code> complete before switching
+         * states.
+         *
+         * <p class='note'>The SharedPreferences.Editor interface
+         * isn't expected to be implemented directly.  However, if you
+         * previously did implement it and are now getting errors
+         * about missing <code>apply()</code>, you can simply call
+         * {@link #commit} from <code>apply()</code>.
          */
         void apply();
     }

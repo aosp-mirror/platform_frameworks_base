@@ -1195,7 +1195,14 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
 
     private void tryCommit(SharedPreferences.Editor editor) {
         if (mPreferenceManager.shouldCommit()) {
-            editor.apply();
+            try {
+                editor.apply();
+            } catch (AbstractMethodError unused) {
+                // The app injected its own pre-Gingerbread
+                // SharedPreferences.Editor implementation without
+                // an apply method.
+                editor.commit();
+            }
         }
     }
     
