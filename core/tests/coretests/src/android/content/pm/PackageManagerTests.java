@@ -45,6 +45,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class PackageManagerTests extends AndroidTestCase {
@@ -378,6 +379,18 @@ public class PackageManagerTests extends AndroidTestCase {
                     assertEquals(publicSrcPath, appInstallPath);
                     assertFalse((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                     assertTrue(info.nativeLibraryDir.startsWith(dataDir.getPath()));
+
+                    // Make sure the native library dir is not a symlink
+                    final File nativeLibDir = new File(info.nativeLibraryDir);
+                    assertTrue("Native library dir should exist at " + info.nativeLibraryDir,
+                            nativeLibDir.exists());
+                    try {
+                        assertEquals("Native library dir should not be a symlink",
+                                info.nativeLibraryDir,
+                                nativeLibDir.getCanonicalPath());
+                    } catch (IOException e) {
+                        fail("Can't read " + nativeLibDir.getPath());
+                    }
                 } else if (rLoc == INSTALL_LOC_SD){
                     assertTrue("Application flags (" + info.flags
                             + ") should contain FLAG_EXTERNAL_STORAGE",
@@ -391,6 +404,19 @@ public class PackageManagerTests extends AndroidTestCase {
                     assertTrue("The native library path (" + info.nativeLibraryDir
                             + ") should start with " + SECURE_CONTAINERS_PREFIX,
                             info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+
+                    // Make sure the native library in /data/data/<app>/lib is a
+                    // symlink to the ASEC
+                    final File nativeLibSymLink = new File(info.dataDir, "lib");
+                    assertTrue("Native library symlink should exist at " + nativeLibSymLink.getPath(),
+                            nativeLibSymLink.exists());
+                    try {
+                        assertEquals(nativeLibSymLink.getPath() + " should be a symlink to "
+                                + info.nativeLibraryDir, info.nativeLibraryDir, nativeLibSymLink
+                                .getCanonicalPath());
+                    } catch (IOException e) {
+                        fail("Can't read " + nativeLibSymLink.getPath());
+                    }
                 } else {
                     // TODO handle error. Install should have failed.
                     fail("Install should have failed");
@@ -1406,13 +1432,21 @@ public class PackageManagerTests extends AndroidTestCase {
                         receiver);
                 assertTrue(retCode);
                 ApplicationInfo info = getPm().getApplicationInfo(ip.pkg.packageName, 0);
-                assertNotNull(info);
+                assertNotNull("ApplicationInfo for recently installed application should exist",
+                        info);
                 if ((moveFlags & PackageManager.MOVE_INTERNAL) != 0) {
-                    assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0);
-                    assertTrue(info.nativeLibraryDir.startsWith(info.dataDir));
+                    assertTrue("ApplicationInfo.FLAG_EXTERNAL_STORAGE flag should NOT be set",
+                            (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0);
+                    assertTrue("ApplicationInfo.nativeLibraryDir should start with " + info.dataDir,
+                            info.nativeLibraryDir.startsWith(info.dataDir));
                 } else if ((moveFlags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0){
-                    assertTrue((info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
-                    assertTrue(info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+                    assertTrue("ApplicationInfo.FLAG_EXTERNAL_STORAGE flag should be set",
+                            (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
+                    assertTrue("ApplicationInfo.nativeLibraryDir should start with " + SECURE_CONTAINERS_PREFIX,
+                            info.nativeLibraryDir.startsWith(SECURE_CONTAINERS_PREFIX));
+                    final File nativeLibSymLink = new File(info.dataDir, "lib");
+                    assertTrue("The data directory should have a 'lib' symlink that points to the ASEC container",
+                            nativeLibSymLink.getCanonicalPath().startsWith(SECURE_CONTAINERS_PREFIX));
                 }
             }
         } catch (NameNotFoundException e) {
