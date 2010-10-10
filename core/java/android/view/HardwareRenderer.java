@@ -216,9 +216,11 @@ public abstract class HardwareRenderer {
 
         /**
          * Return a string for the EGL error code, or the hex representation
-         * if an unknown error.
-         * @param error EGL error.
-         * @return Error string.
+         * if the error is unknown.
+         * 
+         * @param error The EGL error to convert into a String.
+         * 
+         * @return An error string correponding to the EGL error code.
          */
         static String getEGLErrorString(int error) {
             switch (error) {
@@ -446,11 +448,9 @@ public abstract class HardwareRenderer {
         }
         
         /**
-         * Defines the EGL configuration for this renderer. The default configuration
-         * is RGBX, no depth, no stencil.
+         * Defines the EGL configuration for this renderer.
          * 
          * @return An {@link android.view.HardwareRenderer.GlRenderer.EglConfigChooser}.
-         * @param glVersion
          */
         EglConfigChooser getConfigChooser(int glVersion) {
             return new ComponentSizeChooser(glVersion, 8, 8, 8, 8, 0, 0);

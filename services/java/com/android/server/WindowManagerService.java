@@ -6832,10 +6832,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 mSurfaceW = w;
                 mSurfaceH = h;
                 try {
+                    final boolean isHwAccelerated = (mAttrs.flags &
+                            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
+                    final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : mAttrs.format;
+                    if (isHwAccelerated && mAttrs.format == PixelFormat.OPAQUE) {
+                        flags |= Surface.OPAQUE;
+                    }
                     mSurface = new Surface(
                             mSession.mSurfaceSession, mSession.mPid,
                             mAttrs.getTitle().toString(),
-                            0, w, h, mAttrs.format, flags);
+                            0, w, h, format, flags);
                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  CREATE SURFACE "
                             + mSurface + " IN SESSION "
                             + mSession.mSurfaceSession

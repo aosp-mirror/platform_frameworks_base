@@ -86,6 +86,15 @@ public class Surface implements Parcelable {
      * play back.
      */
     public static final int PUSH_BUFFERS        = 0x00000200;
+    /**
+     * Indicates that the surface must be considered opaque, even if its
+     * pixel format is set to translucent. This can be useful if an
+     * application needs full RGBA 8888 support for instance but will
+     * still draw every pixel opaque.
+     * 
+     * @hide
+     */
+    public static final int OPAQUE              = 0x00000400;
     
     /** Creates a normal surface. This is the default */
     public static final int FX_SURFACE_NORMAL   = 0x00000000;
@@ -269,7 +278,7 @@ public class Surface implements Parcelable {
             }
             mOrigMatrix.set(m);
         }
-    };
+    }
 
     /**
      * Sets the display metrics used to provide canva's width/height in compatibility mode.
@@ -422,16 +431,20 @@ public class Surface implements Parcelable {
     /* no user serviceable parts here ... */
     @Override
     protected void finalize() throws Throwable {
-        if (mNativeSurface != 0 || mSurfaceControl != 0) {
-            if (DEBUG_RELEASE) {
-                Log.w(LOG_TAG, "Surface.finalize() has work. You should have called release() (" 
-                        + mNativeSurface + ", " + mSurfaceControl + ")", mCreationStack);
-            } else {
-                Log.w(LOG_TAG, "Surface.finalize() has work. You should have called release() (" 
-                        + mNativeSurface + ", " + mSurfaceControl + ")");
+        try {
+            super.finalize();
+        } finally {
+            if (mNativeSurface != 0 || mSurfaceControl != 0) {
+                if (DEBUG_RELEASE) {
+                    Log.w(LOG_TAG, "Surface.finalize() has work. You should have called release() (" 
+                            + mNativeSurface + ", " + mSurfaceControl + ")", mCreationStack);
+                } else {
+                    Log.w(LOG_TAG, "Surface.finalize() has work. You should have called release() (" 
+                            + mNativeSurface + ", " + mSurfaceControl + ")");
+                }
             }
+            release();            
         }
-        release();
     }
     
     private native void init(SurfaceSession s,
