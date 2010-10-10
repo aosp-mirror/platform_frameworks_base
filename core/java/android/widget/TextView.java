@@ -96,11 +96,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
-import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.view.ViewRoot;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
@@ -7311,7 +7311,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static int extractRangeEndFromLong(long range) {
         return (int) (range & 0x00000000FFFFFFFFL);
     }
-    
+
     private void selectCurrentWord() {
         // In case selection mode is started after an orientation change or after a select all,
         // use the current selection instead of creating one
