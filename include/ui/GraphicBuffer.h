@@ -72,6 +72,9 @@ public:
     GraphicBuffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t usage,
             uint32_t stride, native_handle_t* handle, bool keepOwnership);
 
+    // create a buffer from an existing android_native_buffer_t
+    GraphicBuffer(android_native_buffer_t* buffer, bool keepOwnership);
+
     // return status
     status_t initCheck() const;
 
@@ -137,6 +140,10 @@ private:
     GraphicBufferMapper& mBufferMapper;
     ssize_t mInitCheck;
     int mIndex;
+
+    // If we're wrapping another buffer then this reference will make sure it
+    // doesn't get freed.
+    sp<android_native_buffer_t> mWrappedBuffer;
 };
 
 }; // namespace android
