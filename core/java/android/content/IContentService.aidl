@@ -104,7 +104,7 @@ interface IContentService {
      */
     boolean isSyncActive(in Account account, String authority);
 
-    SyncInfo getCurrentSync();
+    List<SyncInfo> getCurrentSyncs();
 
     /**
      * Returns the types of the SyncAdapters that are registered with the system.

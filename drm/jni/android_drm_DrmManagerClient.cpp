@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 #define LOG_TAG "DrmManager-JNI"
 #include <utils/Log.h>
 
@@ -76,7 +76,7 @@ String8 Utility::getStringValue(JNIEnv* env, jobject object, const char* fieldNa
             env->ReleaseStringUTFChars(valueString, bytes);
             delete [] data; data = NULL;
         } else {
-            LOGD("Failed to retrieve the data from the field %s", fieldName);
+            LOGV("Failed to retrieve the data from the field %s", fieldName);
         }
     }
     return dataString;
@@ -223,7 +223,7 @@ static sp<DrmManagerClientImpl> getDrmManagerClientImpl(JNIEnv* env, jobject thi
     return sp<DrmManagerClientImpl>(client);
 }
 
-static void android_drm_DrmManagerClient_loadPlugIns(
+static jint android_drm_DrmManagerClient_loadPlugIns(
         JNIEnv* env, jobject thiz, jint uniqueId, jobject weak_thiz) {
     LOGV("load plugins - Enter");
 
@@ -235,23 +235,26 @@ static void android_drm_DrmManagerClient_loadPlugIns(
 
     setDrmManagerClientImpl(env, thiz, drmManager);
 
-    getDrmManagerClientImpl(env, thiz)->loadPlugIns(uniqueId);
     LOGV("load plugins - Exit");
+    return getDrmManagerClientImpl(env, thiz)->loadPlugIns(uniqueId);
 }
 
-static void android_drm_DrmManagerClient_unloadPlugIns(JNIEnv* env, jobject thiz, jint uniqueId) {
+static jint android_drm_DrmManagerClient_unloadPlugIns(JNIEnv* env, jobject thiz, jint uniqueId) {
     LOGV("unload plugins - Enter");
     sp<DrmManagerClientImpl> client = getDrmManagerClientImpl(env, thiz);
-    client->unloadPlugIns(uniqueId);
-    client->setOnInfoListener(uniqueId, NULL);
+
     DrmManagerClientImpl::remove(uniqueId);
+    int result = client->unloadPlugIns(uniqueId);
+    if (DRM_NO_ERROR == result) {
+        client->setOnInfoListener(uniqueId, NULL);
 
-    sp<DrmManagerClientImpl> oldClient = setDrmManagerClientImpl(env, thiz, NULL);
-    if (oldClient != NULL) {
-        oldClient->setOnInfoListener(uniqueId, NULL);
+        sp<DrmManagerClientImpl> oldClient = setDrmManagerClientImpl(env, thiz, NULL);
+        if (oldClient != NULL) {
+            oldClient->setOnInfoListener(uniqueId, NULL);
+        }
     }
-
     LOGV("unload plugins - Exit");
+    return result;
 }
 
 static jobject android_drm_DrmManagerClient_getConstraintsFromContent(
@@ -356,10 +359,11 @@ static void android_drm_DrmManagerClient_installDrmEngine(
     LOGV("installDrmEngine - Exit");
 }
 
-static void android_drm_DrmManagerClient_saveRights(
+static jint android_drm_DrmManagerClient_saveRights(
             JNIEnv* env, jobject thiz, jint uniqueId,
             jobject drmRights, jstring rightsPath, jstring contentPath) {
     LOGV("saveRights - Enter");
+    int result = DRM_ERROR_UNKNOWN;
     int dataLength = 0;
     char* mData =  Utility::getByteArrayValue(env, drmRights, "mData", &dataLength);
 
@@ -368,13 +372,14 @@ static void android_drm_DrmManagerClient_saveRights(
                 Utility::getStringValue(env, drmRights, "mMimeType"),
                 Utility::getStringValue(env, drmRights, "mAccountId"),
                 Utility::getStringValue(env, drmRights, "mSubscriptionId"));
-        getDrmManagerClientImpl(env, thiz)
+        result = getDrmManagerClientImpl(env, thiz)
             ->saveRights(uniqueId, rights, Utility::getStringValue(env, rightsPath),
                                 Utility::getStringValue(env, contentPath));
     }
 
     delete mData; mData = NULL;
     LOGV("saveRights - Exit");
+    return result;
 }
 
 static jboolean android_drm_DrmManagerClient_canHandle(
@@ -423,7 +428,7 @@ static jobject android_drm_DrmManagerClient_processDrmInfo(
 
         String8 keyString = Utility::getStringValue(env, key);
         String8 valueString = Utility::getStringValue(env, valString);
-        LOGD("Key: %s | Value: %s", keyString.string(), valueString.string());
+        LOGV("Key: %s | Value: %s", keyString.string(), valueString.string());
 
         drmInfo.put(keyString, valueString);
     }
@@ -495,7 +500,7 @@ static jobject android_drm_DrmManagerClient_acquireDrmInfo(
 
         String8 keyString = Utility::getStringValue(env, key);
         String8 valueString = Utility::getStringValue(env, value);
-        LOGD("Key: %s | Value: %s", keyString.string(), valueString.string());
+        LOGV("Key: %s | Value: %s", keyString.string(), valueString.string());
 
         drmInfoReq.put(keyString, valueString);
     }
@@ -570,18 +575,17 @@ static jint android_drm_DrmManagerClient_checkRightsStatus(
     return rightsStatus;
 }
 
-static void android_drm_DrmManagerClient_removeRights(
+static jint android_drm_DrmManagerClient_removeRights(
             JNIEnv* env, jobject thiz, jint uniqueId, jstring path) {
-    LOGV("removeRights Enter");
-    getDrmManagerClientImpl(env, thiz)->removeRights(uniqueId, Utility::getStringValue(env, path));
-    LOGV("removeRights Exit");
+    LOGV("removeRights");
+    return getDrmManagerClientImpl(env, thiz)
+               ->removeRights(uniqueId, Utility::getStringValue(env, path));
 }
 
-static void android_drm_DrmManagerClient_removeAllRights(
+static jint android_drm_DrmManagerClient_removeAllRights(
             JNIEnv* env, jobject thiz, jint uniqueId) {
-    LOGV("removeAllRights Enter");
-    getDrmManagerClientImpl(env, thiz)->removeAllRights(uniqueId);
-    LOGV("removeAllRights Exit");
+    LOGV("removeAllRights");
+    return getDrmManagerClientImpl(env, thiz)->removeAllRights(uniqueId);
 }
 
 static jint android_drm_DrmManagerClient_openConvertSession(
@@ -674,10 +678,10 @@ static jobject android_drm_DrmManagerClient_closeConvertSession(
 
 static JNINativeMethod nativeMethods[] = {
 
-    {"_loadPlugIns", "(ILjava/lang/Object;)V",
+    {"_loadPlugIns", "(ILjava/lang/Object;)I",
                                     (void*)android_drm_DrmManagerClient_loadPlugIns},
 
-    {"_unloadPlugIns", "(I)V",
+    {"_unloadPlugIns", "(I)I",
                                     (void*)android_drm_DrmManagerClient_unloadPlugIns},
 
     {"_getConstraints", "(ILjava/lang/String;I)Landroid/content/ContentValues;",
@@ -698,7 +702,7 @@ static JNINativeMethod nativeMethods[] = {
     {"_acquireDrmInfo", "(ILandroid/drm/DrmInfoRequest;)Landroid/drm/DrmInfo;",
                                     (void*)android_drm_DrmManagerClient_acquireDrmInfo},
 
-    {"_saveRights", "(ILandroid/drm/DrmRights;Ljava/lang/String;Ljava/lang/String;)V",
+    {"_saveRights", "(ILandroid/drm/DrmRights;Ljava/lang/String;Ljava/lang/String;)I",
                                     (void*)android_drm_DrmManagerClient_saveRights},
 
     {"_getDrmObjectType", "(ILjava/lang/String;Ljava/lang/String;)I",
@@ -710,10 +714,10 @@ static JNINativeMethod nativeMethods[] = {
     {"_checkRightsStatus", "(ILjava/lang/String;I)I",
                                     (void*)android_drm_DrmManagerClient_checkRightsStatus},
 
-    {"_removeRights", "(ILjava/lang/String;)V",
+    {"_removeRights", "(ILjava/lang/String;)I",
                                     (void*)android_drm_DrmManagerClient_removeRights},
 
-    {"_removeAllRights", "(I)V",
+    {"_removeAllRights", "(I)I",
                                     (void*)android_drm_DrmManagerClient_removeAllRights},
 
     {"_openConvertSession", "(ILjava/lang/String;)I",

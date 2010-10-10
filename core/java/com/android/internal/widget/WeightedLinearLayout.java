@@ -30,8 +30,10 @@ import static com.android.internal.R.*;
  * the available space.
  */
 public class WeightedLinearLayout extends LinearLayout {
-    private float mMajorWeight;
-    private float mMinorWeight;
+    private float mMajorWeightMin;
+    private float mMinorWeightMin;
+    private float mMajorWeightMax;
+    private float mMinorWeightMax;
 
     public WeightedLinearLayout(Context context) {
         super(context);
@@ -43,8 +45,10 @@ public class WeightedLinearLayout extends LinearLayout {
         TypedArray a = 
             context.obtainStyledAttributes(attrs, styleable.WeightedLinearLayout);
 
-        mMajorWeight = a.getFloat(styleable.WeightedLinearLayout_majorWeight, 0.0f);
-        mMinorWeight = a.getFloat(styleable.WeightedLinearLayout_minorWeight, 0.0f);
+        mMajorWeightMin = a.getFloat(styleable.WeightedLinearLayout_majorWeightMin, 0.0f);
+        mMinorWeightMin = a.getFloat(styleable.WeightedLinearLayout_minorWeightMin, 0.0f);
+        mMajorWeightMax = a.getFloat(styleable.WeightedLinearLayout_majorWeightMax, 0.0f);
+        mMinorWeightMax = a.getFloat(styleable.WeightedLinearLayout_minorWeightMax, 0.0f);
         
         a.recycle();
     }
@@ -60,17 +64,20 @@ public class WeightedLinearLayout extends LinearLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         int width = getMeasuredWidth();
-        int height = getMeasuredHeight();
         boolean measure = false;
 
         widthMeasureSpec = MeasureSpec.makeMeasureSpec(width, EXACTLY);
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, EXACTLY);
 
-        final float widthWeight = isPortrait ? mMinorWeight : mMajorWeight;
-        if (widthMode == AT_MOST && widthWeight > 0.0f) {
-            if (width < (screenWidth * widthWeight)) {
-                widthMeasureSpec = MeasureSpec.makeMeasureSpec((int) (screenWidth * widthWeight),
-                        EXACTLY);
+        final float widthWeightMin = isPortrait ? mMinorWeightMin : mMajorWeightMin;
+        final float widthWeightMax = isPortrait ? mMinorWeightMax : mMajorWeightMax;
+        if (widthMode == AT_MOST) {
+            final int weightedMin = (int) (screenWidth * widthWeightMin);
+            final int weightedMax = (int) (screenWidth * widthWeightMin);
+            if (widthWeightMin > 0.0f && width < weightedMin) {
+                widthMeasureSpec = MeasureSpec.makeMeasureSpec(weightedMin, EXACTLY);
+                measure = true;
+            } else if (widthWeightMax > 0.0f && width > weightedMax) {
+                widthMeasureSpec = MeasureSpec.makeMeasureSpec(weightedMax, EXACTLY);
                 measure = true;
             }
         }
@@ -78,7 +85,7 @@ public class WeightedLinearLayout extends LinearLayout {
         // TODO: Support height?
 
         if (measure) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);            
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
     }
 }

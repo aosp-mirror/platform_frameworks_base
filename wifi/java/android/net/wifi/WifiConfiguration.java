@@ -16,8 +16,7 @@
 
 package android.net.wifi;
 
-import android.net.DhcpInfo;
-import android.net.ProxyProperties;
+import android.net.LinkProperties;
 import android.os.Parcelable;
 import android.os.Parcel;
 
@@ -303,7 +302,7 @@ public class WifiConfiguration implements Parcelable {
      */
     public enum IpAssignment {
         /* Use statically configured IP settings. Configuration can be accessed
-         * with ipConfig */
+         * with linkProperties */
         STATIC,
         /* Use dynamically configured IP settigns */
         DHCP,
@@ -315,10 +314,6 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public IpAssignment ipAssignment;
-    /**
-     * @hide
-     */
-    public DhcpInfo ipConfig;
 
     /**
      * @hide
@@ -328,7 +323,7 @@ public class WifiConfiguration implements Parcelable {
          * should be cleared. */
         NONE,
         /* Use statically configured proxy. Configuration can be accessed
-         * with proxyProperties */
+         * with linkProperties */
         STATIC,
         /* no proxy details are assigned, this is used to indicate
          * that any existing proxy settings should be retained */
@@ -341,7 +336,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * @hide
      */
-    public ProxyProperties proxyProperties;
+    public LinkProperties linkProperties;
 
     public WifiConfiguration() {
         networkId = INVALID_NETWORK_ID;
@@ -361,9 +356,8 @@ public class WifiConfiguration implements Parcelable {
             field.setValue(null);
         }
         ipAssignment = IpAssignment.UNASSIGNED;
-        ipConfig = new DhcpInfo();
         proxySettings = ProxySettings.UNASSIGNED;
-        proxyProperties = new ProxyProperties();
+        linkProperties = new LinkProperties();
     }
 
     public String toString() {
@@ -445,17 +439,13 @@ public class WifiConfiguration implements Parcelable {
             if (value != null) sbuf.append(value);
         }
         sbuf.append('\n');
-        if (ipAssignment == IpAssignment.STATIC) {
-            sbuf.append(" ").append("Static IP configuration:").append('\n');
-            sbuf.append(" ").append(ipConfig);
-        }
-        sbuf.append('\n');
+        sbuf.append("IP assignment: " + ipAssignment.toString());
+        sbuf.append("\n");
+        sbuf.append("Proxy settings: " + proxySettings.toString());
+        sbuf.append("\n");
+        sbuf.append(linkProperties.toString());
+        sbuf.append("\n");
 
-        if (proxySettings == ProxySettings.STATIC) {
-            sbuf.append(" ").append("Proxy configuration:").append('\n');
-            sbuf.append(" ").append(proxyProperties);
-        }
-        sbuf.append('\n');
         return sbuf.toString();
     }
 
@@ -521,9 +511,8 @@ public class WifiConfiguration implements Parcelable {
                 enterpriseFields[i].setValue(source.enterpriseFields[i].value());
             }
             ipAssignment = source.ipAssignment;
-            ipConfig = new DhcpInfo(source.ipConfig);
             proxySettings = source.proxySettings;
-            proxyProperties = new ProxyProperties(source.proxyProperties);
+            linkProperties = new LinkProperties(source.linkProperties);
         }
     }
 
@@ -550,15 +539,8 @@ public class WifiConfiguration implements Parcelable {
             dest.writeString(field.value());
         }
         dest.writeString(ipAssignment.name());
-        dest.writeInt(ipConfig.ipAddress);
-        dest.writeInt(ipConfig.netmask);
-        dest.writeInt(ipConfig.gateway);
-        dest.writeInt(ipConfig.dns1);
-        dest.writeInt(ipConfig.dns2);
-        dest.writeInt(ipConfig.serverAddress);
-        dest.writeInt(ipConfig.leaseDuration);
         dest.writeString(proxySettings.name());
-        dest.writeParcelable(proxyProperties, flags);
+        dest.writeParcelable(linkProperties, flags);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -587,15 +569,8 @@ public class WifiConfiguration implements Parcelable {
                 }
 
                 config.ipAssignment = IpAssignment.valueOf(in.readString());
-                config.ipConfig.ipAddress = in.readInt();
-                config.ipConfig.netmask = in.readInt();
-                config.ipConfig.gateway = in.readInt();
-                config.ipConfig.dns1 = in.readInt();
-                config.ipConfig.dns2 = in.readInt();
-                config.ipConfig.serverAddress = in.readInt();
-                config.ipConfig.leaseDuration = in.readInt();
                 config.proxySettings = ProxySettings.valueOf(in.readString());
-                config.proxyProperties = in.readParcelable(null);
+                config.linkProperties = in.readParcelable(null);
                 return config;
             }
 

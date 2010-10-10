@@ -50,6 +50,9 @@ public final class MtpCursor extends AbstractWindowedCursor {
 
     public MtpCursor(MtpClient client, int queryType, int deviceID, long storageID, long objectID,
             String[] projection) {
+        if (client == null) {
+            throw new NullPointerException("client null in MtpCursor constructor");
+        }
         mColumns = projection;
 
         HashMap<String, Integer> map;

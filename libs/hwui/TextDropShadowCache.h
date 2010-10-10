@@ -21,7 +21,7 @@
 
 #include <SkPaint.h>
 
-#include "GenerationCache.h"
+#include "utils/GenerationCache.h"
 #include "FontRenderer.h"
 #include "Texture.h"
 

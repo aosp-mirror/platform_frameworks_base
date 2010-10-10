@@ -75,12 +75,10 @@ DrmConstraints::KeyIterator DrmConstraints::keyIterator() {
 DrmConstraints::KeyIterator::KeyIterator(const DrmConstraints::KeyIterator& keyIterator)
     : mDrmConstraints(keyIterator.mDrmConstraints),
       mIndex(keyIterator.mIndex) {
-    LOGV("DrmConstraints::KeyIterator::KeyIterator");
 }
 
 DrmConstraints::KeyIterator& DrmConstraints::KeyIterator::operator=(
     const DrmConstraints::KeyIterator& keyIterator) {
-    LOGV("DrmConstraints::KeyIterator::operator=");
     mDrmConstraints = keyIterator.mDrmConstraints;
     mIndex = keyIterator.mIndex;
     return *this;
@@ -94,12 +92,10 @@ DrmConstraints::Iterator DrmConstraints::iterator() {
 DrmConstraints::Iterator::Iterator(const DrmConstraints::Iterator& iterator) :
     mDrmConstraints(iterator.mDrmConstraints),
     mIndex(iterator.mIndex) {
-    LOGV("DrmConstraints::Iterator::Iterator");
 }
 
 DrmConstraints::Iterator& DrmConstraints::Iterator::operator=(
     const DrmConstraints::Iterator& iterator) {
-    LOGV("DrmConstraints::Iterator::operator=");
     mDrmConstraints = iterator.mDrmConstraints;
     mIndex = iterator.mIndex;
     return *this;

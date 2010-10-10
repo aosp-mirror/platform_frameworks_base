@@ -1319,12 +1319,36 @@ public abstract class ContentResolver {
     }
 
     /**
-     * If a sync is active returns the information about it, otherwise returns false.
+     * If a sync is active returns the information about it, otherwise returns null.
+     * <p>
      * @return the SyncInfo for the currently active sync or null if one is not active.
+     * @deprecated
+     * Since multiple concurrent syncs are now supported you should use
+     * {@link #getCurrentSyncs()} to get the accurate list of current syncs.
+     * This method returns the first item from the list of current syncs
+     * or null if there are none.
      */
+    @Deprecated
     public static SyncInfo getCurrentSync() {
         try {
-            return getContentService().getCurrentSync();
+            final List<SyncInfo> syncs = getContentService().getCurrentSyncs();
+            if (syncs.isEmpty()) {
+                return null;
+            }
+            return syncs.get(0);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Returns a list with information about all the active syncs. This list will be empty
+     * if there are no active syncs.
+     * @return a List of SyncInfo objects for the currently active syncs.
+     */
+    public static List<SyncInfo> getCurrentSyncs() {
+        try {
+            return getContentService().getCurrentSyncs();
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }

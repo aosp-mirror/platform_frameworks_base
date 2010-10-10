@@ -95,7 +95,7 @@ public class SyncStorageEngine extends Handler {
 
     public static final long NOT_IN_BACKOFF_MODE = -1;
 
-    private static final Intent SYNC_CONNECTION_SETTING_CHANGED_INTENT =
+    public static final Intent SYNC_CONNECTION_SETTING_CHANGED_INTENT =
             new Intent("com.android.sync.SYNC_CONN_STATUS_CHANGED");
 
     // TODO: i18n -- grab these out of resources.
@@ -1085,23 +1085,6 @@ public class SyncStorageEngine extends Handler {
         }
 
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
-    }
-
-    /**
-     * Return the currently active sync information, or null if there is no
-     * active sync.  Note that the returned object is the real, live active
-     * sync object, so be careful what you do with it.
-     * <p>
-     * Since multiple concurrent syncs are now supported you should use
-     * {@link #getCurrentSyncs()} to get the accurate list of current syncs.
-     * This method returns the first item from the list of current syncs
-     * or null if there are none.
-     * @deprecated use {@link #getCurrentSyncs()}
-     */
-    public SyncInfo getCurrentSync() {
-        synchronized (mAuthorities) {
-            return !mCurrentSyncs.isEmpty() ? mCurrentSyncs.get(0) : null;
-        }
     }
 
     /**

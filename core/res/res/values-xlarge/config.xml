@@ -25,6 +25,9 @@
     <string name="config_statusBarComponent">com.android.systemui/com.android.systemui.statusbar.tablet.TabletStatusBarService</string>
     <bool name="config_statusBarCanHide">false</bool>
 
+    <!-- see comment in values/config.xml -->
+    <integer name="config_longPressOnPowerBehavior">2</integer>
+
     <!-- Show sliding tab before lockscreen -->
     <bool name="config_enableSlidingTabFirst">false</bool>
     <!-- Enable lockscreen rotation -->

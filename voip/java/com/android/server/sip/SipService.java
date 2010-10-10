@@ -100,6 +100,7 @@ public final class SipService extends ISipService.Stub {
     public static void start(Context context) {
         if (SipManager.isApiSupported(context)) {
             ServiceManager.addService("sip", new SipService(context));
+            context.sendBroadcast(new Intent(SipManager.ACTION_SIP_SERVICE_UP));
             Log.i(TAG, "SIP service started");
         }
     }
@@ -825,11 +826,13 @@ public final class SipService extends ISipService.Stub {
             synchronized (SipService.this) {
                 if (notCurrentSession(session)) return;
 
-                if (errorCode == SipErrorCode.INVALID_CREDENTIALS) {
-                    if (DEBUG) Log.d(TAG, "   pause auto-registration");
-                    stop();
-                } else {
-                    onError();
+                switch (errorCode) {
+                    case SipErrorCode.INVALID_CREDENTIALS:
+                    case SipErrorCode.SERVER_UNREACHABLE:
+                        if (DEBUG) Log.d(TAG, "   pause auto-registration");
+                        stop();
+                    default:
+                        restartLater();
                 }
 
                 mErrorCode = errorCode;
@@ -846,11 +849,11 @@ public final class SipService extends ISipService.Stub {
 
                 mErrorCode = SipErrorCode.TIME_OUT;
                 mProxy.onRegistrationTimeout(session);
-                onError();
+                restartLater();
             }
         }
 
-        private void onError() {
+        private void restartLater() {
             mRegistered = false;
             restart(backoffDuration());
             if (mKeepAliveProcess != null) {

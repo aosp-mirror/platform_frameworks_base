@@ -99,6 +99,11 @@ public class DownloadManager {
     public final static String COLUMN_LOCAL_URI = "local_uri";
 
     /**
+     * The pathname of the file where the download is stored.
+     */
+    public final static String COLUMN_LOCAL_FILENAME = "local_filename";
+
+    /**
      * Current status of the download, as one of the STATUS_* constants.
      */
     public final static String COLUMN_STATUS = "status";
@@ -272,7 +277,8 @@ public class DownloadManager {
         COLUMN_STATUS,
         COLUMN_REASON,
         COLUMN_BYTES_DOWNLOADED_SO_FAR,
-        COLUMN_LAST_MODIFIED_TIMESTAMP
+        COLUMN_LAST_MODIFIED_TIMESTAMP,
+        COLUMN_LOCAL_FILENAME
     };
 
     // columns to request from DownloadProvider
@@ -914,6 +920,9 @@ public class DownloadManager {
             }
             if (column.equals(COLUMN_MEDIA_TYPE)) {
                 return getUnderlyingString(Downloads.COLUMN_MIME_TYPE);
+            }
+            if (column.equals(COLUMN_LOCAL_FILENAME)) {
+                return getUnderlyingString(Downloads.Impl._DATA);
             }
 
             assert column.equals(COLUMN_LOCAL_URI);

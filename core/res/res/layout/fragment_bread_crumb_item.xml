@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:textAppearance="?android:attr/textAppearanceMediumInverse"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:drawableLeft="@drawable/nav_divider"
         android:paddingLeft="12dp"
         android:drawablePadding="12dp"

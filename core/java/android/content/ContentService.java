@@ -386,19 +386,15 @@ public final class ContentService extends IContentService.Stub {
         return false;
     }
 
-    public SyncInfo getCurrentSync() {
+    public List<SyncInfo> getCurrentSyncs() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
         long identityToken = clearCallingIdentity();
         try {
-            SyncManager syncManager = getSyncManager();
-            if (syncManager != null) {
-                return syncManager.getSyncStorageEngine().getCurrentSync();
-            }
+            return getSyncManager().getSyncStorageEngine().getCurrentSyncs();
         } finally {
             restoreCallingIdentity(identityToken);
         }
-        return null;
     }
 
     public SyncStatusInfo getSyncStatus(Account account, String authority) {

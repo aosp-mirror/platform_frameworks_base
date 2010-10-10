@@ -385,8 +385,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     glActiveTexture(GL_TEXTURE0);
 
-    LayerSize size(bounds.getWidth(), bounds.getHeight());
-    Layer* layer = mCaches.layerCache.get(size);
+    Layer* layer = mCaches.layerCache.get(bounds.getWidth(), bounds.getHeight());
     if (!layer) {
         return false;
     }
@@ -394,6 +393,8 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     layer->mode = mode;
     layer->alpha = alpha;
     layer->layer.set(bounds);
+    layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->height),
+            bounds.getWidth() / float(layer->width), 0.0f);
 
     // Save the layer in the snapshot
     snapshot->flags |= Snapshot::kFlagIsLayer;
@@ -420,7 +421,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         // Initialize the texture if needed
         if (layer->empty) {
             layer->empty = false;
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.width, size.height, 0,
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layer->width, layer->height, 0,
                     GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         }
 
@@ -455,12 +456,12 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
         // TODO: Workaround for b/3054204
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-                bounds.getWidth(), bounds.getHeight(), 0);
+                layer->width, layer->height, 0);
 
         // TODO: Waiting for b/3054204 to be fixed
         // if (layer->empty) {
         //     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-        //             bounds.getWidth(), bounds.getHeight(), 0);
+        //             layer->width, layer->height, 0);
         //     layer->empty = false;
         // } else {
         //     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
@@ -502,8 +503,8 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
                 layer->alpha << 24, SkXfermode::kDstIn_Mode, true);
     }
 
-    // Layers are already drawn with a top-left origin, don't flip the texture
-    resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
+    const Rect& texCoords = layer->texCoords;
+    resetDrawTextureTexCoords(texCoords.left, texCoords.top, texCoords.right, texCoords.bottom);
 
     if (fboLayer) {
         drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
@@ -526,9 +527,8 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         mCaches.fboCache.put(current->fbo);
     }
 
-    LayerSize size(rect.getWidth(), rect.getHeight());
     // Failing to add the layer to the cache should happen only if the layer is too large
-    if (!mCaches.layerCache.put(size, layer)) {
+    if (!mCaches.layerCache.put(layer)) {
         LAYER_LOGD("Deleting layer");
         glDeleteTextures(1, &layer->texture);
         delete layer;
@@ -692,9 +692,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    Patch* mesh = mCaches.patchCache.get(width, height);
-    mesh->updateVertices(bitmap->width(), bitmap->height(),left, top, right, bottom,
-            xDivs, yDivs, width, height);
+    const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
+            right - left, bottom - top, xDivs, yDivs, width, height);
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size

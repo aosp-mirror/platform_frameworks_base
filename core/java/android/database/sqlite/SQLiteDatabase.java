@@ -2114,7 +2114,14 @@ public class SQLiteDatabase extends SQLiteClosable {
                 return;
             }
 
-            if (!mCacheFullWarning && mCompiledQueries.size() == mMaxSqlCacheSize) {
+            int maxCacheSz = (mConnectionNum == 0) ? mMaxSqlCacheSize :
+                    mParentConnObj.mMaxSqlCacheSize;
+            boolean printWarning =
+                    (mConnectionNum == 0)
+                            ? (!mCacheFullWarning && mCompiledQueries.size() == maxCacheSz)
+                            : (!mParentConnObj.mCacheFullWarning && 
+                                    mParentConnObj.mCompiledQueries.size() == maxCacheSz);
+           if (printWarning) {
                 /*
                  * cache size of {@link #mMaxSqlCacheSize} is not enough for this app.
                  * log a warning.

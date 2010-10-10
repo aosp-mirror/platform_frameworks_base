@@ -8,7 +8,7 @@ typedef struct TestResult_s {
     float score;
     int64_t time;
 } TestResult;
-TestResult *g_results;
+//TestResult *g_results;
 
 static int64_t g_time;
 

@@ -29,6 +29,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -140,11 +141,14 @@ public class Dialog implements DialogInterface, Window.Callback,
      * <var>context</var>.  If 0, the default dialog theme will be used.
      */
     public Dialog(Context context, int theme) {
-        mContext = new ContextThemeWrapper(
-            context, theme == 0 ? 
-                    (context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
-                            ? com.android.internal.R.style.Theme_Holo_Dialog
-                                    : com.android.internal.R.style.Theme_Dialog) : theme);
+        if (theme == 0) {
+            TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(com.android.internal.R.attr.dialogTheme,
+                    outValue, true);
+            theme = outValue.resourceId;
+        }
+
+        mContext = new ContextThemeWrapper(context, theme);
         mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         Window w = PolicyManager.makeNewWindow(mContext);
         mWindow = w;

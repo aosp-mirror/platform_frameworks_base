@@ -17,7 +17,6 @@ typedef struct __attribute__((packed, aligned(4))) Point {
 } Point_t;
 Point_t *point;
 
-#pragma rs export_var(point, partMesh)
 #pragma rs export_func(addParticles)
 
 int root() {

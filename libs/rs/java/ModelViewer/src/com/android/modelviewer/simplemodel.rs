@@ -31,11 +31,6 @@ float gRotate;
 rs_font gItalic;
 rs_allocation gTextAlloc;
 
-#pragma rs export_var(gPVBackground, gPFBackground, gTGrid, gTestMesh, gPFSBackground, gRotate, gItalic, gTextAlloc)
-
-float gDT;
-int64_t gLastTime;
-
 void init() {
     gRotate = 0.0f;
 }

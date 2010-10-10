@@ -56,6 +56,8 @@ public class SearchView extends LinearLayout {
 
     private OnQueryChangeListener mOnQueryChangeListener;
     private OnCloseListener mOnCloseListener;
+    private OnFocusChangeListener mOnQueryTextFocusChangeListener;
+    private OnSuggestionSelectionListener mOnSuggestionListener;
 
     private boolean mIconifiedByDefault;
     private boolean mIconified;
@@ -68,6 +70,7 @@ public class SearchView extends LinearLayout {
     private boolean mSubmitButtonEnabled;
     private CharSequence mQueryHint;
     private boolean mQueryRefinement;
+    private boolean mClearingFocus;
 
     private SearchableInfo mSearchable;
 
@@ -117,6 +120,32 @@ public class SearchView extends LinearLayout {
         boolean onClose();
     }
 
+    /**
+     * Callback interface for selection events on suggestions. These callbacks
+     * are only relevant when a SearchableInfo has been specified by {@link #setSearchableInfo}.
+     */
+    public interface OnSuggestionSelectionListener {
+
+        /**
+         * Called when a suggestion was selected by navigating to it.
+         * @param position the absolute position in the list of suggestions.
+         *
+         * @return true if the listener handles the event and wants to override the default
+         * behavior of possibly rewriting the query based on the selected item, false otherwise.
+         */
+        boolean onSuggestionSelected(int position);
+
+        /**
+         * Called when a suggestion was clicked.
+         * @param position the absolute position of the clicked item in the list of suggestions.
+         *
+         * @return true if the listener handles the event and wants to override the default
+         * behavior of launching any intent or submitting a search query specified on that item.
+         * Return false otherwise.
+         */
+        boolean onSuggestionClicked(int position);
+    }
+
     public SearchView(Context context) {
         this(context, null);
     }
@@ -141,6 +170,15 @@ public class SearchView extends LinearLayout {
         mQueryTextView.setOnEditorActionListener(mOnEditorActionListener);
         mQueryTextView.setOnItemClickListener(mOnItemClickListener);
         mQueryTextView.setOnItemSelectedListener(mOnItemSelectedListener);
+        // Inform any listener of focus changes 
+        mQueryTextView.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (mOnQueryTextFocusChangeListener != null) {
+                    mOnQueryTextFocusChangeListener.onFocusChange(SearchView.this, hasFocus);
+                }
+            }
+        });
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SearchView, 0, 0);
         setIconifiedByDefault(a.getBoolean(R.styleable.SearchView_iconifiedByDefault, true));
@@ -165,6 +203,27 @@ public class SearchView extends LinearLayout {
         updateViewsVisibility(mIconifiedByDefault);
     }
 
+    /** @hide */
+    @Override
+    public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
+        if (mClearingFocus) return false;
+        boolean result = mQueryTextView.requestFocus(direction, previouslyFocusedRect);
+        if (result && !isIconified()) {
+            setImeVisibility(true);
+        }
+        return result;
+    }
+
+    /** @hide */
+    @Override
+    public void clearFocus() {
+        mClearingFocus = true;
+        super.clearFocus();
+        mQueryTextView.clearFocus();
+        setImeVisibility(false);
+        mClearingFocus = false;
+    }
+
     /**
      * Sets a listener for user actions within the SearchView.
      *
@@ -182,6 +241,24 @@ public class SearchView extends LinearLayout {
      */
     public void setOnCloseListener(OnCloseListener listener) {
         mOnCloseListener = listener;
+    }
+
+    /**
+     * Sets a listener to inform when the focus of the query text field changes.
+     *
+     * @param listener the listener to inform of focus changes.
+     */
+    public void setOnQueryTextFocusChangeListener(OnFocusChangeListener listener) {
+        mOnQueryTextFocusChangeListener = listener;
+    }
+
+    /**
+     * Sets a listener to inform when a suggestion is focused or clicked.
+     *
+     * @param listener the listener to inform of suggestion selection events.
+     */
+    public void setOnSuggestionSelectionListener(OnSuggestionSelectionListener listener) {
+        mOnSuggestionListener = listener;
     }
 
     /**
@@ -224,6 +301,7 @@ public class SearchView extends LinearLayout {
     public void setIconifiedByDefault(boolean iconified) {
         mIconifiedByDefault = iconified;
         updateViewsVisibility(iconified);
+        setImeVisibility(!iconified);
     }
 
     /**
@@ -340,28 +418,25 @@ public class SearchView extends LinearLayout {
         final int visCollapsed = collapsed ? VISIBLE : GONE;
         // Visibility of views that are visible when expanded
         final int visExpanded = collapsed ? GONE : VISIBLE;
+        // Is there text in the query
+        final boolean hasText = !TextUtils.isEmpty(mQueryTextView.getText());
 
         mSearchButton.setVisibility(visCollapsed);
-        mSubmitButton.setVisibility(mSubmitButtonEnabled ? visExpanded : GONE);
+        mSubmitButton.setVisibility(mSubmitButtonEnabled && hasText ? visExpanded : GONE);
         mSearchEditFrame.setVisibility(visExpanded);
-
-        setImeVisibility(!collapsed);
     }
 
     private void setImeVisibility(boolean visible) {
-        // don't mess with the soft input if we're not iconified by default
-        if (mIconifiedByDefault) {
-            InputMethodManager imm = (InputMethodManager)
-            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager)
+        getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-            // We made sure the IME was displayed, so also make sure it is closed
-            // when we go away.
-            if (imm != null) {
-                if (visible) {
-                    imm.showSoftInputUnchecked(0, null);
-                } else {
-                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
-                }
+        // We made sure the IME was displayed, so also make sure it is closed
+        // when we go away.
+        if (imm != null) {
+            if (visible) {
+                imm.showSoftInputUnchecked(0, null);
+            } else {
+                imm.hideSoftInputFromWindow(getWindowToken(), 0);
             }
         }
     }
@@ -478,6 +553,7 @@ public class SearchView extends LinearLayout {
                     || !mOnQueryChangeListener.onSubmitQuery(query.toString())) {
                 if (mSearchable != null) {
                     launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null, query.toString());
+                    setImeVisibility(false);
                 }
             }
         }
@@ -485,7 +561,14 @@ public class SearchView extends LinearLayout {
 
     private void onCloseClicked() {
         if (mOnCloseListener == null || !mOnCloseListener.onClose()) {
-            mQueryTextView.setText("");
+            CharSequence text = mQueryTextView.getText();
+            if (TextUtils.isEmpty(text)) {
+                // query field already empty, hide the keyboard and remove focus
+                mQueryTextView.clearFocus();
+                setImeVisibility(false);
+            } else {
+                mQueryTextView.setText("");
+            }
             updateViewsVisibility(mIconifiedByDefault);
         }
     }
@@ -493,6 +576,7 @@ public class SearchView extends LinearLayout {
     private void onSearchClicked() {
         mQueryTextView.requestFocus();
         updateViewsVisibility(false);
+        setImeVisibility(true);
     }
 
     private final OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
@@ -503,7 +587,10 @@ public class SearchView extends LinearLayout {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (DBG)
                 Log.d(LOG_TAG, "onItemClick() position " + position);
-            launchSuggestion(position, KeyEvent.KEYCODE_UNKNOWN, null);
+            if (mOnSuggestionListener == null
+                    || !mOnSuggestionListener.onSuggestionClicked(position)) {
+                launchSuggestion(position, KeyEvent.KEYCODE_UNKNOWN, null);
+            }
         }
     };
 
@@ -517,7 +604,10 @@ public class SearchView extends LinearLayout {
                 Log.d(LOG_TAG, "onItemSelected() position " + position);
             // A suggestion has been selected, rewrite the query if possible,
             // otherwise the restore the original query.
-            rewriteQueryFromSuggestion(position);
+            if (mOnSuggestionListener == null
+                    || !mOnSuggestionListener.onSuggestionSelected(position)) {
+                rewriteQueryFromSuggestion(position);
+            }
         }
 
         /**
@@ -722,13 +812,4 @@ public class SearchView extends LinearLayout {
         public void afterTextChanged(Editable s) {
         }
     };
-
-    /*
-     * Avoid getting focus when searching for something to focus on.
-     * The user will have to touch the text view to get focus.
-     */
-    protected boolean onRequestFocusInDescendants(int direction,
-            Rect previouslyFocusedRect) {
-        return false;
-    }
- }
+}

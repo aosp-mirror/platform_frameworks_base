@@ -96,7 +96,6 @@ class ActivityRecord extends IApplicationToken.Stub {
     int configChangeFlags;  // which config values have changed
     boolean keysPaused;     // has key dispatching been paused for it?
     boolean inHistory;      // are we in the history stack?
-    boolean persistent;     // requested to be persistent?
     int launchMode;         // the launch mode activity attribute.
     boolean visible;        // does this activity's window need to be shown?
     boolean waitingVisible; // true if waiting for a new act to become vis
@@ -161,7 +160,6 @@ class ActivityRecord extends IApplicationToken.Stub {
                 pw.print(" finishing="); pw.println(finishing);
         pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
                 pw.print(" inHistory="); pw.print(inHistory);
-                pw.print(" persistent="); pw.print(persistent);
                 pw.print(" immersive="); pw.print(immersive);
                 pw.print(" launchMode="); pw.println(launchMode);
         pw.print(prefix); pw.print("fullscreen="); pw.print(fullscreen);
@@ -215,7 +213,6 @@ class ActivityRecord extends IApplicationToken.Stub {
         configDestroy = false;
         keysPaused = false;
         inHistory = false;
-        persistent = false;
         visible = true;
         waitingVisible = false;
         nowVisible = false;

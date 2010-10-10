@@ -31,15 +31,13 @@ class Camera;
 
 class CameraSourceTimeLapse : public CameraSource {
 public:
-    static CameraSourceTimeLapse *Create(
-        int64_t timeBetweenTimeLapseFrameCaptureUs,
-        int32_t width, int32_t height,
-        int32_t videoFrameRate);
-
-    static CameraSourceTimeLapse *CreateFromCamera(const sp<Camera> &camera,
-        int64_t timeBetweenTimeLapseFrameCaptureUs,
-        int32_t width, int32_t height,
-        int32_t videoFrameRate);
+    static CameraSourceTimeLapse *CreateFromCamera(
+        const sp<ICamera> &camera,
+        int32_t cameraId,
+        Size videoSize,
+        int32_t videoFrameRate,
+        const sp<Surface>& surface,
+        int64_t timeBetweenTimeLapseFrameCaptureUs);
 
     virtual ~CameraSourceTimeLapse();
 
@@ -132,10 +130,13 @@ private:
     // Status code for last read.
     status_t mLastReadStatus;
 
-    CameraSourceTimeLapse(const sp<Camera> &camera,
-        int64_t timeBetweenTimeLapseFrameCaptureUs,
-        int32_t width, int32_t height,
-        int32_t videoFrameRate);
+    CameraSourceTimeLapse(
+        const sp<ICamera> &camera,
+        int32_t cameraId,
+        Size videoSize,
+        int32_t videoFrameRate,
+        const sp<Surface>& surface,
+        int64_t timeBetweenTimeLapseFrameCaptureUs);
 
     // Wrapper over CameraSource::signalBufferReturned() to implement quick stop.
     // It only handles the case when mLastReadBufferCopy is signalled. Otherwise

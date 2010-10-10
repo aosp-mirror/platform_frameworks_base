@@ -74,7 +74,8 @@ bool M3UParser::itemAt(size_t index, AString *uri, sp<AMessage> *meta) {
 static bool MakeURL(const char *baseURL, const char *url, AString *out) {
     out->clear();
 
-    if (strncasecmp("http://", baseURL, 7)) {
+    if (strncasecmp("http://", baseURL, 7)
+            && strncasecmp("file://", baseURL, 7)) {
         // Base URL must be absolute
         return false;
     }
@@ -128,7 +129,12 @@ status_t M3UParser::parse(const void *_data, size_t size) {
             line.setTo(&data[offset], offsetLF - offset);
         }
 
-        LOGI("#%s#", line.c_str());
+        // LOGI("#%s#", line.c_str());
+
+        if (line.empty()) {
+            offset = offsetLF + 1;
+            continue;
+        }
 
         if (lineNo == 0 && line == "#EXTM3U") {
             mIsExtM3U = true;
@@ -152,11 +158,20 @@ status_t M3UParser::parse(const void *_data, size_t size) {
                     return ERROR_MALFORMED;
                 }
                 err = parseMetaData(line, &itemMeta, "duration");
+            } else if (line.startsWith("#EXT-X-DISCONTINUITY")) {
+                if (mIsVariantPlaylist) {
+                    return ERROR_MALFORMED;
+                }
+                if (itemMeta == NULL) {
+                    itemMeta = new AMessage;
+                }
+                itemMeta->setInt32("discontinuity", true);
             } else if (line.startsWith("#EXT-X-STREAM-INF")) {
                 if (mMeta != NULL) {
                     return ERROR_MALFORMED;
                 }
                 mIsVariantPlaylist = true;
+                err = parseStreamInf(line, &itemMeta);
             }
 
             if (err != OK) {
@@ -210,6 +225,61 @@ status_t M3UParser::parseMetaData(
         *meta = new AMessage;
     }
     (*meta)->setInt32(key, x);
+
+    return OK;
+}
+
+// static
+status_t M3UParser::parseStreamInf(
+        const AString &line, sp<AMessage> *meta) {
+    ssize_t colonPos = line.find(":");
+
+    if (colonPos < 0) {
+        return ERROR_MALFORMED;
+    }
+
+    size_t offset = colonPos + 1;
+
+    while (offset < line.size()) {
+        ssize_t end = line.find(",", offset);
+        if (end < 0) {
+            end = line.size();
+        }
+
+        AString attr(line, offset, end - offset);
+        attr.trim();
+
+        offset = end + 1;
+
+        ssize_t equalPos = attr.find("=");
+        if (equalPos < 0) {
+            continue;
+        }
+
+        AString key(attr, 0, equalPos);
+        key.trim();
+
+        AString val(attr, equalPos + 1, attr.size() - equalPos - 1);
+        val.trim();
+
+        LOGV("key=%s value=%s", key.c_str(), val.c_str());
+
+        if (!strcasecmp("bandwidth", key.c_str())) {
+            const char *s = val.c_str();
+            char *end;
+            unsigned long x = strtoul(s, &end, 10);
+
+            if (end == s || *end != '\0') {
+                // malformed
+                continue;
+            }
+
+            if (meta->get() == NULL) {
+                *meta = new AMessage;
+            }
+            (*meta)->setInt32("bandwidth", x);
+        }
+    }
 
     return OK;
 }

@@ -551,6 +551,10 @@
              anchor for positioning the cursor within text. -->
         <attr name="textSelectHandle" format="reference" />
 
+        <!-- Theme to use for dialogs spawned from this theme. -->
+        <attr name="dialogTheme" format="reference" />
+        <!-- Theme to use for alert dialogs spawned from this theme. -->
+        <attr name="alertDialogTheme" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2605,8 +2609,10 @@
 
     <!-- @hide -->
     <declare-styleable name="WeightedLinearLayout">
-        <attr name="majorWeight" format="float" />
-        <attr name="minorWeight" format="float" />
+        <attr name="majorWeightMin" format="float" />
+        <attr name="minorWeightMin" format="float" />
+        <attr name="majorWeightMax" format="float" />
+        <attr name="minorWeightMax" format="float" />
     </declare-styleable>
 
     <!-- ========================= -->

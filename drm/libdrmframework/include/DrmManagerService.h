@@ -46,6 +46,10 @@ private:
     virtual ~DrmManagerService();
 
 public:
+    int addUniqueId(int uniqueId);
+
+    void removeUniqueId(int uniqueId);
+
     status_t loadPlugIns(int uniqueId);
 
     status_t loadPlugIns(int uniqueId, const String8& plugInDirPath);
@@ -65,7 +69,7 @@ public:
 
     DrmInfo* acquireDrmInfo(int uniqueId, const DrmInfoRequest* drmInforequest);
 
-    void saveRights(int uniqueId, const DrmRights& drmRights,
+    status_t saveRights(int uniqueId, const DrmRights& drmRights,
             const String8& rightsPath, const String8& contentPath);
 
     String8 getOriginalMimeType(int uniqueId, const String8& path);
@@ -74,17 +78,17 @@ public:
 
     int checkRightsStatus(int uniqueId, const String8& path,int action);
 
-    void consumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
+    status_t consumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
 
-    void setPlaybackStatus(
+    status_t setPlaybackStatus(
             int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int position);
 
     bool validateAction(int uniqueId, const String8& path,
             int action, const ActionDescription& description);
 
-    void removeRights(int uniqueId, const String8& path);
+    status_t removeRights(int uniqueId, const String8& path);
 
-    void removeAllRights(int uniqueId);
+    status_t removeAllRights(int uniqueId);
 
     int openConvertSession(int uniqueId, const String8& mimeType);
 
@@ -96,15 +100,15 @@ public:
 
     DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length);
 
-    void closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
+    status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 
-    void initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
+    status_t initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
             int decryptUnitId, const DrmBuffer* headerInfo);
 
-    status_t decrypt(int uniqueId, DecryptHandle* decryptHandle,
-            int decryptUnitId, const DrmBuffer* encBuffer, DrmBuffer** decBuffer);
+    status_t decrypt(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId,
+            const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV);
 
-    void finalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
+    status_t finalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
 
     ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
             void* buffer, ssize_t numBytes, off_t offset);

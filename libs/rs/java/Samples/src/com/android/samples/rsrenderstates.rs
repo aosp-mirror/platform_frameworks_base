@@ -67,18 +67,6 @@ rs_program_vertex gProgVertexCustom;
 rs_program_fragment gProgFragmentCustom;
 rs_program_fragment gProgFragmentMultitex;
 
-#pragma rs export_var(gProgVertex, gProgFragmentColor, gProgFragmentTexture)
-#pragma rs export_var(gProgStoreBlendNoneDepth, gProgStoreBlendNone, gProgStoreBlendAlpha, gProgStoreBlendAdd)
-#pragma rs export_var(gTexOpaque, gTexTorus, gTexTransparent, gTexChecker)
-#pragma rs export_var(gMbyNMesh, gTorusMesh)
-#pragma rs export_var(gFontSans, gFontSerif, gFontSerifBold, gFontSerifItalic, gFontSerifBoldItalic, gFontMono, gTextAlloc)
-#pragma rs export_var(gLinearClamp, gLinearWrap, gMipLinearWrap, gMipLinearAniso8, gMipLinearAniso15, gNearestClamp)
-#pragma rs export_var(gCullBack, gCullFront, gCullNone)
-#pragma rs export_var(gVSConstants, gFSConstants, gVSInputs, gProgVertexCustom, gProgFragmentCustom, gProgFragmentMultitex)
-
-//What we are showing
-#pragma rs export_var(gDisplayMode)
-
 float gDt = 0;
 
 void init() {

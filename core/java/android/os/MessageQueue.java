@@ -34,16 +34,19 @@ public class MessageQueue {
     Message mMessages;
     private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
     private IdleHandler[] mPendingIdleHandlers;
-    private boolean mQuiting = false;
+    private boolean mQuiting;
     boolean mQuitAllowed = true;
+
+    // Indicates whether next() is blocked waiting in pollOnce() with a non-zero timeout.
+    private boolean mBlocked;
 
     @SuppressWarnings("unused")
     private int mPtr; // used by native code
     
     private native void nativeInit();
     private native void nativeDestroy();
-    private native boolean nativePollOnce(int timeoutMillis);
-    private native void nativeWake();
+    private native void nativePollOnce(int ptr, int timeoutMillis);
+    private native void nativeWake(int ptr);
 
     /**
      * Callback interface for discovering when a thread is going to block
@@ -113,7 +116,7 @@ public class MessageQueue {
             if (nextPollTimeoutMillis != 0) {
                 Binder.flushPendingCommands();
             }
-            nativePollOnce(nextPollTimeoutMillis);
+            nativePollOnce(mPtr, nextPollTimeoutMillis);
 
             synchronized (this) {
                 // Try to retrieve the next message.  Return if found.
@@ -122,7 +125,9 @@ public class MessageQueue {
                 if (msg != null) {
                     final long when = msg.when;
                     if (now >= when) {
+                        mBlocked = false;
                         mMessages = msg.next;
+                        msg.next = null;
                         if (Config.LOGV) Log.v("MessageQueue", "Returning message: " + msg);
                         msg.markInUse();
                         return msg;
@@ -139,6 +144,7 @@ public class MessageQueue {
                 }
                 if (pendingIdleHandlerCount == 0) {
                     // No idle handlers to run.  Loop and wait some more.
+                    mBlocked = true;
                     continue;
                 }
 
@@ -185,6 +191,7 @@ public class MessageQueue {
         if (msg.target == null && !mQuitAllowed) {
             throw new RuntimeException("Main thread not allowed to quit");
         }
+        final boolean needWake;
         synchronized (this) {
             if (mQuiting) {
                 RuntimeException e = new RuntimeException(
@@ -201,6 +208,7 @@ public class MessageQueue {
             if (p == null || when == 0 || when < p.when) {
                 msg.next = p;
                 mMessages = msg;
+                needWake = mBlocked; // new head, might need to wake up
             } else {
                 Message prev = null;
                 while (p != null && p.when <= when) {
@@ -209,9 +217,12 @@ public class MessageQueue {
                 }
                 msg.next = prev.next;
                 prev.next = msg;
+                needWake = false; // still waiting on head, no need to wake up
             }
         }
-        nativeWake();
+        if (needWake) {
+            nativeWake(mPtr);
+        }
         return true;
     }
 

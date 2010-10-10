@@ -20,7 +20,7 @@
 #include <SkShader.h>
 
 #include "Texture.h"
-#include "GenerationCache.h"
+#include "utils/GenerationCache.h"
 
 namespace android {
 namespace uirenderer {

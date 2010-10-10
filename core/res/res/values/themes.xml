@@ -137,6 +137,8 @@
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
+        <item name="dialogTheme">@android:style/Theme.Dialog</item>
+        <item name="alertDialogTheme">@android:style/Theme.Dialog.Alert</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -156,8 +158,8 @@
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_middle</item>
-        <item name="textSelectHandleRight">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_left</item>
+        <item name="textSelectHandleRight">@android:drawable/text_select_handle_right</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@android:style/Widget.TextSelectHandle</item>
 
@@ -689,9 +691,9 @@
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_dark</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_dark</item>
 
-        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background</item>
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_holo_dark</item>
 
-        <item name="activatedBackgroundIndicator">@android:drawable/activated_background</item>
+        <item name="activatedBackgroundIndicator">@android:drawable/list_selector_activated_holo_dark</item>
 
         <item name="listDividerAlertDialog">@android:drawable/divider_horizontal_holo_dark</item>
 
@@ -715,7 +717,7 @@
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
         <item name="windowIsFloating">false</item>
-        <item name="windowContentOverlay">@android:drawable/title_bar_shadow</item>
+        <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@android:style/WindowTitle.Holo</item>
         <item name="windowTitleSize">25dip</item>
@@ -727,6 +729,8 @@
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog.Holo</item>
+        <item name="dialogTheme">@android:style/Theme.Holo.Dialog</item>
+        <item name="alertDialogTheme">@android:style/Theme.Holo.Dialog.Alert</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -907,15 +911,15 @@
         <item name="listPreferredItemHeight">64dip</item>
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
-        <item name="listDivider">@drawable/divider_horizontal_holo_dark</item>
+        <item name="listDivider">@drawable/divider_horizontal_holo_light</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.Holo.Light.TextView.ListSeparator</item>   
 
-        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio</item>
-        <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check</item>
+        <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_light</item>
+        <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check_holo_light</item>
 
-        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background</item>
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_holo_light</item>
 
-        <item name="activatedBackgroundIndicator">@android:drawable/activated_background</item>
+        <item name="activatedBackgroundIndicator">@android:drawable/list_selector_activated_holo_light</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">
@@ -928,7 +932,7 @@
         <item name="expandableListPreferredChildIndicatorRight">
                 ?android:attr/expandableListPreferredItemIndicatorRight</item>
 
-        <item name="listDividerAlertDialog">@android:drawable/divider_horizontal_holo_dark</item>
+        <item name="listDividerAlertDialog">@android:drawable/divider_horizontal_holo_light</item>
 
         <!-- Gallery attributes -->
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
@@ -939,7 +943,7 @@
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
         <item name="windowIsFloating">false</item>
-        <item name="windowContentOverlay">@android:drawable/title_bar_shadow</item>
+        <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@android:style/WindowTitle.Holo</item>
         <item name="windowTitleSize">25dip</item>
@@ -950,7 +954,9 @@
         <item name="windowActionModeOverlay">false</item>
 
         <!-- Dialog attributes -->
-        <item name="alertDialogStyle">@android:style/AlertDialog.Holo</item>
+        <item name="alertDialogStyle">@android:style/AlertDialog.Holo.Light</item>
+        <item name="dialogTheme">@android:style/Theme.Holo.Light.Dialog</item>
+        <item name="alertDialogTheme">@android:style/Theme.Holo.Light.Dialog.Alert</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -1024,8 +1030,8 @@
         <item name="quickContactBadgeStyleSmallWindowSmall">@android:style/Widget.Holo.QuickContactBadgeSmall.WindowSmall</item>
         <item name="quickContactBadgeStyleSmallWindowMedium">@android:style/Widget.Holo.QuickContactBadgeSmall.WindowMedium</item>
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
-        <item name="listPopupWindowStyle">@android:style/Widget.Holo.ListPopupWindow</item>
-        <item name="popupMenuStyle">@android:style/Widget.Holo.PopupMenu</item>
+        <item name="listPopupWindowStyle">@android:style/Widget.Holo.Light.ListPopupWindow</item>
+        <item name="popupMenuStyle">@android:style/Widget.Holo.Light.PopupMenu</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
@@ -1101,7 +1107,7 @@
     <style name="Theme.Holo.Dialog">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
-        <item name="android:windowBackground">@android:drawable/dialog_full_holo</item>
+        <item name="android:windowBackground">@android:drawable/dialog_full_holo_dark</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Holo.Dialog</item>
@@ -1135,6 +1141,42 @@
     <style name="Theme.Holo.Dialog.Alert">
         <item name="windowBackground">@android:color/transparent</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
+        <item name="windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Light holo dialog themes -->
+
+    <!-- Holo light theme for dialog windows and activities, which is used by the
+         {@link android.app.Dialog} class.  This changes the window to be
+         floating (not fill the entire screen), and puts a frame around its
+         contents.  You can set this theme on an activity if you would like to
+         make an activity that looks like a Dialog.
+         This is the default Dialog theme for applications targeting Honeycomb
+         or newer. -->
+    <style name="Theme.Holo.Light.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowTitleStyle">@android:style/DialogWindowTitle.Holo.Light</item>
+        <item name="android:windowBackground">@android:drawable/dialog_full_holo_light</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Holo.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:windowActionBar">false</item>
+
+        <item name="android:colorBackgroundCacheHint">@null</item>
+
+        <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>
+        <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
+    </style>
+
+    <!-- Holo light theme for alert dialog windows, which is used by the
+         {@link android.app.AlertDialog} class.  This is basically a dialog
+         but sets the background to empty so it can do two-tone backgrounds.
+         For applications targeting Honeycomb or newer, this is the default
+         AlertDialog theme. -->
+    <style name="Theme.Holo.Light.Dialog.Alert">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo.Light</item>
         <item name="windowContentOverlay">@null</item>
     </style>
 

@@ -29,8 +29,6 @@ typedef struct ListAllocs_s {
 
 ListAllocs *gList;
 
-#pragma rs export_var(gDY, gFont, gList)
-
 void init() {
     gDY = 0.0f;
 }
