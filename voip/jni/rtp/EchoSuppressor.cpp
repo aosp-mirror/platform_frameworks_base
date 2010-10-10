@@ -158,11 +158,12 @@ void EchoSuppressor::run(int16_t *playbacked, int16_t *recorded)
     if (correlation > 0.3f) {
         float factor = 1.0f - correlation;
         factor *= factor;
+        factor /= 2.0; // suppress harder
         for (int i = 0; i < mSampleCount; ++i) {
             recorded[i] *= factor;
         }
     }
-//    LOGI("latency %5d, correlation %.10f", latency, correlation);
+    //LOGI("latency %5d, correlation %.10f", latency, correlation);
 
 
     // Increase RecordOffset.
