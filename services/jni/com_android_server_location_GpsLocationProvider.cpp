@@ -326,29 +326,45 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
 
 static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject obj)
 {
-    sGpsInterface->cleanup();
+    const GpsInterface* interface = GetGpsInterface();
+    if (interface)
+        interface->cleanup();
 }
 
 static jboolean android_location_GpsLocationProvider_set_position_mode(JNIEnv* env, jobject obj,
         jint mode, jint recurrence, jint min_interval, jint preferred_accuracy, jint preferred_time)
 {
-    return (sGpsInterface->set_position_mode(mode, recurrence, min_interval, preferred_accuracy,
-            preferred_time) == 0);
+    const GpsInterface* interface = GetGpsInterface();
+    if (interface)
+        return (interface->set_position_mode(mode, recurrence, min_interval, preferred_accuracy,
+                preferred_time) == 0);
+    else
+        return false;
 }
 
 static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject obj)
 {
-    return (sGpsInterface->start() == 0);
+    const GpsInterface* interface = GetGpsInterface();
+    if (interface)
+        return (interface->start() == 0);
+    else
+        return false;
 }
 
 static jboolean android_location_GpsLocationProvider_stop(JNIEnv* env, jobject obj)
 {
-    return (sGpsInterface->stop() == 0);
+    const GpsInterface* interface = GetGpsInterface();
+    if (interface)
+        return (interface->stop() == 0);
+    else
+        return false;
 }
 
 static void android_location_GpsLocationProvider_delete_aiding_data(JNIEnv* env, jobject obj, jint flags)
 {
-    sGpsInterface->delete_aiding_data(flags);
+    const GpsInterface* interface = GetGpsInterface();
+    if (interface)
+        interface->delete_aiding_data(flags);
 }
 
 static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, jobject obj,
@@ -456,19 +472,26 @@ static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject 
 static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobject obj,
         jlong time, jlong timeReference, jint uncertainty)
 {
-    sGpsInterface->inject_time(time, timeReference, uncertainty);
+    const GpsInterface* interface = GetGpsInterface();
+    if (interface)
+        interface->inject_time(time, timeReference, uncertainty);
 }
 
 static void android_location_GpsLocationProvider_inject_location(JNIEnv* env, jobject obj,
         jdouble latitude, jdouble longitude, jfloat accuracy)
 {
-    sGpsInterface->inject_location(latitude, longitude, accuracy);
+    const GpsInterface* interface = GetGpsInterface();
+    if (interface)
+        interface->inject_location(latitude, longitude, accuracy);
 }
 
 static jboolean android_location_GpsLocationProvider_supports_xtra(JNIEnv* env, jobject obj)
 {
     if (!sGpsXtraInterface) {
-        sGpsXtraInterface = (const GpsXtraInterface*)sGpsInterface->get_extension(GPS_XTRA_INTERFACE);
+        const GpsInterface* interface = GetGpsInterface();
+        if (!interface)
+            return false;
+        sGpsXtraInterface = (const GpsXtraInterface*)interface->get_extension(GPS_XTRA_INTERFACE);
         if (sGpsXtraInterface) {
             int result = sGpsXtraInterface->init(&sGpsXtraCallbacks);
             if (result) {
