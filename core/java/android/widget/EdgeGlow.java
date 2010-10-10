@@ -38,7 +38,7 @@ public class EdgeGlow {
     // Time it will take for a pulled glow to decay to partial strength before release
     private static final int PULL_DECAY_TIME = 10000;
 
-    private static final float MAX_ALPHA = 1.f;
+    private static final float MAX_ALPHA = 0.8f;
     private static final float HELD_EDGE_ALPHA = 0.7f;
     private static final float HELD_EDGE_SCALE_Y = 0.5f;
     private static final float HELD_GLOW_ALPHA = 0.5f;
@@ -145,10 +145,9 @@ public class EdgeGlow {
         mEdgeScaleY = mEdgeScaleYStart = Math.max(
                 HELD_EDGE_SCALE_Y, Math.min(distance * PULL_DISTANCE_EDGE_FACTOR, 1.f));
 
-        mGlowAlpha = mGlowAlphaStart = Math.min(
+        mGlowAlpha = mGlowAlphaStart = Math.min(MAX_ALPHA,
                 mGlowAlpha +
-                (Math.abs(deltaDistance) * PULL_DISTANCE_ALPHA_GLOW_FACTOR),
-                MAX_ALPHA);
+                (Math.abs(deltaDistance) * PULL_DISTANCE_ALPHA_GLOW_FACTOR));
 
         float glowChange = Math.abs(deltaDistance);
         if (deltaDistance > 0 && mPullDistance < 0) {
@@ -157,8 +156,10 @@ public class EdgeGlow {
         if (mPullDistance == 0) {
             mGlowScaleY = 0;
         }
-        mGlowScaleY = mGlowScaleYStart = Math.max(
-                0, mGlowScaleY + glowChange * PULL_DISTANCE_GLOW_FACTOR);
+
+        // Do not allow glow to get larger than MAX_GLOW_HEIGHT.
+        mGlowScaleY = mGlowScaleYStart = Math.min(MAX_GLOW_HEIGHT, Math.max(
+                0, mGlowScaleY + glowChange * PULL_DISTANCE_GLOW_FACTOR));
 
         mEdgeAlphaFinish = mEdgeAlpha;
         mEdgeScaleYFinish = mEdgeScaleY;

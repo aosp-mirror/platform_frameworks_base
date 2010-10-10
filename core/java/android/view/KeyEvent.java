@@ -46,10 +46,12 @@ import android.view.KeyCharacterMap.KeyData;
  * with the special action {@link #ACTION_MULTIPLE} that either specifies
  * that single repeated key code or a sequence of characters to insert.
  * </p><p>
- * In general, the framework makes no guarantees that the key events delivered
- * to a view constitute a complete key press.  In particular, there is no
- * guarantee that a view will always receive a key event with {@link #ACTION_UP}
- * for each {@link #ACTION_DOWN} that was delivered.
+ * In general, the framework cannot guarantee that the key events it delivers
+ * to a view always constitute complete key sequences since some events may be dropped
+ * or modified by containing views before they are delivered.  The view implementation
+ * should be prepared to handle {@link #FLAG_CANCELED} and should tolerate anomalous
+ * situations such as receiving a new {@link #ACTION_DOWN} without first having
+ * received an {@link #ACTION_UP} for the prior key press.
  * </p><p>
  * Refer to {@link InputDevice} for more information about how different kinds of
  * input devices and sources represent keys and buttons.

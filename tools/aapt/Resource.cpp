@@ -835,7 +835,9 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
     bool hasErrors = false;
 
     if (drawables != NULL) {
-        err = preProcessImages(bundle, assets, drawables);
+        if (bundle->getOutputAPKFile() != NULL) {
+            err = preProcessImages(bundle, assets, drawables);
+        }
         if (err == NO_ERROR) {
             err = makeFileResources(bundle, assets, &table, drawables, "drawable");
             if (err != NO_ERROR) {

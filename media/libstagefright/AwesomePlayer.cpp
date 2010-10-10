@@ -876,12 +876,19 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
     return OK;
 }
 
+// static
+void AwesomePlayer::OnRTSPSeekDoneWrapper(void *cookie) {
+    static_cast<AwesomePlayer *>(cookie)->onRTSPSeekDone();
+}
+
+void AwesomePlayer::onRTSPSeekDone() {
+    notifyListener_l(MEDIA_SEEK_COMPLETE);
+    mSeekNotificationSent = true;
+}
+
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     if (mRTSPController != NULL) {
-        mRTSPController->seek(timeUs);
-
-        notifyListener_l(MEDIA_SEEK_COMPLETE);
-        mSeekNotificationSent = true;
+        mRTSPController->seekAsync(timeUs, OnRTSPSeekDoneWrapper, this);
         return OK;
     }
 

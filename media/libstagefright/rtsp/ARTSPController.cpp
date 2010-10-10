@@ -27,7 +27,10 @@ namespace android {
 
 ARTSPController::ARTSPController(const sp<ALooper> &looper)
     : mState(DISCONNECTED),
-      mLooper(looper) {
+      mLooper(looper),
+      mSeekDoneCb(NULL),
+      mSeekDoneCookie(NULL),
+      mLastSeekCompletedTimeUs(-1) {
     mReflector = new AHandlerReflector<ARTSPController>(this);
     looper->registerHandler(mReflector);
 }
@@ -80,14 +83,31 @@ void ARTSPController::disconnect() {
     mHandler.clear();
 }
 
-void ARTSPController::seek(int64_t timeUs) {
+void ARTSPController::seekAsync(
+        int64_t timeUs,
+        void (*seekDoneCb)(void *), void *cookie) {
     Mutex::Autolock autoLock(mLock);
 
-    if (mState != CONNECTED) {
+    CHECK(seekDoneCb != NULL);
+    CHECK(mSeekDoneCb == NULL);
+
+    // Ignore seek requests that are too soon after the previous one has
+    // completed, we don't want to swamp the server.
+
+    bool tooEarly =
+        mLastSeekCompletedTimeUs >= 0
+            && ALooper::GetNowUs() < mLastSeekCompletedTimeUs + 500000ll;
+
+    if (mState != CONNECTED || tooEarly) {
+        (*seekDoneCb)(cookie);
         return;
     }
 
-    mHandler->seek(timeUs);
+    mSeekDoneCb = seekDoneCb;
+    mSeekDoneCookie = cookie;
+
+    sp<AMessage> msg = new AMessage(kWhatSeekDone, mReflector->id());
+    mHandler->seek(timeUs, msg);
 }
 
 size_t ARTSPController::countTracks() {
@@ -129,6 +149,19 @@ void ARTSPController::onMessageReceived(const sp<AMessage> &msg) {
             Mutex::Autolock autoLock(mLock);
             mState = DISCONNECTED;
             mCondition.signal();
+            break;
+        }
+
+        case kWhatSeekDone:
+        {
+            LOGI("seek done");
+
+            mLastSeekCompletedTimeUs = ALooper::GetNowUs();
+
+            void (*seekDoneCb)(void *) = mSeekDoneCb;
+            mSeekDoneCb = NULL;
+
+            (*seekDoneCb)(mSeekDoneCookie);
             break;
         }
 

@@ -1,0 +1,419 @@
+page.title=Targetting Android Devices
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Quickview</h2>
+<ul>
+  <li>You can target your web page for different screens using viewport metadata, CSS, and
+JavaScript</li>
+  <li>Techniques in this document work for Android 2.0 and greater</li>
+</ul>
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#Metadata">Using Viewport Metadata</a>
+  <ol>
+    <li><a href="#ViewportSize">Defining the viewport size</a></li>
+    <li><a href="#ViewportScale">Defining the viewport scale</a></li>
+    <li><a href="#ViewportDensity">Defining the viewport target density</a></li>
+  </ol>
+</li>
+<li><a href="#DensityCSS">Targetting Device Density with CSS</a></li>
+<li><a href="#DensityJS">Targetting Device Density with JavaScript</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>If you're developing a web application for Android or redesigning one for mobile devices, you
+should account for some factors that affect the way the Android Browser renders your web page by
+default. There are two fundamental factors that you should account for:</p>
+
+<dl>
+  <dt>The size of the viewport and scale of the web page</dt>
+    <dd>When the Android Browser loads a web page, the default behavior is to load the
+page in "overview mode," which provides a zoomed-out perspective of the web page. You can override
+this behavior for your web page by defining the default dimensions of the viewport or the initial
+scale of the viewport. You can also control how much the user can zoom in and out of your web
+page, if at all.
+    <p>However, the user can also disable overview mode in the
+Browser settings, so you should not assume that your page will load in overview mode. You
+should instead customize the viewport size and/or scale as appropriate for your page.</p></dd>
+
+  <dt>The device's screen density</dt>
+    <dd>The screen density (the number of pixels per inch) on an Android-powered device affects
+the resolution and size at which a web page is displayed. (There are three screen density
+categories: low, medium, and high.) The Android Browser compensates for variations in the screen
+density by scaling a web page so that all devices display the web page at the same perceivable size
+as a medium-density screen. If graphics are an important element of your web design, you
+should pay close attention to the scaling that occurs on different densities, because image scaling
+can produce artifacts (blurring and pixelation). 
+      <p>To provide the best visual representation on all
+screen densities, you should control how scaling occurs by providing viewport metadata about
+your web page's target screen density and providing alternative graphics for different screen
+densities, which you can apply to different screens using CSS or JavaScript.</p></dd>
+</dl>
+
+<p>The rest of this document describes how you can account for these effects, and how to target
+your web page for specific screen configurations.</p>
+
+<p class="note"><strong>Note:</strong> The features described in this document are supported
+by the Android Browser application on Android 2.0 and greater. Third-party web browsers running on
+Android might not support these techniques for controlling the viewport size and targetting
+screen densities.</p>
+
+
+
+<h2 id="Metadata">Using Viewport Metadata</h2>
+
+<p>The viewport is the area in which the Android Browser
+draws a web page. Although the viewport's visible area matches the size of the screen,
+the viewport has its own dimensions that determine the number of pixels available to a web page.
+That is, the number of pixels available to a web page before it exceeds the screen area is
+defined by the dimensions of the viewport,
+not the dimensions of the device screen. For example, although a device screen might have a width of
+480 pixels, the viewport can have a width of 800 pixels, so that a web page designed to be 800
+pixels wide is completely visible on the screen.</p>
+
+<p>You can define properties of the viewport for your web page using the {@code "viewport"}
+property in an HTML {@code &lt;meta&gt;} tag (which must
+be placed in your document {@code &lt;head&gt;}). You can define multiple viewport properties in the
+{@code &lt;meta&gt;} tag's {@code content} attribute. For example, you can define the height and
+width of the viewport, the initial scale of the page, and the target screen density.
+Each viewport property in the {@code content} attribute must be separated by a comma.</p>
+
+<p>For example, the following snippet from an HTML document specifies that the viewport width
+should exactly match the device screen width and that the ability to zoom should be disabled:</p>
+
+<pre>
+&lt;head&gt;
+    &lt;title&gt;Example&lt;/title&gt;
+    &lt;meta name="viewport" content="width=device-width, user-scalable=no" /&gt;
+&lt;/head&gt;
+</pre>
+
+<p>That's an example of just two viewport properties. The following syntax shows all of the
+supported viewport properties and the general types of values accepted by each one:</p>
+
+<pre>
+&lt;meta name="viewport"
+      content="
+          <b>height</b> = [<em>pixel_value</em> | device-height] ,
+          <b>width</b> = [<em>pixel_value</em> | device-width ] ,
+          <b>initial-scale</b> = <em>float_value</em> ,
+          <b>minimum-scale</b> = <em>float_value</em> ,
+          <b>maximum-scale</b> = <em>float_value</em> ,
+          <b>user-scalable</b> = [yes | no] ,
+          <b>target-densitydpi</b> = [<em>dpi_value</em> | device-dpi |
+                               high-dpi | medium-dpi | low-dpi]
+          " /&gt;
+</pre>
+
+<p>The following sections discuss how to use each of these viewport properties and exactly what the
+accepted values are.</p>
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/webapps/compare-default.png" alt="" height="300" />
+  <p class="img-caption"><strong>Figure 1.</strong> A web page with no viewport metadata and an
+image that's 320 pixels wide (the viewport is 800 pixels wide, by default).</p>
+</div>
+
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/webapps/compare-width400.png" alt="" height="300" />
+  <p class="img-caption"><strong>Figure 2.</strong> A web page with viewport {@code width=400}
+(the image in the web page is 320 pixels wide).</p>
+</div>
+
+
+<h3 id="ViewportSize">Defining the viewport size</h3>
+
+<p>Viewport's {@code height} and {@code width} properties allow you to specify the size of the
+viewport (the number of pixels available to the web page before it goes off screen). By default, the
+Android Browser's minimum viewport width is 800 pixels, so if your web
+page specifies its size to be 320 pixels wide, then your page renders smaller than the visible
+screen (even if the physical screen is 320 pixels wide, because the viewport simulates a
+drawable area that's 800 pixels wide), as shown in figure 1. So, you should explicitly define the
+viewport {@code width} to match the width for which you have designed your web page.</p>
+
+<p class="note"><strong>Note:</strong> Width values that are greater than 10,000 are ignored and
+values less than (or equal to) 320 result in a value equal to the device-width. Height values that
+are greater then 10,000 or less than 200 are also ignored.</p>
+
+<p>For example, if your web page is designed to be exactly 320 pixels wide, then you might
+want to specify that for the viewport width:</p>
+
+<pre>
+&lt;meta name="viewport" content="width=320" /&gt;
+</pre>
+
+<p>In this case, your web page exactly fits the screen width, because the web page width and
+viewport width are the same.</p>
+
+<p>To demonstrate how this property affects the size of
+your web page, figure 2 shows a web page that contains an image that's 320 pixels wide, but with the
+viewport width set to 400.</p>
+
+
+<p class="note"><strong>Note:</strong> If you set the viewport width to match your web page width
+and the device screen width does <em>not</em> match those dimensions, then the web page
+still fits the screen even if the device has a high or low-density screen, because the
+Android Browser scales web pages to match the perceived size on a medium-density
+screen, by default (as you can see in figure 2, when comparing the hdpi device to the mdpi device).
+Screen densities are discussed more in <a href="#ViewportDensity">Defining the viewport target
+density</a>.</p>
+
+
+<h4>Automatic sizing</h4>
+
+<p>As an alternative to specifying the viewport dimensions with exact pixels, you can set the
+viewport size to always match the dimensions of the device screen, by defining the
+viewport properties {@code height}
+and {@code width} with the values {@code device-height} and {@code device-width}, respectively. This
+is appropriate when you're developing a web application that has a fluid width (not fixed width),
+but you want it to appear as if it's fixed (to perfectly fit every screen as
+if the web page width is set to match each screen). For example:</p>
+
+<pre>
+&lt;meta name="viewport" content="width=device-width" /&gt;
+</pre>
+
+<p>This results in the viewport width matching whatever the current screen width is, as shown in
+figure 3. It's important to notice that, this results in images being scaled to fit the screen
+when the current device does not match the <a href="#ViewportDensity">target
+density</a>, which is medium-density if you don't specify otherwise. As a result, the image
+displayed on the high-density device in figure 3 is scaled up in order to match the width
+of a screen with a medium-density screen.</p>
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/webapps/compare-initialscale.png" alt="" height="300" />
+  <p class="img-caption"><strong>Figure 3.</strong> A web page with viewport {@code
+width=device-width} <em>or</em> {@code initial-scale=1.0}.</p>
+</div>
+
+<p class="note"><strong>Note:</strong> If you instead want {@code
+device-width} and {@code device-height} to match the physical screen pixels for every device,
+instead of scaling your web page to match the target density, then you must also include
+the {@code target-densitydpi} property with a value of {@code device-dpi}. This is discussed more in
+the section about <a href="#ViewportDensity">Defining the viewport density</a>. Otherwise, simply
+using {@code device-height} and {@code device-width} to define the viewport size makes your web page
+fit every device screen, but scaling occurs on your images in order to adjust for different screen
+densities.</p>
+
+
+
+<h3 id="ViewportScale">Defining the viewport scale</h3>
+
+<p>The scale of the viewport defines the level of zoom applied to the web page. Viewport
+properties allow you to specify the scale of your web page in the following ways:</p>
+<dl>
+  <dt>{@code initial-scale}</dt>
+  <dd>The initial scale of the page. The value is a float that indicates a multiplier for your web
+page size, relative to the screen size. For example, if you set the initial scale to "1.0" then the
+web page is displayed to match the resolution of the <a href="#ViewportDensity">target
+density</a> 1-to-1. If set to "2.0", then the page is enlarged (zoomed in) by a factor of 2.
+    <p>The default initial scale is calculated to fit the web page in the viewport size.
+Because the default viewport width is 800 pixels, if the device screen resolution is less than
+800 pixels wide, the initial scale is something less than 1.0, by default, in order to fit the
+800-pixel-wide page on the screen.</p></dd>
+
+  <dt>{@code minimum-scale}</dt>
+  <dd>The minimum scale to allow. The value is a float that indicates the minimum multiplier for
+your web page size, relative to the screen size. For example, if you set this to "1.0", then the
+page can't zoom out because the minimum size is 1-to-1 with the <a href="#ViewportDensity">target
+density</a>.</dd>
+
+  <dt>{@code maximum-scale}</dt>
+  <dd>The maximum scale to allow for the page. The value is a float that indicates the
+maximum multiplier for your web page size,
+relative to the screen size. For example, if you set this to "2.0", then the page can't
+zoom in more than 2 times the target size.</dd>
+
+  <dt>{@code user-scalable}</dt>
+  <dd>Whether the user can change the scale of the page at all (zoom in and out). Set to {@code yes}
+to allow scaling and {@code no} to disallow scaling. The default is {@code yes}. If you set
+this to {@code no}, then the {@code minimum-scale} and {@code maximum-scale} are ignored,
+because scaling is not possible.</dd>
+</dl>
+
+<p>All scale values must be within the range 0.01&ndash;10.</p>
+
+<p>For example:</p>
+
+<pre>
+&lt;meta name="viewport" content="initial-scale=1.0" /&gt;
+</pre>
+
+<p>This metadata sets the initial scale to be full sized, relative to the viewport's target
+density.</p>
+
+
+
+
+<h3 id="ViewportDensity">Defining the viewport target density</h3>
+
+<p>The density of a device's screen is based on the screen resolution. There are three screen
+density categories supported by Android: low (ldpi), medium (mdpi), and high (mdpi). A screen
+with low density has fewer available pixels per inch, whereas a screen with high density has more
+pixels per inch (compared to a medium density screen). The Android Browser targets a medium density 
+screen by default.</p>
+
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/webapps/compare-initialscale-devicedpi.png" alt="" height="300" />
+  <p class="img-caption"><strong>Figure 4.</strong> A web page with viewport {@code
+width=device-width} and {@code target-densitydpi=device-dpi}.</p>
+</div>
+
+
+<p>Because the default target density is medium, when users have a device with a low or high density
+screen, the Android Browser scales web pages (effectively zooms the pages) so they display at a
+size that matches the perceived appearance on a medium density screen. Specifically, the Android
+Browser applies approximately 1.5x scaling to web pages on a high density screen
+(because its screen pixels are smaller) and approximately 0.75x scaling to pages on a low density
+screen (because its screen pixels are bigger).</p>
+
+<p>Due to this default scaling, figures 1, 2, and 3 show the example web page at the same physical
+size on both the high and medium density device (the high-density device shows the
+web page with a default scale factor that is 1.5 times larger than the actual pixel resolution, to
+match the target density). This can introduce some undesirable artifacts in your images.
+For example, although an image appears the same size on a medium and high-density device, the image
+on the high-density device appears more blurry, because the image is designed to be 320 pixels
+wide, but is drawn with 480 pixels.</p>
+
+<p>You can change the target screen density for your web page using the {@code target-densitydpi}
+viewport property. It accepts the following values:</p>
+
+<ul>
+<li><code>device-dpi</code> - Use the device's native dpi as the target dpi. Default scaling never
+occurs.</li>
+<li><code>high-dpi</code> - Use hdpi as the target dpi. Medium and low density screens scale down
+as appropriate.</li>
+<li><code>medium-dpi</code> - Use mdpi as the target dpi. High density screens scale up and low
+density screens scale down. This is the default target density.</li>
+<li><code>low-dpi</code> - Use ldpi as the target dpi. Medium and high density screens scale up
+as appropriate.</li>
+<li><em><code>&lt;value&gt;</code></em> - Specify a dpi value to use as the target dpi. Values must
+be within the range 70&ndash;400.</li>
+</ul></p>
+
+<p>For example, to prevent the Android Browser from scaling of your web page for different screen
+densities, set
+the {@code target-densitydpi} viewport property to {@code device-dpi}. When you do, the Android
+Browser does not scale the page and, instead, displays your web page to match the current screen
+density. In this case, you should also define the viewport width to match the device width, so your
+web page naturally fits the screen size. For example:</p>
+
+<pre>
+&lt;meta name="viewport" content="target-densitydpi=device-dpi, width=device-width" /&gt;
+</pre>
+
+<p>Figure 4 shows a web page using these viewport settings&mdash;the high-density device
+now displays the page smaller because its physical pixels are smaller than those on the
+medium-density device, so no scaling occurs and the 320-pixel-wide image is drawn using exactly 320
+pixels on both screens. (This is how you should define your viewport if
+you want to customize your web page based on screen density and provide different image assets for
+different densities, <a href="#DensityCSS">with CSS</a> or
+<a href="#DensityJS">with JavaScript</a>.)</p>
+
+
+<h2 id="DensityCSS">Targetting Device Density with CSS</h2>
+
+<p>The Android Browser supports a CSS media feature that allows you to create styles for specific
+screen densities&mdash;the <code>-webkit-device-pixel-ratio</code> CSS media feature. The
+value you apply to this feature should be either
+"0.75", "1", or "1.5", to indicate that the styles are for devices with low density, medium density,
+or high density screens, respectively.</p>
+
+<p>For example, you can create separate stylesheets for each density:</p>
+
+<pre>
+&lt;link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio: 1.5)" href="hdpi.css" /&gt;
+&lt;link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio: 1.0)" href="mdpi.css" /&gt;
+&lt;link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio: 0.75)" href="ldpi.css" /&gt;
+</pre>
+
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/webapps/compare-width-devicedpi-css.png" alt="" height="300" />
+  <p class="img-caption"><strong>Figure 5.</strong> A web page with CSS that's targetted to
+specific screen densities using the {@code -webkit-device-pixel-ratio} media feature. Notice
+that the hdpi device shows a different image that's applied in CSS.</p>
+</div>
+
+<p>Or, specify the different styles in one stylesheet:</p>
+
+<pre class="no-pretty-print">
+#header {
+    background:url(medium-density-image.png);
+}
+
+&#64;media screen and (-webkit-device-pixel-ratio: 1.5) {
+    // CSS for high-density screens
+    #header {
+        background:url(high-density-image.png);
+    }
+}
+
+&#64;media screen and (-webkit-device-pixel-ratio: 0.75) {
+    // CSS for low-density screens
+    #header {
+        background:url(low-density-image.png);
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> The default style for {@code #header} applies the image
+designed for medium-density devices in order to support devices running a version of Android less
+than 2.0, which do not support the {@code -webkit-device-pixel-ratio} media feature.</p>
+
+<p>The types of styles you might want to adjust based on the screen density depend on how you've
+defined your viewport properties. To provide fully-customized styles that tailor your web page for
+each of the supported densities, you should set your viewport properties so the viewport width and
+density match the device. That is:</p>
+
+<pre>
+&lt;meta name="viewport" content="target-densitydpi=device-dpi, width=device-width" /&gt;
+</pre>
+
+<p>This way, the Android Browser does not perform scaling on your web page and the viewport width
+matches the screen width exactly. On its own, these viewport properties create results shown in
+figure 4. However, by adding some custom CSS using the {@code -webkit-device-pixel-ratio} media
+feature, you can apply different styles. For example, figure 5 shows a web page with these viewport
+properties and also some CSS added that applies a high-resolution image for high-density
+screens.</p>
+
+
+
+<h2 id="DensityJS">Targetting Device Density with JavaScript</h2>
+
+<p>The Android Browser supports a DOM property that allows you to query the density of the current
+device&mdash;the <code>window.devicePixelRatio</code> DOM property. The value of this property
+specifies the scaling factor used for the current device. For example, if the value
+of <code>window.devicePixelRatio</code> is "1.0", then the device is considered a medium density
+device and no scaling is applied by default; if the value is "1.5", then the device is
+considered a high density device and the page is scaled 1.5x by default; if the value
+is "0.75", then the device is considered a low density device and the page is scaled
+0.75x by default. Of course, the scaling that the Android Browser applies is based on the web page's
+target density&mdash;as described in the section about <a href="#ViewportDensity">Defining the
+viewport target density</a>, the default target is medium-density, but you can change the
+target to affect how your web page is scaled for different screen densities.</p>
+
+<p>For example, here's how you can query the device density with JavaScript:</p>
+
+<pre>
+if (window.devicePixelRatio == 1.5) {
+  alert("This is a high-density screen");
+} else if (window.devicePixelRation == 0.75) {
+  alert("This is a low-density screen");
+}
+</pre>
+
+
+
+
+
+
+
