@@ -24,9 +24,7 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 
-import java.net.InetAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 
 import junit.framework.Assert;
 
@@ -162,15 +160,15 @@ final public class Proxy {
             final URI uri = URI.create(url);
             final String host = uri.getHost();
             if (host != null) {
-                if (host.equalsIgnoreCase("localhost")) {
-                    return true;
-                }
-                if (InetAddress.getByName(host).isLoopbackAddress()) {
+                // TODO: InetAddress.isLoopbackAddress should be used to check
+                // for localhost. However no public factory methods exist which
+                // can be used without triggering DNS lookup if host is not localhost.
+                if (host.equalsIgnoreCase("localhost") ||
+                        host.equals("127.0.0.1") ||
+                        host.equals("[::1]")) {
                     return true;
                 }
             }
-        } catch (UnknownHostException uex) {
-            // Ignore (INetworkSystem.ipStringToByteArray)
         } catch (IllegalArgumentException iex) {
             // Ignore (URI.create)
         }
