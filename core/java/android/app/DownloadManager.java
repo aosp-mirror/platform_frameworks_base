@@ -28,6 +28,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.provider.Downloads;
+import android.util.Log;
 import android.util.Pair;
 
 import java.io.File;
@@ -53,6 +54,8 @@ import java.util.Set;
  * download in a notification or from the downloads UI.
  */
 public class DownloadManager {
+    private static final String TAG = "DownloadManager";
+
     /**
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
@@ -748,20 +751,11 @@ public class DownloadManager {
      * @return the number of downloads actually removed
      */
     public int remove(long... ids) {
-        StringBuilder whereClause = new StringBuilder();
-        String[] whereArgs = new String[ids.length];
-
-        whereClause.append(Downloads.Impl._ID + " IN (");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                whereClause.append(",");
-            }
-            whereClause.append("?");
-            whereArgs[i] = Long.toString(ids[i]);
+        if (ids == null || ids.length == 0) {
+            // called with nothing to remove!
+            throw new IllegalArgumentException("input param 'ids' can't be null");
         }
-        whereClause.append(")");
-
-        return mResolver.delete(mBaseUri, whereClause.toString(), whereArgs);
+        return mResolver.delete(mBaseUri, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
     }
 
     /**
@@ -828,12 +822,13 @@ public class DownloadManager {
      */
     static String getWhereClauseForIds(long[] ids) {
         StringBuilder whereClause = new StringBuilder();
-        whereClause.append(Downloads.Impl._ID + " IN (");
+        whereClause.append("(");
         for (int i = 0; i < ids.length; i++) {
             if (i > 0) {
-                whereClause.append(",");
+                whereClause.append("OR ");
             }
-            whereClause.append("?");
+            whereClause.append(Downloads.Impl._ID);
+            whereClause.append(" = ? ");
         }
         whereClause.append(")");
         return whereClause.toString();
