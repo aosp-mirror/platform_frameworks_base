@@ -8023,8 +8023,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final float newPosX = rawX - mTouchToWindowOffsetX + mHotspotX;
                 final float newPosY = rawY - mTouchToWindowOffsetY + mHotspotY + mTouchOffsetY;
 
-                mController.updatePosition(this, (int) Math.round(newPosX),
-                        (int) Math.round(newPosY));
+                mController.updatePosition(this, Math.round(newPosX), Math.round(newPosY));
 
                 break;
             }
