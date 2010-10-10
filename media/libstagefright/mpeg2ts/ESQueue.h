@@ -35,6 +35,7 @@ struct ElementaryStreamQueue {
     ElementaryStreamQueue(Mode mode);
 
     status_t appendData(const void *data, size_t size, int64_t timeUs);
+    void clear();
 
     sp<ABuffer> dequeueAccessUnit();
 

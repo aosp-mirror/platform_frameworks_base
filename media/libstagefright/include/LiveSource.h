@@ -44,6 +44,13 @@ protected:
     virtual ~LiveSource();
 
 private:
+    struct BandwidthItem {
+        AString mURI;
+        unsigned long mBandwidth;
+    };
+    Vector<BandwidthItem> mBandwidthItems;
+
+    AString mMasterURL;
     AString mURL;
     status_t mInitCheck;
 
@@ -56,10 +63,15 @@ private:
     off_t mSourceSize;
     off_t mOffsetBias;
 
+    bool mSignalDiscontinuity;
+    ssize_t mPrevBandwidthIndex;
+
     status_t fetchM3U(const char *url, sp<ABuffer> *buffer);
 
+    static int SortByBandwidth(const BandwidthItem *a, const BandwidthItem *b);
+
     bool switchToNext();
-    bool loadPlaylist();
+    bool loadPlaylist(bool fetchMaster);
 
     DISALLOW_EVIL_CONSTRUCTORS(LiveSource);
 };
