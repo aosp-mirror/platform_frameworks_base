@@ -356,7 +356,8 @@ static int CompareSoftwareCodecsFirst(
 }
 
 // static
-uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
+uint32_t OMXCodec::getComponentQuirks(
+        const char *componentName, bool isEncoder) {
     uint32_t quirks = 0;
 
     if (!strcmp(componentName, "OMX.Nvidia.amr.decoder") ||
@@ -419,6 +420,13 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
 
     if (!strcmp(componentName, "OMX.TI.Video.Decoder")) {
         quirks |= kInputBufferSizesAreBogus;
+    }
+
+    if (!strncmp(componentName, "OMX.SEC.", 8) && !isEncoder) {
+        // These output buffers contain no video data, just some
+        // opaque information that allows the overlay to display their
+        // contents.
+        quirks |= kOutputBuffersAreUnreadable;
     }
 
     return quirks;
@@ -507,7 +515,7 @@ sp<MediaSource> OMXCodec::Create(
             LOGV("Successfully allocated OMX node '%s'", componentName);
 
             sp<OMXCodec> codec = new OMXCodec(
-                    omx, node, getComponentQuirks(componentName),
+                    omx, node, getComponentQuirks(componentName, createEncoder),
                     createEncoder, mime, componentName,
                     source);
 
@@ -1770,6 +1778,10 @@ void OMXCodec::on_message(const omx_message &msg) {
                 }
                 if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_CODECCONFIG) {
                     buffer->meta_data()->setInt32(kKeyIsCodecConfig, true);
+                }
+
+                if (mQuirks & kOutputBuffersAreUnreadable) {
+                    buffer->meta_data()->setInt32(kKeyIsUnreadable, true);
                 }
 
                 buffer->meta_data()->setPointer(

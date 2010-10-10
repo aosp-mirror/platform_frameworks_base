@@ -1593,21 +1593,30 @@ status_t AwesomePlayer::suspend() {
 
     if (mLastVideoBuffer) {
         size_t size = mLastVideoBuffer->range_length();
+
         if (size) {
-            state->mLastVideoFrameSize = size;
-            state->mLastVideoFrame = malloc(size);
-            memcpy(state->mLastVideoFrame,
-                   (const uint8_t *)mLastVideoBuffer->data()
-                        + mLastVideoBuffer->range_offset(),
-                   size);
+            int32_t unreadable;
+            if (!mLastVideoBuffer->meta_data()->findInt32(
+                        kKeyIsUnreadable, &unreadable)
+                    || unreadable == 0) {
+                state->mLastVideoFrameSize = size;
+                state->mLastVideoFrame = malloc(size);
+                memcpy(state->mLastVideoFrame,
+                       (const uint8_t *)mLastVideoBuffer->data()
+                            + mLastVideoBuffer->range_offset(),
+                       size);
 
-            state->mVideoWidth = mVideoWidth;
-            state->mVideoHeight = mVideoHeight;
+                state->mVideoWidth = mVideoWidth;
+                state->mVideoHeight = mVideoHeight;
 
-            sp<MetaData> meta = mVideoSource->getFormat();
-            CHECK(meta->findInt32(kKeyColorFormat, &state->mColorFormat));
-            CHECK(meta->findInt32(kKeyWidth, &state->mDecodedWidth));
-            CHECK(meta->findInt32(kKeyHeight, &state->mDecodedHeight));
+                sp<MetaData> meta = mVideoSource->getFormat();
+                CHECK(meta->findInt32(kKeyColorFormat, &state->mColorFormat));
+                CHECK(meta->findInt32(kKeyWidth, &state->mDecodedWidth));
+                CHECK(meta->findInt32(kKeyHeight, &state->mDecodedHeight));
+            } else {
+                LOGV("Unable to save last video frame, we have no access to "
+                     "the decoded video data.");
+            }
         }
     }
 

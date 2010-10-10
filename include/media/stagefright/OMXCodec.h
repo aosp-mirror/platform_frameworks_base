@@ -103,6 +103,7 @@ private:
         kSupportsMultipleFramesPerInputBuffer = 1024,
         kAvoidMemcopyInputRecordingFrames     = 2048,
         kRequiresLargerEncoderOutputBuffer    = 4096,
+        kOutputBuffersAreUnreadable           = 8192,
     };
 
     struct BufferInfo {
@@ -249,7 +250,8 @@ private:
 
     status_t configureCodec(const sp<MetaData> &meta);
 
-    static uint32_t getComponentQuirks(const char *componentName);
+    static uint32_t getComponentQuirks(
+            const char *componentName, bool isEncoder);
 
     static void findMatchingCodecs(
             const char *mime,
