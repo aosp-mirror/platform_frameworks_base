@@ -288,8 +288,8 @@ public class DropBoxManager {
     }
 
     /**
-     * Gets the next entry from the drop box *after* the specified time.
-     * Requires android.permission.READ_LOGS.  You must always call
+     * Gets the next entry from the drop box <em>after</em> the specified time.
+     * Requires <code>android.permission.READ_LOGS</code>.  You must always call
      * {@link Entry#close()} on the return value!
      *
      * @param tag of entry to look for, null for all tags
