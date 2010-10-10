@@ -129,9 +129,10 @@ DrmSupportInfo* DrmPassthruPlugIn::onGetSupportInfo(int uniqueId) {
     return drmSupportInfo;
 }
 
-void DrmPassthruPlugIn::onSaveRights(int uniqueId, const DrmRights& drmRights,
+status_t DrmPassthruPlugIn::onSaveRights(int uniqueId, const DrmRights& drmRights,
             const String8& rightsPath, const String8& contentPath) {
     LOGD("DrmPassthruPlugIn::onSaveRights : %d", uniqueId);
+    return DRM_NO_ERROR;
 }
 
 DrmInfo* DrmPassthruPlugIn::onAcquireDrmInfo(int uniqueId, const DrmInfoRequest* drmInfoRequest) {
@@ -174,14 +175,16 @@ int DrmPassthruPlugIn::onCheckRightsStatus(int uniqueId, const String8& path, in
     return rightsStatus;
 }
 
-void DrmPassthruPlugIn::onConsumeRights(int uniqueId, DecryptHandle* decryptHandle,
+status_t DrmPassthruPlugIn::onConsumeRights(int uniqueId, DecryptHandle* decryptHandle,
             int action, bool reserve) {
     LOGD("DrmPassthruPlugIn::onConsumeRights() : %d", uniqueId);
+    return DRM_NO_ERROR;
 }
 
-void DrmPassthruPlugIn::onSetPlaybackStatus(int uniqueId, DecryptHandle* decryptHandle,
+status_t DrmPassthruPlugIn::onSetPlaybackStatus(int uniqueId, DecryptHandle* decryptHandle,
             int playbackStatus, int position) {
     LOGD("DrmPassthruPlugIn::onSetPlaybackStatus() : %d", uniqueId);
+    return DRM_NO_ERROR;
 }
 
 bool DrmPassthruPlugIn::onValidateAction(int uniqueId, const String8& path,
@@ -190,16 +193,19 @@ bool DrmPassthruPlugIn::onValidateAction(int uniqueId, const String8& path,
     return true;
 }
 
-void DrmPassthruPlugIn::onRemoveRights(int uniqueId, const String8& path) {
+status_t DrmPassthruPlugIn::onRemoveRights(int uniqueId, const String8& path) {
     LOGD("DrmPassthruPlugIn::onRemoveRights() : %d", uniqueId);
+    return DRM_NO_ERROR;
 }
 
-void DrmPassthruPlugIn::onRemoveAllRights(int uniqueId) {
+status_t DrmPassthruPlugIn::onRemoveAllRights(int uniqueId) {
     LOGD("DrmPassthruPlugIn::onRemoveAllRights() : %d", uniqueId);
+    return DRM_NO_ERROR;
 }
 
-void DrmPassthruPlugIn::onOpenConvertSession(int uniqueId, int convertId) {
+status_t DrmPassthruPlugIn::onOpenConvertSession(int uniqueId, int convertId) {
     LOGD("DrmPassthruPlugIn::onOpenConvertSession() : %d", uniqueId);
+    return DRM_NO_ERROR;
 }
 
 DrmConvertedStatus* DrmPassthruPlugIn::onConvertData(
@@ -237,7 +243,7 @@ status_t DrmPassthruPlugIn::onOpenDecryptSession(
     return DRM_ERROR_CANNOT_HANDLE;
 }
 
-void DrmPassthruPlugIn::onCloseDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {
+status_t DrmPassthruPlugIn::onCloseDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {
     LOGD("DrmPassthruPlugIn::onCloseDecryptSession() : %d", uniqueId);
     if (NULL != decryptHandle) {
         if (NULL != decryptHandle->decryptInfo) {
@@ -245,15 +251,17 @@ void DrmPassthruPlugIn::onCloseDecryptSession(int uniqueId, DecryptHandle* decry
         }
         delete decryptHandle; decryptHandle = NULL;
     }
+    return DRM_NO_ERROR;
 }
 
-void DrmPassthruPlugIn::onInitializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
+status_t DrmPassthruPlugIn::onInitializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
             int decryptUnitId, const DrmBuffer* headerInfo) {
     LOGD("DrmPassthruPlugIn::onInitializeDecryptUnit() : %d", uniqueId);
+    return DRM_NO_ERROR;
 }
 
 status_t DrmPassthruPlugIn::onDecrypt(int uniqueId, DecryptHandle* decryptHandle,
-            int decryptUnitId, const DrmBuffer* encBuffer, DrmBuffer** decBuffer) {
+            int decryptUnitId, const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV) {
     LOGD("DrmPassthruPlugIn::onDecrypt() : %d", uniqueId);
     /**
      * As a workaround implementation passthru would copy the given
@@ -267,9 +275,10 @@ status_t DrmPassthruPlugIn::onDecrypt(int uniqueId, DecryptHandle* decryptHandle
     return DRM_NO_ERROR;
 }
 
-void DrmPassthruPlugIn::onFinalizeDecryptUnit(
+status_t DrmPassthruPlugIn::onFinalizeDecryptUnit(
             int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId) {
     LOGD("DrmPassthruPlugIn::onFinalizeDecryptUnit() : %d", uniqueId);
+    return DRM_NO_ERROR;
 }
 
 ssize_t DrmPassthruPlugIn::onPread(int uniqueId, DecryptHandle* decryptHandle,

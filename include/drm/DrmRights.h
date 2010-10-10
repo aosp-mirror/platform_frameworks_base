@@ -61,7 +61,7 @@ public:
     /**
      * Destructor for DrmRights
      */
-    virtual ~DrmRights() {}
+    virtual ~DrmRights();
 
 public:
     /**
@@ -97,6 +97,7 @@ private:
     String8 mMimeType;
     String8 mAccountId;
     String8 mSubscriptionId;
+    char* mRightsFromFile;
 };
 
 };

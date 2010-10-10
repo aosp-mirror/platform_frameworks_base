@@ -15,14 +15,21 @@
  */
 
 #include <drm/DrmRights.h>
+#include <ReadWriteUtils.h>
 
 using namespace android;
 
 DrmRights::DrmRights(const String8& rightsFilePath, const String8& mimeType,
-            const String8& accountId, const String8& subscriptionId) {
-    /**
-     * TODO Read DrmRights from rights file
-     */
+            const String8& accountId, const String8& subscriptionId) :
+    mMimeType(mimeType),
+    mAccountId(accountId),
+    mSubscriptionId(subscriptionId),
+    mRightsFromFile(NULL) {
+    int rightsLength = 0;
+    if (String8("") != rightsFilePath) {
+        rightsLength = ReadWriteUtils::readBytes(rightsFilePath, &mRightsFromFile);
+    }
+    mData = DrmBuffer(mRightsFromFile, rightsLength);
 }
 
 DrmRights::DrmRights(const DrmBuffer& rightsData, const String8& mimeType,
@@ -30,7 +37,12 @@ DrmRights::DrmRights(const DrmBuffer& rightsData, const String8& mimeType,
     mData(rightsData),
     mMimeType(mimeType),
     mAccountId(accountId),
-    mSubscriptionId(subscriptionId) {
+    mSubscriptionId(subscriptionId),
+    mRightsFromFile(NULL) {
+}
+
+DrmRights::~DrmRights() {
+    delete[] mRightsFromFile; mRightsFromFile = NULL;
 }
 
 const DrmBuffer& DrmRights::getData(void) const {
