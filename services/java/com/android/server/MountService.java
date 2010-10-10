@@ -225,7 +225,6 @@ class MountService extends IMountService.Stub
     private static final int OBB_MCS_BOUND = 2;
     private static final int OBB_MCS_UNBIND = 3;
     private static final int OBB_MCS_RECONNECT = 4;
-    private static final int OBB_MCS_GIVE_UP = 5;
 
     /*
      * Default Container Service information
@@ -1728,7 +1727,7 @@ class MountService extends IMountService.Stub
 
     private class ObbActionHandler extends Handler {
         private boolean mBound = false;
-        private List<ObbAction> mActions = new LinkedList<ObbAction>();
+        private final List<ObbAction> mActions = new LinkedList<ObbAction>();
 
         ObbActionHandler(Looper l) {
             super(l);
@@ -1738,7 +1737,7 @@ class MountService extends IMountService.Stub
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case OBB_RUN_ACTION: {
-                    ObbAction action = (ObbAction) msg.obj;
+                    final ObbAction action = (ObbAction) msg.obj;
 
                     if (DEBUG_OBB)
                         Slog.i(TAG, "OBB_RUN_ACTION: " + action.toString());
@@ -1774,7 +1773,7 @@ class MountService extends IMountService.Stub
                         }
                         mActions.clear();
                     } else if (mActions.size() > 0) {
-                        ObbAction action = mActions.get(0);
+                        final ObbAction action = mActions.get(0);
                         if (action != null) {
                             action.execute(this);
                         }
@@ -1822,13 +1821,6 @@ class MountService extends IMountService.Stub
                     }
                     break;
                 }
-                case OBB_MCS_GIVE_UP: {
-                    if (DEBUG_OBB)
-                        Slog.i(TAG, "OBB_MCS_GIVE_UP");
-                    mActions.remove(0);
-                    mObbActionHandler.sendEmptyMessage(OBB_MCS_BOUND);
-                    break;
-                }
             }
         }
 
@@ -1868,7 +1860,7 @@ class MountService extends IMountService.Stub
                 mRetries++;
                 if (mRetries > MAX_RETRIES) {
                     Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
-                    mObbActionHandler.sendEmptyMessage(OBB_MCS_GIVE_UP);
+                    mObbActionHandler.sendEmptyMessage(OBB_MCS_UNBIND);
                     handleError();
                     return;
                 } else {
