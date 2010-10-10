@@ -1069,10 +1069,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (mNetAttributes[checkType] == null) continue;
                 if (mNetAttributes[checkType].mRadio == ConnectivityManager.TYPE_MOBILE &&
                         noMobileData) {
-                    if (DBG) {
-                        Slog.d(TAG, "not failing over to mobile type " + checkType +
-                                " because Mobile Data Disabled");
-                    }
+                    Slog.e(TAG, "not failing over to mobile type " + checkType +
+                            " because Mobile Data Disabled");
                     continue;
                 }
                 if (mNetAttributes[checkType].isDefault()) {
@@ -1120,6 +1118,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     newNet = null; // not officially avail..  try anyway, but
                                    // report no failover
                 }
+            } else {
+                Slog.e(TAG, "Network failover failing.");
             }
         }
 
@@ -1162,16 +1162,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         String reason = info.getReason();
         String extraInfo = info.getExtraInfo();
 
-        if (DBG) {
-            String reasonText;
-            if (reason == null) {
-                reasonText = ".";
-            } else {
-                reasonText = " (" + reason + ").";
-            }
-            Slog.v(TAG, "Attempt to connect to " + info.getTypeName() +
-                    " failed" + reasonText);
+        String reasonText;
+        if (reason == null) {
+            reasonText = ".";
+        } else {
+            reasonText = " (" + reason + ").";
         }
+        Slog.e(TAG, "Attempt to connect to " + info.getTypeName() + " failed" + reasonText);
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
@@ -1195,9 +1192,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (newNet != null) {
                 NetworkInfo switchTo = newNet.getNetworkInfo();
                 if (!switchTo.isConnected()) {
-                    // if the other net is connected they've already reset this and perhaps even gotten
-                    // a positive report we don't want to overwrite, but if not we need to clear this now
-                    // to turn our cellular sig strength white
+                    // if the other net is connected they've already reset this and perhaps
+                    // even gotten a positive report we don't want to overwrite, but if not
+                    // we need to clear this now to turn our cellular sig strength white
                     mDefaultInetConditionPublished = 0;
                 }
                 intent.putExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO, switchTo);
