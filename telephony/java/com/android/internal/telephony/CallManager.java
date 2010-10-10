@@ -925,7 +925,7 @@ public final class CallManager {
         }
 
         if (hasActiveFgCall()) {
-            getActiveFgCall().getPhone().sendDtmf(c);
+            getActiveFgCall().getPhone().startDtmf(c);
             result = true;
         }
 
