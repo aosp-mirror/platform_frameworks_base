@@ -87,48 +87,11 @@ public:
         ROTATION_270 = 3
     };
 
-    /* Actions returned by interceptXXX methods. */
-    enum {
-        // The input dispatcher should do nothing and discard the input unless other
-        // flags are set.
-        ACTION_NONE = 0,
-
-        // The input dispatcher should dispatch the input to the application.
-        ACTION_DISPATCH = 0x00000001,
-    };
-
     /* Gets information about the display with the specified id.
      * Returns true if the display info is available, false otherwise.
      */
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation) = 0;
-
-    /* Intercepts a key event.
-     * The policy can use this method as an opportunity to perform power management functions
-     * and early event preprocessing such as updating policy flags.
-     *
-     * Returns a policy action constant such as ACTION_DISPATCH.
-     */
-    virtual int32_t interceptKey(nsecs_t when, int32_t deviceId,
-            bool down, int32_t keyCode, int32_t scanCode, uint32_t& policyFlags) = 0;
-
-    /* Intercepts a switch event.
-     * The policy can use this method as an opportunity to perform power management functions
-     * and early event preprocessing such as updating policy flags.
-     *
-     * Switches are not dispatched to applications so this method should
-     * usually return ACTION_NONE.
-     */
-    virtual int32_t interceptSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
-            uint32_t& policyFlags) = 0;
-
-    /* Intercepts a generic touch, trackball or other event.
-     * The policy can use this method as an opportunity to perform power management functions
-     * and early event preprocessing such as updating policy flags.
-     *
-     * Returns a policy action constant such as ACTION_DISPATCH.
-     */
-    virtual int32_t interceptGeneric(nsecs_t when, uint32_t& policyFlags) = 0;
 
     /* Determines whether to turn on some hacks we have to improve the touch interaction with a
      * certain device whose screen currently is not all that good.
@@ -403,8 +366,6 @@ public:
 protected:
     InputDevice* mDevice;
     InputReaderContext* mContext;
-
-    bool applyStandardPolicyActions(nsecs_t when, int32_t policyActions);
 };
 
 
@@ -466,8 +427,6 @@ private:
 
     void processKey(nsecs_t when, bool down, int32_t keyCode, int32_t scanCode,
             uint32_t policyFlags);
-    void applyPolicyAndDispatch(nsecs_t when, uint32_t policyFlags,
-            bool down, int32_t keyCode, int32_t scanCode, int32_t metaState, nsecs_t downTime);
 
     ssize_t findKeyDownLocked(int32_t scanCode);
 };
@@ -525,8 +484,6 @@ private:
     void initializeLocked();
 
     void sync(nsecs_t when);
-    void applyPolicyAndDispatch(nsecs_t when, int32_t motionEventAction,
-            PointerCoords* pointerCoords, nsecs_t downTime);
 };
 
 
@@ -828,10 +785,6 @@ private:
     void dispatchTouch(nsecs_t when, uint32_t policyFlags, TouchData* touch,
             BitSet32 idBits, uint32_t changedId, uint32_t pointerCount,
             int32_t motionEventAction);
-
-    void applyPolicyAndDispatchVirtualKey(nsecs_t when, uint32_t policyFlags,
-            int32_t keyEventAction, int32_t keyEventFlags,
-            int32_t keyCode, int32_t scanCode, nsecs_t downTime);
 
     bool isPointInsideSurfaceLocked(int32_t x, int32_t y);
     const VirtualKey* findVirtualKeyHitLocked(int32_t x, int32_t y);
