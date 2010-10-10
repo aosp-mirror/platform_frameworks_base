@@ -354,14 +354,6 @@ TEST_F(LooperTest, AddFd_WhenCallbackAdded_ReturnsOne) {
             << "addFd should return 1 because FD was added";
 }
 
-TEST_F(LooperTest, AddFd_WhenEventsIsZero_ReturnsError) {
-    Pipe pipe;
-    int result = mLooper->addFd(pipe.receiveFd, 0, 0, NULL, NULL);
-
-    EXPECT_EQ(-1, result)
-            << "addFd should return -1 because arguments were invalid";
-}
-
 TEST_F(LooperTest, AddFd_WhenIdentIsNegativeAndCallbackIsNull_ReturnsError) {
     Pipe pipe;
     int result = mLooper->addFd(pipe.receiveFd, -1, ALOOPER_EVENT_INPUT, NULL, NULL);
