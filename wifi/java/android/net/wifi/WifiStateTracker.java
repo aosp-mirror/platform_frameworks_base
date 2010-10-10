@@ -863,15 +863,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                 mIsAnyNetworkDisabled.set(false);
                 requestConnectionInfo();
                 SupplicantState supplState = mWifiInfo.getSupplicantState();
-                /**
-                 * The MAC address isn't going to change, so just request it
-                 * once here.
-                 */
-                String macaddr = getMacAddress();
 
-                if (macaddr != null) {
-                    mWifiInfo.setMacAddress(macaddr);
-                }
                 if (LOCAL_LOGD) Log.v(TAG, "Connection to supplicant established, state=" +
                     supplState);
                 // Wi-Fi supplicant connection state changed:
@@ -1290,6 +1282,10 @@ public class WifiStateTracker extends NetworkStateTracker {
                      */
                     setNumAllowedChannels();
                     synchronized (this) {
+                        String macaddr = WifiNative.getMacAddressCommand();
+                        if (macaddr != null) {
+                            mWifiInfo.setMacAddress(macaddr);
+                        }
                         if (mRunState == RUN_STATE_STARTING) {
                             mRunState = RUN_STATE_RUNNING;
                             if (!mIsScanOnly) {
@@ -2008,18 +2004,6 @@ public class WifiStateTracker extends NetworkStateTracker {
             return -1;
         }
         return WifiNative.getLinkSpeedCommand();
-    }
-
-    /**
-     * Get MAC address of radio
-     *
-     * @return MAC address, null on failure
-     */
-    public synchronized String getMacAddress() {
-        if (mWifiState.get() != WIFI_STATE_ENABLED || isDriverStopped()) {
-            return null;
-        }
-        return WifiNative.getMacAddressCommand();
     }
 
     /**
