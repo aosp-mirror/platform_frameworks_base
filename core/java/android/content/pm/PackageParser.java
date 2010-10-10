@@ -183,7 +183,7 @@ public class PackageParser {
      * @param flags indicating which optional information is included.
      */
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
-            int gids[], int flags) {
+            int gids[], int flags, long firstInstallTime, long lastUpdateTime) {
 
         PackageInfo pi = new PackageInfo();
         pi.packageName = p.packageName;
@@ -193,6 +193,8 @@ public class PackageParser {
         pi.sharedUserLabel = p.mSharedUserLabel;
         pi.applicationInfo = p.applicationInfo;
         pi.installLocation = p.installLocation;
+        pi.firstInstallTime = firstInstallTime;
+        pi.lastUpdateTime = lastUpdateTime;
         if ((flags&PackageManager.GET_GIDS) != 0) {
             pi.gids = gids;
         }
