@@ -238,15 +238,25 @@ static const GpsInterface* get_gps_interface() {
     return interface;
 }
 
+static const GpsInterface* GetGpsInterface() {
+    if (!sGpsInterface) {
+        sGpsInterface = get_gps_interface();
+        if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0) {
+            sGpsInterface = NULL;
+            return NULL;
+        }
+    }
+    return sGpsInterface;
+}
+
 static const AGpsInterface* GetAGpsInterface()
 {
-    if (!sGpsInterface)
-        sGpsInterface = get_gps_interface();
-    if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
+    const GpsInterface* interface = GetGpsInterface();
+    if (!interface)
         return NULL;
 
     if (!sAGpsInterface) {
-        sAGpsInterface = (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
+        sAGpsInterface = (const AGpsInterface*)interface->get_extension(AGPS_INTERFACE);
         if (sAGpsInterface)
             sAGpsInterface->init(&sAGpsCallbacks);
     }
@@ -255,13 +265,12 @@ static const AGpsInterface* GetAGpsInterface()
 
 static const GpsNiInterface* GetNiInterface()
 {
-    if (!sGpsInterface)
-        sGpsInterface = get_gps_interface();
-    if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
+    const GpsInterface* interface = GetGpsInterface();
+    if (!interface)
         return NULL;
 
     if (!sGpsNiInterface) {
-       sGpsNiInterface = (const GpsNiInterface*)sGpsInterface->get_extension(GPS_NI_INTERFACE);
+       sGpsNiInterface = (const GpsNiInterface*)interface->get_extension(GPS_NI_INTERFACE);
         if (sGpsNiInterface)
            sGpsNiInterface->init(&sGpsNiCallbacks);
     }
@@ -270,13 +279,12 @@ static const GpsNiInterface* GetNiInterface()
 
 static const AGpsRilInterface* GetAGpsRilInterface()
 {
-    if (!sGpsInterface)
-        sGpsInterface = get_gps_interface();
-    if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
+    const GpsInterface* interface = GetGpsInterface();
+    if (!interface)
         return NULL;
 
     if (!sAGpsRilInterface) {
-       sAGpsRilInterface = (const AGpsRilInterface*)sGpsInterface->get_extension(AGPS_RIL_INTERFACE);
+       sAGpsRilInterface = (const AGpsRilInterface*)interface->get_extension(AGPS_RIL_INTERFACE);
         if (sAGpsRilInterface)
             sAGpsRilInterface->init(&sAGpsRilCallbacks);
     }
@@ -297,9 +305,7 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
 }
 
 static jboolean android_location_GpsLocationProvider_is_supported(JNIEnv* env, jclass clazz) {
-    if (!sGpsInterface)
-        sGpsInterface = get_gps_interface();
-    return (sGpsInterface != NULL);
+    return (sGpsInterface != NULL || get_gps_interface() != NULL);
 }
 
 static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject obj)
@@ -308,13 +314,12 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
     if (!mCallbacksObj)
         mCallbacksObj = env->NewGlobalRef(obj);
 
-    if (!sGpsInterface)
-        sGpsInterface = get_gps_interface();
-    if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0)
+    const GpsInterface* interface = GetGpsInterface();
+    if (!interface)
         return false;
 
     if (!sGpsDebugInterface)
-       sGpsDebugInterface = (const GpsDebugInterface*)sGpsInterface->get_extension(GPS_DEBUG_INTERFACE);
+       sGpsDebugInterface = (const GpsDebugInterface*)interface->get_extension(GPS_DEBUG_INTERFACE);
 
     return true;
 }
