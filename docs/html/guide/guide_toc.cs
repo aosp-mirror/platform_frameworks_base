@@ -110,7 +110,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
                <span class="en">Application Resources</span>
-             </a> <span class="new">new!</span></div>
+             </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/providing-resources.html">
                 <span class="en">Providing Resources</span>
@@ -120,14 +120,14 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/runtime-changes.html">
                 <span class="en">Handling Runtime Changes</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/localization.html">
                 <span class="en">Localization</span>
               </a></li>
           <li class="toggle-list">
             <div><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">
               <span class="en">Resource Types</span>
-            </a> <span class="new">new!</span></div>
+            </a></div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/topics/resources/animation-resource.html">Animation</a></li>
               <li><a href="<?cs var:toroot ?>guide/topics/resources/color-list-resource.html">Color State List</a></li>
@@ -147,11 +147,11 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/data/data-storage.html">
             <span class="en">Data Storage</span>
-          </a> <span class="new">new!</span></div>
+          </a></div>
           <ul>
             <li><a href="<?cs var:toroot ?>guide/topics/data/backup.html">
                 <span class="en">Data Backup</span>
-              </a> <span class="new">new!</span>
+              </a>
             </li>
           </ul>
       </li>
@@ -227,7 +227,7 @@
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/location/obtaining-user-location.html">
                 <span class="en">Obtaining User Location</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
         </ul>
       </li>
   <!--<li class="toggle-list">
@@ -246,7 +246,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot?>guide/topics/search/index.html">
             <span class="en">Search</span>
-          </a> <span class="new">new!</span></div>
+          </a></div>
           <ul>
             <li><a href="<?cs var:toroot?>guide/topics/search/search-dialog.html">Using the Android Search Dialog</a></li>
             <li><a href="<?cs var:toroot?>guide/topics/search/adding-recent-query-suggestions.html">Adding Recent Query Suggestions</a></li>
@@ -281,6 +281,10 @@
      <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
             <span class="en">Device Administration</span></a>
             <span class="new">new!</span>
+    </li>
+    <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
+           <span class="en">Device Administration</span>
+        </a> <span class="new">new!</span><!-- 10/8/10 -->
     </li>
     </ul>
   </li>
@@ -328,18 +332,18 @@
            <div>
                 <a href="<?cs var:toroot ?>guide/developing/testing/index.html">
                    <span class="en">Testing</span>
-               </a> <span class="new">new!</span>
+               </a>
            </div>
            <ul>
               <li>
                 <a href="<?cs var:toroot ?>guide/developing/testing/testing_eclipse.html">
                   <span class="en">Testing in Eclipse, with ADT</span>
-                </a> <span class="new">new!</span>
+                </a>
               </li>
               <li>
                 <a href="<?cs var:toroot ?>guide/developing/testing/testing_otheride.html">
                   <span class="en">Testing in Other IDEs</span>
-                </a> <span class="new">new!</span>
+                </a>
               </li>
            </ul>
          </li>
@@ -354,8 +358,7 @@
       <!--<li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT Plugin</a></li>-->
               <li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html">aidl</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/avd.html">AVDs</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
-            <span class="new">new!</span></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/ddms.html">ddms</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#dx">dx</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>
@@ -435,7 +438,7 @@
     <ul>
       <li><a href="<?cs var:toroot ?>guide/practices/compatibility.html">
             <span class="en">Compatibility</span>
-          </a><span class="new">new!</span></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
             <span class="en">Supporting Multiple Screens</span>
           </a></li>
@@ -478,16 +481,16 @@
     <ul>
       <li><a href="<?cs var:toroot ?>guide/webapps/targetting.html">
             <span class="en">Targetting Android Devices</span>
-          </a> <span class="new">new!</span></li>
+          </a> <span class="new">new!</span><!-- 10/8/10 --></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/webview.html">
             <span class="en">Building Web Apps in WebView</span>
-          </a> <span class="new">new!</span></li>
+          </a> <span class="new">new!</span><!-- 10/8/10 --></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/debugging.html">
             <span class="en">Debugging Web Apps</span>
-          </a> <span class="new">new!</span></li>
+          </a> <span class="new">new!</span><!-- 10/8/10 --></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/best-practices.html">
             <span class="en">Best Practices for Web Apps</span>
-          </a> <span class="new">new!</span></li>
+          </a> <span class="new">new!</span><!-- 10/8/10 --></li>
     </ul>
   </li>
 
@@ -507,10 +510,10 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
             <span class="en">Market Filters</span>
-           </a> <span class="new">new!</span></li>
+           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/install-location.html">
             <span class="en">App Install Location</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
             <span class="en">Supported Media Formats</span>
           </a></li>
