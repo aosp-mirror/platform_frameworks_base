@@ -444,11 +444,11 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     }
     if (transform & HAL_TRANSFORM_FLIP_V) {
         swap(vLT, vLB);
-        swap(vRB, vRT);
+        swap(vRT, vRB);
     }
     if (transform & HAL_TRANSFORM_FLIP_H) {
-        swap(vLT, vRB);
-        swap(vLB, vRT);
+        swap(vLT, vRT);
+        swap(vLB, vRB);
     }
 
     TexCoords texCoords[4];
