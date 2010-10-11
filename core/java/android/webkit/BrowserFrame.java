@@ -73,7 +73,7 @@ class BrowserFrame extends Handler {
     // that if the UI thread posts any messages after the message
     // queue has been cleared,they are ignored.
     private boolean mBlockMessages = false;
-    private int mOrientation;
+    private int mOrientation = -1;
     private static String sDatabaseDirectory;
     private static String sCacheDirectory;
 
@@ -225,7 +225,6 @@ class BrowserFrame extends Handler {
         mCallbackProxy = proxy;
         mDatabase = WebViewDatabase.getInstance(appContext);
         mWebViewCore = w;
-        mOrientation = 0;
 
         AssetManager am = context.getAssets();
         nativeCreateFrame(w, am, proxy.getBackForwardList());
