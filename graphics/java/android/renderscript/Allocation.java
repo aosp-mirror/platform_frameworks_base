@@ -372,17 +372,6 @@ public class Allocation extends BaseObj {
         return a;
     }
 
-    static Allocation createFromBitmapBoxed(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
-        throws IllegalArgumentException {
-
-        rs.validate();
-        int id = rs.nAllocationCreateFromBitmapBoxed(dstFmt.mID, genMips, b);
-        if(id == 0) {
-            throw new IllegalStateException("Load failed.");
-        }
-        return new Allocation(id, rs, null);
-    }
-
     static public Allocation createFromBitmapResource(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
 
@@ -413,24 +402,6 @@ public class Allocation extends BaseObj {
         }
 
         return null;
-    }
-
-    static public Allocation createFromBitmapResourceBoxed(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips)
-        throws IllegalArgumentException {
-
-        mBitmapOptions.inPreferredConfig = null;
-        if (dstFmt == rs.mElement_RGBA_8888) {
-            mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        } else if (dstFmt == rs.mElement_RGB_888) {
-            mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        } else if (dstFmt == rs.mElement_RGBA_4444) {
-            mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_4444;
-        } else if (dstFmt == rs.mElement_RGB_565) {
-            mBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
-        }
-
-        Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
-        return createFromBitmapBoxed(rs, b, dstFmt, genMips);
     }
 
     static public Allocation createFromString(RenderScript rs, String str)

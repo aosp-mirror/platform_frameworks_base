@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -146,14 +145,10 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
     // ----------------------------------------------------------------------
 
-    public RenderScriptGL createRenderScript(boolean useDepth, boolean forceSW) {
+    public RenderScriptGL createRenderScript(RenderScriptGL.SurfaceConfig sc) {
         Log.v(RenderScript.LOG_TAG, "createRenderScript");
-        mRS = new RenderScriptGL(useDepth, forceSW);
+        mRS = new RenderScriptGL(sc);
         return mRS;
-    }
-
-    public RenderScriptGL createRenderScript(boolean useDepth) {
-        return createRenderScript(useDepth, false);
     }
 
     public void destroyRenderScript() {
@@ -161,7 +156,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         mRS.destroy();
         mRS = null;
     }
-    
+
     public void createRenderScript(RenderScriptGL rs) {
         mRS = rs;
     }

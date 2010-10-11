@@ -145,16 +145,6 @@ AllocationCreateFromBitmap {
 	ret RsAllocation
 	}
 
-AllocationCreateFromBitmapBoxed {
-	param uint32_t width
-	param uint32_t height
-	param RsElement dstFmt
-	param RsElement srcFmt
-	param bool genMips
-	param const void * data
-	ret RsAllocation
-	}
-
 
 AllocationUploadToTexture {
 	param RsAllocation alloc
