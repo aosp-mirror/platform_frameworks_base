@@ -6758,10 +6758,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mInputContentType != null) {
                 mInputContentType.enterDown = false;
             }
-            hideInsertionPointCursorController();
-            if (mSelectionModifierCursorController != null) {
-                mSelectionModifierCursorController.hide();
-            }
+            hideControllers();
         }
 
         startStopMarquee(hasWindowFocus);
@@ -6771,10 +6768,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (visibility != VISIBLE) {
-            hideInsertionPointCursorController();
-            if (mSelectionModifierCursorController != null) {
-                mSelectionModifierCursorController.hide();
-            }
+            hideControllers();
         }
     }
 
@@ -8358,9 +8352,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    private void hideSelectionModifierCursorController() {
+        if (mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.hide();
+        }
+    }
+    
     private void hideControllers() {
         hideInsertionPointCursorController();
-        stopSelectionActionMode();
+        hideSelectionModifierCursorController();
     }
 
     private int getOffsetForHorizontal(int line, int x) {
