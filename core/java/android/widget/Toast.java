@@ -30,6 +30,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 /**
  * A toast is a view containing a quick little message for the user.  The toast class
@@ -281,6 +283,21 @@ public class Toast {
         tv.setText(s);
     }
 
+    private void trySendAccessibilityEvent() {
+        AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(mContext);
+        if (!accessibilityManager.isEnabled()) {
+            return;
+        }
+        // treat toasts as notifications since they are used to
+        // announce a transient piece of information to the user
+        AccessibilityEvent event = AccessibilityEvent.obtain(
+                AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
+        event.setClassName(getClass().getName());
+        event.setPackageName(mContext.getPackageName());
+        mView.dispatchPopulateAccessibilityEvent(event);
+        accessibilityManager.sendAccessibilityEvent(event);
+    }
+
     // =======================================================================================
     // All the gunk below is the interaction with the Notification Service, which handles
     // the proper ordering of these system-wide.
@@ -371,6 +388,7 @@ public class Toast {
                 }
                 if (localLOGV) Log.v(TAG, "ADD! " + mView + " in " + this);
                 mWM.addView(mView, mParams);
+                trySendAccessibilityEvent();
             }
         }
 
