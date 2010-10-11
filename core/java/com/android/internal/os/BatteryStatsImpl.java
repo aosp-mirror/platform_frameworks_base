@@ -74,6 +74,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
     
+    // No, really, THIS is the maximum number of items we will record in the history.
+    private static final int MAX_MAX_HISTORY_ITEMS = 3000;
+
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
@@ -1177,15 +1180,20 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBtHeadset = headset;
     }
 
+    int mChangedStates = 0;
+
     void addHistoryRecordLocked(long curTime) {
         if (!mHaveBatteryLevel || !mRecordingHistory) {
             return;
         }
 
         // If the current time is basically the same as the last time,
-        // just collapse into one record.
+        // and no states have since the last recorded entry changed and
+        // are now resetting back to their original value, then just collapse
+        // into one record.
         if (mHistoryEnd != null && mHistoryEnd.cmd == HistoryItem.CMD_UPDATE
-                && (mHistoryBaseTime+curTime) < (mHistoryEnd.time+500)) {
+                && (mHistoryBaseTime+curTime) < (mHistoryEnd.time+2000)
+                && ((mHistoryEnd.states^mHistoryCur.states)&mChangedStates) == 0) {
             // If the current is the same as the one before, then we no
             // longer need the entry.
             if (mHistoryLastEnd != null && mHistoryLastEnd.cmd == HistoryItem.CMD_UPDATE
@@ -1196,20 +1204,29 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryEnd = mHistoryLastEnd;
                 mHistoryLastEnd = null;
             } else {
+                mChangedStates |= mHistoryEnd.states^mHistoryCur.states;
                 mHistoryEnd.setTo(mHistoryEnd.time, HistoryItem.CMD_UPDATE, mHistoryCur);
             }
             return;
         }
 
-        if (mNumHistoryItems == MAX_HISTORY_ITEMS) {
+        mChangedStates = 0;
+
+        if (mNumHistoryItems == MAX_HISTORY_ITEMS
+                || mNumHistoryItems == MAX_MAX_HISTORY_ITEMS) {
             addHistoryRecordLocked(curTime, HistoryItem.CMD_OVERFLOW);
         }
 
         if (mNumHistoryItems >= MAX_HISTORY_ITEMS) {
             // Once we've reached the maximum number of items, we only
+            // record changes to the battery level and the most interesting states.
+            // Once we've reached the maximum maximum number of items, we only
             // record changes to the battery level.
             if (mHistoryEnd != null && mHistoryEnd.batteryLevel
-                    == mHistoryCur.batteryLevel) {
+                    == mHistoryCur.batteryLevel &&
+                    (mNumHistoryItems >= MAX_MAX_HISTORY_ITEMS
+                            || ((mHistoryEnd.states^mHistoryCur.states)
+                                    & HistoryItem.MOST_INTERESTING_STATES) == 0)) {
                 return;
             }
         }
@@ -4458,10 +4475,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void commitPendingDataToDisk() {
-        Parcel next;
+        final Parcel next;
         synchronized (this) {
             next = mPendingWrite;
             mPendingWrite = null;
+            if (next == null) {
+                return;
+            }
 
             mWriteLock.lock();
         }
