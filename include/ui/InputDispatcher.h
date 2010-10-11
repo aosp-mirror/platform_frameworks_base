@@ -924,7 +924,6 @@ private:
     void drainInboundQueueLocked();
     void releasePendingEventLocked();
     void releaseInboundEventLocked(EventEntry* entry);
-    bool isEventFromTrustedSourceLocked(EventEntry* entry);
 
     // Dispatch state.
     bool mDispatchEnabled;
@@ -971,10 +970,10 @@ private:
             nsecs_t currentTime, ConfigurationChangedEntry* entry);
     bool dispatchKeyLocked(
             nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout,
-            bool dropEvent, nsecs_t* nextWakeupTime);
+            DropReason* dropReason, nsecs_t* nextWakeupTime);
     bool dispatchMotionLocked(
             nsecs_t currentTime, MotionEntry* entry,
-            bool dropEvent, nsecs_t* nextWakeupTime);
+            DropReason* dropReason, nsecs_t* nextWakeupTime);
     void dispatchEventToCurrentInputTargetsLocked(
             nsecs_t currentTime, EventEntry* entry, bool resumeWithAppendedMotionSample);
 
