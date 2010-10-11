@@ -186,9 +186,11 @@ class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_UPDATE_TIME = 1<<6;
 
     static final int REMOVE_CHATTY = 1<<16;
-    
+
+    static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
+
     static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
-            "com.android.defcontainer",
+            DEFAULT_CONTAINER_PACKAGE,
             "com.android.defcontainer.DefaultContainerService");
 
     private static final String LIB_DIR_NAME = "lib";
@@ -4774,7 +4776,15 @@ class PackageManagerService extends IPackageManager.Stub {
                 ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
                 // Remote call to find out default install location
-                PackageInfoLite pkgLite = mContainerService.getMinimalPackageInfo(packageURI, flags);
+                final PackageInfoLite pkgLite;
+                try {
+                    mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    pkgLite = mContainerService.getMinimalPackageInfo(packageURI, flags);
+                } finally {
+                    mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+
                 int loc = pkgLite.recommendedInstallLocation;
                 if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION){
                     ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
@@ -4989,8 +4999,14 @@ class PackageManagerService extends IPackageManager.Stub {
             libraryPath = new File(dataDir, LIB_DIR_NAME).getPath();
         }
 
-        boolean  checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
-            return imcs.checkFreeStorage(false, packageURI);
+        boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
+            try {
+                mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                return imcs.checkFreeStorage(false, packageURI);
+            } finally {
+                mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
         }
 
         String getCodePath() {
@@ -5034,11 +5050,14 @@ class PackageManagerService extends IPackageManager.Stub {
             // Copy the resource now
             int ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             try {
+                mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 if (imcs.copyResource(packageURI, out)) {
                     ret = PackageManager.INSTALL_SUCCEEDED;
                 }
             } finally {
                 try { if (out != null) out.close(); } catch (IOException e) {}
+                mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
             return ret;
@@ -5209,17 +5228,31 @@ class PackageManagerService extends IPackageManager.Stub {
             cid = getTempContainerId();
         }
 
-        boolean  checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
-            return imcs.checkFreeStorage(true, packageURI);
+        boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
+            try {
+                mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                return imcs.checkFreeStorage(true, packageURI);
+            } finally {
+                mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (temp) {
                 createCopyFile();
             }
-            String newCachePath = imcs.copyResourceToContainer(
-                    packageURI, cid,
-                    getEncryptKey(), RES_FILE_NAME);
+
+            final String newCachePath;
+            try {
+                mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                newCachePath = imcs.copyResourceToContainer(packageURI, cid,
+                        getEncryptKey(), RES_FILE_NAME);
+            } finally {
+                mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
             if (newCachePath != null) {
                 setCachePath(newCachePath);
                 return PackageManager.INSTALL_SUCCEEDED;
