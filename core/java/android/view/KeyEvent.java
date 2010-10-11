@@ -195,7 +195,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_TAB             = 61;
     /** Key code constant: Space key. */
     public static final int KEYCODE_SPACE           = 62;
-    /** Key code constant: Symbol modifier key. */
+    /** Key code constant: Symbol modifier key.
+     * Used to enter alternate symbols. */
     public static final int KEYCODE_SYM             = 63;
     /** Key code constant: Explorer special function key.
      * Used to launch a browser application. */
@@ -205,7 +206,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_ENVELOPE        = 65;
     /** Key code constant: Enter key. */
     public static final int KEYCODE_ENTER           = 66;
-    /** Key code constant: Delete key. */
+    /** Key code constant: Backspace key.
+     * Deletes characters before the insertion point. */
     public static final int KEYCODE_DEL             = 67;
     /** Key code constant: '`' (backtick) key. */
     public static final int KEYCODE_GRAVE           = 68;
@@ -227,7 +229,10 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_SLASH           = 76;
     /** Key code constant: '@' key. */
     public static final int KEYCODE_AT              = 77;
-    /** Key code constant: Number Lock modifier key. */
+    /** Key code constant: Number modifier key.
+     * Used to enter numeric symbols.
+     * This key is not Num Lock; it is more like {@link #KEYCODE_ALT_LEFT} and is
+     * interpreted as an ALT key by {@link android.text.method.MetaKeyKeyListener}. */
     public static final int KEYCODE_NUM             = 78;
     /** Key code constant: Headset Hook key.
      * Used to hang up calls and stop media. */
