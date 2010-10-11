@@ -67,6 +67,7 @@ struct BatteryManagerConstants {
     jint healthDead;
     jint healthOverVoltage;
     jint healthUnspecifiedFailure;
+    jint healthCold;
 };
 static BatteryManagerConstants gConstants;
 
@@ -104,6 +105,7 @@ static jint getBatteryStatus(const char* status)
 static jint getBatteryHealth(const char* status)
 {
     switch (status[0]) {
+        case 'C': return gConstants.healthCold;         // Cold
         case 'D': return gConstants.healthDead;         // Dead
         case 'G': return gConstants.healthGood;         // Good
         case 'O': {
@@ -390,6 +392,9 @@ int register_android_server_BatteryService(JNIEnv* env)
     gConstants.healthUnspecifiedFailure = env->GetStaticIntField(clazz, 
             env->GetStaticFieldID(clazz, "BATTERY_HEALTH_UNSPECIFIED_FAILURE", "I"));
     
+    gConstants.healthCold = env->GetStaticIntField(clazz,
+            env->GetStaticFieldID(clazz, "BATTERY_HEALTH_COLD", "I"));
+
     return jniRegisterNativeMethods(env, "com/android/server/BatteryService", sMethods, NELEM(sMethods));
 }
 
