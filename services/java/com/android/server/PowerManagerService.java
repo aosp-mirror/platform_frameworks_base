@@ -245,6 +245,8 @@ class PowerManagerService extends IPowerManager.Stub
     private int[] mButtonBacklightValues;
     private int[] mKeyboardBacklightValues;
     private int mLightSensorWarmupTime;
+    private int mWarningSpewThrottleCount;
+    private long mWarningSpewThrottleTime;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -2095,6 +2097,21 @@ class PowerManagerService extends IPowerManager.Stub
         return (mScreenBrightness.animating && mScreenBrightness.targetValue == 0);
     }
 
+    private boolean shouldLog(long time) {
+        synchronized (mLocks) {
+            if (time > (mWarningSpewThrottleTime + (60*60*1000))) {
+                mWarningSpewThrottleTime = time;
+                mWarningSpewThrottleCount = 0;
+                return true;
+            } else if (mWarningSpewThrottleCount < 30) {
+                mWarningSpewThrottleCount++;
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     private void forceUserActivityLocked() {
         if (isScreenTurningOffLocked()) {
             // cancel animation so userActivity will succeed
@@ -2112,7 +2129,15 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     public void userActivity(long time, boolean noChangeLights) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (shouldLog(time)) {
+                Slog.w(TAG, "Caller does not have DEVICE_POWER permission.  pid="
+                        + Binder.getCallingPid() + " uid=" + Binder.getCallingUid());
+            }
+            return;
+        }
+
         userActivity(time, -1, noChangeLights, OTHER_EVENT, false);
     }
 
