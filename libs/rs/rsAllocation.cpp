@@ -26,6 +26,8 @@
 #include <OpenGl/glext.h>
 #endif
 
+#include "utils/StopWatch.h"
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -150,6 +152,8 @@ void Allocation::uploadToTexture(const Context *rsc)
         return;
     }
 
+    bool isFirstUpload = false;
+
     if (!mTextureID) {
         glGenTextures(1, &mTextureID);
 
@@ -162,6 +166,7 @@ void Allocation::uploadToTexture(const Context *rsc)
             mUploadDefered = true;
             return;
         }
+        isFirstUpload = true;
     }
     glBindTexture(GL_TEXTURE_2D, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -171,9 +176,15 @@ void Allocation::uploadToTexture(const Context *rsc)
         adapt.setLOD(lod+mTextureLOD);
 
         uint16_t * ptr = static_cast<uint16_t *>(adapt.getElement(0,0));
-        glTexImage2D(GL_TEXTURE_2D, lod, format,
-                     adapt.getDimX(), adapt.getDimY(),
-                     0, format, type, ptr);
+        if(isFirstUpload) {
+            glTexImage2D(GL_TEXTURE_2D, lod, format,
+                         adapt.getDimX(), adapt.getDimY(),
+                         0, format, type, ptr);
+        } else {
+            glTexSubImage2D(GL_TEXTURE_2D, lod, 0, 0,
+                         adapt.getDimX(), adapt.getDimY(),
+                         format, type, ptr);
+        }
     }
     if (mTextureGenMipmap) {
 #ifndef ANDROID_RS_BUILD_FOR_HOST
@@ -749,6 +760,32 @@ RsAllocation rsi_AllocationCreateBitmapRef(Context *rsc, RsType vtype,
     Allocation * alloc = new Allocation(rsc, type, bmp, callbackData, callback);
     alloc->incUserRef();
     return alloc;
+}
+
+void rsi_AllocationUpdateFromBitmap(Context *rsc, RsAllocation va, RsElement _src, const void *data)
+{
+    Allocation *texAlloc = static_cast<Allocation *>(va);
+    const Element *src = static_cast<const Element *>(_src);
+    const Element *dst = texAlloc->getType()->getElement();
+    uint32_t w = texAlloc->getType()->getDimX();
+    uint32_t h = texAlloc->getType()->getDimY();
+    bool genMips = texAlloc->getType()->getDimLOD();
+
+    ElementConverter_t cvt = pickConverter(dst, src);
+    if (cvt) {
+        cvt(texAlloc->getPtr(), data, w * h);
+        if (genMips) {
+            Adapter2D adapt(rsc, texAlloc);
+            Adapter2D adapt2(rsc, texAlloc);
+            for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+                adapt.setLOD(lod);
+                adapt2.setLOD(lod + 1);
+                mip(adapt2, adapt);
+            }
+        }
+    } else {
+        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
+    }
 }
 
 RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data)

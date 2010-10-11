@@ -127,6 +127,12 @@ AllocationCreateSized {
 	ret RsAllocation
 	}
 
+AllocationUpdateFromBitmap {
+	param RsAllocation alloc
+	param RsElement srcFmt
+	param const void * data
+	}
+
 AllocationCreateBitmapRef {
 	param RsType type
 	param void * bmpPtr
