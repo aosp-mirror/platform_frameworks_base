@@ -141,6 +141,7 @@ public:
         int                     getHeight() const;
 
         const DisplayHardware&  displayHardware() const;
+        DisplayHardware&        editDisplayHardware();
         const Transform&        transform() const;
         EGLDisplay              getEGLDisplay() const;
         
@@ -200,6 +201,7 @@ public:
                                                       PixelFormat* format,
                                                       uint32_t reqWidth,
                                                       uint32_t reqHeight);
+    virtual status_t                    turnElectronBeamOff(int32_t mode);
 
             void                        screenReleased(DisplayID dpy);
             void                        screenAcquired(DisplayID dpy);
@@ -324,6 +326,8 @@ private:
                     sp<IMemoryHeap>* heap,
                     uint32_t* width, uint32_t* height, PixelFormat* format,
                     uint32_t reqWidth = 0, uint32_t reqHeight = 0);
+
+            status_t turnElectronBeamOffImplLocked();
 
             friend class FreezeLock;
             sp<FreezeLock> getFreezeLock() const;
