@@ -493,6 +493,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 + " info: " + info);
         }
 
+        if (info != null) {
+            native_update_network_state(info.isConnected(), info.getType(),
+                    info.isRoaming(), info.getExtraInfo());
+        }
+
         if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE_SUPL
                 && mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
             String apnName = info.getExtraInfo();
@@ -1601,4 +1606,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private native void native_agps_set_ref_location_cellid(int type, int mcc, int mnc,
             int lac, int cid);
     private native void native_agps_set_id(int type, String setid);
+
+    private native void native_update_network_state(boolean connected, int type,
+            boolean roaming, String extraInfo);
 }
