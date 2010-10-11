@@ -134,17 +134,15 @@ public class MockRilController {
         return curstate == state;
     }
 
-
-
     /**
-     * Set an MT call
+     * Start an incoming call for the given phone number
      *
-     * @param phoneNumber for the number shown
+     * @param phoneNumber is the number to show as incoming call
+     * @return true if the incoming call is started successfully, false if it fails.
      */
-    public boolean setMTCall(String phoneNumber) {
+    public boolean startIncomingCall(String phoneNumber) {
         RilCtrlCmds.CtrlReqSetMTCall req = new RilCtrlCmds.CtrlReqSetMTCall();
 
-        // Check whether it is a valid number
         req.setPhoneNumber(phoneNumber);
         if (!sendCtrlCommand(RilCtrlCmds.CTRL_CMD_SET_MT_CALL, 0, 0, req)) {
             Log.v(TAG, "send CMD_SET_MT_CALL request failed");
@@ -153,4 +151,68 @@ public class MockRilController {
         return true;
     }
 
+    /**
+     * Hang up a connection remotelly for the given call fail cause
+     *
+     * @param connectionID is the connection to be hung up
+     * @param failCause is the call fail cause defined in ril.h
+     * @return true if the hangup is successful, false if it fails
+     */
+    public boolean hangupRemote(int connectionId, int failCause) {
+        RilCtrlCmds.CtrlHangupConnRemote req = new RilCtrlCmds.CtrlHangupConnRemote();
+        req.setConnectionId(connectionId);
+        req.setCallFailCause(failCause);
+
+        if (!sendCtrlCommand(RilCtrlCmds.CTRL_CMD_HANGUP_CONN_REMOTE, 0, 0, req)) {
+            Log.v(TAG, "send CTRL_CMD_HANGUP_CONN_REMOTE request failed");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Set call transition flag to the Mock Ril
+     *
+     * @param flag is a boolean value for the call transiton flag
+     *             true: call transition: dialing->alert, alert->active is controlled
+     *             false: call transition is automatically handled by Mock Ril
+     * @return true if the request is successful, false if it failed to set the flag
+     */
+    public boolean setCallTransitionFlag(boolean flag) {
+        RilCtrlCmds.CtrlSetCallTransitionFlag req = new RilCtrlCmds.CtrlSetCallTransitionFlag();
+
+        req.setFlag(flag);
+
+        if (!sendCtrlCommand(RilCtrlCmds.CTRL_CMD_SET_CALL_TRANSITION_FLAG, 0, 0, req)) {
+            Log.v(TAG, "send CTRL_CMD_SET_CALL_TRANSITION_FLAG request failed");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Set the dialing call to alert if the call transition flag is true
+     *
+     * @return true if the call transition is successful, false if it fails
+     */
+    public boolean setDialCallToAlert() {
+        if (!sendCtrlCommand(RilCtrlCmds.CTRL_CMD_SET_CALL_ALERT, 0, 0, null)) {
+            Log.v(TAG, "send CTRL_CMD_SET_CALL_ALERT request failed");
+            return false;
+        }
+        return true;
+   }
+
+   /**
+    * Set the alert call to active if the call transition flag is true
+    *
+    * @return true if the call transition is successful, false if it fails
+    */
+   public boolean setAlertCallToActive() {
+        if (!sendCtrlCommand(RilCtrlCmds.CTRL_CMD_SET_CALL_ACTIVE, 0, 0, null)) {
+            Log.v(TAG, "send CTRL_CMD_SET_CALL_ACTIVE request failed");
+            return false;
+        }
+        return true;
+   }
 }
