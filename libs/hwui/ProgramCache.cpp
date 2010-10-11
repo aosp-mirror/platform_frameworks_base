@@ -50,7 +50,7 @@ const char* gVS_Header_Varyings_HasBitmap =
         "varying vec2 outBitmapTexCoords;\n";
 const char* gVS_Header_Varyings_HasGradient[3] = {
         // Linear
-        "varying float index;\n",
+        "varying vec2 linear;\n",
         // Circular
         "varying vec2 circular;\n",
         // Sweep
@@ -62,7 +62,7 @@ const char* gVS_Main_OutTexCoords =
         "    outTexCoords = texCoords;\n";
 const char* gVS_Main_OutGradient[3] = {
         // Linear
-        "    index = (screenSpace * position).x;\n",
+        "    linear = vec2((screenSpace * position).x, 0.5);\n",
         // Circular
         "    circular = (screenSpace * position).xy;\n",
         // Sweep
@@ -121,7 +121,7 @@ const char* gFS_Main_FetchA8Texture =
         "    fragColor = color * texture2D(sampler, outTexCoords).a;\n";
 const char* gFS_Main_FetchGradient[3] = {
         // Linear
-        "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n",
+        "    vec4 gradientColor = texture2D(gradientSampler, linear);\n",
         // Circular
         "    float index = length(circular);\n"
         "    vec4 gradientColor = texture2D(gradientSampler, vec2(index, 0.5));\n",
