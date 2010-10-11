@@ -234,7 +234,6 @@
         <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
-        <item name="actionButtonPadding">12dip</item>
         <item name="actionModeBackground">@android:drawable/action_bar_context_background</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
         <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
@@ -243,7 +242,10 @@
         <item name="actionModeStyle">@style/Widget.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.ActionBar</item>
-        <item name="actionBarSize">50dip</item>
+        <item name="actionBarSize">56dip</item>
+
+        <item name="dividerVertical">@drawable/divider_vertical_dark</item>
+        <item name="buttonGroupStyle">@android:style/Widget.ButtonGroup</item>
     </style>
     
     <!-- Variant of the default (dark) theme with no title bar -->
@@ -826,7 +828,6 @@
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
-        <item name="actionButtonPadding">12dip</item>
         <item name="actionModeBackground">@android:drawable/cab_holo_dark</item>
         <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
         <item name="actionBarTabStyle">@style/Widget.Holo.ActionBarView_TabView</item>
@@ -835,8 +836,10 @@
         <item name="actionModeStyle">@style/Widget.Holo.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.Holo.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.Holo.ActionBar</item>
-        <item name="actionBarSize">50dip</item>
+        <item name="actionBarSize">56dip</item>
 
+        <item name="dividerVertical">@drawable/divider_vertical_holo_dark</item>
+        <item name="buttonGroupStyle">@android:style/Widget.Holo.ButtonGroup</item>
     </style>
 
     <!-- New Honeycomb holographic theme. Light version.  The widgets in the
@@ -1052,7 +1055,6 @@
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
-        <item name="actionButtonPadding">12dip</item>
         <item name="actionModeBackground">@android:drawable/cab_holo_light</item>
         <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
         <item name="actionBarTabStyle">@style/Widget.Holo.ActionBarView_TabView</item>
@@ -1061,8 +1063,10 @@
         <item name="actionModeStyle">@style/Widget.Holo.Light.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.Holo.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.Holo.ActionBar</item>
-        <item name="actionBarSize">50dip</item>
+        <item name="actionBarSize">56dip</item>
 
+        <item name="dividerVertical">@drawable/divider_vertical_holo_light</item>
+        <item name="buttonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup</item>
     </style>
 
     <!-- Development legacy name; if you're using this, switch. -->

@@ -905,9 +905,9 @@
         <item name="android:displayOptions">useLogo</item>
         <item name="android:divider">@android:drawable/action_bar_divider</item>
         <item name="android:height">?android:attr/actionBarSize</item>
-        <item name="android:paddingLeft">3dip</item>
+        <item name="android:paddingLeft">0dip</item>
         <item name="android:paddingTop">0dip</item>
-        <item name="android:paddingRight">3dip</item>
+        <item name="android:paddingRight">0dip</item>
         <item name="android:paddingBottom">0dip</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionBar.Subtitle</item>
@@ -916,7 +916,6 @@
     <style name="Widget.ActionMode">
         <item name="android:background">?android:attr/actionModeBackground</item>
         <item name="android:height">?android:attr/actionBarSize</item>
-        <item name="android:itemPadding">?android:attr/actionButtonPadding</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Subtitle</item>
     </style>
@@ -939,6 +938,8 @@
 
     <style name="Widget.ActionButton">
         <item name="android:background">@null</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
     </style>
 
     <style name="Widget.ActionButton.Overflow">
@@ -992,6 +993,11 @@
         <item name="android:textColor">@android:color/secondary_text_light</item>
     </style>
 
+    <style name="Widget.ButtonGroup">
+        <item name="divider">?android:attr/dividerVertical</item>
+        <item name="buttonBackground">?android:attr/listChoiceBackgroundIndicator</item>
+    </style>
+
     <!-- Begin Holo theme styles -->
 
     <!-- Text Styles -->
@@ -1009,6 +1015,7 @@
     </style>
 
     <style name="TextAppearance.Holo.Medium" parent="TextAppearance.Medium">
+        <item name="android:textLineHeight">24dip</item>
     </style>
 
     <style name="TextAppearance.Holo.Small" parent="TextAppearance.Small">
@@ -1073,16 +1080,16 @@
     </style>
 
     <style name="TextAppearance.Holo.Widget.DropDownHint">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">?textColorPrimary</item>
         <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget.DropDownItem">
-        <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
+        <item name="android:textColor">?textColorPrimaryDisableOnly</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget.TextView.SpinnerItem">
-        <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
+        <item name="android:textColor">?textColorPrimaryDisableOnly</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget.EditText">
@@ -1142,13 +1149,13 @@
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Holo.Light.Large" parent="TextAppearance.Large">
+    <style name="TextAppearance.Holo.Light.Large" parent="TextAppearance.Holo.Large">
     </style>
 
-    <style name="TextAppearance.Holo.Light.Medium" parent="TextAppearance.Medium">
+    <style name="TextAppearance.Holo.Light.Medium" parent="TextAppearance.Holo.Medium">
     </style>
 
-    <style name="TextAppearance.Holo.Light.Small" parent="TextAppearance.Small">
+    <style name="TextAppearance.Holo.Light.Small" parent="TextAppearance.Holo.Small">
     </style>
  
    <style name="TextAppearance.Holo.Light.Large.Inverse">
@@ -1258,6 +1265,9 @@
         <item name="android:minHeight">48dip</item>
         <item name="android:paddingLeft">24dip</item>
         <item name="android:paddingRight">24dip</item>
+    </style>
+
+    <style name="Widget.Holo.ButtonGroup" parent="Widget.ButtonGroup">
     </style>
 
     <style name="Widget.Holo.TextView" parent="Widget.TextView">
@@ -1393,12 +1403,14 @@
     </style>
 
     <style name="Widget.Holo.DropDownItem" parent="Widget.DropDownItem">
+        <item name="android:textAppearance">@style/TextAppearance.Holo.Widget.DropDownItem</item>
     </style>
 
     <style name="Widget.Holo.DropDownItem.Spinner">
     </style>
 
     <style name="Widget.Holo.TextView.SpinnerItem" parent="Widget.TextView.SpinnerItem">
+        <item name="android:textAppearance">@style/TextAppearance.Holo.Widget.TextView.SpinnerItem</item>
     </style>
 
     <style name="Widget.Holo.KeyboardView" parent="Widget.KeyboardView">
@@ -1433,11 +1445,25 @@
     <style name="Widget.Holo.PopupMenu" parent="Widget.Holo.ListPopupWindow">
     </style>
 
-    <style name="Widget.Holo.ActionButton" parent="Widget.ActionButton">
+    <style name="Widget.Holo.ButtonBar">
+        <item name="android:divider">?android:attr/dividerVertical</item>
     </style>
 
-    <style name="Widget.Holo.ActionButton.Overflow" parent="Widget.ActionButton.Overflow">
+    <style name="Widget.Holo.ButtonBar.Button">
+    </style>
+
+    <style name="Widget.Holo.ActionButton" parent="Widget.ActionButton">
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
+        <item name="android:minWidth">64dip</item>
+        <item name="android:minHeight">56dip</item>
+    </style>
+
+    <style name="Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_dark</item>
+    </style>
+
+    <style name="Widget.Holo.ActionButton.TextButton" parent="Widget.Holo.ButtonBar.Button">
     </style>
 
     <style name="Widget.Holo.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
@@ -1458,7 +1484,7 @@
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
     </style>
 
-    <style name="Widget.Holo.ActionButton.CloseMode" parent="Widget.ActionButton.CloseMode">
+    <style name="Widget.Holo.ActionButton.CloseMode">
         <item name="android:src">@drawable/cab_ic_close_holo</item>
     </style>
 
@@ -1466,6 +1492,7 @@
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
         <item name="android:background">@null</item>
+        <item name="android:divider">?android:attr/dividerVertical</item>
     </style>
 
     <!-- Light widget styles -->
@@ -1491,6 +1518,9 @@
         <item name="android:minHeight">48dip</item>
         <item name="android:paddingLeft">24dip</item>
         <item name="android:paddingRight">24dip</item>
+    </style>
+
+    <style name="Widget.Holo.Light.ButtonGroup" parent="Widget.Holo.ButtonGroup">
     </style>
 
     <style name="Widget.Holo.Light.TextView" parent="Widget.TextView">
@@ -1619,13 +1649,13 @@
     <style name="Widget.Holo.Light.WebView" parent="Widget.WebView">
     </style>
 
-    <style name="Widget.Holo.Light.DropDownItem" parent="Widget.DropDownItem">
+    <style name="Widget.Holo.Light.DropDownItem" parent="Widget.Holo.DropDownItem">
     </style>
 
     <style name="Widget.Holo.Light.DropDownItem.Spinner">
     </style>
 
-    <style name="Widget.Holo.Light.TextView.SpinnerItem" parent="Widget.TextView.SpinnerItem">
+    <style name="Widget.Holo.Light.TextView.SpinnerItem" parent="Widget.Holo.TextView.SpinnerItem">
     </style>
 
     <style name="Widget.Holo.Light.KeyboardView" parent="Widget.KeyboardView">
@@ -1660,10 +1690,10 @@
     <style name="Widget.Holo.Light.PopupMenu" parent="Widget.Holo.Light.ListPopupWindow">
     </style>
 
-    <style name="Widget.Holo.Light.ActionButton" parent="Widget.ActionButton">
+    <style name="Widget.Holo.Light.ActionButton" parent="Widget.Holo.ActionButton">
     </style>
 
-    <style name="Widget.Holo.Light.ActionButton.Overflow" parent="Widget.ActionButton.Overflow">
+    <style name="Widget.Holo.Light.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_light</item>
     </style>
 
@@ -1676,16 +1706,16 @@
     <style name="Widget.Holo.Light.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
     </style>
 
-    <style name="Widget.Holo.Light.ActionMode" parent="Widget.ActionMode">
+    <style name="Widget.Holo.Light.ActionMode" parent="Widget.Holo.ActionMode">
         <item name="android:background">@android:drawable/cab_holo_light</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
     </style>
 
-    <style name="Widget.Holo.Light.ActionButton.CloseMode" parent="Widget.ActionButton.CloseMode">
+    <style name="Widget.Holo.Light.ActionButton.CloseMode">
     </style>
 
-    <style name="Widget.Holo.Light.ActionBar" parent="Widget.ActionBar">
+    <style name="Widget.Holo.Light.ActionBar" parent="Widget.Holo.ActionBar">
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
         <item name="android:background">@null</item>

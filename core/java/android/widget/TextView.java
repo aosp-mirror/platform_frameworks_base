@@ -734,6 +734,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case com.android.internal.R.styleable.TextView_textSelectHandle:
                 mTextSelectHandleRes = a.getResourceId(attr, 0);
                 break;
+                
+            case com.android.internal.R.styleable.TextView_textLineHeight:
+                int lineHeight = a.getDimensionPixelSize(attr, 0);
+                if (lineHeight != 0) {
+                    setLineHeight(lineHeight);
+                }
             }
         }
         a.recycle();
@@ -1063,6 +1069,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * or last-line padding.
      */
     public int getLineHeight() {
+        if (mLineHeight != 0) {
+            return mLineHeight;
+        }
         return FastMath.round(mTextPaint.getFontMetricsInt(null) * mSpacingMult
                           + mSpacingAdd);
     }
@@ -1655,7 +1664,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                        TextAppearance_textStyle, -1);
 
         setTypefaceByIndex(typefaceIndex, styleIndex);
+        
+        int lineHeight = appearance.getDimensionPixelSize(
+                com.android.internal.R.styleable.TextAppearance_textLineHeight, 0);
+        if (lineHeight != 0) {
+            setLineHeight(lineHeight);
+        }
+
         appearance.recycle();
+    }
+
+    /**
+     * Set the height of a line of text in pixels. This value will override line height
+     * values stored in the font modified by lineSpacingExtra and lineSpacingMultiplier.
+     *
+     * @param lineHeight Desired height of a single line of text in pixels
+     */
+    public void setLineHeight(int lineHeight) {
+        mLineHeight = lineHeight;
     }
 
     /**
@@ -8449,6 +8475,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private float                   mSpacingMult = 1;
     private float                   mSpacingAdd = 0;
+    private int                     mLineHeight = 0;
 
     private static final int        LINES = 1;
     private static final int        EMS = LINES;

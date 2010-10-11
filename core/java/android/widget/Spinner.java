@@ -589,7 +589,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             
             setAnchorView(Spinner.this);
             setModal(true);
-            setPromptPosition(POSITION_PROMPT_BELOW);
+            setPromptPosition(POSITION_PROMPT_ABOVE);
             setOnItemClickListener(new OnItemClickListener() {
                 public void onItemClick(AdapterView parent, View v, int position, long id) {
                     Spinner.this.setSelection(position);

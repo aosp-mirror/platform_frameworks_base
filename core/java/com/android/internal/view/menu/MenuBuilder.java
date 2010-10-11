@@ -236,14 +236,14 @@ public class MenuBuilder implements Menu {
                 int themeResForType = THEME_RES_FOR_TYPE[mMenuType];
                 switch (themeResForType) {
                     case THEME_APPLICATION:
-                        wrappedContext = new ContextThemeWrapper(mContext, themeResForType);
+                        wrappedContext = mContext;
                         break;
                     case THEME_ALERT_DIALOG:
                         wrappedContext = new ContextThemeWrapper(mContext,
                                 getAlertDialogTheme(mContext));
                         break;
                     default:
-                        wrappedContext = mContext;
+                        wrappedContext = new ContextThemeWrapper(mContext, themeResForType);
                         break;
                 }
                 mInflater = (LayoutInflater) wrappedContext
