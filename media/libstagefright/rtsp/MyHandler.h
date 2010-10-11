@@ -86,6 +86,7 @@ struct MyHandler : public AHandler {
           mFirstAccessUnitNTP(0),
           mNumAccessUnitsReceived(0),
           mCheckPending(false),
+          mCheckGeneration(0),
           mTryTCPInterleaving(false),
           mReceivedFirstRTCPPacket(false) {
         mNetLooper->setName("rtsp net");
@@ -434,6 +435,13 @@ struct MyHandler : public AHandler {
 
             case 'chek':
             {
+                int32_t generation;
+                CHECK(msg->findInt32("generation", &generation));
+                if (generation != mCheckGeneration) {
+                    // This is an outdated message. Ignore.
+                    break;
+                }
+
                 if (mNumAccessUnitsReceived == 0) {
                     LOGI("stream ended? aborting.");
                     (new AMessage('abor', id()))->post();
@@ -454,12 +462,7 @@ struct MyHandler : public AHandler {
                 }
 
                 ++mNumAccessUnitsReceived;
-
-                if (!mCheckPending) {
-                    mCheckPending = true;
-                    sp<AMessage> check = new AMessage('chek', id());
-                    check->post(kAccessUnitTimeoutUs);
-                }
+                postAccessUnitTimeoutCheck();
 
                 size_t trackIndex;
                 CHECK(msg->findSize("track-index", &trackIndex));
@@ -557,6 +560,11 @@ struct MyHandler : public AHandler {
 
                 mSeekPending = true;
 
+                // Disable the access unit timeout until we resumed
+                // playback again.
+                mCheckPending = true;
+                ++mCheckGeneration;
+
                 AString request = "PAUSE ";
                 request.append(mSessionURL);
                 request.append(" RTSP/1.0\r\n");
@@ -611,6 +619,9 @@ struct MyHandler : public AHandler {
 
                 LOGI("PLAY completed with result %d (%s)",
                      result, strerror(-result));
+
+                mCheckPending = false;
+                postAccessUnitTimeoutCheck();
 
                 if (result == OK) {
                     sp<RefBase> obj;
@@ -672,6 +683,17 @@ struct MyHandler : public AHandler {
                 TRESPASS();
                 break;
         }
+    }
+
+    void postAccessUnitTimeoutCheck() {
+        if (mCheckPending) {
+            return;
+        }
+
+        mCheckPending = true;
+        sp<AMessage> check = new AMessage('chek', id());
+        check->setInt32("generation", mCheckGeneration);
+        check->post(kAccessUnitTimeoutUs);
     }
 
     static void SplitString(
@@ -783,6 +805,7 @@ private:
     uint64_t mFirstAccessUnitNTP;
     int64_t mNumAccessUnitsReceived;
     bool mCheckPending;
+    int32_t mCheckGeneration;
     bool mTryTCPInterleaving;
     bool mReceivedFirstRTCPPacket;
 
