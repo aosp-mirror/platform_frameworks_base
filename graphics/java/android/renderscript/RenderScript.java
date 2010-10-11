@@ -186,6 +186,10 @@ public class RenderScript {
     synchronized int nAllocationCreateTyped(int type) {
         return rsnAllocationCreateTyped(mContext, type);
     }
+    native void  rsnAllocationUpdateFromBitmap(int con, int alloc, Bitmap bmp);
+    synchronized void nAllocationUpdateFromBitmap(int alloc, Bitmap bmp) {
+        rsnAllocationUpdateFromBitmap(mContext, alloc, bmp);
+    }
     native int  rsnAllocationCreateFromBitmap(int con, int dstFmt, boolean genMips, Bitmap bmp);
     synchronized int nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp) {
         return rsnAllocationCreateFromBitmap(mContext, dstFmt, genMips, bmp);

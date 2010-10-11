@@ -423,6 +423,23 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint dst
     return 0;
 }
 
+static void
+nAllocationUpdateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jobject jbitmap)
+{
+    SkBitmap const * nativeBitmap =
+            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+    const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap::Config config = bitmap.getConfig();
+
+    RsElement e = SkBitmapToPredefined(config);
+    if (e) {
+        bitmap.lockPixels();
+        const void* ptr = bitmap.getPixels();
+        rsAllocationUpdateFromBitmap(con, (RsAllocation)alloc, e, ptr);
+        bitmap.unlockPixels();
+    }
+}
+
 static void ReleaseBitmapCallback(void *bmp)
 {
     SkBitmap const * nativeBitmap = (SkBitmap const *)bmp;
@@ -1234,6 +1251,7 @@ static JNINativeMethod methods[] = {
 {"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },
 
 {"rsnAllocationCreateTyped",         "(II)I",                                 (void*)nAllocationCreateTyped },
+{"rsnAllocationUpdateFromBitmap",    "(IILandroid/graphics/Bitmap;)V",        (void*)nAllocationUpdateFromBitmap },
 {"rsnAllocationCreateFromBitmap",    "(IIZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
 {"rsnAllocationCreateBitmapRef",     "(IILandroid/graphics/Bitmap;)I",        (void*)nAllocationCreateBitmapRef },
 {"rsnAllocationCreateFromAssetStream","(IIZI)I",                              (void*)nAllocationCreateFromAssetStream },

@@ -149,13 +149,37 @@ uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) co
     return offset;
 }
 
+bool Type::isValidGLComponent(uint32_t fieldIdx) {
+    // Do not create attribs for padding
+    if(mElement->getFieldName(fieldIdx)[0] == '#') {
+        return false;
+    }
+
+    // Only GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FIXED, GL_FLOAT are accepted.
+    // Filter rs types accordingly
+    RsDataType dt = mElement->getField(fieldIdx)->getComponent().getType();
+    if(dt != RS_TYPE_FLOAT_32 && dt != RS_TYPE_UNSIGNED_8 &&
+       dt != RS_TYPE_UNSIGNED_16 && dt != RS_TYPE_SIGNED_8 &&
+       dt != RS_TYPE_SIGNED_16) {
+        return false;
+    }
+
+    // Now make sure they are not arrays
+    uint32_t arraySize = mElement->getFieldArraySize(fieldIdx);
+    if(arraySize != 1) {
+        return false;
+    }
+
+    return true;
+}
 
 void Type::makeGLComponents()
 {
     // Count the number of gl attrs to initialize
     mAttribsSize = 0;
-    for (uint32_t ct=0; ct < getElement()->getFieldCount(); ct++) {
-        if(getElement()->getFieldName(ct)[0] != '#') {
+
+    for (uint32_t ct=0; ct < mElement->getFieldCount(); ct++) {
+        if(isValidGLComponent(ct)) {
             mAttribsSize ++;
         }
     }
@@ -168,10 +192,10 @@ void Type::makeGLComponents()
     }
 
     uint32_t userNum = 0;
-    for (uint32_t ct=0; ct < getElement()->getFieldCount(); ct++) {
-        const Component &c = getElement()->getField(ct)->getComponent();
+    for (uint32_t ct=0; ct < mElement->getFieldCount(); ct++) {
+        const Component &c = mElement->getField(ct)->getComponent();
 
-        if(getElement()->getFieldName(ct)[0] == '#') {
+        if(!isValidGLComponent(ct)) {
             continue;
         }
 
@@ -180,7 +204,7 @@ void Type::makeGLComponents()
         mAttribs[userNum].type = c.getGLType();
         mAttribs[userNum].normalized = c.getType() != RS_TYPE_FLOAT_32;//c.getIsNormalized();
         String8 tmp(RS_SHADER_ATTR);
-        tmp.append(getElement()->getFieldName(ct));
+        tmp.append(mElement->getFieldName(ct));
         mAttribs[userNum].name.setTo(tmp.string());
 
         userNum ++;
