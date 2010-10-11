@@ -7599,7 +7599,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState win = allAppWindows.get(i);
                 if (win == startingWindow || win.mAppFreezing
                         || win.mViewVisibility != View.VISIBLE
-                        || win.mAttrs.type == TYPE_APPLICATION_STARTING) {
+                        || win.mAttrs.type == TYPE_APPLICATION_STARTING
+                        || win.mDestroying) {
                     continue;
                 }
                 if (DEBUG_VISIBILITY) {
