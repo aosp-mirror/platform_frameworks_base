@@ -84,7 +84,7 @@ import java.util.Set;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
