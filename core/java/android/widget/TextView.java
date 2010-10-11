@@ -6610,12 +6610,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int selEnd = getSelectionEnd();
 
             if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
+                // If a tap was used to give focus to that view, move cursor at tap position.
                 // Has to be done before onTakeFocus, which can be overloaded.
-                if (mLastTouchOffset >= 0) {
-                    // Can happen when a TextView is displayed after its content has been deleted.
-                    mLastTouchOffset = Math.min(mLastTouchOffset, mText.length());
-                    Selection.setSelection((Spannable) mText, mLastTouchOffset);
-                }
+                moveCursorToLastTapPosition();
 
                 if (mMovement != null) {
                     mMovement.onTakeFocus(this, (Spannable) mText, direction);
@@ -6677,8 +6674,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 terminateSelectionActionMode();
             }
-
-            mLastTouchOffset = -1;
         }
 
         startStopMarquee(focused);
@@ -6688,6 +6683,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
+    }
+
+    private void moveCursorToLastTapPosition() {
+        if (mSelectionModifierCursorController != null) {
+            int mTapToFocusPosition = ((SelectionModifierCursorController)
+                    mSelectionModifierCursorController).getMinTouchOffset();
+            if (mTapToFocusPosition >= 0) {
+                // Safety check, should not be possible.
+                if (mTapToFocusPosition > mText.length()) {
+                    Log.e(LOG_TAG, "Invalid tap focus position (" + mTapToFocusPosition + " vs "
+                            + mText.length() + ")");
+                    mTapToFocusPosition = mText.length();
+                }
+                Selection.setSelection((Spannable) mText, mTapToFocusPosition);
+            }
+        }
     }
 
     @Override
@@ -6781,7 +6792,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Tapping outside stops selection mode, if any
                 stopSelectionActionMode();
 
-                if (mInsertionPointCursorController != null) {
+                if (mInsertionPointCursorController != null && mText.length() > 0) {
                     mInsertionPointCursorController.show();
                 }
             }
@@ -7321,7 +7332,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int minOffset, maxOffset;
 
-        if (mDPadCenterIsDown || mEnterKeyIsDown) {
+        if (mContextMenuTriggeredByKey) {
             minOffset = getSelectionStart();
             maxOffset = getSelectionEnd();
         } else {
@@ -7391,6 +7402,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onCreateContextMenu(ContextMenu menu) {
         super.onCreateContextMenu(menu);
         boolean added = false;
+        mContextMenuTriggeredByKey = mDPadCenterIsDown || mEnterKeyIsDown;
+        // Problem with context menu on long press: the menu appears while the key in down and when
+        // the key is released, the view does not receive the key_up event. This ensures that the
+        // state is reset whenever the context menu action is displayed.
+        // mContextMenuTriggeredByKey saved that state so that it is available in
+        // onTextContextMenuItem. We cannot simply clear these flags in onTextContextMenuItem since
+        // it may not be called (if the user/ discards the context menu with the back key).
+        mDPadCenterIsDown = mEnterKeyIsDown = false;
 
         MenuHandler handler = new MenuHandler();
 
@@ -8148,6 +8167,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         SelectionModifierCursorController() {
             mStartHandle = new HandleView(this, HandleView.LEFT);
             mEndHandle = new HandleView(this, HandleView.RIGHT);
+            mMinTouchOffset = mMaxTouchOffset = -1;
         }
 
         public void show() {
@@ -8230,14 +8250,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public boolean onTouchEvent(MotionEvent event) {
-            if (isFocused() && isTextEditable()) {
+            // This is done even when the View does not have focus, so that long presses can start
+            // selection and tap can move cursor from this tap position.
+            if (isTextEditable()) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         final int x = (int) event.getX();
                         final int y = (int) event.getY();
 
                         // Remember finger down position, to be able to start selection from there
-                        mMinTouchOffset = mMaxTouchOffset = mLastTouchOffset = getOffset(x, y);
+                        mMinTouchOffset = mMaxTouchOffset = getOffset(x, y);
 
                         break;
 
@@ -8395,11 +8417,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CursorController        mInsertionPointCursorController;
     private CursorController        mSelectionModifierCursorController;
     private ActionMode              mSelectionActionMode;
-    private int                     mLastTouchOffset = -1;
     // These are needed to desambiguate a long click. If the long click comes from ones of these, we
     // select from the current cursor position. Otherwise, select from long pressed position.
     private boolean                 mDPadCenterIsDown = false;
     private boolean                 mEnterKeyIsDown = false;
+    private boolean                 mContextMenuTriggeredByKey = false;
     // Created once and shared by different CursorController helper methods.
     // Only one cursor controller is active at any time which prevent race conditions.
     private static Rect             sCursorControllerTempRect = new Rect();
