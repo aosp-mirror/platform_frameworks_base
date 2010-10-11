@@ -102,8 +102,9 @@ public class Metadata
     public static final int PAUSE_AVAILABLE = 29;         // Boolean
     public static final int SEEK_BACKWARD_AVAILABLE = 30; // Boolean
     public static final int SEEK_FORWARD_AVAILABLE = 31;  // Boolean
+    public static final int SEEK_AVAILABLE = 32;          // Boolean
 
-    private static final int LAST_SYSTEM = 31;
+    private static final int LAST_SYSTEM = 32;
     private static final int FIRST_CUSTOM = 8192;
 
     // Shorthands to set the MediaPlayer's metadata filter.
