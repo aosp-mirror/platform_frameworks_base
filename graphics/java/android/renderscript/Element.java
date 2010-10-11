@@ -47,7 +47,7 @@ public class Element extends BaseObj {
         UNSIGNED_8 (8, 1),
         UNSIGNED_16 (9, 2),
         UNSIGNED_32 (10, 4),
-        //UNSIGNED_64 (11, 8),
+        UNSIGNED_64 (11, 8),
 
         BOOLEAN(12, 1),
 
@@ -140,6 +140,13 @@ public class Element extends BaseObj {
             rs.mElement_I32 = createUser(rs, DataType.SIGNED_32);
         }
         return rs.mElement_I32;
+    }
+
+    public static Element U64(RenderScript rs) {
+        if(rs.mElement_U64 == null) {
+            rs.mElement_U64 = createUser(rs, DataType.UNSIGNED_64);
+        }
+        return rs.mElement_U64;
     }
 
     public static Element I64(RenderScript rs) {

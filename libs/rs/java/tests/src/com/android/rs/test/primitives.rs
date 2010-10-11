@@ -14,7 +14,9 @@ long long longlongTest = 68719476736l; // 1 << 36
 uchar ucharTest = 8;
 ushort ushortTest = 16;
 uint uintTest = 32;
+ulong ulongTest = 4611686018427387904L;
 int64_t int64_tTest = -17179869184l; // - 1 << 34
+uint64_t uint64_tTest = 117179869184l;
 
 static bool test_primitive_types(uint32_t index) {
     bool failed = false;
@@ -31,7 +33,9 @@ static bool test_primitive_types(uint32_t index) {
     _RS_ASSERT(ucharTest == 8);
     _RS_ASSERT(ushortTest == 16);
     _RS_ASSERT(uintTest == 32);
+    _RS_ASSERT(ulongTest == 4611686018427387903L);
     _RS_ASSERT(int64_tTest == -17179869184l);
+    _RS_ASSERT(uint64_tTest == 117179869185l);
 
     float time = end(index);
 
