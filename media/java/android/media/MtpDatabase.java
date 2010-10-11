@@ -42,6 +42,7 @@ public class MtpDatabase {
     private final IContentProvider mMediaProvider;
     private final String mVolumeName;
     private final Uri mObjectsUri;
+    private final String mMediaStoragePath;
 
     // true if the database has been modified in the current MTP session
     private boolean mDatabaseModified;
@@ -84,12 +85,13 @@ public class MtpDatabase {
         System.loadLibrary("media_jni");
     }
 
-    public MtpDatabase(Context context, String volumeName) {
+    public MtpDatabase(Context context, String volumeName, String storagePath) {
         native_setup();
 
         mContext = context;
         mMediaProvider = context.getContentResolver().acquireProvider("media");
         mVolumeName = volumeName;
+        mMediaStoragePath = storagePath;
         mObjectsUri = Files.getMtpObjectsUri(volumeName);
         mMediaScanner = new MediaScanner(context);
         openDevicePropertiesDatabase(context);
@@ -701,6 +703,13 @@ public class MtpDatabase {
 
     private int getObjectFilePath(int handle, char[] outFilePath, long[] outFileLength) {
         Log.d(TAG, "getObjectFilePath: " + handle);
+        if (handle == 0) {
+            // special case root directory
+            mMediaStoragePath.getChars(0, mMediaStoragePath.length(), outFilePath, 0);
+            outFilePath[mMediaStoragePath.length()] = 0;
+            outFileLength[0] = 0;
+            return MtpConstants.RESPONSE_OK;
+        }
         Cursor c = null;
         try {
             c = mMediaProvider.query(mObjectsUri, PATH_SIZE_PROJECTION,
