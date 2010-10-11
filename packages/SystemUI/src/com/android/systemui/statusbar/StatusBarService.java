@@ -294,6 +294,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         mScrollView = (ScrollView)expanded.findViewById(R.id.scroll);
         mNotificationLinearLayout = expanded.findViewById(R.id.notificationLinearLayout);
 
+        mExpandedView.setVisibility(View.GONE);
         mOngoingTitle.setVisibility(View.GONE);
         mLatestTitle.setVisibility(View.GONE);
 
@@ -691,6 +692,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         mExpandedView.requestFocus(View.FOCUS_FORWARD);
         mTrackingView.setVisibility(View.VISIBLE);
+        mExpandedView.setVisibility(View.VISIBLE);
 
         if (!mTicking) {
             setDateViewVisibility(true, com.android.internal.R.anim.fade_in);
@@ -767,6 +769,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
         mExpandedParams.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         mTrackingView.setVisibility(View.GONE);
+        mExpandedView.setVisibility(View.GONE);
 
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
             setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
@@ -1323,29 +1326,26 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
             mExpandedContents.getLocationInWindow(mPositionTmp);
             final int contentsBottom = mPositionTmp[1] + mExpandedContents.getHeight();
 
-            mExpandedParams.y = pos + mTrackingView.getHeight()
-                    - (mTrackingParams.height-closePos) - contentsBottom;
-            int max = h;
-            if (mExpandedParams.y > max) {
-                mExpandedParams.y = max;
-            }
-            int min = mTrackingPosition;
-            if (mExpandedParams.y < min) {
-                mExpandedParams.y = min;
-            }
-
-            boolean visible = (mTrackingPosition + mTrackingView.getHeight()) > h;
-            if (!visible) {
-                // if the contents aren't visible, move the expanded view way off screen
-                // because the window itself extends below the content view.
-                mExpandedParams.y = -disph;
-            }
-            mExpandedDialog.getWindow().setAttributes(mExpandedParams);
-
-            // As long as this isn't just a repositioning that's not supposed to affect
-            // the user's perception of what's showing, call to say that the visibility
-            // has changed. (Otherwise, someone else will call to do that).
             if (expandedPosition != EXPANDED_LEAVE_ALONE) {
+                mExpandedParams.y = pos + mTrackingView.getHeight()
+                        - (mTrackingParams.height-closePos) - contentsBottom;
+                int max = h;
+                if (mExpandedParams.y > max) {
+                    mExpandedParams.y = max;
+                }
+                int min = mTrackingPosition;
+                if (mExpandedParams.y < min) {
+                    mExpandedParams.y = min;
+                }
+
+                boolean visible = (mTrackingPosition + mTrackingView.getHeight()) > h;
+                if (!visible) {
+                    // if the contents aren't visible, move the expanded view way off screen
+                    // because the window itself extends below the content view.
+                    mExpandedParams.y = -disph;
+                }
+                mExpandedDialog.getWindow().setAttributes(mExpandedParams);
+
                 if (SPEW) Slog.d(TAG, "updateExpandedViewPos visibilityChanged(" + visible + ")");
                 visibilityChanged(visible);
             }
