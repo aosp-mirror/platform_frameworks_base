@@ -643,7 +643,7 @@ public class VideoEditorTestImpl implements VideoEditor {
                                 Integer.toString(colorEffect.getType()));
                         if (colorEffect.getType() == EffectColor.TYPE_COLOR) {
                             serializer.attribute("", ATTR_COLOR_EFFECT_VALUE,
-                                    Integer.toString(colorEffect.getParam()));
+                                    Integer.toString(colorEffect.getColor()));
                         }
                     } else if (effect instanceof EffectKenBurns) {
                         final Rect startRect = ((EffectKenBurns)effect).getStartRect();
@@ -972,7 +972,8 @@ public class VideoEditorTestImpl implements VideoEditor {
             final int colorEffectType =
                 Integer.parseInt(parser.getAttributeValue("", ATTR_COLOR_EFFECT_TYPE));
             final int color;
-            if (colorEffectType == EffectColor.TYPE_COLOR) {
+            if (colorEffectType == EffectColor.TYPE_COLOR
+                    || colorEffectType == EffectColor.TYPE_GRADIENT) {
                 color = Integer.parseInt(parser.getAttributeValue("", ATTR_COLOR_EFFECT_VALUE));
             } else {
                 color = 0;
