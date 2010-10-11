@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony;
+package android.telephony;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableStringBuilder;
