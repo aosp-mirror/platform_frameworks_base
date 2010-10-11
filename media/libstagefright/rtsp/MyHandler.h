@@ -28,12 +28,16 @@
 #include "ASessionDescription.h"
 
 #include <ctype.h>
+#include <cutils/properties.h>
 
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/MediaErrors.h>
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 // If no access units are received within 3 secs, assume that the rtp
 // stream has ended and signal end of stream.
@@ -44,6 +48,19 @@ static int64_t kAccessUnitTimeoutUs = 3000000ll;
 static int64_t kStartupTimeoutUs = 10000000ll;
 
 namespace android {
+
+static void MakeUserAgentString(AString *s) {
+    s->setTo("stagefright/1.1 (Linux;Android ");
+
+#if (PROPERTY_VALUE_MAX < 8)
+#error "PROPERTY_VALUE_MAX must be at least 8"
+#endif
+
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.build.version.release", value, "Unknown");
+    s->append(value);
+    s->append(")");
+}
 
 static bool GetAttribute(const char *s, const char *key, AString *value) {
     value->clear();
@@ -135,6 +152,131 @@ struct MyHandler : public AHandler {
         }
 
         return maxTimeUs;
+    }
+
+    static void addRR(const sp<ABuffer> &buf) {
+        uint8_t *ptr = buf->data() + buf->size();
+        ptr[0] = 0x80 | 0;
+        ptr[1] = 201;  // RR
+        ptr[2] = 0;
+        ptr[3] = 1;
+        ptr[4] = 0xde;  // SSRC
+        ptr[5] = 0xad;
+        ptr[6] = 0xbe;
+        ptr[7] = 0xef;
+
+        buf->setRange(0, buf->size() + 8);
+    }
+
+    static void addSDES(int s, const sp<ABuffer> &buffer) {
+        struct sockaddr_in addr;
+        socklen_t addrSize = sizeof(addr);
+        CHECK_EQ(0, getsockname(s, (sockaddr *)&addr, &addrSize));
+
+        uint8_t *data = buffer->data() + buffer->size();
+        data[0] = 0x80 | 1;
+        data[1] = 202;  // SDES
+        data[4] = 0xde;  // SSRC
+        data[5] = 0xad;
+        data[6] = 0xbe;
+        data[7] = 0xef;
+
+        size_t offset = 8;
+
+        data[offset++] = 1;  // CNAME
+
+        AString cname = "stagefright@";
+        cname.append(inet_ntoa(addr.sin_addr));
+        data[offset++] = cname.size();
+
+        memcpy(&data[offset], cname.c_str(), cname.size());
+        offset += cname.size();
+
+        data[offset++] = 6;  // TOOL
+
+        AString tool;
+        MakeUserAgentString(&tool);
+
+        data[offset++] = tool.size();
+
+        memcpy(&data[offset], tool.c_str(), tool.size());
+        offset += tool.size();
+
+        data[offset++] = 0;
+
+        if ((offset % 4) > 0) {
+            size_t count = 4 - (offset % 4);
+            switch (count) {
+                case 3:
+                    data[offset++] = 0;
+                case 2:
+                    data[offset++] = 0;
+                case 1:
+                    data[offset++] = 0;
+            }
+        }
+
+        size_t numWords = (offset / 4) - 1;
+        data[2] = numWords >> 8;
+        data[3] = numWords & 0xff;
+
+        buffer->setRange(buffer->offset(), buffer->size() + offset);
+    }
+
+    // In case we're behind NAT, fire off two UDP packets to the remote
+    // rtp/rtcp ports to poke a hole into the firewall for future incoming
+    // packets. We're going to send an RR/SDES RTCP packet to both of them.
+    void pokeAHole(int rtpSocket, int rtcpSocket, const AString &transport) {
+        AString source;
+        AString server_port;
+        if (!GetAttribute(transport.c_str(),
+                          "source",
+                          &source)
+                || !GetAttribute(transport.c_str(),
+                                 "server_port",
+                                 &server_port)) {
+            return;
+        }
+
+        int rtpPort, rtcpPort;
+        if (sscanf(server_port.c_str(), "%d-%d", &rtpPort, &rtcpPort) != 2
+                || rtpPort <= 0 || rtpPort > 65535
+                || rtcpPort <=0 || rtcpPort > 65535
+                || rtcpPort != rtpPort + 1
+                || (rtpPort & 1) != 0) {
+            return;
+        }
+
+        struct sockaddr_in addr;
+        memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = inet_addr(source.c_str());
+
+        if (addr.sin_addr.s_addr == INADDR_NONE) {
+            return;
+        }
+
+        // Make up an RR/SDES RTCP packet.
+        sp<ABuffer> buf = new ABuffer(65536);
+        buf->setRange(0, 0);
+        addRR(buf);
+        addSDES(rtpSocket, buf);
+
+        addr.sin_port = htons(rtpPort);
+
+        ssize_t n = sendto(
+                rtpSocket, buf->data(), buf->size(), 0,
+                (const sockaddr *)&addr, sizeof(addr));
+        CHECK_EQ(n, (ssize_t)buf->size());
+
+        addr.sin_port = htons(rtcpPort);
+
+        n = sendto(
+                rtcpSocket, buf->data(), buf->size(), 0,
+                (const sockaddr *)&addr, sizeof(addr));
+        CHECK_EQ(n, (ssize_t)buf->size());
+
+        LOGV("successfully poked holes.");
     }
 
     virtual void onMessageReceived(const sp<AMessage> &msg) {
@@ -284,6 +426,17 @@ struct MyHandler : public AHandler {
 
                         sp<AMessage> notify = new AMessage('accu', id());
                         notify->setSize("track-index", trackIndex);
+
+                        i = response->mHeaders.indexOfKey("transport");
+                        CHECK_GE(i, 0);
+
+                        if (!track->mUsingInterleavedTCP) {
+                            AString transport = response->mHeaders.valueAt(i);
+
+                            pokeAHole(track->mRTPSocket,
+                                      track->mRTCPSocket,
+                                      transport);
+                        }
 
                         mRTPConn->addStream(
                                 track->mRTPSocket, track->mRTCPSocket,
