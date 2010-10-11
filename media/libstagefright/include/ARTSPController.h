@@ -33,7 +33,7 @@ struct ARTSPController : public MediaExtractor {
     status_t connect(const char *url);
     void disconnect();
 
-    void seek(int64_t timeUs);
+    void seekAsync(int64_t timeUs, void (*seekDoneCb)(void *), void *cookie);
 
     virtual size_t countTracks();
     virtual sp<MediaSource> getTrack(size_t index);
@@ -46,6 +46,14 @@ struct ARTSPController : public MediaExtractor {
 
     void onMessageReceived(const sp<AMessage> &msg);
 
+    virtual uint32_t flags() const {
+        // Seeking 10secs forward or backward is a very expensive operation
+        // for rtsp, so let's not enable that.
+        // The user can always use the seek bar.
+
+        return CAN_PAUSE | CAN_SEEK;
+    }
+
 protected:
     virtual ~ARTSPController();
 
@@ -53,6 +61,7 @@ private:
     enum {
         kWhatConnectDone    = 'cdon',
         kWhatDisconnectDone = 'ddon',
+        kWhatSeekDone       = 'sdon',
     };
 
     enum State {
@@ -70,6 +79,10 @@ private:
     sp<ALooper> mLooper;
     sp<MyHandler> mHandler;
     sp<AHandlerReflector<ARTSPController> > mReflector;
+
+    void (*mSeekDoneCb)(void *);
+    void *mSeekDoneCookie;
+    int64_t mLastSeekCompletedTimeUs;
 
     DISALLOW_EVIL_CONSTRUCTORS(ARTSPController);
 };

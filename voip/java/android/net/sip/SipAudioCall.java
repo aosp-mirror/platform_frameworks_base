@@ -43,9 +43,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class that handles an audio call over SIP.
+ * Class that handles an Internet audio call over SIP. {@link SipManager}
+ * facilitates instantiating a {@code SipAudioCall} object for making/receiving
+ * calls. See {@link SipManager#makeAudioCall} and
+ * {@link SipManager#takeAudioCall}.
  */
-/** @hide */
 public class SipAudioCall {
     private static final String TAG = SipAudioCall.class.getSimpleName();
     private static final boolean RELEASE_SOCKET = true;
@@ -56,7 +58,7 @@ public class SipAudioCall {
     public static class Listener {
         /**
          * Called when the call object is ready to make another call.
-         * The default implementation calls {@link #onChange}.
+         * The default implementation calls {@link #onChanged}.
          *
          * @param call the call object that is ready to make another call
          */
@@ -66,7 +68,7 @@ public class SipAudioCall {
 
         /**
          * Called when a request is sent out to initiate a new call.
-         * The default implementation calls {@link #onChange}.
+         * The default implementation calls {@link #onChanged}.
          *
          * @param call the call object that carries out the audio call
          */
@@ -76,7 +78,7 @@ public class SipAudioCall {
 
         /**
          * Called when a new call comes in.
-         * The default implementation calls {@link #onChange}.
+         * The default implementation calls {@link #onChanged}.
          *
          * @param call the call object that carries out the audio call
          * @param caller the SIP profile of the caller
@@ -87,7 +89,7 @@ public class SipAudioCall {
 
         /**
          * Called when a RINGING response is received for the INVITE request
-         * sent. The default implementation calls {@link #onChange}.
+         * sent. The default implementation calls {@link #onChanged}.
          *
          * @param call the call object that carries out the audio call
          */
@@ -97,7 +99,7 @@ public class SipAudioCall {
 
         /**
          * Called when the session is established.
-         * The default implementation calls {@link #onChange}.
+         * The default implementation calls {@link #onChanged}.
          *
          * @param call the call object that carries out the audio call
          */
@@ -107,7 +109,7 @@ public class SipAudioCall {
 
         /**
          * Called when the session is terminated.
-         * The default implementation calls {@link #onChange}.
+         * The default implementation calls {@link #onChanged}.
          *
          * @param call the call object that carries out the audio call
          */
@@ -117,7 +119,7 @@ public class SipAudioCall {
 
         /**
          * Called when the peer is busy during session initialization.
-         * The default implementation calls {@link #onChange}.
+         * The default implementation calls {@link #onChanged}.
          *
          * @param call the call object that carries out the audio call
          */
@@ -127,7 +129,7 @@ public class SipAudioCall {
 
         /**
          * Called when the call is on hold.
-         * The default implementation calls {@link #onChange}.
+         * The default implementation calls {@link #onChanged}.
          *
          * @param call the call object that carries out the audio call
          */
@@ -257,8 +259,10 @@ public class SipAudioCall {
      *
      * @return true if the call is established
      */
-    public synchronized boolean isInCall() {
-        return mInCall;
+    public boolean isInCall() {
+        synchronized (this) {
+            return mInCall;
+        }
     }
 
     /**
@@ -266,8 +270,10 @@ public class SipAudioCall {
      *
      * @return true if the call is on hold
      */
-    public synchronized boolean isOnHold() {
-        return mHold;
+    public boolean isOnHold() {
+        synchronized (this) {
+            return mHold;
+        }
     }
 
     /**
@@ -299,8 +305,10 @@ public class SipAudioCall {
      *
      * @return the local SIP profile
      */
-    public synchronized SipProfile getLocalProfile() {
-        return mLocalProfile;
+    public SipProfile getLocalProfile() {
+        synchronized (this) {
+            return mLocalProfile;
+        }
     }
 
     /**
@@ -308,8 +316,10 @@ public class SipAudioCall {
      *
      * @return the peer's SIP profile
      */
-    public synchronized SipProfile getPeerProfile() {
-        return (mSipSession == null) ? null : mSipSession.getPeerProfile();
+    public SipProfile getPeerProfile() {
+        synchronized (this) {
+            return (mSipSession == null) ? null : mSipSession.getPeerProfile();
+        }
     }
 
     /**
@@ -318,9 +328,11 @@ public class SipAudioCall {
      *
      * @return the session state
      */
-    public synchronized int getState() {
-        if (mSipSession == null) return SipSession.State.READY_TO_CALL;
-        return mSipSession.getState();
+    public int getState() {
+        synchronized (this) {
+            if (mSipSession == null) return SipSession.State.READY_TO_CALL;
+            return mSipSession.getState();
+        }
     }
 
 
@@ -330,8 +342,10 @@ public class SipAudioCall {
      * @return the session object that carries this call
      * @hide
      */
-    public synchronized SipSession getSipSession() {
-        return mSipSession;
+    public SipSession getSipSession() {
+        synchronized (this) {
+            return mSipSession;
+        }
     }
 
     private SipSession.Listener createListener() {
@@ -364,22 +378,25 @@ public class SipAudioCall {
             }
 
             @Override
-            public synchronized void onRinging(SipSession session,
+            public void onRinging(SipSession session,
                     SipProfile peerProfile, String sessionDescription) {
-                if ((mSipSession == null) || !mInCall
-                        || !session.getCallId().equals(mSipSession.getCallId())) {
-                    // should not happen
-                    session.endCall();
-                    return;
-                }
+                synchronized (SipAudioCall.this) {
+                    if ((mSipSession == null) || !mInCall
+                            || !session.getCallId().equals(
+                                    mSipSession.getCallId())) {
+                        // should not happen
+                        session.endCall();
+                        return;
+                    }
 
-                // session changing request
-                try {
-                    String answer = createAnswer(sessionDescription).encode();
-                    mSipSession.answerCall(answer, SESSION_TIMEOUT);
-                } catch (Throwable e) {
-                    Log.e(TAG, "onRinging()", e);
-                    session.endCall();
+                    // session changing request
+                    try {
+                        String answer = createAnswer(sessionDescription).encode();
+                        mSipSession.answerCall(answer, SESSION_TIMEOUT);
+                    } catch (Throwable e) {
+                        Log.e(TAG, "onRinging()", e);
+                        session.endCall();
+                    }
                 }
             }
 
@@ -508,18 +525,22 @@ public class SipAudioCall {
      * @throws SipException if the SIP service fails to attach this object to
      *        the session
      */
-    public synchronized void attachCall(SipSession session,
-            String sessionDescription) throws SipException {
-        mSipSession = session;
-        mPeerSd = sessionDescription;
-        Log.v(TAG, "attachCall()" + mPeerSd);
-        try {
-            session.setListener(createListener());
+    public void attachCall(SipSession session, String sessionDescription)
+            throws SipException {
+        synchronized (this) {
+            mSipSession = session;
+            mPeerSd = sessionDescription;
+            Log.v(TAG, "attachCall()" + mPeerSd);
+            try {
+                session.setListener(createListener());
 
-            if (getState() == SipSession.State.INCOMING_CALL) startRinging();
-        } catch (Throwable e) {
-            Log.e(TAG, "attachCall()", e);
-            throwSipException(e);
+                if (getState() == SipSession.State.INCOMING_CALL) {
+                    startRinging();
+                }
+            } catch (Throwable e) {
+                Log.e(TAG, "attachCall()", e);
+                throwSipException(e);
+            }
         }
     }
 
@@ -529,7 +550,7 @@ public class SipAudioCall {
      * and {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
      * will be called.
      *
-     * @param callee the SIP profile to make the call to
+     * @param peerProfile the SIP profile to make the call to
      * @param sipSession the {@link SipSession} for carrying out the call
      * @param timeout the timeout value in seconds. Default value (defined by
      *        SIP protocol) is used if {@code timeout} is zero or negative.
@@ -537,15 +558,19 @@ public class SipAudioCall {
      * @throws SipException if the SIP service fails to create a session for the
      *        call
      */
-    public synchronized void makeCall(SipProfile peerProfile,
-            SipSession sipSession, int timeout) throws SipException {
-        mSipSession = sipSession;
-        try {
-            mAudioStream = new AudioStream(InetAddress.getByName(getLocalIp()));
-            sipSession.setListener(createListener());
-            sipSession.makeCall(peerProfile, createOffer().encode(), timeout);
-        } catch (IOException e) {
-            throw new SipException("makeCall()", e);
+    public void makeCall(SipProfile peerProfile, SipSession sipSession,
+            int timeout) throws SipException {
+        synchronized (this) {
+            mSipSession = sipSession;
+            try {
+                mAudioStream = new AudioStream(InetAddress.getByName(
+                        getLocalIp()));
+                sipSession.setListener(createListener());
+                sipSession.makeCall(peerProfile, createOffer().encode(),
+                        timeout);
+            } catch (IOException e) {
+                throw new SipException("makeCall()", e);
+            }
         }
     }
 
@@ -553,13 +578,15 @@ public class SipAudioCall {
      * Ends a call.
      * @throws SipException if the SIP service fails to end the call
      */
-    public synchronized void endCall() throws SipException {
-        stopRinging();
-        stopCall(RELEASE_SOCKET);
-        mInCall = false;
+    public void endCall() throws SipException {
+        synchronized (this) {
+            stopRinging();
+            stopCall(RELEASE_SOCKET);
+            mInCall = false;
 
-        // perform the above local ops first and then network op
-        if (mSipSession != null) mSipSession.endCall();
+            // perform the above local ops first and then network op
+            if (mSipSession != null) mSipSession.endCall();
+        }
     }
 
     /**
@@ -574,13 +601,15 @@ public class SipAudioCall {
      * @see Listener.onError
      * @throws SipException if the SIP service fails to hold the call
      */
-    public synchronized void holdCall(int timeout) throws SipException {
+    public void holdCall(int timeout) throws SipException {
+        synchronized (this) {
         if (mHold) return;
-        mSipSession.changeCall(createHoldOffer().encode(), timeout);
-        mHold = true;
+            mSipSession.changeCall(createHoldOffer().encode(), timeout);
+            mHold = true;
 
-        AudioGroup audioGroup = getAudioGroup();
-        if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
+            AudioGroup audioGroup = getAudioGroup();
+            if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_ON_HOLD);
+        }
     }
 
     /**
@@ -594,13 +623,16 @@ public class SipAudioCall {
      * @see Listener.onError
      * @throws SipException if the SIP service fails to answer the call
      */
-    public synchronized void answerCall(int timeout) throws SipException {
-        stopRinging();
-        try {
-            mAudioStream = new AudioStream(InetAddress.getByName(getLocalIp()));
-            mSipSession.answerCall(createAnswer(mPeerSd).encode(), timeout);
-        } catch (IOException e) {
-            throw new SipException("answerCall()", e);
+    public void answerCall(int timeout) throws SipException {
+        synchronized (this) {
+            stopRinging();
+            try {
+                mAudioStream = new AudioStream(InetAddress.getByName(
+                        getLocalIp()));
+                mSipSession.answerCall(createAnswer(mPeerSd).encode(), timeout);
+            } catch (IOException e) {
+                throw new SipException("answerCall()", e);
+            }
         }
     }
 
@@ -616,12 +648,14 @@ public class SipAudioCall {
      * @see Listener.onError
      * @throws SipException if the SIP service fails to unhold the call
      */
-    public synchronized void continueCall(int timeout) throws SipException {
-        if (!mHold) return;
-        mSipSession.changeCall(createContinueOffer().encode(), timeout);
-        mHold = false;
-        AudioGroup audioGroup = getAudioGroup();
-        if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_NORMAL);
+    public void continueCall(int timeout) throws SipException {
+        synchronized (this) {
+            if (!mHold) return;
+            mSipSession.changeCall(createContinueOffer().encode(), timeout);
+            mHold = false;
+            AudioGroup audioGroup = getAudioGroup();
+            if (audioGroup != null) audioGroup.setMode(AudioGroup.MODE_NORMAL);
+        }
     }
 
     private SimpleSessionDescription createOffer() {
@@ -741,12 +775,15 @@ public class SipAudioCall {
     }
 
     /** Toggles mute. */
-    public synchronized void toggleMute() {
-        AudioGroup audioGroup = getAudioGroup();
-        if (audioGroup != null) {
-            audioGroup.setMode(
-                    mMuted ? AudioGroup.MODE_NORMAL : AudioGroup.MODE_MUTED);
-            mMuted = !mMuted;
+    public void toggleMute() {
+        synchronized (this) {
+            AudioGroup audioGroup = getAudioGroup();
+            if (audioGroup != null) {
+                audioGroup.setMode(mMuted
+                        ? AudioGroup.MODE_NORMAL
+                        : AudioGroup.MODE_MUTED);
+                mMuted = !mMuted;
+            }
         }
     }
 
@@ -755,14 +792,18 @@ public class SipAudioCall {
      *
      * @return true if the call is muted
      */
-    public synchronized boolean isMuted() {
-        return mMuted;
+    public boolean isMuted() {
+        synchronized (this) {
+            return mMuted;
+        }
     }
 
     /** Puts the device to speaker mode. */
-    public synchronized void setSpeakerMode(boolean speakerMode) {
-        ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
-                .setSpeakerphoneOn(speakerMode);
+    public void setSpeakerMode(boolean speakerMode) {
+        synchronized (this) {
+            ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
+                    .setSpeakerphoneOn(speakerMode);
+        }
     }
 
     /**
@@ -787,14 +828,16 @@ public class SipAudioCall {
      *        inputs.
      * @param result the result message to send when done
      */
-    public synchronized void sendDtmf(int code, Message result) {
-        AudioGroup audioGroup = getAudioGroup();
-        if ((audioGroup != null) && (mSipSession != null)
-                && (SipSession.State.IN_CALL == getState())) {
-            Log.v(TAG, "send DTMF: " + code);
-            audioGroup.sendDtmf(code);
+    public void sendDtmf(int code, Message result) {
+        synchronized (this) {
+            AudioGroup audioGroup = getAudioGroup();
+            if ((audioGroup != null) && (mSipSession != null)
+                    && (SipSession.State.IN_CALL == getState())) {
+                Log.v(TAG, "send DTMF: " + code);
+                audioGroup.sendDtmf(code);
+            }
+            if (result != null) result.sendToTarget();
         }
-        if (result != null) result.sendToTarget();
     }
 
     /**
@@ -808,8 +851,10 @@ public class SipAudioCall {
      *      yet been set up
      * @hide
      */
-    public synchronized AudioStream getAudioStream() {
-        return mAudioStream;
+    public AudioStream getAudioStream() {
+        synchronized (this) {
+            return mAudioStream;
+        }
     }
 
     /**
@@ -826,9 +871,11 @@ public class SipAudioCall {
      * @see #getAudioStream
      * @hide
      */
-    public synchronized AudioGroup getAudioGroup() {
-        if (mAudioGroup != null) return mAudioGroup;
-        return ((mAudioStream == null) ? null : mAudioStream.getGroup());
+    public AudioGroup getAudioGroup() {
+        synchronized (this) {
+            if (mAudioGroup != null) return mAudioGroup;
+            return ((mAudioStream == null) ? null : mAudioStream.getGroup());
+        }
     }
 
     /**
@@ -839,11 +886,13 @@ public class SipAudioCall {
      * @see #getAudioStream
      * @hide
      */
-    public synchronized void setAudioGroup(AudioGroup group) {
-        if ((mAudioStream != null) && (mAudioStream.getGroup() != null)) {
-            mAudioStream.join(group);
+    public void setAudioGroup(AudioGroup group) {
+        synchronized (this) {
+            if ((mAudioStream != null) && (mAudioStream.getGroup() != null)) {
+                mAudioStream.join(group);
+            }
+            mAudioGroup = group;
         }
-        mAudioGroup = group;
     }
 
     /**
@@ -983,8 +1032,10 @@ public class SipAudioCall {
      *
      * @param enabled true to enable; false to disable
      */
-    public synchronized void setRingbackToneEnabled(boolean enabled) {
-        mRingbackToneEnabled = enabled;
+    public void setRingbackToneEnabled(boolean enabled) {
+        synchronized (this) {
+            mRingbackToneEnabled = enabled;
+        }
     }
 
     /**
@@ -992,8 +1043,10 @@ public class SipAudioCall {
      *
      * @param enabled true to enable; false to disable
      */
-    public synchronized void setRingtoneEnabled(boolean enabled) {
-        mRingtoneEnabled = enabled;
+    public void setRingtoneEnabled(boolean enabled) {
+        synchronized (this) {
+            mRingtoneEnabled = enabled;
+        }
     }
 
     private void startRingbackTone() {

@@ -81,7 +81,9 @@ void ScriptC::setupScript(Context *rsc)
         if (dest) {
             *dest = ptr;
         } else {
-            LOGE("ScriptC::setupScript, NULL var binding address.");
+            if (rsc->props.mLogScripts) {
+                LOGV("ScriptC::setupScript, NULL var binding address.");
+            }
         }
     }
 }

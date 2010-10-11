@@ -936,3 +936,157 @@ int movefiles()
 done:
     return 0;
 }
+
+int linklib(const char* dataDir, const char* asecLibDir)
+{
+    char libdir[PKG_PATH_MAX];
+    struct stat s, libStat;
+    int rc = 0;
+
+    const size_t libdirLen = strlen(dataDir) + strlen(PKG_LIB_POSTFIX);
+    if (libdirLen >= PKG_PATH_MAX) {
+        LOGE("library dir len too large");
+        rc = -1;
+        goto out;
+    }
+
+    if (snprintf(libdir, sizeof(libdir), "%s%s", dataDir, PKG_LIB_POSTFIX) != (ssize_t)libdirLen) {
+        LOGE("library dir not written successfully: %s\n", strerror(errno));
+        rc = -1;
+        goto out;
+    }
+
+    if (stat(dataDir, &s) < 0) return -1;
+
+    if (chown(dataDir, 0, 0) < 0) {
+        LOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
+        return -1;
+    }
+
+    if (chmod(dataDir, 0700) < 0) {
+        LOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        rc = -1;
+        goto out;
+    }
+
+    if (lstat(libdir, &libStat) < 0) {
+        LOGE("couldn't stat lib dir: %s\n", strerror(errno));
+        rc = -1;
+        goto out;
+    }
+
+    if (S_ISDIR(libStat.st_mode)) {
+        if (delete_dir_contents(libdir, 1, 0) < 0) {
+            rc = -1;
+            goto out;
+        }
+    } else if (S_ISLNK(libStat.st_mode)) {
+        if (unlink(libdir) < 0) {
+            rc = -1;
+            goto out;
+        }
+    }
+
+    if (symlink(asecLibDir, libdir) < 0) {
+        LOGE("couldn't symlink directory '%s' -> '%s': %s\n", libdir, asecLibDir, strerror(errno));
+        rc = -errno;
+        goto out;
+    }
+
+    if (lchown(libdir, AID_SYSTEM, AID_SYSTEM) < 0) {
+        LOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
+        unlink(libdir);
+        rc = -errno;
+        goto out;
+    }
+
+out:
+    if (chmod(dataDir, s.st_mode) < 0) {
+        LOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        return -errno;
+    }
+
+    if (chown(dataDir, s.st_uid, s.st_gid) < 0) {
+        LOGE("failed to chown '%s' : %s\n", dataDir, strerror(errno));
+        return -errno;
+    }
+
+    return rc;
+}
+
+int unlinklib(const char* dataDir)
+{
+    char libdir[PKG_PATH_MAX];
+    struct stat s, libStat;
+    int rc = 0;
+
+    const size_t libdirLen = strlen(dataDir) + strlen(PKG_LIB_POSTFIX);
+    if (libdirLen >= PKG_PATH_MAX) {
+        return -1;
+    }
+
+    if (snprintf(libdir, sizeof(libdir), "%s%s", dataDir, PKG_LIB_POSTFIX) != (ssize_t)libdirLen) {
+        LOGE("library dir not written successfully: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if (stat(dataDir, &s) < 0) {
+        LOGE("couldn't state data dir");
+        return -1;
+    }
+
+    if (chown(dataDir, 0, 0) < 0) {
+        LOGE("failed to chown '%s': %s\n", dataDir, strerror(errno));
+        return -1;
+    }
+
+    if (chmod(dataDir, 0700) < 0) {
+        LOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        rc = -1;
+        goto out;
+    }
+
+    if (lstat(libdir, &libStat) < 0) {
+        LOGE("couldn't stat lib dir: %s\n", strerror(errno));
+        rc = -1;
+        goto out;
+    }
+
+    if (S_ISDIR(libStat.st_mode)) {
+        if (delete_dir_contents(libdir, 1, 0) < 0) {
+            rc = -1;
+            goto out;
+        }
+    } else if (S_ISLNK(libStat.st_mode)) {
+        if (unlink(libdir) < 0) {
+            rc = -1;
+            goto out;
+        }
+    }
+
+    if (mkdir(libdir, 0755) < 0) {
+        LOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
+        rc = -errno;
+        goto out;
+    }
+
+    if (chown(libdir, AID_SYSTEM, AID_SYSTEM) < 0) {
+        LOGE("cannot chown dir '%s': %s\n", libdir, strerror(errno));
+        unlink(libdir);
+        rc = -errno;
+        goto out;
+    }
+
+out:
+    if (chmod(dataDir, s.st_mode) < 0) {
+        LOGE("failed to chmod '%s': %s\n", dataDir, strerror(errno));
+        return -1;
+    }
+
+    if (chown(dataDir, s.st_uid, s.st_gid) < 0) {
+        LOGE("failed to chown '%s' : %s\n", dataDir, strerror(errno));
+        return -1;
+    }
+
+    return rc;
+}

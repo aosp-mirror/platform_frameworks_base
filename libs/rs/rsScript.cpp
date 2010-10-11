@@ -66,7 +66,9 @@ void Script::setVar(uint32_t slot, const void *val, uint32_t len)
         memcpy(destPtr, val, len);
         //LOGE("setVar f2  %f", ((const float *)destPtr)[0]);
     } else {
-        LOGE("Calling setVar on slot = %i which is null", slot);
+        //if (rsc->props.mLogScripts) {
+            LOGV("Calling setVar on slot = %i which is null", slot);
+        //}
     }
 }
 

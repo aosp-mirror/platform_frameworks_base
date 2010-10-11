@@ -573,18 +573,18 @@ public class DownloadManager {
          */
         public static final int ORDER_DESCENDING = 2;
 
-        private Long mId = null;
+        private long[] mIds = null;
         private Integer mStatusFlags = null;
         private String mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
         private int mOrderDirection = ORDER_DESCENDING;
         private boolean mOnlyIncludeVisibleInDownloadsUi = false;
 
         /**
-         * Include only the download with the given ID.
+         * Include only the downloads with the given IDs.
          * @return this object
          */
-        public Query setFilterById(long id) {
-            mId = id;
+        public Query setFilterById(long... ids) {
+            mIds = ids;
             return this;
         }
 
@@ -645,9 +645,11 @@ public class DownloadManager {
         Cursor runQuery(ContentResolver resolver, String[] projection, Uri baseUri) {
             Uri uri = baseUri;
             List<String> selectionParts = new ArrayList<String>();
+            String[] selectionArgs = null;
 
-            if (mId != null) {
-                uri = ContentUris.withAppendedId(uri, mId);
+            if (mIds != null) {
+                selectionParts.add(getWhereClauseForIds(mIds));
+                selectionArgs = getWhereArgsForIds(mIds);
             }
 
             if (mStatusFlags != null) {
@@ -682,7 +684,7 @@ public class DownloadManager {
             String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
             String orderBy = mOrderByColumn + " " + orderDirection;
 
-            return resolver.query(uri, projection, selection, null, orderBy);
+            return resolver.query(uri, projection, selection, selectionArgs, orderBy);
         }
 
         private String joinStrings(String joiner, Iterable<String> parts) {
@@ -744,17 +746,28 @@ public class DownloadManager {
     }
 
     /**
-     * Cancel a download and remove it from the download manager.  The download will be stopped if
+     * Cancel downloads and remove them from the download manager.  Each download will be stopped if
      * it was running, and it will no longer be accessible through the download manager.  If a file
-     * was already downloaded, it will not be deleted.
+     * was already downloaded to external storage, it will not be deleted.
      *
-     * @param id the ID of the download
+     * @param ids the IDs of the downloads to remove
+     * @return the number of downloads actually removed
      */
-    public void remove(long id) {
-        int numDeleted = mResolver.delete(getDownloadUri(id), null, null);
-        if (numDeleted == 0) {
-            throw new IllegalArgumentException("Download " + id + " does not exist");
+    public int remove(long... ids) {
+        StringBuilder whereClause = new StringBuilder();
+        String[] whereArgs = new String[ids.length];
+
+        whereClause.append(Downloads.Impl._ID + " IN (");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                whereClause.append(",");
+            }
+            whereClause.append("?");
+            whereArgs[i] = Long.toString(ids[i]);
         }
+        whereClause.append(")");
+
+        return mResolver.delete(mBaseUri, whereClause.toString(), whereArgs);
     }
 
     /**
@@ -782,20 +795,20 @@ public class DownloadManager {
     }
 
     /**
-     * Restart the given download, which must have already completed (successfully or not).  This
+     * Restart the given downloads, which must have already completed (successfully or not).  This
      * method will only work when called from within the download manager's process.
-     * @param id the ID of the download
+     * @param ids the IDs of the downloads
      * @hide
      */
-    public void restartDownload(long id) {
-        Cursor cursor = query(new Query().setFilterById(id));
+    public void restartDownload(long... ids) {
+        Cursor cursor = query(new Query().setFilterById(ids));
         try {
-            if (!cursor.moveToFirst()) {
-                throw new IllegalArgumentException("No download with id " + id);
-            }
-            int status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS));
-            if (status != STATUS_SUCCESSFUL && status != STATUS_FAILED) {
-                throw new IllegalArgumentException("Cannot restart incomplete download: " + id);
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                int status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS));
+                if (status != STATUS_SUCCESSFUL && status != STATUS_FAILED) {
+                    throw new IllegalArgumentException("Cannot restart incomplete download: "
+                            + cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+                }
             }
         } finally {
             cursor.close();
@@ -806,7 +819,7 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, -1);
         values.putNull(Downloads.Impl._DATA);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        mResolver.update(getDownloadUri(id), values, null, null);
+        mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
     }
 
     /**
@@ -814,6 +827,33 @@ public class DownloadManager {
      */
     Uri getDownloadUri(long id) {
         return ContentUris.withAppendedId(mBaseUri, id);
+    }
+
+    /**
+     * Get a parameterized SQL WHERE clause to select a bunch of IDs.
+     */
+    static String getWhereClauseForIds(long[] ids) {
+        StringBuilder whereClause = new StringBuilder();
+        whereClause.append(Downloads.Impl._ID + " IN (");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                whereClause.append(",");
+            }
+            whereClause.append("?");
+        }
+        whereClause.append(")");
+        return whereClause.toString();
+    }
+
+    /**
+     * Get the selection args for a clause returned by {@link #getWhereClauseForIds(long[])}.
+     */
+    static String[] getWhereArgsForIds(long[] ids) {
+        String[] whereArgs = new String[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            whereArgs[i] = Long.toString(ids[i]);
+        }
+        return whereArgs;
     }
 
     /**

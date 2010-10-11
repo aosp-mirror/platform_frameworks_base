@@ -18,6 +18,9 @@
 
 #include <media/stagefright/foundation/ABitReader.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaErrors.h>
+#include <media/stagefright/MetaData.h>
 
 namespace android {
 
@@ -41,10 +44,12 @@ void FindAVCDimensions(
     br.skipBits(16);
     parseUE(&br);  // seq_parameter_set_id
 
+    unsigned chroma_format_idc = 1;  // 4:2:0 chroma format
+
     if (profile_idc == 100 || profile_idc == 110
             || profile_idc == 122 || profile_idc == 244
             || profile_idc == 44 || profile_idc == 83 || profile_idc == 86) {
-        unsigned chroma_format_idc = parseUE(&br);
+        chroma_format_idc = parseUE(&br);
         if (chroma_format_idc == 3) {
             br.skipBits(1);  // residual_colour_transform_flag
         }
@@ -85,6 +90,212 @@ void FindAVCDimensions(
 
     *height = (2 - frame_mbs_only_flag)
         * (pic_height_in_map_units_minus1 * 16 + 16);
+
+    if (!frame_mbs_only_flag) {
+        br.getBits(1);  // mb_adaptive_frame_field_flag
+    }
+
+    br.getBits(1);  // direct_8x8_inference_flag
+
+    if (br.getBits(1)) {  // frame_cropping_flag
+        unsigned frame_crop_left_offset = parseUE(&br);
+        unsigned frame_crop_right_offset = parseUE(&br);
+        unsigned frame_crop_top_offset = parseUE(&br);
+        unsigned frame_crop_bottom_offset = parseUE(&br);
+
+        unsigned cropUnitX, cropUnitY;
+        if (chroma_format_idc == 0  /* monochrome */) {
+            cropUnitX = 1;
+            cropUnitY = 2 - frame_mbs_only_flag;
+        } else {
+            unsigned subWidthC = (chroma_format_idc == 3) ? 1 : 2;
+            unsigned subHeightC = (chroma_format_idc == 1) ? 2 : 1;
+
+            cropUnitX = subWidthC;
+            cropUnitY = subHeightC * (2 - frame_mbs_only_flag);
+        }
+
+        LOGV("frame_crop = (%u, %u, %u, %u), cropUnitX = %u, cropUnitY = %u",
+             frame_crop_left_offset, frame_crop_right_offset,
+             frame_crop_top_offset, frame_crop_bottom_offset,
+             cropUnitX, cropUnitY);
+
+        *width -=
+            (frame_crop_left_offset + frame_crop_right_offset) * cropUnitX;
+        *height -=
+            (frame_crop_top_offset + frame_crop_bottom_offset) * cropUnitY;
+    }
+}
+
+status_t getNextNALUnit(
+        const uint8_t **_data, size_t *_size,
+        const uint8_t **nalStart, size_t *nalSize,
+        bool startCodeFollows) {
+    const uint8_t *data = *_data;
+    size_t size = *_size;
+
+    *nalStart = NULL;
+    *nalSize = 0;
+
+    if (size == 0) {
+        return -EAGAIN;
+    }
+
+    // Skip any number of leading 0x00.
+
+    size_t offset = 0;
+    while (offset < size && data[offset] == 0x00) {
+        ++offset;
+    }
+
+    if (offset == size) {
+        return -EAGAIN;
+    }
+
+    // A valid startcode consists of at least two 0x00 bytes followed by 0x01.
+
+    if (offset < 2 || data[offset] != 0x01) {
+        return ERROR_MALFORMED;
+    }
+
+    ++offset;
+
+    size_t startOffset = offset;
+
+    for (;;) {
+        while (offset < size && data[offset] != 0x01) {
+            ++offset;
+        }
+
+        if (offset == size) {
+            if (startCodeFollows) {
+                offset = size + 2;
+                break;
+            }
+
+            return -EAGAIN;
+        }
+
+        if (data[offset - 1] == 0x00 && data[offset - 2] == 0x00) {
+            break;
+        }
+
+        ++offset;
+    }
+
+    size_t endOffset = offset - 2;
+    while (data[endOffset - 1] == 0x00) {
+        --endOffset;
+    }
+
+    *nalStart = &data[startOffset];
+    *nalSize = endOffset - startOffset;
+
+    if (offset + 2 < size) {
+        *_data = &data[offset - 2];
+        *_size = size - offset + 2;
+    } else {
+        *_data = NULL;
+        *_size = 0;
+    }
+
+    return OK;
+}
+
+static sp<ABuffer> FindNAL(
+        const uint8_t *data, size_t size, unsigned nalType,
+        size_t *stopOffset) {
+    const uint8_t *nalStart;
+    size_t nalSize;
+    while (getNextNALUnit(&data, &size, &nalStart, &nalSize, true) == OK) {
+        if ((nalStart[0] & 0x1f) == nalType) {
+            sp<ABuffer> buffer = new ABuffer(nalSize);
+            memcpy(buffer->data(), nalStart, nalSize);
+            return buffer;
+        }
+    }
+
+    return NULL;
+}
+
+sp<MetaData> MakeAVCCodecSpecificData(const sp<ABuffer> &accessUnit) {
+    const uint8_t *data = accessUnit->data();
+    size_t size = accessUnit->size();
+
+    sp<ABuffer> seqParamSet = FindNAL(data, size, 7, NULL);
+    if (seqParamSet == NULL) {
+        return NULL;
+    }
+
+    int32_t width, height;
+    FindAVCDimensions(seqParamSet, &width, &height);
+
+    size_t stopOffset;
+    sp<ABuffer> picParamSet = FindNAL(data, size, 8, &stopOffset);
+    CHECK(picParamSet != NULL);
+
+    size_t csdSize =
+        1 + 3 + 1 + 1
+        + 2 * 1 + seqParamSet->size()
+        + 1 + 2 * 1 + picParamSet->size();
+
+    sp<ABuffer> csd = new ABuffer(csdSize);
+    uint8_t *out = csd->data();
+
+    *out++ = 0x01;  // configurationVersion
+    memcpy(out, seqParamSet->data() + 1, 3);  // profile/level...
+    out += 3;
+    *out++ = (0x3f << 2) | 1;  // lengthSize == 2 bytes
+    *out++ = 0xe0 | 1;
+
+    *out++ = seqParamSet->size() >> 8;
+    *out++ = seqParamSet->size() & 0xff;
+    memcpy(out, seqParamSet->data(), seqParamSet->size());
+    out += seqParamSet->size();
+
+    *out++ = 1;
+
+    *out++ = picParamSet->size() >> 8;
+    *out++ = picParamSet->size() & 0xff;
+    memcpy(out, picParamSet->data(), picParamSet->size());
+
+#if 0
+    LOGI("AVC seq param set");
+    hexdump(seqParamSet->data(), seqParamSet->size());
+#endif
+
+    sp<MetaData> meta = new MetaData;
+    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
+
+    meta->setData(kKeyAVCC, 0, csd->data(), csd->size());
+    meta->setInt32(kKeyWidth, width);
+    meta->setInt32(kKeyHeight, height);
+
+    LOGI("found AVC codec config (%d x %d)", width, height);
+
+    return meta;
+}
+
+bool IsIDR(const sp<ABuffer> &buffer) {
+    const uint8_t *data = buffer->data();
+    size_t size = buffer->size();
+
+    bool foundIDR = false;
+
+    const uint8_t *nalStart;
+    size_t nalSize;
+    while (getNextNALUnit(&data, &size, &nalStart, &nalSize, true) == OK) {
+        CHECK_GT(nalSize, 0u);
+
+        unsigned nalType = nalStart[0] & 0x1f;
+
+        if (nalType == 5) {
+            foundIDR = true;
+            break;
+        }
+    }
+
+    return foundIDR;
 }
 
 }  // namespace android

@@ -888,9 +888,7 @@ status_t AwesomePlayer::getPosition(int64_t *positionUs) {
 }
 
 status_t AwesomePlayer::seekTo(int64_t timeUs) {
-    if (mExtractorFlags
-            & (MediaExtractor::CAN_SEEK_FORWARD
-                | MediaExtractor::CAN_SEEK_BACKWARD)) {
+    if (mExtractorFlags & MediaExtractor::CAN_SEEK) {
         Mutex::Autolock autoLock(mLock);
         return seekTo_l(timeUs);
     }
@@ -898,12 +896,19 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
     return OK;
 }
 
+// static
+void AwesomePlayer::OnRTSPSeekDoneWrapper(void *cookie) {
+    static_cast<AwesomePlayer *>(cookie)->onRTSPSeekDone();
+}
+
+void AwesomePlayer::onRTSPSeekDone() {
+    notifyListener_l(MEDIA_SEEK_COMPLETE);
+    mSeekNotificationSent = true;
+}
+
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     if (mRTSPController != NULL) {
-        mRTSPController->seek(timeUs);
-
-        notifyListener_l(MEDIA_SEEK_COMPLETE);
-        mSeekNotificationSent = true;
+        mRTSPController->seekAsync(timeUs, OnRTSPSeekDoneWrapper, this);
         return OK;
     }
 

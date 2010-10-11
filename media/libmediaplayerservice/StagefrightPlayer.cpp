@@ -187,6 +187,10 @@ status_t StagefrightPlayer::getMetadata(
             Metadata::kSeekForwardAvailable,
             flags & MediaExtractor::CAN_SEEK_FORWARD);
 
+    metadata.appendBool(
+            Metadata::kSeekAvailable,
+            flags & MediaExtractor::CAN_SEEK);
+
     return OK;
 }
 

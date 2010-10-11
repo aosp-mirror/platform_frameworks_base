@@ -86,8 +86,10 @@ struct MyHandler : public AHandler {
           mFirstAccessUnitNTP(0),
           mNumAccessUnitsReceived(0),
           mCheckPending(false),
+          mCheckGeneration(0),
           mTryTCPInterleaving(false),
-          mReceivedFirstRTCPPacket(false) {
+          mReceivedFirstRTCPPacket(false),
+          mSeekable(false) {
         mNetLooper->setName("rtsp net");
         mNetLooper->start(false /* runOnCallingThread */,
                           false /* canCallJava */,
@@ -114,9 +116,10 @@ struct MyHandler : public AHandler {
         (new AMessage('abor', id()))->post();
     }
 
-    void seek(int64_t timeUs) {
+    void seek(int64_t timeUs, const sp<AMessage> &doneMsg) {
         sp<AMessage> msg = new AMessage('seek', id());
         msg->setInt64("time", timeUs);
+        msg->setMessage("doneMsg", doneMsg);
         msg->post();
     }
 
@@ -378,6 +381,7 @@ struct MyHandler : public AHandler {
                 mFirstAccessUnitNTP = 0;
                 mNumAccessUnitsReceived = 0;
                 mReceivedFirstRTCPPacket = false;
+                mSeekable = false;
 
                 sp<AMessage> reply = new AMessage('tear', id());
 
@@ -434,6 +438,13 @@ struct MyHandler : public AHandler {
 
             case 'chek':
             {
+                int32_t generation;
+                CHECK(msg->findInt32("generation", &generation));
+                if (generation != mCheckGeneration) {
+                    // This is an outdated message. Ignore.
+                    break;
+                }
+
                 if (mNumAccessUnitsReceived == 0) {
                     LOGI("stream ended? aborting.");
                     (new AMessage('abor', id()))->post();
@@ -454,12 +465,7 @@ struct MyHandler : public AHandler {
                 }
 
                 ++mNumAccessUnitsReceived;
-
-                if (!mCheckPending) {
-                    mCheckPending = true;
-                    sp<AMessage> check = new AMessage('chek', id());
-                    check->post(kAccessUnitTimeoutUs);
-                }
+                postAccessUnitTimeoutCheck();
 
                 size_t trackIndex;
                 CHECK(msg->findSize("track-index", &trackIndex));
@@ -548,7 +554,17 @@ struct MyHandler : public AHandler {
 
             case 'seek':
             {
+                sp<AMessage> doneMsg;
+                CHECK(msg->findMessage("doneMsg", &doneMsg));
+
                 if (mSeekPending) {
+                    doneMsg->post();
+                    break;
+                }
+
+                if (!mSeekable) {
+                    LOGW("This is a live stream, ignoring seek request.");
+                    doneMsg->post();
                     break;
                 }
 
@@ -556,6 +572,11 @@ struct MyHandler : public AHandler {
                 CHECK(msg->findInt64("time", &timeUs));
 
                 mSeekPending = true;
+
+                // Disable the access unit timeout until we resumed
+                // playback again.
+                mCheckPending = true;
+                ++mCheckGeneration;
 
                 AString request = "PAUSE ";
                 request.append(mSessionURL);
@@ -569,6 +590,7 @@ struct MyHandler : public AHandler {
 
                 sp<AMessage> reply = new AMessage('see1', id());
                 reply->setInt64("time", timeUs);
+                reply->setMessage("doneMsg", doneMsg);
                 mConn->sendRequest(request.c_str(), reply);
                 break;
             }
@@ -597,7 +619,11 @@ struct MyHandler : public AHandler {
 
                 request.append("\r\n");
 
+                sp<AMessage> doneMsg;
+                CHECK(msg->findMessage("doneMsg", &doneMsg));
+
                 sp<AMessage> reply = new AMessage('see2', id());
+                reply->setMessage("doneMsg", doneMsg);
                 mConn->sendRequest(request.c_str(), reply);
                 break;
             }
@@ -611,6 +637,9 @@ struct MyHandler : public AHandler {
 
                 LOGI("PLAY completed with result %d (%s)",
                      result, strerror(-result));
+
+                mCheckPending = false;
+                postAccessUnitTimeoutCheck();
 
                 if (result == OK) {
                     sp<RefBase> obj;
@@ -633,6 +662,11 @@ struct MyHandler : public AHandler {
                 }
 
                 mSeekPending = false;
+
+                sp<AMessage> doneMsg;
+                CHECK(msg->findMessage("doneMsg", &doneMsg));
+
+                doneMsg->post();
                 break;
             }
 
@@ -674,6 +708,17 @@ struct MyHandler : public AHandler {
         }
     }
 
+    void postAccessUnitTimeoutCheck() {
+        if (mCheckPending) {
+            return;
+        }
+
+        mCheckPending = true;
+        sp<AMessage> check = new AMessage('chek', id());
+        check->setInt32("generation", mCheckGeneration);
+        check->post(kAccessUnitTimeoutUs);
+    }
+
     static void SplitString(
             const AString &s, const char *separator, List<AString> *items) {
         items->clear();
@@ -692,6 +737,8 @@ struct MyHandler : public AHandler {
     }
 
     void parsePlayResponse(const sp<ARTSPResponse> &response) {
+        mSeekable = false;
+
         ssize_t i = response->mHeaders.indexOfKey("range");
         if (i < 0) {
             // Server doesn't even tell use what range it is going to
@@ -755,6 +802,8 @@ struct MyHandler : public AHandler {
 
             ++n;
         }
+
+        mSeekable = true;
     }
 
     sp<APacketSource> getPacketSource(size_t index) {
@@ -783,8 +832,10 @@ private:
     uint64_t mFirstAccessUnitNTP;
     int64_t mNumAccessUnitsReceived;
     bool mCheckPending;
+    int32_t mCheckGeneration;
     bool mTryTCPInterleaving;
     bool mReceivedFirstRTCPPacket;
+    bool mSeekable;
 
     struct TrackInfo {
         AString mURL;

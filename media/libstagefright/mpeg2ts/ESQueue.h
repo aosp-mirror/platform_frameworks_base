@@ -56,9 +56,6 @@ private:
             unsigned profile, unsigned sampling_freq_index,
             unsigned channel_configuration);
 
-    static sp<MetaData> MakeAVCCodecSpecificData(
-            const sp<ABuffer> &accessUnit);
-
     DISALLOW_EVIL_CONSTRUCTORS(ElementaryStreamQueue);
 };
 

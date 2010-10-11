@@ -727,7 +727,7 @@ android_media_MediaPlayer_setAuxEffectSendLevel(JNIEnv *env, jobject thiz, jfloa
 }
 
 static void android_media_MediaPlayer_attachAuxEffect(JNIEnv *env,  jobject thiz, jint effectId) {
-    LOGV("attachAuxEffect(): %d", sessionId);
+    LOGV("attachAuxEffect(): %d", effectId);
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);

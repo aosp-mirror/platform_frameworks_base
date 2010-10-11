@@ -41,7 +41,7 @@ sp<MetaData> MediaExtractor::getMetaData() {
 }
 
 uint32_t MediaExtractor::flags() const {
-    return CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD | CAN_PAUSE;
+    return CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD | CAN_PAUSE | CAN_SEEK;
 }
 
 // static

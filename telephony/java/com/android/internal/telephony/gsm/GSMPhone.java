@@ -1204,7 +1204,8 @@ public class GSMPhone extends PhoneBase {
                 // Check if this is a different SIM than the previous one. If so unset the
                 // voice mail number.
                 String imsi = getVmSimImsi();
-                if (imsi != null && !getSubscriberId().equals(imsi)) {
+                String imsiFromSIM = getSubscriberId();
+                if (imsi != null && imsiFromSIM != null && !imsiFromSIM.equals(imsi)) {
                     storeVoiceMailNumber(null);
                     setVmSimImsi(null);
                 }
