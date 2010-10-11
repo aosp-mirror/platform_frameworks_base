@@ -125,8 +125,6 @@ public:
         sMutex.lock();
         if (mServer)
             mServer->sendObjectAdded(handle);
-        else
-            LOGE("sendObjectAdded called while disconnected\n");
         sMutex.unlock();
     }
 
@@ -134,8 +132,6 @@ public:
         sMutex.lock();
         if (mServer)
             mServer->sendObjectRemoved(handle);
-        else
-            LOGE("sendObjectRemoved called while disconnected\n");
         sMutex.unlock();
     }
 };
@@ -187,12 +183,9 @@ static void
 android_media_MtpServer_send_object_added(JNIEnv *env, jobject thiz, jint handle)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("send_object_added %d\n", handle);
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     if (thread)
         thread->sendObjectAdded(handle);
-    else
-        LOGE("sendObjectAdded called while disconnected\n");
 #endif
 }
 
@@ -200,12 +193,9 @@ static void
 android_media_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint handle)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("send_object_removed %d\n", handle);
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     if (thread)
         thread->sendObjectRemoved(handle);
-    else
-        LOGE("sendObjectRemoved called while disconnected\n");
 #endif
 }
 
