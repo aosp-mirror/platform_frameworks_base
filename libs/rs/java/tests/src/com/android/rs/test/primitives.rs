@@ -25,7 +25,7 @@ static bool test_primitive_types(uint32_t index) {
     _RS_ASSERT(charTest == -16);
     _RS_ASSERT(shortTest == -32);
     _RS_ASSERT(intTest == -64);
-    _RS_ASSERT(longTest == 17179869184l);
+    _RS_ASSERT(longTest == 17179869185l);
     _RS_ASSERT(longlongTest == 68719476735l);
 
     _RS_ASSERT(ucharTest == 8);

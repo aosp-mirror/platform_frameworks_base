@@ -58,11 +58,11 @@ public class UT_primitives extends UnitTest {
         }
         s.set_intTest(-64);
 
-        /*long pL = s.get_longTest();
+        long pL = s.get_longTest();
         if (pL != 17179869184l) {
             return false;
         }
-        s.set_longTest(17179869185l);*/
+        s.set_longTest(17179869185l);
 
         long pLL = s.get_longlongTest();
         if (pLL != 68719476736L) {
