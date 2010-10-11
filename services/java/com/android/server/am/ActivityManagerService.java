@@ -6812,6 +6812,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             sb.append("Subject: ").append(subject).append("\n");
         }
         sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
+        if (Debug.isDebuggerConnected()) {
+            sb.append("Debugger: Connected\n");
+        }
         sb.append("\n");
 
         // Do the rest in a worker thread to avoid blocking the caller on I/O
