@@ -1281,8 +1281,9 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         
         if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
             if (!dirty.isEmpty() || mIsAnimating) {
-                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, yoff);
+                mIsAnimating = false;
                 dirty.setEmpty();
+                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, yoff);
             }
 
             if (scrolling) {
