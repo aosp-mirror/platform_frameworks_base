@@ -95,6 +95,10 @@ enum {
     // Indicates that the input event was injected.
     POLICY_FLAG_INJECTED = 0x01000000,
 
+    // Indicates that the input event is from a trusted source such as a directly attached
+    // input device or an application with system-wide event injection permission.
+    POLICY_FLAG_TRUSTED = 0x02000000,
+
     /* These flags are set by the input reader policy as it intercepts each event. */
 
     // Indicates that the screen was off when the event was received and the event

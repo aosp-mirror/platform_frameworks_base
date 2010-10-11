@@ -5243,13 +5243,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mTempInputWindows.clear();
         }
         
-        /* Provides feedback for a virtual key down. */
-        public void virtualKeyDownFeedback() {
-            synchronized (mWindowMap) {
-                mPolicy.performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
-            }
-        }
-        
         /* Notifies that the lid switch changed state. */
         public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
             mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
