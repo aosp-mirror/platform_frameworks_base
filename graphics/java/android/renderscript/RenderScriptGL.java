@@ -23,7 +23,8 @@ import android.graphics.BitmapFactory;
 import android.util.Config;
 import android.util.Log;
 import android.view.Surface;
-
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
 /**
  * @hide
@@ -34,16 +35,90 @@ public class RenderScriptGL extends RenderScript {
     int mWidth;
     int mHeight;
 
+    public static class SurfaceConfig {
+        int mDepthMin       = 0;
+        int mDepthPref      = 0;
+        int mStencilMin     = 0;
+        int mStencilPref    = 0;
+        int mColorMin       = 8;
+        int mColorPref      = 8;
+        int mAlphaMin       = 0;
+        int mAlphaPref      = 0;
+        int mSamplesMin     = 1;
+        int mSamplesPref    = 1;
+        float mSamplesQ     = 1.f;
 
-    public RenderScriptGL(boolean useDepth, boolean forceSW) {
+        public SurfaceConfig() {
+        }
+
+        public SurfaceConfig(SurfaceConfig sc) {
+            mDepthMin = sc.mDepthMin;
+            mDepthPref = sc.mDepthPref;
+            mStencilMin = sc.mStencilMin;
+            mStencilPref = sc.mStencilPref;
+            mColorMin = sc.mColorMin;
+            mColorPref = sc.mColorPref;
+            mAlphaMin = sc.mAlphaMin;
+            mAlphaPref = sc.mAlphaPref;
+            mSamplesMin = sc.mSamplesMin;
+            mSamplesPref = sc.mSamplesPref;
+            mSamplesQ = sc.mSamplesQ;
+        }
+
+        private void validateRange(int umin, int upref, int rmin, int rmax) {
+            if (umin < rmin || umin > rmax) {
+                throw new IllegalArgumentException("Minimum value provided out of range.");
+            }
+            if (upref < umin) {
+                throw new IllegalArgumentException("Prefered must be >= Minimum.");
+            }
+        }
+
+        public void setColor(int minimum, int prefered) {
+            validateRange(minimum, prefered, 5, 8);
+            mColorMin = minimum;
+            mColorPref = prefered;
+        }
+        public void setAlpha(int minimum, int prefered) {
+            validateRange(minimum, prefered, 0, 8);
+            mAlphaMin = minimum;
+            mAlphaPref = prefered;
+        }
+        public void setDepth(int minimum, int prefered) {
+            validateRange(minimum, prefered, 0, 24);
+            mDepthMin = minimum;
+            mDepthPref = prefered;
+        }
+        public void setSamples(int minimum, int prefered, float Q) {
+            validateRange(minimum, prefered, 0, 24);
+            if (Q < 0.0f || Q > 1.0f) {
+                throw new IllegalArgumentException("Quality out of 0-1 range.");
+            }
+            mSamplesMin = minimum;
+            mSamplesPref = prefered;
+            mSamplesQ = Q;
+        }
+    };
+
+    SurfaceConfig mSurfaceConfig;
+
+    public void configureSurface(SurfaceHolder sh) {
+        //getHolder().setFormat(PixelFormat.TRANSLUCENT);
+    }
+
+    public void checkSurface(SurfaceHolder sh) {
+    }
+
+    public RenderScriptGL(SurfaceConfig sc) {
+        mSurfaceConfig = new SurfaceConfig(sc);
+
+
+
         mSurface = null;
         mWidth = 0;
         mHeight = 0;
         mDev = nDeviceCreate();
-        if(forceSW) {
-            nDeviceSetConfig(mDev, 0, 1);
-        }
-        mContext = nContextCreateGL(mDev, 0, useDepth);
+        mContext = nContextCreateGL(mDev, 0, mSurfaceConfig.mDepthMin > 0);
         mMessageThread = new MessageThread(this);
         mMessageThread.start();
         Element.initPredefined(this);

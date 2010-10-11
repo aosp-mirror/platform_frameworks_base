@@ -194,10 +194,6 @@ public class RenderScript {
     synchronized int nAllocationCreateBitmapRef(int type, Bitmap bmp) {
         return rsnAllocationCreateBitmapRef(mContext, type, bmp);
     }
-    native int  rsnAllocationCreateFromBitmapBoxed(int con, int dstFmt, boolean genMips, Bitmap bmp);
-    synchronized int nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp) {
-        return rsnAllocationCreateFromBitmapBoxed(mContext, dstFmt, genMips, bmp);
-    }
     native int  rsnAllocationCreateFromAssetStream(int con, int dstFmt, boolean genMips, int assetStream);
     synchronized int nAllocationCreateFromAssetStream(int dstFmt, boolean genMips, int assetStream) {
         return rsnAllocationCreateFromAssetStream(mContext, dstFmt, genMips, assetStream);
