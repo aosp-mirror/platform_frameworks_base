@@ -336,7 +336,7 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
                 PixelFormat.RGBX_8888);
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("StatusBar");
-        // TODO lp.windowAnimations = R.style.Animation_StatusBar;
+        lp.windowAnimations = com.android.internal.R.style.Animation_StatusBar;
 
         WindowManagerImpl.getDefault().addView(view, lp);
     }
