@@ -55,16 +55,18 @@ public class UnitTest extends Thread {
 
     protected RSMessage mRsMessage = new RSMessage() {
         public void run() {
-            switch (mID) {
-                case RS_MSG_TEST_PASSED:
-                    result = 1;
-                    break;
-                case RS_MSG_TEST_FAILED:
-                    result = -1;
-                    break;
-                default:
-                    android.util.Log.v("RenderScript", "Unit test got unexpected message");
-                    return;
+            if (result == 0) {
+                switch (mID) {
+                    case RS_MSG_TEST_PASSED:
+                        result = 1;
+                        break;
+                    case RS_MSG_TEST_FAILED:
+                        result = -1;
+                        break;
+                    default:
+                        android.util.Log.v("RenderScript", "Unit test got unexpected message");
+                        return;
+                }
             }
 
             if (mItem != null) {

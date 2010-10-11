@@ -27,13 +27,65 @@ public class UT_primitives extends UnitTest {
         mRes = res;
     }
 
+    private boolean initializeGlobals(ScriptC_primitives s) {
+        float pF = s.get_floatTest();
+        if (pF != 1.99f) {
+            return false;
+        }
+        s.set_floatTest(2.99f);
+
+        double pD = s.get_doubleTest();
+        if (pD != 2.05) {
+            return false;
+        }
+        s.set_doubleTest(3.05);
+
+        byte pC = s.get_charTest();
+        if (pC != -8) {
+            return false;
+        }
+        s.set_charTest((byte)-16);
+
+        short pS = s.get_shortTest();
+        if (pS != -16) {
+            return false;
+        }
+        s.set_shortTest((short)-32);
+
+        int pI = s.get_intTest();
+        if (pI != -32) {
+            return false;
+        }
+        s.set_intTest(-64);
+
+        /*long pL = s.get_longTest();
+        if (pL != 17179869184l) {
+            return false;
+        }
+        s.set_longTest(17179869185l);*/
+
+        long pLL = s.get_longlongTest();
+        if (pLL != 68719476736L) {
+            return false;
+        }
+        s.set_longlongTest(68719476735L);
+        //s.set_longlongTest(0);
+
+        return true;
+    }
+
     public void run() {
         RenderScript pRS = RenderScript.create();
         ScriptC_primitives s = new ScriptC_primitives(pRS, mRes, R.raw.primitives, true);
         pRS.mMessageCallback = mRsMessage;
-        s.invoke_primitives_test(0, 0);
-        pRS.finish();
-        waitForMessage();
+        if (!initializeGlobals(s)) {
+            // initializeGlobals failed
+            result = -1;
+        } else {
+            s.invoke_primitives_test(0, 0);
+            pRS.finish();
+            waitForMessage();
+        }
         pRS.destroy();
     }
 }
