@@ -370,7 +370,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
             }
         }
         done = dispatchKeyLocked(currentTime, typedEntry, keyRepeatTimeout,
-                dropReason != DROP_REASON_NOT_DROPPED, nextWakeupTime);
+                &dropReason, nextWakeupTime);
         break;
     }
 
@@ -380,7 +380,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
             dropReason = DROP_REASON_APP_SWITCH;
         }
         done = dispatchMotionLocked(currentTime, typedEntry,
-                dropReason != DROP_REASON_NOT_DROPPED, nextWakeupTime);
+                &dropReason, nextWakeupTime);
         break;
     }
 
@@ -431,6 +431,9 @@ void InputDispatcher::dropInboundEventLocked(EventEntry* entry, DropReason dropR
     const char* reason;
     switch (dropReason) {
     case DROP_REASON_POLICY:
+#if DEBUG_INBOUND_EVENT_DETAILS
+        LOGD("Dropped event because policy requested that it not be delivered to the application.");
+#endif
         reason = "inbound event was dropped because the policy requested that it not be "
                 "delivered to the application";
         break;
@@ -473,7 +476,7 @@ bool InputDispatcher::isAppSwitchKeyCode(int32_t keyCode) {
 bool InputDispatcher::isAppSwitchKeyEventLocked(KeyEntry* keyEntry) {
     return ! (keyEntry->flags & AKEY_EVENT_FLAG_CANCELED)
             && isAppSwitchKeyCode(keyEntry->keyCode)
-            && isEventFromTrustedSourceLocked(keyEntry)
+            && (keyEntry->policyFlags & POLICY_FLAG_TRUSTED)
             && (keyEntry->policyFlags & POLICY_FLAG_PASS_TO_USER);
 }
 
@@ -541,12 +544,6 @@ void InputDispatcher::releaseInboundEventLocked(EventEntry* entry) {
     mAllocator.releaseEventEntry(entry);
 }
 
-bool InputDispatcher::isEventFromTrustedSourceLocked(EventEntry* entry) {
-    InjectionState* injectionState = entry->injectionState;
-    return ! injectionState
-            || hasInjectionPermission(injectionState->injectorPid, injectionState->injectorUid);
-}
-
 void InputDispatcher::resetKeyRepeatLocked() {
     if (mKeyRepeatState.lastKeyEntry) {
         mAllocator.releaseKeyEntry(mKeyRepeatState.lastKeyEntry);
@@ -559,7 +556,8 @@ InputDispatcher::KeyEntry* InputDispatcher::synthesizeKeyRepeatLocked(
     KeyEntry* entry = mKeyRepeatState.lastKeyEntry;
 
     // Reuse the repeated key entry if it is otherwise unreferenced.
-    uint32_t policyFlags = entry->policyFlags & (POLICY_FLAG_RAW_MASK | POLICY_FLAG_PASS_TO_USER);
+    uint32_t policyFlags = (entry->policyFlags & POLICY_FLAG_RAW_MASK)
+            | POLICY_FLAG_PASS_TO_USER | POLICY_FLAG_TRUSTED;
     if (entry->refCount == 1) {
         mAllocator.recycleKeyEntry(entry);
         entry->eventTime = currentTime;
@@ -608,19 +606,13 @@ bool InputDispatcher::dispatchConfigurationChangedLocked(
 
 bool InputDispatcher::dispatchKeyLocked(
         nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout,
-        bool dropEvent, nsecs_t* nextWakeupTime) {
+        DropReason* dropReason, nsecs_t* nextWakeupTime) {
     // Give the policy a chance to intercept the key.
     if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN) {
-        bool trusted;
-        if (! dropEvent && mFocusedWindow) {
-            trusted = checkInjectionPermission(mFocusedWindow, entry->injectionState);
-        } else {
-            trusted = isEventFromTrustedSourceLocked(entry);
-        }
-        if (trusted) {
+        if (entry->policyFlags & POLICY_FLAG_PASS_TO_USER) {
             CommandEntry* commandEntry = postCommandLocked(
                     & InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible);
-            if (! dropEvent && mFocusedWindow) {
+            if (mFocusedWindow) {
                 commandEntry->inputChannel = mFocusedWindow->inputChannel;
             }
             commandEntry->keyEntry = entry;
@@ -630,13 +622,16 @@ bool InputDispatcher::dispatchKeyLocked(
             entry->interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_CONTINUE;
         }
     } else if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_SKIP) {
+        if (*dropReason == DROP_REASON_NOT_DROPPED) {
+            *dropReason = DROP_REASON_POLICY;
+        }
         resetTargetsLocked();
         setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_SUCCEEDED);
         return true;
     }
 
     // Clean up if dropping the event.
-    if (dropEvent) {
+    if (*dropReason != DROP_REASON_NOT_DROPPED) {
         resetTargetsLocked();
         setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
         return true;
@@ -648,7 +643,8 @@ bool InputDispatcher::dispatchKeyLocked(
 
         if (entry->repeatCount == 0
                 && entry->action == AKEY_EVENT_ACTION_DOWN
-                && ! entry->isInjected()) {
+                && (entry->policyFlags & POLICY_FLAG_TRUSTED)
+                && !entry->isInjected()) {
             if (mKeyRepeatState.lastKeyEntry
                     && mKeyRepeatState.lastKeyEntry->keyCode == entry->keyCode) {
                 // We have seen two identical key downs in a row which indicates that the device
@@ -713,9 +709,9 @@ void InputDispatcher::logOutboundKeyDetailsLocked(const char* prefix, const KeyE
 }
 
 bool InputDispatcher::dispatchMotionLocked(
-        nsecs_t currentTime, MotionEntry* entry, bool dropEvent, nsecs_t* nextWakeupTime) {
+        nsecs_t currentTime, MotionEntry* entry, DropReason* dropReason, nsecs_t* nextWakeupTime) {
     // Clean up if dropping the event.
-    if (dropEvent) {
+    if (*dropReason != DROP_REASON_NOT_DROPPED) {
         resetTargetsLocked();
         setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
         return true;
@@ -2085,6 +2081,7 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
         return;
     }
 
+    policyFlags |= POLICY_FLAG_TRUSTED;
     mPolicy->interceptKeyBeforeQueueing(eventTime, deviceId, action, /*byref*/ flags,
             keyCode, scanCode, /*byref*/ policyFlags);
 
@@ -2130,6 +2127,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
         return;
     }
 
+    policyFlags |= POLICY_FLAG_TRUSTED;
     mPolicy->interceptGenericBeforeQueueing(eventTime, /*byref*/ policyFlags);
 
     bool needWake;
@@ -2263,6 +2261,7 @@ void InputDispatcher::notifySwitch(nsecs_t when, int32_t switchCode, int32_t swi
             switchCode, switchValue, policyFlags);
 #endif
 
+    policyFlags |= POLICY_FLAG_TRUSTED;
     mPolicy->notifySwitch(when, switchCode, switchValue, policyFlags);
 }
 
@@ -2275,7 +2274,11 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
 #endif
 
     nsecs_t endTime = now() + milliseconds_to_nanoseconds(timeoutMillis);
-    bool trusted = hasInjectionPermission(injectorPid, injectorUid);
+
+    uint32_t policyFlags = POLICY_FLAG_INJECTED;
+    if (hasInjectionPermission(injectorPid, injectorUid)) {
+        policyFlags |= POLICY_FLAG_TRUSTED;
+    }
 
     EventEntry* injectedEntry;
     switch (event->getType()) {
@@ -2291,11 +2294,8 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         int32_t flags = keyEvent->getFlags();
         int32_t keyCode = keyEvent->getKeyCode();
         int32_t scanCode = keyEvent->getScanCode();
-        uint32_t policyFlags = POLICY_FLAG_INJECTED;
-        if (trusted) {
-            mPolicy->interceptKeyBeforeQueueing(eventTime, deviceId, action, /*byref*/ flags,
-                    keyCode, scanCode, /*byref*/ policyFlags);
-        }
+        mPolicy->interceptKeyBeforeQueueing(eventTime, deviceId, action, /*byref*/ flags,
+                keyCode, scanCode, /*byref*/ policyFlags);
 
         mLock.lock();
         injectedEntry = mAllocator.obtainKeyEntry(eventTime, deviceId, keyEvent->getSource(),
@@ -2314,10 +2314,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         }
 
         nsecs_t eventTime = motionEvent->getEventTime();
-        uint32_t policyFlags = POLICY_FLAG_INJECTED;
-        if (trusted) {
-            mPolicy->interceptGenericBeforeQueueing(eventTime, /*byref*/ policyFlags);
-        }
+        mPolicy->interceptGenericBeforeQueueing(eventTime, /*byref*/ policyFlags);
 
         mLock.lock();
         const nsecs_t* sampleEventTimes = motionEvent->getSampleEventTimes();
