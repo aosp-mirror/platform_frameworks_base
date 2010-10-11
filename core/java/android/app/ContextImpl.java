@@ -2752,14 +2752,15 @@ class ContextImpl extends Context {
         private final File mBackupFile;
         private final int mMode;
 
-        private Map<String, Object> mMap;  // guarded by 'this'
-        private long mTimestamp;  // guarded by 'this'
+        private Map<String, Object> mMap;     // guarded by 'this'
         private int mDiskWritesInFlight = 0;  // guarded by 'this'
-        private boolean mLoaded = false;  // guarded by 'this'
+        private boolean mLoaded = false;      // guarded by 'this'
+        private long mStatTimestamp;          // guarded by 'this'
+        private long mStatSize;               // guarded by 'this'
 
         private final Object mWritingToDiskLock = new Object();
         private static final Object mContent = new Object();
-        private WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners;
+        private final WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners;
 
         SharedPreferencesImpl(
             File file, int mode, Map initialContents) {
@@ -2770,7 +2771,7 @@ class ContextImpl extends Context {
             mMap = initialContents != null ? initialContents : new HashMap<String, Object>();
             FileStatus stat = new FileStatus();
             if (FileUtils.getFileStatus(file.getPath(), stat)) {
-                mTimestamp = stat.mtime;
+                mStatTimestamp = stat.mtime;
             }
             mListeners = new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
         }
@@ -2797,7 +2798,7 @@ class ContextImpl extends Context {
                 return true;
             }
             synchronized (this) {
-                return mTimestamp != stat.mtime;
+                return mStatTimestamp != stat.mtime || mStatSize != stat.size;
             }
         }
 
@@ -3191,7 +3192,8 @@ class ContextImpl extends Context {
                 FileStatus stat = new FileStatus();
                 if (FileUtils.getFileStatus(mFile.getPath(), stat)) {
                     synchronized (this) {
-                        mTimestamp = stat.mtime;
+                        mStatTimestamp = stat.mtime;
+                        mStatSize = stat.size;
                     }
                 }
                 // Writing was successful, delete the backup file if there is one.
