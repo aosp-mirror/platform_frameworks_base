@@ -163,6 +163,7 @@ void MtpServer::run() {
                 mData.setOperationCode(operation);
                 mData.setTransactionID(transaction);
                 LOGV("sending data:");
+                mData.dump();
                 ret = mData.write(fd);
                 if (ret < 0) {
                     LOGE("request write returned %d, errno: %d", ret, errno);
@@ -177,6 +178,7 @@ void MtpServer::run() {
             mResponse.setTransactionID(transaction);
             LOGV("sending response %04X", mResponse.getResponseCode());
             ret = mResponse.write(fd);
+            mResponse.dump();
             if (ret < 0) {
                 LOGE("request write returned %d, errno: %d", ret, errno);
                 if (errno == ECANCELED) {
@@ -546,7 +548,7 @@ MtpResponseCode MtpServer::doGetObject() {
     // send data header
     mData.setOperationCode(mRequest.getOperationCode());
     mData.setTransactionID(mRequest.getTransactionID());
-    mData.writeDataHeader(mFD, fileLength);
+    mData.writeDataHeader(mFD, fileLength + MTP_CONTAINER_HEADER_SIZE);
 
     // then transfer the file
     int ret = ioctl(mFD, MTP_SEND_FILE, (unsigned long)&mfr);
