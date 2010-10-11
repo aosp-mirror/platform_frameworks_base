@@ -359,6 +359,10 @@ public class RenderScript {
     synchronized void nScriptSetVarI(int id, int slot, int val) {
         rsnScriptSetVarI(mContext, id, slot, val);
     }
+    native void rsnScriptSetVarJ(int con, int id, int slot, long val);
+    synchronized void nScriptSetVarJ(int id, int slot, long val) {
+        rsnScriptSetVarJ(mContext, id, slot, val);
+    }
     native void rsnScriptSetVarF(int con, int id, int slot, float val);
     synchronized void nScriptSetVarF(int id, int slot, float val) {
         rsnScriptSetVarF(mContext, id, slot, val);

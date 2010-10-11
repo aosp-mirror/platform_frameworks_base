@@ -80,6 +80,10 @@ public class Script extends BaseObj {
         mRS.nScriptSetVarI(mID, index, v);
     }
 
+    public void setVar(int index, long v) {
+        mRS.nScriptSetVarJ(mID, index, v);
+    }
+
     public void setVar(int index, boolean v) {
         mRS.nScriptSetVarI(mID, index, v ? 1 : 0);
     }
