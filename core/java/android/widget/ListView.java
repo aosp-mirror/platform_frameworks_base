@@ -26,7 +26,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
@@ -2980,7 +2979,6 @@ public class ListView extends AbsListView {
             if (!mStackFromBottom) {
                 int bottom;
                 
-                final int scrollY = mScrollY;
                 for (int i = 0; i < count; i++) {
                     if ((headerDividers || first + i >= headerCount) &&
                             (footerDividers || first + i < footerLimit)) {

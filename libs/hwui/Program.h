@@ -77,14 +77,14 @@ public:
              const mat4& transformMatrix);
 
     /**
+     * Sets the color associated with this shader.
+     */
+    void setColor(const float r, const float g, const float b, const float a);
+
+    /**
      * Name of the position attribute.
      */
     int position;
-
-    /**
-     * Name of the color uniform.
-     */
-    int color;
 
     /**
      * Name of the transform uniform.

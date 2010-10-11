@@ -24,6 +24,14 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+#define MODULATE_OP_NO_MODULATE 0
+#define MODULATE_OP_MODULATE 1
+#define MODULATE_OP_MODULATE_A8 2
+
+///////////////////////////////////////////////////////////////////////////////
 // Vertex shaders snippets
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -69,8 +77,7 @@ const char* gVS_Main_OutGradient[3] = {
         "    sweep = (screenSpace * position).xy;\n"
 };
 const char* gVS_Main_OutBitmapTexCoords =
-        "    vec4 bitmapCoords = textureTransform * position;\n"
-        "    outBitmapTexCoords = bitmapCoords.xy * textureDimension;\n";
+        "    outBitmapTexCoords = (textureTransform * position).xy * textureDimension;\n";
 const char* gVS_Main_Position =
         "    gl_Position = transform * position;\n";
 const char* gVS_Footer =
@@ -113,12 +120,52 @@ const char* gFS_Uniforms_ColorOp[4] = {
 const char* gFS_Main =
         "\nvoid main(void) {\n"
         "    lowp vec4 fragColor;\n";
+
+// Fast cases
+const char* gFS_Fast_SingleColor =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = color;\n"
+        "}\n\n";
+const char* gFS_Fast_SingleTexture =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = texture2D(sampler, outTexCoords);\n"
+        "}\n\n";
+const char* gFS_Fast_SingleModulateTexture =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = color.a * texture2D(sampler, outTexCoords);\n"
+        "}\n\n";
+const char* gFS_Fast_SingleA8Texture =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = vec4(0.0, 0.0, 0.0, texture2D(sampler, outTexCoords).a);\n"
+        "}\n\n";
+const char* gFS_Fast_SingleModulateA8Texture =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = color * texture2D(sampler, outTexCoords).a;\n"
+        "}\n\n";
+const char* gFS_Fast_SingleGradient =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = texture2D(gradientSampler, linear);\n"
+        "}\n\n";
+const char* gFS_Fast_SingleModulateGradient =
+        "\nvoid main(void) {\n"
+        "    gl_FragColor = color.a * texture2D(gradientSampler, linear);\n"
+        "}\n\n";
+
+// General case
 const char* gFS_Main_FetchColor =
         "    fragColor = color;\n";
-const char* gFS_Main_FetchTexture =
-        "    fragColor = color * texture2D(sampler, outTexCoords);\n";
-const char* gFS_Main_FetchA8Texture =
-        "    fragColor = color * texture2D(sampler, outTexCoords).a;\n";
+const char* gFS_Main_FetchTexture[2] = {
+        // Don't modulate
+        "    fragColor = texture2D(sampler, outTexCoords);\n",
+        // Modulate
+        "    fragColor = color * texture2D(sampler, outTexCoords);\n"
+};
+const char* gFS_Main_FetchA8Texture[2] = {
+        // Don't modulate
+        "    fragColor = vec4(0.0, 0.0, 0.0, texture2D(sampler, outTexCoords).a);\n",
+        // Modulate
+        "    fragColor = color * texture2D(sampler, outTexCoords).a;\n"
+};
 const char* gFS_Main_FetchGradient[3] = {
         // Linear
         "    vec4 gradientColor = texture2D(gradientSampler, linear);\n",
@@ -137,12 +184,30 @@ const char* gFS_Main_BlendShadersBG =
         "    fragColor = blendShaders(gradientColor, bitmapColor)";
 const char* gFS_Main_BlendShadersGB =
         "    fragColor = blendShaders(bitmapColor, gradientColor)";
-const char* gFS_Main_BlendShaders_Modulate =
-        " * fragColor.a;\n";
-const char* gFS_Main_GradientShader_Modulate =
-        "    fragColor = gradientColor * fragColor.a;\n";
-const char* gFS_Main_BitmapShader_Modulate =
-        "    fragColor = bitmapColor * fragColor.a;\n";
+const char* gFS_Main_BlendShaders_Modulate[3] = {
+        // Don't modulate
+        ";\n",
+        // Modulate
+        " * fragColor.a;\n",
+        // Modulate with alpha 8 texture
+        " * texture2D(sampler, outTexCoords).a;\n"
+};
+const char* gFS_Main_GradientShader_Modulate[3] = {
+        // Don't modulate
+        "    fragColor = gradientColor;\n",
+        // Modulate
+        "    fragColor = gradientColor * fragColor.a;\n",
+        // Modulate with alpha 8 texture
+        "    fragColor = gradientColor * texture2D(sampler, outTexCoords).a;\n"
+    };
+const char* gFS_Main_BitmapShader_Modulate[3] = {
+        // Don't modulate
+        "    fragColor = bitmapColor;\n",
+        // Modulate
+        "    fragColor = bitmapColor * fragColor.a;\n",
+        // Modulate with alpha 8 texture
+        "    fragColor = bitmapColor * texture2D(sampler, outTexCoords).a;\n"
+    };
 const char* gFS_Main_FragColor =
         "    gl_FragColor = fragColor;\n";
 const char* gFS_Main_FragColor_Blend =
@@ -317,7 +382,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     // Set the default precision
     String8 shader;
 
-    bool blendFramebuffer = description.framebufferMode >= SkXfermode::kPlus_Mode;
+    const bool blendFramebuffer = description.framebufferMode >= SkXfermode::kPlus_Mode;
     if (blendFramebuffer) {
         shader.append(gFS_Header_Extension_FramebufferFetch);
     }
@@ -335,15 +400,72 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gVS_Header_Varyings_HasBitmap);
     }
 
-
     // Uniforms
-    shader.append(gFS_Uniforms_Color);
+    int modulateOp = MODULATE_OP_NO_MODULATE;
+    const bool singleColor = !description.hasTexture &&
+            !description.hasGradient && !description.hasBitmap;
+
+    if (description.modulate || singleColor) {
+        shader.append(gFS_Uniforms_Color);
+        if (!singleColor) modulateOp = MODULATE_OP_MODULATE;
+    }
     if (description.hasTexture) {
         shader.append(gFS_Uniforms_TextureSampler);
     }
     if (description.hasGradient) {
         shader.append(gFS_Uniforms_GradientSampler[description.gradientType]);
     }
+
+    // Optimization for common cases
+    if (!blendFramebuffer) {
+        bool fast = false;
+
+        const bool noShader = !description.hasGradient && !description.hasBitmap;
+        const bool singleTexture = description.hasTexture &&
+                !description.hasAlpha8Texture && noShader;
+        const bool singleA8Texture = description.hasTexture &&
+                description.hasAlpha8Texture && noShader;
+        const bool singleGradient = !description.hasTexture &&
+                description.hasGradient && !description.hasBitmap &&
+                description.gradientType == ProgramDescription::kGradientLinear;
+
+        if (singleColor) {
+            shader.append(gFS_Fast_SingleColor);
+            fast = true;
+        } else if (singleTexture) {
+            if (!description.modulate) {
+                shader.append(gFS_Fast_SingleTexture);
+            } else {
+                shader.append(gFS_Fast_SingleModulateTexture);
+            }
+            fast = true;
+        } else if (singleA8Texture) {
+            if (!description.modulate) {
+                shader.append(gFS_Fast_SingleA8Texture);
+            } else {
+                shader.append(gFS_Fast_SingleModulateA8Texture);
+            }
+            fast = true;
+        } else if (singleGradient) {
+            if (!description.modulate) {
+                shader.append(gFS_Fast_SingleGradient);
+            } else {
+                shader.append(gFS_Fast_SingleModulateGradient);
+            }
+            fast = true;
+        }
+
+        if (fast) {
+            if (DEBUG_PROGRAM_CACHE) {
+                PROGRAM_LOGD("*** Fast case:\n");
+                PROGRAM_LOGD("*** Generated fragment shader:\n\n");
+                printLongString(shader);
+            }
+
+            return shader;
+        }
+    }
+
     if (description.hasBitmap) {
         shader.append(gFS_Uniforms_BitmapSampler);
     }
@@ -368,12 +490,16 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         // Stores the result in fragColor directly
         if (description.hasTexture) {
             if (description.hasAlpha8Texture) {
-                shader.append(gFS_Main_FetchA8Texture);
+                if (!description.hasGradient && !description.hasBitmap) {
+                    shader.append(gFS_Main_FetchA8Texture[modulateOp]);
+                }
             } else {
-                shader.append(gFS_Main_FetchTexture);
+                shader.append(gFS_Main_FetchTexture[modulateOp]);
             }
         } else {
-            shader.append(gFS_Main_FetchColor);
+            if ((!description.hasGradient && !description.hasBitmap) || description.modulate) {
+                shader.append(gFS_Main_FetchColor);
+            }
         }
         if (description.hasGradient) {
             shader.append(gFS_Main_FetchGradient[description.gradientType]);
@@ -387,17 +513,20 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         }
         // Case when we have two shaders set
         if (description.hasGradient && description.hasBitmap) {
+            int op = description.hasAlpha8Texture ? MODULATE_OP_MODULATE_A8 : modulateOp;
             if (description.isBitmapFirst) {
                 shader.append(gFS_Main_BlendShadersBG);
             } else {
                 shader.append(gFS_Main_BlendShadersGB);
             }
-            shader.append(gFS_Main_BlendShaders_Modulate);
+            shader.append(gFS_Main_BlendShaders_Modulate[op]);
         } else {
             if (description.hasGradient) {
-                shader.append(gFS_Main_GradientShader_Modulate);
+                int op = description.hasAlpha8Texture ? MODULATE_OP_MODULATE_A8 : modulateOp;
+                shader.append(gFS_Main_GradientShader_Modulate[op]);
             } else if (description.hasBitmap) {
-                shader.append(gFS_Main_BitmapShader_Modulate);
+                int op = description.hasAlpha8Texture ? MODULATE_OP_MODULATE_A8 : modulateOp;
+                shader.append(gFS_Main_BitmapShader_Modulate[op]);
             }
         }
         // Apply the color op if needed
