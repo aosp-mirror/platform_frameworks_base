@@ -238,6 +238,8 @@ class SipHelper {
         ClientTransaction tid = responseEvent.getClientTransaction();
         ClientTransaction ct = authenticationHelper.handleChallenge(
                 responseEvent.getResponse(), tid, mSipProvider, 5);
+        if (DEBUG) Log.d(TAG, "send request with challenge response: "
+                + ct.getRequest());
         ct.sendRequest();
         return ct;
     }
