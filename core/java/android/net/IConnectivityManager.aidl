@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
+import android.net.ProxyProperties;
 import android.os.IBinder;
 
 /**
@@ -85,4 +86,10 @@ interface IConnectivityManager
     void requestNetworkTransitionWakelock(in String forWhom);
 
     void reportInetCondition(int networkType, int percentage);
+
+    ProxyProperties getGlobalProxy();
+
+    void setGlobalProxy(in ProxyProperties p);
+
+    ProxyProperties getProxy();
 }

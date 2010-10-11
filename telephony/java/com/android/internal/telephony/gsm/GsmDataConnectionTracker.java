@@ -1007,14 +1007,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             ApnSetting apn = mPendingDataConnection.getApn();
             if (apn.proxy != null && apn.proxy.length() != 0) {
                 try {
-                    ProxyProperties proxy = new ProxyProperties();
-                    proxy.setSocketAddress(new InetSocketAddress(InetAddress.getByName(apn.proxy),
-                            Integer.parseInt(apn.port)));
+                    ProxyProperties proxy = new ProxyProperties(apn.proxy,
+                            Integer.parseInt(apn.port), null);
                     mLinkProperties.setHttpProxy(proxy);
-                } catch (UnknownHostException e) {
-                    loge("UnknownHostException making ProxyProperties: " + e);
-                } catch (SecurityException e) {
-                    loge("SecurityException making ProxyProperties: " + e);
                 } catch (NumberFormatException e) {
                     loge("NumberFormatException making ProxyProperties (" + apn.port +
                             "): " + e);

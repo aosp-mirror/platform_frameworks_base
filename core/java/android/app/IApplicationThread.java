@@ -88,6 +88,7 @@ public interface IApplicationThread extends IInterface {
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
     void updateTimeZone() throws RemoteException;
     void clearDnsCache() throws RemoteException;
+    void setHttpProxy(String proxy, String port, String exclList) throws RemoteException;
     void processInBackground() throws RemoteException;
     void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args)
             throws RemoteException;
@@ -148,4 +149,5 @@ public interface IApplicationThread extends IInterface {
     int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+35;
     int DUMP_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+36;
     int CLEAR_DNS_CACHE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+37;
+    int SET_HTTP_PROXY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+38;
 }

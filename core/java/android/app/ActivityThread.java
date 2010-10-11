@@ -42,6 +42,9 @@ import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.net.IConnectivityManager;
+import android.net.Proxy;
+import android.net.ProxyProperties;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -272,7 +275,7 @@ public final class ActivityThread {
             super(resultCode, resultData, resultExtras, TYPE_COMPONENT, ordered, sticky, token);
             this.intent = intent;
         }
-        
+
         Intent intent;
         ActivityInfo info;
         public String toString() {
@@ -590,6 +593,10 @@ public final class ActivityThread {
         public void clearDnsCache() {
             // a non-standard API to get this to libcore
             InetAddress.clearDnsCache();
+        }
+
+        public void setHttpProxy(String host, String port, String exclList) {
+            Proxy.setHttpProxySystemProperty(host, port, exclList);
         }
 
         public void processInBackground() {
@@ -3252,6 +3259,16 @@ public final class ActivityThread {
                       + " can be debugged on port 8100...");
             }
         }
+
+        /**
+         * Initialize the default http proxy in this process for the reasons we set the time zone.
+         */
+        IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+        IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+        try {
+            ProxyProperties proxyProperties = service.getProxy();
+            Proxy.setHttpProxySystemProperty(proxyProperties);
+        } catch (RemoteException e) {}
 
         if (data.instrumentationName != null) {
             ContextImpl appContext = new ContextImpl();

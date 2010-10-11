@@ -76,6 +76,8 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.net.Proxy;
+import android.net.ProxyProperties;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -127,6 +129,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -960,6 +963,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int SHOW_STRICT_MODE_VIOLATION_MSG = 26;
     static final int CHECK_EXCESSIVE_WAKE_LOCKS_MSG = 27;
     static final int CLEAR_DNS_CACHE = 28;
+    static final int UPDATE_HTTP_PROXY = 29;
 
     AlertDialog mUidAlert;
 
@@ -1120,6 +1124,30 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 r.thread.clearDnsCache();
                             } catch (RemoteException ex) {
                                 Slog.w(TAG, "Failed to clear dns cache for: " + r.info.processName);
+                            }
+                        }
+                    }
+                }
+            } break;
+            case UPDATE_HTTP_PROXY: {
+                ProxyProperties proxy = (ProxyProperties)msg.obj;
+                String host = "";
+                String port = "";
+                String exclList = "";
+                if (proxy != null) {
+                    host = proxy.getHost();
+                    port = Integer.toString(proxy.getPort());
+                    exclList = proxy.getExclusionList();
+                }
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+                        ProcessRecord r = mLruProcesses.get(i);
+                        if (r.thread != null) {
+                            try {
+                                r.thread.setHttpProxy(host, port, exclList);
+                            } catch (RemoteException ex) {
+                                Slog.w(TAG, "Failed to update http proxy for: " +
+                                        r.info.processName);
                             }
                         }
                     }
@@ -10400,6 +10428,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
             mHandler.sendEmptyMessage(CLEAR_DNS_CACHE);
+        }
+
+        if (Proxy.PROXY_CHANGE_ACTION.equals(intent.getAction())) {
+            ProxyProperties proxy = intent.getParcelableExtra("proxy");
+            mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY, proxy));
         }
 
         /*
