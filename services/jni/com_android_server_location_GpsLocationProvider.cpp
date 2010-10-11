@@ -238,7 +238,11 @@ static const GpsInterface* get_gps_interface() {
     return interface;
 }
 
-static const GpsInterface* GetGpsInterface() {
+static const GpsInterface* GetGpsInterface(JNIEnv* env, jobject obj) {
+    // this must be set before calling into the HAL library
+    if (!mCallbacksObj)
+        mCallbacksObj = env->NewGlobalRef(obj);
+
     if (!sGpsInterface) {
         sGpsInterface = get_gps_interface();
         if (!sGpsInterface || sGpsInterface->init(&sGpsCallbacks) != 0) {
@@ -249,9 +253,9 @@ static const GpsInterface* GetGpsInterface() {
     return sGpsInterface;
 }
 
-static const AGpsInterface* GetAGpsInterface()
+static const AGpsInterface* GetAGpsInterface(JNIEnv* env, jobject obj)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (!interface)
         return NULL;
 
@@ -263,9 +267,9 @@ static const AGpsInterface* GetAGpsInterface()
     return sAGpsInterface;
 }
 
-static const GpsNiInterface* GetNiInterface()
+static const GpsNiInterface* GetNiInterface(JNIEnv* env, jobject obj)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (!interface)
         return NULL;
 
@@ -277,9 +281,9 @@ static const GpsNiInterface* GetNiInterface()
     return sGpsNiInterface;
 }
 
-static const AGpsRilInterface* GetAGpsRilInterface()
+static const AGpsRilInterface* GetAGpsRilInterface(JNIEnv* env, jobject obj)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (!interface)
         return NULL;
 
@@ -310,11 +314,7 @@ static jboolean android_location_GpsLocationProvider_is_supported(JNIEnv* env, j
 
 static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject obj)
 {
-    // this must be set before calling into the HAL library
-    if (!mCallbacksObj)
-        mCallbacksObj = env->NewGlobalRef(obj);
-
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (!interface)
         return false;
 
@@ -326,7 +326,7 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
 
 static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject obj)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (interface)
         interface->cleanup();
 }
@@ -334,7 +334,7 @@ static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject ob
 static jboolean android_location_GpsLocationProvider_set_position_mode(JNIEnv* env, jobject obj,
         jint mode, jint recurrence, jint min_interval, jint preferred_accuracy, jint preferred_time)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (interface)
         return (interface->set_position_mode(mode, recurrence, min_interval, preferred_accuracy,
                 preferred_time) == 0);
@@ -344,7 +344,7 @@ static jboolean android_location_GpsLocationProvider_set_position_mode(JNIEnv* e
 
 static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject obj)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (interface)
         return (interface->start() == 0);
     else
@@ -353,7 +353,7 @@ static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject 
 
 static jboolean android_location_GpsLocationProvider_stop(JNIEnv* env, jobject obj)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (interface)
         return (interface->stop() == 0);
     else
@@ -362,7 +362,7 @@ static jboolean android_location_GpsLocationProvider_stop(JNIEnv* env, jobject o
 
 static void android_location_GpsLocationProvider_delete_aiding_data(JNIEnv* env, jobject obj, jint flags)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (interface)
         interface->delete_aiding_data(flags);
 }
@@ -402,7 +402,7 @@ static void android_location_GpsLocationProvider_agps_set_reference_location_cel
         jobject obj, jint type, jint mcc, jint mnc, jint lac, jint cid)
 {
     AGpsRefLocation location;
-    const AGpsRilInterface* interface = GetAGpsRilInterface();
+    const AGpsRilInterface* interface = GetAGpsRilInterface(env, obj);
     if (!interface) {
         LOGE("no AGPS RIL interface in agps_set_reference_location_cellid");
         return;
@@ -429,7 +429,7 @@ static void android_location_GpsLocationProvider_agps_send_ni_message(JNIEnv* en
         jobject obj, jbyteArray ni_msg, jint size)
 {
     size_t sz;
-    const AGpsRilInterface* interface = GetAGpsRilInterface();
+    const AGpsRilInterface* interface = GetAGpsRilInterface(env, obj);
     if (!interface) {
         LOGE("no AGPS RIL interface in send_ni_message");
         return;
@@ -445,7 +445,7 @@ static void android_location_GpsLocationProvider_agps_send_ni_message(JNIEnv* en
 static void android_location_GpsLocationProvider_agps_set_id(JNIEnv *env,
         jobject obj, jint type, jstring  setid_string)
 {
-    const AGpsRilInterface* interface = GetAGpsRilInterface();
+    const AGpsRilInterface* interface = GetAGpsRilInterface(env, obj);
     if (!interface) {
         LOGE("no AGPS RIL interface in agps_set_id");
         return;
@@ -472,7 +472,7 @@ static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject 
 static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobject obj,
         jlong time, jlong timeReference, jint uncertainty)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (interface)
         interface->inject_time(time, timeReference, uncertainty);
 }
@@ -480,7 +480,7 @@ static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobjec
 static void android_location_GpsLocationProvider_inject_location(JNIEnv* env, jobject obj,
         jdouble latitude, jdouble longitude, jfloat accuracy)
 {
-    const GpsInterface* interface = GetGpsInterface();
+    const GpsInterface* interface = GetGpsInterface(env, obj);
     if (interface)
         interface->inject_location(latitude, longitude, accuracy);
 }
@@ -488,7 +488,7 @@ static void android_location_GpsLocationProvider_inject_location(JNIEnv* env, jo
 static jboolean android_location_GpsLocationProvider_supports_xtra(JNIEnv* env, jobject obj)
 {
     if (!sGpsXtraInterface) {
-        const GpsInterface* interface = GetGpsInterface();
+        const GpsInterface* interface = GetGpsInterface(env, obj);
         if (!interface)
             return false;
         sGpsXtraInterface = (const GpsXtraInterface*)interface->get_extension(GPS_XTRA_INTERFACE);
@@ -513,7 +513,7 @@ static void android_location_GpsLocationProvider_inject_xtra_data(JNIEnv* env, j
 
 static void android_location_GpsLocationProvider_agps_data_conn_open(JNIEnv* env, jobject obj, jstring apn)
 {
-    const AGpsInterface* interface = GetAGpsInterface();
+    const AGpsInterface* interface = GetAGpsInterface(env, obj);
     if (!interface) {
         LOGE("no AGPS interface in agps_data_conn_open");
         return;
@@ -529,7 +529,7 @@ static void android_location_GpsLocationProvider_agps_data_conn_open(JNIEnv* env
 
 static void android_location_GpsLocationProvider_agps_data_conn_closed(JNIEnv* env, jobject obj)
 {
-    const AGpsInterface* interface = GetAGpsInterface();
+    const AGpsInterface* interface = GetAGpsInterface(env, obj);
     if (!interface) {
         LOGE("no AGPS interface in agps_data_conn_open");
         return;
@@ -539,7 +539,7 @@ static void android_location_GpsLocationProvider_agps_data_conn_closed(JNIEnv* e
 
 static void android_location_GpsLocationProvider_agps_data_conn_failed(JNIEnv* env, jobject obj)
 {
-    const AGpsInterface* interface = GetAGpsInterface();
+    const AGpsInterface* interface = GetAGpsInterface(env, obj);
     if (!interface) {
         LOGE("no AGPS interface in agps_data_conn_open");
         return;
@@ -550,7 +550,7 @@ static void android_location_GpsLocationProvider_agps_data_conn_failed(JNIEnv* e
 static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jobject obj,
         jint type, jstring hostname, jint port)
 {
-    const AGpsInterface* interface = GetAGpsInterface();
+    const AGpsInterface* interface = GetAGpsInterface(env, obj);
     if (!interface) {
         LOGE("no AGPS interface in agps_data_conn_open");
         return;
@@ -563,7 +563,7 @@ static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jo
 static void android_location_GpsLocationProvider_send_ni_response(JNIEnv* env, jobject obj,
       jint notifId, jint response)
 {
-    const GpsNiInterface* interface = GetNiInterface();
+    const GpsNiInterface* interface = GetNiInterface(env, obj);
     if (!interface) {
         LOGE("no NI interface in send_ni_response");
         return;
