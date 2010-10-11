@@ -20,8 +20,9 @@
 
 #include <arpa/inet.h>
 
-#include <ctype.h>
 #include <pthread.h>
+#include <sys/prctl.h>
+#include <sys/resource.h>
 
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MediaBuffer.h>
@@ -1104,6 +1105,7 @@ status_t MPEG4Writer::writeOneChunk() {
 void MPEG4Writer::threadFunc() {
     LOGV("threadFunc");
 
+    prctl(PR_SET_NAME, (unsigned long)"MPEG4Writer", 0, 0, 0);
     while (!mDone) {
         {
             Mutex::Autolock autolock(mLock);
@@ -1632,6 +1634,11 @@ status_t MPEG4Writer::Track::threadEntry() {
     int64_t previousPausedDurationUs = 0;
     int64_t timestampUs;
 
+    if (mIsAudio) {
+        prctl(PR_SET_NAME, (unsigned long)"AudioTrackEncoding", 0, 0, 0);
+    } else {
+        prctl(PR_SET_NAME, (unsigned long)"VideoTrackEncoding", 0, 0, 0);
+    }
     sp<MetaData> meta_data;
 
     mNumSamples = 0;
