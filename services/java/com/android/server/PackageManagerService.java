@@ -3931,17 +3931,22 @@ class PackageManagerService extends IPackageManager.Stub {
                     allowed = false;
                 } else if (bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE
                         || bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
-                    allowed = (checkSignaturesLP(bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
+                    allowed = (checkSignaturesLP(
+                            bp.packageSetting.signatures.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH)
                             || (checkSignaturesLP(mPlatformPackage.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH);
-                    if (bp.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
+                    if (!allowed && bp.protectionLevel
+                            == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
                         if (isSystemApp(pkg)) {
                             // For updated system applications, the signatureOrSystem permission
                             // is granted only if it had been defined by the original application.
                             if (isUpdatedSystemApp(pkg)) {
-                                PackageSetting sysPs = mSettings.getDisabledSystemPkg(pkg.packageName);
-                                if(sysPs.grantedPermissions.contains(perm)) {
+                                PackageSetting sysPs = mSettings.getDisabledSystemPkg(
+                                        pkg.packageName);
+                                final GrantedPermissions origGp = sysPs.sharedUser != null
+                                        ? sysPs.sharedUser : sysPs;
+                                if (origGp.grantedPermissions.contains(perm)) {
                                     allowed = true;
                                 } else {
                                     allowed = false;
