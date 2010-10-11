@@ -46,7 +46,7 @@ public class ValueAnimator<T> extends Animator {
     /*
      * The default amount of time in ms between animation frames
      */
-    private static final long DEFAULT_FRAME_DELAY = 30;
+    private static final long DEFAULT_FRAME_DELAY = 10;
 
     /**
      * Messages sent to timing handler: START is sent when an animation first begins, FRAME is sent
@@ -469,7 +469,8 @@ public class ValueAnimator<T> extends Animator {
                     // If there are still active or delayed animations, call the handler again
                     // after the frameDelay
                     if (callAgain && (!sAnimations.isEmpty() || !sDelayedAnims.isEmpty())) {
-                        sendEmptyMessageDelayed(ANIMATION_FRAME, sFrameDelay);
+                        sendEmptyMessageDelayed(ANIMATION_FRAME,  Math.max(0, sFrameDelay -
+-                            (AnimationUtils.currentAnimationTimeMillis() - currentTime)));
                     }
                     break;
             }
