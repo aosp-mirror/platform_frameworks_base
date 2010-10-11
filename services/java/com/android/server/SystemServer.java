@@ -35,7 +35,12 @@ import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.AudioService;
-import android.os.*;
+import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.StrictMode;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.Contacts.People;
 import android.provider.Settings;
 import android.server.BluetoothA2dpService;
@@ -581,6 +586,16 @@ public class SystemServer
     native public static void init1(String[] args);
 
     public static void main(String[] args) {
+        if (System.currentTimeMillis() < 0) {
+            // If a device's clock is before 1970 (before 0), a lot of
+            // APIs crash dealing with negative numbers, notably
+            // java.io.File#setLastModified, so instead we fake it and
+            // hope that time from cell towers or NTP fixes it
+            // shortly.
+            Slog.w(TAG, "System clock is before 1970; setting to 1970.");
+            SystemClock.setCurrentTimeMillis(1);  // 0 isn't allowed
+        }
+
         if (SamplingProfilerIntegration.isEnabled()) {
             SamplingProfilerIntegration.start();
             timer = new Timer();
