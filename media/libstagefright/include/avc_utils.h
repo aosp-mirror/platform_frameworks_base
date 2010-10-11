@@ -29,6 +29,16 @@ void FindAVCDimensions(
 
 unsigned parseUE(ABitReader *br);
 
+status_t getNextNALUnit(
+        const uint8_t **_data, size_t *_size,
+        const uint8_t **nalStart, size_t *nalSize,
+        bool startCodeFollows = false);
+
+struct MetaData;
+sp<MetaData> MakeAVCCodecSpecificData(const sp<ABuffer> &accessUnit);
+
+bool IsIDR(const sp<ABuffer> &accessUnit);
+
 }  // namespace android
 
 #endif  // AVC_UTILS_H_

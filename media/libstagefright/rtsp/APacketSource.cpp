@@ -490,6 +490,8 @@ APacketSource::APacketSource(
     : mInitCheck(NO_INIT),
       mFormat(new MetaData),
       mEOSResult(OK),
+      mIsAVC(false),
+      mScanForIDR(true),
       mRTPTimeBase(0),
       mNormalPlayTimeBaseUs(0),
       mLastNormalPlayTimeUs(0) {
@@ -509,6 +511,8 @@ APacketSource::APacketSource(
 
     mInitCheck = OK;
     if (!strncmp(desc.c_str(), "H264/", 5)) {
+        mIsAVC = true;
+
         mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
 
         int32_t width, height;
@@ -719,6 +723,20 @@ void APacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
         return;
     }
 
+    if (mScanForIDR && mIsAVC) {
+        // This pretty piece of code ensures that the first access unit
+        // fed to the decoder after stream-start or seek is guaranteed to
+        // be an IDR frame. This is to workaround limitations of a certain
+        // hardware h.264 decoder that requires this to be the case.
+
+        if (!IsIDR(buffer)) {
+            LOGV("skipping AU while scanning for next IDR frame.");
+            return;
+        }
+
+        mScanForIDR = false;
+    }
+
     Mutex::Autolock autoLock(mLock);
     mBuffers.push_back(buffer);
     mCondition.signal();
@@ -735,6 +753,8 @@ void APacketSource::signalEOS(status_t result) {
 void APacketSource::flushQueue() {
     Mutex::Autolock autoLock(mLock);
     mBuffers.clear();
+
+    mScanForIDR = true;
 }
 
 int64_t APacketSource::getNormalPlayTimeUs() {
