@@ -59,10 +59,9 @@ public class MtpDatabase {
     private static final String[] ID_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
     };
-    private static final String[] PATH_FORMAT_PROJECTION = new String[] {
+    private static final String[] PATH_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
-            Files.FileColumns.FORMAT, // 2
     };
     private static final String[] PATH_SIZE_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
@@ -479,13 +478,11 @@ public class MtpDatabase {
 
         // first compute current path
         String path = null;
-        int format = 0;
         String[] whereArgs = new String[] {  Integer.toString(handle) };
         try {
-            c = mMediaProvider.query(mObjectsUri, PATH_FORMAT_PROJECTION, ID_WHERE, whereArgs, null);
+            c = mMediaProvider.query(mObjectsUri, PATH_PROJECTION, ID_WHERE, whereArgs, null);
             if (c != null && c.moveToNext()) {
                 path = c.getString(1);
-                format = c.getInt(2);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in getObjectFilePath", e);
@@ -497,10 +494,6 @@ public class MtpDatabase {
         }
         if (path == null) {
             return MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE;
-        }
-        if (format == MtpConstants.FORMAT_ASSOCIATION) {
-            // Only files can be renamed
-            return MtpConstants.RESPONSE_ACCESS_DENIED;
         }
 
         // now rename the file.  make sure this succeeds before updating database
@@ -522,11 +515,13 @@ public class MtpDatabase {
         values.put(Files.FileColumns.DATA, newPath);
         int updated = 0;
         try {
+            // note - we are relying on a special case in MediaProvider.update() to update
+            // the paths for all children in the case where this is a directory.
             updated = mMediaProvider.update(mObjectsUri, values, ID_WHERE, whereArgs);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in mMediaProvider.update", e);
         }
-        if (updated != 1) {
+        if (updated == 0) {
             Log.e(TAG, "Unable to update path for " + path + " to " + newPath);
             // this shouldn't happen, but if it does we need to rename the file to its original name
             newFile.renameTo(oldFile);

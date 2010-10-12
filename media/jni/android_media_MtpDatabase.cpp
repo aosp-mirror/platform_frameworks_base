@@ -817,9 +817,8 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
             result = new MtpProperty(property, MTP_TYPE_STR);
             break;
         case MTP_PROPERTY_OBJECT_FILE_NAME:
-            // We allow renaming files but not folders
-            result = new MtpProperty(property, MTP_TYPE_STR,
-                    format != MTP_FORMAT_ASSOCIATION);
+            // We allow renaming files and folders
+            result = new MtpProperty(property, MTP_TYPE_STR, true);
             break;
     }
 
