@@ -71,13 +71,13 @@ void ObjectBase::setContext(Context *rsc)
 void ObjectBase::incUserRef() const
 {
     mUserRefCount ++;
-    //LOGV("ObjectBase %p inc ref %i", this, mRefCount);
+    //LOGV("ObjectBase %p inc ref %i", this, mUserRefCount);
 }
 
 void ObjectBase::incSysRef() const
 {
     mSysRefCount ++;
-    //LOGV("ObjectBase %p inc ref %i", this, mRefCount);
+    //LOGV("ObjectBase %p inc ref %i", this, mSysRefCount);
 }
 
 bool ObjectBase::checkDelete() const
@@ -96,14 +96,14 @@ bool ObjectBase::decUserRef() const
 {
     rsAssert(mUserRefCount > 0);
     mUserRefCount --;
-    //dumpObj("decUserRef");
+    //dumpLOGV("decUserRef");
     return checkDelete();
 }
 
 bool ObjectBase::zeroUserRef() const
 {
     mUserRefCount = 0;
-    //dumpObj("zeroUserRef");
+    //dumpLOGV("zeroUserRef");
     return checkDelete();
 }
 
@@ -111,7 +111,7 @@ bool ObjectBase::decSysRef() const
 {
     rsAssert(mSysRefCount > 0);
     mSysRefCount --;
-    //dumpObj("decSysRef");
+    //dumpLOGV("decSysRef");
     return checkDelete();
 }
 
