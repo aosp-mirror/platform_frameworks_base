@@ -5468,9 +5468,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setAlpha(float alpha) {
         mAlpha = alpha;
         if (onSetAlpha((int) (alpha * 255))) {
+            mPrivateFlags |= ALPHA_SET;
             // subclass is handling alpha - don't optimize rendering cache invalidation
             invalidate();
         } else {
+            mPrivateFlags &= ~ALPHA_SET;
             invalidate(false);
         }
     }
