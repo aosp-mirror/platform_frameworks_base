@@ -136,7 +136,7 @@ const char* gFS_Fast_SingleModulateTexture =
         "}\n\n";
 const char* gFS_Fast_SingleA8Texture =
         "\nvoid main(void) {\n"
-        "    gl_FragColor = vec4(0.0, 0.0, 0.0, texture2D(sampler, outTexCoords).a);\n"
+        "    gl_FragColor = texture2D(sampler, outTexCoords);\n"
         "}\n\n";
 const char* gFS_Fast_SingleModulateA8Texture =
         "\nvoid main(void) {\n"
@@ -162,7 +162,7 @@ const char* gFS_Main_FetchTexture[2] = {
 };
 const char* gFS_Main_FetchA8Texture[2] = {
         // Don't modulate
-        "    fragColor = vec4(0.0, 0.0, 0.0, texture2D(sampler, outTexCoords).a);\n",
+        "    fragColor = texture2D(sampler, outTexCoords);\n",
         // Modulate
         "    fragColor = color * texture2D(sampler, outTexCoords).a;\n"
 };

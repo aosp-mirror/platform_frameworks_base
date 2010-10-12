@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -99,7 +98,8 @@ public class NinePatchDrawable extends Drawable {
         mPadding = state.mPadding;
         mTargetDensity = res != null ? res.getDisplayMetrics().densityDpi
                 : state.mTargetDensity;
-        if (DEFAULT_DITHER != state.mDither) {
+        //noinspection PointlessBooleanExpression
+        if (state.mDither != DEFAULT_DITHER) {
             // avoid calling the setter unless we need to, since it does a
             // lazy allocation of a paint
             setDither(state.mDither);
