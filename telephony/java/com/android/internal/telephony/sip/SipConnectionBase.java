@@ -56,8 +56,8 @@ abstract class SipConnectionBase extends Connection {
     private DisconnectCause mCause = DisconnectCause.NOT_DISCONNECTED;
     private PostDialState postDialState = PostDialState.NOT_STARTED;
 
-    SipConnectionBase(String calleeSipUri) {
-        dialString = calleeSipUri;
+    SipConnectionBase(String dialString) {
+        this.dialString = dialString;
 
         postDialString = PhoneNumberUtils.extractPostDialPortion(dialString);
 
