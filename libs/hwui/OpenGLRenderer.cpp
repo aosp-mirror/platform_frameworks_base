@@ -985,6 +985,7 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      ProgramDescription description;
      description.hasTexture = true;
      description.hasAlpha8Texture = true;
+     const bool setColor = description.setAlpha8Color(r, g, b, a);
 
      if (applyFilters) {
          if (mShader) {
@@ -1021,7 +1022,9 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
          mModelView.loadIdentity();
      }
      mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-     glUniform4f(mCaches.currentProgram->color, r, g, b, a);
+     if (setColor) {
+         mCaches.currentProgram->setColor(r, g, b, a);
+     }
 
      textureUnit++;
      if (applyFilters) {
@@ -1126,6 +1129,8 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
 
     // Describe the required shaders
     ProgramDescription description;
+    const bool setColor = description.setColor(r, g, b, a);
+
     if (mShader) {
         mShader->describe(description, mExtensions);
     }
@@ -1152,7 +1157,7 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
         mat4 identity;
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
     }
-    glUniform4f(mCaches.currentProgram->color, r, g, b, a);
+    mCaches.currentProgram->setColor(r, g, b, a);
 
     // Setup attributes and uniforms required by the shaders
     if (mShader) {
@@ -1189,6 +1194,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
 
     ProgramDescription description;
     description.hasTexture = true;
+    const bool setColor = description.setColor(alpha, alpha, alpha, alpha);
     if (mColorFilter) {
         mColorFilter->describe(description, mExtensions);
     }
@@ -1211,7 +1217,9 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     glUniform1i(mCaches.currentProgram->getUniform("sampler"), 0);
 
     // Always premultiplied
-    glUniform4f(mCaches.currentProgram->color, alpha, alpha, alpha, alpha);
+    if (setColor) {
+        mCaches.currentProgram->setColor(alpha, alpha, alpha, alpha);
+    }
 
     // Mesh
     int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");

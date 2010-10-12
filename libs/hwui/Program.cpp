@@ -58,7 +58,6 @@ Program::Program(const char* vertex, const char* fragment) {
     mUse = false;
 
     position = addAttrib("position");
-    color = addUniform("color");
     transform = addUniform("transform");
 }
 
@@ -122,6 +121,10 @@ void Program::set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
     t.multiply(modelViewMatrix);
 
     glUniformMatrix4fv(transform, 1, GL_FALSE, &t.data[0]);
+}
+
+void Program::setColor(const float r, const float g, const float b, const float a) {
+    glUniform4f(getUniform("color"), r, g, b, a);
 }
 
 void Program::use() {
