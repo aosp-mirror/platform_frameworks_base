@@ -91,6 +91,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -6820,16 +6821,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
-        if (action == MotionEvent.ACTION_DOWN) {
-            if (hasInsertionController()) {
-                getInsertionController().onTouchEvent(event);
-            }
-            if (hasSelectionController()) {
-                getSelectionController().onTouchEvent(event);
-            }
 
-            // Reset this state; it will be re-set if super.onTouchEvent
-            // causes focus to move to the view.
+        if (mInsertionPointCursorController != null) {
+            mInsertionPointCursorController.onTouchEvent(event);
+        }
+        if (mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.onTouchEvent(event);
+        }
+
+        if (action == MotionEvent.ACTION_DOWN) {
+        // Reset this state; it will be re-set if super.onTouchEvent
+        // causes focus to move to the view.
             mTouchFocusSelected = false;
             mScrolled = false;
         }
@@ -6847,13 +6849,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if ((mMovement != null || onCheckIsTextEditor()) && mText instanceof Spannable && mLayout != null) {
-            if (hasInsertionController()) {
-                getInsertionController().onTouchEvent(event);
-            }
-            if (hasSelectionController()) {
-                getSelectionController().onTouchEvent(event);
-            }
-
             boolean handled = false;
 
             // Save previous selection, in case this event is used to show the IME.
@@ -7782,7 +7777,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 mDrawable = mSelectHandleLeft;
                 handleWidth = mDrawable.getIntrinsicWidth();
-                mHotspotX = handleWidth / 4 * 3;
+                mHotspotX = (handleWidth * 3) / 4;
                 break;
             }
 
@@ -7949,6 +7944,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mIsDragging = true;
                 break;
             }
+
             case MotionEvent.ACTION_MOVE: {
                 final float rawX = ev.getRawX();
                 final float rawY = ev.getRawY();
@@ -7959,6 +7955,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 break;
             }
+
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mIsDragging = false;
@@ -8073,6 +8070,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mMinTouchOffset, mMaxTouchOffset;
         // Whether selection anchors are active
         private boolean mIsShowing;
+        // Double tap detection
+        private long mPreviousTapUpTime = 0;
+        private int mPreviousTapPositionX;
+        private int mPreviousTapPositionY;
 
         SelectionModifierCursorController() {
             mStartHandle = new HandleView(this, HandleView.LEFT);
@@ -8167,6 +8168,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         // Remember finger down position, to be able to start selection from there
                         mMinTouchOffset = mMaxTouchOffset = getOffset(x, y);
 
+                        // Double tap detection
+                        long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
+                        if (duration <= ViewConfiguration.getDoubleTapTimeout()) {
+                            final int deltaX = x - mPreviousTapPositionX;
+                            final int deltaY = y - mPreviousTapPositionY;
+                            final int distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                            final int doubleTapSlop = ViewConfiguration.get(getContext()).getScaledDoubleTapSlop();
+                            final int slopSquared = doubleTapSlop * doubleTapSlop;
+                            if (distanceSquared < slopSquared) {
+                                startTextSelectionMode();
+                                // Hacky: onTapUpEvent will open a context menu with cut/copy
+                                // Prevent this by hiding handles which will be revived instead.
+                                hide();
+                            }
+                        }
+                        mPreviousTapPositionX = x;
+                        mPreviousTapPositionY = y;
+
                         break;
 
                     case MotionEvent.ACTION_POINTER_DOWN:
@@ -8177,6 +8196,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT)) {
                             updateMinAndMaxOffsets(event);
                         }
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        mPreviousTapUpTime = SystemClock.uptimeMillis();
                         break;
                 }
             }
