@@ -26,6 +26,7 @@
 
 #include <cutils/properties.h>
 
+#include <EGL/eglext.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 #include <GLES2/gl2.h>
@@ -58,7 +59,18 @@ void Context::initEGL(bool useGL2)
     mEGL.mNumConfigs = -1;
     EGLint configAttribs[128];
     EGLint *configAttribsPtr = configAttribs;
-    EGLint context_attribs2[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+    EGLint context_attribs2[] = { EGL_CONTEXT_CLIENT_VERSION, 2,
+            EGL_NONE, GL_NONE, EGL_NONE };
+
+#ifdef HAS_CONTEXT_PRIORITY
+#ifdef EGL_IMG_context_priority
+#warning "using EGL_IMG_context_priority"
+    if (mThreadPriority > 0) {
+        context_attribs2[2] = EGL_CONTEXT_PRIORITY_LEVEL_IMG;
+        context_attribs2[3] = EGL_CONTEXT_PRIORITY_LOW_IMG;
+    }
+#endif
+#endif
 
     memset(configAttribs, 0, sizeof(configAttribs));
 
