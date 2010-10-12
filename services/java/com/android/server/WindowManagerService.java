@@ -557,19 +557,20 @@ public class WindowManagerService extends IWindowManager.Stub
 
         /* call out to each visible window/session informing it about the drag
          */
-        void broadcastDragStartedLw() {
+        void broadcastDragStartedLw(final float touchX, final float touchY) {
             // Cache a base-class instance of the clip metadata so that parceling
             // works correctly in calling out to the apps.
             mDataDescription = new ClipDescription(mData);
             mNotifiedWindows.clear();
             mDragInProgress = true;
 
+            DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED, touchX, touchY,
+                    mDataDescription, null);
+
             if (DEBUG_DRAG) {
-                Slog.d(TAG, "broadcasting DRAG_STARTED of " + mDataDescription);
+                Slog.d(TAG, "broadcasting DRAG_STARTED: " + evt);
             }
 
-            DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED, 0, 0,
-                    mDataDescription, null);
             final int N = mWindows.size();
             for (int i = 0; i < N; i++) {
                 // sendDragStartedLw() clones evt for local-process dispatch
@@ -6217,7 +6218,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         mDragState.mServerChannel);
 
                 mDragState.mData = data;
-                mDragState.broadcastDragStartedLw();
+                mDragState.broadcastDragStartedLw(touchX, touchY);
 
                 // remember the thumb offsets for later
                 mDragState.mThumbOffsetX = thumbCenterX;
