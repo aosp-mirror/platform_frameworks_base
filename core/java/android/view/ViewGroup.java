@@ -2188,7 +2188,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         
         float alpha = child.getAlpha();
         // Bail out early if the view does not need to be drawn
-        if (alpha <= ViewConfiguration.ALPHA_THRESHOLD) return more;
+        if (alpha <= ViewConfiguration.ALPHA_THRESHOLD && (child.mPrivateFlags & ALPHA_SET) == 0) {
+            return more;
+        }
 
         child.computeScroll();
 
