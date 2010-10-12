@@ -995,7 +995,8 @@
 
     <style name="Widget.ButtonGroup">
         <item name="divider">?android:attr/dividerVertical</item>
-        <item name="buttonBackground">?android:attr/listChoiceBackgroundIndicator</item>
+        <item name="buttonBackground">?android:attr/groupButtonBackground</item>
+        <item name="showDividers">middle</item>
     </style>
 
     <!-- Begin Holo theme styles -->

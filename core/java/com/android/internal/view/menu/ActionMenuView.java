@@ -94,6 +94,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         a.recycle();
         
         mDividerPadding = DIVIDER_PADDING * res.getDisplayMetrics().density;
+
+        setBaselineAligned(false);
     }
 
     @Override
