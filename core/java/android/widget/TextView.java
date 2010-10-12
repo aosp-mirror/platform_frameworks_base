@@ -21,6 +21,7 @@ import com.android.internal.widget.EditableInputConnection;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.R;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -7695,6 +7696,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return false;
             }
 
+            TypedArray styledAttributes = mContext.obtainStyledAttributes(R.styleable.Theme);
+
             mode.setTitle(mContext.getString(com.android.internal.R.string.textSelectionCABTitle));
             mode.setSubtitle(null);
 
@@ -7711,24 +7714,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (canCut()) {
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
-                    setIcon(com.android.internal.R.drawable.ic_menu_cut).
+                    setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModeCutDrawable, 0)).
                     setAlphabeticShortcut('x');
                 atLeastOne = true;
             }
 
             if (canCopy()) {
                 menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
-                    setIcon(com.android.internal.R.drawable.ic_menu_copy).
+                    setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModeCopyDrawable, 0)).
                     setAlphabeticShortcut('c');
                 atLeastOne = true;
             }
 
             if (canPaste()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
-                        setIcon(com.android.internal.R.drawable.ic_menu_paste).
+                        setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModePasteDrawable, 0)).
                         setAlphabeticShortcut('v');
                 atLeastOne = true;
             }
+
+            styledAttributes.recycle();
 
             if (atLeastOne) {
                 mSelectionModifierCursorController.show();

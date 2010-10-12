@@ -508,6 +508,13 @@
         <!-- Drawable to use for the close action mode button -->
         <attr name="actionModeCloseDrawable" format="reference" />
 
+        <!-- Drawable to use for the Cut action button in Contextual Action Bar -->
+        <attr name="actionModeCutDrawable" format="reference" />
+        <!-- Drawable to use for the Copy action button in Contextual Action Bar -->
+        <attr name="actionModeCopyDrawable" format="reference" />
+        <!-- Drawable to use for the Paste action button in Contextual Action Bar -->
+        <attr name="actionModePasteDrawable" format="reference" />
+        
         <!-- =================== -->
         <!-- Preference styles   -->
         <!-- =================== -->

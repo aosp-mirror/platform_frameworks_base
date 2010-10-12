@@ -16,7 +16,7 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/copy"
-        android:icon="@drawable/ic_menu_copy"
+        android:icon="?android:attr/actionModeCopyDrawable"
         android:showAsAction="always"
         />
     <item android:id="@+id/share"

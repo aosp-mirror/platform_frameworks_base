@@ -1424,4 +1424,8 @@
 
   <public type="string" name="selectTextMode" />
 
+  <public type="attr" name="actionModeCutDrawable" />
+  <public type="attr" name="actionModeCopyDrawable" />
+  <public type="attr" name="actionModePasteDrawable" />
+
 </resources>

@@ -238,6 +238,9 @@
         <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
         <item name="actionModeBackground">@android:drawable/action_bar_context_background</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
+        <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_dark</item>
+        <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_dark</item>
+        <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_dark</item>
         <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.ActionBarView_TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.ActionBarView_TabText</item>
@@ -313,6 +316,9 @@
         <item name="progressBarStyleInverse">@android:style/Widget.ProgressBar</item>
         <item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small</item>
         <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large</item>
+        <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_light</item>
+        <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_light</item>
+        <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_light</item>
     </style>
     
     <!-- Variant of the light theme with no title bar -->
