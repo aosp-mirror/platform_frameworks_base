@@ -43,6 +43,9 @@ namespace uirenderer {
 #define RAD_TO_DEG (180.0f / 3.14159265f)
 #define MIN_ANGLE 0.001f
 
+// TODO: This should be set in properties
+#define ALPHA_THRESHOLD (0x7f / PANEL_BIT_DEPTH)
+
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
@@ -294,7 +297,9 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         mode = SkXfermode::kSrcOver_Mode;
     }
 
-    createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags, previousFbo);
+    if (!mSnapshot->previous->invisible) {
+        createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags, previousFbo);
+    }
 
     return count;
 }
@@ -380,6 +385,14 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     if (bounds.isEmpty() || bounds.getWidth() > mMaxTextureSize ||
             bounds.getHeight() > mMaxTextureSize) {
+        snapshot->invisible = true;
+    } else {
+        // TODO: Should take the mode into account
+        snapshot->invisible = snapshot->previous->invisible || alpha <= ALPHA_THRESHOLD;
+    }
+
+    // Bail out if we won't draw in this snapshot
+    if (snapshot->invisible) {
         return false;
     }
 
@@ -536,7 +549,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 }
 
 void OpenGLRenderer::clearLayerRegions() {
-    if (mLayers.size() == 0) return;
+    if (mLayers.size() == 0 || mSnapshot->invisible) return;
 
     for (uint32_t i = 0; i < mLayers.size(); i++) {
         Rect* bounds = mLayers.itemAt(i);
@@ -598,6 +611,10 @@ const Rect& OpenGLRenderer::getClipBounds() {
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
+    if (mSnapshot->invisible) {
+        return true;
+    }
+
     Rect r(left, top, right, bottom);
     mSnapshot->transform->mapRect(r);
     return !mSnapshot->clipRect->intersects(r);
@@ -703,6 +720,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
 }
 
 void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
+    if (mSnapshot->invisible) return;
+
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
@@ -802,6 +821,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     if (text == NULL || count == 0 || (paint->getAlpha() == 0 && paint->getXfermode() == NULL)) {
         return;
     }
+    if (mSnapshot->invisible) return;
 
     paint->setAntiAlias(true);
 
@@ -866,6 +886,8 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
+    if (mSnapshot->invisible) return;
+
     GLuint textureUnit = 0;
     glActiveTexture(gTextureUnits[textureUnit]);
 

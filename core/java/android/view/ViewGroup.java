@@ -69,7 +69,7 @@ import java.util.ArrayList;
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
 
     private static final boolean DBG = false;
-
+    
     /**
      * Views which have been hidden or removed which need to be animated on
      * their way out.
@@ -2185,6 +2185,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
             return more;
         }
+        
+        float alpha = child.getAlpha();
+        // Bail out early if the view does not need to be drawn
+        if (alpha <= ViewConfiguration.ALPHA_THRESHOLD) return more;
 
         child.computeScroll();
 
@@ -2216,8 +2220,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 canvas.scale(scale, scale);
             }
         }
-
-        float alpha = child.getAlpha();
 
         if (transformToApply != null || alpha < 1.0f || !child.hasIdentityMatrix()) {
             int transX = 0;
@@ -2253,7 +2255,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if (alpha < 1.0f) {
                 mGroupFlags |= FLAG_CLEAR_TRANSFORMATION;
-            
+
                 if (hasNoCache) {
                     final int multipliedAlpha = (int) (255 * alpha);
                     if (!child.onSetAlpha(multipliedAlpha)) {
