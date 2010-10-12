@@ -1692,6 +1692,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     public final static int CHECK_FOCUS = 1013;
     public final static int CLOSE_SYSTEM_DIALOGS = 1014;
     public final static int DISPATCH_DRAG_EVENT = 1015;
+    public final static int DISPATCH_DRAG_LOCATION_EVENT = 1016;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1867,7 +1868,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 mView.onCloseSystemDialogs((String)msg.obj);
             }
         } break;
-        case DISPATCH_DRAG_EVENT: {
+        case DISPATCH_DRAG_EVENT:
+        case DISPATCH_DRAG_LOCATION_EVENT: {
             handleDragEvent((DragEvent)msg.obj);
         } break;
         }
@@ -2841,7 +2843,14 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     }
 
     public void dispatchDragEvent(DragEvent event) {
-        Message msg = obtainMessage(DISPATCH_DRAG_EVENT, event);
+        final int what;
+        if (event.getAction() == DragEvent.ACTION_DRAG_LOCATION) {
+            what = DISPATCH_DRAG_LOCATION_EVENT;
+            removeMessages(what);
+        } else {
+            what = DISPATCH_DRAG_EVENT;
+        }
+        Message msg = obtainMessage(what, event);
         sendMessage(msg);
     }
 
