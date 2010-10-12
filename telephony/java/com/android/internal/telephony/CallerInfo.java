@@ -383,8 +383,8 @@ public class CallerInfo {
      */
     public String toString() {
         return new StringBuilder(384)
-                .append("\nname: " + name)
-                .append("\nphoneNumber: " + phoneNumber)
+                .append("\nname: " + /*name*/ "nnnnnn")
+                .append("\nphoneNumber: " + /*phoneNumber*/ "xxxxxxx")
                 .append("\ncnapName: " + cnapName)
                 .append("\nnumberPresentation: " + numberPresentation)
                 .append("\nnamePresentation: " + namePresentation)
@@ -395,8 +395,8 @@ public class CallerInfo {
                 .append("\nphotoResource: " + photoResource)
                 .append("\nperson_id: " + person_id)
                 .append("\nneedUpdate: " + needUpdate)
-                .append("\ncontactRefUri: " + contactRefUri)
-                .append("\ncontactRingtoneUri: " + contactRefUri)
+                .append("\ncontactRefUri: " + /*contactRefUri*/ "xxxxxxx")
+                .append("\ncontactRingtoneUri: " + /*contactRefUri*/ "xxxxxxx")
                 .append("\nshouldSendToVoicemail: " + shouldSendToVoicemail)
                 .append("\ncachedPhoto: " + cachedPhoto)
                 .append("\nisCachedPhotoCurrent: " + isCachedPhotoCurrent)
