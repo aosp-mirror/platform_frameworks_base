@@ -387,7 +387,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         return pointer != null ? pointer.yVelocity : 0;
     }
     
-    private final Pointer getPointer(int id) {
+    private Pointer getPointer(int id) {
         for (Pointer pointer = mPointerListHead; pointer != null; pointer = pointer.next) {
             if (pointer.id == id) {
                 return pointer;
@@ -396,7 +396,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         return null;
     }
     
-    private static final Pointer obtainPointer() {
+    private static Pointer obtainPointer() {
         synchronized (sPool) {
             if (sRecycledPointerCount != 0) {
                 Pointer element = sRecycledPointerListHead;
@@ -409,7 +409,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         return new Pointer();
     }
     
-    private static final void releasePointer(Pointer pointer) {
+    private static void releasePointer(Pointer pointer) {
         synchronized (sPool) {
             if (sRecycledPointerCount < POINTER_POOL_CAPACITY) {
                 pointer.next = sRecycledPointerListHead;
@@ -419,7 +419,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
         }
     }
     
-    private static final void releasePointerList(Pointer pointer) {
+    private static void releasePointerList(Pointer pointer) {
         if (pointer != null) {
             synchronized (sPool) {
                 int count = sRecycledPointerCount;
