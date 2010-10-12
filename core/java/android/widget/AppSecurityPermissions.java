@@ -17,14 +17,14 @@
 package android.widget;
 
 import com.android.internal.R;
+
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -329,11 +329,6 @@ public class AppSecurityPermissions  implements View.OnClickListener {
 
         TextView permGrpView = (TextView) permView.findViewById(R.id.permission_group);
         TextView permDescView = (TextView) permView.findViewById(R.id.permission_list);
-        if (dangerous) {
-            final Resources resources = context.getResources();
-            permGrpView.setTextColor(resources.getColor(R.color.perms_dangerous_grp_color));
-            permDescView.setTextColor(resources.getColor(R.color.perms_dangerous_perm_color));
-        }
 
         ImageView imgView = (ImageView)permView.findViewById(R.id.perm_icon);
         imgView.setImageDrawable(icon);
