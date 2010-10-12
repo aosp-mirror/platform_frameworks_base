@@ -18,7 +18,6 @@ package com.android.internal.telephony.sip;
 
 import android.content.Context;
 import android.net.rtp.AudioGroup;
-import android.net.rtp.AudioStream;
 import android.net.sip.SipAudioCall;
 import android.net.sip.SipErrorCode;
 import android.net.sip.SipException;
@@ -29,11 +28,9 @@ import android.os.AsyncResult;
 import android.os.Message;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.Call;
-import com.android.internal.telephony.CallerInfo;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.Phone;
@@ -385,40 +382,6 @@ public class SipPhone extends SipPhoneBase {
             }
         }
 
-        private CallerInfo createCallerInfo(String number, SipProfile callee) {
-            SipProfile p = callee;
-            String name = p.getDisplayName();
-            if (TextUtils.isEmpty(name)) name = p.getUserName();
-            CallerInfo info = new CallerInfo();
-            info.name = name;
-            info.phoneNumber = number;
-            if (DEBUG) {
-                Log.d(LOG_TAG, "create caller info from scratch:");
-                Log.d(LOG_TAG, "     name: " + info.name);
-                Log.d(LOG_TAG, "     numb: " + info.phoneNumber);
-            }
-            return info;
-        }
-
-        // from contacts
-        private CallerInfo findCallerInfo(String number) {
-            CallerInfo info = CallerInfo.getCallerInfo(mContext, number);
-            if ((info == null) || (info.name == null)) return null;
-            if (DEBUG) {
-                Log.d(LOG_TAG, "got caller info from contact:");
-                Log.d(LOG_TAG, "     name: " + info.name);
-                Log.d(LOG_TAG, "     numb: " + info.phoneNumber);
-                Log.d(LOG_TAG, "     pres: " + info.numberPresentation);
-            }
-            return info;
-        }
-
-        private CallerInfo getCallerInfo(String number, SipProfile callee) {
-            CallerInfo info = findCallerInfo(number);
-            if (info == null) info = createCallerInfo(number, callee);
-            return info;
-        }
-
         Connection dial(String originalNumber) throws SipException {
             String calleeSipUri = originalNumber;
             if (!calleeSipUri.contains("@")) {
@@ -427,8 +390,7 @@ public class SipPhone extends SipPhoneBase {
             try {
                 SipProfile callee =
                         new SipProfile.Builder(calleeSipUri).build();
-                CallerInfo info = getCallerInfo(originalNumber, callee);
-                SipConnection c = new SipConnection(this, callee, info);
+                SipConnection c = new SipConnection(this, callee);
                 connections.add(c);
                 c.dial();
                 setState(Call.State.DIALING);
@@ -464,10 +426,7 @@ public class SipPhone extends SipPhoneBase {
 
         void initIncomingCall(SipAudioCall sipAudioCall, boolean makeCallWait) {
             SipProfile callee = sipAudioCall.getPeerProfile();
-            CallerInfo info = findCallerInfo(getUriString(callee));
-            if (info == null) info = findCallerInfo(callee.getUserName());
-            if (info == null) info = findCallerInfo(callee.getDisplayName());
-            SipConnection c = new SipConnection(this, callee, info);
+            SipConnection c = new SipConnection(this, callee);
             connections.add(c);
 
             Call.State newState = makeCallWait ? State.WAITING : State.INCOMING;
@@ -703,12 +662,10 @@ public class SipPhone extends SipPhoneBase {
             }
         };
 
-        public SipConnection(SipCall owner, SipProfile callee,
-                CallerInfo info) {
+        public SipConnection(SipCall owner, SipProfile callee) {
             super(getUriString(callee));
             mOwner = owner;
             mPeer = callee;
-            setUserData(info);
         }
 
         void initIncomingCall(SipAudioCall sipAudioCall, Call.State newState) {
