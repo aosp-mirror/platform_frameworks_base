@@ -3320,7 +3320,7 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
         }
     }
 
-    for (size_t i = 0; i < mMotionMementos.size(); i++) {
+    for (size_t i = 0; i < mMotionMementos.size(); ) {
         const MotionMemento& memento = mMotionMementos.itemAt(i);
         if (shouldCancelEvent(memento.source, options)) {
             outEvents.push(allocator->obtainMotionEntry(currentTime,
