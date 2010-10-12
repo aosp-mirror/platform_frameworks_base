@@ -104,6 +104,10 @@ public final class StrictMode {
     // Only show an annoying dialog at most every 30 seconds
     private static final long MIN_DIALOG_INTERVAL_MS = 30000;
 
+    // How many offending stacks to keep track of (and time) per loop
+    // of the Looper.
+    private static final int MAX_OFFENSES_PER_LOOP = 10;
+
     // Thread-policy:
 
     /**
@@ -680,6 +684,17 @@ public final class StrictMode {
         }
     }
 
+    private static final ThreadLocal<ArrayList<ViolationInfo>> violationsBeingTimed =
+            new ThreadLocal<ArrayList<ViolationInfo>>() {
+        @Override protected ArrayList<ViolationInfo> initialValue() {
+            return new ArrayList<ViolationInfo>();
+        }
+    };
+
+    private static boolean tooManyViolationsThisLoop() {
+        return violationsBeingTimed.get().size() >= MAX_OFFENSES_PER_LOOP;
+    }
+
     private static class AndroidBlockGuardPolicy implements BlockGuard.Policy {
         private int mPolicyMask;
 
@@ -707,6 +722,9 @@ public final class StrictMode {
             if ((mPolicyMask & DETECT_DISK_WRITE) == 0) {
                 return;
             }
+            if (tooManyViolationsThisLoop()) {
+                return;
+            }
             BlockGuard.BlockGuardPolicyException e = new StrictModeDiskWriteViolation(mPolicyMask);
             e.fillInStackTrace();
             startHandlingViolationException(e);
@@ -717,6 +735,9 @@ public final class StrictMode {
             if ((mPolicyMask & DETECT_DISK_READ) == 0) {
                 return;
             }
+            if (tooManyViolationsThisLoop()) {
+                return;
+            }
             BlockGuard.BlockGuardPolicyException e = new StrictModeDiskReadViolation(mPolicyMask);
             e.fillInStackTrace();
             startHandlingViolationException(e);
@@ -725,6 +746,9 @@ public final class StrictMode {
         // Part of BlockGuard.Policy interface:
         public void onNetwork() {
             if ((mPolicyMask & DETECT_NETWORK) == 0) {
+                return;
+            }
+            if (tooManyViolationsThisLoop()) {
                 return;
             }
             BlockGuard.BlockGuardPolicyException e = new StrictModeNetworkViolation(mPolicyMask);
@@ -746,13 +770,6 @@ public final class StrictMode {
             info.violationUptimeMillis = SystemClock.uptimeMillis();
             handleViolationWithTimingAttempt(info);
         }
-
-        private static final ThreadLocal<ArrayList<ViolationInfo>> violationsBeingTimed =
-                new ThreadLocal<ArrayList<ViolationInfo>>() {
-            @Override protected ArrayList<ViolationInfo> initialValue() {
-                return new ArrayList<ViolationInfo>();
-            }
-        };
 
         // Attempts to fill in the provided ViolationInfo's
         // durationMillis field if this thread has a Looper we can use
@@ -780,7 +797,7 @@ public final class StrictMode {
 
             MessageQueue queue = Looper.myQueue();
             final ArrayList<ViolationInfo> records = violationsBeingTimed.get();
-            if (records.size() >= 10) {
+            if (records.size() >= MAX_OFFENSES_PER_LOOP) {
                 // Not worth measuring.  Too many offenses in one loop.
                 return;
             }
