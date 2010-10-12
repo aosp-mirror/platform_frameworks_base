@@ -3947,6 +3947,16 @@ public class WebView extends AbsoluteLayout
             // requestFormData, and it needs to have the correct nodePointer.
             mWebTextView.setNodePointer(nodePointer);
             mWebTextView.setType(nativeFocusCandidateType());
+            Rect paddingRect = nativeFocusCandidatePaddingRect();
+            if (paddingRect != null) {
+                // Use contentToViewDimension since these are the dimensions of
+                // the padding.
+                mWebTextView.setPadding(
+                        contentToViewDimension(paddingRect.left),
+                        contentToViewDimension(paddingRect.top),
+                        contentToViewDimension(paddingRect.right),
+                        contentToViewDimension(paddingRect.bottom));
+            }
             if (null == text) {
                 if (DebugFlags.WEB_VIEW) {
                     Log.v(LOGTAG, "rebuildWebTextView null == text");
@@ -7841,6 +7851,13 @@ public class WebView extends AbsoluteLayout
     /* package */ native int      nativeFocusCandidateMaxLength();
     /* package */ native String   nativeFocusCandidateName();
     private native Rect     nativeFocusCandidateNodeBounds();
+    /**
+     * @return A Rect with left, top, right, bottom set to the corresponding
+     * padding values in the focus candidate, if it is a textfield/textarea with
+     * a style.  Otherwise return null.  This is not actually a rectangle; Rect
+     * is being used to pass four integers.
+     */
+    private native Rect     nativeFocusCandidatePaddingRect();
     /* package */ native int      nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
     private native int      nativeFocusCandidateTextSize();
