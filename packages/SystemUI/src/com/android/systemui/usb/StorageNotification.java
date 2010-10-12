@@ -16,33 +16,17 @@
 
 package com.android.systemui.usb;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.storage.IMountService;
-import android.os.Message;
-import android.os.ServiceManager;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
-import android.os.storage.StorageResultCode;
 import android.provider.Settings;
 import android.util.Slog;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class StorageNotification extends StorageEventListener {
     private static final String TAG = "StorageNotification";
@@ -165,10 +149,16 @@ public class StorageNotification extends StorageEventListener {
                      * Show safe to unmount media notification, and enable UMS
                      * notification if connected.
                      */
-                    setMediaStorageNotification(
-                            com.android.internal.R.string.ext_media_safe_unmount_notification_title,
-                            com.android.internal.R.string.ext_media_safe_unmount_notification_message,
-                            com.android.internal.R.drawable.stat_notify_sdcard, true, true, null);
+                    if (Environment.isExternalStorageRemovable()) {
+                        setMediaStorageNotification(
+                                com.android.internal.R.string.ext_media_safe_unmount_notification_title,
+                                com.android.internal.R.string.ext_media_safe_unmount_notification_message,
+                                com.android.internal.R.drawable.stat_notify_sdcard, true, true, null);
+                    } else {
+                        // This device does not have removable storage, so
+                        // don't tell the user they can remove it.
+                        setMediaStorageNotification(0, 0, 0, false, false, null);
+                    }
                     updateUsbMassStorageNotification(mUmsAvailable);
                 }
             } else {
