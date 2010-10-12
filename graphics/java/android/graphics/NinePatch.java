@@ -86,7 +86,7 @@ public class NinePatch {
                        mPaint != null ? mPaint.mNativePaint : 0,
                        canvas.mDensity, mBitmap.mDensity);
         } else {
-            canvas.drawPatch(mBitmap, mChunk, location, null);
+            canvas.drawPatch(mBitmap, mChunk, location, mPaint);
         }
     }
     
@@ -104,7 +104,7 @@ public class NinePatch {
                         canvas.mDensity, mBitmap.mDensity);
         } else {
             mRect.set(location);
-            canvas.drawPatch(mBitmap, mChunk, mRect, null);
+            canvas.drawPatch(mBitmap, mChunk, mRect, mPaint);
         }
     }
 

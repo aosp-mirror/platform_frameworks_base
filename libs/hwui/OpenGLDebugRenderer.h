@@ -46,8 +46,8 @@ public:
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint);
     void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-            uint32_t width, uint32_t height, float left, float top, float right, float bottom,
-            const SkPaint* paint);
+            const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+            float left, float top, float right, float bottom, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);

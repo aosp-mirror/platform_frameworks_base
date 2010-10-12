@@ -18,29 +18,36 @@
 #define ANDROID_UI_PATCH_H
 
 #include <sys/types.h>
-#include <cstring>
 
 #include "Vertex.h"
+#include "utils/Compare.h"
 
 namespace android {
 namespace uirenderer {
+
+///////////////////////////////////////////////////////////////////////////////
+// 9-patch structures
+///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Description of a patch.
  */
 struct PatchDescription {
-    PatchDescription(): bitmapWidth(0), bitmapHeight(0),
-            pixelWidth(0), pixelHeight(0), xCount(0), yCount(0) { }
+    PatchDescription(): bitmapWidth(0), bitmapHeight(0), pixelWidth(0), pixelHeight(0),
+            xCount(0), yCount(0), emptyCount(0), colorKey(0) { }
     PatchDescription(const float bitmapWidth, const float bitmapHeight,
             const float pixelWidth, const float pixelHeight,
-            const uint32_t xCount, const uint32_t yCount):
+            const uint32_t xCount, const uint32_t yCount,
+            const int8_t emptyCount, const uint32_t colorKey):
             bitmapWidth(bitmapWidth), bitmapHeight(bitmapHeight),
             pixelWidth(pixelWidth), pixelHeight(pixelHeight),
-            xCount(xCount), yCount(yCount) { }
+            xCount(xCount), yCount(yCount),
+            emptyCount(emptyCount), colorKey(colorKey) { }
     PatchDescription(const PatchDescription& description):
             bitmapWidth(description.bitmapWidth), bitmapHeight(description.bitmapHeight),
             pixelWidth(description.pixelWidth), pixelHeight(description.pixelHeight),
-            xCount(description.xCount), yCount(description.yCount) { }
+            xCount(description.xCount), yCount(description.yCount),
+            emptyCount(description.emptyCount), colorKey(description.colorKey) { }
 
     float bitmapWidth;
     float bitmapHeight;
@@ -48,9 +55,26 @@ struct PatchDescription {
     float pixelHeight;
     uint32_t xCount;
     uint32_t yCount;
+    int8_t emptyCount;
+    uint32_t colorKey;
 
     bool operator<(const PatchDescription& rhs) const {
-        return memcmp(this, &rhs, sizeof(PatchDescription)) < 0;
+        compare(bitmapWidth) {
+            compare(bitmapHeight) {
+                compare(pixelWidth) {
+                    compare(pixelHeight) {
+                        compareI(xCount) {
+                            compareI(yCount) {
+                                compareI(emptyCount) {
+                                    compareI(colorKey) return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }; // struct PatchDescription
 
@@ -59,13 +83,14 @@ struct PatchDescription {
  * indices to render the vertices.
  */
 struct Patch {
-    Patch(const uint32_t xCount, const uint32_t yCount);
+    Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQuads = 0);
     ~Patch();
 
     void updateVertices(const float bitmapWidth, const float bitmapHeight,
             float left, float top, float right, float bottom,
             const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t width, const uint32_t height);
+            const uint32_t width, const uint32_t height,
+            const uint32_t colorKey = 0);
 
     TextureVertex* vertices;
     uint32_t verticesCount;
@@ -73,10 +98,12 @@ struct Patch {
 private:
     static inline void generateRow(TextureVertex*& vertex, float y1, float y2,
             float v1, float v2, const int32_t xDivs[], uint32_t xCount,
-            float stretchX, float width, float bitmapWidth);
+            float stretchX, float width, float bitmapWidth,
+            uint32_t& quadCount, const uint32_t colorKey);
     static inline void generateQuad(TextureVertex*& vertex,
             float x1, float y1, float x2, float y2,
-            float u1, float v1, float u2, float v2);
+            float u1, float v1, float u2, float v2,
+            uint32_t& quadCount, const uint32_t colorKey);
 }; // struct Patch
 
 }; // namespace uirenderer

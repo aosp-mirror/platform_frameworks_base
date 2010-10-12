@@ -236,16 +236,19 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
             case DrawPatch: {
                 int32_t* xDivs = NULL;
                 int32_t* yDivs = NULL;
+                uint32_t* colors = NULL;
                 uint32_t xDivsCount = 0;
                 uint32_t yDivsCount = 0;
+                int8_t numColors = 0;
 
                 SkBitmap* bitmap = getBitmap();
 
                 xDivs = getInts(xDivsCount);
                 yDivs = getInts(yDivsCount);
+                colors = getUInts(numColors);
 
-                renderer.drawPatch(bitmap, xDivs, yDivs, xDivsCount, yDivsCount,
-                        getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
+                renderer.drawPatch(bitmap, xDivs, yDivs, colors, xDivsCount, yDivsCount,
+                        numColors, getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
             }
             break;
             case DrawColor: {
@@ -450,12 +453,13 @@ void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcT
 }
 
 void DisplayListRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-        uint32_t width, uint32_t height, float left, float top, float right, float bottom,
-        const SkPaint* paint) {
+        const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
     addOp(DisplayList::DrawPatch);
     addBitmap(bitmap);
     addInts(xDivs, width);
     addInts(yDivs, height);
+    addUInts(colors, numColors);
     addBounds(left, top, right, bottom);
     addPaint(paint);
 }

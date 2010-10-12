@@ -24,6 +24,7 @@
 
 #include <SkMatrix.h>
 
+#include "utils/Compare.h"
 #include "Matrix.h"
 
 namespace android {
@@ -52,9 +53,6 @@ void Matrix4::loadIdentity() {
 
     mSimpleMatrix = true;
 }
-
-#define EPSILON 0.00001f
-#define almost(u, v) (fabs((u) - (v)) < EPSILON)
 
 bool Matrix4::changesBounds() {
     return !(almost(data[0], 1.0f) && almost(data[1], 0.0f) && almost(data[2], 0.0f) &&

@@ -22,6 +22,7 @@
 #include <SkPath.h>
 
 #include "Texture.h"
+#include "utils/Compare.h"
 #include "utils/GenerationCache.h"
 
 namespace android {
@@ -63,7 +64,18 @@ struct PathCacheEntry {
     float strokeWidth;
 
     bool operator<(const PathCacheEntry& rhs) const {
-        return memcmp(this, &rhs, sizeof(PathCacheEntry)) < 0;
+        compareI(path) {
+            compareI(join) {
+                compareI(cap) {
+                    compareI(style) {
+                        compare(miter) {
+                            compare(strokeWidth) return false;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }; // struct PathCacheEntry
 

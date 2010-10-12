@@ -169,6 +169,11 @@ private:
         return (int32_t*) mReader.skip(count * sizeof(int32_t));
     }
 
+    uint32_t* getUInts(int8_t& count) {
+        count = getInt();
+        return (uint32_t*) mReader.skip(count * sizeof(uint32_t));
+    }
+
     float* getFloats(int& count) {
         count = getInt();
         return (float*) mReader.skip(count * sizeof(float));
@@ -236,8 +241,8 @@ public:
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint);
     void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-            uint32_t width, uint32_t height, float left, float top, float right, float bottom,
-            const SkPaint* paint);
+            const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+            float left, float top, float right, float bottom, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
@@ -287,6 +292,13 @@ private:
     void addInts(const int32_t* values, uint32_t count) {
         mWriter.writeInt(count);
         for (uint32_t i = 0; i < count; i++) {
+            mWriter.writeInt(values[i]);
+        }
+    }
+
+    void addUInts(const uint32_t* values, int8_t count) {
+        mWriter.writeInt(count);
+        for (int8_t i = 0; i < count; i++) {
             mWriter.writeInt(values[i]);
         }
     }

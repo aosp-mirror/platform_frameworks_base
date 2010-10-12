@@ -29,7 +29,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_PATCHES 0
+#define DEBUG_PATCHES 1
 
 // Debug
 #if DEBUG_PATCHES
@@ -50,8 +50,8 @@ public:
 
     Patch* get(const float bitmapWidth, const float bitmapHeight,
             const float pixelWidth, const float pixelHeight,
-            const int32_t* xDivs, const int32_t* yDivs,
-            const uint32_t width, const uint32_t height);
+            const int32_t* xDivs, const int32_t* yDivs, const uint32_t* colors,
+            const uint32_t width, const uint32_t height, const int8_t numColors);
     void clear();
 
 private:

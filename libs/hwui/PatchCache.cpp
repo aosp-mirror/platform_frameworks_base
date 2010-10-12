@@ -17,7 +17,6 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #include <utils/Log.h>
-#include <utils/ResourceTypes.h>
 
 #include "PatchCache.h"
 #include "Properties.h"
@@ -45,7 +44,7 @@ PatchCache::~PatchCache() {
 
 void PatchCache::clear() {
     size_t count = mCache.size();
-    for (int i = 0; i < count; i++) {
+    for (size_t i = 0; i < count; i++) {
         delete mCache.valueAt(i);
     }
     mCache.clear();
@@ -53,11 +52,23 @@ void PatchCache::clear() {
 
 Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
         const float pixelWidth, const float pixelHeight,
-        const int32_t* xDivs, const int32_t* yDivs,
-        const uint32_t width, const uint32_t height) {
+        const int32_t* xDivs, const int32_t* yDivs, const uint32_t* colors,
+        const uint32_t width, const uint32_t height, const int8_t numColors) {
+
+    int8_t transparentQuads = 0;
+    uint32_t colorKey = 0;
+
+    if (uint8_t(numColors) < sizeof(uint32_t) * 4) {
+        for (int8_t i = 0; i < numColors; i++) {
+            if (colors[i] == 0x0) {
+                transparentQuads++;
+                colorKey |= 0x1 << i;
+            }
+        }
+    }
 
     const PatchDescription description(bitmapWidth, bitmapHeight,
-            pixelWidth, pixelHeight, width, height);
+            pixelWidth, pixelHeight, width, height, transparentQuads, colorKey);
 
     ssize_t index = mCache.indexOfKey(description);
     Patch* mesh = NULL;
@@ -66,11 +77,13 @@ Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
     }
 
     if (!mesh) {
-        PATCH_LOGD("Creating new patch mesh, w=%d h=%d", width, height);
+        PATCH_LOGD("New patch mesh "
+                "xCount=%d yCount=%d, w=%.2f h=%.2f, bw=%.2f bh=%.2f",
+                width, height, pixelWidth, pixelHeight, bitmapWidth, bitmapHeight);
 
-        mesh = new Patch(width, height);
+        mesh = new Patch(width, height, transparentQuads);
         mesh->updateVertices(bitmapWidth, bitmapHeight, 0.0f, 0.0f,
-                pixelWidth, pixelHeight, xDivs, yDivs, width, height);
+                pixelWidth, pixelHeight, xDivs, yDivs, width, height, colorKey);
 
         if (mCache.size() >= mMaxEntries) {
             delete mCache.valueAt(mCache.size() - 1);
