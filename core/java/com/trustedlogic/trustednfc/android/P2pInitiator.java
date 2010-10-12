@@ -23,15 +23,14 @@ package com.trustedlogic.trustednfc.android;
 
 import java.io.IOException;
 
-import com.trustedlogic.trustednfc.android.internal.ErrorCodes;
-
+import android.nfc.IP2pInitiator;
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
  * P2pInitiator represents the initiator in an NFC-IP1 peer-to-peer
  * communication.
- * 
+ *
  * @see P2pTarget
  * @since AA02.01
  * @hide
@@ -44,24 +43,24 @@ public class P2pInitiator extends P2pDevice {
      * The entry point for P2P tag operations.
      * @hide
      */
-	private IP2pInitiator mService;
-	
+	private final IP2pInitiator mService;
+
     /**
      * Internal constructor for the P2pInitiator class.
-     * 
+     *
      * @param handle The handle returned by the NFC service and used to identify
      * 				 the tag in subsequent calls.
-     * 
+     *
      * @hide
      */
     P2pInitiator(IP2pInitiator service, int handle) {
         this.mService = service;
         this.mHandle = handle;
-    }	
+    }
 
     /**
      * Receives data from a P2pInitiator.
-     * 
+     *
      * @return data sent by the P2pInitiator.
      * @throws IOException if the target has been lost or if the connection has
      *             been closed.
@@ -81,7 +80,7 @@ public class P2pInitiator extends P2pDevice {
 
     /**
      * Sends data to a P2pInitiator.
-     * 
+     *
      * @param data data to be sent to the P2pInitiator.
      * @throws IOException if the target has been lost or if the connection has
      *             been closed.
