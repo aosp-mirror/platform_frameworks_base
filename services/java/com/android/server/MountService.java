@@ -1240,6 +1240,10 @@ class MountService extends IMountService.Stub
         return mLegacyState;
     }
 
+    public boolean isExternalStorageEmulated() {
+        return mEmulateExternalStorage;
+    }
+
     public int mountVolume(String path) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 

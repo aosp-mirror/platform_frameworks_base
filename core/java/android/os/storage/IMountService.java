@@ -565,6 +565,25 @@ public interface IMountService extends IInterface {
                 }
                 return _result;
             }
+
+            /**
+             * Returns whether the external storage is emulated.
+             */
+            public boolean isExternalStorageEmulated() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                boolean _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_isExternalStorageEmulated, _data, _reply, 0);
+                    _reply.readException();
+                    _result = 0 != _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -618,6 +637,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_isObbMounted = IBinder.FIRST_CALL_TRANSACTION + 23;
 
         static final int TRANSACTION_getMountedObbPath = IBinder.FIRST_CALL_TRANSACTION + 24;
+
+        static final int TRANSACTION_isExternalStorageEmulated = IBinder.FIRST_CALL_TRANSACTION + 25;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -889,6 +910,13 @@ public interface IMountService extends IInterface {
                     reply.writeString(mountedPath);
                     return true;
                 }
+                case TRANSACTION_isExternalStorageEmulated: {
+                    data.enforceInterface(DESCRIPTOR);
+                    boolean emulated = isExternalStorageEmulated();
+                    reply.writeNoException();
+                    reply.writeInt(emulated ? 1 : 0);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1043,4 +1071,9 @@ public interface IMountService extends IInterface {
      * Unregisters an IMountServiceListener
      */
     public void unregisterListener(IMountServiceListener listener) throws RemoteException;
+
+    /**
+     * Returns whether or not the external storage is emulated.
+     */
+    public boolean isExternalStorageEmulated() throws RemoteException;
 }

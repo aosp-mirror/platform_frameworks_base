@@ -47,6 +47,7 @@ enum {
     TRANSACTION_unmountObb,
     TRANSACTION_isObbMounted,
     TRANSACTION_getMountedObbPath,
+    TRANSACTION_isExternalStorageEmulated,
 };
 
 class BpMountService: public BpInterface<IMountService>
