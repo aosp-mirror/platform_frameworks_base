@@ -182,11 +182,6 @@ public:
 
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation);
-    virtual int32_t interceptKey(nsecs_t when, int32_t deviceId,
-            bool down, int32_t keyCode, int32_t scanCode, uint32_t& policyFlags);
-    virtual int32_t interceptSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
-            uint32_t& policyFlags);
-    virtual int32_t interceptGeneric(nsecs_t when, uint32_t& policyFlags);
     virtual bool filterTouchEvents();
     virtual bool filterJumpyTouchEvents();
     virtual void getVirtualKeyDefinitions(const String8& deviceName,
@@ -204,8 +199,14 @@ public:
     virtual nsecs_t getKeyRepeatTimeout();
     virtual nsecs_t getKeyRepeatDelay();
     virtual int32_t getMaxEventsPerSecond();
+    virtual void interceptKeyBeforeQueueing(nsecs_t when, int32_t deviceId,
+            int32_t action, int32_t& flags, int32_t keyCode, int32_t scanCode,
+            uint32_t& policyFlags);
+    virtual void interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags);
+    virtual void notifySwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
+            uint32_t policyFlags);
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
             int32_t injectorPid, int32_t injectorUid);
@@ -461,18 +462,25 @@ bool NativeInputManager::isScreenBright() {
     return android_server_PowerManagerService_isScreenBright();
 }
 
-int32_t NativeInputManager::interceptKey(nsecs_t when,
-        int32_t deviceId, bool down, int32_t keyCode, int32_t scanCode, uint32_t& policyFlags) {
-#if DEBUG_INPUT_READER_POLICY
-    LOGD("interceptKey - when=%lld, deviceId=%d, down=%d, keyCode=%d, scanCode=%d, "
-            "policyFlags=0x%x",
-            when, deviceId, down, keyCode, scanCode, policyFlags);
+void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
+        int32_t deviceId, int32_t action, int32_t &flags,
+        int32_t keyCode, int32_t scanCode, uint32_t& policyFlags) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("interceptKeyBeforeQueueing - when=%lld, deviceId=%d, action=%d, flags=%d, "
+            "keyCode=%d, scanCode=%d, policyFlags=0x%x",
+            when, deviceId, action, flags, keyCode, scanCode, policyFlags);
 #endif
 
-    if (down && (policyFlags & POLICY_FLAG_VIRTUAL)) {
-        JNIEnv* env = jniEnv();
-        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyDownFeedback);
-        checkAndClearExceptionFromCallback(env, "virtualKeyDownFeedback");
+    bool down = action == AKEY_EVENT_ACTION_DOWN;
+    if ((policyFlags & POLICY_FLAG_VIRTUAL) || (flags & AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY)) {
+        policyFlags |= POLICY_FLAG_VIRTUAL;
+        flags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
+
+        if (down) {
+            JNIEnv* env = jniEnv();
+            env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyDownFeedback);
+            checkAndClearExceptionFromCallback(env, "virtualKeyDownFeedback");
+        }
     }
 
     const int32_t WM_ACTION_PASS_TO_USER = 1;
@@ -496,10 +504,10 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
         wmActions = WM_ACTION_PASS_TO_USER;
     }
 
-    int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
     if (! isScreenOn) {
         // Key presses and releases wake the device.
         policyFlags |= POLICY_FLAG_WOKE_HERE;
+        flags |= AKEY_EVENT_FLAG_WOKE_HERE;
     }
 
     if (! isScreenBright) {
@@ -516,36 +524,31 @@ int32_t NativeInputManager::interceptKey(nsecs_t when,
     }
 
     if (wmActions & WM_ACTION_PASS_TO_USER) {
-        actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
+        policyFlags |= POLICY_FLAG_PASS_TO_USER;
     }
-
-    return actions;
 }
 
-int32_t NativeInputManager::interceptGeneric(nsecs_t when, uint32_t& policyFlags) {
-#if DEBUG_INPUT_READER_POLICY
-    LOGD("interceptGeneric - when=%lld, policyFlags=0x%x", when, policyFlags);
+void NativeInputManager::interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("interceptGenericBeforeQueueing - when=%lld, policyFlags=0x%x", when, policyFlags);
 #endif
 
-    int32_t actions = InputReaderPolicyInterface::ACTION_NONE;
     if (isScreenOn()) {
         // Only dispatch events when the device is awake.
         // Do not wake the device.
-        actions |= InputReaderPolicyInterface::ACTION_DISPATCH;
+        policyFlags |= POLICY_FLAG_PASS_TO_USER;
 
         if (! isScreenBright()) {
             // Brighten the screen if dimmed.
             policyFlags |= POLICY_FLAG_BRIGHT_HERE;
         }
     }
-
-    return actions;
 }
 
-int32_t NativeInputManager::interceptSwitch(nsecs_t when, int32_t switchCode,
-        int32_t switchValue, uint32_t& policyFlags) {
-#if DEBUG_INPUT_READER_POLICY
-    LOGD("interceptSwitch - when=%lld, switchCode=%d, switchValue=%d, policyFlags=0x%x",
+void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
+        int32_t switchValue, uint32_t policyFlags) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("notifySwitch - when=%lld, switchCode=%d, switchValue=%d, policyFlags=0x%x",
             when, switchCode, switchValue, policyFlags);
 #endif
 
@@ -558,8 +561,6 @@ int32_t NativeInputManager::interceptSwitch(nsecs_t when, int32_t switchCode,
         checkAndClearExceptionFromCallback(env, "notifyLidSwitchChanged");
         break;
     }
-
-    return InputReaderPolicyInterface::ACTION_NONE;
 }
 
 bool NativeInputManager::filterTouchEvents() {

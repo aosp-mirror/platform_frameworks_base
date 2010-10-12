@@ -49,6 +49,8 @@ import java.util.Properties;
 public class InputManager {
     static final String TAG = "InputManager";
     
+    private static final boolean DEBUG = false;
+
     private final Callbacks mCallbacks;
     private final Context mContext;
     private final WindowManagerService mWindowManagerService;
@@ -131,7 +133,9 @@ public class InputManager {
             throw new IllegalArgumentException("Invalid display id or dimensions.");
         }
         
-        Slog.i(TAG, "Setting display #" + displayId + " size to " + width + "x" + height);
+        if (DEBUG) {
+            Slog.d(TAG, "Setting display #" + displayId + " size to " + width + "x" + height);
+        }
         nativeSetDisplaySize(displayId, width, height);
     }
     
@@ -140,7 +144,9 @@ public class InputManager {
             throw new IllegalArgumentException("Invalid rotation.");
         }
         
-        Slog.i(TAG, "Setting display #" + displayId + " orientation to " + rotation);
+        if (DEBUG) {
+            Slog.d(TAG, "Setting display #" + displayId + " orientation to " + rotation);
+        }
         nativeSetDisplayOrientation(displayId, rotation);
     }
     
