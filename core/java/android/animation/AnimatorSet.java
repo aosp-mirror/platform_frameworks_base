@@ -328,7 +328,7 @@ public final class AnimatorSet extends Animator {
      * animations of this AnimatorSet.
      */
     @Override
-    public void setDuration(long duration) {
+    public AnimatorSet setDuration(long duration) {
         if (duration < 0) {
             throw new IllegalArgumentException("duration must be a value of zero or greater");
         }
@@ -338,6 +338,7 @@ public final class AnimatorSet extends Animator {
             node.animation.setDuration(duration);
         }
         mDuration = duration;
+        return this;
     }
 
     /**
@@ -384,7 +385,8 @@ public final class AnimatorSet extends Animator {
             }
         } else {
             // TODO: Need to cancel out of the delay appropriately
-            ValueAnimator delayAnim = new ValueAnimator(mStartDelay, 0f, 1f);
+            ValueAnimator delayAnim = ValueAnimator.ofFloat(0f, 1f);
+            delayAnim.setDuration(mStartDelay);
             delayAnim.addListener(new AnimatorListenerAdapter() {
                 public void onAnimationEnd(Animator anim) {
                     for (Node node : nodesToStart) {
@@ -929,7 +931,9 @@ public final class AnimatorSet extends Animator {
          */
         public void after(long delay) {
             // setup dummy ValueAnimator just to run the clock
-            after(new ValueAnimator(delay, 0f, 1f));
+            ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+            anim.setDuration(delay);
+            after(anim);
         }
 
     }

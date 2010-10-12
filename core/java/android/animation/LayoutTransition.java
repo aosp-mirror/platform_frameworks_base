@@ -189,23 +189,24 @@ public class LayoutTransition {
     public LayoutTransition() {
         if (defaultChangeIn == null) {
             // "left" is just a placeholder; we'll put real properties/values in when needed
-            PropertyValuesHolder<Integer> pvhLeft = new PropertyValuesHolder<Integer>("left", 0, 1);
-            PropertyValuesHolder<Integer> pvhTop = new PropertyValuesHolder<Integer>("top", 0, 1);
-            PropertyValuesHolder<Integer> pvhRight = new PropertyValuesHolder<Integer>("right", 0, 1);
-            PropertyValuesHolder<Integer> pvhBottom = new PropertyValuesHolder<Integer>("bottom", 0, 1);
-            defaultChangeIn = new ObjectAnimator<PropertyValuesHolder>(DEFAULT_DURATION, this,
+            PropertyValuesHolder pvhLeft = PropertyValuesHolder.ofInt("left", 0, 1);
+            PropertyValuesHolder pvhTop = PropertyValuesHolder.ofInt("top", 0, 1);
+            PropertyValuesHolder pvhRight = PropertyValuesHolder.ofInt("right", 0, 1);
+            PropertyValuesHolder pvhBottom = PropertyValuesHolder.ofInt("bottom", 0, 1);
+            defaultChangeIn = ObjectAnimator.ofPropertyValuesHolder(this,
                     pvhLeft, pvhTop, pvhRight, pvhBottom);
+            defaultChangeIn.setDuration(DEFAULT_DURATION);
             defaultChangeIn.setStartDelay(mChangingAppearingDelay);
             defaultChangeIn.setInterpolator(mChangingAppearingInterpolator);
             defaultChangeOut = defaultChangeIn.clone();
             defaultChangeOut.setStartDelay(mChangingDisappearingDelay);
             defaultChangeOut.setInterpolator(mChangingDisappearingInterpolator);
-            defaultFadeIn =
-                    new ObjectAnimator<Float>(DEFAULT_DURATION, this, "alpha", 0f, 1f);
+            defaultFadeIn = ObjectAnimator.ofFloat(this, "alpha", 0f, 1f);
+            defaultFadeIn.setDuration(DEFAULT_DURATION);
             defaultFadeIn.setStartDelay(mAppearingDelay);
             defaultFadeIn.setInterpolator(mAppearingInterpolator);
-            defaultFadeOut =
-                    new ObjectAnimator<Float>(DEFAULT_DURATION, this, "alpha", 1f, 0f);
+            defaultFadeOut = ObjectAnimator.ofFloat(this, "alpha", 1f, 0f);
+            defaultFadeOut.setDuration(DEFAULT_DURATION);
             defaultFadeOut.setStartDelay(mDisappearingDelay);
             defaultFadeOut.setInterpolator(mDisappearingInterpolator);
         }
