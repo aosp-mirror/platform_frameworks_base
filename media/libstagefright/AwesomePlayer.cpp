@@ -303,6 +303,28 @@ status_t AwesomePlayer::setDataSource_l(
 }
 
 status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
+    // Attempt to approximate overall stream bitrate by summing all
+    // tracks' individual bitrates, if not all of them advertise bitrate,
+    // we have to fail.
+
+    int64_t totalBitRate = 0;
+
+    for (size_t i = 0; i < extractor->countTracks(); ++i) {
+        sp<MetaData> meta = extractor->getTrackMetaData(i);
+
+        int32_t bitrate;
+        if (!meta->findInt32(kKeyBitRate, &bitrate)) {
+            totalBitRate = -1;
+            break;
+        }
+
+        totalBitRate += bitrate;
+    }
+
+    mBitrate = totalBitRate;
+
+    LOGV("mBitrate = %lld bits/sec", mBitrate);
+
     bool haveAudio = false;
     bool haveVideo = false;
     for (size_t i = 0; i < extractor->countTracks(); ++i) {
@@ -441,6 +463,8 @@ void AwesomePlayer::reset_l() {
 
     delete mSuspensionState;
     mSuspensionState = NULL;
+
+    mBitrate = -1;
 }
 
 void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
@@ -453,17 +477,32 @@ void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
     }
 }
 
+bool AwesomePlayer::getBitrate(int64_t *bitrate) {
+    off_t size;
+    if (mDurationUs >= 0 && mCachedSource != NULL
+            && mCachedSource->getSize(&size) == OK) {
+        *bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
+        return true;
+    }
+
+    if (mBitrate >= 0) {
+        *bitrate = mBitrate;
+        return true;
+    }
+
+    *bitrate = 0;
+
+    return false;
+}
+
 // Returns true iff cached duration is available/applicable.
 bool AwesomePlayer::getCachedDuration_l(int64_t *durationUs, bool *eos) {
-    off_t totalSize;
+    int64_t bitrate;
 
     if (mRTSPController != NULL) {
         *durationUs = mRTSPController->getQueueDurationUs(eos);
         return true;
-    } else if (mCachedSource != NULL && mDurationUs >= 0
-            && mCachedSource->getSize(&totalSize) == OK) {
-        int64_t bitrate = totalSize * 8000000ll / mDurationUs;  // in bits/sec
-
+    } else if (mCachedSource != NULL && getBitrate(&bitrate)) {
         size_t cachedDataRemaining = mCachedSource->approxDataRemaining(eos);
         *durationUs = cachedDataRemaining * 8000000ll / bitrate;
         return true;
@@ -490,10 +529,8 @@ void AwesomePlayer::onBufferingUpdate() {
                 finishAsyncPrepare_l();
             }
         } else {
-            off_t size;
-            if (mDurationUs >= 0 && mCachedSource->getSize(&size) == OK) {
-                int64_t bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
-
+            int64_t bitrate;
+            if (getBitrate(&bitrate)) {
                 size_t cachedSize = mCachedSource->cachedSize();
                 int64_t cachedDurationUs = cachedSize * 8000000ll / bitrate;
 
