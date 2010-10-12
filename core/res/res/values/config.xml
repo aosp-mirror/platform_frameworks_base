@@ -369,7 +369,7 @@
     <integer name="config_datause_notification_type">2</integer>
 
     <!-- Enables SIP on WIFI only -->
-    <bool name="config_sip_wifi_only">false</bool>
+    <bool name="config_sip_wifi_only">true</bool>
 
     <!-- Boolean indicating if restoring network selection should be skipped -->
     <!-- The restoring is handled by modem if it is true-->
