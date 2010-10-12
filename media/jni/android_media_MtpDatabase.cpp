@@ -804,7 +804,6 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
             result = new MtpProperty(property, MTP_TYPE_UINT128);
             break;
         case MTP_PROPERTY_NAME:
-        case MTP_PROPERTY_OBJECT_FILE_NAME:
         case MTP_PROPERTY_DATE_MODIFIED:
         case MTP_PROPERTY_DISPLAY_NAME:
         case MTP_PROPERTY_DATE_ADDED:
@@ -816,6 +815,11 @@ MtpProperty* MyMtpDatabase::getObjectPropertyDesc(MtpObjectProperty property,
         case MTP_PROPERTY_COMPOSER:
         case MTP_PROPERTY_DESCRIPTION:
             result = new MtpProperty(property, MTP_TYPE_STR);
+            break;
+        case MTP_PROPERTY_OBJECT_FILE_NAME:
+            // We allow renaming files but not folders
+            result = new MtpProperty(property, MTP_TYPE_STR,
+                    format != MTP_FORMAT_ASSOCIATION);
             break;
     }
 
