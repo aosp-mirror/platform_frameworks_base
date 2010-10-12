@@ -2668,6 +2668,18 @@ bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,
             return false;
         }
 
+        ssize_t fromConnectionIndex = getConnectionIndexLocked(fromChannel);
+        ssize_t toConnectionIndex = getConnectionIndexLocked(toChannel);
+        if (fromConnectionIndex >= 0 && toConnectionIndex >= 0) {
+            sp<Connection> fromConnection = mConnectionsByReceiveFd.valueAt(fromConnectionIndex);
+            sp<Connection> toConnection = mConnectionsByReceiveFd.valueAt(toConnectionIndex);
+
+            fromConnection->inputState.copyPointerStateTo(toConnection->inputState);
+            synthesizeCancelationEventsForConnectionLocked(fromConnection,
+                    InputState::CANCEL_POINTER_EVENTS,
+                    "transferring touch focus from this window to another window");
+        }
+
 #if DEBUG_FOCUS
         logDispatchStateLocked();
 #endif
@@ -3402,6 +3414,24 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
 void InputDispatcher::InputState::clear() {
     mKeyMementos.clear();
     mMotionMementos.clear();
+}
+
+void InputDispatcher::InputState::copyPointerStateTo(InputState& other) const {
+    for (size_t i = 0; i < mMotionMementos.size(); i++) {
+        const MotionMemento& memento = mMotionMementos.itemAt(i);
+        if (memento.source & AINPUT_SOURCE_CLASS_POINTER) {
+            for (size_t j = 0; j < other.mMotionMementos.size(); ) {
+                const MotionMemento& otherMemento = other.mMotionMementos.itemAt(j);
+                if (memento.deviceId == otherMemento.deviceId
+                        && memento.source == otherMemento.source) {
+                    other.mMotionMementos.removeAt(j);
+                } else {
+                    j += 1;
+                }
+            }
+            other.mMotionMementos.push(memento);
+        }
+    }
 }
 
 bool InputDispatcher::InputState::shouldCancelEvent(int32_t eventSource,

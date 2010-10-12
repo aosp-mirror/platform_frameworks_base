@@ -757,6 +757,9 @@ private:
         // Clears the current state.
         void clear();
 
+        // Copies pointer-related parts of the input state to another instance.
+        void copyPointerStateTo(InputState& other) const;
+
     private:
         struct KeyMemento {
             int32_t deviceId;
