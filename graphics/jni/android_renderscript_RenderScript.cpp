@@ -423,6 +423,23 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint dst
     return 0;
 }
 
+static void
+nAllocationUpdateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jobject jbitmap)
+{
+    SkBitmap const * nativeBitmap =
+            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+    const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap::Config config = bitmap.getConfig();
+
+    RsElement e = SkBitmapToPredefined(config);
+    if (e) {
+        bitmap.lockPixels();
+        const void* ptr = bitmap.getPixels();
+        rsAllocationUpdateFromBitmap(con, (RsAllocation)alloc, e, ptr);
+        bitmap.unlockPixels();
+    }
+}
+
 static void ReleaseBitmapCallback(void *bmp)
 {
     SkBitmap const * nativeBitmap = (SkBitmap const *)bmp;
@@ -777,6 +794,13 @@ nScriptSetVarI(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slo
 {
     LOG_API("nScriptSetVarI, con(%p), s(%p), slot(%i), val(%i)", con, (void *)script, slot, val);
     rsScriptSetVarI(con, (RsScript)script, slot, val);
+}
+
+static void
+nScriptSetVarJ(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slot, jlong val)
+{
+    LOG_API("nScriptSetVarJ, con(%p), s(%p), slot(%i), val(%lli)", con, (void *)script, slot, val);
+    rsScriptSetVarJ(con, (RsScript)script, slot, val);
 }
 
 static void
@@ -1227,6 +1251,7 @@ static JNINativeMethod methods[] = {
 {"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },
 
 {"rsnAllocationCreateTyped",         "(II)I",                                 (void*)nAllocationCreateTyped },
+{"rsnAllocationUpdateFromBitmap",    "(IILandroid/graphics/Bitmap;)V",        (void*)nAllocationUpdateFromBitmap },
 {"rsnAllocationCreateFromBitmap",    "(IIZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
 {"rsnAllocationCreateBitmapRef",     "(IILandroid/graphics/Bitmap;)I",        (void*)nAllocationCreateBitmapRef },
 {"rsnAllocationCreateFromAssetStream","(IIZI)I",                              (void*)nAllocationCreateFromAssetStream },
@@ -1266,6 +1291,7 @@ static JNINativeMethod methods[] = {
 {"rsnScriptInvoke",                  "(III)V",                                (void*)nScriptInvoke },
 {"rsnScriptInvokeV",                 "(III[B)V",                              (void*)nScriptInvokeV },
 {"rsnScriptSetVarI",                 "(IIII)V",                               (void*)nScriptSetVarI },
+{"rsnScriptSetVarJ",                 "(IIIJ)V",                               (void*)nScriptSetVarJ },
 {"rsnScriptSetVarF",                 "(IIIF)V",                               (void*)nScriptSetVarF },
 {"rsnScriptSetVarD",                 "(IIID)V",                               (void*)nScriptSetVarD },
 {"rsnScriptSetVarV",                 "(III[B)V",                              (void*)nScriptSetVarV },

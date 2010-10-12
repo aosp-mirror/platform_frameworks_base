@@ -65,7 +65,7 @@ size_t Element::getSizeBits() const
 
     size_t total = 0;
     for (size_t ct=0; ct < mFieldCount; ct++) {
-        total += mFields[ct].e->mBits * mFields[ct].arraySize;;
+        total += mFields[ct].e->mBits * mFields[ct].arraySize;
     }
     return total;
 }

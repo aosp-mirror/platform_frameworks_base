@@ -796,10 +796,6 @@ int32_t InputMapper::getMetaState() {
     return 0;
 }
 
-bool InputMapper::applyStandardPolicyActions(nsecs_t when, int32_t policyActions) {
-    return policyActions & InputReaderPolicyInterface::ACTION_DISPATCH;
-}
-
 
 // --- SwitchInputMapper ---
 
@@ -823,11 +819,7 @@ void SwitchInputMapper::process(const RawEvent* rawEvent) {
 }
 
 void SwitchInputMapper::processSwitch(nsecs_t when, int32_t switchCode, int32_t switchValue) {
-    uint32_t policyFlags = 0;
-    int32_t policyActions = getPolicy()->interceptSwitch(
-            when, switchCode, switchValue, policyFlags);
-
-    applyStandardPolicyActions(when, policyActions);
+    getDispatcher()->notifySwitch(when, switchCode, switchValue, 0);
 }
 
 int32_t SwitchInputMapper::getSwitchState(uint32_t sourceMask, int32_t switchCode) {
@@ -983,29 +975,9 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
         getContext()->updateGlobalMetaState();
     }
 
-    applyPolicyAndDispatch(when, policyFlags, down, keyCode, scanCode, newMetaState, downTime);
-}
-
-void KeyboardInputMapper::applyPolicyAndDispatch(nsecs_t when, uint32_t policyFlags, bool down,
-        int32_t keyCode, int32_t scanCode, int32_t metaState, nsecs_t downTime) {
-    int32_t policyActions = getPolicy()->interceptKey(when,
-            getDeviceId(), down, keyCode, scanCode, policyFlags);
-
-    if (! applyStandardPolicyActions(when, policyActions)) {
-        return; // event dropped
-    }
-
-    int32_t keyEventAction = down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP;
-    int32_t keyEventFlags = AKEY_EVENT_FLAG_FROM_SYSTEM;
-    if (policyFlags & POLICY_FLAG_WOKE_HERE) {
-        keyEventFlags |= AKEY_EVENT_FLAG_WOKE_HERE;
-    }
-    if (policyFlags & POLICY_FLAG_VIRTUAL) {
-        keyEventFlags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
-    }
-
     getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
-            keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
+            down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP,
+            AKEY_EVENT_FLAG_FROM_SYSTEM, keyCode, scanCode, newMetaState, downTime);
 }
 
 ssize_t KeyboardInputMapper::findKeyDownLocked(int32_t scanCode) {
@@ -1215,26 +1187,13 @@ void TrackballInputMapper::sync(nsecs_t when) {
         }
     } // release lock
 
-    applyPolicyAndDispatch(when, motionEventAction, & pointerCoords, downTime);
-
-    mAccumulator.clear();
-}
-
-void TrackballInputMapper::applyPolicyAndDispatch(nsecs_t when, int32_t motionEventAction,
-        PointerCoords* pointerCoords, nsecs_t downTime) {
-    uint32_t policyFlags = 0;
-    int32_t policyActions = getPolicy()->interceptGeneric(when, policyFlags);
-
-    if (! applyStandardPolicyActions(when, policyActions)) {
-        return; // event dropped
-    }
-
     int32_t metaState = mContext->getGlobalMetaState();
     int32_t pointerId = 0;
-
-    getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_TRACKBALL, policyFlags,
+    getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_TRACKBALL, 0,
             motionEventAction, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
-            1, & pointerId, pointerCoords, mXPrecision, mYPrecision, downTime);
+            1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
+
+    mAccumulator.clear();
 }
 
 int32_t TrackballInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCode) {
@@ -2012,15 +1971,7 @@ void TouchInputMapper::reset() {
 }
 
 void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
-    // Apply generic policy actions.
-
     uint32_t policyFlags = 0;
-    int32_t policyActions = getPolicy()->interceptGeneric(when, policyFlags);
-
-    if (! applyStandardPolicyActions(when, policyActions)) {
-        mLastTouch.clear();
-        return; // event dropped
-    }
 
     // Preprocess pointer data.
 
@@ -2160,24 +2111,11 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
     } // release lock
 
     // Dispatch virtual key.
-    applyPolicyAndDispatchVirtualKey(when, policyFlags, keyEventAction, keyEventFlags,
-            keyCode, scanCode, downTime);
-    return touchResult;
-}
-
-void TouchInputMapper::applyPolicyAndDispatchVirtualKey(nsecs_t when, uint32_t policyFlags,
-        int32_t keyEventAction, int32_t keyEventFlags,
-        int32_t keyCode, int32_t scanCode, nsecs_t downTime) {
     int32_t metaState = mContext->getGlobalMetaState();
-
     policyFlags |= POLICY_FLAG_VIRTUAL;
-    int32_t policyActions = getPolicy()->interceptKey(when, getDeviceId(),
-            keyEventAction == AKEY_EVENT_ACTION_DOWN, keyCode, scanCode, policyFlags);
-
-    if (applyStandardPolicyActions(when, policyActions)) {
-        getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
-                keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
-    }
+    getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
+            keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
+    return touchResult;
 }
 
 void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {

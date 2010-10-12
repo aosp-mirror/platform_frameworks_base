@@ -320,6 +320,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
     mOrientation = 0;
+    mPreviewWindowFlag = 0;
     mOrientationChanged = false;
     mPlayShutterSound = true;
     cameraService->setCameraBusy(cameraId);
@@ -508,6 +509,8 @@ status_t CameraService::Client::setPreviewDisplay(const sp<Surface>& surface) {
         if (mUseOverlay) {
             result = setOverlay();
         } else if (mPreviewWindow != 0) {
+            native_window_set_buffers_transform(mPreviewWindow.get(),
+                                                mPreviewWindowFlag);
             result = mHardware->setPreviewWindow(mPreviewWindow);
         }
     }
@@ -633,7 +636,10 @@ status_t CameraService::Client::startPreviewMode() {
         if (result != NO_ERROR) return result;
         result = mHardware->startPreview();
     } else {
-        // XXX: Set the orientation of the ANativeWindow.
+        if (mPreviewWindow != 0) {
+            native_window_set_buffers_transform(mPreviewWindow.get(),
+                                                mPreviewWindowFlag);
+        }
         mHardware->setPreviewWindow(mPreviewWindow);
         result = mHardware->startPreview();
     }
@@ -818,15 +824,19 @@ status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t a
         switch (arg1) {
             case 0:
                 orientation = ISurface::BufferHeap::ROT_0;
+                mPreviewWindowFlag = 0;
                 break;
             case 90:
                 orientation = ISurface::BufferHeap::ROT_90;
+                mPreviewWindowFlag = NATIVE_WINDOW_TRANSFORM_ROT_90;
                 break;
             case 180:
                 orientation = ISurface::BufferHeap::ROT_180;
+                mPreviewWindowFlag = NATIVE_WINDOW_TRANSFORM_ROT_180;
                 break;
             case 270:
                 orientation = ISurface::BufferHeap::ROT_270;
+                mPreviewWindowFlag = NATIVE_WINDOW_TRANSFORM_ROT_270;
                 break;
             default:
                 return BAD_VALUE;

@@ -1228,6 +1228,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void reportAGpsStatus(int type, int status) {
         switch (status) {
             case GPS_REQUEST_AGPS_DATA_CONN:
+                if (DEBUG) Log.d(TAG, "GPS_REQUEST_AGPS_DATA_CONN");
                 // Set mAGpsDataConnectionState before calling startUsingNetworkFeature
                 //  to avoid a race condition with handleUpdateNetworkState()
                 mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
@@ -1250,6 +1251,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 }
                 break;
             case GPS_RELEASE_AGPS_DATA_CONN:
+                if (DEBUG) Log.d(TAG, "GPS_RELEASE_AGPS_DATA_CONN");
                 if (mAGpsDataConnectionState != AGPS_DATA_CONNECTION_CLOSED) {
                     mConnMgr.stopUsingNetworkFeature(
                             ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
@@ -1258,13 +1260,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 }
                 break;
             case GPS_AGPS_DATA_CONNECTED:
-                // Log.d(TAG, "GPS_AGPS_DATA_CONNECTED");
+                if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONNECTED");
                 break;
             case GPS_AGPS_DATA_CONN_DONE:
-                // Log.d(TAG, "GPS_AGPS_DATA_CONN_DONE");
+                if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_DONE");
                 break;
             case GPS_AGPS_DATA_CONN_FAILED:
-                // Log.d(TAG, "GPS_AGPS_DATA_CONN_FAILED");
+                if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_FAILED");
                 break;
         }
     }

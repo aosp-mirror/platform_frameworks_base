@@ -43,7 +43,7 @@ namespace uirenderer {
  */
 class Snapshot: public LightRefBase<Snapshot> {
 public:
-    Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0) {
+    Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0), invisible(false) {
         transform = &mTransformRoot;
         clipRect = &mClipRectRoot;
     }
@@ -53,8 +53,8 @@ public:
      * the previous snapshot.
      */
     Snapshot(const sp<Snapshot>& s, int saveFlags):
-            flags(0), previous(s), layer(NULL),
-            fbo(s->fbo), viewport(s->viewport), height(s->height) {
+            flags(0), previous(s), layer(NULL), fbo(s->fbo),
+            invisible(s->invisible), viewport(s->viewport), height(s->height) {
         if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
             mTransformRoot.load(*s->transform);
             transform = &mTransformRoot;
@@ -210,6 +210,12 @@ public:
      * Only set when the flag kFlagIsFboLayer is set.
      */
     GLuint fbo;
+
+    /**
+     * Indicates that this snapshot is invisible and nothing should be drawn
+     * inside it.
+     */
+    bool invisible;
 
     /**
      * Current viewport.

@@ -90,6 +90,18 @@ public class Allocation extends BaseObj {
         subData1D(0, mType.getElementCount(), d);
     }
 
+    public void updateFromBitmap(Bitmap b)
+        throws IllegalArgumentException {
+
+        mRS.validate();
+        if(mType.getX() != b.getWidth() ||
+           mType.getY() != b.getHeight()) {
+            throw new IllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
+        }
+
+        mRS.nAllocationUpdateFromBitmap(mID, b);
+    }
+
     public void subData(int xoff, FieldPacker fp) {
         int eSize = mType.mElement.getSizeBytes();
         final byte[] data = fp.getData();

@@ -92,6 +92,7 @@ public final class SipService extends ISipService.Stub {
             new HashMap<String, ISipSession>();
 
     private ConnectivityReceiver mConnectivityReceiver;
+    private boolean mScreenOn;
 
     /**
      * Starts the SIP service. Do nothing if the SIP API is not supported on the
@@ -111,10 +112,26 @@ public final class SipService extends ISipService.Stub {
         mConnectivityReceiver = new ConnectivityReceiver();
         context.registerReceiver(mConnectivityReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        context.registerReceiver(mScreenOnOffReceiver,
+                new IntentFilter(Intent.ACTION_SCREEN_ON));
+        context.registerReceiver(mScreenOnOffReceiver,
+                new IntentFilter(Intent.ACTION_SCREEN_OFF));
 
         mTimer = new WakeupTimer(context);
         mWifiOnly = SipManager.isSipWifiOnly(context);
     }
+
+    BroadcastReceiver mScreenOnOffReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                mScreenOn = true;
+            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                mScreenOn = false;
+            }
+        }
+    };
 
     private MyExecutor getExecutor() {
         // create mExecutor lazily
@@ -366,7 +383,10 @@ public final class SipService extends ISipService.Stub {
         boolean wifiOff = (isWifi && !connected) || (wasWifi && !sameType);
         boolean wifiOn = isWifi && connected;
         if (wifiOff) {
-            releaseWifiLock();
+            if (mScreenOn) releaseWifiLock();
+            // If the screen is off, we still keep the wifi lock in order
+            // to be able to reassociate with any available AP. Otherwise,
+            // the wifi driver could be stopped after 15 mins of idle time.
         } else if (wifiOn) {
             if (anyOpened()) grabWifiLock();
         }

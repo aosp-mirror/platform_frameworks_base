@@ -25,7 +25,7 @@ public class EffectColor extends Effect {
     /**
      * Change the video frame color to the RGB color value provided
      */
-    public static final int TYPE_COLOR = 1; // color as 888 RGB
+    public static final int TYPE_COLOR = 1;
     /**
      * Change the video frame color to a gradation from RGB color (at the top of
      * the frame) to black (at the bottom of the frame).
@@ -44,7 +44,7 @@ public class EffectColor extends Effect {
      */
     public static final int TYPE_FIFTIES = 5;
 
-    // Colors for the color effect
+    // Predefined colors
     public static final int GREEN = 0x0000ff00;
     public static final int PINK = 0x00ff66cc;
     public static final int GRAY = 0x007f7f7f;
@@ -52,8 +52,8 @@ public class EffectColor extends Effect {
     // The effect type
     private final int mType;
 
-    // The effect parameter
-    private final int mParam;
+    // The effect color
+    private final int mColor;
 
     /**
      * An object of this type cannot be instantiated by using the default
@@ -73,29 +73,47 @@ public class EffectColor extends Effect {
      *            is applied
      * @param durationMs The duration of this effect in milliseconds
      * @param type type of the effect. type is one of: TYPE_COLOR,
-     *            TYPE_GRADIENT, TYPE_SEPIA, TYPE_NEGATIVE, TYPE_FIFTIES. If
-     *            type is not supported, the argument is ignored
-     * @param param if type is TYPE_COLOR, param is the RGB color as 888.
-     *            Otherwise, param is ignored
+     *            TYPE_GRADIENT, TYPE_SEPIA, TYPE_NEGATIVE, TYPE_FIFTIES.
+     * @param color If type is TYPE_COLOR, color is the RGB color as 888.
+     *              If type is TYPE_GRADIENT, color is the RGB color at the
+     *              top of the frame. Otherwise, color is ignored
      */
     public EffectColor(MediaItem mediaItem, String effectId, long startTimeMs, long durationMs,
-            int type, int param) {
+            int type, int color) {
         super(mediaItem, effectId, startTimeMs, durationMs);
+        switch (type) {
+            case TYPE_COLOR:
+            case TYPE_GRADIENT: {
+                mColor = color;
+                break;
+            }
+
+            case TYPE_SEPIA:
+            case TYPE_NEGATIVE:
+            case TYPE_FIFTIES: {
+                mColor = -1;
+                break;
+            }
+
+            default: {
+                throw new IllegalArgumentException("Invalid type: " + type);
+            }
+        }
+
         mType = type;
-        mParam = param;
     }
 
     /**
-     * @return The type of this effect
+     * @return The effect type
      */
     public int getType() {
         return mType;
     }
 
     /**
-     * @return the color as RGB 888 if type is TYPE_COLOR. Otherwise, ignore.
+     * @return the color as RGB 888 if type is TYPE_COLOR or TYPE_GRADIENT.
      */
-    public int getParam() {
-        return mParam;
+    public int getColor() {
+        return mColor;
     }
 }

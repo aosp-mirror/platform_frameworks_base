@@ -98,7 +98,8 @@ public class ExtractEditText extends EditText {
     }
     
     @Override public boolean onTextContextMenuItem(int id) {
-        if (mIME != null) {
+        // Horrible hack: select word option has to be handled by original view to work.
+        if (mIME != null && id != android.R.id.startSelectingText) {
             if (mIME.onExtractTextContextMenuItem(id)) {
                 return true;
             }

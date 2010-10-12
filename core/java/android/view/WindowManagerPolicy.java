@@ -65,6 +65,7 @@ import android.view.animation.Animation;
  * @hide
  */
 public interface WindowManagerPolicy {
+    // Policy flags.  These flags are also defined in frameworks/base/include/ui/Input.h.
     public final static int FLAG_WAKE = 0x00000001;
     public final static int FLAG_WAKE_DROPPED = 0x00000002;
     public final static int FLAG_SHIFT = 0x00000004;
@@ -76,9 +77,11 @@ public interface WindowManagerPolicy {
     public final static int FLAG_VIRTUAL = 0x00000100;
 
     public final static int FLAG_INJECTED = 0x01000000;
+    public final static int FLAG_TRUSTED = 0x02000000;
 
     public final static int FLAG_WOKE_HERE = 0x10000000;
     public final static int FLAG_BRIGHT_HERE = 0x20000000;
+    public final static int FLAG_PASS_TO_USER = 0x40000000;
 
     public final static boolean WATCH_POINTER = false;
 

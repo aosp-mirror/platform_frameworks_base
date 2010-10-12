@@ -121,6 +121,7 @@ protected:
 
     VertexArray::Attrib *mAttribs;
     uint32_t mAttribsSize;
+    bool isValidGLComponent(uint32_t fieldIdx);
     void makeGLComponents();
 
 private:

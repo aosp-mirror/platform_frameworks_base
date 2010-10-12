@@ -82,10 +82,12 @@ import android.os.SystemClock;
  *     }
  * }
  * </code></pre></p><p>
- * In general, the framework makes no guarantees that the motion events delivered
- * to a view constitute a complete gesture.  In particular, there is no
- * guarantee that a view will always receive a motion event with {@link #ACTION_UP}
- * for each {@link #ACTION_DOWN} that was delivered.
+ * In general, the framework cannot guarantee that the motion events it delivers
+ * to a view always constitute a complete motion sequences since some events may be dropped
+ * or modified by containing views before they are delivered.  The view implementation
+ * should be prepared to handle {@link #ACTION_CANCEL} and should tolerate anomalous
+ * situations such as receiving a new {@link #ACTION_DOWN} without first having
+ * received an {@link #ACTION_UP} for the prior gesture.
  * </p><p>
  * Refer to {@link InputDevice} for more information about how different kinds of
  * input devices and sources represent pointer coordinates.

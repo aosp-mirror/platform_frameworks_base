@@ -804,7 +804,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         // stop intercepting input
                         mDragState.unregister();
-                        mInputMonitor.updateInputWindowsLw();
+                        synchronized (mWindowMap) {
+                            mInputMonitor.updateInputWindowsLw();
+                        }
 
                         // free our resources and drop all the object references
                         mDragState.reset();
@@ -5670,13 +5672,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mTempInputWindows.clear();
         }
         
-        /* Provides feedback for a virtual key down. */
-        public void virtualKeyDownFeedback() {
-            synchronized (mWindowMap) {
-                mPolicy.performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
-            }
-        }
-        
         /* Notifies that the lid switch changed state. */
         public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
             mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
@@ -8128,7 +8123,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState win = allAppWindows.get(i);
                 if (win == startingWindow || win.mAppFreezing
                         || win.mViewVisibility != View.VISIBLE
-                        || win.mAttrs.type == TYPE_APPLICATION_STARTING) {
+                        || win.mAttrs.type == TYPE_APPLICATION_STARTING
+                        || win.mDestroying) {
                     continue;
                 }
                 if (DEBUG_VISIBILITY) {

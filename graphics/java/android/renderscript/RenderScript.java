@@ -186,6 +186,10 @@ public class RenderScript {
     synchronized int nAllocationCreateTyped(int type) {
         return rsnAllocationCreateTyped(mContext, type);
     }
+    native void  rsnAllocationUpdateFromBitmap(int con, int alloc, Bitmap bmp);
+    synchronized void nAllocationUpdateFromBitmap(int alloc, Bitmap bmp) {
+        rsnAllocationUpdateFromBitmap(mContext, alloc, bmp);
+    }
     native int  rsnAllocationCreateFromBitmap(int con, int dstFmt, boolean genMips, Bitmap bmp);
     synchronized int nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp) {
         return rsnAllocationCreateFromBitmap(mContext, dstFmt, genMips, bmp);
@@ -359,6 +363,10 @@ public class RenderScript {
     synchronized void nScriptSetVarI(int id, int slot, int val) {
         rsnScriptSetVarI(mContext, id, slot, val);
     }
+    native void rsnScriptSetVarJ(int con, int id, int slot, long val);
+    synchronized void nScriptSetVarJ(int id, int slot, long val) {
+        rsnScriptSetVarJ(mContext, id, slot, val);
+    }
     native void rsnScriptSetVarF(int con, int id, int slot, float val);
     synchronized void nScriptSetVarF(int id, int slot, float val) {
         rsnScriptSetVarF(mContext, id, slot, val);
@@ -506,6 +514,7 @@ public class RenderScript {
     Element mElement_I16;
     Element mElement_U32;
     Element mElement_I32;
+    Element mElement_U64;
     Element mElement_I64;
     Element mElement_F32;
     Element mElement_F64;

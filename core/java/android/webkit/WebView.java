@@ -1972,6 +1972,7 @@ public class WebView extends AbsoluteLayout
      *         bounds of the view.
      */
     public Picture capturePicture() {
+        if (mNativeClass == 0) return null;
         Picture result = new Picture();
         nativeCopyBaseContentToPicture(result);
         return result;

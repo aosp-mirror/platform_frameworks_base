@@ -166,6 +166,7 @@ private:
         sp<CameraService>               mCameraService;  // immutable after constructor
         sp<ICameraClient>               mCameraClient;
         int                             mCameraId;       // immutable after constructor
+        int                             mCameraFacing;   // immutable after constructor
         pid_t                           mClientPid;
         sp<CameraHardwareInterface>     mHardware;       // cleared after disconnect()
         bool                            mUseOverlay;     // immutable after constructor
@@ -176,6 +177,7 @@ private:
         int                             mOrientation;     // Current display orientation
         // True if display orientation has been changed. This is only used in overlay.
         int                             mOrientationChanged;
+        int                             mPreviewWindowFlag;
         bool                            mPlayShutterSound;
 
         // Ensures atomicity among the public methods

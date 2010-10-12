@@ -63,7 +63,8 @@ public class Scroller  {
     private static final int SCROLL_MODE = 0;
     private static final int FLING_MODE = 1;
 
-    private final float mDeceleration;
+    private float mDeceleration;
+    private final float mPpi;
 
     /**
      * Create a Scroller with the default duration and interpolator.
@@ -79,13 +80,28 @@ public class Scroller  {
     public Scroller(Context context, Interpolator interpolator) {
         mFinished = true;
         mInterpolator = interpolator;
-        float ppi = context.getResources().getDisplayMetrics().density * 160.0f;
-        mDeceleration = SensorManager.GRAVITY_EARTH   // g (m/s^2)
-                      * 39.37f                        // inch/meter
-                      * ppi                           // pixels per inch
-                      * ViewConfiguration.getScrollFriction();
+        mPpi = context.getResources().getDisplayMetrics().density * 160.0f;
+        mDeceleration = computeDeceleration(ViewConfiguration.getScrollFriction());
+    }
+
+    /**
+     * The amount of friction applied to flings. The default value
+     * is {@link ViewConfiguration#getScrollFriction}.
+     * 
+     * @return A scalar dimensionless value representing the coefficient of
+     *         friction.
+     */
+    public final void setFriction(float friction) {
+        computeDeceleration(friction);
     }
     
+    private float computeDeceleration(float friction) {
+        return SensorManager.GRAVITY_EARTH   // g (m/s^2)
+                      * 39.37f               // inch/meter
+                      * mPpi                 // pixels per inch
+                      * friction;
+    }
+
     /**
      * 
      * Returns whether the scroller has finished scrolling.

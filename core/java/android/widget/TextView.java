@@ -6638,7 +6638,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!mFrozenWithFocus || (selStart < 0 || selEnd < 0)) {
                 // If a tap was used to give focus to that view, move cursor at tap position.
                 // Has to be done before onTakeFocus, which can be overloaded.
-                moveCursorToLastTapPosition();
+                final int lastTapPosition = getLastTapPosition();
+                if (lastTapPosition >= 0) {
+                    Selection.setSelection((Spannable) mText, lastTapPosition);
+                }
 
                 if (mMovement != null) {
                     mMovement.onTakeFocus(this, (Spannable) mText, direction);
@@ -6700,6 +6703,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 terminateSelectionActionMode();
             }
+
+            if (mSelectionModifierCursorController != null) {
+                ((SelectionModifierCursorController) mSelectionModifierCursorController).resetTouchOffsets();
+            }
         }
 
         startStopMarquee(focused);
@@ -6711,20 +6718,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
     }
 
-    private void moveCursorToLastTapPosition() {
+    private int getLastTapPosition() {
         if (mSelectionModifierCursorController != null) {
-            int mTapToFocusPosition = ((SelectionModifierCursorController)
+            int lastTapPosition = ((SelectionModifierCursorController)
                     mSelectionModifierCursorController).getMinTouchOffset();
-            if (mTapToFocusPosition >= 0) {
+            if (lastTapPosition >= 0) {
                 // Safety check, should not be possible.
-                if (mTapToFocusPosition > mText.length()) {
-                    Log.e(LOG_TAG, "Invalid tap focus position (" + mTapToFocusPosition + " vs "
+                if (lastTapPosition > mText.length()) {
+                    Log.e(LOG_TAG, "Invalid tap focus position (" + lastTapPosition + " vs "
                             + mText.length() + ")");
-                    mTapToFocusPosition = mText.length();
+                    lastTapPosition = mText.length();
                 }
-                Selection.setSelection((Spannable) mText, mTapToFocusPosition);
+                return lastTapPosition;
             }
         }
+
+        return -1;
     }
 
     @Override
@@ -6749,10 +6758,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mInputContentType != null) {
                 mInputContentType.enterDown = false;
             }
-            hideInsertionPointCursorController();
-            if (mSelectionModifierCursorController != null) {
-                mSelectionModifierCursorController.hide();
-            }
+            hideControllers();
         }
 
         startStopMarquee(hasWindowFocus);
@@ -6762,10 +6768,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (visibility != VISIBLE) {
-            hideInsertionPointCursorController();
-            if (mSelectionModifierCursorController != null) {
-                mSelectionModifierCursorController.hide();
-            }
+            hideControllers();
         }
     }
 
@@ -8193,7 +8196,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         SelectionModifierCursorController() {
             mStartHandle = new HandleView(this, HandleView.LEFT);
             mEndHandle = new HandleView(this, HandleView.RIGHT);
-            mMinTouchOffset = mMaxTouchOffset = -1;
+            resetTouchOffsets();
         }
 
         public void show() {
@@ -8325,6 +8328,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mMaxTouchOffset;
         }
 
+        public void resetTouchOffsets() {
+            mMinTouchOffset = mMaxTouchOffset = -1;
+        }
+
         /**
          * @return true iff this controller is currently used to move the selection start.
          */
@@ -8345,9 +8352,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    private void hideSelectionModifierCursorController() {
+        if (mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.hide();
+        }
+    }
+    
     private void hideControllers() {
         hideInsertionPointCursorController();
-        stopSelectionActionMode();
+        hideSelectionModifierCursorController();
     }
 
     private int getOffsetForHorizontal(int line, int x) {

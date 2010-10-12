@@ -107,6 +107,7 @@ public class BatteryManager {
     public static final int BATTERY_HEALTH_DEAD = 4;
     public static final int BATTERY_HEALTH_OVER_VOLTAGE = 5;
     public static final int BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
+    public static final int BATTERY_HEALTH_COLD = 7;
 
     // values of the "plugged" field in the ACTION_BATTERY_CHANGED intent.
     // These must be powers of 2.

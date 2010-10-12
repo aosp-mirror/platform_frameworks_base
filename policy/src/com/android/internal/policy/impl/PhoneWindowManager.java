@@ -1123,6 +1123,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean interceptKeyBeforeDispatching(WindowState win, int action, int flags,
             int keyCode, int metaState, int repeatCount, int policyFlags) {
+        if ((policyFlags & WindowManagerPolicy.FLAG_TRUSTED) == 0) {
+            return false;
+        }
+
         final boolean keyguardOn = keyguardOn();
         final boolean down = (action == KeyEvent.ACTION_DOWN);
         final boolean canceled = ((flags & KeyEvent.FLAG_CANCELED) != 0);
@@ -1149,7 +1153,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!down) {
                     mHomePressed = false;
                     
-                    if (! canceled) {
+                    if (!canceled) {
                         // If an incoming call is ringing, HOME is totally disabled.
                         // (The user is already on the InCallScreen at this point,
                         // and his ONLY options are to answer or reject the call.)
@@ -1831,7 +1835,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptKeyBeforeQueueing(long whenNanos, int keyCode, boolean down,
             int policyFlags, boolean isScreenOn) {
         int result = ACTION_PASS_TO_USER;
-        
+        if ((policyFlags & WindowManagerPolicy.FLAG_TRUSTED) == 0) {
+            return result;
+        }
+
+        if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0) {
+            performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
+        }
+
         final boolean isWakeKey = (policyFlags
                 & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
         

@@ -44,6 +44,11 @@ namespace uirenderer {
     #define PROGRAM_LOGD(...)
 #endif
 
+// TODO: This should be set in properties
+#define PANEL_BIT_DEPTH 20
+#define COLOR_COMPONENT_THRESHOLD (1.0f - (0.5f / PANEL_BIT_DEPTH))
+#define COLOR_COMPONENT_INV_THRESHOLD (0.5f / PANEL_BIT_DEPTH)
+
 #define PROGRAM_KEY_TEXTURE 0x1
 #define PROGRAM_KEY_A8_TEXTURE 0x2
 #define PROGRAM_KEY_BITMAP 0x4
@@ -68,6 +73,7 @@ namespace uirenderer {
 #define PROGRAM_BITMAP_WRAPT_SHIFT 11
 
 #define PROGRAM_GRADIENT_TYPE_SHIFT 33
+#define PROGRAM_MODULATE 35
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -99,7 +105,7 @@ struct ProgramDescription {
     };
 
     ProgramDescription():
-        hasTexture(false), hasAlpha8Texture(false),
+        hasTexture(false), hasAlpha8Texture(false), modulate(false),
         hasBitmap(false), isBitmapNpot(false), hasGradient(false),
         gradientType(kGradientLinear),
         shadersMode(SkXfermode::kClear_Mode), isBitmapFirst(false),
@@ -111,6 +117,9 @@ struct ProgramDescription {
     // Texturing
     bool hasTexture;
     bool hasAlpha8Texture;
+
+    // Modulate, this should only be set when setColor() return true
+    bool modulate;
 
     // Shaders
     bool hasBitmap;
@@ -134,18 +143,31 @@ struct ProgramDescription {
     SkXfermode::Mode framebufferMode;
     bool swapSrcDst;
 
-    inline uint32_t getEnumForWrap(GLenum wrap) const {
-        switch (wrap) {
-            case GL_CLAMP_TO_EDGE:
-                return 0;
-            case GL_REPEAT:
-                return 1;
-            case GL_MIRRORED_REPEAT:
-                return 2;
-        }
-        return 0;
+    /**
+     * Indicates, for a given color, whether color modulation is required in
+     * the fragment shader. When this method returns true, the program should
+     * be provided with a modulation color.
+     */
+    bool setColor(const float r, const float g, const float b, const float a) {
+        modulate = a < COLOR_COMPONENT_THRESHOLD || r < COLOR_COMPONENT_THRESHOLD ||
+                g < COLOR_COMPONENT_THRESHOLD || b < COLOR_COMPONENT_THRESHOLD;
+        return modulate;
     }
 
+    /**
+     * Indicates, for a given color, whether color modulation is required in
+     * the fragment shader. When this method returns true, the program should
+     * be provided with a modulation color.
+     */
+    bool setAlpha8Color(const float r, const float g, const float b, const float a) {
+        modulate = a < COLOR_COMPONENT_THRESHOLD || r > COLOR_COMPONENT_INV_THRESHOLD ||
+                g > COLOR_COMPONENT_INV_THRESHOLD || b > COLOR_COMPONENT_INV_THRESHOLD;
+        return modulate;
+    }
+
+    /**
+     * Computes the unique key identifying this program.
+     */
     programid key() const {
         programid key = 0;
         if (hasTexture) key |= PROGRAM_KEY_TEXTURE;
@@ -180,14 +202,32 @@ struct ProgramDescription {
         }
         key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
+        if (modulate) key |= programid(0x1) << PROGRAM_MODULATE;
         return key;
     }
 
+    /**
+     * Logs the specified message followed by the key identifying this program.
+     */
     void log(const char* message) const {
         programid k = key();
         PROGRAM_LOGD("%s (key = 0x%.8x%.8x)", message, uint32_t(k >> 32),
                 uint32_t(k & 0xffffffff));
     }
+
+private:
+    inline uint32_t getEnumForWrap(GLenum wrap) const {
+        switch (wrap) {
+            case GL_CLAMP_TO_EDGE:
+                return 0;
+            case GL_REPEAT:
+                return 1;
+            case GL_MIRRORED_REPEAT:
+                return 2;
+        }
+        return 0;
+    }
+
 }; // struct ProgramDescription
 
 /**

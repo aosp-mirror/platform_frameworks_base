@@ -1969,26 +1969,30 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         sendScreenState(true);
    }
 
-    private void setRadioStateFromRILInt(int state) {
-        RadioState newState;
+    private RadioState getRadioStateFromInt(int stateInt) {
+        RadioState state;
 
         /* RIL_RadioState ril.h */
-        switch(state) {
-            case 0: newState = RadioState.RADIO_OFF; break;
-            case 1: newState = RadioState.RADIO_UNAVAILABLE; break;
-            case 2: newState = RadioState.SIM_NOT_READY; break;
-            case 3: newState = RadioState.SIM_LOCKED_OR_ABSENT; break;
-            case 4: newState = RadioState.SIM_READY; break;
-            case 5: newState = RadioState.RUIM_NOT_READY; break;
-            case 6: newState = RadioState.RUIM_READY; break;
-            case 7: newState = RadioState.RUIM_LOCKED_OR_ABSENT; break;
-            case 8: newState = RadioState.NV_NOT_READY; break;
-            case 9: newState = RadioState.NV_READY; break;
+        switch(stateInt) {
+            case 0: state = RadioState.RADIO_OFF; break;
+            case 1: state = RadioState.RADIO_UNAVAILABLE; break;
+            case 2: state = RadioState.SIM_NOT_READY; break;
+            case 3: state = RadioState.SIM_LOCKED_OR_ABSENT; break;
+            case 4: state = RadioState.SIM_READY; break;
+            case 5: state = RadioState.RUIM_NOT_READY; break;
+            case 6: state = RadioState.RUIM_READY; break;
+            case 7: state = RadioState.RUIM_LOCKED_OR_ABSENT; break;
+            case 8: state = RadioState.NV_NOT_READY; break;
+            case 9: state = RadioState.NV_READY; break;
 
             default:
                 throw new RuntimeException(
-                            "Unrecognized RIL_RadioState: " +state);
+                            "Unrecognized RIL_RadioState: " + stateInt);
         }
+        return state;
+    }
+
+    private void switchToRadioState(RadioState newState) {
 
         if (mInitialRadioStateChange) {
             if (newState.isOn()) {
@@ -2369,9 +2373,10 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         switch(response) {
             case RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED:
                 /* has bonus radio state int */
-                setRadioStateFromRILInt(p.readInt());
+                RadioState newState = getRadioStateFromInt(p.readInt());
+                if (RILJ_LOGD) unsljLogMore(response, newState.toString());
 
-                if (RILJ_LOGD) unsljLogMore(response, mState.toString());
+                switchToRadioState(newState);
             break;
             case RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED:
                 if (RILJ_LOGD) unsljLog(response);

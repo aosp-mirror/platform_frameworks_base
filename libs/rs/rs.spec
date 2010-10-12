@@ -127,6 +127,12 @@ AllocationCreateSized {
 	ret RsAllocation
 	}
 
+AllocationUpdateFromBitmap {
+	param RsAllocation alloc
+	param RsElement srcFmt
+	param const void * data
+	}
+
 AllocationCreateBitmapRef {
 	param RsType type
 	param void * bmpPtr
@@ -336,6 +342,12 @@ ScriptSetVarI {
 	param RsScript s
 	param uint32_t slot
 	param int value
+	}
+
+ScriptSetVarJ {
+	param RsScript s
+	param uint32_t slot
+	param int64_t value
 	}
 
 ScriptSetVarF {
