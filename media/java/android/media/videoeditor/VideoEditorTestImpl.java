@@ -1143,17 +1143,20 @@ public class VideoEditorTestImpl implements VideoEditor {
      * @param mediaItem The media item
      */
     private void removeAdjacentTransitions(MediaItem mediaItem) {
-        final Iterator<Transition> it = mTransitions.iterator();
-        while (it.hasNext()) {
-            Transition t = it.next();
-            if (t.getAfterMediaItem() == mediaItem || t.getBeforeMediaItem() == mediaItem) {
-                it.remove();
-                t.invalidate();
-                mediaItem.setBeginTransition(null);
-                mediaItem.setEndTransition(null);
-                break;
-            }
+        final Transition beginTransition = mediaItem.getBeginTransition();
+        if (beginTransition != null) {
+            beginTransition.invalidate();
+            mTransitions.remove(beginTransition);
         }
+
+        final Transition endTransition = mediaItem.getEndTransition();
+        if (endTransition != null) {
+            endTransition.invalidate();
+            mTransitions.remove(endTransition);
+        }
+
+        mediaItem.setBeginTransition(null);
+        mediaItem.setEndTransition(null);
     }
 
     /**
@@ -1162,7 +1165,7 @@ public class VideoEditorTestImpl implements VideoEditor {
      * @param index The media item index
      */
     private void removeTransitionBefore(int index) {
-        final MediaItem mediaItem = mMediaItems.get(0);
+        final MediaItem mediaItem = mMediaItems.get(index);
         final Iterator<Transition> it = mTransitions.iterator();
         while (it.hasNext()) {
             Transition t = it.next();
