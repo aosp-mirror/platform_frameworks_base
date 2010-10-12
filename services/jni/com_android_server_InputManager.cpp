@@ -50,7 +50,6 @@ static struct {
     jmethodID notifyLidSwitchChanged;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyANR;
-    jmethodID virtualKeyDownFeedback;
     jmethodID interceptKeyBeforeQueueing;
     jmethodID interceptKeyBeforeDispatching;
     jmethodID checkInjectEventsPermission;
@@ -192,6 +191,8 @@ public:
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
+    virtual void notifySwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
+            uint32_t policyFlags);
     virtual void notifyConfigurationChanged(nsecs_t when);
     virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
             const sp<InputChannel>& inputChannel);
@@ -205,8 +206,6 @@ public:
     virtual void interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags);
-    virtual void notifySwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
-            uint32_t policyFlags);
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
             int32_t injectorPid, int32_t injectorUid);
@@ -255,7 +254,6 @@ private:
 
     static bool populateWindow(JNIEnv* env, jobject windowObj, InputWindow& outWindow);
 
-    static bool isPolicyKey(int32_t keyCode, bool isScreenOn);
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
     static inline JNIEnv* jniEnv() {
@@ -289,37 +287,6 @@ void NativeInputManager::dump(String8& dump) {
 
     mInputManager->getDispatcher()->dump(dump);
     dump.append("\n");
-}
-
-bool NativeInputManager::isPolicyKey(int32_t keyCode, bool isScreenOn) {
-    // Special keys that the WindowManagerPolicy might care about.
-    switch (keyCode) {
-    case AKEYCODE_VOLUME_UP:
-    case AKEYCODE_VOLUME_DOWN:
-    case AKEYCODE_ENDCALL:
-    case AKEYCODE_POWER:
-    case AKEYCODE_CALL:
-    case AKEYCODE_HOME:
-    case AKEYCODE_MENU:
-    case AKEYCODE_SEARCH:
-        // media keys
-    case AKEYCODE_HEADSETHOOK:
-    case AKEYCODE_MEDIA_PLAY_PAUSE:
-    case AKEYCODE_MEDIA_STOP:
-    case AKEYCODE_MEDIA_NEXT:
-    case AKEYCODE_MEDIA_PREVIOUS:
-    case AKEYCODE_MEDIA_REWIND:
-    case AKEYCODE_MEDIA_FAST_FORWARD:
-        // The policy always cares about these keys.
-        return true;
-    default:
-        // We need to pass all keys to the policy in the following cases:
-        // - screen is off
-        // - keyguard is visible
-        // - policy is performing key chording
-        //return ! isScreenOn || keyguardVisible || chording;
-        return true; // XXX stubbed out for now
-    }
 }
 
 bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -454,115 +421,6 @@ bool NativeInputManager::getDisplayInfo(int32_t displayId,
     return result;
 }
 
-bool NativeInputManager::isScreenOn() {
-    return android_server_PowerManagerService_isScreenOn();
-}
-
-bool NativeInputManager::isScreenBright() {
-    return android_server_PowerManagerService_isScreenBright();
-}
-
-void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
-        int32_t deviceId, int32_t action, int32_t &flags,
-        int32_t keyCode, int32_t scanCode, uint32_t& policyFlags) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("interceptKeyBeforeQueueing - when=%lld, deviceId=%d, action=%d, flags=%d, "
-            "keyCode=%d, scanCode=%d, policyFlags=0x%x",
-            when, deviceId, action, flags, keyCode, scanCode, policyFlags);
-#endif
-
-    bool down = action == AKEY_EVENT_ACTION_DOWN;
-    if ((policyFlags & POLICY_FLAG_VIRTUAL) || (flags & AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY)) {
-        policyFlags |= POLICY_FLAG_VIRTUAL;
-        flags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
-
-        if (down) {
-            JNIEnv* env = jniEnv();
-            env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.virtualKeyDownFeedback);
-            checkAndClearExceptionFromCallback(env, "virtualKeyDownFeedback");
-        }
-    }
-
-    const int32_t WM_ACTION_PASS_TO_USER = 1;
-    const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
-    const int32_t WM_ACTION_GO_TO_SLEEP = 4;
-
-    bool isScreenOn = this->isScreenOn();
-    bool isScreenBright = this->isScreenBright();
-
-    jint wmActions = 0;
-    if (isPolicyKey(keyCode, isScreenOn)) {
-        JNIEnv* env = jniEnv();
-
-        wmActions = env->CallIntMethod(mCallbacksObj,
-                gCallbacksClassInfo.interceptKeyBeforeQueueing,
-                when, keyCode, down, policyFlags, isScreenOn);
-        if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
-            wmActions = 0;
-        }
-    } else {
-        wmActions = WM_ACTION_PASS_TO_USER;
-    }
-
-    if (! isScreenOn) {
-        // Key presses and releases wake the device.
-        policyFlags |= POLICY_FLAG_WOKE_HERE;
-        flags |= AKEY_EVENT_FLAG_WOKE_HERE;
-    }
-
-    if (! isScreenBright) {
-        // Key presses and releases brighten the screen if dimmed.
-        policyFlags |= POLICY_FLAG_BRIGHT_HERE;
-    }
-
-    if (wmActions & WM_ACTION_GO_TO_SLEEP) {
-        android_server_PowerManagerService_goToSleep(when);
-    }
-
-    if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
-        android_server_PowerManagerService_userActivity(when, POWER_MANAGER_BUTTON_EVENT);
-    }
-
-    if (wmActions & WM_ACTION_PASS_TO_USER) {
-        policyFlags |= POLICY_FLAG_PASS_TO_USER;
-    }
-}
-
-void NativeInputManager::interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("interceptGenericBeforeQueueing - when=%lld, policyFlags=0x%x", when, policyFlags);
-#endif
-
-    if (isScreenOn()) {
-        // Only dispatch events when the device is awake.
-        // Do not wake the device.
-        policyFlags |= POLICY_FLAG_PASS_TO_USER;
-
-        if (! isScreenBright()) {
-            // Brighten the screen if dimmed.
-            policyFlags |= POLICY_FLAG_BRIGHT_HERE;
-        }
-    }
-}
-
-void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
-        int32_t switchValue, uint32_t policyFlags) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    LOGD("notifySwitch - when=%lld, switchCode=%d, switchValue=%d, policyFlags=0x%x",
-            when, switchCode, switchValue, policyFlags);
-#endif
-
-    JNIEnv* env = jniEnv();
-
-    switch (switchCode) {
-    case SW_LID:
-        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyLidSwitchChanged,
-                when, switchValue == 0);
-        checkAndClearExceptionFromCallback(env, "notifyLidSwitchChanged");
-        break;
-    }
-}
-
 bool NativeInputManager::filterTouchEvents() {
     if (mFilterTouchEvents < 0) {
         JNIEnv* env = jniEnv();
@@ -689,6 +547,24 @@ void NativeInputManager::getExcludedDeviceNames(Vector<String8>& outExcludedDevi
             env->DeleteLocalRef(item);
         }
         env->DeleteLocalRef(result);
+    }
+}
+
+void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
+        int32_t switchValue, uint32_t policyFlags) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("notifySwitch - when=%lld, switchCode=%d, switchValue=%d, policyFlags=0x%x",
+            when, switchCode, switchValue, policyFlags);
+#endif
+
+    JNIEnv* env = jniEnv();
+
+    switch (switchCode) {
+    case SW_LID:
+        env->CallVoidMethod(mCallbacksObj, gCallbacksClassInfo.notifyLidSwitchChanged,
+                when, switchValue == 0);
+        checkAndClearExceptionFromCallback(env, "notifyLidSwitchChanged");
+        break;
     }
 }
 
@@ -944,13 +820,88 @@ void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
     mInputManager->getDispatcher()->setInputDispatchMode(enabled, frozen);
 }
 
-bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
-        const KeyEvent* keyEvent, uint32_t policyFlags) {
-    bool isScreenOn = this->isScreenOn();
-    if (! isPolicyKey(keyEvent->getKeyCode(), isScreenOn)) {
-        return false;
+bool NativeInputManager::isScreenOn() {
+    return android_server_PowerManagerService_isScreenOn();
+}
+
+bool NativeInputManager::isScreenBright() {
+    return android_server_PowerManagerService_isScreenBright();
+}
+
+void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
+        int32_t deviceId, int32_t action, int32_t &flags,
+        int32_t keyCode, int32_t scanCode, uint32_t& policyFlags) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("interceptKeyBeforeQueueing - when=%lld, deviceId=%d, action=%d, flags=%d, "
+            "keyCode=%d, scanCode=%d, policyFlags=0x%x",
+            when, deviceId, action, flags, keyCode, scanCode, policyFlags);
+#endif
+
+    if ((policyFlags & POLICY_FLAG_VIRTUAL) || (flags & AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY)) {
+        policyFlags |= POLICY_FLAG_VIRTUAL;
+        flags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
     }
 
+    const int32_t WM_ACTION_PASS_TO_USER = 1;
+    const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
+    const int32_t WM_ACTION_GO_TO_SLEEP = 4;
+
+    bool isScreenOn = this->isScreenOn();
+    bool isScreenBright = this->isScreenBright();
+
+    JNIEnv* env = jniEnv();
+    jint wmActions = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.interceptKeyBeforeQueueing,
+            when, keyCode, action == AKEY_EVENT_ACTION_DOWN, policyFlags, isScreenOn);
+    if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
+        wmActions = 0;
+    }
+
+    if (policyFlags & POLICY_FLAG_TRUSTED) {
+        if (! isScreenOn) {
+            // Key presses and releases wake the device.
+            policyFlags |= POLICY_FLAG_WOKE_HERE;
+            flags |= AKEY_EVENT_FLAG_WOKE_HERE;
+        }
+
+        if (! isScreenBright) {
+            // Key presses and releases brighten the screen if dimmed.
+            policyFlags |= POLICY_FLAG_BRIGHT_HERE;
+        }
+
+        if (wmActions & WM_ACTION_GO_TO_SLEEP) {
+            android_server_PowerManagerService_goToSleep(when);
+        }
+
+        if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
+            android_server_PowerManagerService_userActivity(when, POWER_MANAGER_BUTTON_EVENT);
+        }
+    }
+
+    if (wmActions & WM_ACTION_PASS_TO_USER) {
+        policyFlags |= POLICY_FLAG_PASS_TO_USER;
+    }
+}
+
+void NativeInputManager::interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags) {
+#if DEBUG_INPUT_DISPATCHER_POLICY
+    LOGD("interceptGenericBeforeQueueing - when=%lld, policyFlags=0x%x", when, policyFlags);
+#endif
+
+    if (isScreenOn()) {
+        // Only dispatch events when the device is awake.
+        // Do not wake the device.
+        policyFlags |= POLICY_FLAG_PASS_TO_USER;
+
+        if ((policyFlags & POLICY_FLAG_TRUSTED) && !isScreenBright()) {
+            // Brighten the screen if dimmed.
+            policyFlags |= POLICY_FLAG_BRIGHT_HERE;
+        }
+    }
+}
+
+bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
+        const KeyEvent* keyEvent, uint32_t policyFlags) {
     JNIEnv* env = jniEnv();
 
     // Note: inputChannel may be null.
@@ -1364,9 +1315,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.notifyANR, gCallbacksClassInfo.clazz,
             "notifyANR", "(Ljava/lang/Object;Landroid/view/InputChannel;)J");
-
-    GET_METHOD_ID(gCallbacksClassInfo.virtualKeyDownFeedback, gCallbacksClassInfo.clazz,
-            "virtualKeyDownFeedback", "()V");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, gCallbacksClassInfo.clazz,
             "interceptKeyBeforeQueueing", "(JIZIZ)I");
