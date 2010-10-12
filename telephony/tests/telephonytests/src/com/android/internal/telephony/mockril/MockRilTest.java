@@ -55,7 +55,7 @@ public class MockRilTest extends InstrumentationTestCase {
     }
 
     /**
-     * Test protobuf serialization and deserialization
+     * Test Case 1: Test protobuf serialization and deserialization
      * @throws InvalidProtocolBufferMicroException
      */
     public void testProtobufSerDes() throws InvalidProtocolBufferMicroException {
@@ -77,7 +77,7 @@ public class MockRilTest extends InstrumentationTestCase {
     }
 
     /**
-     * Test echo command works using writeMsg & readMsg
+     * Test case 2: Test echo command works using writeMsg & readMsg
      */
     public void testEchoMsg() throws IOException {
         log("testEchoMsg E");
@@ -110,7 +110,7 @@ public class MockRilTest extends InstrumentationTestCase {
     }
 
     /**
-     * Test get as
+     * Test case 3: Test get as
      */
     public void testGetAs() {
         log("testGetAs E");
@@ -150,6 +150,9 @@ public class MockRilTest extends InstrumentationTestCase {
         log("testGetAs X");
     }
 
+    /**
+     * Test case 3: test get radio state
+     */
     public void testGetRadioState() throws IOException {
         log("testGetRadioState E");
 
@@ -175,6 +178,9 @@ public class MockRilTest extends InstrumentationTestCase {
         log("testGetRadioState X");
     }
 
+    /**
+     * Test case 5: test set radio state
+     */
     public void testSetRadioState() throws IOException {
         log("testSetRadioState E");
 
@@ -187,11 +193,112 @@ public class MockRilTest extends InstrumentationTestCase {
         Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_SET_RADIO_STATE, 0, 0, cmdrs);
 
         Msg resp = Msg.recv(mMockRilChannel);
+        log("get response status :" + resp.getStatus());
+        log("get response for command: " + resp.getCmd());
+        log("get command token: " + resp.getToken());
 
         RilCtrlCmds.CtrlRspRadioState rsp = resp.getDataAs(RilCtrlCmds.CtrlRspRadioState.class);
 
         int state = rsp.getState();
         log("get response for testSetRadioState: " + state);
         assertTrue(RilCmds.RADIOSTATE_SIM_NOT_READY == state);
+    }
+
+    /**
+     * Test case 6: test start incoming call and hangup it.
+     */
+    public void testStartIncomingCallAndHangup() throws IOException {
+        log("testStartIncomingCallAndHangup");
+        RilCtrlCmds.CtrlReqSetMTCall cmd = new RilCtrlCmds.CtrlReqSetMTCall();
+        String incomingCall = "6502889108";
+        // set the MT call
+        cmd.setPhoneNumber(incomingCall);
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_SET_MT_CALL, 0, 0, cmd);
+        // get response
+        Msg resp = Msg.recv(mMockRilChannel);
+        log("Get response status: " + resp.getStatus());
+        assertTrue("The ril is not in a proper state to set MT calls.",
+                   resp.getStatus() == RilCtrlCmds.CTRL_STATUS_OK);
+
+        // allow the incoming call alerting for some time
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {}
+
+        // we are playing a trick to assume the current is 1
+        RilCtrlCmds.CtrlHangupConnRemote hangupCmd = new RilCtrlCmds.CtrlHangupConnRemote();
+        hangupCmd.setConnectionId(1);
+        hangupCmd.setCallFailCause(16);   // normal hangup
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_HANGUP_CONN_REMOTE, 0, 0, hangupCmd);
+
+        // get response
+        resp = Msg.recv(mMockRilChannel);
+        log("Get response for hangup connection: " + resp.getStatus());
+        assertTrue("CTRL_CMD_HANGUP_CONN_REMOTE failed",
+                   resp.getStatus() == RilCtrlCmds.CTRL_STATUS_OK);
+    }
+
+    /**
+     * Test case 7: test set call transition flag
+     */
+    public void testSetCallTransitionFlag() throws IOException {
+        log("testSetCallTransitionFlag");
+        // Set flag to true:
+        RilCtrlCmds.CtrlSetCallTransitionFlag cmd = new RilCtrlCmds.CtrlSetCallTransitionFlag();
+        cmd.setFlag(true);
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_SET_CALL_TRANSITION_FLAG, 0, 0, cmd);
+
+        Msg resp = Msg.recv(mMockRilChannel);
+        log("Get response status: " + resp.getStatus());
+        assertTrue("Set call transition flag failed",
+                   resp.getStatus() == RilCtrlCmds.CTRL_STATUS_OK);
+
+        // add a dialing call
+        RilCtrlCmds.CtrlReqAddDialingCall cmdDialCall = new RilCtrlCmds.CtrlReqAddDialingCall();
+        String phoneNumber = "5102345678";
+        cmdDialCall.setPhoneNumber(phoneNumber);
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_ADD_DIALING_CALL, 0, 0, cmdDialCall);
+        resp = Msg.recv(mMockRilChannel);
+        log("Get response status for adding a dialing call: " + resp.getStatus());
+        assertTrue("add dialing call failed",
+                   resp.getStatus() == RilCtrlCmds.CTRL_STATUS_OK);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {}
+
+        // send command to force call state change
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_SET_CALL_ALERT, 0, 0, null);
+        resp = Msg.recv(mMockRilChannel);
+        log("Get response status: " + resp.getStatus());
+        assertTrue("Set call alert failed",
+                   resp.getStatus() == RilCtrlCmds.CTRL_STATUS_OK);
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {}
+
+        // send command to force call state change
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_SET_CALL_ACTIVE, 0, 0, null);
+        resp = Msg.recv(mMockRilChannel);
+        log("Get response status: " + resp.getStatus());
+        assertTrue("Set call active failed",
+                   resp.getStatus() == RilCtrlCmds.CTRL_STATUS_OK);
+
+        // hangup the active all remotely
+        RilCtrlCmds.CtrlHangupConnRemote hangupCmd = new RilCtrlCmds.CtrlHangupConnRemote();
+        hangupCmd.setConnectionId(1);
+        hangupCmd.setCallFailCause(16);   // normal hangup
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_HANGUP_CONN_REMOTE, 0, 0, hangupCmd);
+        resp = Msg.recv(mMockRilChannel);
+        log("Get response for hangup connection: " + resp.getStatus());
+        assertTrue("CTRL_CMD_HANGUP_CONN_REMOTE failed",
+                   resp.getStatus() == RilCtrlCmds.CTRL_STATUS_OK);
+
+        // set the flag to false
+        cmd.setFlag(false);
+        Msg.send(mMockRilChannel, RilCtrlCmds.CTRL_CMD_SET_CALL_TRANSITION_FLAG, 0, 0, cmd);
+        resp = Msg.recv(mMockRilChannel);
+        assertTrue("Set call transition flag failed",
+                   resp.getStatus() == RilCtrlCmds.CTRL_STATUS_OK);
     }
 }
