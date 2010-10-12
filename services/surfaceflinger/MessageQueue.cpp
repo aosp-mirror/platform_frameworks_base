@@ -72,14 +72,6 @@ sp<MessageBase> MessageQueue::waitMessage(nsecs_t timeout)
             nsecs_t now = systemTime();
             nsecs_t nextEventTime = -1;
 
-            // invalidate messages are always handled first
-            if (mInvalidate) {
-                mInvalidate = false;
-                mInvalidateMessage->when = now;
-                result = mInvalidateMessage;
-                break;
-            }
-
             LIST::iterator cur(mMessages.begin());
             if (cur != mMessages.end()) {
                 result = *cur;
@@ -93,6 +85,14 @@ sp<MessageBase> MessageQueue::waitMessage(nsecs_t timeout)
                 }
                 nextEventTime = result->when;
                 result = 0;
+            }
+
+            // see if we have an invalidate message
+            if (mInvalidate) {
+                mInvalidate = false;
+                mInvalidateMessage->when = now;
+                result = mInvalidateMessage;
+                break;
             }
 
             if (timeout >= 0) {
