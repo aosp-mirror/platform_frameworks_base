@@ -1057,10 +1057,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean interceptKeyBeforeDispatching(WindowState win, int action, int flags,
             int keyCode, int metaState, int repeatCount, int policyFlags) {
-        if ((policyFlags & WindowManagerPolicy.FLAG_TRUSTED) == 0) {
-            return false;
-        }
-
         final boolean keyguardOn = keyguardOn();
         final boolean down = (action == KeyEvent.ACTION_DOWN);
         final boolean canceled = ((flags & KeyEvent.FLAG_CANCELED) != 0);
@@ -1739,9 +1735,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptKeyBeforeQueueing(long whenNanos, int keyCode, boolean down,
             int policyFlags, boolean isScreenOn) {
         int result = ACTION_PASS_TO_USER;
-        if ((policyFlags & WindowManagerPolicy.FLAG_TRUSTED) == 0) {
-            return result;
-        }
 
         if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0) {
             performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
@@ -1749,7 +1742,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final boolean isWakeKey = (policyFlags
                 & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
-        
+
+        // If the key is injected, pretend that the screen is on and don't let the
+        // device go to sleep.  This feature is mainly used for testing purposes.
+        final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
+        if (isInjected) {
+            isScreenOn = true;
+        }
+
         // If screen is off then we treat the case where the keyguard is open but hidden
         // the same as if it were open and in front.
         // This will prevent any keys other than the power button from waking the screen
@@ -1848,7 +1848,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || (handled && hungUp && keyCode == KeyEvent.KEYCODE_POWER)) {
                     mShouldTurnOffOnKeyUp = false;
                 } else {
-                    // only try to turn off the screen if we didn't already hang up
+                    // Only try to turn off the screen if we didn't already hang up.
                     mShouldTurnOffOnKeyUp = true;
                     mHandler.postDelayed(mPowerLongPress,
                             ViewConfiguration.getGlobalActionKeyTimeout());
@@ -1871,12 +1871,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (keyguardActive
                             || (sleeps && !gohome)
                             || (gohome && !goHome() && sleeps)) {
-                        // they must already be on the keyguad or home screen,
-                        // go to sleep instead
-                        Log.d(TAG, "I'm tired mEndcallBehavior=0x"
-                                + Integer.toHexString(mEndcallBehavior));
-                        result &= ~ACTION_POKE_USER_ACTIVITY;
-                        result |= ACTION_GO_TO_SLEEP;
+                        // They must already be on the keyguard or home screen,
+                        // go to sleep instead unless the event was injected.
+                        if (!isInjected) {
+                            Log.d(TAG, "I'm tired mEndcallBehavior=0x"
+                                    + Integer.toHexString(mEndcallBehavior));
+                            result &= ~ACTION_POKE_USER_ACTIVITY;
+                            result |= ACTION_GO_TO_SLEEP;
+                        }
                     }
                     result &= ~ACTION_PASS_TO_USER;
                 }
