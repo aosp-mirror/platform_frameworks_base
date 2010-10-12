@@ -27,7 +27,8 @@ M3UParser::M3UParser(
     : mInitCheck(NO_INIT),
       mBaseURI(baseURI),
       mIsExtM3U(false),
-      mIsVariantPlaylist(false) {
+      mIsVariantPlaylist(false),
+      mIsComplete(false) {
     mInitCheck = parse(data, size);
 }
 
@@ -44,6 +45,10 @@ bool M3UParser::isExtM3U() const {
 
 bool M3UParser::isVariantPlaylist() const {
     return mIsVariantPlaylist;
+}
+
+bool M3UParser::isComplete() const {
+    return mIsComplete;
 }
 
 sp<AMessage> M3UParser::meta() {
@@ -153,6 +158,8 @@ status_t M3UParser::parse(const void *_data, size_t size) {
                     return ERROR_MALFORMED;
                 }
                 err = parseMetaData(line, &mMeta, "media-sequence");
+            } else if (line.startsWith("#EXT-X-ENDLIST")) {
+                mIsComplete = true;
             } else if (line.startsWith("#EXTINF")) {
                 if (mIsVariantPlaylist) {
                     return ERROR_MALFORMED;

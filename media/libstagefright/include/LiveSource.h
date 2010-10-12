@@ -40,6 +40,11 @@ struct LiveSource : public DataSource {
         return kWantsPrefetching;
     }
 
+    bool getDuration(int64_t *durationUs) const;
+
+    bool isSeekable() const;
+    bool seekTo(int64_t seekTimeUs);
+
 protected:
     virtual ~LiveSource();
 
@@ -53,6 +58,7 @@ private:
     AString mMasterURL;
     AString mURL;
     status_t mInitCheck;
+    int64_t mDurationUs;
 
     sp<M3UParser> mPlaylist;
     int32_t mFirstItemSequenceNumber;
@@ -72,6 +78,7 @@ private:
 
     bool switchToNext();
     bool loadPlaylist(bool fetchMaster);
+    void determineSeekability();
 
     DISALLOW_EVIL_CONSTRUCTORS(LiveSource);
 };

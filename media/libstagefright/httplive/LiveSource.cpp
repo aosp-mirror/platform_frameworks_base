@@ -31,6 +31,7 @@ namespace android {
 LiveSource::LiveSource(const char *url)
     : mMasterURL(url),
       mInitCheck(NO_INIT),
+      mDurationUs(-1),
       mPlaylistIndex(0),
       mLastFetchTimeUs(-1),
       mSource(new NuHTTPDataSource),
@@ -40,6 +41,8 @@ LiveSource::LiveSource(const char *url)
       mPrevBandwidthIndex(-1) {
     if (switchToNext()) {
         mInitCheck = OK;
+
+        determineSeekability();
     }
 }
 
@@ -139,7 +142,7 @@ bool LiveSource::loadPlaylist(bool fetchMaster) {
         }
 #else
         // Stay on the lowest bandwidth available.
-        size_t index = 0;  // Lowest bandwidth stream
+        size_t index = mBandwidthItems.size() - 1;  // Highest bandwidth stream
 #endif
 
         mURL = mBandwidthItems.editItemAt(index).mURI;
@@ -334,6 +337,71 @@ status_t LiveSource::fetchM3U(const char *url, sp<ABuffer> *out) {
     *out = buffer;
 
     return OK;
+}
+
+bool LiveSource::seekTo(int64_t seekTimeUs) {
+    LOGV("seek to %lld us", seekTimeUs);
+
+    if (!mPlaylist->isComplete()) {
+        return false;
+    }
+
+    int32_t targetDuration;
+    if (!mPlaylist->meta()->findInt32("target-duration", &targetDuration)) {
+        return false;
+    }
+
+    int64_t seekTimeSecs = (seekTimeUs + 500000ll) / 1000000ll;
+
+    int64_t index = seekTimeSecs / targetDuration;
+
+    if (index < 0 || index >= mPlaylist->size()) {
+        return false;
+    }
+
+    size_t newPlaylistIndex = mFirstItemSequenceNumber + index;
+
+    if (newPlaylistIndex == mPlaylistIndex) {
+        return false;
+    }
+
+    mPlaylistIndex = newPlaylistIndex;
+
+    switchToNext();
+    mOffsetBias = 0;
+
+    LOGV("seeking to index %lld", index);
+
+    return true;
+}
+
+bool LiveSource::getDuration(int64_t *durationUs) const {
+    if (mDurationUs >= 0) {
+        *durationUs = mDurationUs;
+        return true;
+    }
+
+    *durationUs = 0;
+    return false;
+}
+
+bool LiveSource::isSeekable() const {
+    return mDurationUs >= 0;
+}
+
+void LiveSource::determineSeekability() {
+    mDurationUs = -1;
+
+    if (!mPlaylist->isComplete()) {
+        return;
+    }
+
+    int32_t targetDuration;
+    if (!mPlaylist->meta()->findInt32("target-duration", &targetDuration)) {
+        return;
+    }
+
+    mDurationUs = targetDuration * 1000000ll * mPlaylist->size();
 }
 
 }  // namespace android
