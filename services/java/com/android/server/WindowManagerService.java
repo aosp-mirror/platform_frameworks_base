@@ -804,7 +804,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         // stop intercepting input
                         mDragState.unregister();
-                        mInputMonitor.updateInputWindowsLw();
+                        synchronized (mWindowMap) {
+                            mInputMonitor.updateInputWindowsLw();
+                        }
 
                         // free our resources and drop all the object references
                         mDragState.reset();
