@@ -478,7 +478,7 @@ class BrowserFrame extends Handler {
                             .getCurrentItem();
                     if (item != null) {
                         WebAddress uri = new WebAddress(item.getUrl());
-                        String schemePlusHost = uri.mScheme + uri.mHost;
+                        String schemePlusHost = uri.getScheme() + uri.getHost();
                         String[] up =
                                 mDatabase.getUsernamePassword(schemePlusHost);
                         if (up != null && up[0] != null) {
@@ -811,7 +811,7 @@ class BrowserFrame extends Handler {
                     }
                     WebAddress uri = new WebAddress(mCallbackProxy
                             .getBackForwardList().getCurrentItem().getUrl());
-                    String schemePlusHost = uri.mScheme + uri.mHost;
+                    String schemePlusHost = uri.getScheme() + uri.getHost();
                     String[] ret = getUsernamePassword();
                     // Has the user entered a username/password pair and is
                     // there some POST data

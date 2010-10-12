@@ -26,15 +26,15 @@ public class WebAddressTest extends TestCase {
     @SmallTest
     public void testHostWithTrailingDot() {
         WebAddress webAddress = new WebAddress("http://google.com./b/c/g");
-        assertEquals("google.com.", webAddress.mHost);
-        assertEquals("/b/c/g", webAddress.mPath);
+        assertEquals("google.com.", webAddress.getHost());
+        assertEquals("/b/c/g", webAddress.getPath());
     }
 
     // http://b/1011602
     @SmallTest
     public void testPathWithoutLeadingSlash() {
         WebAddress webAddress = new WebAddress("http://www.myspace.com?si=1");
-        assertEquals("www.myspace.com", webAddress.mHost);
-        assertEquals("/?si=1", webAddress.mPath);
+        assertEquals("www.myspace.com", webAddress.getHost());
+        assertEquals("/?si=1", webAddress.getPath());
     }
 }

@@ -327,10 +327,10 @@ public class RequestQueue implements RequestFeeder {
 
         /* Create and queue request */
         Request req;
-        HttpHost httpHost = new HttpHost(uri.mHost, uri.mPort, uri.mScheme);
+        HttpHost httpHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
 
         // set up request
-        req = new Request(method, httpHost, mProxyHost, uri.mPath, bodyProvider,
+        req = new Request(method, httpHost, mProxyHost, uri.getPath(), bodyProvider,
                           bodyLength, eventHandler, headers);
 
         queueRequest(req, false);
@@ -375,9 +375,9 @@ public class RequestQueue implements RequestFeeder {
             HttpLog.v("RequestQueue.dispatchSynchronousRequest " + uri);
         }
 
-        HttpHost host = new HttpHost(uri.mHost, uri.mPort, uri.mScheme);
+        HttpHost host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
 
-        Request req = new Request(method, host, mProxyHost, uri.mPath,
+        Request req = new Request(method, host, mProxyHost, uri.getPath(),
                 bodyProvider, bodyLength, eventHandler, headers);
 
         // Open a new connection that uses our special RequestFeeder
