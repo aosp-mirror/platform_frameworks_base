@@ -254,12 +254,34 @@
             <li><a href="<?cs var:toroot?>guide/topics/search/searchable-config.html">Searchable Configuration</a></li>
           </ul>
       </li>
-      <li><a href="<?cs var:toroot?>guide/topics/testing/testing_android.html">
-            <span class="en">Testing and Instrumentation</span>
-          </a></li>
+      <li class="toggle-list">
+           <div>
+                <a href="<?cs var:toroot ?>guide/topics/testing/index.html">
+                   <span class="en">Testing</span>
+               </a> <span class="new">new!</span>
+           </div>
+           <ul>
+              <li><a href="<?cs var:toroot?>guide/topics/testing/testing_android.html">
+                <span class="en">Testing Fundamentals</span></a>
+              </li>
+              <li><a href="<?cs var:toroot?>guide/topics/testing/activity_testing.html">
+                <span class="en">Activity Testing</span></a>
+              </li>
+              <li><a href="<?cs var:toroot ?>guide/topics/testing/contentprovider_testing.html">
+                <span class="en">Content Provider Testing</span></a>
+              </li>
+              <li><a href="<?cs var:toroot ?>guide/topics/testing/service_testing.html">
+                <span class="en">Service Testing</span></a>
+              </li>
+              <li><a href="<?cs var:toroot ?>guide/topics/testing/what_to_test.html">
+                <span class="en">What To Test</span></a>
+              </li>
+           </ul>
+      </li>
      <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
             <span class="en">Device Administration</span>
-         </a> <span class="new">new!</span><!-- 10/8/10 --></li>
+         </a> <span class="new">new!</span>
+    </li>
     </ul>
   </li>
 
