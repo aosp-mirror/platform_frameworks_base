@@ -238,7 +238,7 @@ public final class SIMRecords extends IccRecords {
         msisdn = number;
         msisdnTag = alphaTag;
 
-        if(DBG) log("Set MSISDN: " + msisdnTag +" " + msisdn);
+        if(DBG) log("Set MSISDN: " + msisdnTag + " " + /*msisdn*/ "xxxxxxx");
 
 
         AdnRecord adn = new AdnRecord(msisdnTag, msisdn);
@@ -496,7 +496,7 @@ public final class SIMRecords extends IccRecords {
                     imsi = null;
                 }
 
-                Log.d(LOG_TAG, "IMSI: " + imsi.substring(0, 6) + "xxxxxxxxx");
+                Log.d(LOG_TAG, "IMSI: " + imsi.substring(0, 6) + "xxxxxxx");
 
                 if (mncLength == UNKNOWN) {
                     // the SIM has told us all it knows, but it didn't know the mnc length.
@@ -619,7 +619,7 @@ public final class SIMRecords extends IccRecords {
                 msisdn = adn.getNumber();
                 msisdnTag = adn.getAlphaTag();
 
-                Log.d(LOG_TAG, "MSISDN: " + msisdn);
+                Log.d(LOG_TAG, "MSISDN: " + /*msisdn*/ "xxxxxxx");
             break;
 
             case EVENT_SET_MSISDN_DONE:
