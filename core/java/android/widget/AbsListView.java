@@ -2965,7 +2965,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int firstPos = mFirstPosition;
             final int lastPos = firstPos + getChildCount() - 1;
             
-            int viewTravelCount = 0;
+            int viewTravelCount;
             if (position <= firstPos) {                
                 viewTravelCount = firstPos - position + 1;
                 mMode = MOVE_UP_POS;
@@ -2998,7 +2998,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int firstPos = mFirstPosition;
             final int lastPos = firstPos + getChildCount() - 1;
             
-            int viewTravelCount = 0;
+            int viewTravelCount;
             if (position <= firstPos) {
                 final int boundPosFromLast = lastPos - boundPosition;
                 if (boundPosFromLast < 1) {
@@ -3059,7 +3059,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int childCount = getChildCount();
             final int lastPos = firstPos + childCount - 1;
 
-            int viewTravelCount = 0;
+            int viewTravelCount;
             if (position < firstPos) {
                 viewTravelCount = firstPos - position;
             } else if (position > lastPos) {
@@ -3246,6 +3246,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 break;
             }
         }
+    }
+    
+    /**
+     * The amount of friction applied to flings. The default value
+     * is {@link ViewConfiguration#getScrollFriction}.
+     * 
+     * @return A scalar dimensionless value representing the coefficient of
+     *         friction.
+     */
+    public void setFriction(float friction) {
+        if (mFlingRunnable == null) {
+            mFlingRunnable = new FlingRunnable();
+        }
+        mFlingRunnable.mScroller.setFriction(friction);        
     }
     
     /**
@@ -3581,22 +3595,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return The position of the first (or only) item in the row containing y
      */
     abstract int findMotionRow(int y);
-    
-    /**
-     * Find the row closest to y. This row will be used as the motion row when scrolling.
-     * 
-     * @param y Where the user touched
-     * @return The position of the first (or only) item in the row closest to y
-     */
-    int findClosestMotionRow(int y) {
-        final int childCount = getChildCount();
-        if (childCount == 0) {
-            return INVALID_POSITION;
-        }
-        
-        final int motionRow = findMotionRow(y);
-        return motionRow != INVALID_POSITION ? motionRow : mFirstPosition + childCount - 1;
-    }
 
     /**
      * Causes all the views to be rebuilt and redrawn.
