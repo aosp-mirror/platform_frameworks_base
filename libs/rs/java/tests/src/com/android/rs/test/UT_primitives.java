@@ -64,12 +64,24 @@ public class UT_primitives extends UnitTest {
         }
         s.set_longTest(17179869185l);
 
+        long puL = s.get_ulongTest();
+        if (puL != 4611686018427387904L) {
+            return false;
+        }
+        s.set_ulongTest(4611686018427387903L);
+
+
         long pLL = s.get_longlongTest();
         if (pLL != 68719476736L) {
             return false;
         }
         s.set_longlongTest(68719476735L);
-        //s.set_longlongTest(0);
+
+        long pu64 = s.get_uint64_tTest();
+        if (pu64 != 117179869184l) {
+            return false;
+        }
+        s.set_uint64_tTest(117179869185l);
 
         return true;
     }
