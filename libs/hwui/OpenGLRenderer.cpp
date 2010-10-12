@@ -689,8 +689,8 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 }
 
 void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-        uint32_t width, uint32_t height, float left, float top, float right, float bottom,
-        const SkPaint* paint) {
+        const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
     if (quickReject(left, top, right, bottom)) {
         return;
     }
@@ -705,7 +705,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     getAlphaAndMode(paint, &alpha, &mode);
 
     const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
-            right - left, bottom - top, xDivs, yDivs, width, height);
+            right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size
