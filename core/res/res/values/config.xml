@@ -148,6 +148,9 @@
     <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
+
+    <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
+    <bool name="config_unplugTurnsOnScreen">false</bool>
     
     <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
 
@@ -351,7 +354,7 @@
     <integer name="config_datause_notification_type">2</integer>
 
     <!-- Enables SIP on WIFI only -->
-    <bool name="config_sip_wifi_only">false</bool>
+    <bool name="config_sip_wifi_only">true</bool>
 
     <!-- Boolean indicating if restoring network selection should be skipped -->
     <!-- The restoring is handled by modem if it is true-->

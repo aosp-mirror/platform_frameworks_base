@@ -35,7 +35,12 @@ import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.AudioService;
-import android.os.*;
+import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.StrictMode;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.Contacts.People;
 import android.provider.Settings;
 import android.server.BluetoothA2dpService;
@@ -573,6 +578,10 @@ public class SystemServer
     static Timer timer;
     static final long SNAPSHOT_INTERVAL = 60 * 60 * 1000; // 1hr
 
+    // The earliest supported time.  We pick one day into 1970, to
+    // give any timezone code room without going into negative time.
+    private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
+
     /**
      * This method is called from Zygote to initialize the system. This will cause the native
      * services (SurfaceFlinger, AudioFlinger, etc..) to be started. After that it will call back
@@ -581,6 +590,16 @@ public class SystemServer
     native public static void init1(String[] args);
 
     public static void main(String[] args) {
+        if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
+            // If a device's clock is before 1970 (before 0), a lot of
+            // APIs crash dealing with negative numbers, notably
+            // java.io.File#setLastModified, so instead we fake it and
+            // hope that time from cell towers or NTP fixes it
+            // shortly.
+            Slog.w(TAG, "System clock is before 1970; setting to 1970.");
+            SystemClock.setCurrentTimeMillis(EARLIEST_SUPPORTED_TIME);
+        }
+
         if (SamplingProfilerIntegration.isEnabled()) {
             SamplingProfilerIntegration.start();
             timer = new Timer();

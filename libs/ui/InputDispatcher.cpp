@@ -432,10 +432,9 @@ void InputDispatcher::dropInboundEventLocked(EventEntry* entry, DropReason dropR
     switch (dropReason) {
     case DROP_REASON_POLICY:
 #if DEBUG_INBOUND_EVENT_DETAILS
-        LOGD("Dropped event because policy requested that it not be delivered to the application.");
+        LOGD("Dropped event because policy consumed it.");
 #endif
-        reason = "inbound event was dropped because the policy requested that it not be "
-                "delivered to the application";
+        reason = "inbound event was dropped because the policy consumed it";
         break;
     case DROP_REASON_DISABLED:
         LOGI("Dropped event because input dispatch is disabled.");
@@ -625,15 +624,13 @@ bool InputDispatcher::dispatchKeyLocked(
         if (*dropReason == DROP_REASON_NOT_DROPPED) {
             *dropReason = DROP_REASON_POLICY;
         }
-        resetTargetsLocked();
-        setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_SUCCEEDED);
-        return true;
     }
 
     // Clean up if dropping the event.
     if (*dropReason != DROP_REASON_NOT_DROPPED) {
         resetTargetsLocked();
-        setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
+        setInjectionResultLocked(entry, *dropReason == DROP_REASON_POLICY
+                ? INPUT_EVENT_INJECTION_SUCCEEDED : INPUT_EVENT_INJECTION_FAILED);
         return true;
     }
 
@@ -713,7 +710,8 @@ bool InputDispatcher::dispatchMotionLocked(
     // Clean up if dropping the event.
     if (*dropReason != DROP_REASON_NOT_DROPPED) {
         resetTargetsLocked();
-        setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
+        setInjectionResultLocked(entry, *dropReason == DROP_REASON_POLICY
+                ? INPUT_EVENT_INJECTION_SUCCEEDED : INPUT_EVENT_INJECTION_FAILED);
         return true;
     }
 
@@ -3320,7 +3318,7 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
         }
     }
 
-    for (size_t i = 0; i < mMotionMementos.size(); i++) {
+    for (size_t i = 0; i < mMotionMementos.size(); ) {
         const MotionMemento& memento = mMotionMementos.itemAt(i);
         if (shouldCancelEvent(memento.source, options)) {
             outEvents.push(allocator->obtainMotionEntry(currentTime,

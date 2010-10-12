@@ -430,13 +430,14 @@ public:
     }
 
     void mountObb(const String16& filename, const String16& key,
-            const sp<IObbActionListener>& token)
+            const sp<IObbActionListener>& token, int32_t nonce)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
         data.writeString16(filename);
         data.writeString16(key);
         data.writeStrongBinder(token->asBinder());
+        data.writeInt32(nonce);
         if (remote()->transact(TRANSACTION_mountObb, data, &reply) != NO_ERROR) {
             LOGD("mountObb could not contact remote\n");
             return;
@@ -448,12 +449,15 @@ public:
         }
     }
 
-    void unmountObb(const String16& filename, const bool force, const sp<IObbActionListener>& token)
+    void unmountObb(const String16& filename, const bool force,
+            const sp<IObbActionListener>& token, const int32_t nonce)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
         data.writeString16(filename);
         data.writeInt32(force ? 1 : 0);
+        data.writeStrongBinder(token->asBinder());
+        data.writeInt32(nonce);
         if (remote()->transact(TRANSACTION_unmountObb, data, &reply) != NO_ERROR) {
             LOGD("unmountObb could not contact remote\n");
             return;
