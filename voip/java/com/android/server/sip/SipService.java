@@ -868,6 +868,7 @@ public final class SipService extends ISipService.Stub {
                     case SipErrorCode.SERVER_UNREACHABLE:
                         if (DEBUG) Log.d(TAG, "   pause auto-registration");
                         stop();
+                        break;
                     default:
                         restartLater();
                 }
