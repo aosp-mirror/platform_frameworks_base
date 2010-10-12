@@ -25,6 +25,20 @@ import android.util.SparseArray;
  */
 public class ViewConfiguration {
     /**
+     * Expected bit depth of the display panel.
+     * 
+     * @hide
+     */
+    public static final float PANEL_BIT_DEPTH = 24;
+
+    /**
+     * Minimum alpha required for a view to draw.
+     * 
+     * @hide
+     */
+    public static final float ALPHA_THRESHOLD = 0.5f / PANEL_BIT_DEPTH;
+    
+    /**
      * Defines the width of the horizontal scrollbar and the height of the vertical scrollbar in
      * pixels
      */

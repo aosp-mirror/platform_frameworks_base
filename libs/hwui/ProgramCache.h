@@ -45,7 +45,7 @@ namespace uirenderer {
 #endif
 
 // TODO: This should be set in properties
-#define PANEL_BIT_DEPTH 18
+#define PANEL_BIT_DEPTH 20
 #define COLOR_COMPONENT_THRESHOLD (1.0f - (0.5f / PANEL_BIT_DEPTH))
 #define COLOR_COMPONENT_INV_THRESHOLD (0.5f / PANEL_BIT_DEPTH)
 
