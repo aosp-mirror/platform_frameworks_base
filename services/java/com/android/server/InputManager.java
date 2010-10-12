@@ -384,11 +384,6 @@ public class InputManager {
         private static final String CALIBRATION_DIR_PATH = "usr/idc/";
         
         @SuppressWarnings("unused")
-        public void virtualKeyDownFeedback() {
-            mWindowManagerService.mInputMonitor.virtualKeyDownFeedback();
-        }
-        
-        @SuppressWarnings("unused")
         public void notifyConfigurationChanged(long whenNanos) {
             mWindowManagerService.sendNewConfiguration();
         }
