@@ -387,7 +387,8 @@ public class SipPhone extends SipPhoneBase {
             try {
                 SipProfile callee =
                         new SipProfile.Builder(calleeSipUri).build();
-                SipConnection c = new SipConnection(this, callee);
+                SipConnection c = new SipConnection(this, callee,
+                        originalNumber);
                 connections.add(c);
                 c.dial();
                 setState(Call.State.DIALING);
@@ -578,6 +579,7 @@ public class SipPhone extends SipPhoneBase {
         private SipAudioCall mSipAudioCall;
         private Call.State mState = Call.State.IDLE;
         private SipProfile mPeer;
+        private String mOriginalNumber; // may be a PSTN number
         private boolean mIncoming = false;
 
         private SipAudioCallAdapter mAdapter = new SipAudioCallAdapter() {
@@ -659,10 +661,16 @@ public class SipPhone extends SipPhoneBase {
             }
         };
 
-        public SipConnection(SipCall owner, SipProfile callee) {
-            super(getUriString(callee));
+        public SipConnection(SipCall owner, SipProfile callee,
+                String originalNumber) {
+            super(originalNumber);
             mOwner = owner;
             mPeer = callee;
+            mOriginalNumber = originalNumber;
+        }
+
+        public SipConnection(SipCall owner, SipProfile callee) {
+            this(owner, callee, getUriString(callee));
         }
 
         void initIncomingCall(SipAudioCall sipAudioCall, Call.State newState) {
@@ -735,7 +743,10 @@ public class SipPhone extends SipPhoneBase {
 
         @Override
         public String getAddress() {
-            return getUriString(mPeer);
+            // Phone app uses this to query caller ID. Return the original dial
+            // number (which may be a PSTN number) instead of the peer's SIP
+            // URI.
+            return mOriginalNumber;
         }
 
         @Override
