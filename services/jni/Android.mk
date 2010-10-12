@@ -23,7 +23,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
     libsystem_server \
 	libutils \
-	libui
+	libui \
+    libsurfaceflinger_client
 
 ifeq ($(TARGET_SIMULATOR),true)
 ifeq ($(TARGET_OS),linux)
