@@ -30,7 +30,7 @@ public:
         : BpInterface<IObbActionListener>(impl)
     { }
 
-    virtual void onObbResult(const String16& filename, const String16& status) { }
+    virtual void onObbResult(const String16& filename, const int32_t nonce, const int32_t state) { }
 };
 
 IMPLEMENT_META_INTERFACE(ObbActionListener, "IObbActionListener");
@@ -44,8 +44,9 @@ status_t BnObbActionListener::onTransact(
         case TRANSACTION_onObbResult: {
             CHECK_INTERFACE(IObbActionListener, data, reply);
             String16 filename = data.readString16();
-            String16 state = data.readString16();
-            onObbResult(filename, state);
+            int32_t nonce = data.readInt32();
+            int32_t state = data.readInt32();
+            onObbResult(filename, nonce, state);
             reply->writeNoException();
             return NO_ERROR;
         } break;

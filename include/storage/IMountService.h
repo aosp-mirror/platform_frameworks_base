@@ -61,9 +61,9 @@ public:
     virtual void shutdown(const sp<IMountShutdownObserver>& observer) = 0;
     virtual void finishMediaUpdate() = 0;
     virtual void mountObb(const String16& filename, const String16& key,
-            const sp<IObbActionListener>& token) = 0;
+            const sp<IObbActionListener>& token, const int32_t nonce) = 0;
     virtual void unmountObb(const String16& filename, const bool force,
-            const sp<IObbActionListener>& token) = 0;
+            const sp<IObbActionListener>& token, const int32_t nonce) = 0;
     virtual bool isObbMounted(const String16& filename) = 0;
     virtual bool getMountedObbPath(const String16& filename, String16& path) = 0;
 };
