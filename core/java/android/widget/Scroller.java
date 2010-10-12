@@ -92,7 +92,7 @@ public class Scroller  {
      *         friction.
      */
     public final void setFriction(float friction) {
-        computeDeceleration(friction);
+        mDeceleration = computeDeceleration(friction);
     }
     
     private float computeDeceleration(float friction) {
