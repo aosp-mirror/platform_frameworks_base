@@ -16,7 +16,8 @@
 
 <com.android.internal.view.menu.ActionMenuItemView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:layout_gravity="center">
     <ImageButton android:id="@+id/imageButton"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"
@@ -28,5 +29,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone"
-            android:background="?attr/listChoiceBackgroundIndicator" />
+            android:background="?attr/groupButtonBackground"
+            style="?attr/buttonStyleSmall" />
 </com.android.internal.view.menu.ActionMenuItemView>

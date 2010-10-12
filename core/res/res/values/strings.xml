@@ -2402,4 +2402,6 @@
     <!-- Label for selecting the input method to use -->
     <string name="ime_enabler_subtype_title">Select inputmethods in <xliff:g id="ime_application_name">%1$s</xliff:g></string>
 
+    <!-- Label for the "Done" button on the far left of action mode toolbars. -->
+    <string name="action_mode_done">Done</string>
 </resources>
