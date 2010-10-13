@@ -68,7 +68,6 @@ void LayerCache::setMaxSize(uint32_t maxSize) {
 void LayerCache::deleteLayer(Layer* layer) {
     if (layer) {
         mSize -= layer->width * layer->height * 4;
-
         glDeleteTextures(1, &layer->texture);
         delete layer;
     }
@@ -133,12 +132,16 @@ bool LayerCache::put(Layer* layer) {
     if (size < mMaxSize) {
         // TODO: Use an LRU
         while (mSize + size > mMaxSize) {
-            Layer* biggest = mCache.top().mLayer;
-            deleteLayer(biggest);
-            mCache.removeAt(mCache.size() - 1);
+            size_t position = 0;
+#if LAYER_REMOVE_BIGGEST
+            position = mCache.size() - 1;
+#endif
+            Layer* victim = mCache.itemAt(position).mLayer;
+            deleteLayer(victim);
+            mCache.removeAt(position);
 
-            LAYER_LOGD("  Deleting layer %.2fx%.2f", biggest->layer.getWidth(),
-                    biggest->layer.getHeight());
+            LAYER_LOGD("  Deleting layer %.2fx%.2f", victim->layer.getWidth(),
+                    victim->layer.getHeight());
         }
 
         LayerEntry entry(layer);

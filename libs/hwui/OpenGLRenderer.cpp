@@ -441,6 +441,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                 layer->texture, 0);
 
+#if DEBUG_LAYERS
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LOGE("Framebuffer incomplete (GL error code 0x%x)", status);
@@ -453,6 +454,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
             return false;
         }
+#endif
 
         // Clear the FBO
         glDisable(GL_SCISSOR_TEST);
