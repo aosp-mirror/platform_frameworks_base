@@ -43,6 +43,7 @@ public:
         eSecure             = 0x00000080,
         eNonPremultiplied   = 0x00000100,
         ePushBuffers        = 0x00000200,
+        eOpaque             = 0x00000400,
 
         eFXSurfaceNormal    = 0x00000000,
         eFXSurfaceBlur      = 0x00010000,

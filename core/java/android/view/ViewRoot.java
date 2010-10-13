@@ -472,7 +472,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     mAttachInfo.mHardwareRenderer.destroy(true);
                 }                
                 mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
-                mAttachInfo.mHardwareAccelerated = true;
+                mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareRenderer != null;
             }
         }
     }
@@ -1692,6 +1692,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     public final static int CHECK_FOCUS = 1013;
     public final static int CLOSE_SYSTEM_DIALOGS = 1014;
     public final static int DISPATCH_DRAG_EVENT = 1015;
+    public final static int DISPATCH_DRAG_LOCATION_EVENT = 1016;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1867,7 +1868,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 mView.onCloseSystemDialogs((String)msg.obj);
             }
         } break;
-        case DISPATCH_DRAG_EVENT: {
+        case DISPATCH_DRAG_EVENT:
+        case DISPATCH_DRAG_LOCATION_EVENT: {
             handleDragEvent((DragEvent)msg.obj);
         } break;
         }
@@ -2518,7 +2520,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Unable to note drag target change");
                     }
-                    mCurrentDragView = prevDragView;
                 }
             }
         }
@@ -2538,13 +2539,13 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 event.mAction = DragEvent.ACTION_DRAG_EXITED;
                 mCurrentDragView.dispatchDragEvent(event);
             }
+            mCurrentDragView = newDragTarget;
         }
         // If we've dragged over a new view, send it the ENTERED message
         if (newDragTarget != null) {
             event.mAction = DragEvent.ACTION_DRAG_ENTERED;
             newDragTarget.dispatchDragEvent(event);
         }
-        mCurrentDragView = newDragTarget;
         event.mAction = action;  // restore the event's original state
     }
 
@@ -2841,7 +2842,14 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     }
 
     public void dispatchDragEvent(DragEvent event) {
-        Message msg = obtainMessage(DISPATCH_DRAG_EVENT, event);
+        final int what;
+        if (event.getAction() == DragEvent.ACTION_DRAG_LOCATION) {
+            what = DISPATCH_DRAG_LOCATION_EVENT;
+            removeMessages(what);
+        } else {
+            what = DISPATCH_DRAG_EVENT;
+        }
+        Message msg = obtainMessage(what, event);
         sendMessage(msg);
     }
 

@@ -508,6 +508,13 @@
         <!-- Drawable to use for the close action mode button -->
         <attr name="actionModeCloseDrawable" format="reference" />
 
+        <!-- Drawable to use for the Cut action button in Contextual Action Bar -->
+        <attr name="actionModeCutDrawable" format="reference" />
+        <!-- Drawable to use for the Copy action button in Contextual Action Bar -->
+        <attr name="actionModeCopyDrawable" format="reference" />
+        <!-- Drawable to use for the Paste action button in Contextual Action Bar -->
+        <attr name="actionModePasteDrawable" format="reference" />
+        
         <!-- =================== -->
         <!-- Preference styles   -->
         <!-- =================== -->
@@ -559,6 +566,9 @@
 
         <!-- Style for button groups -->
         <attr name="buttonGroupStyle" format="reference" />
+
+        <!-- Drawable for group button backgrounds -->
+        <attr name="groupButtonBackground" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -4202,5 +4212,11 @@
         <attr name="divider" />
         <!-- Drawable to use as a background for buttons added to this group. -->
         <attr name="buttonBackground" format="reference" />
+        <!-- Setting for which dividers to show. -->
+        <attr name="showDividers">
+            <flag name="beginning" value="1" />
+            <flag name="middle" value="2" />
+            <flag name="end" value="4" />
+        </attr>
     </declare-styleable>
 </resources>

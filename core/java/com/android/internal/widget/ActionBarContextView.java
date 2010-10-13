@@ -21,13 +21,13 @@ import com.android.internal.view.menu.MenuBuilder;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
+import android.widget.Button;
+import android.widget.ButtonGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -40,8 +40,8 @@ public class ActionBarContextView extends ViewGroup {
     
     private CharSequence mTitle;
     private CharSequence mSubtitle;
-    
-    private ImageButton mCloseButton;
+
+    private View mClose;
     private View mCustomView;
     private LinearLayout mTitleLayout;
     private TextView mTitleView;
@@ -120,7 +120,8 @@ public class ActionBarContextView extends ViewGroup {
     private void initTitle() {
         if (mTitleLayout == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            mTitleLayout = (LinearLayout) inflater.inflate(R.layout.action_bar_title_item, null);
+            inflater.inflate(R.layout.action_bar_title_item, this);
+            mTitleLayout = (LinearLayout) getChildAt(getChildCount() - 1);
             mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
             mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
             if (mTitle != null) {
@@ -136,7 +137,6 @@ public class ActionBarContextView extends ViewGroup {
                 }
                 mSubtitleView.setVisibility(VISIBLE);
             }
-            addView(mTitleLayout);
         } else {
             mTitleView.setText(mTitle);
             mSubtitleView.setText(mSubtitle);
@@ -148,16 +148,20 @@ public class ActionBarContextView extends ViewGroup {
     }
 
     public void initForMode(final ActionMode mode) {
-        if (mCloseButton == null) {
-            mCloseButton = new ImageButton(getContext(), null,
-                    com.android.internal.R.attr.actionModeCloseButtonStyle);
+        if (mClose == null) {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            inflater.inflate(R.layout.action_mode_close_item, this);
+            mClose = getChildAt(getChildCount() - 1);
+        } else {
+            addView(mClose);
         }
-        mCloseButton.setOnClickListener(new OnClickListener() {
+
+        View closeButton = mClose.findViewById(R.id.action_mode_close_button);
+        closeButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 mode.finish();
             }
         });
-        addView(mCloseButton);
 
         final MenuBuilder menu = (MenuBuilder) mode.getMenu();
         mMenuView = (ActionMenuView) menu.getMenuView(MenuBuilder.TYPE_ACTION_BUTTON, this);
@@ -224,8 +228,8 @@ public class ActionBarContextView extends ViewGroup {
         final int height = maxHeight - verticalPadding;
         final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
         
-        if (mCloseButton != null) {
-            availableWidth = measureChildView(mCloseButton, availableWidth, childSpecHeight, 0);
+        if (mClose != null) {
+            availableWidth = measureChildView(mClose, availableWidth, childSpecHeight, 0);
         }
 
         if (mTitleLayout != null && mCustomView == null) {
@@ -235,7 +239,7 @@ public class ActionBarContextView extends ViewGroup {
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
-            if (child == mCloseButton || child == mTitleLayout || child == mCustomView) {
+            if (child == mClose || child == mTitleLayout || child == mCustomView) {
                 continue;
             }
             
@@ -278,8 +282,8 @@ public class ActionBarContextView extends ViewGroup {
         final int y = getPaddingTop();
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
         
-        if (mCloseButton != null && mCloseButton.getVisibility() != GONE) {
-            x += positionChild(mCloseButton, x, y, contentHeight);
+        if (mClose != null && mClose.getVisibility() != GONE) {
+            x += positionChild(mClose, x, y, contentHeight);
         }
         
         if (mTitleLayout != null && mCustomView == null) {

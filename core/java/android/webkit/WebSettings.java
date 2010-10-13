@@ -219,6 +219,32 @@ public class WebSettings {
     private boolean         mLoadWithOverviewMode = false;
     private boolean         mEnableSmoothTransition = false;
 
+    // AutoFill Profile data
+    /**
+     * @hide for now, pending API council approval.
+     */
+    public static class AutoFillProfile {
+        private String mFullName;
+        private String mEmailAddress;
+
+        public AutoFillProfile() {
+        }
+
+        public AutoFillProfile(String fullName, String email) {
+            mFullName = fullName;
+            mEmailAddress = email;
+        }
+
+        public void setFullName(String fullName) { mFullName = fullName; }
+        public void setEmailAddress(String emailAddress) { mEmailAddress = emailAddress; }
+
+        public String getFullName() { return mFullName; }
+        public String getEmailAddress() { return mEmailAddress; }
+    }
+
+
+    private AutoFillProfile mAutoFillProfile;
+
     // private WebSettings, not accessible by the host activity
     static private int      mDoubleTapToastCount = 3;
 
@@ -594,20 +620,6 @@ public class WebSettings {
      */
     public boolean getSaveFormData() {
         return mSaveFormData;
-    }
-
-    /**
-     * @hide
-     */
-    public void setAutoFillEnabled(boolean enabled) {
-        mAutoFillEnabled = enabled;
-    }
-
-    /**
-     * @hide
-     */
-    public boolean getAutoFillEnabled() {
-        return mAutoFillEnabled;
     }
 
     /**
@@ -1566,6 +1578,31 @@ public class WebSettings {
             mSyntheticLinksEnabled = flag;
             postSync();
         }
+    }
+
+    /**
+     * @hide
+     */
+    public synchronized void setAutoFillEnabled(boolean enabled) {
+        if (mAutoFillEnabled != enabled) {
+            mAutoFillEnabled = enabled;
+            postSync();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public synchronized boolean getAutoFillEnabled() {
+        return mAutoFillEnabled;
+    }
+
+    /**
+     * @hide
+     */
+    public synchronized void setAutoFillProfile(AutoFillProfile profile) {
+        mAutoFillProfile = profile;
+        postSync();
     }
 
     int getDoubleTapToastCount() {

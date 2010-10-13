@@ -126,8 +126,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IPowerManager.aidl \
     core/java/android/os/IRemoteCallback.aidl \
 	core/java/android/os/IVibratorService.aidl \
-	core/java/android/service/urlrenderer/IUrlRendererService.aidl \
-	core/java/android/service/urlrenderer/IUrlRendererCallback.aidl \
     core/java/android/service/wallpaper/IWallpaperConnection.aidl \
     core/java/android/service/wallpaper/IWallpaperEngine.aidl \
     core/java/android/service/wallpaper/IWallpaperService.aidl \

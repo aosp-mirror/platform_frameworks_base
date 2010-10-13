@@ -72,11 +72,11 @@ void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcT
 }
 
 void OpenGLDebugRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-        uint32_t width, uint32_t height, float left, float top, float right, float bottom,
-        const SkPaint* paint) {
+        const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
     mPrimitivesCount++;
     StopWatch w("drawPatch");
-    OpenGLRenderer::drawPatch(bitmap, xDivs, yDivs, width, height,
+    OpenGLRenderer::drawPatch(bitmap, xDivs, yDivs, colors, width, height, numColors,
             left, top, right, bottom, paint);
 }
 

@@ -339,7 +339,6 @@ FontState::FontState()
     mCurrentQuadIndex = 0;
     mRSC = NULL;
     mLibrary = NULL;
-    setFontColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     // Get the renderer properties
     char property[PROPERTY_VALUE_MAX];
@@ -378,6 +377,8 @@ FontState::FontState()
     // Compute the gamma tables
     mBlackGamma = gamma;
     mWhiteGamma = 1.0f / gamma;
+
+    setFontColor(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
 FontState::~FontState()
@@ -831,6 +832,7 @@ void FontState::setFontColor(float r, float g, float b, float a) {
     } else if (luminance >= mWhiteThreshold) {
         mConstants.mGamma = mWhiteGamma;
     }
+
     mConstantsDirty = true;
 }
 

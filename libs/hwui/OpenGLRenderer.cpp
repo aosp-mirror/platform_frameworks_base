@@ -425,8 +425,6 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         snapshot->flags |= Snapshot::kFlagDirtyOrtho;
         snapshot->orthoMatrix.load(mOrthoMatrix);
 
-        setScissorFromClip();
-
         // Bind texture to FBO
         glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
         glBindTexture(GL_TEXTURE_2D, layer->texture);
@@ -441,6 +439,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                 layer->texture, 0);
 
+#if DEBUG_LAYERS
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LOGE("Framebuffer incomplete (GL error code 0x%x)", status);
@@ -453,12 +452,14 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
             return false;
         }
+#endif
 
         // Clear the FBO
-        glDisable(GL_SCISSOR_TEST);
+        glScissor(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glEnable(GL_SCISSOR_TEST);
+
+        setScissorFromClip();
 
         // Change the ortho projection
         glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
@@ -467,19 +468,14 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         // Copy the framebuffer into the layer
         glBindTexture(GL_TEXTURE_2D, layer->texture);
 
-        // TODO: Workaround for b/3054204
-        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-                layer->width, layer->height, 0);
-
-        // TODO: Waiting for b/3054204 to be fixed
-        // if (layer->empty) {
-        //     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-        //             layer->width, layer->height, 0);
-        //     layer->empty = false;
-        // } else {
-        //     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
-        //             bounds.getWidth(), bounds.getHeight());
-        //  }
+         if (layer->empty) {
+             glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
+                     layer->width, layer->height, 0);
+             layer->empty = false;
+         } else {
+             glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
+                     bounds.getWidth(), bounds.getHeight());
+          }
 
         // Enqueue the buffer coordinates to clear the corresponding region later
         mLayers.push(new Rect(bounds));
@@ -694,8 +690,8 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 }
 
 void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
-        uint32_t width, uint32_t height, float left, float top, float right, float bottom,
-        const SkPaint* paint) {
+        const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
+        float left, float top, float right, float bottom, const SkPaint* paint) {
     if (quickReject(left, top, right, bottom)) {
         return;
     }
@@ -710,7 +706,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     getAlphaAndMode(paint, &alpha, &mode);
 
     const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
-            right - left, bottom - top, xDivs, yDivs, width, height);
+            right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
 
     // Specify right and bottom as +1.0f from left/top to prevent scaling since the
     // patch mesh already defines the final size

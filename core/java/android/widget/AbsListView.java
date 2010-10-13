@@ -505,6 +505,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private Runnable mClearScrollingCache;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
+    private float mVelocityScale = 1.0f;
     
     final boolean[] mIsScrap = new boolean[1];
     
@@ -2596,7 +2597,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     } else {
                         final VelocityTracker velocityTracker = mVelocityTracker;
                         velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                        final int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
+                        final int initialVelocity = (int)
+                                (velocityTracker.getYVelocity(mActivePointerId) * mVelocityScale);
     
                         if (Math.abs(initialVelocity) > mMinimumVelocity) {
                             if (mFlingRunnable == null) {
@@ -2865,14 +2867,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         private void endFling() {
             mTouchMode = TOUCH_MODE_REST;
 
-            reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
-            clearScrollingCache();
-
             removeCallbacks(this);
-
             if (mPositionScroller != null) {
                 removeCallbacks(mPositionScroller);
             }
+
+            reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+            clearScrollingCache();
         }
 
         public void run() {
@@ -3260,6 +3261,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mFlingRunnable = new FlingRunnable();
         }
         mFlingRunnable.mScroller.setFriction(friction);        
+    }
+
+    /**
+     * Sets a scale factor for the fling velocity. The initial scale
+     * factor is 1.0.
+     * 
+     * @param scale The scale factor to multiply the velocity by.
+     */
+    public void setVelocityScale(float scale) {
+        mVelocityScale = scale;
     }
     
     /**

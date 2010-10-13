@@ -30,6 +30,8 @@ namespace uirenderer {
 // Debug
 #define DEBUG_LAYERS 0
 
+// Indicates whether to remove the biggest layers first, or the smaller ones
+#define LAYER_REMOVE_BIGGEST 0
 // Textures used by layers must have dimensions multiples of this number
 #define LAYER_SIZE 64
 

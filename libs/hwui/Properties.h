@@ -44,8 +44,8 @@
 // Converts a number of mega-bytes into bytes
 #define MB(s) s * 1024 * 1024
 
-#define DEFAULT_TEXTURE_CACHE_SIZE 22.0f
-#define DEFAULT_LAYER_CACHE_SIZE 4.0f
+#define DEFAULT_TEXTURE_CACHE_SIZE 20.0f
+#define DEFAULT_LAYER_CACHE_SIZE 6.0f
 #define DEFAULT_PATH_CACHE_SIZE 4.0f
 #define DEFAULT_PATCH_CACHE_SIZE 512
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f

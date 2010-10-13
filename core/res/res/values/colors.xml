@@ -130,5 +130,12 @@
     <color name="highlighted_text_holo_light">#ccd2e461</color>
     <color name="link_text_holo_dark">#5c5cff</color>
     <color name="link_text_holo_light">#0000ee</color>
+
+    <!-- Group buttons -->
+    <color name="group_button_background_pressed_holo_dark">#46c5c1ff</color>
+    <color name="group_button_background_focused_holo_dark">#2699cc00</color>
+
+    <color name="group_button_background_pressed_holo_light">#ffffffff</color>
+    <color name="group_button_background_focused_holo_light">#4699cc00</color>
 </resources>
 

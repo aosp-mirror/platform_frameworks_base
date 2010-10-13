@@ -89,6 +89,8 @@
 
         <item name="buttonStyleToggle">@android:style/Widget.Button.Toggle</item>
 
+        <item name="groupButtonBackground">?android:attr/listChoiceBackgroundIndicator</item>
+
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
         <!-- @hide -->
@@ -236,6 +238,9 @@
         <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
         <item name="actionModeBackground">@android:drawable/action_bar_context_background</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
+        <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_dark</item>
+        <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_dark</item>
+        <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_dark</item>
         <item name="actionBarTabStyle">@style/Widget.ActionBarView_TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.ActionBarView_TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.ActionBarView_TabText</item>
@@ -311,6 +316,9 @@
         <item name="progressBarStyleInverse">@android:style/Widget.ProgressBar</item>
         <item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small</item>
         <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large</item>
+        <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_light</item>
+        <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_light</item>
+        <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_light</item>
     </style>
     
     <!-- Variant of the light theme with no title bar -->
@@ -683,6 +691,8 @@
 
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Button.Toggle</item>
 
+        <item name="groupButtonBackground">@android:drawable/group_button_background_holo_dark</item>
+
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
         <!-- @hide -->
@@ -752,8 +762,8 @@
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_middle</item>
-        <item name="textSelectHandleRight">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_left</item>
+        <item name="textSelectHandleRight">@android:drawable/text_select_handle_right</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@android:style/Widget.Holo.TextSelectHandle</item>
 
@@ -878,7 +888,7 @@
         <item name="textColorHighlightInverse">@android:color/highlighted_text_holo_dark</item>
         <item name="textColorLink">@android:color/link_text_holo_light</item>
         <item name="textColorLinkInverse">@android:color/link_text_holo_dark</item>
-        <item name="textColorAlertDialogListItem">@android:color/primary_text_holo_dark</item>
+        <item name="textColorAlertDialogListItem">@android:color/primary_text_holo_light</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Holo.Light.Large</item>
         <item name="textAppearanceMedium">@android:style/TextAppearance.Holo.Light.Medium</item>
@@ -909,6 +919,8 @@
         <item name="buttonStyleInset">@android:style/Widget.Holo.Light.Button.Inset</item>
 
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Light.Button.Toggle</item>
+
+        <item name="groupButtonBackground">@android:drawable/group_button_background_holo_light</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
@@ -979,8 +991,8 @@
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_middle</item>
-        <item name="textSelectHandleRight">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_left</item>
+        <item name="textSelectHandleRight">@android:drawable/text_select_handle_right</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@android:style/Widget.Holo.TextSelectHandle</item>
 
@@ -1016,7 +1028,7 @@
         <item name="scrollViewStyle">@android:style/Widget.Holo.ScrollView</item>
         <item name="horizontalScrollViewStyle">@android:style/Widget.Holo.HorizontalScrollView</item>
         <item name="spinnerStyle">?android:attr/dropDownSpinnerStyle</item>
-        <item name="dropDownSpinnerStyle">@android:style/Widget.Holo.Spinner.DropDown</item>
+        <item name="dropDownSpinnerStyle">@android:style/Widget.Holo.Light.Spinner.DropDown</item>
         <item name="starStyle">@android:style/Widget.Holo.CompoundButton.Star</item>
         <item name="tabWidgetStyle">@android:style/Widget.Holo.TabWidget</item>
         <item name="textViewStyle">@android:style/Widget.Holo.TextView</item>

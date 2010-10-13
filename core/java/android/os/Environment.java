@@ -31,7 +31,14 @@ public class Environment {
 
     private static final String SYSTEM_PROPERTY_EFS_ENABLED = "persist.security.efs.enabled";
 
-    private static IMountService mMntSvc = null;
+    private static class MountServiceHolder {
+        static IMountService mSingleton = IMountService.Stub.asInterface(ServiceManager
+                .getService("mount"));
+    }
+
+    private static final Object mLock = new Object();
+
+    private volatile static Boolean mIsExternalStorageEmulated = null;
 
     /**
      * Gets the Android root directory.
@@ -382,11 +389,8 @@ public class Environment {
      */
     public static String getExternalStorageState() {
         try {
-            if (mMntSvc == null) {
-                mMntSvc = IMountService.Stub.asInterface(ServiceManager
-                                                         .getService("mount"));
-            }
-            return mMntSvc.getVolumeState(getExternalStorageDirectory().toString());
+            return MountServiceHolder.mSingleton.getVolumeState(getExternalStorageDirectory()
+                    .toString());
         } catch (Exception rex) {
             return Environment.MEDIA_REMOVED;
         }
@@ -403,6 +407,32 @@ public class Environment {
     public static boolean isExternalStorageRemovable() {
         return Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_externalStorageRemovable);
+    }
+
+    /**
+     * Returns whether the device has an external storage device which is
+     * emulated. If true, the device does not have real external storage
+     * and certain system services such as the package manager use this
+     * to determine where to install an application.
+     *
+     * @hide
+     */
+    public static boolean isExternalStorageEmulated() {
+        if (mIsExternalStorageEmulated == null) {
+            synchronized (mLock) {
+                if (mIsExternalStorageEmulated == null) {
+                    boolean externalStorageEmulated;
+                    try {
+                        externalStorageEmulated =
+                                MountServiceHolder.mSingleton.isExternalStorageEmulated();
+                    } catch (Exception e) {
+                        externalStorageEmulated = false;
+                    }
+                    mIsExternalStorageEmulated = Boolean.valueOf(externalStorageEmulated);
+                }
+            }
+        }
+        return mIsExternalStorageEmulated;
     }
 
     static File getDirectory(String variableName, String defaultPath) {

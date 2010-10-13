@@ -440,7 +440,7 @@ public class DefaultContainerService extends IntentService {
         String status = Environment.getExternalStorageState();
         long availSDSize = -1;
         boolean mediaAvailable = false;
-        if (status.equals(Environment.MEDIA_MOUNTED)) {
+        if (!Environment.isExternalStorageEmulated() && status.equals(Environment.MEDIA_MOUNTED)) {
             StatFs sdStats = new StatFs(
                     Environment.getExternalStorageDirectory().getPath());
             availSDSize = (long)sdStats.getAvailableBlocks() *
