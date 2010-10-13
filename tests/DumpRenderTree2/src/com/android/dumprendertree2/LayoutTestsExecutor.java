@@ -394,6 +394,7 @@ public class LayoutTestsExecutor extends Activity {
         webViewSettings.setDomStorageEnabled(true);
         webViewSettings.setWorkersEnabled(false);
         webViewSettings.setXSSAuditorEnabled(false);
+        webViewSettings.setPageCacheCapacity(0);
 
         // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
         mCurrentWebView.useMockDeviceOrientation();
@@ -565,6 +566,7 @@ public class LayoutTestsExecutor extends Activity {
     /** String constants for use with layoutTestController.overridePreference() */
     private final String WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED =
             "WebKitOfflineWebApplicationCacheEnabled";
+    private final String WEBKIT_USES_PAGE_CACHE_PREFERENCE_KEY = "WebKitUsesPageCachePreferenceKey";
 
     Handler mLayoutTestControllerHandler = new Handler() {
         @Override
@@ -609,12 +611,16 @@ public class LayoutTestsExecutor extends Activity {
                      * WebView for the main frame. EventSender suffers from the same
                      * problem.
                      */
-                    if (msg.getData().getString("key").equals(
-                            WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED)) {
-                        mCurrentWebView.getSettings().setAppCacheEnabled(msg.getData().getBoolean(
-                                "value"));
+                    String key = msg.getData().getString("key");
+                    boolean value = msg.getData().getBoolean("value");
+                    if (WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED.equals(key)) {
+                        mCurrentWebView.getSettings().setAppCacheEnabled(value);
+                    } else if (WEBKIT_USES_PAGE_CACHE_PREFERENCE_KEY.equals(key)) {
+                        // Cache the maximum possible number of pages.
+                        mCurrentWebView.getSettings().setPageCacheCapacity(Integer.MAX_VALUE);
                     } else {
-                        Log.w(LOG_TAG, "MSG_OVERRIDE_PREFERENCE: unsupported preference!");
+                        Log.w(LOG_TAG, "LayoutTestController.overridePreference(): " +
+                              "Unsupported preference '" + key + "'");
                     }
                     break;
 
