@@ -91,6 +91,10 @@ void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
         return;
     }
 
+    int64_t timeUs;
+    CHECK(buffer->meta()->findInt64("time", &timeUs));
+    LOGV("queueAccessUnit timeUs=%lld us (%.2f secs)", timeUs, timeUs / 1E6);
+
     Mutex::Autolock autoLock(mLock);
     mBuffers.push_back(buffer);
     mCondition.signal();
@@ -101,8 +105,15 @@ void AnotherPacketSource::queueDiscontinuity() {
     buffer->meta()->setInt32("discontinuity", true);
 
     Mutex::Autolock autoLock(mLock);
+
     mBuffers.push_back(buffer);
     mCondition.signal();
+}
+
+void AnotherPacketSource::clear() {
+    Mutex::Autolock autoLock(mLock);
+    mBuffers.clear();
+    mEOSResult = OK;
 }
 
 void AnotherPacketSource::signalEOS(status_t result) {
