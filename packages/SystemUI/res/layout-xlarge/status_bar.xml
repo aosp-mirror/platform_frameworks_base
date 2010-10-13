@@ -136,6 +136,27 @@
             android:layout_alignParentRight="true"
             android:orientation="horizontal"
             >
+            <com.android.systemui.statusbar.tablet.ShirtPocket
+                android:id="@+id/pocket"
+                android:layout_width="71dip"
+                android:layout_height="match_parent"
+                android:background="@drawable/ic_sysbar_icon_bg"
+                android:paddingLeft="4dip"
+                android:paddingRight="4dip"
+                android:animateLayoutChanges="true"
+                android:clickable="true"
+                android:descendantFocusability="blocksDescendants"
+                android:gravity="center"
+                >
+                <ImageView 
+                    android:id="@+id/pocket_icon"
+                    android:src="@drawable/ic_sysbar_pocket"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    />
+            </com.android.systemui.statusbar.tablet.ShirtPocket>
             <com.android.systemui.statusbar.KeyButtonView android:id="@+id/menu"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
