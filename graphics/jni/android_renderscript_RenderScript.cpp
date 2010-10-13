@@ -158,10 +158,26 @@ nContextCreate(JNIEnv *_env, jobject _this, jint dev, jint ver)
 }
 
 static jint
-nContextCreateGL(JNIEnv *_env, jobject _this, jint dev, jint ver, jboolean useDepth)
+nContextCreateGL(JNIEnv *_env, jobject _this, jint dev, jint ver,
+                 int colorMin, int colorPref,
+                 int alphaMin, int alphaPref,
+                 int depthMin, int depthPref,
+                 int stencilMin, int stencilPref,
+                 int samplesMin, int samplesPref, float samplesQ)
 {
+    RsSurfaceConfig sc;
+    sc.alphaMin = alphaMin;
+    sc.alphaPref = alphaPref;
+    sc.colorMin = colorMin;
+    sc.colorPref = colorPref;
+    sc.depthMin = depthMin;
+    sc.depthPref = depthPref;
+    sc.samplesMin = samplesMin;
+    sc.samplesPref = samplesPref;
+    sc.samplesQ = samplesQ;
+
     LOG_API("nContextCreateGL");
-    return (jint)rsContextCreateGL((RsDevice)dev, ver, useDepth);
+    return (jint)rsContextCreateGL((RsDevice)dev, ver, sc);
 }
 
 static void
@@ -309,7 +325,7 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, RsContext con, jint id, jint
 
     rsElementGetSubElements(con, (RsElement)id, ids, names, (uint32_t)dataSize);
 
-    for(jint i = 0; i < dataSize; i ++) {
+    for(jint i = 0; i < dataSize; i++) {
         _env->SetObjectArrayElement(_names, i, _env->NewStringUTF(names[i]));
         _env->SetIntArrayRegion(_IDs, i, 1, (const jint*)&ids[i]);
     }
@@ -1220,7 +1236,7 @@ static JNINativeMethod methods[] = {
 
 // All methods below are thread protected in java.
 {"rsnContextCreate",                 "(II)I",                                 (void*)nContextCreate },
-{"rsnContextCreateGL",               "(IIZ)I",                                (void*)nContextCreateGL },
+{"rsnContextCreateGL",               "(IIIIIIIIIIIIF)I",                      (void*)nContextCreateGL },
 {"rsnContextFinish",                 "(I)V",                                  (void*)nContextFinish },
 {"rsnContextSetPriority",            "(II)V",                                 (void*)nContextSetPriority },
 {"rsnContextSetSurface",             "(IIILandroid/view/Surface;)V",          (void*)nContextSetSurface },

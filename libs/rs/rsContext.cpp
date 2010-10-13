@@ -18,6 +18,7 @@
 #include "rsContext.h"
 #include "rsThreadIO.h"
 #include <ui/FramebufferNativeWindow.h>
+#include <ui/PixelFormat.h>
 #include <ui/EGLUtils.h>
 #include <ui/egl/android_natives.h>
 
@@ -56,8 +57,61 @@ static void checkEglError(const char* op, EGLBoolean returnVal = EGL_TRUE) {
     }
 }
 
-void Context::initEGL(bool useGL2)
+void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
+
+#define X(VAL) {VAL, #VAL}
+    struct {EGLint attribute; const char* name;} names[] = {
+    X(EGL_BUFFER_SIZE),
+    X(EGL_ALPHA_SIZE),
+    X(EGL_BLUE_SIZE),
+    X(EGL_GREEN_SIZE),
+    X(EGL_RED_SIZE),
+    X(EGL_DEPTH_SIZE),
+    X(EGL_STENCIL_SIZE),
+    X(EGL_CONFIG_CAVEAT),
+    X(EGL_CONFIG_ID),
+    X(EGL_LEVEL),
+    X(EGL_MAX_PBUFFER_HEIGHT),
+    X(EGL_MAX_PBUFFER_PIXELS),
+    X(EGL_MAX_PBUFFER_WIDTH),
+    X(EGL_NATIVE_RENDERABLE),
+    X(EGL_NATIVE_VISUAL_ID),
+    X(EGL_NATIVE_VISUAL_TYPE),
+    X(EGL_SAMPLES),
+    X(EGL_SAMPLE_BUFFERS),
+    X(EGL_SURFACE_TYPE),
+    X(EGL_TRANSPARENT_TYPE),
+    X(EGL_TRANSPARENT_RED_VALUE),
+    X(EGL_TRANSPARENT_GREEN_VALUE),
+    X(EGL_TRANSPARENT_BLUE_VALUE),
+    X(EGL_BIND_TO_TEXTURE_RGB),
+    X(EGL_BIND_TO_TEXTURE_RGBA),
+    X(EGL_MIN_SWAP_INTERVAL),
+    X(EGL_MAX_SWAP_INTERVAL),
+    X(EGL_LUMINANCE_SIZE),
+    X(EGL_ALPHA_MASK_SIZE),
+    X(EGL_COLOR_BUFFER_TYPE),
+    X(EGL_RENDERABLE_TYPE),
+    X(EGL_CONFORMANT),
+   };
+#undef X
+
+    for (size_t j = 0; j < sizeof(names) / sizeof(names[0]); j++) {
+        EGLint value = -1;
+        EGLint returnVal = eglGetConfigAttrib(dpy, config, names[j].attribute, &value);
+        EGLint error = eglGetError();
+        if (returnVal && error == EGL_SUCCESS) {
+            LOGV(" %s: %d (0x%x)", names[j].name, value, value);
+        }
+    }
+}
+
+
+void Context::initGLThread()
 {
+    pthread_mutex_lock(&gInitMutex);
+    LOGV("initGLThread start %p", this);
+
     mEGL.mNumConfigs = -1;
     EGLint configAttribs[128];
     EGLint *configAttribsPtr = configAttribs;
@@ -69,15 +123,13 @@ void Context::initEGL(bool useGL2)
     configAttribsPtr[1] = EGL_WINDOW_BIT;
     configAttribsPtr += 2;
 
-    if (useGL2) {
-        configAttribsPtr[0] = EGL_RENDERABLE_TYPE;
-        configAttribsPtr[1] = EGL_OPENGL_ES2_BIT;
-        configAttribsPtr += 2;
-    }
+    configAttribsPtr[0] = EGL_RENDERABLE_TYPE;
+    configAttribsPtr[1] = EGL_OPENGL_ES2_BIT;
+    configAttribsPtr += 2;
 
-    if (mUseDepth) {
+    if (mUserSurfaceConfig.depthMin > 0) {
         configAttribsPtr[0] = EGL_DEPTH_SIZE;
-        configAttribsPtr[1] = 16;
+        configAttribsPtr[1] = mUserSurfaceConfig.depthMin;
         configAttribsPtr += 2;
     }
 
@@ -97,29 +149,94 @@ void Context::initEGL(bool useGL2)
     eglInitialize(mEGL.mDisplay, &mEGL.mMajorVersion, &mEGL.mMinorVersion);
     checkEglError("eglInitialize");
 
-    status_t err = EGLUtils::selectConfigForNativeWindow(mEGL.mDisplay, configAttribs, mWndSurface, &mEGL.mConfig);
+#if 1
+    PixelFormat pf = PIXEL_FORMAT_RGBA_8888;
+    if (mUserSurfaceConfig.alphaMin == 0) {
+        pf = PIXEL_FORMAT_RGBX_8888;
+    }
+
+    status_t err = EGLUtils::selectConfigForPixelFormat(mEGL.mDisplay, configAttribs, pf, &mEGL.mConfig);
     if (err) {
        LOGE("%p, couldn't find an EGLConfig matching the screen format\n", this);
     }
-    //eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
-
-
-    if (useGL2) {
-        mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, context_attribs2);
-    } else {
-        mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, NULL);
+    if (props.mLogVisual) {
+        printEGLConfiguration(mEGL.mDisplay, mEGL.mConfig);
     }
+#else
+    eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
+#endif
+
+    mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, context_attribs2);
     checkEglError("eglCreateContext");
     if (mEGL.mContext == EGL_NO_CONTEXT) {
         LOGE("%p, eglCreateContext returned EGL_NO_CONTEXT", this);
     }
     gGLContextCount++;
+
+
+    EGLint pbuffer_attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+    mEGL.mSurfaceDefault = eglCreatePbufferSurface(mEGL.mDisplay, mEGL.mConfig, pbuffer_attribs);
+    checkEglError("eglCreatePbufferSurface");
+    if (mEGL.mSurfaceDefault == EGL_NO_SURFACE) {
+        LOGE("eglCreatePbufferSurface returned EGL_NO_SURFACE");
+    }
+
+    EGLBoolean ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurfaceDefault, mEGL.mSurfaceDefault, mEGL.mContext);
+    checkEglError("eglMakeCurrent", ret);
+
+    mGL.mVersion = glGetString(GL_VERSION);
+    mGL.mVendor = glGetString(GL_VENDOR);
+    mGL.mRenderer = glGetString(GL_RENDERER);
+    mGL.mExtensions = glGetString(GL_EXTENSIONS);
+
+    //LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
+    LOGV("GL Version %s", mGL.mVersion);
+    //LOGV("GL Vendor %s", mGL.mVendor);
+    LOGV("GL Renderer %s", mGL.mRenderer);
+    //LOGV("GL Extensions %s", mGL.mExtensions);
+
+    const char *verptr = NULL;
+    if (strlen((const char *)mGL.mVersion) > 9) {
+        if (!memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
+            verptr = (const char *)mGL.mVersion + 12;
+        }
+        if (!memcmp(mGL.mVersion, "OpenGL ES ", 10)) {
+            verptr = (const char *)mGL.mVersion + 9;
+        }
+    }
+
+    if (!verptr) {
+        LOGE("Error, OpenGL ES Lite not supported");
+    } else {
+        sscanf(verptr, " %i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
+    }
+
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &mGL.mMaxVertexAttribs);
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &mGL.mMaxVertexUniformVectors);
+    glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &mGL.mMaxVertexTextureUnits);
+
+    glGetIntegerv(GL_MAX_VARYING_VECTORS, &mGL.mMaxVaryingVectors);
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &mGL.mMaxTextureImageUnits);
+
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &mGL.mMaxFragmentTextureImageUnits);
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &mGL.mMaxFragmentUniformVectors);
+
+    mGL.OES_texture_npot = NULL != strstr((const char *)mGL.mExtensions, "GL_OES_texture_npot");
+    mGL.EXT_texture_max_aniso = 1.0f;
+    bool hasAniso = NULL != strstr((const char *)mGL.mExtensions, "GL_EXT_texture_filter_anisotropic");
+    if(hasAniso) {
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mGL.EXT_texture_max_aniso);
+    }
+
+    LOGV("initGLThread end %p", this);
+    pthread_mutex_unlock(&gInitMutex);
 }
 
 void Context::deinitEGL()
 {
     LOGV("%p, deinitEGL", this);
-    setSurface(0, 0, NULL);
+
+    eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEGL.mContext);
     eglDestroyContext(mEGL.mDisplay, mEGL.mContext);
     checkEglError("eglDestroyContext");
 
@@ -312,6 +429,8 @@ void * Context::threadProc(void *vrsc)
          LOGE("pthread_setspecific %i", status);
      }
 
+     rsc->initGLThread();
+
      rsc->mScriptC.init(rsc);
      if (rsc->mIsGraphicsContext) {
          rsc->mStateRaster.init(rsc);
@@ -460,7 +579,7 @@ void Context::setPriority(int32_t p)
 #endif
 }
 
-Context::Context(Device *dev, bool isGraphics, bool useDepth)
+Context::Context(Device *dev, const RsSurfaceConfig *sc)
 {
     pthread_mutex_lock(&gInitMutex);
 
@@ -468,15 +587,19 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
     mDev = dev;
     mRunning = false;
     mExit = false;
-    mUseDepth = useDepth;
     mPaused = false;
     mObjHead = NULL;
     mError = RS_ERROR_NONE;
     mErrorMsg = NULL;
+    if (sc) {
+        mUserSurfaceConfig = *sc;
+    } else {
+        memset(&mUserSurfaceConfig, 0, sizeof(mUserSurfaceConfig));
+    }
 
     memset(&mEGL, 0, sizeof(mEGL));
     memset(&mGL, 0, sizeof(mGL));
-    mIsGraphicsContext = isGraphics;
+    mIsGraphicsContext = sc != NULL;
 
     int status;
     pthread_attr_t threadAttr;
@@ -490,6 +613,7 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
         }
     }
     gThreadTLSKeyCount++;
+
     pthread_mutex_unlock(&gInitMutex);
 
     // Global init done at this point.
@@ -534,8 +658,6 @@ Context::Context(Device *dev, bool isGraphics, bool useDepth)
             break;
         }
     }
-
-
     pthread_attr_destroy(&threadAttr);
 }
 
@@ -568,28 +690,21 @@ void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
 
     EGLBoolean ret;
     if (mEGL.mSurface != NULL) {
-        ret = eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurfaceDefault, mEGL.mSurfaceDefault, mEGL.mContext);
         checkEglError("eglMakeCurrent", ret);
 
         ret = eglDestroySurface(mEGL.mDisplay, mEGL.mSurface);
         checkEglError("eglDestroySurface", ret);
 
         mEGL.mSurface = NULL;
-        mWidth = 0;
-        mHeight = 0;
+        mWidth = 1;
+        mHeight = 1;
     }
 
     mWndSurface = sur;
     if (mWndSurface != NULL) {
         mWidth = w;
         mHeight = h;
-        bool first = false;
-        if (!mEGL.mContext) {
-            first = true;
-            pthread_mutex_lock(&gInitMutex);
-            initEGL(true);
-            pthread_mutex_unlock(&gInitMutex);
-        }
 
         mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
         checkEglError("eglCreateWindowSurface");
@@ -601,53 +716,6 @@ void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
         checkEglError("eglMakeCurrent", ret);
 
         mStateVertex.updateSize(this);
-
-        if (first) {
-            mGL.mVersion = glGetString(GL_VERSION);
-            mGL.mVendor = glGetString(GL_VENDOR);
-            mGL.mRenderer = glGetString(GL_RENDERER);
-            mGL.mExtensions = glGetString(GL_EXTENSIONS);
-
-            //LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
-            LOGV("GL Version %s", mGL.mVersion);
-            //LOGV("GL Vendor %s", mGL.mVendor);
-            LOGV("GL Renderer %s", mGL.mRenderer);
-            //LOGV("GL Extensions %s", mGL.mExtensions);
-
-            const char *verptr = NULL;
-            if (strlen((const char *)mGL.mVersion) > 9) {
-                if (!memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
-                    verptr = (const char *)mGL.mVersion + 12;
-                }
-                if (!memcmp(mGL.mVersion, "OpenGL ES ", 10)) {
-                    verptr = (const char *)mGL.mVersion + 9;
-                }
-            }
-
-            if (!verptr) {
-                LOGE("Error, OpenGL ES Lite not supported");
-            } else {
-                sscanf(verptr, " %i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
-            }
-
-            glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &mGL.mMaxVertexAttribs);
-            glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &mGL.mMaxVertexUniformVectors);
-            glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &mGL.mMaxVertexTextureUnits);
-
-            glGetIntegerv(GL_MAX_VARYING_VECTORS, &mGL.mMaxVaryingVectors);
-            glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &mGL.mMaxTextureImageUnits);
-
-            glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &mGL.mMaxFragmentTextureImageUnits);
-            glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &mGL.mMaxFragmentUniformVectors);
-
-            mGL.OES_texture_npot = NULL != strstr((const char *)mGL.mExtensions, "GL_OES_texture_npot");
-            mGL.EXT_texture_max_aniso = 1.0f;
-            bool hasAniso = NULL != strstr((const char *)mGL.mExtensions, "GL_EXT_texture_filter_anisotropic");
-            if(hasAniso) {
-                glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mGL.EXT_texture_max_aniso);
-            }
-        }
-
     }
 }
 
@@ -829,7 +897,7 @@ void Context::dumpDebug() const
     LOGE(" GL Extensions: %s", mGL.mExtensions);
     LOGE(" GL int Versions %i %i", mGL.mMajorVersion, mGL.mMinorVersion);
     LOGE(" RS width %i, height %i", mWidth, mHeight);
-    LOGE(" RS running %i, exit %i, useDepth %i, paused %i", mRunning, mExit, mUseDepth, mPaused);
+    LOGE(" RS running %i, exit %i, paused %i", mRunning, mExit, mPaused);
     LOGE(" RS pThreadID %li, nativeThreadID %i", mThreadId, mNativeThreadId);
 
     LOGV("MAX Textures %i, %i  %i", mGL.mMaxVertexTextureUnits, mGL.mMaxFragmentTextureImageUnits, mGL.mMaxTextureImageUnits);
@@ -957,15 +1025,15 @@ RsContext rsContextCreate(RsDevice vdev, uint32_t version)
 {
     LOGV("rsContextCreate %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = new Context(dev, false, false);
+    Context *rsc = new Context(dev, NULL);
     return rsc;
 }
 
-RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, bool useDepth)
+RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, RsSurfaceConfig sc)
 {
-    LOGV("rsContextCreateGL %p, %i", vdev, useDepth);
+    LOGV("rsContextCreateGL %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = new Context(dev, true, useDepth);
+    Context *rsc = new Context(dev, &sc);
     LOGV("rsContextCreateGL ret %p ", rsc);
     return rsc;
 }

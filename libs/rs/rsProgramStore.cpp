@@ -76,12 +76,23 @@ void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state)
 
     //LOGE("pfs  %i, %i, %x", mDepthWriteEnable, mDepthTestEnable, mDepthFunc);
 
-    glDepthMask(mDepthWriteEnable);
-    if(mDepthTestEnable || mDepthWriteEnable) {
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(mDepthFunc);
+    if (rsc->mUserSurfaceConfig.depthMin > 0) {
+        glDepthMask(mDepthWriteEnable);
+        if(mDepthTestEnable || mDepthWriteEnable) {
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(mDepthFunc);
+        } else {
+            glDisable(GL_DEPTH_TEST);
+        }
     } else {
+        glDepthMask(false);
         glDisable(GL_DEPTH_TEST);
+    }
+
+    if (rsc->mUserSurfaceConfig.stencilMin > 0) {
+    } else {
+        glStencilMask(0);
+        glDisable(GL_STENCIL_TEST);
     }
 
     if (mDitherEnable) {

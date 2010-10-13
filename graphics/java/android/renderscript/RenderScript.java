@@ -69,9 +69,22 @@ public class RenderScript {
 
     // Methods below are wrapped to protect the non-threadsafe
     // lockless fifo.
-    native int  rsnContextCreateGL(int dev, int ver, boolean useDepth);
-    synchronized int nContextCreateGL(int dev, int ver, boolean useDepth) {
-        return rsnContextCreateGL(dev, ver, useDepth);
+    native int  rsnContextCreateGL(int dev, int ver,
+                 int colorMin, int colorPref,
+                 int alphaMin, int alphaPref,
+                 int depthMin, int depthPref,
+                 int stencilMin, int stencilPref,
+                 int samplesMin, int samplesPref, float samplesQ);
+    synchronized int nContextCreateGL(int dev, int ver,
+                 int colorMin, int colorPref,
+                 int alphaMin, int alphaPref,
+                 int depthMin, int depthPref,
+                 int stencilMin, int stencilPref,
+                 int samplesMin, int samplesPref, float samplesQ) {
+        return rsnContextCreateGL(dev, ver, colorMin, colorPref,
+                                  alphaMin, alphaPref, depthMin, depthPref,
+                                  stencilMin, stencilPref,
+                                  samplesMin, samplesPref, samplesQ);
     }
     native int  rsnContextCreate(int dev, int ver);
     synchronized int nContextCreate(int dev, int ver) {
