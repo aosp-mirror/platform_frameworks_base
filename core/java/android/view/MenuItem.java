@@ -45,6 +45,12 @@ public interface MenuItem {
      * A good rule of thumb is to have no more than 2 items set to always show at a time.
      */
     public static final int SHOW_AS_ACTION_ALWAYS = 2;
+
+    /**
+     * When this item is in the action bar, always show it with a text label even if
+     * it also has an icon specified.
+     */
+    public static final int SHOW_AS_ACTION_WITH_TEXT = 4;
     
     /**
      * Interface definition for a callback to be invoked when a menu item is

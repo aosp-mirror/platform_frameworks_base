@@ -7708,28 +7708,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (canSelectText()) {
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                     setIcon(com.android.internal.R.drawable.ic_menu_select_all).
-                    setAlphabeticShortcut('a');
+                    setAlphabeticShortcut('a').
+                    setShowAsAction(
+                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
                 atLeastOne = true;
             }
 
             if (canCut()) {
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
                     setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModeCutDrawable, 0)).
-                    setAlphabeticShortcut('x');
+                    setAlphabeticShortcut('x').
+                    setShowAsAction(
+                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
                 atLeastOne = true;
             }
 
             if (canCopy()) {
                 menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
                     setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModeCopyDrawable, 0)).
-                    setAlphabeticShortcut('c');
+                    setAlphabeticShortcut('c').
+                    setShowAsAction(
+                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
                 atLeastOne = true;
             }
 
             if (canPaste()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
                         setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModePasteDrawable, 0)).
-                        setAlphabeticShortcut('v');
+                        setAlphabeticShortcut('v').
+                        setShowAsAction(
+                                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
                 atLeastOne = true;
             }
 

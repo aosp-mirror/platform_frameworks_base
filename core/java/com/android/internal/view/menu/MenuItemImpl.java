@@ -38,6 +38,10 @@ import com.android.internal.view.menu.MenuView.ItemView;
 public final class MenuItemImpl implements MenuItem {
     private static final String TAG = "MenuItemImpl";
     
+    private static final int SHOW_AS_ACTION_MASK = SHOW_AS_ACTION_NEVER |
+            SHOW_AS_ACTION_IF_ROOM |
+            SHOW_AS_ACTION_ALWAYS;
+
     private final int mId;
     private final int mGroup;
     private final int mCategoryOrder;
@@ -649,11 +653,11 @@ public final class MenuItemImpl implements MenuItem {
     }
     
     public boolean requestsActionButton() {
-        return mShowAsAction == SHOW_AS_ACTION_IF_ROOM;
+        return (mShowAsAction & SHOW_AS_ACTION_IF_ROOM) == SHOW_AS_ACTION_IF_ROOM;
     }
     
     public boolean requiresActionButton() {
-        return mShowAsAction == SHOW_AS_ACTION_ALWAYS;
+        return (mShowAsAction & SHOW_AS_ACTION_ALWAYS) == SHOW_AS_ACTION_ALWAYS;
     }
 
     public void setIsActionButton(boolean isActionButton) {
@@ -664,7 +668,23 @@ public final class MenuItemImpl implements MenuItem {
         }
     }
 
+    public boolean showsTextAsAction() {
+        return (mShowAsAction & SHOW_AS_ACTION_WITH_TEXT) == SHOW_AS_ACTION_WITH_TEXT;
+    }
+
     public void setShowAsAction(int actionEnum) {
+        switch (actionEnum & SHOW_AS_ACTION_MASK) {
+            case SHOW_AS_ACTION_ALWAYS:
+            case SHOW_AS_ACTION_IF_ROOM:
+            case SHOW_AS_ACTION_NEVER:
+                // Looks good!
+                break;
+
+            default:
+                // Mutually exclusive options selected!
+                throw new IllegalArgumentException("SHOW_AS_ACTION_ALWAYS, SHOW_AS_ACTION_IF_ROOM,"
+                        + " and SHOW_AS_ACTION_NEVER are mutually exclusive.");
+        }
         mShowAsAction = actionEnum;
         mMenu.onItemActionRequestChanged(this);
     }
