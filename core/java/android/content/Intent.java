@@ -5267,7 +5267,14 @@ public class Intent implements Parcelable, Cloneable {
                 b.append(' ');
             }
             first = false;
-            b.append("dat=").append(mData);
+            b.append("dat=");
+            if (mData.getScheme().equalsIgnoreCase("tel")) {
+                b.append("tel:xxx-xxx-xxxx");
+            } else if (mData.getScheme().equalsIgnoreCase("smsto")) {
+                b.append("smsto:xxx-xxx-xxxx");
+            } else {
+                b.append(mData);
+            }
         }
         if (mType != null) {
             if (!first) {

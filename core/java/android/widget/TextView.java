@@ -92,6 +92,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.view.ViewRoot;
@@ -6852,8 +6853,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void prepareCursorControllers() {
+        boolean windowSupportsHandles = false;
+
+        ViewGroup.LayoutParams params = getRootView().getLayoutParams();
+        if (params instanceof WindowManager.LayoutParams) {
+            WindowManager.LayoutParams windowParams = (WindowManager.LayoutParams) params;
+            windowSupportsHandles = windowParams.type < WindowManager.LayoutParams.FIRST_SUB_WINDOW
+                    || windowParams.type > WindowManager.LayoutParams.LAST_SUB_WINDOW;
+        }
+
         // TODO Add an extra android:cursorController flag to disable the controller?
-        if (mCursorVisible && mLayout != null) {
+        if (windowSupportsHandles && mCursorVisible && mLayout != null) {
             if (mInsertionPointCursorController == null) {
                 mInsertionPointCursorController = new InsertionPointCursorController();
             }
@@ -6861,7 +6871,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mInsertionPointCursorController = null;
         }
 
-        if (textCanBeSelected() && mLayout != null) {
+        if (windowSupportsHandles && textCanBeSelected() && mLayout != null) {
             if (mSelectionModifierCursorController == null) {
                 mSelectionModifierCursorController = new SelectionModifierCursorController();
             }

@@ -1285,15 +1285,13 @@ public class WifiStateTracker extends NetworkStateTracker {
                         if (macaddr != null) {
                             mWifiInfo.setMacAddress(macaddr);
                         }
-                        if (mRunState == RUN_STATE_STARTING) {
-                            mRunState = RUN_STATE_RUNNING;
-                            if (!mIsScanOnly) {
-                                reconnectCommand();
-                            } else {
-                                // In some situations, supplicant needs to be kickstarted to
-                                // start the background scanning
-                                scan(true);
-                            }
+                        mRunState = RUN_STATE_RUNNING;
+                        if (!mIsScanOnly) {
+                            reconnectCommand();
+                        } else {
+                            // In some situations, supplicant needs to be kickstarted to
+                            // start the background scanning
+                            scan(true);
                         }
                     }
                     break;
@@ -1613,12 +1611,10 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     public synchronized boolean restart() {
-        if (mRunState == RUN_STATE_STOPPED) {
+        if (isDriverStopped()) {
             mRunState = RUN_STATE_STARTING;
             resetConnections(true);
             return startDriver();
-        } else if (mRunState == RUN_STATE_STOPPING) {
-            mRunState = RUN_STATE_STARTING;
         }
         return true;
     }

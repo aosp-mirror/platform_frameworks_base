@@ -99,6 +99,10 @@ responsive to input and thus avoid ANR dialogs caused by the 5 second input
 event timeout. These same practices should be followed for any other threads
 that display UI, as they are also subject to the same timeouts.</p>
 
+<p>You can use {@link android.os.StrictMode} to help find potentially
+long running operations such as network or database operations that
+you might accidentally be doing your main thread.</p>
+
 <p>The specific constraint on IntentReceiver execution time emphasizes what
 they were meant to do: small, discrete amounts of work in the background such
 as saving a setting or registering a Notification. So as with other methods

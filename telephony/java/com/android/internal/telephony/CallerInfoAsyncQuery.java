@@ -135,7 +135,7 @@ public class CallerInfoAsyncQuery {
                 } else {
 
                     if (DBG) log("Processing event: " + cw.event + " token (arg1): " + msg.arg1 +
-                            " command: " + msg.what + " query URI: " + args.uri);
+                        " command: " + msg.what + " query URI: " + sanitizeUriToString(args.uri));
 
                     switch (cw.event) {
                         case EVENT_NEW_QUERY:
@@ -297,7 +297,7 @@ public class CallerInfoAsyncQuery {
             OnQueryCompleteListener listener, Object cookie) {
         if (DBG) {
             log("##### CallerInfoAsyncQuery startQuery()... #####");
-            log("- number: " + number);
+            log("- number: " + /*number*/ "xxxxxxx");
             log("- cookie: " + cookie);
         }
 
@@ -309,7 +309,7 @@ public class CallerInfoAsyncQuery {
 
         if (PhoneNumberUtils.isUriNumber(number)) {
             // "number" is really a SIP address.
-            if (DBG) log("  - Treating number as a SIP address: " + number);
+            if (DBG) log("  - Treating number as a SIP address: " + /*number*/ "xxxxxxx");
 
             // We look up SIP addresses directly in the Data table:
             contactRef = Data.CONTENT_URI;
@@ -341,7 +341,7 @@ public class CallerInfoAsyncQuery {
         }
 
         if (DBG) {
-            log("==> contactRef: " + contactRef);
+            log("==> contactRef: " + sanitizeUriToString(contactRef));
             log("==> selection: " + selection);
             if (selectionArgs != null) {
                 for (int i = 0; i < selectionArgs.length; i++) {
@@ -383,8 +383,8 @@ public class CallerInfoAsyncQuery {
      */
     public void addQueryListener(int token, OnQueryCompleteListener listener, Object cookie) {
 
-        if (DBG) log("adding listener to query: " + mHandler.mQueryUri + " handler: " +
-                mHandler.toString());
+        if (DBG) log("adding listener to query: " + sanitizeUriToString(mHandler.mQueryUri) +
+                " handler: " + mHandler.toString());
 
         //create cookieWrapper, add query request to end of queue.
         CookieWrapper cw = new CookieWrapper();
@@ -416,6 +416,20 @@ public class CallerInfoAsyncQuery {
         mHandler.mQueryUri = null;
         mHandler.mCallerInfo = null;
         mHandler = null;
+    }
+
+    private static String sanitizeUriToString(Uri uri) {
+        if (uri != null) {
+            String uriString = uri.toString();
+            int indexOfLastSlash = uriString.lastIndexOf('/');
+            if (indexOfLastSlash > 0) {
+                return uriString.substring(0, indexOfLastSlash) + "/xxxxxxx";
+            } else {
+                return uriString;
+            }
+        } else {
+            return "";
+        }
     }
 
     /**

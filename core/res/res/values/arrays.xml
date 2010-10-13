@@ -63,6 +63,9 @@
         <item>@drawable/scrollbar_handle_horizontal</item>
         <item>@drawable/scrollbar_handle_vertical</item>
         <item>@drawable/spinner_dropdown_background</item>
+        <item>@drawable/text_select_handle_left</item>
+        <item>@drawable/text_select_handle_middle</item>
+        <item>@drawable/text_select_handle_right</item>
         <item>@drawable/title_bar</item>
         <item>@drawable/title_bar_shadow</item>
         <!-- Visual lock screen -->

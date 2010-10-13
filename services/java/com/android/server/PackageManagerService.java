@@ -7208,6 +7208,8 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
                             pw.print(" installStatus="); pw.print(ps.installStatus);
                             pw.print(" enabled="); pw.println(ps.enabled);
+                    pw.print("    versionCode="); pw.print(ps.versionCode);
+                            pw.print(" versionName="); pw.println(ps.pkg.mVersionName);
                     if (ps.disabledComponents.size() > 0) {
                         pw.println("    disabledComponents:");
                         for (String s : ps.disabledComponents) {
