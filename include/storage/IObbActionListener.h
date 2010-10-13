@@ -29,7 +29,7 @@ class IObbActionListener: public IInterface
 public:
     DECLARE_META_INTERFACE(ObbActionListener);
 
-    virtual void onObbResult(const String16& filename, const String16& status) = 0;
+    virtual void onObbResult(const String16& filename, const int32_t nonce, const int32_t state) = 0;
 };
 
 // ----------------------------------------------------------------------------

@@ -69,9 +69,11 @@ public interface IObbActionListener extends IInterface {
                     data.enforceInterface(DESCRIPTOR);
                     String filename;
                     filename = data.readString();
-                    String status;
-                    status = data.readString();
-                    this.onObbResult(filename, status);
+                    int nonce;
+                    nonce = data.readInt();
+                    int status;
+                    status = data.readInt();
+                    this.onObbResult(filename, nonce, status);
                     reply.writeNoException();
                     return true;
                 }
@@ -101,13 +103,15 @@ public interface IObbActionListener extends IInterface {
              *            on
              * @param returnCode status of the operation
              */
-            public void onObbResult(String filename, String status) throws RemoteException {
+            public void onObbResult(String filename, int nonce, int status)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     _data.writeString(filename);
-                    _data.writeString(status);
+                    _data.writeInt(nonce);
+                    _data.writeInt(status);
                     mRemote.transact(Stub.TRANSACTION_onObbResult, _data, _reply, 0);
                     _reply.readException();
                 } finally {
@@ -124,7 +128,8 @@ public interface IObbActionListener extends IInterface {
      * Return from an OBB action result.
      * 
      * @param filename the path to the OBB the operation was performed on
-     * @param returnCode status of the operation
+     * @param nonce identifier that is meaningful to the receiver
+     * @param status status code as defined in {@link OnObbStateChangeListener}
      */
-    public void onObbResult(String filename, String status) throws RemoteException;
+    public void onObbResult(String filename, int nonce, int status) throws RemoteException;
 }
