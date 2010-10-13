@@ -277,7 +277,6 @@ public class AlertDialog extends Dialog implements DialogInterface {
     public static class Builder {
         private final AlertController.AlertParams P;
         private int mTheme;
-        private Context mWrappedContext;
         
         /**
          * Constructor using a context for this builder and the {@link AlertDialog} it creates.
@@ -291,7 +290,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * the {@link AlertDialog} it creates.
          */
         public Builder(Context context, int theme) {
-            P = new AlertController.AlertParams(context);
+            P = new AlertController.AlertParams(new ContextThemeWrapper(context, theme));
             mTheme = theme;
         }
         
@@ -304,10 +303,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @return A Context for built Dialogs.
          */
         public Context getContext() {
-            if (mWrappedContext == null) {
-                mWrappedContext = new ContextThemeWrapper(P.mContext, mTheme);
-            }
-            return mWrappedContext;
+            return P.mContext;
         }
 
         /**

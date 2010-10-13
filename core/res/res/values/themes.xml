@@ -756,8 +756,8 @@
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_middle</item>
-        <item name="textSelectHandleRight">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_left</item>
+        <item name="textSelectHandleRight">@android:drawable/text_select_handle_right</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@android:style/Widget.Holo.TextSelectHandle</item>
 
@@ -882,7 +882,7 @@
         <item name="textColorHighlightInverse">@android:color/highlighted_text_holo_dark</item>
         <item name="textColorLink">@android:color/link_text_holo_light</item>
         <item name="textColorLinkInverse">@android:color/link_text_holo_dark</item>
-        <item name="textColorAlertDialogListItem">@android:color/primary_text_holo_dark</item>
+        <item name="textColorAlertDialogListItem">@android:color/primary_text_holo_light</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Holo.Light.Large</item>
         <item name="textAppearanceMedium">@android:style/TextAppearance.Holo.Light.Medium</item>
@@ -985,8 +985,8 @@
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_middle</item>
-        <item name="textSelectHandleRight">@android:drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@android:drawable/text_select_handle_left</item>
+        <item name="textSelectHandleRight">@android:drawable/text_select_handle_right</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@android:style/Widget.Holo.TextSelectHandle</item>
 
