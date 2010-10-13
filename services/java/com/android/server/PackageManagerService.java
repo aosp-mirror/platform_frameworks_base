@@ -5156,9 +5156,6 @@ class PackageManagerService extends IPackageManager.Stub {
                     // we don't consider this to be a failure of the core package deletion
                 }
             }
-            if (libraryPath != null) {
-                NativeLibraryHelper.removeNativeBinariesLI(libraryPath);
-            }
         }
 
         private boolean setPermissions() {
