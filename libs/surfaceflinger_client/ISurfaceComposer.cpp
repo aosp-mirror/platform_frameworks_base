@@ -151,6 +151,15 @@ public:
         return reply.readInt32();
     }
 
+    virtual status_t turnElectronBeamOn(int32_t mode)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
+        data.writeInt32(mode);
+        remote()->transact(BnSurfaceComposer::TURN_ELECTRON_BEAM_ON, data, &reply);
+        return reply.readInt32();
+    }
+
     virtual void signal() const
     {
         Parcel data, reply;
@@ -237,6 +246,12 @@ status_t BnSurfaceComposer::onTransact(
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
             int32_t mode = data.readInt32();
             status_t res = turnElectronBeamOff(mode);
+            reply->writeInt32(res);
+        }
+        case TURN_ELECTRON_BEAM_ON: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
+            int32_t mode = data.readInt32();
+            status_t res = turnElectronBeamOn(mode);
             reply->writeInt32(res);
         }
         default:

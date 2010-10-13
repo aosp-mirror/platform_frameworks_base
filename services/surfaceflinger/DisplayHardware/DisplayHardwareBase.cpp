@@ -396,7 +396,6 @@ void DisplayHardwareBase::acquireScreen() const
 {
     status_t err = mDisplayEventThread->acquireScreen();
     if (err >= 0) {
-        mCanDraw = true;
         mScreenAcquired = true;
     }
 }
