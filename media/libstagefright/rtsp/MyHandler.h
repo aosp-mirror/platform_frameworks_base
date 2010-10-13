@@ -105,7 +105,9 @@ struct MyHandler : public AHandler {
           mCheckPending(false),
           mCheckGeneration(0),
           mTryTCPInterleaving(false),
+          mTryFakeRTCP(false),
           mReceivedFirstRTCPPacket(false),
+          mReceivedFirstRTPPacket(false),
           mSeekable(false) {
         mNetLooper->setName("rtsp net");
         mNetLooper->start(false /* runOnCallingThread */,
@@ -534,6 +536,7 @@ struct MyHandler : public AHandler {
                 mFirstAccessUnitNTP = 0;
                 mNumAccessUnitsReceived = 0;
                 mReceivedFirstRTCPPacket = false;
+                mReceivedFirstRTPPacket = false;
                 mSeekable = false;
 
                 sp<AMessage> reply = new AMessage('tear', id());
@@ -611,9 +614,14 @@ struct MyHandler : public AHandler {
 
             case 'accu':
             {
-                int32_t firstRTCP;
-                if (msg->findInt32("first-rtcp", &firstRTCP)) {
+                int32_t first;
+                if (msg->findInt32("first-rtcp", &first)) {
                     mReceivedFirstRTCPPacket = true;
+                    break;
+                }
+
+                if (msg->findInt32("first-rtp", &first)) {
+                    mReceivedFirstRTPPacket = true;
                     break;
                 }
 
@@ -839,9 +847,17 @@ struct MyHandler : public AHandler {
             case 'tiou':
             {
                 if (!mReceivedFirstRTCPPacket) {
-                    if (mTryTCPInterleaving) {
+                    if (mTryFakeRTCP) {
                         LOGW("Never received any data, disconnecting.");
                         (new AMessage('abor', id()))->post();
+                    } else if (mTryTCPInterleaving && mReceivedFirstRTPPacket) {
+                        LOGW("We received RTP packets but no RTCP packets, "
+                             "using fake timestamps.");
+
+                        mTryFakeRTCP = true;
+
+                        mReceivedFirstRTCPPacket = true;
+                        mRTPConn->fakeTimestamps();
                     } else {
                         LOGW("Never received any data, switching transports.");
 
@@ -987,7 +1003,9 @@ private:
     bool mCheckPending;
     int32_t mCheckGeneration;
     bool mTryTCPInterleaving;
+    bool mTryFakeRTCP;
     bool mReceivedFirstRTCPPacket;
+    bool mReceivedFirstRTPPacket;
     bool mSeekable;
 
     struct TrackInfo {
