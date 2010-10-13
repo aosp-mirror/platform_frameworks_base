@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY;
 
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
@@ -2324,6 +2325,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(FLAG_SHOW_WALLPAPER, FLAG_SHOW_WALLPAPER&(~getForcedWindowFlags()));
         }
 
+        if (getContext().getApplicationInfo().targetSdkVersion
+                < android.os.Build.VERSION_CODES.HONEYCOMB) {
+            addFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
+        }
+        
         WindowManager.LayoutParams params = getAttributes();
 
         if (!hasSoftInputMode()) {

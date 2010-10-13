@@ -31,5 +31,6 @@ oneway interface IStatusBar
     void animateExpand();
     void animateCollapse();
     void setLightsOn(boolean on);
+    void setMenuKeyVisible(boolean visible);
 }
 
