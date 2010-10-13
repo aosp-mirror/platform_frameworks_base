@@ -92,7 +92,7 @@ public final class SipService extends ISipService.Stub {
             new HashMap<String, ISipSession>();
 
     private ConnectivityReceiver mConnectivityReceiver;
-    private boolean mScreenOn;
+    private boolean mWifiEnabled;
 
     /**
      * Starts the SIP service. Do nothing if the SIP API is not supported on the
@@ -112,23 +112,32 @@ public final class SipService extends ISipService.Stub {
         mConnectivityReceiver = new ConnectivityReceiver();
         context.registerReceiver(mConnectivityReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        context.registerReceiver(mScreenOnOffReceiver,
-                new IntentFilter(Intent.ACTION_SCREEN_ON));
-        context.registerReceiver(mScreenOnOffReceiver,
-                new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        context.registerReceiver(mWifiStateReceiver,
+                new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 
         mTimer = new WakeupTimer(context);
         mWifiOnly = SipManager.isSipWifiOnly(context);
     }
 
-    BroadcastReceiver mScreenOnOffReceiver = new BroadcastReceiver() {
+    BroadcastReceiver mWifiStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mScreenOn = false;
-            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                mScreenOn = true;
+            if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
+                int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                        WifiManager.WIFI_STATE_UNKNOWN);
+                synchronized (SipService.this) {
+                    switch (state) {
+                        case WifiManager.WIFI_STATE_ENABLED:
+                            mWifiEnabled = true;
+                            if (anyOpened()) grabWifiLock();
+                            break;
+                        case WifiManager.WIFI_STATE_DISABLED:
+                            mWifiEnabled = false;
+                            releaseWifiLock();
+                            break;
+                    }
+                }
             }
         }
     };
@@ -182,7 +191,7 @@ public final class SipService extends ISipService.Stub {
                     incomingCallPendingIntent, listener);
             if (localProfile.getAutoRegistration()) {
                 group.openToReceiveCalls();
-                if (isWifiActive()) grabWifiLock();
+                if (mWifiEnabled) grabWifiLock();
             }
         } catch (SipException e) {
             Log.e(TAG, "openToReceiveCalls()", e);
@@ -216,7 +225,7 @@ public final class SipService extends ISipService.Stub {
         group = mSipGroups.remove(localProfileUri);
         notifyProfileRemoved(group.getLocalProfile());
         group.close();
-        if (isWifiActive() && !anyOpened()) releaseWifiLock();
+        if (!anyOpened()) releaseWifiLock();
     }
 
     public synchronized boolean isOpened(String localProfileUri) {
@@ -349,7 +358,7 @@ public final class SipService extends ISipService.Stub {
 
     private void grabWifiLock() {
         if (mWifiLock == null) {
-            if (DEBUG) Log.d(TAG, "acquire wifi lock");
+            if (DEBUG) Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~ acquire wifi lock");
             mWifiLock = ((WifiManager)
                     mContext.getSystemService(Context.WIFI_SERVICE))
                     .createWifiLock(WifiManager.WIFI_MODE_FULL, TAG);
@@ -359,14 +368,10 @@ public final class SipService extends ISipService.Stub {
 
     private void releaseWifiLock() {
         if (mWifiLock != null) {
-            if (DEBUG) Log.d(TAG, "release wifi lock");
+            if (DEBUG) Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~ release wifi lock");
             mWifiLock.release();
             mWifiLock = null;
         }
-    }
-
-    private boolean isWifiActive() {
-        return "WIFI".equalsIgnoreCase(mNetworkType);
     }
 
     private synchronized void onConnectivityChanged(
@@ -382,14 +387,6 @@ public final class SipService extends ISipService.Stub {
         boolean isWifi = "WIFI".equalsIgnoreCase(type);
         boolean wifiOff = (isWifi && !connected) || (wasWifi && !sameType);
         boolean wifiOn = isWifi && connected;
-        if (wifiOff) {
-            if (mScreenOn) releaseWifiLock();
-            // If the screen is off, we still keep the wifi lock in order
-            // to be able to reassociate with any available AP. Otherwise,
-            // the wifi driver could be stopped after 15 mins of idle time.
-        } else if (wifiOn) {
-            if (anyOpened()) grabWifiLock();
-        }
 
         try {
             boolean wasConnected = mConnected;
@@ -409,7 +406,6 @@ public final class SipService extends ISipService.Stub {
                     group.onConnectivityChanged(true);
                 }
             }
-
         } catch (SipException e) {
             Log.e(TAG, "onConnectivityChanged()", e);
         }
