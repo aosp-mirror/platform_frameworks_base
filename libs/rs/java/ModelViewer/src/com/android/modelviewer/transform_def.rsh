@@ -25,39 +25,8 @@ typedef struct __attribute__((packed, aligned(4))) {
     rs_matrix4x4 globalMat;
     rs_matrix4x4 localMat;
 
-    float4 transforms0;
-    float4 transforms1;
-    float4 transforms2;
-    float4 transforms3;
-    float4 transforms4;
-    float4 transforms5;
-    float4 transforms6;
-    float4 transforms7;
-    float4 transforms8;
-    float4 transforms9;
-    float4 transforms10;
-    float4 transforms11;
-    float4 transforms12;
-    float4 transforms13;
-    float4 transforms14;
-    float4 transforms15;
-
-    int transformType0;
-    int transformType1;
-    int transformType2;
-    int transformType3;
-    int transformType4;
-    int transformType5;
-    int transformType6;
-    int transformType7;
-    int transformType8;
-    int transformType9;
-    int transformType10;
-    int transformType11;
-    int transformType12;
-    int transformType13;
-    int transformType14;
-    int transformType15;
+    float4 transforms[16];
+    int transformTypes[16];
 
     int isDirty;
 
