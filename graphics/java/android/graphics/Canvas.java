@@ -447,6 +447,16 @@ public class Canvas {
     public void getMatrix(Matrix ctm) {
         native_getCTM(mNativeCanvas, ctm.native_instance);
     }
+
+    /**
+     * Returns a pointer to an internal 4x4 native matrix. The returned
+     * pointer is a pointer to an array of 16 floats.
+     * 
+     * @hide
+     */
+    public int getNativeMatrix() {
+        return 0;
+    }
     
     /**
      * Return a new matrix with a copy of the canvas' current transformation

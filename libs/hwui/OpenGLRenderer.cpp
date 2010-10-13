@@ -584,6 +584,10 @@ void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
     mSnapshot->transform->load(*matrix);
 }
 
+const float* OpenGLRenderer::getMatrix() const {
+    return &mSnapshot->transform->data[0];
+}
+
 void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
     mSnapshot->transform->copyTo(*matrix);
 }
