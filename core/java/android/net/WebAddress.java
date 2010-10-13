@@ -39,13 +39,11 @@ import java.util.regex.Pattern;
  */
 public class WebAddress {
 
-    private final static String LOGTAG = "http";
-
-    public String mScheme;
-    public String mHost;
-    public int mPort;
-    public String mPath;
-    public String mAuthInfo;
+    private String mScheme;
+    private String mHost;
+    private int mPort;
+    private String mPath;
+    private String mAuthInfo;
 
     static final int MATCH_GROUP_SCHEME = 1;
     static final int MATCH_GROUP_AUTHORITY = 2;
@@ -122,6 +120,7 @@ public class WebAddress {
         if (mScheme.equals("")) mScheme = "http";
     }
 
+    @Override
     public String toString() {
         String port = "";
         if ((mPort != 443 && mScheme.equals("https")) ||
@@ -134,5 +133,45 @@ public class WebAddress {
         }
 
         return mScheme + "://" + authInfo + mHost + port + mPath;
+    }
+
+    public void setScheme(String scheme) {
+      mScheme = scheme;
+    }
+
+    public String getScheme() {
+      return mScheme;
+    }
+
+    public void setHost(String host) {
+      mHost = host;
+    }
+
+    public String getHost() {
+      return mHost;
+    }
+
+    public void setPort(int port) {
+      mPort = port;
+    }
+
+    public int getPort() {
+      return mPort;
+    }
+
+    public void setPath(String path) {
+      mPath = path;
+    }
+
+    public String getPath() {
+      return mPath;
+    }
+
+    public void setAuthInfo(String authInfo) {
+      mAuthInfo = authInfo;
+    }
+
+    public String getAuthInfo() {
+      return mAuthInfo;
     }
 }

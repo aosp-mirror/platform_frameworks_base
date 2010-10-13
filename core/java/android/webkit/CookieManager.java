@@ -359,7 +359,7 @@ public final class CookieManager {
                     // negative means far future
                     if (cookie.expires < 0 || cookie.expires > now) {
                         // secure cookies can't be overwritten by non-HTTPS url
-                        if (!cookieEntry.secure || HTTPS.equals(uri.mScheme)) {
+                        if (!cookieEntry.secure || HTTPS.equals(uri.getScheme())) {
                             cookieEntry.value = cookie.value;
                             cookieEntry.expires = cookie.expires;
                             cookieEntry.secure = cookie.secure;
@@ -444,7 +444,7 @@ public final class CookieManager {
         }
 
         long now = System.currentTimeMillis();
-        boolean secure = HTTPS.equals(uri.mScheme);
+        boolean secure = HTTPS.equals(uri.getScheme());
         Iterator<Cookie> iter = cookieList.iterator();
 
         SortedSet<Cookie> cookieSet = new TreeSet<Cookie>(COMPARATOR);
@@ -692,7 +692,7 @@ public final class CookieManager {
      *          ended with "/"
      */
     private String[] getHostAndPath(WebAddress uri) {
-        if (uri.mHost != null && uri.mPath != null) {
+        if (uri.getHost() != null && uri.getPath() != null) {
 
             /*
              * The domain (i.e. host) portion of the cookie is supposed to be
@@ -703,12 +703,12 @@ public final class CookieManager {
              * See: http://www.ieft.org/rfc/rfc2965.txt (Section 3.3.3)
              */
             String[] ret = new String[2];
-            ret[0] = uri.mHost.toLowerCase();
-            ret[1] = uri.mPath;
+            ret[0] = uri.getHost().toLowerCase();
+            ret[1] = uri.getPath();
 
             int index = ret[0].indexOf(PERIOD);
             if (index == -1) {
-                if (uri.mScheme.equalsIgnoreCase("file")) {
+                if (uri.getScheme().equalsIgnoreCase("file")) {
                     // There is a potential bug where a local file path matches
                     // another file in the local web server directory. Still
                     // "localhost" is the best pseudo domain name.
