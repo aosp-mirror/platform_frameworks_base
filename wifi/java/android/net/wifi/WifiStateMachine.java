@@ -45,8 +45,6 @@ import android.net.NetworkUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.LinkProperties;
-import android.net.ProxyProperties;
-import android.net.wifi.WifiConfiguration.Status;
 import android.os.Binder;
 import android.os.Message;
 import android.os.Parcelable;
@@ -60,7 +58,6 @@ import android.os.ServiceManager;
 import android.os.Process;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -70,26 +67,18 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
-import android.database.ContentObserver;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+
 import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -1511,8 +1500,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
-     * Send the tracker a notification that a connection to the supplicant
-     * daemon has been established.
+     * Send the tracker a notification that connection to the supplicant
+     * daemon is lost
      */
     void notifySupplicantLost() {
         sendMessage(SUP_DISCONNECTION_EVENT);
@@ -1944,16 +1933,18 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     sendSupplicantConnectionChangedBroadcast(true);
                     transitionTo(mDriverSupReadyState);
                     break;
-                case CMD_STOP_SUPPLICANT:
-                    Log.d(TAG, "Stop supplicant received");
+                case SUP_DISCONNECTION_EVENT:
+                    Log.e(TAG, "Failed to setup control channel, restart supplicant");
                     WifiNative.stopSupplicant();
                     transitionTo(mDriverLoadedState);
+                    sendMessageAtFrontOfQueue(CMD_START_SUPPLICANT);
                     break;
-                    /* Fail soft ap when waiting for supplicant start */
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
                 case CMD_START_AP:
-                    Log.d(TAG, "Failed to start soft AP with a running supplicant");
-                    setWifiApState(WIFI_AP_STATE_FAILED);
-                    break;
+                case CMD_STOP_AP:
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
                 case CMD_SET_SCAN_MODE:
@@ -1965,10 +1956,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                     deferMessage(message);
-                    break;
-                case CMD_STOP_AP:
-                case CMD_START_SUPPLICANT:
-                case CMD_UNLOAD_DRIVER:
                     break;
                 default:
                     return NOT_HANDLED;
@@ -1993,23 +1980,24 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             WifiConfiguration config;
             switch(message.what) {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
+                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
                     Log.d(TAG, "Stop supplicant received");
+                    WifiNative.closeSupplicantConnection();
                     WifiNative.stopSupplicant();
-                    //$FALL-THROUGH$
+                    handleNetworkDisconnect();
+                    sendSupplicantConnectionChangedBroadcast(false);
+                    mSupplicantStateTracker.resetSupplicantState();
+                    transitionTo(mDriverLoadedState);
+                    break;
                 case SUP_DISCONNECTION_EVENT:  /* Supplicant died */
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+                    Log.e(TAG, "Supplicant died, restarting");
                     WifiNative.closeSupplicantConnection();
                     handleNetworkDisconnect();
                     sendSupplicantConnectionChangedBroadcast(false);
                     mSupplicantStateTracker.resetSupplicantState();
                     transitionTo(mDriverLoadedState);
-
-                    /* When supplicant dies, unload driver and enter failed state */
-                    //TODO: consider bringing up supplicant again
-                    if (message.what == SUP_DISCONNECTION_EVENT) {
-                        Log.d(TAG, "Supplicant died, unloading driver");
-                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_STATE_UNKNOWN, 0));
-                    }
+                    sendMessageAtFrontOfQueue(CMD_START_SUPPLICANT); /* restart */
                     break;
                 case CMD_START_DRIVER:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
@@ -2171,15 +2159,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 transitionTo(mScanModeState);
             } else {
                 WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
-                /* If supplicant has already connected, before we could finish establishing
-                 * the control channel connection, we miss all the supplicant events.
-                 * Disconnect and reconnect when driver has started to ensure we receive
-                 * all supplicant events.
-                 *
-                 * TODO: This is a bit unclean, ideally the supplicant should never
-                 * connect until told to do so by the framework
-                 */
-                WifiNative.disconnectCommand();
                 WifiNative.reconnectCommand();
                 transitionTo(mConnectModeState);
             }
@@ -2564,7 +2543,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
           switch(message.what) {
               case CMD_IP_CONFIG_SUCCESS:
-                  mReconnectCount = 0;
                   mLastSignalLevel = -1; // force update of signal strength
                   synchronized (mDhcpInfo) {
                       mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
@@ -2585,9 +2563,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                    * to a given network, disable the network
                    */
                   if (++mReconnectCount > getMaxDhcpRetries()) {
-                          Log.e(TAG, "Failed " +
-                                  mReconnectCount + " times, Disabling " + mLastNetworkId);
+                      Log.e(TAG, "Failed " +
+                              mReconnectCount + " times, Disabling " + mLastNetworkId);
                       WifiConfigStore.disableNetwork(mLastNetworkId);
+                      mReconnectCount = 0;
                   }
 
                   /* DHCP times out after about 30 seconds, we do a
