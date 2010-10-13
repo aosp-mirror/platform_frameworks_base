@@ -73,6 +73,14 @@ public class WallpaperManager {
     
     /**
      * Command for {@link #sendWallpaperCommand}: reported by the wallpaper
+     * host when the user releases a secondary pointer on an empty area
+     * (not performing an action in the host).  The x and y arguments are
+     * the location of the secondary tap in screen coordinates.
+     */
+    public static final String COMMAND_SECONDARY_TAP = "android.wallpaper.secondaryTap";
+
+    /**
+     * Command for {@link #sendWallpaperCommand}: reported by the wallpaper
      * host when the user drops an object into an area of the host.  The x
      * and y arguments are the location of the drop.
      */

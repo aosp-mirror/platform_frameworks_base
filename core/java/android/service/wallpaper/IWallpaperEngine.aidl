@@ -17,6 +17,7 @@
 package android.service.wallpaper;
 
 import android.view.MotionEvent;
+import android.os.Bundle;
 
 /**
  * @hide
@@ -25,5 +26,7 @@ oneway interface IWallpaperEngine {
     void setDesiredSize(int width, int height);
     void setVisibility(boolean visible);
     void dispatchPointer(in MotionEvent event);
+    void dispatchWallpaperCommand(String action, int x, int y,
+            int z, in Bundle extras);
 	void destroy();
 }
