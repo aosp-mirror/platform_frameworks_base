@@ -5057,6 +5057,8 @@ public class WebView extends AbsoluteLayout
                     if (!mAllowPanAndScale) {
                         return true;
                     }
+                    mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
+                    mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                 }
                 x = mScaleDetector.getFocusX();
                 y = mScaleDetector.getFocusY();
