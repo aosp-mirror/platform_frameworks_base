@@ -29,7 +29,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_PATCHES 1
+#define DEBUG_PATCHES 0
 
 // Debug
 #if DEBUG_PATCHES
