@@ -784,6 +784,11 @@ public class WebView extends AbsoluteLayout
     private EdgeGlow mEdgeGlowBottom;
     private EdgeGlow mEdgeGlowLeft;
     private EdgeGlow mEdgeGlowRight;
+    /*
+     * These manage the delta the user has pulled beyond the edges.
+     */
+    private int mOverscrollDeltaX;
+    private int mOverscrollDeltaY;
 
     // Used to match key downs and key ups
     private boolean mGotKeyDown;
@@ -2569,17 +2574,59 @@ public class WebView extends AbsoluteLayout
             boolean clampedY) {
         mInOverScrollMode = false;
         int maxX = computeMaxScrollX();
+        int maxY = computeMaxScrollY();
         if (maxX == 0) {
             // do not over scroll x if the page just fits the screen
             scrollX = pinLocX(scrollX);
         } else if (scrollX < 0 || scrollX > maxX) {
             mInOverScrollMode = true;
         }
-        if (scrollY < 0 || scrollY > computeMaxScrollY()) {
+        if (scrollY < 0 || scrollY > maxY) {
             mInOverScrollMode = true;
         }
 
+        int oldX = mScrollX;
+        int oldY = mScrollY;
+
         super.scrollTo(scrollX, scrollY);
+
+        // Only show overscroll bars if there was no movement in any direction
+        // as a result of scrolling.
+        if (mEdgeGlowTop != null && oldY == mScrollY && oldX == mScrollX) {
+            // Don't show left/right glows if we fit the whole content.
+            // Also don't show if there was vertical movement.
+            if (maxX > 0) {
+                final int pulledToX = oldX + mOverscrollDeltaX;
+                if (pulledToX < 0) {
+                    mEdgeGlowLeft.onPull((float) mOverscrollDeltaX / getWidth());
+                    if (!mEdgeGlowRight.isFinished()) {
+                        mEdgeGlowRight.onRelease();
+                    }
+                } else if (pulledToX > maxX) {
+                    mEdgeGlowRight.onPull((float) mOverscrollDeltaX / getWidth());
+                    if (!mEdgeGlowLeft.isFinished()) {
+                        mEdgeGlowLeft.onRelease();
+                    }
+                }
+                mOverscrollDeltaX = 0;
+            }
+
+            if (maxY > 0 || getOverScrollMode() == OVER_SCROLL_ALWAYS) {
+                final int pulledToY = oldY + mOverscrollDeltaY;
+                if (pulledToY < 0) {
+                    mEdgeGlowTop.onPull((float) mOverscrollDeltaY / getHeight());
+                    if (!mEdgeGlowBottom.isFinished()) {
+                        mEdgeGlowBottom.onRelease();
+                    }
+                } else if (pulledToY > maxY) {
+                    mEdgeGlowBottom.onPull((float) mOverscrollDeltaY / getHeight());
+                    if (!mEdgeGlowTop.isFinished()) {
+                        mEdgeGlowTop.onRelease();
+                    }
+                }
+                mOverscrollDeltaY = 0;
+            }
+        }
     }
 
     /**
@@ -5562,42 +5609,16 @@ public class WebView extends AbsoluteLayout
             final int oldY = mScrollY;
             final int rangeX = computeMaxScrollX();
             final int rangeY = computeMaxScrollY();
+
+            if (mEdgeGlowTop != null) {
+                // Save the deltas for overscroll glow.
+                mOverscrollDeltaX = deltaX;
+                mOverscrollDeltaY = deltaY;
+            }
+
             overScrollBy(deltaX, deltaY, oldX, oldY,
                     rangeX, rangeY,
                     mOverscrollDistance, mOverscrollDistance, true);
-
-            if (mEdgeGlowTop != null) {
-                // Don't show left/right glows if we fit the whole content.
-                if (rangeX > 0) {
-                    final int pulledToX = oldX + deltaX;
-                    if (pulledToX < 0) {
-                        mEdgeGlowLeft.onPull((float) deltaX / getWidth());
-                        if (!mEdgeGlowRight.isFinished()) {
-                            mEdgeGlowRight.onRelease();
-                        }
-                    } else if (pulledToX > rangeX) {
-                        mEdgeGlowRight.onPull((float) deltaX / getWidth());
-                        if (!mEdgeGlowLeft.isFinished()) {
-                            mEdgeGlowLeft.onRelease();
-                        }
-                    }
-                }
-
-                if (rangeY > 0 || getOverScrollMode() == OVER_SCROLL_ALWAYS) {
-                    final int pulledToY = oldY + deltaY;
-                    if (pulledToY < 0) {
-                        mEdgeGlowTop.onPull((float) deltaY / getHeight());
-                        if (!mEdgeGlowBottom.isFinished()) {
-                            mEdgeGlowBottom.onRelease();
-                        }
-                    } else if (pulledToY > rangeY) {
-                        mEdgeGlowBottom.onPull((float) deltaY / getHeight());
-                        if (!mEdgeGlowTop.isFinished()) {
-                            mEdgeGlowTop.onRelease();
-                        }
-                    }
-                }
-            }
         }
         if (!getSettings().getBuiltInZoomControls()) {
             boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
