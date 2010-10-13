@@ -2520,7 +2520,6 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Unable to note drag target change");
                     }
-                    mCurrentDragView = prevDragView;
                 }
             }
         }
@@ -2540,13 +2539,13 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 event.mAction = DragEvent.ACTION_DRAG_EXITED;
                 mCurrentDragView.dispatchDragEvent(event);
             }
+            mCurrentDragView = newDragTarget;
         }
         // If we've dragged over a new view, send it the ENTERED message
         if (newDragTarget != null) {
             event.mAction = DragEvent.ACTION_DRAG_ENTERED;
             newDragTarget.dispatchDragEvent(event);
         }
-        mCurrentDragView = newDragTarget;
         event.mAction = action;  // restore the event's original state
     }
 
