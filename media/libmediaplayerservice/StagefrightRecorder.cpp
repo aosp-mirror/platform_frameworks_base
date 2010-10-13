@@ -24,6 +24,7 @@
 #include <media/stagefright/AudioSource.h>
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/CameraSource.h>
+#include <media/stagefright/MPEG2TSWriter.h>
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
@@ -632,6 +633,9 @@ status_t StagefrightRecorder::start() {
         case OUTPUT_FORMAT_RTP_AVP:
             return startRTPRecording();
 
+        case OUTPUT_FORMAT_MPEG2TS:
+            return startMPEG2TSRecording();
+
         default:
             LOGE("Unsupported output file format: %d", mOutputFormat);
             return UNKNOWN_ERROR;
@@ -795,6 +799,52 @@ status_t StagefrightRecorder::startRTPRecording() {
     mWriter = new ARTPWriter(dup(mOutputFd));
     mWriter->addSource(source);
     mWriter->setListener(mListener);
+
+    return mWriter->start();
+}
+
+status_t StagefrightRecorder::startMPEG2TSRecording() {
+    CHECK_EQ(mOutputFormat, OUTPUT_FORMAT_MPEG2TS);
+
+    sp<MediaWriter> writer = new MPEG2TSWriter(dup(mOutputFd));
+
+    if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+        if (mAudioEncoder != AUDIO_ENCODER_AAC) {
+            return ERROR_UNSUPPORTED;
+        }
+
+        status_t err = setupAudioEncoder(writer);
+
+        if (err != OK) {
+            return err;
+        }
+    }
+
+    if (mVideoSource == VIDEO_SOURCE_DEFAULT
+            || mVideoSource == VIDEO_SOURCE_CAMERA) {
+        if (mVideoEncoder != VIDEO_ENCODER_H264) {
+            return ERROR_UNSUPPORTED;
+        }
+
+        sp<MediaSource> encoder;
+        status_t err = setupVideoEncoder(&encoder);
+
+        if (err != OK) {
+            return err;
+        }
+
+        writer->addSource(encoder);
+    }
+
+    if (mMaxFileDurationUs != 0) {
+        writer->setMaxFileDuration(mMaxFileDurationUs);
+    }
+
+    if (mMaxFileSizeBytes != 0) {
+        writer->setMaxFileSize(mMaxFileSizeBytes);
+    }
+
+    mWriter = writer;
 
     return mWriter->start();
 }

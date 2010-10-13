@@ -63,6 +63,8 @@ private:
     sp<ALooper> mLooper;
     sp<AMessage> mNotify;
 
+    sp<ABuffer> mAACCodecSpecificData;
+
     sp<ABuffer> mAACBuffer;
 
     unsigned mStreamType;
@@ -125,6 +127,8 @@ void MPEG2TSWriter::SourceInfo::start(const sp<AMessage> &notify) {
 void MPEG2TSWriter::SourceInfo::stop() {
     mLooper->unregisterHandler(id());
     mLooper->stop();
+
+    mSource->stop();
 }
 
 void MPEG2TSWriter::SourceInfo::extractCodecSpecificData() {
@@ -133,17 +137,47 @@ void MPEG2TSWriter::SourceInfo::extractCodecSpecificData() {
     const char *mime;
     CHECK(meta->findCString(kKeyMIMEType, &mime));
 
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
+        uint32_t type;
+        const void *data;
+        size_t size;
+        if (!meta->findData(kKeyESDS, &type, &data, &size)) {
+            // Codec specific data better be in the first data buffer.
+            return;
+        }
+
+        ESDS esds((const char *)data, size);
+        CHECK_EQ(esds.InitCheck(), (status_t)OK);
+
+        const uint8_t *codec_specific_data;
+        size_t codec_specific_data_size;
+        esds.getCodecSpecificInfo(
+                (const void **)&codec_specific_data, &codec_specific_data_size);
+
+        CHECK_GE(codec_specific_data_size, 2u);
+
+        mAACCodecSpecificData = new ABuffer(codec_specific_data_size);
+
+        memcpy(mAACCodecSpecificData->data(), codec_specific_data,
+               codec_specific_data_size);
+
+        return;
+    }
+
     if (strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)) {
+        return;
+    }
+
+    uint32_t type;
+    const void *data;
+    size_t size;
+    if (!meta->findData(kKeyAVCC, &type, &data, &size)) {
+        // Codec specific data better be part of the data stream then.
         return;
     }
 
     sp<ABuffer> out = new ABuffer(1024);
     out->setRange(0, 0);
-
-    uint32_t type;
-    const void *data;
-    size_t size;
-    CHECK(meta->findData(kKeyAVCC, &type, &data, &size));
 
     const uint8_t *ptr = (const uint8_t *)data;
 
@@ -250,21 +284,7 @@ void MPEG2TSWriter::SourceInfo::appendAACFrames(MediaBuffer *buffer) {
         mAACBuffer->setRange(0, 0);
     }
 
-    sp<MetaData> meta = mSource->getFormat();
-    uint32_t type;
-    const void *data;
-    size_t size;
-    CHECK(meta->findData(kKeyESDS, &type, &data, &size));
-
-    ESDS esds((const char *)data, size);
-    CHECK_EQ(esds.InitCheck(), (status_t)OK);
-
-    const uint8_t *codec_specific_data;
-    size_t codec_specific_data_size;
-    esds.getCodecSpecificInfo(
-            (const void **)&codec_specific_data, &codec_specific_data_size);
-
-    CHECK_GE(codec_specific_data_size, 2u);
+    const uint8_t *codec_specific_data = mAACCodecSpecificData->data();
 
     unsigned profile = (codec_specific_data[0] >> 3) - 1;
 
@@ -355,7 +375,18 @@ void MPEG2TSWriter::SourceInfo::onMessageReceived(const sp<AMessage> &msg) {
             }
 
             if (err == OK) {
-                if (buffer->range_length() > 0) {
+                if (mStreamType == 0x0f && mAACCodecSpecificData == NULL) {
+                    // The first buffer contains codec specific data.
+
+                    CHECK_GE(buffer->range_length(), 2u);
+
+                    mAACCodecSpecificData = new ABuffer(buffer->range_length());
+
+                    memcpy(mAACCodecSpecificData->data(),
+                           (const uint8_t *)buffer->data()
+                            + buffer->range_offset(),
+                           buffer->range_length());
+                } else if (buffer->range_length() > 0) {
                     if (mStreamType == 0x0f) {
                         appendAACFrames(buffer);
                     } else {
@@ -378,12 +409,25 @@ void MPEG2TSWriter::SourceInfo::onMessageReceived(const sp<AMessage> &msg) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+MPEG2TSWriter::MPEG2TSWriter(int fd)
+    : mFile(fdopen(fd, "wb")),
+      mStarted(false),
+      mNumSourcesDone(0),
+      mNumTSPacketsWritten(0),
+      mNumTSPacketsBeforeMeta(0) {
+    init();
+}
+
 MPEG2TSWriter::MPEG2TSWriter(const char *filename)
     : mFile(fopen(filename, "wb")),
       mStarted(false),
       mNumSourcesDone(0),
       mNumTSPacketsWritten(0),
       mNumTSPacketsBeforeMeta(0) {
+    init();
+}
+
+void MPEG2TSWriter::init() {
     CHECK(mFile != NULL);
 
     mLooper = new ALooper;
@@ -396,6 +440,10 @@ MPEG2TSWriter::MPEG2TSWriter(const char *filename)
 }
 
 MPEG2TSWriter::~MPEG2TSWriter() {
+    if (mStarted) {
+        stop();
+    }
+
     mLooper->unregisterHandler(mReflector->id());
     mLooper->stop();
 
