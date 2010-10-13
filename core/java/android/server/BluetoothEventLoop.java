@@ -539,7 +539,14 @@ class BluetoothEventLoop {
             authorized = a2dp.getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
                 Log.i(TAG, "Allowing incoming A2DP / AVRCP connection from " + address);
-                mBluetoothService.notifyIncomingA2dpConnection(address);
+                // Some headsets try to connect AVCTP before AVDTP - against the recommendation
+                // If AVCTP connection fails, we get stuck in IncomingA2DP state in the state
+                // machine.  We don't handle AVCTP signals currently. We only send
+                // intents for AVDTP state changes. We need to handle both of them in
+                // some cases. For now, just don't move to incoming state in this case.
+                if (!BluetoothUuid.isAvrcpTarget(uuid)) {
+                    mBluetoothService.notifyIncomingA2dpConnection(address);
+                }
             } else {
                 Log.i(TAG, "Rejecting incoming A2DP / AVRCP connection from " + address);
             }
