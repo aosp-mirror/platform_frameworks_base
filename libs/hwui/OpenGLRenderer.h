@@ -432,6 +432,9 @@ private:
     // Misc
     GLint mMaxTextureSize;
 
+    // Indentity matrix
+    const mat4 mIdentity;
+
     friend class DisplayListRenderer;
 
 }; // class OpenGLRenderer

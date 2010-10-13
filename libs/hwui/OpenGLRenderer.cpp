@@ -585,7 +585,10 @@ void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
 }
 
 const float* OpenGLRenderer::getMatrix() const {
-    return &mSnapshot->transform->data[0];
+    if (mSnapshot->fbo != 0) {
+        return &mSnapshot->transform->data[0];
+    }
+    return &mIdentity.data[0];
 }
 
 void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
