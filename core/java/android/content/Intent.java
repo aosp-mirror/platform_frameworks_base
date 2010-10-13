@@ -5268,10 +5268,15 @@ public class Intent implements Parcelable, Cloneable {
             }
             first = false;
             b.append("dat=");
-            if (mData.getScheme().equalsIgnoreCase("tel")) {
-                b.append("tel:xxx-xxx-xxxx");
-            } else if (mData.getScheme().equalsIgnoreCase("smsto")) {
-                b.append("smsto:xxx-xxx-xxxx");
+            String scheme = mData.getScheme();
+            if (scheme != null) {
+                if (scheme.equalsIgnoreCase("tel")) {
+                    b.append("tel:xxx-xxx-xxxx");
+                } else if (scheme.equalsIgnoreCase("smsto")) {
+                    b.append("smsto:xxx-xxx-xxxx");
+                } else {
+                    b.append(mData);
+                }
             } else {
                 b.append(mData);
             }
