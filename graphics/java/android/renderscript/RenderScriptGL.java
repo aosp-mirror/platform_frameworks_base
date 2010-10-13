@@ -18,6 +18,7 @@ package android.renderscript;
 
 import java.lang.reflect.Field;
 
+import android.graphics.PixelFormat;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Config;
@@ -103,7 +104,11 @@ public class RenderScriptGL extends RenderScript {
     SurfaceConfig mSurfaceConfig;
 
     public void configureSurface(SurfaceHolder sh) {
-        //getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        if (mSurfaceConfig.mAlphaMin > 1) {
+            sh.setFormat(PixelFormat.RGBA_8888);
+        } else {
+            sh.setFormat(PixelFormat.RGBX_8888);
+        }
     }
 
     public void checkSurface(SurfaceHolder sh) {
@@ -112,13 +117,17 @@ public class RenderScriptGL extends RenderScript {
     public RenderScriptGL(SurfaceConfig sc) {
         mSurfaceConfig = new SurfaceConfig(sc);
 
-
-
         mSurface = null;
         mWidth = 0;
         mHeight = 0;
         mDev = nDeviceCreate();
-        mContext = nContextCreateGL(mDev, 0, mSurfaceConfig.mDepthMin > 0);
+        mContext = nContextCreateGL(mDev, 0,
+                                    mSurfaceConfig.mColorMin, mSurfaceConfig.mColorPref,
+                                    mSurfaceConfig.mAlphaMin, mSurfaceConfig.mAlphaPref,
+                                    mSurfaceConfig.mDepthMin, mSurfaceConfig.mDepthPref,
+                                    mSurfaceConfig.mStencilMin, mSurfaceConfig.mStencilPref,
+                                    mSurfaceConfig.mSamplesMin, mSurfaceConfig.mSamplesPref,
+                                    mSurfaceConfig.mSamplesQ);
         mMessageThread = new MessageThread(this);
         mMessageThread.start();
         Element.initPredefined(this);
