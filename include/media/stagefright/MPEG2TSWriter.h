@@ -25,7 +25,10 @@
 
 namespace android {
 
+struct ABuffer;
+
 struct MPEG2TSWriter : public MediaWriter {
+    MPEG2TSWriter(int fd);
     MPEG2TSWriter(const char *filename);
 
     virtual status_t addSource(const sp<MediaSource> &source);
@@ -58,6 +61,8 @@ private:
 
     int64_t mNumTSPacketsWritten;
     int64_t mNumTSPacketsBeforeMeta;
+
+    void init();
 
     void writeTS();
     void writeProgramAssociationTable();
