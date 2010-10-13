@@ -270,8 +270,8 @@ public class WifiMonitor {
                 if (WifiNative.connectToSupplicant()) {
                     return true;
                 }
-                if (connectTries++ < 3) {
-                    nap(5);
+                if (connectTries++ < 5) {
+                    nap(1);
                 } else {
                     break;
                 }
