@@ -425,8 +425,6 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         snapshot->flags |= Snapshot::kFlagDirtyOrtho;
         snapshot->orthoMatrix.load(mOrthoMatrix);
 
-        setScissorFromClip();
-
         // Bind texture to FBO
         glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
         glBindTexture(GL_TEXTURE_2D, layer->texture);
@@ -457,10 +455,11 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 #endif
 
         // Clear the FBO
-        glDisable(GL_SCISSOR_TEST);
+        glScissor(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glEnable(GL_SCISSOR_TEST);
+
+        setScissorFromClip();
 
         // Change the ortho projection
         glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
