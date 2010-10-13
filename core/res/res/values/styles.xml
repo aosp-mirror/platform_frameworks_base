@@ -1505,6 +1505,11 @@
     </style>
 
     <style name="Widget.Holo.Light.Button.Small">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@android:color/primary_text_holo_light</item>
+        <item name="android:minHeight">40dip</item>
+        <item name="android:paddingLeft">24dip</item>
+        <item name="android:paddingRight">24dip</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Inset">
