@@ -67,9 +67,9 @@ public abstract class OnObbStateChangeListener {
     public static final int ERROR_ALREADY_MOUNTED = 24;
 
     /**
-     * The current application does not have permission to use this OBB because
-     * the OBB indicates it's owned by a different package or the key used to
-     * open it is incorrect. Returned in status messages from calls made via
+     * The current application does not have permission to use this OBB. This
+     * could be because the OBB indicates it's owned by a different package or
+     * some other error. Returned in status messages from calls made via
      * {@link StorageManager}
      */
     public static final int ERROR_PERMISSION_DENIED = 25;
