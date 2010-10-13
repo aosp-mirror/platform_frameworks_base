@@ -30,53 +30,53 @@ package com.trustedlogic.trustednfc.android.internal;
 
 public class NativeLlcpServiceSocket {
 
-	private int mHandle;
-	
-	private int mLocalMiu;
-	
-	private int mLocalRw;
-	
-	private int mLocalLinearBufferLength;
-	
-	private int mSap;
-	
-	private int mTimeout;
-	
-	private String mServiceName;
-	
-	public NativeLlcpServiceSocket(){
-		
-	}
-	
-	public NativeLlcpServiceSocket(String serviceName){
-		mServiceName = serviceName;
-	}
-	
+    private int mHandle;
+
+    private int mLocalMiu;
+
+    private int mLocalRw;
+
+    private int mLocalLinearBufferLength;
+
+    private int mSap;
+
+    private int mTimeout;
+
+    private String mServiceName;
+
+    public NativeLlcpServiceSocket(){
+
+    }
+
+    public NativeLlcpServiceSocket(String serviceName){
+        mServiceName = serviceName;
+    }
+
     public native NativeLlcpSocket doAccept(int timeout, int miu, int rw, int linearBufferLength);
 
     public native boolean doClose();
-    
+
     public int getHandle(){
-    	return mHandle;
+        return mHandle;
     }
-    
+
     public void setAcceptTimeout(int timeout){
-    	mTimeout = timeout; 
+        mTimeout = timeout;
     }
-    
+
     public int getAcceptTimeout(){
-    	return mTimeout;
+        return mTimeout;
     }
-    
+
     public int getRw(){
-    	return mLocalRw;
+        return mLocalRw;
     }
-    
+
     public int getMiu(){
-    	return mLocalMiu;
+        return mLocalMiu;
     }
-    
+
     public int getLinearBufferLength(){
-    	return mLocalLinearBufferLength;
+        return mLocalLinearBufferLength;
     }
 }

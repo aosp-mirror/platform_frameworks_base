@@ -24,7 +24,8 @@ package com.trustedlogic.trustednfc.android;
 
 import java.io.IOException;
 
-import com.trustedlogic.trustednfc.android.internal.ErrorCodes;
+import android.nfc.ErrorCodes;
+import android.nfc.ILlcpSocket;
 
 import android.os.RemoteException;
 import android.util.Log;
@@ -32,7 +33,7 @@ import android.util.Log;
 /**
  * LlcpClientSocket represents a LLCP Connection-Oriented client to be used in a
  * connection-oriented communication
- * 
+ *
  * @since AA02.01
  * @hide
  */
@@ -43,14 +44,14 @@ public class LlcpSocket {
 	/**
 	 * The handle returned by the NFC service and used to identify the LLCP
 	 * socket in every call of this class.
-	 * 
+	 *
 	 * @hide
 	 */
 	protected int mHandle;
 
 	/**
 	 * The entry point for LLCP socket operations.
-	 * 
+	 *
 	 * @hide
 	 */
 	protected ILlcpSocket mService;
@@ -84,7 +85,7 @@ public class LlcpSocket {
 
 	/**
 	 * Internal constructor for the LlcpSocket class.
-	 * 
+	 *
 	 * @param service
 	 *            The entry point to the Nfc Service for LlcpServiceSocket
 	 *            class.
@@ -100,7 +101,7 @@ public class LlcpSocket {
 
 	/**
 	 * Connect request to a specific LLCP Service by its SAP.
-	 * 
+	 *
 	 * @param sap
 	 *            Service Access Point number of the LLCP Service
 	 * @throws IOException
@@ -128,7 +129,7 @@ public class LlcpSocket {
 
 	/**
 	 * Connect request to a specific LLCP Service by its Service Name.
-	 * 
+	 *
 	 * @param sn
 	 *            Service Name of the LLCP Service
 	 * @throws IOException
@@ -156,7 +157,7 @@ public class LlcpSocket {
 
 	/**
 	 * Set the timeout for the connect request
-	 * 
+	 *
 	 * @param timeout
 	 *            timeout value for the connect request
 	 * @since AA02.01
@@ -171,7 +172,7 @@ public class LlcpSocket {
 
 	/**
 	 * Get the timeout value of the connect request
-	 * 
+	 *
 	 * @return mTimeout
 	 * @since AA02.01
 	 */
@@ -187,7 +188,7 @@ public class LlcpSocket {
 	/**
 	 * Disconnect request to the connected LLCP socket and close the created
 	 * socket.
-	 * 
+	 *
 	 * @throws IOException
 	 *             if the LLCP has been lost or deactivated.
 	 * @since AA02.01
@@ -206,7 +207,7 @@ public class LlcpSocket {
 
 	/**
 	 * Send data to the connected LLCP Socket.
-	 * 
+	 *
 	 * @throws IOException
 	 *             if the LLCP has been lost or deactivated.
 	 * @since AA02.01
@@ -220,12 +221,12 @@ public class LlcpSocket {
 			}
 		} catch (RemoteException e) {
 			Log.e(TAG, "RemoteException in send(): ", e);
-		}		
+		}
 	}
 
 	/**
 	 * Receive data from the connected LLCP socket
-	 * 
+	 *
 	 * @param receiveBuffer
 	 *            a buffer for the received data
 	 * @return length length of the data received
@@ -242,14 +243,14 @@ public class LlcpSocket {
 			}
 		} catch (RemoteException e) {
 			Log.e(TAG, "RemoteException in send(): ", e);
-		}	
-		
+		}
+
 		return receivedLength;
 	}
-	
+
 	/**
 	 * Returns the local Service Access Point number of the socket
-	 * 
+	 *
 	 * @return localSap
 	 * @since AA02.01
 	 */
@@ -264,7 +265,7 @@ public class LlcpSocket {
 
 	/**
 	 * Returns the local Maximum Information Unit(MIU) of the socket
-	 * 
+	 *
 	 * @return miu
 	 * @since AA02.01
 	 */
@@ -279,7 +280,7 @@ public class LlcpSocket {
 
 	/**
 	 * Returns the local Receive Window(RW) of the socket
-	 * 
+	 *
 	 * @return rw
 	 * @since AA02.01
 	 */
@@ -296,7 +297,7 @@ public class LlcpSocket {
 	 * Returns the remote Maximum Information Unit(MIU) of the socket.
 	 * <p>
 	 * This method must be called when the socket is in CONNECTED_STATE
-	 * 
+	 *
 	 * @return remoteMiu
 	 * @throws LlcpException
 	 *             if the LlcpClientSocket is not in a CONNECTED_STATE
@@ -320,7 +321,7 @@ public class LlcpSocket {
 	 * Returns the remote Receive Window(RW) of the connected remote socket.
 	 * <p>
 	 * This method must be called when the socket is in CONNECTED_STATE
-	 * 
+	 *
 	 * @return rw
 	 * @throws LlcpException
 	 *             if the LlcpClientSocket is not in a CONNECTED_STATE

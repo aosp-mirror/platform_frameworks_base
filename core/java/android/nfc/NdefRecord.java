@@ -138,6 +138,18 @@ public class NdefRecord implements Parcelable {
      */
     public static final byte[] RTD_HANDOVER_SELECT = {0x48, 0x73}; // "Hs"
 
+    private static final byte FLAG_MB = (byte) 0x80;
+    private static final byte FLAG_ME = (byte) 0x40;
+    private static final byte FLAG_CF = (byte) 0x20;
+    private static final byte FLAG_SR = (byte) 0x10;
+    private static final byte FLAG_IL = (byte) 0x08;
+
+    private final byte mFlags;
+    private final short mTnf;
+    private final byte[] mType;
+    private final byte[] mId;
+    private final byte[] mPayload;
+
     /**
      * Construct an NDEF Record.
      * <p>
@@ -153,7 +165,29 @@ public class NdefRecord implements Parcelable {
      *                must not be null
      */
     public NdefRecord(short tnf, byte[] type, byte[] id, byte[] payload) {
-        throw new UnsupportedOperationException();
+        /* check arguments */
+        if ((type == null) || (id == null) || (payload == null)) {
+            throw new IllegalArgumentException("Illegal null argument");
+        }
+
+        /* generate flag */
+        byte flags = FLAG_MB | FLAG_ME;
+
+        /* Determine if it is a short record */
+        if(payload.length < 0xFF) {
+            flags |= FLAG_SR;
+        }
+
+        /* Determine if an id is present */
+        if(id.length != 0) {
+            flags |= FLAG_IL;
+        }
+
+        mFlags = flags;
+        mTnf = tnf;
+        mType = type.clone();
+        mId = id.clone();
+        mPayload = payload.clone();
     }
 
     /**
@@ -174,7 +208,7 @@ public class NdefRecord implements Parcelable {
      * TNF is the top-level type.
      */
     public short getTnf() {
-        throw new UnsupportedOperationException();
+        return mTnf;
     }
 
     /**
@@ -184,21 +218,21 @@ public class NdefRecord implements Parcelable {
      * payload format.
      */
     public byte[] getType() {
-        throw new UnsupportedOperationException();
+        return mType.clone();
     }
 
     /**
      * Returns the variable length ID.
      */
     public byte[] getId() {
-        throw new UnsupportedOperationException();
+        return mId.clone();
     }
 
     /**
      * Returns the variable length payload.
      */
     public byte[] getPayload() {
-        throw new UnsupportedOperationException();
+        return mPayload.clone();
     }
 
     /**
@@ -206,26 +240,43 @@ public class NdefRecord implements Parcelable {
      * @hide
      */
     public byte[] toByteArray() {
-        throw new UnsupportedOperationException();
+        return generate(mFlags, mTnf, mType, mId, mPayload);
     }
 
-    @Override
     public int describeContents() {
         return 0;
     }
 
-    @Override
     public void writeToParcel(Parcel dest, int flags) {
-        throw new UnsupportedOperationException();
+        dest.writeInt(mTnf);
+        dest.writeInt(mType.length);
+        dest.writeByteArray(mType);
+        dest.writeInt(mId.length);
+        dest.writeByteArray(mId);
+        dest.writeInt(mPayload.length);
+        dest.writeByteArray(mPayload);
     }
 
     public static final Parcelable.Creator<NdefRecord> CREATOR =
             new Parcelable.Creator<NdefRecord>() {
         public NdefRecord createFromParcel(Parcel in) {
-            throw new UnsupportedOperationException();
+            short tnf = (short)in.readInt();
+            int typeLength = in.readInt();
+            byte[] type = new byte[typeLength];
+            in.readByteArray(type);
+            int idLength = in.readInt();
+            byte[] id = new byte[idLength];
+            in.readByteArray(id);
+            int payloadLength = in.readInt();
+            byte[] payload = new byte[payloadLength];
+            in.readByteArray(payload);
+
+            return new NdefRecord(tnf, type, id, payload);
         }
         public NdefRecord[] newArray(int size) {
-            throw new UnsupportedOperationException();
+            return new NdefRecord[size];
         }
     };
+
+    private native byte[] generate(short flags, short tnf, byte[] type, byte[] id, byte[] data);
 }
