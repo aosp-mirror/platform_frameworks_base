@@ -111,7 +111,7 @@ storage.</p>
 <p class="caution"><strong>Caution:</strong> Although XML markup such as this will be ignored by
 older platforms, you must be careful not to use programming APIs introduced in API Level 8
 while your {@code minSdkVersion} is less than "8", unless you perform the work necessary to
-provide backward compatiblity in your code. For information about building
+provide backward compatibility in your code. For information about building
 backward compatibility in your application code, see the <a
 href="{@docRoot}resources/articles/backward-compatibility.html">Backward Compatibility</a>
 article.</p>
@@ -167,6 +167,10 @@ not work until external storage is remounted.</dd>
     <dd>Your {@link android.app.admin.DeviceAdminReceiver} and all its admin capabilities will
 be disabled, which can have unforeseeable consequences for the device functionality, which may
 persist after external storage is remounted.</dd>
+  <dt>Broadcast Receivers listening for "boot completed"</dt>
+    <dd>The system delivers the {@link android.content.Intent#ACTION_BOOT_COMPLETED} broadcast
+before the external storage is mounted to the device. If your application is installed on the
+external storage, it can never receive this broadcast.</dd>
 </dl>
 
 <p>If your application uses any of the features listed above, you <strong>should not</strong> allow
