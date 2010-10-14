@@ -166,10 +166,10 @@ public final class NfcAdapter {
             }
             sIsInitialized = true;
 
-            // TODO(npelly): check which method to use here to get the service
-            IBinder b = ServiceManager.getService(Context.NFC_SERVICE);
+            IBinder b = ServiceManager.getService("nfc");
             if (b == null) {
-                return null;  // This device does not have NFC
+                Log.d(TAG, "NFC Service not available");
+                return null;
             }
 
             sAdapter = new NfcAdapter(INfcAdapter.Stub.asInterface(b));
