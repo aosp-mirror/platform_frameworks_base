@@ -102,9 +102,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.app.admin.DevicePolicyManager;
-import com.trustedlogic.trustednfc.android.NfcManager;
-import com.trustedlogic.trustednfc.android.INfcManager;
-
 import com.android.internal.os.IDropBoxManagerService;
 
 import java.io.File;
@@ -173,7 +170,6 @@ class ContextImpl extends Context {
     private static ThrottleManager sThrottleManager;
     private static WifiManager sWifiManager;
     private static LocationManager sLocationManager;
-    private static NfcManager sNfcManager;
     private static final HashMap<String, SharedPreferencesImpl> sSharedPrefs =
             new HashMap<String, SharedPreferencesImpl>();
 
@@ -972,8 +968,6 @@ class ContextImpl extends Context {
             return getClipboardManager();
         } else if (WALLPAPER_SERVICE.equals(name)) {
             return getWallpaperManager();
-        } else if (NFC_SERVICE.equals(name)) {
-            return getNfcManager();
         } else if (DROPBOX_SERVICE.equals(name)) {
             return getDropBoxManager();
         } else if (DEVICE_POLICY_SERVICE.equals(name)) {
@@ -1207,21 +1201,6 @@ class ContextImpl extends Context {
             }
         }
         return mDownloadManager;
-    }
-
-    private NfcManager getNfcManager()
-    {
-        synchronized (sSync) {
-            if (sNfcManager == null) {
-                IBinder b = ServiceManager.getService(NFC_SERVICE);
-                if (b == null) {
-                    return null;
-                }
-                INfcManager service = INfcManager.Stub.asInterface(b);
-                sNfcManager = new NfcManager(service, mMainThread.getHandler());
-            }
-        }
-        return sNfcManager;
     }
 
     @Override

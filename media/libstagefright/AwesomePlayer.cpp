@@ -26,6 +26,7 @@
 #include "include/SoftwareRenderer.h"
 #include "include/NuCachedSource2.h"
 #include "include/ThrottledSource.h"
+#include "include/MPEG2TSExtractor.h"
 
 #include "ARTPSession.h"
 #include "APacketSource.h"
@@ -302,6 +303,28 @@ status_t AwesomePlayer::setDataSource_l(
 }
 
 status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
+    // Attempt to approximate overall stream bitrate by summing all
+    // tracks' individual bitrates, if not all of them advertise bitrate,
+    // we have to fail.
+
+    int64_t totalBitRate = 0;
+
+    for (size_t i = 0; i < extractor->countTracks(); ++i) {
+        sp<MetaData> meta = extractor->getTrackMetaData(i);
+
+        int32_t bitrate;
+        if (!meta->findInt32(kKeyBitRate, &bitrate)) {
+            totalBitRate = -1;
+            break;
+        }
+
+        totalBitRate += bitrate;
+    }
+
+    mBitrate = totalBitRate;
+
+    LOGV("mBitrate = %lld bits/sec", mBitrate);
+
     bool haveAudio = false;
     bool haveVideo = false;
     for (size_t i = 0; i < extractor->countTracks(); ++i) {
@@ -440,6 +463,8 @@ void AwesomePlayer::reset_l() {
 
     delete mSuspensionState;
     mSuspensionState = NULL;
+
+    mBitrate = -1;
 }
 
 void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
@@ -452,17 +477,32 @@ void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
     }
 }
 
+bool AwesomePlayer::getBitrate(int64_t *bitrate) {
+    off_t size;
+    if (mDurationUs >= 0 && mCachedSource != NULL
+            && mCachedSource->getSize(&size) == OK) {
+        *bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
+        return true;
+    }
+
+    if (mBitrate >= 0) {
+        *bitrate = mBitrate;
+        return true;
+    }
+
+    *bitrate = 0;
+
+    return false;
+}
+
 // Returns true iff cached duration is available/applicable.
 bool AwesomePlayer::getCachedDuration_l(int64_t *durationUs, bool *eos) {
-    off_t totalSize;
+    int64_t bitrate;
 
     if (mRTSPController != NULL) {
         *durationUs = mRTSPController->getQueueDurationUs(eos);
         return true;
-    } else if (mCachedSource != NULL && mDurationUs >= 0
-            && mCachedSource->getSize(&totalSize) == OK) {
-        int64_t bitrate = totalSize * 8000000ll / mDurationUs;  // in bits/sec
-
+    } else if (mCachedSource != NULL && getBitrate(&bitrate)) {
         size_t cachedDataRemaining = mCachedSource->approxDataRemaining(eos);
         *durationUs = cachedDataRemaining * 8000000ll / bitrate;
         return true;
@@ -489,10 +529,8 @@ void AwesomePlayer::onBufferingUpdate() {
                 finishAsyncPrepare_l();
             }
         } else {
-            off_t size;
-            if (mDurationUs >= 0 && mCachedSource->getSize(&size) == OK) {
-                int64_t bitrate = size * 8000000ll / mDurationUs;  // in bits/sec
-
+            int64_t bitrate;
+            if (getBitrate(&bitrate)) {
                 size_t cachedSize = mCachedSource->cachedSize();
                 int64_t cachedDurationUs = cachedSize * 8000000ll / bitrate;
 
@@ -506,8 +544,8 @@ void AwesomePlayer::onBufferingUpdate() {
                 // We don't know the bitrate of the stream, use absolute size
                 // limits to maintain the cache.
 
-                const size_t kLowWaterMarkBytes = 400000;
-                const size_t kHighWaterMarkBytes = 1000000;
+                const size_t kLowWaterMarkBytes = 40000;
+                const size_t kHighWaterMarkBytes = 200000;
 
                 if ((mFlags & PLAYING) && !eos
                         && (cachedDataRemaining < kLowWaterMarkBytes)) {
@@ -1343,13 +1381,16 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         String8 uri("http://");
         uri.append(mUri.string() + 11);
 
-        dataSource = new LiveSource(uri.string());
+        sp<LiveSource> liveSource = new LiveSource(uri.string());
 
-        mCachedSource = new NuCachedSource2(dataSource);
+        mCachedSource = new NuCachedSource2(liveSource);
         dataSource = mCachedSource;
 
         sp<MediaExtractor> extractor =
             MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
+
+        static_cast<MPEG2TSExtractor *>(extractor.get())
+            ->setLiveSource(liveSource);
 
         return setDataSource_l(extractor);
     } else if (!strncmp("rtsp://gtalk/", mUri.string(), 13)) {

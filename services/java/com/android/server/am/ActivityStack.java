@@ -2535,7 +2535,7 @@ public class ActivityStack {
                     mWaitingActivityLaunched.add(outResult);
                     do {
                         try {
-                            wait();
+                            mService.wait();
                         } catch (InterruptedException e) {
                         }
                     } while (!outResult.timeout && outResult.who == null);
@@ -2551,7 +2551,7 @@ public class ActivityStack {
                         mWaitingActivityVisible.add(outResult);
                         do {
                             try {
-                                wait();
+                                mService.wait();
                             } catch (InterruptedException e) {
                             }
                         } while (!outResult.timeout && outResult.who == null);

@@ -40,13 +40,13 @@ import com.android.internal.util.HierarchicalStateMachine;
  */
 
 public class BluetoothProfileState extends HierarchicalStateMachine {
-    private static final boolean DBG = true; // STOPSHIP - change to false.
+    private static final boolean DBG = true;
     private static final String TAG = "BluetoothProfileState";
 
-    public static int HFP = 0;
-    public static int A2DP = 1;
+    public static final int HFP = 0;
+    public static final int A2DP = 1;
 
-    private static int TRANSITION_TO_STABLE = 100;
+    static final int TRANSITION_TO_STABLE = 100;
 
     private int mProfile;
     private BluetoothDevice mPendingDevice;
@@ -57,7 +57,7 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if (action.equals(BluetoothHeadset.ACTION_STATE_CHANGED)) {
                 int newState = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, 0);
                 if (mProfile == HFP && (newState == BluetoothHeadset.STATE_CONNECTED ||
@@ -68,6 +68,10 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
                 int newState = intent.getIntExtra(BluetoothA2dp.EXTRA_SINK_STATE, 0);
                 if (mProfile == A2DP && (newState == BluetoothA2dp.STATE_CONNECTED ||
                     newState == BluetoothA2dp.STATE_DISCONNECTED)) {
+                    sendMessage(TRANSITION_TO_STABLE);
+                }
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                if (device.equals(mPendingDevice)) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
             }
@@ -84,6 +88,7 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         filter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         context.registerReceiver(mBroadcastReceiver, filter);
     }
 

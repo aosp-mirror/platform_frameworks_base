@@ -76,6 +76,9 @@ enum output_format {
     /* Stream over a socket, limited to a single stream */
     OUTPUT_FORMAT_RTP_AVP = 7,
 
+    /* H.264/AAC data encapsulated in MPEG2/TS */
+    OUTPUT_FORMAT_MPEG2TS = 8,
+
     OUTPUT_FORMAT_LIST_END // must be last - used to validate format type
 };
 

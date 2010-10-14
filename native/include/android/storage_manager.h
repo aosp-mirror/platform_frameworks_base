@@ -74,10 +74,10 @@ enum {
     AOBB_STATE_ERROR_ALREADY_MOUNTED = 24,
 
     /*
-     * The current application does not have permission to use this OBB
-     * because the OBB indicates it's owned by a different package or the
-     * key used to open it is incorrect. Can be returned as the status for
-     * callbacks made during asynchronous OBB actions.
+     * The current application does not have permission to use this OBB.
+     * This could be because the OBB indicates it's owned by a different
+     * package. Can be returned as the status for callbacks made during
+     * asynchronous OBB actions.
      */
     AOBB_STATE_ERROR_PERMISSION_DENIED = 25,
 };

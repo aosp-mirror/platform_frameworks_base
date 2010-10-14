@@ -22,47 +22,47 @@
 
 package com.trustedlogic.trustednfc.android.internal;
 
-import com.trustedlogic.trustednfc.android.LlcpPacket;
+import android.nfc.LlcpPacket;
 
 /**
  * LlcpConnectionlessSocket represents a LLCP Connectionless object to be used
  * in a connectionless communication
- * 
+ *
  * @since AA02.01
- * {@hide}
+ * @hide
  */
 
 public class NativeLlcpConnectionlessSocket {
-	
-	private int mHandle;
-	
-	private int mSap;
-	
-	private int mLinkMiu;
-	
-	public NativeLlcpConnectionlessSocket(){;
-	}
-	
-	public NativeLlcpConnectionlessSocket(int sap){
-		mSap = sap;
-	}
-	
+
+    private int mHandle;
+
+    private int mSap;
+
+    private int mLinkMiu;
+
+    public NativeLlcpConnectionlessSocket(){;
+    }
+
+    public NativeLlcpConnectionlessSocket(int sap){
+        mSap = sap;
+    }
+
     public native boolean doSendTo(int sap, byte[] data);
 
     public native LlcpPacket doReceiveFrom(int linkMiu);
 
     public native boolean doClose();
-    
+
     public int getLinkMiu(){
-    	return mLinkMiu;
+        return mLinkMiu;
     }
-    
+
     public int getSap(){
-    	return mSap;
+        return mSap;
     }
-    
+
     public int getHandle(){
-    	return mHandle;
+        return mHandle;
     }
 
 }

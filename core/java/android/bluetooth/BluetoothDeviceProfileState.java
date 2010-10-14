@@ -56,7 +56,7 @@ import com.android.internal.util.HierarchicalStateMachine;
  */
 public final class BluetoothDeviceProfileState extends HierarchicalStateMachine {
     private static final String TAG = "BluetoothDeviceProfileState";
-    private static final boolean DBG = true; //STOPSHIP - Change to false
+    private static final boolean DBG = false;
 
     public static final int CONNECT_HFP_OUTGOING = 1;
     public static final int CONNECT_HFP_INCOMING = 2;
@@ -136,6 +136,10 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 Message msg = new Message();
                 msg.what = AUTO_CONNECT_PROFILES;
                 sendMessageDelayed(msg, AUTO_CONNECT_DELAY);
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                // This is technically not needed, but we can get stuck sometimes.
+                // For example, if incoming A2DP fails, we are not informed by Bluez
+                sendMessage(TRANSITION_TO_STABLE);
             }
       }
     };
@@ -175,6 +179,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         filter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         filter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
 
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
@@ -217,7 +222,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     private class BondedDevice extends HierarchicalState {
         @Override
         protected void enter() {
-            log("Entering ACL Connected state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering ACL Connected state with: " + getCurrentMessage().what);
             Message m = new Message();
             m.copyFrom(getCurrentMessage());
             sendMessageAtFrontOfQueue(m);
@@ -295,14 +300,18 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
         @Override
         protected void enter() {
-            log("Entering OutgoingHandsfree state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering OutgoingHandsfree state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_HFP_OUTGOING &&
                 mCommand != DISCONNECT_HFP_OUTGOING) {
                 Log.e(TAG, "Error: OutgoingHandsfree state with command:" + mCommand);
             }
             mStatus = processCommand(mCommand);
-            if (!mStatus) sendMessage(TRANSITION_TO_STABLE);
+            if (!mStatus) {
+                sendMessage(TRANSITION_TO_STABLE);
+                mService.sendProfileStateMessage(BluetoothProfileState.HFP,
+                                                 BluetoothProfileState.TRANSITION_TO_STABLE);
+            }
         }
 
         @Override
@@ -386,14 +395,18 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
         @Override
         protected void enter() {
-            log("Entering IncomingHandsfree state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering IncomingHandsfree state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_HFP_INCOMING &&
                 mCommand != DISCONNECT_HFP_INCOMING) {
                 Log.e(TAG, "Error: IncomingHandsfree state with command:" + mCommand);
             }
             mStatus = processCommand(mCommand);
-            if (!mStatus) sendMessage(TRANSITION_TO_STABLE);
+            if (!mStatus) {
+                sendMessage(TRANSITION_TO_STABLE);
+                mService.sendProfileStateMessage(BluetoothProfileState.HFP,
+                                                 BluetoothProfileState.TRANSITION_TO_STABLE);
+            }
         }
 
         @Override
@@ -454,14 +467,18 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
         @Override
         protected void enter() {
-            log("Entering OutgoingA2dp state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering OutgoingA2dp state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_A2DP_OUTGOING &&
                 mCommand != DISCONNECT_A2DP_OUTGOING) {
                 Log.e(TAG, "Error: OutgoingA2DP state with command:" + mCommand);
             }
             mStatus = processCommand(mCommand);
-            if (!mStatus) sendMessage(TRANSITION_TO_STABLE);
+            if (!mStatus) {
+                sendMessage(TRANSITION_TO_STABLE);
+                mService.sendProfileStateMessage(BluetoothProfileState.A2DP,
+                                                 BluetoothProfileState.TRANSITION_TO_STABLE);
+            }
         }
 
         @Override
@@ -516,7 +533,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     }
                     break;
                 case DISCONNECT_A2DP_OUTGOING:
-                    processCommand(DISCONNECT_A2DP_OUTGOING);
+                    deferMessage(message);
                     break;
                 case DISCONNECT_A2DP_INCOMING:
                     // Ignore, will be handled by Bluez
@@ -542,14 +559,18 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
         @Override
         protected void enter() {
-            log("Entering IncomingA2dp state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering IncomingA2dp state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_A2DP_INCOMING &&
                 mCommand != DISCONNECT_A2DP_INCOMING) {
                 Log.e(TAG, "Error: IncomingA2DP state with command:" + mCommand);
             }
             mStatus = processCommand(mCommand);
-            if (!mStatus) sendMessage(TRANSITION_TO_STABLE);
+            if (!mStatus) {
+                sendMessage(TRANSITION_TO_STABLE);
+                mService.sendProfileStateMessage(BluetoothProfileState.A2DP,
+                                                 BluetoothProfileState.TRANSITION_TO_STABLE);
+            }
         }
 
         @Override
@@ -622,7 +643,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     }
 
     synchronized boolean processCommand(int command) {
-        log("Processing command:" + command);
+        Log.i(TAG, "Processing command:" + command);
         switch(command) {
             case  CONNECT_HFP_OUTGOING:
                 if (mHeadsetService != null) {

@@ -25,7 +25,7 @@ package com.trustedlogic.trustednfc.android.internal;
 /**
  * Native interface to the NDEF tag functions
  *
- * {@hide}
+ * @hide
  */
 public class NativeNdefTag {
     private int mHandle;

@@ -19,8 +19,11 @@
 #include <utils/Log.h>
 
 #include "include/MPEG2TSExtractor.h"
+#include "include/LiveSource.h"
+#include "include/NuCachedSource2.h"
 
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
@@ -37,7 +40,8 @@ static const size_t kTSPacketSize = 188;
 struct MPEG2TSSource : public MediaSource {
     MPEG2TSSource(
             const sp<MPEG2TSExtractor> &extractor,
-            const sp<AnotherPacketSource> &impl);
+            const sp<AnotherPacketSource> &impl,
+            bool seekable);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -50,14 +54,20 @@ private:
     sp<MPEG2TSExtractor> mExtractor;
     sp<AnotherPacketSource> mImpl;
 
+    // If there are both audio and video streams, only the video stream
+    // will be seekable, otherwise the single stream will be seekable.
+    bool mSeekable;
+
     DISALLOW_EVIL_CONSTRUCTORS(MPEG2TSSource);
 };
 
 MPEG2TSSource::MPEG2TSSource(
         const sp<MPEG2TSExtractor> &extractor,
-        const sp<AnotherPacketSource> &impl)
+        const sp<AnotherPacketSource> &impl,
+        bool seekable)
     : mExtractor(extractor),
-      mImpl(impl) {
+      mImpl(impl),
+      mSeekable(seekable) {
 }
 
 status_t MPEG2TSSource::start(MetaData *params) {
@@ -69,12 +79,26 @@ status_t MPEG2TSSource::stop() {
 }
 
 sp<MetaData> MPEG2TSSource::getFormat() {
-    return mImpl->getFormat();
+    sp<MetaData> meta = mImpl->getFormat();
+
+    int64_t durationUs;
+    if (mExtractor->mLiveSource != NULL
+            && mExtractor->mLiveSource->getDuration(&durationUs)) {
+        meta->setInt64(kKeyDuration, durationUs);
+    }
+
+    return meta;
 }
 
 status_t MPEG2TSSource::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
+
+    int64_t seekTimeUs;
+    ReadOptions::SeekMode seekMode;
+    if (mSeekable && options && options->getSeekTo(&seekTimeUs, &seekMode)) {
+        mExtractor->seekTo(seekTimeUs);
+    }
 
     status_t finalResult;
     while (!mImpl->hasBufferAvailable(&finalResult)) {
@@ -109,7 +133,20 @@ sp<MediaSource> MPEG2TSExtractor::getTrack(size_t index) {
         return NULL;
     }
 
-    return new MPEG2TSSource(this, mSourceImpls.editItemAt(index));
+    bool seekable = true;
+    if (mSourceImpls.size() > 1) {
+        CHECK_EQ(mSourceImpls.size(), 2u);
+
+        sp<MetaData> meta = mSourceImpls.editItemAt(index)->getFormat();
+        const char *mime;
+        CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+        if (!strncasecmp("audio/", mime, 6)) {
+            seekable = false;
+        }
+    }
+
+    return new MPEG2TSSource(this, mSourceImpls.editItemAt(index), seekable);
 }
 
 sp<MetaData> MPEG2TSExtractor::getTrackMetaData(
@@ -187,6 +224,46 @@ status_t MPEG2TSExtractor::feedMore() {
     mOffset += n;
 
     return OK;
+}
+
+void MPEG2TSExtractor::setLiveSource(const sp<LiveSource> &liveSource) {
+    Mutex::Autolock autoLock(mLock);
+
+    mLiveSource = liveSource;
+}
+
+void MPEG2TSExtractor::seekTo(int64_t seekTimeUs) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mLiveSource == NULL) {
+        return;
+    }
+
+    if (mDataSource->flags() & DataSource::kIsCachingDataSource) {
+        static_cast<NuCachedSource2 *>(mDataSource.get())->suspend();
+    }
+
+    if (mLiveSource->seekTo(seekTimeUs)) {
+        mParser->signalDiscontinuity(true  /* isSeek */);
+        mOffset = 0;
+    }
+
+    if (mDataSource->flags() & DataSource::kIsCachingDataSource) {
+        static_cast<NuCachedSource2 *>(mDataSource.get())
+            ->clearCacheAndResume();
+    }
+}
+
+uint32_t MPEG2TSExtractor::flags() const {
+    Mutex::Autolock autoLock(mLock);
+
+    uint32_t flags = CAN_PAUSE;
+
+    if (mLiveSource != NULL && mLiveSource->isSeekable()) {
+        flags |= CAN_SEEK_FORWARD | CAN_SEEK_BACKWARD | CAN_SEEK;
+    }
+
+    return flags;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

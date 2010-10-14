@@ -36,6 +36,7 @@ public:
     enum Flags {
         kWantsPrefetching      = 1,
         kStreamedFromLocalHost = 2,
+        kIsCachingDataSource   = 4,
     };
 
     static sp<DataSource> CreateFromURI(

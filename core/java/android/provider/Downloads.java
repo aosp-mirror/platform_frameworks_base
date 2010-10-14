@@ -300,6 +300,15 @@ public final class Downloads {
      */
     public static final String COLUMN_DESCRIPTION = "description";
 
+    /**
+     * Set to true if this download is deleted. It is completely removed from the database
+     * when MediaProvider database also deletes the metadata asociated with this downloaded file.
+     * <P>Type: BOOLEAN</P>
+     * <P>Owner can Read</P>
+     * @hide
+     */
+    public static final String COLUMN_DELETED = "deleted";
+
     /*
      * Lists the destinations that an application can specify for a download.
      */
@@ -880,6 +889,23 @@ public final class Downloads {
          */
         public static final String COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT =
             "bypass_recommended_size_limit";
+
+        /**
+         * Set to true if this download is deleted. It is completely removed from the database
+         * when MediaProvider database also deletes the metadata asociated with this downloaded file.
+         * <P>Type: BOOLEAN</P>
+         * <P>Owner can Read</P>
+         */
+        public static final String COLUMN_DELETED = "deleted";
+
+        /**
+         * The URI to the corresponding entry in MediaProvider for this downloaded entry. It is
+         * used to delete the entries from MediaProvider database when it is deleted from the
+         * downloaded list.
+         * <P>Type: TEXT</P>
+         * <P>Owner can Read</P>
+         */
+        public static final String COLUMN_MEDIAPROVIDER_URI = "mediaprovider_uri";
 
         /*
          * Lists the destinations that an application can specify for a download.
