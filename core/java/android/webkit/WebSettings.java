@@ -179,7 +179,6 @@ public class WebSettings {
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
     private boolean         mUseFixedViewport = false;
-    private int             mMaxFixedViewportWidth = WebView.DEFAULT_VIEWPORT_WIDTH;
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
     private long            mMaximumDecodedImageSize = 0; // 0 means default
@@ -378,7 +377,6 @@ public class WebSettings {
         final int minTabletWidth = context.getResources().getDimensionPixelSize(
             com.android.internal.R.dimen.min_xlarge_screen_width);
         mUseFixedViewport = (metrics.density == 1.0f && landscapeWidth >= minTabletWidth);
-        mMaxFixedViewportWidth = (int) (landscapeWidth * 1.25);
 
         if (sLockForLocaleSettings == null) {
             sLockForLocaleSettings = new Object();
@@ -1567,13 +1565,6 @@ public class WebSettings {
      */
     /* package */ boolean getUseFixedViewport() {
         return mUseFixedViewport;
-    }
-
-    /**
-     * Returns maximum fixed viewport width.
-     */
-    /* package */ int getMaxFixedViewportWidth() {
-        return mMaxFixedViewportWidth;
     }
 
     /**
