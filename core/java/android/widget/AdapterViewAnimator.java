@@ -345,7 +345,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (relativeIndex >= 0 && relativeIndex <= mNumActiveViews - 1 && mAdapter != null) {
             int adapterCount =  mAdapter.getCount();
             int i = modulo(mCurrentWindowStartUnbounded + relativeIndex, adapterCount);
-            return mViewsMap.get(i).view;
+            if (mViewsMap.get(i) != null) {
+                return mViewsMap.get(i).view;
+            }
         }
         return null;
     }
