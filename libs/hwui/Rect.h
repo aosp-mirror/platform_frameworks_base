@@ -149,10 +149,10 @@ struct Rect {
     }
 
     void snapToPixelBoundaries() {
-        left = floor(left);
-        top = floor(top);
-        right = ceil(right);
-        bottom = ceil(bottom);
+        left = floorf(left);
+        top = floorf(top);
+        right = ceilf(right);
+        bottom = ceilf(bottom);
     }
 
     void dump() const {
