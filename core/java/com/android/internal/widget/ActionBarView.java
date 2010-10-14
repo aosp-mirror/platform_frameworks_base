@@ -351,7 +351,7 @@ public class ActionBarView extends ViewGroup {
                 break;
             case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
                 mSpinner = new Spinner(mContext, null,
-                        com.android.internal.R.attr.dropDownSpinnerStyle);
+                        com.android.internal.R.attr.actionDropDownStyle);
                 mSpinner.setOnItemSelectedListener(mNavItemSelectedListener);
                 addView(mSpinner);
                 break;
