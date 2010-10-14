@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.view.ViewConfiguration;
 import com.android.internal.util.FastMath;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -3954,6 +3955,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return;
+
         restartMarqueeIfNeeded();
 
         // Draw the background for this view
@@ -7047,6 +7050,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected float getLeftFadingEdgeStrength() {
+        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return 0.0f;
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
@@ -7073,6 +7077,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected float getRightFadingEdgeStrength() {
+        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return 0.0f;
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
