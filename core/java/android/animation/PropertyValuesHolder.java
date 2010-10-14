@@ -30,7 +30,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * animations with ValueAnimator or ObjectAnimator that operate on several different properties
  * in parallel.
  */
-public class PropertyValuesHolder implements Cloneable {
+public class PropertyValuesHolder<T> implements Cloneable {
 
     /**
      * The name of the property associated with the values. This need not be a real property,
@@ -118,88 +118,22 @@ public class PropertyValuesHolder implements Cloneable {
     private Object mAnimatedValue;
 
     /**
-     * Internal utility constructor, used by the factory methods to set the property name.
-     * @param propertyName The name of the property for this holder.
+     * Constructs a PropertyValuesHolder object with just a set of values. This constructor
+     * is typically not used when animating objects with ObjectAnimator, because that
+     * object needs distinct and meaningful property names. Simpler animations of one
+     * set of values using ValueAnimator may use this constructor, however, because no
+     * distinguishing name is needed.
+     * @param values The set of values to animate between. If there is only one value, it
+     * is assumed to be the final value being animated to, and the initial value will be
+     * derived on the fly.
      */
-    private PropertyValuesHolder(String propertyName) {
-        mPropertyName = propertyName;
+    public PropertyValuesHolder(T...values) {
+        this(null, values);
     }
 
     /**
-     * Constructs and returns a PropertyValuesHolder with a given property name and
-     * set of int values.
-     * @param propertyName The name of the property being animated.
-     * @param values The values that the named property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    public static PropertyValuesHolder ofInt(String propertyName, int... values) {
-        PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
-        pvh.setIntValues(values);
-        return pvh;
-    }
-
-    /**
-     * Constructs and returns a PropertyValuesHolder with a given property name and
-     * set of float values.
-     * @param propertyName The name of the property being animated.
-     * @param values The values that the named property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    public static PropertyValuesHolder ofFloat(String propertyName, float... values) {
-        PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
-        pvh.setFloatValues(values);
-        return pvh;
-    }
-
-    /**
-     * Constructs and returns a PropertyValuesHolder with a given property name and
-     * set of double values.
-     * @param propertyName The name of the property being animated.
-     * @param values The values that the named property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    public static PropertyValuesHolder ofDouble(String propertyName, double... values) {
-        PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
-        pvh.setDoubleValues(values);
-        return pvh;
-    }
-
-    /**
-     * Constructs and returns a PropertyValuesHolder with a given property name and
-     * set of long values.
-     * @param propertyName The name of the property being animated.
-     * @param values The values that the named property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    public static PropertyValuesHolder ofLong(String propertyName, long... values) {
-        PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
-        pvh.setLongValues(values);
-        return pvh;
-    }
-
-    /**
-     * Constructs and returns a PropertyValuesHolder with a given property name and
-     * set of Object values. This variant also takes a TypeEvaluator because the system
-     * cannot interpolate between objects of unknown type.
-     *
-     * @param propertyName The name of the property being animated.
-     * @param evaluator A TypeEvaluator that will be called on each animation frame to
-     * provide the ncessry interpolation between the Object values to derive the animated
-     * value.
-     * @param values The values that the named property will animate between.
-     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
-     */
-    public static PropertyValuesHolder ofObject(String propertyName, TypeEvaluator evaluator,
-            Object... values) {
-        PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
-        pvh.setObjectValues(values);
-        pvh.setEvaluator(evaluator);
-        return pvh;
-    }
-
-    /**
-     * Constructs and returns a PropertyValuesHolder object with the specified property name and set
-     * of values. These values can be of any type, but the type should be consistent so that
+     * Constructs a PropertyValuesHolder object with the specified property name and set of
+     * values. These values can be of any type, but the type should be consistent so that
      * an appropriate {@link android.animation.TypeEvaluator} can be found that matches
      * the common type.
      * <p>If there is only one value, it is assumed to be the end value of an animation,
@@ -217,120 +151,9 @@ public class PropertyValuesHolder implements Cloneable {
      * ValueAnimator object.
      * @param values The set of values to animate between.
      */
-    public static PropertyValuesHolder ofKeyframe(String propertyName, Keyframe... values) {
-        PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
-        pvh.setKeyframes(values);
-        return pvh;
-    }
-
-    /**
-     * Set the animated values for this object to this set of ints.
-     * If there is only one value, it is assumed to be the end value of an animation,
-     * and an initial value will be derived, if possible, by calling a getter function
-     * on the object. Also, if any value is null, the value will be filled in when the animation
-     * starts in the same way. This mechanism of automatically getting null values only works
-     * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
-     * no way of determining what the value should be.
-     *
-     * @param values One or more values that the animation will animate between.
-     */
-    public void setIntValues(int... values) {
-        mValueType = int.class;
-        mKeyframeSet = KeyframeSet.ofInt(values);
-    }
-
-    /**
-     * Set the animated values for this object to this set of floats.
-     * If there is only one value, it is assumed to be the end value of an animation,
-     * and an initial value will be derived, if possible, by calling a getter function
-     * on the object. Also, if any value is null, the value will be filled in when the animation
-     * starts in the same way. This mechanism of automatically getting null values only works
-     * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
-     * no way of determining what the value should be.
-     *
-     * @param values One or more values that the animation will animate between.
-     */
-    public void setFloatValues(float... values) {
-        mValueType = float.class;
-        mKeyframeSet = KeyframeSet.ofFloat(values);
-    }
-
-    /**
-     * Set the animated values for this object to this set of doubles.
-     * If there is only one value, it is assumed to be the end value of an animation,
-     * and an initial value will be derived, if possible, by calling a getter function
-     * on the object. Also, if any value is null, the value will be filled in when the animation
-     * starts in the same way. This mechanism of automatically getting null values only works
-     * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
-     * no way of determining what the value should be.
-     *
-     * @param values One or more values that the animation will animate between.
-     */
-    public void setDoubleValues(double... values) {
-        mValueType = double.class;
-        mKeyframeSet = KeyframeSet.ofDouble(values);
-    }
-
-    /**
-     * Set the animated values for this object to this set of longs.
-     * If there is only one value, it is assumed to be the end value of an animation,
-     * and an initial value will be derived, if possible, by calling a getter function
-     * on the object. Also, if any value is null, the value will be filled in when the animation
-     * starts in the same way. This mechanism of automatically getting null values only works
-     * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
-     * no way of determining what the value should be.
-     *
-     * @param values One or more values that the animation will animate between.
-     */
-    public void setLongValues(long... values) {
-        mValueType = long.class;
-        mKeyframeSet = KeyframeSet.ofLong(values);
-    }
-
-    /**
-     * Set the animated values for this object to this set of Keyframes.
-     *
-     * @param values One or more values that the animation will animate between.
-     */
-    public void setKeyframes(Keyframe... values) {
-        int numKeyframes = values.length;
-        Keyframe keyframes[] = new Keyframe[Math.max(numKeyframes,2)];
-        mValueType = ((Keyframe)values[0]).getType();
-        for (int i = 0; i < numKeyframes; ++i) {
-            keyframes[i] = (Keyframe)values[i];
-        }
-        mKeyframeSet = new KeyframeSet(keyframes);
-    }
-
-    /**
-     * Set the animated values for this object to this set of Objects.
-     * If there is only one value, it is assumed to be the end value of an animation,
-     * and an initial value will be derived, if possible, by calling a getter function
-     * on the object. Also, if any value is null, the value will be filled in when the animation
-     * starts in the same way. This mechanism of automatically getting null values only works
-     * if the PropertyValuesHolder object is used in conjunction
-     * {@link ObjectAnimator}, and with a getter function either
-     * derived automatically from <code>propertyName</code> or set explicitly via
-     * {@link #setGetter(java.lang.reflect.Method)}, since otherwise PropertyValuesHolder has
-     * no way of determining what the value should be.
-     * 
-     * @param values One or more values that the animation will animate between.
-     */
-    public void setObjectValues(Object... values) {
-        mValueType = values[0].getClass();
-        mKeyframeSet = KeyframeSet.ofObject(values);
+    public PropertyValuesHolder(String propertyName, T... values) {
+        mPropertyName = propertyName;
+        setValues(values);
     }
 
     /**
@@ -346,7 +169,6 @@ public class PropertyValuesHolder implements Cloneable {
      * no way of determining what the value should be.
      * @param values The set of values to animate between.
      */
-    /*
     public void setValues(T... values) {
         int numKeyframes = values.length;
         for (int i = 0; i < numKeyframes; ++i) {
@@ -388,7 +210,6 @@ public class PropertyValuesHolder implements Cloneable {
         }
         mKeyframeSet = new KeyframeSet(keyframes);
     }
-    */
 
 
 
@@ -530,7 +351,7 @@ public class PropertyValuesHolder implements Cloneable {
                     setupGetter(targetClass);
                 }
                 try {
-                    kf.setValue(mGetter.invoke(target));
+                    kf.setValue((T) mGetter.invoke(target));
                 } catch (InvocationTargetException e) {
                     Log.e("PropertyValuesHolder", e.toString());
                 } catch (IllegalAccessException e) {
@@ -553,7 +374,7 @@ public class PropertyValuesHolder implements Cloneable {
                 Class targetClass = target.getClass();
                 setupGetter(targetClass);
             }
-            kf.setValue(mGetter.invoke(target));
+            kf.setValue((T) mGetter.invoke(target));
         } catch (InvocationTargetException e) {
             Log.e("PropertyValuesHolder", e.toString());
         } catch (IllegalAccessException e) {
@@ -593,7 +414,9 @@ public class PropertyValuesHolder implements Cloneable {
         for (int i = 0; i < numKeyframes; ++i) {
             newKeyframes[i] = keyframes.get(i).clone();
         }
-        return PropertyValuesHolder.ofKeyframe(mPropertyName, newKeyframes);
+        PropertyValuesHolder pvhClone = new PropertyValuesHolder(mPropertyName,
+                (Object[]) newKeyframes);
+        return pvhClone;
     }
     /**
      * Internal function to set the value on the target object, using the setter set up

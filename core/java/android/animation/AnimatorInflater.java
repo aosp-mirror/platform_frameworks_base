@@ -52,9 +52,8 @@ public class AnimatorInflater {
     private static final int VALUE_TYPE_FLOAT       = 0;
     private static final int VALUE_TYPE_INT         = 1;
     private static final int VALUE_TYPE_DOUBLE      = 2;
-    private static final int VALUE_TYPE_LONG        = 3;
-    private static final int VALUE_TYPE_COLOR       = 4;
-    private static final int VALUE_TYPE_CUSTOM      = 5;
+    private static final int VALUE_TYPE_COLOR       = 3;
+    private static final int VALUE_TYPE_CUSTOM      = 4;
 
     /**
      * Loads an {@link Animator} object from a resource
@@ -193,113 +192,56 @@ public class AnimatorInflater {
         int valueType = a.getInt(com.android.internal.R.styleable.Animator_valueType,
                 VALUE_TYPE_FLOAT);
 
-        if (anim == null) {
-            anim = new ValueAnimator();
-        }
+        Object valueFrom = null;
+        Object valueTo = null;
         TypeEvaluator evaluator = null;
-        boolean hasFrom = a.hasValue(com.android.internal.R.styleable.Animator_valueFrom);
-        boolean hasTo = a.hasValue(com.android.internal.R.styleable.Animator_valueTo);
 
         switch (valueType) {
-
-            case VALUE_TYPE_FLOAT: {
-                float valueFrom;
-                float valueTo;
-                if (hasFrom) {
+            case VALUE_TYPE_FLOAT:
+                if (a.hasValue(com.android.internal.R.styleable.Animator_valueFrom)) {
                     valueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                    if (hasTo) {
-                        valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                        anim.setFloatValues(valueFrom, valueTo);
-                    } else {
-                        anim.setFloatValues(valueFrom);
-                    }
-                } else {
-                    valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                    anim.setFloatValues(valueTo);
                 }
-            }
-            break;
-
+                if (a.hasValue(com.android.internal.R.styleable.Animator_valueTo)) {
+                    valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
+                }
+                break;
             case VALUE_TYPE_COLOR:
                 evaluator = new RGBEvaluator();
-                anim.setEvaluator(evaluator);
                 // fall through to pick up values
-            case VALUE_TYPE_INT: {
-                int valueFrom;
-                int valueTo;
-                if (hasFrom) {
+            case VALUE_TYPE_INT:
+                if (a.hasValue(com.android.internal.R.styleable.Animator_valueFrom)) {
                     valueFrom = a.getInteger(com.android.internal.R.styleable.Animator_valueFrom, 0);
-                    if (hasTo) {
-                        valueTo = a.getInteger(com.android.internal.R.styleable.Animator_valueTo, 0);
-                        anim.setIntValues(valueFrom, valueTo);
-                    } else {
-                        anim.setIntValues(valueFrom);
-                    }
-                } else {
+                }
+                if (a.hasValue(com.android.internal.R.styleable.Animator_valueTo)) {
                     valueTo = a.getInteger(com.android.internal.R.styleable.Animator_valueTo, 0);
-                    anim.setIntValues(valueTo);
                 }
-            }
-            break;
-
-            case VALUE_TYPE_LONG: {
-                int valueFrom;
-                int valueTo;
-                if (hasFrom) {
-                    valueFrom = a.getInteger(com.android.internal.R.styleable.Animator_valueFrom, 0);
-                    if (hasTo) {
-                        valueTo = a.getInteger(com.android.internal.R.styleable.Animator_valueTo, 0);
-                        anim.setLongValues(valueFrom, valueTo);
-                    } else {
-                        anim.setLongValues(valueFrom);
-                    }
-                } else {
-                    valueTo = a.getInteger(com.android.internal.R.styleable.Animator_valueTo, 0);
-                    anim.setLongValues(valueTo);
+                break;
+            case VALUE_TYPE_DOUBLE:
+                if (a.hasValue(com.android.internal.R.styleable.Animator_valueFrom)) {
+                    valueFrom = (Double)((Float)(a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f))).doubleValue();
                 }
-            }
-            break;
-
-            case VALUE_TYPE_DOUBLE: {
-                double valueFrom;
-                double valueTo;
-                if (hasFrom) {
-                    valueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                    if (hasTo) {
-                        valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                        anim.setDoubleValues(valueFrom, valueTo);
-                    } else {
-                        anim.setDoubleValues(valueFrom);
-                    }
-                } else {
-                    valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                    anim.setDoubleValues(valueTo);
+                if (a.hasValue(com.android.internal.R.styleable.Animator_valueTo)) {
+                    valueTo = (Double)((Float)a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f)).doubleValue();
                 }
-            }
-            break;
-
-            case VALUE_TYPE_CUSTOM: {
+                break;
+            case VALUE_TYPE_CUSTOM:
                 // TODO: How to get an 'Object' value?
-                float valueFrom;
-                float valueTo;
-                if (hasFrom) {
+                if (a.hasValue(com.android.internal.R.styleable.Animator_valueFrom)) {
                     valueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                    if (hasTo) {
-                        valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                        anim.setFloatValues(valueFrom, valueTo);
-                    } else {
-                        anim.setFloatValues(valueFrom);
-                    }
-                } else {
-                    valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                    anim.setFloatValues(valueTo);
                 }
-            }
-            break;
+                if (a.hasValue(com.android.internal.R.styleable.Animator_valueTo)) {
+                    valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
+                }
+                break;
         }
 
+        if (anim == null) {
+            anim = new ValueAnimator(duration, valueFrom, valueTo);
+        } else {
+            anim.setDuration(duration);
+            anim.setValues(valueFrom, valueTo);
+        }
 
-        anim.setDuration(duration);
         anim.setStartDelay(startDelay);
 
         if (a.hasValue(com.android.internal.R.styleable.Animator_repeatCount)) {

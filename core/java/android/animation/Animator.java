@@ -78,7 +78,7 @@ public abstract class Animator implements Cloneable {
      *
      * @param duration The length of the animation, in milliseconds.
      */
-    public abstract Animator setDuration(long duration);
+    public abstract void setDuration(long duration);
 
     /**
      * Gets the length of the animation.

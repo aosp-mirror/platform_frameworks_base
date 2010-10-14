@@ -41,8 +41,8 @@ public class DrawableHolder implements AnimatorListener {
     private float mScaleY = 1.0f;
     private BitmapDrawable mDrawable;
     private float mAlpha = 1f;
-    private ArrayList<ObjectAnimator> mAnimators = new ArrayList<ObjectAnimator>();
-    private ArrayList<ObjectAnimator> mNeedToStart = new ArrayList<ObjectAnimator>();
+    private ArrayList<ObjectAnimator<Float>> mAnimators = new ArrayList<ObjectAnimator<Float>>();
+    private ArrayList<ObjectAnimator<Float>> mNeedToStart = new ArrayList<ObjectAnimator<Float>>();
 
     public DrawableHolder(BitmapDrawable drawable) {
         this(drawable, 0.0f, 0.0f);
@@ -67,13 +67,12 @@ public class DrawableHolder implements AnimatorListener {
      * @param toValue the target value
      * @param replace if true, replace the current animation with this one.
      */
-    public ObjectAnimator addAnimTo(long duration, long delay,
+    public ObjectAnimator<Float> addAnimTo(long duration, long delay,
             String property, float toValue, boolean replace) {
 
         if (replace) removeAnimationFor(property);
 
-        ObjectAnimator anim = ObjectAnimator.ofFloat(this, property, toValue);
-        anim.setDuration(duration);
+        ObjectAnimator<Float> anim = new ObjectAnimator<Float>(duration, this, property, toValue);
         anim.setStartDelay(delay);
         anim.setInterpolator(EASE_OUT_INTERPOLATOR);
         this.addAnimation(anim, replace);
@@ -87,8 +86,8 @@ public class DrawableHolder implements AnimatorListener {
      * @param property
      */
     public void removeAnimationFor(String property) {
-        ArrayList<ObjectAnimator> removalList = new ArrayList<ObjectAnimator>();
-        for (ObjectAnimator currentAnim : mAnimators) {
+        ArrayList<ObjectAnimator<Float>> removalList = new ArrayList<ObjectAnimator<Float>>();
+        for (ObjectAnimator<Float> currentAnim : mAnimators) {
             if (property.equals(currentAnim.getPropertyName())) {
                 currentAnim.cancel();
                 removalList.add(currentAnim);
@@ -102,7 +101,7 @@ public class DrawableHolder implements AnimatorListener {
      * Stops all animations and removes them from the list.
      */
     public void clearAnimations() {
-        for (ObjectAnimator currentAnim : mAnimators) {
+        for (ObjectAnimator<Float> currentAnim : mAnimators) {
             currentAnim.cancel();
         }
         mAnimators.clear();
@@ -115,7 +114,7 @@ public class DrawableHolder implements AnimatorListener {
      * @param overwrite
      * @return
      */
-    private DrawableHolder addAnimation(ObjectAnimator anim, boolean overwrite) {
+    private DrawableHolder addAnimation(ObjectAnimator<Float> anim, boolean overwrite) {
         if (anim != null)
             mAnimators.add(anim);
         mNeedToStart.add(anim);
@@ -149,7 +148,7 @@ public class DrawableHolder implements AnimatorListener {
      */
     public void startAnimations(ValueAnimator.AnimatorUpdateListener listener) {
         for (int i = 0; i < mNeedToStart.size(); i++) {
-            ObjectAnimator anim = mNeedToStart.get(i);
+            ObjectAnimator<Float> anim = mNeedToStart.get(i);
             anim.addUpdateListener(listener);
             anim.addListener(this);
             anim.start();
