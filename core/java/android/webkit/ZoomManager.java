@@ -778,12 +778,6 @@ class ZoomManager {
         } else {
             mMaxZoomScale = viewState.mMaxScale;
         }
-        if (viewState.mViewportWidth > 0 &&
-            mWebView.getSettings().getUseFixedViewport() &&
-            mWebView.getSettings().getUseWideViewPort()) {
-            // Use website specified viewport width.
-            setZoomOverviewWidth(viewState.mViewportWidth);
-        }
     }
 
     /**
@@ -793,15 +787,19 @@ class ZoomManager {
     public void onNewPicture(WebViewCore.DrawData drawData) {
         final int viewWidth = mWebView.getViewWidth();
 
-        if (!mWebView.getSettings().getUseFixedViewport()
-            && mWebView.getSettings().getUseWideViewPort()) {
-            // limit mZoomOverviewWidth upper bound to
-            // sMaxViewportWidth so that if the page doesn't behave
-            // well, the WebView won't go insane. limit the lower
-            // bound to match the default scale for mobile sites.
-            setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth,
+        if (mWebView.getSettings().getUseWideViewPort()) {
+            if (!mWebView.getSettings().getUseFixedViewport()) {
+                // limit mZoomOverviewWidth upper bound to
+                // sMaxViewportWidth so that if the page doesn't behave
+                // well, the WebView won't go insane. limit the lower
+                // bound to match the default scale for mobile sites.
+                setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth,
                     Math.max((int) (viewWidth * mInvDefaultScale),
                             Math.max(drawData.mMinPrefWidth, drawData.mViewPoint.x))));
+            } else {
+                final int contentWidth = drawData.mWidthHeight.x;
+                setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
+            }
         }
 
         final float zoomOverviewScale = getZoomOverviewScale();

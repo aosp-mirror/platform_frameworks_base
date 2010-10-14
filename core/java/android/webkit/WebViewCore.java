@@ -1817,7 +1817,6 @@ final class WebViewCore {
         int mScrollX;
         int mScrollY;
         boolean mMobileSite;
-        int mViewportWidth;
     }
 
     static class DrawData {
@@ -1859,15 +1858,6 @@ final class WebViewCore {
             }
             if (mInitialViewState != null) {
                 draw.mViewState = mInitialViewState;
-                if (mViewportWidth == -1 && mSettings.getUseFixedViewport() &&
-                    mSettings.getUseWideViewPort()) {
-                    final int fixedViewportMargin = mContext.getResources().getDimensionPixelSize(
-                      com.android.internal.R.dimen.fixed_viewport_margin);
-                    // Use website's initial preferred width as the fixed viewport width.
-                    mViewportWidth = Math.min(mSettings.getMaxFixedViewportWidth(),
-                        draw.mMinPrefWidth + 2 * fixedViewportMargin);
-                    draw.mViewState.mViewportWidth = mViewportWidth;
-                }
                 mInitialViewState = null;
             }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
@@ -2201,7 +2191,6 @@ final class WebViewCore {
         mInitialViewState.mScrollX = mRestoredX;
         mInitialViewState.mScrollY = mRestoredY;
         mInitialViewState.mMobileSite = (0 == mViewportWidth);
-        mInitialViewState.mViewportWidth = mViewportWidth;
         if (mRestoredScale > 0) {
             mInitialViewState.mViewScale = mRestoredScale / 100.0f;
             if (mRestoredTextWrapScale > 0) {
