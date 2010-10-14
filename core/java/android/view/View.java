@@ -2037,8 +2037,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      */
     boolean mCanAcceptDrop;
-    private int mThumbnailWidth;
-    private int mThumbnailHeight;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -9921,10 +9919,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             throw new IllegalStateException("Drag thumb dimensions must not be negative");
         }
 
+        if (ViewDebug.DEBUG_DRAG) {
+            Log.d(VIEW_LOG_TAG, "drag thumb: width=" + thumbSize.x + " height=" + thumbSize.y
+                    + " thumbX=" + thumbTouchPoint.x + " thumbY=" + thumbTouchPoint.y);
+        }
         Surface surface = new Surface();
         try {
             IBinder token = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
-                    myWindowOnly, mThumbnailWidth, mThumbnailHeight, surface);
+                    myWindowOnly, thumbSize.x, thumbSize.y, surface);
             if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token=" + token
                     + " surface=" + surface);
             if (token != null) {
@@ -9949,53 +9951,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         return okay;
-    }
-
-    private void measureThumbnail() {
-        mPrivateFlags &= ~MEASURED_DIMENSION_SET;
-
-        onMeasureDragThumbnail();
-
-        // flag not set, setDragThumbnailDimension() was not invoked, we raise
-        // an exception to warn the developer
-        if ((mPrivateFlags & MEASURED_DIMENSION_SET) != MEASURED_DIMENSION_SET) {
-            throw new IllegalStateException("onMeasureDragThumbnail() did not set the"
-                    + " measured dimension by calling setDragThumbnailDimension()");
-        }
-
-        if (ViewDebug.DEBUG_DRAG) {
-            Log.d(VIEW_LOG_TAG, "Drag thumb measured: w=" + mThumbnailWidth
-                    + " h=" + mThumbnailHeight);
-        }
-    }
-
-    /**
-     * The View must call this method from onMeasureDragThumbnail() in order to
-     * specify the dimensions of the drag thumbnail image.
-     *
-     * @param width The desired thumbnail width.
-     * @param height The desired thumbnail height.
-     */
-    protected final void setDragThumbnailDimension(int width, int height) {
-        mPrivateFlags |= MEASURED_DIMENSION_SET;
-        mThumbnailWidth = width;
-        mThumbnailHeight = height;
-    }
-
-    /**
-     * The default implementation specifies a drag thumbnail that matches the
-     * View's current size and appearance.
-     */
-    protected void onMeasureDragThumbnail() {
-        setDragThumbnailDimension(getWidth(), getHeight());
-    }
-
-    /**
-     * The default implementation just draws the current View appearance as the thumbnail
-     * @param canvas
-     */
-    protected void onDrawDragThumbnail(Canvas canvas) {
-        draw(canvas);
     }
 
     /**
