@@ -776,7 +776,7 @@
      	
      <!-- @hide -->	
      <style name="TextAppearance.SearchResult.Title">	
-         <item name="android:textSize">16sp</item>	
+         <item name="android:textSize">16sp</item>
      </style>	
      	
      <!-- @hide -->	
@@ -1044,12 +1044,18 @@
     </style>
 
     <style name="TextAppearance.Holo.SearchResult">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.SearchResult.Title">
+         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="TextAppearance.Holo.SearchResult.Subtitle">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">?textColorSecondaryInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget" parent="TextAppearance.Widget">
