@@ -1915,9 +1915,6 @@ status_t SurfaceFlinger::turnElectronBeamOffImplLocked()
 
 status_t SurfaceFlinger::turnElectronBeamOff(int32_t mode)
 {
-    if (!GLExtensions::getInstance().haveFramebufferObject())
-        return INVALID_OPERATION;
-
     class MessageTurnElectronBeamOff : public MessageBase {
         SurfaceFlinger* flinger;
         status_t result;
@@ -1959,14 +1956,16 @@ status_t SurfaceFlinger::turnElectronBeamOnImplLocked()
     }
     electronBeamOnAnimationImplLocked();
     hw.setCanDraw(true);
+
+    // make sure to redraw the whole screen when the animation is done
+    mDirtyRegion.set(hw.bounds());
+    signalEvent();
+
     return NO_ERROR;
 }
 
 status_t SurfaceFlinger::turnElectronBeamOn(int32_t mode)
 {
-    if (!GLExtensions::getInstance().haveFramebufferObject())
-        return INVALID_OPERATION;
-
     class MessageTurnElectronBeamOn : public MessageBase {
         SurfaceFlinger* flinger;
         status_t result;
