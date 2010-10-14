@@ -169,7 +169,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Herramientas de desarrollo"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funciones necesarias solo para desarrolladores de aplicaciones"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Almacenamiento"</string>
-    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Acceder a la tarjeta SD"</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Acceso almacenamiento compartido"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Acceder a la tarjeta SD"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"inhabilitar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Permite que las aplicaciones inhabiliten la barra de estado, o añadan y eliminen iconos del sistema."</string>
@@ -403,22 +403,14 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Permite que una aplicación configure el teléfono Bluetooth local, y vea dispositivos remotos y sincronice el teléfono con ellos."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"crear conexiones de Bluetooth"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Permite que una aplicación vea la configuración del teléfono Bluetooth local, y cree y acepte conexiones con los dispositivos sincronizados."</string>
-    <!-- no translation found for permlab_nfcAdmin (2251302233012250056) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcAdmin (1935842611464895785) -->
-    <skip />
-    <!-- no translation found for permlab_nfcRaw (4423471711114325708) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcRaw (5533022736559385665) -->
-    <skip />
-    <!-- no translation found for permlab_nfcNotify (478470360082792358) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcNotify (2990053517962070617) -->
-    <skip />
-    <!-- no translation found for permlab_nfcLlcp (4972051461007030426) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcLlcp (91592127786004640) -->
-    <skip />
+    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"Administración de NFC"</string>
+    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Permite que una aplicación configure el teléfono NFC local."</string>
+    <string name="permlab_nfcRaw" msgid="4423471711114325708">"Acceso completo NFC a dispositivo remoto"</string>
+    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Permite que una aplicación acceda a los dispositivos NFC remotos."</string>
+    <string name="permlab_nfcNotify" msgid="478470360082792358">"Notificación NFC de dispositivo remoto"</string>
+    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Permite que una aplicación reciba notificaciones sobre las operaciones relacionadas con dispositivos NFC remotos."</string>
+    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"Notificación NFC de dispositivo LLCP remoto"</string>
+    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Permite que una aplicación reciba notificaciones de operaciones LLCP relacionadas con dispositivos NFC remotos."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"inhabilitar bloqueo del teclado"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permite que una aplicación inhabilite el bloqueo del teclado y cualquier protección con contraseña asociada. Un ejemplo legítimo de este permiso es la inhabilitación por parte del teléfono del bloqueo del teclado cuando recibe una llamada telefónica entrante y su posterior habilitación cuando finaliza la llamada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
@@ -435,22 +427,26 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permite a una aplicación leer cualquier frase, palabra o nombre privado que el usuario haya almacenado en su diccionario."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"escribir en el diccionario definido por el usuario"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permite a una aplicación escribir palabras nuevas en el diccionario de usuario."</string>
-    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"modificar/eliminar contenido de la tarjeta SD"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"modificar/suprimir contenido"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificar/eliminar contenido de la tarjeta SD"</string>
-    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Permite que una aplicación escriba en la tarjeta SD."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Permit esc aplic en almac comp"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Permite que una aplicación escriba en la tarjeta SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"acceder al sistema de archivos almacenado en caché"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permite que una aplicación lea y escriba el sistema de archivos almacenado en caché."</string>
-    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Limitar opciones de contraseña"</string>
-    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Permite restringir los tipos de contraseñas que puede utilizar el usuario."</string>
-    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Controlar intentos de acceso"</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" msgid="7227578260165172673">"Se ha producido un error al intentar controlar el acceso al dispositivo para realizar una acción."</string>
-    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Restablecer contraseña"</string>
-    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Permite forzar la contraseña para establecer un valor nuevo que el administrador deberá proporcionar al usuario para poder acceder."</string>
-    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Forzar bloqueo"</string>
-    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Permite controlar el momento de bloqueo del dispositivo solicitando al usuario que vuelva a introducir la contraseña."</string>
+    <!-- no translation found for permlab_use_sip (5986952362795870502) -->
+    <skip />
+    <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
+    <skip />
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecimiento de reglas de contraseña"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Control de la longitud y de los caracteres permitidos en las contraseñas de bloqueo de pantalla"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Control de intentos de bloqueo de pantalla"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"Control del número de contraseñas incorrectas introducidas al desbloquear la pantalla, así como bloqueo del teléfono o borrado de todos los datos si se introducen demasiadas contraseñas incorrectas"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Modificación de contraseña de bloqueo de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Modificación de contraseña de bloqueo de pantalla"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueo de pantalla"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Control de la forma en que se bloquea la pantalla y del momento en que se bloquea"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
-    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" msgid="7669895333814222586">"Permite realizar un restablecimiento de fábrica eliminando todos los datos sin confirmación."</string>
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"Borrado de los datos del teléfono sin avisar restableciendo datos de fábrica"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvil"</item>
@@ -610,10 +606,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Permite que la aplicación lea todas las URL que ha visitado el navegador y todos sus marcadores."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"escribir en marcadores y en el historial del navegador"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Permite que una aplicación modifique la información de los marcadores o del historial del navegador almacenada en el teléfono. Las aplicaciones malintencionadas pueden utilizar este permiso para borrar o modificar los datos del navegador."</string>
-    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
-    <skip />
-    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"establecer alarma en un reloj"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Permite a la aplicación establecer una alarma en una aplicación de reloj instalada. Es posible que algunas aplicaciones de reloj no incluyan esta función."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modificar los permisos de ubicación geográfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permite que una aplicación modifique los permisos de ubicación geográfica del navegador. Las aplicaciones malintencionadas pueden utilizar este permiso para permitir el envío de información sobre la ubicación a sitios web arbitrarios."</string>
     <string name="save_password_message" msgid="767344687139195790">"¿Deseas que el navegador recuerde esta contraseña?"</string>
@@ -808,17 +802,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostrar todos"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Almacenamiento USB masivo"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Conectado por USB"</string>
-    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Has conectado el teléfono al equipo mediante USB. Selecciona el botón situado debajo si deseas copiar archivos entre el equipo y la tarjeta SD del teléfono con Android."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Has conectado el teléfono al equipo mediante USB. Selecciona el botón situado debajo si deseas copiar archivos entre el equipo y el almacenamiento compartido del teléfono con Android."</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Has conectado el teléfono al equipo mediante USB. Selecciona el botón situado debajo si deseas copiar archivos entre el equipo y la tarjeta SD del teléfono con Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Activar almacenamiento USB"</string>
-    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"Se ha producido un problema al intentar utilizar la tarjeta SD para el almacenamiento USB."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"Se ha producido un problema al intentar utilizar el almacenamiento compartido para el almacenamiento USB."</string>
     <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"Se ha producido un problema al intentar utilizar la tarjeta SD para el almacenamiento USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"Conectado por USB"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Para copiar archivos al/desde el equipo"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Desactivar almacenamiento USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Seleccionar para desactivar USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"El almacenamiento USB está en uso."</string>
-    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Antes de desactivar el almacenamiento USB, asegúrate de haber desmontado (\"retirado\") la tarjeta SD del teléfono con Android del equipo."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Antes de desactivar el almacenamiento USB, asegúrate de haber desactivado (\"extraído\") el almacenamiento compartido del teléfono con Android del equipo."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Antes de desactivar el almacenamiento USB, asegúrate de haber desmontado (\"retirado\") la tarjeta SD del teléfono con Android del equipo."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Desactivar almacenamiento USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Se ha producido un problema al desactivar el almacenamiento USB. Asegúrate de haber desactivado el host USB y, a continuación, vuelve a intentarlo."</string>
@@ -826,9 +820,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si activas el almacenamiento USB, se detendrán algunas aplicaciones que estás utilizando y estas no estarán disponibles hasta que lo desactives."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"No se ha podido realizar la operación USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"Formatear tarjeta SD"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"Formateo almacenamiento compart"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatear tarjeta SD"</string>
-    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"¿Estás seguro de que quieres formatear la tarjeta SD? Se perderán todos los datos de la tarjeta."</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"¿Quieres formatear el almacenamiento compartido y borrar todos los archivos? Esta acción no se puede deshacer."</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"¿Estás seguro de que quieres formatear la tarjeta SD? Se perderán todos los datos de la tarjeta."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Dispositivo de depuración USB conectado"</string>
@@ -837,28 +831,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
-    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"Preparando tarjeta SD"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"Preparando almacenam compart"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Preparando tarjeta SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Comprobando errores..."</string>
-    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Tarjeta SD vacía"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Almacenamiento compartido vacío"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Tarjeta SD vacía"</string>
-    <!-- outdated translation 1312266820092958014 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"La tarjeta SD está vacía o utiliza un sistema de archivos incompatible."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"Almacenamiento compartido vacío o con sistema de archivos no admitido"</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"La tarjeta SD está vacía o su sistema de archivos es incompatible."</string>
-    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Tarjeta SD dañada"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Almacenamiento compartido dañado"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Tarjeta SD dañada"</string>
-    <!-- outdated translation 2679412884290061775 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"La tarjeta SD está dañada. Es posible que sea necesario volver a formatearla."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"El almacenamiento compartido está dañado. Es posible que sea necesario volver a formatearlo."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"La tarjeta SD está dañada. Es posible que sea necesario volver a formatearla."</string>
-    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"La tarjeta SD se ha extraído inesperadamente."</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"Almacenam comp extraído inesp"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"La tarjeta SD se ha extraído inesperadamente."</string>
-    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Desactiva la tarjeta SD antes de extraerla para evitar la pérdida de datos."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Desactiva el almacenamiento compartido antes de extraerlo para evitar pérdidas de datos."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Desactiva la tarjeta SD antes de extraerla para evitar la pérdida de datos."</string>
-    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"Es seguro extraer la tarjeta SD."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"Almac extraíble forma segura"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Es seguro extraer la tarjeta SD."</string>
-    <!-- outdated translation 7613960686747592770 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"Ya puedes extraer la tarjeta SD."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"Puedes extraer el almacenamiento compartido de forma segura."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Puedes extraer la tarjeta SD de forma segura."</string>
-    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"Tarjeta SD extraída"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"Almacenam compartido extraído"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Tarjeta SD extraída"</string>
-    <!-- outdated translation 4205117227342822275 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"La tarjeta SD se ha extraído. Inserta una nueva tarjeta SD para aumentar la capacidad de almacenamiento de tu dispositivo."</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"Se ha extraído el almacenamiento compartido. Inserta un nuevo medio."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"La tarjeta SD se ha extraído. Inserta una nueva."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"No se ha encontrado ninguna actividad coincidente."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"actualizar estadísticas de uso de componentes"</string>
