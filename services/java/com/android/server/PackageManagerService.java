@@ -8825,7 +8825,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 try {
                     str = new FileInputStream(mBackupSettingsFilename);
                     mReadMessages.append("Reading from backup settings file\n");
-                    Log.i(TAG, "Reading from backup settings file!");
+                    reportSettingsProblem(Log.INFO, "Need to read from backup settings file");
                     if (mSettingsFilename.exists()) {
                         // If both the backup and settings file exist, we
                         // ignore the settings since it might have been
@@ -8844,7 +8844,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (str == null) {
                     if (!mSettingsFilename.exists()) {
                         mReadMessages.append("No settings file found\n");
-                        Slog.i(TAG, "No current settings file!");
+                        reportSettingsProblem(Log.INFO, "No settings file; creating initial state");
                         return false;
                     }
                     str = new FileInputStream(mSettingsFilename);
@@ -8860,7 +8860,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
                 if (type != XmlPullParser.START_TAG) {
                     mReadMessages.append("No start tag found in settings file\n");
-                    Slog.e(TAG, "No start tag found in package manager settings");
+                    reportSettingsProblem(Log.WARN, "No start tag found in package manager settings");
                     return false;
                 }
 
@@ -8923,10 +8923,12 @@ class PackageManagerService extends IPackageManager.Stub {
 
             } catch(XmlPullParserException e) {
                 mReadMessages.append("Error reading: " + e.toString());
+                reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
                 Slog.e(TAG, "Error reading package manager settings", e);
 
             } catch(java.io.IOException e) {
                 mReadMessages.append("Error reading: " + e.toString());
+                reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
                 Slog.e(TAG, "Error reading package manager settings", e);
 
             }
@@ -8940,7 +8942,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
                             pp.nativeLibraryPathString, pp.versionCode, pp.pkgFlags, true, true);
                     if (p == null) {
-                        Slog.w(TAG, "Unable to create application package for "
+                        reportSettingsProblem(Log.WARN, "Unable to create application package for "
                                 + pp.name);
                         continue;
                     }
@@ -8950,13 +8952,13 @@ class PackageManagerService extends IPackageManager.Stub {
                             + " has shared uid " + pp.sharedId
                             + " that is not a shared uid\n";
                     mReadMessages.append(msg);
-                    Slog.e(TAG, msg);
+                    reportSettingsProblem(Log.ERROR, msg);
                 } else {
                     String msg = "Bad package setting: package " + pp.name
                             + " has shared uid " + pp.sharedId
                             + " that is not defined\n";
                     mReadMessages.append(msg);
-                    Slog.e(TAG, msg);
+                    reportSettingsProblem(Log.ERROR, msg);
                 }
             }
             mPendingPackages.clear();
