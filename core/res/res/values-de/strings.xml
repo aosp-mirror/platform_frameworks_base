@@ -122,8 +122,8 @@
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Die angeforderte Datei wurde nicht gefunden."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Es werden zurzeit zu viele Anfragen verarbeitet. Versuchen Sie es später erneut."</string>
     <string name="notification_title" msgid="1259940370369187045">"Fehler bei Anmeldung für <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="contentServiceSync" msgid="8353523060269335667">"Synchronisieren"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronisieren"</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"Synchronisierung"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronisierung"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Zu viele <xliff:g id="CONTENT_TYPE">%s</xliff:g> gelöscht."</string>
     <string name="low_memory" msgid="6632412458436461203">"Telefonspeicher ist voll! Löschen Sie Dateien, um Speicherplatz freizugeben."</string>
     <string name="me" msgid="6545696007631404292">"Eigene"</string>
@@ -169,7 +169,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Entwickler-Tools"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funktionen nur für Anwendungsentwickler vorgesehen."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Speicher"</string>
-    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Greift auf die SD-Karte zu."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Zugriff auf gem. Speicher"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Greift auf die SD-Karte zu."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Ermöglicht der Anwendung, die Statusanzeige zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen."</string>
@@ -184,7 +184,7 @@
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS empfangen"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Ermöglicht der Anwendung, MMS-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Anwendungen können Ihre Nachrichten möglicherweise überwachen oder löschen, bevor sie angezeigt werden."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Kurznachrichten senden"</string>
-    <string name="permdesc_sendSms" msgid="1946540351763502120">"Ermöglicht Anwendungen das Senden von SMS-Nachrichten. Bei schädlichen Anwendungen können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
+    <string name="permdesc_sendSms" msgid="1946540351763502120">"Ermöglicht der Anwendung das Senden von SMS-Nachrichten. Bei schädlichen Anwendungen können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS oder MMS lesen"</string>
     <string name="permdesc_readSms" msgid="3002170087197294591">"Ermöglicht einer Anwendung, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte Kurznachrichten zu lesen. Schädliche Anwendungen lesen so möglicherweise Ihre  vertraulichen Nachrichten."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMS oder MMS bearbeiten"</string>
@@ -312,7 +312,7 @@
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Audio aufnehmen"</string>
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Ermöglicht der Anwendung, auf den Pfad für Audioaufzeichnungen zuzugreifen."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Bilder und Videos aufnehmen"</string>
-    <string name="permdesc_camera" msgid="6004878235852154239">"Ermöglicht der Anwendung, Fotos und Videos mit der Kamera aufzunehmen. So kann die Anwendung jederzeit Bilder zusammentragen, die von der Kamera erfasst werden."</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Ermöglicht der Anwendung, Fotos und Videos mit der Kamera aufzunehmen. So kann die Anwendung jederzeit Bilder aus dem Sichtfeld der Kamera erfassen."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"Telefon dauerhaft deaktivieren."</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Ermöglicht der Anwendung, das gesamte Telefon dauerhaft zu deaktivieren. Dies birgt hohe Risiken."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"Neustart des Telefons erzwingen"</string>
@@ -403,22 +403,14 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Ermöglicht einer Anwendung, das lokale Bluetooth-Telefon zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth-Verbindungen herstellen"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Ermöglicht einer Anwendung, die Konfiguration des lokalen Bluetooth-Telefons einzusehen und Verbindungen mit Partnergeräten herzustellen und zu akzeptieren."</string>
-    <!-- no translation found for permlab_nfcAdmin (2251302233012250056) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcAdmin (1935842611464895785) -->
-    <skip />
-    <!-- no translation found for permlab_nfcRaw (4423471711114325708) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcRaw (5533022736559385665) -->
-    <skip />
-    <!-- no translation found for permlab_nfcNotify (478470360082792358) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcNotify (2990053517962070617) -->
-    <skip />
-    <!-- no translation found for permlab_nfcLlcp (4972051461007030426) -->
-    <skip />
-    <!-- no translation found for permdesc_nfcLlcp (91592127786004640) -->
-    <skip />
+    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"NFC-Verwaltung"</string>
+    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Ermöglicht einer Anwendung, das lokale NFC-Telefon zu konfigurieren"</string>
+    <string name="permlab_nfcRaw" msgid="4423471711114325708">"NFC-Vollzugriff auf Remote-Gerät"</string>
+    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Ermöglicht einer Anwendung den Zugriff auf Remote-NFC-Geräte"</string>
+    <string name="permlab_nfcNotify" msgid="478470360082792358">"NFC-Benachrichtigung von Remote-Gerät"</string>
+    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Hiermit wird eine Anwendung über Operationen im Zusammenhang mit Remote-NFC-Geräten benachrichtigt."</string>
+    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"NFC-Benachrichtigung von Remote-LLCP-Gerät"</string>
+    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Hiermit wird eine Anwendung über LLCP-Operationen im Zusammenhang mit NFC-Remote-Geräten benachrichtigt."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"Tastensperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Ermöglicht einer Anwendung, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. So wird die Tastensperre vom Telefon deaktiviert, wenn ein Anruf eingeht, und nach Beendigung des Anrufs wieder aktiviert."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Synchronisierungseinstellungen lesen"</string>
@@ -432,56 +424,60 @@
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"abonnierte Feeds schreiben"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Ermöglicht einer Anwendung, Änderungen an den kürzlich synchronisierten Feeds vorzunehmen. Schädliche Anwendungen könnten so Ihre synchronisierten Feeds ändern."</string>
     <string name="permlab_readDictionary" msgid="432535716804748781">"nutzerdefiniertes Wörterbuch lesen"</string>
-    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Erlaubt einer Anwendung, alle privaten Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat."</string>
+    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Ermöglicht einer Anwendung, alle privaten Wörter, Namen und Ausdrücke zu lesen, die ein Nutzer in seinem Wörterbuch gespeichert hat."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"in nutzerdefiniertes Wörterbuch schreiben"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Ermöglicht einer Anwendung, neue Wörter in das Wörterbuch des Nutzers zu schreiben."</string>
-    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"SD-Karten-Inhalt ändern/löschen"</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Ermöglicht einer Anwendung, Ihrem Wörterbuch neue Einträge hinzuzufügen."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"Speicherinhalt ändern/löschen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SD-Karten-Inhalt ändern/löschen"</string>
-    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Ermöglicht einer Anwendung, auf die SD-Karte zu schreiben"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Schreiben in gem. Speicher"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Ermöglicht einer Anwendung, auf die SD-Karte zu schreiben"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Zugriff auf das Cache-Dateisystem"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Gewährt einer Anwendung Lese- und Schreibzugriff auf das Cache-Dateisystem."</string>
-    <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwort beschränken"</string>
-    <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Beschränken der erlaubten Passworttypen"</string>
-    <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Anmeldeversuche überwachen"</string>
-    <!-- outdated translation 1961251179624843483 -->     <string name="policydesc_watchLogin" msgid="7227578260165172673">"Fehlgeschlagene Versuche·zum Anmelden/Durchführen einer Aktion überwachen"</string>
-    <!-- outdated translation 9084772090797485420 -->     <string name="policylab_resetPassword" msgid="2620077191242688955">"Passwort zurücksetzen"</string>
-    <!-- outdated translation 3332167600331799991 -->     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Festlegen eines neuen Werts für Ihr Passwort, sodass der Administrator es Ihnen vor dem Anmelden übermitteln muss."</string>
-    <!-- outdated translation 5760466025247634488 -->     <string name="policylab_forceLock" msgid="2274085384704248431">"Sperren erzwingen"</string>
-    <!-- outdated translation 2819868664946089740 -->     <string name="policydesc_forceLock" msgid="5696964126226028442">"Steuerung der Gerätesperre; erfordert die erneute Passworteingabe"</string>
+    <!-- no translation found for permlab_use_sip (5986952362795870502) -->
+    <skip />
+    <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
+    <skip />
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Zulässige Länge und Zeichen für Passwörter zum Entsperren des Displays festlegen"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Telefon sperren oder alle Daten auf dem Telefon löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Passwort zum Entsperren des Displays ändern"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Passwort zum Entsperren des Displays ändern"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Display sperren"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Steuern Sie, wie und wann das Display gesperrt wird."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle Daten löschen"</string>
-    <!-- outdated translation 2314060933796396205 -->     <string name="policydesc_wipeData" msgid="7669895333814222586">"Zurücksetzen auf die Werkseinstellungen. Dabei werden alle Ihre Daten ohne Nachfrage gelöscht."</string>
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Telefon ohne Warnung löschen"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
     <item msgid="869923650527136615">"Mobil"</item>
-    <item msgid="7897544654242874543">"Arbeit"</item>
-    <item msgid="1103601433382158155">"Fax (Arbeit)"</item>
+    <item msgid="7897544654242874543">"Geschäftlich"</item>
+    <item msgid="1103601433382158155">"Fax (geschäftl.)"</item>
     <item msgid="1735177144948329370">"Fax (privat)"</item>
     <item msgid="603878674477207394">"Pager"</item>
-    <item msgid="1650824275177931637">"Andere"</item>
+    <item msgid="1650824275177931637">"Sonstige"</item>
     <item msgid="9192514806975898961">"Benutzerdefiniert"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Privat"</item>
-    <item msgid="7084237356602625604">"Arbeit"</item>
-    <item msgid="1112044410659011023">"Andere"</item>
+    <item msgid="7084237356602625604">"Geschäftlich"</item>
+    <item msgid="1112044410659011023">"Sonstige"</item>
     <item msgid="2374913952870110618">"Benutzerdefiniert"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Privat"</item>
-    <item msgid="5629153956045109251">"Arbeit"</item>
-    <item msgid="4966604264500343469">"Andere"</item>
+    <item msgid="5629153956045109251">"Geschäftlich"</item>
+    <item msgid="4966604264500343469">"Sonstige"</item>
     <item msgid="4932682847595299369">"Benutzerdefiniert"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Privat"</item>
-    <item msgid="1359644565647383708">"Arbeit"</item>
+    <item msgid="1359644565647383708">"Geschäftlich"</item>
     <item msgid="7868549401053615677">"Andere"</item>
     <item msgid="3145118944639869809">"Benutzerdefiniert"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="7546335612189115615">"Arbeit"</item>
-    <item msgid="4378074129049520373">"Andere"</item>
+    <item msgid="7546335612189115615">"Geschäftlich"</item>
+    <item msgid="4378074129049520373">"Sonstige"</item>
     <item msgid="3455047468583965104">"Benutzerdefiniert"</item>
   </string-array>
   <string-array name="imProtocols">
@@ -497,11 +493,11 @@
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Benutzerdefiniert"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Privat"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobil"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"Arbeit"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax (Beruflich)"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Geschäftlich"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax (geschäftl.)"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax (privat)"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
-    <string name="phoneTypeOther" msgid="1544425847868765990">"Andere"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Sonstige"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Rückruf"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Auto"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Firma (Hauptnummer)"</string>
@@ -511,8 +507,8 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY/TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Handy (geschäftlich)"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager (beruflich)"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Handy (geschäftl.)"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager (geschäftl.)"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Zweite Nummer"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Geburtstag"</string>
@@ -520,17 +516,17 @@
     <string name="eventTypeOther" msgid="5834288791948564594">"Termin"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Benutzerdefiniert"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Privat"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"Beruflich"</string>
-    <string name="emailTypeOther" msgid="2923008695272639549">"Andere"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Geschäftlich"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Sonstige"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Benutzerdefiniert"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Privat"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Beruflich"</string>
-    <string name="postalTypeOther" msgid="2726111966623584341">"Andere"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Geschäftlich"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Sonstige"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Benutzerdefiniert"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Privat"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"Beruflich"</string>
-    <string name="imTypeOther" msgid="5377007495735915478">"Andere"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Geschäftlich"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Sonstige"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Benutzerdefiniert"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
@@ -541,13 +537,13 @@
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="29268870505363872">"Beruflich"</string>
-    <string name="orgTypeOther" msgid="3951781131570124082">"Andere"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Geschäftlich"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Sonstige"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Benutzerdefiniert"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Benutzerdefiniert"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Privat"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Geschäftlich"</string>
-    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Andere"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Sonstige"</string>
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"über <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> über <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN-Code eingeben"</string>
@@ -563,7 +559,7 @@
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Notruf"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Zurück zum Anruf"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Korrekt!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Tut uns leid. Versuchen Sie es noch einmal."</string>
+    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Bitte versuchen Sie es erneut."</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Wird geladen (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Aufgeladen"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
@@ -610,10 +606,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Ermöglicht der Anwendung, alle URLs, die mit dem Browser besucht wurden, sowie alle Lesezeichen des Browsers zu lesen."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"Browserverlauf und Lesezeichen schreiben"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Ermöglicht einer Anwendung, den auf Ihrem Telefon gespeicherten Browserverlauf und die Lesezeichen zu ändern. Schädliche Anwendungen können so Ihre Browserdaten löschen oder ändern."</string>
-    <!-- no translation found for permlab_setAlarm (5924401328803615165) -->
-    <skip />
-    <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
-    <skip />
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"Alarm im Wecker festlegen"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Ermöglicht dieser Anwendung, einen Alarm mithilfe eines installierten Weckers festzulegen. Einige Weckeranwendungen verfügen möglicherweise nicht über diese Funktion."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Geolokalisierungsberechtigungen des Browsers ändern"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Ermöglicht einer Anwendung, die Geolokalisierungsberechtigungen des Browsers zu ändern. Schädliche Anwendungen können dies nutzen, um das Senden von Standortinformationen an willkürliche Websites zuzulassen."</string>
     <string name="save_password_message" msgid="767344687139195790">"Möchten Sie, dass der Browser dieses Passwort speichert?"</string>
@@ -745,7 +739,7 @@
     <string name="capital_off" msgid="6815870386972805832">"AUS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Aktion durchführen mit"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Standardmäßig für diese Aktion verwenden."</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Löschen Sie die Standardeinstellungen unter \"Starteinstellungen &gt; Anwendungen &gt; Anwendungen verwalten\"."</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Standardeinstellung zurücksetzen unter \"Einstellungen &gt; Anwendungen &gt; Anwendungen verwalten\"."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Aktion auswählen"</string>
     <string name="noApplications" msgid="1691104391758345586">"Diese Aktion kann von keiner Anwendung ausgeführt werden."</string>
     <string name="aerr_title" msgid="653922989522758100">"Tut uns leid!"</string>
@@ -808,17 +802,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Alle anzeigen"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-Massenspeicher"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-Verbindung"</string>
-    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Sie haben Ihr Telefon über USB mit Ihrem Computer verbunden. Wählen Sie die Schaltfläche unten aus, wenn Sie Dateien auf Ihren Computer oder die SD-Karte Ihres Android-Geräts kopieren möchten."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Sie haben Ihr Telefon über USB mit Ihrem Computer verbunden. Wählen Sie die Schaltfläche unten aus, wenn Sie Dateien von Ihrem Computer in den gemeinsamen Speicher Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Sie haben Ihr Telefon über USB mit Ihrem Computer verbunden. Wählen Sie die Schaltfläche unten aus, wenn Sie Dateien auf Ihren Computer oder die SD-Karte Ihres Android-Geräts kopieren möchten."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB-Speicher aktivieren"</string>
-    <!-- outdated translation 2534784751603345363 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"Bei der Verwendung Ihrer SD-Karte als USB-Speicher ist ein Problem aufgetreten."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"Bei der Verwendung Ihres gemeinsamen Speichers als USB-Speicher ist ein Problem aufgetreten."</string>
     <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"Bei der Verwendung Ihrer SD-Karte als USB-Speicher ist ein Problem aufgetreten."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB-Verbindung"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Zum Kopieren von Dateien zum/vom Computer"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB-Speicher deaktivieren"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Auswählen, um USB-Speicher zu deaktivieren."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-Speicher in Verwendung"</string>
-    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Stellen Sie vor dem Deaktivieren des USB-Speichers sicher, dass Sie Ihre Android-SD-Karte von Ihrem Computer getrennt (\"ausgeworfen\") haben."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Stellen Sie vor dem Deaktivieren des USB-Speichers sicher, dass Sie den gemeinsamen Android-Speicher von Ihrem Computer getrennt (\"ausgeworfen\") haben."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Stellen Sie vor dem Deaktivieren des USB-Speichers sicher, dass Sie Ihre Android-SD-Karte von Ihrem Computer getrennt (\"ausgeworfen\") haben."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB-Speicher deaktivieren"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Beim Deaktivieren des USB-Speichers ist ein Problem aufgetreten. Überprüfen Sie, ob Sie den USB-Host getrennt haben, und versuchen Sie es erneut."</string>
@@ -826,9 +820,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Wenn Sie den USB-Speicher aktivieren, werden einige von Ihnen verwendete Anwendungen angehalten und sind möglicherweise nicht verfügbar, bis Sie den USB-Speicher wieder deaktivieren."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB-Vorgang fehlgeschlagen"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"SD-Karte formatieren"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"Speicher formatieren"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD-Karte formatieren"</string>
-    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"Möchten Sie die SD-Karte wirklich formatieren? Alle Daten auf Ihrer Karte gehen dann verloren."</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"Gemeinsamen Speicher formatieren und alle darauf gespeicherten Dateien löschen? Diese Aktion kann nicht rückgängig gemacht werden!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Möchten Sie die SD-Karte wirklich formatieren? Alle Daten auf Ihrer Karte gehen dann verloren."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging verbunden"</string>
@@ -837,28 +831,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"Kandidaten"</u></string>
-    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"SD-Karte wird vorbereitet"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"Gem. Speicher vorbereiten"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD-Karte wird vorbereitet"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Suche nach Fehlern"</string>
-    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"SD-Karte leer"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Gemeinsamer Speicher leer"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"SD-Karte leer"</string>
-    <!-- outdated translation 1312266820092958014 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"Die SD-Karte ist leer oder verwendet ein Dateisystem, das nicht unterstützt wird."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"Gemeinsamer Speicher ist leer oder verfügt über ein nicht unterstütztes Dateisystem"</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD-Karte ist leer oder verfügt über ein nicht unterstütztes Dateisystem."</string>
-    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Beschädigte SD-Karte"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Gem. Speicher beschädigt"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Beschädigte SD-Karte"</string>
-    <!-- outdated translation 2679412884290061775 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"Die SD-Karte ist beschädigt. Sie müssen Ihre Karte eventuell neu formatieren."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"Gemeinsamer Speicher ist beschädigt. Sie müssen ihn neu formatieren."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Die SD-Karte ist beschädigt. Sie müssen Ihre Karte eventuell neu formatieren."</string>
-    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"SD-Karte unerwartet entfernt"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"Gem. Speicher entfernt"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD-Karte unerwartet entfernt"</string>
-    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"SD-Karte vor dem Entnehmen trennen, um Datenverlust zu vermeiden."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Trennen Sie den gemeinsamen Speicher vor dem Entfernen, um Datenverlust zu vermeiden."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"SD-Karte vor dem Entnehmen trennen, um Datenverlust zu vermeiden."</string>
-    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"SD-Karte kann entfernt werden."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"Speicher kann entfernt werden."</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD-Karte kann entfernt werden."</string>
-    <!-- outdated translation 7613960686747592770 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"Die SD-Karte kann jetzt entfernt werden."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"Gemeinsamer Speicher kann entfernt werden."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Die SD-Karte kann entfernt werden."</string>
-    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"SD-Karte entfernt"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"Gemeinsamer Speicher entfernt"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD-Karte entfernt"</string>
-    <!-- outdated translation 4205117227342822275 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"Die SD-Karte wurde entfernt. Legen Sie eine neue SD-Karte ein, um den Speicherplatz Ihres Geräts zu erweitern."</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"Gemeinsamer Speicher entfernt. Neuen Datenträger einlegen"</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-Karte entfernt. Legen Sie eine neue ein."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Keine passenden Aktivitäten gefunden"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"Nutzungsstatistik der Komponente aktualisieren"</string>
