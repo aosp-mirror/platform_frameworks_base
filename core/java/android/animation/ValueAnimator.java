@@ -682,8 +682,8 @@ public class ValueAnimator extends Animator {
                     // If there are still active or delayed animations, call the handler again
                     // after the frameDelay
                     if (callAgain && (!sAnimations.isEmpty() || !sDelayedAnims.isEmpty())) {
-                        sendEmptyMessageDelayed(ANIMATION_FRAME,  Math.max(0, sFrameDelay -
--                            (AnimationUtils.currentAnimationTimeMillis() - currentTime)));
+                        sendEmptyMessageDelayed(ANIMATION_FRAME, Math.max(0, sFrameDelay -
+                            (AnimationUtils.currentAnimationTimeMillis() - currentTime)));
                     }
                     break;
             }
