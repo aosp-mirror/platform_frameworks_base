@@ -844,7 +844,7 @@ class ZoomManager {
             if (mInitialScale > 0) {
                 scale = mInitialScale;
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
-            } else if (viewState.mViewScale > 0 && 
+            } else if (viewState.mViewScale > 0 &&
                 (viewState.mMobileSite || !settings.getUseFixedViewport())) {
                 mTextWrapScale = viewState.mTextWrapScale;
                 scale = viewState.mViewScale;
