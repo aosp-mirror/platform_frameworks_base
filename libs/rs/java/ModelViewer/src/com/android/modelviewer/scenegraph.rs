@@ -48,16 +48,16 @@ void init() {
 
 int root(int launchID) {
 
-    gGroup->transforms1.w += 0.5f;
+    gGroup->transforms[1].w += 0.5f;
     gGroup->isDirty = 1;
 
     SgTransform *robot1Ptr = gRobot1 + gRobot1Index;
 
-    robot1Ptr->transforms1.w -= 1.5f;
+    robot1Ptr->transforms[1].w -= 1.5f;
     robot1Ptr->isDirty = 1;
 
     SgTransform *robot2Ptr = gRobot2 + gRobot2Index;
-    robot2Ptr->transforms1.w += 2.5f;
+    robot2Ptr->transforms[1].w += 2.5f;
     robot2Ptr->isDirty = 1;
 
     rsForEach(gTransformRS, gRootNode->children, gRootNode->children, 0);

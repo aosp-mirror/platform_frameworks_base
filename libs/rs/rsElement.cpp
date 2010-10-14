@@ -73,11 +73,12 @@ size_t Element::getSizeBits() const
 void Element::dumpLOGV(const char *prefix) const
 {
     ObjectBase::dumpLOGV(prefix);
-    LOGV("%s   Element: components %i,  size %i", prefix, mFieldCount, mBits);
+    LOGV("%s Element: fieldCount: %i,  size bytes: %i", prefix, mFieldCount, getSizeBytes());
     for (uint32_t ct = 0; ct < mFieldCount; ct++) {
-        char buf[1024];
-        sprintf(buf, "%s component %i: ", prefix, ct);
-        //mComponents[ct]->dumpLOGV(buf);
+        LOGV("%s Element field index: %u ------------------", prefix, ct);
+        LOGV("%s name: %s, offsetBits: %u, arraySize: %u",
+             prefix, mFields[ct].name.string(), mFields[ct].offsetBits, mFields[ct].arraySize);
+        mFields[ct].e->dumpLOGV(prefix);
     }
 }
 

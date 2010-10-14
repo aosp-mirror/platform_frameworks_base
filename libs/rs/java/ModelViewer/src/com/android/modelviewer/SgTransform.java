@@ -46,9 +46,6 @@ public class SgTransform {
     ScriptField_SgTransform mChildField;
     public ScriptField_SgTransform.Item mTransformData;
 
-    Float4[] mTransforms;
-    TransformType[] mTransformTypes;
-
     RenderScript mRS;
 
     Vector mChildren;
@@ -66,62 +63,20 @@ public class SgTransform {
     }
 
     public void setTransform(int index, Float4 value, TransformType type) {
-        mTransforms[index] = value;
-        mTransformTypes[index] = type;
+        mTransformData.transforms[index] = value;
+        mTransformData.transformTypes[index] = type.mID;
     }
 
     void initData() {
-        int numTransforms = 16;
-        mTransforms = new Float4[numTransforms];
-        mTransformTypes = new TransformType[numTransforms];
-        for(int i = 0; i < numTransforms; i ++) {
-            mTransforms[i] = new Float4(0, 0, 0, 0);
-            mTransformTypes[i] = TransformType.NONE;
+        int numElements = mTransformData.transforms.length;
+        mTransformData.transformTypes = new int[numElements];
+        for(int i = 0; i < numElements; i ++) {
+            mTransformData.transforms[i] = new Float4(0, 0, 0, 0);
+            mTransformData.transformTypes[i] = TransformType.NONE.mID;
         }
-    }
-
-    void setData() {
-
-        mTransformData.globalMat = new Matrix4f();
-        mTransformData.localMat = new Matrix4f();
-
-        mTransformData.transforms0 = mTransforms[0];
-        mTransformData.transforms1 = mTransforms[1];
-        mTransformData.transforms2 = mTransforms[2];
-        mTransformData.transforms3 = mTransforms[3];
-        mTransformData.transforms4 = mTransforms[4];
-        mTransformData.transforms5 = mTransforms[5];
-        mTransformData.transforms6 = mTransforms[6];
-        mTransformData.transforms7 = mTransforms[7];
-        mTransformData.transforms8 = mTransforms[8];
-        mTransformData.transforms9 = mTransforms[9];
-        mTransformData.transforms10 = mTransforms[10];
-        mTransformData.transforms11 = mTransforms[11];
-        mTransformData.transforms12 = mTransforms[12];
-        mTransformData.transforms13 = mTransforms[13];
-        mTransformData.transforms14 = mTransforms[14];
-        mTransformData.transforms15 = mTransforms[15];
-
-        mTransformData.transformType0 = mTransformTypes[0].mID;
-        mTransformData.transformType1 = mTransformTypes[1].mID;
-        mTransformData.transformType2 = mTransformTypes[2].mID;
-        mTransformData.transformType3 = mTransformTypes[3].mID;
-        mTransformData.transformType4 = mTransformTypes[4].mID;
-        mTransformData.transformType5 = mTransformTypes[5].mID;
-        mTransformData.transformType6 = mTransformTypes[6].mID;
-        mTransformData.transformType7 = mTransformTypes[7].mID;
-        mTransformData.transformType8 = mTransformTypes[8].mID;
-        mTransformData.transformType9 = mTransformTypes[9].mID;
-        mTransformData.transformType10 = mTransformTypes[10].mID;
-        mTransformData.transformType11 = mTransformTypes[11].mID;
-        mTransformData.transformType12 = mTransformTypes[12].mID;
-        mTransformData.transformType13 = mTransformTypes[13].mID;
-        mTransformData.transformType14 = mTransformTypes[14].mID;
-        mTransformData.transformType15 = mTransformTypes[15].mID;
 
         mTransformData.isDirty = 1;
         mTransformData.children = null;
-
     }
 
     public SgTransform(RenderScript rs) {
@@ -132,7 +87,6 @@ public class SgTransform {
     }
 
     public ScriptField_SgTransform.Item getData() {
-        setData();
         if(mChildren.size() != 0) {
             mChildField = new ScriptField_SgTransform(mRS, mChildren.size());
             mTransformData.children = mChildField.getAllocation();
