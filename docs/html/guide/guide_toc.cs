@@ -279,12 +279,8 @@
            </ul>
       </li>
      <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
-            <span class="en">Device Administration</span></a>
-            <span class="new">new!</span>
-    </li>
-    <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
-           <span class="en">Device Administration</span>
-        </a> <span class="new">new!</span><!-- 10/8/10 -->
+            <span class="en">Device Administration</span>
+         </a> <span class="new">new!</span>
     </li>
     </ul>
   </li>
