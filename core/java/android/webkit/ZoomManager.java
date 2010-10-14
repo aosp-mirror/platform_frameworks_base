@@ -830,20 +830,26 @@ class ZoomManager {
         WebViewCore.ViewState viewState = drawData.mViewState;
         final Point viewSize = drawData.mViewPoint;
         updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
+        if (mWebView.getSettings().getUseWideViewPort() &&
+            mWebView.getSettings().getUseFixedViewport()) {
+            final int contentWidth = drawData.mWidthHeight.x;
+            setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
+        }
 
         if (!mWebView.drawHistory()) {
             final float scale;
             final boolean reflowText;
+            WebSettings settings = mWebView.getSettings();
 
             if (mInitialScale > 0) {
                 scale = mInitialScale;
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
-            } else if (viewState.mViewScale > 0) {
+            } else if (viewState.mViewScale > 0 && 
+                (viewState.mMobileSite || !settings.getUseFixedViewport())) {
                 mTextWrapScale = viewState.mTextWrapScale;
                 scale = viewState.mViewScale;
                 reflowText = false;
             } else {
-                WebSettings settings = mWebView.getSettings();
                 if (settings.getUseWideViewPort()
                     && (settings.getLoadWithOverviewMode() || settings.getUseFixedViewport())) {
                     mInitialZoomOverview = true;
