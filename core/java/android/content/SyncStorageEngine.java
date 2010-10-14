@@ -411,7 +411,7 @@ public class SyncStorageEngine extends Handler {
     }
 
     public void setSyncAutomatically(Account account, String providerName, boolean sync) {
-        Log.d(TAG, "setSyncAutomatically: " + account + ", provider " + providerName
+        Log.d(TAG, "setSyncAutomatically: " + /*account +*/ ", provider " + providerName
                 + " -> " + sync);
         synchronized (mAuthorities) {
             AuthorityInfo authority = getOrCreateAuthorityLocked(account, providerName, -1, false);
