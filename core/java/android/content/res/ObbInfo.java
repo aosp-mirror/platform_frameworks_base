@@ -48,6 +48,13 @@ public class ObbInfo implements Parcelable {
      */
     public int flags;
 
+    /**
+     * The salt for the encryption algorithm.
+     * 
+     * @hide
+     */
+    public byte[] salt;
+
     // Only allow things in this package to instantiate.
     /* package */ ObbInfo() {
     }
@@ -75,6 +82,7 @@ public class ObbInfo implements Parcelable {
         dest.writeString(packageName);
         dest.writeInt(version);
         dest.writeInt(flags);
+        dest.writeByteArray(salt);
     }
 
     public static final Parcelable.Creator<ObbInfo> CREATOR
@@ -93,5 +101,6 @@ public class ObbInfo implements Parcelable {
         packageName = source.readString();
         version = source.readInt();
         flags = source.readInt();
+        salt = source.createByteArray();
     }
 }

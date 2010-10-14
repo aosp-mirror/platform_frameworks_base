@@ -547,8 +547,14 @@ class SipSessionGroup implements SipListener {
             mState = SipSession.State.PINGING;
             try {
                 processCommand(new OptionsCommand());
-                while (SipSession.State.PINGING == mState) {
-                    Thread.sleep(1000);
+                for (int i = 0; i < 15; i++) {
+                    if (SipSession.State.PINGING != mState) break;
+                    Thread.sleep(200);
+                }
+                if (SipSession.State.PINGING == mState) {
+                    // FIXME: what to do if server doesn't respond
+                    reset();
+                    if (DEBUG) Log.w(TAG, "no response from ping");
                 }
             } catch (SipException e) {
                 Log.e(TAG, "sendKeepAlive failed", e);

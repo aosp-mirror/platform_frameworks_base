@@ -23,6 +23,7 @@
 #include <gtest/gtest.h>
 
 #include <fcntl.h>
+#include <string.h>
 
 namespace android {
 
@@ -63,6 +64,10 @@ TEST_F(ObbFileTest, WriteThenRead) {
 
     mObbFile->setPackageName(String8(packageName));
     mObbFile->setVersion(versionNum);
+#define SALT_SIZE 8
+    unsigned char salt[SALT_SIZE] = {0x01, 0x10, 0x55, 0xAA, 0xFF, 0x00, 0x5A, 0xA5};
+    EXPECT_TRUE(mObbFile->setSalt(salt, SALT_SIZE))
+            << "Salt should be successfully set";
 
     EXPECT_TRUE(mObbFile->writeTo(mFileName))
             << "couldn't write to fake .obb file";
@@ -77,6 +82,19 @@ TEST_F(ObbFileTest, WriteThenRead) {
     const char* currentPackageName = mObbFile->getPackageName().string();
     EXPECT_STREQ(packageName, currentPackageName)
             << "package name didn't come out the same as it went in";
+
+    size_t saltLen;
+    const unsigned char* newSalt = mObbFile->getSalt(&saltLen);
+
+    EXPECT_EQ(sizeof(salt), saltLen)
+            << "salt sizes were not the same";
+
+    for (int i = 0; i < sizeof(salt); i++) {
+        EXPECT_EQ(salt[i], newSalt[i])
+                << "salt character " << i << " should be equal";
+    }
+    EXPECT_TRUE(memcmp(newSalt, salt, sizeof(salt)) == 0)
+            << "salts should be the same";
 }
 
 }

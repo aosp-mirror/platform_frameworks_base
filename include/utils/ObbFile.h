@@ -27,6 +27,7 @@ namespace android {
 
 // OBB flags (bit 0)
 #define OBB_OVERLAY         (1 << 0)
+#define OBB_SALTED          (1 << 1)
 
 class ObbFile : public RefBase {
 protected:
@@ -70,6 +71,26 @@ public:
         mFlags = flags;
     }
 
+    const unsigned char* getSalt(size_t* length) const {
+        if ((mFlags & OBB_SALTED) == 0) {
+            *length = 0;
+            return NULL;
+        }
+
+        *length = sizeof(mSalt);
+        return mSalt;
+    }
+
+    bool setSalt(const unsigned char* salt, size_t length) {
+        if (length != sizeof(mSalt)) {
+            return false;
+        }
+
+        memcpy(mSalt, salt, sizeof(mSalt));
+        mFlags |= OBB_SALTED;
+        return true;
+    }
+
     bool isOverlay() {
         return (mFlags & OBB_OVERLAY) == OBB_OVERLAY;
     }
@@ -102,6 +123,12 @@ private:
 
     /* Flags for this OBB type. */
     int32_t mFlags;
+
+    /* Whether the file is salted. */
+    bool mSalted;
+
+    /* The encryption salt. */
+    unsigned char mSalt[8];
 
     const char* mFileName;
 
