@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
@@ -67,8 +66,8 @@ import javax.sip.SipException;
  * @hide
  */
 public final class SipService extends ISipService.Stub {
-    private static final String TAG = "SipService";
-    private static final boolean DEBUGV = false;
+    static final String TAG = "SipService";
+    static final boolean DEBUGV = false;
     private static final boolean DEBUG = true;
     private static final boolean DEBUG_TIMER = DEBUG && false;
     private static final int EXPIRY_TIME = 3600;
@@ -95,7 +94,7 @@ public final class SipService extends ISipService.Stub {
 
     private ConnectivityReceiver mConnectivityReceiver;
     private boolean mWifiEnabled;
-    private MyWakeLock mMyWakeLock;
+    private SipWakeLock mMyWakeLock;
 
     /**
      * Starts the SIP service. Do nothing if the SIP API is not supported on the
@@ -117,7 +116,7 @@ public final class SipService extends ISipService.Stub {
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         context.registerReceiver(mWifiStateReceiver,
                 new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
-        mMyWakeLock = new MyWakeLock((PowerManager)
+        mMyWakeLock = new SipWakeLock((PowerManager)
                 context.getSystemService(Context.POWER_SERVICE));
 
         mTimer = new WakeupTimer(context);
@@ -459,7 +458,8 @@ public final class SipService extends ISipService.Stub {
         private SipSessionGroup createSipSessionGroup(String localIp,
                 SipProfile localProfile, String password) throws SipException {
             try {
-                return new SipSessionGroup(localIp, localProfile, password);
+                return new SipSessionGroup(localIp, localProfile, password,
+                        mMyWakeLock);
             } catch (IOException e) {
                 // network disconnected
                 Log.w(TAG, "createSipSessionGroup(): network disconnected?");
@@ -546,6 +546,7 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onRinging(ISipSession s, SipProfile caller,
                 String sessionDescription) {
+            if (DEBUGV) Log.d(TAG, "<<<<< onRinging()");
             SipSessionGroup.SipSessionImpl session =
                     (SipSessionGroup.SipSessionImpl) s;
             synchronized (SipService.this) {
@@ -1358,43 +1359,6 @@ public final class SipService extends ISipService.Stub {
             } finally {
                 mMyWakeLock.release(task);
             }
-        }
-    }
-
-    private static class MyWakeLock {
-        private PowerManager mPowerManager;
-        private PowerManager.WakeLock mWakeLock;
-        private HashSet<Object> mHolders = new HashSet<Object>();
-
-        MyWakeLock(PowerManager powerManager) {
-            mPowerManager = powerManager;
-        }
-
-        synchronized void reset() {
-            mHolders.clear();
-            release(null);
-            if (DEBUGV) Log.v(TAG, "~~~ hard reset wakelock");
-        }
-
-        synchronized void acquire(Object holder) {
-            mHolders.add(holder);
-            if (mWakeLock == null) {
-                mWakeLock = mPowerManager.newWakeLock(
-                        PowerManager.PARTIAL_WAKE_LOCK, "SipWakeLock");
-            }
-            if (!mWakeLock.isHeld()) mWakeLock.acquire();
-            if (DEBUGV) Log.v(TAG, "acquire wakelock: holder count="
-                    + mHolders.size());
-        }
-
-        synchronized void release(Object holder) {
-            mHolders.remove(holder);
-            if ((mWakeLock != null) && mHolders.isEmpty()
-                    && mWakeLock.isHeld()) {
-                mWakeLock.release();
-            }
-            if (DEBUGV) Log.v(TAG, "release wakelock: holder count="
-                    + mHolders.size());
         }
     }
 }
