@@ -175,8 +175,8 @@ public class StackView extends AdapterViewAnimator {
             }
             view.setVisibility(VISIBLE);
 
-            ObjectAnimator<Float> fadeIn = new ObjectAnimator<Float>(DEFAULT_ANIMATION_DURATION,
-                    view, "alpha", view.getAlpha(), 1.0f);
+            ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
+            fadeIn.setDuration(DEFAULT_ANIMATION_DURATION);
             fadeIn.start();
         } else if (fromIndex == mNumActiveViews - 1 && toIndex == mNumActiveViews - 2) {
             // Slide item in
@@ -186,12 +186,11 @@ public class StackView extends AdapterViewAnimator {
             int duration = Math.round(mStackSlider.getDurationForNeutralPosition(mYVelocity));
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
-            PropertyValuesHolder<Float> slideInY =
-                    new PropertyValuesHolder<Float>("YProgress", 0.0f);
-            PropertyValuesHolder<Float> slideInX =
-                    new PropertyValuesHolder<Float>("XProgress", 0.0f);
-            ObjectAnimator pa = new ObjectAnimator(duration, animationSlider,
+            PropertyValuesHolder slideInY = PropertyValuesHolder.ofFloat("YProgress", 0.0f);
+            PropertyValuesHolder slideInX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
+            ObjectAnimator pa = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
                     slideInX, slideInY);
+            pa.setDuration(duration);
             pa.setInterpolator(new LinearInterpolator());
             pa.start();
         } else if (fromIndex == mNumActiveViews - 2 && toIndex == mNumActiveViews - 1) {
@@ -201,12 +200,11 @@ public class StackView extends AdapterViewAnimator {
             int duration = Math.round(mStackSlider.getDurationForOffscreenPosition(mYVelocity));
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
-            PropertyValuesHolder<Float> slideOutY =
-                    new PropertyValuesHolder<Float>("YProgress", 1.0f);
-            PropertyValuesHolder<Float> slideOutX =
-                    new PropertyValuesHolder<Float>("XProgress", 0.0f);
-            ObjectAnimator pa = new ObjectAnimator(duration, animationSlider,
-                   slideOutX, slideOutY);
+            PropertyValuesHolder slideOutY = PropertyValuesHolder.ofFloat("YProgress", 1.0f);
+            PropertyValuesHolder slideOutX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
+            ObjectAnimator pa = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
+                    slideOutX, slideOutY);
+            pa.setDuration(duration);
             pa.setInterpolator(new LinearInterpolator());
             pa.start();
         } else if (fromIndex == -1 && toIndex == mNumActiveViews - 1) {
@@ -217,8 +215,8 @@ public class StackView extends AdapterViewAnimator {
             lp.setVerticalOffset(-mSlideAmount);
         } else if (toIndex == -1) {
             // Fade item out
-            ObjectAnimator<Float> fadeOut = new ObjectAnimator<Float>
-                    (DEFAULT_ANIMATION_DURATION, view, "alpha", view.getAlpha(), 0.0f);
+            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 0.0f);
+            fadeOut.setDuration(DEFAULT_ANIMATION_DURATION);
             fadeOut.start();
         }
 
@@ -236,8 +234,8 @@ public class StackView extends AdapterViewAnimator {
         float r = (index * 1.0f) / (mNumActiveViews - 2);
 
         float scale = 1 - PERSPECTIVE_SCALE_FACTOR * (1 - r);
-        PropertyValuesHolder<Float> scaleX = new PropertyValuesHolder<Float>("scaleX", scale);
-        PropertyValuesHolder<Float> scaleY = new PropertyValuesHolder<Float>("scaleY", scale);
+        PropertyValuesHolder scaleX = PropertyValuesHolder.ofFloat("scaleX", scale);
+        PropertyValuesHolder scaleY = PropertyValuesHolder.ofFloat("scaleY", scale);
 
         r = (float) Math.pow(r, 2);
 
@@ -247,9 +245,9 @@ public class StackView extends AdapterViewAnimator {
                 (mMeasuredHeight * (1 - PERSPECTIVE_SHIFT_FACTOR) / 2.0f);
         float transY = perspectiveTranslation + scaleShiftCorrection;
 
-        PropertyValuesHolder<Float> translationY =
-                new PropertyValuesHolder<Float>("translationY", transY);
-        ObjectAnimator pa = new ObjectAnimator(100, view, scaleX, scaleY, translationY);
+        PropertyValuesHolder translationY = PropertyValuesHolder.ofFloat("translationY", transY);
+        ObjectAnimator pa = ObjectAnimator.ofPropertyValuesHolder(view, scaleX, scaleY, translationY);
+        pa.setDuration(100);
         pa.start();
     }
 
@@ -538,12 +536,11 @@ public class StackView extends AdapterViewAnimator {
             }
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
-            PropertyValuesHolder<Float> snapBackY =
-                    new PropertyValuesHolder<Float>("YProgress", finalYProgress);
-            PropertyValuesHolder<Float> snapBackX =
-                    new PropertyValuesHolder<Float>("XProgress", 0.0f);
-            ObjectAnimator pa = new ObjectAnimator(duration, animationSlider,
+            PropertyValuesHolder snapBackY = PropertyValuesHolder.ofFloat("YProgress", finalYProgress);
+            PropertyValuesHolder snapBackX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
+            ObjectAnimator pa = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
                     snapBackX, snapBackY);
+            pa.setDuration(duration);
             pa.setInterpolator(new LinearInterpolator());
             pa.start();
         } else if (mSwipeGestureType == GESTURE_SLIDE_DOWN) {
@@ -557,12 +554,12 @@ public class StackView extends AdapterViewAnimator {
             }
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
-            PropertyValuesHolder<Float> snapBackY =
-                    new PropertyValuesHolder<Float>("YProgress", finalYProgress);
-            PropertyValuesHolder<Float> snapBackX =
-                    new PropertyValuesHolder<Float>("XProgress", 0.0f);
-            ObjectAnimator pa = new ObjectAnimator(duration, animationSlider,
+            PropertyValuesHolder snapBackY =
+                    PropertyValuesHolder.ofFloat("YProgress",finalYProgress);
+            PropertyValuesHolder snapBackX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
+            ObjectAnimator pa = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
                     snapBackX, snapBackY);
+            pa.setDuration(duration);
             pa.start();
         }
 

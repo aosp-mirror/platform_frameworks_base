@@ -17,6 +17,7 @@
 package android.animation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This class holds a collection of Keyframe objects and is called by ValueAnimator to calculate
@@ -31,10 +32,83 @@ class KeyframeSet {
 
     public KeyframeSet(Keyframe... keyframes) {
         mKeyframes = new ArrayList<Keyframe>();
-        for (Keyframe keyframe : keyframes) {
-            mKeyframes.add(keyframe);
-        }
+        mKeyframes.addAll(Arrays.asList(keyframes));
         mNumKeyframes = mKeyframes.size();
+    }
+
+    public static KeyframeSet ofInt(int... values) {
+        int numKeyframes = values.length;
+        Keyframe keyframes[] = new Keyframe[Math.max(numKeyframes,2)];
+        if (numKeyframes == 1) {
+            keyframes[0] = new Keyframe(0f, (Object) null);
+            keyframes[1] = new Keyframe(1f, values[0]);
+        } else {
+            keyframes[0] = new Keyframe(0f, values[0]);
+            for (int i = 1; i < numKeyframes; ++i) {
+                keyframes[i] = new Keyframe((float) i / (numKeyframes - 1), values[i]);
+            }
+        }
+        return new KeyframeSet(keyframes);
+    }
+
+    public static KeyframeSet ofFloat(float... values) {
+        int numKeyframes = values.length;
+        Keyframe keyframes[] = new Keyframe[Math.max(numKeyframes,2)];
+        if (numKeyframes == 1) {
+            keyframes[0] = new Keyframe(0f, (Object) null);
+            keyframes[1] = new Keyframe(1f, values[0]);
+        } else {
+            keyframes[0] = new Keyframe(0f, values[0]);
+            for (int i = 1; i < numKeyframes; ++i) {
+                keyframes[i] = new Keyframe((float) i / (numKeyframes - 1), values[i]);
+            }
+        }
+        return new KeyframeSet(keyframes);
+    }
+
+    public static KeyframeSet ofDouble(double... values) {
+        int numKeyframes = values.length;
+        Keyframe keyframes[] = new Keyframe[Math.max(numKeyframes,2)];
+        if (numKeyframes == 1) {
+            keyframes[0] = new Keyframe(0f, (Object) null);
+            keyframes[1] = new Keyframe(1f, values[0]);
+        } else {
+            keyframes[0] = new Keyframe(0f, values[0]);
+            for (int i = 1; i < numKeyframes; ++i) {
+                keyframes[i] = new Keyframe((float) i / (numKeyframes - 1), values[i]);
+            }
+        }
+        return new KeyframeSet(keyframes);
+    }
+
+    public static KeyframeSet ofLong(long... values) {
+        int numKeyframes = values.length;
+        Keyframe keyframes[] = new Keyframe[Math.max(numKeyframes,2)];
+        if (numKeyframes == 1) {
+            keyframes[0] = new Keyframe(0f, (Object) null);
+            keyframes[1] = new Keyframe(1f, values[0]);
+        } else {
+            keyframes[0] = new Keyframe(0f, values[0]);
+            for (int i = 1; i < numKeyframes; ++i) {
+                keyframes[i] = new Keyframe((float) i / (numKeyframes - 1), values[i]);
+            }
+        }
+        return new KeyframeSet(keyframes);
+    }
+
+    public static KeyframeSet ofObject(Object... values) {
+        int numKeyframes = values.length;
+        Keyframe keyframes[] = new Keyframe[Math.max(numKeyframes,2)];
+        if (numKeyframes == 1) {
+            keyframes[0] = new Keyframe(0f, (Object) null);
+            keyframes[1] = new Keyframe(1f, values[0]);
+        } else {
+            keyframes[0] = new Keyframe(0f, values[0]);
+            for (int i = 1; i < numKeyframes; ++i) {
+                keyframes[i] = new Keyframe((float) i / (numKeyframes - 1), values[i]);
+            }
+        }
+        return new KeyframeSet(keyframes);
     }
 
     /**
