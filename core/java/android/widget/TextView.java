@@ -4447,6 +4447,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         hideControllers();
+        stopTextSelectionMode();
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
