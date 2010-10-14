@@ -38,7 +38,10 @@ import java.util.HashMap;
  * network access on the application's main thread, where UI
  * operations are received and animations take place.  Keeping disk
  * and network operations off the main thread makes for much smoother,
- * more responsive applications.
+ * more responsive applications.  By keeping your application's main thread
+ * responsive, you also prevent
+ * <a href="{@docRoot}guide/practices/design/responsiveness.html">ANR dialogs</a>
+ * from being shown to users.
  *
  * <p class="note">Note that even though an Android device's disk is
  * often on flash memory, many devices run a filesystem on top of that
