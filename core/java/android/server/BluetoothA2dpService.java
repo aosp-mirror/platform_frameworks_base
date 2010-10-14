@@ -367,6 +367,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         int state = getSinkState(device);
         String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
 
+        switch (state) {
+            case BluetoothA2dp.STATE_DISCONNECTED:
+            case BluetoothA2dp.STATE_DISCONNECTING:
+                return false;
+        }
         // State is CONNECTING or CONNECTED or PLAYING
         handleSinkStateChange(device, state, BluetoothA2dp.STATE_DISCONNECTING);
         if (!disconnectSinkNative(path)) {
