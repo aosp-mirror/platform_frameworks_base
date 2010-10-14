@@ -1839,8 +1839,8 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
         }
     };
 
-    // the full animation is 24 frames
-    const int nbFrames = 12;
+    // the full animation is 12 frames
+    int nbFrames = 8;
     s_curve_interpolator itr(nbFrames, 7.5f);
     s_curve_interpolator itg(nbFrames, 8.0f);
     s_curve_interpolator itb(nbFrames, 8.5f);
@@ -1858,6 +1858,7 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
         hw.flip(screenBounds);
     }
 
+    nbFrames = 4;
     v_stretch vverts(hw_w, hw_h);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
