@@ -1292,6 +1292,14 @@ public class HierarchicalStateMachine {
     }
 
     /**
+     * Removes a message from the message queue.
+     * Protected, may only be called by instances of HierarchicalStateMachine.
+     */
+    protected final void removeMessages(int what) {
+        mHsmHandler.removeMessages(what);
+    }
+
+    /**
      * Conditionally quit the looper and stop execution.
      *
      * This sends the HSM_QUIT_MSG to the state machine and
