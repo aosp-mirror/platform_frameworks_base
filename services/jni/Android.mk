@@ -24,7 +24,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
     libsystem_server \
 	libutils \
-	libui
+	libui \
+    libsurfaceflinger_client
 
 LOCAL_STATIC_LIBRARIES := libusbhost
 

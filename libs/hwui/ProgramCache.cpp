@@ -417,7 +417,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
 
     // Optimization for common cases
-    if (!blendFramebuffer) {
+    if (!blendFramebuffer && description.colorOp == ProgramDescription::kColorNone) {
         bool fast = false;
 
         const bool noShader = !description.hasGradient && !description.hasBitmap;

@@ -484,7 +484,7 @@ public interface IMountService extends IInterface {
              * IObbActionListener to inform it of the terminal state of the
              * call.
              */
-            public void mountObb(String filename, String key, IObbActionListener token)
+            public void mountObb(String filename, String key, IObbActionListener token, int nonce)
                     throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -493,6 +493,7 @@ public interface IMountService extends IInterface {
                     _data.writeString(filename);
                     _data.writeString(key);
                     _data.writeStrongBinder((token != null ? token.asBinder() : null));
+                    _data.writeInt(nonce);
                     mRemote.transact(Stub.TRANSACTION_mountObb, _data, _reply, 0);
                     _reply.readException();
                 } finally {
@@ -508,8 +509,8 @@ public interface IMountService extends IInterface {
              * IObbActionListener to inform it of the terminal state of the
              * call.
              */
-            public void unmountObb(String filename, boolean force, IObbActionListener token)
-                    throws RemoteException {
+            public void unmountObb(String filename, boolean force, IObbActionListener token,
+                    int nonce) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
@@ -517,6 +518,7 @@ public interface IMountService extends IInterface {
                     _data.writeString(filename);
                     _data.writeInt((force ? 1 : 0));
                     _data.writeStrongBinder((token != null ? token.asBinder() : null));
+                    _data.writeInt(nonce);
                     mRemote.transact(Stub.TRANSACTION_unmountObb, _data, _reply, 0);
                     _reply.readException();
                 } finally {
@@ -876,7 +878,9 @@ public interface IMountService extends IInterface {
                     key = data.readString();
                     IObbActionListener observer;
                     observer = IObbActionListener.Stub.asInterface(data.readStrongBinder());
-                    mountObb(filename, key, observer);
+                    int nonce;
+                    nonce = data.readInt();
+                    mountObb(filename, key, observer, nonce);
                     reply.writeNoException();
                     return true;
                 }
@@ -888,7 +892,9 @@ public interface IMountService extends IInterface {
                     force = 0 != data.readInt();
                     IObbActionListener observer;
                     observer = IObbActionListener.Stub.asInterface(data.readStrongBinder());
-                    unmountObb(filename, force, observer);
+                    int nonce;
+                    nonce = data.readInt();
+                    unmountObb(filename, force, observer, nonce);
                     reply.writeNoException();
                     return true;
                 }
@@ -1007,7 +1013,7 @@ public interface IMountService extends IInterface {
      * MountService will call back to the supplied IObbActionListener to inform
      * it of the terminal state of the call.
      */
-    public void mountObb(String filename, String key, IObbActionListener token)
+    public void mountObb(String filename, String key, IObbActionListener token, int nonce)
             throws RemoteException;
 
     /*
@@ -1051,7 +1057,7 @@ public interface IMountService extends IInterface {
      * MountService will call back to the supplied IObbActionListener to inform
      * it of the terminal state of the call.
      */
-    public void unmountObb(String filename, boolean force, IObbActionListener token)
+    public void unmountObb(String filename, boolean force, IObbActionListener token, int nonce)
             throws RemoteException;
 
     /*

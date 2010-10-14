@@ -20,15 +20,23 @@ import static android.widget.SuggestionsAdapter.getColumnString;
 
 import com.android.internal.R;
 
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -66,6 +74,7 @@ public class SearchView extends LinearLayout {
     private View mSubmitButton;
     private View mCloseButton;
     private View mSearchEditFrame;
+    private View mVoiceButton;
     private AutoCompleteTextView mQueryTextView;
     private boolean mSubmitButtonEnabled;
     private CharSequence mQueryHint;
@@ -73,6 +82,10 @@ public class SearchView extends LinearLayout {
     private boolean mClearingFocus;
 
     private SearchableInfo mSearchable;
+
+    // For voice searching
+    private final Intent mVoiceWebSearchIntent;
+    private final Intent mVoiceAppSearchIntent;
 
     // A weak map of drawables we've gotten from other packages, so we don't load them
     // more than once.
@@ -162,10 +175,13 @@ public class SearchView extends LinearLayout {
         mSearchEditFrame = findViewById(R.id.search_edit_frame);
         mSubmitButton = findViewById(R.id.search_go_btn);
         mCloseButton = findViewById(R.id.search_close_btn);
+        mVoiceButton = findViewById(R.id.search_voice_btn);
 
         mSearchButton.setOnClickListener(mOnClickListener);
         mCloseButton.setOnClickListener(mOnClickListener);
         mSubmitButton.setOnClickListener(mOnClickListener);
+        mVoiceButton.setOnClickListener(mOnClickListener);
+
         mQueryTextView.addTextChangedListener(mTextWatcher);
         mQueryTextView.setOnEditorActionListener(mOnEditorActionListener);
         mQueryTextView.setOnItemClickListener(mOnItemClickListener);
@@ -183,6 +199,15 @@ public class SearchView extends LinearLayout {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SearchView, 0, 0);
         setIconifiedByDefault(a.getBoolean(R.styleable.SearchView_iconifiedByDefault, true));
         a.recycle();
+
+        // Save voice intent for later queries/launching
+        mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        mVoiceWebSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mVoiceWebSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+
+        mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         updateViewsVisibility(mIconifiedByDefault);
     }
@@ -206,12 +231,8 @@ public class SearchView extends LinearLayout {
     /** @hide */
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
-        if (mClearingFocus) return false;
-        boolean result = mQueryTextView.requestFocus(direction, previouslyFocusedRect);
-        if (result && !isIconified()) {
-            setImeVisibility(true);
-        }
-        return result;
+        if (mClearingFocus || isIconified()) return false;
+        return mQueryTextView.requestFocus(direction, previouslyFocusedRect);
     }
 
     /** @hide */
@@ -299,6 +320,7 @@ public class SearchView extends LinearLayout {
      * @param iconified whether the search field should be iconified by default
      */
     public void setIconifiedByDefault(boolean iconified) {
+        if (mIconifiedByDefault == iconified) return;
         mIconifiedByDefault = iconified;
         updateViewsVisibility(iconified);
         setImeVisibility(!iconified);
@@ -349,8 +371,8 @@ public class SearchView extends LinearLayout {
      * button is not required.
      */
     public void setSubmitButtonEnabled(boolean enabled) {
-        mSubmitButton.setVisibility(enabled ? VISIBLE : GONE);
         mSubmitButtonEnabled = enabled;
+        updateViewsVisibility(isIconified());
     }
 
     /**
@@ -424,6 +446,7 @@ public class SearchView extends LinearLayout {
         mSearchButton.setVisibility(visCollapsed);
         mSubmitButton.setVisibility(mSubmitButtonEnabled && hasText ? visExpanded : GONE);
         mSearchEditFrame.setVisibility(visExpanded);
+        updateVoiceButton(!hasText);
     }
 
     private void setImeVisibility(boolean visible) {
@@ -458,6 +481,8 @@ public class SearchView extends LinearLayout {
                 onCloseClicked();
             } else if (v == mSubmitButton) {
                 onSubmitQuery();
+            } else if (v == mVoiceButton) {
+                onVoiceClicked();
             }
         }
     };
@@ -525,6 +550,34 @@ public class SearchView extends LinearLayout {
         }
     }
 
+    /**
+     * Update the visibility of the voice button.  There are actually two voice search modes,
+     * either of which will activate the button.
+     * @param empty whether the search query text field is empty. If it is, then the other
+     * criteria apply to make the voice button visible. Otherwise the voice button will not
+     * be visible - i.e., if the user has typed a query, remove the voice button.
+     */
+    private void updateVoiceButton(boolean empty) {
+        int visibility = View.GONE;
+        if (mSearchable != null && mSearchable.getVoiceSearchEnabled() && empty
+                && !isIconified()) {
+            Intent testIntent = null;
+            if (mSearchable.getVoiceSearchLaunchWebSearch()) {
+                testIntent = mVoiceWebSearchIntent;
+            } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
+                testIntent = mVoiceAppSearchIntent;
+            }
+            if (testIntent != null) {
+                ResolveInfo ri = getContext().getPackageManager().resolveActivity(testIntent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+                if (ri != null) {
+                    visibility = View.VISIBLE;
+                }
+            }
+        }
+        mVoiceButton.setVisibility(visibility);
+    }
+
     private final OnEditorActionListener mOnEditorActionListener = new OnEditorActionListener() {
 
         /**
@@ -542,8 +595,10 @@ public class SearchView extends LinearLayout {
         if (isSubmitButtonEnabled()) {
             mSubmitButton.setVisibility(hasText ? VISIBLE : GONE);
         }
-        if (mOnQueryChangeListener != null)
+        updateVoiceButton(!hasText);
+        if (mOnQueryChangeListener != null) {
             mOnQueryChangeListener.onQueryTextChanged(newText.toString());
+        }
     }
 
     private void onSubmitQuery() {
@@ -555,8 +610,13 @@ public class SearchView extends LinearLayout {
                     launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null, query.toString());
                     setImeVisibility(false);
                 }
+                dismissSuggestions();
             }
         }
+    }
+
+    private void dismissSuggestions() {
+        mQueryTextView.dismissDropDown();
     }
 
     private void onCloseClicked() {
@@ -564,12 +624,13 @@ public class SearchView extends LinearLayout {
             CharSequence text = mQueryTextView.getText();
             if (TextUtils.isEmpty(text)) {
                 // query field already empty, hide the keyboard and remove focus
-                mQueryTextView.clearFocus();
+                clearFocus();
                 setImeVisibility(false);
             } else {
                 mQueryTextView.setText("");
             }
             updateViewsVisibility(mIconifiedByDefault);
+            if (mIconifiedByDefault) setImeVisibility(false);
         }
     }
 
@@ -577,6 +638,29 @@ public class SearchView extends LinearLayout {
         mQueryTextView.requestFocus();
         updateViewsVisibility(false);
         setImeVisibility(true);
+    }
+
+    private void onVoiceClicked() {
+        // guard against possible race conditions
+        if (mSearchable == null) {
+            return;
+        }
+        SearchableInfo searchable = mSearchable;
+        try {
+            if (searchable.getVoiceSearchLaunchWebSearch()) {
+                Intent webSearchIntent = createVoiceWebSearchIntent(mVoiceWebSearchIntent,
+                        searchable);
+                getContext().startActivity(webSearchIntent);
+            } else if (searchable.getVoiceSearchLaunchRecognizer()) {
+                Intent appSearchIntent = createVoiceAppSearchIntent(mVoiceAppSearchIntent,
+                        searchable);
+                getContext().startActivity(appSearchIntent);
+            }
+        } catch (ActivityNotFoundException e) {
+            // Should not happen, since we check the availability of
+            // voice search before showing the button. But just in case...
+            Log.w(LOG_TAG, "Could not find voice search activity");
+        }
     }
 
     private final OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
@@ -590,6 +674,7 @@ public class SearchView extends LinearLayout {
             if (mOnSuggestionListener == null
                     || !mOnSuggestionListener.onSuggestionClicked(position)) {
                 launchSuggestion(position, KeyEvent.KEYCODE_UNKNOWN, null);
+                dismissSuggestions();
             }
         }
     };
@@ -739,6 +824,79 @@ public class SearchView extends LinearLayout {
         }
         intent.setComponent(mSearchable.getSearchActivity());
         return intent;
+    }
+
+    /**
+     * Create and return an Intent that can launch the voice search activity for web search.
+     */
+    private Intent createVoiceWebSearchIntent(Intent baseIntent, SearchableInfo searchable) {
+        Intent voiceIntent = new Intent(baseIntent);
+        ComponentName searchActivity = searchable.getSearchActivity();
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, searchActivity == null ? null
+                : searchActivity.flattenToShortString());
+        return voiceIntent;
+    }
+
+    /**
+     * Create and return an Intent that can launch the voice search activity, perform a specific
+     * voice transcription, and forward the results to the searchable activity.
+     *
+     * @param baseIntent The voice app search intent to start from
+     * @return A completely-configured intent ready to send to the voice search activity
+     */
+    private Intent createVoiceAppSearchIntent(Intent baseIntent, SearchableInfo searchable) {
+        ComponentName searchActivity = searchable.getSearchActivity();
+
+        // create the necessary intent to set up a search-and-forward operation
+        // in the voice search system.   We have to keep the bundle separate,
+        // because it becomes immutable once it enters the PendingIntent
+        Intent queryIntent = new Intent(Intent.ACTION_SEARCH);
+        queryIntent.setComponent(searchActivity);
+        PendingIntent pending = PendingIntent.getActivity(getContext(), 0, queryIntent,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        // Now set up the bundle that will be inserted into the pending intent
+        // when it's time to do the search.  We always build it here (even if empty)
+        // because the voice search activity will always need to insert "QUERY" into
+        // it anyway.
+        Bundle queryExtras = new Bundle();
+
+        // Now build the intent to launch the voice search.  Add all necessary
+        // extras to launch the voice recognizer, and then all the necessary extras
+        // to forward the results to the searchable activity
+        Intent voiceIntent = new Intent(baseIntent);
+
+        // Add all of the configuration options supplied by the searchable's metadata
+        String languageModel = RecognizerIntent.LANGUAGE_MODEL_FREE_FORM;
+        String prompt = null;
+        String language = null;
+        int maxResults = 1;
+
+        Resources resources = getResources();
+        if (searchable.getVoiceLanguageModeId() != 0) {
+            languageModel = resources.getString(searchable.getVoiceLanguageModeId());
+        }
+        if (searchable.getVoicePromptTextId() != 0) {
+            prompt = resources.getString(searchable.getVoicePromptTextId());
+        }
+        if (searchable.getVoiceLanguageId() != 0) {
+            language = resources.getString(searchable.getVoiceLanguageId());
+        }
+        if (searchable.getVoiceMaxResults() != 0) {
+            maxResults = searchable.getVoiceMaxResults();
+        }
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, languageModel);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, searchActivity == null ? null
+                : searchActivity.flattenToShortString());
+
+        // Add the values that configure forwarding the results
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT, pending);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT_BUNDLE, queryExtras);
+
+        return voiceIntent;
     }
 
     /**

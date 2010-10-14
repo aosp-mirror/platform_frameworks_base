@@ -583,6 +583,7 @@ import java.util.ArrayList;
             return false;
         case MotionEvent.ACTION_UP:
         case MotionEvent.ACTION_CANCEL:
+            super.onTouchEvent(event);
             if (mHasPerformedLongClick) {
                 mGotTouchDown = false;
                 return false;
@@ -780,9 +781,6 @@ import java.util.ArrayList;
         // webkit's drawing.
         setWillNotDraw(!inPassword);
         setBackgroundDrawable(inPassword ? mBackground : null);
-        // For non-password fields, avoid the invals from TextView's blinking
-        // cursor
-        setCursorVisible(inPassword);
     }
 
     /**

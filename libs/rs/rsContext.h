@@ -69,7 +69,7 @@ namespace renderscript {
 class Context
 {
 public:
-    Context(Device *, bool isGraphics, bool useDepth);
+    Context(Device *, const RsSurfaceConfig *sc);
     ~Context();
 
     static pthread_key_t gThreadTLSKey;
@@ -82,6 +82,7 @@ public:
         Script * mScript;
     };
     ScriptTLSStruct *mTlsStruct;
+    RsSurfaceConfig mUserSurfaceConfig;
 
     typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
 
@@ -207,6 +208,7 @@ protected:
         EGLConfig mConfig;
         EGLContext mContext;
         EGLSurface mSurface;
+        EGLSurface mSurfaceDefault;
         EGLDisplay mDisplay;
     } mEGL;
 
@@ -240,7 +242,6 @@ protected:
 
     bool mRunning;
     bool mExit;
-    bool mUseDepth;
     bool mPaused;
     RsError mError;
     const char *mErrorMsg;
@@ -274,7 +275,8 @@ protected:
 private:
     Context();
 
-    void initEGL(bool useGL2);
+    void initEGL();
+    void initGLThread();
     void deinitEGL();
 
     uint32_t runRootScript();

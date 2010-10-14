@@ -55,12 +55,26 @@ enum RsDeviceParam {
     RS_DEVICE_PARAM_COUNT
 };
 
+typedef struct {
+    uint32_t colorMin;
+    uint32_t colorPref;
+    uint32_t alphaMin;
+    uint32_t alphaPref;
+    uint32_t depthMin;
+    uint32_t depthPref;
+    uint32_t stencilMin;
+    uint32_t stencilPref;
+    uint32_t samplesMin;
+    uint32_t samplesPref;
+    float samplesQ;
+} RsSurfaceConfig;
+
 RsDevice rsDeviceCreate();
 void rsDeviceDestroy(RsDevice);
 void rsDeviceSetConfig(RsDevice, RsDeviceParam, int32_t value);
 
 RsContext rsContextCreate(RsDevice, uint32_t version);
-RsContext rsContextCreateGL(RsDevice, uint32_t version, bool useDepth);
+RsContext rsContextCreateGL(RsDevice, uint32_t version, RsSurfaceConfig sc);
 void rsContextDestroy(RsContext);
 
 uint32_t rsContextGetMessage(RsContext, void *data, size_t *receiveLen, size_t bufferLen, bool wait);
@@ -269,6 +283,7 @@ typedef struct {
     uint32_t arrayEnd;
 
 } RsScriptCall;
+
 
 #ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"

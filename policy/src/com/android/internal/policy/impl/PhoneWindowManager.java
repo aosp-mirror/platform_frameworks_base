@@ -287,6 +287,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mDeskDockIntent;
     boolean mSearchKeyPressed;
     boolean mConsumeSearchKeyUp;
+    boolean mShowMenuKey = false; // track FLAG_NEEDS_MENU_KEY on frontmost window
 
     // support for activating the lock screen while the screen is on
     boolean mAllowLockscreenWhenOn;
@@ -1123,10 +1124,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean interceptKeyBeforeDispatching(WindowState win, int action, int flags,
             int keyCode, int metaState, int repeatCount, int policyFlags) {
-        if ((policyFlags & WindowManagerPolicy.FLAG_TRUSTED) == 0) {
-            return false;
-        }
-
         final boolean keyguardOn = keyguardOn();
         final boolean down = (action == KeyEvent.ACTION_DOWN);
         final boolean canceled = ((flags & KeyEvent.FLAG_CANCELED) != 0);
@@ -1603,8 +1600,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public int finishAnimationLw() {
         int changes = 0;
-
         boolean topIsFullscreen = false;
+
+        final WindowManager.LayoutParams lp = (mTopFullscreenOpaqueWindowState != null)
+                ? mTopFullscreenOpaqueWindowState.getAttrs()
+                : null;
+
         if (mStatusBar != null) {
             if (localLOGV) Log.i(TAG, "force=" + mForceStatusBar
                     + " top=" + mTopFullscreenOpaqueWindowState);
@@ -1612,7 +1613,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                 if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
             } else if (mTopFullscreenOpaqueWindowState != null) {
-                final WindowManager.LayoutParams lp = mTopFullscreenOpaqueWindowState.getAttrs();
                 if (localLOGV) {
                     Log.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
                             + " shown frame: " + mTopFullscreenOpaqueWindowState.getShownFrameLw());
@@ -1637,10 +1637,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
-        
-        if (topIsFullscreen != mTopIsFullscreen) {
+
+        boolean topNeedsMenu = mShowMenuKey;
+        if (lp != null) {
+            topNeedsMenu = (lp.flags & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
+        }
+
+        if (DEBUG_LAYOUT) Log.v(TAG, "Top window " 
+                + (topNeedsMenu ? "needs" : "does not need")
+                + " the MENU key");
+
+        final boolean changedFullscreen = (mTopIsFullscreen != topIsFullscreen);
+        final boolean changedMenu = (topNeedsMenu != mShowMenuKey);
+
+        if (changedFullscreen || changedMenu) {
             final boolean topIsFullscreenF = topIsFullscreen;
+            final boolean topNeedsMenuF = topNeedsMenu;
+
             mTopIsFullscreen = topIsFullscreen;
+            mShowMenuKey = topNeedsMenu;
+
             mHandler.post(new Runnable() {
                     public void run() {
                         if (mStatusBarService == null) {
@@ -1654,7 +1670,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         final IStatusBarService sbs = mStatusBarService;
                         if (mStatusBarService != null) {
                             try {
-                                sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
+                                if (changedFullscreen) {
+                                    sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
+                                }
+                                if (changedMenu) {
+                                    sbs.setMenuKeyVisible(topNeedsMenuF);
+                                }
                             } catch (RemoteException e) {
                                 // This should be impossible because we're in the same process.
                                 mStatusBarService = null;
@@ -1835,9 +1856,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptKeyBeforeQueueing(long whenNanos, int keyCode, boolean down,
             int policyFlags, boolean isScreenOn) {
         int result = ACTION_PASS_TO_USER;
-        if ((policyFlags & WindowManagerPolicy.FLAG_TRUSTED) == 0) {
-            return result;
-        }
 
         if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0) {
             performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
@@ -1845,7 +1863,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final boolean isWakeKey = (policyFlags
                 & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
-        
+
+        // If the key is injected, pretend that the screen is on and don't let the
+        // device go to sleep.  This feature is mainly used for testing purposes.
+        final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
+        if (isInjected) {
+            isScreenOn = true;
+        }
+
         // If screen is off then we treat the case where the keyguard is open but hidden
         // the same as if it were open and in front.
         // This will prevent any keys other than the power button from waking the screen
@@ -1944,7 +1969,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || (handled && hungUp && keyCode == KeyEvent.KEYCODE_POWER)) {
                     mShouldTurnOffOnKeyUp = false;
                 } else {
-                    // only try to turn off the screen if we didn't already hang up
+                    // Only try to turn off the screen if we didn't already hang up.
                     mShouldTurnOffOnKeyUp = true;
                     mHandler.postDelayed(mPowerLongPress,
                             ViewConfiguration.getGlobalActionKeyTimeout());
@@ -1967,12 +1992,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (keyguardActive
                             || (sleeps && !gohome)
                             || (gohome && !goHome() && sleeps)) {
-                        // they must already be on the keyguad or home screen,
-                        // go to sleep instead
-                        Log.d(TAG, "I'm tired mEndcallBehavior=0x"
-                                + Integer.toHexString(mEndcallBehavior));
-                        result &= ~ACTION_POKE_USER_ACTIVITY;
-                        result |= ACTION_GO_TO_SLEEP;
+                        // They must already be on the keyguard or home screen,
+                        // go to sleep instead unless the event was injected.
+                        if (!isInjected) {
+                            Log.d(TAG, "I'm tired mEndcallBehavior=0x"
+                                    + Integer.toHexString(mEndcallBehavior));
+                            result &= ~ACTION_POKE_USER_ACTIVITY;
+                            result |= ACTION_GO_TO_SLEEP;
+                        }
                     }
                     result &= ~ACTION_PASS_TO_USER;
                 }

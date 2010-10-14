@@ -842,31 +842,35 @@ void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
         flags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
     }
 
-    const int32_t WM_ACTION_PASS_TO_USER = 1;
-    const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
-    const int32_t WM_ACTION_GO_TO_SLEEP = 4;
+    // Policy:
+    // - Ignore untrusted events and pass them along.
+    // - Ask the window manager what to do with normal events and trusted injected events.
+    // - For normal events wake and brighten the screen if currently off or dim.
+    if ((policyFlags & POLICY_FLAG_TRUSTED)) {
+        const int32_t WM_ACTION_PASS_TO_USER = 1;
+        const int32_t WM_ACTION_POKE_USER_ACTIVITY = 2;
+        const int32_t WM_ACTION_GO_TO_SLEEP = 4;
 
-    bool isScreenOn = this->isScreenOn();
-    bool isScreenBright = this->isScreenBright();
+        bool isScreenOn = this->isScreenOn();
+        bool isScreenBright = this->isScreenBright();
 
-    JNIEnv* env = jniEnv();
-    jint wmActions = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.interceptKeyBeforeQueueing,
-            when, keyCode, action == AKEY_EVENT_ACTION_DOWN, policyFlags, isScreenOn);
-    if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
-        wmActions = 0;
-    }
-
-    if (policyFlags & POLICY_FLAG_TRUSTED) {
-        if (! isScreenOn) {
-            // Key presses and releases wake the device.
-            policyFlags |= POLICY_FLAG_WOKE_HERE;
-            flags |= AKEY_EVENT_FLAG_WOKE_HERE;
+        JNIEnv* env = jniEnv();
+        jint wmActions = env->CallIntMethod(mCallbacksObj,
+                gCallbacksClassInfo.interceptKeyBeforeQueueing,
+                when, keyCode, action == AKEY_EVENT_ACTION_DOWN, policyFlags, isScreenOn);
+        if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
+            wmActions = 0;
         }
 
-        if (! isScreenBright) {
-            // Key presses and releases brighten the screen if dimmed.
-            policyFlags |= POLICY_FLAG_BRIGHT_HERE;
+        if (!(flags & POLICY_FLAG_INJECTED)) {
+            if (!isScreenOn) {
+                policyFlags |= POLICY_FLAG_WOKE_HERE;
+                flags |= AKEY_EVENT_FLAG_WOKE_HERE;
+            }
+
+            if (!isScreenBright) {
+                policyFlags |= POLICY_FLAG_BRIGHT_HERE;
+            }
         }
 
         if (wmActions & WM_ACTION_GO_TO_SLEEP) {
@@ -876,9 +880,11 @@ void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
         if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
             android_server_PowerManagerService_userActivity(when, POWER_MANAGER_BUTTON_EVENT);
         }
-    }
 
-    if (wmActions & WM_ACTION_PASS_TO_USER) {
+        if (wmActions & WM_ACTION_PASS_TO_USER) {
+            policyFlags |= POLICY_FLAG_PASS_TO_USER;
+        }
+    } else {
         policyFlags |= POLICY_FLAG_PASS_TO_USER;
     }
 }
@@ -888,33 +894,47 @@ void NativeInputManager::interceptGenericBeforeQueueing(nsecs_t when, uint32_t& 
     LOGD("interceptGenericBeforeQueueing - when=%lld, policyFlags=0x%x", when, policyFlags);
 #endif
 
-    if (isScreenOn()) {
-        // Only dispatch events when the device is awake.
-        // Do not wake the device.
-        policyFlags |= POLICY_FLAG_PASS_TO_USER;
+    // Policy:
+    // - Ignore untrusted events and pass them along.
+    // - No special filtering for injected events required at this time.
+    // - Filter normal events based on screen state.
+    // - For normal events brighten (but do not wake) the screen if currently dim.
+    if ((policyFlags & POLICY_FLAG_TRUSTED) && !(policyFlags & POLICY_FLAG_INJECTED)) {
+        if (isScreenOn()) {
+            policyFlags |= POLICY_FLAG_PASS_TO_USER;
 
-        if ((policyFlags & POLICY_FLAG_TRUSTED) && !isScreenBright()) {
-            // Brighten the screen if dimmed.
-            policyFlags |= POLICY_FLAG_BRIGHT_HERE;
+            if (!isScreenBright()) {
+                policyFlags |= POLICY_FLAG_BRIGHT_HERE;
+            }
         }
+    } else {
+        policyFlags |= POLICY_FLAG_PASS_TO_USER;
     }
 }
 
 bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
         const KeyEvent* keyEvent, uint32_t policyFlags) {
-    JNIEnv* env = jniEnv();
+    // Policy:
+    // - Ignore untrusted events and pass them along.
+    // - Filter normal events and trusted injected events through the window manager policy to
+    //   handle the HOME key and the like.
+    if (policyFlags & POLICY_FLAG_TRUSTED) {
+        JNIEnv* env = jniEnv();
 
-    // Note: inputChannel may be null.
-    jobject inputChannelObj = getInputChannelObjLocal(env, inputChannel);
-    jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
-            gCallbacksClassInfo.interceptKeyBeforeDispatching,
-            inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
-            keyEvent->getKeyCode(), keyEvent->getMetaState(),
-            keyEvent->getRepeatCount(), policyFlags);
-    bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
+        // Note: inputChannel may be null.
+        jobject inputChannelObj = getInputChannelObjLocal(env, inputChannel);
+        jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
+                gCallbacksClassInfo.interceptKeyBeforeDispatching,
+                inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
+                keyEvent->getKeyCode(), keyEvent->getMetaState(),
+                keyEvent->getRepeatCount(), policyFlags);
+        bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
 
-    env->DeleteLocalRef(inputChannelObj);
-    return consumed && ! error;
+        env->DeleteLocalRef(inputChannelObj);
+        return consumed && ! error;
+    } else {
+        return false;
+    }
 }
 
 void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) {

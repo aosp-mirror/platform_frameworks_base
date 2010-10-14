@@ -79,6 +79,7 @@ public class TabletStatusBarService extends StatusBarService {
     View mNotificationButtons;
     View mSystemInfo;
     View mNavigationArea;
+    View mMenuButton;
 
     NotificationPanel mNotificationPanel;
     SystemPanel mSystemPanel;
@@ -205,6 +206,7 @@ public class TabletStatusBarService extends StatusBarService {
 
         // The navigation buttons
         mNavigationArea = sb.findViewById(R.id.navigationArea);
+        mMenuButton = mNavigationArea.findViewById(R.id.menu);
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -370,6 +372,8 @@ public class TabletStatusBarService extends StatusBarService {
                 if (contentIntent != null) {
                     oldEntry.content.setOnClickListener(new NotificationClicker(contentIntent,
                                 notification.pkg, notification.tag, notification.id));
+                } else {
+                    oldEntry.content.setOnClickListener(null);
                 }
                 // Update the icon.
                 final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
@@ -501,6 +505,15 @@ public class TabletStatusBarService extends StatusBarService {
             setViewVisibility(mCurtains, View.VISIBLE, R.anim.lights_out_in);
             setViewVisibility(mBarContents, View.GONE, R.anim.status_bar_out);
         }
+    }
+
+    public void setMenuKeyVisible(boolean visible) {
+        if (DEBUG) {
+            Slog.d(TAG, (visible?"showing":"hiding") + " the MENU button");
+        }
+        setViewVisibility(mMenuButton,
+                visible ? View.VISIBLE : View.INVISIBLE,
+                visible ? R.anim.navigation_in : R.anim.navigation_out);
     }
 
     private void setAreThereNotifications() {
@@ -760,6 +773,8 @@ public class TabletStatusBarService extends StatusBarService {
         if (contentIntent != null) {
             content.setOnClickListener(new NotificationClicker(contentIntent,
                         sbn.pkg, sbn.tag, sbn.id));
+        } else {
+            content.setOnClickListener(null);
         }
 
         View expanded = null;

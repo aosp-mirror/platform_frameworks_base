@@ -72,15 +72,16 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
         mCommandQueue = new CommandQueue(this, iconList);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        boolean[] lightsOn = new boolean[1];
+        boolean[] switches = new boolean[2];
         try {
             mBarService.registerStatusBar(mCommandQueue, iconList, notificationKeys, notifications,
-                    lightsOn);
+                    switches);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
 
-        setLightsOn(lightsOn[0]);
+        setLightsOn(switches[0]);
+        setMenuKeyVisible(switches[1]);
 
         // Set up the initial icon state
         int N = iconList.size();
@@ -120,7 +121,11 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
         // TODO lp.windowAnimations = R.style.Animation_StatusBar;
         WindowManagerImpl.getDefault().addView(sb, lp);
 
-        Slog.d(TAG, "Added status bar view w/ gravity 0x" + Integer.toHexString(lp.gravity));
+        Slog.d(TAG, "Added status bar view: gravity=0x" + Integer.toHexString(lp.gravity) 
+                    + " icons=" + iconList.size()
+                    + " lights=" + (switches[0]?"on":"off")
+                    + " menu=" + (switches[1]?"visible":"invisible")
+                    );
     }
 }
 

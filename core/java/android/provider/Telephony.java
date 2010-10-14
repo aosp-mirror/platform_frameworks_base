@@ -1215,9 +1215,8 @@ public final class Telephony {
             }
 
             Uri uri = uriBuilder.build();
-            if (DEBUG) {
-                Log.v(TAG, "getOrCreateThreadId uri: " + uri);
-            }
+            //if (DEBUG) Log.v(TAG, "getOrCreateThreadId uri: " + uri);
+
             Cursor cursor = SqliteWrapper.query(context, context.getContentResolver(),
                     uri, ID_PROJECTION, null, null, null);
             if (DEBUG) {

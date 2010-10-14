@@ -254,7 +254,6 @@ android.graphics.drawable.StateListDrawable
 android.graphics.drawable.StateListDrawable$StateListState
 android.graphics.drawable.TransitionDrawable
 android.graphics.drawable.TransitionDrawable$TransitionState
-android.graphics.utils.BoundaryPatch
 android.hardware.Camera
 android.hardware.Camera$Parameters
 android.hardware.GeomagneticField

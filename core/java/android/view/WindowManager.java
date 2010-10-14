@@ -611,6 +611,19 @@ public interface WindowManager extends ViewManager {
          * {@hide} */
         public static final int FLAG_SPLIT_TOUCH = 0x00800000;
 
+        /**
+         * Flag for a window belonging to an activity that responds to {@link KeyEvent#KEYCODE_MENU}
+         * and therefore needs a Menu key. For devices where Menu is a physical button this flag is
+         * ignored, but on devices where the Menu key is drawn in software it may be hidden unless
+         * this flag is set.
+         *
+         * (Note that Action Bars, when available, are the preferred way to offer additional
+         * functions otherwise accessed via an options menu.)
+         *
+         * {@hide}
+         */
+        public static final int FLAG_NEEDS_MENU_KEY = 0x01000000;
+
         /** Window flag: *sigh* The lock screen wants to continue running its
          * animation while it is fading.  A kind-of hack to allow this.  Maybe
          * in the future we just make this the default behavior.

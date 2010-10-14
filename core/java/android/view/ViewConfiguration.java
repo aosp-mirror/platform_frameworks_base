@@ -37,7 +37,11 @@ public class ViewConfiguration {
      * @hide
      */
     public static final float ALPHA_THRESHOLD = 0.5f / PANEL_BIT_DEPTH;
-    
+    /**
+     * @hide
+     */
+    public static final float ALPHA_THRESHOLD_INT = 0x7f / PANEL_BIT_DEPTH;
+
     /**
      * Defines the width of the horizontal scrollbar and the height of the vertical scrollbar in
      * pixels

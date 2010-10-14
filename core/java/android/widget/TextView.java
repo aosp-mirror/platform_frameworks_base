@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.view.ViewConfiguration;
 import com.android.internal.util.FastMath;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -97,6 +98,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.view.ViewRoot;
@@ -3954,6 +3956,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return;
+
         restartMarqueeIfNeeded();
 
         // Draw the background for this view
@@ -6943,8 +6947,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void prepareCursorControllers() {
+        boolean windowSupportsHandles = false;
+
+        ViewGroup.LayoutParams params = getRootView().getLayoutParams();
+        if (params instanceof WindowManager.LayoutParams) {
+            WindowManager.LayoutParams windowParams = (WindowManager.LayoutParams) params;
+            windowSupportsHandles = windowParams.type < WindowManager.LayoutParams.FIRST_SUB_WINDOW
+                    || windowParams.type > WindowManager.LayoutParams.LAST_SUB_WINDOW;
+        }
+
         // TODO Add an extra android:cursorController flag to disable the controller?
-        if (mCursorVisible && mLayout != null) {
+        if (windowSupportsHandles && mCursorVisible && mLayout != null) {
             if (mInsertionPointCursorController == null) {
                 mInsertionPointCursorController = new InsertionPointCursorController();
             }
@@ -6952,7 +6965,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mInsertionPointCursorController = null;
         }
 
-        if (textCanBeSelected() && mLayout != null) {
+        if (windowSupportsHandles && textCanBeSelected() && mLayout != null) {
             if (mSelectionModifierCursorController == null) {
                 mSelectionModifierCursorController = new SelectionModifierCursorController();
             }
@@ -7047,6 +7060,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected float getLeftFadingEdgeStrength() {
+        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return 0.0f;
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
@@ -7073,6 +7087,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected float getRightFadingEdgeStrength() {
+        if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return 0.0f;
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (mMarquee != null && !mMarquee.isStopped()) {
                 final Marquee marquee = mMarquee;
@@ -7708,28 +7723,36 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (canSelectText()) {
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                     setIcon(com.android.internal.R.drawable.ic_menu_select_all).
-                    setAlphabeticShortcut('a');
+                    setAlphabeticShortcut('a').
+                    setShowAsAction(
+                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
                 atLeastOne = true;
             }
 
             if (canCut()) {
                 menu.add(0, ID_CUT, 0, com.android.internal.R.string.cut).
                     setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModeCutDrawable, 0)).
-                    setAlphabeticShortcut('x');
+                    setAlphabeticShortcut('x').
+                    setShowAsAction(
+                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
                 atLeastOne = true;
             }
 
             if (canCopy()) {
                 menu.add(0, ID_COPY, 0, com.android.internal.R.string.copy).
                     setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModeCopyDrawable, 0)).
-                    setAlphabeticShortcut('c');
+                    setAlphabeticShortcut('c').
+                    setShowAsAction(
+                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
                 atLeastOne = true;
             }
 
             if (canPaste()) {
                 menu.add(0, ID_PASTE, 0, com.android.internal.R.string.paste).
                         setIcon(styledAttributes.getResourceId(R.styleable.Theme_actionModePasteDrawable, 0)).
-                        setAlphabeticShortcut('v');
+                        setAlphabeticShortcut('v').
+                        setShowAsAction(
+                                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
                 atLeastOne = true;
             }
 

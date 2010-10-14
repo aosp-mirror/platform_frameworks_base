@@ -144,6 +144,7 @@
                 android:paddingLeft="4dip"
                 android:paddingRight="4dip"
                 systemui:keyCode="82"
+                android:visibility="invisible"
                 />
             <ImageButton android:id="@+id/recent"
                 android:layout_width="wrap_content"

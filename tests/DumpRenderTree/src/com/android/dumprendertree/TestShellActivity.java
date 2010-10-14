@@ -66,7 +66,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static enum DumpDataType {DUMP_AS_TEXT, EXT_REPR, NO_OP}
 
     // String constants for use with layoutTestController.overridePreferences
-    private final String WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED = "WebKitOfflineWebApplicationCacheEnabled";
+    private final String WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED =
+            "WebKitOfflineWebApplicationCacheEnabled";
+    private final String WEBKIT_USES_PAGE_CACHE_PREFERENCE_KEY = "WebKitUsesPageCachePreferenceKey";
 
     public class AsyncHandler extends Handler {
         @Override
@@ -524,8 +526,14 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         // called the layoutTestController method. Currently, we just use the
         // WebView for the main frame. EventSender suffers from the same
         // problem.
-        if (key.equals(WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED)) {
+        if (WEBKIT_OFFLINE_WEB_APPLICATION_CACHE_ENABLED.equals(key)) {
             mWebView.getSettings().setAppCacheEnabled(value);
+        } else if (WEBKIT_USES_PAGE_CACHE_PREFERENCE_KEY.equals(key)) {
+            // Cache the maximum possible number of pages.
+            mWebView.getSettings().setPageCacheCapacity(Integer.MAX_VALUE);
+        } else {
+            Log.w(LOGTAG, "LayoutTestController.overridePreference(): " +
+                  "Unsupported preference '" + key + "'");
         }
     }
 
@@ -879,6 +887,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         settings.setDomStorageEnabled(true);
         settings.setWorkersEnabled(false);
         settings.setXSSAuditorEnabled(false);
+        settings.setPageCacheCapacity(0);
     }
 
     private WebView mWebView;

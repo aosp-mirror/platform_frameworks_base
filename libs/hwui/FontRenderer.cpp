@@ -482,9 +482,9 @@ void FontRenderer::initVertexArrayBuffers() {
     }
 
     glGenBuffers(1, &mIndexBufferID);
-    glBindBuffer(GL_ARRAY_BUFFER, mIndexBufferID);
-    glBufferData(GL_ARRAY_BUFFER, indexBufferSizeBytes, indexBufferData, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferID);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSizeBytes, indexBufferData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     free(indexBufferData);
 

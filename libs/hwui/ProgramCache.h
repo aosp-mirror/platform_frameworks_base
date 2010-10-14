@@ -135,7 +135,7 @@ struct ProgramDescription {
     GLenum bitmapWrapT;
 
     // Color operations
-    int colorOp;
+    ColorModifier colorOp;
     SkXfermode::Mode colorMode;
 
     // Framebuffer blending (requires Extensions.hasFramebufferFetch())

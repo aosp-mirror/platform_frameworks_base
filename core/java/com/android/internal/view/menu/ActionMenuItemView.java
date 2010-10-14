@@ -21,13 +21,13 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 /**
  * @hide
  */
-public class ActionMenuItemView extends FrameLayout
+public class ActionMenuItemView extends LinearLayout
         implements MenuView.ItemView, View.OnClickListener {
     private static final String TAG = "ActionMenuItemView";
 
@@ -65,8 +65,6 @@ public class ActionMenuItemView extends FrameLayout
     public void initialize(MenuItemImpl itemData, int menuType) {
         mItemData = itemData;
 
-        setClickable(true);
-        setFocusable(true);
         setIcon(itemData.getIcon());
         setTitle(itemData.getTitle()); // Title only takes effect if there is no icon
         setId(itemData.getItemId());
@@ -128,7 +126,7 @@ public class ActionMenuItemView extends FrameLayout
         // populate accessibility description with title
         setContentDescription(title);
 
-        if (mImageButton.getDrawable() == null) {
+        if (mImageButton.getDrawable() == null || mItemData.showsTextAsAction()) {
             mTextButton.setText(mTitle);
             mTextButton.setVisibility(VISIBLE);
         }

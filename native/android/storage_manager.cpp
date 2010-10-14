@@ -21,10 +21,13 @@
 
 #include <binder/Binder.h>
 #include <binder/IServiceManager.h>
+#include <utils/Atomic.h>
 #include <utils/Log.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>
 #include <utils/String16.h>
+#include <utils/Vector.h>
+#include <utils/threads.h>
 
 
 using namespace android;
@@ -38,20 +41,46 @@ public:
             mStorageManager(mgr)
     {}
 
-    virtual void onObbResult(const android::String16& filename, const android::String16& state);
+    virtual void onObbResult(const android::String16& filename, const int32_t nonce,
+            const int32_t state);
+};
+
+class ObbCallback {
+public:
+    ObbCallback(int32_t _nonce, AStorageManager_obbCallbackFunc _cb, void* _data)
+            : nonce(_nonce)
+            , cb(_cb)
+            , data(_data)
+    {}
+
+    int32_t nonce;
+    AStorageManager_obbCallbackFunc cb;
+    void* data;
 };
 
 struct AStorageManager : public RefBase {
 protected:
-    AStorageManager_obbCallbackFunc mObbCallback;
-    void* mObbCallbackData;
+    Mutex mCallbackLock;
+    Vector<ObbCallback*> mCallbacks;
+    volatile int32_t mNextNonce;
     sp<ObbActionListener> mObbActionListener;
     sp<IMountService> mMountService;
 
+    int32_t getNextNonce() {
+        return android_atomic_inc(&mNextNonce);
+    }
+
+    ObbCallback* registerObbCallback(AStorageManager_obbCallbackFunc func, void* data) {
+        ObbCallback* cb = new ObbCallback(getNextNonce(), func, data);
+        {
+            AutoMutex _l(mCallbackLock);
+            mCallbacks.push(cb);
+        }
+        return cb;
+    }
+
 public:
     AStorageManager()
-            : mObbCallback(NULL)
-            , mObbCallbackData(NULL)
     {
     }
 
@@ -73,26 +102,40 @@ public:
         return true;
     }
 
-    void setObbCallback(AStorageManager_obbCallbackFunc cb, void* data) {
-        mObbCallback = cb;
-        mObbCallbackData = data;
-    }
+    void fireCallback(const char* filename, const int32_t nonce, const int32_t state) {
+        ObbCallback* target = NULL;
+        {
+            AutoMutex _l(mCallbackLock);
+            int N = mCallbacks.size();
+            for (int i = 0; i < N; i++) {
+                ObbCallback* cb = mCallbacks.editItemAt(i);
+                if (cb->nonce == nonce) {
+                    target = cb;
+                    mCallbacks.removeAt(i);
+                    break;
+                }
+            }
+        }
 
-    void fireCallback(const char* filename, const char* state) {
-        if (mObbCallback != NULL) {
-            mObbCallback(filename, state, mObbCallbackData);
+        if (target != NULL) {
+            target->cb(filename, state, target->data);
+            delete target;
+        } else {
+            LOGI("Didn't find the callback handler for: %s\n", filename);
         }
     }
 
-    void mountObb(const char* filename, const char* key) {
+    void mountObb(const char* filename, const char* key, AStorageManager_obbCallbackFunc func, void* data) {
+        ObbCallback* cb = registerObbCallback(func, data);
         String16 filename16(filename);
         String16 key16(key);
-        mMountService->mountObb(filename16, key16, mObbActionListener);
+        mMountService->mountObb(filename16, key16, mObbActionListener, cb->nonce);
     }
 
-    void unmountObb(const char* filename, const bool force) {
+    void unmountObb(const char* filename, const bool force, AStorageManager_obbCallbackFunc func, void* data) {
+        ObbCallback* cb = registerObbCallback(func, data);
         String16 filename16(filename);
-        mMountService->unmountObb(filename16, force, mObbActionListener);
+        mMountService->unmountObb(filename16, force, mObbActionListener, cb->nonce);
     }
 
     int isObbMounted(const char* filename) {
@@ -111,8 +154,8 @@ public:
     }
 };
 
-void ObbActionListener::onObbResult(const android::String16& filename, const android::String16& state) {
-    mStorageManager->fireCallback(String8(filename).string(), String8(state).string());
+void ObbActionListener::onObbResult(const android::String16& filename, const int32_t nonce, const int32_t state) {
+    mStorageManager->fireCallback(String8(filename).string(), nonce, state);
 }
 
 
@@ -131,16 +174,14 @@ void AStorageManager_delete(AStorageManager* mgr) {
     }
 }
 
-void AStorageManager_setObbCallback(AStorageManager* mgr, AStorageManager_obbCallbackFunc cb, void* data) {
-    mgr->setObbCallback(cb, data);
+void AStorageManager_mountObb(AStorageManager* mgr, const char* filename, const char* key,
+        AStorageManager_obbCallbackFunc cb, void* data) {
+    mgr->mountObb(filename, key, cb, data);
 }
 
-void AStorageManager_mountObb(AStorageManager* mgr, const char* filename, const char* key) {
-    mgr->mountObb(filename, key);
-}
-
-void AStorageManager_unmountObb(AStorageManager* mgr, const char* filename, const int force) {
-    mgr->unmountObb(filename, force != 0);
+void AStorageManager_unmountObb(AStorageManager* mgr, const char* filename, const int force,
+        AStorageManager_obbCallbackFunc cb, void* data) {
+    mgr->unmountObb(filename, force != 0, cb, data);
 }
 
 int AStorageManager_isObbMounted(AStorageManager* mgr, const char* filename) {

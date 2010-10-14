@@ -141,9 +141,7 @@ class PowerManagerService extends IPowerManager.Stub
     // used for noChangeLights in setPowerState()
     private static final int LIGHTS_MASK        = SCREEN_BRIGHT_BIT | BUTTON_BRIGHT_BIT | KEYBOARD_BRIGHT_BIT;
 
-    static final boolean ANIMATE_SCREEN_LIGHTS = true;
-    static final boolean ANIMATE_BUTTON_LIGHTS = false;
-    static final boolean ANIMATE_KEYBOARD_LIGHTS = false;
+    boolean mAnimateScreenLights = true;
 
     static final int ANIM_STEPS = 60/4;
     // Slower animation for autobrightness changes
@@ -201,15 +199,12 @@ class PowerManagerService extends IPowerManager.Stub
     private UnsynchronizedWakeLock mPreventScreenOnPartialLock;
     private UnsynchronizedWakeLock mProximityPartialLock;
     private HandlerThread mHandlerThread;
+    private HandlerThread mScreenOffThread;
+    private Handler mScreenOffHandler;
     private Handler mHandler;
     private final TimeoutTask mTimeoutTask = new TimeoutTask();
-    private final LightAnimator mLightAnimator = new LightAnimator();
     private final BrightnessState mScreenBrightness
             = new BrightnessState(SCREEN_BRIGHT_BIT);
-    private final BrightnessState mKeyboardBrightness
-            = new BrightnessState(KEYBOARD_BRIGHT_BIT);
-    private final BrightnessState mButtonBrightness
-            = new BrightnessState(BUTTON_BRIGHT_BIT);
     private boolean mStillNeedSleepNotification;
     private boolean mIsPowered = false;
     private IActivityManager mActivityService;
@@ -261,6 +256,7 @@ class PowerManagerService extends IPowerManager.Stub
     
     private native void nativeInit();
     private native void nativeSetPowerState(boolean screenOn, boolean screenBright);
+    private native void nativeStartSurfaceFlingerAnimation();
 
     /*
     static PrintStream mLog;
@@ -485,6 +481,35 @@ class PowerManagerService extends IPowerManager.Stub
         mKeyboardLight = lights.getLight(LightsService.LIGHT_ID_KEYBOARD);
         mAttentionLight = lights.getLight(LightsService.LIGHT_ID_ATTENTION);
 
+        nativeInit();
+        synchronized (mLocks) {
+            updateNativePowerStateLocked();
+        }
+
+        mInitComplete = false;
+        mScreenOffThread = new HandlerThread("PowerManagerService.mScreenOffThread") {
+            @Override
+            protected void onLooperPrepared() {
+                mScreenOffHandler = new Handler();
+                synchronized (mScreenOffThread) {
+                    mInitComplete = true;
+                    mScreenOffThread.notifyAll();
+                }
+            }
+        };
+        mScreenOffThread.start();
+
+        synchronized (mScreenOffThread) {
+            while (!mInitComplete) {
+                try {
+                    mScreenOffThread.wait();
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+            }
+        }
+        
+        mInitComplete = false;
         mHandlerThread = new HandlerThread("PowerManagerService") {
             @Override
             protected void onLooperPrepared() {
@@ -530,6 +555,9 @@ class PowerManagerService extends IPowerManager.Stub
         mScreenOffIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
         Resources resources = mContext.getResources();
+
+        mAnimateScreenLights = resources.getBoolean(
+                com.android.internal.R.bool.config_animateScreenLights);
 
         mUnplugTurnsOnScreen = resources.getBoolean(
                 com.android.internal.R.bool.config_unplugTurnsOnScreen);
@@ -1093,8 +1121,6 @@ class PowerManagerService extends IPowerManager.Stub
             pw.println("  mUseSoftwareAutoBrightness=" + mUseSoftwareAutoBrightness);
             pw.println("  mAutoBrightessEnabled=" + mAutoBrightessEnabled);
             mScreenBrightness.dump(pw, "  mScreenBrightness: ");
-            mKeyboardBrightness.dump(pw, "  mKeyboardBrightness: ");
-            mButtonBrightness.dump(pw, "  mButtonBrightness: ");
 
             int N = mLocks.size();
             pw.println();
@@ -1724,7 +1750,8 @@ class PowerManagerService extends IPowerManager.Stub
         // I don't think we need to check the current state here because all of these
         // Power.setScreenState and sendNotificationLocked can both handle being
         // called multiple times in the same state. -joeo
-        EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, reason, mTotalTouchDownTime, mTouchCycles);
+        EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 0, reason, mTotalTouchDownTime,
+                mTouchCycles);
         mLastTouchDown = 0;
         int err = setScreenStateLocked(false);
         if (err == 0) {
@@ -1754,145 +1781,95 @@ class PowerManagerService extends IPowerManager.Stub
         int onMask = 0;
 
         int preferredBrightness = getPreferredBrightness();
-        boolean startAnimation = false;
 
         if ((difference & KEYBOARD_BRIGHT_BIT) != 0) {
-            if (ANIMATE_KEYBOARD_LIGHTS) {
-                if ((newState & KEYBOARD_BRIGHT_BIT) == 0) {
-                    mKeyboardBrightness.setTargetLocked(Power.BRIGHTNESS_OFF,
-                            ANIM_STEPS, INITIAL_KEYBOARD_BRIGHTNESS,
-                            Power.BRIGHTNESS_ON);
-                } else {
-                    mKeyboardBrightness.setTargetLocked(Power.BRIGHTNESS_ON,
-                            ANIM_STEPS, INITIAL_KEYBOARD_BRIGHTNESS,
-                            Power.BRIGHTNESS_OFF);
-                }
-                startAnimation = true;
+            if ((newState & KEYBOARD_BRIGHT_BIT) == 0) {
+                offMask |= KEYBOARD_BRIGHT_BIT;
             } else {
-                if ((newState & KEYBOARD_BRIGHT_BIT) == 0) {
-                    offMask |= KEYBOARD_BRIGHT_BIT;
-                } else {
-                    onMask |= KEYBOARD_BRIGHT_BIT;
-                }
+                onMask |= KEYBOARD_BRIGHT_BIT;
             }
         }
 
         if ((difference & BUTTON_BRIGHT_BIT) != 0) {
-            if (ANIMATE_BUTTON_LIGHTS) {
-                if ((newState & BUTTON_BRIGHT_BIT) == 0) {
-                    mButtonBrightness.setTargetLocked(Power.BRIGHTNESS_OFF,
-                            ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
-                            Power.BRIGHTNESS_ON);
-                } else {
-                    mButtonBrightness.setTargetLocked(Power.BRIGHTNESS_ON,
-                            ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
-                            Power.BRIGHTNESS_OFF);
-                }
-                startAnimation = true;
+            if ((newState & BUTTON_BRIGHT_BIT) == 0) {
+                offMask |= BUTTON_BRIGHT_BIT;
             } else {
-                if ((newState & BUTTON_BRIGHT_BIT) == 0) {
-                    offMask |= BUTTON_BRIGHT_BIT;
-                } else {
-                    onMask |= BUTTON_BRIGHT_BIT;
-                }
+                onMask |= BUTTON_BRIGHT_BIT;
             }
         }
 
         if ((difference & (SCREEN_ON_BIT | SCREEN_BRIGHT_BIT)) != 0) {
-            if (ANIMATE_SCREEN_LIGHTS) {
-                int nominalCurrentValue = -1;
-                // If there was an actual difference in the light state, then
-                // figure out the "ideal" current value based on the previous
-                // state.  Otherwise, this is a change due to the brightness
-                // override, so we want to animate from whatever the current
-                // value is.
-                if ((realDifference & (SCREEN_ON_BIT | SCREEN_BRIGHT_BIT)) != 0) {
-                    switch (oldState & (SCREEN_BRIGHT_BIT|SCREEN_ON_BIT)) {
-                        case SCREEN_BRIGHT_BIT | SCREEN_ON_BIT:
-                            nominalCurrentValue = preferredBrightness;
-                            break;
-                        case SCREEN_ON_BIT:
-                            nominalCurrentValue = Power.BRIGHTNESS_DIM;
-                            break;
-                        case 0:
-                            nominalCurrentValue = Power.BRIGHTNESS_OFF;
-                            break;
-                        case SCREEN_BRIGHT_BIT:
-                        default:
-                            // not possible
-                            nominalCurrentValue = (int)mScreenBrightness.curValue;
-                            break;
-                    }
+            int nominalCurrentValue = -1;
+            // If there was an actual difference in the light state, then
+            // figure out the "ideal" current value based on the previous
+            // state.  Otherwise, this is a change due to the brightness
+            // override, so we want to animate from whatever the current
+            // value is.
+            if ((realDifference & (SCREEN_ON_BIT | SCREEN_BRIGHT_BIT)) != 0) {
+                switch (oldState & (SCREEN_BRIGHT_BIT|SCREEN_ON_BIT)) {
+                    case SCREEN_BRIGHT_BIT | SCREEN_ON_BIT:
+                        nominalCurrentValue = preferredBrightness;
+                        break;
+                    case SCREEN_ON_BIT:
+                        nominalCurrentValue = Power.BRIGHTNESS_DIM;
+                        break;
+                    case 0:
+                        nominalCurrentValue = Power.BRIGHTNESS_OFF;
+                        break;
+                    case SCREEN_BRIGHT_BIT:
+                    default:
+                        // not possible
+                        nominalCurrentValue = (int)mScreenBrightness.curValue;
+                        break;
                 }
-                int brightness = preferredBrightness;
-                int steps = ANIM_STEPS;
-                if ((newState & SCREEN_BRIGHT_BIT) == 0) {
-                    // dim or turn off backlight, depending on if the screen is on
-                    // the scale is because the brightness ramp isn't linear and this biases
-                    // it so the later parts take longer.
-                    final float scale = 1.5f;
-                    float ratio = (((float)Power.BRIGHTNESS_DIM)/preferredBrightness);
-                    if (ratio > 1.0f) ratio = 1.0f;
-                    if ((newState & SCREEN_ON_BIT) == 0) {
-                        if ((oldState & SCREEN_BRIGHT_BIT) != 0) {
-                            // was bright
-                            steps = ANIM_STEPS;
-                        } else {
-                            // was dim
-                            steps = (int)(ANIM_STEPS*ratio*scale);
-                        }
-                        brightness = Power.BRIGHTNESS_OFF;
+            }
+            int brightness = preferredBrightness;
+            int steps = ANIM_STEPS;
+            if ((newState & SCREEN_BRIGHT_BIT) == 0) {
+                // dim or turn off backlight, depending on if the screen is on
+                // the scale is because the brightness ramp isn't linear and this biases
+                // it so the later parts take longer.
+                final float scale = 1.5f;
+                float ratio = (((float)Power.BRIGHTNESS_DIM)/preferredBrightness);
+                if (ratio > 1.0f) ratio = 1.0f;
+                if ((newState & SCREEN_ON_BIT) == 0) {
+                    if ((oldState & SCREEN_BRIGHT_BIT) != 0) {
+                        // was bright
+                        steps = ANIM_STEPS;
                     } else {
-                        if ((oldState & SCREEN_ON_BIT) != 0) {
-                            // was bright
-                            steps = (int)(ANIM_STEPS*(1.0f-ratio)*scale);
-                        } else {
-                            // was dim
-                            steps = (int)(ANIM_STEPS*ratio);
-                        }
-                        if (mStayOnConditions != 0 && mBatteryService.isPowered(mStayOnConditions)) {
-                            // If the "stay on while plugged in" option is
-                            // turned on, then the screen will often not
-                            // automatically turn off while plugged in.  To
-                            // still have a sense of when it is inactive, we
-                            // will then count going dim as turning off.
-                            mScreenOffTime = SystemClock.elapsedRealtime();
-                        }
-                        brightness = Power.BRIGHTNESS_DIM;
+                        // was dim
+                        steps = (int)(ANIM_STEPS*ratio*scale);
                     }
-                }
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    mBatteryStats.noteScreenBrightness(brightness);
-                } catch (RemoteException e) {
-                    // Nothing interesting to do.
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-                if (mScreenBrightness.setTargetLocked(brightness,
-                        steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue)) {
-                    startAnimation = true;
-                }
-            } else {
-                if ((newState & SCREEN_BRIGHT_BIT) == 0) {
-                    // dim or turn off backlight, depending on if the screen is on
-                    if ((newState & SCREEN_ON_BIT) == 0) {
-                        offMask |= SCREEN_BRIGHT_BIT;
-                    } else {
-                        dimMask |= SCREEN_BRIGHT_BIT;
-                    }
+                    brightness = Power.BRIGHTNESS_OFF;
                 } else {
-                    onMask |= SCREEN_BRIGHT_BIT;
+                    if ((oldState & SCREEN_ON_BIT) != 0) {
+                        // was bright
+                        steps = (int)(ANIM_STEPS*(1.0f-ratio)*scale);
+                    } else {
+                        // was dim
+                        steps = (int)(ANIM_STEPS*ratio);
+                    }
+                    if (mStayOnConditions != 0 && mBatteryService.isPowered(mStayOnConditions)) {
+                        // If the "stay on while plugged in" option is
+                        // turned on, then the screen will often not
+                        // automatically turn off while plugged in.  To
+                        // still have a sense of when it is inactive, we
+                        // will then count going dim as turning off.
+                        mScreenOffTime = SystemClock.elapsedRealtime();
+                    }
+                    brightness = Power.BRIGHTNESS_DIM;
                 }
             }
-        }
-
-        if (startAnimation) {
-            if (mSpew) {
-                Slog.i(TAG, "Scheduling light animator!");
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mBatteryStats.noteScreenBrightness(brightness);
+            } catch (RemoteException e) {
+                // Nothing interesting to do.
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
-            mHandler.removeCallbacks(mLightAnimator);
-            mHandler.post(mLightAnimator);
+            mScreenBrightness.setTargetLocked(brightness, steps,
+                    INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
         }
 
         if (offMask != 0) {
@@ -1934,7 +1911,7 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    class BrightnessState {
+    class BrightnessState implements Runnable {
         final int mask;
 
         boolean initialized;
@@ -1954,13 +1931,13 @@ class PowerManagerService extends IPowerManager.Stub
                     + " delta=" + delta);
         }
 
-        boolean setTargetLocked(int target, int stepsToTarget, int initialValue,
+        void setTargetLocked(int target, int stepsToTarget, int initialValue,
                 int nominalCurrentValue) {
             if (!initialized) {
                 initialized = true;
                 curValue = (float)initialValue;
             } else if (targetValue == target) {
-                return false;
+                return;
             }
             targetValue = target;
             delta = (targetValue -
@@ -1974,7 +1951,12 @@ class PowerManagerService extends IPowerManager.Stub
                         + noticeMe);
             }
             animating = true;
-            return true;
+
+            if (mSpew) {
+                Slog.i(TAG, "scheduling light animator");
+            }
+            mScreenOffHandler.removeCallbacks(this);
+            mScreenOffHandler.post(this);
         }
 
         boolean stepLocked() {
@@ -2000,32 +1982,50 @@ class PowerManagerService extends IPowerManager.Stub
                     more = false;
                 }
             }
-            //Slog.i(TAG, "Animating brightess " + curIntValue + ": " + mask);
+            if (mSpew) Slog.d(TAG, "Animating curIntValue=" + curIntValue + ": " + mask);
             setLightBrightness(mask, curIntValue);
+            finishAnimation(more, curIntValue);
+            return more;
+        }
+
+        void jumpToTarget() {
+            if (mSpew) Slog.d(TAG, "jumpToTarget targetValue=" + targetValue + ": " + mask);
+            setLightBrightness(mask, targetValue);
+            final int tv = targetValue;
+            curValue = tv;
+            targetValue = -1;
+            finishAnimation(false, tv);
+        }
+
+        private void finishAnimation(boolean more, int curIntValue) {
             animating = more;
             if (!more) {
                 if (mask == SCREEN_BRIGHT_BIT && curIntValue == Power.BRIGHTNESS_OFF) {
                     screenOffFinishedAnimatingLocked(mScreenOffReason);
                 }
             }
-            return more;
         }
-    }
 
-    private class LightAnimator implements Runnable {
         public void run() {
-            synchronized (mLocks) {
-                long now = SystemClock.uptimeMillis();
-                boolean more = mScreenBrightness.stepLocked();
-                if (mKeyboardBrightness.stepLocked()) {
-                    more = true;
+            if (mAnimateScreenLights) {
+                synchronized (mLocks) {
+                    long now = SystemClock.uptimeMillis();
+                    boolean more = mScreenBrightness.stepLocked();
+                    if (more) {
+                        mScreenOffHandler.postAtTime(this, now+(1000/60));
+                    }
                 }
-                if (mButtonBrightness.stepLocked()) {
-                    more = true;
+            } else {
+                boolean animate;
+                boolean jump;
+                synchronized (mLocks) {
+                    jump = animating; // we haven't already run this animation
+                    animate = jump && targetValue == Power.BRIGHTNESS_OFF; // we're turning off
                 }
-                if (more) {
-                    mHandler.postAtTime(mLightAnimator, now+(1000/60));
+                if (animate) {
+                    nativeStartSurfaceFlingerAnimation();
                 }
+                mScreenBrightness.jumpToTarget();
             }
         }
     }
@@ -2343,49 +2343,15 @@ class PowerManagerService extends IPowerManager.Stub
                     Slog.d(TAG, "keyboardValue " + keyboardValue);
                 }
 
-                boolean startAnimation = false;
                 if (mAutoBrightessEnabled && mScreenBrightnessOverride < 0) {
-                    if (ANIMATE_SCREEN_LIGHTS) {
-                        if (mScreenBrightness.setTargetLocked(lcdValue,
-                                AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_SCREEN_BRIGHTNESS,
-                                (int)mScreenBrightness.curValue)) {
-                            startAnimation = true;
-                        }
-                    } else {
-                        int brightnessMode = (mAutoBrightessEnabled
-                                            ? LightsService.BRIGHTNESS_MODE_SENSOR
-                                            : LightsService.BRIGHTNESS_MODE_USER);
-                        mLcdLight.setBrightness(lcdValue, brightnessMode);
-                    }
+                    mScreenBrightness.setTargetLocked(lcdValue, AUTOBRIGHTNESS_ANIM_STEPS,
+                            INITIAL_SCREEN_BRIGHTNESS, (int)mScreenBrightness.curValue);
                 }
                 if (mButtonBrightnessOverride < 0) {
-                    if (ANIMATE_BUTTON_LIGHTS) {
-                        if (mButtonBrightness.setTargetLocked(buttonValue,
-                                AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
-                                (int)mButtonBrightness.curValue)) {
-                            startAnimation = true;
-                        }
-                    } else {
-                         mButtonLight.setBrightness(buttonValue);
-                    }
+                    mButtonLight.setBrightness(buttonValue);
                 }
                 if (mButtonBrightnessOverride < 0 || !mKeyboardVisible) {
-                    if (ANIMATE_KEYBOARD_LIGHTS) {
-                        if (mKeyboardBrightness.setTargetLocked(keyboardValue,
-                                AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
-                                (int)mKeyboardBrightness.curValue)) {
-                            startAnimation = true;
-                        }
-                    } else {
-                        mKeyboardLight.setBrightness(keyboardValue);
-                    }
-                }
-                if (startAnimation) {
-                    if (mDebugLightSensor) {
-                        Slog.i(TAG, "lightSensorChangedLocked scheduling light animator");
-                    }
-                    mHandler.removeCallbacks(mLightAnimator);
-                    mHandler.post(mLightAnimator);
+                    mKeyboardLight.setBrightness(keyboardValue);
                 }
             }
         }
@@ -2754,6 +2720,7 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    // for watchdog
     public void monitor() {
         synchronized (mLocks) { }
     }
@@ -2773,34 +2740,23 @@ class PowerManagerService extends IPowerManager.Stub
     public void setBacklightBrightness(int brightness) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         // Don't let applications turn the screen all the way off
-        brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
-        mLcdLight.setBrightness(brightness);
-        mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
-        mButtonLight.setBrightness(brightness);
-        long identity = Binder.clearCallingIdentity();
-        try {
-            mBatteryStats.noteScreenBrightness(brightness);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException calling noteScreenBrightness on BatteryStatsService", e);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+        synchronized (mLocks) {
+            brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
+            mLcdLight.setBrightness(brightness);
+            mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
+            mButtonLight.setBrightness(brightness);
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mBatteryStats.noteScreenBrightness(brightness);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "RemoteException calling noteScreenBrightness on BatteryStatsService", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
 
-        // update our animation state
-        if (ANIMATE_SCREEN_LIGHTS) {
-            mScreenBrightness.curValue = brightness;
-            mScreenBrightness.animating = false;
-            mScreenBrightness.targetValue = -1;
-        }
-        if (ANIMATE_KEYBOARD_LIGHTS) {
-            mKeyboardBrightness.curValue = brightness;
-            mKeyboardBrightness.animating = false;
-            mKeyboardBrightness.targetValue = -1;
-        }
-        if (ANIMATE_BUTTON_LIGHTS) {
-            mButtonBrightness.curValue = brightness;
-            mButtonBrightness.animating = false;
-            mButtonBrightness.targetValue = -1;
+            // update our animation state
+            mScreenBrightness.targetValue = brightness;
+            mScreenBrightness.jumpToTarget();
         }
     }
 

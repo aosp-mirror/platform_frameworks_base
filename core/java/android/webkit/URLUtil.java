@@ -74,9 +74,9 @@ public final class URLUtil {
         }
 
         // Check host
-        if (webAddress.mHost.indexOf('.') == -1) {
+        if (webAddress.getHost().indexOf('.') == -1) {
             // no dot: user probably entered a bare domain.  try .com
-            webAddress.mHost = "www." + webAddress.mHost + ".com";
+            webAddress.setHost("www." + webAddress.getHost() + ".com");
         }
         return webAddress.toString();
     }

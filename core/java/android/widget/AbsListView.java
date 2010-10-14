@@ -3050,6 +3050,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         void startWithOffset(int position, int offset) {
+            startWithOffset(position, offset, SCROLL_DURATION);
+        }
+
+        void startWithOffset(int position, int offset, int duration) {
             mTargetPos = position;
             mOffsetFromTop = offset;
             mBoundPos = INVALID_POSITION;
@@ -3068,14 +3072,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } else {
                 // On-screen, just scroll.
                 final int targetTop = getChildAt(position - firstPos).getTop();
-                smoothScrollBy(targetTop - offset, SCROLL_DURATION);
+                smoothScrollBy(targetTop - offset, duration);
                 return;
             }
 
             // Estimate how many screens we should travel
             final float screenTravelCount = (float) viewTravelCount / childCount;
-            mScrollDuration = screenTravelCount < 1 ? (int) (screenTravelCount * SCROLL_DURATION) :
-                    (int) (SCROLL_DURATION / screenTravelCount);
+            mScrollDuration = screenTravelCount < 1 ? (int) (screenTravelCount * duration) :
+                    (int) (duration / screenTravelCount);
             mLastSeenPos = INVALID_POSITION;
 
             post(this);
@@ -3284,7 +3288,26 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         mPositionScroller.start(position);
     }
-    
+
+    /**
+     * Smoothly scroll to the specified adapter position. The view will scroll
+     * such that the indicated position is displayed <code>offset</code> pixels from
+     * the top edge of the view. If this is impossible, (e.g. the offset would scroll
+     * the first or last item beyond the boundaries of the list) it will get as close
+     * as possible. The scroll will take <code>duration</code> milliseconds to complete.
+     *
+     * @param position Position to scroll to
+     * @param offset Desired distance in pixels of <code>position</code> from the top
+     *               of the view when scrolling is finished
+     * @param duration Number of milliseconds to use for the scroll
+     */
+    public void smoothScrollToPositionFromTop(int position, int offset, int duration) {
+        if (mPositionScroller == null) {
+            mPositionScroller = new PositionScroller();
+        }
+        mPositionScroller.startWithOffset(position, offset, duration);
+    }
+
     /**
      * Smoothly scroll to the specified adapter position. The view will scroll
      * such that the indicated position is displayed <code>offset</code> pixels from

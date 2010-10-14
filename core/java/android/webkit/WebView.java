@@ -33,7 +33,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.DrawFilter;
-import android.graphics.Interpolator;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Picture;
@@ -48,7 +47,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.text.Selection;
@@ -93,8 +91,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -309,8 +305,6 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener {
 
-    // enable debug output for drag trackers
-    private static final boolean DEBUG_DRAG_TRACKER = false;
     // if AUTO_REDRAW_HACK is true, then the CALL key will toggle redrawing
     // the screen all-the-time. Good for profiling our drawing code
     static private final boolean AUTO_REDRAW_HACK = false;
@@ -1965,7 +1959,7 @@ public class WebView extends AbsoluteLayout
     public void clearView() {
         mContentWidth = 0;
         mContentHeight = 0;
-        if (mNativeClass != 0) nativeSetBaseLayer(0);
+        setBaseLayer(0, null);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
@@ -3464,17 +3458,7 @@ public class WebView extends AbsoluteLayout
         if (mTitleBar != null) {
             canvas.translate(0, (int) mTitleBar.getHeight());
         }
-        if (mDragTrackerHandler == null) {
-            drawContent(canvas);
-        } else {
-            if (!mDragTrackerHandler.draw(canvas)) {
-                // sometimes the tracker doesn't draw, even though its active
-                drawContent(canvas);
-            }
-            if (mDragTrackerHandler.isFinished()) {
-                mDragTrackerHandler = null;
-            }
-        }
+        drawContent(canvas);
         canvas.restoreToCount(saveCount);
 
         // Now draw the shadow.
@@ -3619,6 +3603,17 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    void setBaseLayer(int layer, Rect invalRect) {
+        if (mNativeClass == 0)
+            return;
+        if (invalRect == null) {
+            Rect rect = new Rect(0, 0, mContentWidth, mContentHeight);
+            nativeSetBaseLayer(layer, rect);
+        } else {
+            nativeSetBaseLayer(layer, invalRect);
+        }
+    }
+
     private void onZoomAnimationStart() {
         // If it is in password mode, turn it off so it does not draw misplaced.
         if (inEditingMode() && nativeFocusCandidateIsPassword()) {
@@ -3719,17 +3714,32 @@ public class WebView extends AbsoluteLayout
         } else if (drawCursorRing) {
             extras = DRAW_EXTRAS_CURSOR_RING;
         }
-        DrawFilter df = null;
-        if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
-            df = mZoomFilter;
-        } else if (animateScroll) {
-            df = mScrollFilter;
-        }
-        canvas.setDrawFilter(df);
-        int content = nativeDraw(canvas, color, extras, true);
-        canvas.setDrawFilter(null);
-        if (content != 0) {
-            mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
+
+        if (canvas.isHardwareAccelerated()) {
+            try {
+                if (canvas.acquireContext()) {
+                      Rect rect = new Rect(getLeft(), getTop(), getRight(),
+                                           getBottom() - getVisibleTitleHeight());
+                      if (nativeDrawGL(rect, getScale(), extras)) {
+                          invalidate();
+                      }
+                }
+            } finally {
+                canvas.releaseContext();
+            }
+        } else {
+            DrawFilter df = null;
+            if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
+                df = mZoomFilter;
+            } else if (animateScroll) {
+                df = mScrollFilter;
+            }
+            canvas.setDrawFilter(df);
+            int content = nativeDraw(canvas, color, extras, true);
+            canvas.setDrawFilter(null);
+            if (content != 0) {
+                mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
+            }
         }
 
         if (extras == DRAW_EXTRAS_CURSOR_RING) {
@@ -4698,207 +4708,6 @@ public class WebView extends AbsoluteLayout
     private static final float MAX_SLOPE_FOR_DIAG = 1.5f;
     private static final int MIN_BREAK_SNAP_CROSS_DISTANCE = 80;
 
-    private static int sign(float x) {
-        return x > 0 ? 1 : (x < 0 ? -1 : 0);
-    }
-
-    // if the page can scroll <= this value, we won't allow the drag tracker
-    // to have any effect.
-    private static final int MIN_SCROLL_AMOUNT_TO_DISABLE_DRAG_TRACKER = 4;
-
-    private class DragTrackerHandler {
-        private final DragTracker mProxy;
-        private final float mStartY, mStartX;
-        private final float mMinDY, mMinDX;
-        private final float mMaxDY, mMaxDX;
-        private float mCurrStretchY, mCurrStretchX;
-        private int mSX, mSY;
-        private Interpolator mInterp;
-        private float[] mXY = new float[2];
-
-        // inner (non-state) classes can't have enums :(
-        private static final int DRAGGING_STATE = 0;
-        private static final int ANIMATING_STATE = 1;
-        private static final int FINISHED_STATE = 2;
-        private int mState;
-
-        public DragTrackerHandler(float x, float y, DragTracker proxy) {
-            mProxy = proxy;
-
-            int docBottom = computeVerticalScrollRange() + getTitleHeight();
-            int viewTop = getScrollY();
-            int viewBottom = viewTop + getHeight();
-
-            mStartY = y;
-            mMinDY = -viewTop;
-            mMaxDY = docBottom - viewBottom;
-
-            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
-                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, " dragtracker y= " + y +
-                      " up/down= " + mMinDY + " " + mMaxDY);
-            }
-
-            int docRight = computeHorizontalScrollRange();
-            int viewLeft = getScrollX();
-            int viewRight = viewLeft + getWidth();
-            mStartX = x;
-            mMinDX = -viewLeft;
-            mMaxDX = docRight - viewRight;
-
-            mState = DRAGGING_STATE;
-            mProxy.onStartDrag(x, y);
-
-            // ensure we buildBitmap at least once
-            mSX = -99999;
-        }
-
-        private float computeStretch(float delta, float min, float max) {
-            float stretch = 0;
-            if (max - min > MIN_SCROLL_AMOUNT_TO_DISABLE_DRAG_TRACKER) {
-                if (delta < min) {
-                    stretch = delta - min;
-                } else if (delta > max) {
-                    stretch = delta - max;
-                }
-            }
-            return stretch;
-        }
-
-        public void dragTo(float x, float y) {
-            float sy = computeStretch(mStartY - y, mMinDY, mMaxDY);
-            float sx = computeStretch(mStartX - x, mMinDX, mMaxDX);
-
-            if ((mSnapScrollMode & SNAP_X) != 0) {
-                sy = 0;
-            } else if ((mSnapScrollMode & SNAP_Y) != 0) {
-                sx = 0;
-            }
-
-            if (mCurrStretchX != sx || mCurrStretchY != sy) {
-                mCurrStretchX = sx;
-                mCurrStretchY = sy;
-                if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
-                    Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "---- stretch " + sx +
-                          " " + sy);
-                }
-                if (mProxy.onStretchChange(sx, sy)) {
-                    invalidate();
-                }
-            }
-        }
-
-        public void stopDrag() {
-            final int DURATION = 200;
-            int now = (int)SystemClock.uptimeMillis();
-            mInterp = new Interpolator(2);
-            mXY[0] = mCurrStretchX;
-            mXY[1] = mCurrStretchY;
-         //   float[] blend = new float[] { 0.5f, 0, 0.75f, 1 };
-            float[] blend = new float[] { 0, 0.5f, 0.75f, 1 };
-            mInterp.setKeyFrame(0, now, mXY, blend);
-            float[] zerozero = new float[] { 0, 0 };
-            mInterp.setKeyFrame(1, now + DURATION, zerozero, null);
-            mState = ANIMATING_STATE;
-
-            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
-                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "----- stopDrag, starting animation");
-            }
-        }
-
-        // Call this after each draw. If it ruturns null, the tracker is done
-        public boolean isFinished() {
-            return mState == FINISHED_STATE;
-        }
-
-        private int hiddenHeightOfTitleBar() {
-            return getTitleHeight() - getVisibleTitleHeight();
-        }
-
-        // need a way to know if 565 or 8888 is the right config for
-        // capturing the display and giving it to the drag proxy
-        private Bitmap.Config offscreenBitmapConfig() {
-            // hard code 565 for now
-            return Bitmap.Config.RGB_565;
-        }
-
-        /*  If the tracker draws, then this returns true, otherwise it will
-            return false, and draw nothing.
-         */
-        public boolean draw(Canvas canvas) {
-            if (mCurrStretchX != 0 || mCurrStretchY != 0) {
-                int sx = getScrollX();
-                int sy = getScrollY() - hiddenHeightOfTitleBar();
-                if (mSX != sx || mSY != sy) {
-                    buildBitmap(sx, sy);
-                    mSX = sx;
-                    mSY = sy;
-                }
-
-                if (mState == ANIMATING_STATE) {
-                    Interpolator.Result result = mInterp.timeToValues(mXY);
-                    if (result == Interpolator.Result.FREEZE_END) {
-                        mState = FINISHED_STATE;
-                        return false;
-                    } else {
-                        mProxy.onStretchChange(mXY[0], mXY[1]);
-                        invalidate();
-                        // fall through to the draw
-                    }
-                }
-                int count = canvas.save(Canvas.MATRIX_SAVE_FLAG);
-                canvas.translate(sx, sy);
-                mProxy.onDraw(canvas);
-                canvas.restoreToCount(count);
-                return true;
-            }
-            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
-                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, " -- draw false " +
-                      mCurrStretchX + " " + mCurrStretchY);
-            }
-            return false;
-        }
-
-        private void buildBitmap(int sx, int sy) {
-            int w = getWidth();
-            int h = getViewHeight();
-            Bitmap bm = Bitmap.createBitmap(w, h, offscreenBitmapConfig());
-            Canvas canvas = new Canvas(bm);
-            canvas.translate(-sx, -sy);
-            drawContent(canvas);
-
-            if (DebugFlags.DRAG_TRACKER || DEBUG_DRAG_TRACKER) {
-                Log.d(DebugFlags.DRAG_TRACKER_LOGTAG, "--- buildBitmap " + sx +
-                      " " + sy + " " + w + " " + h);
-            }
-            mProxy.onBitmapChange(bm);
-        }
-    }
-
-    /** @hide */
-    public static class DragTracker {
-        public void onStartDrag(float x, float y) {}
-        public boolean onStretchChange(float sx, float sy) {
-            // return true to have us inval the view
-            return false;
-        }
-        public void onStopDrag() {}
-        public void onBitmapChange(Bitmap bm) {}
-        public void onDraw(Canvas canvas) {}
-    }
-
-    /** @hide */
-    public DragTracker getDragTracker() {
-        return mDragTracker;
-    }
-
-    /** @hide */
-    public void setDragTracker(DragTracker tracker) {
-        mDragTracker = tracker;
-    }
-
-    private DragTracker mDragTracker;
-    private DragTrackerHandler mDragTrackerHandler;
-
     private boolean hitFocusedPlugin(int contentX, int contentY) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "nativeFocusIsPlugin()=" + nativeFocusIsPlugin());
@@ -5304,10 +5113,6 @@ public class WebView extends AbsoluteLayout
                     startDrag();
                 }
 
-                if (mDragTrackerHandler != null) {
-                    mDragTrackerHandler.dragTo(x, y);
-                }
-
                 // do pan
                 if (mTouchMode != TOUCH_DRAG_LAYER_MODE) {
                     int newScrollX = pinLocX(mScrollX + deltaX);
@@ -5581,9 +5386,6 @@ public class WebView extends AbsoluteLayout
         mLastTouchTime = eventTime;
         mVelocityTracker = VelocityTracker.obtain();
         mSnapScrollMode = SNAP_NONE;
-        if (mDragTracker != null) {
-            mDragTrackerHandler = new DragTrackerHandler(x, y, mDragTracker);
-        }
     }
 
     private void startDrag() {
@@ -5616,9 +5418,6 @@ public class WebView extends AbsoluteLayout
     }
 
     private void stopTouch() {
-        if (mDragTrackerHandler != null) {
-            mDragTrackerHandler.stopDrag();
-        }
         // we also use mVelocityTracker == null to tell us that we are
         // not "moving around", so we can take the slower/prettier
         // mode in the drawing code
@@ -5629,9 +5428,6 @@ public class WebView extends AbsoluteLayout
     }
 
     private void cancelTouch() {
-        if (mDragTrackerHandler != null) {
-            mDragTrackerHandler.stopDrag();
-        }
         // we also use mVelocityTracker == null to tell us that we are
         // not "moving around", so we can take the slower/prettier
         // mode in the drawing code
@@ -6621,7 +6417,7 @@ public class WebView extends AbsoluteLayout
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
-                    nativeSetBaseLayer(draw.mBaseLayer);
+                    setBaseLayer(draw.mBaseLayer, draw.mInvalRegion.getBounds());
                     final Point viewSize = draw.mViewPoint;
                     WebViewCore.ViewState viewState = draw.mViewState;
                     boolean isPictureAfterFirstLayout = viewState != null;
@@ -7603,6 +7399,7 @@ public class WebView extends AbsoluteLayout
             boolean splitIfNeeded);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations();
+    private native boolean  nativeDrawGL(Rect rect, float scale, int extras);
     private native void     nativeExtendSelection(int x, int y);
     private native int      nativeFindAll(String findLower, String findUpper);
     private native void     nativeFindNext(boolean forward);
@@ -7664,7 +7461,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    private native void     nativeSetBaseLayer(int layer);
+    private native void     nativeSetBaseLayer(int layer, Rect invalRect);
     private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
