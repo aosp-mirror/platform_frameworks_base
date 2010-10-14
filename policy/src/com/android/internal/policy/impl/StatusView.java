@@ -4,11 +4,14 @@ package com.android.internal.policy.impl;
 
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
+import com.google.android.util.AbstractMessageParser.Resources;
 
 import java.util.Date;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -138,11 +141,14 @@ class StatusView {
     /** Originated from PatternUnlockScreen **/
     void updateStatusLines() {
         if (mHasProperty) {
-            // TODO Get actual name & email
-            String name = "John Smith";
-            String email = "jsmith@gmail.com";
-            mPropertyOf.setText("Property of:\n" + name + "\n" + email);
-            mPropertyOf.setVisibility(View.VISIBLE);
+            ContentResolver res = getContext().getContentResolver();
+            String info = Settings.Secure.getString(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO);
+            boolean enabled = Settings.Secure.getInt(res,
+                    Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1) != 0;
+
+            mPropertyOf.setText(info);
+            mPropertyOf.setVisibility(enabled && !TextUtils.isEmpty(info) ?
+                    View.VISIBLE : View.INVISIBLE);
         }
 
         if (!mHasStatus2) return;
