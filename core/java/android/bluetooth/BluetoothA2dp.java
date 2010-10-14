@@ -20,6 +20,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.IBinder;
+import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.server.BluetoothA2dpService;
@@ -335,6 +336,26 @@ public final class BluetoothA2dp implements BluetoothProfile {
             }
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
+     * This function checks if the remote device is an AVCRP
+     * target and thus whether we should send volume keys
+     * changes or not.
+     * @hide
+     */
+    public boolean shouldSendVolumeKeys(BluetoothDevice device) {
+        if (isEnabled() && isValidDevice(device)) {
+            ParcelUuid[] uuids = device.getUuids();
+            if (uuids == null) return false;
+
+            for (ParcelUuid uuid: uuids) {
+                if (BluetoothUuid.isAvrcpTarget(uuid)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
