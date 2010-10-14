@@ -20,6 +20,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 using namespace android;
 
@@ -29,7 +30,9 @@ static const char* gProgVersion = "1.0";
 static int wantUsage = 0;
 static int wantVersion = 0;
 
-#define ADD_OPTS "n:v:o"
+#define SALT_LEN 8
+
+#define ADD_OPTS "n:v:os:"
 static const struct option longopts[] = {
     {"help",       no_argument, &wantUsage,   1},
     {"version",    no_argument, &wantVersion, 1},
@@ -38,14 +41,27 @@ static const struct option longopts[] = {
     {"name",       required_argument, NULL, 'n'},
     {"version",    required_argument, NULL, 'v'},
     {"overlay",    optional_argument, NULL, 'o'},
+    {"salt",       required_argument, NULL, 's'},
 
     {NULL, 0, NULL, '\0'}
 };
 
-struct package_info_t {
+class PackageInfo {
+public:
+    PackageInfo()
+            : packageName(NULL)
+            , packageVersion(-1)
+            , overlay(false)
+            , salted(false)
+    {
+        memset(&salt, 0, sizeof(salt));
+    }
+
     char* packageName;
     int packageVersion;
     bool overlay;
+    bool salted;
+    unsigned char salt[SALT_LEN];
 };
 
 /*
@@ -59,6 +75,13 @@ void usage(void)
         " %s a[dd] [ OPTIONS ] FILENAME\n"
         "   Adds an OBB signature to the file.\n\n", gProgName);
     fprintf(stderr,
+        "   Options:\n"
+        "     -n <package name>      sets the OBB package name (required)\n"
+        "     -v <OBB version>       sets the OBB version (required)\n"
+        "     -o                     sets the OBB overlay flag\n"
+        "     -s <8 byte hex salt>   sets the crypto key salt (if encrypted)\n"
+        "\n");
+    fprintf(stderr,
         " %s r[emove] FILENAME\n"
         "   Removes the OBB signature from the file.\n\n", gProgName);
     fprintf(stderr,
@@ -66,7 +89,7 @@ void usage(void)
         "   Prints the OBB signature information of a file.\n\n", gProgName);
 }
 
-void doAdd(const char* filename, struct package_info_t* info) {
+void doAdd(const char* filename, struct PackageInfo* info) {
     ObbFile *obb = new ObbFile();
     if (obb->readFrom(filename)) {
         fprintf(stderr, "ERROR: %s: OBB signature already present\n", filename);
@@ -76,6 +99,9 @@ void doAdd(const char* filename, struct package_info_t* info) {
     obb->setPackageName(String8(info->packageName));
     obb->setVersion(info->packageVersion);
     obb->setOverlay(info->overlay);
+    if (info->salted) {
+        obb->setSalt(info->salt, SALT_LEN);
+    }
 
     if (!obb->writeTo(filename)) {
         fprintf(stderr, "ERROR: %s: couldn't write OBB signature: %s\n",
@@ -113,6 +139,40 @@ void doInfo(const char* filename) {
     printf("     Version: %d\n", obb->getVersion());
     printf("       Flags: 0x%08x\n", obb->getFlags());
     printf("     Overlay: %s\n", obb->isOverlay() ? "true" : "false");
+    printf("        Salt: ");
+
+    size_t saltLen;
+    const unsigned char* salt = obb->getSalt(&saltLen);
+    if (salt != NULL) {
+        for (int i = 0; i < SALT_LEN; i++) {
+            printf("%02x", salt[i]);
+        }
+        printf("\n");
+    } else {
+        printf("<empty>\n");
+    }
+}
+
+bool fromHex(char h, unsigned char *b) {
+    if (h >= '0' && h <= '9') {
+        *b = h - '0';
+        return true;
+    } else if (h >= 'a' && h <= 'f') {
+        *b = h - 'a' + 10;
+        return true;
+    } else if (h >= 'A' && h <= 'F') {
+        *b = h - 'A' + 10;
+        return true;
+    }
+    return false;
+}
+
+bool hexToByte(char h1, char h2, unsigned char* b) {
+    unsigned char first, second;
+    if (!fromHex(h1, &first)) return false;
+    if (!fromHex(h2, &second)) return false;
+    *b = (first << 4) | second;
+    return true;
 }
 
 /*
@@ -120,11 +180,9 @@ void doInfo(const char* filename) {
  */
 int main(int argc, char* const argv[])
 {
-    const char *prog = argv[0];
-    struct options *options;
     int opt;
     int option_index = 0;
-    struct package_info_t package_info;
+    struct PackageInfo package_info;
 
     int result = 1;    // pessimistically assume an error.
 
@@ -145,7 +203,7 @@ int main(int argc, char* const argv[])
             package_info.packageName = optarg;
             break;
         case 'v': {
-            char *end;
+            char* end;
             package_info.packageVersion = strtol(optarg, &end, 10);
             if (*optarg == '\0' || *end != '\0') {
                 fprintf(stderr, "ERROR: invalid version; should be integer!\n\n");
@@ -156,6 +214,25 @@ int main(int argc, char* const argv[])
         }
         case 'o':
             package_info.overlay = true;
+            break;
+        case 's':
+            if (strlen(optarg) != SALT_LEN * 2) {
+                fprintf(stderr, "ERROR: salt must be 8 bytes in hex (e.g., ABCD65031337D00D)\n\n");
+                wantUsage = 1;
+                goto bail;
+            }
+
+            package_info.salted = true;
+
+            unsigned char b;
+            for (int i = 0, j = 0; i < SALT_LEN; i++, j+=2) {
+                if (!hexToByte(optarg[j], optarg[j+1], &b)) {
+                    fprintf(stderr, "ERROR: salt must be in hex (e.g., ABCD65031337D00D)\n");
+                    wantUsage = 1;
+                    goto bail;
+                }
+                package_info.salt[i] = b;
+            }
             break;
         case '?':
             wantUsage = 1;

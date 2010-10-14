@@ -29,10 +29,11 @@
 
 #define kFooterTagSize 8  /* last two 32-bit integers */
 
-#define kFooterMinSize 25 /* 32-bit signature version (4 bytes)
+#define kFooterMinSize 33 /* 32-bit signature version (4 bytes)
                            * 32-bit package version (4 bytes)
                            * 32-bit flags (4 bytes)
-                           * 32-bit package name size (4-bytes)
+                           * 64-bit salt (8 bytes)
+                           * 32-bit package name size (4 bytes)
                            * >=1-character package name (1 byte)
                            * 32-bit footer size (4 bytes)
                            * 32-bit footer marker (4 bytes)
@@ -47,8 +48,9 @@
 /* offsets in version 1 of the header */
 #define kPackageVersionOffset 4
 #define kFlagsOffset          8
-#define kPackageNameLenOffset 12
-#define kPackageNameOffset    16
+#define kSaltOffset           12
+#define kPackageNameLenOffset 20
+#define kPackageNameOffset    24
 
 /*
  * TEMP_FAILURE_RETRY is defined by some, but not all, versions of
@@ -79,11 +81,12 @@ typedef off64_t my_off64_t;
 
 namespace android {
 
-ObbFile::ObbFile() :
-        mPackageName(""),
-        mVersion(-1),
-        mFlags(0)
+ObbFile::ObbFile()
+        : mPackageName("")
+        , mVersion(-1)
+        , mFlags(0)
 {
+    memset(mSalt, 0, sizeof(mSalt));
 }
 
 ObbFile::~ObbFile() {
@@ -192,7 +195,7 @@ bool ObbFile::parseObbFile(int fd)
 
 #ifdef DEBUG
     for (int i = 0; i < footerSize; ++i) {
-        LOGI("char: 0x%02x", scanBuf[i]);
+        LOGI("char: 0x%02x\n", scanBuf[i]);
     }
 #endif
 
@@ -205,6 +208,8 @@ bool ObbFile::parseObbFile(int fd)
 
     mVersion = (int32_t) get4LE((unsigned char*)scanBuf + kPackageVersionOffset);
     mFlags = (int32_t) get4LE((unsigned char*)scanBuf + kFlagsOffset);
+
+    memcpy(&mSalt, (unsigned char*)scanBuf + kSaltOffset, sizeof(mSalt));
 
     uint32_t packageNameLen = get4LE((unsigned char*)scanBuf + kPackageNameLenOffset);
     if (packageNameLen <= 0
@@ -255,7 +260,7 @@ bool ObbFile::writeTo(int fd)
     my_lseek64(fd, 0, SEEK_END);
 
     if (mPackageName.size() == 0 || mVersion == -1) {
-        LOGW("tried to write uninitialized ObbFile data");
+        LOGW("tried to write uninitialized ObbFile data\n");
         return false;
     }
 
@@ -264,43 +269,48 @@ bool ObbFile::writeTo(int fd)
 
     put4LE(intBuf, kSigVersion);
     if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
-        LOGW("couldn't write signature version: %s", strerror(errno));
+        LOGW("couldn't write signature version: %s\n", strerror(errno));
         return false;
     }
 
     put4LE(intBuf, mVersion);
     if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
-        LOGW("couldn't write package version");
+        LOGW("couldn't write package version\n");
         return false;
     }
 
     put4LE(intBuf, mFlags);
     if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
-        LOGW("couldn't write package version");
+        LOGW("couldn't write package version\n");
+        return false;
+    }
+
+    if (write(fd, mSalt, sizeof(mSalt)) != (ssize_t)sizeof(mSalt)) {
+        LOGW("couldn't write salt: %s\n", strerror(errno));
         return false;
     }
 
     size_t packageNameLen = mPackageName.size();
     put4LE(intBuf, packageNameLen);
     if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
-        LOGW("couldn't write package name length: %s", strerror(errno));
+        LOGW("couldn't write package name length: %s\n", strerror(errno));
         return false;
     }
 
     if (write(fd, mPackageName.string(), packageNameLen) != (ssize_t)packageNameLen) {
-        LOGW("couldn't write package name: %s", strerror(errno));
+        LOGW("couldn't write package name: %s\n", strerror(errno));
         return false;
     }
 
     put4LE(intBuf, kPackageNameOffset + packageNameLen);
     if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
-        LOGW("couldn't write footer size: %s", strerror(errno));
+        LOGW("couldn't write footer size: %s\n", strerror(errno));
         return false;
     }
 
     put4LE(intBuf, kSignature);
     if (write(fd, &intBuf, sizeof(uint32_t)) != (ssize_t)sizeof(uint32_t)) {
-        LOGW("couldn't write footer magic signature: %s", strerror(errno));
+        LOGW("couldn't write footer magic signature: %s\n", strerror(errno));
         return false;
     }
 
