@@ -319,6 +319,8 @@ public class WebView extends AbsoluteLayout
 
     private ZoomManager mZoomManager;
 
+    private Rect mGLRectViewport;
+
     /**
      *  Transportation object for returning WebView across thread boundaries.
      */
@@ -3718,8 +3720,11 @@ public class WebView extends AbsoluteLayout
         if (canvas.isHardwareAccelerated()) {
             try {
                 if (canvas.acquireContext()) {
-                      Rect rect = new Rect(getLeft(), getTop(), getRight(),
-                                           getBottom() - getVisibleTitleHeight());
+                      Rect rect = new Rect(mGLRectViewport.left,
+                                           mGLRectViewport.top,
+                                           mGLRectViewport.right,
+                                           mGLRectViewport.bottom
+                                           - getVisibleTitleHeight());
                       if (nativeDrawGL(rect, getScale(), extras)) {
                           invalidate();
                       }
@@ -4622,6 +4627,16 @@ public class WebView extends AbsoluteLayout
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
     }
 
+    void setGLRectViewport() {
+        View window = getRootView();
+        int[] location = new int[2];
+        getLocationInWindow(location);
+        mGLRectViewport = new Rect(location[0], window.getHeight()
+                             - (location[1] + getHeight()),
+                             location[0] + getWidth(),
+                             window.getHeight() - location[1]);
+    }
+
     /**
      * @hide
      */
@@ -4637,6 +4652,7 @@ public class WebView extends AbsoluteLayout
             // notify the WebKit about the new dimensions.
             sendViewSizeZoom(false);
         }
+        setGLRectViewport();
         return changed;
     }
 
