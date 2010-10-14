@@ -439,11 +439,10 @@ bool EventHub::getEvent(RawEvent* outEvent)
             // Since mFDs[0] is used for inotify, we process regular events starting at index 1.
             mInputDeviceIndex += 1;
             if (mInputDeviceIndex >= mFDCount) {
-                mInputDeviceIndex = 0;
                 break;
             }
 
-            const struct pollfd &pfd = mFDs[mInputDeviceIndex];
+            const struct pollfd& pfd = mFDs[mInputDeviceIndex];
             if (pfd.revents & POLLIN) {
                 int32_t readSize = read(pfd.fd, mInputBufferData,
                         sizeof(struct input_event) * INPUT_BUFFER_SIZE);
@@ -460,11 +459,17 @@ bool EventHub::getEvent(RawEvent* outEvent)
             }
         }
 
+#if HAVE_INOTIFY
         // readNotify() will modify mFDs and mFDCount, so this must be done after
         // processing all other events.
         if(mFDs[0].revents & POLLIN) {
             readNotify(mFDs[0].fd);
+            mFDs[0].revents = 0;
+            continue; // report added or removed devices immediately
         }
+#endif
+
+        mInputDeviceIndex = 0;
 
         // Poll for events.  Mind the wake lock dance!
         // We hold a wake lock at all times except during poll().  This works due to some
@@ -482,7 +487,7 @@ bool EventHub::getEvent(RawEvent* outEvent)
 
         if (pollResult <= 0) {
             if (errno != EINTR) {
-                LOGW("select failed (errno=%d)\n", errno);
+                LOGW("poll failed (errno=%d)\n", errno);
                 usleep(100000);
             }
         }
