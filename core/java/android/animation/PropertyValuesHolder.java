@@ -135,7 +135,6 @@ public class PropertyValuesHolder implements Cloneable {
     public static PropertyValuesHolder ofInt(String propertyName, int... values) {
         PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
         pvh.setIntValues(values);
-        Log.v("PVH", "ofFloat: propertyName: " + pvh.mPropertyName);
         return pvh;
     }
 
@@ -149,7 +148,6 @@ public class PropertyValuesHolder implements Cloneable {
     public static PropertyValuesHolder ofFloat(String propertyName, float... values) {
         PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
         pvh.setFloatValues(values);
-        Log.v("PVH", "ofFloat: propertyName: " + pvh.mPropertyName);
         return pvh;
     }
 
@@ -352,8 +350,6 @@ public class PropertyValuesHolder implements Cloneable {
      */
     private Method getPropertyFunction(Class targetClass, String prefix, Class valueType) {
         // TODO: faster implementation...
-        Log.v("PVH", "getPropertyFunction: class, prefix, valueType, propertyName: " +
-            targetClass + ", " + prefix + ", " + valueType + ", "+ mPropertyName);
         Method returnVal = null;
         String firstLetter = mPropertyName.substring(0, 1);
         String theRest = mPropertyName.substring(1);
