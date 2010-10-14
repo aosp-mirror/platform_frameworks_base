@@ -20,9 +20,14 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
+
 #include <limits.h>
+
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Timers.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
+
 #include "com_android_server_PowerManagerService.h"
 
 namespace android {
@@ -119,6 +124,12 @@ static void android_server_PowerManagerService_nativeSetPowerState(JNIEnv* env,
     gScreenBright = screenBright;
 }
 
+static void android_server_PowerManagerService_nativeStartSurfaceFlingerAnimation(JNIEnv* env,
+        jobject obj) {
+    sp<ISurfaceComposer> s(ComposerService::getComposerService());
+    s->turnElectronBeamOff(0);
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gPowerManagerServiceMethods[] = {
@@ -127,6 +138,8 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) android_server_PowerManagerService_nativeInit },
     { "nativeSetPowerState", "(ZZ)V",
             (void*) android_server_PowerManagerService_nativeSetPowerState },
+    { "nativeStartSurfaceFlingerAnimation", "()V",
+            (void*) android_server_PowerManagerService_nativeStartSurfaceFlingerAnimation },
 };
 
 #define FIND_CLASS(var, className) \
