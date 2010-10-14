@@ -65,7 +65,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private final BluetoothService mBluetoothService;
     private final BluetoothAdapter mAdapter;
     private int   mTargetA2dpState;
-    private boolean mAdjustedPriority = false;
     private BluetoothDevice mPlayingA2dpDevice;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -334,7 +333,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
         String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
 
-        // State is DISCONNECTED
+        // State is DISCONNECTED and we are connecting.
+        if (getPriority(device) < BluetoothA2dp.PRIORITY_AUTO_CONNECT) {
+            setPriority(device, BluetoothA2dp.PRIORITY_AUTO_CONNECT);
+        }
         handleSinkStateChange(device, state, BluetoothA2dp.STATE_CONNECTING);
 
         if (!connectSinkNative(path)) {
@@ -513,14 +515,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             mTargetA2dpState = -1;
 
             if (getPriority(device) > BluetoothA2dp.PRIORITY_OFF &&
-                    state == BluetoothA2dp.STATE_CONNECTING ||
                     state == BluetoothA2dp.STATE_CONNECTED) {
                 // We have connected or attempting to connect.
                 // Bump priority
                 setPriority(device, BluetoothA2dp.PRIORITY_AUTO_CONNECT);
-            }
-
-            if (state == BluetoothA2dp.STATE_CONNECTED) {
                 // We will only have 1 device with AUTO_CONNECT priority
                 // To be backward compatible set everyone else to have PRIORITY_ON
                 adjustOtherSinkPriorities(device);
@@ -547,14 +545,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     }
 
     private void adjustOtherSinkPriorities(BluetoothDevice connectedDevice) {
-        if (!mAdjustedPriority) {
-            for (BluetoothDevice device : mAdapter.getBondedDevices()) {
-                if (getPriority(device) >= BluetoothA2dp.PRIORITY_AUTO_CONNECT &&
-                    !device.equals(connectedDevice)) {
-                    setPriority(device, BluetoothA2dp.PRIORITY_ON);
-                }
+        for (BluetoothDevice device : mAdapter.getBondedDevices()) {
+            if (getPriority(device) >= BluetoothA2dp.PRIORITY_AUTO_CONNECT &&
+                !device.equals(connectedDevice)) {
+                setPriority(device, BluetoothA2dp.PRIORITY_ON);
             }
-            mAdjustedPriority = true;
         }
     }
 
