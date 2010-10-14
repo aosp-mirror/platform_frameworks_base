@@ -75,6 +75,12 @@ public:
 
     virtual MtpResponseCode         resetDeviceProperty(MtpDeviceProperty property) = 0;
 
+    virtual MtpResponseCode         getObjectPropertyList(MtpObjectHandle handle,
+                                            MtpObjectFormat format,
+                                            MtpObjectProperty property,
+                                            int groupCode, int depth,
+                                            MtpDataPacket& packet) = 0;
+
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
                                             MtpDataPacket& packet) = 0;
 

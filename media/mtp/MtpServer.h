@@ -93,6 +93,7 @@ private:
     MtpResponseCode     doGetDevicePropValue();
     MtpResponseCode     doSetDevicePropValue();
     MtpResponseCode     doResetDevicePropValue();
+    MtpResponseCode     doGetObjectPropList();
     MtpResponseCode     doGetObjectInfo();
     MtpResponseCode     doGetObject();
     MtpResponseCode     doSendObjectInfo();
