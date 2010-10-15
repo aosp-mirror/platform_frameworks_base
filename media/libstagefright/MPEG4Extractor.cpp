@@ -498,7 +498,9 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             if (chunk_type == FOURCC('s', 't', 'b', 'l')) {
                 LOGV("sampleTable chunk is %d bytes long.", (size_t)chunk_size);
 
-                if (mDataSource->flags() & DataSource::kWantsPrefetching) {
+                if (mDataSource->flags()
+                        & (DataSource::kWantsPrefetching
+                            | DataSource::kIsCachingDataSource)) {
                     sp<MPEG4DataSource> cachedSource =
                         new MPEG4DataSource(mDataSource);
 
