@@ -112,7 +112,7 @@ static void
 nObjDestroy(JNIEnv *_env, jobject _this, RsContext con, jint obj)
 {
     LOG_API("nObjDestroy, con(%p) obj(%p)", con, (void *)obj);
-    rsObjDestroy(con, (uint32_t)obj);
+    rsObjDestroy(con, (void *)obj);
 }
 
 
