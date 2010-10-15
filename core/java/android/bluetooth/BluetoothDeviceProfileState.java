@@ -59,7 +59,7 @@ import java.util.Set;
  */
 public final class BluetoothDeviceProfileState extends HierarchicalStateMachine {
     private static final String TAG = "BluetoothDeviceProfileState";
-    private static final boolean DBG = true; //STOPSHIP - Change to false
+    private static final boolean DBG = false;
 
     // TODO(): Restructure the state machine to make it scalable with regard to profiles.
     public static final int CONNECT_HFP_OUTGOING = 1;
@@ -246,7 +246,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     private class BondedDevice extends HierarchicalState {
         @Override
         protected void enter() {
-            log("Entering ACL Connected state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering ACL Connected state with: " + getCurrentMessage().what);
             Message m = new Message();
             m.copyFrom(getCurrentMessage());
             sendMessageAtFrontOfQueue(m);
@@ -346,7 +346,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
         @Override
         protected void enter() {
-            log("Entering OutgoingHandsfree state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering OutgoingHandsfree state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_HFP_OUTGOING &&
                 mCommand != DISCONNECT_HFP_OUTGOING) {
@@ -458,7 +458,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
         @Override
         protected void enter() {
-            log("Entering IncomingHandsfree state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering IncomingHandsfree state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_HFP_INCOMING &&
                 mCommand != DISCONNECT_HFP_INCOMING) {
@@ -537,7 +537,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
         @Override
         protected void enter() {
-            log("Entering OutgoingA2dp state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering OutgoingA2dp state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_A2DP_OUTGOING &&
                 mCommand != DISCONNECT_A2DP_OUTGOING) {
@@ -646,7 +646,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
         @Override
         protected void enter() {
-            log("Entering IncomingA2dp state with: " + getCurrentMessage().what);
+            Log.i(TAG, "Entering IncomingA2dp state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_A2DP_INCOMING &&
                 mCommand != DISCONNECT_A2DP_INCOMING) {
@@ -875,7 +875,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     }
 
     synchronized boolean processCommand(int command) {
-        log("Processing command:" + command);
+        Log.i(TAG, "Processing command:" + command);
         switch(command) {
             case  CONNECT_HFP_OUTGOING:
                 if (mHeadsetService == null) {

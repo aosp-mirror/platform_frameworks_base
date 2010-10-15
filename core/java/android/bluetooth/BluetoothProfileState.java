@@ -40,7 +40,7 @@ import com.android.internal.util.HierarchicalStateMachine;
  */
 
 public class BluetoothProfileState extends HierarchicalStateMachine {
-    private static final boolean DBG = true; // STOPSHIP - change to false.
+    private static final boolean DBG = true;
     private static final String TAG = "BluetoothProfileState";
 
     public static final int HFP = 0;
