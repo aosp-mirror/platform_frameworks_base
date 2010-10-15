@@ -264,7 +264,9 @@ public class RuntimeInit {
         // TODO: Doing this here works, but it seems kind of arbitrary. Find
         // a better place. The goal is to set it up for applications, but not
         // tools like am.
+        System.out.close();
         System.setOut(new AndroidPrintStream(Log.INFO, "System.out"));
+        System.err.close();
         System.setErr(new AndroidPrintStream(Log.WARN, "System.err"));
 
         commonInit();
