@@ -120,6 +120,7 @@ public:
             uint32_t reqWidth, uint32_t reqHeight) = 0;
 
     virtual status_t turnElectronBeamOff(int32_t mode) = 0;
+    virtual status_t turnElectronBeamOn(int32_t mode) = 0;
 
     /* Signal surfaceflinger that there might be some work to do
      * This is an ASYNCHRONOUS call.
@@ -146,7 +147,8 @@ public:
         UNFREEZE_DISPLAY,
         SIGNAL,
         CAPTURE_SCREEN,
-        TURN_ELECTRON_BEAM_OFF
+        TURN_ELECTRON_BEAM_OFF,
+        TURN_ELECTRON_BEAM_ON
     };
 
     virtual status_t    onTransact( uint32_t code,

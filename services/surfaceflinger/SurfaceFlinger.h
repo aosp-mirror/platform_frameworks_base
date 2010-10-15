@@ -202,6 +202,7 @@ public:
                                                       uint32_t reqWidth,
                                                       uint32_t reqHeight);
     virtual status_t                    turnElectronBeamOff(int32_t mode);
+    virtual status_t                    turnElectronBeamOn(int32_t mode);
 
             void                        screenReleased(DisplayID dpy);
             void                        screenAcquired(DisplayID dpy);
@@ -329,6 +330,11 @@ private:
                     uint32_t reqWidth = 0, uint32_t reqHeight = 0);
 
             status_t turnElectronBeamOffImplLocked();
+            status_t turnElectronBeamOnImplLocked();
+            status_t electronBeamOffAnimationImplLocked();
+            status_t electronBeamOnAnimationImplLocked();
+            status_t renderScreenToTextureLocked(DisplayID dpy,
+                    GLuint* textureName, GLfloat* uOut, GLfloat* vOut);
 
             friend class FreezeLock;
             sp<FreezeLock> getFreezeLock() const;
@@ -391,6 +397,7 @@ private:
                 bool                        mHwWorkListDirty;
                 bool                        mDeferReleaseConsole;
                 bool                        mFreezeDisplay;
+                bool                        mElectronBeamAnimation;
                 int32_t                     mFreezeCount;
                 nsecs_t                     mFreezeDisplayTime;
                 Vector< sp<LayerBase> >     mVisibleLayersSortedByZ;
