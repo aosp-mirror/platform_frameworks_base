@@ -22,7 +22,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * NdefTagConnection is a connection to an NDEF target on an NDEF tag.
+ * A connection to an NDEF target on an {@link NdefTag}.
+ * <p>You can acquire this kind of connection with {@link NfcAdapter#createNdefTagConnection
+ * createNdefTagConnection()}. Use the connection to read or write {@link NdefMessage}s.
  */
 public class NdefTagConnection extends RawTagConnection {
     public static final int NDEF_MODE_READ_ONCE = 1;
@@ -44,7 +46,7 @@ public class NdefTagConnection extends RawTagConnection {
     /**
      * Read NDEF message(s).
      * This will always return the most up to date payload, and can block.
-     * It can be canceled with close().
+     * It can be canceled with {@link RawTagConnection#close}.
      * Most NDEF tags will contain just one NDEF message.
      * <p>
      * @throws FormatException if the tag is not NDEF formatted
@@ -79,12 +81,12 @@ public class NdefTagConnection extends RawTagConnection {
     /**
      * Attempt to write an NDEF message to a tag.
      * This method will block until the data is written. It can be canceled
-     * with close().
+     * with {@link RawTagConnection#close}.
      * Many tags are write-once, so use this method carefully.
      * Specification allows for multiple NDEF messages per NDEF tag, but it is
      * encourage to only write one message, this so API only takes a single
-     * message. Use NdefRecord to write several records to a single tag.
-     * For write-many tags, use makeReadOnly() after this method to attempt
+     * message. Use {@link NdefRecord} to write several records to a single tag.
+     * For write-many tags, use {@link #makeReadOnly} after this method to attempt
      * to prevent further modification. For write-once tags this is not
      * neccesary.
      * Requires NFC_WRITE permission.
@@ -114,7 +116,7 @@ public class NdefTagConnection extends RawTagConnection {
     /**
      * Attempts to make the NDEF data in this tag read-only.
      * This method will block until the action is complete. It can be canceled
-     * with close().
+     * with {@link RawTagConnection#close}.
      * Requires NFC_WRITE permission.
      * @return true if the tag is now read-only
      * @throws IOException if the target is lost, or connection closed

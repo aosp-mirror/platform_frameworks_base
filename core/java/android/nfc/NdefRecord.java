@@ -22,20 +22,18 @@ import android.os.Parcelable;
 import java.lang.UnsupportedOperationException;
 
 /**
- * NDEF Record data.
- * <p>
- * Immutable data class. An NDEF record always contains
+ * Represents a logical (unchunked) NDEF (NFC Data Exchange Format) record.
+ * <p>An NDEF record always contains:
  * <ul>
- * <li>3-bit TNF field
- * <li>Variable length type
- * <li>Variable length ID
- * <li>Variable length payload
+ * <li>3-bit TNF (Type Name Format) field: Indicates how to interpret the type field
+ * <li>Variable length type: Describes the record format
+ * <li>Variable length ID: A unique identifier for the record
+ * <li>Variable length payload: The actual data payload
  * </ul>
- * The TNF (Type Name Format) field indicates how to interpret the type field.
- * <p>
- * This class represents a logical (unchunked) NDEF record. The underlying
+ * <p>The underlying record
  * representation may be chunked across several NDEF records when the payload is
  * large.
+ * <p>This is an immutable data class.
  */
 public class NdefRecord implements Parcelable {
     /**
