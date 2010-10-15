@@ -5955,8 +5955,8 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private void extractPublicFiles(PackageParser.Package newPackage,
                                     File publicZipFile) throws IOException {
-        final ZipOutputStream publicZipOutStream =
-                new ZipOutputStream(new FileOutputStream(publicZipFile));
+        final FileOutputStream fstr = new FileOutputStream(publicZipFile);
+        final ZipOutputStream publicZipOutStream = new ZipOutputStream(fstr);
         final ZipFile privateZip = new ZipFile(newPackage.mPath);
 
         // Copy manifest, resources.arsc and res directory to public zip
@@ -5981,6 +5981,9 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        publicZipOutStream.finish();
+        publicZipOutStream.flush();
+        FileUtils.sync(fstr);
         publicZipOutStream.close();
         FileUtils.setPermissions(
                 publicZipFile.getAbsolutePath(),
@@ -8482,8 +8485,8 @@ class PackageManagerService extends IPackageManager.Stub {
             mPastSignatures.clear();
 
             try {
-                BufferedOutputStream str = new BufferedOutputStream(new FileOutputStream(
-                        mSettingsFilename));
+                FileOutputStream fstr = new FileOutputStream(mSettingsFilename);
+                BufferedOutputStream str = new BufferedOutputStream(fstr);
 
                 //XmlSerializer serializer = XmlUtils.serializerInstance();
                 XmlSerializer serializer = new FastXmlSerializer();
@@ -8564,6 +8567,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 serializer.endDocument();
 
                 str.flush();
+                FileUtils.sync(fstr);
                 str.close();
 
                 // New settings successfully written, old ones are no longer
@@ -8580,7 +8584,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 File tempFile = new File(mPackageListFilename.toString() + ".tmp");
                 JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
 
-                str = new BufferedOutputStream(new FileOutputStream(journal.chooseForWrite()));
+                fstr = new FileOutputStream(journal.chooseForWrite());
+                str = new BufferedOutputStream(fstr);
                 try {
                     StringBuilder sb = new StringBuilder();
                     for (PackageSetting pkg : mPackages.values()) {
@@ -8616,6 +8621,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         str.write(sb.toString().getBytes());
                     }
                     str.flush();
+                    FileUtils.sync(fstr);
                     str.close();
                     journal.commit();
                 }

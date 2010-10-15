@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothHeadset;
 import android.net.TrafficStats;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
@@ -4482,6 +4483,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             FileOutputStream stream = new FileOutputStream(mFile.chooseForWrite());
             stream.write(next.marshall());
             stream.flush();
+            FileUtils.sync(stream);
             stream.close();
             mFile.commit();
         } catch (IOException e) {
