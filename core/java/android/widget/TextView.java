@@ -16,7 +16,6 @@
 
 package android.widget;
 
-import android.view.ViewConfiguration;
 import com.android.internal.util.FastMath;
 import com.android.internal.widget.EditableInputConnection;
 
@@ -97,6 +96,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -4525,7 +4525,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         hideControllers();
-        stopTextSelectionMode();
+        stopSelectionActionMode();
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
