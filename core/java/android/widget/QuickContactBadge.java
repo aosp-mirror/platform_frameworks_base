@@ -48,6 +48,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     private QueryHandler mQueryHandler;
     private Drawable mBadgeBackground;
     private Drawable mNoBadgeBackground;
+    private int mSelectedContactsAppTabIndex = -1;
 
     protected String[] mExcludeMimes = null;
 
@@ -133,6 +134,15 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
         onContactUriChanged();
     }
 
+    /**
+     * Sets the currently selected tab of the Contacts application. If not set, this is -1
+     * and therefore does not save a tab selection when a phone call is being made
+     * @hide
+     */
+    public void setSelectedContactsAppTabIndex(int value) {
+        mSelectedContactsAppTabIndex = value;
+    }
+
     private void onContactUriChanged() {
         if (mContactUri == null && mContactEmail == null && mContactPhone == null) {
             if (mNoBadgeBackground == null) {
@@ -215,7 +225,13 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     }
 
     private void trigger(Uri lookupUri) {
-        QuickContact.showQuickContact(getContext(), this, lookupUri, mMode, mExcludeMimes);
+        final Intent intent = QuickContact.getQuickContactIntent(getContext(), this, lookupUri,
+                mMode, mExcludeMimes);
+        if (mSelectedContactsAppTabIndex != -1) {
+            intent.putExtra(QuickContact.EXTRA_SELECTED_CONTACTS_APP_TAB_INDEX,
+                    mSelectedContactsAppTabIndex);
+        }
+        getContext().startActivity(intent);
     }
 
     private class QueryHandler extends AsyncQueryHandler {
