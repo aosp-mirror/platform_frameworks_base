@@ -641,7 +641,8 @@ public class VideoEditorTestImpl implements VideoEditor {
                         final EffectColor colorEffect = (EffectColor)effect;
                         serializer.attribute("", ATTR_COLOR_EFFECT_TYPE,
                                 Integer.toString(colorEffect.getType()));
-                        if (colorEffect.getType() == EffectColor.TYPE_COLOR) {
+                        if (colorEffect.getType() == EffectColor.TYPE_COLOR ||
+                                colorEffect.getType() == EffectColor.TYPE_GRADIENT) {
                             serializer.attribute("", ATTR_COLOR_EFFECT_VALUE,
                                     Integer.toString(colorEffect.getColor()));
                         }
