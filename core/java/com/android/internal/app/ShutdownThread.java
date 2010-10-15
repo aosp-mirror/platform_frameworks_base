@@ -381,7 +381,7 @@ public final class ShutdownThread extends Thread {
             // vibrator is asynchronous so we need to wait to avoid shutting down too soon.
             try {
                 Thread.sleep(SHUTDOWN_VIBRATE_MS);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException unused) {
             }
         }
 
