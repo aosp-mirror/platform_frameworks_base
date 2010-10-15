@@ -865,6 +865,10 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 
+    Rect clipRect(*mSnapshot->clipRect);
+    glScissor(clipRect.left, mSnapshot->height - clipRect.bottom,
+            clipRect.getWidth(), clipRect.getHeight());
+
     if (mHasShadow) {
         glActiveTexture(gTextureUnits[0]);
         mCaches.dropShadowCache.setFontRenderer(fontRenderer);
@@ -889,12 +893,15 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     const Rect& clip = mSnapshot->getLocalClip();
     clearLayerRegions();
+
     fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 
     drawTextDecorations(text, bytesCount, length, x, y, paint);
+
+    setScissorFromClip();
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
