@@ -6074,6 +6074,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, "Failure writing last done pre-boot receivers", e);
             file.delete();
         } finally {
+            FileUtils.sync(fos);
             if (dos != null) {
                 try {
                     dos.close();
