@@ -840,9 +840,15 @@ public class WifiStateTracker extends NetworkStateTracker {
         switch (msg.what) {
             case EVENT_SUPPLICANT_CONNECTION:
                 mRunState = RUN_STATE_RUNNING;
+                String macaddr;
                 synchronized (this) {
                     updateBatteryWorkSourceLocked(null);
+                    macaddr = WifiNative.getMacAddressCommand();
                 }
+                if (macaddr != null) {
+                    mWifiInfo.setMacAddress(macaddr);
+                }
+
                 checkUseStaticIp();
                 /* Reset notification state on new connection */
                 resetNotificationTimer();
