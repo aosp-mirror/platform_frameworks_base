@@ -169,7 +169,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Udviklingsværktøjer"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funktioner kun til programudviklere."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Få adgang til delt hukommelse."</string>
+    <!-- outdated translation 5455804353220581312 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Få adgang til delt hukommelse."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiver eller rediger statuslinje"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Tillader, at et program deaktiverer statuslinjen eller tilføjer eller fjerner systemikoner."</string>
@@ -321,16 +321,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Tillader, at programmet monterer eller demonterer filsystemer til flytbar lagring."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formater ekstern lagring"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Tillader, at et program formaterer flytbart lager."</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"hente oplysninger om sikkert lager"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"Tillader programmet at få oplysninger om sikkert lager."</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"opret sikkert lager"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"Tillader programmet at oprette sikkert lager."</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"ødelægge sikkert lager"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Tillader programmet at ødelægge sikkert lager."</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"montere/demontere sikkert lager"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Tillader programmet at montere/demontere sikkert lager."</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"omdøbe sikkert lager"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Tillader programmet at omdøbe sikkert lager."</string>
+    <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"hente oplysninger om sikkert lager"</string>
+    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"Tillader programmet at få oplysninger om sikkert lager."</string>
+    <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"opret sikkert lager"</string>
+    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"Tillader programmet at oprette sikkert lager."</string>
+    <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"ødelægge sikkert lager"</string>
+    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Tillader programmet at ødelægge sikkert lager."</string>
+    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"montere/demontere sikkert lager"</string>
+    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Tillader programmet at montere/demontere sikkert lager."</string>
+    <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"omdøbe sikkert lager"</string>
+    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Tillader programmet at omdøbe sikkert lager."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"kontroller vibrator"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Lader programmet kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontroller lommelygte"</string>
@@ -427,9 +427,9 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Tillader, at et program læser alle private ord, navne og sætninger, som brugeren eventuelt har gemt i brugerordbogen."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"skriv til den brugerdefinerede ordbog"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Tillader, at et program skriver nye ord i brugerordbogen."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"ret/slet indholdet i delt hukommelse"</string>
+    <!-- outdated translation 993707436941016913 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"ret/slet indholdet i delt hukommelse"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"ret/slet indholdet på SD-kortet"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Til. prog. at sk. t. delt huk."</string>
+    <!-- outdated translation 4131871541127211526 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Til. prog. at sk. t. delt huk."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Tillader, at et program skriver til SD-kortet."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"få adgang til cache-filsystemet"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Tillader, at et program læser og skriver til cache-filsystemet."</string>
@@ -802,17 +802,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-masselagring"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB er tilsluttet"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Du har forbundet din telefon til din computer via USB. Vælg knappen nedenfor, hvis du ønsker at kopiere filer mellem din computer og din Androids delte hukommelse."</string>
+    <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Du har forbundet din telefon til din computer via USB. Vælg knappen nedenfor, hvis du ønsker at kopiere filer mellem din computer og din Androids delte hukommelse."</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Du har forbundet din telefon til din computer via USB. Vælg knappen nedenfor, hvis du ønsker at kopiere filer mellem din computer og din Androids SD-kort."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Slå USB-lagringen til"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"Der opstod et problem med at bruge den delte hukommelse til USB-lagring."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"Der opstod et problem med at bruge dit SD-kort til USB-lagring."</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Der opstod et problem med at bruge den delte hukommelse til USB-lagring."</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Der opstod et problem med at bruge den delte hukommelse til USB-lagring."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB er tilsluttet"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Vælg for at kopiere filer til/fra din computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Slå USB-lagringen fra"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Vælg for at slå USB-lagring fra."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-lager i brug"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Sørg for, at du har demonteret (\"udskubbet\") din Androids delte hukommelse fra computeren, før du slår USB-lagring fra."</string>
+    <!-- outdated translation 8745345260780267185 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Sørg for, at du har demonteret (\"udskubbet\") din Androids delte hukommelse fra computeren, før du slår USB-lagring fra."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Sørg for, at du har demonteret (\"udskubbet\") din Androids SD-kort fra computeren, før du slår USB-lagring fra."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Slå USB-lagring fra"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Der opstod et problem med at slå USB-lagringen fra. Sørg for, at du har demonteret USB-værten, og prøv så igen."</string>
@@ -820,9 +820,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Hvis du slår USB-lagring til, vil nogle af de programmer, som du bruger, stoppe, og de kan være utilgængelige, indtil du slår USB-lagring til igen."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB-handlingen mislykkedes"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"Formater delt hukom."</string>
+    <!-- outdated translation 6577908006949742217 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formater delt hukom."</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formater SD-kort"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"Vil du formatere den delte hukommelse og slette alle filer, som er gemt der? Handlingen kan ikke fortydes!"</string>
+    <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vil du formatere den delte hukommelse og slette alle filer, som er gemt der? Handlingen kan ikke fortydes!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Er du sikker på, du ønsker at formatere SD-kortet? Alle data på kortet mistes."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formater"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning er tilsluttet"</string>
@@ -831,28 +831,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"Forbereder delt hukommelse"</string>
+    <!-- outdated translation 4239516675028438997 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Forbereder delt hukommelse"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Forbereder SD-kortet"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Kontrollerer for fejl."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Tom delt hukommelse"</string>
+    <!-- outdated translation 3937345577983730873 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Tom delt hukommelse"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Tomt SD-kort"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"Delt hukommelse er tom eller har et ikke-understøttet filsystem."</string>
+    <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Delt hukommelse er tom eller har et ikke-understøttet filsystem."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD-kortet er tomt eller har et ikke understøttet filsystem."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Beskadiget delt hukommelse"</string>
+    <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Beskadiget delt hukommelse"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Beskadiget SD-kort"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"Delt hukommelse er beskadiget. Du bliver muligvis nødt til at formatere den igen."</string>
+    <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Delt hukommelse er beskadiget. Du bliver muligvis nødt til at formatere den igen."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD-kortet er beskadiget. Du bliver muligvis nødt til at formatere det igen."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"Delt huk. blev fjernet uventet"</string>
+    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Delt huk. blev fjernet uventet"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD-kortet blev fjernet uventet"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Demonter delt hukommelse inden fjernelse for at undgå tab af data."</string>
+    <!-- outdated translation 2005396464494648937 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Demonter delt hukommelse inden fjernelse for at undgå tab af data."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Demonter SD-kortet inden fjernelse for at undgå tab af data."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"Sikkert at fjerne delt hukom."</string>
+    <!-- outdated translation 36525881018679515 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Sikkert at fjerne delt hukom."</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD-kortet kan fjernes sikkert"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"Du kan nu fjerne den delte hukommelse."</string>
+    <!-- outdated translation 7503769106285188703 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Du kan nu fjerne den delte hukommelse."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Du kan nu fjerne SD-kortet."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"Fjernet delt hukommelse"</string>
+    <!-- outdated translation 1874889764367085562 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Fjernet delt hukommelse"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD-kortet er fjernet"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"Delt hukommelse fjernet. Indsæt nyt medie."</string>
+    <!-- outdated translation 2730890441331344776 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Delt hukommelse fjernet. Indsæt nyt medie."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-kortet er fjernet. Indsæt et nyt."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Der blev ikke fundet nogen matchende aktiviteter"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"opdater brugerstatistikker for komponenter"</string>

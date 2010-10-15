@@ -169,7 +169,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Инструменты разработки"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Функции, необходимые только разработчикам приложений."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Доступ к общему накопителю."</string>
+    <!-- outdated translation 5455804353220581312 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Доступ к общему накопителю."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Доступ к SD-карте."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"отключать или изменять строку состояния"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Позволяет приложению отключать строку состояния или добавлять/удалять системные значки."</string>
@@ -321,16 +321,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Позволяет приложению монтировать и удалять файловые системы съемных носителей."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"форматировать внешний накопитель"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Позволяет приложению форматировать съемный накопитель."</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"получать сведения о защищенном хранилище"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"Позволяет программе получать сведения о защищенном хранилище."</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"создать защищенное хранилище"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"Позволяет программам создавать защищенные хранилища."</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"удалять защищенное хранилище"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Позволяет программе удалять защищенные хранилища."</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"подключать / отключать защищенное хранилище"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Позволяет программе подключать и отключать защищенные хранилища."</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"переименовать защищенное хранилище"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Позволяет программам переименовывать защищенные хранилища."</string>
+    <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"получать сведения о защищенном хранилище"</string>
+    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"Позволяет программе получать сведения о защищенном хранилище."</string>
+    <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"создать защищенное хранилище"</string>
+    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"Позволяет программам создавать защищенные хранилища."</string>
+    <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"удалять защищенное хранилище"</string>
+    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Позволяет программе удалять защищенные хранилища."</string>
+    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"подключать / отключать защищенное хранилище"</string>
+    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Позволяет программе подключать и отключать защищенные хранилища."</string>
+    <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"переименовать защищенное хранилище"</string>
+    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Позволяет программам переименовывать защищенные хранилища."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"управлять вибровызовом"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Позволяет приложению управлять виброзвонком."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"управлять вспышкой"</string>
@@ -427,9 +427,9 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"записывать в словарь пользователя"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Позволяет приложению записывать новые слова в словарь пользователя."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"изменять и удалять содержимое общего накопителя"</string>
+    <!-- outdated translation 993707436941016913 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"изменять и удалять содержимое общего накопителя"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"изменять/удалять содержимое SD-карты"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Разрешает приложению запись на общий накопитель."</string>
+    <!-- outdated translation 4131871541127211526 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Разрешает приложению запись на общий накопитель."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Разрешает приложению запись на SD-карту"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"получать доступ к кэшу файловой системы"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Разрешает программам доступ для записи и чтения к кэшу файловой системы."</string>
@@ -802,17 +802,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Показать все"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Запоминающее устройство USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-подключение установлено"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Телефон подключен к компьютеру через порт USB. Для копирования файлов между компьютером и общим накопителем Android нажмите кнопку ниже."</string>
+    <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Телефон подключен к компьютеру через порт USB. Для копирования файлов между компьютером и общим накопителем Android нажмите кнопку ниже."</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Телефон подключен к компьютеру через порт USB. Нажмите кнопку ниже, если необходимо копировать файлы с компьютера на SD-карту устройства Android (или наоборот)."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Включить USB-накопитель"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"При использовании общего накопителя как USB-накопителя возникла ошибка."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"При использовании SD-карты как USB-накопителя возникла неполадка."</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"При использовании общего накопителя как USB-накопителя возникла ошибка."</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"При использовании общего накопителя как USB-накопителя возникла ошибка."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB-подключение установлено"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Выберите копирование файлов на компьютер или с компьютера."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Выключить USB-накопитель"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Выберите, чтобы выключить USB-накопитель."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-накопитель используется"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Перед отключением USB-накопителя убедитесь, что общий накопитель Android был отключен от компьютера."</string>
+    <!-- outdated translation 8745345260780267185 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Перед отключением USB-накопителя убедитесь, что общий накопитель Android был отключен от компьютера."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Перед отключением USB-накопителя убедитесь, что SD-карта устройства Android была отключена от компьютера."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Выключить USB-накопитель"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"При выключении USB-накопителя произошла неполадка. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
@@ -820,9 +820,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"При включении USB-накопителя некоторые используемые приложения могут прекратить работу и оставаться недоступными до отключения USB-накопителя."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Сбой операции USB-подключения"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"Форматировать"</string>
+    <!-- outdated translation 6577908006949742217 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Форматировать"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Очистить SD-карту"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"Форматирование общего накопителя безвозвратно удалит все файлы на нем! Продолжить?"</string>
+    <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Форматирование общего накопителя безвозвратно удалит все файлы на нем! Продолжить?"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Отформатировать карту SD? Все данные, находящиеся на карте, будут уничтожены."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
@@ -831,28 +831,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"варианты"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"Подготавливается общий накопитель"</string>
+    <!-- outdated translation 4239516675028438997 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Подготавливается общий накопитель"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Подготовка карты SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Проверка ошибок."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Нет данных на общем накопителе"</string>
+    <!-- outdated translation 3937345577983730873 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Нет данных на общем накопителе"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Пустая карта SD"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"На общем накопителе нет данных или его файловая система не поддерживается."</string>
+    <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"На общем накопителе нет данных или его файловая система не поддерживается."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD-карта пуста или использует неподдерживаемую файловую систему"</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Общий накопитель поврежден"</string>
+    <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Общий накопитель поврежден"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Поврежденная карта SD"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"Общий накопитель поврежден. Попробуйте отформатировать его."</string>
+    <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Общий накопитель поврежден. Попробуйте отформатировать его."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD-карта повреждена. Попробуйте отформатировать ее."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"Общий накопитель неожиданно отключен"</string>
+    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Общий накопитель неожиданно отключен"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Карта SD неожиданно извлечена"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Перед извлечением общего накопителя отключите его во избежание потери данных."</string>
+    <!-- outdated translation 2005396464494648937 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Перед извлечением общего накопителя отключите его во избежание потери данных."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Перед извлечением карты SD отключите ее во избежание потери данных."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"Общий накопитель безопасно отключен"</string>
+    <!-- outdated translation 36525881018679515 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Общий накопитель безопасно отключен"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Безопасное удаление карты SD"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"Теперь общий накопитель может быть безопасно отключен."</string>
+    <!-- outdated translation 7503769106285188703 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Теперь общий накопитель может быть безопасно отключен."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Можно безопасно извлечь SD-карту."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"Общий накопитель удален"</string>
+    <!-- outdated translation 1874889764367085562 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Общий накопитель удален"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Отсутствует карта SD"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"Общий накопитель отключен. Вставьте другой накопитель."</string>
+    <!-- outdated translation 2730890441331344776 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Общий накопитель отключен. Вставьте другой накопитель."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-карта извлечена. Вставьте новую карту."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Подходящих действий не найдено"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"обновлять статистику использования компонентов"</string>

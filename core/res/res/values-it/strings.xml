@@ -169,7 +169,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Strumenti di sviluppo"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funzionalità necessarie soltanto agli sviluppatori di applicazioni."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Archiviazione"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"Accesso all\'archivio condiviso."</string>
+    <!-- outdated translation 5455804353220581312 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Accesso all\'archivio condiviso."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accesso alla scheda SD."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"disattivare o modificare la barra di stato"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Consente all\'applicazione di disattivare la barra di stato o di aggiungere e rimuovere icone di sistema."</string>
@@ -321,16 +321,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Consente montaggio e smontaggio da parte dell\'applicazione dei filesystem degli archivi rimovibili."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formattazione archivio esterno"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Consente all\'applicazione di formattare l\'archivio rimovibile."</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"recupero di informazioni sull\'archiviazione protetta"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"Consente all\'applicazione di ottenere informazioni sull\'archiviazione protetta."</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"creazione archiviazione protetta"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"Consente all\'applicazione di creare un\'archiviazione protetta."</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"eliminazione archiviazione protetta"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Consente all\'applicazione di eliminare l\'archiviazione protetta."</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"montaggio/smontaggio archiviazione protetta"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Consente all\'applicazione di montare/smontare l\'archiviazione protetta."</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"rinominazione archiviazione protetta"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Consente all\'applicazione di rinominare l\'archiviazione protetta."</string>
+    <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"recupero di informazioni sull\'archiviazione protetta"</string>
+    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"Consente all\'applicazione di ottenere informazioni sull\'archiviazione protetta."</string>
+    <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"creazione archiviazione protetta"</string>
+    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"Consente all\'applicazione di creare un\'archiviazione protetta."</string>
+    <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"eliminazione archiviazione protetta"</string>
+    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Consente all\'applicazione di eliminare l\'archiviazione protetta."</string>
+    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"montaggio/smontaggio archiviazione protetta"</string>
+    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Consente all\'applicazione di montare/smontare l\'archiviazione protetta."</string>
+    <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"rinominazione archiviazione protetta"</string>
+    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Consente all\'applicazione di rinominare l\'archiviazione protetta."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"controllo vibrazione"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Consente all\'applicazione di controllare la vibrazione."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"controllo flash"</string>
@@ -427,9 +427,9 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Consente a un\'applicazione di leggere parole, nomi e frasi private che l\'utente potrebbe aver memorizzato nel dizionario utente."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"scrittura nel dizionario definito dall\'utente"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Consente a un\'applicazione di scrivere nuove parole nel dizionario utente."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"modifica/eliminaz. contenuti arch. cond."</string>
+    <!-- outdated translation 993707436941016913 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modifica/eliminaz. contenuti arch. cond."</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificare/eliminare i contenuti della scheda SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"Consente a un\'applicazione di scrivere nell\'arch. cond."</string>
+    <!-- outdated translation 4131871541127211526 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Consente a un\'applicazione di scrivere nell\'arch. cond."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Consente a un\'applicazione di scrivere sulla scheda SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accesso al filesystem nella cache"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Consente a un\'applicazione di leggere e scrivere il filesystem nella cache."</string>
@@ -802,17 +802,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostra tutto"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Archiviazione di massa USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB collegata"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"Il telefono è stato collegato al computer tramite USB. Seleziona il pulsante sottostante se desideri copiare file tra il computer e l\'archivio condiviso di Android."</string>
+    <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Il telefono è stato collegato al computer tramite USB. Seleziona il pulsante sottostante se desideri copiare file tra il computer e l\'archivio condiviso di Android."</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Il telefono è stato collegato al computer tramite USB. Seleziona il pulsante sottostante se desideri copiare file tra il computer e la scheda SD di Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Attiva archivio USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"Problema di utilizzo dell\'archivio condiviso per l\'archiviazione USB."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"Problema di utilizzo della scheda SD per l\'archiviazione USB."</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Problema di utilizzo dell\'archivio condiviso per l\'archiviazione USB."</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Problema di utilizzo dell\'archivio condiviso per l\'archiviazione USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB collegata"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Seleziona per copiare file sul/dal tuo computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Disattiva archivio USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Seleziona per disattivare archivio USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"Archiviazione USB in uso"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"Prima di disattivare l\'archiviazione USB, assicurati di avere smontato (\"espulso\") l\'archivio condiviso di Android dal computer."</string>
+    <!-- outdated translation 8745345260780267185 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Prima di disattivare l\'archiviazione USB, assicurati di avere smontato (\"espulso\") l\'archivio condiviso di Android dal computer."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Prima di disattivare l\'archiviazione USB, assicurati di avere smontato (\"espulso\") la scheda SD di Android dal computer."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Disattiva archiviazione USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Si è verificato un problema durante la disattivazione dell\'archiviazione USB. Verifica di avere smontato l\'host USB e riprova."</string>
@@ -820,9 +820,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Se attivi l\'archivio USB, alcune applicazioni in uso si bloccheranno e potrebbero risultare non disponibili finché non disattiverai l\'archivio USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Operazione USB non riuscita"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"Formatta archivio cond."</string>
+    <!-- outdated translation 6577908006949742217 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatta archivio cond."</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatta scheda SD"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"Formattare l\'archivio condiviso cancellando tutti i file memorizzati al suo interno? Questa azione è irreversibile."</string>
+    <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Formattare l\'archivio condiviso cancellando tutti i file memorizzati al suo interno? Questa azione è irreversibile."</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Formattare la scheda SD? Tutti i dati sulla scheda verranno persi."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatta"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
@@ -831,28 +831,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidati"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"Preparazione archivio condiviso"</string>
+    <!-- outdated translation 4239516675028438997 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Preparazione archivio condiviso"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Preparazione scheda SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Ricerca errori."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"Archivio condiviso vuoto"</string>
+    <!-- outdated translation 3937345577983730873 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Archivio condiviso vuoto"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Scheda SD vuota"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"Archivio condiviso vuoto o con filesystem non supportato."</string>
+    <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Archivio condiviso vuoto o con filesystem non supportato."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"Scheda SD vuota o con filesystem non supportato."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"Archivio condiviso danneggiato"</string>
+    <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Archivio condiviso danneggiato"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Scheda SD danneggiata"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"Archivio condiviso danneggiato. Potrebbe essere necessario riformattarlo."</string>
+    <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Archivio condiviso danneggiato. Potrebbe essere necessario riformattarlo."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Scheda SD danneggiata. Potrebbe essere necessario riformattarla."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"Rimozione inaspettata archivio cond."</string>
+    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Rimozione inaspettata archivio cond."</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Rimozione imprevista della scheda SD"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"Smonta l\'archivio condiviso prima della rimozione per evitare la perdita di dati."</string>
+    <!-- outdated translation 2005396464494648937 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Smonta l\'archivio condiviso prima della rimozione per evitare la perdita di dati."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Smonta scheda SD prima della rimozione per evitare la perdita di dati."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"Puoi rimuovere l\'archivio cond."</string>
+    <!-- outdated translation 36525881018679515 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Puoi rimuovere l\'archivio cond."</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"È possibile rimuovere la scheda SD"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"Puoi rimuovere l\'archivio condiviso in tutta sicurezza."</string>
+    <!-- outdated translation 7503769106285188703 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Puoi rimuovere l\'archivio condiviso in tutta sicurezza."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Puoi rimuovere la scheda SD in tutta sicurezza."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"Archivio condiviso rimosso"</string>
+    <!-- outdated translation 1874889764367085562 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Archivio condiviso rimosso"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Scheda SD rimossa"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"Archivio condiviso rimosso. Inserisci un nuovo supporto."</string>
+    <!-- outdated translation 2730890441331344776 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Archivio condiviso rimosso. Inserisci un nuovo supporto."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Scheda SD rimossa. Inseriscine un\'altra."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Nessuna attività corrispondente trovata"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"aggiornare le statistiche di utilizzo dei componenti"</string>
