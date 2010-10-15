@@ -34,8 +34,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.RemotableViewMethod;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.RemoteViews.RemoteView;
 
 

@@ -597,8 +597,10 @@ void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
 }
 
 void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
-    mat4 m(*matrix);
-    mSnapshot->transform->multiply(m);
+    SkMatrix transform;
+    mSnapshot->transform->copyTo(transform);
+    transform.preConcat(*matrix);
+    mSnapshot->transform->load(transform);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -606,7 +608,8 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-    const Rect& clip = *mSnapshot->clipRect;
+    Rect clip(*mSnapshot->clipRect);
+    clip.snapToPixelBoundaries();
     glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 

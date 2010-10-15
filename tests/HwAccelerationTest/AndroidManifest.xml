@@ -40,8 +40,27 @@
         </activity>
         
         <activity
+                android:name="Bitmaps3dActivity"
+                android:label="_Bitmaps3d">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
                 android:name="LabelsActivity"
                 android:label="_Labels">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+            <activity
+                android:name="ViewFlipperActivity"
+                android:label="_ViewFlipper"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
