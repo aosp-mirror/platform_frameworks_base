@@ -125,6 +125,8 @@ extern int register_android_database_SQLiteQuery(JNIEnv* env);
 extern int register_android_database_SQLiteStatement(JNIEnv* env);
 extern int register_android_debug_JNITest(JNIEnv* env);
 extern int register_android_nio_utils(JNIEnv* env);
+extern int register_android_nfc_NdefMessage(JNIEnv *env);
+extern int register_android_nfc_NdefRecord(JNIEnv *env);
 extern int register_android_pim_EventRecurrence(JNIEnv* env);
 extern int register_android_text_format_Time(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
@@ -168,18 +170,6 @@ extern int register_android_view_KeyEvent(JNIEnv* env);
 extern int register_android_view_MotionEvent(JNIEnv* env);
 extern int register_android_content_res_ObbScanner(JNIEnv* env);
 extern int register_android_content_res_Configuration(JNIEnv* env);
-
-#ifdef HAVE_NFC
-extern int register_com_trustedlogic_trustednfc_android_internal_NativeNfcManager(JNIEnv *env);
-extern int register_com_trustedlogic_trustednfc_android_internal_NativeNfcTag(JNIEnv *env);
-extern int register_com_trustedlogic_trustednfc_android_internal_NativeNdefTag(JNIEnv *env);
-extern int register_com_trustedlogic_trustednfc_android_NdefMessage(JNIEnv *env);
-extern int register_com_trustedlogic_trustednfc_android_NdefRecord(JNIEnv *env);
-extern int register_com_trustedlogic_trustednfc_android_internal_NativeP2pDevice(JNIEnv *env);
-extern int register_com_trustedlogic_trustednfc_android_internal_NativeLlcpSocket(JNIEnv *env);
-extern int register_com_trustedlogic_trustednfc_android_internal_NativeLlcpConnectionlessSocket(JNIEnv *env);
-extern int register_com_trustedlogic_trustednfc_android_internal_NativeLlcpServiceSocket(JNIEnv *env);
-#endif
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -1263,6 +1253,8 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_net_NetworkUtils),
     REG_JNI(register_android_net_TrafficStats),
     REG_JNI(register_android_net_wifi_WifiManager),
+    REG_JNI(register_android_nfc_NdefMessage),
+    REG_JNI(register_android_nfc_NdefRecord),
     REG_JNI(register_android_os_MemoryFile),
     REG_JNI(register_com_android_internal_os_ZygoteInit),
     REG_JNI(register_android_hardware_Camera),
@@ -1297,18 +1289,6 @@ static const RegJNIRec gRegJNI[] = {
 
     REG_JNI(register_android_content_res_ObbScanner),
     REG_JNI(register_android_content_res_Configuration),
-
-#ifdef HAVE_NFC
-    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeNfcManager),
-    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeNfcTag),
-    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeNdefTag),
-    REG_JNI(register_com_trustedlogic_trustednfc_android_NdefMessage),
-    REG_JNI(register_com_trustedlogic_trustednfc_android_NdefRecord),
-    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeP2pDevice),
-    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeLlcpSocket),
-    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeLlcpConnectionlessSocket),
-    REG_JNI(register_com_trustedlogic_trustednfc_android_internal_NativeLlcpServiceSocket),
-#endif
 };
 
 /*

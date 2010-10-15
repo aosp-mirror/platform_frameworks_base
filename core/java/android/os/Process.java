@@ -86,6 +86,12 @@ public class Process {
     public static final int WIFI_UID = 1010;
 
     /**
+     * Defines the UID/GID for the NFC service process.
+     * @hide
+     */
+    public static final int NFC_UID = 1022;
+
+    /**
      * Defines the start of a range of UIDs (and GIDs), going from this
      * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
      * to applications.
