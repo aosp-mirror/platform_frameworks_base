@@ -132,8 +132,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private LinkProperties mLinkProperties;
 
-    // Held during driver load and unload
-    private static PowerManager.WakeLock sWakeLock;
+    // Wakelock held during wifi start/stop and driver load/unload
+    private PowerManager.WakeLock mWakeLock;
 
     private Context mContext;
 
@@ -469,7 +469,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         };
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        sWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         addState(mDefaultState);
             addState(mInitialState, mDefaultState);
@@ -624,11 +624,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * TODO: doc
      */
     public void setDriverStart(boolean enable) {
-      if (enable) {
-          sendMessage(CMD_START_DRIVER);
-      } else {
-          sendMessage(CMD_STOP_DRIVER);
-      }
+        if (enable) {
+            sendMessage(CMD_START_DRIVER);
+        } else {
+            sendMessage(CMD_STOP_DRIVER);
+        }
     }
 
     /**
@@ -951,6 +951,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         mReportedRunning = false;
                     }
                 }
+                mWakeLock.setWorkSource(newSource);
             } catch (RemoteException ignore) {
             }
         }
@@ -1678,7 +1679,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
              */
             new Thread(new Runnable() {
                 public void run() {
-                    sWakeLock.acquire();
+                    mWakeLock.acquire();
                     //enabling state
                     switch(message.arg1) {
                         case WIFI_STATE_ENABLING:
@@ -1704,7 +1705,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         }
                         sendMessage(CMD_LOAD_DRIVER_FAILURE);
                     }
-                    sWakeLock.release();
+                    mWakeLock.release();
                 }
             }).start();
         }
@@ -1802,7 +1803,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             new Thread(new Runnable() {
                 public void run() {
                     if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-                    sWakeLock.acquire();
+                    mWakeLock.acquire();
                     if(WifiNative.unloadDriver()) {
                         Log.d(TAG, "Driver unload successful");
                         sendMessage(CMD_UNLOAD_DRIVER_SUCCESS);
@@ -1832,7 +1833,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                                 break;
                         }
                     }
-                    sWakeLock.release();
+                    mWakeLock.release();
                 }
             }).start();
         }
@@ -1936,7 +1937,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     checkIsBluetoothPlaying();
 
                     sendSupplicantConnectionChangedBroadcast(true);
-                    transitionTo(mDriverSupReadyState);
+                    transitionTo(mDriverStartedState);
                     break;
                 case SUP_DISCONNECTION_EVENT:
                     Log.e(TAG, "Failed to setup control channel, restart supplicant");
@@ -2003,11 +2004,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     mSupplicantStateTracker.resetSupplicantState();
                     transitionTo(mDriverLoadedState);
                     sendMessageAtFrontOfQueue(CMD_START_SUPPLICANT); /* restart */
-                    break;
-                case CMD_START_DRIVER:
-                    EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    WifiNative.startDriverCommand();
-                    transitionTo(mDriverStartingState);
                     break;
                 case SCAN_RESULTS_EVENT:
                     setScanResults(WifiNative.scanResultsCommand());
@@ -2185,12 +2181,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     mNumAllowedChannels = message.arg1;
                     WifiNative.setNumAllowedChannelsCommand(message.arg1);
                     break;
-                case CMD_START_DRIVER:
-                    /* Ignore another driver start */
-                    break;
                 case CMD_STOP_DRIVER:
+                    mWakeLock.acquire();
                     WifiNative.stopDriverCommand();
                     transitionTo(mDriverStoppingState);
+                    mWakeLock.release();
                     break;
                 case CMD_REQUEST_CM_WAKELOCK:
                     if (mCm == null) {
@@ -2266,7 +2261,18 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-            return NOT_HANDLED;
+            switch (message.what) {
+                case CMD_START_DRIVER:
+                    mWakeLock.acquire();
+                    WifiNative.startDriverCommand();
+                    transitionTo(mDriverStartingState);
+                    mWakeLock.release();
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
         }
     }
 

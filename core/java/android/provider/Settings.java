@@ -3297,6 +3297,14 @@ public final class Settings {
         public static final String WIFI_IDLE_MS = "wifi_idle_ms";
 
         /**
+         * The interval in milliseconds to issue scans when the driver is
+         * started. This is necessary to allow wifi to connect to an
+         * access point when the driver is suspended.
+         * @hide
+         */
+        public static final String WIFI_SCAN_INTERVAL_MS = "wifi_scan_interval_ms";
+
+        /**
          * The interval in milliseconds at which to check packet counts on the
          * mobile data interface when screen is on, to detect possible data
          * connection problems.
