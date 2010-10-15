@@ -13,6 +13,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	Main.cpp
 
+LOCAL_CFLAGS := -Wall -Werror
+
 #LOCAL_C_INCLUDES +=
 
 LOCAL_STATIC_LIBRARIES := \
@@ -24,6 +26,20 @@ LOCAL_LDLIBS += -lpthread
 endif
 
 LOCAL_MODULE := obbtool
+
+include $(BUILD_HOST_EXECUTABLE)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := pbkdf2gen
+
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_CFLAGS := -Wall -Werror
+
+LOCAL_SRC_FILES := pbkdf2gen.cpp
+
+LOCAL_SHARED_LIBRARIES := libcrypto
 
 include $(BUILD_HOST_EXECUTABLE)
 

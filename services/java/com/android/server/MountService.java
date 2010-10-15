@@ -17,7 +17,6 @@
 package com.android.server;
 
 import com.android.internal.app.IMediaContainerService;
-import com.android.internal.util.HexDump;
 import com.android.server.am.ActivityManagerService;
 
 import android.content.BroadcastReceiver;
@@ -46,13 +45,15 @@ import android.os.storage.IMountShutdownObserver;
 import android.os.storage.IObbActionListener;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageResultCode;
-import android.security.MessageDigest;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,6 +62,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 /**
  * MountService implements back-end services for platform storage
@@ -154,6 +159,18 @@ class MountService extends IMountService.Stub
      * Used as a lock in methods to manipulate secure containers.
      */
     final private HashSet<String> mAsecMountSet = new HashSet<String>();
+
+    /**
+     * The size of the crypto algorithm key in bits for OBB files. Currently
+     * Twofish is used which takes 128-bit keys.
+     */
+    private static final int CRYPTO_ALGORITHM_KEY_SIZE = 128;
+
+    /**
+     * The number of times to run SHA1 in the PBKDF2 function for OBB files.
+     * 1024 is reasonably secure and not too slow.
+     */
+    private static final int PBKDF2_HASH_ROUNDS = 1024;
 
     /**
      * Mounted OBB tracking information. Used to track the current state of all
@@ -1916,16 +1933,23 @@ class MountService extends IMountService.Stub
             if (mKey == null) {
                 hashedKey = "none";
             } else {
-                final MessageDigest md;
                 try {
-                    md = MessageDigest.getInstance("MD5");
+                    SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+
+                    KeySpec ks = new PBEKeySpec(mKey.toCharArray(), obbInfo.salt,
+                            PBKDF2_HASH_ROUNDS, CRYPTO_ALGORITHM_KEY_SIZE);
+                    SecretKey key = factory.generateSecret(ks);
+                    BigInteger bi = new BigInteger(key.getEncoded());
+                    hashedKey = bi.toString(16);
                 } catch (NoSuchAlgorithmException e) {
-                    Slog.e(TAG, "Could not load MD5 algorithm", e);
-                    sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_PERMISSION_DENIED);
+                    Slog.e(TAG, "Could not load PBKDF2 algorithm", e);
+                    sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
+                    return;
+                } catch (InvalidKeySpecException e) {
+                    Slog.e(TAG, "Invalid key spec when loading PBKDF2 algorithm", e);
+                    sendNewStatusOrIgnore(OnObbStateChangeListener.ERROR_INTERNAL);
                     return;
                 }
-
-                hashedKey = HexDump.toHexString(md.digest(mKey.getBytes()));
             }
 
             int rc = StorageResultCode.OperationSucceeded;
