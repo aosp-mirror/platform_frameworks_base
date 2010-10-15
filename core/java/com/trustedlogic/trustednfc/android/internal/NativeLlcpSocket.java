@@ -25,29 +25,29 @@ package com.trustedlogic.trustednfc.android.internal;
 /**
  * LlcpClientSocket represents a LLCP Connection-Oriented client to be used in a
  * connection-oriented communication
- * {@hide}
+ * @hide
  */
 
 public class NativeLlcpSocket {
-	
-	private int mHandle;
-	
-	private int mSap;
-	
-	private int mLocalMiu;
-	
-	private int mLocalRw;
-	
+
+    private int mHandle;
+
+    private int mSap;
+
+    private int mLocalMiu;
+
+    private int mLocalRw;
+
     private int mTimeout;
-    
+
     public NativeLlcpSocket(){
-    	
+
     }
-    
+
     public NativeLlcpSocket(int sap, int miu, int rw){
-    	mSap = sap;
-    	mLocalMiu = miu;
-    	mLocalRw = rw;
+        mSap = sap;
+        mLocalMiu = miu;
+        mLocalRw = rw;
     }
 
     public native boolean doConnect(int nSap, int timeout);
@@ -59,35 +59,35 @@ public class NativeLlcpSocket {
     public native boolean doSend(byte[] data);
 
     public native int doReceive(byte[] recvBuff);
-    
+
     public native int doGetRemoteSocketMiu();
-    
+
     public native int doGetRemoteSocketRw();
-    
-    
-    
+
+
+
     public void setConnectTimeout(int timeout){
-    	mTimeout = timeout;
+        mTimeout = timeout;
     }
-    
+
     public int getConnectTimeout(){
-    	return mTimeout;
+        return mTimeout;
     }
-    
+
     public int getSap(){
-    	return mSap;
+        return mSap;
     }
-    
+
     public int getMiu(){
-    	return mLocalMiu;
+        return mLocalMiu;
     }
-    
+
     public int getRw(){
-    	return mLocalRw;
+        return mLocalRw;
     }
-    
+
     public int getHandle(){
-    	return mHandle;
+        return mHandle;
     }
 
 }

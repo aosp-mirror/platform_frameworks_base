@@ -24,52 +24,52 @@ package com.trustedlogic.trustednfc.android.internal;
 
 /**
  * Native interface to the P2P Initiator functions
- * 
- * {@hide}
+ *
+ * @hide
  */
 public class NativeP2pDevice {
-	
-	/**
-	* Peer-to-Peer Target.
-	*/
-	public static final short MODE_P2P_TARGET          = 0x00;
 
-	/**
-	* Peer-to-Peer Initiator.
-	*/
-	public static final short MODE_P2P_INITIATOR       = 0x01;
+    /**
+    * Peer-to-Peer Target.
+    */
+    public static final short MODE_P2P_TARGET          = 0x00;
 
-	/**
-	* Invalid target type.
-	*/
-	public static final short MODE_INVALID			   = 0xff;
+    /**
+    * Peer-to-Peer Initiator.
+    */
+    public static final short MODE_P2P_INITIATOR       = 0x01;
 
-	private int mHandle;
+    /**
+    * Invalid target type.
+    */
+    public static final short MODE_INVALID             = 0xff;
 
-	private int mMode;
+    private int mHandle;
 
-	private byte[] mGeneralBytes;
+    private int mMode;
 
-	public native byte[] doReceive();
+    private byte[] mGeneralBytes;
 
-	public native boolean doSend(byte[] data);
+    public native byte[] doReceive();
 
-	public native boolean doConnect();
+    public native boolean doSend(byte[] data);
 
-	public native boolean doDisconnect();
+    public native boolean doConnect();
 
-	public native byte[] doTransceive(byte[] data);
-	
-	public int getHandle() {
-		return mHandle;
-	}
+    public native boolean doDisconnect();
 
-	public int getMode() {
-		return mMode;
-	}
+    public native byte[] doTransceive(byte[] data);
 
-	public byte[] getGeneralBytes() {
-		return mGeneralBytes;
-	}
+    public int getHandle() {
+        return mHandle;
+    }
+
+    public int getMode() {
+        return mMode;
+    }
+
+    public byte[] getGeneralBytes() {
+        return mGeneralBytes;
+    }
 
 }

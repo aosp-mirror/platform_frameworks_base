@@ -23,14 +23,14 @@ package com.trustedlogic.trustednfc.android;
 
 import java.io.IOException;
 
-import com.trustedlogic.trustednfc.android.internal.ErrorCodes;
-
+import android.nfc.ErrorCodes;
+import android.nfc.IP2pTarget;
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
  * P2pTarget represents the target in an NFC-IP1 peer-to-peer communication.
- * 
+ *
  * @see P2pInitiator
  * @since AA02.01
  * @hide
@@ -43,27 +43,27 @@ public class P2pTarget extends P2pDevice {
      * The entry point for P2P tag operations.
      * @hide
      */
-	private IP2pTarget mService;
-	
+	private final IP2pTarget mService;
+
     /**
      * Flag set when the object is closed and thus not usable any more.
      * @hide
      */
-	private boolean isClosed = false;
-	
+	private final boolean isClosed = false;
+
     /**
      * Flag set when the tag is connected.
      * @hide
      */
 	private boolean isConnected = false;
-	
+
     /**
      * Check if tag is still opened.
-     * 
+     *
      * @return data sent by the P2pInitiator.
      * @throws NfcException if accessing a closed target.
-     * 
-     * @hide          
+     *
+     * @hide
      */
     public void checkState() throws NfcException {
     	if(isClosed) {
@@ -73,21 +73,21 @@ public class P2pTarget extends P2pDevice {
 
     /**
      * Internal constructor for the P2pTarget class.
-     * 
+     *
      * @param handle The handle returned by the NFC service and used to identify
      * 				 the tag in subsequent calls.
-     * 
+     *
      * @hide
      */
     P2pTarget(IP2pTarget service, int handle) {
         this.mService = service;
         this.mHandle = handle;
-    }	
+    }
 
     /**
      * Connects to the P2pTarget. This shall be called prior to any other
      * operation on the P2pTarget.
-     * 
+     *
      * @throws NfcException
      */
     public void connect() throws NfcException {
@@ -96,7 +96,7 @@ public class P2pTarget extends P2pDevice {
     	if (isConnected) {
     		throw new NfcException("Already connected");
     	}
-    	
+
     	// Perform connect
         try {
             int result = mService.connect(mHandle);
@@ -105,7 +105,8 @@ public class P2pTarget extends P2pDevice {
                     throw new NfcException("Failed to connect");
                 }
                 else {
-                    throw NfcManager.convertErrorToNfcException(result);
+      //              TODO(nxp)
+     //               throw NfcAdapter.convertErrorToNfcException(result);
                 }
             }
             isConnected = true;
@@ -117,7 +118,7 @@ public class P2pTarget extends P2pDevice {
     /**
      * Disconnects from the P2p Target. This must be called so that other
      * targets can be discovered. It restarts the NFC discovery loop.
-     * 
+     *
      * @throws NFCException
      */
     public void disconnect() throws NfcException {
@@ -132,7 +133,7 @@ public class P2pTarget extends P2pDevice {
 
     /**
      * Exchanges raw data with the P2pTarget.
-     * 
+     *
      * @param data data to be sent to the P2pTarget
      * @return data sent in response by the P2pTarget
      * @throws IOException if the target has been lost or the connection has
@@ -158,10 +159,11 @@ public class P2pTarget extends P2pDevice {
 
     /**
      * Get the General bytes of the connected P2P Target
-     * 
+     *
      * @return general bytes of the connected P2P Target
      * @throws IOException if the target in not in connected state
      */
+    @Override
     public byte[] getGeneralBytes() throws IOException {
         try {
             if(isConnected){

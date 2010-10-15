@@ -88,9 +88,10 @@
     <protected-broadcast android:name="android.hardware.action.USB_CAMERA_ATTACHED" />
     <protected-broadcast android:name="android.hardware.action.USB_CAMERA_DETACHED" />
 
-    <protected-broadcast android:name="com.trustedlogic.trustednfc.android.action.NDEF_TAG_DISCOVERED" />
-    <protected-broadcast android:name="com.trustedlogic.trustednfc.android.action.TRANSACTION_DETECTED" />
-    <protected-broadcast android:name="com.trustedlogic.trustednfc.android.action.LLCP_LINK_STATE_CHANGED" />
+    <protected-broadcast android:name="android.nfc.action.NDEF_TAG_DISCOVERED" />
+    <protected-broadcast android:name="android.nfc.action.TAG_DISCOVERED" />
+    <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
+    <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
