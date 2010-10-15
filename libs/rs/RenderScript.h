@@ -27,6 +27,8 @@ extern "C" {
 //////////////////////////////////////////////////////
 //
 
+typedef void * RsAsyncVoidPtr;
+
 typedef void * RsAdapter1D;
 typedef void * RsAdapter2D;
 typedef void * RsAllocation;
@@ -283,6 +285,11 @@ typedef struct {
     uint32_t arrayEnd;
 
 } RsScriptCall;
+
+
+// Async commands for returning new IDS
+void * rsaTypeCreate(RsContext, RsElement, uint32_t dimCount,
+                     const RsDimension *dims, const uint32_t *vals);
 
 
 #ifndef NO_RS_FUNCS

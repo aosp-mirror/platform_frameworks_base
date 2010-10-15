@@ -15,6 +15,8 @@
  */
 
 #include "rsLocklessFifo.h"
+#include "utils/Timers.h"
+#include "utils/StopWatch.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -115,6 +117,10 @@ void LocklessCommandFifo::commitSync(uint32_t command, uint32_t sizeInBytes)
     if (mInShutdown) {
         return;
     }
+
+    //char buf[1024];
+    //sprintf(buf, "RenderScript LocklessCommandFifo::commitSync  %p %i  %i", this, command, sizeInBytes);
+    //StopWatch compileTimer(buf);
     commit(command, sizeInBytes);
     flush();
 }

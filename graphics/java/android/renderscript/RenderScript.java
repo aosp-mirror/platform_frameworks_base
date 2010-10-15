@@ -178,17 +178,9 @@ public class RenderScript {
         rsnElementGetSubElements(mContext, id, IDs, names);
     }
 
-    native void rsnTypeBegin(int con, int elementID);
-    synchronized void nTypeBegin(int elementID) {
-        rsnTypeBegin(mContext, elementID);
-    }
-    native void rsnTypeAdd(int con, int dim, int val);
-    synchronized void nTypeAdd(int dim, int val) {
-        rsnTypeAdd(mContext, dim, val);
-    }
-    native int  rsnTypeCreate(int con);
-    synchronized int nTypeCreate() {
-        return rsnTypeCreate(mContext);
+    native int rsnTypeCreate(int con, int eid, int[] dims, int[] vals);
+    synchronized int nTypeCreate(int eid, int[] dims, int[] vals) {
+        return rsnTypeCreate(mContext, eid, dims, vals);
     }
     native void rsnTypeGetNativeData(int con, int id, int[] typeData);
     synchronized void nTypeGetNativeData(int id, int[] typeData) {
