@@ -1683,6 +1683,7 @@ status_t SurfaceFlinger::renderScreenToTextureLocked(DisplayID dpy,
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
             hw_w, hw_h, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
     if (glGetError() != GL_NO_ERROR) {
+        while ( glGetError() != GL_NO_ERROR ) ;
         GLint tw = (2 << (31 - clz(hw_w)));
         GLint th = (2 << (31 - clz(hw_h)));
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
@@ -2014,11 +2015,9 @@ status_t SurfaceFlinger::turnElectronBeamOffImplLocked()
         // we're already off
         return NO_ERROR;
     }
-    status_t result = electronBeamOffAnimationImplLocked();
-    if (result == NO_ERROR) {
-        hw.setCanDraw(false);
-    }
-    return result;
+    electronBeamOffAnimationImplLocked();
+    hw.setCanDraw(false);
+    return NO_ERROR;
 }
 
 status_t SurfaceFlinger::turnElectronBeamOff(int32_t mode)
@@ -2065,11 +2064,9 @@ status_t SurfaceFlinger::turnElectronBeamOnImplLocked()
         // we're already on
         return NO_ERROR;
     }
-    status_t result = electronBeamOnAnimationImplLocked();
-    if (result == NO_ERROR) {
-        hw.setCanDraw(true);
-    }
-    return result;
+    electronBeamOnAnimationImplLocked();
+    hw.setCanDraw(true);
+    return NO_ERROR;
 }
 
 status_t SurfaceFlinger::turnElectronBeamOn(int32_t mode)
