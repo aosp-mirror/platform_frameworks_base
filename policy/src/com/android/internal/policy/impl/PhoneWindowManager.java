@@ -96,6 +96,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
@@ -163,6 +164,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int DRAG_LAYER = 16;
     // things in here CAN NOT take focus, but are shown on top of everything else.
     static final int SYSTEM_OVERLAY_LAYER = 17;
+    static final int SECURE_SYSTEM_OVERLAY_LAYER = 18;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -691,7 +693,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
-            lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+            lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
             lp.flags = 
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE|
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
@@ -787,6 +789,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void adjustWindowParamsLw(WindowManager.LayoutParams attrs) {
         switch (attrs.type) {
             case TYPE_SYSTEM_OVERLAY:
+            case TYPE_SECURE_SYSTEM_OVERLAY:
             case TYPE_TOAST:
                 // These types of windows can't receive input events.
                 attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -864,6 +867,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return INPUT_METHOD_DIALOG_LAYER;
         case TYPE_SYSTEM_OVERLAY:
             return SYSTEM_OVERLAY_LAYER;
+        case TYPE_SECURE_SYSTEM_OVERLAY:
+            return SECURE_SYSTEM_OVERLAY_LAYER;
         case TYPE_PRIORITY_PHONE:
             return PRIORITY_PHONE_LAYER;
         case TYPE_TOAST:
