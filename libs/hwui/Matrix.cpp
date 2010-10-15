@@ -87,7 +87,7 @@ void Matrix4::load(const SkMatrix& v) {
 
     data[kScaleZ] = 1.0f;
 
-    mSimpleMatrix = (v.getType() <= SkMatrix::kScale_Mask);
+    mSimpleMatrix = (v.getType() <= (SkMatrix::kScale_Mask | SkMatrix::kTranslate_Mask));
 }
 
 void Matrix4::copyTo(SkMatrix& v) const {

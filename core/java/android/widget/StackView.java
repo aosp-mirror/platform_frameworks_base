@@ -16,10 +16,9 @@
 
 package android.widget;
 
-import android.animation.PropertyValuesHolder;
 import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
@@ -31,15 +30,12 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.TableMaskFilter;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.LinearInterpolator;
 import android.widget.RemoteViews.RemoteView;
 
@@ -54,13 +50,14 @@ public class StackView extends AdapterViewAnimator {
     /**
      * Default animation parameters
      */
-    private final int DEFAULT_ANIMATION_DURATION = 400;
-    private final int MINIMUM_ANIMATION_DURATION = 50;
+    private static final int DEFAULT_ANIMATION_DURATION = 400;
+    private static final int MINIMUM_ANIMATION_DURATION = 50;
 
     /**
      * Parameters effecting the perspective visuals
      */
     private static float PERSPECTIVE_SHIFT_FACTOR = 0.12f;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private static float PERSPECTIVE_SCALE_FACTOR = 0.35f;
 
     /**
@@ -182,7 +179,6 @@ public class StackView extends AdapterViewAnimator {
             // Slide item in
             view.setVisibility(VISIBLE);
 
-            LayoutParams lp = (LayoutParams) view.getLayoutParams();
             int duration = Math.round(mStackSlider.getDurationForNeutralPosition(mYVelocity));
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
@@ -195,8 +191,6 @@ public class StackView extends AdapterViewAnimator {
             pa.start();
         } else if (fromIndex == mNumActiveViews - 2 && toIndex == mNumActiveViews - 1) {
             // Slide item out
-            LayoutParams lp = (LayoutParams) view.getLayoutParams();
-
             int duration = Math.round(mStackSlider.getDurationForOffscreenPosition(mYVelocity));
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
@@ -730,10 +724,14 @@ public class StackView extends AdapterViewAnimator {
             return 0;
         }
 
+        // Used for animations
+        @SuppressWarnings({"UnusedDeclaration"})
         public float getYProgress() {
             return mYProgress;
         }
 
+        // Used for animations
+        @SuppressWarnings({"UnusedDeclaration"})
         public float getXProgress() {
             return mXProgress;
         }
