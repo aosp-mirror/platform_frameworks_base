@@ -126,9 +126,9 @@ public final class SipService extends ISipService.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mScreenOn = true;
-            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 mScreenOn = false;
+            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                mScreenOn = true;
             }
         }
     };
