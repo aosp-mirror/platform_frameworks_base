@@ -149,7 +149,8 @@ bool InputWindow::frameContainsPoint(int32_t x, int32_t y) const {
 
 bool InputWindow::isTrustedOverlay() const {
     return layoutParamsType == TYPE_INPUT_METHOD
-            || layoutParamsType == TYPE_INPUT_METHOD_DIALOG;
+            || layoutParamsType == TYPE_INPUT_METHOD_DIALOG
+            || layoutParamsType == TYPE_SECURE_SYSTEM_OVERLAY;
 }
 
 
@@ -1350,7 +1351,7 @@ void InputDispatcher::addMonitoringTargetsLocked() {
         target.flags = 0;
         target.xOffset = 0;
         target.yOffset = 0;
-        target.windowType = InputWindow::TYPE_SYSTEM_OVERLAY;
+        target.windowType = -1;
     }
 }
 
