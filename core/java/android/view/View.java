@@ -9854,6 +9854,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mView = new WeakReference<View>(view);
         }
 
+        final public View getView() {
+            return mView.get();
+        }
+
         /**
          * Provide the draggable-thumbnail metrics for the operation: the dimensions of
          * the thumbnail image itself, and the point within that thumbnail that should
@@ -9932,6 +9936,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (token != null) {
                 Canvas canvas = surface.lockCanvas(null);
                 try {
+                    canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                     thumbBuilder.onDrawThumbnail(canvas);
                 } finally {
                     surface.unlockCanvasAndPost(canvas);
