@@ -153,7 +153,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
             DropdownPopup popup = new DropdownPopup(context, attrs, defStyle, hintResource);
 
-            popup.setWidth(a.getDimensionPixelSize(
+            popup.setWidth(a.getLayoutDimension(
                     com.android.internal.R.styleable.Spinner_dropDownWidth,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
             popup.setBackgroundDrawable(a.getDrawable(
