@@ -118,6 +118,7 @@ private:
     status_t startAMRRecording();
     status_t startAACRecording();
     status_t startRTPRecording();
+    status_t startMPEG2TSRecording();
     sp<MediaSource> createAudioSource();
     status_t checkVideoEncoderCapabilities();
     status_t setupCameraSource(sp<CameraSource> *cameraSource);
