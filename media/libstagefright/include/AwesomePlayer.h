@@ -154,6 +154,8 @@ private:
     bool mSeekNotificationSent;
     int64_t mSeekTimeUs;
 
+    int64_t mBitrate;  // total bitrate of the file (in bps) or -1 if unknown.
+
     bool mWatchForAudioSeekComplete;
     bool mWatchForAudioEOS;
 
@@ -256,6 +258,8 @@ private:
 
     static void OnRTSPSeekDoneWrapper(void *cookie);
     void onRTSPSeekDone();
+
+    bool getBitrate(int64_t *bitrate);
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
