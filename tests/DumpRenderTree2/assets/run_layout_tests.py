@@ -18,6 +18,8 @@ import subprocess
 import tempfile
 import webbrowser
 
+import run_apache2
+
 #TODO: These should not be hardcoded
 RESULTS_ABSOLUTE_PATH = "/sdcard/layout-test-results/"
 DETAILS_HTML = "details.html"
@@ -33,16 +35,9 @@ def main(options, args):
 
   tmpdir = tempfile.gettempdir()
 
-  if options.tests_root_directory != None:
-    # if options.tests_root_directory is absolute, os.getcwd() is discarded!
-    tests_root_directory = os.path.normpath(os.path.join(os.getcwd(), options.tests_root_directory))
-    server_options = " --tests-root-directory=" + tests_root_directory
-  else:
-    server_options = "";
-
   # Restart the server
-  cmd = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "run_apache2.py") + server_options + " restart"
-  os.system(cmd);
+  if run_apache2.main("restart", options) == False:
+    return
 
   # Run the tests in path
   adb_cmd = "adb"
