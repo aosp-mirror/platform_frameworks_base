@@ -2717,6 +2717,16 @@ public class BluetoothService extends IBluetooth.Stub {
         mA2dpService = a2dpService;
     }
 
+    public void sendProfileStateMessage(int profile, int cmd) {
+        Message msg = new Message();
+        msg.what = cmd;
+        if (profile == BluetoothProfileState.HFP) {
+            mHfpProfileState.sendMessage(msg);
+        } else if (profile == BluetoothProfileState.A2DP) {
+            mA2dpProfileState.sendMessage(msg);
+        }
+    }
+
     private static void log(String msg) {
         Log.d(TAG, msg);
     }
