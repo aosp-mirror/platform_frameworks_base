@@ -168,6 +168,10 @@ public class NdefRecord implements Parcelable {
             throw new IllegalArgumentException("Illegal null argument");
         }
 
+        if (tnf < 0 || tnf > 0x07) {
+            throw new IllegalArgumentException("TNF out of range " + tnf);
+        }
+
         /* generate flag */
         byte flags = FLAG_MB | FLAG_ME;
 
