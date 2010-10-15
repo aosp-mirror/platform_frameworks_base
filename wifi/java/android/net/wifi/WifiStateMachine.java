@@ -165,6 +165,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int CMD_UNLOAD_DRIVER_SUCCESS            = 5;
     /* Indicates driver unload failed */
     private static final int CMD_UNLOAD_DRIVER_FAILURE            = 6;
+    /* Set bluetooth headset proxy */
+    private static final int CMD_SET_BLUETOOTH_HEADSET_PROXY      = 7;
+    /* Set bluetooth A2dp proxy */
+    private static final int CMD_SET_BLUETOOTH_A2DP_PROXY         = 8;
 
     /* Start the supplicant */
     private static final int CMD_START_SUPPLICANT                 = 11;
@@ -1267,21 +1271,20 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
-     * Whether to disable coexistence mode while obtaining IP address. This
-     * logic will return true only if the current bluetooth
-     * headset/handsfree state is disconnected. This means if it is in an
-     * error state, we will NOT disable coexistence mode to err on the side
-     * of safety.
+     * Whether to disable coexistence mode while obtaining IP address. We
+     * disable coexistence if the headset indicates that there are no
+     * connected devices. If we have not got an indication of the service
+     * connection yet, we go ahead with disabling coexistence mode.
      *
      * @return Whether to disable coexistence mode.
      */
-    private synchronized boolean shouldDisableCoexistenceMode() {
+    private boolean shouldDisableCoexistenceMode() {
+        if (mBluetoothHeadset == null) return true;
         Set<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
-
-        return (devices.size() != 0 ? true : false);
+        return (devices.size() != 0 ? false : true);
     }
 
-    private synchronized void checkIsBluetoothPlaying() {
+    private void checkIsBluetoothPlaying() {
         boolean isBluetoothPlaying = false;
         if (mBluetoothA2dp != null) {
             Set<BluetoothDevice> connected = mBluetoothA2dp.getConnectedDevices();
@@ -1299,23 +1302,19 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
         new BluetoothProfile.ServiceListener() {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            synchronized (WifiStateMachine.this) {
                 if (profile == BluetoothProfile.HEADSET) {
-                    mBluetoothHeadset = (BluetoothHeadset) proxy;
+                    sendMessage(CMD_SET_BLUETOOTH_HEADSET_PROXY, proxy);
                 } else if (profile == BluetoothProfile.A2DP) {
-                    mBluetoothA2dp = (BluetoothA2dp)proxy;
+                    sendMessage(CMD_SET_BLUETOOTH_A2DP_PROXY, proxy);
                 }
-            }
         }
 
         public void onServiceDisconnected(int profile) {
-            synchronized (WifiStateMachine.this) {
                 if (profile == BluetoothProfile.HEADSET) {
-                    mBluetoothHeadset = null;
+                    sendMessage(CMD_SET_BLUETOOTH_HEADSET_PROXY, null);
                 } else if (profile == BluetoothProfile.A2DP) {
-                    mBluetoothA2dp = null;
+                    sendMessage(CMD_SET_BLUETOOTH_A2DP_PROXY, null);
                 }
-            }
         }
     };
 
@@ -1575,6 +1574,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             SyncParams syncParams;
             switch (message.what) {
+                case CMD_SET_BLUETOOTH_HEADSET_PROXY:
+                    mBluetoothHeadset = (BluetoothHeadset) message.obj;
+                    break;
+                case CMD_SET_BLUETOOTH_A2DP_PROXY:
+                    mBluetoothA2dp = (BluetoothA2dp) message.obj;
+                    break;
                     /* Synchronous call returns */
                 case CMD_PING_SUPPLICANT:
                 case CMD_REMOVE_NETWORK:
@@ -2468,10 +2473,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 mModifiedBluetoothCoexistenceMode = false;
                 mPowerMode = DRIVER_POWER_MODE_AUTO;
 
-                // TODO(): Incorporate the else part in the state machine
-                // If mBluetoothHeadset == null, means it not conencted to the
-                // service yet.
-                if (mBluetoothHeadset != null && shouldDisableCoexistenceMode()) {
+                if (shouldDisableCoexistenceMode()) {
                     /*
                      * There are problems setting the Wi-Fi driver's power
                      * mode to active when bluetooth coexistence mode is
