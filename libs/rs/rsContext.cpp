@@ -976,9 +976,9 @@ void rsi_GetName(Context *rsc, void * obj, const char **name)
     (*name) = ob->getName();
 }
 
-void rsi_ObjDestroy(Context *rsc, void *obj)
+void rsi_ObjDestroy(Context *rsc, void *optr)
 {
-    ObjectBase *ob = static_cast<ObjectBase *>(obj);
+    ObjectBase *ob = static_cast<ObjectBase *>(optr);
     rsc->removeName(ob);
     ob->decUserRef();
 }

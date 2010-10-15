@@ -134,14 +134,6 @@ public:
     TypeState();
     ~TypeState();
 
-    size_t mX;
-    size_t mY;
-    size_t mZ;
-    uint32_t mLOD;
-    bool mFaces;
-    ObjectBaseRef<const Element> mElement;
-
-
     // Cache of all existing types.
     Vector<Type *> mTypes;
 };

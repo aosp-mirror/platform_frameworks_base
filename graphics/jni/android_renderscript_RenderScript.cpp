@@ -112,7 +112,7 @@ static void
 nObjDestroy(JNIEnv *_env, jobject _this, RsContext con, jint obj)
 {
     LOG_API("nObjDestroy, con(%p) obj(%p)", con, (void *)obj);
-    rsObjDestroy(con, (void *)obj);
+    rsObjDestroy(con, (uint32_t)obj);
 }
 
 
@@ -336,25 +336,21 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, RsContext con, jint id, jint
 
 // -----------------------------------
 
-static void
-nTypeBegin(JNIEnv *_env, jobject _this, RsContext con, jint eID)
+static int
+nTypeCreate(JNIEnv *_env, jobject _this, RsContext con, RsElement eid, jintArray _dims, jintArray _dimValues)
 {
-    LOG_API("nTypeBegin, con(%p) e(%p)", con, (RsElement)eID);
-    rsTypeBegin(con, (RsElement)eID);
-}
-
-static void
-nTypeAdd(JNIEnv *_env, jobject _this, RsContext con, jint dim, jint val)
-{
-    LOG_API("nTypeAdd, con(%p) dim(%i), val(%i)", con, dim, val);
-    rsTypeAdd(con, (RsDimension)dim, val);
-}
-
-static jint
-nTypeCreate(JNIEnv *_env, jobject _this, RsContext con)
-{
+    int count = _env->GetArrayLength(_dims);
     LOG_API("nTypeCreate, con(%p)", con);
-    return (jint)rsTypeCreate(con);
+
+    jint *dimPtr = _env->GetIntArrayElements(_dims, NULL);
+    jint *dimValPtr = _env->GetIntArrayElements(_dimValues, NULL);
+
+    jint id = (jint)rsaTypeCreate(con, (RsElement)eid, count,
+                                  (RsDimension *)dimPtr, (uint32_t *)dimValPtr);
+
+    _env->ReleaseIntArrayElements(_dims, dimPtr, JNI_ABORT);
+    _env->ReleaseIntArrayElements(_dimValues, dimValPtr, JNI_ABORT);
+    return (jint)id;
 }
 
 static void
@@ -1261,9 +1257,7 @@ static JNINativeMethod methods[] = {
 {"rsnElementGetNativeData",          "(II[I)V",                               (void*)nElementGetNativeData },
 {"rsnElementGetSubElements",         "(II[I[Ljava/lang/String;)V",            (void*)nElementGetSubElements },
 
-{"rsnTypeBegin",                     "(II)V",                                 (void*)nTypeBegin },
-{"rsnTypeAdd",                       "(III)V",                                (void*)nTypeAdd },
-{"rsnTypeCreate",                    "(I)I",                                  (void*)nTypeCreate },
+{"rsnTypeCreate",                    "(II[I[I)I",                             (void*)nTypeCreate },
 {"rsnTypeGetNativeData",             "(II[I)V",                               (void*)nTypeGetNativeData },
 
 {"rsnAllocationCreateTyped",         "(II)I",                                 (void*)nAllocationCreateTyped },

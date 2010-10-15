@@ -30,8 +30,6 @@ class Allocation : public ObjectBase
     // The graphics equilivent of malloc.  The allocation contains a structure of elements.
 
 public:
-    // By policy this allocation will hold a pointer to the type
-    // but will not destroy it on destruction.
     Allocation(Context *rsc, const Type *);
     Allocation(Context *rsc, const Type *, void *bmp, void *callbackData, RsBitmapCallback_t callback);
 

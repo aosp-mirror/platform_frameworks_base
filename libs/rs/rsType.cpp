@@ -381,88 +381,6 @@ Type * Type::cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const
 namespace android {
 namespace renderscript {
 
-void rsi_TypeBegin(Context *rsc, RsElement vse)
-{
-    TypeState * stc = &rsc->mStateType;
-
-    stc->mX = 0;
-    stc->mY = 0;
-    stc->mZ = 0;
-    stc->mLOD = false;
-    stc->mFaces = false;
-    stc->mElement.set(static_cast<const Element *>(vse));
-}
-
-void rsi_TypeAdd(Context *rsc, RsDimension dim, size_t value)
-{
-    TypeState * stc = &rsc->mStateType;
-
-    if (dim < 0) {
-        //error
-        return;
-    }
-
-
-    switch (dim) {
-    case RS_DIMENSION_X:
-        stc->mX = value;
-        return;
-    case RS_DIMENSION_Y:
-        stc->mY = value;
-        return;
-    case RS_DIMENSION_Z:
-        stc->mZ = value;
-        return;
-    case RS_DIMENSION_FACE:
-        stc->mFaces = (value != 0);
-        return;
-    case RS_DIMENSION_LOD:
-        stc->mLOD = (value != 0);
-        return;
-    default:
-        break;
-    }
-
-    if ((dim < 0) || (dim > RS_DIMENSION_MAX)) {
-        LOGE("rsTypeAdd: Bad dimension");
-        //error
-        return;
-    }
-
-    // todo: implement array support
-
-}
-
-RsType rsi_TypeCreate(Context *rsc)
-{
-    TypeState * stc = &rsc->mStateType;
-
-    for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
-        Type *t = stc->mTypes[ct];
-        if (t->getElement() != stc->mElement.get()) continue;
-        if (t->getDimX() != stc->mX) continue;
-        if (t->getDimY() != stc->mY) continue;
-        if (t->getDimZ() != stc->mZ) continue;
-        if (t->getDimLOD() != stc->mLOD) continue;
-        if (t->getDimFaces() != stc->mFaces) continue;
-        t->incUserRef();
-        return t;
-    }
-
-    Type * st = new Type(rsc);
-    st->incUserRef();
-    st->setDimX(stc->mX);
-    st->setDimY(stc->mY);
-    st->setDimZ(stc->mZ);
-    st->setElement(stc->mElement.get());
-    st->setDimLOD(stc->mLOD);
-    st->setDimFaces(stc->mFaces);
-    st->compute();
-    stc->mElement.clear();
-    stc->mTypes.push(st);
-    return st;
-}
-
 void rsi_TypeGetNativeData(Context *rsc, RsType type, uint32_t *typeData, uint32_t typeDataSize)
 {
     rsAssert(typeDataSize == 6);
@@ -481,5 +399,63 @@ void rsi_TypeGetNativeData(Context *rsc, RsType type, uint32_t *typeData, uint32
 
 
 }
+}
+
+void * rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
+                     const RsDimension *dims, const uint32_t *vals)
+{
+    Context *rsc = static_cast<Context *>(con);
+    Element *e = static_cast<Element *>(_e);
+    TypeState * stc = &rsc->mStateType;
+
+    uint32_t dimX = 0;
+    uint32_t dimY = 0;
+    uint32_t dimZ = 0;
+    uint32_t dimLOD = 0;
+    uint32_t dimFaces = 0;
+
+    for (uint32_t ct=0; ct < dimCount; ct++) {
+        switch(dims[ct]) {
+        case RS_DIMENSION_X: dimX = vals[ct]; break;
+        case RS_DIMENSION_Y: dimY = vals[ct]; break;
+        case RS_DIMENSION_Z: dimZ = vals[ct]; break;
+        case RS_DIMENSION_LOD: dimLOD = vals[ct]; break;
+        case RS_DIMENSION_FACE: dimFaces = vals[ct]; break;
+
+        default:
+            LOGE("rsaTypeCreate: Bad dimension");
+            rsAssert(0);
+        }
+    }
+
+    ObjectBase::lockUserRef();
+    for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
+        Type *t = stc->mTypes[ct];
+        if (t->getElement() != e) continue;
+        if (t->getDimX() != dimX) continue;
+        if (t->getDimY() != dimY) continue;
+        if (t->getDimZ() != dimZ) continue;
+        if (t->getDimLOD() != dimLOD) continue;
+        if (t->getDimFaces() != dimFaces) continue;
+        t->prelockedIncUserRef();
+        ObjectBase::unlockUserRef();
+        return t;
+    }
+    ObjectBase::unlockUserRef();
+
+    Type * st = new Type(rsc);
+    st->incUserRef();
+    st->setDimX(dimX);
+    st->setDimY(dimY);
+    st->setDimZ(dimZ);
+    st->setElement(e);
+    st->setDimLOD(dimLOD);
+    st->setDimFaces(dimFaces);
+    st->compute();
+
+    ObjectBase::lockUserRef();
+    stc->mTypes.push(st);
+    ObjectBase::unlockUserRef();
+    return st;
 }
 
