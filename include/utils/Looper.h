@@ -24,10 +24,10 @@
 
 #include <android/looper.h>
 
-// Currently using poll() instead of epoll_wait() since it does a better job of meeting a
-// timeout deadline.  epoll_wait() typically causes additional delays of up to 10ms
-// beyond the requested timeout.
-//#define LOOPER_USES_EPOLL
+// When defined, uses epoll_wait() for polling, otherwise uses poll().
+#define LOOPER_USES_EPOLL
+
+// When defined, logs performance statistics for tuning and debugging purposes.
 //#define LOOPER_STATISTICS
 
 #ifdef LOOPER_USES_EPOLL
