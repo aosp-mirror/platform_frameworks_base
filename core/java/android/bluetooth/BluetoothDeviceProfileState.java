@@ -586,7 +586,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     }
                     break;
                 case DISCONNECT_A2DP_OUTGOING:
-                    processCommand(DISCONNECT_A2DP_OUTGOING);
+                    deferMessage(message);
                     break;
                 case DISCONNECT_A2DP_INCOMING:
                     // Ignore, will be handled by Bluez
