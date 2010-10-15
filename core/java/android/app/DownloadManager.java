@@ -28,7 +28,6 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.provider.Downloads;
-import android.util.Log;
 import android.util.Pair;
 
 import java.io.File;
@@ -141,6 +140,12 @@ public class DownloadManager {
      */
     public final static String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
 
+    /**
+     * The URI to the corresponding entry in MediaProvider for this downloaded entry. It is
+     * used to delete the entries from MediaProvider database when it is deleted from the
+     * downloaded list.
+     */
+    public static final String COLUMN_MEDIAPROVIDER_URI = "mediaprovider_uri";
 
     /**
      * Value of {@link #COLUMN_STATUS} when the download is waiting to start.
@@ -271,6 +276,7 @@ public class DownloadManager {
     // this array must contain all public columns
     private static final String[] COLUMNS = new String[] {
         COLUMN_ID,
+        COLUMN_MEDIAPROVIDER_URI,
         COLUMN_TITLE,
         COLUMN_DESCRIPTION,
         COLUMN_URI,
@@ -287,6 +293,7 @@ public class DownloadManager {
     // columns to request from DownloadProvider
     private static final String[] UNDERLYING_COLUMNS = new String[] {
         Downloads.Impl._ID,
+        Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
         Downloads.COLUMN_TITLE,
         Downloads.COLUMN_DESCRIPTION,
         Downloads.COLUMN_URI,
@@ -683,6 +690,9 @@ public class DownloadManager {
                 selectionParts.add(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
             }
 
+            // only return rows which are not marked 'deleted = 1'
+            selectionParts.add(Downloads.Impl.COLUMN_DELETED + " != '1'");
+
             String selection = joinStrings(" AND ", selectionParts);
             String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
             String orderBy = mOrderByColumn + " " + orderDirection;
@@ -746,6 +756,26 @@ public class DownloadManager {
         Uri downloadUri = mResolver.insert(Downloads.CONTENT_URI, values);
         long id = Long.parseLong(downloadUri.getLastPathSegment());
         return id;
+    }
+
+    /**
+     * Marks the specified download as 'to be deleted'. This is done when a completed download
+     * is to be removed but the row was stored without enough info to delete the corresponding
+     * metadata from Mediaprovider database. Actual cleanup of this row is done in DownloadService.
+     *
+     * @param ids the IDs of the downloads to be marked 'deleted'
+     * @return the number of downloads actually updated
+     * @hide
+     */
+    public int markRowDeleted(long... ids) {
+        if (ids == null || ids.length == 0) {
+            // called with nothing to remove!
+            throw new IllegalArgumentException("input param 'ids' can't be null");
+        }
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.COLUMN_DELETED, 1);
+        return mResolver.update(mBaseUri, values, getWhereClauseForIds(ids),
+                getWhereArgsForIds(ids));
     }
 
     /**
@@ -958,6 +988,9 @@ public class DownloadManager {
             }
             if (column.equals(COLUMN_LOCAL_FILENAME)) {
                 return getUnderlyingString(Downloads.Impl._DATA);
+            }
+            if (column.equals(COLUMN_MEDIAPROVIDER_URI)) {
+                return getUnderlyingString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
             }
 
             assert column.equals(COLUMN_LOCAL_URI);
