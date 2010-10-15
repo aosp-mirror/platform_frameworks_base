@@ -65,6 +65,8 @@ import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.provider.Settings.System.STAY_ON_WHILE_PLUGGED_IN;
+import static android.provider.Settings.System.WINDOW_ANIMATION_SCALE;
+import static android.provider.Settings.System.TRANSITION_ANIMATION_SCALE;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -243,6 +245,11 @@ class PowerManagerService extends IPowerManager.Stub
     boolean mUnplugTurnsOnScreen;
     private int mWarningSpewThrottleCount;
     private long mWarningSpewThrottleTime;
+    private int mAnimationSetting = ANIM_SETTING_OFF;
+
+    // Must match with the ISurfaceComposer constants in C++.
+    private static final int ANIM_SETTING_ON = 0x01;
+    private static final int ANIM_SETTING_OFF = 0x10;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -256,7 +263,7 @@ class PowerManagerService extends IPowerManager.Stub
     
     private native void nativeInit();
     private native void nativeSetPowerState(boolean screenOn, boolean screenBright);
-    private native void nativeStartSurfaceFlingerAnimation();
+    private native void nativeStartSurfaceFlingerAnimation(int mode);
 
     /*
     static PrintStream mLog;
@@ -426,6 +433,12 @@ class PowerManagerService extends IPowerManager.Stub
             return iVal != null ? iVal : defValue;
         }
 
+        private float getFloat(String name, float defValue) {
+            ContentValues values = mSettings.getValues(name);
+            Float fVal = values != null ? values.getAsFloat(Settings.System.VALUE) : null;
+            return fVal != null ? fVal : defValue;
+        }
+
         public void update(Observable o, Object arg) {
             synchronized (mLocks) {
                 // STAY_ON_WHILE_PLUGGED_IN, default to when plugged into AC
@@ -436,7 +449,7 @@ class PowerManagerService extends IPowerManager.Stub
                 // SCREEN_OFF_TIMEOUT, default to 15 seconds
                 mScreenOffTimeoutSetting = getInt(SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT);
 
-                 // DIM_SCREEN
+                // DIM_SCREEN
                 //mDimScreen = getInt(DIM_SCREEN) != 0;
 
                 // SCREEN_BRIGHTNESS_MODE, default to manual
@@ -445,6 +458,17 @@ class PowerManagerService extends IPowerManager.Stub
 
                 // recalculate everything
                 setScreenOffTimeoutsLocked();
+
+                final float windowScale = getFloat(WINDOW_ANIMATION_SCALE, 1.0f);
+                final float transitionScale = getFloat(TRANSITION_ANIMATION_SCALE, 1.0f);
+                mAnimationSetting = 0;
+                if (windowScale > 0.5f) {
+                    mAnimationSetting |= ANIM_SETTING_OFF;
+                }
+                if (transitionScale > 0.5f) {
+                    // Uncomment this if you want the screen-on animation.
+                    // mAnimationSetting |= ANIM_SETTING_ON;
+                }
             }
         }
     }
@@ -583,9 +607,11 @@ class PowerManagerService extends IPowerManager.Stub
                 "(" + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?) or ("
+                        + Settings.System.NAME + "=?) or ("
+                        + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?)",
                 new String[]{STAY_ON_WHILE_PLUGGED_IN, SCREEN_OFF_TIMEOUT, DIM_SCREEN,
-                        SCREEN_BRIGHTNESS_MODE},
+                        SCREEN_BRIGHTNESS_MODE, WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE},
                 null);
         mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mHandler);
         SettingsObserver settingsObserver = new SettingsObserver();
@@ -2023,7 +2049,12 @@ class PowerManagerService extends IPowerManager.Stub
                     animate = jump && targetValue == Power.BRIGHTNESS_OFF; // we're turning off
                 }
                 if (animate) {
-                    nativeStartSurfaceFlingerAnimation();
+                    // TODO: I think it's possible that if you sleep & wake multiple times
+                    // quickly for different reasons, mScreenOffReason for the first animation
+                    // might get stomped on as it starts the second animation.
+                    nativeStartSurfaceFlingerAnimation(
+                            mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
+                            ? 0 : mAnimationSetting);
                 }
                 mScreenBrightness.jumpToTarget();
             }
