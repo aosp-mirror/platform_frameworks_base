@@ -39,8 +39,29 @@ public class NdefTagConnection extends RawTagConnection {
      * Internal constructor, to be used by NfcAdapter
      * @hide
      */
-    NdefTagConnection(INfcAdapter service, NdefTag tag) throws RemoteException {
+    /* package private */ NdefTagConnection(INfcAdapter service, NdefTag tag, String target) throws RemoteException {
         super(service, tag);
+        String[] targets = tag.getNdefTargets();
+        int i;
+
+        // Check target validity
+        for (i=0; i<targets.length; i++) {
+            if (target.equals(targets[i])) {
+                break;
+            }
+        }
+        if (i >= targets.length) {
+            // Target not found
+            throw new IllegalArgumentException();
+        }
+    }
+
+    /**
+     * Internal constructor, to be used by NfcAdapter
+     * @hide
+     */
+    /* package private */ NdefTagConnection(INfcAdapter service, NdefTag tag) throws RemoteException {
+        this(service, tag, tag.getNdefTargets()[0]);
     }
 
     /**
