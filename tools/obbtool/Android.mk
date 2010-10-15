@@ -29,18 +29,21 @@ LOCAL_MODULE := obbtool
 
 include $(BUILD_HOST_EXECUTABLE)
 
-include $(CLEAR_VARS)
+# Non-Linux hosts might not have OpenSSL libcrypto
+ifeq ($(HOST_OS),linux)
+    include $(CLEAR_VARS)
 
-LOCAL_MODULE := pbkdf2gen
+    LOCAL_MODULE := pbkdf2gen
 
-LOCAL_MODULE_TAGS := optional
+    LOCAL_MODULE_TAGS := optional
 
-LOCAL_CFLAGS := -Wall -Werror
+    LOCAL_CFLAGS := -Wall -Werror
 
-LOCAL_SRC_FILES := pbkdf2gen.cpp
+    LOCAL_SRC_FILES := pbkdf2gen.cpp
 
-LOCAL_SHARED_LIBRARIES := libcrypto
+    LOCAL_SHARED_LIBRARIES := libcrypto
 
-include $(BUILD_HOST_EXECUTABLE)
+    include $(BUILD_HOST_EXECUTABLE)
+endif # HOST_OS == linux
 
 endif # TARGET_BUILD_APPS
