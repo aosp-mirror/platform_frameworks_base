@@ -1287,7 +1287,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                      */
                     setNumAllowedChannels();
                     synchronized (this) {
-                        String macaddr = WifiNative.getMacAddressCommand();
+                        macaddr = WifiNative.getMacAddressCommand();
                         if (macaddr != null) {
                             mWifiInfo.setMacAddress(macaddr);
                         }
