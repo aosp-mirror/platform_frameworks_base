@@ -5888,7 +5888,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 View v = LayoutInflater.from(mContext).inflate(
                         com.android.internal.R.layout.safe_mode, null);
                 WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+                lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
                 lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
                 lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                 lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
