@@ -332,6 +332,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     /**
+     * @hide
+     */
+    public void setSelectedContactsAppTabIndex(int value) {
+        mPhotoView.setSelectedContactsAppTabIndex(value);
+    }
+
+    /**
      * Turn on/off showing of the aggregate badge element.
      */
     public void showAggregateBadge(boolean showBagde) {

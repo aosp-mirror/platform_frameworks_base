@@ -5543,6 +5543,14 @@ public final class ContactsContract {
         public static final int MODE_LARGE = 3;
 
         /**
+         * Extra used to specify the last selected tab index of the Contacts app.
+         * If this is not given or -1
+         * @hide
+         */
+        public static final String EXTRA_SELECTED_CONTACTS_APP_TAB_INDEX =
+                "SELECTED_TAB_INDEX";
+
+        /**
          * Trigger a dialog that lists the various methods of interacting with
          * the requested {@link Contacts} entry. This may be based on available
          * {@link ContactsContract.Data} rows under that contact, and may also
@@ -5567,6 +5575,16 @@ public final class ContactsContract {
          */
         public static void showQuickContact(Context context, View target, Uri lookupUri, int mode,
                 String[] excludeMimes) {
+            context.startActivity(getQuickContactIntent(context, target, lookupUri, mode,
+                    excludeMimes));
+        }
+
+        /**
+         * Creates the Intent to launch Quick Contacts
+         * @hide
+         */
+        public static Intent getQuickContactIntent(Context context, View target, Uri lookupUri,
+                int mode, String[] excludeMimes) {
             // Find location and bounds of target view, adjusting based on the
             // assumed local density.
             final float appScale = context.getResources().getCompatibilityInfo().applicationScale;
@@ -5580,7 +5598,7 @@ public final class ContactsContract {
             rect.bottom = (int) ((pos[1] + target.getHeight()) * appScale + 0.5f);
 
             // Trigger with obtained rectangle
-            showQuickContact(context, rect, lookupUri, mode, excludeMimes);
+            return getQuickContactIntent(context, rect, lookupUri, mode, excludeMimes);
         }
 
         /**
@@ -5611,6 +5629,16 @@ public final class ContactsContract {
          */
         public static void showQuickContact(Context context, Rect target, Uri lookupUri, int mode,
                 String[] excludeMimes) {
+            context.startActivity(getQuickContactIntent(context, target, lookupUri, mode,
+                    excludeMimes));
+        }
+
+        /**
+         * Creates the Intent to launch Quick Contacts
+         * @hide
+         */
+        public static Intent getQuickContactIntent(Context context, Rect target, Uri lookupUri,
+                int mode, String[] excludeMimes) {
             // Launch pivot dialog through intent for now
             final Intent intent = new Intent(ACTION_QUICK_CONTACT);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -5620,7 +5648,7 @@ public final class ContactsContract {
             intent.setSourceBounds(target);
             intent.putExtra(EXTRA_MODE, mode);
             intent.putExtra(EXTRA_EXCLUDE_MIMES, excludeMimes);
-            context.startActivity(intent);
+            return intent;
         }
     }
 
