@@ -26,6 +26,7 @@
 #include "include/SoftwareRenderer.h"
 #include "include/NuCachedSource2.h"
 #include "include/ThrottledSource.h"
+#include "include/MPEG2TSExtractor.h"
 
 #include "ARTPSession.h"
 #include "APacketSource.h"
@@ -509,8 +510,8 @@ void AwesomePlayer::onBufferingUpdate() {
                 // We don't know the bitrate of the stream, use absolute size
                 // limits to maintain the cache.
 
-                const size_t kLowWaterMarkBytes = 400000;
-                const size_t kHighWaterMarkBytes = 1000000;
+                const size_t kLowWaterMarkBytes = 40000;
+                const size_t kHighWaterMarkBytes = 200000;
 
                 if ((mFlags & PLAYING) && !eos
                         && (cachedDataRemaining < kLowWaterMarkBytes)) {
@@ -1365,13 +1366,16 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         String8 uri("http://");
         uri.append(mUri.string() + 11);
 
-        dataSource = new LiveSource(uri.string());
+        sp<LiveSource> liveSource = new LiveSource(uri.string());
 
-        mCachedSource = new NuCachedSource2(dataSource);
+        mCachedSource = new NuCachedSource2(liveSource);
         dataSource = mCachedSource;
 
         sp<MediaExtractor> extractor =
             MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
+
+        static_cast<MPEG2TSExtractor *>(extractor.get())
+            ->setLiveSource(liveSource);
 
         return setDataSource_l(extractor);
     } else if (!strncmp("rtsp://gtalk/", mUri.string(), 13)) {

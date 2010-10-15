@@ -32,6 +32,7 @@ struct M3UParser : public RefBase {
 
     bool isExtM3U() const;
     bool isVariantPlaylist() const;
+    bool isComplete() const;
 
     sp<AMessage> meta();
 
@@ -52,6 +53,7 @@ private:
     AString mBaseURI;
     bool mIsExtM3U;
     bool mIsVariantPlaylist;
+    bool mIsComplete;
 
     sp<AMessage> mMeta;
     Vector<Item> mItems;

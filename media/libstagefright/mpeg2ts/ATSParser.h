@@ -33,7 +33,7 @@ struct ATSParser : public RefBase {
     ATSParser();
 
     void feedTSPacket(const void *data, size_t size);
-    void signalDiscontinuity();
+    void signalDiscontinuity(bool isASeek = false);
 
     enum SourceType {
         AVC_VIDEO,

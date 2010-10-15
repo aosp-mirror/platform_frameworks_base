@@ -43,6 +43,8 @@ struct AnotherPacketSource : public MediaSource {
     void queueDiscontinuity();
     void signalEOS(status_t result);
 
+    void clear();
+
 protected:
     virtual ~AnotherPacketSource();
 

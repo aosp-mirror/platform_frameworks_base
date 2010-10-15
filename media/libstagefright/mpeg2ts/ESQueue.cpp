@@ -42,6 +42,7 @@ sp<MetaData> ElementaryStreamQueue::getFormat() {
 
 void ElementaryStreamQueue::clear() {
     mBuffer->setRange(0, 0);
+    mTimestamps.clear();
     mFormat.clear();
 }
 

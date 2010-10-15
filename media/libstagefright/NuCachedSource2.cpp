@@ -179,7 +179,8 @@ NuCachedSource2::NuCachedSource2(const sp<DataSource> &source)
       mFinalStatus(OK),
       mLastAccessPos(0),
       mFetching(true),
-      mLastFetchTimeUs(-1) {
+      mLastFetchTimeUs(-1),
+      mSuspended(false) {
     mLooper->setName("NuCachedSource2");
     mLooper->registerHandler(mReflector);
     mLooper->start();
@@ -205,7 +206,7 @@ status_t NuCachedSource2::getSize(off_t *size) {
 }
 
 uint32_t NuCachedSource2::flags() {
-    return mSource->flags();
+    return (mSource->flags() & ~kWantsPrefetching) | kIsCachingDataSource;
 }
 
 void NuCachedSource2::onMessageReceived(const sp<AMessage> &msg) {
@@ -219,6 +220,12 @@ void NuCachedSource2::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatRead:
         {
             onRead(msg);
+            break;
+        }
+
+        case kWhatSuspend:
+        {
+            onSuspend();
             break;
         }
 
@@ -263,6 +270,7 @@ void NuCachedSource2::onFetch() {
 
     bool keepAlive =
         !mFetching
+            && !mSuspended
             && mFinalStatus == OK
             && ALooper::GetNowUs() >= mLastFetchTimeUs + kKeepAliveIntervalUs;
 
@@ -279,7 +287,7 @@ void NuCachedSource2::onFetch() {
             LOGI("Cache full, done prefetching for now");
             mFetching = false;
         }
-    } else {
+    } else if (!mSuspended) {
         Mutex::Autolock autoLock(mLock);
         restartPrefetcherIfNecessary_l();
     }
@@ -466,6 +474,40 @@ status_t NuCachedSource2::seekInternal_l(off_t offset) {
     mFetching = true;
 
     return OK;
+}
+
+void NuCachedSource2::clearCacheAndResume() {
+    LOGV("clearCacheAndResume");
+
+    Mutex::Autolock autoLock(mLock);
+
+    CHECK(mSuspended);
+
+    mCacheOffset = 0;
+    mFinalStatus = OK;
+    mLastAccessPos = 0;
+    mLastFetchTimeUs = -1;
+
+    size_t totalSize = mCache->totalSize();
+    CHECK_EQ(mCache->releaseFromStart(totalSize), totalSize);
+
+    mFetching = true;
+    mSuspended = false;
+}
+
+void NuCachedSource2::suspend() {
+    (new AMessage(kWhatSuspend, mReflector->id()))->post();
+
+    while (!mSuspended) {
+        usleep(10000);
+    }
+}
+
+void NuCachedSource2::onSuspend() {
+    Mutex::Autolock autoLock(mLock);
+
+    mFetching = false;
+    mSuspended = true;
 }
 
 }  // namespace android

@@ -49,13 +49,17 @@ struct ATSParser::Program : public RefBase {
             unsigned pid, unsigned payload_unit_start_indicator,
             ABitReader *br);
 
-    void signalDiscontinuity();
+    void signalDiscontinuity(bool isASeek);
 
     sp<MediaSource> getSource(SourceType type);
+
+    int64_t convertPTSToTimestamp(uint64_t PTS);
 
 private:
     unsigned mProgramMapPID;
     KeyedVector<unsigned, sp<Stream> > mStreams;
+    bool mFirstPTSValid;
+    uint64_t mFirstPTS;
 
     void parseProgramMap(ABitReader *br);
 
@@ -63,13 +67,13 @@ private:
 };
 
 struct ATSParser::Stream : public RefBase {
-    Stream(unsigned elementaryPID, unsigned streamType);
+    Stream(Program *program, unsigned elementaryPID, unsigned streamType);
 
     void parse(
             unsigned payload_unit_start_indicator,
             ABitReader *br);
 
-    void signalDiscontinuity();
+    void signalDiscontinuity(bool isASeek);
 
     sp<MediaSource> getSource(SourceType type);
 
@@ -77,6 +81,7 @@ protected:
     virtual ~Stream();
 
 private:
+    Program *mProgram;
     unsigned mElementaryPID;
     unsigned mStreamType;
 
@@ -101,7 +106,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 ATSParser::Program::Program(unsigned programMapPID)
-    : mProgramMapPID(programMapPID) {
+    : mProgramMapPID(programMapPID),
+      mFirstPTSValid(false),
+      mFirstPTS(0) {
 }
 
 bool ATSParser::Program::parsePID(
@@ -128,9 +135,9 @@ bool ATSParser::Program::parsePID(
     return true;
 }
 
-void ATSParser::Program::signalDiscontinuity() {
+void ATSParser::Program::signalDiscontinuity(bool isASeek) {
     for (size_t i = 0; i < mStreams.size(); ++i) {
-        mStreams.editValueAt(i)->signalDiscontinuity();
+        mStreams.editValueAt(i)->signalDiscontinuity(isASeek);
     }
 }
 
@@ -213,10 +220,12 @@ void ATSParser::Program::parseProgramMap(ABitReader *br) {
         ssize_t index = mStreams.indexOfKey(elementaryPID);
 #if 0  // XXX revisit
         CHECK_LT(index, 0);
-        mStreams.add(elementaryPID, new Stream(elementaryPID, streamType));
+        mStreams.add(elementaryPID,
+                     new Stream(this, elementaryPID, streamType));
 #else
         if (index < 0) {
-            mStreams.add(elementaryPID, new Stream(elementaryPID, streamType));
+            mStreams.add(elementaryPID,
+                         new Stream(this, elementaryPID, streamType));
         }
 #endif
 
@@ -239,10 +248,26 @@ sp<MediaSource> ATSParser::Program::getSource(SourceType type) {
     return NULL;
 }
 
+int64_t ATSParser::Program::convertPTSToTimestamp(uint64_t PTS) {
+    if (!mFirstPTSValid) {
+        mFirstPTSValid = true;
+        mFirstPTS = PTS;
+        PTS = 0;
+    } else if (PTS < mFirstPTS) {
+        PTS = 0;
+    } else {
+        PTS -= mFirstPTS;
+    }
+
+    return (PTS * 100) / 9;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-ATSParser::Stream::Stream(unsigned elementaryPID, unsigned streamType)
-    : mElementaryPID(elementaryPID),
+ATSParser::Stream::Stream(
+        Program *program, unsigned elementaryPID, unsigned streamType)
+    : mProgram(program),
+      mElementaryPID(elementaryPID),
       mStreamType(streamType),
       mBuffer(new ABuffer(128 * 1024)),
       mPayloadStarted(false),
@@ -281,12 +306,20 @@ void ATSParser::Stream::parse(
     mBuffer->setRange(0, mBuffer->size() + payloadSizeBits / 8);
 }
 
-void ATSParser::Stream::signalDiscontinuity() {
+void ATSParser::Stream::signalDiscontinuity(bool isASeek) {
     LOGV("Stream discontinuity");
     mPayloadStarted = false;
     mBuffer->setRange(0, 0);
 
     mQueue.clear();
+
+    if (isASeek) {
+        // This is only a "minor" discontinuity, we stay within the same
+        // bitstream.
+
+        mSource->clear();
+        return;
+    }
 
     if (mStreamType == 0x1b && mSource != NULL) {
         // Don't signal discontinuities on audio streams.
@@ -467,7 +500,7 @@ void ATSParser::Stream::onPayloadData(
     LOGV("onPayloadData mStreamType=0x%02x", mStreamType);
 
     CHECK(PTS_DTS_flags == 2 || PTS_DTS_flags == 3);
-    int64_t timeUs = (PTS * 100) / 9;
+    int64_t timeUs = mProgram->convertPTSToTimestamp(PTS);
 
     status_t err = mQueue.appendData(data, size, timeUs);
     CHECK_EQ(err, (status_t)OK);
@@ -515,9 +548,9 @@ void ATSParser::feedTSPacket(const void *data, size_t size) {
     parseTS(&br);
 }
 
-void ATSParser::signalDiscontinuity() {
+void ATSParser::signalDiscontinuity(bool isASeek) {
     for (size_t i = 0; i < mPrograms.size(); ++i) {
-        mPrograms.editItemAt(i)->signalDiscontinuity();
+        mPrograms.editItemAt(i)->signalDiscontinuity(isASeek);
     }
 }
 
