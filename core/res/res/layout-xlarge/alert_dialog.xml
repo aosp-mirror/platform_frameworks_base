@@ -107,7 +107,8 @@
         android:layout_height="wrap_content"
         android:minHeight="54dip"
         android:orientation="vertical" >
-        <LinearLayout
+        <ButtonGroup
+            style="?android:attr/alertDialogButtonGroupStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -145,6 +146,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:visibility="gone" />
-        </LinearLayout>
+        </ButtonGroup>
      </LinearLayout>
 </com.android.internal.widget.WeightedLinearLayout>

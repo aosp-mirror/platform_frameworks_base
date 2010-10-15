@@ -994,9 +994,8 @@
     </style>
 
     <style name="Widget.ButtonGroup">
-        <item name="divider">?android:attr/dividerVertical</item>
         <item name="buttonBackground">?android:attr/groupButtonBackground</item>
-        <item name="showDividers">middle</item>
+        <item name="showDividers"></item>
     </style>
 
     <!-- Begin Holo theme styles -->
@@ -1275,6 +1274,12 @@
     </style>
 
     <style name="Widget.Holo.ButtonGroup" parent="Widget.ButtonGroup">
+        <item name="divider">?android:attr/dividerVertical</item>
+        <item name="showDividers">middle</item>
+    </style>
+
+    <style name="Widget.Holo.ButtonGroup.AlertDialog">
+        <item name="android:background">@android:drawable/dialog_divider_horizontal_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.TextView" parent="Widget.TextView">
@@ -1538,6 +1543,10 @@
     </style>
 
     <style name="Widget.Holo.Light.ButtonGroup" parent="Widget.Holo.ButtonGroup">
+    </style>
+
+    <style name="Widget.Holo.Light.ButtonGroup.AlertDialog">
+        <item name="android:background">@android:drawable/dialog_divider_horizontal_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.TextView" parent="Widget.TextView">

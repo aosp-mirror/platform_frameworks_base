@@ -89,7 +89,7 @@
 
         <item name="buttonStyleToggle">@android:style/Widget.Button.Toggle</item>
 
-        <item name="groupButtonBackground">?android:attr/listChoiceBackgroundIndicator</item>
+        <item name="groupButtonBackground">@android:drawable/btn_default</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
@@ -141,6 +141,7 @@
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
         <item name="dialogTheme">@android:style/Theme.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Dialog.Alert</item>
+        <item name="alertDialogButtonGroupStyle">?android:attr/buttonGroupStyle</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -743,6 +744,7 @@
         <item name="alertDialogStyle">@android:style/AlertDialog.Holo</item>
         <item name="dialogTheme">@android:style/Theme.Holo.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Holo.Dialog.Alert</item>
+        <item name="alertDialogButtonGroupStyle">@android:style/Widget.Holo.ButtonGroup.AlertDialog</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -972,6 +974,7 @@
         <item name="alertDialogStyle">@android:style/AlertDialog.Holo.Light</item>
         <item name="dialogTheme">@android:style/Theme.Holo.Light.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Holo.Light.Dialog.Alert</item>
+        <item name="alertDialogButtonGroupStyle">@android:style/Widget.Holo.Light.ButtonGroup.AlertDialog</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>

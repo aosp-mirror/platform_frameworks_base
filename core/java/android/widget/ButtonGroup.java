@@ -18,14 +18,21 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class ButtonGroup extends LinearLayout {
+    private static final String LOG = "ButtonGroup";
+
     private Drawable mDivider;
-    private Drawable mButtonBackground;
+    private int mDividerWidth;
+    private int mDividerHeight;
+    private int mButtonBackgroundRes;
     private int mShowDividers;
 
     /**
@@ -45,6 +52,8 @@ public class ButtonGroup extends LinearLayout {
      */
     public static final int SHOW_DIVIDER_END = 4;
 
+    private final Rect mTempRect = new Rect();
+
     public ButtonGroup(Context context) {
         this(context, null);
     }
@@ -59,11 +68,11 @@ public class ButtonGroup extends LinearLayout {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.ButtonGroup, defStyleRes, 0);
         
-        mDivider = a.getDrawable(com.android.internal.R.styleable.ButtonGroup_divider);
-        mButtonBackground = a.getDrawable(
-                com.android.internal.R.styleable.ButtonGroup_buttonBackground);
-        mShowDividers = a.getInt(com.android.internal.R.styleable.ButtonGroup_showDividers,
-                SHOW_DIVIDER_MIDDLE);
+        setDividerDrawable(a.getDrawable(com.android.internal.R.styleable.ButtonGroup_divider));
+        mButtonBackgroundRes = a.getResourceId(
+                com.android.internal.R.styleable.ButtonGroup_buttonBackground, 0);
+        setShowDividers(a.getInt(com.android.internal.R.styleable.ButtonGroup_showDividers,
+                SHOW_DIVIDER_MIDDLE));
         a.recycle();
     }
 
@@ -75,6 +84,9 @@ public class ButtonGroup extends LinearLayout {
      *                     or {@link #SHOW_DIVIDER_NONE} to show no dividers.
      */
     public void setShowDividers(int showDividers) {
+        if (showDividers != mShowDividers) {
+            requestLayout();
+        }
         mShowDividers = showDividers;
     }
 
@@ -86,60 +98,148 @@ public class ButtonGroup extends LinearLayout {
         return mShowDividers;
     }
 
+    /**
+     * Set a drawable to be used as a divider between items.
+     * @param divider Drawable that will divide each item.
+     */
+    public void setDividerDrawable(Drawable divider) {
+        if (divider == mDivider) {
+            return;
+        }
+        mDivider = divider;
+        mDividerWidth = divider.getIntrinsicWidth();
+        mDividerHeight = divider.getIntrinsicHeight();
+        requestLayout();
+    }
+
+    /**
+     * Retrieve the drawable used to draw dividers between items.
+     * @return The divider drawable
+     */
+    public Drawable getDividerDrawable() {
+        return mDivider;
+    }
+
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        if (!hasDividerBefore(index)) {
-            if (((getChildCount() > 0
-                    && (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE)
-                    || (mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING)) {
-                super.addView(new DividerView(mContext), index, makeDividerLayoutParams());
-                if (index >= 0) {
-                    index++;
+        if (mButtonBackgroundRes != 0) {
+            // Preserve original padding as we change the background
+            final int paddingLeft = child.getPaddingLeft();
+            final int paddingRight = child.getPaddingRight();
+            final int paddingTop = child.getPaddingTop();
+            final int paddingBottom = child.getPaddingBottom();
+            child.setBackgroundResource(mButtonBackgroundRes);
+            child.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+        }
+
+        super.addView(child, index, params);
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        // Add the extra size that dividers contribute.
+        int dividerCount = 0;
+        if ((mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE) {
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                if (getChildAt(i).getVisibility() != GONE) {
+                    dividerCount++;
+                }
+            }
+            dividerCount = Math.max(0, dividerCount);
+        }
+        if ((mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING) {
+            dividerCount++;
+        }
+        if ((mShowDividers & SHOW_DIVIDER_END) == SHOW_DIVIDER_END) {
+            dividerCount++;
+        }
+
+        if (getOrientation() == VERTICAL) {
+            final int dividerSize = mDividerHeight * dividerCount;
+            setMeasuredDimension(getMeasuredWidth(),
+                    resolveSize(getMeasuredHeight() + dividerSize, heightMeasureSpec));
+        } else {
+            final int dividerSize = mDividerWidth * dividerCount;
+            setMeasuredDimension(resolveSize(getMeasuredWidth() + dividerSize, widthMeasureSpec),
+                    getMeasuredHeight());
+        }
+    }
+
+    @Override
+    public void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
+        final boolean begin = (mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING;
+        final boolean middle = (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
+
+        // Offset children to leave space for dividers.
+        if (getOrientation() == VERTICAL) {
+            int offset = begin ? mDividerHeight : 0;
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = getChildAt(i);
+                child.offsetTopAndBottom(offset);
+                if (middle && child.getVisibility() != GONE) {
+                    offset += mDividerHeight;
+                }
+            }
+        } else {
+            int offset = begin ? mDividerWidth : 0;
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View child = getChildAt(i);
+                child.offsetLeftAndRight(offset);
+                if (middle && child.getVisibility() != GONE) {
+                    offset += mDividerWidth;
                 }
             }
         }
-
-        // Preserve original padding as we change the background
-        final int paddingLeft = child.getPaddingLeft();
-        final int paddingRight = child.getPaddingRight();
-        final int paddingTop = child.getPaddingTop();
-        final int paddingBottom = child.getPaddingBottom();
-        child.setBackgroundDrawable(mButtonBackground);
-        child.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-
-        final boolean isLast = index < 0 || index == getChildCount();
-        super.addView(child, index, params);
-
-        if (index >= 0) {
-            index++;
-        }
-        if ((isLast && (mShowDividers & SHOW_DIVIDER_END) == SHOW_DIVIDER_END) ||
-                ((mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE &&
-                        !(getChildAt(index) instanceof DividerView))) {
-            super.addView(new DividerView(mContext), index, makeDividerLayoutParams());
-        }
-    }
-    
-    private boolean hasDividerBefore(int index) {
-        if (index == -1) {
-            index = getChildCount();
-        }
-        index--;
-        if (index < 0) {
-            return false;
-        }
-        return getChildAt(index) instanceof DividerView;
     }
 
-    private LayoutParams makeDividerLayoutParams() {
-        return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-    }
+    @Override
+    public void dispatchDraw(Canvas canvas) {
+        final boolean begin = (mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING;
+        final boolean middle = (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
+        final boolean end = (mShowDividers & SHOW_DIVIDER_END) == SHOW_DIVIDER_END;
+        final boolean vertical = getOrientation() == VERTICAL;
 
-    private class DividerView extends ImageView {
-        public DividerView(Context context) {
-            super(context);
-            setImageDrawable(mDivider);
-            setScaleType(ImageView.ScaleType.FIT_XY);
+        final Rect bounds = mTempRect;
+        bounds.left = mPaddingLeft;
+        bounds.right = mRight - mLeft - mPaddingRight;
+        bounds.top = mPaddingTop;
+        bounds.bottom = mBottom - mTop - mPaddingBottom;
+
+        if (begin) {
+            if (vertical) {
+                bounds.bottom = bounds.top + mDividerHeight;
+            } else {
+                bounds.right = bounds.left + mDividerWidth;
+            }
+            mDivider.setBounds(bounds);
+            mDivider.draw(canvas);
         }
+
+        final int childCount = getChildCount();
+        int i = 0;
+        while (i < childCount) {
+            final View child = getChildAt(i);
+            i++;
+            if ((middle && i < childCount && child.getVisibility() != GONE) || end) {
+                if (vertical) {
+                    bounds.top = child.getBottom();
+                    bounds.bottom = bounds.top + mDividerHeight;
+                } else {
+                    bounds.left = child.getRight();
+                    bounds.right = bounds.left + mDividerWidth;
+                }
+                mDivider.setBounds(bounds);
+                mDivider.draw(canvas);
+            }
+        }
+
+        super.dispatchDraw(canvas);
     }
 }
