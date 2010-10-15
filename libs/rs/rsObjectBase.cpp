@@ -93,9 +93,8 @@ bool ObjectBase::checkDelete() const
         if (mRSC && mRSC->props.mLogObjects) {
             dumpLOGV("checkDelete");
         }
-        delete this;
-
         unlockUserRef();
+        delete this;
         return true;
     }
     return false;
@@ -170,9 +169,7 @@ void ObjectBase::add() const
 
 void ObjectBase::remove() const
 {
-    // Should be within gObjectInitMutex lock
-    // lock will be from checkDelete a few levels up in the stack.
-
+    lockUserRef();
     //LOGV("calling remove  rsc %p", mRSC);
     if (!mRSC) {
         rsAssert(!mPrev);
@@ -191,12 +188,11 @@ void ObjectBase::remove() const
     }
     mPrev = NULL;
     mNext = NULL;
+    unlockUserRef();
 }
 
 void ObjectBase::zeroAllUserRef(Context *rsc)
 {
-    lockUserRef();
-
     if (rsc->props.mLogObjects) {
         LOGV("Forcing release of all outstanding user refs.");
     }
@@ -219,8 +215,6 @@ void ObjectBase::zeroAllUserRef(Context *rsc)
         LOGV("Objects remaining.");
         dumpAll(rsc);
     }
-
-    unlockUserRef();
 }
 
 void ObjectBase::dumpAll(Context *rsc)
