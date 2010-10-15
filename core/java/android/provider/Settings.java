@@ -2553,6 +2553,19 @@ public final class Settings {
 
 
         /**
+         * This preference contains the string that shows for owner info on LockScren.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_OWNER_INFO = "lock_screen_owner_info";
+
+        /**
+         * This preference enables showing the owner info on LockScren.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
+            "lock_screen_owner_info_enabled";
+
+        /**
          * Whether assisted GPS should be enabled or not.
          * @hide
          */

@@ -794,13 +794,9 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     const Element *dst = static_cast<const Element *>(_dst);
 
     //LOGE("%p rsi_AllocationCreateFromBitmap %i %i %i", rsc, w, h, genMips);
-    rsi_TypeBegin(rsc, _dst);
-    rsi_TypeAdd(rsc, RS_DIMENSION_X, w);
-    rsi_TypeAdd(rsc, RS_DIMENSION_Y, h);
-    if (genMips) {
-        rsi_TypeAdd(rsc, RS_DIMENSION_LOD, 1);
-    }
-    RsType type = rsi_TypeCreate(rsc);
+    RsDimension dims[] = {RS_DIMENSION_X, RS_DIMENSION_Y, RS_DIMENSION_LOD};
+    uint32_t dimValues[] = {w, h, genMips};
+    RsType type = rsaTypeCreate(rsc, _dst, 3, dims, dimValues);
 
     RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, type);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);

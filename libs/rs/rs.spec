@@ -64,7 +64,7 @@ GetName {
 	}
 
 ObjDestroy {
-	param void *obj
+	param RsAsyncVoidPtr objPtr
 	}
 
 ElementCreate {
@@ -97,18 +97,6 @@ ElementGetSubElements {
 	param uint32_t dataSize
 	}
 
-TypeBegin {
-	param RsElement type
-	}
-
-TypeAdd {
-	param RsDimension dim
-	param size_t value
-	}
-
-TypeCreate {
-	ret RsType
-	}
 
 TypeGetNativeData {
 	param RsType type
@@ -135,8 +123,8 @@ AllocationUpdateFromBitmap {
 
 AllocationCreateBitmapRef {
 	param RsType type
-	param void * bmpPtr
-	param void * callbackData
+	param RsAsyncVoidPtr bmpPtr
+	param RsAsyncVoidPtr callbackData
 	param RsBitmapCallback_t callback
 	ret RsAllocation
 	}

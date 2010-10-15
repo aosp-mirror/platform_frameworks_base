@@ -132,7 +132,8 @@ public class Type extends BaseObj {
 
     public static class Builder {
         RenderScript mRS;
-        Entry[] mEntries;
+        Dimension[] mDimensions;
+        int[] mDimensionValues;
         int mEntryCount;
         Element mElement;
 
@@ -147,7 +148,8 @@ public class Type extends BaseObj {
             }
 
             mRS = rs;
-            mEntries = new Entry[4];
+            mDimensions = new Dimension[4];
+            mDimensionValues = new int[4];
             mElement = e;
         }
 
@@ -155,46 +157,45 @@ public class Type extends BaseObj {
             if(value < 1) {
                 throw new IllegalArgumentException("Values of less than 1 for Dimensions are not valid.");
             }
-            if(mEntries.length >= mEntryCount) {
-                Entry[] en = new Entry[mEntryCount + 8];
-                System.arraycopy(mEntries, 0, en, 0, mEntries.length);
-                mEntries = en;
+            if(mDimensions.length >= mEntryCount) {
+                Dimension[] dn = new Dimension[mEntryCount + 8];
+                System.arraycopy(mDimensions, 0, dn, 0, mEntryCount);
+                mDimensions = dn;
+
+                int[] in = new int[mEntryCount + 8];
+                System.arraycopy(mDimensionValues, 0, in, 0, mEntryCount);
+                mDimensionValues = in;
             }
-            mEntries[mEntryCount] = new Entry();
-            mEntries[mEntryCount].mDim = d;
-            mEntries[mEntryCount].mValue = value;
+            mDimensions[mEntryCount] = d;
+            mDimensionValues[mEntryCount] = value;
             mEntryCount++;
         }
 
-        static synchronized Type internalCreate(RenderScript rs, Builder b) {
-            rs.nTypeBegin(b.mElement.mID);
-            for (int ct=0; ct < b.mEntryCount; ct++) {
-                Entry en = b.mEntries[ct];
-                rs.nTypeAdd(en.mDim.mID, en.mValue);
-            }
-            int id = rs.nTypeCreate();
-            return new Type(id, rs);
-        }
-
         public Type create() {
-            Type t = internalCreate(mRS, this);
+            int dims[] = new int[mEntryCount];
+            for (int ct=0; ct < mEntryCount; ct++) {
+                dims[ct] = mDimensions[ct].mID;
+            }
+
+            int id = mRS.nTypeCreate(mElement.getID(), dims, mDimensionValues);
+            Type t = new Type(id, mRS);
             t.mElement = mElement;
 
             for(int ct=0; ct < mEntryCount; ct++) {
-                if(mEntries[ct].mDim == Dimension.X) {
-                    t.mDimX = mEntries[ct].mValue;
+                if(mDimensions[ct] == Dimension.X) {
+                    t.mDimX = mDimensionValues[ct];
                 }
-                if(mEntries[ct].mDim == Dimension.Y) {
-                    t.mDimY = mEntries[ct].mValue;
+                if(mDimensions[ct] == Dimension.Y) {
+                    t.mDimY = mDimensionValues[ct];
                 }
-                if(mEntries[ct].mDim == Dimension.Z) {
-                    t.mDimZ = mEntries[ct].mValue;
+                if(mDimensions[ct] == Dimension.Z) {
+                    t.mDimZ = mDimensionValues[ct];
                 }
-                if(mEntries[ct].mDim == Dimension.LOD) {
-                    t.mDimLOD = mEntries[ct].mValue != 0;
+                if(mDimensions[ct] == Dimension.LOD) {
+                    t.mDimLOD = mDimensionValues[ct] != 0;
                 }
-                if(mEntries[ct].mDim == Dimension.FACE) {
-                    t.mDimFaces = mEntries[ct].mValue != 0;
+                if(mDimensions[ct] == Dimension.FACE) {
+                    t.mDimFaces = mDimensionValues[ct] != 0;
                 }
             }
             t.calcElementCount();

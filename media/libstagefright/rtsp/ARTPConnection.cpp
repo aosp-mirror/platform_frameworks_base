@@ -59,7 +59,8 @@ struct ARTPConnection::StreamInfo {
     sp<AMessage> mNotifyMsg;
     KeyedVector<uint32_t, sp<ARTPSource> > mSources;
 
-    int32_t mNumRTCPPacketsReceived;
+    int64_t mNumRTCPPacketsReceived;
+    int64_t mNumRTPPacketsReceived;
     struct sockaddr_in mRemoteRTCPAddr;
 
     bool mIsInjected;
@@ -168,6 +169,12 @@ void ARTPConnection::onMessageReceived(const sp<AMessage> &msg) {
             break;
         }
 
+        case kWhatFakeTimestamps:
+        {
+            onFakeTimestamps();
+            break;
+        }
+
         default:
         {
             TRESPASS();
@@ -199,6 +206,7 @@ void ARTPConnection::onAddStream(const sp<AMessage> &msg) {
     CHECK(msg->findMessage("notify", &info->mNotifyMsg));
 
     info->mNumRTCPPacketsReceived = 0;
+    info->mNumRTPPacketsReceived = 0;
     memset(&info->mRemoteRTCPAddr, 0, sizeof(info->mRemoteRTCPAddr));
 
     if (!injected) {
@@ -373,6 +381,12 @@ status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
 }
 
 status_t ARTPConnection::parseRTP(StreamInfo *s, const sp<ABuffer> &buffer) {
+    if (s->mNumRTPPacketsReceived++ == 0) {
+        sp<AMessage> notify = s->mNotifyMsg->dup();
+        notify->setInt32("first-rtp", true);
+        notify->post();
+    }
+
     size_t size = buffer->size();
 
     if (size < 12) {
@@ -635,6 +649,28 @@ void ARTPConnection::onInjectPacket(const sp<AMessage> &msg) {
         err = parseRTP(s, buffer);
     } else {
         err = parseRTCP(s, buffer);
+    }
+}
+
+void ARTPConnection::fakeTimestamps() {
+    (new AMessage(kWhatFakeTimestamps, id()))->post();
+}
+
+void ARTPConnection::onFakeTimestamps() {
+    List<StreamInfo>::iterator it = mStreams.begin();
+    while (it != mStreams.end()) {
+        StreamInfo &info = *it++;
+
+        for (size_t j = 0; j < info.mSources.size(); ++j) {
+            sp<ARTPSource> source = info.mSources.valueAt(j);
+
+            if (!source->timeEstablished()) {
+                source->timeUpdate(0, 0);
+                source->timeUpdate(0 + 90000, 0x100000000ll);
+
+                mFlags |= kFakeTimestamps;
+            }
+        }
     }
 }
 

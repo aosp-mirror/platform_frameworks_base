@@ -138,8 +138,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     /**
      * In and out animations.
      */
-    ObjectAnimator<?> mInAnimation;
-    ObjectAnimator<?> mOutAnimation;
+    ObjectAnimator mInAnimation;
+    ObjectAnimator mOutAnimation;
 
     private  ArrayList<View> mViewsToBringToFront;
 
@@ -246,12 +246,16 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
     }
 
-    ObjectAnimator<?> getDefaultInAnimation() {
-        return new ObjectAnimator<Float>(DEFAULT_ANIMATION_DURATION, null, "alpha", 0.0f, 1.0f);
+    ObjectAnimator getDefaultInAnimation() {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(null, "alpha", 0.0f, 1.0f);
+        anim.setDuration(DEFAULT_ANIMATION_DURATION);
+        return anim;
     }
 
-    ObjectAnimator<?> getDefaultOutAnimation() {
-        return new ObjectAnimator<Float>(DEFAULT_ANIMATION_DURATION, null, "alpha", 1.0f, 0.0f);
+    ObjectAnimator getDefaultOutAnimation() {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(null, "alpha", 1.0f, 0.0f);
+        anim.setDuration(DEFAULT_ANIMATION_DURATION);
+        return anim;
     }
 
     /**
@@ -341,7 +345,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (relativeIndex >= 0 && relativeIndex <= mNumActiveViews - 1 && mAdapter != null) {
             int adapterCount =  mAdapter.getCount();
             int i = modulo(mCurrentWindowStartUnbounded + relativeIndex, adapterCount);
-            return mViewsMap.get(i).view;
+            if (mViewsMap.get(i) != null) {
+                return mViewsMap.get(i).view;
+            }
         }
         return null;
     }
@@ -692,10 +698,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      *
      * @return An Animation or null if none is set.
      *
-     * @see #setInAnimation(android.view.animation.Animation)
+     * @see #setInAnimation(android.animation.ObjectAnimator)
      * @see #setInAnimation(android.content.Context, int)
      */
-    public ObjectAnimator<?> getInAnimation() {
+    public ObjectAnimator getInAnimation() {
         return mInAnimation;
     }
 
@@ -707,7 +713,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @see #getInAnimation()
      * @see #setInAnimation(android.content.Context, int)
      */
-    public void setInAnimation(ObjectAnimator<?> inAnimation) {
+    public void setInAnimation(ObjectAnimator inAnimation) {
         mInAnimation = inAnimation;
     }
 
@@ -716,10 +722,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      *
      * @return An Animation or null if none is set.
      *
-     * @see #setOutAnimation(android.view.animation.Animation)
+     * @see #setOutAnimation(android.animation.ObjectAnimator)
      * @see #setOutAnimation(android.content.Context, int)
      */
-    public ObjectAnimator<?> getOutAnimation() {
+    public ObjectAnimator getOutAnimation() {
         return mOutAnimation;
     }
 
@@ -731,7 +737,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @see #getOutAnimation()
      * @see #setOutAnimation(android.content.Context, int)
      */
-    public void setOutAnimation(ObjectAnimator<?> outAnimation) {
+    public void setOutAnimation(ObjectAnimator outAnimation) {
         mOutAnimation = outAnimation;
     }
 
@@ -742,10 +748,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @param resourceID The resource id of the animation.
      *
      * @see #getInAnimation()
-     * @see #setInAnimation(android.view.animation.Animation)
+     * @see #setInAnimation(android.animation.ObjectAnimator)
      */
     public void setInAnimation(Context context, int resourceID) {
-        setInAnimation((ObjectAnimator<?>) AnimatorInflater.loadAnimator(context, resourceID));
+        setInAnimation((ObjectAnimator) AnimatorInflater.loadAnimator(context, resourceID));
     }
 
     /**
@@ -755,10 +761,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @param resourceID The resource id of the animation.
      *
      * @see #getOutAnimation()
-     * @see #setOutAnimation(android.view.animation.Animation)
+     * @see #setOutAnimation(android.animation.ObjectAnimator)
      */
     public void setOutAnimation(Context context, int resourceID) {
-        setOutAnimation((ObjectAnimator<?>) AnimatorInflater.loadAnimator(context, resourceID));
+        setOutAnimation((ObjectAnimator) AnimatorInflater.loadAnimator(context, resourceID));
     }
 
     /**

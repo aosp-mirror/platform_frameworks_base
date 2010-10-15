@@ -590,9 +590,7 @@ static void android_location_GpsLocationProvider_update_network_state(JNIEnv* en
         jboolean connected, int type, jboolean roaming, jstring extraInfo)
 {
     const AGpsRilInterface* interface = GetAGpsRilInterface(env, obj);
-    if (interface &&
-            (interface->size > ((char *)&interface->update_network_state - (char *)&interface)) &&
-            interface->update_network_state) {
+    if (interface && interface->update_network_state) {
         if (extraInfo) {
             const char *extraInfoStr = env->GetStringUTFChars(extraInfo, NULL);
             interface->update_network_state(connected, type, roaming, extraInfoStr);

@@ -67,15 +67,12 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
         // Reset our local matrix
         rsMatrixLoadIdentity(localMat);
 
-        float4 *transformSource = &data->transforms0;
-        int *transformTypes = &data->transformType0;
-
         for(int i = 0; i < 16; i ++) {
-            if(transformTypes[i] == TRANSFORM_NONE) {
+            if(data->transformTypes[i] == TRANSFORM_NONE) {
                 break;
             }
             //rsDebug("Transform adding transformation", transformTypes[i]);
-            appendTransformation(transformTypes[i], transformSource[i], localMat);
+            appendTransformation(data->transformTypes[i], data->transforms[i], localMat);
         }
     }
 

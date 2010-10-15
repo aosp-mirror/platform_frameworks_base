@@ -903,10 +903,6 @@ void OMXCodec::setVideoInputFormat(
     OMX_COLOR_FORMATTYPE colorFormat;
     CHECK_EQ(OK, findTargetColorFormat(meta, &colorFormat));
 
-    if (!strcasecmp("OMX.Nvidia.h264.encoder", mComponentName)) {
-        colorFormat = OMX_COLOR_FormatYUV420Planar;
-    }
-
     status_t err;
     OMX_PARAM_PORTDEFINITIONTYPE def;
     OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;

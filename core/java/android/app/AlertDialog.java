@@ -78,7 +78,6 @@ public class AlertDialog extends Dialog implements DialogInterface {
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
                 outValue, true);
-        Log.d("AlertDialog", "getDefaultDialogTheme data " + outValue.data + " id " + outValue.resourceId);
         return outValue.resourceId;
     }
 

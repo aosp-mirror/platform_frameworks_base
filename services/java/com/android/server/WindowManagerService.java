@@ -555,6 +555,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        int getDragLayerLw() {
+            return mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_DRAG)
+                    * TYPE_LAYER_MULTIPLIER
+                    + TYPE_LAYER_OFFSET;
+        }
+
         /* call out to each visible window/session informing it about the drag
          */
         void broadcastDragStartedLw(final float touchX, final float touchY) {
@@ -5533,7 +5539,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return null;
         }
 
-        private void addDragInputWindow(InputWindowList windowList) {
+        private void addDragInputWindowLw(InputWindowList windowList) {
             final InputWindow inputWindow = windowList.add();
             inputWindow.inputChannel = mDragState.mServerChannel;
             inputWindow.name = "drag";
@@ -5545,9 +5551,7 @@ public class WindowManagerService extends IWindowManager.Stub
             inputWindow.hasFocus = true;
             inputWindow.hasWallpaper = false;
             inputWindow.paused = false;
-            inputWindow.layer = mPolicy.windowTypeToLayerLw(inputWindow.layoutParamsType)
-                    * TYPE_LAYER_MULTIPLIER
-                    + TYPE_LAYER_OFFSET;
+            inputWindow.layer = mDragState.getDragLayerLw();
             inputWindow.ownerPid = Process.myPid();
             inputWindow.ownerUid = Process.myUid();
 
@@ -5583,7 +5587,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_DRAG) {
                     Log.d(TAG, "Inserting drag window");
                 }
-                addDragInputWindow(mTempInputWindows);
+                addDragInputWindowLw(mTempInputWindows);
             }
 
             final int N = windows.size();
@@ -6231,6 +6235,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     surface.setPosition((int)(touchX - thumbCenterX),
                             (int)(touchY - thumbCenterY));
                     surface.setAlpha(.5f);
+                    surface.setLayer(mDragState.getDragLayerLw());
                     surface.show();
                 } finally {
                     surface.closeTransaction();

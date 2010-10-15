@@ -835,7 +835,7 @@
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
 
         <!-- Action bar styles -->
-        <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown</item>
+        <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
         <item name="actionModeBackground">@android:drawable/cab_holo_dark</item>
@@ -1064,17 +1064,17 @@
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
 
         <!-- Action bar styles -->
-        <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown</item>
-        <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
-        <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
+        <item name="actionDropDownStyle">@android:style/Widget.Holo.Light.Spinner.DropDown.ActionBar</item>
+        <item name="actionButtonStyle">@android:style/Widget.Holo.Light.ActionButton</item>
+        <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.Light.ActionButton.Overflow</item>
         <item name="actionModeBackground">@android:drawable/cab_holo_light</item>
         <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
-        <item name="actionBarTabStyle">@style/Widget.Holo.ActionBarView_TabView</item>
-        <item name="actionBarTabBarStyle">@style/Widget.Holo.ActionBarView_TabBar</item>
-        <item name="actionBarTabTextStyle">@style/Widget.Holo.ActionBarView_TabText</item>
+        <item name="actionBarTabStyle">@style/Widget.Holo.Light.ActionBarView_TabView</item>
+        <item name="actionBarTabBarStyle">@style/Widget.Holo.Light.ActionBarView_TabBar</item>
+        <item name="actionBarTabTextStyle">@style/Widget.Holo.Light.ActionBarView_TabText</item>
         <item name="actionModeStyle">@style/Widget.Holo.Light.ActionMode</item>
-        <item name="actionModeCloseButtonStyle">@style/Widget.Holo.ActionButton.CloseMode</item>
-        <item name="actionBarStyle">@android:style/Widget.Holo.ActionBar</item>
+        <item name="actionModeCloseButtonStyle">@style/Widget.Holo.Light.ActionButton.CloseMode</item>
+        <item name="actionBarStyle">@android:style/Widget.Holo.Light.ActionBar</item>
         <item name="actionBarSize">56dip</item>
 
         <item name="dividerVertical">@drawable/divider_vertical_holo_light</item>

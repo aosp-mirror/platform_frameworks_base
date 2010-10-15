@@ -776,7 +776,7 @@
      	
      <!-- @hide -->	
      <style name="TextAppearance.SearchResult.Title">	
-         <item name="android:textSize">16sp</item>	
+         <item name="android:textSize">16sp</item>
      </style>	
      	
      <!-- @hide -->	
@@ -1044,12 +1044,18 @@
     </style>
 
     <style name="TextAppearance.Holo.SearchResult">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColorHint">?textColorHintInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.SearchResult.Title">
+         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="TextAppearance.Holo.SearchResult.Subtitle">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">?textColorSecondaryInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget" parent="TextAppearance.Widget">
@@ -1380,6 +1386,7 @@
     </style>
 
     <style name="Widget.Holo.Spinner" parent="Widget.Spinner.DropDown">
+        <item name="android:background">@android:drawable/spinner_background_holo_dark</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_holo_dark</item>
         <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
         <item name="android:dropDownVerticalOffset">0dip</item>
@@ -1389,6 +1396,10 @@
     </style>
 
     <style name="Widget.Holo.Spinner.DropDown">
+    </style>
+
+    <style name="Widget.Holo.Spinner.DropDown.ActionBar">
+        <item name="android:background">@android:drawable/spinner_cab_background_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.CompoundButton.Star" parent="Widget.CompoundButton.Star">
@@ -1454,10 +1465,10 @@
     </style>
 
     <style name="Widget.Holo.ActionButton" parent="Widget.ActionButton">
-        <item name="android:paddingLeft">16dip</item>
-        <item name="android:paddingRight">16dip</item>
-        <item name="android:minWidth">64dip</item>
+        <item name="android:paddingLeft">4dip</item>
+        <item name="android:paddingRight">4dip</item>
         <item name="android:minHeight">56dip</item>
+        <item name="android:scaleType">center</item>
     </style>
 
     <style name="Widget.Holo.ActionButton.Overflow">
@@ -1631,7 +1642,8 @@
     <style name="Widget.Holo.Light.HorizontalScrollView" parent="Widget.HorizontalScrollView">
     </style>
 
-    <style name="Widget.Holo.Light.Spinner" parent="Widget.Spinner.DropDown">
+    <style name="Widget.Holo.Light.Spinner" parent="Widget.Holo.Spinner">
+        <item name="android:background">@android:drawable/spinner_background_holo_light</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_holo_light</item>
         <item name="android:popupBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
         <item name="android:dropDownVerticalOffset">0dip</item>
@@ -1641,6 +1653,10 @@
     </style>
 
     <style name="Widget.Holo.Light.Spinner.DropDown">
+    </style>
+
+    <style name="Widget.Holo.Light.Spinner.DropDown.ActionBar">
+        <item name="android:background">@android:drawable/spinner_cab_background_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.CompoundButton.Star" parent="Widget.CompoundButton.Star">

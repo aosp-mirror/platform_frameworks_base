@@ -42,6 +42,9 @@ struct NuCachedSource2 : public DataSource {
     size_t cachedSize();
     size_t approxDataRemaining(bool *eos);
 
+    void suspend();
+    void clearCacheAndResume();
+
 protected:
     virtual ~NuCachedSource2();
 
@@ -61,6 +64,7 @@ private:
     enum {
         kWhatFetchMore  = 'fetc',
         kWhatRead       = 'read',
+        kWhatSuspend    = 'susp',
     };
 
     sp<DataSource> mSource;
@@ -78,10 +82,12 @@ private:
     sp<AMessage> mAsyncResult;
     bool mFetching;
     int64_t mLastFetchTimeUs;
+    bool mSuspended;
 
     void onMessageReceived(const sp<AMessage> &msg);
     void onFetch();
     void onRead(const sp<AMessage> &msg);
+    void onSuspend();
 
     void fetchInternal();
     ssize_t readInternal(off_t offset, void *data, size_t size);

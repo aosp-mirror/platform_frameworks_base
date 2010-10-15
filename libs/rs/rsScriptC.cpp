@@ -529,8 +529,6 @@ RsScript rsi_ScriptCCreate(Context * rsc)
 
     ss->runCompiler(rsc, s.get());
     s->incUserRef();
-    s->setContext(rsc);
-
     ss->clear(rsc);
     return s.get();
 }

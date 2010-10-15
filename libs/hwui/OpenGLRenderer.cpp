@@ -388,7 +388,8 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         snapshot->invisible = true;
     } else {
         // TODO: Should take the mode into account
-        snapshot->invisible = snapshot->previous->invisible || alpha <= ALPHA_THRESHOLD;
+        snapshot->invisible = snapshot->previous->invisible ||
+                (alpha <= ALPHA_THRESHOLD && fboLayer);
     }
 
     // Bail out if we won't draw in this snapshot
@@ -551,7 +552,7 @@ void OpenGLRenderer::clearLayerRegions() {
         Rect* bounds = mLayers.itemAt(i);
 
         // Clear the framebuffer where the layer will draw
-        glScissor(bounds->left, mHeight - bounds->bottom,
+        glScissor(bounds->left, mSnapshot->height - bounds->bottom,
                 bounds->getWidth(), bounds->getHeight());
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -620,7 +621,12 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
 
     Rect r(left, top, right, bottom);
     mSnapshot->transform->mapRect(r);
-    return !mSnapshot->clipRect->intersects(r);
+    r.snapToPixelBoundaries();
+
+    Rect clipRect(*mSnapshot->clipRect);
+    clipRect.snapToPixelBoundaries();
+
+    return !clipRect.intersects(r);
 }
 
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {

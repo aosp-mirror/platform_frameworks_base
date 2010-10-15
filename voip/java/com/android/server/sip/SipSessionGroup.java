@@ -153,7 +153,13 @@ class SipSessionGroup implements SipListener {
     }
 
     synchronized void onConnectivityChanged() {
-        for (SipSessionImpl s : mSessionMap.values()) {
+        SipSessionImpl[] ss = mSessionMap.values().toArray(
+                    new SipSessionImpl[mSessionMap.size()]);
+        // Iterate on the copied array instead of directly on mSessionMap to
+        // avoid ConcurrentModificationException being thrown when
+        // SipSessionImpl removes itself from mSessionMap in onError() in the
+        // following loop.
+        for (SipSessionImpl s : ss) {
             s.onError(SipErrorCode.DATA_CONNECTION_LOST,
                     "data connection lost");
         }

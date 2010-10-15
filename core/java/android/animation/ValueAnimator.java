@@ -37,7 +37,7 @@ import java.util.HashMap;
  * out of an animation. This behavior can be changed by calling
  * {@link ValueAnimator#setInterpolator(TimeInterpolator)}.</p>
  */
-public class ValueAnimator<T> extends Animator {
+public class ValueAnimator extends Animator {
 
     /**
      * Internal constants
@@ -154,7 +154,7 @@ public class ValueAnimator<T> extends Animator {
     //
 
     // How long the animation should last in ms
-    private long mDuration;
+    private long mDuration = 300;
 
     // The amount of time in ms to delay starting the animation after start() is called
     private long mStartDelay = 0;
@@ -218,28 +218,261 @@ public class ValueAnimator<T> extends Animator {
 
     /**
      * Creates a new ValueAnimator object. This default constructor is primarily for
-     * use internally; the other constructors which take parameters are more generally
+     * use internally; the factory methods which take parameters are more generally
      * useful.
      */
     public ValueAnimator() {
     }
 
     /**
-     * Constructs an ValueAnimator object with the specified duration and set of
-     * values. If the values are a set of PropertyValuesHolder objects, then these objects
-     * define the potentially multiple properties being animated and the values the properties are
-     * animated between. Otherwise, the values define a single set of values animated between.
+     * Constructs and returns a ValueAnimator that animates between int values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
      *
-     * @param duration The length of the animation, in milliseconds.
-     * @param values The set of values to animate between. If these values are not
-     * PropertyValuesHolder objects, then there should be more than one value, since the values
-     * determine the interval to animate between.
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
      */
-    public ValueAnimator(long duration, T...values) {
-        mDuration = duration;
-        if (values.length > 0) {
-            setValues(values);
+    public static ValueAnimator ofInt(int... values) {
+        ValueAnimator anim = new ValueAnimator();
+        anim.setIntValues(values);
+        return anim;
+    }
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between float values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    public static ValueAnimator ofFloat(float... values) {
+        ValueAnimator anim = new ValueAnimator();
+        anim.setFloatValues(values);
+        return anim;
+    }
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between double values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    public static ValueAnimator ofDouble(double... values) {
+        ValueAnimator anim = new ValueAnimator();
+        anim.setDoubleValues(values);
+        return anim;
+    }
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between long values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    public static ValueAnimator ofLong(long... values) {
+        ValueAnimator anim = new ValueAnimator();
+        anim.setLongValues(values);
+        return anim;
+    }
+
+    /**
+     * Constructs and returns a ValueAnimator that animates between the values
+     * specified in the PropertyValuesHolder objects.
+     *
+     * @param values A set of PropertyValuesHolder objects whose values will be animated
+     * between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    public static ValueAnimator ofPropertyValuesHolder(PropertyValuesHolder... values) {
+        ValueAnimator anim = new ValueAnimator();
+        anim.setValues(values);
+        return anim;
+    }
+    /**
+     * Constructs and returns a ValueAnimator that animates between Object values. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * <p>Since ValueAnimator does not know how to animate between arbitrary Objects, this
+     * factory method also takes a TypeEvaluator object that the ValueAnimator will use
+     * to perform that interpolation.
+     *
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the ncessry interpolation between the Object values to derive the animated
+     * value.
+     * @param values A set of values that the animation will animate between over time.
+     * @return A ValueAnimator object that is set up to animate between the given values.
+     */
+    public static ValueAnimator ofObject(TypeEvaluator evaluator, Object... values) {
+        ValueAnimator anim = new ValueAnimator();
+        anim.setObjectValues(values);
+        anim.setEvaluator(evaluator);
+        return anim;
+    }
+
+    /**
+     * Sets int values that will be animated between. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * <p>If there are already multiple sets of values defined for this ValueAnimator via more
+     * than one PropertyValuesHolder object, this method will set the values for the first
+     * of those objects.</p>
+     *
+     * @param values A set of values that the animation will animate between over time.
+     */
+    public void setIntValues(int... values) {
+        if (values == null || values.length == 0) {
+            return;
         }
+        if (mValues == null || mValues.length == 0) {
+            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofInt("", values)});
+        } else {
+            PropertyValuesHolder valuesHolder = mValues[0];
+            valuesHolder.setIntValues(values);
+        }
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
+    }
+
+    /**
+     * Sets float values that will be animated between. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * <p>If there are already multiple sets of values defined for this ValueAnimator via more
+     * than one PropertyValuesHolder object, this method will set the values for the first
+     * of those objects.</p>
+     *
+     * @param values A set of values that the animation will animate between over time.
+     */
+    public void setFloatValues(float... values) {
+        if (values == null || values.length == 0) {
+            return;
+        }
+        if (mValues == null || mValues.length == 0) {
+            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofFloat("", values)});
+        } else {
+            PropertyValuesHolder valuesHolder = mValues[0];
+            valuesHolder.setFloatValues(values);
+        }
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
+    }
+
+    /**
+     * Sets long values that will be animated between. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * <p>If there are already multiple sets of values defined for this ValueAnimator via more
+     * than one PropertyValuesHolder object, this method will set the values for the first
+     * of those objects.</p>
+     *
+     * @param values A set of values that the animation will animate between over time.
+     */
+    public void setLongValues(long... values) {
+        if (values == null || values.length == 0) {
+            return;
+        }
+        if (mValues == null || mValues.length == 0) {
+            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofLong("", values)});
+        } else {
+            PropertyValuesHolder valuesHolder = mValues[0];
+            valuesHolder.setLongValues(values);
+        }
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
+    }
+
+    /**
+     * Sets double values that will be animated between. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * <p>If there are already multiple sets of values defined for this ValueAnimator via more
+     * than one PropertyValuesHolder object, this method will set the values for the first
+     * of those objects.</p>
+     *
+     * @param values A set of values that the animation will animate between over time.
+     */
+    public void setDoubleValues(double... values) {
+        if (values == null || values.length == 0) {
+            return;
+        }
+        if (mValues == null || mValues.length == 0) {
+            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofDouble("", values)});
+        } else {
+            PropertyValuesHolder valuesHolder = mValues[0];
+            valuesHolder.setDoubleValues(values);
+        }
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
+    }
+
+    /**
+     * Sets the values to animate between for this animation. A single
+     * value implies that that value is the one being animated to. However, this is not typically
+     * useful in a ValueAnimator object because there is no way for the object to determine the
+     * starting value for the animation (unlike ObjectAnimator, which can derive that value
+     * from the target object and property being animated). Therefore, there should typically
+     * be two or more values.
+     *
+     * <p>If there are already multiple sets of values defined for this ValueAnimator via more
+     * than one PropertyValuesHolder object, this method will set the values for the first
+     * of those objects.</p>
+     *
+     * <p>There should be a TypeEvaluator set on the ValueAnimator that knows how to interpolate
+     * between these value objects. ValueAnimator only knows how to interpolate between the
+     * primitive types specified in the other setValues() methods.</p>
+     *
+     * @param values The set of values to animate between.
+     */
+    public void setObjectValues(Object... values) {
+        if (values == null || values.length == 0) {
+            return;
+        }
+        if (mValues == null || mValues.length == 0) {
+            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofObject("",
+                    (TypeEvaluator)null, values)});
+        } else {
+            PropertyValuesHolder valuesHolder = mValues[0];
+            valuesHolder.setObjectValues(values);
+        }
+        // New property/values/target should cause re-initialization prior to starting
+        mInitialized = false;
     }
 
     /**
@@ -275,30 +508,6 @@ public class ValueAnimator<T> extends Animator {
     }
 
     /**
-     * Sets the values to animate between for this animation. If <code>values</code> is
-     * a set of PropertyValuesHolder objects, these objects will become the set of properties
-     * animated and the values that those properties are animated between. Otherwise, this method
-     * will set only one set of values for the ValueAnimator. Also, if the values are not
-     * PropertyValuesHolder objects and if there are already multiple sets of
-     * values defined for this ValueAnimator via
-     * more than one PropertyValuesHolder objects, this method will set the values for
-     * the first of those objects.
-     *
-     * @param values The set of values to animate between.
-     */
-    public void setValues(T... values) {
-        if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{
-                    new PropertyValuesHolder("", (Object[])values)});
-        } else {
-            PropertyValuesHolder valuesHolder = mValues[0];
-            valuesHolder.setValues(values);
-        }
-        // New property/values/target should cause re-initialization prior to starting
-        mInitialized = false;
-    }
-
-    /**
      * This function is called immediately before processing the first animation
      * frame of an animation. If there is a nonzero <code>startDelay</code>, the
      * function is called after that delay ends.
@@ -321,16 +530,20 @@ public class ValueAnimator<T> extends Animator {
 
 
     /**
-     * Sets the length of the animation.
+     * Sets the length of the animation. The default duration is 300 milliseconds.
      *
      * @param duration The length of the animation, in milliseconds.
+     * @return ValueAnimator The object called with setDuration(). This return
+     * value makes it easier to compose statements together that construct and then set the
+     * duration, as in <code>ValueAnimator.ofInt(0, 10).setDuration(500).start()</code>.
      */
-    public void setDuration(long duration) {
+    public ValueAnimator setDuration(long duration) {
         mDuration = duration;
+        return this;
     }
 
     /**
-     * Gets the length of the animation.
+     * Gets the length of the animation. The default duration is 300 milliseconds.
      *
      * @return The length of the animation, in milliseconds.
      */
@@ -469,8 +682,8 @@ public class ValueAnimator<T> extends Animator {
                     // If there are still active or delayed animations, call the handler again
                     // after the frameDelay
                     if (callAgain && (!sAnimations.isEmpty() || !sDelayedAnims.isEmpty())) {
-                        sendEmptyMessageDelayed(ANIMATION_FRAME,  Math.max(0, sFrameDelay -
--                            (AnimationUtils.currentAnimationTimeMillis() - currentTime)));
+                        sendEmptyMessageDelayed(ANIMATION_FRAME, Math.max(0, sFrameDelay -
+                            (AnimationUtils.currentAnimationTimeMillis() - currentTime)));
                     }
                     break;
             }

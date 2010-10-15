@@ -39,6 +39,7 @@ public:
     void incUserRef() const;
     bool decUserRef() const;
     bool zeroUserRef() const;
+    void prelockedIncUserRef() const;
 
     const char * getName() const {
         return mName.string();
@@ -47,7 +48,6 @@ public:
     void setName(const char *, uint32_t len);
 
     Context * getContext() const {return mRSC;}
-    void setContext(Context *);
 
     static void zeroAllUserRef(Context *rsc);
     static void dumpAll(Context *rsc);
@@ -58,12 +58,17 @@ public:
 
     static bool isValid(const Context *rsc, const ObjectBase *obj);
 
+    static void lockUserRef();
+    static void unlockUserRef();
+
 protected:
     const char *mAllocFile;
     uint32_t mAllocLine;
     Context *mRSC;
 
 private:
+    static pthread_mutex_t gObjectInitMutex;
+
     void add() const;
     void remove() const;
 

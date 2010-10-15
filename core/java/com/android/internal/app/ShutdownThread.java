@@ -35,6 +35,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.os.storage.IMountService;
 import android.os.storage.IMountShutdownObserver;
@@ -61,6 +62,9 @@ public final class ShutdownThread extends Thread {
     
     private static boolean mReboot;
     private static String mRebootReason;
+
+    // Provides shutdown assurance in case the system_server is killed
+    public static final String SHUTDOWN_ACTION_PROPERTY = "sys.shutdown.requested";
 
     // static instance of this thread
     private static final ShutdownThread sInstance = new ShutdownThread();
@@ -244,7 +248,17 @@ public final class ShutdownThread extends Thread {
                 actionDone();
             }
         };
-        
+
+        /*
+         * Write a system property in case the system_server reboots before we
+         * get to the actual hardware restart. If that happens, we'll retry at
+         * the beginning of the SystemServer startup.
+         */
+        {
+            String reason = (mReboot ? "1" : "0") + (mRebootReason != null ? mRebootReason : "");
+            SystemProperties.set(SHUTDOWN_ACTION_PROPERTY, reason);
+        }
+
         Log.i(TAG, "Sending shutdown broadcast...");
         
         // First send the high-level shut down broadcast.
@@ -374,10 +388,21 @@ public final class ShutdownThread extends Thread {
             }
         }
 
-        if (mReboot) {
-            Log.i(TAG, "Rebooting, reason: " + mRebootReason);
+        rebootOrShutdown(mReboot, mRebootReason);
+    }
+
+    /**
+     * Do not call this directly. Use {@link #reboot(Context, String, boolean)}
+     * or {@link #shutdown(Context, boolean)} instead.
+     *
+     * @param reboot true to reboot or false to shutdown
+     * @param reason reason for reboot
+     */
+    public static void rebootOrShutdown(boolean reboot, String reason) {
+        if (reboot) {
+            Log.i(TAG, "Rebooting, reason: " + reason);
             try {
-                Power.reboot(mRebootReason);
+                Power.reboot(reason);
             } catch (Exception e) {
                 Log.e(TAG, "Reboot failed, will attempt shutdown instead", e);
             }

@@ -24,39 +24,48 @@ package com.trustedlogic.trustednfc.android.internal;
 
 /**
  * Native interface to the NFC tag functions
- * 
- * {@hide}
+ *
+ * @hide
  */
 public class NativeNfcTag {
-	private int mHandle;
+    private int mHandle;
 
-	private String mType;
-	
-	private byte[] mUid;
+    private String mType;
 
-	public native boolean doConnect();
+    private byte[] mUid;
 
-	public native boolean doDisconnect();
-	
-	public native void doAsyncDisconnect();
+    public native boolean doConnect();
 
-	public native byte[] doTransceive(byte[] data);
+    public native boolean doDisconnect();
 
-	public native boolean checkNDEF();
-	
+    public native void doAsyncDisconnect();
+
+    public native byte[] doTransceive(byte[] data);
+
+    public native boolean checkNDEF();
+
     public native byte[] doRead();
 
     public native boolean doWrite(byte[] buf);
 
-	public int getHandle() {
-		return mHandle;
-	}
-	
-	public String getType() {
-		return mType;
-	}
-	
-	public byte[] getUid() {
-		return mUid;
-	}
+    private NativeNfcTag() {
+    }
+
+    public NativeNfcTag(int handle, String type, byte[] uid) {
+        mHandle = handle;
+        mType = type;
+        mUid = uid.clone();
+    }
+
+    public int getHandle() {
+        return mHandle;
+    }
+
+    public String getType() {
+        return mType;
+    }
+
+    public byte[] getUid() {
+        return mUid;
+    }
 }

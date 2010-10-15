@@ -25,16 +25,20 @@
 using namespace android;
 using namespace android::renderscript;
 
+pthread_mutex_t ObjectBase::gObjectInitMutex = PTHREAD_MUTEX_INITIALIZER;
+
 ObjectBase::ObjectBase(Context *rsc)
 {
     mUserRefCount = 0;
     mSysRefCount = 0;
-    mRSC = NULL;
+    mRSC = rsc;
     mNext = NULL;
     mPrev = NULL;
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
-    setContext(rsc);
+
+    rsAssert(rsc);
+    add();
 }
 
 ObjectBase::~ObjectBase()
@@ -56,22 +60,17 @@ void ObjectBase::dumpLOGV(const char *op) const
     }
 }
 
-void ObjectBase::setContext(Context *rsc)
-{
-    if (mRSC) {
-        remove();
-    }
-    rsAssert(rsc);
-    mRSC = rsc;
-    if (rsc) {
-        add();
-    }
-}
-
 void ObjectBase::incUserRef() const
 {
-    mUserRefCount ++;
+    lockUserRef();
+    mUserRefCount++;
+    unlockUserRef();
     //LOGV("ObjectBase %p inc ref %i", this, mUserRefCount);
+}
+
+void ObjectBase::prelockedIncUserRef() const
+{
+    mUserRefCount++;
 }
 
 void ObjectBase::incSysRef() const
@@ -83,10 +82,20 @@ void ObjectBase::incSysRef() const
 bool ObjectBase::checkDelete() const
 {
     if (!(mSysRefCount | mUserRefCount)) {
+        lockUserRef();
+
+        // Recheck the user ref count since it can be incremented from other threads.
+        if (mUserRefCount) {
+            unlockUserRef();
+            return false;
+        }
+
         if (mRSC && mRSC->props.mLogObjects) {
             dumpLOGV("checkDelete");
         }
         delete this;
+
+        unlockUserRef();
         return true;
     }
     return false;
@@ -94,17 +103,25 @@ bool ObjectBase::checkDelete() const
 
 bool ObjectBase::decUserRef() const
 {
+    lockUserRef();
     rsAssert(mUserRefCount > 0);
-    mUserRefCount --;
     //dumpLOGV("decUserRef");
-    return checkDelete();
+    mUserRefCount--;
+    unlockUserRef();
+    bool ret = checkDelete();
+    return ret;
 }
 
 bool ObjectBase::zeroUserRef() const
 {
+    lockUserRef();
+    // This can only happen during cleanup and is therefore
+    // thread safe.
     mUserRefCount = 0;
     //dumpLOGV("zeroUserRef");
-    return checkDelete();
+    unlockUserRef();
+    bool ret = checkDelete();
+    return ret;
 }
 
 bool ObjectBase::decSysRef() const
@@ -125,8 +142,20 @@ void ObjectBase::setName(const char *name, uint32_t len)
     mName.setTo(name, len);
 }
 
+void ObjectBase::lockUserRef()
+{
+    pthread_mutex_lock(&gObjectInitMutex);
+}
+
+void ObjectBase::unlockUserRef()
+{
+    pthread_mutex_unlock(&gObjectInitMutex);
+}
+
 void ObjectBase::add() const
 {
+    pthread_mutex_lock(&gObjectInitMutex);
+
     rsAssert(!mNext);
     rsAssert(!mPrev);
     //LOGV("calling add  rsc %p", mRSC);
@@ -135,16 +164,22 @@ void ObjectBase::add() const
         mRSC->mObjHead->mPrev = this;
     }
     mRSC->mObjHead = this;
+
+    pthread_mutex_unlock(&gObjectInitMutex);
 }
 
 void ObjectBase::remove() const
 {
+    // Should be within gObjectInitMutex lock
+    // lock will be from checkDelete a few levels up in the stack.
+
     //LOGV("calling remove  rsc %p", mRSC);
     if (!mRSC) {
         rsAssert(!mPrev);
         rsAssert(!mNext);
         return;
     }
+
     if (mRSC->mObjHead == this) {
         mRSC->mObjHead = mNext;
     }
@@ -160,6 +195,8 @@ void ObjectBase::remove() const
 
 void ObjectBase::zeroAllUserRef(Context *rsc)
 {
+    lockUserRef();
+
     if (rsc->props.mLogObjects) {
         LOGV("Forcing release of all outstanding user refs.");
     }
@@ -182,10 +219,14 @@ void ObjectBase::zeroAllUserRef(Context *rsc)
         LOGV("Objects remaining.");
         dumpAll(rsc);
     }
+
+    unlockUserRef();
 }
 
 void ObjectBase::dumpAll(Context *rsc)
 {
+    lockUserRef();
+
     LOGV("Dumping all objects");
     const ObjectBase * o = rsc->mObjHead;
     while (o) {
@@ -193,17 +234,23 @@ void ObjectBase::dumpAll(Context *rsc)
         o->dumpLOGV("  ");
         o = o->mNext;
     }
+
+    unlockUserRef();
 }
 
 bool ObjectBase::isValid(const Context *rsc, const ObjectBase *obj)
 {
+    lockUserRef();
+
     const ObjectBase * o = rsc->mObjHead;
     while (o) {
         if (o == obj) {
+            unlockUserRef();
             return true;
         }
         o = o->mNext;
     }
+    unlockUserRef();
     return false;
 }
 

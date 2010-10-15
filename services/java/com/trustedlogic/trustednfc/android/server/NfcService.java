@@ -17,44 +17,43 @@
 package com.trustedlogic.trustednfc.android.server;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.Set;
 
-import com.trustedlogic.trustednfc.android.ILlcpConnectionlessSocket;
-import com.trustedlogic.trustednfc.android.ILlcpServiceSocket;
-import com.trustedlogic.trustednfc.android.INfcManager;
-import com.trustedlogic.trustednfc.android.ILlcpSocket;
-import com.trustedlogic.trustednfc.android.INfcTag;
-import com.trustedlogic.trustednfc.android.IP2pInitiator;
-import com.trustedlogic.trustednfc.android.IP2pTarget;
-import com.trustedlogic.trustednfc.android.LlcpPacket;
-import com.trustedlogic.trustednfc.android.NdefMessage;
-import com.trustedlogic.trustednfc.android.NfcException;
-import com.trustedlogic.trustednfc.android.NfcManager;
+import android.nfc.ErrorCodes;
+import android.nfc.FormatException;
+import android.nfc.ILlcpConnectionlessSocket;
+import android.nfc.ILlcpServiceSocket;
+import android.nfc.INfcAdapter;
+import android.nfc.ILlcpSocket;
+import android.nfc.INfcTag;
+import android.nfc.IP2pInitiator;
+import android.nfc.IP2pTarget;
+import android.nfc.LlcpPacket;
+import android.nfc.NdefMessage;
+import android.nfc.Tag;
+//import android.nfc.NfcException;
+//import android.nfc.NfcManager;
+import android.nfc.NfcAdapter;
 import com.trustedlogic.trustednfc.android.internal.NativeLlcpConnectionlessSocket;
 import com.trustedlogic.trustednfc.android.internal.NativeLlcpServiceSocket;
 import com.trustedlogic.trustednfc.android.internal.NativeLlcpSocket;
 import com.trustedlogic.trustednfc.android.internal.NativeNfcManager;
 import com.trustedlogic.trustednfc.android.internal.NativeNfcTag;
 import com.trustedlogic.trustednfc.android.internal.NativeP2pDevice;
-import com.trustedlogic.trustednfc.android.internal.ErrorCodes;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
-public class NfcService extends INfcManager.Stub implements Runnable {
+public class NfcService extends INfcAdapter.Stub implements Runnable {
 
     /**
      * NFC Service tag
@@ -188,15 +187,15 @@ public class NfcService extends INfcManager.Stub implements Runnable {
 
     private static final String PROPERTY_NFC_DISCOVERY_NFCIP_VALUE = "discovery.nfcip";
 
-    private Context mContext;
+    private final Context mContext;
 
-    private HashMap<Integer, Object> mObjectMap = new HashMap<Integer, Object>();
+    private final HashMap<Integer, Object> mObjectMap = new HashMap<Integer, Object>();
 
-    private HashMap<Integer, Object> mSocketMap = new HashMap<Integer, Object>();
+    private final HashMap<Integer, Object> mSocketMap = new HashMap<Integer, Object>();
 
-    private LinkedList<RegisteredSocket> mRegisteredSocketList = new LinkedList<RegisteredSocket>();
+    private final LinkedList<RegisteredSocket> mRegisteredSocketList = new LinkedList<RegisteredSocket>();
 
-    private int mLlcpLinkState = NfcManager.LLCP_LINK_STATE_DEACTIVATED;
+    private int mLlcpLinkState = NfcAdapter.LLCP_LINK_STATE_DEACTIVATED;
 
     private int mGeneratedSocketHandle = 0;
 
@@ -216,9 +215,42 @@ public class NfcService extends INfcManager.Stub implements Runnable {
 
     private boolean mOpenPending = false;
 
-    private NativeNfcManager mManager;
+    private final NativeNfcManager mManager;
 
-    private ILlcpSocket mLlcpSocket = new ILlcpSocket.Stub() {
+    private final ILlcpSocket mLlcpSocket = new ILlcpSocket.Stub() {
+
+        private final int CONNECT_FLAG = 0x01;
+        private final int CLOSE_FLAG   = 0x02;
+        private final int RECV_FLAG    = 0x04;
+        private final int SEND_FLAG    = 0x08;
+
+        private int concurrencyFlags;
+        private Object sync;
+
+        private void enterCritical(int mask, int current) {
+            int result = -1;
+            try {
+                while (result != 0) {
+                    synchronized(this) {
+                        result = concurrencyFlags & mask;
+                    }
+                    sync.wait();
+                }
+            }
+            catch(InterruptedException e) {
+            }
+            // Set flag
+            concurrencyFlags |= current;
+        }
+
+        private void leaveCritical(int current) {
+            synchronized(this) {
+                // Clear flag
+                concurrencyFlags &= ~current;
+            }
+            // Release waiting threads
+            sync.notifyAll();
+        }
 
         public int close(int nativeHandle) throws RemoteException {
             NativeLlcpSocket socket = null;
@@ -232,7 +264,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
             /* find the socket in the hmap */
             socket = (NativeLlcpSocket) findSocket(nativeHandle);
             if (socket != null) {
-                if (mLlcpLinkState == NfcManager.LLCP_LINK_STATE_ACTIVATED) {
+                if (mLlcpLinkState == NfcAdapter.LLCP_LINK_STATE_ACTIVATED) {
                     isSuccess = socket.doClose();
                     if (isSuccess) {
                         /* Remove the socket closed from the hmap */
@@ -476,7 +508,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
 
     };
 
-    private ILlcpServiceSocket mLlcpServerSocketService = new ILlcpServiceSocket.Stub() {
+    private final ILlcpServiceSocket mLlcpServerSocketService = new ILlcpServiceSocket.Stub() {
 
         public int accept(int nativeHandle) throws RemoteException {
             NativeLlcpServiceSocket socket = null;
@@ -522,7 +554,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
             /* find the socket in the hmap */
             socket = (NativeLlcpServiceSocket) findSocket(nativeHandle);
             if (socket != null) {
-                if (mLlcpLinkState == NfcManager.LLCP_LINK_STATE_ACTIVATED) {
+                if (mLlcpLinkState == NfcAdapter.LLCP_LINK_STATE_ACTIVATED) {
                     isSuccess = socket.doClose();
                     if (isSuccess) {
                         /* Remove the socket closed from the hmap */
@@ -571,7 +603,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         }
     };
 
-    private ILlcpConnectionlessSocket mLlcpConnectionlessSocketService = new ILlcpConnectionlessSocket.Stub() {
+    private final ILlcpConnectionlessSocket mLlcpConnectionlessSocketService = new ILlcpConnectionlessSocket.Stub() {
 
         public void close(int nativeHandle) throws RemoteException {
             NativeLlcpConnectionlessSocket socket = null;
@@ -585,7 +617,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
             /* find the socket in the hmap */
             socket = (NativeLlcpConnectionlessSocket) findSocket(nativeHandle);
             if (socket != null) {
-                if (mLlcpLinkState == NfcManager.LLCP_LINK_STATE_ACTIVATED) {
+                if (mLlcpLinkState == NfcAdapter.LLCP_LINK_STATE_ACTIVATED) {
                     isSuccess = socket.doClose();
                     if (isSuccess) {
                         /* Remove the socket closed from the hmap */
@@ -669,7 +701,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         }
     };
 
-    private INfcTag mNfcTagService = new INfcTag.Stub() {
+    private final INfcTag mNfcTagService = new INfcTag.Stub() {
 
         public int close(int nativeHandle) throws RemoteException {
             NativeNfcTag tag = null;
@@ -807,34 +839,55 @@ public class NfcService extends INfcManager.Stub implements Runnable {
                 /* Create an NdefMessage */
                 try {
                     return new NdefMessage(buf);
-                } catch (NfcException e) {
+                } catch (FormatException e) {
                     return null;
                 }
             }
             return null;
         }
 
-        public boolean write(int nativeHandle, NdefMessage msg) throws RemoteException {
+        public int write(int nativeHandle, NdefMessage msg) throws RemoteException {
             NativeNfcTag tag;
-            boolean isSuccess = false;
 
             // Check if NFC is enabled
             if (!mIsNfcEnabled) {
-                return isSuccess;
+                return ErrorCodes.ERROR_NOT_INITIALIZED;
             }
 
             /* find the tag in the hmap */
             tag = (NativeNfcTag) findObject(nativeHandle);
-            if (tag != null) {
-                isSuccess = tag.doWrite(msg.toByteArray());
+            if (tag == null) {
+                return ErrorCodes.ERROR_IO;
             }
-            return isSuccess;
+
+            if (tag.doWrite(msg.toByteArray())) {
+                return ErrorCodes.SUCCESS;
+            }
+            else {
+                return ErrorCodes.ERROR_IO;
+            }
 
         }
 
+        public int getLastError(int nativeHandle) throws RemoteException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        public int getModeHint(int nativeHandle) throws RemoteException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        public int makeReadOnly(int nativeHandle) throws RemoteException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+
     };
 
-    private IP2pInitiator mP2pInitiatorService = new IP2pInitiator.Stub() {
+    private final IP2pInitiator mP2pInitiatorService = new IP2pInitiator.Stub() {
 
         public byte[] getGeneralBytes(int nativeHandle) throws RemoteException {
             NativeP2pDevice device;
@@ -911,7 +964,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         }
     };
 
-    private IP2pTarget mP2pTargetService = new IP2pTarget.Stub() {
+    private final IP2pTarget mP2pTargetService = new IP2pTarget.Stub() {
 
         public int connect(int nativeHandle) throws RemoteException {
             NativeP2pDevice device;
@@ -1033,8 +1086,8 @@ public class NfcService extends INfcManager.Stub implements Runnable {
                 NativeNfcManager.INTERNAL_LLCP_LINK_STATE_CHANGED_ACTION));
 
         mContext.registerReceiver(mNfcServiceReceiver, new IntentFilter(
-                NfcManager.LLCP_LINK_STATE_CHANGED_ACTION));
-        
+                NfcAdapter.ACTION_LLCP_LINK_STATE_CHANGED));
+
         mContext.registerReceiver(mNfcServiceReceiver, new IntentFilter(
                 NativeNfcManager.INTERNAL_TARGET_DESELECTED_ACTION));
 
@@ -1088,7 +1141,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
             /* Store the socket handle */
             int sockeHandle = mGeneratedSocketHandle;
 
-            if (mLlcpLinkState == NfcManager.LLCP_LINK_STATE_ACTIVATED) {
+            if (mLlcpLinkState == NfcAdapter.LLCP_LINK_STATE_ACTIVATED) {
                 NativeLlcpConnectionlessSocket socket;
 
                 socket = mManager.doCreateLlcpConnectionlessSocket(sap);
@@ -1167,7 +1220,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         if (mNbSocketCreated < LLCP_SOCKET_NB_MAX) {
             int sockeHandle = mGeneratedSocketHandle;
 
-            if (mLlcpLinkState == NfcManager.LLCP_LINK_STATE_ACTIVATED) {
+            if (mLlcpLinkState == NfcAdapter.LLCP_LINK_STATE_ACTIVATED) {
                 NativeLlcpServiceSocket socket;
 
                 socket = mManager.doCreateLlcpServiceSocket(sap, sn, miu, rw, linearBufferLength);
@@ -1251,7 +1304,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
 
             int sockeHandle = mGeneratedSocketHandle;
 
-            if (mLlcpLinkState == NfcManager.LLCP_LINK_STATE_ACTIVATED) {
+            if (mLlcpLinkState == NfcAdapter.LLCP_LINK_STATE_ACTIVATED) {
                 NativeLlcpSocket socket;
 
                 socket = mManager.doCreateLlcpSocket(sap, miu, rw, linearBufferLength);
@@ -1333,7 +1386,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
             mManager.doDeselectSecureElement(mSelectedSeId);
         mNfcSecureElementState = 0;
             mSelectedSeId = 0;
-        
+
         /* Store that a secure element is deselected */
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.NFC_SECURE_ELEMENT_ON, 0);
@@ -1341,9 +1394,9 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         /* Reset Secure Element ID */
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.NFC_SECURE_ELEMENT_ID, 0);
-        
 
-        return ErrorCodes.SUCCESS; 
+
+        return ErrorCodes.SUCCESS;
     }
 
     public boolean disable() throws RemoteException {
@@ -1615,30 +1668,10 @@ public class NfcService extends INfcManager.Stub implements Runnable {
 
     }
 
-    public int openTagConnection() throws RemoteException {
-        NativeNfcTag tag;
-        // Check if NFC is enabled
-        if (!mIsNfcEnabled) {
-            return ErrorCodes.ERROR_NOT_INITIALIZED;
-        }
+    public void openTagConnection(Tag tag) throws RemoteException {
+        NativeNfcTag nativeTag = new NativeNfcTag(tag.getHandle(), "", tag.getId());
 
-        mContext.enforceCallingPermission(android.Manifest.permission.NFC_RAW,
-                "NFC_RAW permission required to open NFC Tag connection");
-        if (!mOpenPending) {
-            mOpenPending = true;
-            tag = mManager.doOpenTagConnection(mTimeout);
-            if (tag != null) {
-                mObjectMap.put(tag.getHandle(), tag);
-                return tag.getHandle();
-            } else {
-                mOpenPending = false;
-                /* Restart polling loop for notification */
-                mManager.enableDiscovery(DISCOVERY_MODE_READER);
-                return ErrorCodes.ERROR_IO;
-            }
-        } else {
-            return ErrorCodes.ERROR_BUSY;
-        }
+        mObjectMap.put(nativeTag.getHandle(), nativeTag);
     }
 
     public int selectSecureElement(int seId) throws RemoteException {
@@ -1646,7 +1679,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         if (!mIsNfcEnabled) {
             return ErrorCodes.ERROR_NOT_INITIALIZED;
         }
-        
+
         if (mSelectedSeId == seId) {
             return ErrorCodes.ERROR_SE_ALREADY_SELECTED;
         }
@@ -1668,7 +1701,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         /* Store the ID of the Secure Element Selected */
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.NFC_SECURE_ELEMENT_ID, mSelectedSeId);
-        
+
         mNfcSecureElementState = 1;
 
         return ErrorCodes.SUCCESS;
@@ -1847,6 +1880,16 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         return ErrorCodes.SUCCESS;
     }
 
+    public NdefMessage localGet() throws RemoteException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void localSet(NdefMessage message) throws RemoteException {
+        // TODO Auto-generated method stub
+
+    }
+
     // Reset all internals
     private void reset() {
 
@@ -1856,7 +1899,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         mRegisteredSocketList.clear();
 
         // Reset variables
-        mLlcpLinkState = NfcManager.LLCP_LINK_STATE_DEACTIVATED;
+        mLlcpLinkState = NfcAdapter.LLCP_LINK_STATE_DEACTIVATED;
         mNbSocketCreated = 0;
         mIsNfcEnabled = false;
         mSelectedSeId = 0;
@@ -1869,6 +1912,9 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         Object device = null;
 
         device = mObjectMap.get(key);
+        if (device == null) {
+            Log.w(TAG, "Handle not found !");
+        }
 
         return device;
     }
@@ -1947,11 +1993,11 @@ public class NfcService extends INfcManager.Stub implements Runnable {
      * LLCP link in not activated
      */
     private class RegisteredSocket {
-        private int mType;
+        private final int mType;
 
-        private int mHandle;
+        private final int mHandle;
 
-        private int mSap;
+        private final int mSap;
 
         private int mMiu;
 
@@ -1988,17 +2034,17 @@ public class NfcService extends INfcManager.Stub implements Runnable {
         }
     }
 
-    private BroadcastReceiver mNfcServiceReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mNfcServiceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Internal NFC Intent received");
 
             /* LLCP Link deactivation */
-            if (intent.getAction().equals(NfcManager.LLCP_LINK_STATE_CHANGED_ACTION)) {
-                mLlcpLinkState = intent.getIntExtra(NfcManager.LLCP_LINK_STATE_CHANGED_EXTRA,
-                        NfcManager.LLCP_LINK_STATE_DEACTIVATED);
+            if (intent.getAction().equals(NfcAdapter.ACTION_LLCP_LINK_STATE_CHANGED)) {
+                mLlcpLinkState = intent.getIntExtra(NfcAdapter.EXTRA_LLCP_LINK_STATE_CHANGED,
+                        NfcAdapter.LLCP_LINK_STATE_DEACTIVATED);
 
-                if (mLlcpLinkState == NfcManager.LLCP_LINK_STATE_DEACTIVATED) {
+                if (mLlcpLinkState == NfcAdapter.LLCP_LINK_STATE_DEACTIVATED) {
                     /* restart polling loop */
                     mManager.enableDiscovery(DISCOVERY_MODE_READER);
                 }
@@ -2010,9 +2056,9 @@ public class NfcService extends INfcManager.Stub implements Runnable {
 
                 mLlcpLinkState = intent.getIntExtra(
                         NativeNfcManager.INTERNAL_LLCP_LINK_STATE_CHANGED_EXTRA,
-                        NfcManager.LLCP_LINK_STATE_DEACTIVATED);
+                        NfcAdapter.LLCP_LINK_STATE_DEACTIVATED);
 
-                if (mLlcpLinkState == NfcManager.LLCP_LINK_STATE_ACTIVATED) {
+                if (mLlcpLinkState == NfcAdapter.LLCP_LINK_STATE_ACTIVATED) {
                     /* check if sockets are registered */
                     ListIterator<RegisteredSocket> it = mRegisteredSocketList.listIterator();
 
@@ -2086,16 +2132,16 @@ public class NfcService extends INfcManager.Stub implements Runnable {
 
                     /* Broadcast Intent Link LLCP activated */
                     Intent LlcpLinkIntent = new Intent();
-                    LlcpLinkIntent.setAction(NfcManager.LLCP_LINK_STATE_CHANGED_ACTION);
+                    LlcpLinkIntent.setAction(NfcAdapter.ACTION_LLCP_LINK_STATE_CHANGED);
 
-                    LlcpLinkIntent.putExtra(NfcManager.LLCP_LINK_STATE_CHANGED_EXTRA,
-                            NfcManager.LLCP_LINK_STATE_ACTIVATED);
+                    LlcpLinkIntent.putExtra(NfcAdapter.EXTRA_LLCP_LINK_STATE_CHANGED,
+                            NfcAdapter.LLCP_LINK_STATE_ACTIVATED);
 
                     Log.d(TAG, "Broadcasting LLCP activation");
                     mContext.sendOrderedBroadcast(LlcpLinkIntent,
                             android.Manifest.permission.NFC_LLCP);
                 }
-            }            
+            }
             /* Target Deactivated */
             else if (intent.getAction().equals(
                     NativeNfcManager.INTERNAL_TARGET_DESELECTED_ACTION)) {
@@ -2104,7 +2150,7 @@ public class NfcService extends INfcManager.Stub implements Runnable {
                 }
                 /* Restart polling loop for notification */
                 mManager.enableDiscovery(DISCOVERY_MODE_READER);
-                
+
             }
         }
     };

@@ -342,7 +342,7 @@ public class Element extends BaseObj {
         mElementNames = n;
         mArraySizes = as;
         for (int ct = 0; ct < mElements.length; ct++ ) {
-            mSize += mElements[ct].mSize;
+            mSize += mElements[ct].mSize * mArraySizes[ct];
         }
     }
 
