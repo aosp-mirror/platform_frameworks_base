@@ -44,7 +44,7 @@ LOCAL_C_INCLUDES := \
     $(TOP)/external/skia/include/utils \
     $(TOP)/external/skia/include/effects \
     $(TOP)/frameworks/base/media/libstagefright \
-    $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
+    $(TOP)/frameworks/base/include/media/stagefright/openmax \
     $(TOP)/frameworks/base/include/ \
     $(TOP)/frameworks/base/
 

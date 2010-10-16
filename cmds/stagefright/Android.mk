@@ -13,7 +13,7 @@ LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
 	frameworks/base/media/libstagefright/include \
-	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
+	$(TOP)/frameworks/base/include/media/stagefright/openmax
 
 LOCAL_CFLAGS += -Wno-multichar
 
@@ -37,7 +37,7 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
-	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
+	$(TOP)/frameworks/base/include/media/stagefright/openmax
 
 LOCAL_CFLAGS += -Wno-multichar
 
@@ -61,7 +61,7 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
-	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
+	$(TOP)/frameworks/base/include/media/stagefright/openmax
 
 LOCAL_CFLAGS += -Wno-multichar
 

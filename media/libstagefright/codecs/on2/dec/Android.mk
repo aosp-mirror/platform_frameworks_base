@@ -8,7 +8,7 @@ LOCAL_MODULE := libstagefright_vpxdec
 
 LOCAL_C_INCLUDES := \
         $(TOP)/frameworks/base/media/libstagefright/include \
-        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
+        $(TOP)/frameworks/base/include/media/stagefright/openmax \
         $(TOP)/external/libvpx \
         $(TOP)/external/libvpx/vpx_codec \
         $(TOP)/external/libvpx/vpx_ports
