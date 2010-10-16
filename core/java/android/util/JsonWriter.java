@@ -70,7 +70,7 @@ import java.util.List;
  * This code encodes the above structure: <pre>   {@code
  *   public void writeJsonStream(OutputStream out, List<Message> messages) throws IOException {
  *     JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
- *     writer.setIndentSpaces(4);
+ *     writer.setIndent("  ");
  *     writeMessagesArray(writer, messages);
  *     writer.close();
  *   }
