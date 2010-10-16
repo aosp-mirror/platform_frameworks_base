@@ -24,7 +24,7 @@ import android.util.Log;
 
 //TODO(npelly) permission {@link android.Manifest.permission#NFC_MODIFY}
 /**
- * Represents a local NFC Adapter.
+ * Represents the device's local NFC adapter.
  * <p>
  * Use the static {@link #getDefaultAdapter} method to get the default NFC
  * Adapter for this Android device. Most Android devices will have only one NFC
