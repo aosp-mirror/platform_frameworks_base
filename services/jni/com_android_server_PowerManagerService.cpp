@@ -125,9 +125,9 @@ static void android_server_PowerManagerService_nativeSetPowerState(JNIEnv* env,
 }
 
 static void android_server_PowerManagerService_nativeStartSurfaceFlingerAnimation(JNIEnv* env,
-        jobject obj) {
+        jobject obj, jint mode) {
     sp<ISurfaceComposer> s(ComposerService::getComposerService());
-    s->turnElectronBeamOff(0);
+    s->turnElectronBeamOff(mode);
 }
 
 // ----------------------------------------------------------------------------
@@ -138,7 +138,7 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) android_server_PowerManagerService_nativeInit },
     { "nativeSetPowerState", "(ZZ)V",
             (void*) android_server_PowerManagerService_nativeSetPowerState },
-    { "nativeStartSurfaceFlingerAnimation", "()V",
+    { "nativeStartSurfaceFlingerAnimation", "(I)V",
             (void*) android_server_PowerManagerService_nativeStartSurfaceFlingerAnimation },
 };
 
