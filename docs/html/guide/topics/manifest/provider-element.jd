@@ -96,19 +96,10 @@ If "{@code false}", the provider is available only to components of the
 same application or applications with the same user ID.  The default value
 is "{@code true}".
 
-<p>You can export a content provider but still limit access to it with the
-<code><a
-href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">permission</a></code>
-attribute. Note that due to a bug in versions of Android prior to {@link
-android.os.Build.VERSION_CODES#VERSION_GINGERBREAD} providers were exported
-even if {@code android:exported} were set to {@code false}. Therefore, for
-provider security on all devices, protect your provider with a
-signature-level permission. For information on defining a permission, see
-the <a
-href="{@docRoot}guide/topics/manifest/permission-element.html">permission
-element</a>.  For information on using the permission, see the <a
-href="{@docRoot}guide/topics/manifest/uses-permission-element.html">uses-permission
-element</a>.</p></dd>
+<p>
+You can export a content provider but still limit access to it with the
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">permission</a></code> attribute.
+</p></dd> 
 
 <dt><a name="gprmsn"></a>{@code android:grantUriPermissions}</dt>
 <dd>Whether or not those who ordinarily would not have permission to 
