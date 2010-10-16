@@ -9,7 +9,7 @@ page.title=Bluetooth
     <li>Android's bluetooth APIs allow your application to perform wireless data transactions with
 other devices</li>
   </ul>
-  
+
   <h2>In this document</h2>
   <ol>
     <li><a href="#TheBasics">The Basics</a></li>
@@ -32,7 +32,7 @@ other devices</li>
     </li>
     <li><a href="#ManagingAConnection">Managing a Connection</a></li>
   </ol>
-  
+
   <h2>Key classes</h2>
   <ol>
     <li>{@link android.bluetooth.BluetoothAdapter}</li>
@@ -289,7 +289,7 @@ is discussed below.</p>
 of paired devices to see if the desired device is already known. To do so,
 call {@link android.bluetooth.BluetoothAdapter#getBondedDevices()}. This
 will return a Set of {@link android.bluetooth.BluetoothDevice}s representing
-paired devices. For example, you can query all paired devices and then add then
+paired devices. For example, you can query all paired devices and then
 show the name of each device to the user, using an ArrayAdapter:</p>
 <pre>
 Set&lt;BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
