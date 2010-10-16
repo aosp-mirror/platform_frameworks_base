@@ -347,6 +347,7 @@
         <!-- ============ -->
         <eat-comment />
         <attr name="alertDialogStyle" format="reference" />
+        <attr name="alertDialogButtonGroupStyle" format="reference" />
 
         <!-- ============ -->
         <!-- Panel styles -->
