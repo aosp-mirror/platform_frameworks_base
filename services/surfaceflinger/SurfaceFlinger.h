@@ -329,8 +329,8 @@ private:
                     uint32_t* width, uint32_t* height, PixelFormat* format,
                     uint32_t reqWidth = 0, uint32_t reqHeight = 0);
 
-            status_t turnElectronBeamOffImplLocked();
-            status_t turnElectronBeamOnImplLocked();
+            status_t turnElectronBeamOffImplLocked(int32_t mode);
+            status_t turnElectronBeamOnImplLocked(int32_t mode);
             status_t electronBeamOffAnimationImplLocked();
             status_t electronBeamOnAnimationImplLocked();
             status_t renderScreenToTextureLocked(DisplayID dpy,
@@ -397,7 +397,7 @@ private:
                 bool                        mHwWorkListDirty;
                 bool                        mDeferReleaseConsole;
                 bool                        mFreezeDisplay;
-                bool                        mElectronBeamAnimation;
+                int32_t                     mElectronBeamAnimationMode;
                 int32_t                     mFreezeCount;
                 nsecs_t                     mFreezeDisplayTime;
                 Vector< sp<LayerBase> >     mVisibleLayersSortedByZ;

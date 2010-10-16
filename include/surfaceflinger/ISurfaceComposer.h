@@ -78,6 +78,11 @@ public:
         eOrientationSwapMask    = 0x01
     };
     
+    enum {
+        eElectronBeamAnimationOn  = 0x01,
+        eElectronBeamAnimationOff = 0x10
+    };
+
     // flags for setOrientation
     enum {
         eOrientationAnimationDisable = 0x00000001

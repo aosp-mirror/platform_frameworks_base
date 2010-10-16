@@ -82,7 +82,7 @@ SurfaceFlinger::SurfaceFlinger()
         mHwWorkListDirty(false),
         mDeferReleaseConsole(false),
         mFreezeDisplay(false),
-        mElectronBeamAnimation(false),
+        mElectronBeamAnimationMode(0),
         mFreezeCount(0),
         mFreezeDisplayTime(0),
         mDebugRegion(0),
@@ -431,8 +431,7 @@ void SurfaceFlinger::handleConsoleEvents()
         hw.acquireScreen();
         // this is a temporary work-around, eventually this should be called
         // by the power-manager
-        if (mElectronBeamAnimation)
-            SurfaceFlinger::turnElectronBeamOn(0);
+        SurfaceFlinger::turnElectronBeamOn(mElectronBeamAnimationMode);
     }
 
     if (mDeferReleaseConsole && hw.isScreenAcquired()) {
@@ -2008,14 +2007,24 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
 
 // ---------------------------------------------------------------------------
 
-status_t SurfaceFlinger::turnElectronBeamOffImplLocked()
+status_t SurfaceFlinger::turnElectronBeamOffImplLocked(int32_t mode)
 {
     DisplayHardware& hw(graphicPlane(0).editDisplayHardware());
     if (!hw.canDraw()) {
         // we're already off
         return NO_ERROR;
     }
-    electronBeamOffAnimationImplLocked();
+    if (mode & ISurfaceComposer::eElectronBeamAnimationOff) {
+        electronBeamOffAnimationImplLocked();
+    }
+
+    // always clear the whole screen at the end of the animation
+    glClearColor(0,0,0,1);
+    glDisable(GL_SCISSOR_TEST);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_SCISSOR_TEST);
+    hw.flip( Region(hw.bounds()) );
+
     hw.setCanDraw(false);
     return NO_ERROR;
 }
@@ -2024,22 +2033,23 @@ status_t SurfaceFlinger::turnElectronBeamOff(int32_t mode)
 {
     class MessageTurnElectronBeamOff : public MessageBase {
         SurfaceFlinger* flinger;
+        int32_t mode;
         status_t result;
     public:
-        MessageTurnElectronBeamOff(SurfaceFlinger* flinger)
-            : flinger(flinger), result(PERMISSION_DENIED) {
+        MessageTurnElectronBeamOff(SurfaceFlinger* flinger, int32_t mode)
+            : flinger(flinger), mode(mode), result(PERMISSION_DENIED) {
         }
         status_t getResult() const {
             return result;
         }
         virtual bool handler() {
             Mutex::Autolock _l(flinger->mStateLock);
-            result = flinger->turnElectronBeamOffImplLocked();
+            result = flinger->turnElectronBeamOffImplLocked(mode);
             return true;
         }
     };
 
-    sp<MessageBase> msg = new MessageTurnElectronBeamOff(this);
+    sp<MessageBase> msg = new MessageTurnElectronBeamOff(this, mode);
     status_t res = postMessageSync(msg);
     if (res == NO_ERROR) {
         res = static_cast<MessageTurnElectronBeamOff*>( msg.get() )->getResult();
@@ -2047,21 +2057,23 @@ status_t SurfaceFlinger::turnElectronBeamOff(int32_t mode)
         // work-around: when the power-manager calls us we activate the
         // animation. eventually, the "on" animation will be called
         // by the power-manager itself
-        mElectronBeamAnimation = true;
+        mElectronBeamAnimationMode = mode;
     }
     return res;
 }
 
 // ---------------------------------------------------------------------------
 
-status_t SurfaceFlinger::turnElectronBeamOnImplLocked()
+status_t SurfaceFlinger::turnElectronBeamOnImplLocked(int32_t mode)
 {
     DisplayHardware& hw(graphicPlane(0).editDisplayHardware());
     if (hw.canDraw()) {
         // we're already on
         return NO_ERROR;
     }
-    electronBeamOnAnimationImplLocked();
+    if (mode & ISurfaceComposer::eElectronBeamAnimationOn) {
+        electronBeamOnAnimationImplLocked();
+    }
     hw.setCanDraw(true);
 
     // make sure to redraw the whole screen when the animation is done
@@ -2075,22 +2087,23 @@ status_t SurfaceFlinger::turnElectronBeamOn(int32_t mode)
 {
     class MessageTurnElectronBeamOn : public MessageBase {
         SurfaceFlinger* flinger;
+        int32_t mode;
         status_t result;
     public:
-        MessageTurnElectronBeamOn(SurfaceFlinger* flinger)
-            : flinger(flinger), result(PERMISSION_DENIED) {
+        MessageTurnElectronBeamOn(SurfaceFlinger* flinger, int32_t mode)
+            : flinger(flinger), mode(mode), result(PERMISSION_DENIED) {
         }
         status_t getResult() const {
             return result;
         }
         virtual bool handler() {
             Mutex::Autolock _l(flinger->mStateLock);
-            result = flinger->turnElectronBeamOnImplLocked();
+            result = flinger->turnElectronBeamOnImplLocked(mode);
             return true;
         }
     };
 
-    postMessageAsync( new MessageTurnElectronBeamOn(this) );
+    postMessageAsync( new MessageTurnElectronBeamOn(this, mode) );
     return NO_ERROR;
 }
 
