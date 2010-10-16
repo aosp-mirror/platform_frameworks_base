@@ -29,7 +29,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
     private static final String TAG = "MasterClear";
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, final Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_REMOTE_INTENT)) {
             if (!"google.com".equals(intent.getStringExtra("from"))) {
                 Slog.w(TAG, "Ignoring master clear request -- not from trusted server.");
@@ -37,16 +37,23 @@ public class MasterClearReceiver extends BroadcastReceiver {
             }
         }
 
-        try {
-            Slog.w(TAG, "!!! FACTORY RESET !!!");
-            if (intent.hasExtra("enableEFS")) {
-                RecoverySystem.rebootToggleEFS(context, intent.getBooleanExtra("enableEFS", false));
-            } else {
-                RecoverySystem.rebootWipeUserData(context);
+        Slog.w(TAG, "!!! FACTORY RESET !!!");
+        // The reboot call is blocking, so we need to do it on another thread.
+        Thread thr = new Thread("Reboot") {
+            @Override
+            public void run() {
+                try {
+                    if (intent.hasExtra("enableEFS")) {
+                        RecoverySystem.rebootToggleEFS(context, intent.getBooleanExtra("enableEFS", false));
+                    } else {
+                        RecoverySystem.rebootWipeUserData(context);
+                    }
+                    Log.wtf(TAG, "Still running after master clear?!");
+                } catch (IOException e) {
+                    Slog.e(TAG, "Can't perform master clear/factory reset", e);
+                }
             }
-            Log.wtf(TAG, "Still running after master clear?!");
-        } catch (IOException e) {
-            Slog.e(TAG, "Can't perform master clear/factory reset", e);
-        }
+        };
+        thr.start();
     }
 }

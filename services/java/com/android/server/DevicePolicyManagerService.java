@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.storage.ExternalStorageFormatter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
@@ -41,6 +42,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -71,6 +73,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     
     final Context mContext;
     final MyPackageMonitor mMonitor;
+    final PowerManager.WakeLock mWakeLock;
 
     IPowerManager mIPowerManager;
     
@@ -216,6 +219,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext = context;
         mMonitor = new MyPackageMonitor();
         mMonitor.register(context, true);
+        mWakeLock = ((PowerManager)context.getSystemService(Context.POWER_SERVICE))
+                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
     }
 
     private IPowerManager getIPowerManager() {
@@ -862,10 +867,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
     
     void wipeDataLocked(int flags) {
-        try {
-            RecoverySystem.rebootWipeUserData(mContext);
-        } catch (IOException e) {
-            Slog.w(TAG, "Failed requesting data wipe", e);
+        if ((flags&DevicePolicyManager.WIPE_EXTERNAL_STORAGE) != 0) {
+            Intent intent = new Intent(ExternalStorageFormatter.FORMAT_AND_FACTORY_RESET);
+            intent.setComponent(ExternalStorageFormatter.COMPONENT_NAME);
+            mWakeLock.acquire(10000);
+            mContext.startService(intent);
+        } else {
+            try {
+                RecoverySystem.rebootWipeUserData(mContext);
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed requesting data wipe", e);
+            }
         }
     }
     
