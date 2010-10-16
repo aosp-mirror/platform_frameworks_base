@@ -89,7 +89,7 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsgMeshComputeBoundingBox(rs_mesh mesh, float *minX, float *minY, float *minZ,
                                                 float *maxX, float *maxY, float *maxZ);
-void __attribute__((overloadable))
+__inline__ static void __attribute__((overloadable, always_inline))
 rsgMeshComputeBoundingBox(rs_mesh mesh, float3 *bBoxMin, float3 *bBoxMax) {
     float x1, y1, z1, x2, y2, z2;
     rsgMeshComputeBoundingBox(mesh, &x1, &y1, &z1, &x2, &y2, &z2);
