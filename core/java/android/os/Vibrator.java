@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.util.Log;
+
 /**
  * Class that operates the vibrator on the device.
  * <p>
@@ -23,6 +25,8 @@ package android.os;
  */
 public class Vibrator
 {
+    private static final String TAG = "Vibrator";
+
     IVibratorService mService;
     private final Binder mToken = new Binder();
 
@@ -40,9 +44,14 @@ public class Vibrator
      */
     public void vibrate(long milliseconds)
     {
+        if (mService == null) {
+            Log.w(TAG, "Failed to vibrate; no vibrator service.");
+            return;
+        }
         try {
             mService.vibrate(milliseconds, mToken);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to vibrate.", e);
         }
     }
 
@@ -61,13 +70,18 @@ public class Vibrator
      */
     public void vibrate(long[] pattern, int repeat)
     {
+        if (mService == null) {
+            Log.w(TAG, "Failed to vibrate; no vibrator service.");
+            return;
+        }
         // catch this here because the server will do nothing.  pattern may
         // not be null, let that be checked, because the server will drop it
         // anyway
         if (repeat < pattern.length) {
             try {
                 mService.vibratePattern(pattern, repeat, mToken);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to vibrate.", e);
             }
         } else {
             throw new ArrayIndexOutOfBoundsException();
@@ -79,9 +93,13 @@ public class Vibrator
      */
     public void cancel()
     {
+        if (mService == null) {
+            return;
+        }
         try {
             mService.cancelVibrate(mToken);
         } catch (RemoteException e) {
+            Log.w(TAG, "Failed to cancel vibration.", e);
         }
     }
 }
