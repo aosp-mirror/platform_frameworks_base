@@ -563,6 +563,8 @@ public class ZygoteInit {
 
     public static void main(String argv[]) {
         try {
+            VMRuntime.getRuntime().setMinimumHeapSize(5 * 1024 * 1024);
+
             // Start profiling the zygote initialization.
             SamplingProfilerIntegration.start();
 
