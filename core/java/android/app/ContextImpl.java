@@ -3138,6 +3138,7 @@ class ContextImpl extends Context {
                     return;
                 }
                 XmlUtils.writeMapXml(mcr.mapToWriteToDisk, str);
+                FileUtils.sync(str);
                 str.close();
                 setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
                 FileStatus stat = new FileStatus();

@@ -91,7 +91,22 @@ public class FileUtils
      * @return volume ID or -1
      */
     public static native int getFatVolumeId(String mountPoint);
-        
+
+    /**
+     * Perform an fsync on the given FileOutputStream.  The stream at this
+     * point must be flushed but not yet closed.
+     */
+    public static boolean sync(FileOutputStream stream) {
+        try {
+            if (stream != null) {
+                stream.getFD().sync();
+            }
+            return true;
+        } catch (IOException e) {
+        }
+        return false;
+    }
+
     // copy a file from srcFile to destFile, return true if succeed, return
     // false if fail
     public static boolean copyFile(File srcFile, File destFile) {
@@ -118,7 +133,7 @@ public class FileUtils
             if (destFile.exists()) {
                 destFile.delete();
             }
-            OutputStream out = new FileOutputStream(destFile);
+            FileOutputStream out = new FileOutputStream(destFile);
             try {
                 byte[] buffer = new byte[4096];
                 int bytesRead;
@@ -126,6 +141,11 @@ public class FileUtils
                     out.write(buffer, 0, bytesRead);
                 }
             } finally {
+                out.flush();
+                try {
+                    out.getFD().sync();
+                } catch (IOException e) {
+                }
                 out.close();
             }
             return true;
