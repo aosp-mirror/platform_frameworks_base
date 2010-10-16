@@ -763,6 +763,13 @@ public class ActivityManager {
         public static final int FLAG_CANT_SAVE_STATE = 1<<0;
         
         /**
+         * Constant for {@link #flags}: this process is associated with a
+         * persistent system app.
+         * @hide
+         */
+        public static final int FLAG_PERSISTENT = 1<<1;
+
+        /**
          * Flags of information.  May be any of
          * {@link #FLAG_CANT_SAVE_STATE}.
          * @hide
