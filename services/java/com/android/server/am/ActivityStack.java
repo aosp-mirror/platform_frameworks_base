@@ -1881,7 +1881,27 @@ public class ActivityStack {
             String resultWho, int requestCode,
             int callingPid, int callingUid, boolean onlyIfNeeded,
             boolean componentSpecified) {
-        Slog.i(TAG, "Starting: " + intent);
+
+        int err = START_SUCCESS;
+
+        ProcessRecord callerApp = null;
+        if (caller != null) {
+            callerApp = mService.getRecordForAppLocked(caller);
+            if (callerApp != null) {
+                callingPid = callerApp.pid;
+                callingUid = callerApp.info.uid;
+            } else {
+                Slog.w(TAG, "Unable to find app for caller " + caller
+                      + " (pid=" + callingPid + ") when starting: "
+                      + intent.toString());
+                err = START_PERMISSION_DENIED;
+            }
+        }
+
+        if (err == START_SUCCESS) {
+            Slog.i(TAG, "Starting: " + intent + " from pid "
+                    + (callerApp != null ? callerApp.pid : callingPid));
+        }
 
         ActivityRecord sourceRecord = null;
         ActivityRecord resultRecord = null;
@@ -1916,9 +1936,7 @@ public class ActivityStack {
             }
         }
 
-        int err = START_SUCCESS;
-
-        if (intent.getComponent() == null) {
+        if (err == START_SUCCESS && intent.getComponent() == null) {
             // We couldn't find a class that can handle the given Intent.
             // That's the end of that!
             err = START_INTENT_NOT_RESOLVED;
@@ -1928,20 +1946,6 @@ public class ActivityStack {
             // We couldn't find the specific class specified in the Intent.
             // Also the end of the line.
             err = START_CLASS_NOT_FOUND;
-        }
-
-        ProcessRecord callerApp = null;
-        if (err == START_SUCCESS && caller != null) {
-            callerApp = mService.getRecordForAppLocked(caller);
-            if (callerApp != null) {
-                callingPid = callerApp.pid;
-                callingUid = callerApp.info.uid;
-            } else {
-                Slog.w(TAG, "Unable to find app for caller " + caller
-                      + " (pid=" + callingPid + ") when starting: "
-                      + intent.toString());
-                err = START_PERMISSION_DENIED;
-            }
         }
 
         if (err != START_SUCCESS) {
