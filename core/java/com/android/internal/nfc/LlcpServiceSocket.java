@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-/**
- * File            : LLCPServerSocket.java
- * Original-Author : Trusted Logic S.A. (Daniel Tomas)
- * Created         : 18-02-2010
- */
-
-package com.trustedlogic.trustednfc.android;
+package com.android.internal.nfc;
 
 import java.io.IOException;
 
 import android.nfc.ErrorCodes;
 import android.nfc.ILlcpSocket;
 import android.nfc.ILlcpServiceSocket;
-
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
  * LlcpServiceSocket represents a LLCP Service to be used in a
  * Connection-oriented communication
- *
- * @since AA02.01
- * @hide
  */
 public class LlcpServiceSocket {
 
@@ -45,15 +35,11 @@ public class LlcpServiceSocket {
 	/**
 	 * The handle returned by the NFC service and used to identify the LLCP
 	 * Service socket in every call of this class.
-	 *
-	 * @hide
 	 */
 	protected int mHandle;
 
 	/**
 	 * The entry point for LLCP Service socket operations.
-	 *
-	 * @hide
 	 */
 	protected ILlcpServiceSocket mService;
 
@@ -92,7 +78,6 @@ public class LlcpServiceSocket {
 	 * @param handle
 	 *            The handle returned by the NFC service and used to identify
 	 *            the socket in subsequent calls.
-	 * @hide
 	 */
 	LlcpServiceSocket(ILlcpServiceSocket service, ILlcpSocket socketService, int handle) {
 		this.mService = service;
@@ -112,7 +97,6 @@ public class LlcpServiceSocket {
 	 *             if not enough ressources are available
 	 *
 	 * @see LlcpSocket
-	 * @since AA02.01
 	 */
 	public LlcpSocket accept() throws IOException, LlcpException {
 
@@ -141,7 +125,6 @@ public class LlcpServiceSocket {
 	 *
 	 * @param timeout
 	 *            value of the timeout for the accept request
-	 * @since AA02.01
 	 */
 	public void setAcceptTimeout(int timeout) {
 		try {
@@ -155,7 +138,6 @@ public class LlcpServiceSocket {
 	 * Get the timeout value of the accept request
 	 *
 	 * @return mTimeout
-	 * @since AA02.01
 	 */
 	public int getAcceptTimeout() {
 		try {
@@ -168,8 +150,6 @@ public class LlcpServiceSocket {
 
 	/**
 	 * Close the created Llcp Service socket
-	 *
-	 * @since AA02.01
 	 */
 	public void close() {
 		try {
@@ -178,5 +158,4 @@ public class LlcpServiceSocket {
 			Log.e(TAG, "RemoteException in close(): ", e);
 		}
 	}
-
 }

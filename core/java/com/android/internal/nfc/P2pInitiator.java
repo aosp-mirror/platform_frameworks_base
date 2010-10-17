@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-/**
- * File            : P2PInitiator.java
- * Original-Author : Trusted Logic S.A. (Daniel Tomas)
- */
-
-package com.trustedlogic.trustednfc.android;
+package com.android.internal.nfc;
 
 import java.io.IOException;
 
@@ -32,8 +27,6 @@ import android.util.Log;
  * communication.
  *
  * @see P2pTarget
- * @since AA02.01
- * @hide
  */
 public class P2pInitiator extends P2pDevice {
 
@@ -41,7 +34,6 @@ public class P2pInitiator extends P2pDevice {
 
 	/**
      * The entry point for P2P tag operations.
-     * @hide
      */
 	private final IP2pInitiator mService;
 
@@ -50,8 +42,6 @@ public class P2pInitiator extends P2pDevice {
      *
      * @param handle The handle returned by the NFC service and used to identify
      * 				 the tag in subsequent calls.
-     *
-     * @hide
      */
     P2pInitiator(IP2pInitiator service, int handle) {
         this.mService = service;
