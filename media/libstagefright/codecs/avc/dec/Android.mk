@@ -20,7 +20,7 @@ LOCAL_C_INCLUDES := \
  	$(LOCAL_PATH)/include \
  	$(LOCAL_PATH)/../common/include \
         $(TOP)/frameworks/base/media/libstagefright/include \
-        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
+        $(TOP)/frameworks/base/include/media/stagefright/openmax
 
 LOCAL_CFLAGS := -DOSCL_IMPORT_REF= -DOSCL_UNUSED_ARG= -DOSCL_EXPORT_REF=
 

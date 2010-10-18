@@ -157,9 +157,12 @@ public:
     inline  size_t              size() const;
     inline  size_t              length() const;
     inline  size_t              bytes() const;
+    inline  bool                isEmpty() const;
     
     inline  const SharedBuffer* sharedBuffer() const;
     
+            void                clear();
+
             void                setTo(const String8& other);
             status_t            setTo(const char* other);
             status_t            setTo(const char* other, size_t numChars);
@@ -343,6 +346,11 @@ inline size_t String8::length() const
 inline size_t String8::size() const
 {
     return length();
+}
+
+inline bool String8::isEmpty() const
+{
+    return length() == 0;
 }
 
 inline size_t String8::bytes() const

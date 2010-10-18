@@ -597,8 +597,10 @@ void OpenGLRenderer::getMatrix(SkMatrix* matrix) {
 }
 
 void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
-    mat4 m(*matrix);
-    mSnapshot->transform->multiply(m);
+    SkMatrix transform;
+    mSnapshot->transform->copyTo(transform);
+    transform.preConcat(*matrix);
+    mSnapshot->transform->load(transform);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -606,7 +608,8 @@ void OpenGLRenderer::concatMatrix(SkMatrix* matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-    const Rect& clip = *mSnapshot->clipRect;
+    Rect clip(*mSnapshot->clipRect);
+    clip.snapToPixelBoundaries();
     glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
 }
 
@@ -721,11 +724,13 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     const Patch* mesh = mCaches.patchCache.get(bitmap->width(), bitmap->height(),
             right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
 
-    // Specify right and bottom as +1.0f from left/top to prevent scaling since the
-    // patch mesh already defines the final size
-    drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f,
-            mode, texture->blend, &mesh->vertices[0].position[0],
-            &mesh->vertices[0].texture[0], GL_TRIANGLES, mesh->verticesCount);
+    if (mesh) {
+        // Specify right and bottom as +1.0f from left/top to prevent scaling since the
+        // patch mesh already defines the final size
+        drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f,
+                mode, texture->blend, &mesh->vertices[0].position[0],
+                &mesh->vertices[0].texture[0], GL_TRIANGLES, mesh->verticesCount);
+    }
 }
 
 void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
@@ -862,6 +867,10 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 
+    Rect clipRect(*mSnapshot->clipRect);
+    glScissor(clipRect.left, mSnapshot->height - clipRect.bottom,
+            clipRect.getWidth(), clipRect.getHeight());
+
     if (mHasShadow) {
         glActiveTexture(gTextureUnits[0]);
         mCaches.dropShadowCache.setFontRenderer(fontRenderer);
@@ -886,12 +895,15 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     const Rect& clip = mSnapshot->getLocalClip();
     clearLayerRegions();
+
     fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 
     drawTextDecorations(text, bytesCount, length, x, y, paint);
+
+    setScissorFromClip();
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {

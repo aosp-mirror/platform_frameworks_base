@@ -1550,8 +1550,54 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @Override
     public String toString() {
         return "MotionEvent{" + Integer.toHexString(System.identityHashCode(this))
-            + " action=" + mAction + " x=" + getX()
-            + " y=" + getY() + " pressure=" + getPressure() + " size=" + getSize() + "}";
+            + " action=" + actionToString(mAction)
+            + " x=" + getX()
+            + " y=" + getY()
+            + " pressure=" + getPressure()
+            + " size=" + getSize()
+            + " touchMajor=" + getTouchMajor()
+            + " touchMinor=" + getTouchMinor()
+            + " toolMajor=" + getToolMajor()
+            + " toolMinor=" + getToolMinor()
+            + " orientation=" + getOrientation()
+            + " meta=" + KeyEvent.metaStateToString(mMetaState)
+            + " pointerCount=" + getPointerCount()
+            + " historySize=" + getHistorySize()
+            + " flags=0x" + Integer.toHexString(mFlags)
+            + " edgeFlags=0x" + Integer.toHexString(mEdgeFlags)
+            + " device=" + mDeviceId
+            + " source=0x" + Integer.toHexString(mSource)
+            + "}";
+    }
+
+    /**
+     * Returns a string that represents the symbolic name of the specified action
+     * such as "ACTION_DOWN", "ACTION_POINTER_DOWN(3)" or "35" (if unknown).
+     *
+     * @param action The action.
+     * @return The symbolic name of the specified action.
+     * @hide
+     */
+    public static String actionToString(int action) {
+        switch (action) {
+            case ACTION_DOWN:
+                return "ACTION_DOWN";
+            case ACTION_UP:
+                return "ACTION_UP";
+            case ACTION_CANCEL:
+                return "ACTION_CANCEL";
+            case ACTION_MOVE:
+                return "ACTION_MOVE";
+        }
+        int index = (action & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
+        switch (action & ACTION_MASK) {
+            case ACTION_POINTER_DOWN:
+                return "ACTION_POINTER_DOWN(" + index + ")";
+            case ACTION_POINTER_UP:
+                return "ACTION_POINTER_UP(" + index + ")";
+            default:
+                return Integer.toString(action);
+        }
     }
 
     public static final Parcelable.Creator<MotionEvent> CREATOR

@@ -93,7 +93,37 @@ enum {
     AMETA_SHIFT_RIGHT_ON = 0x80,
 
     /* This mask is used to check whether the SYM meta key is pressed. */
-    AMETA_SYM_ON = 0x04
+    AMETA_SYM_ON = 0x04,
+
+    /* This mask is used to check whether the FUNCTION meta key is pressed. */
+    AMETA_FUNCTION_ON = 0x08,
+
+    /* This mask is used to check whether one of the CTRL meta keys is pressed. */
+    AMETA_CTRL_ON = 0x1000,
+
+    /* This mask is used to check whether the left CTRL meta key is pressed. */
+    AMETA_CTRL_LEFT_ON = 0x2000,
+
+    /* This mask is used to check whether the right CTRL meta key is pressed. */
+    AMETA_CTRL_RIGHT_ON = 0x4000,
+
+    /* This mask is used to check whether one of the META meta keys is pressed. */
+    AMETA_META_ON = 0x10000,
+
+    /* This mask is used to check whether the left META meta key is pressed. */
+    AMETA_META_LEFT_ON = 0x20000,
+
+    /* This mask is used to check whether the right META meta key is pressed. */
+    AMETA_META_RIGHT_ON = 0x40000,
+
+    /* This mask is used to check whether the CAPS LOCK meta key is latched. */
+    AMETA_CAPS_LOCK_LATCHED = 0x100000,
+
+    /* This mask is used to check whether the NUM LOCK meta key is latched. */
+    AMETA_NUM_LOCK_LATCHED = 0x200000,
+
+    /* This mask is used to check whether the SCROLL LOCK meta key is latched. */
+    AMETA_SCROLL_LOCK_LATCHED = 0x400000,
 };
 
 /*

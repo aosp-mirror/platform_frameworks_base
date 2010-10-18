@@ -35,6 +35,7 @@ find_binaries() {
     UMOUNTBIN=`which umount`
     DDBIN=`which dd`
     RSYNCBIN=`which rsync`
+    PBKDF2GEN=`which pbkdf2gen`
 }
 
 check_prereqs() {
@@ -74,6 +75,11 @@ check_prereqs() {
         exit 1
     elif [ ! -x "${LOSETUPBIN}" ]; then \
         echo "ERROR: ${LOSETUPBIN} is not executable!"
+        exit 1
+    fi
+
+    if [ "${PBKDF2GEN}x" = "x" ]; then \
+        echo "ERROR: Could not find pbkdf2gen in your path!"
         exit 1
     fi
 }
@@ -142,7 +148,6 @@ onexit() {
 usage() {
     echo "mkobb.sh -- Create OBB files for use on Android"
     echo ""
-    echo " -c             Use an encrypted OBB; must specify key"
     echo " -d <directory> Use <directory> as input for OBB files"
     echo " -k <key>       Use <key> to encrypt OBB file"
     echo " -K             Prompt for key to encrypt OBB file"
@@ -156,7 +161,7 @@ check_prereqs
 
 use_crypto=0
 
-args=`getopt -o cd:hk:Ko:v -- "$@"`
+args=`getopt -o d:hk:Ko:v -- "$@"`
 eval set -- "$args"
 
 while true; do \
@@ -223,9 +228,9 @@ loop_dev=$(${LOSETUPBIN} -f) || ( echo "ERROR: losetup wouldn't tell us the next
 ${LOSETUPBIN} ${loop_dev} ${tempfile} || ( echo "ERROR: couldn't create loopback device"; exit 1 )
 
 if [ ${use_crypto} -eq 1 ]; then \
-    hashed_key=`echo -n "${key}" | md5sum | awk '{ print $1 }'`
+    eval `${PBKDF2GEN} ${key}`
     unique_dm_name=`basename ${tempfile}`
-    echo "0 `blockdev --getsize ${loop_dev}` crypt ${CRYPTO} ${hashed_key} 0 ${loop_dev} 0" | dmsetup create ${unique_dm_name}
+    echo "0 `blockdev --getsize ${loop_dev}` crypt ${CRYPTO} ${key} 0 ${loop_dev} 0" | dmsetup create ${unique_dm_name}
     old_loop_dev=${loop_dev}
     loop_dev=/dev/mapper/${unique_dm_name}
 fi
@@ -252,6 +257,11 @@ ${RSYNCBIN} -av --no-owner --no-group ${directory}/ ${temp_mount}/
 echo ""
 
 echo "Successfully created \`${filename}'"
+
+if [ ${use_crypto} -eq 1 ]; then \
+    echo "salt for use with obbtool is:"
+    echo "${salt}"
+fi
 
 #
 # Undo all the temporaries

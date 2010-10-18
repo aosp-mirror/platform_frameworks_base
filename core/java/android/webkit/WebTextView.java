@@ -317,6 +317,22 @@ import java.util.ArrayList;
         return ptr == mNodePointer;
     }
 
+    /**
+     * Ensure that the underlying textfield is lined up with the WebTextView.
+     */
+    private void lineUpScroll() {
+        Layout layout = getLayout();
+        if (mWebView != null && layout != null) {
+            float maxScrollX = Touch.getMaxScrollX(this, layout, mScrollY);
+            if (DebugFlags.WEB_TEXT_VIEW) {
+                Log.v(LOGTAG, "onTouchEvent x=" + mScrollX + " y="
+                        + mScrollY + " maxX=" + maxScrollX);
+            }
+            mWebView.scrollFocusedTextInput(maxScrollX > 0 ?
+                    mScrollX / maxScrollX : 0, mScrollY);
+        }
+    }
+
     @Override public InputConnection onCreateInputConnection(
             EditorInfo outAttrs) {
         InputConnection connection = super.onCreateInputConnection(outAttrs);
@@ -412,6 +428,12 @@ import java.util.ArrayList;
     }
 
     @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        lineUpScroll();
+    }
+
+    @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
         if (!mFromWebKit && !mFromFocusChange && !mFromSetInputType
                 && mWebView != null && !mInSetTextAndKeepSelection) {
@@ -420,6 +442,7 @@ import java.util.ArrayList;
                         + " selEnd=" + selEnd);
             }
             mWebView.setSelection(selStart, selEnd);
+            lineUpScroll();
         }
     }
 
@@ -544,17 +567,7 @@ import java.util.ArrayList;
             // to big for the case of a small textfield.
             int smallerSlop = slop/2;
             if (dx > smallerSlop || dy > smallerSlop) {
-                Layout layout = getLayout();
-                if (mWebView != null && layout != null) {
-                    float maxScrollX = (float) Touch.getMaxScrollX(this, layout,
-                            mScrollY);
-                    if (DebugFlags.WEB_TEXT_VIEW) {
-                        Log.v(LOGTAG, "onTouchEvent x=" + mScrollX + " y="
-                                + mScrollY + " maxX=" + maxScrollX);
-                    }
-                    mWebView.scrollFocusedTextInput(maxScrollX > 0 ?
-                            mScrollX / maxScrollX : 0, mScrollY);
-                }
+                // Scrolling is handled in onScrollChanged.
                 mScrolled = true;
                 cancelLongPress();
                 return true;

@@ -23,6 +23,8 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import com.android.internal.os.PkgUsageStats;
+
+import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
@@ -471,6 +473,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
             out.recycle();
             stream.flush();
         } finally {
+            FileUtils.sync(stream);
             stream.close();
         }
     }

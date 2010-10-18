@@ -40,14 +40,14 @@ import com.android.internal.util.HierarchicalStateMachine;
  */
 
 public class BluetoothProfileState extends HierarchicalStateMachine {
-    private static final boolean DBG = true; // STOPSHIP - change to false.
+    private static final boolean DBG = true;
     private static final String TAG = "BluetoothProfileState";
 
     public static final int HFP = 0;
     public static final int A2DP = 1;
     public static final int HID = 2;
 
-    private static int TRANSITION_TO_STABLE = 100;
+    static final int TRANSITION_TO_STABLE = 100;
 
     private int mProfile;
     private BluetoothDevice mPendingDevice;
@@ -58,6 +58,7 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
             if (action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)) {
                 int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, 0);
@@ -77,6 +78,10 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
                     newState == BluetoothInputDevice.STATE_DISCONNECTED)) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                if (device.equals(mPendingDevice)) {
+                    sendMessage(TRANSITION_TO_STABLE);
+                }
             }
         }
     };
@@ -92,6 +97,7 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         filter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         context.registerReceiver(mBroadcastReceiver, filter);
     }
 

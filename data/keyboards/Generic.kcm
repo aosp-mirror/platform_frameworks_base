@@ -1,0 +1,100 @@
+# Copyright (C) 2010 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Generic key character map for full alphabetic US English PC style external keyboards.
+#
+# This file is intentionally very generic and is intended to support a broad rang of keyboards.
+# Do not edit the generic key character map to support a specific keyboard; instead, create
+# a new key character map file with the required keyboard configuration.
+#
+
+[type=QWERTY]
+
+# keycode               display number  base    caps    fn      caps_fn
+
+A                       'A'     '2'     'a'     'A'     'a'     'A'
+B                       'B'     '2'     'b'     'B'     'b'     'B'
+C                       'C'     '2'     'c'     'C'     'c'     'C'
+D                       'D'     '3'     'd'     'D'     'd'     'D'
+E                       'E'     '3'     'e'     'E'     'e'     'E'
+F                       'F'     '3'     'f'     'F'     'f'     'F'
+G                       'G'     '4'     'g'     'G'     'g'     'G'
+H                       'H'     '4'     'h'     'H'     'h'     'H'
+I                       'I'     '4'     'i'     'I'     'i'     'I'
+J                       'J'     '5'     'j'     'J'     'j'     'J'
+K                       'K'     '5'     'k'     'K'     'k'     'K'
+L                       'L'     '5'     'l'     'L'     'l'     'L'
+M                       'M'     '6'     'm'     'M'     'm'     'M'
+N                       'N'     '6'     'n'     'N'     'n'     'N'
+O                       'O'     '6'     'o'     'O'     'o'     'O'
+P                       'P'     '7'     'p'     'P'     'p'     'P'
+Q                       'Q'     '7'     'q'     'Q'     'q'     'Q'
+R                       'R'     '7'     'r'     'R'     'r'     'R'
+S                       'S'     '7'     's'     'S'     's'     'S'
+T                       'T'     '8'     't'     'T'     't'     'T'
+U                       'U'     '8'     'u'     'U'     'u'     'U'
+V                       'V'     '8'     'v'     'V'     'v'     'V'
+W                       'W'     '9'     'w'     'W'     'w'     'W'
+X                       'X'     '9'     'x'     'X'     'x'     'X'
+Y                       'Y'     '9'     'y'     'Y'     'y'     'Y'
+Z                       'Z'     '9'     'z'     'Z'     'z'     'Z'
+
+0                       '0'     '0'     '0'     ')'     '0'     ')'
+1                       '1'     '1'     '1'     '!'     '1'     '!'
+2                       '2'     '2'     '2'     '@'     '2'     '@'
+3                       '3'     '3'     '3'     '#'     '3'     '#'
+4                       '4'     '4'     '4'     '$'     '4'     '$'
+5                       '5'     '5'     '5'     '%'     '5'     '%'
+6                       '6'     '6'     '6'     '^'     '6'     '^'
+7                       '7'     '7'     '7'     '&'     '7'     '&'
+8                       '8'     '8'     '8'     '*'     '8'     '*'
+9                       '9'     '9'     '9'     '('     '9'     '('
+
+SPACE                   0x20    0x20    0x20    0x20    0x20    0x20
+ENTER                   0xa     0xa     0xa     0xa     0xa     0xa
+TAB                     0x9     0x9     0x9     0x9     0x9     0x9
+
+COMMA                   ','     ','     ','     '<'     ','     '<'
+PERIOD                  '.'     '.'     '.'     '>'     '.'     '>'
+SLASH                   '/'     '/'     '/'     '?'     '/'     '?'
+GRAVE                   '`'     '`'     '`'     '~'     '`'     '~'
+MINUS                   '-'     '-'     '-'     '_'     '-'     '_'
+EQUALS                  '='     '='     '='     '+'     '='     '+'
+LEFT_BRACKET            '['     '['     '['     '{'     '['     '{'
+RIGHT_BRACKET           ']'     ']'     ']'     '}'     ']'     '}'
+BACKSLASH               '\'     '\'     '\'     '|'     '\'     '|'
+SEMICOLON               ';'     ';'     ';'     ':'     ';'     ':'
+APOSTROPHE              '''     '''     '''     '"'     '''     '"'
+
+NUMPAD_0                '0'     '0'     '0'     '0'     '0'     '0'
+NUMPAD_1                '1'     '1'     '1'     '1'     '1'     '1'
+NUMPAD_2                '2'     '2'     '2'     '2'     '2'     '2'
+NUMPAD_3                '3'     '3'     '3'     '3'     '3'     '3'
+NUMPAD_4                '4'     '4'     '4'     '4'     '4'     '4'
+NUMPAD_5                '5'     '5'     '5'     '5'     '5'     '5'
+NUMPAD_6                '6'     '6'     '6'     '6'     '6'     '6'
+NUMPAD_7                '7'     '7'     '7'     '7'     '7'     '7'
+NUMPAD_8                '8'     '8'     '8'     '8'     '8'     '8'
+NUMPAD_9                '9'     '9'     '9'     '9'     '9'     '9'
+NUMPAD_LEFT_PAREN       '('     '('     '('     '('     '('     '('
+NUMPAD_RIGHT_PAREN      ')'     ')'     ')'     ')'     ')'     ')'
+NUMPAD_DIVIDE           '/'     '/'     '/'     '/'     '/'     '/'
+NUMPAD_MULTIPLY         '*'     '*'     '*'     '*'     '*'     '*'
+NUMPAD_SUBTRACT         '-'     '-'     '-'     '-'     '-'     '-'
+NUMPAD_ADD              '+'     '+'     '+'     '+'     '+'     '+'
+NUMPAD_DOT              '.'     '.'     '.'     '.'     '.'     '.'
+NUMPAD_COMMA            ','     ','     ','     ','     ','     ','
+NUMPAD_EQUALS           '='     '='     '='     '='     '='     '='
+NUMPAD_ENTER            0xa     0xa     0xa     0xa     0xa     0xa

@@ -419,9 +419,18 @@ private:
         Vector<KeyDown> keyDowns; // keys that are down
         int32_t metaState;
         nsecs_t downTime; // time of most recent key down
+
+        struct LedState {
+            bool avail; // led is available
+            bool on;    // we think the led is currently on
+        };
+        LedState capsLockLedState;
+        LedState numLockLedState;
+        LedState scrollLockLedState;
     } mLocked;
 
     void initializeLocked();
+    void initializeLedStateLocked(LockedState::LedState& ledState, int32_t led);
 
     bool isKeyboardOrGamepadKey(int32_t scanCode);
 
@@ -429,6 +438,10 @@ private:
             uint32_t policyFlags);
 
     ssize_t findKeyDownLocked(int32_t scanCode);
+
+    void updateLedStateLocked(bool reset);
+    void updateLedStateForModifierLocked(LockedState::LedState& ledState, int32_t led,
+            int32_t modifier, bool reset);
 };
 
 
@@ -571,31 +584,36 @@ protected:
 
     // Immutable calibration parameters in parsed form.
     struct Calibration {
-        // Touch Area
-        enum TouchAreaCalibration {
-            TOUCH_AREA_CALIBRATION_DEFAULT,
-            TOUCH_AREA_CALIBRATION_NONE,
-            TOUCH_AREA_CALIBRATION_GEOMETRIC,
-            TOUCH_AREA_CALIBRATION_PRESSURE,
+        // Touch Size
+        enum TouchSizeCalibration {
+            TOUCH_SIZE_CALIBRATION_DEFAULT,
+            TOUCH_SIZE_CALIBRATION_NONE,
+            TOUCH_SIZE_CALIBRATION_GEOMETRIC,
+            TOUCH_SIZE_CALIBRATION_PRESSURE,
         };
 
-        TouchAreaCalibration touchAreaCalibration;
+        TouchSizeCalibration touchSizeCalibration;
 
-        // Tool Area
-        enum ToolAreaCalibration {
-            TOOL_AREA_CALIBRATION_DEFAULT,
-            TOOL_AREA_CALIBRATION_NONE,
-            TOOL_AREA_CALIBRATION_GEOMETRIC,
-            TOOL_AREA_CALIBRATION_LINEAR,
+        // Tool Size
+        enum ToolSizeCalibration {
+            TOOL_SIZE_CALIBRATION_DEFAULT,
+            TOOL_SIZE_CALIBRATION_NONE,
+            TOOL_SIZE_CALIBRATION_GEOMETRIC,
+            TOOL_SIZE_CALIBRATION_LINEAR,
+            TOOL_SIZE_CALIBRATION_AREA,
         };
 
-        ToolAreaCalibration toolAreaCalibration;
-        bool haveToolAreaLinearScale;
-        float toolAreaLinearScale;
-        bool haveToolAreaLinearBias;
-        float toolAreaLinearBias;
-        bool haveToolAreaIsSummed;
-        int32_t toolAreaIsSummed;
+        ToolSizeCalibration toolSizeCalibration;
+        bool haveToolSizeLinearScale;
+        float toolSizeLinearScale;
+        bool haveToolSizeLinearBias;
+        float toolSizeLinearBias;
+        bool haveToolSizeAreaScale;
+        float toolSizeAreaScale;
+        bool haveToolSizeAreaBias;
+        float toolSizeAreaBias;
+        bool haveToolSizeIsSummed;
+        int32_t toolSizeIsSummed;
 
         // Pressure
         enum PressureCalibration {
@@ -671,8 +689,10 @@ protected:
 
         float geometricScale;
 
-        float toolAreaLinearScale;
-        float toolAreaLinearBias;
+        float toolSizeLinearScale;
+        float toolSizeLinearBias;
+        float toolSizeAreaScale;
+        float toolSizeAreaBias;
 
         float pressureScale;
 
@@ -691,11 +711,11 @@ protected:
             bool haveSize;
             InputDeviceInfo::MotionRange size;
 
-            bool haveTouchArea;
+            bool haveTouchSize;
             InputDeviceInfo::MotionRange touchMajor;
             InputDeviceInfo::MotionRange touchMinor;
 
-            bool haveToolArea;
+            bool haveToolSize;
             InputDeviceInfo::MotionRange toolMajor;
             InputDeviceInfo::MotionRange toolMinor;
 

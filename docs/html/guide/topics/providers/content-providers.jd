@@ -838,8 +838,8 @@ For example if the ContentProvider subclass is AutoInfoProvider, the
 </p>
 
 <pre>
-&lt;provider name="com.example.autos.AutoInfoProvider"
-          authorities="com.example.autos.autoinfoprovider" 
+&lt;provider android:name="com.example.autos.AutoInfoProvider"
+          android:authorities="com.example.autos.autoinfoprovider" 
           . . . /&gt
 &lt;/provider&gt;
 </pre>
@@ -891,8 +891,8 @@ For third-party applications, this should be a fully-qualified class name
 (reduced to lowercase) to ensure uniqueness.  The authority is declared in 
 the {@code &lt;provider&gt;} element's {@code authorities} attribute:</p>
 
-<pre>&lt;provider name=".TransportationProvider"
-          authorities="com.example.transportationprovider"
+<pre>&lt;provider android:name=".TransportationProvider"
+          android:authorities="com.example.transportationprovider"
           . . .  &gt;</pre></li>
 
 <li><p>The path that the content provider uses to determine what kind of data is

@@ -42,6 +42,13 @@ import android.view.KeyCharacterMap.KeyData;
  * Meta states describe the pressed state of key modifiers
  * such as {@link #META_SHIFT_ON} or {@link #META_ALT_ON}.
  * </p><p>
+ * Key codes typically correspond one-to-one with individual keys on an input device.
+ * Many keys and key combinations serve quite different functions on different
+ * input devices so care must be taken when interpreting them.  Always use the
+ * {@link KeyCharacterMap} associated with the input device when mapping keys
+ * to characters.  Be aware that there may be multiple key input devices active
+ * at the same time and each will have its own key character map.
+ * </p><p>
  * When interacting with an IME, the framework may deliver key events
  * with the special action {@link #ACTION_MULTIPLE} that either specifies
  * that single repeated key code or a sequence of characters to insert.
@@ -209,7 +216,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Enter key. */
     public static final int KEYCODE_ENTER           = 66;
     /** Key code constant: Backspace key.
-     * Deletes characters before the insertion point. */
+     * Deletes characters before the insertion point, unlike {@link #KEYCODE_FORWARD_DEL}. */
     public static final int KEYCODE_DEL             = 67;
     /** Key code constant: '`' (backtick) key. */
     public static final int KEYCODE_GRAVE           = 68;
@@ -331,6 +338,125 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Mode Button key.
      * On a game controller, the button labeled Mode. */
     public static final int KEYCODE_BUTTON_MODE     = 110;
+    /** Key code constant: Escape key. */
+    public static final int KEYCODE_ESCAPE          = 111;
+    /** Key code constant: Forward Delete key.
+     * Deletes characters ahead of the insertion point, unlike {@link #KEYCODE_DEL}. */
+    public static final int KEYCODE_FORWARD_DEL     = 112;
+    /** Key code constant: Left Control modifier key. */
+    public static final int KEYCODE_CTRL_LEFT       = 113;
+    /** Key code constant: Right Control modifier key. */
+    public static final int KEYCODE_CTRL_RIGHT      = 114;
+    /** Key code constant: Caps Lock modifier key. */
+    public static final int KEYCODE_CAPS_LOCK       = 115;
+    /** Key code constant: Scroll Lock key. */
+    public static final int KEYCODE_SCROLL_LOCK     = 116;
+    /** Key code constant: Left Meta modifier key. */
+    public static final int KEYCODE_META_LEFT       = 117;
+    /** Key code constant: Right Meta modifier key. */
+    public static final int KEYCODE_META_RIGHT      = 118;
+    /** Key code constant: Function modifier key. */
+    public static final int KEYCODE_FUNCTION        = 119;
+    /** Key code constant: System Request / Print Screen key. */
+    public static final int KEYCODE_SYSRQ           = 120;
+    /** Key code constant: Break / Pause key. */
+    public static final int KEYCODE_BREAK           = 121;
+    /** Key code constant: Home Movement key.
+     * Used for scrolling or moving the cursor around to the start of a line
+     * or to the top of a list. */
+    public static final int KEYCODE_MOVE_HOME       = 122;
+    /** Key code constant: End Movement key.
+     * Used for scrolling or moving the cursor around to the end of a line
+     * or to the bottom of a list. */
+    public static final int KEYCODE_MOVE_END        = 123;
+    /** Key code constant: Insert key.
+     * Toggles insert / overwrite edit mode. */
+    public static final int KEYCODE_INSERT          = 124;
+    /** Key code constant: Forward key.
+     * Navigates forward in the history stack.  Complement of {@link #KEYCODE_BACK}. */
+    public static final int KEYCODE_FORWARD         = 125;
+    /** Key code constant: Play media key. */
+    public static final int KEYCODE_MEDIA_PLAY      = 126;
+    /** Key code constant: Pause media key. */
+    public static final int KEYCODE_MEDIA_PAUSE     = 127;
+    /** Key code constant: Close media key.
+     * May be used to close a CD tray, for example. */
+    public static final int KEYCODE_MEDIA_CLOSE     = 128;
+    /** Key code constant: Eject media key.
+     * May be used to eject a CD tray, for example. */
+    public static final int KEYCODE_MEDIA_EJECT     = 129;
+    /** Key code constant: Record media key. */
+    public static final int KEYCODE_MEDIA_RECORD    = 130;
+    /** Key code constant: F1 key. */
+    public static final int KEYCODE_F1              = 131;
+    /** Key code constant: F2 key. */
+    public static final int KEYCODE_F2              = 132;
+    /** Key code constant: F3 key. */
+    public static final int KEYCODE_F3              = 133;
+    /** Key code constant: F4 key. */
+    public static final int KEYCODE_F4              = 134;
+    /** Key code constant: F5 key. */
+    public static final int KEYCODE_F5              = 135;
+    /** Key code constant: F6 key. */
+    public static final int KEYCODE_F6              = 136;
+    /** Key code constant: F7 key. */
+    public static final int KEYCODE_F7              = 137;
+    /** Key code constant: F8 key. */
+    public static final int KEYCODE_F8              = 138;
+    /** Key code constant: F9 key. */
+    public static final int KEYCODE_F9              = 139;
+    /** Key code constant: F10 key. */
+    public static final int KEYCODE_F10             = 140;
+    /** Key code constant: F11 key. */
+    public static final int KEYCODE_F11             = 141;
+    /** Key code constant: F12 key. */
+    public static final int KEYCODE_F12             = 142;
+    /** Key code constant: Num Lock modifier key.
+     * This is the Num Lock key; it is different from {@link #KEYCODE_NUM}.
+     * This key generally modifies the behavior of other keys on the numeric keypad. */
+    public static final int KEYCODE_NUM_LOCK        = 143;
+    /** Key code constant: Numeric keypad '0' key. */
+    public static final int KEYCODE_NUMPAD_0        = 144;
+    /** Key code constant: Numeric keypad '1' key. */
+    public static final int KEYCODE_NUMPAD_1        = 145;
+    /** Key code constant: Numeric keypad '2' key. */
+    public static final int KEYCODE_NUMPAD_2        = 146;
+    /** Key code constant: Numeric keypad '3' key. */
+    public static final int KEYCODE_NUMPAD_3        = 147;
+    /** Key code constant: Numeric keypad '4' key. */
+    public static final int KEYCODE_NUMPAD_4        = 148;
+    /** Key code constant: Numeric keypad '5' key. */
+    public static final int KEYCODE_NUMPAD_5        = 149;
+    /** Key code constant: Numeric keypad '6' key. */
+    public static final int KEYCODE_NUMPAD_6        = 150;
+    /** Key code constant: Numeric keypad '7' key. */
+    public static final int KEYCODE_NUMPAD_7        = 151;
+    /** Key code constant: Numeric keypad '8' key. */
+    public static final int KEYCODE_NUMPAD_8        = 152;
+    /** Key code constant: Numeric keypad '9' key. */
+    public static final int KEYCODE_NUMPAD_9        = 153;
+    /** Key code constant: Numeric keypad '/' key (for division). */
+    public static final int KEYCODE_NUMPAD_DIVIDE   = 154;
+    /** Key code constant: Numeric keypad '*' key (for multiplication). */
+    public static final int KEYCODE_NUMPAD_MULTIPLY = 155;
+    /** Key code constant: Numeric keypad '-' key (for subtraction). */
+    public static final int KEYCODE_NUMPAD_SUBTRACT = 156;
+    /** Key code constant: Numeric keypad '+' key (for addition). */
+    public static final int KEYCODE_NUMPAD_ADD      = 157;
+    /** Key code constant: Numeric keypad '.' key (for decimals or digit grouping). */
+    public static final int KEYCODE_NUMPAD_DOT      = 158;
+    /** Key code constant: Numeric keypad ',' key (for decimals or digit grouping). */
+    public static final int KEYCODE_NUMPAD_COMMA    = 159;
+    /** Key code constant: Numeric keypad Enter key. */
+    public static final int KEYCODE_NUMPAD_ENTER    = 160;
+    /** Key code constant: Numeric keypad '=' key. */
+    public static final int KEYCODE_NUMPAD_EQUALS   = 161;
+    /** Key code constant: Numeric keypad '(' key. */
+    public static final int KEYCODE_NUMPAD_LEFT_PAREN = 162;
+    /** Key code constant: Numeric keypad ')' key. */
+    public static final int KEYCODE_NUMPAD_RIGHT_PAREN = 163;
+
+    private static final int LAST_KEYCODE           = KEYCODE_NUMPAD_RIGHT_PAREN;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -339,7 +465,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
     //  external/webkit/WebKit/android/plugins/ANPKeyCodes.h
     //  tools/puppet_master/PuppetMaster/nav_keys.py
     //  frameworks/base/core/res/res/values/attrs.xml
-    //  commands/monkey/Monkey.java
     //  emulator?
     //
     //  Also Android currently does not reserve code ranges for vendor-
@@ -347,9 +472,213 @@ public class KeyEvent extends InputEvent implements Parcelable {
     //  MUST contribute a patch to the open source project to define
     //  those new codes.  This is intended to maintain a consistent
     //  set of key code definitions across all Android devices.
-   
-    private static final int LAST_KEYCODE           = KEYCODE_BUTTON_MODE;
-    
+
+    // Symbolic names of all keys indexed by keycode.
+    // There should be exactly LAST_KEYCODE + 1 entries in this table.
+    private static final String[] KEYCODE_SYMBOLIC_NAMES = new String[] {
+        "KEYCODE_UNKNOWN",
+        "KEYCODE_SOFT_LEFT",
+        "KEYCODE_SOFT_RIGHT",
+        "KEYCODE_HOME",
+        "KEYCODE_BACK",
+        "KEYCODE_CALL",
+        "KEYCODE_ENDCALL",
+        "KEYCODE_0",
+        "KEYCODE_1",
+        "KEYCODE_2",
+        "KEYCODE_3",
+        "KEYCODE_4",
+        "KEYCODE_5",
+        "KEYCODE_6",
+        "KEYCODE_7",
+        "KEYCODE_8",
+        "KEYCODE_9",
+        "KEYCODE_STAR",
+        "KEYCODE_POUND",
+        "KEYCODE_DPAD_UP",
+        "KEYCODE_DPAD_DOWN",
+        "KEYCODE_DPAD_LEFT",
+        "KEYCODE_DPAD_RIGHT",
+        "KEYCODE_DPAD_CENTER",
+        "KEYCODE_VOLUME_UP",
+        "KEYCODE_VOLUME_DOWN",
+        "KEYCODE_POWER",
+        "KEYCODE_CAMERA",
+        "KEYCODE_CLEAR",
+        "KEYCODE_A",
+        "KEYCODE_B",
+        "KEYCODE_C",
+        "KEYCODE_D",
+        "KEYCODE_E",
+        "KEYCODE_F",
+        "KEYCODE_G",
+        "KEYCODE_H",
+        "KEYCODE_I",
+        "KEYCODE_J",
+        "KEYCODE_K",
+        "KEYCODE_L",
+        "KEYCODE_M",
+        "KEYCODE_N",
+        "KEYCODE_O",
+        "KEYCODE_P",
+        "KEYCODE_Q",
+        "KEYCODE_R",
+        "KEYCODE_S",
+        "KEYCODE_T",
+        "KEYCODE_U",
+        "KEYCODE_V",
+        "KEYCODE_W",
+        "KEYCODE_X",
+        "KEYCODE_Y",
+        "KEYCODE_Z",
+        "KEYCODE_COMMA",
+        "KEYCODE_PERIOD",
+        "KEYCODE_ALT_LEFT",
+        "KEYCODE_ALT_RIGHT",
+        "KEYCODE_SHIFT_LEFT",
+        "KEYCODE_SHIFT_RIGHT",
+        "KEYCODE_TAB",
+        "KEYCODE_SPACE",
+        "KEYCODE_SYM",
+        "KEYCODE_EXPLORER",
+        "KEYCODE_ENVELOPE",
+        "KEYCODE_ENTER",
+        "KEYCODE_DEL",
+        "KEYCODE_GRAVE",
+        "KEYCODE_MINUS",
+        "KEYCODE_EQUALS",
+        "KEYCODE_LEFT_BRACKET",
+        "KEYCODE_RIGHT_BRACKET",
+        "KEYCODE_BACKSLASH",
+        "KEYCODE_SEMICOLON",
+        "KEYCODE_APOSTROPHE",
+        "KEYCODE_SLASH",
+        "KEYCODE_AT",
+        "KEYCODE_NUM",
+        "KEYCODE_HEADSETHOOK",
+        "KEYCODE_FOCUS",
+        "KEYCODE_PLUS",
+        "KEYCODE_MENU",
+        "KEYCODE_NOTIFICATION",
+        "KEYCODE_SEARCH",
+        "KEYCODE_MEDIA_PLAY_PAUSE",
+        "KEYCODE_MEDIA_STOP",
+        "KEYCODE_MEDIA_NEXT",
+        "KEYCODE_MEDIA_PREVIOUS",
+        "KEYCODE_MEDIA_REWIND",
+        "KEYCODE_MEDIA_FAST_FORWARD",
+        "KEYCODE_MUTE",
+        "KEYCODE_PAGE_UP",
+        "KEYCODE_PAGE_DOWN",
+        "KEYCODE_PICTSYMBOLS",
+        "KEYCODE_SWITCH_CHARSET",
+        "KEYCODE_BUTTON_A",
+        "KEYCODE_BUTTON_B",
+        "KEYCODE_BUTTON_C",
+        "KEYCODE_BUTTON_X",
+        "KEYCODE_BUTTON_Y",
+        "KEYCODE_BUTTON_Z",
+        "KEYCODE_BUTTON_L1",
+        "KEYCODE_BUTTON_R1",
+        "KEYCODE_BUTTON_L2",
+        "KEYCODE_BUTTON_R2",
+        "KEYCODE_BUTTON_THUMBL",
+        "KEYCODE_BUTTON_THUMBR",
+        "KEYCODE_BUTTON_START",
+        "KEYCODE_BUTTON_SELECT",
+        "KEYCODE_BUTTON_MODE",
+        "KEYCODE_ESCAPE",
+        "KEYCODE_FORWARD_DEL",
+        "KEYCODE_CTRL_LEFT",
+        "KEYCODE_CTRL_RIGHT",
+        "KEYCODE_CAPS_LOCK",
+        "KEYCODE_SCROLL_LOCK",
+        "KEYCODE_META_LEFT",
+        "KEYCODE_META_RIGHT",
+        "KEYCODE_FUNCTION",
+        "KEYCODE_SYSRQ",
+        "KEYCODE_BREAK",
+        "KEYCODE_MOVE_HOME",
+        "KEYCODE_MOVE_END",
+        "KEYCODE_INSERT",
+        "KEYCODE_FORWARD",
+        "KEYCODE_MEDIA_PLAY",
+        "KEYCODE_MEDIA_PAUSE",
+        "KEYCODE_MEDIA_CLOSE",
+        "KEYCODE_MEDIA_EJECT",
+        "KEYCODE_MEDIA_RECORD",
+        "KEYCODE_F1",
+        "KEYCODE_F2",
+        "KEYCODE_F3",
+        "KEYCODE_F4",
+        "KEYCODE_F5",
+        "KEYCODE_F6",
+        "KEYCODE_F7",
+        "KEYCODE_F8",
+        "KEYCODE_F9",
+        "KEYCODE_F10",
+        "KEYCODE_F11",
+        "KEYCODE_F12",
+        "KEYCODE_NUM_LOCK",
+        "KEYCODE_NUMPAD_0",
+        "KEYCODE_NUMPAD_1",
+        "KEYCODE_NUMPAD_2",
+        "KEYCODE_NUMPAD_3",
+        "KEYCODE_NUMPAD_4",
+        "KEYCODE_NUMPAD_5",
+        "KEYCODE_NUMPAD_6",
+        "KEYCODE_NUMPAD_7",
+        "KEYCODE_NUMPAD_8",
+        "KEYCODE_NUMPAD_9",
+        "KEYCODE_NUMPAD_DIVIDE",
+        "KEYCODE_NUMPAD_MULTIPLY",
+        "KEYCODE_MUMPAD_SUBTRACT",
+        "KEYCODE_NUMPAD_ADD",
+        "KEYCODE_NUMPAD_DOT",
+        "KEYCODE_NUMPAD_COMMA",
+        "KEYCODE_NUMPAD_ENTER",
+        "KEYCODE_NUMPAD_EQUALS",
+        "KEYCODE_NUMPAD_LEFT_PAREN",
+        "KEYCODE_NUMPAD_RIGHT_PAREN",
+    };
+
+    // Symbolic names of all metakeys in bit order from least significant to most significant.
+    // Accordingly there are exactly 32 values in this table.
+    private static final String[] META_SYMBOLIC_NAMES = new String[] {
+        "META_SHIFT_ON",
+        "META_ALT_ON",
+        "META_SYM_ON",
+        "META_FUNCTION_ON",
+        "META_ALT_LEFT_ON",
+        "META_ALT_RIGHT_ON",
+        "META_SHIFT_LEFT_ON",
+        "META_SHIFT_RIGHT_ON",
+        "META_CAP_LOCKED",
+        "META_ALT_LOCKED",
+        "META_SYM_LOCKED",
+        "0x00000800",
+        "META_CTRL_ON",
+        "META_CTRL_LEFT_ON",
+        "META_CTRL_RIGHT_ON",
+        "0x00008000",
+        "META_META_ON",
+        "META_META_LEFT_ON",
+        "META_META_RIGHT_ON",
+        "0x00080000",
+        "META_CAPS_LOCK_LATCHED",
+        "META_NUM_LOCK_LATCHED",
+        "META_SCROLL_LOCK_LATCHED",
+        "0x00800000",
+        "0x01000000",
+        "0x02000000",
+        "0x04000000",
+        "0x08000000",
+        "0x10000000",
+        "0x20000000",
+        "0x40000000",
+        "0x80000000",
+    };
+
     /**
      * @deprecated There are now more than MAX_KEYCODE keycodes.
      * Use {@link #getMaxKeyCode()} instead.
@@ -375,6 +704,35 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * this is a sequence of characters as returned by {@link #getCharacters}.
      */
     public static final int ACTION_MULTIPLE         = 2;
+
+    /**
+     * SHIFT key locked in CAPS mode.
+     * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
+     * @hide
+     */
+    public static final int META_CAP_LOCKED = 0x100;
+
+    /**
+     * ALT key locked.
+     * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
+     * @hide
+     */
+    public static final int META_ALT_LOCKED = 0x200;
+
+    /**
+     * SYM key locked.
+     * Reserved for use by {@link MetaKeyKeyListener} for a published constant in its API.
+     * @hide
+     */
+    public static final int META_SYM_LOCKED = 0x400;
+
+    /**
+     * Text is in selection mode.
+     * Reserved for use by {@link MetaKeyKeyListener} for a private unpublished constant
+     * in its API that is currently being retained for legacy reasons.
+     * @hide
+     */
+    public static final int META_SELECTING = 0x800;
 
     /**
      * <p>This mask is used to check whether one of the ALT meta keys is pressed.</p>
@@ -439,6 +797,97 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @see #getMetaState()
      */
     public static final int META_SYM_ON = 0x4;
+
+    /**
+     * <p>This mask is used to check whether the FUNCTION meta key is pressed.</p>
+     *
+     * @see #isFunctionPressed()
+     * @see #getMetaState()
+     */
+    public static final int META_FUNCTION_ON = 0x8;
+
+    /**
+     * <p>This mask is used to check whether one of the CTRL meta keys is pressed.</p>
+     *
+     * @see #isCtrlPressed()
+     * @see #getMetaState()
+     * @see #KEYCODE_CTRL_LEFT
+     * @see #KEYCODE_CTRL_RIGHT
+     */
+    public static final int META_CTRL_ON = 0x1000;
+
+    /**
+     * <p>This mask is used to check whether the left CTRL meta key is pressed.</p>
+     *
+     * @see #isCtrlPressed()
+     * @see #getMetaState()
+     * @see #KEYCODE_CTRL_LEFT
+     */
+    public static final int META_CTRL_LEFT_ON = 0x2000;
+
+    /**
+     * <p>This mask is used to check whether the right CTRL meta key is pressed.</p>
+     *
+     * @see #isCtrlPressed()
+     * @see #getMetaState()
+     * @see #KEYCODE_CTRL_RIGHT
+     */
+    public static final int META_CTRL_RIGHT_ON = 0x4000;
+
+    /**
+     * <p>This mask is used to check whether one of the META meta keys is pressed.</p>
+     *
+     * @see #isMetaPressed()
+     * @see #getMetaState()
+     * @see #KEYCODE_META_LEFT
+     * @see #KEYCODE_META_RIGHT
+     */
+    public static final int META_META_ON = 0x10000;
+
+    /**
+     * <p>This mask is used to check whether the left META meta key is pressed.</p>
+     *
+     * @see #isMetaPressed()
+     * @see #getMetaState()
+     * @see #KEYCODE_META_LEFT
+     */
+    public static final int META_META_LEFT_ON = 0x20000;
+
+    /**
+     * <p>This mask is used to check whether the right META meta key is pressed.</p>
+     *
+     * @see #isMetaPressed()
+     * @see #getMetaState()
+     * @see #KEYCODE_META_RIGHT
+     */
+    public static final int META_META_RIGHT_ON = 0x40000;
+
+    /**
+     * <p>This mask is used to check whether the CAPS LOCK meta key is latched.</p>
+     *
+     * @see #isCapsLockLatched()
+     * @see #getMetaState()
+     * @see #KEYCODE_CAPS_LOCK
+     */
+    public static final int META_CAPS_LOCK_LATCHED = 0x100000;
+
+    /**
+     * <p>This mask is used to check whether the NUM LOCK meta key is latched.</p>
+     *
+     * @see #isNumLockLatched()
+     * @see #getMetaState()
+     * @see #KEYCODE_NUM_LOCK
+     */
+    public static final int META_NUM_LOCK_LATCHED = 0x200000;
+
+    /**
+     * <p>This mask is used to check whether the SCROLL LOCK meta key is latched.</p>
+     *
+     * @see #isScrollLockLatched()
+     * @see #getMetaState()
+     * @see #KEYCODE_SCROLL_LOCK
+     */
+    public static final int META_SCROLL_LOCK_LATCHED = 0x400000;
 
     /**
      * This mask is set if the device woke because of this key event.
@@ -601,6 +1050,17 @@ public class KeyEvent extends InputEvent implements Parcelable {
          *         the event to be handled by the next receiver, return false.
          */
         boolean onKeyMultiple(int keyCode, int count, KeyEvent event);
+    }
+
+    static {
+        if (META_SYMBOLIC_NAMES.length != 32) {
+            throw new IllegalStateException(
+                    "META_SYMBOLIC_NAMES array should contain exactly 32 entries.");
+        }
+        if (KEYCODE_SYMBOLIC_NAMES.length != LAST_KEYCODE + 1) {
+            throw new IllegalStateException(
+                    "KEYCODE_SYMBOLIC_NAMES array is out of sync with the keycode constants.");
+        }
     }
 
     /**
@@ -939,9 +1399,29 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @see #isAltPressed()
      * @see #isShiftPressed()
      * @see #isSymPressed()
+     * @see #isCtrlPressed()
+     * @see #isMetaPressed()
+     * @see #isFunctionPressed()
+     * @see #isCapsLockLatched()
+     * @see #isNumLockLatched()
+     * @see #isScrollLockLatched()
      * @see #META_ALT_ON
+     * @see #META_ALT_LEFT_ON
+     * @see #META_ALT_RIGHT_ON
      * @see #META_SHIFT_ON
+     * @see #META_SHIFT_LEFT_ON
+     * @see #META_SHIFT_RIGHT_ON
      * @see #META_SYM_ON
+     * @see #META_FUNCTION_ON
+     * @see #META_CTRL_ON
+     * @see #META_CTRL_LEFT_ON
+     * @see #META_CTRL_RIGHT_ON
+     * @see #META_META_ON
+     * @see #META_META_LEFT_ON
+     * @see #META_META_RIGHT_ON
+     * @see #META_CAPS_LOCK_LATCHED
+     * @see #META_NUM_LOCK_LATCHED
+     * @see #META_SCROLL_LOCK_LATCHED
      */
     public final int getMetaState() {
         return mMetaState;
@@ -961,13 +1441,28 @@ public class KeyEvent extends InputEvent implements Parcelable {
      *
      * @return whether the provided keyCode is one of
      * {@link #KEYCODE_SHIFT_LEFT} {@link #KEYCODE_SHIFT_RIGHT},
-     * {@link #KEYCODE_ALT_LEFT}, {@link #KEYCODE_ALT_RIGHT}
-     * or {@link #KEYCODE_SYM}.
+     * {@link #KEYCODE_ALT_LEFT}, {@link #KEYCODE_ALT_RIGHT},
+     * {@link #KEYCODE_SYM}, {@link #KEYCODE_NUM}, {@link #KEYCODE_FUNCTION},
+     * {@link #KEYCODE_CTRL_LEFT}, {@link #KEYCODE_CTRL_RIGHT},
+     * {@link #KEYCODE_META_LEFT}, or {@link #KEYCODE_META_RIGHT}.
      */
     public static boolean isModifierKey(int keyCode) {
-        return keyCode == KEYCODE_SHIFT_LEFT || keyCode == KEYCODE_SHIFT_RIGHT
-                || keyCode == KEYCODE_ALT_LEFT || keyCode == KEYCODE_ALT_RIGHT
-                || keyCode == KEYCODE_SYM;
+        switch (keyCode) {
+            case KEYCODE_SHIFT_LEFT:
+            case KEYCODE_SHIFT_RIGHT:
+            case KEYCODE_ALT_LEFT:
+            case KEYCODE_ALT_RIGHT:
+            case KEYCODE_SYM:
+            case KEYCODE_NUM:
+            case KEYCODE_FUNCTION:
+            case KEYCODE_CTRL_LEFT:
+            case KEYCODE_CTRL_RIGHT:
+            case KEYCODE_META_LEFT:
+            case KEYCODE_META_RIGHT:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
@@ -1006,6 +1501,80 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public final boolean isSymPressed() {
         return (mMetaState & META_SYM_ON) != 0;
+    }
+
+    /**
+     * <p>Returns the pressed state of the CTRL meta key.</p>
+     *
+     * @return true if the CTRL key is pressed, false otherwise
+     *
+     * @see #KEYCODE_CTRL_LEFT
+     * @see #KEYCODE_CTRL_RIGHT
+     * @see #META_CTRL_ON
+     */
+    public final boolean isCtrlPressed() {
+        return (mMetaState & META_CTRL_ON) != 0;
+    }
+
+    /**
+     * <p>Returns the pressed state of the META meta key.</p>
+     *
+     * @return true if the META key is pressed, false otherwise
+     *
+     * @see #KEYCODE_META_LEFT
+     * @see #KEYCODE_META_RIGHT
+     * @see #META_META_ON
+     */
+    public final boolean isMetaPressed() {
+        return (mMetaState & META_META_ON) != 0;
+    }
+
+    /**
+     * <p>Returns the pressed state of the FUNCTION meta key.</p>
+     *
+     * @return true if the FUNCTION key is pressed, false otherwise
+     *
+     * @see #KEYCODE_FUNCTION
+     * @see #META_FUNCTION_ON
+     */
+    public final boolean isFunctionPressed() {
+        return (mMetaState & META_FUNCTION_ON) != 0;
+    }
+
+    /**
+     * <p>Returns the latched state of the CAPS LOCK meta key.</p>
+     *
+     * @return true if the CAPS LOCK key is latched, false otherwise
+     *
+     * @see #KEYCODE_CAPS_LOCK
+     * @see #META_CAPS_LOCK_LATCHED
+     */
+    public final boolean isCapsLockLatched() {
+        return (mMetaState & META_CAPS_LOCK_LATCHED) != 0;
+    }
+
+    /**
+     * <p>Returns the latched state of the NUM LOCK meta key.</p>
+     *
+     * @return true if the NUM LOCK key is latched, false otherwise
+     *
+     * @see #KEYCODE_NUM_LOCK
+     * @see #META_NUM_LOCK_LATCHED
+     */
+    public final boolean isNumLockLatched() {
+        return (mMetaState & META_NUM_LOCK_LATCHED) != 0;
+    }
+
+    /**
+     * <p>Returns the latched state of the SCROLL LOCK meta key.</p>
+     *
+     * @return true if the SCROLL LOCK key is latched, false otherwise
+     *
+     * @see #KEYCODE_SCROLL_LOCK
+     * @see #META_SCROLL_LOCK_LATCHED
+     */
+    public final boolean isScrollLockLatched() {
+        return (mMetaState & META_SCROLL_LOCK_LATCHED) != 0;
     }
 
     /**
@@ -1392,12 +1961,118 @@ public class KeyEvent extends InputEvent implements Parcelable {
             }
         }
     }
-    
+
+    @Override
     public String toString() {
-        return "KeyEvent{action=" + mAction + " code=" + mKeyCode
-            + " repeat=" + mRepeatCount
-            + " meta=" + mMetaState + " scancode=" + mScanCode
-            + " mFlags=" + mFlags + "}";
+        return "KeyEvent{action=" + actionToString(mAction)
+                + " keycode=" + keyCodeToString(mKeyCode)
+                + " scancode=" + mScanCode
+                + " meta=" + metaStateToString(mMetaState)
+                + " flags=0x" + Integer.toHexString(mFlags)
+                + " repeat=" + mRepeatCount
+                + " device=" + mDeviceId
+                + " source=0x" + Integer.toHexString(mSource)
+                + "}";
+    }
+
+    /**
+     * Returns a string that represents the symbolic name of the specified action
+     * such as "ACTION_DOWN", or "35" (if unknown).
+     *
+     * @param action The action.
+     * @return The symbolic name of the specified action.
+     * @hide
+     */
+    public static String actionToString(int action) {
+        switch (action) {
+            case ACTION_DOWN:
+                return "ACTION_DOWN";
+            case ACTION_UP:
+                return "ACTION_UP";
+            case ACTION_MULTIPLE:
+                return "ACTION_MULTIPLE";
+            default:
+                return Integer.toString(action);
+        }
+    }
+
+    /**
+     * Returns a string that represents the symbolic name of the specified keycode
+     * such as "KEYCODE_A", "KEYCODE_DPAD_UP", or "1001" (if unknown).
+     *
+     * @param keyCode The key code.
+     * @return The symbolic name of the specified keycode.
+     *
+     * @see KeyCharacterMap#getDisplayLabel
+     * @hide
+     */
+    public static String keyCodeToString(int keyCode) {
+        if (keyCode >= 0 && keyCode < KEYCODE_SYMBOLIC_NAMES.length) {
+            return KEYCODE_SYMBOLIC_NAMES[keyCode];
+        }
+        return Integer.toString(keyCode);
+    }
+
+    /**
+     * Gets a keycode by its symbolic name such as "KEYCODE_A" or "1001" (if unknown).
+     *
+     * @param symbolicName The symbolic name of the keycode.
+     * @return The keycode or -1 if not found.
+     * @see #keycodeToString
+     * @hide
+     */
+    public static int keyCodeFromString(String symbolicName) {
+        if (symbolicName == null) {
+            throw new IllegalArgumentException("symbolicName must not be null");
+        }
+
+        final int count = KEYCODE_SYMBOLIC_NAMES.length;
+        for (int i = 0; i < count; i++) {
+            if (symbolicName.equals(KEYCODE_SYMBOLIC_NAMES[i])) {
+                return i;
+            }
+        }
+
+        try {
+            return Integer.parseInt(symbolicName,10);
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
+
+    /**
+     * Returns a string that represents the symbolic name of the specified combined meta
+     * key modifier state flags such as "0", "META_SHIFT_ON",
+     * "META_ALT_ON|META_SHIFT_ON" or "0x10000000" (if unknown).
+     *
+     * @param metaState The meta state.
+     * @return The symbolic name of the specified combined meta state flags.
+     * @hide
+     */
+    public static String metaStateToString(int metaState) {
+        if (metaState == 0) {
+            return "0";
+        }
+        StringBuilder result = null;
+        int i = 0;
+        while (metaState != 0) {
+            final boolean isSet = (metaState & 1) != 0;
+            metaState >>>= 1; // unsigned shift!
+            if (isSet) {
+                final String name = META_SYMBOLIC_NAMES[i];
+                if (result == null) {
+                    if (metaState == 0) {
+                        return name;
+                    }
+                    result = new StringBuilder(name);
+                } else {
+                    result.append('|');
+                    result.append(name);
+                }
+            }
+            i += 1;
+        }
+        return result.toString();
     }
 
     public static final Parcelable.Creator<KeyEvent> CREATOR

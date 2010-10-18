@@ -84,6 +84,7 @@ class SipSessionGroup implements SipListener {
     private static final String ANONYMOUS = "anonymous";
     private static final int EXPIRY_TIME = 3600; // in seconds
     private static final int CANCEL_CALL_TIMER = 3; // in seconds
+    private static final long WAKE_LOCK_HOLDING_TIME = 500; // in milliseconds
 
     private static final EventObject DEREGISTER = new EventObject("Deregister");
     private static final EventObject END_CALL = new EventObject("End call");
@@ -101,6 +102,8 @@ class SipSessionGroup implements SipListener {
     private SipSessionImpl mCallReceiverSession;
     private String mLocalIp;
 
+    private SipWakeLock mWakeLock;
+
     // call-id-to-SipSession map
     private Map<String, SipSessionImpl> mSessionMap =
             new HashMap<String, SipSessionImpl>();
@@ -110,10 +113,11 @@ class SipSessionGroup implements SipListener {
      * @param password the password of the profile
      * @throws IOException if cannot assign requested address
      */
-    public SipSessionGroup(String localIp, SipProfile myself, String password)
-            throws SipException, IOException {
+    public SipSessionGroup(String localIp, SipProfile myself, String password,
+            SipWakeLock wakeLock) throws SipException, IOException {
         mLocalProfile = myself;
         mPassword = password;
+        mWakeLock = wakeLock;
         reset(localIp);
     }
 
@@ -271,7 +275,14 @@ class SipSessionGroup implements SipListener {
         }
     }
 
-    public void processRequest(RequestEvent event) {
+    public void processRequest(final RequestEvent event) {
+        if (isRequestEvent(Request.INVITE, event)) {
+            if (DEBUG) Log.d(TAG, "<<<<< got INVITE, thread:"
+                    + Thread.currentThread());
+            // Acquire a wake lock and keep it for WAKE_LOCK_HOLDING_TIME;
+            // should be large enough to bring up the app.
+            mWakeLock.acquire(WAKE_LOCK_HOLDING_TIME);
+        }
         process(event);
     }
 
@@ -547,8 +558,14 @@ class SipSessionGroup implements SipListener {
             mState = SipSession.State.PINGING;
             try {
                 processCommand(new OptionsCommand());
-                while (SipSession.State.PINGING == mState) {
-                    Thread.sleep(1000);
+                for (int i = 0; i < 15; i++) {
+                    if (SipSession.State.PINGING != mState) break;
+                    Thread.sleep(200);
+                }
+                if (SipSession.State.PINGING == mState) {
+                    // FIXME: what to do if server doesn't respond
+                    reset();
+                    if (DEBUG) Log.w(TAG, "no response from ping");
                 }
             } catch (SipException e) {
                 Log.e(TAG, "sendKeepAlive failed", e);

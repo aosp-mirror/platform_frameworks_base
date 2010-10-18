@@ -167,7 +167,8 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_KEYGUARD_DIALOG, to = "TYPE_KEYGUARD_DIALOG"),
             @ViewDebug.IntToString(from = TYPE_SYSTEM_ERROR, to = "TYPE_SYSTEM_ERROR"),
             @ViewDebug.IntToString(from = TYPE_INPUT_METHOD, to = "TYPE_INPUT_METHOD"),
-            @ViewDebug.IntToString(from = TYPE_INPUT_METHOD_DIALOG, to = "TYPE_INPUT_METHOD_DIALOG")
+            @ViewDebug.IntToString(from = TYPE_INPUT_METHOD_DIALOG, to = "TYPE_INPUT_METHOD_DIALOG"),
+            @ViewDebug.IntToString(from = TYPE_SECURE_SYSTEM_OVERLAY, to = "TYPE_SECURE_SYSTEM_OVERLAY")
         })
         public int type;
     
@@ -345,13 +346,25 @@ public interface WindowManager extends ViewManager {
          * Window type: panel that slides out from the status bar
          */
         public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14;
-        
+
+        /**
+         * Window type: secure system overlay windows, which need to be displayed
+         * on top of everything else.  These windows must not take input
+         * focus, or they will interfere with the keyguard.
+         *
+         * This is exactly like {@link #TYPE_SYSTEM_OVERLAY} except that only the
+         * system itself is allowed to create these overlays.  Applications cannot
+         * obtain permission to create secure system overlays.
+         * @hide
+         */
+        public static final int TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15;
+
         /**
          * Window type: the drag-and-drop pseudowindow.  There is only one
          * drag layer (at most), and it is placed on top of all other windows.
          * @hide
          */
-        public static final int TYPE_DRAG               = FIRST_SYSTEM_WINDOW+15;
+        public static final int TYPE_DRAG               = FIRST_SYSTEM_WINDOW+16;
 
         /**
          * End of types of system windows.

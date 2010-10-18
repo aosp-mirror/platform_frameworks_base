@@ -71,6 +71,8 @@ LOCAL_SRC_FILES:= \
 	android_net_TrafficStats.cpp \
 	android_net_wifi_Wifi.cpp \
 	android_nio_utils.cpp \
+	android_nfc_NdefMessage.cpp \
+	android_nfc_NdefRecord.cpp \
 	android_pim_EventRecurrence.cpp \
 	android_text_format_Time.cpp \
 	android_security_Md5MessageDigest.cpp \
@@ -196,18 +198,11 @@ LOCAL_SHARED_LIBRARIES := \
 	libicui18n \
 	libmedia \
 	libwpa_client \
-	libjpeg
+	libjpeg \
+	libnfc_ndef
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui
-endif
-
-ifeq ($(BOARD_HAVE_NFC),true)
-LOCAL_SHARED_LIBRARIES += \
-	libnfc_jni \
-	libnfc
-
-LOCAL_CFLAGS += -DHAVE_NFC
 endif
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)

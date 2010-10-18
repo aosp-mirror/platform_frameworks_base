@@ -501,6 +501,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mLocalOnly;
         ClipData mData;
         ClipDescription mDataDescription;
+        float mCurrentX, mCurrentY;
         float mThumbOffsetX, mThumbOffsetY;
         InputChannel mServerChannel, mClientChannel;
         WindowState mTargetWindow;
@@ -570,19 +571,14 @@ public class WindowManagerService extends IWindowManager.Stub
             mNotifiedWindows.clear();
             mDragInProgress = true;
 
-            DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED, touchX, touchY,
-                    mDataDescription, null);
-
             if (DEBUG_DRAG) {
-                Slog.d(TAG, "broadcasting DRAG_STARTED: " + evt);
+                Slog.d(TAG, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
             }
 
             final int N = mWindows.size();
             for (int i = 0; i < N; i++) {
-                // sendDragStartedLw() clones evt for local-process dispatch
-                sendDragStartedLw(mWindows.get(i), evt);
+                sendDragStartedLw(mWindows.get(i), touchX, touchY, mDataDescription);
             }
-            evt.recycle();
         }
 
         /* helper - send a caller-provided event, presumed to be DRAG_STARTED, if the
@@ -593,18 +589,23 @@ public class WindowManagerService extends IWindowManager.Stub
          * This method clones the 'event' parameter if it's being delivered to the same
          * process, so it's safe for the caller to call recycle() on the event afterwards.
          */
-        private void sendDragStartedLw(WindowState newWin, DragEvent event) {
+        private void sendDragStartedLw(WindowState newWin, float touchX, float touchY,
+                ClipDescription desc) {
             if (mDragInProgress && newWin.isPotentialDragTarget()) {
+                DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED,
+                        touchX - newWin.mFrame.left, touchY - newWin.mFrame.top,
+                        desc, null);
                 try {
-                    // clone for local callees since dispatch will recycle the event
-                    if (Process.myPid() == newWin.mSession.mPid) {
-                        event = DragEvent.obtain(event);
-                    }
                     newWin.mClient.dispatchDragEvent(event);
                     // track each window that we've notified that the drag is starting
                     mNotifiedWindows.add(newWin);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Unable to drag-start window " + newWin);
+                } finally {
+                    // if the callee was local, the dispatch has already recycled the event
+                    if (Process.myPid() != newWin.mSession.mPid) {
+                        event.recycle();
+                    }
                 }
             }
         }
@@ -624,11 +625,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_DRAG) {
                     Slog.d(TAG, "sending DRAG_STARTED to new window " + newWin);
                 }
-                DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED, 0, 0,
-                        mDataDescription, null);
-                // sendDragStartedLw() clones 'event' if the window is process-local
-                sendDragStartedLw(newWin, event);
-                event.recycle();
+                sendDragStartedLw(newWin, mCurrentX, mCurrentY, mDataDescription);
             }
         }
 
@@ -669,7 +666,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     // force DRAG_EXITED_EVENT if appropriate
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_EXITED,
-                            0, 0, null, null);
+                            x - mTargetWindow.mFrame.left, y - mTargetWindow.mFrame.top,
+                            null, null);
                     mTargetWindow.mClient.dispatchDragEvent(evt);
                     if (myPid != mTargetWindow.mSession.mPid) {
                         evt.recycle();
@@ -680,7 +678,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         Slog.d(TAG, "sending DRAG_LOCATION to " + touchedWin);
                     }
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_LOCATION,
-                            x, y, null, null);
+                            x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
+                            null, null);
                     touchedWin.mClient.dispatchDragEvent(evt);
                     if (myPid != touchedWin.mSession.mPid) {
                         evt.recycle();
@@ -700,7 +699,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.d(TAG, "sending DROP to " + touchedWin);
                 }
                 final int myPid = Process.myPid();
-                DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DROP, x, y, null, mData);
+                DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DROP,
+                        x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
+                        null, mData);
                 try {
                     touchedWin.mClient.dispatchDragEvent(evt);
                 } catch (RemoteException e) {
@@ -6216,12 +6217,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 // !!! TODO: extract the current touch (x, y) in screen coordinates.  That
                 // will let us eliminate the (touchX,touchY) parameters from the API.
 
+                // !!! FIXME: put all this heavy stuff onto the mH looper, as well as
+                // the actual drag event dispatch stuff in the dragstate
+
                 mDragState.register();
                 mInputMonitor.updateInputWindowsLw();
                 mInputManager.transferTouchFocus(callingWin.mInputChannel,
                         mDragState.mServerChannel);
 
                 mDragState.mData = data;
+                mDragState.mCurrentX = touchX;
+                mDragState.mCurrentY = touchY;
                 mDragState.broadcastDragStartedLw(touchX, touchY);
 
                 // remember the thumb offsets for later
@@ -6230,15 +6236,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Make the surface visible at the proper location
                 final Surface surface = mDragState.mSurface;
-                surface.openTransaction();
+                Surface.openTransaction();
                 try {
                     surface.setPosition((int)(touchX - thumbCenterX),
                             (int)(touchY - thumbCenterY));
-                    surface.setAlpha(.5f);
+                    surface.setAlpha(.7071f);
                     surface.setLayer(mDragState.getDragLayerLw());
                     surface.show();
                 } finally {
-                    surface.closeTransaction();
+                    Surface.closeTransaction();
                 }
             }
 

@@ -347,6 +347,7 @@
         <!-- ============ -->
         <eat-comment />
         <attr name="alertDialogStyle" format="reference" />
+        <attr name="alertDialogButtonGroupStyle" format="reference" />
 
         <!-- ============ -->
         <!-- Panel styles -->
@@ -1056,6 +1057,59 @@
         <enum name="KEYCODE_BUTTON_START" value="108" />
         <enum name="KEYCODE_BUTTON_SELECT" value="109" />
         <enum name="KEYCODE_BUTTON_MODE" value="110" />
+        <enum name="KEYCODE_ESCAPE" value="111" />
+        <enum name="KEYCODE_FORWARD_DEL" value="112" />
+        <enum name="KEYCODE_CTRL_LEFT" value="113" />
+        <enum name="KEYCODE_CTRL_RIGHT" value="114" />
+        <enum name="KEYCODE_CAPS_LOCK" value="115" />
+        <enum name="KEYCODE_SCROLL_LOCK" value="116" />
+        <enum name="KEYCODE_META_LEFT" value="117" />
+        <enum name="KEYCODE_META_RIGHT" value="118" />
+        <enum name="KEYCODE_FUNCTION" value="119" />
+        <enum name="KEYCODE_SYSRQ" value="120" />
+        <enum name="KEYCODE_BREAK" value="121" />
+        <enum name="KEYCODE_MOVE_HOME" value="122" />
+        <enum name="KEYCODE_MOVE_END" value="123" />
+        <enum name="KEYCODE_INSERT" value="124" />
+        <enum name="KEYCODE_FORWARD" value="125" />
+        <enum name="KEYCODE_MEDIA_PLAY" value="126" />
+        <enum name="KEYCODE_MEDIA_PAUSE" value="127" />
+        <enum name="KEYCODE_MEDIA_CLOSE" value="128" />
+        <enum name="KEYCODE_MEDIA_EJECT" value="129" />
+        <enum name="KEYCODE_MEDIA_RECORD" value="130" />
+        <enum name="KEYCODE_F1" value="131" />
+        <enum name="KEYCODE_F2" value="132" />
+        <enum name="KEYCODE_F3" value="133" />
+        <enum name="KEYCODE_F4" value="134" />
+        <enum name="KEYCODE_F5" value="135" />
+        <enum name="KEYCODE_F6" value="136" />
+        <enum name="KEYCODE_F7" value="137" />
+        <enum name="KEYCODE_F8" value="138" />
+        <enum name="KEYCODE_F9" value="139" />
+        <enum name="KEYCODE_F10" value="140" />
+        <enum name="KEYCODE_F11" value="141" />
+        <enum name="KEYCODE_F12" value="142" />
+        <enum name="NUM_LOCK" value="143" />
+        <enum name="NUMPAD_0" value="144" />
+        <enum name="NUMPAD_1" value="145" />
+        <enum name="NUMPAD_2" value="146" />
+        <enum name="NUMPAD_3" value="147" />
+        <enum name="NUMPAD_4" value="148" />
+        <enum name="NUMPAD_5" value="149" />
+        <enum name="NUMPAD_6" value="150" />
+        <enum name="NUMPAD_7" value="151" />
+        <enum name="NUMPAD_8" value="152" />
+        <enum name="NUMPAD_9" value="153" />
+        <enum name="NUMPAD_DIVIDE" value="154" />
+        <enum name="NUMPAD_MULTIPLY" value="155" />
+        <enum name="NUMPAD_SUBTRACT" value="156" />
+        <enum name="NUMPAD_ADD" value="157" />
+        <enum name="NUMPAD_DOT" value="158" />
+        <enum name="NUMPAD_COMMA" value="159" />
+        <enum name="NUMPAD_ENTER" value="160" />
+        <enum name="NUMPAD_EQUALS" value="161" />
+        <enum name="NUMPAD_LEFT_PAREN" value="162" />
+        <enum name="NUMPAD_RIGHT_PAREN" value="163" />
     </attr>
 
     <!-- ***************************************************************** -->

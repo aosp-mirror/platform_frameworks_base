@@ -144,6 +144,7 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final boolean MULTIPLE_APPLICATION_UIDS = true;
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
+    private static final int NFC_UID = Process.NFC_UID;
     private static final int FIRST_APPLICATION_UID =
         Process.FIRST_APPLICATION_UID;
     private static final int MAX_APPLICATION_UIDS = 1000;
@@ -739,6 +740,10 @@ class PackageManagerService extends IPackageManager.Stub {
         mSettings.addSharedUserLP("android.uid.log",
                 MULTIPLE_APPLICATION_UIDS
                         ? LOG_UID : FIRST_APPLICATION_UID,
+                ApplicationInfo.FLAG_SYSTEM);
+        mSettings.addSharedUserLP("android.uid.nfc",
+                MULTIPLE_APPLICATION_UIDS
+                        ? NFC_UID : FIRST_APPLICATION_UID,
                 ApplicationInfo.FLAG_SYSTEM);
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
@@ -5156,9 +5161,6 @@ class PackageManagerService extends IPackageManager.Stub {
                     // we don't consider this to be a failure of the core package deletion
                 }
             }
-            if (libraryPath != null) {
-                NativeLibraryHelper.removeNativeBinariesLI(libraryPath);
-            }
         }
 
         private boolean setPermissions() {
@@ -5953,8 +5955,8 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private void extractPublicFiles(PackageParser.Package newPackage,
                                     File publicZipFile) throws IOException {
-        final ZipOutputStream publicZipOutStream =
-                new ZipOutputStream(new FileOutputStream(publicZipFile));
+        final FileOutputStream fstr = new FileOutputStream(publicZipFile);
+        final ZipOutputStream publicZipOutStream = new ZipOutputStream(fstr);
         final ZipFile privateZip = new ZipFile(newPackage.mPath);
 
         // Copy manifest, resources.arsc and res directory to public zip
@@ -5979,6 +5981,9 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        publicZipOutStream.finish();
+        publicZipOutStream.flush();
+        FileUtils.sync(fstr);
         publicZipOutStream.close();
         FileUtils.setPermissions(
                 publicZipFile.getAbsolutePath(),
@@ -8480,8 +8485,8 @@ class PackageManagerService extends IPackageManager.Stub {
             mPastSignatures.clear();
 
             try {
-                BufferedOutputStream str = new BufferedOutputStream(new FileOutputStream(
-                        mSettingsFilename));
+                FileOutputStream fstr = new FileOutputStream(mSettingsFilename);
+                BufferedOutputStream str = new BufferedOutputStream(fstr);
 
                 //XmlSerializer serializer = XmlUtils.serializerInstance();
                 XmlSerializer serializer = new FastXmlSerializer();
@@ -8562,6 +8567,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 serializer.endDocument();
 
                 str.flush();
+                FileUtils.sync(fstr);
                 str.close();
 
                 // New settings successfully written, old ones are no longer
@@ -8578,7 +8584,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 File tempFile = new File(mPackageListFilename.toString() + ".tmp");
                 JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
 
-                str = new BufferedOutputStream(new FileOutputStream(journal.chooseForWrite()));
+                fstr = new FileOutputStream(journal.chooseForWrite());
+                str = new BufferedOutputStream(fstr);
                 try {
                     StringBuilder sb = new StringBuilder();
                     for (PackageSetting pkg : mPackages.values()) {
@@ -8614,6 +8621,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         str.write(sb.toString().getBytes());
                     }
                     str.flush();
+                    FileUtils.sync(fstr);
                     str.close();
                     journal.commit();
                 }
@@ -8828,7 +8836,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 try {
                     str = new FileInputStream(mBackupSettingsFilename);
                     mReadMessages.append("Reading from backup settings file\n");
-                    Log.i(TAG, "Reading from backup settings file!");
+                    reportSettingsProblem(Log.INFO, "Need to read from backup settings file");
                     if (mSettingsFilename.exists()) {
                         // If both the backup and settings file exist, we
                         // ignore the settings since it might have been
@@ -8847,7 +8855,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (str == null) {
                     if (!mSettingsFilename.exists()) {
                         mReadMessages.append("No settings file found\n");
-                        Slog.i(TAG, "No current settings file!");
+                        reportSettingsProblem(Log.INFO, "No settings file; creating initial state");
                         return false;
                     }
                     str = new FileInputStream(mSettingsFilename);
@@ -8863,7 +8871,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
                 if (type != XmlPullParser.START_TAG) {
                     mReadMessages.append("No start tag found in settings file\n");
-                    Slog.e(TAG, "No start tag found in package manager settings");
+                    reportSettingsProblem(Log.WARN, "No start tag found in package manager settings");
                     return false;
                 }
 
@@ -8926,10 +8934,12 @@ class PackageManagerService extends IPackageManager.Stub {
 
             } catch(XmlPullParserException e) {
                 mReadMessages.append("Error reading: " + e.toString());
+                reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
                 Slog.e(TAG, "Error reading package manager settings", e);
 
             } catch(java.io.IOException e) {
                 mReadMessages.append("Error reading: " + e.toString());
+                reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
                 Slog.e(TAG, "Error reading package manager settings", e);
 
             }
@@ -8943,7 +8953,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
                             pp.nativeLibraryPathString, pp.versionCode, pp.pkgFlags, true, true);
                     if (p == null) {
-                        Slog.w(TAG, "Unable to create application package for "
+                        reportSettingsProblem(Log.WARN, "Unable to create application package for "
                                 + pp.name);
                         continue;
                     }
@@ -8953,13 +8963,13 @@ class PackageManagerService extends IPackageManager.Stub {
                             + " has shared uid " + pp.sharedId
                             + " that is not a shared uid\n";
                     mReadMessages.append(msg);
-                    Slog.e(TAG, msg);
+                    reportSettingsProblem(Log.ERROR, msg);
                 } else {
                     String msg = "Bad package setting: package " + pp.name
                             + " has shared uid " + pp.sharedId
                             + " that is not defined\n";
                     mReadMessages.append(msg);
-                    Slog.e(TAG, msg);
+                    reportSettingsProblem(Log.ERROR, msg);
                 }
             }
             mPendingPackages.clear();

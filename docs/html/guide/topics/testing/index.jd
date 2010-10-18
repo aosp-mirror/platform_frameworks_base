@@ -13,14 +13,6 @@ page.title=Testing
 <h4>Concepts</h4>
 <ul>
     <li>
-        Testing Tools describes the Eclipse with ADT and command-line tools you use to test
-        Android applications.
-    </li>
-    <li>
-        What to Test is an overview of the types of testing you should do. It focuses on testing
-        system-wide aspects of Android that can affect every component in your application.
-    </li>
-    <li>
         <a href="{@docRoot}guide/topics/testing/activity_testing.html">
         Activity Testing</a> focuses on testing activities. It describes how instrumentation allows
         you to control activities outside the normal application lifecycle. It also lists
@@ -37,6 +29,11 @@ page.title=Testing
         <a href="{@docRoot}guide/topics/testing/service_testing.html">
         Service Testing</a> focuses on testing services. It also lists service-specific features
         you should test.
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/testing/what_to_test.html">What to Test</a>
+        is an overview of the types of testing you should do. It focuses on testing
+        system-wide aspects of Android that can affect every component in your application.
     </li>
 </ul>
 <h4>Procedures</h4>
@@ -65,9 +62,8 @@ page.title=Testing
 <h4>Samples</h4>
 <ul>
     <li>
-        <a href="{@docRoot}resources/samples/NotePadTest.html">Note Pad Provider
-        Test</a> is a test package for the
-        <a href="{@docRoot}resources/samples/NotePad.html">Note Pad</a> sample
+        <a href="{@docRoot}resources/samples/NotePadTest.html">Note Pad Test</a> is a test
+        package for the <a href="{@docRoot}resources/samples/NotePad.html">Note Pad</a> sample
         application. It provides a simple example of unit testing
         a {@link android.content.ContentProvider}.
     </li>

@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.ContactsContract.CommonDataKinds.SipAddress;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
@@ -37,8 +38,7 @@ import android.util.Log;
  */
 
 public class CallerInfoAsyncQuery {
-
-    private static final boolean DBG = true; // STOPSHIP: disable debugging before ship
+    private static final boolean DBG = (SystemProperties.getInt("ro.debuggable", 0) == 1);
     private static final String LOG_TAG = "CallerInfoAsyncQuery";
 
     private static final int EVENT_NEW_QUERY = 1;

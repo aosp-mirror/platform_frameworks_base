@@ -82,6 +82,7 @@ SurfaceFlinger::SurfaceFlinger()
         mHwWorkListDirty(false),
         mDeferReleaseConsole(false),
         mFreezeDisplay(false),
+        mElectronBeamAnimationMode(0),
         mFreezeCount(0),
         mFreezeDisplayTime(0),
         mDebugRegion(0),
@@ -428,6 +429,9 @@ void SurfaceFlinger::handleConsoleEvents()
     int what = android_atomic_and(0, &mConsoleSignals);
     if (what & eConsoleAcquired) {
         hw.acquireScreen();
+        // this is a temporary work-around, eventually this should be called
+        // by the power-manager
+        SurfaceFlinger::turnElectronBeamOn(mElectronBeamAnimationMode);
     }
 
     if (mDeferReleaseConsole && hw.isScreenAcquired()) {
@@ -1559,6 +1563,7 @@ status_t SurfaceFlinger::onTransact(
         case UNFREEZE_DISPLAY:
         case BOOT_FINISHED:
         case TURN_ELECTRON_BEAM_OFF:
+        case TURN_ELECTRON_BEAM_ON:
         {
             // codes that require permission check
             IPCThreadState* ipc = IPCThreadState::self();
@@ -1652,27 +1657,18 @@ status_t SurfaceFlinger::onTransact(
     return err;
 }
 
-
 // ---------------------------------------------------------------------------
 
-status_t SurfaceFlinger::turnElectronBeamOffImplLocked()
+status_t SurfaceFlinger::renderScreenToTextureLocked(DisplayID dpy,
+        GLuint* textureName, GLfloat* uOut, GLfloat* vOut)
 {
-    status_t result = PERMISSION_DENIED;
-
     if (!GLExtensions::getInstance().haveFramebufferObject())
         return INVALID_OPERATION;
 
     // get screen geometry
-    const int dpy = 0;
     const DisplayHardware& hw(graphicPlane(dpy).displayHardware());
-    if (!hw.canDraw()) {
-        // we're already off
-        return NO_ERROR;
-    }
-
     const uint32_t hw_w = hw.getWidth();
     const uint32_t hw_h = hw.getHeight();
-    const Region screenBounds(hw.bounds());
     GLfloat u = 1;
     GLfloat v = 1;
 
@@ -1683,198 +1679,433 @@ status_t SurfaceFlinger::turnElectronBeamOffImplLocked()
     GLuint name, tname;
     glGenTextures(1, &tname);
     glBindTexture(GL_TEXTURE_2D, tname);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, hw_w, hw_h, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+            hw_w, hw_h, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
     if (glGetError() != GL_NO_ERROR) {
+        while ( glGetError() != GL_NO_ERROR ) ;
         GLint tw = (2 << (31 - clz(hw_w)));
         GLint th = (2 << (31 - clz(hw_h)));
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                tw, th, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
         u = GLfloat(hw_w) / tw;
         v = GLfloat(hw_h) / th;
     }
     glGenFramebuffersOES(1, &name);
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, name);
-    glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tname, 0);
+    glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES,
+            GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tname, 0);
 
-    GLenum status = glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
-    if (status == GL_FRAMEBUFFER_COMPLETE_OES) {
-        // redraw the screen entirely...
-        glClearColor(0,0,0,1);
+    // redraw the screen entirely...
+    glClearColor(0,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
+    const size_t count = layers.size();
+    for (size_t i=0 ; i<count ; ++i) {
+        const sp<LayerBase>& layer(layers[i]);
+        layer->drawForSreenShot();
+    }
+
+    // back to main framebuffer
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+    glDisable(GL_SCISSOR_TEST);
+    glDeleteFramebuffersOES(1, &name);
+
+    *textureName = tname;
+    *uOut = u;
+    *vOut = v;
+    return NO_ERROR;
+}
+
+// ---------------------------------------------------------------------------
+
+status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
+{
+    status_t result = PERMISSION_DENIED;
+
+    if (!GLExtensions::getInstance().haveFramebufferObject())
+        return INVALID_OPERATION;
+
+    // get screen geometry
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    const uint32_t hw_w = hw.getWidth();
+    const uint32_t hw_h = hw.getHeight();
+    const Region screenBounds(hw.bounds());
+
+    GLfloat u, v;
+    GLuint tname;
+    result = renderScreenToTextureLocked(0, &tname, &u, &v);
+    if (result != NO_ERROR) {
+        return result;
+    }
+
+    GLfloat vtx[8];
+    const GLfloat texCoords[4][2] = { {0,v}, {0,0}, {u,0}, {u,v} };
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, tname);
+    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 0, vtx);
+
+    class s_curve_interpolator {
+        const float nbFrames, s, v;
+    public:
+        s_curve_interpolator(int nbFrames, float s)
+        : nbFrames(1.0f / (nbFrames-1)), s(s),
+          v(1.0f + expf(-s + 0.5f*s)) {
+        }
+        float operator()(int f) {
+            const float x = f * nbFrames;
+            return ((1.0f/(1.0f + expf(-x*s + 0.5f*s))) - 0.5f) * v + 0.5f;
+        }
+    };
+
+    class v_stretch {
+        const GLfloat hw_w, hw_h;
+    public:
+        v_stretch(uint32_t hw_w, uint32_t hw_h)
+        : hw_w(hw_w), hw_h(hw_h) {
+        }
+        void operator()(GLfloat* vtx, float v) {
+            const GLfloat w = hw_w + (hw_w * v);
+            const GLfloat h = hw_h - (hw_h * v);
+            const GLfloat x = (hw_w - w) * 0.5f;
+            const GLfloat y = (hw_h - h) * 0.5f;
+            vtx[0] = x;         vtx[1] = y;
+            vtx[2] = x;         vtx[3] = y + h;
+            vtx[4] = x + w;     vtx[5] = y + h;
+            vtx[6] = x + w;     vtx[7] = y;
+        }
+    };
+
+    class h_stretch {
+        const GLfloat hw_w, hw_h;
+    public:
+        h_stretch(uint32_t hw_w, uint32_t hw_h)
+        : hw_w(hw_w), hw_h(hw_h) {
+        }
+        void operator()(GLfloat* vtx, float v) {
+            const GLfloat w = hw_w - (hw_w * v);
+            const GLfloat h = 1.0f;
+            const GLfloat x = (hw_w - w) * 0.5f;
+            const GLfloat y = (hw_h - h) * 0.5f;
+            vtx[0] = x;         vtx[1] = y;
+            vtx[2] = x;         vtx[3] = y + h;
+            vtx[4] = x + w;     vtx[5] = y + h;
+            vtx[6] = x + w;     vtx[7] = y;
+        }
+    };
+
+    // the full animation is 24 frames
+    const int nbFrames = 12;
+    s_curve_interpolator itr(nbFrames, 7.5f);
+    s_curve_interpolator itg(nbFrames, 8.0f);
+    s_curve_interpolator itb(nbFrames, 8.5f);
+
+    v_stretch vverts(hw_w, hw_h);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+    for (int i=0 ; i<nbFrames ; i++) {
+        float x, y, w, h;
+        const float vr = itr(i);
+        const float vg = itg(i);
+        const float vb = itb(i);
+
+        // clear screen
+        glColorMask(1,1,1,1);
         glClear(GL_COLOR_BUFFER_BIT);
-        const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
-        const size_t count = layers.size();
-        for (size_t i=0 ; i<count ; ++i) {
-            const sp<LayerBase>& layer(layers[i]);
-            layer->drawForSreenShot();
-        }
-        // back to main framebuffer
-        glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-        glDisable(GL_SCISSOR_TEST);
-
-        GLfloat vtx[8];
-        const GLfloat texCoords[4][2] = { {0,v}, {0,0}, {u,0}, {u,v} };
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, tname);
-        glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-        glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glVertexPointer(2, GL_FLOAT, 0, vtx);
 
-        class s_curve_interpolator {
-            const float nbFrames, s, v;
-        public:
-            s_curve_interpolator(int nbFrames, float s)
-                : nbFrames(1.0f / (nbFrames-1)), s(s),
-                  v(1.0f + expf(-s + 0.5f*s)) {
-            }
-            float operator()(int f) {
-                const float x = f * nbFrames;
-                return ((1.0f/(1.0f + expf(-x*s + 0.5f*s))) - 0.5f) * v + 0.5f;
-            }
-        };
+        // draw the red plane
+        vverts(vtx, vr);
+        glColorMask(1,0,0,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-        class v_stretch {
-            const GLfloat hw_w, hw_h;
-        public:
-            v_stretch(uint32_t hw_w, uint32_t hw_h)
-                : hw_w(hw_w), hw_h(hw_h) {
-            }
-            void operator()(GLfloat* vtx, float v) {
-                const GLfloat w = hw_w + (hw_w * v);
-                const GLfloat h = hw_h - (hw_h * v);
-                const GLfloat x = (hw_w - w) * 0.5f;
-                const GLfloat y = (hw_h - h) * 0.5f;
-                vtx[0] = x;         vtx[1] = y;
-                vtx[2] = x;         vtx[3] = y + h;
-                vtx[4] = x + w;     vtx[5] = y + h;
-                vtx[6] = x + w;     vtx[7] = y;
-            }
-        };
+        // draw the green plane
+        vverts(vtx, vg);
+        glColorMask(0,1,0,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-        class h_stretch {
-            const GLfloat hw_w, hw_h;
-        public:
-            h_stretch(uint32_t hw_w, uint32_t hw_h)
-                : hw_w(hw_w), hw_h(hw_h) {
-            }
-            void operator()(GLfloat* vtx, float v) {
-                const GLfloat w = hw_w - (hw_w * v);
-                const GLfloat h = 1.0f;
-                const GLfloat x = (hw_w - w) * 0.5f;
-                const GLfloat y = (hw_h - h) * 0.5f;
-                vtx[0] = x;         vtx[1] = y;
-                vtx[2] = x;         vtx[3] = y + h;
-                vtx[4] = x + w;     vtx[5] = y + h;
-                vtx[6] = x + w;     vtx[7] = y;
-            }
-        };
+        // draw the blue plane
+        vverts(vtx, vb);
+        glColorMask(0,0,1,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-        // the full animation is 24 frames
-        const int nbFrames = 12;
-
-        v_stretch vverts(hw_w, hw_h);
-        s_curve_interpolator itr(nbFrames, 7.5f);
-        s_curve_interpolator itg(nbFrames, 8.0f);
-        s_curve_interpolator itb(nbFrames, 8.5f);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-        for (int i=0 ; i<nbFrames ; i++) {
-            float x, y, w, h;
-            const float vr = itr(i);
-            const float vg = itg(i);
-            const float vb = itb(i);
-
-            // clear screen
-            glColorMask(1,1,1,1);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glEnable(GL_TEXTURE_2D);
-
-            // draw the red plane
-            vverts(vtx, vr);
-            glColorMask(1,0,0,1);
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-            // draw the green plane
-            vverts(vtx, vg);
-            glColorMask(0,1,0,1);
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-            // draw the blue plane
-            vverts(vtx, vb);
-            glColorMask(0,0,1,1);
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-            // draw the white highlight (we use the last vertices)
-            glDisable(GL_TEXTURE_2D);
-            glColorMask(1,1,1,1);
-            glColor4f(vg, vg, vg, 1);
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-            hw.flip(screenBounds);
-        }
-
-        h_stretch hverts(hw_w, hw_h);
-        glDisable(GL_BLEND);
+        // draw the white highlight (we use the last vertices)
         glDisable(GL_TEXTURE_2D);
         glColorMask(1,1,1,1);
-        for (int i=0 ; i<nbFrames ; i++) {
-            const float v = itg(i);
-            hverts(vtx, v);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glColor4f(1-v, 1-v, 1-v, 1);
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-            hw.flip(screenBounds);
-        }
-
-        glColorMask(1,1,1,1);
-        glEnable(GL_SCISSOR_TEST);
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        result = NO_ERROR;
-    } else {
-        // release FBO resources
-        glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-        result = BAD_VALUE;
+        glColor4f(vg, vg, vg, 1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        hw.flip(screenBounds);
     }
 
-    glDeleteFramebuffersOES(1, &name);
+    h_stretch hverts(hw_w, hw_h);
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+    glColorMask(1,1,1,1);
+    for (int i=0 ; i<nbFrames ; i++) {
+        const float v = itg(i);
+        hverts(vtx, v);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glColor4f(1-v, 1-v, 1-v, 1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        hw.flip(screenBounds);
+    }
+
+    glColorMask(1,1,1,1);
+    glEnable(GL_SCISSOR_TEST);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDeleteTextures(1, &tname);
+    return NO_ERROR;
+}
+
+status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
+{
+    status_t result = PERMISSION_DENIED;
+
+    if (!GLExtensions::getInstance().haveFramebufferObject())
+        return INVALID_OPERATION;
+
+
+    // get screen geometry
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    const uint32_t hw_w = hw.getWidth();
+    const uint32_t hw_h = hw.getHeight();
+    const Region screenBounds(hw.bounds());
+
+    GLfloat u, v;
+    GLuint tname;
+    result = renderScreenToTextureLocked(0, &tname, &u, &v);
+    if (result != NO_ERROR) {
+        return result;
+    }
+
+    // back to main framebuffer
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+    glDisable(GL_SCISSOR_TEST);
+
+    GLfloat vtx[8];
+    const GLfloat texCoords[4][2] = { {0,v}, {0,0}, {u,0}, {u,v} };
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, tname);
+    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 0, vtx);
+
+    class s_curve_interpolator {
+        const float nbFrames, s, v;
+    public:
+        s_curve_interpolator(int nbFrames, float s)
+        : nbFrames(1.0f / (nbFrames-1)), s(s),
+          v(1.0f + expf(-s + 0.5f*s)) {
+        }
+        float operator()(int f) {
+            const float x = f * nbFrames;
+            return ((1.0f/(1.0f + expf(-x*s + 0.5f*s))) - 0.5f) * v + 0.5f;
+        }
+    };
+
+    class v_stretch {
+        const GLfloat hw_w, hw_h;
+    public:
+        v_stretch(uint32_t hw_w, uint32_t hw_h)
+        : hw_w(hw_w), hw_h(hw_h) {
+        }
+        void operator()(GLfloat* vtx, float v) {
+            const GLfloat w = hw_w + (hw_w * v);
+            const GLfloat h = hw_h - (hw_h * v);
+            const GLfloat x = (hw_w - w) * 0.5f;
+            const GLfloat y = (hw_h - h) * 0.5f;
+            vtx[0] = x;         vtx[1] = y;
+            vtx[2] = x;         vtx[3] = y + h;
+            vtx[4] = x + w;     vtx[5] = y + h;
+            vtx[6] = x + w;     vtx[7] = y;
+        }
+    };
+
+    class h_stretch {
+        const GLfloat hw_w, hw_h;
+    public:
+        h_stretch(uint32_t hw_w, uint32_t hw_h)
+        : hw_w(hw_w), hw_h(hw_h) {
+        }
+        void operator()(GLfloat* vtx, float v) {
+            const GLfloat w = hw_w - (hw_w * v);
+            const GLfloat h = 1.0f;
+            const GLfloat x = (hw_w - w) * 0.5f;
+            const GLfloat y = (hw_h - h) * 0.5f;
+            vtx[0] = x;         vtx[1] = y;
+            vtx[2] = x;         vtx[3] = y + h;
+            vtx[4] = x + w;     vtx[5] = y + h;
+            vtx[6] = x + w;     vtx[7] = y;
+        }
+    };
+
+    // the full animation is 12 frames
+    int nbFrames = 8;
+    s_curve_interpolator itr(nbFrames, 7.5f);
+    s_curve_interpolator itg(nbFrames, 8.0f);
+    s_curve_interpolator itb(nbFrames, 8.5f);
+
+    h_stretch hverts(hw_w, hw_h);
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+    glColorMask(1,1,1,1);
+    for (int i=nbFrames-1 ; i>=0 ; i--) {
+        const float v = itg(i);
+        hverts(vtx, v);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glColor4f(1-v, 1-v, 1-v, 1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        hw.flip(screenBounds);
+    }
+
+    nbFrames = 4;
+    v_stretch vverts(hw_w, hw_h);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+    for (int i=nbFrames-1 ; i>=0 ; i--) {
+        float x, y, w, h;
+        const float vr = itr(i);
+        const float vg = itg(i);
+        const float vb = itb(i);
+
+        // clear screen
+        glColorMask(1,1,1,1);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glEnable(GL_TEXTURE_2D);
+
+        // draw the red plane
+        vverts(vtx, vr);
+        glColorMask(1,0,0,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        // draw the green plane
+        vverts(vtx, vg);
+        glColorMask(0,1,0,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        // draw the blue plane
+        vverts(vtx, vb);
+        glColorMask(0,0,1,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        hw.flip(screenBounds);
+    }
+
+    glColorMask(1,1,1,1);
+    glEnable(GL_SCISSOR_TEST);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDeleteTextures(1, &tname);
 
-    if (result == NO_ERROR) {
-        DisplayHardware& hw(graphicPlane(dpy).editDisplayHardware());
-        hw.setCanDraw(false);
+    return NO_ERROR;
+}
+
+// ---------------------------------------------------------------------------
+
+status_t SurfaceFlinger::turnElectronBeamOffImplLocked(int32_t mode)
+{
+    DisplayHardware& hw(graphicPlane(0).editDisplayHardware());
+    if (!hw.canDraw()) {
+        // we're already off
+        return NO_ERROR;
+    }
+    if (mode & ISurfaceComposer::eElectronBeamAnimationOff) {
+        electronBeamOffAnimationImplLocked();
     }
 
-    return result;
+    // always clear the whole screen at the end of the animation
+    glClearColor(0,0,0,1);
+    glDisable(GL_SCISSOR_TEST);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_SCISSOR_TEST);
+    hw.flip( Region(hw.bounds()) );
+
+    hw.setCanDraw(false);
+    return NO_ERROR;
 }
 
 status_t SurfaceFlinger::turnElectronBeamOff(int32_t mode)
 {
-    if (!GLExtensions::getInstance().haveFramebufferObject())
-        return INVALID_OPERATION;
-
     class MessageTurnElectronBeamOff : public MessageBase {
         SurfaceFlinger* flinger;
+        int32_t mode;
         status_t result;
     public:
-        MessageTurnElectronBeamOff(SurfaceFlinger* flinger)
-            : flinger(flinger), result(PERMISSION_DENIED) {
+        MessageTurnElectronBeamOff(SurfaceFlinger* flinger, int32_t mode)
+            : flinger(flinger), mode(mode), result(PERMISSION_DENIED) {
         }
         status_t getResult() const {
             return result;
         }
         virtual bool handler() {
             Mutex::Autolock _l(flinger->mStateLock);
-            result = flinger->turnElectronBeamOffImplLocked();
+            result = flinger->turnElectronBeamOffImplLocked(mode);
             return true;
         }
     };
 
-    sp<MessageBase> msg = new MessageTurnElectronBeamOff(this);
+    sp<MessageBase> msg = new MessageTurnElectronBeamOff(this, mode);
     status_t res = postMessageSync(msg);
     if (res == NO_ERROR) {
         res = static_cast<MessageTurnElectronBeamOff*>( msg.get() )->getResult();
+
+        // work-around: when the power-manager calls us we activate the
+        // animation. eventually, the "on" animation will be called
+        // by the power-manager itself
+        mElectronBeamAnimationMode = mode;
     }
     return res;
+}
+
+// ---------------------------------------------------------------------------
+
+status_t SurfaceFlinger::turnElectronBeamOnImplLocked(int32_t mode)
+{
+    DisplayHardware& hw(graphicPlane(0).editDisplayHardware());
+    if (hw.canDraw()) {
+        // we're already on
+        return NO_ERROR;
+    }
+    if (mode & ISurfaceComposer::eElectronBeamAnimationOn) {
+        electronBeamOnAnimationImplLocked();
+    }
+    hw.setCanDraw(true);
+
+    // make sure to redraw the whole screen when the animation is done
+    mDirtyRegion.set(hw.bounds());
+    signalEvent();
+
+    return NO_ERROR;
+}
+
+status_t SurfaceFlinger::turnElectronBeamOn(int32_t mode)
+{
+    class MessageTurnElectronBeamOn : public MessageBase {
+        SurfaceFlinger* flinger;
+        int32_t mode;
+        status_t result;
+    public:
+        MessageTurnElectronBeamOn(SurfaceFlinger* flinger, int32_t mode)
+            : flinger(flinger), mode(mode), result(PERMISSION_DENIED) {
+        }
+        status_t getResult() const {
+            return result;
+        }
+        virtual bool handler() {
+            Mutex::Autolock _l(flinger->mStateLock);
+            result = flinger->turnElectronBeamOnImplLocked(mode);
+            return true;
+        }
+    };
+
+    postMessageAsync( new MessageTurnElectronBeamOn(this, mode) );
+    return NO_ERROR;
 }
 
 // ---------------------------------------------------------------------------

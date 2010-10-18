@@ -35,6 +35,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.FileObserver;
@@ -836,6 +837,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                         } catch (IOException ex) {}
                     }
                     if (fos != null) {
+                        FileUtils.sync(fos);
                         try {
                             fos.close();
                         } catch (IOException ex) {}

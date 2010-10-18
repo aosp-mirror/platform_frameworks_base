@@ -616,8 +616,8 @@ void FontRenderer::precacheLatin(SkPaint* paint) {
     // Remaining capacity is measured in %
     uint32_t remainingCapacity = getRemainingCacheCapacity();
     uint32_t precacheIdx = 0;
-    while(remainingCapacity > 25 && precacheIdx < mLatinPrecache.size()) {
-        mCurrentFont->getCachedUTFChar(paint, (int32_t)mLatinPrecache[precacheIdx]);
+    while (remainingCapacity > 25 && precacheIdx < mLatinPrecache.size()) {
+        mCurrentFont->getCachedUTFChar(paint, (int32_t) mLatinPrecache[precacheIdx]);
         remainingCapacity = getRemainingCacheCapacity();
         precacheIdx ++;
     }

@@ -30,12 +30,12 @@ import android.widget.TextView;
 
 public class ArrowKeyMovementMethod implements MovementMethod {
     private boolean isCap(Spannable buffer) {
-        return ((MetaKeyKeyListener.getMetaState(buffer, KeyEvent.META_SHIFT_ON) == 1) ||
+        return ((MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SHIFT_ON) == 1) ||
                 (MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_SELECTING) != 0));
     }
 
     private boolean isAlt(Spannable buffer) {
-        return MetaKeyKeyListener.getMetaState(buffer, KeyEvent.META_ALT_ON) == 1;
+        return MetaKeyKeyListener.getMetaState(buffer, MetaKeyKeyListener.META_ALT_ON) == 1;
     }
 
     private boolean up(TextView widget, Spannable buffer) {

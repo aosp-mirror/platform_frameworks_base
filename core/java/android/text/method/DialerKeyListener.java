@@ -56,7 +56,7 @@ public class DialerKeyListener extends NumberKeyListener
          * Prefer number if no meta key is active, or if it produces something
          * valid and the meta lookup does not.
          */
-        if ((meta & (KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON)) == 0) {
+        if ((meta & (MetaKeyKeyListener.META_ALT_ON | MetaKeyKeyListener.META_SHIFT_ON)) == 0) {
             if (number != 0) {
                 return number;
             }

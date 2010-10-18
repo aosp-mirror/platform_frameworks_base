@@ -31,8 +31,8 @@ import java.util.List;
  * Within JSON objects, name/value pairs are represented by a single token.
  *
  * <h3>Parsing JSON</h3>
- * To create a recursive descent parser your own JSON streams, first create an
- * entry point method that creates a {@code JsonReader}.
+ * To create a recursive descent parser for your own JSON streams, first create
+ * an entry point method that creates a {@code JsonReader}.
  *
  * <p>Next, create handler methods for each structure in your JSON text. You'll
  * need a method for each object type and for each array type.

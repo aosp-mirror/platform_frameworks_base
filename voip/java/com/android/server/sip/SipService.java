@@ -39,6 +39,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -65,8 +66,8 @@ import javax.sip.SipException;
  * @hide
  */
 public final class SipService extends ISipService.Stub {
-    private static final String TAG = "SipService";
-    private static final boolean DEBUGV = false;
+    static final String TAG = "SipService";
+    static final boolean DEBUGV = false;
     private static final boolean DEBUG = true;
     private static final boolean DEBUG_TIMER = DEBUG && false;
     private static final int EXPIRY_TIME = 3600;
@@ -92,7 +93,8 @@ public final class SipService extends ISipService.Stub {
             new HashMap<String, ISipSession>();
 
     private ConnectivityReceiver mConnectivityReceiver;
-    private boolean mScreenOn;
+    private boolean mWifiEnabled;
+    private SipWakeLock mMyWakeLock;
 
     /**
      * Starts the SIP service. Do nothing if the SIP API is not supported on the
@@ -112,23 +114,34 @@ public final class SipService extends ISipService.Stub {
         mConnectivityReceiver = new ConnectivityReceiver();
         context.registerReceiver(mConnectivityReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        context.registerReceiver(mScreenOnOffReceiver,
-                new IntentFilter(Intent.ACTION_SCREEN_ON));
-        context.registerReceiver(mScreenOnOffReceiver,
-                new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        context.registerReceiver(mWifiStateReceiver,
+                new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+        mMyWakeLock = new SipWakeLock((PowerManager)
+                context.getSystemService(Context.POWER_SERVICE));
 
         mTimer = new WakeupTimer(context);
         mWifiOnly = SipManager.isSipWifiOnly(context);
     }
 
-    BroadcastReceiver mScreenOnOffReceiver = new BroadcastReceiver() {
+    BroadcastReceiver mWifiStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mScreenOn = false;
-            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                mScreenOn = true;
+            if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
+                int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                        WifiManager.WIFI_STATE_UNKNOWN);
+                synchronized (SipService.this) {
+                    switch (state) {
+                        case WifiManager.WIFI_STATE_ENABLED:
+                            mWifiEnabled = true;
+                            if (anyOpened()) grabWifiLock();
+                            break;
+                        case WifiManager.WIFI_STATE_DISABLED:
+                            mWifiEnabled = false;
+                            releaseWifiLock();
+                            break;
+                    }
+                }
             }
         }
     };
@@ -182,7 +195,7 @@ public final class SipService extends ISipService.Stub {
                     incomingCallPendingIntent, listener);
             if (localProfile.getAutoRegistration()) {
                 group.openToReceiveCalls();
-                if (isWifiActive()) grabWifiLock();
+                if (mWifiEnabled) grabWifiLock();
             }
         } catch (SipException e) {
             Log.e(TAG, "openToReceiveCalls()", e);
@@ -216,7 +229,11 @@ public final class SipService extends ISipService.Stub {
         group = mSipGroups.remove(localProfileUri);
         notifyProfileRemoved(group.getLocalProfile());
         group.close();
-        if (isWifiActive() && !anyOpened()) releaseWifiLock();
+
+        if (!anyOpened()) {
+            releaseWifiLock();
+            mMyWakeLock.reset(); // in case there's leak
+        }
     }
 
     public synchronized boolean isOpened(String localProfileUri) {
@@ -349,7 +366,7 @@ public final class SipService extends ISipService.Stub {
 
     private void grabWifiLock() {
         if (mWifiLock == null) {
-            if (DEBUG) Log.d(TAG, "acquire wifi lock");
+            if (DEBUG) Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~ acquire wifi lock");
             mWifiLock = ((WifiManager)
                     mContext.getSystemService(Context.WIFI_SERVICE))
                     .createWifiLock(WifiManager.WIFI_MODE_FULL, TAG);
@@ -359,14 +376,10 @@ public final class SipService extends ISipService.Stub {
 
     private void releaseWifiLock() {
         if (mWifiLock != null) {
-            if (DEBUG) Log.d(TAG, "release wifi lock");
+            if (DEBUG) Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~ release wifi lock");
             mWifiLock.release();
             mWifiLock = null;
         }
-    }
-
-    private boolean isWifiActive() {
-        return "WIFI".equalsIgnoreCase(mNetworkType);
     }
 
     private synchronized void onConnectivityChanged(
@@ -382,14 +395,6 @@ public final class SipService extends ISipService.Stub {
         boolean isWifi = "WIFI".equalsIgnoreCase(type);
         boolean wifiOff = (isWifi && !connected) || (wasWifi && !sameType);
         boolean wifiOn = isWifi && connected;
-        if (wifiOff) {
-            if (mScreenOn) releaseWifiLock();
-            // If the screen is off, we still keep the wifi lock in order
-            // to be able to reassociate with any available AP. Otherwise,
-            // the wifi driver could be stopped after 15 mins of idle time.
-        } else if (wifiOn) {
-            if (anyOpened()) grabWifiLock();
-        }
 
         try {
             boolean wasConnected = mConnected;
@@ -408,8 +413,9 @@ public final class SipService extends ISipService.Stub {
                 for (SipSessionGroupExt group : mSipGroups.values()) {
                     group.onConnectivityChanged(true);
                 }
+            } else {
+                mMyWakeLock.reset(); // in case there's a leak
             }
-
         } catch (SipException e) {
             Log.e(TAG, "onConnectivityChanged()", e);
         }
@@ -452,7 +458,8 @@ public final class SipService extends ISipService.Stub {
         private SipSessionGroup createSipSessionGroup(String localIp,
                 SipProfile localProfile, String password) throws SipException {
             try {
-                return new SipSessionGroup(localIp, localProfile, password);
+                return new SipSessionGroup(localIp, localProfile, password,
+                        mMyWakeLock);
             } catch (IOException e) {
                 // network disconnected
                 Log.w(TAG, "createSipSessionGroup(): network disconnected?");
@@ -539,6 +546,7 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onRinging(ISipSession s, SipProfile caller,
                 String sessionDescription) {
+            if (DEBUGV) Log.d(TAG, "<<<<< onRinging()");
             SipSessionGroup.SipSessionImpl session =
                     (SipSessionGroup.SipSessionImpl) s;
             synchronized (SipService.this) {
@@ -585,7 +593,7 @@ public final class SipService extends ISipService.Stub {
     }
 
     // KeepAliveProcess is controlled by AutoRegistrationProcess.
-    // All methods will be invoked in sync with SipService.this except realRun()
+    // All methods will be invoked in sync with SipService.this.
     private class KeepAliveProcess implements Runnable {
         private static final String TAG = "\\KEEPALIVE/";
         private static final int INTERVAL = 10;
@@ -604,42 +612,32 @@ public final class SipService extends ISipService.Stub {
 
         // timeout handler
         public void run() {
-            if (!mRunning) return;
-            final SipSessionGroup.SipSessionImpl session = mSession;
-
-            // delegate to mExecutor
-            getExecutor().addTask(new Runnable() {
-                public void run() {
-                    realRun(session);
-                }
-            });
-        }
-
-        // real timeout handler
-        private void realRun(SipSessionGroup.SipSessionImpl session) {
             synchronized (SipService.this) {
-                if (notCurrentSession(session)) return;
+                if (!mRunning) return;
 
-                session = session.duplicate();
-                if (DEBUGV) Log.v(TAG, "~~~ keepalive");
-                mTimer.cancel(this);
-                session.sendKeepAlive();
-                if (session.isReRegisterRequired()) {
-                    mSession.register(EXPIRY_TIME);
-                } else {
-                    mTimer.set(INTERVAL * 1000, this);
+                if (DEBUGV) Log.v(TAG, "~~~ keepalive: "
+                        + mSession.getLocalProfile().getUriString());
+                SipSessionGroup.SipSessionImpl session = mSession.duplicate();
+                try {
+                    session.sendKeepAlive();
+                    if (session.isReRegisterRequired()) {
+                        // Acquire wake lock for the registration process. The
+                        // lock will be released when registration is complete.
+                        mMyWakeLock.acquire(mSession);
+                        mSession.register(EXPIRY_TIME);
+                    }
+                } catch (Throwable t) {
+                    Log.w(TAG, "keepalive error: " + t);
                 }
             }
         }
 
         public void stop() {
+            if (DEBUGV && (mSession != null)) Log.v(TAG, "stop keepalive:"
+                    + mSession.getLocalProfile().getUriString());
             mRunning = false;
             mSession = null;
             mTimer.cancel(this);
-        }
-
-        private boolean notCurrentSession(ISipSession session) {
-            return (session != mSession) || !mRunning;
         }
     }
 
@@ -671,6 +669,7 @@ public final class SipService extends ISipService.Stub {
                 // start unregistration to clear up old registration at server
                 // TODO: when rfc5626 is deployed, use reg-id and sip.instance
                 // in registration to avoid adding duplicate entries to server
+                mMyWakeLock.acquire(mSession);
                 mSession.unregister();
                 if (DEBUG) Log.d(TAG, "start AutoRegistrationProcess for "
                         + mSession.getLocalProfile().getUriString());
@@ -680,8 +679,11 @@ public final class SipService extends ISipService.Stub {
         public void stop() {
             if (!mRunning) return;
             mRunning = false;
-            mSession.setListener(null);
-            if (mConnected && mRegistered) mSession.unregister();
+            mMyWakeLock.release(mSession);
+            if (mSession != null) {
+                mSession.setListener(null);
+                if (mConnected && mRegistered) mSession.unregister();
+            }
 
             mTimer.cancel(this);
             if (mKeepAliveProcess != null) {
@@ -738,29 +740,18 @@ public final class SipService extends ISipService.Stub {
             return mRegistered;
         }
 
-        // timeout handler
+        // timeout handler: re-register
         public void run() {
             synchronized (SipService.this) {
                 if (!mRunning) return;
-                final SipSessionGroup.SipSessionImpl session = mSession;
 
-                // delegate to mExecutor
-                getExecutor().addTask(new Runnable() {
-                    public void run() {
-                        realRun(session);
-                    }
-                });
-            }
-        }
-
-        // real timeout handler
-        private void realRun(SipSessionGroup.SipSessionImpl session) {
-            synchronized (SipService.this) {
-                if (notCurrentSession(session)) return;
                 mErrorCode = SipErrorCode.NO_ERROR;
                 mErrorMessage = null;
                 if (DEBUG) Log.d(TAG, "~~~ registering");
-                if (mConnected) session.register(EXPIRY_TIME);
+                if (mConnected) {
+                    mMyWakeLock.acquire(mSession);
+                    mSession.register(EXPIRY_TIME);
+                }
             }
         }
 
@@ -810,6 +801,7 @@ public final class SipService extends ISipService.Stub {
         private boolean notCurrentSession(ISipSession session) {
             if (session != mSession) {
                 ((SipSessionGroup.SipSessionImpl) session).setListener(null);
+                mMyWakeLock.release(session);
                 return true;
             }
             return !mRunning;
@@ -846,6 +838,7 @@ public final class SipService extends ISipService.Stub {
                             mKeepAliveProcess.start();
                         }
                     }
+                    mMyWakeLock.release(session);
                 } else {
                     mRegistered = false;
                     mExpiryTime = -1L;
@@ -876,6 +869,7 @@ public final class SipService extends ISipService.Stub {
                 mErrorCode = errorCode;
                 mErrorMessage = message;
                 mProxy.onRegistrationFailed(session, errorCode, message);
+                mMyWakeLock.release(session);
             }
         }
 
@@ -888,6 +882,7 @@ public final class SipService extends ISipService.Stub {
                 mErrorCode = SipErrorCode.TIME_OUT;
                 mProxy.onRegistrationTimeout(session);
                 restartLater();
+                mMyWakeLock.release(session);
             }
         }
 
@@ -906,7 +901,16 @@ public final class SipService extends ISipService.Stub {
         private MyTimerTask mTask;
 
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(final Context context, final Intent intent) {
+            // Run the handler in MyExecutor to be protected by wake lock
+            getExecutor().execute(new Runnable() {
+                public void run() {
+                    onReceiveInternal(context, intent);
+                }
+            });
+        }
+
+        private void onReceiveInternal(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 Bundle b = intent.getExtras();
@@ -974,11 +978,13 @@ public final class SipService extends ISipService.Stub {
                     if (mTask != null) mTask.cancel();
                     mTask = new MyTimerTask(type, connected);
                     mTimer.schedule(mTask, 2 * 1000L);
-                    // TODO: hold wakup lock so that we can finish change before
-                    // the device goes to sleep
+                    // hold wakup lock so that we can finish changes before the
+                    // device goes to sleep
+                    mMyWakeLock.acquire(mTask);
                 } else {
                     if ((mTask != null) && mTask.mNetworkType.equals(type)) {
                         mTask.cancel();
+                        mMyWakeLock.release(mTask);
                     }
                     onConnectivityChanged(type, false);
                 }
@@ -998,7 +1004,7 @@ public final class SipService extends ISipService.Stub {
             @Override
             public void run() {
                 // delegate to mExecutor
-                getExecutor().addTask(new Runnable() {
+                getExecutor().execute(new Runnable() {
                     public void run() {
                         realRun();
                     }
@@ -1016,13 +1022,13 @@ public final class SipService extends ISipService.Stub {
                     if (DEBUG) Log.d(TAG, " deliver change for " + mNetworkType
                             + (mConnected ? " CONNECTED" : "DISCONNECTED"));
                     onConnectivityChanged(mNetworkType, mConnected);
+                    mMyWakeLock.release(this);
                 }
             }
         }
     }
 
     // TODO: clean up pending SipSession(s) periodically
-
 
     /**
      * Timer that can schedule events to occur even when the device is in sleep.
@@ -1213,7 +1219,8 @@ public final class SipService extends ISipService.Stub {
         }
 
         @Override
-        public synchronized void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent) {
+            // This callback is already protected by AlarmManager's wake lock.
             String action = intent.getAction();
             if (getAction().equals(action)
                     && intent.getExtras().containsKey(TRIGGER_TIME)) {
@@ -1240,7 +1247,7 @@ public final class SipService extends ISipService.Stub {
             }
         }
 
-        private void execute(long triggerTime) {
+        private synchronized void execute(long triggerTime) {
             if (DEBUG_TIMER) Log.d(TAG, "time's up, triggerTime = "
                     + showTime(triggerTime) + ": " + mEventQueue.size());
             if (stopped() || mEventQueue.isEmpty()) return;
@@ -1252,9 +1259,8 @@ public final class SipService extends ISipService.Stub {
                 event.mLastTriggerTime = event.mTriggerTime;
                 event.mTriggerTime += event.mPeriod;
 
-                // run the callback in a new thread to prevent deadlock
-                new Thread(event.mCallback, "SipServiceTimerCallbackThread")
-                        .start();
+                // run the callback in the handler thread to prevent deadlock
+                getExecutor().execute(event.mCallback);
             }
             if (DEBUG_TIMER) {
                 Log.d(TAG, "after timeout execution");
@@ -1318,28 +1324,40 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
-    // Single-threaded executor
-    private static class MyExecutor extends Handler {
+    private static Looper createLooper() {
+        HandlerThread thread = new HandlerThread("SipService.Executor");
+        thread.start();
+        return thread.getLooper();
+    }
+
+    // Executes immediate tasks in a single thread.
+    // Hold/release wake lock for running tasks
+    private class MyExecutor extends Handler {
         MyExecutor() {
             super(createLooper());
         }
 
-        private static Looper createLooper() {
-            HandlerThread thread = new HandlerThread("SipService");
-            thread.start();
-            return thread.getLooper();
-        }
-
-        void addTask(Runnable task) {
+        void execute(Runnable task) {
+            mMyWakeLock.acquire(task);
             Message.obtain(this, 0/* don't care */, task).sendToTarget();
         }
 
         @Override
         public void handleMessage(Message msg) {
             if (msg.obj instanceof Runnable) {
-                ((Runnable) msg.obj).run();
+                executeInternal((Runnable) msg.obj);
             } else {
                 Log.w(TAG, "can't handle msg: " + msg);
+            }
+        }
+
+        private void executeInternal(Runnable task) {
+            try {
+                task.run();
+            } catch (Throwable t) {
+                Log.e(TAG, "run task: " + task, t);
+            } finally {
+                mMyWakeLock.release(task);
             }
         }
     }
