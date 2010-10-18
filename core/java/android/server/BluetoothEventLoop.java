@@ -120,7 +120,9 @@ class BluetoothEventLoop {
                 | PowerManager.ON_AFTER_RELEASE, TAG);
         mWakeLock.setReferenceCounted(false);
         initializeNativeDataNative();
+    }
 
+    /*package*/ void getProfileProxy() {
         mAdapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.A2DP);
     }
 
