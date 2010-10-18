@@ -1,0 +1,163 @@
+page.title=List View Icons
+parent.title=Icon Design Guidelines
+parent.link=icon_design.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#icon1">All Android Versions</a>
+  <ol>
+    <li><a href="#structure1">Structure</a></li>
+    <li><a href="#style1">Light, effects, and shadows</a></li>
+  </ol>
+</li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>List view icons look a lot like dialog icons, but they use an inner shadow
+effect where the light source is above the object. They are also designed to be
+used only in a {@link android.widget.ListView}. Examples include the Settings
+application.</p>
+
+<p>As described in <a href="icon_design.html#icon-sets">Providing
+Density-Specific Icon Sets</a>, you should create separate icon sets for low-,
+medium-, and high-density screens. This ensures that your icons will display
+properly across the range of devices on which your application can be installed.
+See Table 1 for a listing of the recommended finished icon sizes for each
+density. Also, see <a href="icon_design.html#design-tips">Tips for Designers</a>
+for suggestions on how to work with multiple sets of icons.</p>
+
+
+<p class="table-caption"><strong>Table 1.</strong> Summary of finished list view
+icon dimensions for each of the three generalized screen densities.</p>
+
+  <table>
+    <tbody>
+    <tr>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        <nobr>Low density screen <em>(ldpi)</em></nobr>
+      </th>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        <nobr>Medium density screen <em>(mdpi)</em></nobr>
+      </th>
+      <th style="background-color:#f3f3f3;font-weight:normal">
+        <nobr>High density screen <em>(hdpi)</em><nobr>
+      </th>
+    </tr>
+
+    <tr>
+      <td>
+        24 x 24 px
+      </td>
+      <td>
+        32 x 32 px
+      </td>
+      <td>
+        48 x 48 px
+      </td>
+    </tr>
+
+    </tbody>
+  </table>
+
+
+
+<p><strong>Final art must be exported as a transparent PNG file. Do not include
+a background color</strong>.</p>
+
+<p>Templates for creating icons in Adobe Photoshop are available in the <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#templatespack">Icon
+Templates Pack</a>.</p>
+
+<h2 id="icon1">All Android Versions</h2>
+
+<p>The following guidelines describe how to design dialog icons for all versions
+of the Android platform.</p>
+
+<h3 id="structure1">Structure</h3>
+
+<ul>
+<li>A list view icon normally has a 1 px safeframe, but it is OK to use the
+safeframe area for the edge of the anti-alias of a round shape.</li>
+
+<li>All dimensions specified are based on a 32x32 pixel artboard size in
+Photoshop. Keep 1 pixel of padding around the bounding box inside the template.
+</li>
+
+</ul>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/listview_icon.png" alt="A view of list
+view icon structure." />
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 1. </strong>Safeframe and fill gradient for list view
+icons. Icon size is 32x32.</p>
+  </div>
+</td>
+</tr>
+</table>
+
+<h3 id="style1">Light, effects, and shadows</h3>
+
+<p>List view icons are flat and pictured face-on with an inner shadow. Built up
+by a light gradient and inner shadow, they stand out well on a dark
+background.</p>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/listview_icon_details.png" alt="A view
+of light, effects, and shadows for list view icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 2. </strong>Light, effects, and shadows for list view
+icons.</p>
+    <div class="image-caption-nested">
+    <table>
+    <tr><td><em>1.</em></td><td>Inner shadow:</td><td>black | 57 % opacity | angle 120&deg; | blend mode normal | distance 1px | size 1px <td></tr>
+    <tr><td><em>2.</em></td><td>Background:</td><td>black | standard system color <br>These icons are displayed in list views only.</td></tr>
+    <tr><td colspan="2">Note: The list view icon sits on 32x32 px artboard in Photoshop, without a safeframe.</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td style="border:0">
+
+<h4 id="steps1">Step by step</h4>
+
+<ol>
+<li>Add the effects seen in Figure 2 for the proper filter.</li>
+<li>Export the icon at 32x32 as a PNG file with transparency enabled.</li>
+<li>Create the basic shapes using a tool like Adobe Illustrator.</li>
+<li>Import the shape into a tool like Adobe Photoshop and scale to fit an image
+of 32x32 px on a transparent background. </li>
+</ol>
+
+</td>
+</tr>
+</table>

@@ -1,0 +1,330 @@
+page.title=Status Bar Icons
+parent.title=Icon Design Guidelines
+parent.link=icon_design.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#icon9">Android 2.3 and Later</a>
+  <ol>
+    <li><a href="#size9">Size</a></li>
+    <li><a href="#style9">Style, color, and effects</a></li>
+    <li><a href="#dodonts9">Do's and don'ts</a></li>
+    <li><a href="#examples9">Example icons</a></li>
+  </ol>
+</li>
+<li><a href="#icon1">Android 2.2 and Earlier</a></li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>Status bar icons are used to represent notifications from your application in
+the status bar.</p>
+
+<p>As described in <a href="icon_design.html#icon-sets">Providing
+Density-Specific Icon Sets</a>, you should create separate icon sets for low-,
+medium-, and high-density screens. This ensures that your icons will display
+properly across the range of devices on which your application can be installed.
+See <a href="icon_design.html#design-tips">Tips for Designers</a> for
+suggestions on how to work with multiple sets of icons.</p>
+
+<p><strong>Final art must be exported as a transparent PNG file. Do not include
+a background color</strong>.</p>
+
+<p>Templates for creating icons in Adobe Photoshop are available in the <a
+href="{@docRoot}guide/practices/ui_guidelines/icon_design.html#templatespack">Icon
+Templates Pack</a>.</p>
+
+
+<p class="warning"><strong>Warning:</strong>
+
+The style and dimensions of status bar icons have changed drastically in
+Android 2.3 compared to <a href="#icon1">previous versions</a>. <strong>To
+provide support for all Android versions</strong>, developers should:
+<br>
+1. Place status bar icons for Android 2.3 and higher in the
+<code>drawable-hdpi-v9</code>, <code>drawable-mdpi-v9</code>, and <code>drawable-ldpi-v9</code> directories.
+<br>
+2. Place status bar icons for previous versions in
+<code>drawable-hdpi</code>, <code>drawable-mdpi</code>, and <code>drawable-ldpi</code> directories.
+
+</p>
+
+
+
+<h2 id="icon9">Android 2.3 and Later</h2>
+
+<p>The following guidelines describe how to design status bar icons for Android
+2.3 (API Level 9) and later.</p>
+
+<h3 id="size9">Size and positioning</h3>
+
+<p>Status bar icons should use simple shapes and forms and those must be
+scaled and positioned inside the final asset.</p>
+
+<p>Figure 1 illustrates various ways of positioning the icon inside the
+asset. You should size the icons <em>smaller than the actual bounds of the
+asset</em>. <strong>Status bar icons may vary in width, but only
+minimally.</strong></p>
+
+<p>In order to indicate the recommended size for the icon, each example in
+Figure 1 includes two different guide rectangles:</p>
+
+<ul>
+<li>The red box is the bounding box for the full asset.</li>
+<li>The blue box is the recommended bounding box for the actual icon.
+The icon box is sized smaller vertically than the full asset box to allow for
+varying icon shapes while maintaining a consistent visual weight.</li>
+</ul>
+
+<table>
+<tr>
+
+<td style="border:0;">
+<ol class="nolist">
+  <li>Status bar icon dimensions for high-density (<code>hdpi</code>) screens:</li>
+  <ol class="nolist">
+    <li>Full Asset: 24w x 38h px (preferred, width may vary)</li>
+    <li>Icon: 24w x 24h px (preferred, width may vary)</li>
+  </ol>
+  </li>
+</ol>
+</td>
+<td style="border:0;">
+  <img src="{@docRoot}images/icon_design/statusbar_size_hdpi.png" width="318">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Status bar icon dimensions for medium-density (<code>mdpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 16w x 25 px (preferred, width may vary)</li>
+      <li>Icon: 16w x 16w px (preferred, width may vary)</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;">
+ <img src="{@docRoot}images/icon_design/statusbar_size_mdpi.png" width="318">
+</td>
+</tr>
+<tr>
+<td style="border:0;">
+  <ol class="nolist">
+  <li>Status bar icon dimensions for low-density (<code>ldpi</code>) screens:</li>
+    <ol class="nolist">
+      <li>Full Asset: 12w x 19h px (preferred, width may vary)</li>
+      <li>Icon: 12w x 12h px (preferred, width may vary)</li>
+    </ol>
+  </li>
+</ol>
+</td>
+
+<td style="border:0;">
+ <img src="{@docRoot}images/icon_design/statusbar_size_ldpi.png" width="318">
+</td>
+</tr>
+
+<tr>
+<td style="border:0;"></td>
+<td style="border:0;">
+ <p class="table-caption"><strong>Figure 1.</strong>
+ Status bar icon sizing and positioning inside the bounds of the
+ icon asset.</p>
+</td>
+</tr>
+
+</table>
+
+
+
+
+<h3 id="style9">Style, colors, and effects</h3>
+
+<p>Status bar icons are flat, matte, and pictured face-on.</p>
+
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/statusbar_style.png" alt="A view of effects for status bar icons."/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 2. </strong>Style and effects for status icons.</p>
+    <div class="image-caption-nested">
+    <p><em>Note: all pixel dimensions are for medium density and should be scaled appropriately for other densities.</em></p>
+    <table>
+    <tr><td><em>1.</em></td><td nowrap>Fill gradient:</td><td>90&deg;, from <code>#828282</code> to <code>#919191</code><br><br></td></tr>
+    <tr><td><em>2.</em></td><td nowrap>Inner shadow:</td><td><code>#FFFFFF</code>, 10% opacity<br>angle 90&deg;<br>distance 1px<br>size 0px<br><br></td></tr>
+    <tr><td><em>3.</em></td><td nowrap>Inner content:</td><td>Inner content should subtract from the outer shape and consist purely of transparent pixels.</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+
+
+
+<h3 id="dosdonts9">Do's and don'ts</h3>
+
+<p>Below are some "do and don't" examples to consider when creating status bar icons for
+your application. </p>
+
+
+<img src="{@docRoot}images/icon_design/do_dont_statusicons.png">
+
+
+
+
+<h3 id="examples9">Example icons</h3>
+
+<p>Shown below are standard high-density status bar icons that are used in
+the Android platform.</p>
+
+<p class="warning"><strong>Warning:</strong> Because these resources can change
+between platform versions, you should not reference these icons using the
+Android platform resource IDs (i.e. status bar icons under
+<code>android.R.drawable</code>). If you want to use any icons or other internal
+drawable resources, you should store a local copy of those icons or drawables in
+your application resources, then reference the local copy from your application
+code. In that way, you can maintain control over the appearance of your icons,
+even if the system's copy changes. Note that the grid below is not intended to
+be complete.</p>
+
+<img src="{@docRoot}images/icon_design/statusbar_standard.png" />
+
+
+
+<h2 id="icon1">Android 2.2 and Earlier</h2>
+
+<p>The following guidelines describe how to design status bar icons for Android
+2.2 (API Level 8) and earlier.</p>
+
+<h3 id="structure1">Structure</h3>
+
+<ul>
+<li>Rounded corners must always be applied to the base shape and to the details
+of a status bar icon shown Figure 3.</li>
+
+<li>All dimensions specified are based on a 25x25 pixel artboard size with a 2
+pixel safeframe.</li>
+
+<li>Status bar icons can overlap the safeframe to the left and right when
+necessary, but must not overlap the safeframe at the top and bottom.</li>
+
+<li><strong>Final art must be exported as a transparent PNG file.</strong></li>
+
+<li>Templates for creating status bar icons using Adobe Photoshop are available
+in the Icon Templates Pack.</li>
+</ul>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/statusbar_structure.png" alt="A view of
+status bar icon structure." />
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 3. </strong>Safeframe and corner-rounding for status bar
+icons. Icon size is 25x25.</p>
+  </div>
+</td>
+</tr>
+</table>
+
+
+<h3 id="style1">Light, effects, and shadows</h3>
+
+<p>Status bar icons are slightly debossed, high in contrast, and pictured
+face-on to enhance clarity at small sizes.</p>
+
+<table class="image-caption">
+<tr>
+<td class="image-caption-i">
+  <img src="{@docRoot}images/icon_design/statusbar_light.png"/>
+</td>
+<td class="image-caption-c">
+  <div class="caption grad-rule-top">
+    <p><strong>Figure 4. </strong>Light, effects, and shadows for status bar icons.</p>
+    <div class="image-caption-nested">
+    <table>
+    <tr><td><em>1.</em></td><td>Front part:</td><td>Use fill gradient from primary color palette</td></tr>
+    <tr><td><em>2.</em></td><td>Inner bevel:</td><td>depth 100% | direction down<br>size 0px | angle 90° |<br>altitude 30°<br>highlight white 75% opacity<br>shadow black 75% opacity</td></tr>
+    <tr><td><em>3.</em></td><td>Detail:</td><td>white</td></tr>
+    <tr><td><em>4.</em></td><td>Disabled detail:</td><td>grey gradient from palette<br>+ inner bevel: smooth | depth 1% | direction down | size 0px | angle 117° | <br>altitude 42° | highlight white 70% | no shadow</td></tr>
+    </table>
+    </div>
+  </div>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td style="border:0">
+
+<h4 id="palette1">Color palette</h4>
+
+<p>Only status bar icons related to the phone function use full color; all other status bar icons should remain monochromatic.</p>
+
+<table>
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_white.png"/></td>
+<td class="image-caption-c">White<br>r 255 | g 255 | b 255<br>Used for details within the icons and bevel highlight.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_grey.png"/></td>
+<td class="image-caption-c">Grey gradient<br><em>1:&nbsp;&nbsp;</em>r 169 | g 169 | b 169<br><em>2:&nbsp;&nbsp;</em>r 126 | g 126 | b 126<br>Used for disabled details within the icon.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_fill.png"/></td>
+<td class="image-caption-c">Fill gradient<br><em>1:&nbsp;&nbsp;</em>1 r 105 | g 105 | b 105<br><em>2:&nbsp;&nbsp;</em>r 10   | g 10   | b 10<br>Used as color fill.</td>
+</tr>
+
+<tr>
+<td class="image-caption-i"><img src="{@docRoot}images/icon_design/statusbar_palette_black.png"/></td>
+<td class="image-caption-c">Black<br>r 0 | g 0 | b 0<br>Used for bevel shadow.</td>
+</tr>
+
+</table>
+
+</td>
+
+<td style="border:0">
+
+<h4 id="steps1">Step by step</h4>
+
+<ol>
+<li>In a tool like Adobe Photoshop, create the base shape within a 25x25 px
+image on a transparent background. Mind the safeframe, and keep the upper and
+lower 2 pixels free.</li>
+<li>Add rounded corners as specified in Figure 3.</li>
+<li>Add light, effects, and shadows as specified in Figure 4.</li>
+<li>Export the icon at 25x25 as a PNG file with transparency enabled.</li>
+</ol>
+
+</td>
+</tr>
+</table>
