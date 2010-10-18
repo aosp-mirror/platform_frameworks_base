@@ -584,6 +584,16 @@ protected:
 
     // Immutable calibration parameters in parsed form.
     struct Calibration {
+        // Position
+        bool haveXOrigin;
+        int32_t xOrigin;
+        bool haveYOrigin;
+        int32_t yOrigin;
+        bool haveXScale;
+        float xScale;
+        bool haveYScale;
+        float yScale;
+
         // Touch Size
         enum TouchSizeCalibration {
             TOUCH_SIZE_CALIBRATION_DEFAULT,

@@ -1344,7 +1344,7 @@ void TouchInputMapper::dump(String8& dump) {
         dumpRawAxes(dump);
         dumpCalibration(dump);
         dumpSurfaceLocked(dump);
-        dump.appendFormat(INDENT3 "Translation and Scaling Factors:");
+        dump.appendFormat(INDENT3 "Translation and Scaling Factors:\n");
         dump.appendFormat(INDENT4 "XOrigin: %d\n", mLocked.xOrigin);
         dump.appendFormat(INDENT4 "YOrigin: %d\n", mLocked.yOrigin);
         dump.appendFormat(INDENT4 "XScale: %0.3f\n", mLocked.xScale);
@@ -1481,10 +1481,18 @@ bool TouchInputMapper::configureSurfaceLocked() {
 
         // Configure X and Y factors.
         if (mRawAxes.x.valid && mRawAxes.y.valid) {
-            mLocked.xOrigin = mRawAxes.x.minValue;
-            mLocked.yOrigin = mRawAxes.y.minValue;
-            mLocked.xScale = float(width) / mRawAxes.x.getRange();
-            mLocked.yScale = float(height) / mRawAxes.y.getRange();
+            mLocked.xOrigin = mCalibration.haveXOrigin
+                    ? mCalibration.xOrigin
+                    : mRawAxes.x.minValue;
+            mLocked.yOrigin = mCalibration.haveYOrigin
+                    ? mCalibration.yOrigin
+                    : mRawAxes.y.minValue;
+            mLocked.xScale = mCalibration.haveXScale
+                    ? mCalibration.xScale
+                    : float(width) / mRawAxes.x.getRange();
+            mLocked.yScale = mCalibration.haveYScale
+                    ? mCalibration.yScale
+                    : float(height) / mRawAxes.y.getRange();
             mLocked.xPrecision = 1.0f / mLocked.xScale;
             mLocked.yPrecision = 1.0f / mLocked.yScale;
 
@@ -1750,6 +1758,12 @@ void TouchInputMapper::parseCalibration() {
     const InputDeviceCalibration& in = getDevice()->getCalibration();
     Calibration& out = mCalibration;
 
+    // Position
+    out.haveXOrigin = in.tryGetProperty(String8("touch.position.xOrigin"), out.xOrigin);
+    out.haveYOrigin = in.tryGetProperty(String8("touch.position.yOrigin"), out.yOrigin);
+    out.haveXScale = in.tryGetProperty(String8("touch.position.xScale"), out.xScale);
+    out.haveYScale = in.tryGetProperty(String8("touch.position.yScale"), out.yScale);
+
     // Touch Size
     out.touchSizeCalibration = Calibration::TOUCH_SIZE_CALIBRATION_DEFAULT;
     String8 touchSizeCalibrationString;
@@ -1958,6 +1972,20 @@ void TouchInputMapper::resolveCalibration() {
 
 void TouchInputMapper::dumpCalibration(String8& dump) {
     dump.append(INDENT3 "Calibration:\n");
+
+    // Position
+    if (mCalibration.haveXOrigin) {
+        dump.appendFormat(INDENT4 "touch.position.xOrigin: %d\n", mCalibration.xOrigin);
+    }
+    if (mCalibration.haveYOrigin) {
+        dump.appendFormat(INDENT4 "touch.position.yOrigin: %d\n", mCalibration.yOrigin);
+    }
+    if (mCalibration.haveXScale) {
+        dump.appendFormat(INDENT4 "touch.position.xScale: %0.3f\n", mCalibration.xScale);
+    }
+    if (mCalibration.haveYScale) {
+        dump.appendFormat(INDENT4 "touch.position.yScale: %0.3f\n", mCalibration.yScale);
+    }
 
     // Touch Size
     switch (mCalibration.touchSizeCalibration) {
