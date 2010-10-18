@@ -397,8 +397,22 @@ static void dumpNativeHeap(FILE* fp)
         ptr += infoSize;
     }
 
-    fprintf(fp, "END\n");
     free_malloc_leak_info(info);
+
+    fprintf(fp, "MAPS\n");
+    const char* maps = "/proc/self/maps";
+    FILE* in = fopen(maps, "r");
+    if (in == NULL) {
+        fprintf(fp, "Could not open %s\n", maps);
+        return;
+    }
+    char buf[BUFSIZ];
+    while (size_t n = fread(buf, sizeof(char), BUFSIZ, in)) {
+        fwrite(buf, sizeof(char), n, fp);
+    }
+    fclose(in);
+
+    fprintf(fp, "END\n");
 }
 #endif /*HAVE_ANDROID_OS*/
 
