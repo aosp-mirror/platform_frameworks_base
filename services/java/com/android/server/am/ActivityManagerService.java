@@ -7137,6 +7137,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (mHeavyWeightProcess == app) {
                         currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_CANT_SAVE_STATE;
                     }
+                    if (app.persistent) {
+                        currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_PERSISTENT;
+                    }
                     int adj = app.curAdj;
                     if (adj >= EMPTY_APP_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_EMPTY;
