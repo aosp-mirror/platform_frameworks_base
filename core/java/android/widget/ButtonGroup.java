@@ -26,6 +26,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+/**
+ * @hide
+ */
 public class ButtonGroup extends LinearLayout {
     private static final String LOG = "ButtonGroup";
 
