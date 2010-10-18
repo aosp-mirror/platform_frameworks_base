@@ -26,11 +26,16 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
     public static int sEnableIterations = 100;
     public static int sDiscoverableIterations = 1000;
     public static int sScanIterations = 1000;
+    public static int sPairIterations = 100;
     public static int sConnectHeadsetIterations = 100;
     public static int sConnectA2dpIterations = 100;
 
+    public static String sPairAddress = "";
     public static String sHeadsetAddress = "";
     public static String sA2dpAddress = "";
+
+    public static byte[] sPairPin = {'1', '2', '3', '4'};
+    public static int sPairPasskey = 123456;
 
     @Override
     public TestSuite getAllTests() {
@@ -75,6 +80,15 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
             }
         }
 
+        val = arguments.getString("pair_iterations");
+        if (val != null) {
+            try {
+                sPairIterations = Integer.parseInt(val);
+            } catch (NumberFormatException e) {
+                // Invalid argument, fall back to default value
+            }
+        }
+
         val = arguments.getString("connect_a2dp_iterations");
         if (val != null) {
             try {
@@ -93,6 +107,11 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
             }
         }
 
+        val = arguments.getString("pair_address");
+        if (val != null) {
+            sPairAddress = val;
+        }
+
         val = arguments.getString("headset_address");
         if (val != null) {
             sHeadsetAddress = val;
@@ -101,6 +120,20 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
         val = arguments.getString("a2dp_address");
         if (val != null) {
             sA2dpAddress = val;
+        }
+
+        val = arguments.getString("pair_pin");
+        if (val != null) {
+            sPairPin = BluetoothDevice.convertPinToBytes(val);
+        }
+
+        val = arguments.getString("pair_passkey");
+        if (val != null) {
+            try {
+                sPairPasskey = Integer.parseInt(val);
+            } catch (NumberFormatException e) {
+                // Invalid argument, fall back to default value
+            }
         }
     }
 }
