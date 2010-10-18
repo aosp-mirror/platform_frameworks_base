@@ -5619,6 +5619,11 @@ public class WebView extends AbsoluteLayout
             overScrollBy(deltaX, deltaY, oldX, oldY,
                     rangeX, rangeY,
                     mOverscrollDistance, mOverscrollDistance, true);
+            if (mEdgeGlowTop != null &&
+                    (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished() ||
+                            !mEdgeGlowLeft.isFinished() || !mEdgeGlowRight.isFinished())) {
+                invalidate();
+            }
         }
         if (!getSettings().getBuiltInZoomControls()) {
             boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
