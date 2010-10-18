@@ -25,14 +25,7 @@ RESULTS_ABSOLUTE_PATH = "/sdcard/layout-test-results/"
 DETAILS_HTML = "details.html"
 SUMMARY_TXT = "summary.txt"
 
-def main(options, args):
-  if args:
-    path = " ".join(args);
-  else:
-    path = "";
-
-  logging.basicConfig(level=logging.INFO, format='%(message)s')
-
+def main(path, options):
   tmpdir = tempfile.gettempdir()
 
   # Restart the server
@@ -86,4 +79,14 @@ if __name__ == "__main__":
                            help="The directory from which to take the tests, default is external/webkit/LayoutTests in this checkout of the Android tree")
   option_parser.add_option("-s", "--serial", default=None, help="Specify the serial number of device to run test on")
   options, args = option_parser.parse_args();
-  main(options, args);
+
+  logging.basicConfig(level=logging.INFO, format='%(message)s')
+
+  if len(args) > 1:
+    logging.fatal("Usage: run_layout_tests.py [options] test-relative-path")
+  else:
+    if len(args) < 1:
+      path = "";
+    else:
+      path = args[0]
+    main(path, options);
