@@ -19,11 +19,15 @@
 #include <cmath>
 
 #include <utils/Log.h>
+#include <utils/String8.h>
 
 #include "Patch.h"
+#include "Caches.h"
 
 namespace android {
 namespace uirenderer {
+
+class Caches;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
@@ -32,11 +36,14 @@ namespace uirenderer {
 Patch::Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQuads) {
     // 2 triangles per patch, 3 vertices per triangle
     verticesCount = ((xCount + 1) * (yCount + 1) - emptyQuads) * 2 * 3;
-    vertices = new TextureVertex[verticesCount];
+    mVertices = new TextureVertex[verticesCount];
+
+    glGenBuffers(1, &meshBuffer);
 }
 
 Patch::~Patch() {
-    delete[] vertices;
+    delete[] mVertices;
+    glDeleteBuffers(1, &meshBuffer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,7 +84,7 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         stretchY = yStretch / yStretchTex;
     }
 
-    TextureVertex* vertex = vertices;
+    TextureVertex* vertex = mVertices;
     uint32_t quadCount = 0;
 
     float previousStepY = 0.0f;
@@ -108,6 +115,10 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
 
     generateRow(vertex, y1, bottom - top, v1, 1.0f, xDivs, width, stretchX,
             right - left, bitmapWidth, quadCount, colorKey);
+
+    Caches::getInstance().bindMeshBuffer(meshBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(TextureVertex) * verticesCount,
+                mVertices, GL_STATIC_DRAW);
 }
 
 inline void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, float v2,

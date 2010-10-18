@@ -21,19 +21,19 @@
 
 #define EPSILON 0.00001f
 
-#define almost(u, v) (fabs((u) - (v)) < EPSILON)
+#define ALMOST_EQUAL(u, v) (fabs((u) - (v)) < EPSILON)
 
 /**
  * Compare floats.
  */
-#define compare(a) \
+#define FLOAT_COMPARE(a) \
     if (a < rhs.a) return true; \
-    if (almost(a, rhs.a))
+    if (ALMOST_EQUAL(a, rhs.a))
 
 /**
  * Compare integers.
  */
-#define compareI(a) \
+#define INT_COMPARE(a) \
     if (a < rhs.a) return true; \
     if (a == rhs.a)
 

@@ -19,6 +19,8 @@
 
 #include <sys/types.h>
 
+#include <GLES2/gl2.h>
+
 #include "Vertex.h"
 #include "utils/Compare.h"
 
@@ -59,14 +61,14 @@ struct PatchDescription {
     uint32_t colorKey;
 
     bool operator<(const PatchDescription& rhs) const {
-        compare(bitmapWidth) {
-            compare(bitmapHeight) {
-                compare(pixelWidth) {
-                    compare(pixelHeight) {
-                        compareI(xCount) {
-                            compareI(yCount) {
-                                compareI(emptyCount) {
-                                    compareI(colorKey) return false;
+        FLOAT_COMPARE(bitmapWidth) {
+            FLOAT_COMPARE(bitmapHeight) {
+                FLOAT_COMPARE(pixelWidth) {
+                    FLOAT_COMPARE(pixelHeight) {
+                        INT_COMPARE(xCount) {
+                            INT_COMPARE(yCount) {
+                                INT_COMPARE(emptyCount) {
+                                    INT_COMPARE(colorKey) return false;
                                 }
                             }
                         }
@@ -92,10 +94,12 @@ struct Patch {
             const uint32_t width, const uint32_t height,
             const uint32_t colorKey = 0);
 
-    TextureVertex* vertices;
+    GLuint meshBuffer;
     uint32_t verticesCount;
 
 private:
+    TextureVertex* mVertices;
+
     static inline void generateRow(TextureVertex*& vertex, float y1, float y2,
             float v1, float v2, const int32_t xDivs[], uint32_t xCount,
             float stretchX, float width, float bitmapWidth,

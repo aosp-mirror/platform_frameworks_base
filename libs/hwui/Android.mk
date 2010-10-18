@@ -6,10 +6,10 @@ include $(CLEAR_VARS)
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SRC_FILES:= \
 		utils/SortedListImpl.cpp \
-		DisplayListRenderer.cpp \
-		FboCache.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
+		DisplayListRenderer.cpp \
+		FboCache.cpp \
 		GradientCache.cpp \
 		LayerCache.cpp \
 		Matrix.cpp \
