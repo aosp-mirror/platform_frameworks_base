@@ -307,6 +307,9 @@ static void SC_debugFv3(const char *s, float f1, float f2, float f3) {
 static void SC_debugFv4(const char *s, float f1, float f2, float f3, float f4) {
     LOGE("%s {%f, %f, %f, %f}", s, f1, f2, f3, f4);
 }
+static void SC_debugD(const char *s, double d) {
+    LOGE("%s %f, 0x%08llx", s, d, *((long long *) (&d)));
+}
 static void SC_debugFM4v4(const char *s, const float *f) {
     LOGE("%s {%f, %f, %f, %f", s, f[0], f[4], f[8], f[12]);
     LOGE("%s  %f, %f, %f, %f", s, f[1], f[5], f[9], f[13]);
@@ -327,7 +330,13 @@ static void SC_debugI32(const char *s, int32_t i) {
     LOGE("%s %i  0x%x", s, i, i);
 }
 static void SC_debugU32(const char *s, uint32_t i) {
-    LOGE("%s %i  0x%x", s, i, i);
+    LOGE("%s %u  0x%x", s, i, i);
+}
+static void SC_debugLL64(const char *s, long long ll) {
+    LOGE("%s %lld  0x%llx", s, ll, ll);
+}
+static void SC_debugULL64(const char *s, unsigned long long ll) {
+    LOGE("%s %llu  0x%llx", s, ll, ll);
 }
 
 static void SC_debugP(const char *s, const void *p) {
@@ -494,11 +503,19 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z7rsDebugPKcff", (void *)&SC_debugFv2 },
     { "_Z7rsDebugPKcfff", (void *)&SC_debugFv3 },
     { "_Z7rsDebugPKcffff", (void *)&SC_debugFv4 },
+    { "_Z7rsDebugPKcd", (void *)&SC_debugD },
     { "_Z7rsDebugPKcPK12rs_matrix4x4", (void *)&SC_debugFM4v4 },
     { "_Z7rsDebugPKcPK12rs_matrix3x3", (void *)&SC_debugFM3v3 },
     { "_Z7rsDebugPKcPK12rs_matrix2x2", (void *)&SC_debugFM2v2 },
     { "_Z7rsDebugPKci", (void *)&SC_debugI32 },
     { "_Z7rsDebugPKcj", (void *)&SC_debugU32 },
+    // Both "long" and "unsigned long" need to be redirected to their
+    // 64-bit counterparts, since we have hacked Slang to use 64-bit
+    // for "long" on Arm (to be similar to Java).
+    { "_Z7rsDebugPKcl", (void *)&SC_debugLL64 },
+    { "_Z7rsDebugPKcm", (void *)&SC_debugULL64 },
+    { "_Z7rsDebugPKcx", (void *)&SC_debugLL64 },
+    { "_Z7rsDebugPKcy", (void *)&SC_debugULL64 },
     { "_Z7rsDebugPKcPKv", (void *)&SC_debugP },
 
     // RS Math
