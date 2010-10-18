@@ -20,20 +20,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * NdefTag is a Tag that has NDEF messages or can store NDEF messages.
+ * Represents a discovered tag that contains {@link NdefMessage}s (or a tag that can store them).
+ * In practice, a tag is a thing that an NFC-enabled device can communicate with. This
+ * class is a representation of such a tag and can contain the NDEF messages shared by the tag.
+ * <p>An NDEF tag can contain zero or more NDEF messages (represented by {@link NdefMessage}
+ * objects) in addition to the basic tag properties of UID and Type.
  * <p>
- * NDEF Tag's contain zero or more NDEF Messages in addition to the basic
- * Tag properties of UID and Type.
- * <p>
- * NDEF Tag's that have been initialized will usually contain a single NDEF
- * Message (and that Message can contain multiple NDEF Records). However it
- * is possible for NDEF Tag's to contain multiple NDEF Messages.
- * <p>
- * This class is a immutable data class that contains the contents of the NDEF
- * Message(s) as read at Tag discovery time.
- * <p>
- * NfcAdapter.createNdefTagConnection() can be used to modify the contents of
- * some NDEF Tag's.
+ * {@link NdefTag}s that have been initialized will usually contain a single {@link NdefMessage}
+ * (and that Message can contain multiple {@link NdefRecord}s). However it
+ * is possible for {@link NdefTag}s to contain multiple {@link NdefMessage}s.
+ * <p>{@link NfcAdapter#createNdefTagConnection createNdefTagConnection()} can be used to modify the
+ * contents of some tags.
+ * <p>This is an immutable data class.
  */
 public class NdefTag extends Tag implements Parcelable {
     private final NdefMessage[] mMessages;
