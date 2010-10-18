@@ -14,29 +14,20 @@
  * limitations under the License.
  */
 
-/**
- * File            : NFCException.java
- * Original-Author : Trusted Logic S.A. (Jeremie Corbier)
- * Created         : 26-08-2009
- */
-
-package com.trustedlogic.trustednfc.android;
+package com.android.internal.nfc;
 
 /**
- * Generic exception thrown in case something unexpected happened during the
- * NFCManager operations.
- *
- * @since AA01.04
- * @hide
+ * Generic exception thrown in case something unexpected happened during a 
+ * LLCP communication.
  */
-public class NfcException extends Exception {
+public class LlcpException extends Exception {
    /**
-    * Constructs a new NfcException with the current stack trace and the
+    * Constructs a new LlcpException with the current stack trace and the
     * specified detail message.
     *
     * @param s the detail message for this exception.
     */
-   public NfcException(String s) {
+   public LlcpException(String s) {
       super(s);
    }
 }

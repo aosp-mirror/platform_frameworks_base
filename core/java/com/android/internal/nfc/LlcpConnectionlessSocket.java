@@ -14,48 +14,28 @@
  * limitations under the License.
  */
 
-/**
- * File            : LlcpConnectionLessSocket.java
- * Original-Author : Trusted Logic S.A. (Daniel Tomas)
- * Created         : 18-02-2010
- */
-
-package com.trustedlogic.trustednfc.android;
+package com.android.internal.nfc;
 
 import java.io.IOException;
 
 import android.nfc.ErrorCodes;
 import android.nfc.ILlcpConnectionlessSocket;
 import android.nfc.LlcpPacket;
-
 import android.os.RemoteException;
 import android.util.Log;
 
-/**
- * LlcpConnectionlessSocket represents a LLCP Connectionless object to be used
- * in a connectionless communication
- *
- * @since AA02.01
- * @hide
- */
 public class LlcpConnectionlessSocket {
-
-
     private static final String TAG = "LlcpConnectionlessSocket";
 
     /**
      * The handle returned by the NFC service and used to identify the LLCP connectionless socket in
      * every call of this class.
-     *
-     * @hide
      */
     protected int mHandle;
 
 
     /**
      * The entry point for LLCP Connectionless socket operations.
-     *
-     * @hide
      */
     protected ILlcpConnectionlessSocket mService;
 
@@ -66,7 +46,6 @@ public class LlcpConnectionlessSocket {
      * @param service The entry point to the Nfc Service for  LLCP Connectionless socket  class.
      * @param handle The handle returned by the NFC service and used to identify
      *            the socket in subsequent calls.
-     * @hide
      */
 	LlcpConnectionlessSocket(ILlcpConnectionlessSocket service, int handle) {
         this.mService = service;
@@ -79,7 +58,6 @@ public class LlcpConnectionlessSocket {
      * @param packet Service Access Point number related to a LLCP
      *            Connectionless client and a data buffer to send
      * @throws IOException if the LLCP link has been lost or deactivated.
-     * @since AA02.01
      */
     public void sendTo(LlcpPacket packet) throws IOException {
 		try {
@@ -99,7 +77,6 @@ public class LlcpConnectionlessSocket {
      * @return data data received from a specific LLCP Connectionless client
      * @throws IOException if the LLCP link has been lost or deactivated.
      * @see LlcpPacket
-     * @since AA02.01
      */
     public LlcpPacket receiveFrom() throws IOException {
 		try {
@@ -118,8 +95,6 @@ public class LlcpConnectionlessSocket {
 
     /**
      * Close the created Connectionless socket.
-     *
-     * @since AA02.01
      */
     public void close() {
 		try {
@@ -133,7 +108,6 @@ public class LlcpConnectionlessSocket {
      * Returns the local Service Access Point number of the socket
      *
      * @return sap
-     * @since AA02.01
      */
     public int getSap() {
     	int sap = 0;
