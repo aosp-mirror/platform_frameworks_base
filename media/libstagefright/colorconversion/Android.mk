@@ -6,7 +6,7 @@ LOCAL_SRC_FILES:=                     \
         SoftwareRenderer.cpp
 
 LOCAL_C_INCLUDES := \
-        $(TOP)/frameworks/base/include/media/stagefright/openmax
+        $(TOP)/frameworks/base/include/media/stagefright/openmax \
         $(TOP)/hardware/msm7k
 
 LOCAL_SHARED_LIBRARIES :=       \
