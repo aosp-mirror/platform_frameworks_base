@@ -26,14 +26,14 @@
 /**
  * Compare floats.
  */
-#define FLOAT_COMPARE(a) \
+#define LTE_FLOAT(a) \
     if (a < rhs.a) return true; \
     if (ALMOST_EQUAL(a, rhs.a))
 
 /**
  * Compare integers.
  */
-#define INT_COMPARE(a) \
+#define LTE_INT(a) \
     if (a < rhs.a) return true; \
     if (a == rhs.a)
 
