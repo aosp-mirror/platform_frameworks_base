@@ -18,31 +18,19 @@ import subprocess
 import tempfile
 import webbrowser
 
+import run_apache2
+
 #TODO: These should not be hardcoded
 RESULTS_ABSOLUTE_PATH = "/sdcard/layout-test-results/"
 DETAILS_HTML = "details.html"
 SUMMARY_TXT = "summary.txt"
 
-def main(options, args):
-  if args:
-    path = " ".join(args);
-  else:
-    path = "";
-
-  logging.basicConfig(level=logging.INFO, format='%(message)s')
-
+def main(path, options):
   tmpdir = tempfile.gettempdir()
 
-  if options.tests_root_directory != None:
-    # if options.tests_root_directory is absolute, os.getcwd() is discarded!
-    tests_root_directory = os.path.normpath(os.path.join(os.getcwd(), options.tests_root_directory))
-    server_options = " --tests-root-directory=" + tests_root_directory
-  else:
-    server_options = "";
-
   # Restart the server
-  cmd = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "run_apache2.py") + server_options + " restart"
-  os.system(cmd);
+  if run_apache2.main("restart", options) == False:
+    return
 
   # Run the tests in path
   adb_cmd = "adb"
@@ -91,4 +79,14 @@ if __name__ == "__main__":
                            help="The directory from which to take the tests, default is external/webkit/LayoutTests in this checkout of the Android tree")
   option_parser.add_option("-s", "--serial", default=None, help="Specify the serial number of device to run test on")
   options, args = option_parser.parse_args();
-  main(options, args);
+
+  logging.basicConfig(level=logging.INFO, format='%(message)s')
+
+  if len(args) > 1:
+    logging.fatal("Usage: run_layout_tests.py [options] test-relative-path")
+  else:
+    if len(args) < 1:
+      path = "";
+    else:
+      path = args[0]
+    main(path, options);
