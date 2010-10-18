@@ -144,6 +144,7 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final boolean MULTIPLE_APPLICATION_UIDS = true;
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
+    private static final int NFC_UID = Process.NFC_UID;
     private static final int FIRST_APPLICATION_UID =
         Process.FIRST_APPLICATION_UID;
     private static final int MAX_APPLICATION_UIDS = 1000;
@@ -739,6 +740,10 @@ class PackageManagerService extends IPackageManager.Stub {
         mSettings.addSharedUserLP("android.uid.log",
                 MULTIPLE_APPLICATION_UIDS
                         ? LOG_UID : FIRST_APPLICATION_UID,
+                ApplicationInfo.FLAG_SYSTEM);
+        mSettings.addSharedUserLP("android.uid.nfc",
+                MULTIPLE_APPLICATION_UIDS
+                        ? NFC_UID : FIRST_APPLICATION_UID,
                 ApplicationInfo.FLAG_SYSTEM);
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
@@ -5950,8 +5955,8 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private void extractPublicFiles(PackageParser.Package newPackage,
                                     File publicZipFile) throws IOException {
-        final ZipOutputStream publicZipOutStream =
-                new ZipOutputStream(new FileOutputStream(publicZipFile));
+        final FileOutputStream fstr = new FileOutputStream(publicZipFile);
+        final ZipOutputStream publicZipOutStream = new ZipOutputStream(fstr);
         final ZipFile privateZip = new ZipFile(newPackage.mPath);
 
         // Copy manifest, resources.arsc and res directory to public zip
@@ -5976,6 +5981,9 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        publicZipOutStream.finish();
+        publicZipOutStream.flush();
+        FileUtils.sync(fstr);
         publicZipOutStream.close();
         FileUtils.setPermissions(
                 publicZipFile.getAbsolutePath(),
@@ -8477,8 +8485,8 @@ class PackageManagerService extends IPackageManager.Stub {
             mPastSignatures.clear();
 
             try {
-                BufferedOutputStream str = new BufferedOutputStream(new FileOutputStream(
-                        mSettingsFilename));
+                FileOutputStream fstr = new FileOutputStream(mSettingsFilename);
+                BufferedOutputStream str = new BufferedOutputStream(fstr);
 
                 //XmlSerializer serializer = XmlUtils.serializerInstance();
                 XmlSerializer serializer = new FastXmlSerializer();
@@ -8559,6 +8567,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 serializer.endDocument();
 
                 str.flush();
+                FileUtils.sync(fstr);
                 str.close();
 
                 // New settings successfully written, old ones are no longer
@@ -8575,7 +8584,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 File tempFile = new File(mPackageListFilename.toString() + ".tmp");
                 JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
 
-                str = new BufferedOutputStream(new FileOutputStream(journal.chooseForWrite()));
+                fstr = new FileOutputStream(journal.chooseForWrite());
+                str = new BufferedOutputStream(fstr);
                 try {
                     StringBuilder sb = new StringBuilder();
                     for (PackageSetting pkg : mPackages.values()) {
@@ -8611,6 +8621,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         str.write(sb.toString().getBytes());
                     }
                     str.flush();
+                    FileUtils.sync(fstr);
                     str.close();
                     journal.commit();
                 }

@@ -1,0 +1,36 @@
+<HTML>
+<BODY>
+Provides access to Near Field Communication (NFC) functionality, allowing applications to connect
+to NFC tags, then transmit and recieving data. A "tag" may actually be another device that appears
+as a tag.
+
+<p>Here's a summary of the classes:</p>
+
+<dl>
+  <dt>{@link android.nfc.NfcAdapter}</dt>
+  <dd>This represents the device's NFC adapter, which is your entry-point to performing NFC
+operations. Once you acquire an instance with {@link android.nfc.NfcAdapter#getDefaultAdapter}, you
+can create connections to tags.</dd>
+  <dt>{@link android.nfc.NdefTag} and {@link android.nfc.Tag}</dt>
+  <dd>These objects represent a tag. A tag is a thing that the NFC-enabled device can
+communicate with when within range. Usually, you'll work with {@link android.nfc.NdefTag}, which
+represents a tag that's compliant with the NFC Data Exchange Format (NDEF); a {@link
+android.nfc.Tag} represents a generalized tag. Note that {@link android.nfc.NdefTag} extends
+{@link android.nfc.Tag}.</dd>
+  <dt>{@link android.nfc.NdefTagConnection} and {@link android.nfc.RawTagConnection}</dt>
+  <dd>These objects represent a connection to a tag, respective to the type of tag connected
+(either {@link android.nfc.NdefTag} or {@link android.nfc.Tag}). Note that {@link
+android.nfc.NdefTagConnection} extends {@link android.nfc.RawTagConnection}.</dd>
+  <dt>{@link android.nfc.NdefMessage}</dt>
+  <dd>Represents an NDEF data message, which is the standard format in which "records"
+carrying data are transmitted between devices and tags. Your application can receive these
+messages from an {@link android.nfc.NdefTagConnection}.</dd>
+  <dt>{@link android.nfc.NdefRecord}</dt>
+  <dd>Represents a record, which is delivered in a {@link android.nfc.NdefMessage} and describes the
+type of data being shared and carries the data itself.</dd>
+</dl>
+
+<p class="note"><strong>Note:</strong>
+Not all Android-powered devices provide NFC functionality.</p>
+</BODY>
+</HTML>

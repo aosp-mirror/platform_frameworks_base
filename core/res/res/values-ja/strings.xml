@@ -169,7 +169,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"開発ツール"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"アプリケーションのデベロッパーにのみ必要な機能です。"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="5455804353220581312">"共有ストレージへのアクセス"</string>
+    <!-- outdated translation 5455804353220581312 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"共有ストレージへのアクセス"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SDカードにアクセスします。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"ステータスバーの無効化やシステムアイコンの追加や削除をアプリケーションに許可します。"</string>
@@ -321,16 +321,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"リムーバブルメモリのファイルシステムのマウントとマウント解除をアプリケーションに許可します。"</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"外部ストレージのフォーマット"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"アプリケーションがリムーバブルストレージをフォーマットすることを許可します。"</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"セキュアストレージ上の情報の取得"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"セキュアストレージ上の情報の取得をアプリケーションに許可します。"</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"セキュアストレージの作成"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"セキュアストレージの作成をアプリケーションに許可します。"</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"セキュアストレージの破棄"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"セキュアストレージの破棄をアプリケーションに許可します。"</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"セキュアストレージのマウント/マウント解除"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"セキュアストレージのマウント/マウント解除をアプリケーションに許可します。"</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"セキュアストレージ名の変更"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"セキュアストレージ名の変更をアプリケーションに許可します。"</string>
+    <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"セキュアストレージ上の情報の取得"</string>
+    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"セキュアストレージ上の情報の取得をアプリケーションに許可します。"</string>
+    <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"セキュアストレージの作成"</string>
+    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"セキュアストレージの作成をアプリケーションに許可します。"</string>
+    <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"セキュアストレージの破棄"</string>
+    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"セキュアストレージの破棄をアプリケーションに許可します。"</string>
+    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"セキュアストレージのマウント/マウント解除"</string>
+    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"セキュアストレージのマウント/マウント解除をアプリケーションに許可します。"</string>
+    <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"セキュアストレージ名の変更"</string>
+    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"セキュアストレージ名の変更をアプリケーションに許可します。"</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"バイブレーション制御"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"バイブレーションの制御をアプリケーションに許可します。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ライトのコントロール"</string>
@@ -427,9 +427,9 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"アプリケーションが単語リストに登録されている個人的な語句や名前を読み込むことを許可します。"</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"単語リストへの書き込み"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"アプリケーションが単語リストに新しい語句を書き込むことを許可します。"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="993707436941016913">"共有ストレージのコンテンツの変更/削除"</string>
+    <!-- outdated translation 993707436941016913 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"共有ストレージのコンテンツの変更/削除"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SDカードのコンテンツを修正/削除する"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="4131871541127211526">"共有ストレージへの書き込みをアプリケーションに許可します。"</string>
+    <!-- outdated translation 4131871541127211526 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"共有ストレージへの書き込みをアプリケーションに許可します。"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"SDカードへの書き込みをアプリケーションに許可します。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"キャッシュファイルシステムにアクセス"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"キャッシュファイルシステムへの読み書きをアプリケーションに許可します。"</string>
@@ -802,17 +802,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"すべて表示"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USBマスストレージ"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB接続"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="8231462750010066896">"携帯端末をUSBでパソコンに接続しています。パソコンとAndroidの共有ストレージ間でファイルをコピーするには、下のボタンを選択します。"</string>
+    <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"携帯端末をUSBでパソコンに接続しています。パソコンとAndroidの共有ストレージ間でファイルをコピーするには、下のボタンを選択します。"</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"携帯電話をUSBでパソコンに接続しています。パソコンとAndroidのSDカード間でファイルをコピーするには、下のボタンを選択します。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USBストレージをONにする"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="4818347756402740261">"共有ストレージをUSBストレージとして使用する際に問題が発生しました。"</string>
-    <string name="usb_storage_error_message" product="default" msgid="2534784751603345363">"USBメモリにSDカードを使用する際に問題が発生しました。"</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"共有ストレージをUSBストレージとして使用する際に問題が発生しました。"</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"共有ストレージをUSBストレージとして使用する際に問題が発生しました。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB接続"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"パソコンとの間でファイルをコピーします。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USBストレージをOFFにする"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"USBストレージをOFFにする場合に選択します。"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USBストレージを使用中"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="8745345260780267185">"USBストレージをOFFにする前に、パソコンで必ずAndroidの共有ストレージのマウントを解除して（ストレージを取り出して）ください。"</string>
+    <!-- outdated translation 8745345260780267185 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"USBストレージをOFFにする前に、パソコンで必ずAndroidの共有ストレージのマウントを解除して（ストレージを取り出して）ください。"</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"USBストレージをOFFにする前に、パソコンで必ずAndroidのSDカードのマウントを解除して（カードを取り出して）ください。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USBストレージをOFFにする"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USBストレージをOFFにする際に問題が発生しました。USBホストのマウントが解除されていることを確認してからもう一度お試しください。"</string>
@@ -820,9 +820,9 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USBストレージをONにすると、使用中のアプリケーションの一部が停止し、USBストレージをOFFにするまで使用できなくなる場合があります。"</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB操作に失敗しました"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="6577908006949742217">"共有ストレージのフォーマット"</string>
+    <!-- outdated translation 6577908006949742217 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"共有ストレージのフォーマット"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SDカードをフォーマット"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3470815140068502824">"共有ストレージをフォーマットして、保存されているすべてのファイルを消去しますか？この操作は元に戻せません。"</string>
+    <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"共有ストレージをフォーマットして、保存されているすべてのファイルを消去しますか？この操作は元に戻せません。"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"SDカードをフォーマットしてもよろしいですか？カード内のすべてのデータが失われます。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"フォーマット"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
@@ -831,28 +831,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候補"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="4239516675028438997">"共有ストレージの準備中"</string>
+    <!-- outdated translation 4239516675028438997 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"共有ストレージの準備中"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SDカードの準備中"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"エラーを確認しています。"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="3937345577983730873">"共有ストレージが空です"</string>
+    <!-- outdated translation 3937345577983730873 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"共有ストレージが空です"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"空のSDカード"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="1606660756124629708">"共有ストレージが空であるか、サポートされていないファイルシステムを使用しています。"</string>
+    <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"共有ストレージが空であるか、サポートされていないファイルシステムを使用しています。"</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SDカードが空か、サポート対象外のファイルシステムを使用しています。"</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="1724619902076528889">"共有ストレージが破損しています"</string>
+    <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"共有ストレージが破損しています"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"破損したSDカード"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="6460311835130671194">"共有ストレージが破損しています。ストレージの再フォーマットが必要な可能性があります。"</string>
+    <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"共有ストレージが破損しています。ストレージの再フォーマットが必要な可能性があります。"</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SDカードが破損しています。カードのフォーマットが必要な可能性があります。"</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="2582175016060432034">"共有ストレージが不適切に取り外されました"</string>
+    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"共有ストレージが不適切に取り外されました"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SDカードが予期せず取り外されました"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="2005396464494648937">"データの喪失を防ぐため共有ストレージを取り外す前にマウントを解除してください。"</string>
+    <!-- outdated translation 2005396464494648937 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"データの喪失を防ぐため共有ストレージを取り外す前にマウントを解除してください。"</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"データの喪失を防ぐためSDカードを取り外す前にマウントを解除してください。"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="36525881018679515">"共有ストレージの安全な取り外し"</string>
+    <!-- outdated translation 36525881018679515 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"共有ストレージの安全な取り外し"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SDカードを安全に取り外しました"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="7503769106285188703">"共有ストレージを安全に取り外せます。"</string>
+    <!-- outdated translation 7503769106285188703 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"共有ストレージを安全に取り外せます。"</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"SDカードは安全に取り外せます。"</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="1874889764367085562">"共有ストレージが取り外されています"</string>
+    <!-- outdated translation 1874889764367085562 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"共有ストレージが取り外されています"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SDカードが取り外されています"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="2730890441331344776">"共有ストレージが取り外されています。新しいメディアを挿入してください。"</string>
+    <!-- outdated translation 2730890441331344776 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"共有ストレージが取り外されています。新しいメディアを挿入してください。"</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SDカードが取り外されました。新しいカードを挿入してください。"</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"一致するアクティビティが見つかりません"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"コンポーネント使用状況に関する統計情報の更新"</string>

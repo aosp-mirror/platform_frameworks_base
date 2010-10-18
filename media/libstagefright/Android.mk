@@ -46,8 +46,7 @@ LOCAL_SRC_FILES:=                         \
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
-        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
-        $(TOP)/external/opencore/android \
+        $(TOP)/frameworks/base/include/media/stagefright/openmax \
         $(TOP)/external/tremolo \
         $(TOP)/frameworks/base/media/libstagefright/rtsp
 

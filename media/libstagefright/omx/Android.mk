@@ -1,10 +1,12 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+ifneq ($(BUILD_WITHOUT_PV),true)
 # Set up the OpenCore variables.
 include external/opencore/Config.mk
 LOCAL_C_INCLUDES := $(PV_INCLUDES)
 LOCAL_CFLAGS := $(PV_CFLAGS_MINUS_VISIBILITY)
+endif
 
 LOCAL_C_INCLUDES += $(JNI_H_INCLUDE)
 
@@ -20,6 +22,8 @@ LOCAL_SRC_FILES += \
 else
 LOCAL_CFLAGS += -DNO_OPENCORE
 endif
+
+LOCAL_C_INCLUDES += $(TOP)/frameworks/base/include/media/stagefright/openmax
 
 LOCAL_SHARED_LIBRARIES :=       \
         libbinder               \

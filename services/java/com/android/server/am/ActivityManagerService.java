@@ -5888,7 +5888,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 View v = LayoutInflater.from(mContext).inflate(
                         com.android.internal.R.layout.safe_mode, null);
                 WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+                lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
                 lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
                 lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                 lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
@@ -6074,6 +6074,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, "Failure writing last done pre-boot receivers", e);
             file.delete();
         } finally {
+            FileUtils.sync(fos);
             if (dos != null) {
                 try {
                     dos.close();
@@ -7034,6 +7035,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     currApp.uid = app.info.uid;
                     if (mHeavyWeightProcess == app) {
                         currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_CANT_SAVE_STATE;
+                    }
+                    if (app.persistent) {
+                        currApp.flags |= ActivityManager.RunningAppProcessInfo.FLAG_PERSISTENT;
                     }
                     int adj = app.curAdj;
                     if (adj >= EMPTY_APP_ADJ) {

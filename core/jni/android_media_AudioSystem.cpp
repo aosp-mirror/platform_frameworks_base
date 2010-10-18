@@ -99,6 +99,10 @@ android_media_AudioSystem_getParameters(JNIEnv *env, jobject thiz, jstring keys)
 void android_media_AudioSystem_error_callback(status_t err)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        return;
+    }
+
     jclass clazz = env->FindClass("android/media/AudioSystem");
 
     int error;

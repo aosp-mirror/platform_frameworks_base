@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Binder;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.DropBoxManager;
 import android.os.RemoteException;
@@ -384,7 +385,7 @@ class BatteryService extends Binder {
             dumpFile = new File(DUMPSYS_DATA_PATH + BATTERY_STATS_SERVICE_NAME + ".dump");
             dumpStream = new FileOutputStream(dumpFile);
             batteryInfoService.dump(dumpStream.getFD(), DUMPSYS_ARGS);
-            dumpStream.getFD().sync();
+            FileUtils.sync(dumpStream);
 
             // add dump file to drop box
             db.addFile("BATTERY_DISCHARGE_INFO", dumpFile, DropBoxManager.IS_TEXT);

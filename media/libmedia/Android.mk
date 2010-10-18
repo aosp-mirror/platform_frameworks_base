@@ -50,7 +50,7 @@ endif
 LOCAL_C_INCLUDES := \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, graphics corecg) \
-    $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
+    $(TOP)/frameworks/base/include/media/stagefright/openmax \
     external/icu4c/common \
     external/expat/lib
 

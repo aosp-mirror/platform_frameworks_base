@@ -16,24 +16,24 @@
 
 package android.nfc;
 
+import java.util.HashMap;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * NdefTag is a Tag that has NDEF messages or can store NDEF messages.
+ * Represents a discovered tag that contains {@link NdefMessage}s (or a tag that can store them).
+ * In practice, a tag is a thing that an NFC-enabled device can communicate with. This
+ * class is a representation of such a tag and can contain the NDEF messages shared by the tag.
+ * <p>An NDEF tag can contain zero or more NDEF messages (represented by {@link NdefMessage}
+ * objects) in addition to the basic tag properties of UID and Type.
  * <p>
- * NDEF Tag's contain zero or more NDEF Messages in addition to the basic
- * Tag properties of UID and Type.
- * <p>
- * NDEF Tag's that have been initialized will usually contain a single NDEF
- * Message (and that Message can contain multiple NDEF Records). However it
- * is possible for NDEF Tag's to contain multiple NDEF Messages.
- * <p>
- * This class is a immutable data class that contains the contents of the NDEF
- * Message(s) as read at Tag discovery time.
- * <p>
- * NfcAdapter.createNdefTagConnection() can be used to modify the contents of
- * some NDEF Tag's.
+ * {@link NdefTag}s that have been initialized will usually contain a single {@link NdefMessage}
+ * (and that Message can contain multiple {@link NdefRecord}s). However it
+ * is possible for {@link NdefTag}s to contain multiple {@link NdefMessage}s.
+ * <p>{@link NfcAdapter#createNdefTagConnection createNdefTagConnection()} can be used to modify the
+ * contents of some tags.
+ * <p>This is an immutable data class.
  */
 public class NdefTag extends Tag implements Parcelable {
     private final NdefMessage[] mMessages;
@@ -43,8 +43,8 @@ public class NdefTag extends Tag implements Parcelable {
      * tag is discovered and by Parcelable methods.
      * @hide
      */
-    public NdefTag(int type, byte[] uid, int nativeHandle, NdefMessage[] messages) {
-        super(type, true, uid, nativeHandle);
+    public NdefTag(String typeName, byte[] uid, int nativeHandle, NdefMessage[] messages) {
+        super(typeName, true, uid, nativeHandle);
         mMessages = messages.clone();
     }
 
@@ -64,10 +64,22 @@ public class NdefTag extends Tag implements Parcelable {
 
     /**
      * Get only the NDEF Messages from a single NDEF target on a tag.
+     * <p>
+     * This retrieves the NDEF Messages that were found on the Tag at discovery
+     * time. It does not cause any further RF activity, and does not block.
+     * <p>
+     * Most tags only contain a single NDEF message.
+     *
+     * @param target One of targets strings provided by getNdefTargets()
+     * @return NDEF Messages found at Tag discovery
      */
     public NdefMessage[] getNdefMessages(String target) {
-        //TODO(nxp): new api method
-        throw new UnsupportedOperationException();
+        // TODO: handle multiprotocol
+        String[] localTypes = convertToNdefType(mTypeName);
+        if (!target.equals(localTypes[0])) {
+            throw new IllegalArgumentException();
+        }
+        return getNdefMessages();
     }
 
     /** TODO(npelly):
@@ -81,13 +93,35 @@ public class NdefTag extends Tag implements Parcelable {
     public static final String TARGET_MIFARE_CLASSIC = "type_mifare_classic";
     public static final String TARGET_OTHER = "other";
 
+    private static final HashMap<String, String[]> NDEF_TYPES_CONVERTION_TABLE = new HashMap<String, String[]>() {
+        {
+            // TODO: handle multiprotocol
+            // TODO: move INTERNAL_TARGET_Type to TARGET_TYPE mapping to NFC service
+            put(Tag.INTERNAL_TARGET_TYPE_JEWEL, new String[] { NdefTag.TARGET_TYPE_1 });
+            put(Tag.INTERNAL_TARGET_TYPE_MIFARE_UL, new String[] { NdefTag.TARGET_TYPE_2 });
+            put(Tag.INTERNAL_TARGET_TYPE_MIFARE_1K, new String[] { NdefTag.TARGET_MIFARE_CLASSIC });
+            put(Tag.INTERNAL_TARGET_TYPE_MIFARE_4K, new String[] { NdefTag.TARGET_MIFARE_CLASSIC });
+            put(Tag.INTERNAL_TARGET_TYPE_FELICA, new String[] { NdefTag.TARGET_TYPE_3 });
+            put(Tag.INTERNAL_TARGET_TYPE_ISO14443_4, new String[] { NdefTag.TARGET_TYPE_4 });
+            put(Tag.INTERNAL_TARGET_TYPE_MIFARE_DESFIRE, new String[] { NdefTag.TARGET_TYPE_4 });
+        }
+    };
+
+    private String[] convertToNdefType(String internalTypeName) {
+        String[] result =  NDEF_TYPES_CONVERTION_TABLE.get(internalTypeName);
+        if (result == null) {
+            return new String[] { NdefTag.TARGET_OTHER };
+        }
+        return result;
+    }
+
     /**
      * Return the
      *
      * @return
      */
     public String[] getNdefTargets() {
-        throw new UnsupportedOperationException();
+        return convertToNdefType(mTypeName);
     }
 
     @Override
@@ -109,7 +143,7 @@ public class NdefTag extends Tag implements Parcelable {
             int messagesLength = in.readInt();
             NdefMessage[] messages = new NdefMessage[messagesLength];
             in.readTypedArray(messages, NdefMessage.CREATOR);
-            return new NdefTag(tag.mType, tag.mUid, tag.mNativeHandle, messages);
+            return new NdefTag(tag.mTypeName, tag.mUid, tag.mNativeHandle, messages);
         }
         public NdefTag[] newArray(int size) {
             return new NdefTag[size];
