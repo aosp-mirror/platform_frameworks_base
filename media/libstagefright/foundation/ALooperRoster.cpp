@@ -54,7 +54,10 @@ void ALooperRoster::unregisterHandler(ALooper::handler_id handlerID) {
     Mutex::Autolock autoLock(mLock);
 
     ssize_t index = mHandlers.indexOfKey(handlerID);
-    CHECK_GE(index, 0);
+
+    if (index < 0) {
+        return;
+    }
 
     const HandlerInfo &info = mHandlers.valueAt(index);
 
@@ -84,7 +87,8 @@ void ALooperRoster::postMessage(
 
     if (looper == NULL) {
         LOGW("failed to post message. "
-             "Target handler still registered, but object gone.");
+             "Target handler %d still registered, but object gone.",
+             msg->target());
 
         mHandlers.removeItemsAt(index);
         return;
@@ -111,7 +115,8 @@ void ALooperRoster::deliverMessage(const sp<AMessage> &msg) {
 
         if (handler == NULL) {
             LOGW("failed to deliver message. "
-                 "Target handler registered, but object gone.");
+                 "Target handler %d registered, but object gone.",
+                 msg->target());
 
             mHandlers.removeItemsAt(index);
             return;
