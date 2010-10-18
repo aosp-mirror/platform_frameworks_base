@@ -30,7 +30,7 @@ import android.util.Log;
  * Applications must implement their own protocol stack on top of {@link #transceive transceive()}.
  *
  * <p class="note"><strong>Note:</strong>
- * Most methods require the TODO
+ * Use of this class requires the {@link android.Manifest.permission#NFC}
  * permission.
  */
 public class RawTagConnection {
@@ -71,11 +71,15 @@ public class RawTagConnection {
 
     /**
      * Get the {@link Tag} this connection is associated with.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public Tag getTag() {
         return mTag;
     }
 
+    /**
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     */
     public String getTagTarget() {
         return mSelectedTarget;
     }
@@ -84,7 +88,7 @@ public class RawTagConnection {
      * Helper to indicate if {@link #transceive transceive()} calls might succeed.
      * <p>
      * Does not cause RF activity, and does not block.
-     * <p>
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      * @return true if {@link #connect} has completed successfully and the {@link Tag} is believed
      * to be within range. Applications must still handle {@link java.io.IOException}
      * while using {@link #transceive transceive()}, in case connection is lost after this method
@@ -104,7 +108,7 @@ public class RawTagConnection {
      * <p>
      * {@link #close} can be called from another thread to cancel this connection
      * attempt.
-     *
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      * @throws IOException if the target is lost, or connect canceled
      */
     public void connect() throws IOException {
@@ -120,6 +124,7 @@ public class RawTagConnection {
      * <p>
      * Once this method is called, this object cannot be re-used and should be discarded. Further
      * calls to {@link #transceive transceive()} or {@link #connect} will fail.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public void close() {
         mIsConnected = false;
@@ -135,8 +140,7 @@ public class RawTagConnection {
      * <p>
      * This method will block until the response is received. It can be canceled
      * with {@link #close}.
-     * <p>
-     * Requires NFC_WRITE permission.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      *
      * @param data bytes to send
      * @return bytes received in response

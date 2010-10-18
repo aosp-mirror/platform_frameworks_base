@@ -25,6 +25,9 @@ import android.util.Log;
  * A connection to an NDEF target on an {@link NdefTag}.
  * <p>You can acquire this kind of connection with {@link NfcAdapter#createNdefTagConnection
  * createNdefTagConnection()}. Use the connection to read or write {@link NdefMessage}s.
+ * <p class="note"><strong>Note:</strong>
+ * Use of this class requires the {@link android.Manifest.permission#NFC}
+ * permission.
  */
 public class NdefTagConnection extends RawTagConnection {
     public static final int NDEF_MODE_READ_ONCE = 1;
@@ -69,7 +72,7 @@ public class NdefTagConnection extends RawTagConnection {
      * This will always return the most up to date payload, and can block.
      * It can be canceled with {@link RawTagConnection#close}.
      * Most NDEF tags will contain just one NDEF message.
-     * <p>
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      * @throws FormatException if the tag is not NDEF formatted
      * @throws IOException if the target is lost or connection closed
      * @throws FormatException
@@ -109,8 +112,9 @@ public class NdefTagConnection extends RawTagConnection {
      * message. Use {@link NdefRecord} to write several records to a single tag.
      * For write-many tags, use {@link #makeReadOnly} after this method to attempt
      * to prevent further modification. For write-once tags this is not
-     * neccesary.
-     * Requires NFC_WRITE permission.
+     * necessary.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     *
      * @throws FormatException if the tag is not suitable for NDEF messages
      * @throws IOException if the target is lost or connection closed or the
      *                     write failed
@@ -138,7 +142,7 @@ public class NdefTagConnection extends RawTagConnection {
      * Attempts to make the NDEF data in this tag read-only.
      * This method will block until the action is complete. It can be canceled
      * with {@link RawTagConnection#close}.
-     * Requires NFC_WRITE permission.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      * @return true if the tag is now read-only
      * @throws IOException if the target is lost, or connection closed
      */
@@ -164,7 +168,8 @@ public class NdefTagConnection extends RawTagConnection {
 
     /**
      * Read/Write mode hint.
-     * Provides a hint if further reads or writes are likely to suceed.
+     * Provides a hint if further reads or writes are likely to succeed.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      * @return one of NDEF_MODE
      * @throws IOException if the target is lost or connection closed
      */
