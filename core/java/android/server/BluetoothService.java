@@ -319,6 +319,10 @@ public class BluetoothService extends IBluetooth.Stub {
         mEventLoop = new BluetoothEventLoop(mContext, mAdapter, this);
     }
 
+    public synchronized void initAfterA2dpRegistration() {
+        mEventLoop.getProfileProxy();
+    }
+
     @Override
     protected void finalize() throws Throwable {
         mContext.unregisterReceiver(mReceiver);
