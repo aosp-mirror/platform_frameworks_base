@@ -82,6 +82,11 @@ class SipSessionGroup implements SipListener {
     private static final boolean DEBUG = true;
     private static final boolean DEBUG_PING = DEBUG && false;
     private static final String ANONYMOUS = "anonymous";
+    // Limit the size of thread pool to 1 for the order issue when the phone is
+    // waken up from sleep and there are many packets to be processed in the SIP
+    // stack. Note: The default thread pool size in NIST SIP stack is -1 which is
+    // unlimited.
+    private static final String THREAD_POOL_SIZE = "1";
     private static final int EXPIRY_TIME = 3600; // in seconds
     private static final int CANCEL_CALL_TIMER = 3; // in seconds
     private static final long WAKE_LOCK_HOLDING_TIME = 500; // in milliseconds
@@ -129,6 +134,7 @@ class SipSessionGroup implements SipListener {
         SipFactory sipFactory = SipFactory.getInstance();
         Properties properties = new Properties();
         properties.setProperty("javax.sip.STACK_NAME", getStackName());
+        properties.setProperty("javax.sip.THREAD_POOL_SIZE", THREAD_POOL_SIZE);
         String outboundProxy = myself.getProxyAddress();
         if (!TextUtils.isEmpty(outboundProxy)) {
             Log.v(TAG, "outboundProxy is " + outboundProxy);
