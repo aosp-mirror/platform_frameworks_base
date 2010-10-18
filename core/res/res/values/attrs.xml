@@ -4271,6 +4271,8 @@
         <!-- The default state of the SearchView. If true, it will be iconified when not in
              use and expanded when clicked. -->
         <attr name="iconifiedByDefault" format="boolean"/>
+        <!-- An optional maximum width of the SearchView. -->
+        <attr name="maxWidth" />
     </declare-styleable>
 
     <declare-styleable name="ButtonGroup">
