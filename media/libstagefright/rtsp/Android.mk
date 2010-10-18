@@ -21,7 +21,7 @@ LOCAL_SRC_FILES:=       \
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
-	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
+	$(TOP)/frameworks/base/include/media/stagefright/openmax \
         $(TOP)/frameworks/base/media/libstagefright/include \
 
 LOCAL_MODULE:= libstagefright_rtsp
@@ -48,7 +48,7 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
-	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
+	$(TOP)/frameworks/base/include/media/stagefright/openmax
 
 LOCAL_CFLAGS += -Wno-multichar
 
