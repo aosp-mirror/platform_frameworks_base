@@ -89,7 +89,7 @@
 
         <item name="buttonStyleToggle">@android:style/Widget.Button.Toggle</item>
 
-        <item name="groupButtonBackground">@android:drawable/btn_default</item>
+        <item name="groupButtonBackground">@null</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
