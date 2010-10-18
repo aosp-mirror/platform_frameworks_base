@@ -2536,9 +2536,9 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
 #if DEBUG_FOCUS
                 LOGD("Touched window was removed: %s", touchedWindow.channel->getName().string());
 #endif
-                mTouchState.windows.removeAt(i);
                 synthesizeCancelationEventsForInputChannelLocked(touchedWindow.channel,
                         InputState::CANCEL_POINTER_EVENTS, "touched window was removed");
+                mTouchState.windows.removeAt(i);
             }
         }
 
