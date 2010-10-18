@@ -23,11 +23,12 @@
 
 #include <utils/Singleton.h>
 
+#include "FontRenderer.h"
+#include "GammaFontRenderer.h"
 #include "TextureCache.h"
 #include "LayerCache.h"
 #include "GradientCache.h"
 #include "PatchCache.h"
-#include "GammaFontRenderer.h"
 #include "ProgramCache.h"
 #include "PathCache.h"
 #include "TextDropShadowCache.h"
@@ -37,15 +38,55 @@
 namespace android {
 namespace uirenderer {
 
+///////////////////////////////////////////////////////////////////////////////
+// Globals
+///////////////////////////////////////////////////////////////////////////////
+
+#define REQUIRED_TEXTURE_UNITS_COUNT 3
+
+// Generates simple and textured vertices
+#define FV(x, y, u, v) { { x, y }, { u, v } }
+
+// This array is never used directly but used as a memcpy source in the
+// OpenGLRenderer constructor
+static const TextureVertex gMeshVertices[] = {
+        FV(0.0f, 0.0f, 0.0f, 0.0f),
+        FV(1.0f, 0.0f, 1.0f, 0.0f),
+        FV(0.0f, 1.0f, 0.0f, 1.0f),
+        FV(1.0f, 1.0f, 1.0f, 1.0f)
+};
+static const GLsizei gMeshStride = sizeof(TextureVertex);
+static const GLsizei gMeshTextureOffset = 2 * sizeof(float);
+static const GLsizei gMeshCount = 4;
+
+///////////////////////////////////////////////////////////////////////////////
+// Debug
+///////////////////////////////////////////////////////////////////////////////
+
 struct CacheLogger {
     CacheLogger() {
         LOGD("Creating caches");
     }
 }; // struct CacheLogger
 
+///////////////////////////////////////////////////////////////////////////////
+// Caches
+///////////////////////////////////////////////////////////////////////////////
+
 class Caches: public Singleton<Caches> {
     Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
             lastDstMode(GL_ZERO), currentProgram(NULL) {
+        GLint maxTextureUnits;
+        glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+        if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
+            LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
+        }
+
+        glGenBuffers(1, &meshBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
+
+        currentBuffer = meshBuffer;
     }
 
     friend class Singleton<Caches>;
@@ -53,10 +94,40 @@ class Caches: public Singleton<Caches> {
     CacheLogger logger;
 
 public:
+    /**
+     * Binds the VBO used to render simple textured quads.
+     */
+    inline void bindMeshBuffer() {
+        bindMeshBuffer(meshBuffer);
+    }
+
+    /**
+     * Binds the specified VBO.
+     */
+    inline void bindMeshBuffer(const GLuint buffer) {
+        if (currentBuffer != buffer) {
+            glBindBuffer(GL_ARRAY_BUFFER, buffer);
+            currentBuffer = buffer;
+        }
+    }
+
+    /**
+     * Unbinds the VBO used to render simple textured quads.
+     */
+    inline void unbindMeshBuffer() {
+        if (currentBuffer) {
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            currentBuffer = 0;
+        }
+    }
+
     bool blend;
     GLenum lastSrcMode;
     GLenum lastDstMode;
     Program* currentProgram;
+
+    GLuint meshBuffer;
+    GLuint currentBuffer;
 
     TextureCache textureCache;
     LayerCache layerCache;

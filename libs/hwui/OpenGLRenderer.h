@@ -234,8 +234,9 @@ private:
             const Texture* texture, const SkPaint* paint);
 
     /**
-     * Draws a textured mesh with the specified texture. If the indices are omitted, the
-     * mesh is drawn as a simple quad.
+     * Draws a textured mesh with the specified texture. If the indices are omitted,
+     * the mesh is drawn as a simple quad. The mesh pointers become offsets when a
+     * VBO is bound.
      *
      * @param left The left coordinate of the rectangle
      * @param top The top coordinate of the rectangle
@@ -247,15 +248,15 @@ private:
      * @param blend True if the texture contains an alpha channel
      * @param vertices The vertices that define the mesh
      * @param texCoords The texture coordinates of each vertex
-     * @param indices The indices of the vertices, can be NULL
      * @param elementsCount The number of elements in the mesh, required by indices
      * @param swapSrcDst Whether or not the src and dst blending operations should be swapped
      * @param ignoreTransform True if the current transform should be ignored
+     * @param vbo The VBO used to draw the mesh
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
             float alpha, SkXfermode::Mode mode, bool blend,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-            bool swapSrcDst = false, bool ignoreTransform = false);
+            bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0);
 
     /**
      * Prepares the renderer to draw the specified shadow.
@@ -315,12 +316,12 @@ private:
 
     /**
      * Same as above setupTextureAlpha8() but specifies the mesh's vertices
-     * and texCoords pointers.
+     * and texCoords pointers. The pointers become offsets when a VBO is bound.
      */
     void setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
             GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
             SkXfermode::Mode mode, bool transforms, bool applyFilters,
-            GLvoid* vertices, GLvoid* texCoords);
+            GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
 
     /**
      * Draws text underline and strike-through if needed.

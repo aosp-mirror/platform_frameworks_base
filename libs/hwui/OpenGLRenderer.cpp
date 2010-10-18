@@ -35,11 +35,6 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define REQUIRED_TEXTURE_UNITS_COUNT 3
-
-// Generates simple and textured vertices
-#define FV(x, y, u, v) { { x, y }, { u, v } }
-
 #define RAD_TO_DEG (180.0f / 3.14159265f)
 #define MIN_ANGLE 0.001f
 
@@ -49,17 +44,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
-
-// This array is never used directly but used as a memcpy source in the
-// OpenGLRenderer constructor
-static const TextureVertex gMeshVertices[] = {
-        FV(0.0f, 0.0f, 0.0f, 0.0f),
-        FV(1.0f, 0.0f, 1.0f, 0.0f),
-        FV(0.0f, 1.0f, 0.0f, 1.0f),
-        FV(1.0f, 1.0f, 1.0f, 1.0f)
-};
-static const GLsizei gMeshStride = sizeof(TextureVertex);
-static const GLsizei gMeshCount = 4;
 
 /**
  * Structure mapping Skia xfermodes to OpenGL blending factors.
@@ -123,12 +107,6 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
     mFirstSnapshot = new Snapshot;
-
-    GLint maxTextureUnits;
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
-    if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
-        LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
-    }
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 }
@@ -201,6 +179,8 @@ void OpenGLRenderer::releaseContext() {
     glDisable(GL_DITHER);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    mCaches.bindMeshBuffer();
 
     if (mCaches.blend) {
         glEnable(GL_BLEND);
@@ -514,11 +494,13 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     }
 
     const Rect& texCoords = layer->texCoords;
+    mCaches.unbindMeshBuffer();
     resetDrawTextureTexCoords(texCoords.left, texCoords.top, texCoords.right, texCoords.bottom);
 
     if (fboLayer) {
-        drawTextureRect(rect.left, rect.top, rect.right, rect.bottom,
-                layer->texture, layer->alpha / 255.0f, layer->mode, layer->blend);
+        drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
+                layer->alpha / 255.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
+                &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount);
     } else {
         drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
                 1.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
@@ -698,9 +680,16 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     const float u2 = srcRight / width;
     const float v2 = srcBottom / height;
 
+    mCaches.unbindMeshBuffer();
     resetDrawTextureTexCoords(u1, v1, u2, v2);
 
-    drawTextureRect(dstLeft, dstTop, dstRight, dstBottom, texture, paint);
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom, texture->id, alpha / 255.0f,
+            mode, texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+            GL_TRIANGLE_STRIP, gMeshCount);
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
 }
@@ -728,8 +717,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
         // Specify right and bottom as +1.0f from left/top to prevent scaling since the
         // patch mesh already defines the final size
         drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f,
-                mode, texture->blend, &mesh->vertices[0].position[0],
-                &mesh->vertices[0].texture[0], GL_TRIANGLES, mesh->verticesCount);
+                mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
+                GL_TRIANGLES, mesh->verticesCount, false, false, mesh->meshBuffer);
     }
 }
 
@@ -750,7 +739,8 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
     if (isAA) {
         GLuint textureUnit = 0;
         setupTextureAlpha8(mCaches.line.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
-                mode, false, true, mCaches.line.getVertices(), mCaches.line.getTexCoords());
+                mode, false, true, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
+                mCaches.line.getMeshBuffer());
     } else {
         setupColorRect(0.0f, 0.0f, 1.0f, 1.0f, r, g, b, a, mode, false);
     }
@@ -891,11 +881,12 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     // Assume that the modelView matrix does not force scales, rotates, etc.
     const bool linearFilter = mSnapshot->transform->changesBounds();
     setupTextureAlpha8(fontRenderer.getTexture(linearFilter), 0, 0, textureUnit,
-            x, y, r, g, b, a, mode, false, true);
+            x, y, r, g, b, a, mode, false, true, NULL, NULL);
 
     const Rect& clip = mSnapshot->getLocalClip();
     clearLayerRegions();
 
+    mCaches.unbindMeshBuffer();
     fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -1009,21 +1000,20 @@ void OpenGLRenderer::setupTextureAlpha8(const Texture* texture, GLuint& textureU
         bool transforms, bool applyFilters) {
     setupTextureAlpha8(texture->id, texture->width, texture->height, textureUnit,
             x, y, r, g, b, a, mode, transforms, applyFilters,
-            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
+            (GLvoid*) 0, (GLvoid*) gMeshTextureOffset);
 }
 
 void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
         GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
         SkXfermode::Mode mode, bool transforms, bool applyFilters) {
-    setupTextureAlpha8(texture, width, height, textureUnit,
-            x, y, r, g, b, a, mode, transforms, applyFilters,
-            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
+    setupTextureAlpha8(texture, width, height, textureUnit, x, y, r, g, b, a, mode,
+            transforms, applyFilters, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset);
 }
 
 void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t height,
         GLuint& textureUnit, float x, float y, float r, float g, float b, float a,
         SkXfermode::Mode mode, bool transforms, bool applyFilters,
-        GLvoid* vertices, GLvoid* texCoords) {
+        GLvoid* vertices, GLvoid* texCoords, GLuint vbo) {
      // Describe the required shaders
      ProgramDescription description;
      description.hasTexture = true;
@@ -1051,11 +1041,17 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
      glEnableVertexAttribArray(texCoordsSlot);
 
-     // Setup attributes
-     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-             gMeshStride, vertices);
-     glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
-             gMeshStride, texCoords);
+     if (texCoords) {
+         // Setup attributes
+         if (!vertices) {
+             mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
+         } else {
+             mCaches.unbindMeshBuffer();
+         }
+         glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
+                 gMeshStride, vertices);
+         glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
+     }
 
      // Setup uniforms
      if (transforms) {
@@ -1188,8 +1184,9 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
     useProgram(mCaches.programCache.get(description));
 
     // Setup attributes
+    mCaches.bindMeshBuffer();
     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gMeshStride, &mMeshVertices[0].position[0]);
+            gMeshStride, 0);
 
     // Setup uniforms
     mModelView.loadTranslate(left, top, 0.0f);
@@ -1218,21 +1215,20 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     getAlphaAndMode(paint, &alpha, &mode);
 
     drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
-            texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+            texture->blend, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
             GL_TRIANGLE_STRIP, gMeshCount);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend) {
     drawTextureMesh(left, top, right, bottom, texture, alpha, mode, blend,
-            &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
-            GL_TRIANGLE_STRIP, gMeshCount);
+            (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount);
 }
 
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool swapSrcDst, bool ignoreTransform) {
+        bool swapSrcDst, bool ignoreTransform, GLuint vbo) {
     clearLayerRegions();
 
     ProgramDescription description;
@@ -1267,6 +1263,12 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     // Mesh
     int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
     glEnableVertexAttribArray(texCoordsSlot);
+
+    if (!vertices) {
+        mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
+    } else {
+        mCaches.unbindMeshBuffer();
+    }
     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gMeshStride, vertices);
     glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);

@@ -64,12 +64,12 @@ struct PathCacheEntry {
     float strokeWidth;
 
     bool operator<(const PathCacheEntry& rhs) const {
-        compareI(path) {
-            compareI(join) {
-                compareI(cap) {
-                    compareI(style) {
-                        compare(miter) {
-                            compare(strokeWidth) return false;
+        INT_COMPARE(path) {
+            INT_COMPARE(join) {
+                INT_COMPARE(cap) {
+                    INT_COMPARE(style) {
+                        FLOAT_COMPARE(miter) {
+                            FLOAT_COMPARE(strokeWidth) return false;
                         }
                     }
                 }

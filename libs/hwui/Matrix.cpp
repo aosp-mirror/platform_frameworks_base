@@ -55,9 +55,11 @@ void Matrix4::loadIdentity() {
 }
 
 bool Matrix4::changesBounds() {
-    return !(almost(data[0], 1.0f) && almost(data[1], 0.0f) && almost(data[2], 0.0f) &&
-             almost(data[4], 0.0f) && almost(data[5], 1.0f) && almost(data[6], 0.0f) &&
-             almost(data[8], 0.0f) && almost(data[9], 0.0f) && almost(data[10], 1.0f));
+    return !(ALMOST_EQUAL(data[0], 1.0f) && ALMOST_EQUAL(data[1], 0.0f) &&
+             ALMOST_EQUAL(data[2], 0.0f) && ALMOST_EQUAL(data[4], 0.0f) &&
+             ALMOST_EQUAL(data[5], 1.0f) && ALMOST_EQUAL(data[6], 0.0f) &&
+             ALMOST_EQUAL(data[8], 0.0f) && ALMOST_EQUAL(data[9], 0.0f) &&
+             ALMOST_EQUAL(data[10], 1.0f));
 }
 
 void Matrix4::load(const float* v) {
