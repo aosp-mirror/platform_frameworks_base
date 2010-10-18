@@ -1113,7 +1113,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
      * called from native code to update our status
      */
     private void reportStatus(int status) {
-        if (VERBOSE) Log.v(TAG, "reportStatus status: " + status);
+        if (DEBUG) Log.v(TAG, "reportStatus status: " + status);
 
         synchronized(mListeners) {
             boolean wasNavigating = mNavigating;
@@ -1250,8 +1250,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         native_agps_data_conn_failed();
                     }
                 } else if (result == Phone.APN_REQUEST_STARTED) {
+                    if (DEBUG) Log.d(TAG, "Phone.APN_ALREADYAPN_REQUEST_STARTED_ACTIVE");
                     // Nothing to do here
                 } else {
+                    if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed");
                     mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                     native_agps_data_conn_failed();
                 }
