@@ -89,7 +89,7 @@ import java.util.Set;
  */
 public class LocationManagerService extends ILocationManager.Stub implements Runnable {
     private static final String TAG = "LocationManagerService";
-    private static final boolean LOCAL_LOGV = false;
+    private static final boolean LOCAL_LOGV = true;
 
     // The last time a location was written, by provider name.
     private HashMap<String,Long> mLastWriteTime = new HashMap<String,Long>();
@@ -224,15 +224,18 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         @Override
         public String toString() {
+            String result;
             if (mListener != null) {
-                return "Receiver{"
+                result = "Receiver{"
                         + Integer.toHexString(System.identityHashCode(this))
                         + " Listener " + mKey + "}";
             } else {
-                return "Receiver{"
+                result = "Receiver{"
                         + Integer.toHexString(System.identityHashCode(this))
                         + " Intent " + mKey + "}";
             }
+            result += "mUpdateRecords: " + mUpdateRecords;
+            return result;
         }
 
         public boolean isListener() {
@@ -1004,7 +1007,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         public String toString() {
             return "UpdateRecord{"
                     + Integer.toHexString(System.identityHashCode(this))
-                    + " " + mProvider + " " + mReceiver + "}";
+                    + " mProvider: " + mProvider + " mUid: " + mUid + "}";
         }
         
         void dump(PrintWriter pw, String prefix) {
@@ -1119,9 +1122,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private void requestLocationUpdatesLocked(String provider, long minTime, float minDistance,
             boolean singleShot, Receiver receiver) {
-        if (LOCAL_LOGV) {
-            Slog.v(TAG, "_requestLocationUpdates: listener = " + receiver);
-        }
 
         LocationProviderInterface p = mProvidersByName.get(provider);
         if (p == null) {
@@ -1158,6 +1158,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             } else {
                 // Notify the listener that updates are currently disabled
                 receiver.callProviderEnabledLocked(provider, false);
+            }
+            if (LOCAL_LOGV) {
+                Slog.v(TAG, "_requestLocationUpdates: provider = " + provider + " listener = " + receiver);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
