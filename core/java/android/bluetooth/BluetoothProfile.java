@@ -17,10 +17,7 @@
 
 package android.bluetooth;
 
-import android.annotation.SdkConstant;
-import android.annotation.SdkConstant.SdkConstantType;
-
-import java.util.Set;
+import java.util.List;
 
 /**
  * Public APIs for the Bluetooth Profiles.
@@ -150,9 +147,9 @@ public interface BluetoothProfile {
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
-     * @return An unmodifiable set of devices. The set will be empty on error.
+     * @return List of devices. The list will be empty on error.
      */
-    public Set<BluetoothDevice> getConnectedDevices();
+    public List<BluetoothDevice> getConnectedDevices();
 
     /**
      * Get a set of devices that match any of the given connection
@@ -166,9 +163,9 @@ public interface BluetoothProfile {
      * @param states Array of states. States can be one of
      *              {@link #STATE_CONNECTED}, {@link #STATE_CONNECTING},
      *              {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING},
-     * @return An unmodifiable set of devices. The set will be empty on error.
+     * @return List of devices. The list will be empty on error.
      */
-    public Set<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states);
+    public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states);
 
     /**
      * Get the current connection state of the profile
