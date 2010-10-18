@@ -66,7 +66,7 @@ import java.util.HashMap;
  *                 .penaltyLog()
  *                 .build());
  *         StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
- *                 .detectLeakedSqlLiteCursors()
+ *                 .detectLeakedSqlLiteObjects()
  *                 .penaltyLog()
  *                 .penaltyDeath()
  *                 .build());
@@ -959,6 +959,24 @@ public final class StrictMode {
      */
     public static VmPolicy getVmPolicy() {
         return new VmPolicy(sVmPolicyMask);
+    }
+
+    /**
+     * Enable the recommended StrictMode defaults, with violations just being logged.
+     *
+     * <p>This catches disk and network access on the main thread, as
+     * well as leaked SQLite cursors.  This is simply a wrapper around
+     * {@link #setVmPolicy} and {@link #setThreadPolicy}.
+     */
+    public static void enableDefaults() {
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                                   .detectAll()
+                                   .penaltyLog()
+                                   .build());
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                               .detectLeakedSqlLiteObjects()
+                               .penaltyLog()
+                               .build());
     }
 
     /**
