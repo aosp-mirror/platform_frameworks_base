@@ -2500,7 +2500,9 @@ class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        Log.d(TAG, "Scanning app dir " + dir);
+        if (false) {
+            Log.d(TAG, "Scanning app dir " + dir);
+        }
 
         int i;
         for (i=0; i<files.length; i++) {
@@ -2866,10 +2868,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 TAG, "Scanning package " + pkg.packageName);
         if (mPackages.containsKey(pkg.packageName)
                 || mSharedLibraries.containsKey(pkg.packageName)) {
-            Slog.w(TAG, "*************************************************");
             Slog.w(TAG, "Application package " + pkg.packageName
                     + " already installed.  Skipping duplicate.");
-            Slog.w(TAG, "*************************************************");
             mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
             return null;
         }
