@@ -276,8 +276,12 @@ public final class NfcAdapter {
      * Create a raw tag connection to the specified Target
      */
     public RawTagConnection createRawTagConnection(Tag tag, String target) {
-        //TODO
-        throw new UnsupportedOperationException();
+        try {
+            return new RawTagConnection(mService, tag, target);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service died", e);
+            return null;
+        }
     }
 
     /**
@@ -296,7 +300,11 @@ public final class NfcAdapter {
      * Create an NDEF tag connection to the specified Target
      */
     public NdefTagConnection createNdefTagConnection(NdefTag tag, String target) {
-        //TODO
-        throw new UnsupportedOperationException();
+        try {
+            return new NdefTagConnection(mService, tag, target);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service died", e);
+            return null;
+        }
     }
 }

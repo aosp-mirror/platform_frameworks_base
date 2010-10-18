@@ -39,14 +39,34 @@ public class RawTagConnection {
     /*package*/ final INfcTag mTagService;
     /*package*/ final Tag mTag;
     /*package*/ boolean mIsConnected;
+    /*package*/ String mSelectedTarget;
 
     private static final String TAG = "NFC";
 
-    /* package private */ RawTagConnection(INfcAdapter service, Tag tag) throws RemoteException {
+    /* package private */ RawTagConnection(INfcAdapter service, Tag tag, String target) throws RemoteException {
+        String[] targets = tag.getRawTargets();
+        int i;
+
+        // Check target validity
+        for (i=0;i<targets.length;i++) {
+            if (target.equals(targets[i])) {
+                break;
+            }
+        }
+        if (i >= targets.length) {
+            // Target not found
+            throw new IllegalArgumentException();
+        }
+
         mService = service;
         mTagService = service.getNfcTagInterface();
         mService.openTagConnection(tag);  // TODO(nxp): don't connect until connect()
         mTag = tag;
+        mSelectedTarget = target;
+    }
+
+    /* package private */ RawTagConnection(INfcAdapter service, Tag tag) throws RemoteException {
+        this(service, tag, tag.getRawTargets()[0]);
     }
 
     /**
@@ -57,8 +77,7 @@ public class RawTagConnection {
     }
 
     public String getTagTarget() {
-        //TODO
-        throw new UnsupportedOperationException();
+        return mSelectedTarget;
     }
 
     /**
