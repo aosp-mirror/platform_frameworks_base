@@ -75,6 +75,25 @@ public final class NfcAdapter {
             "android.nfc.action.TRANSACTION_DETECTED";
 
     /**
+     * Broadcast Action: an adapter's state changed between enabled and disabled.
+     *
+     * The new value is stored in the extra EXTRA_NEW_BOOLEAN_STATE and just contains
+     * whether it's enabled or disabled, not including any information about whether it's
+     * actively enabling or disabling.
+     *
+     * @hide
+     */
+    public static final String ACTION_ADAPTER_STATE_CHANGE =
+            "android.nfc.action.ADAPTER_STATE_CHANGE";
+
+    /**
+     * The Intent extra for ACTION_ADAPTER_STATE_CHANGE, saying what the new state is.
+     *
+     * @hide
+     */
+    public static final String EXTRA_NEW_BOOLEAN_STATE = "android.nfc.isEnabled";
+
+    /**
      * Mandatory byte array extra field in
      * {@link android.nfc.NfcAdapter#ACTION_TRANSACTION_DETECTED}.
      * <p>
@@ -145,6 +164,7 @@ public final class NfcAdapter {
 
     private static final String TAG = "NFC";
 
+    // Both guarded by NfcAdapter.class:
     private static boolean sIsInitialized = false;
     private static NfcAdapter sAdapter;
 
@@ -224,6 +244,9 @@ public final class NfcAdapter {
     }
 
     /**
+     * NOTE: may block for ~second or more.  Poor API.  Avoid
+     * calling from the UI thread.
+     *
      * @hide
      */
     public boolean enableTagDiscovery() {
@@ -236,6 +259,9 @@ public final class NfcAdapter {
     }
 
     /**
+     * NOTE: may block for ~second or more.  Poor API.  Avoid
+     * calling from the UI thread.
+     *
      * @hide
      */
     public boolean disableTagDiscovery() {
