@@ -82,7 +82,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private static final String TAG = "GpsLocationProvider";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final boolean VERBOSE = false;
 
     // these need to match GpsPositionMode enum in gps.h
@@ -1240,6 +1240,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 int result = mConnMgr.startUsingNetworkFeature(
                         ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
                 if (result == Phone.APN_ALREADY_ACTIVE) {
+                    if (DEBUG) Log.d(TAG, "Phone.APN_ALREADY_ACTIVE");
                     if (mAGpsApn != null) {
                         native_agps_data_conn_open(mAGpsApn);
                         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
