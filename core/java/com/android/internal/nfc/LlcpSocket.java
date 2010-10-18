@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * File            : LlcpClientSocket.java
- * Original-Author : Trusted Logic S.A. (Daniel Tomas)
- * Created         : 18-02-2010
- */
-
-package com.trustedlogic.trustednfc.android;
+package com.android.internal.nfc;
 
 import java.io.IOException;
 
 import android.nfc.ErrorCodes;
 import android.nfc.ILlcpSocket;
-
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
  * LlcpClientSocket represents a LLCP Connection-Oriented client to be used in a
  * connection-oriented communication
- *
- * @since AA02.01
- * @hide
  */
 public class LlcpSocket {
 
@@ -44,15 +34,11 @@ public class LlcpSocket {
 	/**
 	 * The handle returned by the NFC service and used to identify the LLCP
 	 * socket in every call of this class.
-	 *
-	 * @hide
 	 */
 	protected int mHandle;
 
 	/**
 	 * The entry point for LLCP socket operations.
-	 *
-	 * @hide
 	 */
 	protected ILlcpSocket mService;
 
@@ -92,7 +78,6 @@ public class LlcpSocket {
 	 * @param handle
 	 *            The handle returned by the NFC service and used to identify
 	 *            the socket in subsequent calls.
-	 * @hide
 	 */
 	LlcpSocket(ILlcpSocket service, int handle) {
 		this.mService = service;
@@ -109,7 +94,6 @@ public class LlcpSocket {
 	 * @throws LlcpException
 	 *             if the connection request is rejected by the remote LLCP
 	 *             Service
-	 * @since AA02.01
 	 */
 	public void connect(int sap) throws IOException, LlcpException {
 		try {
@@ -137,7 +121,6 @@ public class LlcpSocket {
 	 * @throws LlcpException
 	 *             if the connection request is rejected by the remote LLCP
 	 *             Service
-	 * @since AA02.01
 	 */
 	public void connect(String sn) throws IOException, LlcpException {
 		try {
@@ -160,7 +143,6 @@ public class LlcpSocket {
 	 *
 	 * @param timeout
 	 *            timeout value for the connect request
-	 * @since AA02.01
 	 */
 	public void setConnectTimeout(int timeout) {
 		try {
@@ -174,7 +156,6 @@ public class LlcpSocket {
 	 * Get the timeout value of the connect request
 	 *
 	 * @return mTimeout
-	 * @since AA02.01
 	 */
 	public int getConnectTimeout() {
 		try {
@@ -191,7 +172,6 @@ public class LlcpSocket {
 	 *
 	 * @throws IOException
 	 *             if the LLCP has been lost or deactivated.
-	 * @since AA02.01
 	 */
 	public void close() throws IOException {
 		try {
@@ -210,7 +190,6 @@ public class LlcpSocket {
 	 *
 	 * @throws IOException
 	 *             if the LLCP has been lost or deactivated.
-	 * @since AA02.01
 	 */
 	public void send(byte[] data) throws IOException {
 		try {
@@ -232,7 +211,6 @@ public class LlcpSocket {
 	 * @return length length of the data received
 	 * @throws IOException
 	 *             if the LLCP has been lost or deactivated.
-	 * @since AA02.01
 	 */
 	public int receive(byte[] receiveBuffer) throws IOException {
 		int receivedLength = 0;
@@ -252,7 +230,6 @@ public class LlcpSocket {
 	 * Returns the local Service Access Point number of the socket
 	 *
 	 * @return localSap
-	 * @since AA02.01
 	 */
 	public int getLocalSap() {
 		try {
@@ -267,7 +244,6 @@ public class LlcpSocket {
 	 * Returns the local Maximum Information Unit(MIU) of the socket
 	 *
 	 * @return miu
-	 * @since AA02.01
 	 */
 	public int getLocalSocketMiu() {
 		try {
@@ -282,7 +258,6 @@ public class LlcpSocket {
 	 * Returns the local Receive Window(RW) of the socket
 	 *
 	 * @return rw
-	 * @since AA02.01
 	 */
 	public int getLocalSocketRw() {
 		try {
@@ -301,7 +276,6 @@ public class LlcpSocket {
 	 * @return remoteMiu
 	 * @throws LlcpException
 	 *             if the LlcpClientSocket is not in a CONNECTED_STATE
-	 * @since AA02.01
 	 */
 	public int getRemoteSocketMiu() throws LlcpException {
 		try {
@@ -325,7 +299,6 @@ public class LlcpSocket {
 	 * @return rw
 	 * @throws LlcpException
 	 *             if the LlcpClientSocket is not in a CONNECTED_STATE
-	 * @since AA02.01
 	 */
 	public int getRemoteSocketRw() throws LlcpException {
 		try {
@@ -340,6 +313,4 @@ public class LlcpSocket {
 			return 0;
 		}
 	}
-
-
 }

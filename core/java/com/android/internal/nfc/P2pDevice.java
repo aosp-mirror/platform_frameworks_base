@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-/**
- * File            : P2PDevice.java
- * Original-Author : Trusted Logic S.A. (Daniel Tomas)
- * Created         : 26-02-2010
- */
-
-package com.trustedlogic.trustednfc.android;
+package com.android.internal.nfc;
 
 import java.io.IOException;
 
 /**
  * P2pDevice is the abstract base class for all supported P2P targets the
  * NfcManager can handle.
- * @hide
  */
 public abstract class P2pDevice {
 
@@ -48,19 +41,16 @@ public abstract class P2pDevice {
 
     /**
      * Target handle, used by native calls.
-     * @hide
      */
     protected int mHandle;
 	
     /**
      * Flag set when the object is closed and thus not usable any more.
-     * @hide
      */
 	protected boolean isClosed = false;
 
     /**
      * Prevent default constructor to be public.
-     * @hide
      */
 	protected P2pDevice() {
 	}
