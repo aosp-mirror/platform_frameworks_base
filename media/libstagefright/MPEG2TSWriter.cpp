@@ -725,6 +725,14 @@ void MPEG2TSWriter::writeAccessUnit(
 
     size_t PES_packet_length = accessUnit->size() + 8;
 
+    if (PES_packet_length >= 65536) {
+        // This really should only happen for video.
+        CHECK_EQ(stream_id, 0xe0u);
+
+        // It's valid to set this to 0 for video according to the specs.
+        PES_packet_length = 0;
+    }
+
     uint8_t *ptr = buffer->data();
     *ptr++ = 0x47;
     *ptr++ = 0x40 | (PID >> 8);
