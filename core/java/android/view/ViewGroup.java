@@ -954,7 +954,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // If none of our children could handle the event, try here
         if (!retval) {
-            retval = onDragEvent(event);
+            // Call up to the View implementation that dispatches to installed listeners
+            retval = super.dispatchDragEvent(event);
         }
         return retval;
     }
