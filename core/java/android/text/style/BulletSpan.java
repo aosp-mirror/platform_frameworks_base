@@ -18,6 +18,8 @@ package android.text.style;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Path.Direction;
 import android.os.Parcel;
 import android.text.Layout;
 import android.text.ParcelableSpan;
@@ -30,6 +32,7 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
     private final int mColor;
 
     private static final int BULLET_RADIUS = 3;
+    private static Path sBulletPath = null;
     public static final int STANDARD_GAP_WIDTH = 2;
 
     public BulletSpan() {
@@ -55,11 +58,11 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
         mWantColor = src.readInt() != 0;
         mColor = src.readInt();
     }
-    
+
     public int getSpanTypeId() {
         return TextUtils.BULLET_SPAN;
     }
-    
+
     public int describeContents() {
         return 0;
     }
@@ -89,8 +92,20 @@ public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
 
             p.setStyle(Paint.Style.FILL);
 
-            c.drawCircle(x + dir * BULLET_RADIUS, (top + bottom) / 2.0f,
-                         BULLET_RADIUS, p);
+            if (c.isHardwareAccelerated()) {
+                if (sBulletPath == null) {
+                    sBulletPath = new Path();
+                    // Bullet is slightly better to avoid aliasing artifacts on mdpi devices.
+                    sBulletPath.addCircle(0.0f, 0.0f, 1.2f * BULLET_RADIUS, Direction.CW);
+                }
+
+                c.save();
+                c.translate(x + dir * BULLET_RADIUS, (top + bottom) / 2.0f);
+                c.drawPath(sBulletPath, p);
+                c.restore();
+            } else {
+                c.drawCircle(x + dir * BULLET_RADIUS, (top + bottom) / 2.0f, BULLET_RADIUS, p);
+            }
 
             if (mWantColor) {
                 p.setColor(oldcolor);

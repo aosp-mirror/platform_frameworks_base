@@ -35,7 +35,7 @@ import android.view.KeyEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.webkit.DeviceMotionService;
-import android.webkit.DeviceOrientationManager;
+import android.webkit.DeviceMotionAndOrientationManager;
 import android.webkit.DeviceOrientationService;
 
 import java.util.ArrayList;
@@ -120,7 +120,8 @@ final class WebViewCore {
     private int mWebkitScrollX = 0;
     private int mWebkitScrollY = 0;
 
-    private DeviceOrientationManager mDeviceOrientationManager = new DeviceOrientationManager(this);
+    private DeviceMotionAndOrientationManager mDeviceMotionAndOrientationManager =
+            new DeviceMotionAndOrientationManager(this);
     private DeviceMotionService mDeviceMotionService;
     private DeviceOrientationService mDeviceOrientationService;
 
@@ -2535,19 +2536,19 @@ final class WebViewCore {
     }
 
     private void useMockDeviceOrientation() {
-        mDeviceOrientationManager.useMock();
+        mDeviceMotionAndOrientationManager.useMock();
     }
 
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,
             boolean canProvideBeta, double beta, boolean canProvideGamma, double gamma) {
-        mDeviceOrientationManager.setMockOrientation(canProvideAlpha, alpha, canProvideBeta, beta,
-                canProvideGamma, gamma);
+        mDeviceMotionAndOrientationManager.setMockOrientation(canProvideAlpha, alpha,
+                canProvideBeta, beta, canProvideGamma, gamma);
     }
 
     protected DeviceMotionService getDeviceMotionService() {
         if (mDeviceMotionService == null) {
             mDeviceMotionService =
-                    new DeviceMotionService(mDeviceOrientationManager, mContext);
+                    new DeviceMotionService(mDeviceMotionAndOrientationManager, mContext);
         }
         return mDeviceMotionService;
     }
@@ -2555,7 +2556,7 @@ final class WebViewCore {
     protected DeviceOrientationService getDeviceOrientationService() {
         if (mDeviceOrientationService == null) {
             mDeviceOrientationService =
-                    new DeviceOrientationService(mDeviceOrientationManager, mContext);
+                    new DeviceOrientationService(mDeviceMotionAndOrientationManager, mContext);
         }
         return mDeviceOrientationService;
     }

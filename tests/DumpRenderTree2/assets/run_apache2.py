@@ -29,19 +29,14 @@ import logging
 import optparse
 import time
 
-def main(options, args):
-  if len(args) < 1:
-    run_cmd = ""
-  else:
-    run_cmd = args[0]
-
+def main(run_cmd, options):
   # Setup logging class
   logging.basicConfig(level=logging.INFO, format='%(message)s')
 
   if not run_cmd in ("start", "stop", "restart"):
     logging.info("illegal argument: " + run_cmd)
     logging.info("Usage: python run_apache2.py start|stop|restart")
-    return
+    return False
 
   # Create /tmp/WebKit if it doesn't exist. This is needed for various files used by apache2
   tmp_WebKit = os.path.join("/tmp", "WebKit")
@@ -114,14 +109,25 @@ def main(options, args):
   # to a different PidFile it will not work and will result in a second apache2 instance.
   if (run_cmd == 'restart'):
     logging.info("First will stop...")
-    execute_cmd(export_envvars_cmd + " && " + (apache2_restart_template % ('stop')) + directives + conf_file_cmd)
+    if execute_cmd(envvars_path, error_log_path,
+                   export_envvars_cmd + " && " + (apache2_restart_template % ('stop')) + directives + conf_file_cmd) == False:
+      logging.info("Failed to stop Apache2")
+      return False
     logging.info("Stopped. Will start now...")
     # We need to sleep breifly to avoid errors with apache being stopped and started too quickly
     time.sleep(0.5)
 
-  execute_cmd(export_envvars_cmd + " && " + (apache2_restart_template % (run_cmd)) + directives + conf_file_cmd)
+  if execute_cmd(envvars_path, error_log_path,
+                 export_envvars_cmd + " && " +
+                 (apache2_restart_template % (run_cmd)) + directives +
+                 conf_file_cmd) == False:
+    logging.info("Failed to start Apache2")
+    return False
 
-def execute_cmd(cmd):
+  logging.info("Successfully started")
+  return True
+
+def execute_cmd(envvars_path, error_log_path, cmd):
   p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (out, err) = p.communicate()
 
@@ -139,12 +145,19 @@ def execute_cmd(cmd):
     else:
       logging.info(err)
       logging.info("Try looking in " + error_log_path + " for details")
-  else:
-    logging.info("OK")
+    return False
+
+  return True
 
 if __name__ == "__main__":
   option_parser = optparse.OptionParser(usage="Usage: %prog [options] start|stop|restart")
   option_parser.add_option("", "--tests-root-directory",
                            help="The directory from which to take the tests, default is external/webkit/LayoutTests in this checkout of the Android tree")
   options, args = option_parser.parse_args();
-  main(options, args);
+
+  if len(args) < 1:
+    run_cmd = ""
+  else:
+    run_cmd = args[0]
+
+  main(run_cmd, options)

@@ -68,7 +68,7 @@ Patch* PatchCache::get(const float bitmapWidth, const float bitmapHeight,
     }
 
     // If the 9patch is made of only transparent quads
-    if (transparentQuads == (width + 1) * (height + 1)) {
+    if (transparentQuads == int8_t((width + 1) * (height + 1))) {
         return NULL;
     }
 

@@ -20,23 +20,24 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Immutable data class, represents a discovered tag.
+ * Represents a (generic) discovered tag.
  * <p>
  * A tag is a passive NFC element, such as NFC Forum Tag's, Mifare class Tags,
  * Sony Felica Tags.
  * <p>
  * Tag's have a type and usually have a UID.
  * <p>
- * Tag objects are passed to applications via the NfcAdapter.EXTRA_TAG extra
- * in NfcAdapter.ACTION_TAG_DISCOVERED intents. The Tag object is immutable
- * and represents the state of the Tag at the time of discovery. It can be
- * directly queried for its UID and Type, or used to create a TagConnection
- * (NfcAdapter.createTagConnection()).
+ * {@link Tag} objects are passed to applications via the {@link NfcAdapter#EXTRA_TAG} extra
+ * in {@link NfcAdapter#ACTION_TAG_DISCOVERED} intents. A {@link Tag} object is immutable
+ * and represents the state of the tag at the time of discovery. It can be
+ * directly queried for its UID and Type, or used to create a {@link RawTagConnection}
+ * (with {@link NfcAdapter#createRawTagConnection createRawTagConnection()}).
  * <p>
- * This Tag object can only be used to create a TagConnection while it is in
- * range. If it is removed and then returned to range then the most recent
- * Tag object (in ACTION_TAG_DISCOVERED) should be used to create a
- * TagConnection.
+ * A {@link Tag} can  be used to create a {@link RawTagConnection} only while the tag is in
+ * range. If it is removed and then returned to range, then the most recent
+ * {@link Tag} object (in {@link NfcAdapter#ACTION_TAG_DISCOVERED}) should be used to create a
+ * {@link RawTagConnection}.
+ * <p>This is an immutable data class.
  */
 public class Tag implements Parcelable {
 

@@ -96,12 +96,8 @@ public:
         ty = lineWidth <= 1.0f ? -gLineAABias : -half - gLineAABias;
     }
 
-    inline GLvoid* getVertices() const {
-        return &mPatch->vertices[0].position[0];
-    }
-
-    inline GLvoid* getTexCoords() const {
-        return &mPatch->vertices[0].texture[0];
+    inline GLuint getMeshBuffer() const {
+        return mPatch->meshBuffer;
     }
 
     inline GLsizei getElementsCount() const {

@@ -62,6 +62,7 @@ public class RSTestCore {
         unitTests = new ArrayList<UnitTest>();
 
         unitTests.add(new UT_primitives(this, mRes));
+        unitTests.add(new UT_rsdebug(this, mRes));
         unitTests.add(new UT_fp_mad(this, mRes));
         /*
         unitTests.add(new UnitTest(null, "<Pass>", 1));

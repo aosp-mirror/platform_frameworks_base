@@ -1389,7 +1389,8 @@
         </receiver>
 
         <receiver android:name="com.android.server.MasterClearReceiver"
-            android:permission="android.permission.MASTER_CLEAR" >
+            android:permission="android.permission.MASTER_CLEAR"
+            android:priority="100" >
             <intent-filter>
                 <!-- For Checkin, Settings, etc.: action=MASTER_CLEAR -->
                 <action android:name="android.intent.action.MASTER_CLEAR" />
@@ -1399,8 +1400,11 @@
                 <category android:name="android.intent.category.MASTER_CLEAR" />
             </intent-filter>
         </receiver>
+
+        <service android:name="com.android.internal.os.storage.ExternalStorageFormatter"
+            android:permission="android.permission.MASTER_CLEAR"
+            android:exported="true" />
+
     </application>
 
 </manifest>
-
-

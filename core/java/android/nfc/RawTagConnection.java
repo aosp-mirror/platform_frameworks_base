@@ -22,18 +22,16 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * RawTagConnection is a low-level connection to a Tag.
+ * A low-level connection to a {@link Tag} target.
+ * <p>You can acquire this kind of connection with {@link NfcAdapter#createRawTagConnection
+ * createRawTagConnection()}. Use the connection to send and receive data with {@link #transceive
+ * transceive()}.
  * <p>
- * The only data transfer method that TagConnection offers is transceive().
- * Applications must implement there own protocol stack on top of transceive().
- * <p>
- * Use NfcAdapter.createRawTagConnection() to create a RawTagConnection object.
+ * Applications must implement their own protocol stack on top of {@link #transceive transceive()}.
  *
- * * <p class="note"><strong>Note:</strong>
- * Most methods require the {@link android.Manifest.permission#BLUETOOTH}
- * permission and some also require the
- * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
-
+ * <p class="note"><strong>Note:</strong>
+ * Most methods require the TODO
+ * permission.
  */
 public class RawTagConnection {
 
@@ -52,7 +50,7 @@ public class RawTagConnection {
     }
 
     /**
-     * Get the Tag this connection is associated with.
+     * Get the {@link Tag} this connection is associated with.
      */
     public Tag getTag() {
         return mTag;
@@ -64,13 +62,14 @@ public class RawTagConnection {
     }
 
     /**
-     * Helper to indicate if transceive() calls might succeed.
+     * Helper to indicate if {@link #transceive transceive()} calls might succeed.
      * <p>
      * Does not cause RF activity, and does not block.
      * <p>
-     * Returns true if connect() has completed successfully, and the Tag is not
-     * yet known to be out of range. Applications must still handle IOException
-     * while using transceive().
+     * @return true if {@link #connect} has completed successfully and the {@link Tag} is believed
+     * to be within range. Applications must still handle {@link java.io.IOException}
+     * while using {@link #transceive transceive()}, in case connection is lost after this method
+     * returns true.
      */
     public boolean isConnected() {
         // TODO(nxp): update mIsConnected when tag goes out of range -
@@ -80,11 +79,11 @@ public class RawTagConnection {
     }
 
     /**
-     * Connect to tag.
+     * Connect to the {@link Tag} associated with this connection.
      * <p>
      * This method blocks until the connection is established.
      * <p>
-     * close() can be called from another thread to cancel this connection
+     * {@link #close} can be called from another thread to cancel this connection
      * attempt.
      *
      * @throws IOException if the target is lost, or connect canceled
@@ -95,13 +94,13 @@ public class RawTagConnection {
     }
 
     /**
-     * Close tag connection.
+     * Close this connection.
      * <p>
-     * Causes blocking operations such as transceive() or connect() to
-     * be canceled and immediately throw IOException.
+     * Causes blocking operations such as {@link #transceive transceive()} or {@link #connect} to
+     * be canceled and immediately throw {@link java.io.IOException}.
      * <p>
-     * This object cannot be re-used after calling close(). Further calls
-     * to transceive() or connect() will fail.
+     * Once this method is called, this object cannot be re-used and should be discarded. Further
+     * calls to {@link #transceive transceive()} or {@link #connect} will fail.
      */
     public void close() {
         mIsConnected = false;
@@ -113,10 +112,10 @@ public class RawTagConnection {
     }
 
     /**
-     * Send data to a tag, and return the response.
+     * Send data to a tag and receive the response.
      * <p>
      * This method will block until the response is received. It can be canceled
-     * with close().
+     * with {@link #close}.
      * <p>
      * Requires NFC_WRITE permission.
      *

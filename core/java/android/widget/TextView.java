@@ -7309,6 +7309,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             char c = mTransformed.charAt(start - 1);
             int type = Character.getType(c);
 
+            // Cases where the text ends with a '.' and we select from the end of the line (right
+            // after the dot), or when we select from the space character in "aaaa, bbbb".
+            if (start == end && type == Character.OTHER_PUNCTUATION) continue;
+
             if (c != '\'' &&
                 type != Character.UPPERCASE_LETTER &&
                 type != Character.LOWERCASE_LETTER &&

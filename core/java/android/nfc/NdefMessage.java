@@ -21,10 +21,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * NDEF Message data.
- * <p>
- * Immutable data class. An NDEF message always contains zero or more NDEF
- * records.
+ * Represents an NDEF (NFC Data Exchange Format) data message that contains one or more {@link
+ * NdefRecord}s.
+ * <p>An NDEF message includes "records" that can contain different sets of data, such as
+ * MIME-type media, a URI, or one of the supported RTD types (see {@link NdefRecord}). An NDEF
+ * message always contains zero or more NDEF records.</p>
+ * <p>This is an immutable data class.
  */
 public class NdefMessage implements Parcelable {
     private static final byte FLAG_MB = (byte) 0x80;

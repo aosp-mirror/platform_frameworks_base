@@ -11,6 +11,8 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsDebug(const char *, float, float, float, float);
 extern void __attribute__((overloadable))
+    rsDebug(const char *, double);
+extern void __attribute__((overloadable))
     rsDebug(const char *, const rs_matrix4x4 *);
 extern void __attribute__((overloadable))
     rsDebug(const char *, const rs_matrix3x3 *);
@@ -20,6 +22,14 @@ extern void __attribute__((overloadable))
     rsDebug(const char *, int);
 extern void __attribute__((overloadable))
     rsDebug(const char *, uint);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, long);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, unsigned long);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, long long);
+extern void __attribute__((overloadable))
+    rsDebug(const char *, unsigned long long);
 extern void __attribute__((overloadable))
     rsDebug(const char *, const void *);
 #define RS_DEBUG(a) rsDebug(#a, a)
@@ -803,7 +813,7 @@ static void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion *q) {
 /////////////////////////////////////////////////////
 // utility funcs
 /////////////////////////////////////////////////////
-void __attribute__((overloadable))
+__inline__ static void __attribute__((overloadable, always_inline))
 rsExtractFrustumPlanes(const rs_matrix4x4 *modelViewProj,
                          float4 *left, float4 *right,
                          float4 *top, float4 *bottom,
@@ -853,7 +863,7 @@ rsExtractFrustumPlanes(const rs_matrix4x4 *modelViewProj,
     *far /= len;
 }
 
-bool __attribute__((overloadable))
+__inline__ static bool __attribute__((overloadable, always_inline))
 rsIsSphereInFrustum(float4 *sphere,
                       float4 *left, float4 *right,
                       float4 *top, float4 *bottom,
