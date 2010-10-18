@@ -340,6 +340,11 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
             mInboundQueue.dequeue(entry);
             mPendingEvent = entry;
         }
+
+        // Poke user activity for this event.
+        if (mPendingEvent->policyFlags & POLICY_FLAG_PASS_TO_USER) {
+            pokeUserActivityLocked(mPendingEvent);
+        }
     }
 
     // Now we have an event to dispatch.
@@ -686,11 +691,6 @@ bool InputDispatcher::dispatchKeyLocked(
 
     // Dispatch the key.
     dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
-
-    // Poke user activity.
-    if (shouldPokeUserActivityForCurrentInputTargetsLocked()) {
-        pokeUserActivityLocked(entry->eventTime, POWER_MANAGER_BUTTON_EVENT);
-    }
     return true;
 }
 
@@ -753,31 +753,6 @@ bool InputDispatcher::dispatchMotionLocked(
 
     // Dispatch the motion.
     dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
-
-    // Poke user activity.
-    if (shouldPokeUserActivityForCurrentInputTargetsLocked()) {
-        int32_t eventType;
-        if (isPointerEvent) {
-            switch (entry->action) {
-            case AMOTION_EVENT_ACTION_DOWN:
-                eventType = POWER_MANAGER_TOUCH_EVENT;
-                break;
-            case AMOTION_EVENT_ACTION_UP:
-                eventType = POWER_MANAGER_TOUCH_UP_EVENT;
-                break;
-            default:
-                if (entry->eventTime - entry->downTime >= EVENT_IGNORE_DURATION) {
-                    eventType = POWER_MANAGER_TOUCH_EVENT;
-                } else {
-                    eventType = POWER_MANAGER_LONG_TOUCH_EVENT;
-                }
-                break;
-            }
-        } else {
-            eventType = POWER_MANAGER_BUTTON_EVENT;
-        }
-        pokeUserActivityLocked(entry->eventTime, eventType);
-    }
     return true;
 }
 
@@ -828,6 +803,8 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
 #endif
 
     assert(eventEntry->dispatchInProgress); // should already have been set to true
+
+    pokeUserActivityLocked(eventEntry);
 
     for (size_t i = 0; i < mCurrentInputTargets.size(); i++) {
         const InputTarget& inputTarget = mCurrentInputTargets.itemAt(i);
@@ -1338,7 +1315,6 @@ void InputDispatcher::addWindowTargetLocked(const InputWindow* window, int32_t t
     target.flags = targetFlags;
     target.xOffset = - window->frameLeft;
     target.yOffset = - window->frameTop;
-    target.windowType = window->layoutParamsType;
     target.pointerIds = pointerIds;
 }
 
@@ -1351,7 +1327,6 @@ void InputDispatcher::addMonitoringTargetsLocked() {
         target.flags = 0;
         target.xOffset = 0;
         target.yOffset = 0;
-        target.windowType = -1;
     }
 }
 
@@ -1418,19 +1393,32 @@ String8 InputDispatcher::getApplicationWindowLabelLocked(const InputApplication*
     }
 }
 
-bool InputDispatcher::shouldPokeUserActivityForCurrentInputTargetsLocked() {
-    for (size_t i = 0; i < mCurrentInputTargets.size(); i++) {
-        if (mCurrentInputTargets[i].windowType == InputWindow::TYPE_KEYGUARD) {
-            return false;
+void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
+    int32_t eventType = POWER_MANAGER_BUTTON_EVENT;
+    if (eventEntry->type == EventEntry::TYPE_MOTION) {
+        const MotionEntry* motionEntry = static_cast<const MotionEntry*>(eventEntry);
+        if (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) {
+            switch (motionEntry->action) {
+            case AMOTION_EVENT_ACTION_DOWN:
+                eventType = POWER_MANAGER_TOUCH_EVENT;
+                break;
+            case AMOTION_EVENT_ACTION_UP:
+                eventType = POWER_MANAGER_TOUCH_UP_EVENT;
+                break;
+            default:
+                if (motionEntry->eventTime - motionEntry->downTime >= EVENT_IGNORE_DURATION) {
+                    eventType = POWER_MANAGER_TOUCH_EVENT;
+                } else {
+                    eventType = POWER_MANAGER_LONG_TOUCH_EVENT;
+                }
+                break;
+            }
         }
     }
-    return true;
-}
 
-void InputDispatcher::pokeUserActivityLocked(nsecs_t eventTime, int32_t eventType) {
     CommandEntry* commandEntry = postCommandLocked(
             & InputDispatcher::doPokeUserActivityLockedInterruptible);
-    commandEntry->eventTime = eventTime;
+    commandEntry->eventTime = eventEntry->eventTime;
     commandEntry->userActivityEventType = eventType;
 }
 
