@@ -198,7 +198,7 @@ public class Build {
          * graphics to ensure they look okay on a dark background.
          * </ul>
          */
-        public static final int GINGERBREAD = CUR_DEVELOPMENT;
+        public static final int GINGERBREAD = 9;
     }
     
     /** The type of build, like "user" or "eng". */
