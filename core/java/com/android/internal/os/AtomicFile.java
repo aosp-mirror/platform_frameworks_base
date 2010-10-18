@@ -77,6 +77,7 @@ public class AtomicFile {
     
     public void finishWrite(FileOutputStream str) {
         if (str != null) {
+            FileUtils.sync(str);
             try {
                 str.close();
                 mBackupName.delete();
@@ -88,6 +89,7 @@ public class AtomicFile {
     
     public void failWrite(FileOutputStream str) {
         if (str != null) {
+            FileUtils.sync(str);
             try {
                 str.close();
                 mBaseName.delete();
@@ -109,6 +111,7 @@ public class AtomicFile {
     public void truncate() throws IOException {
         try {
             FileOutputStream fos = new FileOutputStream(mBaseName);
+            FileUtils.sync(fos);
             fos.close();
         } catch (FileNotFoundException e) {
             throw new IOException("Couldn't append " + mBaseName);

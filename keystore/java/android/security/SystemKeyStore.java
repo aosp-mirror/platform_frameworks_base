@@ -94,6 +94,7 @@ public class SystemKeyStore {
             FileOutputStream fos = new FileOutputStream(keyFile);
             fos.write(retKey);
             fos.flush();
+            FileUtils.sync(fos);
             fos.close();
             FileUtils.setPermissions(keyFile.getName(), (FileUtils.S_IRUSR | FileUtils.S_IWUSR),
                 -1, -1);
