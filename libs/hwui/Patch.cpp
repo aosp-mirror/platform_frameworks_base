@@ -19,7 +19,6 @@
 #include <cmath>
 
 #include <utils/Log.h>
-#include <utils/String8.h>
 
 #include "Patch.h"
 #include "Caches.h"

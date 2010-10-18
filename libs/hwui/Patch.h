@@ -61,14 +61,14 @@ struct PatchDescription {
     uint32_t colorKey;
 
     bool operator<(const PatchDescription& rhs) const {
-        FLOAT_COMPARE(bitmapWidth) {
-            FLOAT_COMPARE(bitmapHeight) {
-                FLOAT_COMPARE(pixelWidth) {
-                    FLOAT_COMPARE(pixelHeight) {
-                        INT_COMPARE(xCount) {
-                            INT_COMPARE(yCount) {
-                                INT_COMPARE(emptyCount) {
-                                    INT_COMPARE(colorKey) return false;
+        LTE_FLOAT(bitmapWidth) {
+            LTE_FLOAT(bitmapHeight) {
+                LTE_FLOAT(pixelWidth) {
+                    LTE_FLOAT(pixelHeight) {
+                        LTE_INT(xCount) {
+                            LTE_INT(yCount) {
+                                LTE_INT(emptyCount) {
+                                    LTE_INT(colorKey) return false;
                                 }
                             }
                         }
