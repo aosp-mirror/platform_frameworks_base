@@ -23,13 +23,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Message;
-import android.webkit.DeviceOrientationManager;
+import android.webkit.DeviceMotionAndOrientationManager;
 import java.lang.Runnable;
 import java.util.List;
 
 
 final class DeviceMotionService implements SensorEventListener {
-    private DeviceOrientationManager mManager;
+    private DeviceMotionAndOrientationManager mManager;
     private boolean mIsRunning;
     private Handler mHandler;
     private SensorManager mSensorManager;
@@ -40,7 +40,7 @@ final class DeviceMotionService implements SensorEventListener {
 
     private static final int INTERVAL_MILLIS = 100;
 
-    public DeviceMotionService(DeviceOrientationManager manager, Context context) {
+    public DeviceMotionService(DeviceMotionAndOrientationManager manager, Context context) {
         mManager = manager;
         assert(mManager != null);
         mContext = context;

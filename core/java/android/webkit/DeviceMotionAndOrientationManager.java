@@ -17,17 +17,17 @@
 package android.webkit;
 
 /**
- * This class is simply a container for the methods used to implement DeviceOrientation,
- * including the mock DeviceOrientationClient for use in LayoutTests.
+ * This class is simply a container for the methods used to implement DeviceMotion and
+ * DeviceOrientation, including the mock DeviceOrientationClient for use in LayoutTests.
  *
  * This could be part of WebViewCore, but have moved it to its own class to
  * avoid bloat there.
  * @hide
  */
-public final class DeviceOrientationManager {
+public final class DeviceMotionAndOrientationManager {
     private WebViewCore mWebViewCore;
 
-    public DeviceOrientationManager(WebViewCore webViewCore) {
+    public DeviceMotionAndOrientationManager(WebViewCore webViewCore) {
         mWebViewCore = webViewCore;
     }
 

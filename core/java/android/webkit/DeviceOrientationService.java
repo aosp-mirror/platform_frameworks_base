@@ -22,7 +22,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
-import android.webkit.DeviceOrientationManager;
+import android.webkit.DeviceMotionAndOrientationManager;
 import java.lang.Runnable;
 import java.util.List;
 
@@ -33,7 +33,7 @@ final class DeviceOrientationService implements SensorEventListener {
     // The geomagnetic vector expressed in the body frame.
     private float[] mMagneticFieldVector;
 
-    private DeviceOrientationManager mManager;
+    private DeviceMotionAndOrientationManager mManager;
     private boolean mIsRunning;
     private Handler mHandler;
     private SensorManager mSensorManager;
@@ -45,7 +45,7 @@ final class DeviceOrientationService implements SensorEventListener {
 
     private static final double DELTA_DEGRESS = 1.0;
 
-    public DeviceOrientationService(DeviceOrientationManager manager, Context context) {
+    public DeviceOrientationService(DeviceMotionAndOrientationManager manager, Context context) {
         mManager = manager;
         assert(mManager != null);
         mContext = context;
