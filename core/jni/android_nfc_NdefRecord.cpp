@@ -80,8 +80,92 @@ end:
     return result;
 }
 
+static jint android_nfc_NdefRecord_parseNdefRecord(JNIEnv *e, jobject o,
+        jbyteArray array)
+{
+    uint16_t status;
+    jbyte *raw_record;
+    jsize raw_record_size;
+    jint ret = -1;
+    phFriNfc_NdefRecord_t record;
+
+    jfieldID mType, mId, mPayload, mTnf;
+    jbyteArray type = NULL;
+    jbyteArray id = NULL;
+    jbyteArray payload = NULL;
+
+    jclass record_cls = e->GetObjectClass(o);
+
+    raw_record_size = e->GetArrayLength(array);
+    raw_record = e->GetByteArrayElements(array, NULL);
+    if (raw_record == NULL) {
+        goto clean_and_return;
+    }
+
+    LOGD("phFriNfc_NdefRecord_Parse()");
+    status = phFriNfc_NdefRecord_Parse(&record, (uint8_t *)raw_record);
+    if (status) {
+        LOGE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
+        goto clean_and_return;
+    }
+    LOGD("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
+
+    /* Set TNF field */
+    mTnf = e->GetFieldID(record_cls, "mTnf", "S");
+    e->SetShortField(o, mTnf, record.Tnf);
+
+    /* Set type field */
+    mType = e->GetFieldID(record_cls, "mType", "[B");
+    type = e->NewByteArray(record.TypeLength);
+    if (type == NULL) {
+        goto clean_and_return;
+    }
+    e->SetByteArrayRegion(type, 0, record.TypeLength,
+            (jbyte *)record.Type);
+    e->SetObjectField(o, mType, type);
+
+    /* Set id field */
+    mId = e->GetFieldID(record_cls, "mId", "[B");
+    id = e->NewByteArray(record.IdLength);
+    if (id == NULL) {
+        goto clean_and_return;
+    }
+    e->SetByteArrayRegion(id, 0, record.IdLength,
+            (jbyte *)record.Id);
+    e->SetObjectField(o, mId, id);
+
+    /* Set payload field */
+    mPayload = e->GetFieldID(record_cls, "mPayload", "[B");
+    payload = e->NewByteArray(record.PayloadLength);
+    if (payload == NULL) {
+        goto clean_and_return;
+    }
+    e->SetByteArrayRegion(payload, 0, record.PayloadLength,
+            (jbyte *)record.PayloadData);
+    e->SetObjectField(o, mPayload, payload);
+
+    ret = 0;
+
+clean_and_return:
+    if (type != NULL) {
+        e->DeleteLocalRef(type);
+    }
+    if (id != NULL) {
+        e->DeleteLocalRef(id);
+    }
+    if (payload != NULL) {
+        e->DeleteLocalRef(payload);
+    }
+    if (raw_record != NULL) {
+        e->ReleaseByteArrayElements(array, raw_record, JNI_ABORT);
+    }
+
+    return ret;
+}
+
 static JNINativeMethod gMethods[] = {
     {"generate", "(SS[B[B[B)[B", (void *)android_nfc_NdefRecord_generate},
+    {"parseNdefRecord", "([B)I", (void *)android_nfc_NdefRecord_parseNdefRecord},
 };
 
 int register_android_nfc_NdefRecord(JNIEnv *e)

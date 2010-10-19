@@ -373,6 +373,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/6.xml 6 \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
+    -since ./frameworks/base/api/9.xml 9 \
     -werror -hide 13 \
     -overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -525,7 +526,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-todo $(OUT_DOCS)/$(LOCAL_MODULE)-docs-todo.html \
 		-sdkvalues $(OUT_DOCS) \
-		-hdf android.whichdoc offline 
+		-hdf android.whichdoc offline
 
 ifeq ($(framework_docs_SDK_PREVIEW),true)
   LOCAL_DROIDDOC_OPTIONS += -hdf sdk.preview true
