@@ -560,6 +560,12 @@
         <item name="android:textAppearance">@style/TextAppearance.Widget.TabWidget</item>
         <item name="ellipsize">marquee</item>
         <item name="singleLine">true</item>
+        <item name="android:tabStripLeft">@android:drawable/tab_bottom_left</item>
+        <item name="android:tabStripRight">@android:drawable/tab_bottom_right</item>
+        <item name="android:tabStripEnabled">true</item>
+        <item name="android:divider">@null</item>
+        <item name="android:gravity">fill_horizontal|center_vertical</item>
+        <item name="android:tabLayout">@android:layout/tab_indicator</item>
     </style>
 
     <style name="Widget.Gallery">
@@ -1070,7 +1076,7 @@
     </style>
 
     <style name="TextAppearance.Holo.Widget.TabWidget">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@android:color/tab_indicator_text</item>
     </style>
@@ -1421,6 +1427,13 @@
     </style>
 
     <style name="Widget.Holo.TabWidget" parent="Widget.TabWidget">
+        <item name="android:textAppearance">@style/TextAppearance.Holo.Widget.TabWidget</item>
+        <item name="android:tabStripLeft">@null</item>
+        <item name="android:tabStripRight">@null</item>
+        <item name="android:tabStripEnabled">false</item>
+        <item name="android:divider">@null</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:tabLayout">@android:layout/tab_indicator_holo</item>
     </style>
 
     <style name="Widget.Holo.WebTextView" parent="Widget.WebTextView">
@@ -1693,7 +1706,7 @@
     <style name="Widget.Holo.Light.CompoundButton.Star" parent="Widget.CompoundButton.Star">
     </style>
 
-    <style name="Widget.Holo.Light.TabWidget" parent="Widget.TabWidget">
+    <style name="Widget.Holo.Light.TabWidget" parent="Widget.Holo.TabWidget">
     </style>
 
     <style name="Widget.Holo.Light.WebTextView" parent="Widget.WebTextView">
