@@ -44,6 +44,7 @@ import java.util.Random;
 public class GpsXtraDownloader {
 
     private static final String TAG = "GpsXtraDownloader";
+    static final boolean DEBUG = false;
     
     private Context mContext;
     private String[] mXtraServers;
@@ -107,7 +108,7 @@ public class GpsXtraDownloader {
 
     protected static byte[] doDownload(String url, boolean isProxySet, 
             String proxyHost, int proxyPort) {
-        if (Config.LOGD) Log.d(TAG, "Downloading XTRA data from " + url);
+        if (DEBUG) Log.d(TAG, "Downloading XTRA data from " + url);
 
         AndroidHttpClient client = null;
         try {
@@ -130,7 +131,7 @@ public class GpsXtraDownloader {
             HttpResponse response = client.execute(req);
             StatusLine status = response.getStatusLine();
             if (status.getStatusCode() != 200) { // HTTP 200 is success.
-                if (Config.LOGD) Log.d(TAG, "HTTP error: " + status.getReasonPhrase());
+                if (DEBUG) Log.d(TAG, "HTTP error: " + status.getReasonPhrase());
                 return null;
             }
 
@@ -159,7 +160,7 @@ public class GpsXtraDownloader {
             }
             return body;
         } catch (Exception e) {
-            if (Config.LOGD) Log.d(TAG, "error " + e);
+            if (DEBUG) Log.d(TAG, "error " + e);
         } finally {
             if (client != null) {
                 client.close();

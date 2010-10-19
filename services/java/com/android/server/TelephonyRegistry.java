@@ -254,6 +254,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyServiceState()")){
             return;
         }
+        Slog.i(TAG, "notifyServiceState: " + state);
         synchronized (mRecords) {
             mServiceState = state;
             for (int i = mRecords.size() - 1; i >= 0; i--) {
@@ -295,6 +296,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyMessageWaitingChanged()")) {
             return;
         }
+        Slog.i(TAG, "notifyMessageWaitingChanged: " + mwi);
         synchronized (mRecords) {
             mMessageWaiting = mwi;
             for (int i = mRecords.size() - 1; i >= 0; i--) {
@@ -314,6 +316,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyCallForwardingChanged()")) {
             return;
         }
+        Slog.i(TAG, "notifyCallForwardingChanged: " + cfi);
         synchronized (mRecords) {
             mCallForwarding = cfi;
             for (int i = mRecords.size() - 1; i >= 0; i--) {
@@ -354,6 +357,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
+        Slog.i(TAG, "notifyDataConnection: state=" + state + " isDataConnectivityPossible="
+                + isDataConnectivityPossible + " reason=" + reason
+                + " interfaceName=" + interfaceName + " networkType=" + networkType);
         synchronized (mRecords) {
             mDataConnectionState = state;
             mDataConnectionPossible = isDataConnectivityPossible;
