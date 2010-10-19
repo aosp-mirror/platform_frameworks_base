@@ -95,10 +95,16 @@ public class RawTagConnection {
      * returns true.
      */
     public boolean isConnected() {
-        // TODO(nxp): update mIsConnected when tag goes out of range -
-        //            but do not do an active prescence check in
-        //            isConnected()
-        return mIsConnected;
+        if (!mIsConnected) {
+            return false;
+        }
+
+        try {
+            return mTagService.isPresent(mTag.mNativeHandle);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service died", e);
+            return false;
+        }
     }
 
     /**
