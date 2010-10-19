@@ -81,7 +81,7 @@ interface IBluetooth
     // HID profile APIs
     boolean connectInputDevice(in BluetoothDevice device);
     boolean disconnectInputDevice(in BluetoothDevice device);
-    BluetoothDevice[] getConnectedInputDevices();  // change to Set<> once AIDL supports
+    List<BluetoothDevice> getConnectedInputDevices();
     int getInputDeviceState(in BluetoothDevice device);
     boolean setInputDevicePriority(in BluetoothDevice device, int priority);
     int getInputDevicePriority(in BluetoothDevice device);
@@ -89,7 +89,7 @@ interface IBluetooth
     boolean isTetheringOn();
     void setBluetoothTethering(boolean value);
     int getPanDeviceState(in BluetoothDevice device);
-    BluetoothDevice[] getConnectedPanDevices();
+    List<BluetoothDevice> getConnectedPanDevices();
     boolean connectPanDevice(in BluetoothDevice device);
     boolean disconnectPanDevice(in BluetoothDevice device);
 }

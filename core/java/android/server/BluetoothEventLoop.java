@@ -29,11 +29,12 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelUuid;
+import android.os.PowerManager;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
-import android.os.PowerManager;
 
 
 /**
@@ -629,7 +630,7 @@ class BluetoothEventLoop {
     }
 
     private boolean isOtherInputDeviceConnected(String address) {
-        Set<BluetoothDevice> devices =
+        List<BluetoothDevice> devices =
             mBluetoothService.lookupInputDevicesMatchingStates(new int[] {
                                                 BluetoothInputDevice.STATE_CONNECTING,
                                                 BluetoothInputDevice.STATE_CONNECTED});
@@ -654,13 +655,13 @@ class BluetoothEventLoop {
     }
 
     private boolean isOtherSinkInNonDisconnectedState(String address) {
-        Set<BluetoothDevice> devices =
+        List<BluetoothDevice> devices =
             mA2dp.getDevicesMatchingConnectionStates(new int[] {BluetoothA2dp.STATE_CONNECTED,
                                                      BluetoothA2dp.STATE_CONNECTING,
                                                      BluetoothA2dp.STATE_DISCONNECTING});
 
         if (devices.size() == 0) return false;
-        for(BluetoothDevice dev: devices) {
+        for (BluetoothDevice dev: devices) {
             if (!dev.getAddress().equals(address)) return true;
         }
         return false;

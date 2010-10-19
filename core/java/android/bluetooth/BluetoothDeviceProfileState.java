@@ -321,7 +321,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                               mA2dpService.getDevicesMatchingConnectionStates(
                                   new int[] {BluetoothA2dp.STATE_CONNECTED,
                                              BluetoothProfile.STATE_CONNECTING,
-                                             BluetoothProfile.STATE_DISCONNECTING}).length == 0) {
+                                             BluetoothProfile.STATE_DISCONNECTING}).size() == 0) {
                             mA2dpService.connect(mDevice);
                         }
                         if (mService.getInputDevicePriority(mDevice) ==

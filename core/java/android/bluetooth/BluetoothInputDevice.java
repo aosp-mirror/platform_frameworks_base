@@ -24,10 +24,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Public API for controlling the Bluetooth HID (Input Device) Profile
@@ -167,18 +165,16 @@ public final class BluetoothInputDevice {
 
     /** Check if any Input Device is connected.
      *
-     * @return a unmodifiable set of connected Input Devices, or null on error.
+     * @return List of devices, empty List on error.
      * @hide
      */
-    public Set<BluetoothDevice> getConnectedInputDevices() {
+    public List<BluetoothDevice> getConnectedInputDevices() {
         if (DBG) log("getConnectedInputDevices()");
         try {
-            return Collections.unmodifiableSet(
-                    new HashSet<BluetoothDevice>(
-                        Arrays.asList(mService.getConnectedInputDevices())));
+            return mService.getConnectedInputDevices();
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
-            return null;
+            return new ArrayList<BluetoothDevice>();
         }
     }
 

@@ -79,7 +79,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -1297,14 +1296,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      */
     private boolean shouldDisableCoexistenceMode() {
         if (mBluetoothHeadset == null) return true;
-        Set<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
+        List<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
         return (devices.size() != 0 ? false : true);
     }
 
     private void checkIsBluetoothPlaying() {
         boolean isBluetoothPlaying = false;
         if (mBluetoothA2dp != null) {
-            Set<BluetoothDevice> connected = mBluetoothA2dp.getConnectedDevices();
+            List<BluetoothDevice> connected = mBluetoothA2dp.getConnectedDevices();
 
             for (BluetoothDevice device : connected) {
                 if (mBluetoothA2dp.isA2dpPlaying(device)) {

@@ -58,6 +58,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -1112,18 +1113,16 @@ public class AudioService extends IAudioService.Stub {
         new BluetoothProfile.ServiceListener() {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             mBluetoothHeadset = (BluetoothHeadset) proxy;
-            Set<BluetoothDevice> deviceSet = mBluetoothHeadset.getConnectedDevices();
-            if (deviceSet.size() > 0) {
-                BluetoothDevice[] devices =
-                    deviceSet.toArray(new BluetoothDevice[deviceSet.size()]);
-                mBluetoothHeadsetDevice = devices[0];
+            List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
+            if (deviceList.size() > 0) {
+                mBluetoothHeadsetDevice = deviceList.get(0);
             } else {
                 mBluetoothHeadsetDevice = null;
             }
         }
         public void onServiceDisconnected(int profile) {
             if (mBluetoothHeadset != null) {
-                Set<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
+                List<BluetoothDevice> devices = mBluetoothHeadset.getConnectedDevices();
                 if (devices.size() == 0) {
                     mBluetoothHeadsetDevice = null;
                     clearAllScoClients();
