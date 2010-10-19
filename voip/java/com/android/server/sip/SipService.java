@@ -79,6 +79,7 @@ public final class SipService extends ISipService.Stub {
     private String mNetworkType;
     private boolean mConnected;
     private WakeupTimer mTimer;
+    private WifiScanProcess mWifiScanProcess;
     private WifiManager.WifiLock mWifiLock;
     private boolean mWifiOnly;
 
@@ -371,6 +372,7 @@ public final class SipService extends ISipService.Stub {
                     mContext.getSystemService(Context.WIFI_SERVICE))
                     .createWifiLock(WifiManager.WIFI_MODE_FULL, TAG);
             mWifiLock.acquire();
+            if (!mConnected) startWifiScanner();
         }
     }
 
@@ -379,6 +381,20 @@ public final class SipService extends ISipService.Stub {
             if (DEBUG) Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~ release wifi lock");
             mWifiLock.release();
             mWifiLock = null;
+            stopWifiScanner();
+        }
+    }
+
+    private synchronized void startWifiScanner() {
+        if (mWifiScanProcess == null) {
+            mWifiScanProcess = new WifiScanProcess();
+        }
+        mWifiScanProcess.start();
+    }
+
+    private synchronized void stopWifiScanner() {
+        if (mWifiScanProcess != null) {
+            mWifiScanProcess.stop();
         }
     }
 
@@ -413,8 +429,10 @@ public final class SipService extends ISipService.Stub {
                 for (SipSessionGroupExt group : mSipGroups.values()) {
                     group.onConnectivityChanged(true);
                 }
+                if (isWifi && (mWifiLock != null)) stopWifiScanner();
             } else {
                 mMyWakeLock.reset(); // in case there's a leak
+                if (isWifi && (mWifiLock != null)) startWifiScanner();
             }
         } catch (SipException e) {
             Log.e(TAG, "onConnectivityChanged()", e);
@@ -608,6 +626,36 @@ public final class SipService extends ISipService.Stub {
 
         private String getUri() {
             return mSipGroup.getLocalProfileUri();
+        }
+    }
+
+    private class WifiScanProcess implements Runnable {
+        private static final String TAG = "\\WIFI_SCAN/";
+        private static final int INTERVAL = 60;
+        private boolean mRunning = false;
+
+        private WifiManager mWifiManager;
+
+        public void start() {
+            if (mRunning) return;
+            mRunning = true;
+            mTimer.set(INTERVAL * 1000, this);
+        }
+
+        WifiScanProcess() {
+            mWifiManager = (WifiManager)
+                    mContext.getSystemService(Context.WIFI_SERVICE);
+        }
+
+        public void run() {
+            // scan and associate now
+            if (DEBUGV) Log.v(TAG, "just wake up here for wifi scanning...");
+            mWifiManager.startScanActive();
+        }
+
+        public void stop() {
+            mRunning = false;
+            mTimer.cancel(this);
         }
     }
 
