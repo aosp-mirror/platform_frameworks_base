@@ -38,6 +38,7 @@ import com.android.internal.R;
 public class StateSet {
 
     public static final int[] WILD_CARD = new int[0];
+    public static final int[] NOTHING = new int[] { 0 };
 
     /**
      * Return whether the stateSetOrSpec is matched by all StateSets.

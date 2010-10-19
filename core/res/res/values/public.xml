@@ -1358,6 +1358,8 @@
   <public type="attr" name="buttonGroupStyle" />
   <public type="attr" name="alertDialogButtonGroupStyle" />
   <public type="attr" name="homeAsUpIndicator" />
+  <public type="attr" name="enterFadeDuration" />
+  <public type="attr" name="exitFadeDuration" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />

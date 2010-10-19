@@ -423,6 +423,13 @@ public abstract class Drawable {
     }
 
     /**
+     * If this Drawable does transition animations between states, ask that
+     * it immediately jump to the current state and skip any active animations.
+     */
+    public void jumpToCurrentState() {
+    }
+
+    /**
      * @return The current drawable that will be used by this drawable. For simple drawables, this
      *         is just the drawable itself. For drawables that change state like
      *         {@link StateListDrawable} and {@link LevelListDrawable} this will be the child drawable

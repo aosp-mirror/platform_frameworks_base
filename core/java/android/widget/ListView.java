@@ -581,7 +581,7 @@ public class ListView extends AbsListView {
         final boolean scroll = scrollYDelta != 0;
         if (scroll) {
             scrollListItemsBy(-scrollYDelta);
-            positionSelector(child);
+            positionSelector(INVALID_POSITION, child);
             mSelectedTop = child.getTop();
             invalidate();
         }
@@ -1086,7 +1086,7 @@ public class ListView extends AbsListView {
 
             if (recycleOnMeasure() && mRecycler.shouldRecycleViewType(
                     ((LayoutParams) child.getLayoutParams()).viewType)) {
-                mRecycler.addScrapView(child);
+                mRecycler.addScrapView(child, -1);
             }
         }
 
@@ -1203,7 +1203,7 @@ public class ListView extends AbsListView {
             // Recycle the view before we possibly return from the method
             if (recyle && recycleBin.shouldRecycleViewType(
                     ((LayoutParams) child.getLayoutParams()).viewType)) {
-                recycleBin.addScrapView(child);
+                recycleBin.addScrapView(child, -1);
             }
 
             returnedHeight += child.getMeasuredHeight();
@@ -1507,7 +1507,7 @@ public class ListView extends AbsListView {
             // already cached in mHeaderViews;
             if (dataChanged) {
                 for (int i = 0; i < childCount; i++) {
-                    recycleBin.addScrapView(getChildAt(i));
+                    recycleBin.addScrapView(getChildAt(i), firstPosition+i);
                     if (ViewDebug.TRACE_RECYCLER) {
                         ViewDebug.trace(getChildAt(i),
                                 ViewDebug.RecyclerTraceType.MOVE_TO_SCRAP_HEAP, index, i);
@@ -1610,19 +1610,19 @@ public class ListView extends AbsListView {
                         if (focused != null) {
                             focused.clearFocus();
                         }
-                        positionSelector(sel);
+                        positionSelector(INVALID_POSITION, sel);
                     } else {
                         sel.setSelected(false);
                         mSelectorRect.setEmpty();
                     }
                 } else {
-                    positionSelector(sel);
+                    positionSelector(INVALID_POSITION, sel);
                 }
                 mSelectedTop = sel.getTop();
             } else {
                 if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
                     View child = getChildAt(mMotionPosition - mFirstPosition);
-                    if (child != null) positionSelector(child);
+                    if (child != null) positionSelector(mMotionPosition, child);
                 } else {
                     mSelectedTop = 0;
                     mSelectorRect.setEmpty();
@@ -1703,7 +1703,7 @@ public class ListView extends AbsListView {
 
 
         if (!mDataChanged) {
-            // Try to use an exsiting view for this position
+            // Try to use an existing view for this position
             child = mRecycler.getActiveView(position);
             if (child != null) {
                 if (ViewDebug.TRACE_RECYCLER) {
@@ -1819,6 +1819,11 @@ public class ListView extends AbsListView {
 
         if (mCachingStarted && !child.isDrawingCacheEnabled()) {
             child.setDrawingCacheEnabled(true);
+        }
+
+        if (recycled && (((AbsListView.LayoutParams)child.getLayoutParams()).scrappedFromPosition)
+                != position) {
+            child.jumpDrawablesToCurrentState();
         }
     }
 
@@ -2288,6 +2293,7 @@ public class ListView extends AbsListView {
         }
 
         View selectedView = getSelectedView();
+        int selectedPos = mSelectedPosition;
 
         int nextSelectedPosition = lookForSelectablePositionOnScreen(direction);
         int amountToScroll = amountToScroll(direction, nextSelectedPosition);
@@ -2305,6 +2311,7 @@ public class ListView extends AbsListView {
             setSelectedPositionInt(nextSelectedPosition);
             setNextSelectedPositionInt(nextSelectedPosition);
             selectedView = getSelectedView();
+            selectedPos = nextSelectedPosition;
             if (mItemsCanFocus && focusResult == null) {
                 // there was no new view found to take focus, make sure we
                 // don't leave focus with the old selection
@@ -2345,7 +2352,7 @@ public class ListView extends AbsListView {
 
         if (needToRedraw) {
             if (selectedView != null) {
-                positionSelector(selectedView);
+                positionSelector(selectedPos, selectedView);
                 mSelectedTop = selectedView.getTop();
             }
             if (!awakenScrollBars()) {
@@ -2841,7 +2848,7 @@ public class ListView extends AbsListView {
                 AbsListView.LayoutParams layoutParams = (LayoutParams) first.getLayoutParams();
                 if (recycleBin.shouldRecycleViewType(layoutParams.viewType)) {
                     detachViewFromParent(first);
-                    recycleBin.addScrapView(first);
+                    recycleBin.addScrapView(first, mFirstPosition);
                 } else {
                     removeViewInLayout(first);
                 }
@@ -2872,7 +2879,7 @@ public class ListView extends AbsListView {
                 AbsListView.LayoutParams layoutParams = (LayoutParams) last.getLayoutParams();
                 if (recycleBin.shouldRecycleViewType(layoutParams.viewType)) {
                     detachViewFromParent(last);
-                    recycleBin.addScrapView(last);
+                    recycleBin.addScrapView(last, mFirstPosition+lastIndex);
                 } else {
                     removeViewInLayout(last);
                 }

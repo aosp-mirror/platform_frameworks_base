@@ -36,6 +36,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseBooleanArray;
+import android.util.StateSet;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -252,6 +253,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The drawable used to draw the selector
      */
     Drawable mSelector;
+
+    /**
+     * Set to true if we would like to have the selector showing itself.
+     * We still need to draw and position it even if this is false.
+     */
+    boolean mSelectorShowing;
+
+    /**
+     * The current position of the selector in the list.
+     */
+    int mSelectorPosition = INVALID_POSITION;
 
     /**
      * Defines the selector's location and dimension at drawing time
@@ -1324,6 +1336,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             setSelectedPositionInt(INVALID_POSITION);
             // Do this before setting mNeedSync since setNextSelectedPosition looks at mNeedSync
             setNextSelectedPositionInt(INVALID_POSITION);
+            mSelectorPosition = INVALID_POSITION;
             mNeedSync = true;
             mSyncRowId = ss.firstId;
             mSyncPosition = ss.position;
@@ -1416,6 +1429,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         setSelectedPositionInt(INVALID_POSITION);
         setNextSelectedPositionInt(INVALID_POSITION);
         mSelectedTop = 0;
+        mSelectorShowing = false;
+        mSelectorPosition = INVALID_POSITION;
         mSelectorRect.setEmpty();
         invalidate();
     }
@@ -1708,7 +1723,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             if (child != scrapView) {
-                mRecycler.addScrapView(scrapView);
+                mRecycler.addScrapView(scrapView, position);
                 if (mCacheColorHint != 0) {
                     child.setDrawingCacheBackgroundColor(mCacheColorHint);
                 }
@@ -1734,7 +1749,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return child;
     }
 
-    void positionSelector(View sel) {
+    void positionSelector(int position, View sel) {
+        if (position != INVALID_POSITION) {
+            mSelectorPosition = position;
+        }
+
         final Rect selectorRect = mSelectorRect;
         selectorRect.set(sel.getLeft(), sel.getTop(), sel.getRight(), sel.getBottom());
         positionSelector(selectorRect.left, selectorRect.top, selectorRect.right,
@@ -1743,7 +1762,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         final boolean isChildViewEnabled = mIsChildViewEnabled;
         if (sel.isEnabled() != isChildViewEnabled) {
             mIsChildViewEnabled = !isChildViewEnabled;
-            refreshDrawableState();
+            if (mSelectorShowing) {
+                refreshDrawableState();
+            }
         }
     }
 
@@ -1822,7 +1843,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void drawSelector(Canvas canvas) {
-        if (shouldShowSelector() && mSelectorRect != null && !mSelectorRect.isEmpty()) {
+        if (!mSelectorRect.isEmpty()) {
             final Drawable selector = mSelector;
             selector.setBounds(mSelectorRect);
             selector.draw(canvas);
@@ -1866,7 +1887,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mSelectionRightPadding = padding.right;
         mSelectionBottomPadding = padding.bottom;
         sel.setCallback(this);
-        sel.setState(getDrawableState());
+        updateSelectorState();
     }
 
     /**
@@ -1891,7 +1912,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         Drawable selector = mSelector;
         Rect selectorRect = mSelectorRect;
         if (selector != null && (isFocused() || touchModeDrawsInPressedState())
-                && selectorRect != null && !selectorRect.isEmpty()) {
+                && !selectorRect.isEmpty()) {
 
             final View v = getChildAt(mSelectedPosition - mFirstPosition);
 
@@ -1926,12 +1947,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mScrollDown = down;
     }
 
+    void updateSelectorState() {
+        if (mSelector != null) {
+            if (shouldShowSelector()) {
+                mSelector.setState(getDrawableState());
+            } else {
+                mSelector.setState(StateSet.NOTHING);
+            }
+        }
+    }
+
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        if (mSelector != null) {
-            mSelector.setState(getDrawableState());
-        }
+        updateSelectorState();
     }
 
     @Override
@@ -2141,7 +2170,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 } else {
                     mTouchMode = TOUCH_MODE_DONE_WAITING;
                 }
-
             }
         }
     }
@@ -2316,10 +2344,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mLayoutMode = LAYOUT_NORMAL;
 
                     if (!mDataChanged) {
-                        layoutChildren();
                         child.setPressed(true);
-                        positionSelector(child);
                         setPressed(true);
+                        layoutChildren();
+                        positionSelector(mMotionPosition, child);
 
                         final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
                         final boolean longClickable = isLongClickable();
@@ -2566,7 +2594,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             setSelectedPositionInt(mMotionPosition);
                             layoutChildren();
                             child.setPressed(true);
-                            positionSelector(child);
+                            positionSelector(mMotionPosition, child);
                             setPressed(true);
                             if (mSelector != null) {
                                 Drawable d = mSelector.getCurrent();
@@ -2576,16 +2604,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             }
                             postDelayed(new Runnable() {
                                 public void run() {
+                                    mTouchMode = TOUCH_MODE_REST;
                                     child.setPressed(false);
                                     setPressed(false);
                                     if (!mDataChanged) {
                                         post(performClick);
                                     }
-                                    mTouchMode = TOUCH_MODE_REST;
                                 }
                             }, ViewConfiguration.getPressedStateDuration());
                         } else {
                             mTouchMode = TOUCH_MODE_REST;
+                            updateSelectorState();
                         }
                         return true;
                     } else if (!mDataChanged && mAdapter.isEnabled(motionPosition)) {
@@ -2593,6 +2622,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     }
                 }
                 mTouchMode = TOUCH_MODE_REST;
+                updateSelectorState();
                 break;
             case TOUCH_MODE_SCROLL:
                 final int childCount = getChildCount();
@@ -3507,7 +3537,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     count++;
                     int position = firstPosition + i;
                     if (position >= headerViewsCount && position < footerViewsStart) {
-                        mRecycler.addScrapView(child);
+                        mRecycler.addScrapView(child, position);
 
                         if (ViewDebug.TRACE_RECYCLER) {
                             ViewDebug.trace(child,
@@ -3528,7 +3558,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     count++;
                     int position = firstPosition + i;
                     if (position >= headerViewsCount && position < footerViewsStart) {
-                        mRecycler.addScrapView(child);
+                        mRecycler.addScrapView(child, position);
 
                         if (ViewDebug.TRACE_RECYCLER) {
                             ViewDebug.trace(child,
@@ -3563,8 +3593,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (!inTouchMode && mSelectedPosition != INVALID_POSITION) {
             final int childIndex = mSelectedPosition - mFirstPosition;
             if (childIndex >= 0 && childIndex < getChildCount()) {
-                positionSelector(getChildAt(childIndex));
+                positionSelector(mSelectedPosition, getChildAt(childIndex));
             }
+        } else if (mSelectorPosition != INVALID_POSITION) {
+            final int childIndex = mSelectorPosition - mFirstPosition;
+            if (childIndex >= 0 && childIndex < getChildCount()) {
+                positionSelector(INVALID_POSITION, getChildAt(childIndex));
+            }
+        } else {
+            mSelectorRect.setEmpty();
         }
 
         mBlockLayoutRequests = false;
@@ -3616,7 +3653,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             setSelectedPositionInt(INVALID_POSITION);
             setNextSelectedPositionInt(INVALID_POSITION);
             mSelectedTop = 0;
-            mSelectorRect.setEmpty();
+            mSelectorShowing = false;
         }
     }
 
@@ -3876,6 +3913,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mNextSelectedPosition = INVALID_POSITION;
         mNextSelectedRowId = INVALID_ROW_ID;
         mNeedSync = false;
+        mSelectorPosition = INVALID_POSITION;
         checkSelectionChanged();
     }
 
@@ -4562,6 +4600,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @ViewDebug.ExportedProperty(category = "list")
         boolean forceAdd;
 
+        /**
+         * The position the view was removed from when pulled out of the
+         * scrap heap.
+         * @hide
+         */
+        int scrappedFromPosition;
+
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
@@ -4741,23 +4786,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          * @return A view from the ScrapViews collection. These are unordered.
          */
         View getScrapView(int position) {
-            ArrayList<View> scrapViews;
             if (mViewTypeCount == 1) {
-                scrapViews = mCurrentScrap;
-                int size = scrapViews.size();
-                if (size > 0) {
-                    return scrapViews.remove(size - 1);
-                } else {
-                    return null;
-                }
+                return retrieveFromScrap(mCurrentScrap, position);
             } else {
                 int whichScrap = mAdapter.getItemViewType(position);
                 if (whichScrap >= 0 && whichScrap < mScrapViews.length) {
-                    scrapViews = mScrapViews[whichScrap];
-                    int size = scrapViews.size();
-                    if (size > 0) {
-                        return scrapViews.remove(size - 1);
-                    }
+                    return retrieveFromScrap(mScrapViews[whichScrap], position);
                 }
             }
             return null;
@@ -4768,7 +4802,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          *
          * @param scrap The view to add
          */
-        void addScrapView(View scrap) {
+        void addScrapView(View scrap, int position) {
             AbsListView.LayoutParams lp = (AbsListView.LayoutParams) scrap.getLayoutParams();
             if (lp == null) {
                 return;
@@ -4783,6 +4817,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 return;
             }
+
+            lp.scrappedFromPosition = position;
 
             if (mViewTypeCount == 1) {
                 scrap.dispatchStartTemporaryDetach();
@@ -4810,7 +4846,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             for (int i = count - 1; i >= 0; i--) {
                 final View victim = activeViews[i];
                 if (victim != null) {
-                    int whichScrap = ((AbsListView.LayoutParams) victim.getLayoutParams()).viewType;
+                    final AbsListView.LayoutParams lp
+                            = (AbsListView.LayoutParams) victim.getLayoutParams();
+                    int whichScrap = lp.viewType;
 
                     activeViews[i] = null;
 
@@ -4826,6 +4864,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         scrapViews = mScrapViews[whichScrap];
                     }
                     victim.dispatchStartTemporaryDetach();
+                    lp.scrappedFromPosition = mFirstActivePosition + i;
                     scrapViews.add(victim);
 
                     if (hasListener) {
@@ -4909,6 +4948,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     victim.setDrawingCacheBackgroundColor(color);
                 }
             }
+        }
+    }
+
+    static View retrieveFromScrap(ArrayList<View> scrapViews, int position) {
+        int size = scrapViews.size();
+        if (size > 0) {
+            // See if we still have a view for this position.
+            for (int i=0; i<size; i++) {
+                View view = scrapViews.get(i);
+                if (((AbsListView.LayoutParams)view.getLayoutParams())
+                        .scrappedFromPosition == position) {
+                    scrapViews.remove(i);
+                    return view;
+                }
+            }
+            return scrapViews.remove(size - 1);
+        } else {
+            return null;
         }
     }
 }

@@ -8620,6 +8620,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Call {@link Drawable#jumpToCurrentState() Drawable.jumpToCurrentState()}
+     * on all Drawable objects associated with this view.
+     */
+    public void jumpDrawablesToCurrentState() {
+        if (mBGDrawable != null) {
+            mBGDrawable.jumpToCurrentState();
+        }
+    }
+
+    /**
      * Sets the background color for this view.
      * @param color the color of the background
      */
