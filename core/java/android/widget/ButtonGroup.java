@@ -125,7 +125,7 @@ public class ButtonGroup extends LinearLayout {
 
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        if (mButtonBackgroundRes != 0) {
+        if (child instanceof Button && mButtonBackgroundRes != 0) {
             // Preserve original padding as we change the background
             final int paddingLeft = child.getPaddingLeft();
             final int paddingRight = child.getPaddingRight();
