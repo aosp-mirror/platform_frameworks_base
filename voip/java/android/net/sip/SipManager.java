@@ -126,22 +126,16 @@ public class SipManager {
      * Returns true if the SIP API is supported by the system.
      */
     public static boolean isApiSupported(Context context) {
-        return true;
-        /* TODO: uncomment this before ship
         return context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_SIP);
-         */
     }
 
     /**
      * Returns true if the system supports SIP-based VoIP.
      */
     public static boolean isVoipSupported(Context context) {
-        return true;
-        /* TODO: uncomment this before ship
         return context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_SIP_VOIP) && isApiSupported(context);
-         */
     }
 
     /**
