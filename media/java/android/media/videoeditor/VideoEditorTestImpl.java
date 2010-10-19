@@ -90,6 +90,9 @@ public class VideoEditorTestImpl implements VideoEditor {
     private static final String ATTR_END_RECT_B = "end_b";
     private static final String ATTR_LOOP = "loop";
     private static final String ATTR_MUTED = "muted";
+    private static final String ATTR_DUCK_ENABLED = "ducking_enabled";
+    private static final String ATTR_DUCK_THRESHOLD = "ducking_threshold";
+    private static final String ATTR_DUCKED_TRACK_VOLUME = "ducking_volume";
 
     // Instance variables
     private long mDurationMs;
@@ -716,6 +719,9 @@ public class VideoEditorTestImpl implements VideoEditor {
             serializer.attribute("", ATTR_BEGIN_TIME, Long.toString(at.getBoundaryBeginTime()));
             serializer.attribute("", ATTR_END_TIME, Long.toString(at.getBoundaryEndTime()));
             serializer.attribute("", ATTR_VOLUME, Integer.toString(at.getVolume()));
+            serializer.attribute("", ATTR_DUCK_ENABLED, Boolean.toString(at.isDuckingEnabled()));
+            serializer.attribute("", ATTR_DUCKED_TRACK_VOLUME, Integer.toString(at.getDuckedTrackVolume()));
+            serializer.attribute("", ATTR_DUCK_THRESHOLD, Integer.toString(at.getDuckingThreshhold()));
             serializer.attribute("", ATTR_MUTED, Boolean.toString(at.isMuted()));
             serializer.attribute("", ATTR_LOOP, Boolean.toString(at.isLooping()));
             if (at.getAudioWaveformFilename() != null) {
@@ -1017,10 +1023,13 @@ public class VideoEditorTestImpl implements VideoEditor {
         final int volume = Integer.parseInt(parser.getAttributeValue("", ATTR_VOLUME));
         final boolean muted = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_MUTED));
         final boolean loop = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_LOOP));
+        final boolean duckingEnabled = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_DUCK_ENABLED));
+        final int duckThreshold = Integer.parseInt(parser.getAttributeValue("", ATTR_DUCK_THRESHOLD));
+        final int duckedTrackVolume = Integer.parseInt(parser.getAttributeValue("", ATTR_DUCKED_TRACK_VOLUME));
         final String waveformFilename = parser.getAttributeValue("", ATTR_AUDIO_WAVEFORM_FILENAME);
         try {
             final AudioTrack audioTrack = new AudioTrack(this, audioTrackId, filename, startTimeMs,
-                    beginMs, endMs, loop, volume, muted, waveformFilename);
+                    beginMs, endMs, loop, volume, muted, duckingEnabled, duckThreshold, duckedTrackVolume, waveformFilename);
 
             return audioTrack;
         } catch (IOException ex) {

@@ -20,7 +20,7 @@ import java.io.IOException;
 
 /**
  * This class allows to handle an audio track. This audio file is mixed with the
- * audio samples of the MediaItems.
+ * audio samples of the media items.
  * {@hide}
  */
 public class AudioTrack {
@@ -43,7 +43,7 @@ public class AudioTrack {
 
     // Ducking variables
     private int mDuckingThreshold;
-    private int mDuckingLowVolume;
+    private int mDuckedTrackVolume;
     private boolean mIsDuckingEnabled;
 
     // The audio waveform filename
@@ -98,7 +98,7 @@ public class AudioTrack {
 
         // Ducking is enabled by default
         mDuckingThreshold = 0;
-        mDuckingLowVolume = 0;
+        mDuckedTrackVolume = 0;
         mIsDuckingEnabled = true;
 
         // The audio waveform file is generated later
@@ -120,12 +120,18 @@ public class AudioTrack {
      * @param loop true to loop the audio track
      * @param volume The volume in percentage
      * @param muted true if the audio track is muted
+     * @param threshold Ducking will be activated when the relative energy in
+     *      the media items audio signal goes above this value. The valid
+     *      range of values is 0 to 100.
+     * @param duckedTrackVolume The relative volume of the audio track when ducking
+     *      is active. The valid range of values is 0 to 100.
      * @param audioWaveformFilename The name of the waveform file
      *
      * @throws IOException if file is not found
      */
     AudioTrack(VideoEditor editor, String audioTrackId, String filename, long startTimeMs,
             long beginMs, long endMs, boolean loop, int volume, boolean muted,
+            boolean duckingEnabled, int duckThreshold, int duckedTrackVolume,
             String audioWaveformFilename) throws IOException {
         mUniqueId = audioTrackId;
         mFilename = filename;
@@ -149,6 +155,10 @@ public class AudioTrack {
 
         mLoop = loop;
         mMuted = muted;
+
+        mIsDuckingEnabled = duckingEnabled;
+        mDuckingThreshold = duckThreshold;
+        mDuckedTrackVolume = duckedTrackVolume;
 
         mAudioWaveformFilename = audioWaveformFilename;
     }
@@ -347,15 +357,26 @@ public class AudioTrack {
     }
 
     /**
-     * TODO DEFINE
+     * Enable ducking by specifying the required parameters
      *
-     * @param threshold
-     * @param lowVolume
-     * @param volume
+     * @param threshold Ducking will be activated when the relative energy in
+     *      the media items audio signal goes above this value. The valid
+     *      range of values is 0 to 100.
+     * @param duckedTrackVolume The relative volume of the audio track when ducking
+     *      is active. The valid range of values is 0 to 100.
      */
-    public void enableDucking(int threshold, int lowVolume, int volume) {
+    public void enableDucking(int threshold, int duckedTrackVolume) {
+        if (threshold < 0 || threshold > 100) {
+            throw new IllegalArgumentException("Invalid threshold value: " + threshold);
+        }
+
+        if (duckedTrackVolume < 0 || duckedTrackVolume > 100) {
+            throw new IllegalArgumentException("Invalid duckedTrackVolume value: "
+                    + duckedTrackVolume);
+        }
+
         mDuckingThreshold = threshold;
-        mDuckingLowVolume = lowVolume;
+        mDuckedTrackVolume = duckedTrackVolume;
         mIsDuckingEnabled = true;
     }
 
@@ -374,10 +395,10 @@ public class AudioTrack {
     }
 
     /**
-     * @return The ducking low level
+     * @return The ducked track volume
      */
-    public int getDuckingLowVolume() {
-        return mDuckingLowVolume;
+    public int getDuckedTrackVolume() {
+        return mDuckedTrackVolume;
     }
 
     /**
