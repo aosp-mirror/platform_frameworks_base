@@ -130,6 +130,13 @@ interface IWindowSession {
     boolean performDrag(IWindow window, IBinder dragToken, float touchX, float touchY,
             float thumbCenterX, float thumbCenterY, in ClipData data);
 
+	/**
+	 * Report the result of a drop action targeted to the given window.
+	 * consumed is 'true' when the drop was accepted by a valid recipient,
+	 * 'false' otherwise.
+	 */
+	void reportDropResult(IWindow window, boolean consumed);
+
     /**
      * Tell the OS that we've just dragged into a View that is willing to accept the drop
      */

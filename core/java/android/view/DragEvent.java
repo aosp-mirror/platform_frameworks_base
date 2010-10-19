@@ -29,6 +29,7 @@ public class DragEvent implements Parcelable {
     float mX, mY;
     ClipDescription mClipDescription;
     ClipData mClipData;
+    boolean mDragResult;
 
     private DragEvent mNext;
     private RuntimeException mRecycledLocation;
@@ -53,25 +54,27 @@ public class DragEvent implements Parcelable {
     private DragEvent() {
     }
 
-    private void init(int action, float x, float y, ClipDescription description, ClipData data) {
+    private void init(int action, float x, float y, ClipDescription description, ClipData data,
+            boolean result) {
         mAction = action;
         mX = x;
         mY = y;
         mClipDescription = description;
         mClipData = data;
+        mDragResult = result;
     }
 
     static DragEvent obtain() {
-        return DragEvent.obtain(0, 0f, 0f, null, null);
+        return DragEvent.obtain(0, 0f, 0f, null, null, false);
     }
 
     public static DragEvent obtain(int action, float x, float y,
-            ClipDescription description, ClipData data) {
+            ClipDescription description, ClipData data, boolean result) {
         final DragEvent ev;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
                 ev = new DragEvent();
-                ev.init(action, x, y, description, data);
+                ev.init(action, x, y, description, data, result);
                 return ev;
             }
             ev = gRecyclerTop;
@@ -82,14 +85,14 @@ public class DragEvent implements Parcelable {
         ev.mRecycled = false;
         ev.mNext = null;
 
-        ev.init(action, x, y, description, data);
+        ev.init(action, x, y, description, data, result);
 
         return ev;
     }
 
     public static DragEvent obtain(DragEvent source) {
         return obtain(source.mAction, source.mX, source.mY,
-                source.mClipDescription, source.mClipData);
+                source.mClipDescription, source.mClipData, source.mDragResult);
     }
 
     public int getAction() {
@@ -110,6 +113,10 @@ public class DragEvent implements Parcelable {
 
     public ClipDescription getClipDescription() {
         return mClipDescription;
+    }
+
+    public boolean getResult() {
+        return mDragResult;
     }
 
     /**
@@ -146,7 +153,7 @@ public class DragEvent implements Parcelable {
     public String toString() {
         return "DragEvent{" + Integer.toHexString(System.identityHashCode(this))
         + " action=" + mAction + " @ (" + mX + ", " + mY + ") desc=" + mClipDescription
-        + " data=" + mClipData
+        + " data=" + mClipData + " result=" + mDragResult
         + "}";
     }
 
@@ -160,6 +167,7 @@ public class DragEvent implements Parcelable {
         dest.writeInt(mAction);
         dest.writeFloat(mX);
         dest.writeFloat(mY);
+        dest.writeInt(mDragResult ? 1 : 0);
         if (mClipData == null) {
             dest.writeInt(0);
         } else {
@@ -181,6 +189,7 @@ public class DragEvent implements Parcelable {
             event.mAction = in.readInt();
             event.mX = in.readFloat();
             event.mY = in.readFloat();
+            event.mDragResult = (in.readInt() != 0);
             if (in.readInt() != 0) {
                 event.mClipData = ClipData.CREATOR.createFromParcel(in);
             }

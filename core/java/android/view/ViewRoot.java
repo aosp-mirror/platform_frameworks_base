@@ -2506,7 +2506,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 final View prevDragView = mCurrentDragView;
 
                 // Now dispatch the drag/drop event
-                mView.dispatchDragEvent(event);
+                boolean result = mView.dispatchDragEvent(event);
 
                 // If we changed apparent drag target, tell the OS about it
                 if (prevDragView != mCurrentDragView) {
@@ -2519,6 +2519,16 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         }
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Unable to note drag target change");
+                    }
+                }
+
+                // Report the drop result if necessary
+                if (what == DragEvent.ACTION_DROP) {
+                    try {
+                        Log.i(TAG, "Reporting drop result: " + result);
+                        sWindowSession.reportDropResult(mWindow, result);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Unable to report drop result");
                     }
                 }
             }
