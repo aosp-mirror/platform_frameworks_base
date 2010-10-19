@@ -430,6 +430,21 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
+    private synchronized boolean callingSelf(SipSessionGroupExt ringingGroup,
+            SipSessionGroup.SipSessionImpl ringingSession) {
+        String callId = ringingSession.getCallId();
+        for (SipSessionGroupExt group : mSipGroups.values()) {
+            if ((group != ringingGroup) && group.containsSession(callId)) {
+                if (DEBUG) Log.d(TAG, "call self: "
+                        + ringingSession.getLocalProfile().getUriString()
+                        + " -> " + group.getLocalProfile().getUriString());
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     private class SipSessionGroupExt extends SipSessionAdapter {
         private SipSessionGroup mSipGroup;
         private PendingIntent mIncomingCallPendingIntent;
@@ -450,6 +465,10 @@ public final class SipService extends ISipService.Stub {
 
         public SipProfile getLocalProfile() {
             return mSipGroup.getLocalProfile();
+        }
+
+        public boolean containsSession(String callId) {
+            return mSipGroup.containsSession(callId);
         }
 
         // network connectivity is tricky because network can be disconnected
@@ -551,7 +570,7 @@ public final class SipService extends ISipService.Stub {
                     (SipSessionGroup.SipSessionImpl) s;
             synchronized (SipService.this) {
                 try {
-                    if (!isRegistered()) {
+                    if (!isRegistered() || callingSelf(this, session)) {
                         session.endCall();
                         return;
                     }
