@@ -2763,7 +2763,7 @@ public class WebView extends AbsoluteLayout
     public int findAll(String find) {
         if (0 == mNativeClass) return 0; // client isn't initialized
         int result = find != null ? nativeFindAll(find.toLowerCase(),
-                find.toUpperCase()) : 0;
+                find.toUpperCase(), find.equalsIgnoreCase(mLastFind)) : 0;
         invalidate();
         mLastFind = find;
         return result;
@@ -7427,7 +7427,8 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeEvaluateLayersAnimations();
     private native boolean  nativeDrawGL(Rect rect, float scale, int extras);
     private native void     nativeExtendSelection(int x, int y);
-    private native int      nativeFindAll(String findLower, String findUpper);
+    private native int      nativeFindAll(String findLower, String findUpper,
+            boolean sameAsLastSearch);
     private native void     nativeFindNext(boolean forward);
     /* package */ native int      nativeFocusCandidateFramePointer();
     /* package */ native boolean  nativeFocusCandidateHasNextTextfield();
