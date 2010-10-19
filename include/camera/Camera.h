@@ -200,6 +200,15 @@ public:
             // send command to camera driver
             status_t    sendCommand(int32_t cmd, int32_t arg1, int32_t arg2);
 
+            // return the total number of available video buffers.
+            int32_t     getNumberOfVideoBuffers() const;
+
+            // return the individual video buffer corresponding to the given index.
+            sp<IMemory> getVideoBuffer(int32_t index) const;
+
+            // tell camera hal to store meta data or real YUV in video buffers.
+            status_t    storeMetaDataInBuffers(bool enabled);
+
             void        setListener(const sp<CameraListener>& listener);
             void        setPreviewCallbackFlags(int preview_callback_flag);
 
