@@ -72,6 +72,7 @@ public:
     //ScriptCState mScriptC;
     ShaderCache mShaderCache;
 
+    RsSurfaceConfig mUserSurfaceConfig;
 
     //bool setupCheck();
     bool checkDriver() const {return false;}
