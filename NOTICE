@@ -17,7 +17,7 @@ The Android Open Source Project (http://source.android.com).
    =========================================================================
 
 Apache Commons
-Copyright 1999-2004 The Apache Software Foundation
+Copyright 1999-2006 The Apache Software Foundation
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
@@ -52,6 +52,26 @@ the Apache2 License.
 Media Codecs
 These files are Copyright 1998 - 2009 PacketVideo, but released under
 the Apache2 License.
+
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the TagSoup code.                                 ==
+   =========================================================================
+
+This file is part of TagSoup and is Copyright 2002-2008 by John Cowan.
+
+TagSoup is licensed under the Apache License,
+Version 2.0.  You may obtain a copy of this license at
+http://www.apache.org/licenses/LICENSE-2.0 .  You may also have
+additional legal rights not granted by this license.
+
+TagSoup is distributed in the hope that it will be useful, but
+unless required by applicable law or agreed to in writing, TagSoup
+is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+OF ANY KIND, either express or implied; not even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 
                                Apache License
                            Version 2.0, January 2004

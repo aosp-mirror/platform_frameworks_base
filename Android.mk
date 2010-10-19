@@ -607,6 +607,10 @@ include $(BUILD_DROIDDOC)
 # Build ext.jar
 # ============================================================
 
+# NOTICE notes for non-obvious sections
+# apache-http - covered by the Apache Commons section.
+
+
 ext_dirs := \
 	../../external/nist-sip/java \
 	../../external/apache-http/src \

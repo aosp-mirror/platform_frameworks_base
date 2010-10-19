@@ -12,3 +12,20 @@ ALL_PREBUILT += $(TARGET_OUT)/bin/am
 $(TARGET_OUT)/bin/am : $(LOCAL_PATH)/am | $(ACP)
 	$(transform-prebuilt-to-target)
 
+NOTICE_FILE := NOTICE
+files_noticed := bin/am
+
+# Generate rules for a single file. The argument is the file path relative to
+# the installation root
+define make-notice-file
+
+$(TARGET_OUT_NOTICE_FILES)/src/$(1).txt: $(LOCAL_PATH)/$(NOTICE_FILE)
+	@echo Notice file: $$< -- $$@
+	@mkdir -p $$(dir $$@)
+	@cat $$< >> $$@
+
+$(TARGET_OUT_NOTICE_FILES)/hash-timestamp: $(TARGET_OUT_NOTICE_FILES)/src/$(1).txt
+
+endef
+
+$(foreach file,$(files_noticed),$(eval $(call make-notice-file,$(file))))
