@@ -200,8 +200,17 @@ public class NdefRecord implements Parcelable {
      *
      * @throws FormatException if the data is not a valid NDEF record
      */
-    public NdefRecord(byte[] data) {
-        throw new UnsupportedOperationException();
+    public NdefRecord(byte[] data) throws FormatException {
+        /* Prevent compiler to complain about unassigned final fields */
+        mFlags = 0;
+        mTnf = 0;
+        mType = null;
+        mId = null;
+        mPayload = null;
+        /* Perform actual parsing */
+        if (parseNdefRecord(data) == -1) {
+            throw new FormatException("Error while parsing NDEF record");
+        }
     }
 
     /**
@@ -280,5 +289,6 @@ public class NdefRecord implements Parcelable {
         }
     };
 
+    private native int parseNdefRecord(byte[] data);
     private native byte[] generate(short flags, short tnf, byte[] type, byte[] id, byte[] data);
 }
