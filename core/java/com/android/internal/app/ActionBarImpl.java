@@ -326,18 +326,21 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void selectTab(Tab tab) {
-        if (mSelectedTab == tab) {
-            return;
-        }
-
-        mActionView.setTabSelected(tab != null ? tab.getPosition() : Tab.INVALID_POSITION);
         final FragmentTransaction trans = mActivity.getFragmentManager().openTransaction();
-        if (mSelectedTab != null) {
-            mSelectedTab.getCallback().onTabUnselected(mSelectedTab, trans);
-        }
-        mSelectedTab = (TabImpl) tab;
-        if (mSelectedTab != null) {
-            mSelectedTab.getCallback().onTabSelected(mSelectedTab, trans);
+
+        if (mSelectedTab == tab) {
+            if (mSelectedTab != null) {
+                mSelectedTab.getCallback().onTabReselected(mSelectedTab, trans);
+            }
+        } else {
+            mActionView.setTabSelected(tab != null ? tab.getPosition() : Tab.INVALID_POSITION);
+            if (mSelectedTab != null) {
+                mSelectedTab.getCallback().onTabUnselected(mSelectedTab, trans);
+            }
+            mSelectedTab = (TabImpl) tab;
+            if (mSelectedTab != null) {
+                mSelectedTab.getCallback().onTabSelected(mSelectedTab, trans);
+            }
         }
 
         if (!trans.isEmpty()) {

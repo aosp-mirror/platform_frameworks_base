@@ -470,5 +470,15 @@ public abstract class ActionBar {
          *        will be executed in a single transaction.
          */
         public void onTabUnselected(Tab tab, FragmentTransaction ft);
+
+        /**
+         * Called when a tab that is already selected is chosen again by the user.
+         * Some applications may use this action to return to the top level of a category.
+         *
+         * @param tab The tab that was reselected.
+         * @param ft A {@link FragmentTransaction} for queuing fragment operations to execute
+         *        once this method returns.
+         */
+        public void onTabReselected(Tab tab, FragmentTransaction ft);
     }
 }
