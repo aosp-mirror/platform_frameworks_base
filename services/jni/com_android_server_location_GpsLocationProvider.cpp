@@ -16,7 +16,7 @@
 
 #define LOG_TAG "GpsLocationProvider"
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 
 #include "JNIHelp.h"
 #include "jni.h"
@@ -106,6 +106,7 @@ static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
 
 static void set_capabilities_callback(uint32_t capabilities)
 {
+    LOGD("set_capabilities_callback: %ld\n", capabilities);
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mCallbacksObj, method_setEngineCapabilities, capabilities);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);

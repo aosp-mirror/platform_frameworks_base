@@ -30,6 +30,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BluetoothTestUtils extends Assert {
 
@@ -88,33 +90,6 @@ public class BluetoothTestUtils extends Assert {
      */
     private static final int DISCONNECT_HEADSET_TIMEOUT = 20000;
 
-    private static final int DISCOVERY_STARTED_FLAG = 1;
-    private static final int DISCOVERY_FINISHED_FLAG = 1 << 1;
-    private static final int SCAN_MODE_NONE_FLAG = 1 << 2;
-    private static final int SCAN_MODE_CONNECTABLE_FLAG = 1 << 3;
-    private static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE_FLAG = 1 << 4;
-    private static final int STATE_OFF_FLAG = 1 << 5;
-    private static final int STATE_TURNING_ON_FLAG = 1 << 6;
-    private static final int STATE_ON_FLAG = 1 << 7;
-    private static final int STATE_TURNING_OFF_FLAG = 1 << 8;
-    private static final int PAIR_STATE_FLAG = 1 << 9;
-    private static final int PROFILE_A2DP_FLAG = 1 << 10;
-    private static final int PROFILE_HEADSET_FLAG = 1 << 11;
-
-    private static final int PAIR_STATE_BONDED = 1;
-    private static final int PAIR_STATE_BONDING = 1 << 1;
-    private static final int PAIR_STATE_NONE = 1 << 2;
-
-    private static final int A2DP_STATE_DISCONNECTED = 1;
-    private static final int A2DP_STATE_CONNECTING = 1 << 1;
-    private static final int A2DP_STATE_CONNECTED = 1 << 2;
-    private static final int A2DP_STATE_DISCONNECTING = 1 << 3;
-    private static final int A2DP_STATE_PLAYING = 1 << 4;
-
-    private static final int HEADSET_STATE_DISCONNECTED = 1;
-    private static final int HEADSET_STATE_CONNECTING = 1 << 1;
-    private static final int HEADSET_STATE_CONNECTED = 1 << 2;
-
     /**
      * Time between polls in ms.
      */
@@ -155,8 +130,29 @@ public class BluetoothTestUtils extends Assert {
     private HeadsetServiceListener mHeadsetServiceListener = new HeadsetServiceListener();
 
     private class BluetoothReceiver extends BroadcastReceiver {
+        private static final int DISCOVERY_STARTED_FLAG = 1;
+        private static final int DISCOVERY_FINISHED_FLAG = 1 << 1;
+        private static final int SCAN_MODE_NONE_FLAG = 1 << 2;
+        private static final int SCAN_MODE_CONNECTABLE_FLAG = 1 << 3;
+        private static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE_FLAG = 1 << 4;
+        private static final int STATE_OFF_FLAG = 1 << 5;
+        private static final int STATE_TURNING_ON_FLAG = 1 << 6;
+        private static final int STATE_ON_FLAG = 1 << 7;
+        private static final int STATE_TURNING_OFF_FLAG = 1 << 8;
+        private static final int PROFILE_A2DP_FLAG = 1 << 9;
+        private static final int PROFILE_HEADSET_FLAG = 1 << 10;
+
+        private static final int A2DP_STATE_DISCONNECTED = 1;
+        private static final int A2DP_STATE_CONNECTING = 1 << 1;
+        private static final int A2DP_STATE_CONNECTED = 1 << 2;
+        private static final int A2DP_STATE_DISCONNECTING = 1 << 3;
+        private static final int A2DP_STATE_PLAYING = 1 << 4;
+
+        private static final int HEADSET_STATE_DISCONNECTED = 1;
+        private static final int HEADSET_STATE_CONNECTING = 1 << 1;
+        private static final int HEADSET_STATE_CONNECTED = 1 << 2;
+
         private int mFiredFlags = 0;
-        private int mPairFiredFlags = 0;
         private int mA2dpFiredFlags = 0;
         private int mHeadsetFiredFlags = 0;
 
@@ -198,21 +194,6 @@ public class BluetoothTestUtils extends Assert {
                             break;
                         case BluetoothAdapter.STATE_TURNING_OFF:
                             mFiredFlags |= STATE_TURNING_OFF_FLAG;
-                            break;
-                    }
-                } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(intent.getAction())) {
-                    mFiredFlags |= PAIR_STATE_FLAG;
-                    int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1);
-                    assertNotSame(state, -1);
-                    switch (state) {
-                        case BluetoothDevice.BOND_BONDED:
-                            mPairFiredFlags |= PAIR_STATE_BONDED;
-                            break;
-                        case BluetoothDevice.BOND_BONDING:
-                            mPairFiredFlags |= PAIR_STATE_BONDING;
-                            break;
-                        case BluetoothDevice.BOND_NONE:
-                            mPairFiredFlags |= PAIR_STATE_NONE;
                             break;
                     }
                 } else if (BluetoothA2dp.ACTION_SINK_STATE_CHANGED.equals(intent.getAction())) {
@@ -262,12 +243,6 @@ public class BluetoothTestUtils extends Assert {
             }
         }
 
-        public int getPairFiredFlags() {
-            synchronized (this) {
-                return mPairFiredFlags;
-            }
-        }
-
         public int getA2dpFiredFlags() {
             synchronized (this) {
                 return mA2dpFiredFlags;
@@ -283,14 +258,101 @@ public class BluetoothTestUtils extends Assert {
         public void resetFiredFlags() {
             synchronized (this) {
                 mFiredFlags = 0;
-                mPairFiredFlags = 0;
                 mA2dpFiredFlags = 0;
                 mHeadsetFiredFlags = 0;
             }
         }
     }
 
-    private BluetoothReceiver mReceiver = new BluetoothReceiver();
+    private BluetoothReceiver mBluetoothReceiver = new BluetoothReceiver();
+
+    private class PairReceiver extends BroadcastReceiver {
+        private final static int PAIR_FLAG = 1;
+        private static final int PAIR_STATE_BONDED = 1;
+        private static final int PAIR_STATE_BONDING = 1 << 1;
+        private static final int PAIR_STATE_NONE = 1 << 2;
+
+        private int mFiredFlags = 0;
+        private int mPairFiredFlags = 0;
+
+        private BluetoothDevice mDevice;
+        private int mPasskey;
+        private byte[] mPin;
+
+        public PairReceiver(BluetoothDevice device, int passkey, byte[] pin) {
+            super();
+            mDevice = device;
+            mPasskey = passkey;
+            mPin = pin;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (this) {
+                if (BluetoothDevice.ACTION_PAIRING_REQUEST.equals(intent.getAction())
+                        && mDevice.equals(intent.getParcelableExtra(
+                                BluetoothDevice.EXTRA_DEVICE))) {
+                    int type = intent.getIntExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
+                            BluetoothDevice.ERROR);
+                    assertNotSame(type, BluetoothDevice.ERROR);
+                    switch (type) {
+                        case BluetoothDevice.PAIRING_VARIANT_PIN:
+                            mDevice.setPin(mPin);
+                            break;
+                        case BluetoothDevice.PAIRING_VARIANT_PASSKEY:
+                            mDevice.setPasskey(mPasskey);
+                            break;
+                        case BluetoothDevice.PAIRING_VARIANT_PASSKEY_CONFIRMATION:
+                        case BluetoothDevice.PAIRING_VARIANT_CONSENT:
+                            mDevice.setPairingConfirmation(true);
+                            break;
+                        case BluetoothDevice.PAIRING_VARIANT_OOB_CONSENT:
+                            mDevice.setRemoteOutOfBandData();
+                            break;
+                    }
+                } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(intent.getAction())
+                        && mDevice.equals(intent.getParcelableExtra(
+                                BluetoothDevice.EXTRA_DEVICE))) {
+                    mFiredFlags |= PAIR_FLAG;
+                    int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
+                            BluetoothDevice.ERROR);
+                    assertNotSame(state, BluetoothDevice.ERROR);
+                    switch (state) {
+                        case BluetoothDevice.BOND_BONDED:
+                            mPairFiredFlags |= PAIR_STATE_BONDED;
+                            break;
+                        case BluetoothDevice.BOND_BONDING:
+                            mPairFiredFlags |= PAIR_STATE_BONDING;
+                            break;
+                        case BluetoothDevice.BOND_NONE:
+                            mPairFiredFlags |= PAIR_STATE_NONE;
+                            break;
+                    }
+                }
+            }
+        }
+
+        public int getFiredFlags() {
+            synchronized (this) {
+                return mFiredFlags;
+            }
+        }
+
+        public int getPairFiredFlags() {
+            synchronized (this) {
+                return mPairFiredFlags;
+            }
+        }
+
+        public void resetFiredFlags() {
+            synchronized (this) {
+                mFiredFlags = 0;
+                mPairFiredFlags = 0;
+            }
+        }
+    }
+
+    private List<BroadcastReceiver> mReceivers = new ArrayList<BroadcastReceiver>();
 
     public BluetoothTestUtils(Context context, String tag) {
         this(context, tag, null);
@@ -313,19 +375,16 @@ public class BluetoothTestUtils extends Assert {
             }
         }
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        filter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        mContext.registerReceiver(mReceiver, filter);
-
         mA2dp = new BluetoothA2dp(mContext);
         mHeadset = new BluetoothHeadset(mContext, mHeadsetServiceListener);
+        mBluetoothReceiver = getBluetoothReceiver(mContext);
+        mReceivers.add(mBluetoothReceiver);
     }
 
     public void close() {
-        mContext.unregisterReceiver(mReceiver);
+        while (!mReceivers.isEmpty()) {
+            mContext.unregisterReceiver(mReceivers.remove(0));
+        }
 
         if (mOutputWriter != null) {
             try {
@@ -337,8 +396,9 @@ public class BluetoothTestUtils extends Assert {
     }
 
     public void enable(BluetoothAdapter adapter) {
-        int mask = STATE_TURNING_ON_FLAG | STATE_ON_FLAG | SCAN_MODE_CONNECTABLE_FLAG;
-        mReceiver.resetFiredFlags();
+        int mask = (BluetoothReceiver.STATE_TURNING_ON_FLAG | BluetoothReceiver.STATE_ON_FLAG
+                | BluetoothReceiver.SCAN_MODE_CONNECTABLE_FLAG);
+        mBluetoothReceiver.resetFiredFlags();
 
         int state = adapter.getState();
         switch (state) {
@@ -363,8 +423,8 @@ public class BluetoothTestUtils extends Assert {
             state = adapter.getState();
             if (state == BluetoothAdapter.STATE_ON) {
                 assertTrue(adapter.isEnabled());
-                if ((mReceiver.getFiredFlags() & mask) == mask) {
-                    mReceiver.resetFiredFlags();
+                if ((mBluetoothReceiver.getFiredFlags() & mask) == mask) {
+                    mBluetoothReceiver.resetFiredFlags();
                     writeOutput(String.format("enable() completed in %d ms",
                             (System.currentTimeMillis() - s)));
                     return;
@@ -376,15 +436,16 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("enable() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x)",
                 state, BluetoothAdapter.STATE_ON, firedFlags, mask));
     }
 
     public void disable(BluetoothAdapter adapter) {
-        int mask = STATE_TURNING_OFF_FLAG | STATE_OFF_FLAG | SCAN_MODE_NONE_FLAG;
-        mReceiver.resetFiredFlags();
+        int mask = (BluetoothReceiver.STATE_TURNING_OFF_FLAG | BluetoothReceiver.STATE_OFF_FLAG
+                | BluetoothReceiver.SCAN_MODE_NONE_FLAG);
+        mBluetoothReceiver.resetFiredFlags();
 
         int state = adapter.getState();
         switch (state) {
@@ -412,8 +473,8 @@ public class BluetoothTestUtils extends Assert {
             state = adapter.getState();
             if (state == BluetoothAdapter.STATE_OFF) {
                 assertFalse(adapter.isEnabled());
-                if ((mReceiver.getFiredFlags() & mask) == mask) {
-                    mReceiver.resetFiredFlags();
+                if ((mBluetoothReceiver.getFiredFlags() & mask) == mask) {
+                    mBluetoothReceiver.resetFiredFlags();
                     writeOutput(String.format("disable() completed in %d ms",
                             (System.currentTimeMillis() - s)));
                     return;
@@ -425,15 +486,15 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("disable() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x)",
                 state, BluetoothAdapter.STATE_OFF, firedFlags, mask));
     }
 
     public void discoverable(BluetoothAdapter adapter) {
-        int mask = SCAN_MODE_CONNECTABLE_DISCOVERABLE_FLAG;
-        mReceiver.resetFiredFlags();
+        int mask = BluetoothReceiver.SCAN_MODE_CONNECTABLE_DISCOVERABLE_FLAG;
+        mBluetoothReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
             fail("discoverable() bluetooth not enabled");
@@ -451,8 +512,8 @@ public class BluetoothTestUtils extends Assert {
         while (System.currentTimeMillis() - s < SET_SCAN_MODE_TIMEOUT) {
             scanMode = adapter.getScanMode();
             if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-                if ((mReceiver.getFiredFlags() & mask) == mask) {
-                    mReceiver.resetFiredFlags();
+                if ((mBluetoothReceiver.getFiredFlags() & mask) == mask) {
+                    mBluetoothReceiver.resetFiredFlags();
                     writeOutput(String.format("discoverable() completed in %d ms",
                             (System.currentTimeMillis() - s)));
                     return;
@@ -463,16 +524,16 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("discoverable() timeout: scanMode=%d (expected %d), flags=0x%x "
                 + "(expected 0x%x)", scanMode, BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,
                 firedFlags, mask));
     }
 
     public void undiscoverable(BluetoothAdapter adapter) {
-        int mask = SCAN_MODE_CONNECTABLE_FLAG;
-        mReceiver.resetFiredFlags();
+        int mask = BluetoothReceiver.SCAN_MODE_CONNECTABLE_FLAG;
+        mBluetoothReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
             fail("undiscoverable() bluetooth not enabled");
@@ -490,8 +551,8 @@ public class BluetoothTestUtils extends Assert {
         while (System.currentTimeMillis() - s < SET_SCAN_MODE_TIMEOUT) {
             scanMode = adapter.getScanMode();
             if (scanMode == BluetoothAdapter.SCAN_MODE_CONNECTABLE) {
-                if ((mReceiver.getFiredFlags() & mask) == mask) {
-                    mReceiver.resetFiredFlags();
+                if ((mBluetoothReceiver.getFiredFlags() & mask) == mask) {
+                    mBluetoothReceiver.resetFiredFlags();
                     writeOutput(String.format("undiscoverable() completed in %d ms",
                             (System.currentTimeMillis() - s)));
                     return;
@@ -502,16 +563,16 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("undiscoverable() timeout: scanMode=%d (expected %d), flags=0x%x "
                 + "(expected 0x%x)", scanMode, BluetoothAdapter.SCAN_MODE_CONNECTABLE, firedFlags,
                 mask));
     }
 
     public void startScan(BluetoothAdapter adapter) {
-        int mask = DISCOVERY_STARTED_FLAG;
-        mReceiver.resetFiredFlags();
+        int mask = BluetoothReceiver.DISCOVERY_STARTED_FLAG;
+        mBluetoothReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
             fail("startScan() bluetooth not enabled");
@@ -525,8 +586,8 @@ public class BluetoothTestUtils extends Assert {
 
         long s = System.currentTimeMillis();
         while (System.currentTimeMillis() - s < START_DISCOVERY_TIMEOUT) {
-            if (adapter.isDiscovering() && ((mReceiver.getFiredFlags() & mask) == mask)) {
-                mReceiver.resetFiredFlags();
+            if (adapter.isDiscovering() && ((mBluetoothReceiver.getFiredFlags() & mask) == mask)) {
+                mBluetoothReceiver.resetFiredFlags();
                 writeOutput(String.format("startScan() completed in %d ms",
                         (System.currentTimeMillis() - s)));
                 return;
@@ -534,15 +595,15 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("startScan() timeout: isDiscovering=%b, flags=0x%x (expected 0x%x)",
                 adapter.isDiscovering(), firedFlags, mask));
     }
 
     public void stopScan(BluetoothAdapter adapter) {
-        int mask = DISCOVERY_FINISHED_FLAG;
-        mReceiver.resetFiredFlags();
+        int mask = BluetoothReceiver.DISCOVERY_FINISHED_FLAG;
+        mBluetoothReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
             fail("stopScan() bluetooth not enabled");
@@ -557,8 +618,8 @@ public class BluetoothTestUtils extends Assert {
 
         long s = System.currentTimeMillis();
         while (System.currentTimeMillis() - s < CANCEL_DISCOVERY_TIMEOUT) {
-            if (!adapter.isDiscovering() && ((mReceiver.getFiredFlags() & mask) == mask)) {
-                mReceiver.resetFiredFlags();
+            if (!adapter.isDiscovering() && ((mBluetoothReceiver.getFiredFlags() & mask) == mask)) {
+                mBluetoothReceiver.resetFiredFlags();
                 writeOutput(String.format("stopScan() completed in %d ms",
                         (System.currentTimeMillis() - s)));
                 return;
@@ -566,17 +627,19 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("stopScan() timeout: isDiscovering=%b, flags=0x%x (expected 0x%x)",
                 adapter.isDiscovering(), firedFlags, mask));
 
     }
 
-    public void pair(BluetoothAdapter adapter, BluetoothDevice device) {
-        int mask = PAIR_STATE_FLAG;
-        int pairMask = PAIR_STATE_BONDING | PAIR_STATE_BONDED;
-        mReceiver.resetFiredFlags();
+    public void pair(BluetoothAdapter adapter, BluetoothDevice device, int passkey, byte[] pin) {
+        int mask = PairReceiver.PAIR_FLAG;
+        int pairMask = PairReceiver.PAIR_STATE_BONDING | PairReceiver.PAIR_STATE_BONDED;
+
+        PairReceiver pairReceiver = getPairReceiver(mContext, device, passkey, pin);
+        mReceivers.add(pairReceiver);
 
         if (!adapter.isEnabled()) {
             fail("pair() bluetooth not enabled");
@@ -604,28 +667,32 @@ public class BluetoothTestUtils extends Assert {
             state = device.getBondState();
             if (state == BluetoothDevice.BOND_BONDED) {
                 assertTrue(adapter.getBondedDevices().contains(device));
-                if ((mReceiver.getFiredFlags() & mask) == mask
-                        && (mReceiver.getPairFiredFlags() & pairMask) == pairMask) {
+                if ((pairReceiver.getFiredFlags() & mask) == mask
+                        && (pairReceiver.getPairFiredFlags() & pairMask) == pairMask) {
                     writeOutput(String.format("pair() completed in %d ms: device=%s",
                             (System.currentTimeMillis() - s), device));
+                    mReceivers.remove(pairReceiver);
+                    mContext.unregisterReceiver(pairReceiver);
                     return;
                 }
             }
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        int pairFiredFlags = mReceiver.getPairFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = pairReceiver.getFiredFlags();
+        int pairFiredFlags = pairReceiver.getPairFiredFlags();
+        pairReceiver.resetFiredFlags();
         fail(String.format("pair() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x), "
                 + "pairFlags=0x%x (expected 0x%x)", state, BluetoothDevice.BOND_BONDED, firedFlags,
                 mask, pairFiredFlags, pairMask));
     }
 
     public void unpair(BluetoothAdapter adapter, BluetoothDevice device) {
-        int mask = PAIR_STATE_FLAG;
-        int pairMask = PAIR_STATE_NONE;
-        mReceiver.resetFiredFlags();
+        int mask = PairReceiver.PAIR_FLAG;
+        int pairMask = PairReceiver.PAIR_STATE_NONE;
+
+        PairReceiver pairReceiver = getPairReceiver(mContext, device, 0, null);
+        mReceivers.add(pairReceiver);
 
         if (!adapter.isEnabled()) {
             fail("unpair() bluetooth not enabled");
@@ -653,29 +720,32 @@ public class BluetoothTestUtils extends Assert {
         while (System.currentTimeMillis() - s < UNPAIR_TIMEOUT) {
             if (device.getBondState() == BluetoothDevice.BOND_NONE) {
                 assertFalse(adapter.getBondedDevices().contains(device));
-                if ((mReceiver.getFiredFlags() & mask) == mask
-                        && (mReceiver.getPairFiredFlags() & pairMask) == pairMask) {
+                if ((pairReceiver.getFiredFlags() & mask) == mask
+                       && (pairReceiver.getPairFiredFlags() & pairMask) == pairMask) {
                     writeOutput(String.format("unpair() completed in %d ms: device=%s",
                             (System.currentTimeMillis() - s), device));
+                    mReceivers.remove(pairReceiver);
+                    mContext.unregisterReceiver(pairReceiver);
                     return;
                 }
             }
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        int pairFiredFlags = mReceiver.getPairFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = pairReceiver.getFiredFlags();
+        int pairFiredFlags = pairReceiver.getPairFiredFlags();
+        pairReceiver.resetFiredFlags();
         fail(String.format("unpair() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x), "
                 + "pairFlags=0x%x (expected 0x%x)", state, BluetoothDevice.BOND_BONDED, firedFlags,
                 mask, pairFiredFlags, pairMask));
     }
 
     public void connectA2dp(BluetoothAdapter adapter, BluetoothDevice device) {
-        int mask = PROFILE_A2DP_FLAG;
-        int a2dpMask1 = A2DP_STATE_CONNECTING | A2DP_STATE_CONNECTED | A2DP_STATE_PLAYING;
-        int a2dpMask2 = a2dpMask1 ^ A2DP_STATE_CONNECTED;
-        int a2dpMask3 = a2dpMask1 ^ A2DP_STATE_PLAYING;
-        mReceiver.resetFiredFlags();
+        int mask = BluetoothReceiver.PROFILE_A2DP_FLAG;
+        int a2dpMask1 = (BluetoothReceiver.A2DP_STATE_CONNECTING
+                | BluetoothReceiver.A2DP_STATE_CONNECTED | BluetoothReceiver.A2DP_STATE_PLAYING);
+        int a2dpMask2 = a2dpMask1 ^ BluetoothReceiver.A2DP_STATE_CONNECTED;
+        int a2dpMask3 = a2dpMask1 ^ BluetoothReceiver.A2DP_STATE_PLAYING;
+        mBluetoothReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
             fail("connectA2dp() bluetooth not enabled");
@@ -712,13 +782,13 @@ public class BluetoothTestUtils extends Assert {
                 assertTrue(mA2dp.isSinkConnected(device));
                 // Check whether STATE_CONNECTING and (STATE_CONNECTED or STATE_PLAYING) intents
                 // have fired if we are checking if intents should be fired.
-                int firedFlags = mReceiver.getFiredFlags();
-                int a2dpFiredFlags = mReceiver.getA2dpFiredFlags();
-                if ((mReceiver.getFiredFlags() & mask) == mask
+                int firedFlags = mBluetoothReceiver.getFiredFlags();
+                int a2dpFiredFlags = mBluetoothReceiver.getA2dpFiredFlags();
+                if ((mBluetoothReceiver.getFiredFlags() & mask) == mask
                         && ((a2dpFiredFlags & a2dpMask1) == a2dpMask1
                                 || (a2dpFiredFlags & a2dpMask2) == a2dpMask2
                                 || (a2dpFiredFlags & a2dpMask3) == a2dpMask3)) {
-                    mReceiver.resetFiredFlags();
+                    mBluetoothReceiver.resetFiredFlags();
                     writeOutput(String.format("connectA2dp() completed in %d ms: device=%s",
                             (System.currentTimeMillis() - s), device));
                     return;
@@ -727,9 +797,9 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        int a2dpFiredFlags = mReceiver.getA2dpFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        int a2dpFiredFlags = mBluetoothReceiver.getA2dpFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("connectA2dp() timeout: state=%d (expected %d or %d), "
                 + "flags=0x%x (expected 0x%x), a2dpFlags=0x%x (expected 0x%x or 0x%x or 0x%x)",
                 state, BluetoothHeadset.STATE_CONNECTED, BluetoothA2dp.STATE_PLAYING, firedFlags,
@@ -737,9 +807,10 @@ public class BluetoothTestUtils extends Assert {
     }
 
     public void disconnectA2dp(BluetoothAdapter adapter, BluetoothDevice device) {
-        int mask = PROFILE_A2DP_FLAG;
-        int a2dpMask = A2DP_STATE_DISCONNECTING | A2DP_STATE_DISCONNECTED;
-        mReceiver.resetFiredFlags();
+        int mask = BluetoothReceiver.PROFILE_A2DP_FLAG;
+        int a2dpMask = (BluetoothReceiver.A2DP_STATE_DISCONNECTING
+                | BluetoothReceiver.A2DP_STATE_DISCONNECTED);
+        mBluetoothReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
             fail("disconnectA2dp() bluetooth not enabled");
@@ -777,9 +848,9 @@ public class BluetoothTestUtils extends Assert {
             state = mA2dp.getSinkState(device);
             if (state == BluetoothA2dp.STATE_DISCONNECTED) {
                 assertFalse(mA2dp.isSinkConnected(device));
-                if ((mReceiver.getFiredFlags() & mask) == mask
-                        && (mReceiver.getA2dpFiredFlags() & a2dpMask) == a2dpMask) {
-                    mReceiver.resetFiredFlags();
+                if ((mBluetoothReceiver.getFiredFlags() & mask) == mask
+                        && (mBluetoothReceiver.getA2dpFiredFlags() & a2dpMask) == a2dpMask) {
+                    mBluetoothReceiver.resetFiredFlags();
                     writeOutput(String.format("disconnectA2dp() completed in %d ms: device=%s",
                             (System.currentTimeMillis() - s), device));
                     return;
@@ -788,18 +859,19 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        int a2dpFiredFlags = mReceiver.getA2dpFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        int a2dpFiredFlags = mBluetoothReceiver.getA2dpFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("disconnectA2dp() timeout: state=%d (expected %d), "
                 + "flags=0x%x (expected 0x%x), a2dpFlags=0x%x (expected 0x%x)", state,
                 BluetoothA2dp.STATE_DISCONNECTED, firedFlags, mask, a2dpFiredFlags, a2dpMask));
     }
 
     public void connectHeadset(BluetoothAdapter adapter, BluetoothDevice device) {
-        int mask = PROFILE_HEADSET_FLAG;
-        int headsetMask = HEADSET_STATE_CONNECTING | HEADSET_STATE_CONNECTED;
-        mReceiver.resetFiredFlags();
+        int mask = BluetoothReceiver.PROFILE_HEADSET_FLAG;
+        int headsetMask = (BluetoothReceiver.HEADSET_STATE_CONNECTING
+                | BluetoothReceiver.HEADSET_STATE_CONNECTED);
+        mBluetoothReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
             fail("connectHeadset() bluetooth not enabled");
@@ -839,9 +911,9 @@ public class BluetoothTestUtils extends Assert {
             state = mHeadset.getState(device);
             if (state == BluetoothHeadset.STATE_CONNECTED) {
                 assertTrue(mHeadset.isConnected(device));
-                if ((mReceiver.getFiredFlags() & mask) == mask
-                        && (mReceiver.getHeadsetFiredFlags() & headsetMask) == headsetMask) {
-                    mReceiver.resetFiredFlags();
+                if ((mBluetoothReceiver.getFiredFlags() & mask) == mask
+                        && (mBluetoothReceiver.getHeadsetFiredFlags() & headsetMask) == headsetMask) {
+                    mBluetoothReceiver.resetFiredFlags();
                     writeOutput(String.format("connectHeadset() completed in %d ms: device=%s",
                             (System.currentTimeMillis() - s), device));
                     return;
@@ -850,9 +922,9 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        int headsetFiredFlags = mReceiver.getHeadsetFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        int headsetFiredFlags = mBluetoothReceiver.getHeadsetFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("connectHeadset() timeout: state=%d (expected %d), "
                 + "flags=0x%x (expected 0x%x), headsetFlags=0x%s (expected 0x%x)", state,
                 BluetoothHeadset.STATE_CONNECTED, firedFlags, mask, headsetFiredFlags,
@@ -860,9 +932,9 @@ public class BluetoothTestUtils extends Assert {
     }
 
     public void disconnectHeadset(BluetoothAdapter adapter, BluetoothDevice device) {
-        int mask = PROFILE_HEADSET_FLAG;
-        int headsetMask = HEADSET_STATE_DISCONNECTED;
-        mReceiver.resetFiredFlags();
+        int mask = BluetoothReceiver.PROFILE_HEADSET_FLAG;
+        int headsetMask = BluetoothReceiver.HEADSET_STATE_DISCONNECTED;
+        mBluetoothReceiver.resetFiredFlags();
 
         if (!adapter.isEnabled()) {
             fail("disconnectHeadset() bluetooth not enabled");
@@ -898,9 +970,9 @@ public class BluetoothTestUtils extends Assert {
             state = mHeadset.getState(device);
             if (state == BluetoothHeadset.STATE_DISCONNECTED) {
                 assertFalse(mHeadset.isConnected(device));
-                if ((mReceiver.getFiredFlags() & mask) == mask
-                        && (mReceiver.getHeadsetFiredFlags() & headsetMask) == headsetMask) {
-                    mReceiver.resetFiredFlags();
+                if ((mBluetoothReceiver.getFiredFlags() & mask) == mask
+                        && (mBluetoothReceiver.getHeadsetFiredFlags() & headsetMask) == headsetMask) {
+                    mBluetoothReceiver.resetFiredFlags();
                     writeOutput(String.format("disconnectHeadset() completed in %d ms: device=%s",
                             (System.currentTimeMillis() - s), device));
                     return;
@@ -909,9 +981,9 @@ public class BluetoothTestUtils extends Assert {
             sleep(POLL_TIME);
         }
 
-        int firedFlags = mReceiver.getFiredFlags();
-        int headsetFiredFlags = mReceiver.getHeadsetFiredFlags();
-        mReceiver.resetFiredFlags();
+        int firedFlags = mBluetoothReceiver.getFiredFlags();
+        int headsetFiredFlags = mBluetoothReceiver.getHeadsetFiredFlags();
+        mBluetoothReceiver.resetFiredFlags();
         fail(String.format("disconnectHeadset() timeout: state=%d (expected %d), "
                 + "flags=0x%x (expected 0x%x), headsetFlags=0x%s (expected 0x%x)", state,
                 BluetoothHeadset.STATE_DISCONNECTED, firedFlags, mask, headsetFiredFlags,
@@ -929,6 +1001,29 @@ public class BluetoothTestUtils extends Assert {
         } catch (IOException e) {
             Log.w(mTag, "Could not write to output file", e);
         }
+    }
+
+    private BluetoothReceiver getBluetoothReceiver(Context context) {
+        BluetoothReceiver receiver = new BluetoothReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
+        filter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
+        context.registerReceiver(receiver, filter);
+        return receiver;
+    }
+
+    private PairReceiver getPairReceiver(Context context, BluetoothDevice device, int passkey,
+            byte[] pin) {
+        PairReceiver receiver = new PairReceiver(device, passkey, pin);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        context.registerReceiver(receiver, filter);
+        return receiver;
     }
 
     private void sleep(long time) {

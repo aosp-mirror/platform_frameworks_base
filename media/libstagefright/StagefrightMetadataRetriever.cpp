@@ -112,7 +112,7 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
     sp<MediaSource> decoder =
         OMXCodec::Create(
                 client->interface(), source->getFormat(), false, source,
-                NULL, flags);
+                NULL, flags | OMXCodec::kClientNeedsFramebuffer);
 
     if (decoder.get() == NULL) {
         LOGV("unable to instantiate video decoder.");

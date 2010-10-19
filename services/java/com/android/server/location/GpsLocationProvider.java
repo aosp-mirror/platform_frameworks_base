@@ -82,7 +82,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private static final String TAG = "GpsLocationProvider";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final boolean VERBOSE = false;
 
     // these need to match GpsPositionMode enum in gps.h
@@ -1113,7 +1113,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
      * called from native code to update our status
      */
     private void reportStatus(int status) {
-        if (VERBOSE) Log.v(TAG, "reportStatus status: " + status);
+        if (DEBUG) Log.v(TAG, "reportStatus status: " + status);
 
         synchronized(mListeners) {
             boolean wasNavigating = mNavigating;
@@ -1240,6 +1240,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 int result = mConnMgr.startUsingNetworkFeature(
                         ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
                 if (result == Phone.APN_ALREADY_ACTIVE) {
+                    if (DEBUG) Log.d(TAG, "Phone.APN_ALREADY_ACTIVE");
                     if (mAGpsApn != null) {
                         native_agps_data_conn_open(mAGpsApn);
                         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
@@ -1249,8 +1250,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         native_agps_data_conn_failed();
                     }
                 } else if (result == Phone.APN_REQUEST_STARTED) {
+                    if (DEBUG) Log.d(TAG, "Phone.APN_ALREADYAPN_REQUEST_STARTED_ACTIVE");
                     // Nothing to do here
                 } else {
+                    if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed");
                     mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
                     native_agps_data_conn_failed();
                 }

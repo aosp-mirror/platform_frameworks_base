@@ -109,9 +109,6 @@ struct InputTarget {
     // (ignored for KeyEvents)
     float xOffset, yOffset;
 
-    // The window type of the input target.
-    int32_t windowType;
-
     // The subset of pointer ids to include in motion events dispatched to this input target
     // if FLAG_SPLIT is set.
     BitSet32 pointerIds;
@@ -1004,8 +1001,7 @@ private:
     void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags,
             BitSet32 pointerIds);
     void addMonitoringTargetsLocked();
-    bool shouldPokeUserActivityForCurrentInputTargetsLocked();
-    void pokeUserActivityLocked(nsecs_t eventTime, int32_t eventType);
+    void pokeUserActivityLocked(const EventEntry* eventEntry);
     bool checkInjectionPermission(const InputWindow* window, const InjectionState* injectionState);
     bool isWindowObscuredAtPointLocked(const InputWindow* window, int32_t x, int32_t y) const;
     bool isWindowFinishedWithPreviousInputLocked(const InputWindow* window);
