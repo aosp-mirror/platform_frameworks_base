@@ -110,8 +110,13 @@ public class ButtonGroup extends LinearLayout {
             return;
         }
         mDivider = divider;
-        mDividerWidth = divider.getIntrinsicWidth();
-        mDividerHeight = divider.getIntrinsicHeight();
+        if (divider != null) {
+            mDividerWidth = divider.getIntrinsicWidth();
+            mDividerHeight = divider.getIntrinsicHeight();
+        } else {
+            mDividerWidth = 0;
+            mDividerHeight = 0;
+        }
         requestLayout();
     }
 
@@ -204,6 +209,11 @@ public class ButtonGroup extends LinearLayout {
 
     @Override
     public void dispatchDraw(Canvas canvas) {
+        if (mDivider == null) {
+            super.dispatchDraw(canvas);
+            return;
+        }
+
         final boolean begin = (mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING;
         final boolean middle = (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
         final boolean end = (mShowDividers & SHOW_DIVIDER_END) == SHOW_DIVIDER_END;
