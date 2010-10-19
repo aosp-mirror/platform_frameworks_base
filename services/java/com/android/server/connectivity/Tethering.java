@@ -120,7 +120,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     static final long USB_DISCONNECT_DELAY = 1000;
 
     public Tethering(Context context, Looper looper) {
-        Log.d(TAG, "Tethering starting");
         mContext = context;
         mLooper = looper;
 
@@ -457,7 +456,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 mUsbMassStorageOff = true;
                 updateUsbStatus();
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                Log.d(TAG, "Tethering got CONNECTIVITY_ACTION");
                 mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
             } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 mBooted = true;

@@ -54,7 +54,7 @@ import java.util.Map;
 public class StatusBarManagerService extends IStatusBarService.Stub
 {
     static final String TAG = "StatusBarManagerService";
-    static final boolean SPEW = true;
+    static final boolean SPEW = false;
 
     final Context mContext;
     Handler mHandler = new Handler();
@@ -154,7 +154,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         synchronized (mDisableRecords) {
             manageDisableListLocked(what, token, pkg);
             final int net = gatherDisableActionsLocked();
-            Slog.d(TAG, "disable... net=0x" + Integer.toHexString(net));
             if (net != mDisabled) {
                 mDisabled = net;
                 mHandler.post(new Runnable() {

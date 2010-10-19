@@ -93,8 +93,8 @@ import android.view.WindowManagerPolicy;
  */
 public class KeyguardViewMediator implements KeyguardViewCallback,
         KeyguardUpdateMonitor.SimStateCallback {
-    private final static boolean DEBUG = false && Config.LOGD;
-    private final static boolean DBG_WAKE = DEBUG || true;
+    private final static boolean DEBUG = false;
+    private final static boolean DBG_WAKE = false;
 
     private final static String TAG = "KeyguardViewMediator";
 
@@ -605,7 +605,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * @see #onWakeKeyWhenKeyguardShowingTq(int)
      */
     private void wakeWhenReadyLocked(int keyCode) {
-        if (DBG_WAKE) Log.d(TAG, "wakeWhenReadyLocked(" + keyCode + ")");
+        if (true || DBG_WAKE) Log.d(TAG, "wakeWhenReadyLocked(" + keyCode + ")");
 
         /**
          * acquire the handoff lock that will keep the cpu running.  this will

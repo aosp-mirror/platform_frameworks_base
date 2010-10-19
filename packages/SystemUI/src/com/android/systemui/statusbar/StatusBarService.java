@@ -392,8 +392,6 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
-        Slog.d(TAG, "updateNotification key=" + key + " notification=" + notification);
-
         NotificationData oldList;
         int oldIndex = mOngoing.findEntry(key);
         if (oldIndex >= 0) {
@@ -628,27 +626,27 @@ public class StatusBarService extends Service implements CommandQueue.Callbacks 
 
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
-                Slog.d(TAG, "DISABLE_EXPAND: yes");
+                if (SPEW) Slog.d(TAG, "DISABLE_EXPAND: yes");
                 animateCollapse();
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
+                if (SPEW) Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 if (mTicking) {
                     mTicker.halt();
                 } else {
                     setNotificationIconVisibility(false, com.android.internal.R.anim.fade_out);
                 }
             } else {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
+                if (SPEW) Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
                 if (!mExpandedVisible) {
                     setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
                 }
             }
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if (mTicking && (state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_TICKER: yes");
+                if (SPEW) Slog.d(TAG, "DISABLE_NOTIFICATION_TICKER: yes");
                 mTicker.halt();
             }
         }
