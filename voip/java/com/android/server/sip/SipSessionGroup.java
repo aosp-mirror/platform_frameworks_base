@@ -134,7 +134,8 @@ class SipSessionGroup implements SipListener {
         SipFactory sipFactory = SipFactory.getInstance();
         Properties properties = new Properties();
         properties.setProperty("javax.sip.STACK_NAME", getStackName());
-        properties.setProperty("javax.sip.THREAD_POOL_SIZE", THREAD_POOL_SIZE);
+        properties.setProperty(
+                "gov.nist.javax.sip.THREAD_POOL_SIZE", THREAD_POOL_SIZE);
         String outboundProxy = myself.getProxyAddress();
         if (!TextUtils.isEmpty(outboundProxy)) {
             Log.v(TAG, "outboundProxy is " + outboundProxy);
