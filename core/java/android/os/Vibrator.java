@@ -50,7 +50,7 @@ public class Vibrator
         }
         try {
             mService.vibrate(milliseconds, mToken);
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }
     }
@@ -80,7 +80,7 @@ public class Vibrator
         if (repeat < pattern.length) {
             try {
                 mService.vibratePattern(pattern, repeat, mToken);
-            } catch (Exception e) {
+            } catch (RemoteException e) {
                 Log.w(TAG, "Failed to vibrate.", e);
             }
         } else {
