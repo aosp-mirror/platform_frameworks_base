@@ -824,34 +824,6 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     return texAlloc;
 }
 
-RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint32_t h, RsElement _dst, RsElement _src, bool genMips, const void *data)
-{
-    const Element *srcE = static_cast<const Element *>(_src);
-    const Element *dstE = static_cast<const Element *>(_dst);
-    uint32_t w2 = rsHigherPow2(w);
-    uint32_t h2 = rsHigherPow2(h);
-
-    if ((w2 == w) && (h2 == h)) {
-        return rsi_AllocationCreateFromBitmap(rsc, w, h, _dst, _src, genMips, data);
-    }
-
-    uint32_t bpp = srcE->getSizeBytes();
-    size_t size = w2 * h2 * bpp;
-    uint8_t *tmp = static_cast<uint8_t *>(malloc(size));
-    memset(tmp, 0, size);
-
-    const uint8_t * src = static_cast<const uint8_t *>(data);
-    for (uint32_t y = 0; y < h; y++) {
-        uint8_t * ydst = &tmp[(y + ((h2 - h) >> 1)) * w2 * bpp];
-        memcpy(&ydst[((w2 - w) >> 1) * bpp], src, w * bpp);
-        src += w * bpp;
-    }
-
-    RsAllocation ret = rsi_AllocationCreateFromBitmap(rsc, w2, h2, _dst, _src, genMips, tmp);
-    free(tmp);
-    return ret;
-}
-
 void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
