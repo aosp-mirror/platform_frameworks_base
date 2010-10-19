@@ -168,6 +168,7 @@ void OpenGLRenderer::acquireContext() {
             mCaches.currentProgram = NULL;
         }
     }
+    mCaches.unbindMeshBuffer();
 }
 
 void OpenGLRenderer::releaseContext() {
@@ -180,15 +181,11 @@ void OpenGLRenderer::releaseContext() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    mCaches.bindMeshBuffer();
 
-    if (mCaches.blend) {
-        glEnable(GL_BLEND);
-        glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
-        glBlendEquation(GL_FUNC_ADD);
-    } else {
-        glDisable(GL_BLEND);
-    }
+    mCaches.blend = true;
+    glEnable(GL_BLEND);
+    glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
+    glBlendEquation(GL_FUNC_ADD);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
