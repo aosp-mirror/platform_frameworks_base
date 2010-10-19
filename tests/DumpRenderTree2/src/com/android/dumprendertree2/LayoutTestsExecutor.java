@@ -404,23 +404,26 @@ public class LayoutTestsExecutor extends Activity {
     }
 
     private void startTests() {
+        if (mCurrentTestIndex == 0) {
+            sendFirstTestMessage();
+        }
+
+        runNextTest();
+    }
+
+    private void sendFirstTestMessage() {
         try {
-            Message serviceMsg =
-                    Message.obtain(null, ManagerService.MSG_FIRST_TEST);
+            Message serviceMsg = Message.obtain(null, ManagerService.MSG_FIRST_TEST);
 
             Bundle bundle = new Bundle();
-            if (!mTestsList.isEmpty()) {
-                bundle.putString("firstTest", mTestsList.get(0));
-                bundle.putInt("index", mCurrentTestIndex);
-            }
+            bundle.putString("firstTest", mTestsList.get(0));
+            bundle.putInt("index", mCurrentTestIndex);
 
             serviceMsg.setData(bundle);
             mManagerServiceMessenger.send(serviceMsg);
         } catch (RemoteException e) {
-            Log.e(LOG_TAG, "mCurrentTestRelativePath=" + mCurrentTestRelativePath, e);
+            Log.e(LOG_TAG, "Error sending message to manager service:", e);
         }
-
-        runNextTest();
     }
 
     private void runNextTest() {

@@ -28,6 +28,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -79,6 +80,24 @@ public class AlertDialog extends Dialog implements DialogInterface {
         context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
                 outValue, true);
         return outValue.resourceId;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        if (mCancelable) {
+            final View decor = mWindow.getDecorView();
+            final int width = decor.getWidth();
+            final int height = decor.getHeight();
+            final float x = ev.getX();
+            final float y = ev.getY();
+
+            if (mCancelable && (x < 0 || x > width || y < 0 || y > height)) {
+                cancel();
+                return true;
+            }
+        }
+
+        return super.onTouchEvent(ev);
     }
 
     /**

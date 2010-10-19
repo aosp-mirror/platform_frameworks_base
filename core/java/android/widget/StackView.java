@@ -28,6 +28,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Region;
 import android.graphics.TableMaskFilter;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -113,10 +114,9 @@ public class StackView extends AdapterViewAnimator {
     private ImageView mHighlight;
     private StackSlider mStackSlider;
     private boolean mFirstLayoutHappened = false;
-    private ViewGroup mAncestorContainingAllChildren = null;
-    private int mAncestorHeight = 0;
     private int mStackMode;
     private int mFramePadding;
+    private final Rect invalidateRect = new Rect();
 
     public StackView(Context context) {
         super(context);
@@ -269,24 +269,18 @@ public class StackView extends AdapterViewAnimator {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-    }
-
-    // TODO: right now, this code walks up the hierarchy as far as needed and disables clipping
-    // so that the stack's children can draw outside of the stack's bounds. This is fine within
-    // the context of widgets in the launcher, but is destructive in general, as the clipping
-    // values are not being reset. For this to be a full framework level widget, we will need
-    // framework level support for drawing outside of a parent's bounds.
-    private void disableParentalClipping() {
-        if (mAncestorContainingAllChildren != null) {
-            ViewGroup vg = this;
-            while (vg.getParent() != null && vg.getParent() instanceof ViewGroup) {
-                if (vg == mAncestorContainingAllChildren) break;
-                vg = (ViewGroup) vg.getParent();
-                vg.setClipChildren(false);
-                vg.setClipToPadding(false);
-            }
+        canvas.getClipBounds(invalidateRect);
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
+            invalidateRect.union(lp.getInvalidateRect());
+            lp.resetInvalidateRect();
         }
+
+        canvas.save(Canvas.CLIP_SAVE_FLAG);
+        canvas.clipRect(invalidateRect, Region.Op.UNION);
+        super.dispatchDraw(canvas);
+        canvas.restore();
     }
 
     private void onLayout() {
@@ -343,6 +337,8 @@ public class StackView extends AdapterViewAnimator {
             cancelLongPress();
             requestDisallowInterceptTouchEvent(true);
 
+            if (mAdapter == null) return;
+
             int activeIndex;
             if (mStackMode == ITEMS_SLIDE_UP) {
                 activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ?
@@ -351,8 +347,6 @@ public class StackView extends AdapterViewAnimator {
                 activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ?
                         mNumActiveViews - 2 : mNumActiveViews - 1;
             }
-
-            if (mAdapter == null) return;
 
             if (mLoopViews) {
                 mStackSlider.setMode(StackSlider.NORMAL_MODE);
@@ -845,6 +839,11 @@ public class StackView extends AdapterViewAnimator {
         int horizontalOffset;
         int verticalOffset;
         View mView;
+        int left, top, right, bottom;
+        private final Rect parentRect = new Rect();
+        private final Rect invalidateRect = new Rect();
+        private final RectF invalidateRectf = new RectF();
+        private final Rect globalInvalidateRect = new Rect();
 
         LayoutParams(View view) {
             super(0, 0);
@@ -863,8 +862,9 @@ public class StackView extends AdapterViewAnimator {
             height = 0;
         }
 
-        private Rect parentRect = new Rect();
         void invalidateGlobalRegion(View v, Rect r) {
+            // We need to make a new rect here, so as not to modify the one passed
+            globalInvalidateRect.set(r);
             View p = v;
             if (!(v.getParent() != null && v.getParent() instanceof View)) return;
 
@@ -872,9 +872,10 @@ public class StackView extends AdapterViewAnimator {
             parentRect.set(0, 0, 0, 0);
             int depth = 0;
             while (p.getParent() != null && p.getParent() instanceof View
-                    && !parentRect.contains(r)) {
+                    && !parentRect.contains(globalInvalidateRect)) {
                 if (!firstPass) {
-                    r.offset(p.getLeft() - p.getScrollX(), p.getTop() - p.getScrollY());
+                    globalInvalidateRect.offset(p.getLeft() - p.getScrollX(), p.getTop()
+                            - p.getScrollY());
                     depth++;
                 }
                 firstPass = false;
@@ -882,22 +883,20 @@ public class StackView extends AdapterViewAnimator {
                 parentRect.set(p.getScrollX(), p.getScrollY(),
                                p.getWidth() + p.getScrollX(), p.getHeight() + p.getScrollY());
 
-                // TODO: we need to stop early here if we've hit the edge of the screen
-                // so as to prevent us from walking too high in the hierarchy. A lot of this
-                // code might become a lot more straightforward.
             }
 
-            if (depth > mAncestorHeight) {
-                mAncestorContainingAllChildren = (ViewGroup) p;
-                mAncestorHeight = depth;
-                disableParentalClipping();
-            }
-
-            p.invalidate(r.left, r.top, r.right, r.bottom);
+            p.invalidate(globalInvalidateRect.left, globalInvalidateRect.top,
+                    globalInvalidateRect.right, globalInvalidateRect.bottom);
         }
 
-        private Rect invalidateRect = new Rect();
-        private RectF invalidateRectf = new RectF();
+        Rect getInvalidateRect() {
+            return invalidateRect;
+        }
+
+        void resetInvalidateRect() {
+           invalidateRect.set(0, 0, 0, 0);
+        }
+
         // This is public so that ObjectAnimator can access it
         public void setVerticalOffset(int newVerticalOffset) {
             int offsetDelta = newVerticalOffset - verticalOffset;
@@ -908,14 +907,14 @@ public class StackView extends AdapterViewAnimator {
                 int top = Math.min(mView.getTop() + offsetDelta, mView.getTop());
                 int bottom = Math.max(mView.getBottom() + offsetDelta, mView.getBottom());
 
-                invalidateRectf.set(mView.getLeft(),  top, mView.getRight(), bottom);
+                invalidateRectf.set(mView.getLeft(), top, mView.getRight(), bottom);
 
                 float xoffset = -invalidateRectf.left;
                 float yoffset = -invalidateRectf.top;
                 invalidateRectf.offset(xoffset, yoffset);
                 mView.getMatrix().mapRect(invalidateRectf);
                 invalidateRectf.offset(-xoffset, -yoffset);
-                invalidateRect.set((int) Math.floor(invalidateRectf.left),
+                invalidateRect.union((int) Math.floor(invalidateRectf.left),
                         (int) Math.floor(invalidateRectf.top),
                         (int) Math.ceil(invalidateRectf.right),
                         (int) Math.ceil(invalidateRectf.bottom));
@@ -940,7 +939,7 @@ public class StackView extends AdapterViewAnimator {
                 mView.getMatrix().mapRect(invalidateRectf);
                 invalidateRectf.offset(-xoffset, -yoffset);
 
-                invalidateRect.set((int) Math.floor(invalidateRectf.left),
+                invalidateRect.union((int) Math.floor(invalidateRectf.left),
                         (int) Math.floor(invalidateRectf.top),
                         (int) Math.ceil(invalidateRectf.right),
                         (int) Math.ceil(invalidateRectf.bottom));

@@ -1,9 +1,6 @@
 #ifndef __RS_GRAPHICS_RSH__
 #define __RS_GRAPHICS_RSH__
 
-#include "rs_math.rsh"
-
-
 // Bind a ProgramFragment to the RS context.
 extern void __attribute__((overloadable))
     rsgBindProgramFragment(rs_program_fragment);

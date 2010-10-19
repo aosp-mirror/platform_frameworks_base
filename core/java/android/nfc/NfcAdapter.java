@@ -22,7 +22,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
-//TODO(npelly) permission {@link android.Manifest.permission#NFC_MODIFY}
 /**
  * Represents the device's local NFC adapter.
  * <p>
@@ -35,7 +34,7 @@ import android.util.Log;
  * to NFC Tags.
  * <p class="note">
  * <strong>Note:</strong> Some methods require the
- * TODO permission.
+ * {@link android.Manifest.permission#NFC} permission.
  */
 public final class NfcAdapter {
     /**
@@ -231,8 +230,7 @@ public final class NfcAdapter {
      * <li>provide the NDEF message on over LLCP to peer NFC adapters
      * </ul>
      * The NDEF message is preserved across reboot.
-     * <p>
-     * Requires NFC_WRITE permission
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      *
      * @param message NDEF message to make public
      */
@@ -246,8 +244,7 @@ public final class NfcAdapter {
 
     /**
      * Get the NDEF Message that this adapter appears as to Tag readers.
-     * <p>
-     * Requires NFC_WRITE permission
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      *
      * @return NDEF Message that is publicly readable
      */
@@ -262,6 +259,7 @@ public final class NfcAdapter {
 
     /**
      * Create a raw tag connection to the default Target
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public RawTagConnection createRawTagConnection(Tag tag) {
         try {
@@ -274,14 +272,20 @@ public final class NfcAdapter {
 
     /**
      * Create a raw tag connection to the specified Target
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public RawTagConnection createRawTagConnection(Tag tag, String target) {
-        //TODO
-        throw new UnsupportedOperationException();
+        try {
+            return new RawTagConnection(mService, tag, target);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service died", e);
+            return null;
+        }
     }
 
     /**
      * Create an NDEF tag connection to the default Target
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public NdefTagConnection createNdefTagConnection(NdefTag tag) {
         try {
@@ -294,9 +298,14 @@ public final class NfcAdapter {
 
     /**
      * Create an NDEF tag connection to the specified Target
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public NdefTagConnection createNdefTagConnection(NdefTag tag, String target) {
-        //TODO
-        throw new UnsupportedOperationException();
+        try {
+            return new NdefTagConnection(mService, tag, target);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service died", e);
+            return null;
+        }
     }
 }

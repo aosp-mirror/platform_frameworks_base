@@ -539,6 +539,11 @@ public class Summarizer {
         String textSource = result.getExpectedTextResultPath();
         String imageSource = result.getExpectedImageResultPath();
 
+        if (result.didCrash()) {
+            html.append("<span class=\"source\">Did not look for expected results</span>");
+            return;
+        }
+
         if (textSource == null) {
             // Show if a text result is missing. We may want to revisit this decision when we add
             // support for image results.

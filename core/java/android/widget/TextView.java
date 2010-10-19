@@ -3015,6 +3015,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (imm != null) imm.restartInput(this);
     }
 
+    /**
+     * It would be better to rely on the input type for everything. A password inputType should have
+     * a password transformation. We should hence use isPasswordInputType instead of this method.
+     *
+     * We should:
+     * - Call setInputType in setKeyListener instead of changing the input type directly (which
+     * would install the correct transformation).
+     * - Refuse the installation of a non-password transformation in setTransformation if the input
+     * type is password.
+     *
+     * However, this is like this for legacy reasons and we cannot break existing apps. This method
+     * is useful since it matches what the user can see (obfuscated text or not).
+     *
+     * @return true if the current transformation method is of the password type.
+     */
+    private boolean hasPasswordTransformationMethod() {
+        return mTransformation instanceof PasswordTransformationMethod;
+    }
+
     private boolean isPasswordInputType(int inputType) {
         final int variation = inputType & (EditorInfo.TYPE_MASK_CLASS
                 | EditorInfo.TYPE_MASK_VARIATION);
@@ -7233,7 +7252,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean canCut() {
-        if (mTransformation instanceof PasswordTransformationMethod) {
+        if (hasPasswordTransformationMethod()) {
             return false;
         }
 
@@ -7247,7 +7266,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean canCopy() {
-        if (mTransformation instanceof PasswordTransformationMethod) {
+        if (hasPasswordTransformationMethod()) {
             return false;
         }
 
@@ -7721,11 +7740,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mode.setTitle(mContext.getString(com.android.internal.R.string.textSelectionCABTitle));
             mode.setSubtitle(null);
 
-            selectCurrentWord();
-
             boolean atLeastOne = false;
 
             if (canSelectText()) {
+                if (hasPasswordTransformationMethod()) {
+                    // selectCurrentWord is not available on a password field and would return an
+                    // arbitrary 10-charater selection around pressed position. Select all instead.
+                    Selection.setSelection((Spannable) mText, 0, mText.length());
+                } else {
+                    selectCurrentWord();
+                }
+
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                     setIcon(com.android.internal.R.drawable.ic_menu_select_all).
                     setAlphabeticShortcut('a').

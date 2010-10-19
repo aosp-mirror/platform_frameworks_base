@@ -72,21 +72,17 @@ public class FileFilter {
     };
 
     static final String[] ignoreTestList = {
+        "canvas/philip/tests/2d.drawImage.broken.html", // blocks test, http://b/2982500
         "editing/selection/move-left-right.html", // Causes DumpRenderTree to hang
         "fast/js/excessive-comma-usage.html", // Tests huge initializer list, causes OOM.
         "fast/js/regexp-charclass-crash.html", // RegExp is too large, causing OOM
+        "fast/js/regexp-overflow.html", // Result is too large, causing OOM when reading by DRT, http://b/2697589
         "fast/regex/test1.html", // Causes DumpRenderTree to hang with V8
         "fast/regex/slow.html", // Causes DumpRenderTree to hang with V8
-        "ietestcenter/Javascript/15.4.4.15-3-14.html", // hangs the layout tests
-        // http://b/issue?id=2889595
-        "ietestcenter/Javascript/15.4.4.15-3-29.html", // hangs the layout tests
-        // http://b/issue?id=2889596
-        "ietestcenter/Javascript/15.4.4.15-3-8.html", // hangs the layout tests
-        // http://b/issue?id=2889598
-        "http/tests/xmlhttprequest/simple-cross-origin-progress-events.html", // runs webcore into bad state
-        // http://b/2982500
-        "canvas/philip/tests/2d.drawImage.broken.html", // blocks test
-        // http://b/2982500
+        "http/tests/xmlhttprequest/simple-cross-origin-progress-events.html", // runs webcore into bad state, http://b/2929261
+        "ietestcenter/Javascript/15.4.4.15-3-14.html", // hangs the layout tests, http://b/2889595
+        "ietestcenter/Javascript/15.4.4.15-3-29.html", // hangs the layout tests, http://b/2889596
+        "ietestcenter/Javascript/15.4.4.15-3-8.html", // hangs the layout tests, http://b/2889598
     };
 
     static void fillIgnoreResultList() {
