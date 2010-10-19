@@ -1059,6 +1059,32 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
     return mVideoSource != NULL ? OK : UNKNOWN_ERROR;
 }
 
+void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
+    if (!mSeeking) {
+        return;
+    }
+
+    if (mAudioPlayer != NULL) {
+        LOGV("seeking audio to %lld us (%.2f secs).", timeUs, timeUs / 1E6);
+
+        // If we don't have a video time, seek audio to the originally
+        // requested seek time instead.
+
+        mAudioPlayer->seekTo(videoTimeUs < 0 ? mSeekTimeUs : videoTimeUs);
+        mAudioPlayer->resume();
+        mWatchForAudioSeekComplete = true;
+        mWatchForAudioEOS = true;
+    } else if (!mSeekNotificationSent) {
+        // If we're playing video only, report seek complete now,
+        // otherwise audio player will notify us later.
+        notifyListener_l(MEDIA_SEEK_COMPLETE);
+    }
+
+    mFlags |= FIRST_FRAME;
+    mSeeking = false;
+    mSeekNotificationSent = false;
+}
+
 void AwesomePlayer::onVideoEvent() {
     Mutex::Autolock autoLock(mLock);
     if (!mVideoEventPending) {
@@ -1120,6 +1146,14 @@ void AwesomePlayer::onVideoEvent() {
                     continue;
                 }
 
+                // So video playback is complete, but we may still have
+                // a seek request pending that needs to be applied
+                // to the audio track.
+                if (mSeeking) {
+                    LOGV("video stream ended while seeking!");
+                }
+                finishSeekIfNecessary(-1);
+
                 mFlags |= VIDEO_AT_EOS;
                 postStreamDoneEvent_l(err);
                 return;
@@ -1146,24 +1180,7 @@ void AwesomePlayer::onVideoEvent() {
         mVideoTimeUs = timeUs;
     }
 
-    if (mSeeking) {
-        if (mAudioPlayer != NULL) {
-            LOGV("seeking audio to %lld us (%.2f secs).", timeUs, timeUs / 1E6);
-
-            mAudioPlayer->seekTo(timeUs);
-            mAudioPlayer->resume();
-            mWatchForAudioSeekComplete = true;
-            mWatchForAudioEOS = true;
-        } else if (!mSeekNotificationSent) {
-            // If we're playing video only, report seek complete now,
-            // otherwise audio player will notify us later.
-            notifyListener_l(MEDIA_SEEK_COMPLETE);
-        }
-
-        mFlags |= FIRST_FRAME;
-        mSeeking = false;
-        mSeekNotificationSent = false;
-    }
+    finishSeekIfNecessary(timeUs);
 
     TimeSource *ts = (mFlags & AUDIO_AT_EOS) ? &mSystemTimeSource : mTimeSource;
 
