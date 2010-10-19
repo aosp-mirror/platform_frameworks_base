@@ -6642,6 +6642,19 @@ public final class ContactsContract {
              * <P>Type: boolean</P>
              */
             public static final String IM_ISPRIMARY = "im_isprimary";
+
+            /**
+             * The extra field that allows the client to supply multiple rows of
+             * arbitrary data for the contact (insert or edit). It is a list of
+             * ContentValues, one per data row. Supplying this extra is
+             * basically equivalent to inserting multiple rows into the
+             * {@link Data} table, except the user gets a chance to see and edit
+             * them before saving. Each ContentValues object must have a value
+             * for {@link Data#MIMETYPE}.
+             *
+             * @hide
+             */
+            public static final String DATA = "data";
         }
     }
 }
