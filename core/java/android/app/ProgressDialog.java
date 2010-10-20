@@ -74,10 +74,7 @@ public class ProgressDialog extends AlertDialog {
     private Handler mViewUpdateHandler;
     
     public ProgressDialog(Context context) {
-        this(context,
-                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB
-                ? com.android.internal.R.style.Theme_Holo_Dialog_Alert
-                : com.android.internal.R.style.Theme_Dialog_Alert);
+        super(context);
     }
 
     public ProgressDialog(Context context, int theme) {
