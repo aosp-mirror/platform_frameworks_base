@@ -2149,14 +2149,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
             /* Initialize channel count */
             setNumAllowedChannels();
-            /*
-             * STOPSHIP
-             * TODO: We are having 11A issues that Broadcom is looking
-             * to resolve, this is a temporary fix to allow only 11B/G
-             * and help improve GoogleGuest connectivity
-             * We also need to add the UI for band control
-             */
-            WifiNative.setBandCommand(BAND_2G);
 
             if (mIsScanMode) {
                 WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
