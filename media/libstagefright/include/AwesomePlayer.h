@@ -111,6 +111,11 @@ private:
         AUDIO_AT_EOS        = 256,
         VIDEO_AT_EOS        = 512,
         AUTO_LOOPING        = 1024,
+
+        // We are basically done preparing but are currently buffering
+        // sufficient data to begin playback and finish the preparation phase
+        // for good.
+        PREPARING_CONNECTED = 2048,
     };
 
     mutable Mutex mLock;

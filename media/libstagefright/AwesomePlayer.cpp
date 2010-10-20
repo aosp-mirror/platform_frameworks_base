@@ -412,6 +412,12 @@ void AwesomePlayer::reset_l() {
             LOGI("interrupting the connection process");
             mConnectingDataSource->disconnect();
         }
+
+        if (mFlags & PREPARING_CONNECTED) {
+            // We are basically done preparing, we're just buffering
+            // enough data to start playback, we can safely interrupt that.
+            finishAsyncPrepare_l();
+        }
     }
 
     while (mFlags & PREPARING) {
@@ -1625,7 +1631,7 @@ void AwesomePlayer::abortPrepare(status_t err) {
     }
 
     mPrepareResult = err;
-    mFlags &= ~(PREPARING|PREPARE_CANCELLED);
+    mFlags &= ~(PREPARING|PREPARE_CANCELLED|PREPARING_CONNECTED);
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
 }
@@ -1673,6 +1679,8 @@ void AwesomePlayer::onPrepareAsyncEvent() {
         }
     }
 
+    mFlags |= PREPARING_CONNECTED;
+
     if (mCachedSource != NULL || mRTSPController != NULL) {
         postBufferingEvent_l();
     } else {
@@ -1692,7 +1700,7 @@ void AwesomePlayer::finishAsyncPrepare_l() {
     }
 
     mPrepareResult = OK;
-    mFlags &= ~(PREPARING|PREPARE_CANCELLED);
+    mFlags &= ~(PREPARING|PREPARE_CANCELLED|PREPARING_CONNECTED);
     mFlags |= PREPARED;
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
