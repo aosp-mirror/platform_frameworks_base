@@ -65,6 +65,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.AsyncChannel;
 import com.android.server.am.BatteryStatsService;
 import com.android.internal.R;
 
@@ -198,6 +199,45 @@ public class WifiService extends IWifiManager.Stub {
     private int mNumScansSinceNetworkStateChange;
 
     /**
+     * Asynchronous channel to WifiStateMachine
+     */
+    private AsyncChannel mChannel;
+
+    /**
+     * TODO: Possibly change WifiService into an AsyncService.
+     */
+    private class WifiServiceHandler extends Handler {
+        private AsyncChannel mWshChannel;
+
+        WifiServiceHandler(android.os.Looper looper, Context context) {
+            super(looper);
+            mWshChannel = new AsyncChannel();
+            mWshChannel.connect(context, this, mWifiStateMachine.getHandler(), 0);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
+                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                        mChannel = mWshChannel;
+                    } else {
+                        Slog.d(TAG, "WifiServicehandler.handleMessage could not connect error=" +
+                                msg.arg1);
+                        mChannel = null;
+                    }
+                    break;
+                }
+                default: {
+                    Slog.d(TAG, "WifiServicehandler.handleMessage ignoring msg=" + msg);
+                    break;
+                }
+            }
+        }
+    }
+    WifiServiceHandler mHandler;
+
+    /**
      * Temporary for computing UIDS that are responsible for starting WIFI.
      * Protected by mWifiStateTracker lock.
      */
@@ -218,6 +258,7 @@ public class WifiService extends IWifiManager.Stub {
 
         HandlerThread wifiThread = new HandlerThread("WifiService");
         wifiThread.start();
+        mHandler = new WifiServiceHandler(wifiThread.getLooper(), context);
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -602,7 +643,12 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean removeNetwork(int netId) {
         enforceChangePermission();
-        return mWifiStateMachine.syncRemoveNetwork(netId);
+        if (mChannel != null) {
+            return mWifiStateMachine.syncRemoveNetwork(mChannel, netId);
+        } else {
+            Slog.e(TAG, "mChannel is not initialized");
+            return false;
+        }
     }
 
     /**

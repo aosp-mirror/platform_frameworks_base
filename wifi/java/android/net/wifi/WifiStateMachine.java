@@ -70,6 +70,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.content.Context;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
 
@@ -147,6 +148,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Track if WPS was started since we need to re-enable networks
      * and load configuration afterwards */
     private boolean mWpsStarted = false;
+
+    // Channel for sending replies.
+    private AsyncChannel mReplyChannel = new AsyncChannel();
 
     // Event log tags (must be in sync with event-log-tags)
     private static final int EVENTLOG_WIFI_STATE_CHANGED        = 50021;
@@ -300,7 +304,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int CMD_FORGET_NETWORK                   = 92;
     /* Start Wi-Fi protected setup */
     private static final int CMD_START_WPS                        = 93;
-
 
     /**
      * Interval in milliseconds between polling for connection
@@ -699,8 +702,21 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @param networkId id of the network to be removed
      */
-    public boolean syncRemoveNetwork(int networkId) {
-        return sendSyncMessage(obtainMessage(CMD_REMOVE_NETWORK, networkId, 0)).boolValue;
+    public boolean syncRemoveNetwork(AsyncChannel channel, int networkId) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_REMOVE_NETWORK, networkId);
+        boolean result = resultMsg.arg1 != 0;
+        resultMsg.recycle();
+        return result;
+    }
+
+    /**
+     * Return the result of a removeNetwork
+     *
+     * @param srcMsg is the original message
+     * @param result is true if successfully removed
+     */
+    private void removeNetworkReply(Message srcMsg, boolean result) {
+        mReplyChannel.replyToMessage(srcMsg, CMD_REMOVE_NETWORK, result ? 1 : 0);
     }
 
     private class EnableNetParams {
@@ -1583,7 +1599,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                     /* Synchronous call returns */
                 case CMD_PING_SUPPLICANT:
-                case CMD_REMOVE_NETWORK:
                 case CMD_ENABLE_NETWORK:
                 case CMD_DISABLE_NETWORK:
                 case CMD_ADD_OR_UPDATE_NETWORK:
@@ -1597,6 +1612,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     syncParams.mSyncReturn.intValue = -1;
                     syncParams.mSyncReturn.stringValue = null;
                     notifyOnMsgObject(message);
+                    break;
+                case CMD_REMOVE_NETWORK:
+                    removeNetworkReply(message, false);
                     break;
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
@@ -2023,10 +2041,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_REMOVE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.boolValue = WifiConfigStore.removeNetwork(
-                                message.arg1);
-                    notifyOnMsgObject(message);
+                    boolean ok = WifiConfigStore.removeNetwork(message.arg1);
+                    removeNetworkReply(message, ok);
                     break;
                 case CMD_ENABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
