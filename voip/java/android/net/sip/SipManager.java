@@ -351,17 +351,6 @@ public class SipManager {
     }
 
     /**
-     * The method calls {@code takeAudioCall(incomingCallIntent,
-     * listener, true}.
-     *
-     * @see #takeAudioCall(Intent, SipAudioCall.Listener, boolean)
-     */
-    public SipAudioCall takeAudioCall(Intent incomingCallIntent,
-            SipAudioCall.Listener listener) throws SipException {
-        return takeAudioCall(incomingCallIntent, listener, true);
-    }
-
-    /**
      * Creates a {@link SipAudioCall} to take an incoming call. Before the call
      * is returned, the listener will receive a
      * {@link SipAudioCall.Listener#onRinging}
@@ -374,8 +363,7 @@ public class SipManager {
      * @throws SipException if calling the SIP service results in an error
      */
     public SipAudioCall takeAudioCall(Intent incomingCallIntent,
-            SipAudioCall.Listener listener, boolean ringtoneEnabled)
-            throws SipException {
+            SipAudioCall.Listener listener) throws SipException {
         if (incomingCallIntent == null) return null;
 
         String callId = getCallId(incomingCallIntent);
@@ -394,7 +382,6 @@ public class SipManager {
             if (session == null) return null;
             SipAudioCall call = new SipAudioCall(
                     mContext, session.getLocalProfile());
-            call.setRingtoneEnabled(ringtoneEnabled);
             call.attachCall(new SipSession(session), offerSd);
             call.setListener(listener);
             return call;
