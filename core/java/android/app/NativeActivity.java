@@ -162,15 +162,10 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         
         String path = null;
         
-        if ((ai.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) == 0) {
-            // If the application does not have (Java) code, then no ClassLoader
-            // has been set up for it.  We will need to do our own search for
-            // the native code.
-            File libraryFile = new File(ai.applicationInfo.nativeLibraryDir,
-                    System.mapLibraryName(libname));
-            if (libraryFile.exists()) {
-                path = libraryFile.getPath();
-            }
+        File libraryFile = new File(ai.applicationInfo.nativeLibraryDir,
+                System.mapLibraryName(libname));
+        if (libraryFile.exists()) {
+            path = libraryFile.getPath();
         }
         
         if (path == null) {
