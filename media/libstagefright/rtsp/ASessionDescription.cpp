@@ -57,12 +57,20 @@ bool ASessionDescription::parse(const void *data, size_t size) {
 
     size_t i = 0;
     for (;;) {
-        ssize_t eolPos = desc.find("\r\n", i);
+        ssize_t eolPos = desc.find("\n", i);
+
         if (eolPos < 0) {
             break;
         }
 
-        AString line(desc, i, eolPos - i);
+        AString line;
+        if ((size_t)eolPos > i && desc.c_str()[eolPos - 1] == '\r') {
+            // We accept both '\n' and '\r\n' line endings, if it's
+            // the latter, strip the '\r' as well.
+            line.setTo(desc, i, eolPos - i - 1);
+        } else {
+            line.setTo(desc, i, eolPos - i);
+        }
 
         if (line.size() < 2 || line.c_str()[1] != '=') {
             return false;
@@ -141,7 +149,7 @@ bool ASessionDescription::parse(const void *data, size_t size) {
             }
         }
 
-        i = eolPos + 2;
+        i = eolPos + 1;
     }
 
     return true;
@@ -245,7 +253,7 @@ bool ASessionDescription::getDurationUs(int64_t *durationUs) const {
         return false;
     }
 
-    if (value == "npt=now-") {
+    if (value == "npt=now-" || value == "npt=0-") {
         return false;
     }
 

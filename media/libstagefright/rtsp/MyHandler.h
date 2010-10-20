@@ -96,6 +96,7 @@ struct MyHandler : public AHandler {
           mNetLooper(new ALooper),
           mConn(new ARTSPConnection),
           mRTPConn(new ARTPConnection),
+          mOriginalSessionURL(url),
           mSessionURL(url),
           mSetupTracksSuccessful(false),
           mSeekPending(false),
@@ -113,6 +114,23 @@ struct MyHandler : public AHandler {
         mNetLooper->start(false /* runOnCallingThread */,
                           false /* canCallJava */,
                           PRIORITY_HIGHEST);
+
+        // Strip any authentication info from the session url, we don't
+        // want to transmit user/pass in cleartext.
+        AString host, path, user, pass;
+        unsigned port;
+        if (ARTSPConnection::ParseURL(
+                    mSessionURL.c_str(), &host, &port, &path, &user, &pass)
+                && user.size() > 0) {
+            mSessionURL.clear();
+            mSessionURL.append("rtsp://");
+            mSessionURL.append(host);
+            mSessionURL.append(":");
+            mSessionURL.append(StringPrintf("%u", port));
+            mSessionURL.append(path);
+
+            LOGI("rewritten session url: '%s'", mSessionURL.c_str());
+        }
     }
 
     void connect(const sp<AMessage> &doneMsg) {
@@ -126,7 +144,7 @@ struct MyHandler : public AHandler {
         mConn->observeBinaryData(notify);
 
         sp<AMessage> reply = new AMessage('conn', id());
-        mConn->connect(mSessionURL.c_str(), reply);
+        mConn->connect(mOriginalSessionURL.c_str(), reply);
     }
 
     void disconnect(const sp<AMessage> &doneMsg) {
@@ -312,7 +330,7 @@ struct MyHandler : public AHandler {
                 int32_t reconnect;
                 if (msg->findInt32("reconnect", &reconnect) && reconnect) {
                     sp<AMessage> reply = new AMessage('conn', id());
-                    mConn->connect(mSessionURL.c_str(), reply);
+                    mConn->connect(mOriginalSessionURL.c_str(), reply);
                 } else {
                     (new AMessage('quit', id()))->post();
                 }
@@ -922,7 +940,7 @@ struct MyHandler : public AHandler {
         CHECK(GetAttribute(range.c_str(), "npt", &val));
         float npt1, npt2;
 
-        if (val == "now-") {
+        if (val == "now-" || val == "0-") {
             // This is a live stream and therefore not seekable.
             return;
         } else {
@@ -992,6 +1010,7 @@ private:
     sp<ARTSPConnection> mConn;
     sp<ARTPConnection> mRTPConn;
     sp<ASessionDescription> mSessionDesc;
+    AString mOriginalSessionURL;  // This one still has user:pass@
     AString mSessionURL;
     AString mBaseURL;
     AString mSessionID;
