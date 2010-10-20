@@ -2194,6 +2194,9 @@ void MPEG4Writer::Track::writeTrackHeader(
                         CHECK(mCodecSpecificData);
                         CHECK(mCodecSpecificDataSize > 0);
 
+                        // Make sure all sizes encode to a single byte.
+                        CHECK(mCodecSpecificDataSize + 23 < 128);
+
                         mOwner->writeInt32(0);     // version=0, flags=0
                         mOwner->writeInt8(0x03);   // ES_DescrTag
                         mOwner->writeInt8(23 + mCodecSpecificDataSize);
