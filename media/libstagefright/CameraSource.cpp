@@ -347,9 +347,21 @@ status_t CameraSource::checkVideoSize(
         const CameraParameters& params,
         int32_t width, int32_t height) {
 
+    // The actual video size is the same as the preview size
+    // if the camera hal does not support separate video and
+    // preview output. In this case, we retrieve the video
+    // size from preview.
     int32_t frameWidthActual = -1;
     int32_t frameHeightActual = -1;
-    params.getPreviewSize(&frameWidthActual, &frameHeightActual);
+    Vector<Size> sizes;
+    params.getSupportedVideoSizes(sizes);
+    if (sizes.size() == 0) {
+        // video size is the same as preview size
+        params.getPreviewSize(&frameWidthActual, &frameHeightActual);
+    } else {
+        // video size may not be the same as preview
+        params.getVideoSize(&frameWidthActual, &frameHeightActual);
+    }
     if (frameWidthActual < 0 || frameHeightActual < 0) {
         LOGE("Failed to retrieve video frame size (%dx%d)",
                 frameWidthActual, frameHeightActual);
