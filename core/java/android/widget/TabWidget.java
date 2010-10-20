@@ -26,8 +26,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnFocusChangeListener;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
@@ -53,7 +53,8 @@ import android.view.accessibility.AccessibilityEvent;
 public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     private OnTabSelectionChanged mSelectionChangedListener;
 
-    private int mSelectedTab = 0;
+    // This value will be set to 0 as soon as the first tab is added to TabHost.
+    private int mSelectedTab = -1;
 
     private Drawable mLeftStrip;
     private Drawable mRightStrip;
@@ -98,14 +99,18 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
     @Override
     protected int getChildDrawingOrder(int childCount, int i) {
-        // Always draw the selected tab last, so that drop shadows are drawn
-        // in the correct z-order.
-        if (i == childCount - 1) {
-            return mSelectedTab;
-        } else if (i >= mSelectedTab) {
-            return i + 1;
-        } else {
+        if (mSelectedTab == -1) {
             return i;
+        } else {
+            // Always draw the selected tab last, so that drop shadows are drawn
+            // in the correct z-order.
+            if (i == childCount - 1) {
+                return mSelectedTab;
+            } else if (i >= mSelectedTab) {
+                return i + 1;
+            } else {
+                return i;
+            }
         }
     }
 
@@ -340,7 +345,9 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
             return;
         }
 
-        getChildTabViewAt(mSelectedTab).setSelected(false);
+        if (mSelectedTab != -1) {
+            getChildTabViewAt(mSelectedTab).setSelected(false);
+        }
         mSelectedTab = index;
         getChildTabViewAt(mSelectedTab).setSelected(true);
         mStripMoved = true;
@@ -354,7 +361,9 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         event.setItemCount(getTabCount());
         event.setCurrentItemIndex(mSelectedTab);
-        getChildTabViewAt(mSelectedTab).dispatchPopulateAccessibilityEvent(event);
+        if (mSelectedTab != -1) {
+            getChildTabViewAt(mSelectedTab).dispatchPopulateAccessibilityEvent(event);
+        }
         return true;
     }
 
