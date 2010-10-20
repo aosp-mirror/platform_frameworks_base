@@ -2500,7 +2500,9 @@ class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        Log.d(TAG, "Scanning app dir " + dir);
+        if (false) {
+            Log.d(TAG, "Scanning app dir " + dir);
+        }
 
         int i;
         for (i=0; i<files.length; i++) {
@@ -2866,10 +2868,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 TAG, "Scanning package " + pkg.packageName);
         if (mPackages.containsKey(pkg.packageName)
                 || mSharedLibraries.containsKey(pkg.packageName)) {
-            Slog.w(TAG, "*************************************************");
             Slog.w(TAG, "Application package " + pkg.packageName
                     + " already installed.  Skipping duplicate.");
-            Slog.w(TAG, "*************************************************");
             mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
             return null;
         }
@@ -3286,7 +3286,9 @@ class PackageManagerService extends IPackageManager.Stub {
              *        only for non-system apps and system app upgrades.
              */
             if (pkg.applicationInfo.nativeLibraryDir != null) {
-                final File sharedLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
+                final File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
+                final String dataPathString = dataPath.getPath();
+
                 if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
                     /*
                      * Upgrading from a previous version of the OS sometimes
@@ -3295,15 +3297,24 @@ class PackageManagerService extends IPackageManager.Stub {
                      * Recent changes in the JNI library search path
                      * necessitates we remove those to match previous behavior.
                      */
-                    if (NativeLibraryHelper.removeNativeBinariesFromDirLI(sharedLibraryDir)) {
+                    if (NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryDir)) {
                         Log.i(TAG, "removed obsolete native libraries for system package " + path);
                     }
-                } else if (!isExternal(pkg)) {
-                    Log.i(TAG, path + " changed; unpacking");
-                    mInstaller.unlinkNativeLibraryDirectory(dataPath.getPath());
-                    NativeLibraryHelper.copyNativeBinariesLI(scanFile, sharedLibraryDir);
+                } else if (nativeLibraryDir.getParent().equals(dataPathString)) {
+                    /*
+                     * If this is an internal application or our
+                     * nativeLibraryPath points to our data directory, unpack
+                     * the libraries. The native library path pointing to the
+                     * data directory for an application in an ASEC container
+                     * can happen for older apps that existed before an OTA to
+                     * Gingerbread.
+                     */
+                    Slog.i(TAG, "Unpacking native libraries for " + path);
+                    mInstaller.unlinkNativeLibraryDirectory(dataPathString);
+                    NativeLibraryHelper.copyNativeBinariesLI(scanFile, nativeLibraryDir);
                 } else {
-                    mInstaller.linkNativeLibraryDirectory(dataPath.getPath(),
+                    Slog.i(TAG, "Linking native library dir for " + path);
+                    mInstaller.linkNativeLibraryDirectory(dataPathString,
                             pkg.applicationInfo.nativeLibraryDir);
                 }
             }

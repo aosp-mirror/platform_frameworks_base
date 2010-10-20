@@ -175,13 +175,18 @@ public class Camera {
          * camera image needs to be rotated clockwise so it shows correctly on
          * the display in its natural orientation. It should be 0, 90, 180, or 270.
          *
-         * For example, suppose a device has a naturally tall screen, but the camera
-         * sensor is mounted in landscape. If the top side of the camera sensor is
-         * aligned with the right edge of the display in natural orientation, the
-         * value should be 90.
+         * For example, suppose a device has a naturally tall screen. The
+         * back-facing camera sensor is mounted in landscape. You are looking at
+         * the screen. If the top side of the camera sensor is aligned with the
+         * right edge of the screen in natural orientation, the value should be
+         * 90. If the top side of a front-facing camera sensor is aligned with
+         * the right of the screen, the value should be 270.
          *
          * @see #setDisplayOrientation(int)
          * @see #setRotation(int)
+         * @see #setPreviewSize(int, int)
+         * @see #setPictureSize(int, int)
+         * @see #setJpegThumbnailSize(int, int)
          */
         public int orientation;
     };
@@ -771,13 +776,16 @@ public class Camera {
     public native final void stopSmoothZoom();
 
     /**
-     * Set the display orientation. This affects the preview frames and the
-     * picture displayed after snapshot. This method is useful for portrait
-     * mode applications.
+     * Set the clockwise rotation of preview display in degrees. This affects
+     * the preview frames and the picture displayed after snapshot. This method
+     * is useful for portrait mode applications. Note that preview display of
+     * front-facing cameras is flipped horizontally, that is, the image is
+     * reflected along the central vertical axis of the camera sensor. So the
+     * users can see themselves as looking into a mirror.
      *
-     * This does not affect the order of byte array passed in
-     * {@link PreviewCallback#onPreviewFrame}. This method is not allowed to
-     * be called during preview.
+     * This does not affect the order of byte array passed in {@link
+     * PreviewCallback#onPreviewFrame}, JPEG pictures, or recorded videos. This
+     * method is not allowed to be called during preview.
      *
      * If you want to make the camera image show in the same orientation as
      * the display, you can use the following code.<p>
@@ -797,13 +805,20 @@ public class Camera {
      *         case Surface.ROTATION_270: degrees = 270; break;
      *     }
      *
-     *     int result = (info.orientation - degrees + 360) % 360;
+     *     int result;
+     *     if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+     *         result = (info.orientation + degrees) % 360;
+     *         result = (360 - result) % 360;  // compensate the mirror
+     *     } else {  // back-facing
+     *         result = (info.orientation - degrees + 360) % 360;
+     *     }
      *     camera.setDisplayOrientation(result);
      * }
      * </pre>
      * @param degrees the angle that the picture will be rotated clockwise.
      *                Valid values are 0, 90, 180, and 270. The starting
      *                position is 0 (landscape).
+     * @see #setPreviewDisplay(SurfaceHolder)
      */
     public native final void setDisplayOrientation(int degrees);
 
@@ -1749,20 +1764,23 @@ public class Camera {
          * the orientation in the EXIF header will be missing or 1 (row #0 is
          * top and column #0 is left side).
          *
-         * If appplications want to rotate the picture to match the
-         * orientation of what users see, apps should use {@link
+         * If applications want to rotate the picture to match the orientation
+         * of what users see, apps should use {@link
          * android.view.OrientationEventListener} and {@link CameraInfo}.
          * The value from OrientationEventListener is relative to the natural
-         * orientation of the device. CameraInfo.mOrientation is the angle
-         * between camera orientation and natural device orientation. The sum
-         * of the two is the angle for rotation.
+         * orientation of the device. CameraInfo.orientation is the angle
+         * between camera orientation and natural device orientation. The sum or
+         * of the two is the rotation angle for back-facing camera. The
+         * difference of the two is the rotation angle for front-facing camera.
+         * Note that the JPEG pictures of front-facing cameras are not mirrored
+         * as in preview display.
          *
          * For example, suppose the natural orientation of the device is
          * portrait. The device is rotated 270 degrees clockwise, so the device
-         * orientation is 270. Suppose the camera sensor is mounted in landscape
-         * and the top side of the camera sensor is aligned with the right edge
-         * of the display in natural orientation. So the camera orientation is
-         * 90. The rotation should be set to 0 (270 + 90).
+         * orientation is 270. Suppose a back-facing camera sensor is mounted in
+         * landscape and the top side of the camera sensor is aligned with the
+         * right edge of the display in natural orientation. So the camera
+         * orientation is 90. The rotation should be set to 0 (270 + 90).
          *
          * The reference code is as follows.
          *
@@ -1772,7 +1790,13 @@ public class Camera {
          *            new android.hardware.Camera.CameraInfo();
          *     android.hardware.Camera.getCameraInfo(cameraId, info);
          *     orientation = (orientation + 45) / 90 * 90;
-         *     mParameters.setRotation((orientation + info.mOrientation) % 360);
+         *     int rotation = 0;
+         *     if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+         *         rotation = (info.orientation - orientation + 360) % 360;
+         *     } else {  // back-facing camera
+         *         rotation = (info.orientation + orientation) % 360;
+         *     }
+         *     mParameters.setRotation(rotation);
          * }
          *
          * @param rotation The rotation angle in degrees relative to the

@@ -551,6 +551,10 @@ public class HorizontalScrollView extends FrameLayout {
                                 mEdgeGlowLeft.onRelease();
                             }
                         }
+                        if (mEdgeGlowLeft != null
+                                && (!mEdgeGlowLeft.isFinished() || !mEdgeGlowRight.isFinished())) {
+                            invalidate();
+                        }
                     }
                 }
                 break;

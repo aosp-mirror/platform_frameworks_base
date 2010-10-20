@@ -684,9 +684,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
             String tag, int id, Notification notification, int[] idOut)
     {
-        Slog.d(TAG, "enqueueNotificationWithTag: calling uid=" + callingUid 
-                + ", pid=" + callingPid);
-        
         checkIncomingCall(pkg);
 
         // Limit the number of notifications that any given package except the android

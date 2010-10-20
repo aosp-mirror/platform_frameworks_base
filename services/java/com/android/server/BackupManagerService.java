@@ -84,7 +84,7 @@ import java.util.Set;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
@@ -664,11 +664,11 @@ class BackupManagerService extends IBackupManager.Stub {
                 // backup.
                 RandomAccessFile in = null;
                 try {
-                    Slog.i(TAG, "Found stale backup journal, scheduling:");
+                    Slog.i(TAG, "Found stale backup journal, scheduling");
                     in = new RandomAccessFile(f, "r");
                     while (true) {
                         String packageName = in.readUTF();
-                        Slog.i(TAG, "    + " + packageName);
+                        Slog.i(TAG, "  " + packageName);
                         dataChangedImpl(packageName);
                     }
                 } catch (EOFException e) {

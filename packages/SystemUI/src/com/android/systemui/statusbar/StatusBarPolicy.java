@@ -710,7 +710,6 @@ public class StatusBarPolicy {
         NetworkInfo info = (NetworkInfo)(intent.getParcelableExtra(
                 ConnectivityManager.EXTRA_NETWORK_INFO));
         int connectionStatus = intent.getIntExtra(ConnectivityManager.EXTRA_INET_CONDITION, 0);
-        Slog.d(TAG, "got CONNECTIVITY_ACTION - info=" + info + ", status = " + connectionStatus);
 
         int inetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
 
