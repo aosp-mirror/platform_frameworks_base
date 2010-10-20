@@ -59,24 +59,24 @@ public class DownloadManager {
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
      */
-    public final static String COLUMN_ID = BaseColumns._ID;
+    public final static String COLUMN_ID = Downloads.Impl._ID;
 
     /**
      * The client-supplied title for this download.  This will be displayed in system notifications.
      * Defaults to the empty string.
      */
-    public final static String COLUMN_TITLE = "title";
+    public final static String COLUMN_TITLE = Downloads.Impl.COLUMN_TITLE;
 
     /**
      * The client-supplied description of this download.  This will be displayed in system
      * notifications.  Defaults to the empty string.
      */
-    public final static String COLUMN_DESCRIPTION = "description";
+    public final static String COLUMN_DESCRIPTION = Downloads.Impl.COLUMN_DESCRIPTION;
 
     /**
      * URI to be downloaded.
      */
-    public final static String COLUMN_URI = "uri";
+    public final static String COLUMN_URI = Downloads.Impl.COLUMN_URI;
 
     /**
      * Internet Media Type of the downloaded file.  If no value is provided upon creation, this will
@@ -108,7 +108,7 @@ public class DownloadManager {
     /**
      * Current status of the download, as one of the STATUS_* constants.
      */
-    public final static String COLUMN_STATUS = "status";
+    public final static String COLUMN_STATUS = Downloads.Impl.COLUMN_STATUS;
 
     /**
      * Provides more detail on the status of the download.  Its meaning depends on the value of
@@ -145,7 +145,7 @@ public class DownloadManager {
      * used to delete the entries from MediaProvider database when it is deleted from the
      * downloaded list.
      */
-    public static final String COLUMN_MEDIAPROVIDER_URI = "mediaprovider_uri";
+    public static final String COLUMN_MEDIAPROVIDER_URI = Downloads.Impl.COLUMN_MEDIAPROVIDER_URI;
 
     /**
      * Value of {@link #COLUMN_STATUS} when the download is waiting to start.
@@ -294,15 +294,15 @@ public class DownloadManager {
     private static final String[] UNDERLYING_COLUMNS = new String[] {
         Downloads.Impl._ID,
         Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
-        Downloads.COLUMN_TITLE,
-        Downloads.COLUMN_DESCRIPTION,
-        Downloads.COLUMN_URI,
-        Downloads.COLUMN_MIME_TYPE,
-        Downloads.COLUMN_TOTAL_BYTES,
-        Downloads.COLUMN_STATUS,
-        Downloads.COLUMN_CURRENT_BYTES,
-        Downloads.COLUMN_LAST_MODIFICATION,
-        Downloads.COLUMN_DESTINATION,
+        Downloads.Impl.COLUMN_TITLE,
+        Downloads.Impl.COLUMN_DESCRIPTION,
+        Downloads.Impl.COLUMN_URI,
+        Downloads.Impl.COLUMN_MIME_TYPE,
+        Downloads.Impl.COLUMN_TOTAL_BYTES,
+        Downloads.Impl.COLUMN_STATUS,
+        Downloads.Impl.COLUMN_CURRENT_BYTES,
+        Downloads.Impl.COLUMN_LAST_MODIFICATION,
+        Downloads.Impl.COLUMN_DESTINATION,
         Downloads.Impl.COLUMN_FILE_NAME_HINT,
         Downloads.Impl._DATA,
     };
@@ -520,29 +520,29 @@ public class DownloadManager {
         ContentValues toContentValues(String packageName) {
             ContentValues values = new ContentValues();
             assert mUri != null;
-            values.put(Downloads.COLUMN_URI, mUri.toString());
+            values.put(Downloads.Impl.COLUMN_URI, mUri.toString());
             values.put(Downloads.Impl.COLUMN_IS_PUBLIC_API, true);
-            values.put(Downloads.COLUMN_NOTIFICATION_PACKAGE, packageName);
+            values.put(Downloads.Impl.COLUMN_NOTIFICATION_PACKAGE, packageName);
 
             if (mDestinationUri != null) {
-                values.put(Downloads.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
-                values.put(Downloads.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
+                values.put(Downloads.Impl.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
+                values.put(Downloads.Impl.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
             } else {
-                values.put(Downloads.COLUMN_DESTINATION,
-                           Downloads.DESTINATION_CACHE_PARTITION_PURGEABLE);
+                values.put(Downloads.Impl.COLUMN_DESTINATION,
+                           Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
             }
 
             if (!mRequestHeaders.isEmpty()) {
                 encodeHttpHeaders(values);
             }
 
-            putIfNonNull(values, Downloads.COLUMN_TITLE, mTitle);
-            putIfNonNull(values, Downloads.COLUMN_DESCRIPTION, mDescription);
-            putIfNonNull(values, Downloads.COLUMN_MIME_TYPE, mMimeType);
+            putIfNonNull(values, Downloads.Impl.COLUMN_TITLE, mTitle);
+            putIfNonNull(values, Downloads.Impl.COLUMN_DESCRIPTION, mDescription);
+            putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mMimeType);
 
-            values.put(Downloads.COLUMN_VISIBILITY,
-                    mShowNotification ? Downloads.VISIBILITY_VISIBLE
-                            : Downloads.VISIBILITY_HIDDEN);
+            values.put(Downloads.Impl.COLUMN_VISIBILITY,
+                    mShowNotification ? Downloads.Impl.VISIBILITY_VISIBLE
+                            : Downloads.Impl.VISIBILITY_HIDDEN);
 
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
@@ -585,7 +585,7 @@ public class DownloadManager {
 
         private long[] mIds = null;
         private Integer mStatusFlags = null;
-        private String mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
+        private String mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
         private int mOrderDirection = ORDER_DESCENDING;
         private boolean mOnlyIncludeVisibleInDownloadsUi = false;
 
@@ -637,9 +637,9 @@ public class DownloadManager {
             }
 
             if (column.equals(COLUMN_LAST_MODIFIED_TIMESTAMP)) {
-                mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
+                mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
             } else if (column.equals(COLUMN_TOTAL_SIZE_BYTES)) {
-                mOrderByColumn = Downloads.COLUMN_TOTAL_BYTES;
+                mOrderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
             } else {
                 throw new IllegalArgumentException("Cannot order by " + column);
             }
@@ -665,10 +665,10 @@ public class DownloadManager {
             if (mStatusFlags != null) {
                 List<String> parts = new ArrayList<String>();
                 if ((mStatusFlags & STATUS_PENDING) != 0) {
-                    parts.add(statusClause("=", Downloads.STATUS_PENDING));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_PENDING));
                 }
                 if ((mStatusFlags & STATUS_RUNNING) != 0) {
-                    parts.add(statusClause("=", Downloads.STATUS_RUNNING));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_RUNNING));
                 }
                 if ((mStatusFlags & STATUS_PAUSED) != 0) {
                     parts.add(statusClause("=", Downloads.Impl.STATUS_PAUSED_BY_APP));
@@ -677,7 +677,7 @@ public class DownloadManager {
                     parts.add(statusClause("=", Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
                 }
                 if ((mStatusFlags & STATUS_SUCCESSFUL) != 0) {
-                    parts.add(statusClause("=", Downloads.STATUS_SUCCESS));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_SUCCESS));
                 }
                 if ((mStatusFlags & STATUS_FAILED) != 0) {
                     parts.add("(" + statusClause(">=", 400)
@@ -714,7 +714,7 @@ public class DownloadManager {
         }
 
         private String statusClause(String operator, int value) {
-            return Downloads.COLUMN_STATUS + operator + "'" + value + "'";
+            return Downloads.Impl.COLUMN_STATUS + operator + "'" + value + "'";
         }
     }
 
@@ -753,7 +753,7 @@ public class DownloadManager {
      */
     public long enqueue(Request request) {
         ContentValues values = request.toContentValues(mPackageName);
-        Uri downloadUri = mResolver.insert(Downloads.CONTENT_URI, values);
+        Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
         long id = Long.parseLong(downloadUri.getLastPathSegment());
         return id;
     }
@@ -975,16 +975,16 @@ public class DownloadManager {
                 return Long.toString(translateLong(column));
             }
             if (column.equals(COLUMN_TITLE)) {
-                return getUnderlyingString(Downloads.COLUMN_TITLE);
+                return getUnderlyingString(Downloads.Impl.COLUMN_TITLE);
             }
             if (column.equals(COLUMN_DESCRIPTION)) {
-                return getUnderlyingString(Downloads.COLUMN_DESCRIPTION);
+                return getUnderlyingString(Downloads.Impl.COLUMN_DESCRIPTION);
             }
             if (column.equals(COLUMN_URI)) {
-                return getUnderlyingString(Downloads.COLUMN_URI);
+                return getUnderlyingString(Downloads.Impl.COLUMN_URI);
             }
             if (column.equals(COLUMN_MEDIA_TYPE)) {
-                return getUnderlyingString(Downloads.COLUMN_MIME_TYPE);
+                return getUnderlyingString(Downloads.Impl.COLUMN_MIME_TYPE);
             }
             if (column.equals(COLUMN_LOCAL_FILENAME)) {
                 return getUnderlyingString(Downloads.Impl._DATA);
@@ -1028,19 +1028,19 @@ public class DownloadManager {
                 return getUnderlyingLong(Downloads.Impl._ID);
             }
             if (column.equals(COLUMN_TOTAL_SIZE_BYTES)) {
-                return getUnderlyingLong(Downloads.COLUMN_TOTAL_BYTES);
+                return getUnderlyingLong(Downloads.Impl.COLUMN_TOTAL_BYTES);
             }
             if (column.equals(COLUMN_STATUS)) {
-                return translateStatus((int) getUnderlyingLong(Downloads.COLUMN_STATUS));
+                return translateStatus((int) getUnderlyingLong(Downloads.Impl.COLUMN_STATUS));
             }
             if (column.equals(COLUMN_REASON)) {
-                return getReason((int) getUnderlyingLong(Downloads.COLUMN_STATUS));
+                return getReason((int) getUnderlyingLong(Downloads.Impl.COLUMN_STATUS));
             }
             if (column.equals(COLUMN_BYTES_DOWNLOADED_SO_FAR)) {
-                return getUnderlyingLong(Downloads.COLUMN_CURRENT_BYTES);
+                return getUnderlyingLong(Downloads.Impl.COLUMN_CURRENT_BYTES);
             }
             assert column.equals(COLUMN_LAST_MODIFIED_TIMESTAMP);
-            return getUnderlyingLong(Downloads.COLUMN_LAST_MODIFICATION);
+            return getUnderlyingLong(Downloads.Impl.COLUMN_LAST_MODIFICATION);
         }
 
         private long getReason(int status) {
@@ -1080,23 +1080,23 @@ public class DownloadManager {
             }
 
             switch (status) {
-                case Downloads.STATUS_FILE_ERROR:
+                case Downloads.Impl.STATUS_FILE_ERROR:
                     return ERROR_FILE_ERROR;
 
-                case Downloads.STATUS_UNHANDLED_HTTP_CODE:
-                case Downloads.STATUS_UNHANDLED_REDIRECT:
+                case Downloads.Impl.STATUS_UNHANDLED_HTTP_CODE:
+                case Downloads.Impl.STATUS_UNHANDLED_REDIRECT:
                     return ERROR_UNHANDLED_HTTP_CODE;
 
-                case Downloads.STATUS_HTTP_DATA_ERROR:
+                case Downloads.Impl.STATUS_HTTP_DATA_ERROR:
                     return ERROR_HTTP_DATA_ERROR;
 
-                case Downloads.STATUS_TOO_MANY_REDIRECTS:
+                case Downloads.Impl.STATUS_TOO_MANY_REDIRECTS:
                     return ERROR_TOO_MANY_REDIRECTS;
 
-                case Downloads.STATUS_INSUFFICIENT_SPACE_ERROR:
+                case Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR:
                     return ERROR_INSUFFICIENT_SPACE;
 
-                case Downloads.STATUS_DEVICE_NOT_FOUND_ERROR:
+                case Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR:
                     return ERROR_DEVICE_NOT_FOUND;
 
                 case Downloads.Impl.STATUS_CANNOT_RESUME:
@@ -1120,10 +1120,10 @@ public class DownloadManager {
 
         private int translateStatus(int status) {
             switch (status) {
-                case Downloads.STATUS_PENDING:
+                case Downloads.Impl.STATUS_PENDING:
                     return STATUS_PENDING;
 
-                case Downloads.STATUS_RUNNING:
+                case Downloads.Impl.STATUS_RUNNING:
                     return STATUS_RUNNING;
 
                 case Downloads.Impl.STATUS_PAUSED_BY_APP:
@@ -1132,11 +1132,11 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
                     return STATUS_PAUSED;
 
-                case Downloads.STATUS_SUCCESS:
+                case Downloads.Impl.STATUS_SUCCESS:
                     return STATUS_SUCCESSFUL;
 
                 default:
-                    assert Downloads.isStatusError(status);
+                    assert Downloads.Impl.isStatusError(status);
                     return STATUS_FAILED;
             }
         }
