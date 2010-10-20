@@ -717,6 +717,7 @@ public class SearchView extends LinearLayout {
             if (mOnSuggestionListener == null
                     || !mOnSuggestionListener.onSuggestionClicked(position)) {
                 launchSuggestion(position, KeyEvent.KEYCODE_UNKNOWN, null);
+                setImeVisibility(false);
                 dismissSuggestions();
             }
         }
