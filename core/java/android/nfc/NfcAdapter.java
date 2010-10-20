@@ -15,7 +15,10 @@ import java.lang.UnsupportedOperationException;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.ActivityThread;
 import android.content.Context;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.nfc.INfcAdapter;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -70,6 +73,25 @@ public final class NfcAdapter {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TRANSACTION_DETECTED =
             "android.nfc.action.TRANSACTION_DETECTED";
+
+    /**
+     * Broadcast Action: an adapter's state changed between enabled and disabled.
+     *
+     * The new value is stored in the extra EXTRA_NEW_BOOLEAN_STATE and just contains
+     * whether it's enabled or disabled, not including any information about whether it's
+     * actively enabling or disabling.
+     *
+     * @hide
+     */
+    public static final String ACTION_ADAPTER_STATE_CHANGE =
+            "android.nfc.action.ADAPTER_STATE_CHANGE";
+
+    /**
+     * The Intent extra for ACTION_ADAPTER_STATE_CHANGE, saying what the new state is.
+     *
+     * @hide
+     */
+    public static final String EXTRA_NEW_BOOLEAN_STATE = "android.nfc.isEnabled";
 
     /**
      * Mandatory byte array extra field in
@@ -142,6 +164,7 @@ public final class NfcAdapter {
 
     private static final String TAG = "NFC";
 
+    // Both guarded by NfcAdapter.class:
     private static boolean sIsInitialized = false;
     private static NfcAdapter sAdapter;
 
@@ -149,6 +172,26 @@ public final class NfcAdapter {
 
     private NfcAdapter(INfcAdapter service) {
         mService = service;
+    }
+
+    /**
+     * Helper to check if this device has FEATURE_NFC, but without using
+     * a context.
+     * Equivalent to
+     * context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)
+     */
+    private static boolean hasNfcFeature() {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        if (pm == null) {
+            Log.e(TAG, "Cannot get package manager, assuming no NFC feature");
+            return false;
+        }
+        try {
+            return pm.hasSystemFeature(PackageManager.FEATURE_NFC);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Package manager query failed, assuming no NFC feature", e);
+            return false;
+        }
     }
 
     /**
@@ -165,9 +208,16 @@ public final class NfcAdapter {
             }
             sIsInitialized = true;
 
+            /* is this device meant to have NFC */
+            if (!hasNfcFeature()) {
+                Log.v(TAG, "this device does not have NFC support");
+                return null;
+            }
+
+            /* get a handle to NFC service */
             IBinder b = ServiceManager.getService("nfc");
             if (b == null) {
-                Log.d(TAG, "NFC Service not available");
+                Log.e(TAG, "could not retrieve NFC service");
                 return null;
             }
 
@@ -194,6 +244,9 @@ public final class NfcAdapter {
     }
 
     /**
+     * NOTE: may block for ~second or more.  Poor API.  Avoid
+     * calling from the UI thread.
+     *
      * @hide
      */
     public boolean enableTagDiscovery() {
@@ -206,6 +259,9 @@ public final class NfcAdapter {
     }
 
     /**
+     * NOTE: may block for ~second or more.  Poor API.  Avoid
+     * calling from the UI thread.
+     *
      * @hide
      */
     public boolean disableTagDiscovery() {

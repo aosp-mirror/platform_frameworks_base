@@ -240,6 +240,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     private static final String REPORT_KEY_RUN_TIME = "runtime";
     /**
      * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
+     * reports the number of total iterations of the current test.
+     */
+    private static final String REPORT_KEY_NUM_ITERATIONS = "numiterations";
+    /**
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * reports the guessed suite assignment for the current test.
      */
     private static final String REPORT_KEY_SUITE_ASSIGNMENT = "suiteassignment";
@@ -748,6 +753,20 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
                 mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, "");
             }
 
+            Method testMethod = null;
+            try {
+                testMethod = test.getClass().getMethod(testName);
+                // Report total number of iterations, if test is repetitive
+                if (testMethod.isAnnotationPresent(RepetitiveTest.class)) {
+                    int numIterations = testMethod.getAnnotation(
+                        RepetitiveTest.class).numIterations();
+                    mTestResult.putInt(REPORT_KEY_NUM_ITERATIONS, numIterations);
+                }
+            } catch (NoSuchMethodException e) {
+                // ignore- the test with given name does not exist. Will be handled during test
+                // execution
+            }
+
             // The delay_msec parameter is normally used to provide buffers of idle time
             // for power measurement purposes. To make sure there is a delay before and after
             // every test in a suite, we delay *after* every test (see endTest below) and also
@@ -766,9 +785,9 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             mIncludeDetailedStats = false;
             try {
                 // Look for TimedTest annotation on both test class and test method
-                if (test.getClass().getMethod(testName).isAnnotationPresent(TimedTest.class)) {
+                if (testMethod.isAnnotationPresent(TimedTest.class)) {
                     mIsTimedTest = true;
-                    mIncludeDetailedStats = test.getClass().getMethod(testName).getAnnotation(
+                    mIncludeDetailedStats = testMethod.getAnnotation(
                             TimedTest.class).includeDetailedStats();
                 } else if (test.getClass().isAnnotationPresent(TimedTest.class)) {
                     mIsTimedTest = true;
@@ -778,9 +797,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             } catch (SecurityException e) {
                 // ignore - the test with given name cannot be accessed. Will be handled during
                 // test execution
-            } catch (NoSuchMethodException e) {
-                // ignore- the test with given name does not exist. Will be handled during test
-                // execution
             }
 
             if (mIsTimedTest && mIncludeDetailedStats) {

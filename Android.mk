@@ -375,6 +375,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/6.xml 6 \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
+    -since ./frameworks/base/api/9.xml 9 \
     -since ./frameworks/base/api/current.xml HC \
 		-werror -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
@@ -605,6 +606,10 @@ include $(BUILD_DROIDDOC)
 
 # Build ext.jar
 # ============================================================
+
+# NOTICE notes for non-obvious sections
+# apache-http - covered by the Apache Commons section.
+
 
 ext_dirs := \
 	../../external/nist-sip/java \

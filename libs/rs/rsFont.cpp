@@ -609,22 +609,10 @@ void FontState::initVertexArrayBuffers()
     const Element *posElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
     const Element *texElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 2);
 
-    const Element *elemArray[2];
-    elemArray[0] = posElem;
-    elemArray[1] = texElem;
-
-    String8 posName("position");
-    String8 texName("texture0");
-
-    const char *nameArray[2];
-    nameArray[0] = posName.string();
-    nameArray[1] = texName.string();
-    size_t lengths[2];
-    lengths[0] = posName.size();
-    lengths[1] = texName.size();
-    uint32_t arraySizes[2] = {1, 1};
-
-    const Element *vertexDataElem = Element::create(mRSC, 2, elemArray, nameArray, lengths, arraySizes);
+    mRSC->mStateElement.elementBuilderBegin();
+    mRSC->mStateElement.elementBuilderAdd(posElem, "position", 1);
+    mRSC->mStateElement.elementBuilderAdd(texElem, "texture0", 1);
+    const Element *vertexDataElem = mRSC->mStateElement.elementBuilderCreate(mRSC);
 
     Type *vertexDataType = new Type(mRSC);
     vertexDataType->setDimX(mMaxNumberOfQuads * 4);

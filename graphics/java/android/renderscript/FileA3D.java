@@ -45,7 +45,6 @@ public class FileA3D extends BaseObj {
         PROGRAM_STORE,
         SAMPLER,
         ANIMATION,
-        LIGHT,
         ADAPTER_1D,
         ADAPTER_2D,
         SCRIPT_C;
@@ -117,8 +116,6 @@ public class FileA3D extends BaseObj {
             case SAMPLER:
                 break;
             case ANIMATION:
-                break;
-            case LIGHT:
                 break;
             case ADAPTER_1D:
                 break;

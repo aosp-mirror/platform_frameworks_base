@@ -72,6 +72,7 @@ class HTML5VideoViewProxy extends Handler
     private static final int PREPARED          = 200;
     private static final int ENDED             = 201;
     private static final int POSTER_FETCHED    = 202;
+    private static final int PAUSED            = 203;
 
     private static final String COOKIE = "Cookie";
 
@@ -118,6 +119,7 @@ class HTML5VideoViewProxy extends Handler
         }
         // The spec says the timer should fire every 250 ms or less.
         private static final int TIMEUPDATE_PERIOD = 250;  // ms
+        static boolean isVideoSelfEnded = false;
 
         private static final WebChromeClient.CustomViewCallback mCallback =
             new WebChromeClient.CustomViewCallback() {
@@ -132,7 +134,11 @@ class HTML5VideoViewProxy extends Handler
                     if (mVideoView.isPlaying()) {
                         mVideoView.stopPlayback();
                     }
-                    mCurrentProxy.dispatchOnEnded();
+                    if (isVideoSelfEnded)
+                        mCurrentProxy.dispatchOnEnded();
+                    else
+                        mCurrentProxy.dispatchOnPaused();
+                    isVideoSelfEnded = false;
                     mCurrentProxy = null;
                     mLayout.removeView(mVideoView);
                     mVideoView = null;
@@ -249,7 +255,8 @@ class HTML5VideoViewProxy extends Handler
         // The video ended by itself, so we need to
         // send a message to the UI thread to dismiss
         // the video view and to return to the WebView.
-        sendMessage(obtainMessage(ENDED));
+        // arg1 == 1 means the video ends by itself.
+        sendMessage(obtainMessage(ENDED, 1, 0));
     }
 
     // MediaPlayer.OnErrorListener
@@ -261,6 +268,11 @@ class HTML5VideoViewProxy extends Handler
     public void dispatchOnEnded() {
         Message msg = Message.obtain(mWebCoreHandler, ENDED);
         mWebCoreHandler.sendMessage(msg);
+    }
+
+    public void dispatchOnPaused() {
+      Message msg = Message.obtain(mWebCoreHandler, PAUSED);
+      mWebCoreHandler.sendMessage(msg);
     }
 
     public void onTimeupdate() {
@@ -291,6 +303,8 @@ class HTML5VideoViewProxy extends Handler
                 break;
             }
             case ENDED:
+                if (msg.arg1 == 1)
+                    VideoPlayer.isVideoSelfEnded = true;
             case ERROR: {
                 WebChromeClient client = mWebView.getWebChromeClient();
                 if (client != null) {
@@ -476,6 +490,9 @@ class HTML5VideoViewProxy extends Handler
                     case ENDED:
                         nativeOnEnded(mNativePointer);
                         break;
+                    case PAUSED:
+                        nativeOnPaused(mNativePointer);
+                        break;
                     case POSTER_FETCHED:
                         Bitmap poster = (Bitmap) msg.obj;
                         nativeOnPosterFetched(poster, mNativePointer);
@@ -584,6 +601,7 @@ class HTML5VideoViewProxy extends Handler
 
     private native void nativeOnPrepared(int duration, int width, int height, int nativePointer);
     private native void nativeOnEnded(int nativePointer);
+    private native void nativeOnPaused(int nativePointer);
     private native void nativeOnPosterFetched(Bitmap poster, int nativePointer);
     private native void nativeOnTimeupdate(int position, int nativePointer);
 }

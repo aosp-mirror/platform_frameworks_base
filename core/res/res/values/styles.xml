@@ -577,6 +577,7 @@
     <!-- Default style for {@link android.app.FragmentBreadCrumbs} view. -->
     <style name="Widget.FragmentBreadCrumbs">
         <item name="android:padding">4dp</item>
+        <item name="android:animateLayoutChanges">true</item>
     </style>
 
     <style name="Widget.KeyboardView" parent="android:Widget">

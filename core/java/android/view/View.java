@@ -1943,6 +1943,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     private OnTouchListener mOnTouchListener;
 
+    private OnDragListener mOnDragListener;
+
     /**
      * The application environment this view lives in.
      * This field should be made private, so it is hidden from the SDK.
@@ -2736,6 +2738,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setOnTouchListener(OnTouchListener l) {
         mOnTouchListener = l;
+    }
+
+    /**
+     * Register a callback to be invoked when a drag event is sent to this view.
+     * @param l The drag listener to attach to this view
+     */
+    public void setOnDragListener(OnDragListener l) {
+        mOnDragListener = l;
     }
 
     /**
@@ -9994,10 +10004,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Views typically don't need to override dispatchDragEvent(); it just calls
-     * onDragEvent(what, event) and passes the result up appropriately.
-     *
+     * onDragEvent(event) and passes the result up appropriately.
      */
     public boolean dispatchDragEvent(DragEvent event) {
+        if (mOnDragListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
+                && mOnDragListener.onDrag(this, event)) {
+            return true;
+        }
         return onDragEvent(event);
     }
 
@@ -10285,6 +10298,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * return True if the callback consumed the long click, false otherwise
          */
         boolean onLongClick(View v);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when a drag is being dispatched
+     * to this view.  The callback will be invoked before the hosting view's own
+     * onDrag(event) method.  If the listener wants to fall back to the hosting view's
+     * onDrag(event) behavior, it should return 'false' from this callback.
+     */
+    public interface OnDragListener {
+        /**
+         * Called when a drag event is dispatched to a view. This allows listeners
+         * to get a chance to override base View behavior.
+         *
+         * @param v The view the drag has been dispatched to.
+         * @param event The DragEvent object containing full information
+         *        about the event.
+         * @return true if the listener consumed the DragEvent, false in order to fall
+         *         back to the view's default handling.
+         */
+        boolean onDrag(View v, DragEvent event);
     }
 
     /**

@@ -98,6 +98,9 @@ private:
         virtual status_t        startPreview();
         virtual void            stopPreview();
         virtual bool            previewEnabled();
+        virtual int32_t         getNumberOfVideoBuffers() const;
+        virtual sp<IMemory>     getVideoBuffer(int32_t index) const;
+        virtual status_t        storeMetaDataInBuffers(bool enabled);
         virtual status_t        startRecording();
         virtual void            stopRecording();
         virtual bool            recordingEnabled();

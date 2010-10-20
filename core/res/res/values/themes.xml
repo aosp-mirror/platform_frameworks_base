@@ -706,7 +706,7 @@
 
         <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_holo_dark</item>
 
-        <item name="activatedBackgroundIndicator">@android:drawable/list_selector_activated_holo_dark</item>
+        <item name="activatedBackgroundIndicator">@android:drawable/activated_background_holo_dark</item>
 
         <item name="listDividerAlertDialog">@android:drawable/divider_horizontal_holo_dark</item>
 
@@ -936,7 +936,7 @@
 
         <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_holo_light</item>
 
-        <item name="activatedBackgroundIndicator">@android:drawable/list_selector_activated_holo_light</item>
+        <item name="activatedBackgroundIndicator">@android:drawable/activated_background_holo_light</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">

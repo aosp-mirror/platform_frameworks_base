@@ -348,7 +348,7 @@ void Context::timerPrint()
 
 
     if (props.mLogTimes) {
-        LOGV("RS: Frame (%i),   Script %2.1f (%i),  Clear & Swap %2.1f (%i),  Idle %2.1f (%lli),  Internal %2.1f (%lli), Avg fps: %u",
+        LOGV("RS: Frame (%i),   Script %2.1f%% (%i),  Swap %2.1f%% (%i),  Idle %2.1f%% (%lli),  Internal %2.1f%% (%lli), Avg fps: %u",
              mTimeMSLastFrame,
              100.0 * mTimers[RS_TIMER_SCRIPT] / total, mTimeMSLastScript,
              100.0 * mTimers[RS_TIMER_CLEAR_SWAP] / total, mTimeMSLastSwap,

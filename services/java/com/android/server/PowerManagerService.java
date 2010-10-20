@@ -1971,8 +1971,8 @@ class PowerManagerService extends IPowerManager.Stub
                     / stepsToTarget;
             if (mSpew) {
                 String noticeMe = nominalCurrentValue == curValue ? "" : "  ******************";
-                Slog.i(TAG, "Setting target " + mask + ": cur=" + curValue
-                        + " target=" + targetValue + " delta=" + delta
+                Slog.i(TAG, "setTargetLocked mask=" + mask + " curValue=" + curValue
+                        + " target=" + target + " targetValue=" + targetValue + " delta=" + delta
                         + " nominalCurrentValue=" + nominalCurrentValue
                         + noticeMe);
             }
@@ -2010,20 +2010,20 @@ class PowerManagerService extends IPowerManager.Stub
             }
             if (mSpew) Slog.d(TAG, "Animating curIntValue=" + curIntValue + ": " + mask);
             setLightBrightness(mask, curIntValue);
-            finishAnimation(more, curIntValue);
+            finishAnimationLocked(more, curIntValue);
             return more;
         }
 
-        void jumpToTarget() {
-            if (mSpew) Slog.d(TAG, "jumpToTarget targetValue=" + targetValue + ": " + mask);
+        void jumpToTargetLocked() {
+            if (mSpew) Slog.d(TAG, "jumpToTargetLocked targetValue=" + targetValue + ": " + mask);
             setLightBrightness(mask, targetValue);
             final int tv = targetValue;
             curValue = tv;
             targetValue = -1;
-            finishAnimation(false, tv);
+            finishAnimationLocked(false, tv);
         }
 
-        private void finishAnimation(boolean more, int curIntValue) {
+        private void finishAnimationLocked(boolean more, int curIntValue) {
             animating = more;
             if (!more) {
                 if (mask == SCREEN_BRIGHT_BIT && curIntValue == Power.BRIGHTNESS_OFF) {
@@ -2042,21 +2042,18 @@ class PowerManagerService extends IPowerManager.Stub
                     }
                 }
             } else {
-                boolean animate;
-                boolean jump;
                 synchronized (mLocks) {
-                    jump = animating; // we haven't already run this animation
-                    animate = jump && targetValue == Power.BRIGHTNESS_OFF; // we're turning off
+                    // we're turning off
+                    final boolean animate = animating && targetValue == Power.BRIGHTNESS_OFF;
+                    if (animate) {
+                        // It's pretty scary to hold mLocks for this long, and we should
+                        // redesign this, but it works for now.
+                        nativeStartSurfaceFlingerAnimation(
+                                mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
+                                ? 0 : mAnimationSetting);
+                    }
+                    mScreenBrightness.jumpToTargetLocked();
                 }
-                if (animate) {
-                    // TODO: I think it's possible that if you sleep & wake multiple times
-                    // quickly for different reasons, mScreenOffReason for the first animation
-                    // might get stomped on as it starts the second animation.
-                    nativeStartSurfaceFlingerAnimation(
-                            mScreenOffReason == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
-                            ? 0 : mAnimationSetting);
-                }
-                mScreenBrightness.jumpToTarget();
             }
         }
     }
@@ -2786,8 +2783,10 @@ class PowerManagerService extends IPowerManager.Stub
             }
 
             // update our animation state
-            mScreenBrightness.targetValue = brightness;
-            mScreenBrightness.jumpToTarget();
+            synchronized (mLocks) {
+                mScreenBrightness.targetValue = brightness;
+                mScreenBrightness.jumpToTargetLocked();
+            }
         }
     }
 

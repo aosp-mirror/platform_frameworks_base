@@ -56,6 +56,15 @@ import java.util.WeakHashMap;
  * Provides the user interface elements for the user to enter a search query and submit a
  * request to a search provider. Shows a list of query suggestions or results, if
  * available and allows the user to pick a suggestion or result to launch into.
+ *
+ * <p>
+ * <b>XML attributes</b>
+ * <p>
+ * See {@link android.R.styleable#SearchView SearchView Attributes},
+ * {@link android.R.styleable#View View Attributes}
+ *
+ * @attr ref android.R.styleable#SearchView_iconifiedByDefault
+ * @attr ref android.R.styleable#SearchView_maxWidth
  */
 public class SearchView extends LinearLayout {
 
@@ -80,6 +89,7 @@ public class SearchView extends LinearLayout {
     private CharSequence mQueryHint;
     private boolean mQueryRefinement;
     private boolean mClearingFocus;
+    private int mMaxWidth;
 
     private SearchableInfo mSearchable;
 
@@ -198,6 +208,10 @@ public class SearchView extends LinearLayout {
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SearchView, 0, 0);
         setIconifiedByDefault(a.getBoolean(R.styleable.SearchView_iconifiedByDefault, true));
+        int maxWidth = a.getDimensionPixelSize(R.styleable.SearchView_maxWidth, -1);
+        if (maxWidth != -1) {
+            setMaxWidth(maxWidth);
+        }
         a.recycle();
 
         // Save voice intent for later queries/launching
@@ -434,6 +448,30 @@ public class SearchView extends LinearLayout {
         return mSuggestionsAdapter;
     }
 
+    /**
+     * Makes the view at most this many pixels wide
+     *
+     * @attr ref android.R.styleable#SearchView_maxWidth
+     */
+    public void setMaxWidth(int maxpixels) {
+        mMaxWidth = maxpixels;
+
+        requestLayout();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+
+        if ((widthMode == MeasureSpec.AT_MOST || widthMode == MeasureSpec.EXACTLY) && mMaxWidth > 0
+                && width > mMaxWidth) {
+            super.onMeasure(MeasureSpec.makeMeasureSpec(mMaxWidth, widthMode), heightMeasureSpec);
+        } else {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+    }
+
     private void updateViewsVisibility(final boolean collapsed) {
         mIconified = collapsed;
         // Visibility of views that are visible when collapsed
@@ -447,6 +485,8 @@ public class SearchView extends LinearLayout {
         mSubmitButton.setVisibility(mSubmitButtonEnabled && hasText ? visExpanded : GONE);
         mSearchEditFrame.setVisibility(visExpanded);
         updateVoiceButton(!hasText);
+        requestLayout();
+        invalidate();
     }
 
     private void setImeVisibility(boolean visible) {
@@ -537,6 +577,7 @@ public class SearchView extends LinearLayout {
         //closeSuggestionsAdapter();
 
         mQueryTextView.setDropDownAnimationStyle(0); // no animation
+        mQueryTextView.setThreshold(mSearchable.getSuggestThreshold());
 
         // attach the suggestions adapter, if suggestions are available
         // The existence of a suggestions authority is the proxy for "suggestions available here"
@@ -594,6 +635,8 @@ public class SearchView extends LinearLayout {
         boolean hasText = !TextUtils.isEmpty(text);
         if (isSubmitButtonEnabled()) {
             mSubmitButton.setVisibility(hasText ? VISIBLE : GONE);
+            requestLayout();
+            invalidate();
         }
         updateVoiceButton(!hasText);
         if (mOnQueryChangeListener != null) {

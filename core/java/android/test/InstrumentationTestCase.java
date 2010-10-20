@@ -54,7 +54,7 @@ public class InstrumentationTestCase extends TestCase {
      * @param instrumentation the instrumentation to use with this instance
      *
      * @deprecated Incorrect spelling,
-     * use {@link #injectInstrumentation(android.app.Instrumentation) instead.
+     * use {@link #injectInstrumentation(android.app.Instrumentation)} instead.
      */
     @Deprecated
     public void injectInsrumentation(Instrumentation instrumentation) {
@@ -170,18 +170,23 @@ public class InstrumentationTestCase extends TestCase {
         }
 
         int runCount = 1;
+        boolean isRepetitive = false;
         if (method.isAnnotationPresent(FlakyTest.class)) {
             runCount = method.getAnnotation(FlakyTest.class).tolerance();
+        } else if (method.isAnnotationPresent(RepetitiveTest.class)) {
+            runCount = method.getAnnotation(RepetitiveTest.class).numIterations();
+            isRepetitive = true;
         }
 
         if (method.isAnnotationPresent(UiThreadTest.class)) {
             final int tolerance = runCount;
+            final boolean repetitive = isRepetitive;
             final Method testMethod = method;
             final Throwable[] exceptions = new Throwable[1];
             getInstrumentation().runOnMainSync(new Runnable() {
                 public void run() {
                     try {
-                        runMethod(testMethod, tolerance);
+                        runMethod(testMethod, tolerance, repetitive);
                     } catch (Throwable throwable) {
                         exceptions[0] = throwable;
                     }
@@ -191,11 +196,16 @@ public class InstrumentationTestCase extends TestCase {
                 throw exceptions[0];
             }
         } else {
-            runMethod(method, runCount);
+            runMethod(method, runCount, isRepetitive);
         }
     }
 
+    // For backwards-compatibility after adding isRepetitive
     private void runMethod(Method runMethod, int tolerance) throws Throwable {
+        runMethod(runMethod, tolerance, false);
+    }
+
+    private void runMethod(Method runMethod, int tolerance, boolean isRepetitive) throws Throwable {
         Throwable exception = null;
 
         int runCount = 0;
@@ -211,8 +221,14 @@ public class InstrumentationTestCase extends TestCase {
                 exception = e;
             } finally {
                 runCount++;
+                // Report current iteration number, if test is repetitive
+                if (isRepetitive) {
+                    Bundle iterations = new Bundle();
+                    iterations.putInt("currentiterations", runCount);
+                    getInstrumentation().sendStatus(2, iterations);
+                }
             }
-        } while ((runCount < tolerance) && (exception != null));
+        } while ((runCount < tolerance) && (isRepetitive || exception != null));
 
         if (exception != null) {
             throw exception;

@@ -49,17 +49,6 @@ typedef void (*data_callback)(int32_t msgType,
                               const sp<IMemory>& dataPtr,
                               void* user);
 
-#ifdef USE_GRAPHIC_VIDEO_BUFFERS
-/**
- * Replace data_callback_timestamp. Once we are done, this
- * should be renamed as data_callback_timestamp, and the existing
- * data_callback_timestamp should be deleted.
- */
-typedef void (*videobuffer_callback_timestamp)(nsecs_t timestamp,
-                                        int32_t msgType,
-                                        const sp<android_native_buffer_t>& buf,
-                                        void* user);
-#endif
 typedef void (*data_callback_timestamp)(nsecs_t timestamp,
                                         int32_t msgType,
                                         const sp<IMemory>& dataPtr,
@@ -99,46 +88,6 @@ typedef void (*data_callback_timestamp)(nsecs_t timestamp,
 class CameraHardwareInterface : public virtual RefBase {
 public:
     virtual ~CameraHardwareInterface() { }
-
-#ifdef USE_GRAPHIC_VIDEO_BUFFERS
-    /**
-     * Replace existing setCallbacks() method. Once we are done, the
-     * videobuffer_callback_timestamp parameter will be renamed to
-     * data_callback_timestamp, but its signature will be the same
-     * as videobuffer_callback_timestamp, which will be renamed
-     * to data_callback_timestamp and the exiting data_callback_timestamp
-     * will be deleted.
-     */
-    virtual void        setCallbacks(notify_callback notify_cb,
-                                data_callback data_cb,
-                                videobuffer_callback_timestamp data_cb_timestamp,
-                                void* user) = 0;
-
-    /**
-     * Replace releaseRecordingFrame(). releaseRecordingFrame() should be
-     * changed so that it has the same signature of releaseVideoBuffer(),
-     * once we are done, and releaseVideoBuffer() will be deleted.
-     */
-    virtual void        releaseVideoBuffer(const sp<android_native_buffer_t>& buf) = 0;
-
-    /**
-     * This method should be called after startRecording().
-     *
-     * @param nBuffers the total number of video buffers allocated by the camera
-     *  hal
-     * @param buffers an array allocated by the camera hal to hold the pointers
-     *  to the individual video buffers. The video buffers and the buffers array
-     *  should NOT be modified/released by camera hal until stopRecording() is
-     *  called and all outstanding video buffers previously sent out via
-     *  CAMERA_MSG_VIDEO_FRAME have been released via releaseVideoBuffer().
-     *  Camera hal client must not release the individual buffers and the buffers
-     *  array.
-     * @return no error if OK.
-     */
-    virtual status_t    getVideoBufferInfo(
-                            sp<android_native_buffer_t>** buffers,
-                            size_t *nBuffers) = 0;
-#endif
 
     /** Set the ANativeWindow to which preview frames are sent */
     virtual status_t setPreviewWindow(const sp<ANativeWindow>& buf) = 0;
@@ -195,6 +144,82 @@ public:
      * Returns true if preview is enabled.
      */
     virtual bool        previewEnabled() = 0;
+
+    /**
+     * Retrieve the total number of available buffers from camera hal for passing
+     * video frame data in a recording session. Must be called again if a new
+     * recording session is started.
+     *
+     * This method should be called after startRecording(), since
+     * the some camera hal may choose to allocate the video buffers only after
+     * recording is started.
+     *
+     * Some camera hal may not implement this method, and 0 can be returned to
+     * indicate that this feature is not available.
+     *
+     * @return the number of video buffers that camera hal makes available.
+     *      Zero (0) is returned to indicate that camera hal does not support
+     *      this feature.
+     */
+    virtual int32_t     getNumberOfVideoBuffers() const { return 0; }
+
+    /**
+     * Retrieve the video buffer corresponding to the given index in a
+     * recording session. Must be called again if a new recording session
+     * is started.
+     *
+     * It allows a client to retrieve all video buffers that camera hal makes
+     * available to passing video frame data by calling this method with all
+     * valid index values. The valid index value ranges from 0 to n, where
+     * n = getNumberOfVideoBuffers() - 1. With an index outside of the valid
+     * range, 0 must be returned. This method should be called after
+     * startRecording().
+     *
+     * The video buffers should NOT be modified/released by camera hal
+     * until stopRecording() is called and all outstanding video buffers
+     * previously sent out via CAMERA_MSG_VIDEO_FRAME have been released
+     * via releaseVideoBuffer().
+     *
+     * @param index an index to retrieve the corresponding video buffer.
+     *
+     * @return the video buffer corresponding to the given index.
+     */
+    virtual sp<IMemory> getVideoBuffer(int32_t index) const { return 0; }
+
+    /**
+     * Request the camera hal to store meta data or real YUV data in
+     * the video buffers send out via CAMERA_MSG_VIDEO_FRRAME for a
+     * recording session. If it is not called, the default camera
+     * hal behavior is to store real YUV data in the video buffers.
+     *
+     * This method should be called before startRecording() in order
+     * to be effective.
+     *
+     * If meta data is stored in the video buffers, it is up to the
+     * receiver of the video buffers to interpret the contents and
+     * to find the actual frame data with the help of the meta data
+     * in the buffer. How this is done is outside of the scope of
+     * this method.
+     *
+     * Some camera hal may not support storing meta data in the video
+     * buffers, but all camera hal should support storing real YUV data
+     * in the video buffers. If the camera hal does not support storing
+     * the meta data in the video buffers when it is requested to do
+     * do, INVALID_OPERATION must be returned. It is very useful for
+     * the camera hal to pass meta data rather than the actual frame
+     * data directly to the video encoder, since the amount of the
+     * uncompressed frame data can be very large if video size is large.
+     *
+     * @param enable if true to instruct the camera hal to store
+     *      meta data in the video buffers; false to instruct
+     *      the camera hal to store real YUV data in the video
+     *      buffers.
+     *
+     * @return OK on success.
+     */
+    virtual status_t    storeMetaDataInBuffers(bool enable) {
+                            return enable? INVALID_OPERATION: OK;
+                        }
 
     /**
      * Start record mode. When a record image is available a CAMERA_MSG_VIDEO_FRAME

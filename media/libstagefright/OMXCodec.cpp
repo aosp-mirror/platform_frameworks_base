@@ -510,12 +510,29 @@ sp<MediaSource> OMXCodec::Create(
 
         LOGV("Attempting to allocate OMX node '%s'", componentName);
 
+        uint32_t quirks = getComponentQuirks(componentName, createEncoder);
+
+        if (!createEncoder
+                && (quirks & kOutputBuffersAreUnreadable)
+                && (flags & kClientNeedsFramebuffer)) {
+            if (strncmp(componentName, "OMX.SEC.", 8)) {
+                // For OMX.SEC.* decoders we can enable a special mode that
+                // gives the client access to the framebuffer contents.
+
+                LOGW("Component '%s' does not give the client access to "
+                     "the framebuffer contents. Skipping.",
+                     componentName);
+
+                continue;
+            }
+        }
+
         status_t err = omx->allocateNode(componentName, observer, &node);
         if (err == OK) {
             LOGV("Successfully allocated OMX node '%s'", componentName);
 
             sp<OMXCodec> codec = new OMXCodec(
-                    omx, node, getComponentQuirks(componentName, createEncoder),
+                    omx, node, quirks,
                     createEncoder, mime, componentName,
                     source);
 
@@ -697,6 +714,33 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
     }
 
     initOutputFormat(meta);
+
+    if ((flags & kClientNeedsFramebuffer)
+            && !strncmp(mComponentName, "OMX.SEC.", 8)) {
+        OMX_INDEXTYPE index;
+
+        status_t err =
+            mOMX->getExtensionIndex(
+                    mNode,
+                    "OMX.SEC.index.ThumbnailMode",
+                    &index);
+
+        if (err != OK) {
+            return err;
+        }
+
+        OMX_BOOL enable = OMX_TRUE;
+        err = mOMX->setConfig(mNode, index, &enable, sizeof(enable));
+
+        if (err != OK) {
+            CODEC_LOGE("setConfig('OMX.SEC.index.ThumbnailMode') "
+                       "returned error 0x%08x", err);
+
+            return err;
+        }
+
+        mQuirks &= ~kOutputBuffersAreUnreadable;
+    }
 
     return OK;
 }

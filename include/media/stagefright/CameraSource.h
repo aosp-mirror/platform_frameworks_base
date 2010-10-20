@@ -56,6 +56,14 @@ public:
      * @param frameRate the target frames per second
      * @param surface the preview surface for display where preview
      *          frames are sent to
+     * @param storeMetaDataInVideoBuffers true to request the camera
+     *          source to store meta data in video buffers; false to
+     *          request the camera source to store real YUV frame data
+     *          in the video buffers. The camera source may not support
+     *          storing meta data in video buffers, if so, a request
+     *          to do that will NOT be honored. To find out whether
+     *          meta data is actually being stored in video buffers
+     *          during recording, call isMetaDataStoredInVideoBuffers().
      *
      * @return NULL on error.
      */
@@ -63,12 +71,15 @@ public:
                                           int32_t cameraId,
                                           Size videoSize,
                                           int32_t frameRate,
-                                          const sp<Surface>& surface);
+                                          const sp<Surface>& surface,
+                                          bool storeMetaDataInVideoBuffers = false);
 
     virtual ~CameraSource();
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
+    virtual status_t read(
+            MediaBuffer **buffer, const ReadOptions *options = NULL);
 
     /**
      * Check whether a CameraSource object is properly initialized.
@@ -87,8 +98,43 @@ public:
      */
     virtual sp<MetaData> getFormat();
 
-    virtual status_t read(
-            MediaBuffer **buffer, const ReadOptions *options = NULL);
+    /**
+     * Retrieve the total number of video buffers available from
+     * this source.
+     *
+     * This method is useful if these video buffers are used
+     * for passing video frame data to other media components,
+     * such as OMX video encoders, in order to eliminate the
+     * memcpy of the data.
+     *
+     * @return the total numbner of video buffers. Returns 0 to
+     *      indicate that this source does not make the video
+     *      buffer information availalble.
+     */
+    size_t getNumberOfVideoBuffers() const;
+
+    /**
+     * Retrieve the individual video buffer available from
+     * this source.
+     *
+     * @param index the index corresponding to the video buffer.
+     *      Valid range of the index is [0, n], where n =
+     *      getNumberOfVideoBuffers() - 1.
+     *
+     * @return the video buffer corresponding to the given index.
+     *      If index is out of range, 0 should be returned.
+     */
+    sp<IMemory> getVideoBuffer(size_t index) const;
+
+    /**
+     * Tell whether this camera source stores meta data or real YUV
+     * frame data in video buffers.
+     *
+     * @return true if meta data is stored in the video
+     *      buffers; false if real YUV data is stored in
+     *      the video buffers.
+     */
+    bool isMetaDataStoredInVideoBuffers() const;
 
     virtual void signalBufferReturned(MediaBuffer* buffer);
 
@@ -115,7 +161,8 @@ protected:
 
     CameraSource(const sp<ICamera>& camera, int32_t cameraId,
                  Size videoSize, int32_t frameRate,
-                 const sp<Surface>& surface);
+                 const sp<Surface>& surface,
+                 bool storeMetaDataInVideoBuffers);
 
     virtual void startCameraRecording();
     virtual void stopCameraRecording();
@@ -147,13 +194,15 @@ private:
     int32_t mNumGlitches;
     int64_t mGlitchDurationThresholdUs;
     bool mCollectStats;
+    bool mIsMetaDataStoredInVideoBuffers;
 
     void releaseQueuedFrames();
     void releaseOneRecordingFrame(const sp<IMemory>& frame);
 
 
     status_t init(const sp<ICamera>& camera, int32_t cameraId,
-                Size videoSize, int32_t frameRate);
+                Size videoSize, int32_t frameRate,
+                bool storeMetaDataInVideoBuffers);
     status_t isCameraAvailable(const sp<ICamera>& camera, int32_t cameraId);
     status_t isCameraColorFormatSupported(const CameraParameters& params);
     status_t configureCamera(CameraParameters* params,
