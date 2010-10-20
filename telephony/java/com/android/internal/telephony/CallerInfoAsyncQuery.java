@@ -230,6 +230,14 @@ public class CallerInfoAsyncQuery {
                     mCallerInfo = CallerInfo.getCallerInfo(mQueryContext, mQueryUri, cursor);
                     if (DBG) Log.d(LOG_TAG, "==> Got mCallerInfo: " + mCallerInfo);
 
+                    CallerInfo newCallerInfo = CallerInfo.doSecondaryLookupIfNecessary(
+                            mQueryContext, cw.number, mCallerInfo);
+                    if (newCallerInfo != mCallerInfo) {
+                        mCallerInfo = newCallerInfo;
+                        if (DBG) log("#####async contact look up with numeric username"
+                                + mCallerInfo);
+                    }
+
                     // Use the number entered by the user for display.
                     if (!TextUtils.isEmpty(cw.number)) {
                         mCallerInfo.phoneNumber = PhoneNumberUtils.formatNumber(cw.number);
