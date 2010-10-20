@@ -109,6 +109,50 @@ public class MimeTypeMap {
     }
 
     /**
+     * If the given MIME type is null, or one of the "generic" types (text/plain
+     * or application/octet-stream) map it to a type that Android can deal with.
+     * If the given type is not generic, return it unchanged.
+     *
+     * @param mimeType MIME type provided by the server.
+     * @param url URL of the data being loaded.
+     * @param contentDisposition Content-disposition header given by the server.
+     * @return The MIME type that should be used for this data.
+     */
+    /* package */ String remapGenericMimeType(String mimeType, String url,
+            String contentDisposition) {
+        // If we have one of "generic" MIME types, try to deduce
+        // the right MIME type from the file extension (if any):
+        if ("text/plain".equals(mimeType) ||
+                "application/octet-stream".equals(mimeType)) {
+
+            // for attachment, use the filename in the Content-Disposition
+            // to guess the mimetype
+            String filename = null;
+            if (contentDisposition != null) {
+                filename = URLUtil.parseContentDisposition(contentDisposition);
+            }
+            if (filename != null) {
+                url = filename;
+            }
+            String extension = getFileExtensionFromUrl(url);
+            String newMimeType = getMimeTypeFromExtension(extension);
+            if (newMimeType != null) {
+                mimeType = newMimeType;
+            }
+        } else if ("text/vnd.wap.wml".equals(mimeType)) {
+            // As we don't support wml, render it as plain text
+            mimeType = "text/plain";
+        } else {
+            // It seems that xhtml+xml and vnd.wap.xhtml+xml mime
+            // subtypes are used interchangeably. So treat them the same.
+            if ("application/vnd.wap.xhtml+xml".equals(mimeType)) {
+                mimeType = "application/xhtml+xml";
+            }
+        }
+        return mimeType;
+    }
+
+    /**
      * Get the singleton instance of MimeTypeMap.
      * @return The singleton instance of the MIME-type map.
      */
