@@ -223,6 +223,7 @@ public class WebSettings {
      * @hide for now, pending API council approval.
      */
     public static class AutoFillProfile {
+        private int mUniqueId;
         private String mFullName;
         private String mEmailAddress;
         private String mCompanyName;
@@ -234,10 +235,11 @@ public class WebSettings {
         private String mCountry;
         private String mPhoneNumber;
 
-        public AutoFillProfile(String fullName, String email,
+        public AutoFillProfile(int uniqueId, String fullName, String email,
                 String companyName, String addressLine1, String addressLine2,
                 String city, String state, String zipCode, String country,
                 String phoneNumber) {
+            mUniqueId = uniqueId;
             mFullName = fullName;
             mEmailAddress = email;
             mCompanyName = companyName;
@@ -250,6 +252,7 @@ public class WebSettings {
             mPhoneNumber = phoneNumber;
         }
 
+        public int getUniqueId() { return mUniqueId; }
         public String getFullName() { return mFullName; }
         public String getEmailAddress() { return mEmailAddress; }
         public String getCompanyName() { return mCompanyName; }
@@ -1613,8 +1616,10 @@ public class WebSettings {
      * @hide
      */
     public synchronized void setAutoFillProfile(AutoFillProfile profile) {
-        mAutoFillProfile = profile;
-        postSync();
+        if (mAutoFillProfile != profile) {
+            mAutoFillProfile = profile;
+            postSync();
+        }
     }
 
     int getDoubleTapToastCount() {
