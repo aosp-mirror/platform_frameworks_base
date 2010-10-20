@@ -744,7 +744,8 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
         mQuirks &= ~kOutputBuffersAreUnreadable;
     }
 
-    if (!mIsEncoder
+    if (mNativeWindow != NULL
+        && !mIsEncoder
         && !strncasecmp(mMIME, "video/", 6)
         && !strncmp(mComponentName, "OMX.", 4)) {
         status_t err = initNativeWindow();
@@ -1606,7 +1607,7 @@ status_t OMXCodec::allocateBuffers() {
 }
 
 status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
-    if (mNativeWindow != 0 && portIndex == kPortIndexOutput) {
+    if (mNativeWindow != NULL && portIndex == kPortIndexOutput) {
         return allocateOutputBuffersFromNativeWindow();
     }
 
@@ -1676,6 +1677,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
 
         info.mBuffer = buffer;
         info.mOwnedByComponent = false;
+        info.mOwnedByNativeWindow = false;
         info.mMem = mem;
         info.mMediaBuffer = NULL;
 
