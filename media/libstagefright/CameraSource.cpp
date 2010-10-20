@@ -115,7 +115,7 @@ CameraSource *CameraSource::Create() {
     size.height = -1;
 
     sp<ICamera> camera;
-    return new CameraSource(camera, 0, size, -1, NULL);
+    return new CameraSource(camera, 0, size, -1, NULL, false);
 }
 
 // static
@@ -124,10 +124,12 @@ CameraSource *CameraSource::CreateFromCamera(
     int32_t cameraId,
     Size videoSize,
     int32_t frameRate,
-    const sp<Surface>& surface) {
+    const sp<Surface>& surface,
+    bool storeMetaDataInVideoBuffers) {
 
     CameraSource *source = new CameraSource(camera, cameraId,
-                    videoSize, frameRate, surface);
+                    videoSize, frameRate, surface,
+                    storeMetaDataInVideoBuffers);
 
     if (source != NULL) {
         if (source->initCheck() != OK) {
@@ -143,7 +145,8 @@ CameraSource::CameraSource(
     int32_t cameraId,
     Size videoSize,
     int32_t frameRate,
-    const sp<Surface>& surface)
+    const sp<Surface>& surface,
+    bool storeMetaDataInVideoBuffers)
     : mCameraFlags(0),
       mVideoFrameRate(-1),
       mCamera(0),
@@ -161,7 +164,9 @@ CameraSource::CameraSource(
     mVideoSize.width  = -1;
     mVideoSize.height = -1;
 
-    mInitCheck = init(camera, cameraId, videoSize, frameRate);
+    mInitCheck = init(camera, cameraId,
+                    videoSize, frameRate,
+                    storeMetaDataInVideoBuffers);
 }
 
 status_t CameraSource::initCheck() const {
@@ -411,13 +416,19 @@ status_t CameraSource::checkFrameRate(
  *      width and heigth settings by the camera
  * @param frameRate the target frame rate in frames per second.
  *      if it is -1, use the current camera frame rate setting.
+ * @param storeMetaDataInVideoBuffers request to store meta
+ *      data or real YUV data in video buffers. Request to
+ *      store meta data in video buffers may not be honored
+ *      if the source does not support this feature.
+ *
  * @return OK if no error.
  */
 status_t CameraSource::init(
         const sp<ICamera>& camera,
         int32_t cameraId,
         Size videoSize,
-        int32_t frameRate) {
+        int32_t frameRate,
+        bool storeMetaDataInVideoBuffers) {
 
     status_t err = OK;
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
@@ -451,6 +462,12 @@ status_t CameraSource::init(
     // This CHECK is good, since we just passed the lock/unlock
     // check earlier by calling mCamera->setParameters().
     CHECK_EQ(OK, mCamera->setPreviewDisplay(mSurface));
+
+    mIsMetaDataStoredInVideoBuffers = false;
+    if (storeMetaDataInVideoBuffers &&
+        OK == mCamera->storeMetaDataInBuffers(true)) {
+        mIsMetaDataStoredInVideoBuffers = true;
+    }
 
     /*
      * mCamera->startRecording() signals camera hal to make
@@ -720,6 +737,33 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     LOGV("initial delay: %lld, current time stamp: %lld",
         mStartTimeUs, timeUs);
     mFrameAvailableCondition.signal();
+}
+
+size_t CameraSource::getNumberOfVideoBuffers() const {
+    LOGV("getNumberOfVideoBuffers");
+    size_t nBuffers = 0;
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
+    if (mInitCheck == OK && mCamera != 0) {
+        nBuffers = mCamera->getNumberOfVideoBuffers();
+    }
+    IPCThreadState::self()->restoreCallingIdentity(token);
+    return nBuffers;
+}
+
+sp<IMemory> CameraSource::getVideoBuffer(size_t index) const {
+    LOGV("getVideoBuffer: %d", index);
+    sp<IMemory> buffer = 0;
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
+    if (mInitCheck == OK && mCamera != 0) {
+        buffer = mCamera->getVideoBuffer(index);
+    }
+    IPCThreadState::self()->restoreCallingIdentity(token);
+    return buffer;
+}
+
+bool CameraSource::isMetaDataStoredInVideoBuffers() const {
+    LOGV("isMetaDataStoredInVideoBuffers");
+    return mIsMetaDataStoredInVideoBuffers;
 }
 
 }  // namespace android
