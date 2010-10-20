@@ -205,7 +205,9 @@ inline bool String16::operator<=(const String16& other) const
 
 inline bool String16::operator==(const String16& other) const
 {
-    return strzcmp16(mString, size(), other.mString, other.size()) == 0;
+    const size_t n1 = size();
+    const size_t n2 = other.size();
+    return n1 == n2 && strzcmp16(mString, n1, other.mString, n2) == 0;
 }
 
 inline bool String16::operator!=(const String16& other) const
