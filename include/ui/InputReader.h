@@ -170,11 +170,10 @@ public:
  * and parameters maintained by the input reader.
  */
 class InputReaderContext {
-protected:
+public:
     InputReaderContext() { }
     virtual ~InputReaderContext() { }
 
-public:
     virtual void updateGlobalMetaState() = 0;
     virtual int32_t getGlobalMetaState() = 0;
 
@@ -193,7 +192,7 @@ public:
  *     the input reader, the input reader never calls into other components while holding
  *     an exclusive internal lock whenever re-entrance can happen.
  */
-class InputReader : public InputReaderInterface, private InputReaderContext {
+class InputReader : public InputReaderInterface, protected InputReaderContext {
 public:
     InputReader(const sp<EventHubInterface>& eventHub,
             const sp<InputReaderPolicyInterface>& policy,
@@ -218,6 +217,11 @@ public:
 
     virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
             size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags);
+
+protected:
+    // These methods are protected virtual so they can be overridden and instrumented
+    // by test cases.
+    virtual InputDevice* createDevice(int32_t deviceId, const String8& name, uint32_t classes);
 
 private:
     sp<EventHubInterface> mEventHub;
@@ -244,12 +248,11 @@ private:
 
     void addDevice(int32_t deviceId);
     void removeDevice(int32_t deviceId);
-    InputDevice* createDevice(int32_t deviceId, const String8& name, uint32_t classes);
     void configureExcludedDevices();
 
     void consumeEvent(const RawEvent* rawEvent);
 
-    void handleConfigurationChanged();
+    void handleConfigurationChanged(nsecs_t when);
 
     // state management for all devices
     Mutex mStateLock;
@@ -533,6 +536,21 @@ protected:
         int32_t toolMajor;
         int32_t toolMinor;
         int32_t orientation;
+
+        inline bool operator== (const PointerData& other) const {
+            return id == other.id
+                    && x == other.x
+                    && y == other.y
+                    && pressure == other.pressure
+                    && touchMajor == other.touchMajor
+                    && touchMinor == other.touchMinor
+                    && toolMajor == other.toolMajor
+                    && toolMinor == other.toolMinor
+                    && orientation == other.orientation;
+        }
+        inline bool operator!= (const PointerData& other) const {
+            return !(*this == other);
+        }
     };
 
     // Raw data for a collection of pointers including a pointer id mapping table.
