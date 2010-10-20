@@ -4627,7 +4627,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     next = sRecycleBin;
                     sRecycleBin = this;
                     sRecycledCount += 1;
+                } else {
+                    next = null;
                 }
+                child = null;
             }
         }
     }
