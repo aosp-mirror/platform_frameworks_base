@@ -546,6 +546,10 @@ public class ScrollView extends FrameLayout {
                                 mEdgeGlowTop.onRelease();
                             }
                         }
+                        if (mEdgeGlowTop != null
+                                && (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished())) {
+                            invalidate();
+                        }
                     }
                 }
                 break;
