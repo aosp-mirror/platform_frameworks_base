@@ -194,6 +194,35 @@ void AwesomeLocalRenderer::init(
     }
 }
 
+struct AwesomeNativeWindowRenderer : public AwesomeRenderer {
+    AwesomeNativeWindowRenderer(const sp<ANativeWindow> &nativeWindow)
+        : mNativeWindow(nativeWindow) {
+    }
+
+    virtual void render(MediaBuffer *buffer) {
+        status_t err = mNativeWindow->queueBuffer(
+                mNativeWindow.get(), buffer->graphicBuffer().get());
+        if (err != 0) {
+            LOGE("queueBuffer failed with error %s (%d)", strerror(-err),
+                    -err);
+            return;
+        }
+
+        sp<MetaData> metaData = buffer->meta_data();
+        metaData->setInt32(kKeyRendered, 1);
+    }
+
+protected:
+    virtual ~AwesomeNativeWindowRenderer() {}
+
+private:
+    sp<ANativeWindow> mNativeWindow;
+
+    AwesomeNativeWindowRenderer(const AwesomeNativeWindowRenderer &);
+    AwesomeNativeWindowRenderer &operator=(
+            const AwesomeNativeWindowRenderer &);
+};
+
 AwesomePlayer::AwesomePlayer()
     : mQueueStarted(false),
       mTimeSource(NULL),
@@ -805,16 +834,25 @@ void AwesomePlayer::initRenderer_l() {
         IPCThreadState::self()->flushCommands();
 
         if (mSurface != NULL) {
-            // Other decoders are instantiated locally and as a consequence
-            // allocate their buffers in local address space.
-            mVideoRenderer = new AwesomeLocalRenderer(
-                false,  // previewOnly
-                component,
-                (OMX_COLOR_FORMATTYPE)format,
-                mISurface,
-                mSurface,
-                mVideoWidth, mVideoHeight,
-                decodedWidth, decodedHeight);
+            if (strncmp(component, "OMX.", 4) == 0) {
+                // Hardware decoders avoid the CPU color conversion by decoding
+                // directly to ANativeBuffers, so we must use a renderer that
+                // just pushes those buffers to the ANativeWindow.
+                mVideoRenderer = new AwesomeNativeWindowRenderer(mSurface);
+            } else {
+                // Other decoders are instantiated locally and as a consequence
+                // allocate their buffers in local address space.  This renderer
+                // then performs a color conversion and copy to get the data
+                // into the ANativeBuffer.
+                mVideoRenderer = new AwesomeLocalRenderer(
+                    false,  // previewOnly
+                    component,
+                    (OMX_COLOR_FORMATTYPE)format,
+                    mISurface,
+                    mSurface,
+                    mVideoWidth, mVideoHeight,
+                    decodedWidth, decodedHeight);
+            }
         } else {
             // Our OMX codecs allocate buffers on the media_server side
             // therefore they require a remote IOMXRenderer that knows how
@@ -1054,7 +1092,7 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
             mVideoTrack,
-            NULL, flags);
+            NULL, flags, mSurface);
 
     if (mVideoSource != NULL) {
         int64_t durationUs;
@@ -1811,4 +1849,3 @@ void AwesomePlayer::postAudioSeekComplete() {
 }
 
 }  // namespace android
-

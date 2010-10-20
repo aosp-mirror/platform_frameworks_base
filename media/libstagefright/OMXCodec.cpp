@@ -39,6 +39,7 @@
 #include <binder/MemoryDealer.h>
 #include <binder/ProcessState.h>
 #include <media/IMediaPlayerService.h>
+#include <media/stagefright/HardwareAPI.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
@@ -478,7 +479,8 @@ sp<MediaSource> OMXCodec::Create(
         const sp<MetaData> &meta, bool createEncoder,
         const sp<MediaSource> &source,
         const char *matchComponentName,
-        uint32_t flags) {
+        uint32_t flags,
+        const sp<ANativeWindow> &nativeWindow) {
     const char *mime;
     bool success = meta->findCString(kKeyMIMEType, &mime);
     CHECK(success);
@@ -534,7 +536,7 @@ sp<MediaSource> OMXCodec::Create(
             sp<OMXCodec> codec = new OMXCodec(
                     omx, node, quirks,
                     createEncoder, mime, componentName,
-                    source);
+                    source, nativeWindow);
 
             observer->setCodec(codec);
 
@@ -740,6 +742,15 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
         }
 
         mQuirks &= ~kOutputBuffersAreUnreadable;
+    }
+
+    if (!mIsEncoder
+        && !strncasecmp(mMIME, "video/", 6)
+        && !strncmp(mComponentName, "OMX.", 4)) {
+        status_t err = initNativeWindow();
+        if (err != OK) {
+            return err;
+        }
     }
 
     return OK;
@@ -1429,7 +1440,8 @@ OMXCodec::OMXCodec(
         bool isEncoder,
         const char *mime,
         const char *componentName,
-        const sp<MediaSource> &source)
+        const sp<MediaSource> &source,
+        const sp<ANativeWindow> &nativeWindow)
     : mOMX(omx),
       mOMXLivesLocally(omx->livesLocally(getpid())),
       mNode(node),
@@ -1449,7 +1461,8 @@ OMXCodec::OMXCodec(
       mTargetTimeUs(-1),
       mSkipTimeUs(-1),
       mLeftOverBuffer(NULL),
-      mPaused(false) {
+      mPaused(false),
+      mNativeWindow(nativeWindow) {
     mPortStatus[kPortIndexInput] = ENABLED;
     mPortStatus[kPortIndexOutput] = ENABLED;
 
@@ -1593,6 +1606,10 @@ status_t OMXCodec::allocateBuffers() {
 }
 
 status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
+    if (mNativeWindow != 0 && portIndex == kPortIndexOutput) {
+        return allocateOutputBuffersFromNativeWindow();
+    }
+
     OMX_PARAM_PORTDEFINITIONTYPE def;
     InitOMXParams(&def);
     def.nPortIndex = portIndex;
@@ -1685,6 +1702,178 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
     return OK;
 }
 
+status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
+    // Get the number of buffers needed.
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = kPortIndexOutput;
+
+    status_t err = mOMX->getParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    if (err != OK) {
+        return err;
+    }
+
+    // Check that the color format is in the correct range.
+    CHECK(OMX_COLOR_FormatAndroidPrivateStart <= def.format.video.eColorFormat);
+    CHECK(def.format.video.eColorFormat < OMX_COLOR_FormatAndroidPrivateEnd);
+
+    err = native_window_set_buffers_geometry(
+            mNativeWindow.get(),
+            def.format.video.nFrameWidth,
+            def.format.video.nFrameHeight,
+            def.format.video.eColorFormat
+                - OMX_COLOR_FormatAndroidPrivateStart);
+
+    if (err != 0) {
+        LOGE("native_window_set_buffers_geometry failed: %s (%d)",
+                strerror(-err), -err);
+        return err;
+    }
+
+    // Increase the buffer count by one to allow for the ANativeWindow to hold
+    // on to one of the buffers.
+    def.nBufferCountActual++;
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    if (err != OK) {
+        return err;
+    }
+
+    // Set up the native window.
+    // XXX TODO: Get the gralloc usage flags from the OMX plugin!
+    err = native_window_set_usage(
+            mNativeWindow.get(), GRALLOC_USAGE_HW_TEXTURE);
+    if (err != 0) {
+        LOGE("native_window_set_usage failed: %s (%d)", strerror(-err), -err);
+        return err;
+    }
+
+    err = native_window_set_buffer_count(
+            mNativeWindow.get(), def.nBufferCountActual);
+    if (err != 0) {
+        LOGE("native_window_set_buffer_count failed: %s (%d)", strerror(-err),
+                -err);
+        return err;
+    }
+
+    // XXX TODO: Do something so the ANativeWindow knows that we'll need to get
+    // the same set of buffers.
+
+    CODEC_LOGI("allocating %lu buffers from a native window of size %lu on "
+            "output port", def.nBufferCountActual, def.nBufferSize);
+
+    // Dequeue buffers and send them to OMX
+    OMX_U32 i;
+    for (i = 0; i < def.nBufferCountActual; i++) {
+        android_native_buffer_t* buf;
+        err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf);
+        if (err != 0) {
+            LOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
+            break;
+        }
+
+        sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(buf, false));
+        IOMX::buffer_id bufferId;
+        err = mOMX->useGraphicBuffer(mNode, kPortIndexOutput, graphicBuffer,
+                &bufferId);
+        if (err != 0) {
+            break;
+        }
+
+        CODEC_LOGV("registered graphic buffer with ID %p (pointer = %p)",
+                bufferId, graphicBuffer.get());
+
+        BufferInfo info;
+        info.mData = NULL;
+        info.mSize = def.nBufferSize;
+        info.mBuffer = bufferId;
+        info.mOwnedByComponent = false;
+        info.mOwnedByNativeWindow = false;
+        info.mMem = NULL;
+        info.mMediaBuffer = new MediaBuffer(graphicBuffer);
+        info.mMediaBuffer->setObserver(this);
+
+        mPortBuffers[kPortIndexOutput].push(info);
+    }
+
+    OMX_U32 cancelStart;
+    OMX_U32 cancelEnd;
+
+    if (err != 0) {
+        // If an error occurred while dequeuing we need to cancel any buffers
+        // that were dequeued.
+        cancelStart = 0;
+        cancelEnd = i;
+    } else {
+        // Return the last two buffers to the native window.
+        // XXX TODO: The number of buffers the native window owns should probably be
+        // queried from it when we put the native window in fixed buffer pool mode
+        // (which needs to be implemented).  Currently it's hard-coded to 2.
+        cancelStart = def.nBufferCountActual - 2;
+        cancelEnd = def.nBufferCountActual;
+    }
+
+    for (OMX_U32 i = cancelStart; i < cancelEnd; i++) {
+        BufferInfo *info = &mPortBuffers[kPortIndexOutput].editItemAt(i);
+        cancelBufferToNativeWindow(info);
+    }
+
+    return err;
+}
+
+status_t OMXCodec::cancelBufferToNativeWindow(BufferInfo *info) {
+    CHECK(!info->mOwnedByNativeWindow);
+    CODEC_LOGV("Calling cancelBuffer on buffer %p", info->mBuffer);
+    int err = mNativeWindow->cancelBuffer(
+        mNativeWindow.get(), info->mMediaBuffer->graphicBuffer().get());
+    if (err != 0) {
+      CODEC_LOGE("cancelBuffer failed w/ error 0x%08x", err);
+
+      setState(ERROR);
+      return err;
+    }
+    info->mOwnedByNativeWindow = true;
+    return OK;
+}
+
+OMXCodec::BufferInfo* OMXCodec::dequeueBufferFromNativeWindow() {
+    // Dequeue the next buffer from the native window.
+    android_native_buffer_t* buf;
+    int err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf);
+    if (err != 0) {
+      CODEC_LOGE("dequeueBuffer failed w/ error 0x%08x", err);
+
+      setState(ERROR);
+      return 0;
+    }
+
+    // Determine which buffer we just dequeued.
+    Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexOutput];
+    BufferInfo *bufInfo = 0;
+    for (size_t i = 0; i < buffers->size(); i++) {
+      sp<GraphicBuffer> graphicBuffer = buffers->itemAt(i).
+          mMediaBuffer->graphicBuffer();
+      if (graphicBuffer->handle == buf->handle) {
+        bufInfo = &buffers->editItemAt(i);
+        break;
+      }
+    }
+
+    if (bufInfo == 0) {
+        CODEC_LOGE("dequeued unrecognized buffer: %p", buf);
+
+        setState(ERROR);
+        return 0;
+    }
+
+    // The native window no longer owns the buffer.
+    CHECK(bufInfo->mOwnedByNativeWindow);
+    bufInfo->mOwnedByNativeWindow = false;
+
+    return bufInfo;
+}
+
 void OMXCodec::on_message(const omx_message &msg) {
     Mutex::Autolock autoLock(mLock);
 
@@ -1769,6 +1958,15 @@ void OMXCodec::on_message(const omx_message &msg) {
                     mOMX->freeBuffer(mNode, kPortIndexOutput, buffer);
                 CHECK_EQ(err, OK);
 
+                // Cancel the buffer if it belongs to an ANativeWindow.
+                if (info->mMediaBuffer != NULL) {
+                    sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
+                    if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
+                        cancelBufferToNativeWindow(info);
+                        // Ignore any errors
+                    }
+                }
+
                 buffers->removeAt(i);
 #if 0
             } else if (mPortStatus[kPortIndexOutput] == ENABLED
@@ -1797,8 +1995,10 @@ void OMXCodec::on_message(const omx_message &msg) {
                 }
 
                 MediaBuffer *buffer = info->mMediaBuffer;
+                bool isGraphicBuffer = buffer->graphicBuffer() != NULL;
 
-                if (msg.u.extended_buffer_data.range_offset
+                if (!isGraphicBuffer
+                    && msg.u.extended_buffer_data.range_offset
                         + msg.u.extended_buffer_data.range_length
                             > buffer->size()) {
                     CODEC_LOGE(
@@ -1822,7 +2022,7 @@ void OMXCodec::on_message(const omx_message &msg) {
                     buffer->meta_data()->setInt32(kKeyIsCodecConfig, true);
                 }
 
-                if (mQuirks & kOutputBuffersAreUnreadable) {
+                if (isGraphicBuffer || mQuirks & kOutputBuffersAreUnreadable) {
                     buffer->meta_data()->setInt32(kKeyIsUnreadable, true);
                 }
 
@@ -2247,6 +2447,15 @@ status_t OMXCodec::freeBuffersOnPort(
             // Make sure nobody but us owns this buffer at this point.
             CHECK_EQ(info->mMediaBuffer->refcount(), 0);
 
+            // Cancel the buffer if it belongs to an ANativeWindow.
+            sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
+            if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
+                status_t err = cancelBufferToNativeWindow(info);
+                if (err != OK) {
+                  stickyErr = err;
+                }
+            }
+
             info->mMediaBuffer->release();
         }
 
@@ -2321,6 +2530,7 @@ void OMXCodec::enablePortAsync(OMX_U32 portIndex) {
     CHECK_EQ(mPortStatus[portIndex], DISABLED);
     mPortStatus[portIndex] = ENABLING;
 
+    CODEC_LOGV("sending OMX_CommandPortEnable(%ld)", portIndex);
     status_t err =
         mOMX->sendCommand(mNode, OMX_CommandPortEnable, portIndex);
     CHECK_EQ(err, OK);
@@ -2346,7 +2556,10 @@ void OMXCodec::fillOutputBuffers() {
 
     Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexOutput];
     for (size_t i = 0; i < buffers->size(); ++i) {
-        fillOutputBuffer(&buffers->editItemAt(i));
+        BufferInfo *info = &buffers->editItemAt(i);
+        if (!info->mOwnedByNativeWindow) {
+            fillOutputBuffer(&buffers->editItemAt(i));
+        }
     }
 }
 
@@ -2563,7 +2776,23 @@ void OMXCodec::fillOutputBuffer(BufferInfo *info) {
         return;
     }
 
-    CODEC_LOGV("Calling fill_buffer on buffer %p", info->mBuffer);
+    sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
+    if (graphicBuffer != 0) {
+        // When using a native buffer we need to lock the buffer before giving
+        // it to OMX.
+        CHECK(!info->mOwnedByNativeWindow);
+        CODEC_LOGV("Calling lockBuffer on %p", info->mBuffer);
+        int err = mNativeWindow->lockBuffer(mNativeWindow.get(),
+                graphicBuffer.get());
+        if (err != 0) {
+            CODEC_LOGE("lockBuffer failed w/ error 0x%08x", err);
+
+            setState(ERROR);
+            return;
+        }
+    }
+
+    CODEC_LOGV("Calling fillBuffer on buffer %p", info->mBuffer);
     status_t err = mOMX->fillBuffer(mNode, info->mBuffer);
 
     if (err != OK) {
@@ -3146,7 +3375,32 @@ void OMXCodec::signalBufferReturned(MediaBuffer *buffer) {
 
         if (info->mMediaBuffer == buffer) {
             CHECK_EQ(mPortStatus[kPortIndexOutput], ENABLED);
-            fillOutputBuffer(info);
+            if (buffer->graphicBuffer() == 0) {
+                fillOutputBuffer(info);
+            } else {
+                sp<MetaData> metaData = info->mMediaBuffer->meta_data();
+                int32_t rendered = 0;
+                if (!metaData->findInt32(kKeyRendered, &rendered)) {
+                    rendered = 0;
+                }
+                if (!rendered) {
+                    status_t err = cancelBufferToNativeWindow(info);
+                    if (err < 0) {
+                        return;
+                    }
+                } else {
+                    info->mOwnedByNativeWindow = true;
+                }
+
+                // Dequeue the next buffer from the native window.
+                BufferInfo *nextBufInfo = dequeueBufferFromNativeWindow();
+                if (nextBufInfo == 0) {
+                    return;
+                }
+
+                // Give the buffer to the OMX node to fill.
+                fillOutputBuffer(nextBufInfo);
+            }
             return;
         }
     }
@@ -3477,6 +3731,18 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
     }
 
     printf("}\n");
+}
+
+status_t OMXCodec::initNativeWindow() {
+    // Enable use of a GraphicBuffer as the output for this node.  This must
+    // happen before getting the IndexParamPortDefinition parameter because it
+    // will affect the pixel format that the node reports.
+    status_t err = mOMX->enableGraphicBuffers(mNode, kPortIndexOutput, OMX_TRUE);
+    if (err != 0) {
+        return err;
+    }
+
+    return OK;
 }
 
 void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {

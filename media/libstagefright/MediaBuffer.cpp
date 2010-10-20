@@ -25,6 +25,8 @@
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
 
+#include <ui/GraphicBuffer.h>
+
 namespace android {
 
 // XXX make this truly atomic.
@@ -61,6 +63,20 @@ MediaBuffer::MediaBuffer(size_t size)
       mOriginal(NULL) {
 }
 
+MediaBuffer::MediaBuffer(const sp<GraphicBuffer>& graphicBuffer)
+    : mObserver(NULL),
+      mNextBuffer(NULL),
+      mRefCount(0),
+      mData(NULL),
+      mSize(1),
+      mRangeOffset(0),
+      mRangeLength(mSize),
+      mGraphicBuffer(graphicBuffer),
+      mOwnsData(false),
+      mMetaData(new MetaData),
+      mOriginal(NULL) {
+}
+
 void MediaBuffer::release() {
     if (mObserver == NULL) {
         CHECK_EQ(mRefCount, 0);
@@ -92,10 +108,12 @@ void MediaBuffer::add_ref() {
 }
 
 void *MediaBuffer::data() const {
+    CHECK(mGraphicBuffer == NULL);
     return mData;
 }
 
 size_t MediaBuffer::size() const {
+    CHECK(mGraphicBuffer == NULL);
     return mSize;
 }
 
@@ -108,13 +126,17 @@ size_t MediaBuffer::range_length() const {
 }
 
 void MediaBuffer::set_range(size_t offset, size_t length) {
-    if (offset + length > mSize) {
+    if ((mGraphicBuffer == NULL) && (offset + length > mSize)) {
         LOGE("offset = %d, length = %d, mSize = %d", offset, length, mSize);
     }
-    CHECK(offset + length <= mSize);
+    CHECK((mGraphicBuffer != NULL) || (offset + length <= mSize));
 
     mRangeOffset = offset;
     mRangeLength = length;
+}
+
+sp<GraphicBuffer> MediaBuffer::graphicBuffer() const {
+    return mGraphicBuffer;
 }
 
 sp<MetaData> MediaBuffer::meta_data() {
@@ -158,6 +180,8 @@ int MediaBuffer::refcount() const {
 }
 
 MediaBuffer *MediaBuffer::clone() {
+    CHECK_EQ(mGraphicBuffer, NULL);
+
     MediaBuffer *buffer = new MediaBuffer(mData, mSize);
     buffer->set_range(mRangeOffset, mRangeLength);
     buffer->mMetaData = new MetaData(*mMetaData.get());
@@ -169,4 +193,3 @@ MediaBuffer *MediaBuffer::clone() {
 }
 
 }  // namespace android
-

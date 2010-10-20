@@ -99,6 +99,9 @@ enum {
     kKeyValidSamples      = 'valD',  // int32_t
 
     kKeyIsUnreadable      = 'unre',  // bool (int32_t)
+
+    // An indication that a video buffer has been rendered.
+    kKeyRendered          = 'rend',  // bool (int32_t)
 };
 
 enum {
