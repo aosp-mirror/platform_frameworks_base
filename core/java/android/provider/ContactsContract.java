@@ -32,7 +32,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.net.Uri.Builder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -1444,6 +1443,12 @@ public final class ContactsContract {
          * against the cost of transferring large amounts of denormalized data
          * from the Provider.
          * </p>
+         * <p>
+         * To reduce the amount of data duplication the contacts provider and directory
+         * providers implementing this protocol are allowed to provide common Contacts
+         * and RawContacts fields in the first row returned for each raw contact only and
+         * leave them as null in subsequent rows.
+         * </p>
          */
         public static final class Entity implements BaseColumns, ContactsColumns,
                 ContactNameColumns, RawContactsColumns, BaseSyncColumns, SyncColumns, DataColumns,
@@ -1838,7 +1843,8 @@ public final class ContactsContract {
      * constituent data rows in a single database transaction
      * and causes at most one aggregation pass.
      * <pre>
-     * ArrayList&lt;ContentProviderOperation&gt; ops = Lists.newArrayList();
+     * ArrayList&lt;ContentProviderOperation&gt; ops =
+     *          new ArrayList&lt;ContentProviderOperation&gt;();
      * ...
      * int rawContactInsertIndex = ops.size();
      * ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
@@ -2725,7 +2731,9 @@ public final class ContactsContract {
      * <p>
      * The same done using ContentProviderOperations:
      * <pre>
-     * ArrayList&lt;ContentProviderOperation&gt; ops = Lists.newArrayList();
+     * ArrayList&lt;ContentProviderOperation&gt; ops =
+     *          new ArrayList&lt;ContentProviderOperation&gt;();
+     *
      * ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
      *          .withValue(Data.RAW_CONTACT_ID, rawContactId)
      *          .withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
@@ -2742,7 +2750,9 @@ public final class ContactsContract {
      * Just as with insert, update can be done incrementally or as a batch,
      * the batch mode being the preferred method:
      * <pre>
-     * ArrayList&lt;ContentProviderOperation&gt; ops = Lists.newArrayList();
+     * ArrayList&lt;ContentProviderOperation&gt; ops =
+     *          new ArrayList&lt;ContentProviderOperation&gt;();
+     *
      * ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
      *          .withSelection(Data._ID + "=?", new String[]{String.valueOf(dataId)})
      *          .withValue(Email.DATA, "somebody@android.com")
@@ -2757,7 +2767,9 @@ public final class ContactsContract {
      * Just as with insert and update, deletion can be done either using the
      * {@link ContentResolver#delete} method or using a ContentProviderOperation:
      * <pre>
-     * ArrayList&lt;ContentProviderOperation&gt; ops = Lists.newArrayList();
+     * ArrayList&lt;ContentProviderOperation&gt; ops =
+     *          new ArrayList&lt;ContentProviderOperation&gt;();
+     *
      * ops.add(ContentProviderOperation.newDelete(Data.CONTENT_URI)
      *          .withSelection(Data._ID + "=?", new String[]{String.valueOf(dataId)})
      *          .build());
@@ -4050,7 +4062,9 @@ public final class ContactsContract {
          * <p>A data kind representing the contact's nickname. For example, for
          * Bob Parr ("Mr. Incredible"):
          * <pre>
-         * ArrayList&lt;ContentProviderOperation&gt; ops = Lists.newArrayList();
+         * ArrayList&lt;ContentProviderOperation&gt; ops =
+         *          new ArrayList&lt;ContentProviderOperation&gt;();
+         *
          * ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
          *          .withValue(Data.RAW_CONTACT_ID, rawContactId)
          *          .withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
@@ -6645,14 +6659,41 @@ public final class ContactsContract {
 
             /**
              * The extra field that allows the client to supply multiple rows of
-             * arbitrary data for the contact (insert or edit). It is a list of
-             * ContentValues, one per data row. Supplying this extra is
-             * basically equivalent to inserting multiple rows into the
-             * {@link Data} table, except the user gets a chance to see and edit
-             * them before saving. Each ContentValues object must have a value
-             * for {@link Data#MIMETYPE}.
+             * arbitrary data for a single contact created using the {@link Intent#ACTION_INSERT}
+             * or edited using {@link Intent#ACTION_EDIT}. It is an ArrayList of
+             * {@link ContentValues}, one per data row. Supplying this extra is
+             * similar to inserting multiple rows into the {@link Data} table,
+             * except the user gets a chance to see and edit them before saving.
+             * Each ContentValues object must have a value for {@link Data#MIMETYPE}.
+             * If supplied values are not visible in the editor UI, they will be
+             * dropped.  Duplicate data will dropped.  Some fields
+             * like {@link CommonDataKinds.Email#TYPE Email.TYPE} may be automatically
+             * adjusted to comply with the constraints of the specific account type.
+             * For example, an Exchange contact can only have one phone numbers of type Home,
+             * so the contact editor may choose a different type for this phone number to
+             * avoid dropping the valueable part of the row, which is the phone number.
+             * <p>
+             * Example:
+             * <pre>
+             *  ArrayList&lt;ContentValues&gt; data = new ArrayList&lt;ContentValues&gt;();
              *
-             * @hide
+             *  ContentValues row1 = new ContentValues();
+             *  row1.put(Data.MIMETYPE, Organization.CONTENT_ITEM_TYPE);
+             *  row1.put(Organization.COMPANY, "Android");
+             *  data.add(row1);
+             *
+             *  ContentValues row2 = new ContentValues();
+             *  row2.put(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE);
+             *  row2.put(Email.TYPE, Email.TYPE_CUSTOM);
+             *  row2.put(Email.LABEL, "Green Bot");
+             *  row2.put(Email.ADDRESS, "android@android.com");
+             *  data.add(row2);
+             *
+             *  Intent intent = new Intent(Intent.ACTION_INSERT, Contacts.CONTENT_URI);
+             *  intent.putParcelableArrayListExtra(Insert.DATA, data);
+             *
+             *  startActivity(intent);
+             * </pre>
              */
             public static final String DATA = "data";
         }
