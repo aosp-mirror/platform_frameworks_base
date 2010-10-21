@@ -946,14 +946,12 @@ int linklib(const char* dataDir, const char* asecLibDir)
     const size_t libdirLen = strlen(dataDir) + strlen(PKG_LIB_POSTFIX);
     if (libdirLen >= PKG_PATH_MAX) {
         LOGE("library dir len too large");
-        rc = -1;
-        goto out;
+        return -1;
     }
 
     if (snprintf(libdir, sizeof(libdir), "%s%s", dataDir, PKG_LIB_POSTFIX) != (ssize_t)libdirLen) {
         LOGE("library dir not written successfully: %s\n", strerror(errno));
-        rc = -1;
-        goto out;
+        return -1;
     }
 
     if (stat(dataDir, &s) < 0) return -1;
