@@ -152,7 +152,7 @@ public class ListPopupWindow {
      * @param context Context used for contained views.
      */
     public ListPopupWindow(Context context) {
-        this(context, null, 0, 0);
+        this(context, null, com.android.internal.R.attr.listPopupWindowStyle, 0);
     }
 
     /**
