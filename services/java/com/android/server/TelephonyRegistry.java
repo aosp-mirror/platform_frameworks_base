@@ -366,7 +366,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         Slog.i(TAG, "notifyDataConnection: state=" + state + " isDataConnectivityPossible="
                 + isDataConnectivityPossible + " reason=" + reason
-                + " interfaceName=" + interfaceName + " networkType=" + networkType);
+                + " apn=" + apn + " networkType=" + networkType);
         synchronized (mRecords) {
             boolean modified = false;
             if (state == TelephonyManager.DATA_CONNECTED) {
