@@ -50,7 +50,7 @@ abstract class SipConnectionBase extends Connection {
      * calculating deltas.
      */
     private long connectTimeReal;
-    private long duration;
+    private long duration = -1L;
     private long holdingStartTime;  // The time when the Connection last transitioned
                             // into HOLDING
 
@@ -75,7 +75,7 @@ abstract class SipConnectionBase extends Connection {
                 }
                 break;
             case DISCONNECTED:
-                duration = SystemClock.elapsedRealtime() - connectTimeReal;
+                duration = getDurationMillis();
                 disconnectTime = System.currentTimeMillis();
                 break;
             case HOLDING:
@@ -103,7 +103,7 @@ abstract class SipConnectionBase extends Connection {
     public long getDurationMillis() {
         if (connectTimeReal == 0) {
             return 0;
-        } else if (duration == 0) {
+        } else if (duration < 0) {
             return SystemClock.elapsedRealtime() - connectTimeReal;
         } else {
             return duration;
