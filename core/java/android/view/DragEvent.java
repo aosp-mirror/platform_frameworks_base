@@ -53,6 +53,14 @@ public class DragEvent implements Parcelable {
     private DragEvent() {
     }
 
+    private void init(int action, float x, float y, ClipDescription description, ClipData data) {
+        mAction = action;
+        mX = x;
+        mY = y;
+        mClipDescription = description;
+        mClipData = data;
+    }
+
     static DragEvent obtain() {
         return DragEvent.obtain(0, 0f, 0f, null, null);
     }
@@ -62,7 +70,9 @@ public class DragEvent implements Parcelable {
         final DragEvent ev;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
-                return new DragEvent();
+                ev = new DragEvent();
+                ev.init(action, x, y, description, data);
+                return ev;
             }
             ev = gRecyclerTop;
             gRecyclerTop = ev.mNext;
@@ -72,11 +82,7 @@ public class DragEvent implements Parcelable {
         ev.mRecycled = false;
         ev.mNext = null;
 
-        ev.mAction = action;
-        ev.mX = x;
-        ev.mY = y;
-        ev.mClipDescription = description;
-        ev.mClipData = data;
+        ev.init(action, x, y, description, data);
 
         return ev;
     }
