@@ -717,7 +717,6 @@ public class SipPhone extends SipPhoneBase {
             setState(Call.State.DIALING);
             mSipAudioCall = mSipManager.makeAudioCall(mProfile, mPeer, null,
                     TIMEOUT_MAKE_CALL);
-            mSipAudioCall.setRingbackToneEnabled(false);
             mSipAudioCall.setListener(mAdapter);
         }
 
