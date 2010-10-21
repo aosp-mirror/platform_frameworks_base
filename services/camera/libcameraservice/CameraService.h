@@ -108,6 +108,8 @@ private:
                                        const sp<ICameraClient>& cameraClient,
                                        const sp<CameraHardwareInterface>& hardware,
                                        int cameraId,
+                                       int cameraFacing,
+                                       int mCameraOrientation,
                                        int clientPid);
                                 ~Client();
 
@@ -153,10 +155,14 @@ private:
                                     const sp<IMemoryHeap>& heap,
                                     size_t offset, size_t size);
 
+        int                     getOrientation(int orientation, bool mirror);
+
         // these are initialized in the constructor.
         sp<CameraService>               mCameraService;  // immutable after constructor
         sp<ICameraClient>               mCameraClient;
         int                             mCameraId;       // immutable after constructor
+        int                             mCameraFacing;   // immutable after constructor
+        int                             mCameraOrientation;  // immutable after constructor
         pid_t                           mClientPid;
         sp<CameraHardwareInterface>     mHardware;       // cleared after disconnect()
         bool                            mUseOverlay;     // immutable after constructor
