@@ -996,8 +996,8 @@ static config_pair_t const config_4_attribute_list[] = {
         { EGL_GREEN_SIZE,       8 },
         { EGL_RED_SIZE,         8 },
         { EGL_DEPTH_SIZE,       0 },
-        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_RGBA_8888 },
         { EGL_CONFIG_ID,        2 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_RGBA_8888 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
@@ -1033,8 +1033,8 @@ static config_pair_t const config_7_attribute_list[] = {
         { EGL_GREEN_SIZE,       0 },
         { EGL_RED_SIZE,         0 },
         { EGL_DEPTH_SIZE,      16 },
-        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_A_8 },
         { EGL_CONFIG_ID,        5 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_A_8 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
