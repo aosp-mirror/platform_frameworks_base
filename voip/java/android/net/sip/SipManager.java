@@ -50,6 +50,9 @@ import java.text.ParseException;
  * </ul>
  * {@code SipManager} can only be instantiated if SIP API is supported by the
  * device. (See {@link #isApiSupported}).
+ * <p>Requires permissions to use this class:
+ *   {@link android.Manifest.permission#INTERNET} and
+ *   {@link android.Manifest.permission#USE_SIP}.
  */
 public class SipManager {
     /**

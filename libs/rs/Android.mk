@@ -102,6 +102,9 @@ LOCAL_SRC_FILES:= \
 	rsType.cpp \
 	rsVertexArray.cpp
 
+ifeq ($(TARGET_BOARD_PLATFORM), s5pc110)
+	LOCAL_CFLAGS += -DHAS_CONTEXT_PRIORITY
+endif
 
 LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libacc
 LOCAL_LDLIBS := -lpthread -ldl
