@@ -154,6 +154,11 @@ class FastScroller {
         int textColorNormal = textColor.getDefaultColor();
         mPaint.setColor(textColorNormal);
         mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        // to show mOverlayDrawable properly
+        if (mList.getWidth() > 0 && mList.getHeight() > 0) {
+            onSizeChanged(mList.getWidth(), mList.getHeight(), 0, 0);
+        }
         
         mState = STATE_NONE;
     }
