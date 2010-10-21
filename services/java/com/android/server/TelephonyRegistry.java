@@ -357,7 +357,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyDataActivity()" )) {
             return;
         }
-        handleRemoveListLocked();
         synchronized (mRecords) {
             mDataActivity = state;
             for (Record r : mRecords) {
