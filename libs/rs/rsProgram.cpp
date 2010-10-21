@@ -31,8 +31,6 @@ using namespace android::renderscript;
 
 Program::Program(Context *rsc) : ObjectBase(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mDirty = true;
     mShaderID = 0;
     mAttribCount = 0;
@@ -55,8 +53,6 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
                  const uint32_t * params, uint32_t paramLength) :
     ObjectBase(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mDirty = true;
     mShaderID = 0;
     mAttribCount = 0;

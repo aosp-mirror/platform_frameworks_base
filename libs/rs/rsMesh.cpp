@@ -33,8 +33,6 @@ using namespace android::renderscript;
 
 Mesh::Mesh(Context *rsc) : ObjectBase(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mPrimitives = NULL;
     mPrimitivesCount = 0;
     mVertexBuffers = NULL;

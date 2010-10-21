@@ -33,8 +33,6 @@ using namespace android::renderscript;
 ProgramStore::ProgramStore(Context *rsc) :
     Program(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mDitherEnable = true;
     mBlendEnable = false;
     mColorRWriteEnable = true;
@@ -236,8 +234,8 @@ ProgramStoreState::ProgramStoreState()
 
 ProgramStoreState::~ProgramStoreState()
 {
-    delete mPFS;
-
+    ObjectBase::checkDelete(mPFS);
+    mPFS = NULL;
 }
 
 void ProgramStoreState::init(Context *rsc)
@@ -258,9 +256,8 @@ namespace renderscript {
 
 void rsi_ProgramStoreBegin(Context * rsc, RsElement in, RsElement out)
 {
-    delete rsc->mStateFragmentStore.mPFS;
+    ObjectBase::checkDelete(rsc->mStateFragmentStore.mPFS);
     rsc->mStateFragmentStore.mPFS = new ProgramStore(rsc);
-
 }
 
 void rsi_ProgramStoreDepthFunc(Context *rsc, RsDepthFunc func)

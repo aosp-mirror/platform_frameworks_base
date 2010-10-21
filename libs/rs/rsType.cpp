@@ -27,8 +27,6 @@ using namespace android::renderscript;
 
 Type::Type(Context *rsc) : ObjectBase(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mLODs = 0;
     mLODCount = 0;
     mAttribs = NULL;
@@ -36,7 +34,7 @@ Type::Type(Context *rsc) : ObjectBase(rsc)
     clear();
 }
 
-Type::~Type()
+void Type::preDestroy()
 {
     for (uint32_t ct = 0; ct < mRSC->mStateType.mTypes.size(); ct++) {
         if (mRSC->mStateType.mTypes[ct] == this) {
@@ -44,6 +42,10 @@ Type::~Type()
             break;
         }
     }
+}
+
+Type::~Type()
+{
     if (mLODs) {
         delete [] mLODs;
         mLODs = NULL;
@@ -401,7 +403,7 @@ void rsi_TypeGetNativeData(Context *rsc, RsType type, uint32_t *typeData, uint32
 }
 }
 
-void * rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
+RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
                      const RsDimension *dims, const uint32_t *vals)
 {
     Context *rsc = static_cast<Context *>(con);
@@ -428,7 +430,7 @@ void * rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
         }
     }
 
-    ObjectBase::lockUserRef();
+    ObjectBase::asyncLock();
     for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
         Type *t = stc->mTypes[ct];
         if (t->getElement() != e) continue;
@@ -437,11 +439,11 @@ void * rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
         if (t->getDimZ() != dimZ) continue;
         if (t->getDimLOD() != dimLOD) continue;
         if (t->getDimFaces() != dimFaces) continue;
-        t->prelockedIncUserRef();
-        ObjectBase::unlockUserRef();
+        t->incUserRef();
+        ObjectBase::asyncUnlock();
         return t;
     }
-    ObjectBase::unlockUserRef();
+    ObjectBase::asyncUnlock();
 
     Type * st = new Type(rsc);
     st->incUserRef();
@@ -453,9 +455,9 @@ void * rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
     st->setDimFaces(dimFaces);
     st->compute();
 
-    ObjectBase::lockUserRef();
+    ObjectBase::asyncLock();
     stc->mTypes.push(st);
-    ObjectBase::unlockUserRef();
+    ObjectBase::asyncUnlock();
     return st;
 }
 

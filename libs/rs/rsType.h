@@ -124,6 +124,9 @@ protected:
     bool isValidGLComponent(uint32_t fieldIdx);
     void makeGLComponents();
 
+protected:
+    virtual void preDestroy();
+
 private:
     Type(const Type &);
 };

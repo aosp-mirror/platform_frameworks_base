@@ -27,15 +27,11 @@ using namespace android::renderscript;
 
 Adapter1D::Adapter1D(Context *rsc) : ObjectBase(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     reset();
 }
 
 Adapter1D::Adapter1D(Context *rsc, Allocation *a) : ObjectBase(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     reset();
     setAllocation(a);
 }
@@ -76,7 +72,7 @@ void Adapter1D::data(const void *data)
 
 void Adapter1D::serialize(OStream *stream) const
 {
-    
+
 }
 
 Adapter1D *Adapter1D::createFromStream(Context *rsc, IStream *stream)
@@ -145,15 +141,11 @@ void rsi_Adapter1DData(Context *rsc, RsAdapter1D va, const void *data)
 
 Adapter2D::Adapter2D(Context *rsc) : ObjectBase(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     reset();
 }
 
 Adapter2D::Adapter2D(Context *rsc, Allocation *a) : ObjectBase(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     reset();
     setAllocation(a);
 }
@@ -200,7 +192,7 @@ void Adapter2D::data(const void *data)
 
 void Adapter2D::serialize(OStream *stream) const
 {
-    
+
 }
 
 Adapter2D *Adapter2D::createFromStream(Context *rsc, IStream *stream)

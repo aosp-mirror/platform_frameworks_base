@@ -36,8 +36,6 @@ ProgramRaster::ProgramRaster(Context *rsc,
                              bool pointSprite) :
     Program(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mPointSmooth = pointSmooth;
     mLineSmooth = lineSmooth;
     mPointSprite = pointSprite;

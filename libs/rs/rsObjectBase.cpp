@@ -22,6 +22,7 @@
 #include "rsContextHostStub.h"
 #endif
 
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -34,101 +35,119 @@ ObjectBase::ObjectBase(Context *rsc)
     mRSC = rsc;
     mNext = NULL;
     mPrev = NULL;
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
+
+#if RS_OBJECT_DEBUG
+    mStack.update(2);
+#endif
 
     rsAssert(rsc);
     add();
+    //LOGV("ObjectBase %p con", this);
 }
 
 ObjectBase::~ObjectBase()
 {
     //LOGV("~ObjectBase %p  ref %i,%i", this, mUserRefCount, mSysRefCount);
+#if RS_OBJECT_DEBUG
+    mStack.dump();
+#endif
+
+    if(mPrev || mNext) {
+        // While the normal practice is to call remove before we call
+        // delete.  Its possible for objects without a re-use list
+        // for avoiding duplication to be created on the stack.  In those
+        // cases we need to remove ourself here.
+        asyncLock();
+        remove();
+        asyncUnlock();
+    }
+
     rsAssert(!mUserRefCount);
     rsAssert(!mSysRefCount);
-    remove();
 }
 
 void ObjectBase::dumpLOGV(const char *op) const
 {
     if (mName.size()) {
-        LOGV("%s RSobj %p, name %s, refs %i,%i  from %s,%i links %p,%p,%p",
-             op, this, mName.string(), mUserRefCount, mSysRefCount, mAllocFile, mAllocLine, mNext, mPrev, mRSC);
+        LOGV("%s RSobj %p, name %s, refs %i,%i  links %p,%p,%p",
+             op, this, mName.string(), mUserRefCount, mSysRefCount, mNext, mPrev, mRSC);
     } else {
-        LOGV("%s RSobj %p, no-name, refs %i,%i  from %s,%i links %p,%p,%p",
-             op, this, mUserRefCount, mSysRefCount, mAllocFile, mAllocLine, mNext, mPrev, mRSC);
+        LOGV("%s RSobj %p, no-name, refs %i,%i  links %p,%p,%p",
+             op, this, mUserRefCount, mSysRefCount, mNext, mPrev, mRSC);
     }
 }
 
 void ObjectBase::incUserRef() const
 {
-    lockUserRef();
-    mUserRefCount++;
-    unlockUserRef();
-    //LOGV("ObjectBase %p inc ref %i", this, mUserRefCount);
-}
-
-void ObjectBase::prelockedIncUserRef() const
-{
-    mUserRefCount++;
+    android_atomic_inc(&mUserRefCount);
+    //LOGV("ObjectBase %p incU ref %i, %i", this, mUserRefCount, mSysRefCount);
 }
 
 void ObjectBase::incSysRef() const
 {
-    mSysRefCount ++;
-    //LOGV("ObjectBase %p inc ref %i", this, mSysRefCount);
+    android_atomic_inc(&mSysRefCount);
+    //LOGV("ObjectBase %p incS ref %i, %i", this, mUserRefCount, mSysRefCount);
 }
 
-bool ObjectBase::checkDelete() const
+void ObjectBase::preDestroy() const
 {
-    if (!(mSysRefCount | mUserRefCount)) {
-        lockUserRef();
+}
 
-        // Recheck the user ref count since it can be incremented from other threads.
-        if (mUserRefCount) {
-            unlockUserRef();
-            return false;
-        }
+bool ObjectBase::checkDelete(const ObjectBase *ref)
+{
+    if (!ref) {
+        return false;
+    }
 
-        if (mRSC && mRSC->props.mLogObjects) {
-            dumpLOGV("checkDelete");
-        }
-        unlockUserRef();
-        delete this;
-        return true;
+    asyncLock();
+    // This lock protects us against the non-RS threads changing
+    // the ref counts.  At this point we should be the only thread
+    // working on them.
+    if (ref->mUserRefCount || ref->mSysRefCount) {
+        asyncUnlock();
+        return false;
+    }
+
+    ref->remove();
+    // At this point we can unlock because there should be no possible way
+    // for another thread to reference this object.
+    ref->preDestroy();
+    asyncUnlock();
+    delete ref;
+    return true;
+}
+
+
+bool ObjectBase::decUserRef() const
+{
+    //LOGV("ObjectBase %p decU ref %i, %i", this, mUserRefCount, mSysRefCount);
+    rsAssert(mUserRefCount > 0);
+    if ((android_atomic_dec(&mUserRefCount) <= 1) &&
+        (android_atomic_acquire_load(&mSysRefCount) <= 0)) {
+        return checkDelete(this);
     }
     return false;
 }
 
-bool ObjectBase::decUserRef() const
-{
-    lockUserRef();
-    rsAssert(mUserRefCount > 0);
-    //dumpLOGV("decUserRef");
-    mUserRefCount--;
-    unlockUserRef();
-    bool ret = checkDelete();
-    return ret;
-}
-
 bool ObjectBase::zeroUserRef() const
 {
-    lockUserRef();
-    // This can only happen during cleanup and is therefore
-    // thread safe.
-    mUserRefCount = 0;
-    //dumpLOGV("zeroUserRef");
-    unlockUserRef();
-    bool ret = checkDelete();
-    return ret;
+    //LOGV("ObjectBase %p zeroU ref %i, %i", this, mUserRefCount, mSysRefCount);
+    android_atomic_acquire_store(0, &mUserRefCount);
+    if (android_atomic_acquire_load(&mSysRefCount) <= 0) {
+        return checkDelete(this);
+    }
+    return false;
 }
 
 bool ObjectBase::decSysRef() const
 {
+    //LOGV("ObjectBase %p decS ref %i, %i", this, mUserRefCount, mSysRefCount);
     rsAssert(mSysRefCount > 0);
-    mSysRefCount --;
-    //dumpLOGV("decSysRef");
-    return checkDelete();
+    if ((android_atomic_dec(&mSysRefCount) <= 1) &&
+        (android_atomic_acquire_load(&mUserRefCount) <= 0)) {
+        return checkDelete(this);
+    }
+    return false;
 }
 
 void ObjectBase::setName(const char *name)
@@ -141,19 +160,19 @@ void ObjectBase::setName(const char *name, uint32_t len)
     mName.setTo(name, len);
 }
 
-void ObjectBase::lockUserRef()
+void ObjectBase::asyncLock()
 {
     pthread_mutex_lock(&gObjectInitMutex);
 }
 
-void ObjectBase::unlockUserRef()
+void ObjectBase::asyncUnlock()
 {
     pthread_mutex_unlock(&gObjectInitMutex);
 }
 
 void ObjectBase::add() const
 {
-    pthread_mutex_lock(&gObjectInitMutex);
+    asyncLock();
 
     rsAssert(!mNext);
     rsAssert(!mPrev);
@@ -164,12 +183,11 @@ void ObjectBase::add() const
     }
     mRSC->mObjHead = this;
 
-    pthread_mutex_unlock(&gObjectInitMutex);
+    asyncUnlock();
 }
 
 void ObjectBase::remove() const
 {
-    lockUserRef();
     //LOGV("calling remove  rsc %p", mRSC);
     if (!mRSC) {
         rsAssert(!mPrev);
@@ -188,7 +206,6 @@ void ObjectBase::remove() const
     }
     mPrev = NULL;
     mNext = NULL;
-    unlockUserRef();
 }
 
 void ObjectBase::zeroAllUserRef(Context *rsc)
@@ -219,7 +236,7 @@ void ObjectBase::zeroAllUserRef(Context *rsc)
 
 void ObjectBase::dumpAll(Context *rsc)
 {
-    lockUserRef();
+    asyncLock();
 
     LOGV("Dumping all objects");
     const ObjectBase * o = rsc->mObjHead;
@@ -229,22 +246,22 @@ void ObjectBase::dumpAll(Context *rsc)
         o = o->mNext;
     }
 
-    unlockUserRef();
+    asyncUnlock();
 }
 
 bool ObjectBase::isValid(const Context *rsc, const ObjectBase *obj)
 {
-    lockUserRef();
+    asyncLock();
 
     const ObjectBase * o = rsc->mObjHead;
     while (o) {
         if (o == obj) {
-            unlockUserRef();
+            asyncUnlock();
             return true;
         }
         o = o->mNext;
     }
-    unlockUserRef();
+    asyncUnlock();
     return false;
 }
 

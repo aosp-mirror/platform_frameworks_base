@@ -30,8 +30,6 @@ using namespace android::renderscript;
 Element::Element(Context *rsc) : ObjectBase(rsc)
 {
     mBits = 0;
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mFields = NULL;
     mFieldCount = 0;
     mHasReference = false;
@@ -140,7 +138,7 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
     for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
         Element *ee = rsc->mStateElement.mElements[ct];
         if(ee->isEqual(elem)) {
-            delete elem;
+            ObjectBase::checkDelete(elem);
             ee->incUserRef();
             return ee;
         }
