@@ -162,6 +162,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private final HashMap<BluetoothDevice, Pair<Integer, String>> mPanDevices;
     private final HashMap<String, Pair<byte[], byte[]>> mDeviceOobData;
 
+    private int mProfilesConnected = 0, mProfilesConnecting = 0, mProfilesDisconnecting = 0;
 
     private static String mDockAddress;
     private String mDockPin;
@@ -410,6 +411,10 @@ public class BluetoothService extends IBluetooth.Stub {
         mIsDiscovering = false;
         mAdapterProperties.clear();
         mServiceRecordToPid.clear();
+
+        mProfilesConnected = 0;
+        mProfilesConnecting = 0;
+        mProfilesDisconnecting = 0;
 
         if (saveSetting) {
             persistBluetoothOnSetting(false);
@@ -1563,6 +1568,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         if (DBG) log("Pan Device state : device: " + device + " State:" + prevState + "->" + state);
+        sendConnectionStateChange(device, state, prevState);
     }
 
     /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
@@ -1790,7 +1796,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         if (DBG) log("InputDevice state : device: " + device + " State:" + prevState + "->" + state);
-
+        sendConnectionStateChange(device, state, prevState);
     }
 
     /*package*/ void handleInputDevicePropertyChange(String address, boolean connected) {
@@ -2729,6 +2735,75 @@ public class BluetoothService extends IBluetooth.Stub {
         } else if (profile == BluetoothProfileState.A2DP) {
             mA2dpProfileState.sendMessage(msg);
         }
+    }
+
+    public synchronized void sendConnectionStateChange(BluetoothDevice device, int state,
+                                                        int prevState) {
+        if (updateCountersAndCheckForConnectionStateChange(device, state, prevState)) {
+            state = getAdapterConnectionState(state);
+            prevState = getAdapterConnectionState(prevState);
+            Intent intent = new Intent(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+            intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
+            intent.putExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, state);
+            intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_CONNECTION_STATE, prevState);
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+            log("CONNECTION_STATE_CHANGE: " + device + ": " + prevState + "-> " + state);
+        }
+    }
+
+    private int getAdapterConnectionState(int state) {
+        switch (state) {
+            case BluetoothProfile.STATE_CONNECTING:
+                return BluetoothAdapter.STATE_CONNECTING;
+            case BluetoothProfile.STATE_CONNECTED:
+              return BluetoothAdapter.STATE_CONNECTED;
+            case BluetoothProfile.STATE_DISCONNECTING:
+              return BluetoothAdapter.STATE_DISCONNECTING;
+            case BluetoothProfile.STATE_DISCONNECTED:
+              return BluetoothAdapter.STATE_DISCONNECTED;
+            default:
+              Log.e(TAG, "Error in getAdapterConnectionState");
+              return -1;
+        }
+    }
+
+    private boolean updateCountersAndCheckForConnectionStateChange(BluetoothDevice device,
+                                                                   int state,
+                                                                   int prevState) {
+        switch (state) {
+            case BluetoothProfile.STATE_CONNECTING:
+                mProfilesConnecting++;
+                if (prevState == BluetoothAdapter.STATE_DISCONNECTING) mProfilesDisconnecting--;
+                if (mProfilesConnected > 0 || mProfilesConnecting > 1) return false;
+
+                break;
+            case BluetoothProfile.STATE_CONNECTED:
+                if (prevState == BluetoothAdapter.STATE_CONNECTING) mProfilesConnecting--;
+                if (prevState == BluetoothAdapter.STATE_DISCONNECTING) mProfilesDisconnecting--;
+
+                mProfilesConnected++;
+
+                if (mProfilesConnected > 1) return false;
+                break;
+            case BluetoothProfile.STATE_DISCONNECTING:
+                mProfilesDisconnecting++;
+                mProfilesConnected--;
+
+                if (mProfilesConnected > 0 || mProfilesDisconnecting > 1) return false;
+
+                break;
+            case BluetoothProfile.STATE_DISCONNECTED:
+                if (prevState == BluetoothAdapter.STATE_CONNECTING) mProfilesConnecting--;
+                if (prevState == BluetoothAdapter.STATE_DISCONNECTING) mProfilesDisconnecting--;
+
+                if (prevState == BluetoothAdapter.STATE_CONNECTED) {
+                    mProfilesConnected--;
+                }
+
+                if (mProfilesConnected  > 0 || mProfilesConnecting > 0) return false;
+                break;
+        }
+        return true;
     }
 
     private static void log(String msg) {
