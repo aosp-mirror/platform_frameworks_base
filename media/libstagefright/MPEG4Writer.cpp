@@ -309,11 +309,10 @@ int64_t MPEG4Writer::estimateMoovBoxSize(int32_t bitRate) {
     //
     // Statistical analysis shows that metadata usually accounts
     // for a small portion of the total file size, usually < 0.6%.
-    // Currently, lets set to 0.4% for now.
 
-    // The default MIN_MOOV_BOX_SIZE is set to 0.4% x 1MB,
+    // The default MIN_MOOV_BOX_SIZE is set to 0.6% x 1MB / 2,
     // where 1MB is the common file size limit for MMS application.
-    // The default MAX _MOOV_BOX_SIZE value is based on about 4
+    // The default MAX _MOOV_BOX_SIZE value is based on about 3
     // minute video recording with a bit rate about 3 Mbps, because
     // statistics also show that most of the video captured are going
     // to be less than 3 minutes.
@@ -321,20 +320,33 @@ int64_t MPEG4Writer::estimateMoovBoxSize(int32_t bitRate) {
     // If the estimation is wrong, we will pay the price of wasting
     // some reserved space. This should not happen so often statistically.
     static const int32_t factor = mUse32BitOffset? 1: 2;
-    static const int64_t MIN_MOOV_BOX_SIZE = 4 * 1024;  // 4 KB
+    static const int64_t MIN_MOOV_BOX_SIZE = 3 * 1024;  // 3 KB
     static const int64_t MAX_MOOV_BOX_SIZE = (180 * 3000000 * 6LL / 8000);
     int64_t size = MIN_MOOV_BOX_SIZE;
 
+    // Max file size limit is set
     if (mMaxFileSizeLimitBytes != 0 && mIsFileSizeLimitExplicitlyRequested) {
-        size = mMaxFileSizeLimitBytes * 4 / 1000;
-    } else if (mMaxFileDurationLimitUs != 0) {
-        if (bitRate <= 0) {
-            // We could not estimate the file size since bitRate is not set.
-            size = MIN_MOOV_BOX_SIZE;
-        } else {
-            size = ((mMaxFileDurationLimitUs * bitRate * 4) / 1000 / 8000000);
+        size = mMaxFileSizeLimitBytes * 6 / 1000;
+    }
+
+    // Max file duration limit is set
+    if (mMaxFileDurationLimitUs != 0) {
+        if (bitRate > 0) {
+            int64_t size2 =
+                ((mMaxFileDurationLimitUs * bitRate * 6) / 1000 / 8000000);
+            if (mMaxFileSizeLimitBytes != 0 && mIsFileSizeLimitExplicitlyRequested) {
+                // When both file size and duration limits are set,
+                // we use the smaller limit of the two.
+                if (size > size2) {
+                    size = size2;
+                }
+            } else {
+                // Only max file duration limit is set
+                size = size2;
+            }
         }
     }
+
     if (size < MIN_MOOV_BOX_SIZE) {
         size = MIN_MOOV_BOX_SIZE;
     }
@@ -787,6 +799,10 @@ void MPEG4Writer::write(const void *data, size_t size) {
     write(data, 1, size, mFile);
 }
 
+bool MPEG4Writer::isFileStreamable() const {
+    return mStreamableFile;
+}
+
 bool MPEG4Writer::exceedsFileSizeLimit() {
     // No limit
     if (mMaxFileSizeLimitBytes == 0) {
@@ -799,7 +815,7 @@ bool MPEG4Writer::exceedsFileSizeLimit() {
         nTotalBytesEstimate += (*it)->getEstimatedTrackSizeBytes();
     }
 
-    return (nTotalBytesEstimate  + 1024 >= mMaxFileSizeLimitBytes);
+    return (nTotalBytesEstimate >= mMaxFileSizeLimitBytes);
 }
 
 bool MPEG4Writer::exceedsFileDurationLimit() {
@@ -887,12 +903,16 @@ void MPEG4Writer::Track::updateTrackSizeEstimate() {
 
     int64_t stszBoxSizeBytes = mSamplesHaveSameSize? 4: (mNumSamples * 4);
 
-    mEstimatedTrackSizeBytes = mMdatSizeBytes +             // media data size
-                               mNumStscTableEntries * 12 +  // stsc box size
-                               mNumStssTableEntries * 4 +   // stss box size
-                               mNumSttsTableEntries * 8 +   // stts box size
-                               stcoBoxSizeBytes +           // stco box size
-                               stszBoxSizeBytes;            // stsz box size
+    mEstimatedTrackSizeBytes = mMdatSizeBytes;  // media data size
+    if (!mOwner->isFileStreamable()) {
+        // Reserved free space is not large enough to hold
+        // all meta data and thus wasted.
+        mEstimatedTrackSizeBytes += mNumStscTableEntries * 12 +  // stsc box size
+                                    mNumStssTableEntries * 4 +   // stss box size
+                                    mNumSttsTableEntries * 8 +   // stts box size
+                                    stcoBoxSizeBytes +           // stco box size
+                                    stszBoxSizeBytes;            // stsz box size
+    }
 }
 
 void MPEG4Writer::Track::addOneStscTableEntry(
