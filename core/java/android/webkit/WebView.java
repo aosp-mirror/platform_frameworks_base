@@ -3966,7 +3966,9 @@ public class WebView extends AbsoluteLayout
                 imm.restartInput(mWebTextView);
             }
         }
-        mWebTextView.requestFocus();
+        if (isFocused()) {
+            mWebTextView.requestFocus();
+        }
     }
 
     /**
