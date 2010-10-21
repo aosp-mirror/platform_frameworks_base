@@ -41,6 +41,16 @@ import java.util.Map;
  * facilitates instantiating a {@code SipAudioCall} object for making/receiving
  * calls. See {@link SipManager#makeAudioCall} and
  * {@link SipManager#takeAudioCall}.
+ *
+ * <p>Requires permissions to use this class:
+ *   {@link android.Manifest.permission#INTERNET} and
+ *   {@link android.Manifest.permission#USE_SIP}.
+ * <br/>Requires permissions to {@link #startAudio}:
+ *   {@link android.Manifest.permission#RECORD_AUDIO},
+ *   {@link android.Manifest.permission#ACCESS_WIFI_STATE} and
+ *   {@link android.Manifest.permission#WAKE_LOCK}.
+ * <br/>Requires permissions to {@link #setSpeakerMode}:
+ *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
  */
 public class SipAudioCall {
     private static final String TAG = SipAudioCall.class.getSimpleName();
@@ -776,7 +786,11 @@ public class SipAudioCall {
         }
     }
 
-    /** Puts the device to speaker mode. */
+    /**
+     * Puts the device to speaker mode.
+     * <p>Requires permission:
+     *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
+     */
     public void setSpeakerMode(boolean speakerMode) {
         synchronized (this) {
             ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
@@ -876,6 +890,10 @@ public class SipAudioCall {
     /**
      * Starts the audio for the established call. This method should be called
      * after {@link Listener#onCallEstablished} is called.
+     * <p>Requires permission:
+     *   {@link android.Manifest.permission#RECORD_AUDIO},
+     *   {@link android.Manifest.permission#ACCESS_WIFI_STATE} and
+     *   {@link android.Manifest.permission#WAKE_LOCK}.
      */
     public void startAudio() {
         try {
