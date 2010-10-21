@@ -23,6 +23,10 @@ LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 ifeq ($(TARGET_BOARD_PLATFORM), omap3)
 	LOCAL_CFLAGS += -DNO_RGBX_8888
 endif
+ifeq ($(TARGET_BOARD_PLATFORM), s5pc110)
+	LOCAL_CFLAGS += -DHAS_CONTEXT_PRIORITY
+endif
+
 
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)
