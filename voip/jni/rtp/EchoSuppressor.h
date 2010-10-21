@@ -23,11 +23,12 @@ class EchoSuppressor
 {
 public:
     // The sampleCount must be power of 2.
-    EchoSuppressor(int sampleRate, int sampleCount, int tailLength);
+    EchoSuppressor(int sampleCount, int tailLength);
     ~EchoSuppressor();
     void run(int16_t *playbacked, int16_t *recorded);
 
 private:
+    int mShift;
     int mScale;
     int mSampleCount;
     int mWindowSize;
@@ -35,17 +36,23 @@ private:
     int mRecordLength;
     int mRecordOffset;
 
-    float *mXs;
-    float *mXYs;
-    float *mXXs;
-    float mYY;
+    uint16_t *mXs;
+    uint32_t *mXSums;
+    uint32_t *mX2Sums;
+    uint16_t *mXRecords;
 
-    float *mXYRecords;
-    float *mXXRecords;
-    float *mYYRecords;
+    uint32_t mYSum;
+    uint32_t mY2Sum;
+    uint32_t *mYRecords;
+    uint32_t *mY2Records;
 
-    float mLastX;
-    float mLastY;
+    uint32_t *mXYSums;
+    uint32_t *mXYRecords;
+
+    int32_t mLastX;
+    int32_t mLastY;
+
+    float mWeight;
 };
 
 #endif
