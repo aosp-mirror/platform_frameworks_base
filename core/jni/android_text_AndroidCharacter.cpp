@@ -17,7 +17,7 @@
 
 #define LOG_TAG "AndroidUnicode"
 
-#include <jni.h>
+#include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 #include "utils/misc.h"
 #include "utils/Log.h"
@@ -50,14 +50,6 @@ static int directionality_map[U_CHAR_DIRECTION_COUNT] = {
 
 namespace android {
     
-static void jniThrowException(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    jclass excClazz = env->FindClass(exc);
-    LOG_ASSERT(excClazz, "Unable to find class %s", exc);
-
-    env->ThrowNew(excClazz, msg);
-}
-
 static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray, jbyteArray destArray, int count)
 {
     jchar* src = env->GetCharArrayElements(srcArray, NULL);
