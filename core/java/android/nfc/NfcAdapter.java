@@ -227,14 +227,17 @@ public final class NfcAdapter {
     }
 
     /**
-     * Return true if this NFC Adapter is enabled to discover new tags.
+     * Return true if this NFC Adapter has any features enabled.
      * <p>
      * If this method returns false, then applications should request the user
      * turn on NFC tag discovery in Settings.
+     * <p>
+     * If this method returns false, the NFC hardware is guaranteed not to
+     * perform or respond to any NFC communication.
      *
      * @return true if this NFC Adapter is enabled to discover new tags
      */
-    public boolean isTagDiscoveryEnabled() {
+    public boolean isEnabled() {
         try {
             return mService.isEnabled();
         } catch (RemoteException e) {
@@ -244,12 +247,14 @@ public final class NfcAdapter {
     }
 
     /**
+     * Enable NFC hardware.
+     * <p>
      * NOTE: may block for ~second or more.  Poor API.  Avoid
      * calling from the UI thread.
      *
      * @hide
      */
-    public boolean enableTagDiscovery() {
+    public boolean enable() {
         try {
             return mService.enable();
         } catch (RemoteException e) {
@@ -259,12 +264,16 @@ public final class NfcAdapter {
     }
 
     /**
+     * Disable NFC hardware.
+     * No NFC features will work after this call, and the hardware
+     * will not perform or respond to any NFC communication.
+     * <p>
      * NOTE: may block for ~second or more.  Poor API.  Avoid
      * calling from the UI thread.
      *
      * @hide
      */
-    public boolean disableTagDiscovery() {
+    public boolean disable() {
         try {
             return mService.disable();
         } catch (RemoteException e) {
