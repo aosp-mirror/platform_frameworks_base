@@ -294,6 +294,11 @@ status_t OMX::enableGraphicBuffers(
     return findInstance(node)->enableGraphicBuffers(port_index, enable);
 }
 
+status_t OMX::storeMetaDataInBuffers(
+        node_id node, OMX_U32 port_index, OMX_BOOL enable) {
+    return findInstance(node)->storeMetaDataInBuffers(port_index, enable);
+}
+
 status_t OMX::useBuffer(
         node_id node, OMX_U32 port_index, const sp<IMemory> &params,
         buffer_id *buffer) {

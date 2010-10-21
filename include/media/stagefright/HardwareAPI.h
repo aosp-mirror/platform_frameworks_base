@@ -49,6 +49,32 @@ struct EnableAndroidNativeBuffersParams {
     OMX_BOOL enable;
 };
 
+// A pointer to this struct is passed to OMX_SetParameter() when the extension
+// index "OMX.google.android.index.storeMetaDataInBuffers"
+// is given.
+//
+// When meta data is stored in the video buffers passed between OMX clients
+// and OMX components, interpretation of the buffer data is up to the
+// buffer receiver, and the data may or may not be the actual video data, but
+// some information helpful for the receiver to locate the actual data.
+// The buffer receiver thus needs to know how to interpret what is stored
+// in these buffers, with mechanisms pre-determined externally. How to
+// interpret the meta data is outside of the scope of this method.
+//
+// Currently, this is specifically used to pass meta data from video source
+// (camera component, for instance) to video encoder to avoid memcpying of
+// input video frame data. To do this, bStoreMetaDta is set to OMX_TRUE.
+// If bStoreMetaData is set to false, real YUV frame data will be stored
+// in the buffers. In addition, if no OMX_SetParameter() call is made
+// with the corresponding extension index, real YUV data is stored
+// in the buffers.
+struct StoreMetaDataInBuffersParams {
+    OMX_U32 nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32 nPortIndex;
+    OMX_BOOL bStoreMetaData;
+};
+
 // Color formats in the range [OMX_COLOR_FormatAndroidPrivateStart,
 // OMX_COLOR_FormatAndroidPrivateEnd) will be converted to a gralloc pixel
 // format when used to allocate Android native buffers via gralloc.  The

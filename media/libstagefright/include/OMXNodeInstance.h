@@ -50,6 +50,7 @@ struct OMXNodeInstance {
     status_t setConfig(OMX_INDEXTYPE index, const void *params, size_t size);
 
     status_t enableGraphicBuffers(OMX_U32 portIndex, OMX_BOOL enable);
+    status_t storeMetaDataInBuffers(OMX_U32 portIndex, OMX_BOOL enable);
 
     status_t useBuffer(
             OMX_U32 portIndex, const sp<IMemory> &params,
