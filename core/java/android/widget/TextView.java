@@ -990,6 +990,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setTypeface(tf, styleIndex);
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled == isEnabled()) {
+            return;
+        }
+
+        if (!enabled) {
+            // Hide the soft input if the currently active TextView is disabled
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null && imm.isActive(this)) {
+                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+            }
+        }
+        super.setEnabled(enabled);
+    }
+
     /**
      * Sets the typeface and style in which the text should be displayed,
      * and turns on the fake bold and italic bits in the Paint if the
@@ -4640,7 +4656,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     
     @Override public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        if (onCheckIsTextEditor()) {
+        if (onCheckIsTextEditor() && isEnabled()) {
             if (mInputMethodState == null) {
                 mInputMethodState = new InputMethodState();
             }
@@ -6910,7 +6926,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return superResult;
         }
 
-        if ((mMovement != null || onCheckIsTextEditor()) && mText instanceof Spannable && mLayout != null) {
+        if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
+                && mText instanceof Spannable && mLayout != null) {
             if (mInsertionPointCursorController != null) {
                 mInsertionPointCursorController.onTouchEvent(event);
             }
