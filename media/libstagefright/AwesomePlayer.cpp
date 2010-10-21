@@ -194,6 +194,35 @@ void AwesomeLocalRenderer::init(
     }
 }
 
+struct AwesomeNativeWindowRenderer : public AwesomeRenderer {
+    AwesomeNativeWindowRenderer(const sp<ANativeWindow> &nativeWindow)
+        : mNativeWindow(nativeWindow) {
+    }
+
+    virtual void render(MediaBuffer *buffer) {
+        status_t err = mNativeWindow->queueBuffer(
+                mNativeWindow.get(), buffer->graphicBuffer().get());
+        if (err != 0) {
+            LOGE("queueBuffer failed with error %s (%d)", strerror(-err),
+                    -err);
+            return;
+        }
+
+        sp<MetaData> metaData = buffer->meta_data();
+        metaData->setInt32(kKeyRendered, 1);
+    }
+
+protected:
+    virtual ~AwesomeNativeWindowRenderer() {}
+
+private:
+    sp<ANativeWindow> mNativeWindow;
+
+    AwesomeNativeWindowRenderer(const AwesomeNativeWindowRenderer &);
+    AwesomeNativeWindowRenderer &operator=(
+            const AwesomeNativeWindowRenderer &);
+};
+
 AwesomePlayer::AwesomePlayer()
     : mQueueStarted(false),
       mTimeSource(NULL),
@@ -382,6 +411,12 @@ void AwesomePlayer::reset_l() {
         if (mConnectingDataSource != NULL) {
             LOGI("interrupting the connection process");
             mConnectingDataSource->disconnect();
+        }
+
+        if (mFlags & PREPARING_CONNECTED) {
+            // We are basically done preparing, we're just buffering
+            // enough data to start playback, we can safely interrupt that.
+            finishAsyncPrepare_l();
         }
     }
 
@@ -805,16 +840,25 @@ void AwesomePlayer::initRenderer_l() {
         IPCThreadState::self()->flushCommands();
 
         if (mSurface != NULL) {
-            // Other decoders are instantiated locally and as a consequence
-            // allocate their buffers in local address space.
-            mVideoRenderer = new AwesomeLocalRenderer(
-                false,  // previewOnly
-                component,
-                (OMX_COLOR_FORMATTYPE)format,
-                mISurface,
-                mSurface,
-                mVideoWidth, mVideoHeight,
-                decodedWidth, decodedHeight);
+            if (strncmp(component, "OMX.", 4) == 0) {
+                // Hardware decoders avoid the CPU color conversion by decoding
+                // directly to ANativeBuffers, so we must use a renderer that
+                // just pushes those buffers to the ANativeWindow.
+                mVideoRenderer = new AwesomeNativeWindowRenderer(mSurface);
+            } else {
+                // Other decoders are instantiated locally and as a consequence
+                // allocate their buffers in local address space.  This renderer
+                // then performs a color conversion and copy to get the data
+                // into the ANativeBuffer.
+                mVideoRenderer = new AwesomeLocalRenderer(
+                    false,  // previewOnly
+                    component,
+                    (OMX_COLOR_FORMATTYPE)format,
+                    mISurface,
+                    mSurface,
+                    mVideoWidth, mVideoHeight,
+                    decodedWidth, decodedHeight);
+            }
         } else {
             // Our OMX codecs allocate buffers on the media_server side
             // therefore they require a remote IOMXRenderer that knows how
@@ -1054,7 +1098,7 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
             mVideoTrack,
-            NULL, flags);
+            NULL, flags, mSurface);
 
     if (mVideoSource != NULL) {
         int64_t durationUs;
@@ -1085,7 +1129,7 @@ void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
     }
 
     if (mAudioPlayer != NULL) {
-        LOGV("seeking audio to %lld us (%.2f secs).", timeUs, timeUs / 1E6);
+        LOGV("seeking audio to %lld us (%.2f secs).", videoTimeUs, videoTimeUs / 1E6);
 
         // If we don't have a video time, seek audio to the originally
         // requested seek time instead.
@@ -1587,7 +1631,7 @@ void AwesomePlayer::abortPrepare(status_t err) {
     }
 
     mPrepareResult = err;
-    mFlags &= ~(PREPARING|PREPARE_CANCELLED);
+    mFlags &= ~(PREPARING|PREPARE_CANCELLED|PREPARING_CONNECTED);
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
 }
@@ -1635,6 +1679,8 @@ void AwesomePlayer::onPrepareAsyncEvent() {
         }
     }
 
+    mFlags |= PREPARING_CONNECTED;
+
     if (mCachedSource != NULL || mRTSPController != NULL) {
         postBufferingEvent_l();
     } else {
@@ -1654,7 +1700,7 @@ void AwesomePlayer::finishAsyncPrepare_l() {
     }
 
     mPrepareResult = OK;
-    mFlags &= ~(PREPARING|PREPARE_CANCELLED);
+    mFlags &= ~(PREPARING|PREPARE_CANCELLED|PREPARING_CONNECTED);
     mFlags |= PREPARED;
     mAsyncPrepareEvent = NULL;
     mPreparedCondition.broadcast();
@@ -1811,4 +1857,3 @@ void AwesomePlayer::postAudioSeekComplete() {
 }
 
 }  // namespace android
-

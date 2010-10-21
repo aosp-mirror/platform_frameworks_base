@@ -354,36 +354,8 @@ class LoadListener extends Handler implements EventHandler {
         String contentType = headers.getContentType();
         if (contentType != null) {
             parseContentTypeHeader(contentType);
-
-            // If we have one of "generic" MIME types, try to deduce
-            // the right MIME type from the file extension (if any):
-            if (mMimeType.equals("text/plain") ||
-                    mMimeType.equals("application/octet-stream")) {
-
-                // for attachment, use the filename in the Content-Disposition
-                // to guess the mimetype
-                String contentDisposition = headers.getContentDisposition();
-                String url = null;
-                if (contentDisposition != null) {
-                    url = URLUtil.parseContentDisposition(contentDisposition);
-                }
-                if (url == null) {
-                    url = mUrl;
-                }
-                String newMimeType = guessMimeTypeFromExtension(url);
-                if (newMimeType != null) {
-                    mMimeType = newMimeType;
-                }
-            } else if (mMimeType.equals("text/vnd.wap.wml")) {
-                // As we don't support wml, render it as plain text
-                mMimeType = "text/plain";
-            } else {
-                // It seems that xhtml+xml and vnd.wap.xhtml+xml mime
-                // subtypes are used interchangeably. So treat them the same.
-                if (mMimeType.equals("application/vnd.wap.xhtml+xml")) {
-                    mMimeType = "application/xhtml+xml";
-                }
-            }
+            mMimeType = MimeTypeMap.getSingleton().remapGenericMimeType(
+                    mMimeType, mUrl, headers.getContentDisposition());
         } else {
             /* Often when servers respond with 304 Not Modified or a
                Redirect, then they don't specify a MIMEType. When this

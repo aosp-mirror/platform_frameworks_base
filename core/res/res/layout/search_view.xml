@@ -91,7 +91,7 @@
                 android:dropDownAnchor="@id/search_edit_frame"
                 android:dropDownVerticalOffset="0dip"
                 android:dropDownHorizontalOffset="0dip"
-                android:popupBackground="@android:drawable/search_dropdown_background"
+                android:popupBackground="?android:attr/searchDropdownBackground"
             />
 
             <!-- TODO: Use the generic dialog close drawable -->

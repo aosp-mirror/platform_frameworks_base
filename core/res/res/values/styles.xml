@@ -769,22 +769,22 @@
     
 
     <!-- @hide -->	
-     <style name="TextAppearance.SearchResult">	
-         <item name="android:textStyle">normal</item>	
-         <item name="android:textColor">?textColorPrimaryInverse</item>	
-         <item name="android:textColorHint">?textColorHintInverse</item>	
+     <style name="TextAppearance.SearchResult">
+         <item name="android:textStyle">normal</item>
+         <item name="android:textColor">?textColorPrimaryInverse</item>
+         <item name="android:textColorHint">?textColorHintInverse</item>
      </style>	
      	
      <!-- @hide -->	
-     <style name="TextAppearance.SearchResult.Title">	
+     <style name="TextAppearance.SearchResult.Title">
          <item name="android:textSize">16sp</item>
-     </style>	
+     </style>
      	
      <!-- @hide -->	
-     <style name="TextAppearance.SearchResult.Subtitle">	
-         <item name="android:textSize">13sp</item>	
-         <item name="android:textColor">?textColorSecondaryInverse</item>	
-     </style>	
+     <style name="TextAppearance.SearchResult.Subtitle">
+         <item name="android:textSize">13sp</item>
+         <item name="android:textColor">?textColorSecondaryInverse</item>
+     </style>
 
     <style name="TextAppearance.WindowTitle">
         <item name="android:textColor">#fff</item>
@@ -1187,6 +1187,8 @@
     </style>
 
     <style name="TextAppearance.Holo.Light.SearchResult" parent="TextAppearance.Holo.SearchResult">
+         <item name="android:textColor">?textColorPrimary</item>
+         <item name="android:textColorHint">?textColorHint</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.SearchResult.Title">

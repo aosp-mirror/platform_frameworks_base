@@ -570,6 +570,9 @@
 
         <!-- Drawable for group button backgrounds -->
         <attr name="groupButtonBackground" format="reference" />
+
+        <!-- SearchView dropdown background -->
+        <attr name="searchDropdownBackground" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->

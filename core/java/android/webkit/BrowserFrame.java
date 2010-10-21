@@ -1079,6 +1079,20 @@ class BrowserFrame extends Handler {
         mCallbackProxy.onReceivedHttpAuthRequest(handler, host, realm);
     }
 
+    /**
+     * Called by JNI when the native HTTP stack needs to download a file.
+     *
+     * We delegate the request to CallbackProxy, which owns the current app's
+     * DownloadListener.
+     */
+    private void downloadStart(String url, String userAgent,
+            String contentDisposition, String mimeType, long contentLength) {
+        mimeType = MimeTypeMap.getSingleton().remapGenericMimeType(
+                mimeType, url, contentDisposition);
+        mCallbackProxy.onDownloadStart(url, userAgent,
+                contentDisposition, mimeType, contentLength);
+    }
+
     //==========================================================================
     // native functions
     //==========================================================================
