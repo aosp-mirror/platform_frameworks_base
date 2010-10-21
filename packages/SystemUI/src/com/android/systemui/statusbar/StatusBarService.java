@@ -44,6 +44,7 @@ import com.android.systemui.R;
 
 public abstract class StatusBarService extends Service implements CommandQueue.Callbacks {
     static final String TAG = "StatusBarService";
+    private static final boolean SPEW = false;
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
@@ -121,11 +122,12 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
         // TODO lp.windowAnimations = R.style.Animation_StatusBar;
         WindowManagerImpl.getDefault().addView(sb, lp);
 
-        Slog.d(TAG, "Added status bar view: gravity=0x" + Integer.toHexString(lp.gravity) 
-                    + " icons=" + iconList.size()
-                    + " lights=" + (switches[0]?"on":"off")
-                    + " menu=" + (switches[1]?"visible":"invisible")
-                    );
+        if (SPEW) {
+            Slog.d(TAG, "Added status bar view: gravity=0x" + Integer.toHexString(lp.gravity) 
+                   + " icons=" + iconList.size()
+                   + " lights=" + (switches[0]?"on":"off")
+                   + " menu=" + (switches[1]?"visible":"invisible")
+                   );
+        }
     }
 }
-

@@ -260,6 +260,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyServiceState()")){
             return;
         }
+        Slog.i(TAG, "notifyServiceState: " + state);
         synchronized (mRecords) {
             mServiceState = state;
             for (Record r : mRecords) {
@@ -363,6 +364,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
+        Slog.i(TAG, "notifyDataConnection: state=" + state + " isDataConnectivityPossible="
+                + isDataConnectivityPossible + " reason=" + reason
+                + " interfaceName=" + interfaceName + " networkType=" + networkType);
         synchronized (mRecords) {
             boolean modified = false;
             if (state == TelephonyManager.DATA_CONNECTED) {
