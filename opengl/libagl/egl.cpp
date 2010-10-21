@@ -947,6 +947,7 @@ static config_pair_t const config_0_attribute_list[] = {
         { EGL_RED_SIZE,         5 },
         { EGL_DEPTH_SIZE,       0 },
         { EGL_CONFIG_ID,        0 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_RGB_565 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
@@ -958,6 +959,7 @@ static config_pair_t const config_1_attribute_list[] = {
         { EGL_RED_SIZE,         5 },
         { EGL_DEPTH_SIZE,      16 },
         { EGL_CONFIG_ID,        1 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_RGB_565 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
@@ -970,6 +972,7 @@ static config_pair_t const config_2_attribute_list[] = {
         { EGL_RED_SIZE,         8 },
         { EGL_DEPTH_SIZE,       0 },
         { EGL_CONFIG_ID,        6 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_RGBX_8888 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
@@ -981,6 +984,7 @@ static config_pair_t const config_3_attribute_list[] = {
         { EGL_RED_SIZE,         8 },
         { EGL_DEPTH_SIZE,      16 },
         { EGL_CONFIG_ID,        7 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_RGBX_8888 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
@@ -992,6 +996,7 @@ static config_pair_t const config_4_attribute_list[] = {
         { EGL_GREEN_SIZE,       8 },
         { EGL_RED_SIZE,         8 },
         { EGL_DEPTH_SIZE,       0 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_RGBA_8888 },
         { EGL_CONFIG_ID,        2 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
@@ -1004,6 +1009,7 @@ static config_pair_t const config_5_attribute_list[] = {
         { EGL_RED_SIZE,         8 },
         { EGL_DEPTH_SIZE,      16 },
         { EGL_CONFIG_ID,        3 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_RGBA_8888 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
@@ -1016,6 +1022,7 @@ static config_pair_t const config_6_attribute_list[] = {
         { EGL_RED_SIZE,         0 },
         { EGL_DEPTH_SIZE,       0 },
         { EGL_CONFIG_ID,        4 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_A_8 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
@@ -1026,6 +1033,7 @@ static config_pair_t const config_7_attribute_list[] = {
         { EGL_GREEN_SIZE,       0 },
         { EGL_RED_SIZE,         0 },
         { EGL_DEPTH_SIZE,      16 },
+        { EGL_NATIVE_VISUAL_ID, GGL_PIXEL_FORMAT_A_8 },
         { EGL_CONFIG_ID,        5 },
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
