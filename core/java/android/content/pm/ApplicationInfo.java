@@ -252,9 +252,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_RESTORE_ANY_VERSION = 1<<17;
 
     /**
-     * Value for {@link #flags}: Set to true if the application has been
-     * installed using the forward lock option.
-     *
      * Value for {@link #flags}: Set to true if the application is
      * currently installed on external/removable/unprotected storage.  Such
      * applications may not be available if their storage is not currently
