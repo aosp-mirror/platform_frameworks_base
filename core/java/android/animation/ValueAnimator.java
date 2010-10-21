@@ -523,7 +523,6 @@ public class ValueAnimator extends Animator {
             for (int i = 0; i < numValues; ++i) {
                 mValues[i].init();
             }
-            mCurrentIteration = 0;
             mInitialized = true;
         }
     }
@@ -933,6 +932,7 @@ public class ValueAnimator extends Animator {
             // This sets the initial value of the animation, prior to actually starting it running
             setCurrentPlayTime(getCurrentPlayTime());
         }
+        mCurrentIteration = 0;
         mPlayingState = STOPPED;
         mStartedDelay = false;
         sPendingAnimations.add(this);

@@ -23,7 +23,7 @@ package android.animation;
 public interface TimeInterpolator {
 
     /**
-     * Maps a value representing the elapsed fraciton of an animation to a value that represents
+     * Maps a value representing the elapsed fraction of an animation to a value that represents
      * the interpolated fraction. This interpolated value is then multiplied by the change in
      * value of an animation to derive the animated value at the current elapsed animation time.
      *

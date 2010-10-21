@@ -128,8 +128,11 @@ private:
     };
 
     SkBitmap* getBitmap() {
-        int index = getInt();
-        return &mBitmaps[index - 1];
+        return (SkBitmap*) getInt();
+    }
+
+    SkiaShader* getShader() {
+        return (SkiaShader*) getInt();
     }
 
     inline int getIndex() {
@@ -141,11 +144,7 @@ private:
     }
 
     SkMatrix* getMatrix() {
-        int index = getInt();
-        if (index == 0) {
-            return NULL;
-        }
-        return &mMatrices[index - 1];
+        return (SkMatrix*) getInt();
     }
 
     SkPath* getPath() {
@@ -153,11 +152,7 @@ private:
     }
 
     SkPaint* getPaint() {
-        int index = getInt();
-        if (index == 0) {
-            return NULL;
-        }
-        return &mPaints[index - 1];
+        return (SkPaint*) getInt();
     }
 
     inline float getFloat() {
@@ -186,14 +181,10 @@ private:
 
     PathHeap* mPathHeap;
 
-    SkBitmap* mBitmaps;
-    int mBitmapCount;
-
-    SkMatrix* mMatrices;
-    int mMatrixCount;
-
-    SkPaint* mPaints;
-    int mPaintCount;
+    Vector<SkBitmap*> mBitmapResources;
+    Vector<SkMatrix*> mMatrixResources;
+    Vector<SkPaint*> mPaintResources;
+    Vector<SkiaShader*> mShaderResources;
 
     mutable SkFlattenableReadBuffer mReader;
 
@@ -224,7 +215,7 @@ public:
     void restoreToCount(int saveCount);
 
     int saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* p, int flags);
+            SkPaint* p, int flags);
 
     void translate(float dx, float dy);
     void rotate(float degrees);
@@ -235,18 +226,18 @@ public:
 
     bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
-    void drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint);
+    void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
+    void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint);
+            float dstRight, float dstBottom, SkPaint* paint);
     void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
             const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
-            float left, float top, float right, float bottom, const SkPaint* paint);
+            float left, float top, float right, float bottom, SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
-    void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
+    void drawRect(float left, float top, float right, float bottom, SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
-    void drawLines(float* points, int count, const SkPaint* paint);
+    void drawLines(float* points, int count, SkPaint* paint);
     void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);
 
     void resetShader();
@@ -268,16 +259,20 @@ public:
         return mWriter;
     }
 
-    const SkTDArray<const SkFlatBitmap*>& getBitmaps() const {
-        return mBitmaps;
+    const Vector<SkBitmap*>& getBitmapResources() const {
+        return mBitmapResources;
     }
 
-    const SkTDArray<const SkFlatMatrix*>& getMatrices() const {
-        return mMatrices;
+    const Vector<SkMatrix*>& getMatrixResources() const {
+        return mMatrixResources;
     }
 
-    const SkTDArray<const SkFlatPaint*>& getPaints() const {
-        return mPaints;
+    const Vector<SkPaint*>& getPaintResources() const {
+        return mPaintResources;
+    }
+
+    const Vector<SkiaShader*>& getShaderResources() const {
+        return mShaderResources;
     }
 
 private:
@@ -338,34 +333,40 @@ private:
         addInt(mPathHeap->append(*path));
     }
 
-    int find(SkTDArray<const SkFlatPaint*>& paints, const SkPaint* paint);
-
-    inline void addPaint(const SkPaint* paint) {
-        addInt(find(mPaints, paint));
+    inline void addPaint(SkPaint* paint) {
+        addInt((int)paint);
+        mPaintResources.add(paint);
+        Caches& caches = Caches::getInstance();
+        caches.resourceCache.incrementRefcount(paint);
     }
 
-    int find(SkTDArray<const SkFlatMatrix*>& matrices, const SkMatrix* matrix);
-
-    inline void addMatrix(const SkMatrix* matrix) {
-        addInt(find(mMatrices, matrix));
+    inline void addMatrix(SkMatrix* matrix) {
+        addInt((int)matrix);
+        mMatrixResources.add(matrix);
+        Caches& caches = Caches::getInstance();
+        caches.resourceCache.incrementRefcount(matrix);
     }
 
-    int find(SkTDArray<const SkFlatBitmap*>& bitmaps, const SkBitmap& bitmap);
+    inline void addBitmap(SkBitmap* bitmap) {
+        addInt((int)bitmap);
+        mBitmapResources.add(bitmap);
+        Caches& caches = Caches::getInstance();
+        caches.resourceCache.incrementRefcount(bitmap);
+    }
 
-    inline void addBitmap(const SkBitmap* bitmap) {
-        addInt(find(mBitmaps, *bitmap));
+    inline void addShader(SkiaShader* shader) {
+        addInt((int)shader);
+        mShaderResources.add(shader);
+        Caches& caches = Caches::getInstance();
+        caches.resourceCache.incrementRefcount(shader);
     }
 
     SkChunkAlloc mHeap;
 
-    int mBitmapIndex;
-    SkTDArray<const SkFlatBitmap*> mBitmaps;
-
-    int mMatrixIndex;
-    SkTDArray<const SkFlatMatrix*> mMatrices;
-
-    int mPaintIndex;
-    SkTDArray<const SkFlatPaint*> mPaints;
+    Vector<SkBitmap*> mBitmapResources;
+    Vector<SkMatrix*> mMatrixResources;
+    Vector<SkPaint*> mPaintResources;
+    Vector<SkiaShader*> mShaderResources;
 
     PathHeap* mPathHeap;
     SkWriter32 mWriter;

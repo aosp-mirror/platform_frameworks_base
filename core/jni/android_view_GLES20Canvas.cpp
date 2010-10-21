@@ -87,7 +87,7 @@ static OpenGLRenderer* android_view_GLES20Canvas_createRenderer(JNIEnv* env, job
 #endif
 }
 
-static void android_view_GLES20Canvas_destroyRenderer(JNIEnv* env, jobject canvas,
+static void android_view_GLES20Canvas_destroyRenderer(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer) {
     RENDERER_LOGD("Destroy OpenGLRenderer");
     delete renderer;
@@ -415,7 +415,7 @@ static DisplayList* android_view_GLES20Canvas_createDisplayList(JNIEnv* env,
 }
 
 static void android_view_GLES20Canvas_destroyDisplayList(JNIEnv* env,
-        jobject canvas, DisplayList* displayList) {
+        jobject clazz, DisplayList* displayList) {
     delete displayList;
 }
 

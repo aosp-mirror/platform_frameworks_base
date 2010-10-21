@@ -34,6 +34,11 @@ import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
+import android.util.Finalizers;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An implementation of Canvas on top of OpenGL ES 2.0.
@@ -84,21 +89,34 @@ class GLES20Canvas extends HardwareCanvas {
        
         if (mRenderer == 0) {
             throw new IllegalStateException("Could not create GLES20Canvas renderer");
+        } else {
+            new CanvasFinalizer(this);
         }
     }
 
     private native int nCreateRenderer();    
     private native int nCreateDisplayListRenderer();    
 
-    @Override
-    public synchronized void destroy() {
-        if (mRenderer != 0) {
+    private static native void nDestroyRenderer(int renderer);
+
+    private static class CanvasFinalizer extends Finalizers.ReclaimableReference<GLES20Canvas> {
+        private static final Set<CanvasFinalizer> sFinalizers = Collections.synchronizedSet(
+                new HashSet<CanvasFinalizer>());
+
+        private int mRenderer;
+
+        CanvasFinalizer(GLES20Canvas canvas) {
+            super(canvas, Finalizers.getQueue());
+            mRenderer = canvas.mRenderer;
+            sFinalizers.add(this);
+        }
+
+        @Override
+        public void reclaim() {
             nDestroyRenderer(mRenderer);
-            mRenderer = 0;
+            sFinalizers.remove(this);
         }
     }
-
-    private native void nDestroyRenderer(int renderer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
@@ -178,11 +196,11 @@ class GLES20Canvas extends HardwareCanvas {
 
     private native int nCreateDisplayList(int renderer);
     
-    void destroyDisplayList(int displayList) {
+    static void destroyDisplayList(int displayList) {
         nDestroyDisplayList(displayList);
     }
 
-    private native void nDestroyDisplayList(int displayList);
+    private static native void nDestroyDisplayList(int displayList);
 
     @Override
     public void drawDisplayList(DisplayList displayList) {

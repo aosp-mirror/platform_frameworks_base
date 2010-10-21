@@ -7417,17 +7417,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if ((mViewFlags & WILL_NOT_CACHE_DRAWING) == WILL_NOT_CACHE_DRAWING) {
             return null;
         }
-        
         if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
             return null;
         }
 
         if ((mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED &&
                 ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || mDisplayList == null)) {
-
-            if (mDisplayList != null) {
-                mDisplayList.destroy();
-            }
 
             mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList();
 
@@ -7456,8 +7451,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 canvas.onPostDraw();
 
                 mDisplayList.end();
-
-                canvas.destroy();                
             }
         }
 
@@ -7532,7 +7525,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mUnscaledDrawingCache = null;
         }
         if (mDisplayList != null) {
-            mDisplayList.destroy();
             mDisplayList = null;
         }
     }
