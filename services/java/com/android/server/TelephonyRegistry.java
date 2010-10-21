@@ -65,7 +65,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private final Context mContext;
 
-    private final ArrayList<Record> mRecords = new ArrayList();
+    // access should be inside synchronized (mRecords) for these two fields
+    private final ArrayList<IBinder> mRemoveList = new ArrayList<IBinder>();
+    private final ArrayList<Record> mRecords = new ArrayList<Record>();
 
     private final IBatteryStats mBatteryStats;
 
@@ -158,7 +160,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 r.events = events;
                 if (notifyNow) {
                     if ((events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
-                        sendServiceState(r, mServiceState);
+                        try {
+                            r.callback.onServiceStateChanged(new ServiceState(mServiceState));
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
                     }
                     if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTH) != 0) {
                         try {
@@ -184,7 +190,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                     }
                     if ((events & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
-                        sendCellLocation(r, mCellLocation);
+                        try {
+                            r.callback.onCellLocationChanged(new Bundle(mCellLocation));
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
                     }
                     if ((events & PhoneStateListener.LISTEN_CALL_STATE) != 0) {
                         try {
@@ -238,7 +248,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
-        ArrayList<IBinder> removeList = new ArrayList<IBinder>();
         synchronized (mRecords) {
             mCallState = state;
             mCallIncomingNumber = incomingNumber;
@@ -247,11 +256,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onCallStateChanged(state, incomingNumber);
                     } catch (RemoteException ex) {
-                        removeList.add(r.binder);
+                        mRemoveList.add(r.binder);
                     }
                 }
             }
-            for (IBinder b : removeList) remove(b);
+            handleRemoveListLocked();
         }
         broadcastCallStateChanged(state, incomingNumber);
     }
@@ -265,9 +274,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mServiceState = state;
             for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
-                    sendServiceState(r, state);
+                    try {
+                        r.callback.onServiceStateChanged(new ServiceState(state));
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
                 }
             }
+            handleRemoveListLocked();
         }
         broadcastServiceStateChanged(state);
     }
@@ -276,12 +290,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifySignalStrength()")) {
             return;
         }
-        ArrayList<IBinder> removeList = new ArrayList<IBinder>();
         synchronized (mRecords) {
             mSignalStrength = signalStrength;
             for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
-                    sendSignalStrength(r, signalStrength);
+                    try {
+                        r.callback.onSignalStrengthsChanged(new SignalStrength(signalStrength));
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
                 }
                 if ((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTH) != 0) {
                     try {
@@ -289,11 +306,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         r.callback.onSignalStrengthChanged((gsmSignalStrength == 99 ? -1
                                 : gsmSignalStrength));
                     } catch (RemoteException ex) {
-                        removeList.add(r.binder);
+                        mRemoveList.add(r.binder);
                     }
                 }
             }
-            for (IBinder b : removeList) remove(b);
+            handleRemoveListLocked();
         }
         broadcastSignalStrengthChanged(signalStrength);
     }
@@ -302,7 +319,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyMessageWaitingChanged()")) {
             return;
         }
-        ArrayList<IBinder> removeList = new ArrayList<IBinder>();
         synchronized (mRecords) {
             mMessageWaiting = mwi;
             for (Record r : mRecords) {
@@ -310,11 +326,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onMessageWaitingIndicatorChanged(mwi);
                     } catch (RemoteException ex) {
-                        removeList.add(r.binder);
+                        mRemoveList.add(r.binder);
                     }
                 }
             }
-            for (IBinder b : removeList) remove(b);
+            handleRemoveListLocked();
         }
     }
 
@@ -322,7 +338,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyCallForwardingChanged()")) {
             return;
         }
-        ArrayList<IBinder> removeList = new ArrayList<IBinder>();
         synchronized (mRecords) {
             mCallForwarding = cfi;
             for (Record r : mRecords) {
@@ -330,11 +345,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onCallForwardingIndicatorChanged(cfi);
                     } catch (RemoteException ex) {
-                        removeList.add(r.binder);
+                        mRemoveList.add(r.binder);
                     }
                 }
             }
-            for (IBinder b : removeList) remove(b);
+            handleRemoveListLocked();
         }
     }
 
@@ -342,7 +357,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyDataActivity()" )) {
             return;
         }
-        ArrayList<IBinder> removeList = new ArrayList<IBinder>();
+        handleRemoveListLocked();
         synchronized (mRecords) {
             mDataActivity = state;
             for (Record r : mRecords) {
@@ -350,11 +365,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onDataActivity(state);
                     } catch (RemoteException ex) {
-                        removeList.add(r.binder);
+                        mRemoveList.add(r.binder);
                     }
                 }
             }
-            for (IBinder b : removeList) remove(b);
+            handleRemoveListLocked();
         }
     }
 
@@ -396,17 +411,16 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 modified = true;
             }
             if (modified) {
-                ArrayList<IBinder> removeList = new ArrayList<IBinder>();
                 for (Record r : mRecords) {
                     if ((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
                         try {
                             r.callback.onDataConnectionStateChanged(state, networkType);
                         } catch (RemoteException ex) {
-                            removeList.add(r.binder);
+                            mRemoveList.add(r.binder);
                         }
                     }
                 }
-                for (IBinder b : removeList) remove(b);
+                handleRemoveListLocked();
             }
         }
         broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
@@ -442,36 +456,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCellLocation = cellLocation;
             for (Record r : mRecords) {
                 if ((r.events & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
-                    sendCellLocation(r, cellLocation);
+                    try {
+                        r.callback.onCellLocationChanged(new Bundle(cellLocation));
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+
                 }
             }
-        }
-    }
-
-    /**
-     * Copy the service state object so they can't mess it up in the local calls
-     */
-    private void sendServiceState(Record r, ServiceState state) {
-        try {
-            r.callback.onServiceStateChanged(new ServiceState(state));
-        } catch (RemoteException ex) {
-            remove(r.binder);
-        }
-    }
-
-    private void sendCellLocation(Record r, Bundle cellLocation) {
-        try {
-            r.callback.onCellLocationChanged(new Bundle(cellLocation));
-        } catch (RemoteException ex) {
-            remove(r.binder);
-        }
-    }
-
-    private void sendSignalStrength(Record r, SignalStrength signalStrength) {
-        try {
-            r.callback.onSignalStrengthsChanged(new SignalStrength(signalStrength));
-        } catch (RemoteException ex) {
-            remove(r.binder);
+            handleRemoveListLocked();
         }
     }
 
@@ -630,6 +623,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if ((events & PHONE_STATE_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PHONE_STATE, null);
+        }
+    }
+
+    private void handleRemoveListLocked() {
+        if (mRemoveList.size() > 0) {
+            for (IBinder b: mRemoveList) {
+                remove(b);
+            }
+            mRemoveList.clear();
         }
     }
 }
