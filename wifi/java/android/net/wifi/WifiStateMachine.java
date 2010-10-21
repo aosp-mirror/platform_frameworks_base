@@ -301,9 +301,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * supplicant config.
      */
     private static final int CMD_FORGET_NETWORK                   = 92;
-    /* Start Wi-Fi protected setup */
-    private static final int CMD_START_WPS                        = 93;
-
+    /* Start Wi-Fi protected setup push button configuration */
+    private static final int CMD_START_WPS_PBC                    = 93;
+    /* Start Wi-Fi protected setup pin method configuration */
+    private static final int CMD_START_WPS_PIN                    = 94;
     /**
      * Interval in milliseconds between polling for connection
      * status items that are not sent via asynchronous events.
@@ -787,11 +788,18 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     public void startWpsPbc(String bssid) {
-        sendMessage(obtainMessage(CMD_START_WPS, bssid));
+        sendMessage(obtainMessage(CMD_START_WPS_PBC, bssid));
     }
 
-    public void startWpsPin(String bssid, int apPin) {
-        sendMessage(obtainMessage(CMD_START_WPS, apPin, 0, bssid));
+    public void startWpsWithPinFromAccessPoint(String bssid, int apPin) {
+        sendMessage(obtainMessage(CMD_START_WPS_PIN, apPin, 0, bssid));
+    }
+
+    public int syncStartWpsWithPinFromDevice(AsyncChannel channel, String bssid) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_START_WPS_PIN, bssid);
+        int result = resultMsg.arg1;
+        resultMsg.recycle();
+        return result;
     }
 
     public void enableRssiPolling(boolean enabled) {
@@ -1654,7 +1662,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_CONNECT_NETWORK:
                 case CMD_SAVE_NETWORK:
                 case CMD_FORGET_NETWORK:
-                case CMD_START_WPS:
+                case CMD_START_WPS_PBC:
+                case CMD_START_WPS_PIN:
                     break;
                 default:
                     Log.e(TAG, "Error! unhandled message" + message);
@@ -2395,17 +2404,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
-                case CMD_START_WPS:
+                case CMD_START_WPS_PBC:
                     String bssid = (String) message.obj;
-                    int apPin = message.arg1;
-                    boolean success;
-                    if (apPin != 0) {
-                        /* WPS pin method configuration */
-                        success = WifiConfigStore.startWpsPin(bssid, apPin);
-                    } else {
-                        /* WPS push button configuration */
-                        success = WifiConfigStore.startWpsPbc(bssid);
-                    }
+                    /* WPS push button configuration */
+                    boolean success = WifiConfigStore.startWpsPbc(bssid);
+
                     /* During WPS setup, all other networks are disabled. After
                      * a successful connect a new config is created in the supplicant.
                      *
@@ -2416,6 +2419,24 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                      *
                      * Upon success, the configuration list needs to be reloaded
                      */
+                    if (success) {
+                        mWpsStarted = true;
+                        /* Expect a disconnection from the old connection */
+                        transitionTo(mDisconnectingState);
+                    }
+                    break;
+                case CMD_START_WPS_PIN:
+                    bssid = (String) message.obj;
+                    int apPin = message.arg1;
+                    int pin;
+                    if (apPin != 0) {
+                        /* WPS pin from access point */
+                        success = WifiConfigStore.startWpsWithPinFromAccessPoint(bssid, apPin);
+                    } else {
+                        pin = WifiConfigStore.startWpsWithPinFromDevice(bssid);
+                        success = (pin != -1);
+                        mReplyChannel.replyToMessage(message, CMD_START_WPS_PIN, pin);
+                    }
                     if (success) {
                         mWpsStarted = true;
                         /* Expect a disconnection from the old connection */

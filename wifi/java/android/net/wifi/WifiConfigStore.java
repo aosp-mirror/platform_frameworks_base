@@ -361,16 +361,32 @@ class WifiConfigStore {
     }
 
     /**
-     * Start WPS pin method configuration
+     * Start WPS pin method configuration with pin obtained
+     * from the access point
      */
-    static boolean startWpsPin(String bssid, int apPin) {
-        if (WifiNative.startWpsPinCommand(bssid, apPin)) {
+    static boolean startWpsWithPinFromAccessPoint(String bssid, int apPin) {
+        if (WifiNative.startWpsWithPinFromAccessPointCommand(bssid, apPin)) {
             /* WPS leaves all networks disabled */
             markAllNetworksDisabled();
             return true;
         }
         Log.e(TAG, "Failed to start WPS pin method configuration");
         return false;
+    }
+
+    /**
+     * Start WPS pin method configuration with pin obtained
+     * from the device
+     */
+    static int startWpsWithPinFromDevice(String bssid) {
+        int pin = WifiNative.startWpsWithPinFromDeviceCommand(bssid);
+        /* WPS leaves all networks disabled */
+        if (pin != -1) {
+            markAllNetworksDisabled();
+        } else {
+            Log.e(TAG, "Failed to start WPS pin method configuration");
+        }
+        return pin;
     }
 
     /**

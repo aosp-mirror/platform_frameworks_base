@@ -872,9 +872,19 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachine.startWpsPbc(bssid);
     }
 
-    public void startWpsPin(String bssid, int apPin) {
+    public void startWpsWithPinFromAccessPoint(String bssid, int apPin) {
         enforceChangePermission();
-        mWifiStateMachine.startWpsPin(bssid, apPin);
+        mWifiStateMachine.startWpsWithPinFromAccessPoint(bssid, apPin);
+    }
+
+    public int startWpsWithPinFromDevice(String bssid) {
+        enforceChangePermission();
+        if (mChannel != null) {
+            return mWifiStateMachine.syncStartWpsWithPinFromDevice(mChannel, bssid);
+        } else {
+            Slog.e(TAG, "mChannel is not initialized");
+            return -1;
+        }
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
