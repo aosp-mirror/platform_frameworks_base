@@ -231,6 +231,10 @@ class SipSessionGroup implements SipListener {
         }
     }
 
+    synchronized boolean containsSession(String callId) {
+        return mSessionMap.containsKey(callId);
+    }
+
     private synchronized SipSessionImpl getSipSession(EventObject event) {
         String key = SipHelper.getCallId(event);
         SipSessionImpl session = mSessionMap.get(key);
@@ -582,6 +586,7 @@ class SipSessionGroup implements SipListener {
         }
 
         private void processCommand(EventObject command) throws SipException {
+            if (isLoggable(command)) Log.d(TAG, "process cmd: " + command);
             if (!process(command)) {
                 onError(SipErrorCode.IN_PROGRESS,
                         "cannot initiate a new transaction to execute: "
@@ -1050,6 +1055,13 @@ class SipSessionGroup implements SipListener {
                 mSipHelper.sendCancel(mClientTransaction);
                 startSessionTimer(CANCEL_CALL_TIMER);
                 return true;
+            } else if (isRequestEvent(Request.INVITE, evt)) {
+                // Call self? Send BUSY HERE so server may redirect the call to
+                // voice mailbox.
+                RequestEvent event = (RequestEvent) evt;
+                mSipHelper.sendInviteBusyHere(event,
+                        event.getServerTransaction());
+                return true;
             }
             return false;
         }
@@ -1349,6 +1361,10 @@ class SipSessionGroup implements SipListener {
             }
         }
         return DEBUG;
+    }
+
+    private static boolean isLoggable(EventObject evt) {
+        return isLoggable(null, evt);
     }
 
     private static boolean isLoggable(SipSessionImpl s, EventObject evt) {
