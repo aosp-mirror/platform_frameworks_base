@@ -31,5 +31,9 @@
     -->
     <integer name="config_status_bar_position">0</integer>
 
+    <!-- Component to be used as the status bar service.  Must implement the IStatusBar
+     interface.  This name is in the ComponentName flattened format (package/class)  -->
+    <string name="config_statusBarComponent">com.android.systemui.statusbar.PhoneStatusBarService</string>
+
 </resources>
 

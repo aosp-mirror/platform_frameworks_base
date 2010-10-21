@@ -40,9 +40,10 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
 
+import com.android.systemui.SystemUI;
 import com.android.systemui.R;
 
-public abstract class StatusBarService extends Service implements CommandQueue.Callbacks {
+public abstract class StatusBarService extends SystemUI implements CommandQueue.Callbacks {
     static final String TAG = "StatusBarService";
     private static final boolean SPEW = false;
 
@@ -53,16 +54,7 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
     protected abstract View makeStatusBarView();
     protected abstract int getStatusBarGravity();
 
-    /**
-     * Nobody binds to us.
-     */
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
-    public void onCreate() {
+    public void start() {
         // First set up our views and stuff.
         View sb = makeStatusBarView();
 
@@ -107,7 +99,7 @@ public abstract class StatusBarService extends Service implements CommandQueue.C
         }
 
         // Put up the view
-        final Resources res = getResources();
+        final Resources res = mContext.getResources();
         final int height= res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
 
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(

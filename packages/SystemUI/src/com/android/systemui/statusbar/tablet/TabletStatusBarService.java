@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 import android.app.ActivityManagerNative;
 import android.app.PendingIntent;
 import android.app.Notification;
@@ -80,6 +83,7 @@ public class TabletStatusBarService extends StatusBarService {
     View mSystemInfo;
     View mNavigationArea;
     View mMenuButton;
+    View mRecentButton;
 
     NotificationPanel mNotificationPanel;
     SystemPanel mSystemPanel;
@@ -107,11 +111,13 @@ public class TabletStatusBarService extends StatusBarService {
     boolean mNotificationsOn = true;
 
     protected void addPanelWindows() {
-        final Resources res = getResources();
+        final Context context = mContext;
+
+        final Resources res = context.getResources();
         final int barHeight= res.getDimensionPixelSize(
             com.android.internal.R.dimen.status_bar_height);
 
-        mNotificationPanel = (NotificationPanel)View.inflate(this,
+        mNotificationPanel = (NotificationPanel)View.inflate(context,
                 R.layout.sysbar_panel_notifications, null);
         mNotificationPanel.setVisibility(View.GONE);
         mNotificationPanel.setOnTouchListener(
@@ -132,7 +138,7 @@ public class TabletStatusBarService extends StatusBarService {
 
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
 
-        mSystemPanel = (SystemPanel) View.inflate(this, R.layout.sysbar_panel_system, null);
+        mSystemPanel = (SystemPanel) View.inflate(context, R.layout.sysbar_panel_system, null);
         mSystemPanel.setVisibility(View.GONE);
         mSystemPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_SYSTEM_PANEL,
                     mSystemPanel));
@@ -155,17 +161,18 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate(); // will add the main bar view
+    public void start() {
+        super.start(); // will add the main bar view
     }
 
     protected View makeStatusBarView() {
-        Resources res = getResources();
+        final Context context = mContext;
+        final Resources res = context.getResources();
 
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
 
         final TabletStatusBarView sb = (TabletStatusBarView)View.inflate(
-                this, R.layout.status_bar, null);
+                context, R.layout.status_bar, null);
         mStatusBarView = sb;
 
         sb.setHandler(mHandler);
@@ -174,7 +181,11 @@ public class TabletStatusBarService extends StatusBarService {
         mCurtains = sb.findViewById(R.id.lights_out);
         mSystemInfo = sb.findViewById(R.id.systemInfo);
 
+        mSystemInfo.setOnClickListener(mOnClickListener);
         mSystemInfo.setOnLongClickListener(new SetLightsOnListener(false));
+
+        mRecentButton = sb.findViewById(R.id.recent);
+        mRecentButton.setOnClickListener(mOnClickListener);
 
         SetLightsOnListener on = new SetLightsOnListener(true);
         mCurtains.setOnClickListener(on);
@@ -182,6 +193,7 @@ public class TabletStatusBarService extends StatusBarService {
 
         // the button to open the notification area
         mNotificationTrigger = sb.findViewById(R.id.expand);
+        mNotificationTrigger.setOnClickListener(mOnClickListener);
 
         // the more notifications icon
         mNotificationIconArea = (NotificationIconArea)sb.findViewById(R.id.notificationIcons);
@@ -189,15 +201,15 @@ public class TabletStatusBarService extends StatusBarService {
         // the clear and dnd buttons
         mNotificationButtons = sb.findViewById(R.id.notificationButtons);
         mClearButton = (TextView)mNotificationButtons.findViewById(R.id.clear_all_button);
-        mClearButton.setOnClickListener(mClearButtonListener);
+        mClearButton.setOnClickListener(mOnClickListener);
         mDoNotDisturbButton = (TextView)mNotificationButtons.findViewById(R.id.do_not_disturb);
-        mDoNotDisturbButton.setOnClickListener(mDoNotDisturbButtonListener);
+        mDoNotDisturbButton.setOnClickListener(mOnClickListener);
 
 
         // where the icons go
         mIconLayout = (NotificationIconArea.IconLayout) sb.findViewById(R.id.icons);
 
-        mTicker = new TabletTicker((Context)this, (FrameLayout)sb.findViewById(R.id.ticker));
+        mTicker = new TabletTicker(context, (FrameLayout)sb.findViewById(R.id.ticker));
 
         // System info (center)
         mBatteryMeter = (ImageView) sb.findViewById(R.id.battery);
@@ -366,7 +378,7 @@ public class TabletStatusBarService extends StatusBarService {
             oldEntry.notification = notification;
             try {
                 // Reapply the RemoteViews
-                contentView.reapply(this, oldEntry.content);
+                contentView.reapply(mContext, oldEntry.content);
                 // update the contentIntent
                 final PendingIntent contentIntent = notification.notification.contentIntent;
                 if (contentIntent != null) {
@@ -551,37 +563,6 @@ public class TabletStatusBarService extends StatusBarService {
         */
     }
 
-    public void notificationIconsClicked(View v) {
-        if (DEBUG) Slog.d(TAG, "clicked notification icons");
-        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
-            int msg = (mNotificationPanel.getVisibility() == View.GONE) 
-                ? MSG_OPEN_NOTIFICATION_PANEL
-                : MSG_CLOSE_NOTIFICATION_PANEL;
-            mHandler.removeMessages(msg);
-            mHandler.sendEmptyMessage(msg);
-        }
-    }
-
-    public void systemInfoClicked(View v) {
-        if (DEBUG) Slog.d(TAG, "clicked system info");
-        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
-            int msg = (mSystemPanel.getVisibility() == View.GONE) 
-                ? MSG_OPEN_SYSTEM_PANEL
-                : MSG_CLOSE_SYSTEM_PANEL;
-            mHandler.removeMessages(msg);
-            mHandler.sendEmptyMessage(msg);
-        }
-    }
-
-    public void recentButtonClicked(View v) {
-        if (DEBUG) Slog.d(TAG, "clicked recent apps");
-        Intent intent = new Intent();
-        intent.setClass(this, RecentApplicationsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        startActivity(intent);
-    }
-
     /**
      * Cancel this notification and tell the status bar service about the failure. Hold no locks.
      */
@@ -594,23 +575,66 @@ public class TabletStatusBarService extends StatusBarService {
         }
     }
 
-    private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            try {
-                mBarService.onClearAllNotifications();
-            } catch (RemoteException ex) {
-                // system process is dead if we're here.
+            if (v == mClearButton) {
+                onClickClearButton();
+            } else if (v == mDoNotDisturbButton) {
+                onClickDoNotDisturb();
+            } else if (v == mNotificationTrigger) {
+                onClickNotificationTrigger();
+            } else if (v == mSystemInfo) {
+                onClickSystemInfo();
+            } else if (v == mRecentButton) {
+                onClickRecentButton();
             }
-            animateCollapse();
         }
     };
 
-    private View.OnClickListener mDoNotDisturbButtonListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            mNotificationsOn = !mNotificationsOn;
-            animateCollapse();
+    void onClickClearButton() {
+        try {
+            mBarService.onClearAllNotifications();
+        } catch (RemoteException ex) {
+            // system process is dead if we're here.
         }
-    };
+        animateCollapse();
+    }
+
+    void onClickDoNotDisturb() {
+        mNotificationsOn = !mNotificationsOn;
+        animateCollapse();
+    }
+
+    public void onClickNotificationTrigger() {
+        if (DEBUG) Slog.d(TAG, "clicked notification icons");
+        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
+            int msg = (mNotificationPanel.getVisibility() == View.GONE) 
+                ? MSG_OPEN_NOTIFICATION_PANEL
+                : MSG_CLOSE_NOTIFICATION_PANEL;
+            mHandler.removeMessages(msg);
+            mHandler.sendEmptyMessage(msg);
+        }
+    }
+
+    public void onClickSystemInfo() {
+        if (DEBUG) Slog.d(TAG, "clicked system info");
+        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
+            int msg = (mSystemPanel.getVisibility() == View.GONE) 
+                ? MSG_OPEN_SYSTEM_PANEL
+                : MSG_CLOSE_SYSTEM_PANEL;
+            mHandler.removeMessages(msg);
+            mHandler.sendEmptyMessage(msg);
+        }
+    }
+
+    public void onClickRecentButton() {
+        if (DEBUG) Slog.d(TAG, "clicked recent apps");
+        Intent intent = new Intent();
+        intent.setClass(mContext, RecentApplicationsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        mContext.startActivity(intent);
+    }
 
     private class NotificationClicker implements View.OnClickListener {
         private PendingIntent mIntent;
@@ -642,7 +666,7 @@ public class TabletStatusBarService extends StatusBarService {
                 overlay.setSourceBounds(
                         new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
                 try {
-                    mIntent.send(TabletStatusBarService.this, 0, overlay);
+                    mIntent.send(mContext, 0, overlay);
                 } catch (PendingIntent.CanceledException e) {
                     // the stack trace isn't very helpful here.  Just log the exception message.
                     Slog.w(TAG, "Sending contentIntent failed: " + e);
@@ -685,7 +709,7 @@ public class TabletStatusBarService extends StatusBarService {
             Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
         }
         // Construct the icon.
-        final StatusBarIconView iconView = new StatusBarIconView(this,
+        final StatusBarIconView iconView = new StatusBarIconView(mContext,
                 notification.pkg + "/0x" + Integer.toHexString(notification.id));
         iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
@@ -743,7 +767,8 @@ public class TabletStatusBarService extends StatusBarService {
         }
 
         // create the row view
-        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
         View vetoButton = row.findViewById(R.id.veto);
         if (entry.notification.isClearable()) {
@@ -780,7 +805,7 @@ public class TabletStatusBarService extends StatusBarService {
         View expanded = null;
         Exception exception = null;
         try {
-            expanded = remoteViews.apply(this, content);
+            expanded = remoteViews.apply(mContext, content);
         }
         catch (RuntimeException e) {
             exception = e;
@@ -853,9 +878,15 @@ public class TabletStatusBarService extends StatusBarService {
     private void setViewVisibility(View v, int vis, int anim) {
         if (v.getVisibility() != vis) {
             //Slog.d(TAG, "setViewVisibility vis=" + (vis == View.VISIBLE) + " v=" + v);
-            v.setAnimation(AnimationUtils.loadAnimation((Context)this, anim));
+            v.setAnimation(AnimationUtils.loadAnimation(mContext, anim));
             v.setVisibility(vis);
         }
+    }
+
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("mDisabled=0x");
+        pw.println(Integer.toHexString(mDisabled));
     }
 }
 

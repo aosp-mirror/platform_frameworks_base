@@ -27,9 +27,11 @@ import dalvik.system.Zygote;
 import android.accounts.AccountManagerService;
 import android.app.ActivityManagerNative;
 import android.bluetooth.BluetoothAdapter;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentService;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -502,9 +504,6 @@ class ServerThread extends Thread {
             notification.systemReady();
         }
 
-        if (statusBar != null) {
-            statusBar.systemReady();
-        }
         wm.systemReady();
 
         // Update the configuration for this context by hand, because we're going
@@ -523,7 +522,7 @@ class ServerThread extends Thread {
         }
 
         // These are needed to propagate to the runnable below.
-        final StatusBarManagerService statusBarF = statusBar;
+        final Context contextF = context;
         final BatteryService batteryF = battery;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
@@ -548,7 +547,7 @@ class ServerThread extends Thread {
             public void run() {
                 Slog.i(TAG, "Making services ready");
 
-                if (statusBarF != null) statusBarF.systemReady2();
+                startSystemUi(contextF);
                 if (batteryF != null) batteryF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();
                 if (dockF != null) dockF.systemReady();
@@ -577,6 +576,14 @@ class ServerThread extends Thread {
 
         Looper.loop();
         Slog.d(TAG, "System ServerThread is exiting!");
+    }
+
+    static final void startSystemUi(Context context) {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com.android.systemui",
+                    "com.android.systemui.SystemUIService"));
+        Slog.d(TAG, "Starting service: " + intent);
+        context.startService(intent);
     }
 }
 

@@ -111,22 +111,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     // ================================================================================
-    // Constructing the view
-    // ================================================================================
-
-    public void systemReady() {
-    }
-
-    public void systemReady2() {
-        ComponentName cn = ComponentName.unflattenFromString(
-                mContext.getString(com.android.internal.R.string.config_statusBarComponent));
-        Intent intent = new Intent();
-        intent.setComponent(cn);
-        Slog.i(TAG, "Starting service: " + cn);
-        mContext.startService(intent);
-    }
-
-    // ================================================================================
     // From IStatusBarService
     // ================================================================================
     public void expand() {
