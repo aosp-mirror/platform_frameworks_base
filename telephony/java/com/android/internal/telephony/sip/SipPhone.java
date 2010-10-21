@@ -28,6 +28,7 @@ import android.os.AsyncResult;
 import android.os.Message;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.Call;
@@ -674,6 +675,18 @@ public class SipPhone extends SipPhoneBase {
 
         public SipConnection(SipCall owner, SipProfile callee) {
             this(owner, callee, getUriString(callee));
+        }
+
+        @Override
+        public String getCnapName() {
+            String displayName = mPeer.getDisplayName();
+            return TextUtils.isEmpty(displayName) ? null
+                                                  : displayName;
+        }
+
+        @Override
+        public int getNumberPresentation() {
+            return Connection.PRESENTATION_ALLOWED;
         }
 
         void initIncomingCall(SipAudioCall sipAudioCall, Call.State newState) {
