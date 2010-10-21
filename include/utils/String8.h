@@ -418,9 +418,7 @@ inline bool String8::operator<=(const String8& other) const
 
 inline bool String8::operator==(const String8& other) const
 {
-    return (SharedBuffer::sizeFromData(mString) ==
-            SharedBuffer::sizeFromData(other.mString)) &&
-        strcmp(mString, other.mString) == 0;
+    return strcmp(mString, other.mString) == 0;
 }
 
 inline bool String8::operator!=(const String8& other) const
