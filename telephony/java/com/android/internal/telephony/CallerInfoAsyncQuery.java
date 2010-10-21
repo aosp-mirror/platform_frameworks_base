@@ -235,7 +235,7 @@ public class CallerInfoAsyncQuery {
                             mQueryContext, cw.number, mCallerInfo);
                     if (newCallerInfo != mCallerInfo) {
                         mCallerInfo = newCallerInfo;
-                        if (DBG) log("#####async contact look up with numeric username"
+                        if (DBG) Log.d(LOG_TAG, "#####async contact look up with numeric username"
                                 + mCallerInfo);
                     }
 
