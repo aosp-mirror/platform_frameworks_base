@@ -174,6 +174,14 @@ static void dumpstate() {
        to increase its timeout.  we really need to do the timeouts in
        dumpsys itself... */
     run_command("DUMPSYS", 60, "dumpsys", NULL);
+
+    printf("========================================================\n");
+    printf("== Application Services\n");
+    printf("========================================================\n");
+
+    /* Instead of a 60s timeout, we should give each service a 5 second timeout */
+    run_command("APP SERVICES", 60, "dumpsys", "activity", "service", NULL);
+
 }
 
 static void usage() {
