@@ -146,7 +146,7 @@
                 android:background="@drawable/ic_sysbar_icon_bg"
                 systemui:keyCode="3"
                 />
-            <ImageButton android:id="@+id/recent"
+            <ImageButton android:id="@+id/recent_apps"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent"

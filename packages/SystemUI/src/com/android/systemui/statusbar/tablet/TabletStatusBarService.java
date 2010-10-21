@@ -67,8 +67,11 @@ public class TabletStatusBarService extends StatusBarService {
     public static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
     public static final int MSG_OPEN_SYSTEM_PANEL = 1010;
     public static final int MSG_CLOSE_SYSTEM_PANEL = 1011;
-    
+    public static final int MSG_OPEN_RECENTS_PANEL = 1020;
+    public static final int MSG_CLOSE_RECENTS_PANEL = 1021;
+
     private static final int MAX_IMAGE_LEVEL = 10000;
+    private static final boolean USE_2D_RECENTS = true;
 
     int mIconSize;
 
@@ -76,7 +79,7 @@ public class TabletStatusBarService extends StatusBarService {
 
     // tracking all current notifications
     private NotificationData mNotns = new NotificationData();
-    
+
     TabletStatusBarView mStatusBarView;
     ImageView mNotificationTrigger;
     NotificationIconArea mNotificationIconArea;
@@ -110,6 +113,7 @@ public class TabletStatusBarService extends StatusBarService {
     int mDisabled = 0;
 
     boolean mNotificationsOn = true;
+    private RecentAppsPanel mRecentsPanel;
 
     protected void addPanelWindows() {
         final Context context = mContext;
@@ -118,6 +122,7 @@ public class TabletStatusBarService extends StatusBarService {
         final int barHeight= res.getDimensionPixelSize(
             com.android.internal.R.dimen.status_bar_height);
 
+        // Notification Panel
         mNotificationPanel = (NotificationPanel)View.inflate(context,
                 R.layout.sysbar_panel_notifications, null);
         mNotificationPanel.setVisibility(View.GONE);
@@ -139,11 +144,11 @@ public class TabletStatusBarService extends StatusBarService {
 
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
 
+        // System Panel
         mSystemPanel = (SystemPanel) View.inflate(context, R.layout.sysbar_panel_system, null);
         mSystemPanel.setVisibility(View.GONE);
         mSystemPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_SYSTEM_PANEL,
-                    mSystemPanel));
-
+                mSystemPanel));
         mStatusBarView.setIgnoreChildren(1, mSystemInfo, mSystemPanel);
 
         lp = new WindowManager.LayoutParams(
@@ -159,6 +164,31 @@ public class TabletStatusBarService extends StatusBarService {
 
         WindowManagerImpl.getDefault().addView(mSystemPanel, lp);
         mSystemPanel.setBar(this);
+
+
+        // Recents Panel
+        if (USE_2D_RECENTS) {
+            mRecentsPanel = (RecentAppsPanel) View.inflate(context, R.layout.sysbar_panel_recent,
+                    null);
+            mRecentsPanel.setVisibility(View.GONE);
+            mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
+                    mRecentsPanel));
+            mStatusBarView.setIgnoreChildren(2, mRecentButton, mRecentsPanel);
+
+            lp = new WindowManager.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                    PixelFormat.TRANSLUCENT);
+            lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+            lp.setTitle("RecentsPanel");
+            lp.windowAnimations = com.android.internal.R.style.Animation_SlidingCard;
+
+            WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
+            mRecentsPanel.setBar(this);
+        }
     }
 
     @Override
@@ -181,12 +211,13 @@ public class TabletStatusBarService extends StatusBarService {
         mBarContents = sb.findViewById(R.id.bar_contents);
         mCurtains = sb.findViewById(R.id.lights_out);
         mSystemInfo = sb.findViewById(R.id.systemInfo);
+        mRecentButton = sb.findViewById(R.id.recent_apps);
 
 //        mSystemInfo.setOnClickListener(mOnClickListener);
         mSystemInfo.setOnLongClickListener(new SetLightsOnListener(false));
         mSystemInfo.setOnTouchListener(new ClockTouchListener());
 
-        mRecentButton = sb.findViewById(R.id.recent);
+        mRecentButton = sb.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
 
         SetLightsOnListener on = new SetLightsOnListener(true);
@@ -231,7 +262,7 @@ public class TabletStatusBarService extends StatusBarService {
 
         mPile = (ViewGroup)mNotificationPanel.findViewById(R.id.content);
         mPile.removeAllViews();
-        
+
         ScrollView scroller = (ScrollView)mPile.getParent();
         scroller.setFillViewport(true);
 
@@ -277,6 +308,13 @@ public class TabletStatusBarService extends StatusBarService {
                 case MSG_CLOSE_SYSTEM_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing system panel");
                     mSystemPanel.setVisibility(View.GONE);
+                case MSG_OPEN_RECENTS_PANEL:
+                    if (DEBUG) Slog.d(TAG, "opening recents panel");
+                    if (mRecentsPanel != null) mRecentsPanel.setVisibility(View.VISIBLE);
+                    break;
+                case MSG_CLOSE_RECENTS_PANEL:
+                    if (DEBUG) Slog.d(TAG, "closing recents panel");
+                    if (mRecentsPanel != null) mRecentsPanel.setVisibility(View.GONE);
                     break;
             }
         }
@@ -315,7 +353,7 @@ public class TabletStatusBarService extends StatusBarService {
             mSignalMeter.setImageResource(R.drawable.sysbar_wifimini);
             // adjust to permyriad
             mSignalMeter.setImageLevel(level * (MAX_IMAGE_LEVEL / 100));
-            mSignalIcon.setImageResource(isWifi ? R.drawable.ic_sysbar_wifi_mini 
+            mSignalIcon.setImageResource(isWifi ? R.drawable.ic_sysbar_wifi_mini
                                                 : R.drawable.ic_sysbar_wifi_mini); // XXX
         }
     }
@@ -362,7 +400,7 @@ public class TabletStatusBarService extends StatusBarService {
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ") // TODO");
-        
+
         final NotificationData.Entry oldEntry = mNotns.findByKey(key);
         if (oldEntry == null) {
             Slog.w(TAG, "updateNotification for unknown key: " + key);
@@ -527,6 +565,8 @@ public class TabletStatusBarService extends StatusBarService {
         mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PANEL);
         mHandler.removeMessages(MSG_CLOSE_SYSTEM_PANEL);
         mHandler.sendEmptyMessage(MSG_CLOSE_SYSTEM_PANEL);
+        mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
+        mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
     }
 
     public void setLightsOn(boolean on) {
@@ -665,7 +705,7 @@ public class TabletStatusBarService extends StatusBarService {
                 mIconLayout.setVisibility(View.VISIBLE); // TODO: animation
                 refreshNotificationTrigger();
             } else {
-                int msg = (mNotificationPanel.getVisibility() == View.GONE) 
+                int msg = (mNotificationPanel.getVisibility() == View.GONE)
                     ? MSG_OPEN_NOTIFICATION_PANEL
                     : MSG_CLOSE_NOTIFICATION_PANEL;
                 mHandler.removeMessages(msg);
@@ -677,7 +717,7 @@ public class TabletStatusBarService extends StatusBarService {
     public void onClickSystemInfo() {
         if (DEBUG) Slog.d(TAG, "clicked system info");
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
-            int msg = (mSystemPanel.getVisibility() == View.GONE) 
+            int msg = (mSystemPanel.getVisibility() == View.GONE)
                 ? MSG_OPEN_SYSTEM_PANEL
                 : MSG_CLOSE_SYSTEM_PANEL;
             mHandler.removeMessages(msg);
@@ -687,11 +727,21 @@ public class TabletStatusBarService extends StatusBarService {
 
     public void onClickRecentButton() {
         if (DEBUG) Slog.d(TAG, "clicked recent apps");
-        Intent intent = new Intent();
-        intent.setClass(mContext, RecentApplicationsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        mContext.startActivity(intent);
+        if (mRecentsPanel == null) {
+            Intent intent = new Intent();
+            intent.setClass(mContext, RecentApplicationsActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            mContext.startActivity(intent);
+        } else {
+            if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
+                int msg = (mRecentsPanel.getVisibility() == View.GONE)
+                    ? MSG_OPEN_RECENTS_PANEL
+                    : MSG_CLOSE_RECENTS_PANEL;
+                mHandler.removeMessages(msg);
+                mHandler.sendEmptyMessage(msg);
+            }
+        }
     }
 
     private class NotificationClicker implements View.OnClickListener {
@@ -835,7 +885,7 @@ public class TabletStatusBarService extends StatusBarService {
             final String _pkg = sbn.pkg;
             final String _tag = sbn.tag;
             final int _id = sbn.id;
-            vetoButton.setOnClickListener(new View.OnClickListener() { 
+            vetoButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         try {
                             mBarService.onNotificationClear(_pkg, _tag, _id);
