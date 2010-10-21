@@ -199,8 +199,18 @@ void DisplayHardware::init(uint32_t dpy)
      * Create our OpenGL ES context
      */
     
-    context = eglCreateContext(display, config, NULL, NULL);
-    
+
+    EGLint contextAttributes[] = {
+#ifdef EGL_IMG_context_priority
+#ifdef HAS_CONTEXT_PRIORITY
+#warning "using EGL_IMG_context_priority"
+        EGL_CONTEXT_PRIORITY_LEVEL_IMG, EGL_CONTEXT_PRIORITY_HIGH_IMG,
+#endif
+#endif
+        EGL_NONE, EGL_NONE
+    };
+    context = eglCreateContext(display, config, NULL, contextAttributes);
+
     mDisplay = display;
     mConfig  = config;
     mSurface = surface;
