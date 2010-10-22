@@ -34,15 +34,12 @@ public class NdefMessage implements Parcelable {
 
     private final NdefRecord[] mRecords;
 
-    //TODO(npelly) FormatException
     /**
      * Create an NDEF message from raw bytes.
      * <p>
      * Validation is performed to make sure the Record format headers are valid,
      * and the ID + TYPE + PAYLOAD fields are of the correct size.
      * @throws FormatException
-     *
-     * @hide
      */
     public NdefMessage(byte[] data) throws FormatException {
         mRecords = null;  // stop compiler complaints about final field
@@ -69,10 +66,7 @@ public class NdefMessage implements Parcelable {
     }
 
     /**
-     * Get a byte array representation of this NDEF message.
-     *
-     * @return byte array
-     * @hide
+     * Returns a byte array representation of this entire NDEF message.
      */
     public byte[] toByteArray() {
         //TODO(nxp): do not return null
