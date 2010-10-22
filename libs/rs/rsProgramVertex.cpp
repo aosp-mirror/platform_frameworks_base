@@ -37,9 +37,6 @@ ProgramVertex::ProgramVertex(Context *rsc, const char * shaderText,
                              uint32_t paramLength) :
     Program(rsc, shaderText, shaderLength, params, paramLength)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
-
     init(rsc);
 }
 

@@ -19,6 +19,11 @@
 
 #include "rsUtils.h"
 
+#define RS_OBJECT_DEBUG 0
+
+#if RS_OBJECT_DEBUG
+    #include <utils/CallStack.h>
+#endif
 
 namespace android {
 namespace renderscript {
@@ -31,7 +36,6 @@ class ObjectBase
 {
 public:
     ObjectBase(Context *rsc);
-    virtual ~ObjectBase();
 
     void incSysRef() const;
     bool decSysRef() const;
@@ -39,7 +43,8 @@ public:
     void incUserRef() const;
     bool decUserRef() const;
     bool zeroUserRef() const;
-    void prelockedIncUserRef() const;
+
+    static bool checkDelete(const ObjectBase *);
 
     const char * getName() const {
         return mName.string();
@@ -58,13 +63,18 @@ public:
 
     static bool isValid(const Context *rsc, const ObjectBase *obj);
 
-    static void lockUserRef();
-    static void unlockUserRef();
+    // The async lock is taken during object creation in non-rs threads
+    // and object deletion in the rs thread.
+    static void asyncLock();
+    static void asyncUnlock();
 
 protected:
-    const char *mAllocFile;
-    uint32_t mAllocLine;
+    // Called inside the async lock for any object list management that is
+    // necessary in derived classes.
+    virtual void preDestroy() const;
+
     Context *mRSC;
+    virtual ~ObjectBase();
 
 private:
     static pthread_mutex_t gObjectInitMutex;
@@ -72,14 +82,17 @@ private:
     void add() const;
     void remove() const;
 
-    bool checkDelete() const;
-
     String8 mName;
     mutable int32_t mSysRefCount;
     mutable int32_t mUserRefCount;
 
     mutable const ObjectBase * mPrev;
     mutable const ObjectBase * mNext;
+
+#if RS_OBJECT_DEBUG
+    CallStack mStack;
+#endif
+
 };
 
 template<class T>
@@ -102,6 +115,10 @@ public:
         if (mRef) {
             ref->incSysRef();
         }
+    }
+
+    ObjectBaseRef & operator= (const ObjectBaseRef &ref) {
+        return ObjectBaseRef(ref);
     }
 
     ~ObjectBaseRef() {

@@ -36,9 +36,6 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
                                  uint32_t paramLength) :
     Program(rsc, shaderText, shaderLength, params, paramLength)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
-
     mConstantColor[0] = 1.f;
     mConstantColor[1] = 1.f;
     mConstantColor[2] = 1.f;
@@ -182,8 +179,8 @@ ProgramFragmentState::ProgramFragmentState()
 
 ProgramFragmentState::~ProgramFragmentState()
 {
-    delete mPF;
-
+    ObjectBase::checkDelete(mPF);
+    mPF = NULL;
 }
 
 void ProgramFragmentState::init(Context *rsc)

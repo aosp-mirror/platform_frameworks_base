@@ -35,8 +35,6 @@ using namespace android::renderscript;
 
 ScriptC::ScriptC(Context *rsc) : Script(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mBccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
@@ -524,11 +522,11 @@ RsScript rsi_ScriptCCreate(Context * rsc)
 {
     ScriptCState *ss = &rsc->mScriptC;
 
-    ObjectBaseRef<ScriptC> s = ss->mScript.get();
+    ObjectBaseRef<ScriptC> s(ss->mScript);
     ss->mScript.clear();
+    s->incUserRef();
 
     ss->runCompiler(rsc, s.get());
-    s->incUserRef();
     ss->clear(rsc);
     return s.get();
 }
