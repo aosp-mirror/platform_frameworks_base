@@ -188,15 +188,7 @@ public class Build {
         public static final int FROYO = 8;
         
         /**
-         * Next version of Android.
-         * 
-         * <p>Applications targeting this or a later release will get these
-         * new changes in behavior:</p>
-         * <ul>
-         * <li> The status bar is now dark.  Targeting this version allows
-         * the platform to perform performing compatibility on status bar
-         * graphics to ensure they look okay on a dark background.
-         * </ul>
+         * Newest version of Android, version 2.3.
          */
         public static final int GINGERBREAD = 9;
     }
