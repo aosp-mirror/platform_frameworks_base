@@ -452,17 +452,14 @@ public abstract class WallpaperService extends Service {
         private void dispatchPointer(MotionEvent event) {
             synchronized (mLock) {
                 if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (mPendingMove != null) {
-                        mCaller.removeMessages(MSG_TOUCH_EVENT, mPendingMove);
-                        mPendingMove.recycle();
-                    }
                     mPendingMove = event;
                 } else {
                     mPendingMove = null;
                 }
-                Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT, event);
-                mCaller.sendMessage(msg);
             }
+
+            Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT, event);
+            mCaller.sendMessage(msg);
         }
 
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
@@ -905,14 +902,22 @@ public abstract class WallpaperService extends Service {
                     mEngine.doOffsetsChanged();
                 } break;
                 case MSG_TOUCH_EVENT: {
+                    boolean skip = false;
                     MotionEvent ev = (MotionEvent)message.obj;
-                    synchronized (mEngine.mLock) {
-                        if (mEngine.mPendingMove == ev) {
-                            mEngine.mPendingMove = null;
+                    if (ev.getAction() == MotionEvent.ACTION_MOVE) {
+                        synchronized (mEngine.mLock) {
+                            if (mEngine.mPendingMove == ev) {
+                                mEngine.mPendingMove = null;
+                            } else {
+                                // this is not the motion event we are looking for....
+                                skip = true;
+                            }
                         }
                     }
-                    if (DEBUG) Log.v(TAG, "Delivering touch event: " + ev);
-                    mEngine.onTouchEvent(ev);
+                    if (!skip) {
+                        if (DEBUG) Log.v(TAG, "Delivering touch event: " + ev);
+                        mEngine.onTouchEvent(ev);
+                    }
                     ev.recycle();
                 } break;
                 default :
