@@ -16,6 +16,8 @@
 
 #define LOG_TAG "NdefRecord"
 
+#include <stdlib.h>
+
 #include "jni.h"
 #include "JNIHelp.h"
 
