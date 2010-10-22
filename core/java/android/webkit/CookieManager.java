@@ -98,6 +98,10 @@ public final class CookieManager {
 
     private boolean mAcceptCookie = true;
 
+    // TODO: Remove this if/when we permanently switch to the Chromium HTTP stack
+    // http:/b/3118772
+    private static Boolean sUseChromiumHttpStack;
+
     /**
      * This contains a list of 2nd-level domains that aren't allowed to have
      * wildcards when combined with country-codes. For example: [.co.uk].
@@ -255,6 +259,13 @@ public final class CookieManager {
             sRef = new CookieManager();
         }
         return sRef;
+    }
+
+    private static boolean useChromiumHttpStack() {
+        if (sUseChromiumHttpStack == null) {
+            sUseChromiumHttpStack = nativeUseChromiumHttpStack();
+        }
+        return sUseChromiumHttpStack;
     }
 
     /**
@@ -524,11 +535,11 @@ public final class CookieManager {
      * Remove all cookies
      */
     public void removeAllCookie() {
-        // Clear cookies for the Chromium HTTP stack
-        nativeRemoveAllCookie();
-        // Clear cookies for the Android HTTP stack
-        // TODO: Remove this if/when we permanently switch to the Chromium HTTP stack
-        // http:/b/3118772
+        if (useChromiumHttpStack()) {
+            nativeRemoveAllCookie();
+            return;
+        }
+
         final Runnable clearCache = new Runnable() {
             public void run() {
                 synchronized(CookieManager.this) {
@@ -1023,5 +1034,6 @@ public final class CookieManager {
     }
 
     // Native functions
+    private static native boolean nativeUseChromiumHttpStack();
     private static native void nativeRemoveAllCookie();
 }
