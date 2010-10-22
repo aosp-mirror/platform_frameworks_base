@@ -96,6 +96,7 @@ public class AsmGenerator {
             methods.add(methodName);
         }
         for (String className : createInfo.getDelegateClassNatives()) {
+            className = binaryToInternalClassName(className);
             Set<String> methods = mDelegateMethods.get(className);
             if (methods == null) {
                 methods = new HashSet<String>();
