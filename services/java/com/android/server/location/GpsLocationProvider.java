@@ -1451,23 +1451,30 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
             GsmCellLocation gsm_cell = (GsmCellLocation) phone.getCellLocation();
-            if ((gsm_cell != null) && (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM)
-                    && (phone.getNetworkOperator().length() > 3)) {
+            if ((gsm_cell != null) && (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) &&
+                    (phone.getNetworkOperator() != null) &&
+                        (phone.getNetworkOperator().length() > 3)) {
                 int type;
                 int mcc = Integer.parseInt(phone.getNetworkOperator().substring(0,3));
                 int mnc = Integer.parseInt(phone.getNetworkOperator().substring(3));
-                if (phone.getNetworkType() == TelephonyManager.NETWORK_TYPE_UMTS)
+                int networkType = phone.getNetworkType();
+                if (networkType == TelephonyManager.NETWORK_TYPE_UMTS
+                    || networkType == TelephonyManager.NETWORK_TYPE_HSDPA
+                    || networkType == TelephonyManager.NETWORK_TYPE_HSUPA
+                    || networkType == TelephonyManager.NETWORK_TYPE_HSPA) {
                     type = AGPS_REF_LOCATION_TYPE_UMTS_CELLID;
-                else
+                } else {
                     type = AGPS_REF_LOCATION_TYPE_GSM_CELLID;
+                }
                 native_agps_set_ref_location_cellid(type, mcc, mnc,
                         gsm_cell.getLac(), gsm_cell.getCid());
-            }
-            else
+            } else {
                 Log.e(TAG,"Error getting cell location info.");
+            }
         }
-        else
+        else {
             Log.e(TAG,"CDMA not supported.");
+        }
     }
 
     private void sendMessage(int message, int arg, Object obj) {
