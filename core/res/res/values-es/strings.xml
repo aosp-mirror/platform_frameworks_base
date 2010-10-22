@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Permite que una aplicación configure el teléfono Bluetooth local, y vea dispositivos remotos y sincronice el teléfono con ellos."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"crear conexiones de Bluetooth"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Permite que una aplicación vea la configuración del teléfono Bluetooth local, y cree y acepte conexiones con los dispositivos sincronizados."</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"Administración de NFC"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Permite que una aplicación configure el teléfono NFC local."</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"Acceso completo NFC a dispositivo remoto"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Permite que una aplicación acceda a los dispositivos NFC remotos."</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"Notificación NFC de dispositivo remoto"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Permite que una aplicación reciba notificaciones sobre las operaciones relacionadas con dispositivos NFC remotos."</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"Notificación NFC de dispositivo LLCP remoto"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Permite que una aplicación reciba notificaciones de operaciones LLCP relacionadas con dispositivos NFC remotos."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"inhabilitar bloqueo del teclado"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permite que una aplicación inhabilite el bloqueo del teclado y cualquier protección con contraseña asociada. Un ejemplo legítimo de este permiso es la inhabilitación por parte del teléfono del bloqueo del teclado cuando recibe una llamada telefónica entrante y su posterior habilitación cuando finaliza la llamada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Más información sobre uso de datos"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Límite datos superado"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Más información sobre uso de datos"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>

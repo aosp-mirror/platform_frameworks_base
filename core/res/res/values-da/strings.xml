@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Tillader, at et program konfigurerer den lokale Bluetooth-telefon samt opdager og parrer med fjerne enheder."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opret Bluetooth-forbindelser"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Tillader, at et program viser konfigurationen af den lokale Bluetooth-telefon samt opretter og accepterer forbindelse med parrede enheder."</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"NFC-administration"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Tillader, at et program konfigurerer den lokale NFC-telefon."</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"NFC har fuld adgang til fjernenhed"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Tillader, at et program har adgang til NFC-fjernenheder."</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"NFC-meddelelse fra fjernenhed"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Tillader, at et program meddeles om handlinger, som er relateret til NFC-fjernenheder."</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"NFC-meddelelse fra LLCP-fjernenhed"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Tillader, at et program meddeles om LLCP-handlinger, som er relateret til NFC-fjernenheder."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"deaktiver tastaturlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Tillader, at et program deaktiverer tastaturlåsen og al associeret adgangskodesikkerhed. Et legitimt eksempel på dette er, at telefonen deaktiverer tastaturlåsen, når der modtages et indgående telefonopkald, og genaktiverer tastaturlåsen, når opkaldet er afsluttet."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"læs indstillinger for synkronisering"</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Tryk for oplysninger om brug af mobildata"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Grænsen for mobildata er overskredet"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Tryk for oplysninger om brug af mobildata"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>
