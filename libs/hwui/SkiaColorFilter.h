@@ -18,6 +18,7 @@
 #define ANDROID_UI_SKIA_COLOR_FILTER_H
 
 #include <GLES2/gl2.h>
+#include <SkColorFilter.h>
 
 #include "ProgramCache.h"
 #include "Extensions.h"
@@ -44,7 +45,7 @@ struct SkiaColorFilter {
         kBlend,
     };
 
-    SkiaColorFilter(Type type, bool blend);
+    SkiaColorFilter(SkColorFilter *skFilter, Type type, bool blend);
     virtual ~SkiaColorFilter();
 
     virtual void describe(ProgramDescription& description, const Extensions& extensions) = 0;
@@ -58,9 +59,16 @@ struct SkiaColorFilter {
         return mType;
     }
 
+    SkColorFilter *getSkColorFilter() {
+        return mSkFilter;
+    }
+
 protected:
     Type mType;
     bool mBlend;
+
+private:
+    SkColorFilter *mSkFilter;
 }; // struct SkiaColorFilter
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +79,7 @@ protected:
  * A color filter that multiplies the source color with a matrix and adds a vector.
  */
 struct SkiaColorMatrixFilter: public SkiaColorFilter {
-    SkiaColorMatrixFilter(float* matrix, float* vector);
+    SkiaColorMatrixFilter(SkColorFilter *skFilter, float* matrix, float* vector);
     ~SkiaColorMatrixFilter();
 
     void describe(ProgramDescription& description, const Extensions& extensions);
@@ -87,7 +95,7 @@ private:
  * another fixed value. Ignores the alpha channel of both arguments.
  */
 struct SkiaLightingFilter: public SkiaColorFilter {
-    SkiaLightingFilter(int multiply, int add);
+    SkiaLightingFilter(SkColorFilter *skFilter, int multiply, int add);
 
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program);
@@ -102,7 +110,7 @@ private:
  * and PorterDuff blending mode.
  */
 struct SkiaBlendFilter: public SkiaColorFilter {
-    SkiaBlendFilter(int color, SkXfermode::Mode mode);
+    SkiaBlendFilter(SkColorFilter *skFilter, int color, SkXfermode::Mode mode);
 
     void describe(ProgramDescription& description, const Extensions& extensions);
     void setupProgram(Program* program);

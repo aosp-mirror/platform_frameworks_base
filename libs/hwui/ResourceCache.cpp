@@ -67,6 +67,11 @@ void ResourceCache::incrementRefcount(SkiaShader* shaderResource) {
     incrementRefcount((void*)shaderResource, kShader);
 }
 
+void ResourceCache::incrementRefcount(SkiaColorFilter* filterResource) {
+    filterResource->getSkColorFilter()->safeRef();
+    incrementRefcount((void*)filterResource, kColorFilter);
+}
+
 void ResourceCache::decrementRefcount(void* resource) {
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
@@ -88,6 +93,11 @@ void ResourceCache::decrementRefcount(SkBitmap* bitmapResource) {
 void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
     shaderResource->getSkShader()->safeUnref();
     decrementRefcount((void*)shaderResource);
+}
+
+void ResourceCache::decrementRefcount(SkiaColorFilter* filterResource) {
+    filterResource->getSkColorFilter()->safeUnref();
+    decrementRefcount((void*)filterResource);
 }
 
 void ResourceCache::recycle(SkBitmap* resource) {
@@ -145,6 +155,20 @@ void ResourceCache::destructor(SkiaShader* resource) {
     }
 }
 
+void ResourceCache::destructor(SkiaColorFilter* resource) {
+    ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
+    if (ref == NULL) {
+        // If we're not tracking this resource, just delete it
+        delete resource;
+        return;
+    }
+    ref->destroyed = true;
+    if (ref->refCount == 0) {
+        deleteResourceReference(resource, ref);
+        return;
+    }
+}
+
 void ResourceCache::deleteResourceReference(void* resource, ResourceReference* ref) {
     if (ref->recycled && ref->resourceType == kBitmap) {
         ((SkBitmap*) resource)->setPixels(NULL, NULL);
@@ -161,12 +185,20 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
             }
             break;
             case kShader:
+            {
                 SkiaShader* shader = (SkiaShader*)resource;
                 if (Caches::hasInstance()) {
                     Caches::getInstance().gradientCache.remove(shader->getSkShader());
                 }
                 delete shader;
-                break;
+            }
+            break;
+            case kColorFilter:
+            {
+                SkiaColorFilter* filter = (SkiaColorFilter*)resource;
+                delete filter;
+            }
+            break;
         }
     }
     mCache->removeItem(resource);

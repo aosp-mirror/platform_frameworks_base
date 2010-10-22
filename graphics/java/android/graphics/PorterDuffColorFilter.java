@@ -26,9 +26,10 @@ public class PorterDuffColorFilter extends ColorFilter {
      */
     public PorterDuffColorFilter(int srcColor, PorterDuff.Mode mode) {
         native_instance = native_CreatePorterDuffFilter(srcColor, mode.nativeInt);
-        nativeColorFilter = nCreatePorterDuffFilter(srcColor, mode.nativeInt);
+        nativeColorFilter = nCreatePorterDuffFilter(native_instance, srcColor, mode.nativeInt);
     }
 
     private static native int native_CreatePorterDuffFilter(int srcColor, int porterDuffMode);
-    private static native int nCreatePorterDuffFilter(int srcColor, int porterDuffMode);
+    private static native int nCreatePorterDuffFilter(int nativeFilter, int srcColor,
+            int porterDuffMode);
 }
