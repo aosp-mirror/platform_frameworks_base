@@ -35,8 +35,8 @@
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
 
-//#define LOG_TRACE(...)
-#define LOG_TRACE(...) LOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOG_TRACE(...)
+//#define LOG_TRACE(...) LOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
 namespace android
 {
@@ -46,6 +46,7 @@ static struct {
 
     jmethodID dispatchUnhandledKeyEvent;
     jmethodID preDispatchKeyEvent;
+    jmethodID finish;
     jmethodID setWindowFlags;
     jmethodID setWindowFormat;
     jmethodID showIme;
@@ -62,6 +63,7 @@ struct ActivityWork {
 
 enum {
     CMD_DEF_KEY = 1,
+    CMD_FINISH,
     CMD_SET_WINDOW_FORMAT,
     CMD_SET_WINDOW_FLAGS,
     CMD_SHOW_SOFT_INPUT,
@@ -512,6 +514,11 @@ struct NativeCode : public ANativeActivity {
     sp<Looper> looper;
 };
 
+void android_NativeActivity_finish(ANativeActivity* activity) {
+    NativeCode* code = static_cast<NativeCode*>(activity);
+    write_work(code->mainWorkWrite, CMD_FINISH, 0);
+}
+
 void android_NativeActivity_setWindowFormat(
         ANativeActivity* activity, int32_t format) {
     NativeCode* code = static_cast<NativeCode*>(activity);
@@ -538,6 +545,16 @@ void android_NativeActivity_hideSoftInput(
 
 // ------------------------------------------------------------------------
 
+static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
+   if (env->ExceptionCheck()) {
+       LOGE("An exception was thrown by callback '%s'.", methodName);
+       LOGE_EX(env);
+       env->ExceptionClear();
+       return true;
+   }
+   return false;
+}
+
 /*
  * Callback for handling native events on the application's main thread.
  */
@@ -562,6 +579,7 @@ static int mainWorkCallback(int fd, int events, void* data) {
                         code->env, keyEvent);
                 code->env->CallVoidMethod(code->clazz,
                         gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
+                checkAndClearExceptionFromCallback(code->env, "dispatchUnhandledKeyEvent");
                 code->nativeInputQueue->finishEvent(keyEvent, true);
             }
             int seq;
@@ -570,23 +588,32 @@ static int mainWorkCallback(int fd, int events, void* data) {
                         code->env, keyEvent);
                 code->env->CallVoidMethod(code->clazz,
                         gNativeActivityClassInfo.preDispatchKeyEvent, inputEventObj, seq);
+                checkAndClearExceptionFromCallback(code->env, "preDispatchKeyEvent");
             }
+        } break;
+        case CMD_FINISH: {
+            code->env->CallVoidMethod(code->clazz, gNativeActivityClassInfo.finish);
+            checkAndClearExceptionFromCallback(code->env, "finish");
         } break;
         case CMD_SET_WINDOW_FORMAT: {
             code->env->CallVoidMethod(code->clazz,
                     gNativeActivityClassInfo.setWindowFormat, work.arg1);
+            checkAndClearExceptionFromCallback(code->env, "setWindowFormat");
         } break;
         case CMD_SET_WINDOW_FLAGS: {
             code->env->CallVoidMethod(code->clazz,
                     gNativeActivityClassInfo.setWindowFlags, work.arg1, work.arg2);
+            checkAndClearExceptionFromCallback(code->env, "setWindowFlags");
         } break;
         case CMD_SHOW_SOFT_INPUT: {
             code->env->CallVoidMethod(code->clazz,
                     gNativeActivityClassInfo.showIme, work.arg1);
+            checkAndClearExceptionFromCallback(code->env, "showIme");
         } break;
         case CMD_HIDE_SOFT_INPUT: {
             code->env->CallVoidMethod(code->clazz,
                     gNativeActivityClassInfo.hideIme, work.arg1);
+            checkAndClearExceptionFromCallback(code->env, "hideIme");
         } break;
         default:
             LOGW("Unknown work command: %d", work.cmd);
@@ -1018,6 +1045,9 @@ int register_android_app_NativeActivity(JNIEnv* env)
             gNativeActivityClassInfo.clazz,
             "preDispatchKeyEvent", "(Landroid/view/KeyEvent;I)V");
 
+    GET_METHOD_ID(gNativeActivityClassInfo.finish,
+            gNativeActivityClassInfo.clazz,
+            "finish", "()V");
     GET_METHOD_ID(gNativeActivityClassInfo.setWindowFlags,
             gNativeActivityClassInfo.clazz,
             "setWindowFlags", "(II)V");

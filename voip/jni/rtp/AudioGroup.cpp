@@ -768,7 +768,7 @@ bool AudioGroup::DeviceThread::threadLoop()
     LOGD("latency: output %d, input %d", track.latency(), record.latency());
 
     // Initialize echo canceler.
-    EchoSuppressor echo(sampleRate, sampleCount, sampleCount * 2 +
+    EchoSuppressor echo(sampleCount,
         (track.latency() + record.latency()) * sampleRate / 1000);
 
     // Give device socket a reasonable buffer size.

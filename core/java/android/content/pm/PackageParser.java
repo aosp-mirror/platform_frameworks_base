@@ -1080,6 +1080,16 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
                 
+            } else if (tagName.equals("uses-gl-texture")) {
+                // Just skip this tag
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+                
+            } else if (tagName.equals("compatible-screens")) {
+                // Just skip this tag
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+                
             } else if (tagName.equals("eat-comment")) {
                 // Just skip this tag
                 XmlUtils.skipCurrentTag(parser);

@@ -216,19 +216,21 @@ int main(int argc, char *argv[]) {
         fclose(cmdline);
     }
 
-    /* switch to non-root user and group */
-    gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT };
-    if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
-        LOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
-        return -1;
-    }
-    if (setgid(AID_SHELL) != 0) {
-        LOGE("Unable to setgid, aborting: %s\n", strerror(errno));
-        return -1;
-    }
-    if (setuid(AID_SHELL) != 0) {
-        LOGE("Unable to setuid, aborting: %s\n", strerror(errno));
-        return -1;
+    if (getuid() == 0) {
+        /* switch to non-root user and group */
+        gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT };
+        if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
+            LOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
+            return -1;
+        }
+        if (setgid(AID_SHELL) != 0) {
+            LOGE("Unable to setgid, aborting: %s\n", strerror(errno));
+            return -1;
+        }
+        if (setuid(AID_SHELL) != 0) {
+            LOGE("Unable to setuid, aborting: %s\n", strerror(errno));
+            return -1;
+        }
     }
 
     char path[PATH_MAX], tmp_path[PATH_MAX];

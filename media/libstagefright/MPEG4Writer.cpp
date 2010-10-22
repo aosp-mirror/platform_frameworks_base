@@ -41,7 +41,10 @@ namespace android {
 static const int64_t kMax32BitFileSize = 0x007fffffffLL;
 static const uint8_t kNalUnitTypeSeqParamSet = 0x07;
 static const uint8_t kNalUnitTypePicParamSet = 0x08;
-static const int64_t kVideoMediaTimeAdjustPeriodTimeUs = 10000000LL;  // 10s
+
+// Using longer adjustment period to suppress fluctuations in
+// the audio encoding paths
+static const int64_t kVideoMediaTimeAdjustPeriodTimeUs = 600000000LL;  // 10 minutes
 
 class MPEG4Writer::Track {
 public:
@@ -1175,7 +1178,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
         startTimeUs = 0;
     }
 
-    mIsRealTimeRecording = false;
+    mIsRealTimeRecording = true;
     {
         int32_t isNotRealTime;
         if (params && params->findInt32(kKeyNotRealTime, &isNotRealTime)) {
