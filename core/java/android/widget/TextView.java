@@ -5018,6 +5018,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         mLayout = mHintLayout = null;
+
+        // Since it depends on the value of mLayout
+        prepareCursorControllers();
     }
 
     /**
