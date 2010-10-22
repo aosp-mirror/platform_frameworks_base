@@ -524,6 +524,11 @@ public final class CookieManager {
      * Remove all cookies
      */
     public void removeAllCookie() {
+        // Clear cookies for the Chromium HTTP stack
+        nativeRemoveAllCookie();
+        // Clear cookies for the Android HTTP stack
+        // TODO: Remove this if/when we permanently switch to the Chromium HTTP stack
+        // http:/b/3118772
         final Runnable clearCache = new Runnable() {
             public void run() {
                 synchronized(CookieManager.this) {
@@ -1016,4 +1021,7 @@ public final class CookieManager {
         }
         return ret;
     }
+
+    // Native functions
+    private static native void nativeRemoveAllCookie();
 }
