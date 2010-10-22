@@ -2415,4 +2415,10 @@
     <!-- Text for message for an unknown external media state [CHAR LIMIT=NONE] -->
     <string name="media_unknown_state">External media in unknown state.</string>
 
+    <!-- Text for WebView's text selection Action Mode -->
+    <!-- ActionBar action to share the current selection [CHAR LIMIT=10] -->
+    <string name="share">Share</string>
+    <!-- ActionBar action to use the current selection to open the Find on page functionality [CHAR LIMIT=10]-->
+    <string name="find">Find</string>
+
 </resources>

@@ -17,19 +17,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/copy"
         android:icon="?android:attr/actionModeCopyDrawable"
-        android:showAsAction="always"
+        android:title="@string/copy"
+        android:showAsAction="always|withText"
         />
     <item android:id="@+id/share"
         android:icon="@drawable/ic_menu_share"
-        android:showAsAction="always"
+        android:title="@string/share"
+        android:showAsAction="always|withText"
         />
     <item android:id="@+id/select_all"
-        android:icon="@drawable/ic_menu_select_all"
-        android:showAsAction="always"
+        android:title="@string/selectAll"
+        android:showAsAction="always|withText"
         />
     <item android:id="@+id/find"
         android:icon="@drawable/ic_menu_find"
-        android:showAsAction="always"
+        android:title="@string/find"
+        android:showAsAction="always|withText"
         />
 </menu>
 
