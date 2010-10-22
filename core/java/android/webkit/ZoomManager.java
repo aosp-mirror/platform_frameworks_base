@@ -554,9 +554,7 @@ class ZoomManager {
         }
 
         if (settings.getLayoutAlgorithm() == WebSettings.LayoutAlgorithm.NARROW_COLUMNS
-                && willScaleTriggerZoom(mTextWrapScale)
-                // For tablet, not much need to reflow text w/o double tapping.
-                && !settings.getUseFixedViewport()) {
+                && willScaleTriggerZoom(mTextWrapScale)) {
             refreshZoomScale(true);
         } else if (!mInZoomOverview) {
             zoomToOverview();
