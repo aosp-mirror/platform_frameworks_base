@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"允许应用程序配置本地蓝牙手机，以及发现远程设备并与其配对。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"创建蓝牙连接"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"允许应用程序查看本地蓝牙手机的配置，以及建立或接受与配对设备的连接。"</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"NFC 管理"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"允许应用程序配置本地 NFC 手机。"</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"NFC 可完全访问线控设备"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"允许应用程序访问线控 NFC 设备。"</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"来自线控设备的 NFC 通知"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"当线控 NFC 设备发生操作时，允许通知应用程序。"</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"来自线控 LLCP 设备的 NFC 通知"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"当线控 NFC 设备发生 LLCP 操作时，允许通知应用程序。"</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"停用键锁"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"允许应用程序停用键锁和任何关联的密码安全设置。例如，在手机上接听电话时停用键锁，在通话结束后重新启用键锁。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
@@ -805,14 +801,14 @@
     <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"您已通过 USB 将手机连接至计算机。如果您要在计算机和 Android 手机的共享存储设备之间复制文件，请选择下面的按钮。"</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"您已通过 USB 将手机连接至计算机。如果您要在计算机和 Android 手机的 SD 卡之间复制文件，请点击下面的按钮。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"打开 USB 存储设备"</string>
-    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"使用共享存储设备作为 USB 存储时出现问题。"</string>
-    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"使用共享存储设备作为 USB 存储时出现问题。"</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"将共享存储设备用作 USB 存储设备时出现问题。"</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"将共享存储设备用作 USB 存储设备时出现问题。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 已连接"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"选择将文件复制到计算机或从计算机复制到存储设备。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"关闭 USB 存储设备"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"选中以关闭 USB 存储设备。"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"使用中的 USB 存储设备"</string>
-    <!-- outdated translation 8745345260780267185 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"在关闭 USB 存储前，请确保您已从计算机中卸载（“弹出”）Android 手机的共享存储设备。"</string>
+    <!-- outdated translation 8745345260780267185 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"在关闭 USB 存储设备前，请确保您已从计算机中卸载（“弹出”）Android 手机的共享存储设备。"</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"在关闭 USB 存储设备前，请确保您已从计算机中卸载（“弹出”）Android 手机的 SD 卡。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"关闭 USB 存储设备"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"关闭 USB 存储设备时遇到问题。请检查并确保已卸载了 USB 主设备，然后重试。"</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"轻触以了解有关手机流量详情"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已超出手机数据上限"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"轻触以了解有关手机流量详情"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>
