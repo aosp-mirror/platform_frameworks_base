@@ -306,6 +306,10 @@ public class SearchView extends LinearLayout {
      */
     public void setQuery(CharSequence query, boolean submit) {
         mQueryTextView.setText(query);
+        if (query != null) {
+            mQueryTextView.setSelection(query.length());
+        }
+
         // If the query is not empty and submit is requested, submit the query
         if (submit && !TextUtils.isEmpty(query)) {
             onSubmitQuery();
