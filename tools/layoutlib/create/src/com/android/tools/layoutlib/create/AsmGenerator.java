@@ -313,6 +313,11 @@ public class AsmGenerator {
             rv = new RenameClassAdapter(cw, className, newName);
         }
 
+        ClassVisitor cv = new TransformClassAdapter(mLog, mStubMethods,
+                mDeleteReturns.get(className),
+                newName, rv,
+                stubNativesOnly, stubNativesOnly || hasNativeMethods);
+
         Set<String> delegateMethods = mDelegateMethods.get(className);
         if (delegateMethods != null && !delegateMethods.isEmpty()) {
             // If delegateMethods only contains one entry ALL_NATIVES and the class is
@@ -320,14 +325,10 @@ public class AsmGenerator {
             if (hasNativeMethods ||
                     !(delegateMethods.size() == 1 &&
                             delegateMethods.contains(DelegateClassAdapter.ALL_NATIVES))) {
-                rv = new DelegateClassAdapter(mLog, rv, className, delegateMethods);
+                cv = new DelegateClassAdapter(mLog, cv, className, delegateMethods);
             }
         }
 
-        TransformClassAdapter cv = new TransformClassAdapter(mLog, mStubMethods,
-                mDeleteReturns.get(className),
-                newName, rv,
-                stubNativesOnly, stubNativesOnly || hasNativeMethods);
         cr.accept(cv, 0 /* flags */);
         return cw.toByteArray();
     }
