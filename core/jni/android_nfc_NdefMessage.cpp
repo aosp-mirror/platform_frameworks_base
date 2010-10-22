@@ -16,6 +16,8 @@
 
 #define LOG_TAG "NdefMessage"
 
+#include <stdlib.h>
+
 #include "jni.h"
 #include "JNIHelp.h"
 
