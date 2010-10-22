@@ -21,6 +21,10 @@
 
 using namespace android;
 
+void ANativeActivity_finish(ANativeActivity* activity) {
+    android_NativeActivity_finish(activity);
+}
+
 void ANativeActivity_setWindowFormat(ANativeActivity* activity, int32_t format) {
 	android_NativeActivity_setWindowFormat(activity, format);
 }

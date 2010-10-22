@@ -26,6 +26,9 @@
 
 namespace android {
 
+extern void android_NativeActivity_finish(
+        ANativeActivity* activity);
+
 extern void android_NativeActivity_setWindowFormat(
         ANativeActivity* activity, int32_t format);
 

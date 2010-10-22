@@ -227,6 +227,12 @@ typedef void ANativeActivity_createFunc(ANativeActivity* activity,
  */
 extern ANativeActivity_createFunc ANativeActivity_onCreate;
 
+/**
+ * Finish the given activity.  Its finish() method will be called, causing it
+ * to be stopped and destroyed.
+ */
+void ANativeActivity_finish(ANativeActivity* activity);
+
 void ANativeActivity_setWindowFormat(ANativeActivity* activity, int32_t format);
 
 void ANativeActivity_setWindowFlags(ANativeActivity* activity,
