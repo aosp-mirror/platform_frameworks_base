@@ -256,20 +256,20 @@ static void Bitmap_destructor(JNIEnv* env, jobject, SkBitmap* bitmap) {
 #ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::Caches::hasInstance()) {
         android::uirenderer::Caches::getInstance().resourceCache.destructor(bitmap);
+        return;
     }
-#else // !USE_OPENGL_RENDERER
+#endif // USE_OPENGL_RENDERER
     delete bitmap;
-#endif
 }
 
 static void Bitmap_recycle(JNIEnv* env, jobject, SkBitmap* bitmap) {
 #ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::Caches::hasInstance()) {
         android::uirenderer::Caches::getInstance().resourceCache.recycle(bitmap);
+        return;
     }
-#else // !USE_OPENGL_RENDERER
-    bitmap->setPixels(NULL, NULL);
 #endif // USE_OPENGL_RENDERER
+    bitmap->setPixels(NULL, NULL);
 }
 
 // These must match the int values in Bitmap.java

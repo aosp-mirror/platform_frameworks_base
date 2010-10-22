@@ -66,10 +66,10 @@ public:
 #ifdef USE_OPENGL_RENDERER
         if (android::uirenderer::Caches::hasInstance()) {
             android::uirenderer::Caches::getInstance().resourceCache.destructor(obj);
+            return;
         }
-#else // !USE_OPENGL_RENDERER
+#endif // USE_OPENGL_RENDERER
         delete obj;
-#endif
     }
 
     static SkPaint* init(JNIEnv* env, jobject clazz) {
