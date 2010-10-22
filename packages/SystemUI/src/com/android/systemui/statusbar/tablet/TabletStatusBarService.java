@@ -77,7 +77,7 @@ public class TabletStatusBarService extends StatusBarService {
     private NotificationData mNotns = new NotificationData();
     
     TabletStatusBarView mStatusBarView;
-    View mNotificationTrigger;
+    ImageView mNotificationTrigger;
     NotificationIconArea mNotificationIconArea;
     View mNotificationButtons;
     View mSystemInfo;
@@ -192,7 +192,7 @@ public class TabletStatusBarService extends StatusBarService {
         mCurtains.setOnLongClickListener(on);
 
         // the button to open the notification area
-        mNotificationTrigger = sb.findViewById(R.id.expand);
+        mNotificationTrigger = (ImageView) sb.findViewById(R.id.notificationTrigger);
         mNotificationTrigger.setOnClickListener(mOnClickListener);
 
         // the more notifications icon
@@ -222,6 +222,7 @@ public class TabletStatusBarService extends StatusBarService {
 
         // set the initial view visibility
         setAreThereNotifications();
+        refreshNotificationTrigger();
 
         // Add the windows
         addPanelWindows();
@@ -253,6 +254,7 @@ public class TabletStatusBarService extends StatusBarService {
                                 R.anim.notification_icons_out);
                         setViewVisibility(mNotificationButtons, View.VISIBLE,
                                 R.anim.notification_buttons_in);
+                        refreshNotificationTrigger();
                     }
                     break;
                 case MSG_CLOSE_NOTIFICATION_PANEL:
@@ -263,6 +265,7 @@ public class TabletStatusBarService extends StatusBarService {
                                 R.anim.notification_icons_in);
                         setViewVisibility(mNotificationButtons, View.GONE,
                                 R.anim.notification_buttons_out);
+                        refreshNotificationTrigger();
                     }
                     break;
                 case MSG_OPEN_SYSTEM_PANEL:
@@ -275,6 +278,20 @@ public class TabletStatusBarService extends StatusBarService {
                     break;
             }
         }
+    }
+
+    public void refreshNotificationTrigger() {
+        int resId;
+        boolean panel = (mNotificationPanel != null 
+                && mNotificationPanel.getVisibility() == View.VISIBLE);
+        if (!mNotificationsOn) {
+            resId = R.drawable.ic_sysbar_noti_dnd;
+        } else if (mNotns.size() > 0) {
+            resId = panel ? R.drawable.ic_sysbar_noti_avail_open : R.drawable.ic_sysbar_noti_avail;
+        } else {
+            resId = panel ? R.drawable.ic_sysbar_noti_none_open : R.drawable.ic_sysbar_noti_none;
+        }
+        mNotificationTrigger.setImageResource(resId);
     }
     
     public void setBatteryMeter(int level, boolean plugged) {
@@ -598,21 +615,34 @@ public class TabletStatusBarService extends StatusBarService {
             // system process is dead if we're here.
         }
         animateCollapse();
+        refreshNotificationTrigger();
     }
 
     void onClickDoNotDisturb() {
         mNotificationsOn = !mNotificationsOn;
+        setViewVisibility(mIconLayout,
+                mNotificationsOn ? View.VISIBLE : View.INVISIBLE,
+                mNotificationsOn ? R.anim.notification_dnd_off : R.anim.notification_dnd_on);
         animateCollapse();
+        refreshNotificationTrigger();
     }
 
     public void onClickNotificationTrigger() {
         if (DEBUG) Slog.d(TAG, "clicked notification icons");
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
-            int msg = (mNotificationPanel.getVisibility() == View.GONE) 
-                ? MSG_OPEN_NOTIFICATION_PANEL
-                : MSG_CLOSE_NOTIFICATION_PANEL;
-            mHandler.removeMessages(msg);
-            mHandler.sendEmptyMessage(msg);
+            if (!mNotificationsOn) {
+                mNotificationsOn = true;
+                setViewVisibility(mIconLayout,
+                        View.VISIBLE,
+                        R.anim.notification_dnd_off);
+                refreshNotificationTrigger();
+            } else {
+                int msg = (mNotificationPanel.getVisibility() == View.GONE) 
+                    ? MSG_OPEN_NOTIFICATION_PANEL
+                    : MSG_CLOSE_NOTIFICATION_PANEL;
+                mHandler.removeMessages(msg);
+                mHandler.sendEmptyMessage(msg);
+            }
         }
     }
 
@@ -757,6 +787,8 @@ public class TabletStatusBarService extends StatusBarService {
         for (int i=0; i<N; i++) {
             mPile.addView(mNotns.get(N-i-1).row);
         }
+
+        refreshNotificationTrigger();
     }
 
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {

@@ -32,13 +32,11 @@ public class NotificationIconArea extends LinearLayout {
     private static final String TAG = "NotificationIconArea";
 
     IconLayout mIconLayout;
-    DraggerView mDraggerView;
 
     public NotificationIconArea(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mIconLayout = (IconLayout)findViewById(R.id.icons);
-        mDraggerView = (DraggerView) findViewById(R.id.handle);
     }
 
     static class IconLayout extends LinearLayout {

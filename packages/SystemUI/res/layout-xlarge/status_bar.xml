@@ -28,19 +28,21 @@
         >
 
         <ImageView
-            android:id="@+id/expand"
+            android:id="@+id/notificationTrigger"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_sysbar_open"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="6dip"
+            android:src="@drawable/ic_sysbar_noti_none"
             android:background="@drawable/ic_sysbar_icon_bg"
-            android:paddingLeft="6dip"
+            android:gravity="center"
             />
 
         <LinearLayout
             android:id="@+id/notificationButtons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_toRightOf="@+id/expand"
+            android:layout_toLeftOf="@+id/notificationTrigger"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:visibility="gone"
@@ -78,7 +80,7 @@
             android:id="@+id/notificationIcons"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_toLeftOf="@+id/expand"
+            android:layout_toLeftOf="@+id/notificationTrigger"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             >
@@ -90,14 +92,6 @@
                 android:src="@drawable/ic_sysbar_ime_default"
                 android:background="@drawable/ic_sysbar_icon_bg"
                 android:visibility="invisible"
-                />
-            <view
-                class="com.android.systemui.statusbar.tablet.NotificationIconArea$DraggerView"
-                android:id="@+id/handle"
-                android:layout_width="32dip"
-                android:layout_height="match_parent"
-                android:background="@drawable/sysbar_hidenotification_handle"
-                android:layout_marginLeft="8dip"
                 />
             <view
                 class="com.android.systemui.statusbar.tablet.NotificationIconArea$IconLayout"
