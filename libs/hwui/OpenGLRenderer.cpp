@@ -355,8 +355,16 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     Rect bounds(left, top, right, bottom);
     if (!fboLayer) {
         mSnapshot->transform->mapRect(bounds);
+
         // Layers only make sense if they are in the framebuffer's bounds
         bounds.intersect(*mSnapshot->clipRect);
+
+        // When the layer is not an FBO, we may use glCopyTexImage so we
+        // need to make sure the layer does not extend outside the bounds
+        // of the framebuffer
+        bounds.intersect(snapshot->previous->viewport);
+
+        // We cannot work with sub-pixels in this case
         bounds.snapToPixelBoundaries();
     }
 
