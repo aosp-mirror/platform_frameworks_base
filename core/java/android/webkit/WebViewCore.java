@@ -1074,7 +1074,7 @@ final class WebViewCore {
                             // note: these are in document coordinates
                             // (inv-zoom)
                             Point pt = (Point) msg.obj;
-                            nativeSetScrollOffset(msg.arg1, pt.x, pt.y);
+                            nativeSetScrollOffset(msg.arg1, msg.arg2, pt.x, pt.y);
                             break;
 
                         case SET_GLOBAL_BOUNDS:
@@ -2347,7 +2347,7 @@ final class WebViewCore {
     private native void nativeScrollFocusedTextInput(float xPercent, int y);
 
     // these must be in document space (i.e. not scaled/zoomed).
-    private native void nativeSetScrollOffset(int gen, int dx, int dy);
+    private native void nativeSetScrollOffset(int gen, int userScrolled, int dx, int dy);
 
     private native void nativeSetGlobalBounds(int x, int y, int w, int h);
 

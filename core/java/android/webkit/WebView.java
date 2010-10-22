@@ -2388,7 +2388,7 @@ public class WebView extends AbsoluteLayout
         if (!rect.equals(mLastVisibleRectSent)) {
             Point pos = new Point(rect.left, rect.top);
             mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
-                    nativeMoveGeneration(), 0, pos);
+                    nativeMoveGeneration(), mUserScroll ? 1 : 0, pos);
             mLastVisibleRectSent = rect;
         }
         Rect globalRect = new Rect();
@@ -6444,6 +6444,7 @@ public class WebView extends AbsoluteLayout
                 }
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
+                    mUserScroll = false;
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
                     setBaseLayer(draw.mBaseLayer, draw.mInvalRegion.getBounds());
                     final Point viewSize = draw.mViewPoint;
