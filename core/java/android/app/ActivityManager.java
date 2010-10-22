@@ -797,10 +797,12 @@ public class ActivityManager {
         public static final int IMPORTANCE_PERCEPTIBLE = 130;
         
         /**
-         * Constant for {@link #importance}: this process is running a
-         * heavy-weight application and thus should not be killed.
+         * Constant for {@link #importance}: this process is running an
+         * application that can not save its state, and thus can't be killed
+         * while in the background.
+         * @hide
          */
-        public static final int IMPORTANCE_HEAVY_WEIGHT = 170;
+        public static final int IMPORTANCE_CANT_SAVE_STATE = 170;
         
         /**
          * Constant for {@link #importance}: this process is contains services

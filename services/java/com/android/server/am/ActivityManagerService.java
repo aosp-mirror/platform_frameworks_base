@@ -7152,7 +7152,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     } else if (adj >= SECONDARY_SERVER_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
                     } else if (adj >= HEAVY_WEIGHT_APP_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_HEAVY_WEIGHT;
+                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
                     } else if (adj >= PERCEPTIBLE_APP_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
                     } else if (adj >= VISIBLE_APP_ADJ) {
