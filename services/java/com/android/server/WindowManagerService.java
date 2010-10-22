@@ -5376,8 +5376,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // SVGA or larger screens at medium density are the point
                     // at which we consider it to be an extra large screen.
                     mScreenLayout = Configuration.SCREENLAYOUT_SIZE_XLARGE;
-                } else if (longSize >= 640 && shortSize >= 480) {
-                    // VGA or larger screens at medium density are the point
+                } else if (longSize >= 530 && shortSize >= 400) {
+                    // SVGA or larger screens at high density are the point
                     // at which we consider it to be a large screen.
                     mScreenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE;
                 } else {
