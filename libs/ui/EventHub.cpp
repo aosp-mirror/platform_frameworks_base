@@ -839,7 +839,7 @@ int EventHub::openDevice(const char *deviceName) {
         }
 
         // See if this device has a gamepad.
-        for (size_t i = 0; i < sizeof(GAMEPAD_KEYCODES); i++) {
+        for (size_t i = 0; i < sizeof(GAMEPAD_KEYCODES)/sizeof(GAMEPAD_KEYCODES[0]); i++) {
             if (hasKeycodeLocked(device, GAMEPAD_KEYCODES[i])) {
                 device->classes |= INPUT_DEVICE_CLASS_GAMEPAD;
                 break;
