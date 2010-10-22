@@ -28,11 +28,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.util.TraceClassVisitor;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -178,24 +175,26 @@ public class DelegateClassAdapterTest {
             };
             cl2.testModifiedInstance();
 
-        } catch (Throwable t) {
-            // For debugging, dump the bytecode of the class in case of unexpected error.
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            TraceClassVisitor tcv = new TraceClassVisitor(pw);
-
-            ClassReader cr2 = new ClassReader(bytes);
-            cr2.accept(tcv, 0 /* flags */);
-
-            String msg = "\n" + t.getClass().getCanonicalName();
-            if (t.getMessage() != null) {
-                msg += ": " + t.getMessage();
-            }
-            msg = msg + "\nBytecode dump:\n" + sw.toString();
-
-            // Re-throw exception with new message
-            RuntimeException ex = new RuntimeException(msg, t);
-            throw ex;
+        // This code block is useful for debugging. However to make it work you need to
+        // pull in the org.objectweb.asm.util.TraceClassVisitor class and associated
+        // utilities which are found in the ASM source jar.
+        //
+        // } catch (Throwable t) {
+        //     For debugging, dump the bytecode of the class in case of unexpected error.
+        //     StringWriter sw = new StringWriter();
+        //     PrintWriter pw = new PrintWriter(sw);
+        //     TraceClassVisitor tcv = new TraceClassVisitor(pw);
+        //     ClassReader cr2 = new ClassReader(bytes);
+        //     cr2.accept(tcv, 0 /* flags */);
+        //     String msg = "\n" + t.getClass().getCanonicalName();
+        //     if (t.getMessage() != null) {
+        //       msg += ": " + t.getMessage();
+        //     }
+        //     msg = msg + "\nBytecode dump:\n" + sw.toString();
+        //  // Re-throw exception with new message
+        //     RuntimeException ex = new RuntimeException(msg, t);
+        //     throw ex;
+        } finally {
         }
     }
 
