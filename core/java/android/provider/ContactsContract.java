@@ -6696,6 +6696,18 @@ public final class ContactsContract {
              * </pre>
              */
             public static final String DATA = "data";
+
+            /**
+             * Used to specify the account in which to create the new contact.
+             * <p>
+             * If this value is not provided, the user is presented with a disambiguation
+             * dialog to chose an account
+             * <p>
+             * Type: {@link Account}
+             *
+             * @hide
+             */
+            public static final String ACCOUNT = "com.android.contacts.extra.ACCOUNT";
         }
     }
 }
