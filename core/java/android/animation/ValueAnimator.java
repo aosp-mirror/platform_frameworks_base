@@ -1215,4 +1215,16 @@ public class ValueAnimator extends Animator {
         void onAnimationUpdate(ValueAnimator animation);
 
     }
+
+    /**
+     * Return the number of animations currently running.
+     *
+     * Used by StrictMode internally to annotate violations.  Only
+     * called on the main thread.
+     *
+     * @hide
+     */
+    public static int getCurrentAnimationsCount() {
+        return sAnimations.size();
+    }
 }

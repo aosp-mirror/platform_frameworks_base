@@ -6676,6 +6676,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (info.violationNumThisLoop != 0) {
                 sb.append("Loop-Violation-Number: ").append(info.violationNumThisLoop).append("\n");
             }
+            if (info.numAnimationsRunning != 0) {
+                sb.append("Animations-Running: ").append(info.numAnimationsRunning).append("\n");
+            }
             if (info != null && info.durationMillis != -1) {
                 sb.append("Duration-Millis: ").append(info.durationMillis).append("\n");
             }
