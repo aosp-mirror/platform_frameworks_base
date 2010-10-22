@@ -375,7 +375,7 @@
               <li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#mksdcard">mksdcard</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
-                            <li class="toggle-list">
+              <li class="toggle-list">
                  <div>
                      <a href="<?cs var:toroot?>guide/developing/tools/monkeyrunner_concepts.html">
                      <span class="en">monkeyrunner</span>
@@ -403,6 +403,7 @@
                     </li>
                   </ul>
               </li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/proguard.html">Proguard</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html" >Traceview</a></li>
               <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html" >zipalign</a></li>
