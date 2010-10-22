@@ -247,8 +247,7 @@ public class NdefRecord implements Parcelable {
     }
 
     /**
-     * Return this NDEF Record as a byte array.
-     * @hide
+     * Returns this entire NDEF Record as a byte array.
      */
     public byte[] toByteArray() {
         return generate(mFlags, mTnf, mType, mId, mPayload);
