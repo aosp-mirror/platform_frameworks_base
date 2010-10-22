@@ -281,6 +281,8 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     public void refreshNotificationTrigger() {
+        if (mNotificationTrigger == null) return;
+
         int resId;
         boolean panel = (mNotificationPanel != null 
                 && mNotificationPanel.getVisibility() == View.VISIBLE);
@@ -620,9 +622,7 @@ public class TabletStatusBarService extends StatusBarService {
 
     void onClickDoNotDisturb() {
         mNotificationsOn = !mNotificationsOn;
-        setViewVisibility(mIconLayout,
-                mNotificationsOn ? View.VISIBLE : View.INVISIBLE,
-                mNotificationsOn ? R.anim.notification_dnd_off : R.anim.notification_dnd_on);
+        mIconLayout.setVisibility(mNotificationsOn ? View.VISIBLE : View.INVISIBLE); // TODO: animation
         animateCollapse();
         refreshNotificationTrigger();
     }
@@ -632,9 +632,7 @@ public class TabletStatusBarService extends StatusBarService {
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
             if (!mNotificationsOn) {
                 mNotificationsOn = true;
-                setViewVisibility(mIconLayout,
-                        View.VISIBLE,
-                        R.anim.notification_dnd_off);
+                mIconLayout.setVisibility(View.VISIBLE); // TODO: animation
                 refreshNotificationTrigger();
             } else {
                 int msg = (mNotificationPanel.getVisibility() == View.GONE) 
