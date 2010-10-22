@@ -327,6 +327,9 @@ public final class NfcAdapter {
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public RawTagConnection createRawTagConnection(Tag tag) {
+        if (tag.mServiceHandle == 0) {
+            throw new IllegalArgumentException("mock tag cannot be used for connections");
+        }
         try {
             return new RawTagConnection(mService, tag);
         } catch (RemoteException e) {
@@ -340,6 +343,9 @@ public final class NfcAdapter {
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public RawTagConnection createRawTagConnection(Tag tag, String target) {
+        if (tag.mServiceHandle == 0) {
+            throw new IllegalArgumentException("mock tag cannot be used for connections");
+        }
         try {
             return new RawTagConnection(mService, tag, target);
         } catch (RemoteException e) {
@@ -353,6 +359,9 @@ public final class NfcAdapter {
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public NdefTagConnection createNdefTagConnection(NdefTag tag) {
+        if (tag.mServiceHandle == 0) {
+            throw new IllegalArgumentException("mock tag cannot be used for connections");
+        }
         try {
             return new NdefTagConnection(mService, tag);
         } catch (RemoteException e) {
@@ -366,6 +375,9 @@ public final class NfcAdapter {
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      */
     public NdefTagConnection createNdefTagConnection(NdefTag tag, String target) {
+        if (tag.mServiceHandle == 0) {
+            throw new IllegalArgumentException("mock tag cannot be used for connections");
+        }
         try {
             return new NdefTagConnection(mService, tag, target);
         } catch (RemoteException e) {
