@@ -65,6 +65,7 @@ static SkMemoryStream* buildSkMemoryStream(SkStream *stream) {
         }
     }
     data = (char*)sk_realloc_throw(data, streamLen);
+
     SkMemoryStream* streamMem = new SkMemoryStream();
     streamMem->setMemoryOwned(data, streamLen);
     return streamMem;
@@ -133,6 +134,12 @@ static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
         }
         stream = fdStream;
     } else {
+        /* Restore our offset when we leave, so we can be called more than once
+           with the same descriptor. This is only required if we didn't dup the
+           file descriptor, but it is OK to do it all the time.
+        */
+        AutoFDSeek as(descriptor);
+
         SkFDStream* fdStream = new SkFDStream(descriptor, false);
         if (!fdStream->isValid()) {
             fdStream->unref();
@@ -141,12 +148,6 @@ static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
         stream = buildSkMemoryStream(fdStream);
         fdStream->unref();
     }
-
-    /* Restore our offset when we leave, so we can be called more than once
-       with the same descriptor. This is only required if we didn't dup the
-       file descriptor, but it is OK to do it all the time.
-    */
-    AutoFDSeek as(descriptor);
 
     return doBuildTileIndex(env, stream);
 }
