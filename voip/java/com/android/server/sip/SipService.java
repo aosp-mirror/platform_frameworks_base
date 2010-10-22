@@ -441,10 +441,23 @@ public final class SipService extends ISipService.Stub {
 
     private synchronized void addPendingSession(ISipSession session) {
         try {
+            cleanUpPendingSessions();
             mPendingSessions.put(session.getCallId(), session);
+            if (DEBUG) Log.d(TAG, "#pending sess=" + mPendingSessions.size());
         } catch (RemoteException e) {
             // should not happen with a local call
             Log.e(TAG, "addPendingSession()", e);
+        }
+    }
+
+    private void cleanUpPendingSessions() throws RemoteException {
+        Map.Entry<String, ISipSession>[] entries =
+                mPendingSessions.entrySet().toArray(
+                new Map.Entry[mPendingSessions.size()]);
+        for (Map.Entry<String, ISipSession> entry : entries) {
+            if (entry.getValue().getState() != SipSession.State.INCOMING_CALL) {
+                mPendingSessions.remove(entry.getKey());
+            }
         }
     }
 
@@ -1094,8 +1107,6 @@ public final class SipService extends ISipService.Stub {
             }
         }
     }
-
-    // TODO: clean up pending SipSession(s) periodically
 
     /**
      * Timer that can schedule events to occur even when the device is in sleep.
