@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Pozwala aplikacji na konfigurowanie lokalnego telefonu Bluetooth, wyszukiwanie urządzeń zdalnych i łączenie się z nimi."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"tworzenie połączeń Bluetooth"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Pozwala aplikacji na wyświetlanie konfiguracji lokalnego telefonu Bluetooth oraz na tworzenie i akceptowanie połączeń ze sparowanymi urządzeniami."</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"Administracja komunikacją NFC"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Zezwala aplikacji na konfigurowanie obsługi komunikacji NFC w tym telefonie."</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"Pełny dostęp do urządzenia zdalnego za pomocą komunikacji NFC"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Zezwala aplikacji na uzyskiwanie dostępu do zdalnych urządzeń obsługujących komunikację NFC."</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"Powiadomienie w ramach komunikacji NFC z urządzenia zdalnego"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Zezwala aplikacji na otrzymywanie powiadomień o operacjach związanych ze zdalnymi urządzeniami obsługującymi komunikację NFC."</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"Powiadomienie w ramach komunikacji NFC z urządzenia obsługującego protokół LLCP"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Zezwala aplikacji na otrzymywanie powiadomień o operacjach LLCP związanych ze zdalnymi urządzeniami obsługującymi komunikację NFC."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"wyłączanie blokady klawiatury"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Pozwala aplikacji na wyłączenie blokady klawiatury i wszystkich związanych z tym haseł zabezpieczających. Typowym przykładem takiego działania jest wyłączanie blokady klawiatury, gdy pojawia się połączenie przychodzące, a następnie ponowne jej włączanie po zakończeniu połączenia."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizowania"</string>
@@ -842,7 +838,7 @@
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Uszkodzona karta SD"</string>
     <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Pamięć udostępniona jest uszkodzona. Konieczne może być ponowne sformatowanie."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Karta SD jest uszkodzona. Konieczne może być ponowne sformatowanie."</string>
-    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Nośnik pamięci udostępnionej został wyjęty"</string>
+    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Nośnik pamięci współdzielonej został wyjęty"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Karta SD została nieoczekiwanie wyjęta"</string>
     <!-- outdated translation 2005396464494648937 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Odłącz pamięć udostępnioną przed wyjęciem jej nośnika, aby uniknąć utraty danych."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Odłącz kartę SD przed jej wyjęciem, aby uniknąć utraty danych."</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Dotknij, aby zobaczyć statystyki przesyłu danych"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Przekroczono limit danych"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Dotknij, aby zobaczyć statystyki przesyłu danych"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>

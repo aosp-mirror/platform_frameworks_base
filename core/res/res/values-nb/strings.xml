@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Lar applikasjonen konfigurere den lokale Bluetooth-telefonen, og å oppdage og pare med andre enheter."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opprette Bluetooth-tilkoblinger"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Lar applikasjonen se konfigurasjonen til den lokale Bluetooth-telefonen, og å opprette og godta tilkoblinger med parede enheter."</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"NFC-administrasjon"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Tillater et program å konfigurere lokal NFC-telefon."</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"NFC full tilgang til ekstern enhet"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Tillater et program å få tilgang til eksterne NFC-enheter."</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"NFC varsel fra ekstern enhet"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Tillater et program å bli varslet om operasjoner knyttet til eksterne NFC-enheter."</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"NFC varsel fra ekstern LLCP-enhet"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Tillater et program å bli varslet om LLCP-operasjoner knyttet til eksterne NFC-enheter."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"slå av tastaturlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Lar applikasjonen slå av tastaturlåsen og enhver tilknyttet passordsikkerhet. Et legitimt eksempel på dette er at telefonen slår av tastaturlåsen når den mottar et innkommende anrop, og så slår den på igjen når samtalen er over."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
@@ -820,7 +816,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Hvis du aktiverer USB-lagring, virker ikke lenger enkelte av programmene du bruker, og de kan være utilgjengelige inntil du deaktiverer USB-lagringen."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB-operasjonen mislyktes"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- outdated translation 6577908006949742217 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatér delt lagr."</string>
+    <!-- outdated translation 6577908006949742217 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formater delt lagr."</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatere minnekort"</string>
     <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vil du formatere delt lagring og slette alle lagrede filer? Handlingen kan ikke angres!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Er du sikker på at du ønsker å formatere minnekortet? Alle data på kortet vil gå tapt."</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Berør for å lese mer om bruk av mobildata"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Grensen for mobildatabruk er overskredet"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Berør for å lese mer om bruk av mobildata"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>
