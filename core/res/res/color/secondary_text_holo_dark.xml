@@ -15,13 +15,13 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_window_focused="false" android:state_enabled="false" android:color="@android:color/dim_foreground_dark_disabled"/>
-    <item android:state_window_focused="false" android:color="@android:color/dim_foreground_dark"/>
-    <item android:state_selected="true" android:state_enabled="false" android:color="@android:color/dim_foreground_dark_inverse_disabled"/>
-    <item android:state_pressed="true" android:state_enabled="false" android:color="@android:color/dim_foreground_dark_inverse_disabled"/>
-    <item android:state_selected="true" android:color="@android:color/dim_foreground_dark_inverse"/>
-    <item android:state_activated="true" android:color="@android:color/bright_foreground_dark_inverse"/>
-    <item android:state_pressed="true" android:color="@android:color/dim_foreground_dark_inverse"/>
-    <item android:state_enabled="false" android:color="@android:color/dim_foreground_dark_disabled"/>
-    <item android:color="@android:color/dim_foreground_dark"/> <!-- not selected -->
+    <item android:state_window_focused="false" android:state_enabled="false" android:color="@android:color/dim_foreground_disabled_holo_dark"/>
+    <item android:state_window_focused="false" android:color="@android:color/dim_foreground_holo_dark"/>
+    <item android:state_selected="true" android:state_enabled="false" android:color="@android:color/dim_foreground_inverse_disabled_holo_dark"/>
+    <item android:state_pressed="true" android:state_enabled="false" android:color="@android:color/dim_foreground_inverse_disabled_holo_dark"/>
+    <item android:state_selected="true" android:color="@android:color/dim_foreground_inverse_holo_dark"/>
+    <item android:state_activated="true" android:color="@android:color/bright_foreground_inverse_holo_dark"/>
+    <item android:state_pressed="true" android:color="@android:color/dim_foreground_inverse_holo_dark"/>
+    <item android:state_enabled="false" android:color="@android:color/dim_foreground_disabled_holo_dark"/>
+    <item android:color="@android:color/dim_foreground_holo_dark"/> <!-- not selected -->
 </selector>

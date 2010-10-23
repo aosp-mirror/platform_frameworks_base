@@ -1289,7 +1289,7 @@
     </style>
 
     <style name="Widget.Holo.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
-        <item name="android:background">@android:drawable/list_section_header_holo_dark</item>
+        <item name="android:background">@android:drawable/list_section_divider_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.TextSelectHandle" parent="Widget.TextSelectHandle">
@@ -1521,6 +1521,12 @@
     </style>
 
     <style name="Widget.Holo.Light.Button" parent="Widget.Button">
+        <item name="android:background">@android:drawable/btn_default_holo_light</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@android:color/primary_text_holo_light</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:paddingLeft">32dip</item>
+        <item name="android:paddingRight">32dip</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Small">
@@ -1556,7 +1562,7 @@
     </style>
 
     <style name="Widget.Holo.Light.TextView.ListSeparator" parent="Widget.TextView.ListSeparator">
-        <item name="android:background">@android:drawable/list_section_header_holo_light</item>
+        <item name="android:background">@android:drawable/list_section_divider_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.TextSelectHandle" parent="Widget.TextSelectHandle">
