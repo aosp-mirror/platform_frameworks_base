@@ -552,6 +552,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputManager.unregisterInputChannel(mServerChannel);
                 InputQueue.unregisterInputChannel(mClientChannel);
                 mClientChannel.dispose();
+                mServerChannel.dispose();
                 mClientChannel = null;
                 mServerChannel = null;
             }
@@ -624,7 +625,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 if (DEBUG_DRAG) {
-                    Slog.d(TAG, "sending DRAG_STARTED to new window " + newWin);
+                    Slog.d(TAG, "need to send DRAG_STARTED to new window " + newWin);
                 }
                 sendDragStartedLw(newWin, mCurrentX, mCurrentY, mDataDescription);
             }
@@ -6242,8 +6243,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 mDragState.register();
                 mInputMonitor.updateInputWindowsLw();
-                mInputManager.transferTouchFocus(callingWin.mInputChannel,
-                        mDragState.mServerChannel);
+                if (!mInputManager.transferTouchFocus(callingWin.mInputChannel,
+                        mDragState.mServerChannel)) {
+                    Slog.e(TAG, "Unable to transfer touch focus");
+                    mDragState.unregister();
+                    mDragState = null;
+                    mInputMonitor.updateInputWindowsLw();
+                    return false;
+                }
 
                 mDragState.mData = data;
                 mDragState.mCurrentX = touchX;
