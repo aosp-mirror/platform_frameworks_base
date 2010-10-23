@@ -1441,6 +1441,38 @@
         <attr name="functionalTest" />
     </declare-styleable>
     
+    <!-- Attributes that can be supplied in an AndroidManifest.xml
+         <code>screen</code> tag, a child of <code>compatible-screens</code>,
+         which is itseld a child of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestCompatibleScreensScreen">
+        <!-- Specifies a compatible screen size, as per the device
+             configuration screen size bins. -->
+        <attr name="screenSize">
+            <!-- A small screen configuration, at least 240x320db. -->
+            <enum name="small" value="200" />
+            <!-- A normal screen configuration, at least 320x480db. -->
+            <enum name="normal" value="300" />
+            <!-- A large screen configuration, at least 400x530db. -->
+            <enum name="large" value="400" />
+            <!-- An extra large screen configuration, at least 600x800db. -->
+            <enum name="xlarge" value="500" />
+        </attr>
+        <!-- Specifies a compatible screen density, as per the device
+             configuration screen density bins. -->
+        <attr name="screenDensity" format="integer">
+            <!-- A low density screen, approximately 120dpi. -->
+            <enum name="ldpi" value="120" />
+            <!-- A medium density screen, approximately 160dpi. -->
+            <enum name="mdpi" value="160" />
+            <!-- A high density screen, approximately 240dpi. -->
+            <enum name="hdpi" value="240" />
+            <!-- An extra high density screen, approximately 320dpi. -->
+            <enum name="xhdpi" value="320" />
+        </attr>
+    </declare-styleable>
+    
+    
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May
          also include zero or more {@link #IntentCategory <category> and
          {@link #Extra <extra>} tags. -->
