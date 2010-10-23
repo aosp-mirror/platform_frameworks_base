@@ -75,52 +75,16 @@ struct CacheLogger {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Caches: public Singleton<Caches> {
-    Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
-            lastDstMode(GL_ZERO), currentProgram(NULL) {
-        GLint maxTextureUnits;
-        glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
-        if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
-            LOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
-        }
-
-        glGenBuffers(1, &meshBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
-
-        currentBuffer = meshBuffer;
-    }
+    Caches();
 
     friend class Singleton<Caches>;
 
     CacheLogger logger;
 
 public:
-    /**
-     * Binds the VBO used to render simple textured quads.
-     */
-    inline void bindMeshBuffer() {
-        bindMeshBuffer(meshBuffer);
-    }
-
-    /**
-     * Binds the specified VBO.
-     */
-    inline void bindMeshBuffer(const GLuint buffer) {
-        if (currentBuffer != buffer) {
-            glBindBuffer(GL_ARRAY_BUFFER, buffer);
-            currentBuffer = buffer;
-        }
-    }
-
-    /**
-     * Unbinds the VBO used to render simple textured quads.
-     */
-    inline void unbindMeshBuffer() {
-        if (currentBuffer) {
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            currentBuffer = 0;
-        }
-    }
+    void bindMeshBuffer();
+    void bindMeshBuffer(const GLuint buffer);
+    void unbindMeshBuffer();
 
     bool blend;
     GLenum lastSrcMode;
@@ -145,11 +109,6 @@ public:
 }; // class Caches
 
 }; // namespace uirenderer
-
-#ifdef USE_OPENGL_RENDERER
-using namespace uirenderer;
-ANDROID_SINGLETON_STATIC_INSTANCE(Caches);
-#endif
 
 }; // namespace android
 
