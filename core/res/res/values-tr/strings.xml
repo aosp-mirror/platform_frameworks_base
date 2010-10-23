@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Uygulamaların yerel Bluetooth telefonunu yapılandırmasına ve uzak cihazları keşfedip bunlar ile eşleşmesine izin verir."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth bağlantıları oluştur"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Uygulamaların yerel Bluetooth telefonunun yapılandırmasını görüntülemesine ve eşleşilmiş cihazlar ile bağlantı kurup kabul etmesine izin verir."</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"NFC yönetimi"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Uygulamanın, yerel NFC telefonunu yapılandırmasına izin verir."</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"Uzak cihaza tam NFC erişimi"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Uygulamaya, uzak NFC cihazlarına erişme izni verir."</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"Uzak cihazdan NFC bildirimi"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Uygulamaya, uzak NFC cihazlarıyla ilgili işlemlerin bildirilmesine izin verir."</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"Uzak LLCP cihazından NFC bildirimi"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Uygulamaya, uzak NFC cihazlarıyla ilgili LLCP işlemlerinin bildirilmesine izin verir."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"tuş kilidini devre dışı bırak"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Uygulamaların tuş kilidini ve ilgili şifreli güvenlik önlemini devre dışı bırakmasına izin verir. Bunun geçerli bir örneği gelen bir çağrı alındığında tuş kilidinin devre dışı bırakılması, sonra çağrı bittiğinde kilidin yeniden devreye sokulmasıdır."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını oku"</string>
@@ -838,9 +834,9 @@
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Boş SD kart"</string>
     <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Paylaşılan depolama birimi boş veya desteklenmeyen bir dosya sistemine sahip."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD kart boş veya desteklenmeyen dosya sistemi içeriyor"</string>
-    <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Paylş deplm birimi zarar gördü"</string>
+    <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Payl deplm birimi zarar görmüş"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Hasarlı SD kart"</string>
-    <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Paylaşılan depolama birimi zarar gördü. Yeniden biçimlendirmeniz gerekebilir."</string>
+    <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Paylaşılan depolama birimi zarar görmüş. Yeniden biçimlendirmeniz gerekebilir."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD kart zarar gördü. Yeniden biçimlendirmeniz gerekebilir."</string>
     <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Payl depl brm beklnmdk şekl çıkarld"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD kart beklenmedik biçimde çıkarıldı"</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Mobil veri kullanımı hakkında daha fazla bilgi edinmek için dokunun"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobil veri limiti aşıldı"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Mobil veri kullanımı hakkında daha fazla bilgi edinmek için dokunun"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>

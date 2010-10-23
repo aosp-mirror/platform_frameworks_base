@@ -81,9 +81,9 @@ public class NdefTagConnection extends RawTagConnection {
         //TODO(nxp): do not use getLastError(), it is racy
         try {
             NdefMessage[] msgArray = new NdefMessage[1];
-            NdefMessage msg = mTagService.read(mTag.mNativeHandle);
+            NdefMessage msg = mTagService.read(mTag.mServiceHandle);
             if (msg == null) {
-                int errorCode = mTagService.getLastError(mTag.mNativeHandle);
+                int errorCode = mTagService.getLastError(mTag.mServiceHandle);
                 switch (errorCode) {
                     case ErrorCodes.ERROR_IO:
                         throw new IOException();
@@ -121,7 +121,7 @@ public class NdefTagConnection extends RawTagConnection {
      */
     public void writeNdefMessage(NdefMessage message) throws IOException, FormatException {
         try {
-            int errorCode = mTagService.write(mTag.mNativeHandle, message);
+            int errorCode = mTagService.write(mTag.mServiceHandle, message);
             switch (errorCode) {
                 case ErrorCodes.SUCCESS:
                     break;
@@ -148,7 +148,7 @@ public class NdefTagConnection extends RawTagConnection {
      */
     public boolean makeReadOnly() throws IOException {
         try {
-            int errorCode = mTagService.makeReadOnly(mTag.mNativeHandle);
+            int errorCode = mTagService.makeReadOnly(mTag.mServiceHandle);
             switch (errorCode) {
                 case ErrorCodes.SUCCESS:
                     return true;
@@ -175,7 +175,7 @@ public class NdefTagConnection extends RawTagConnection {
      */
     public int getModeHint() throws IOException {
         try {
-            int result = mTagService.getModeHint(mTag.mNativeHandle);
+            int result = mTagService.getModeHint(mTag.mServiceHandle);
             if (ErrorCodes.isError(result)) {
                 switch (result) {
                     case ErrorCodes.ERROR_IO:

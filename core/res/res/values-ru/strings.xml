@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Позволяет приложению настраивать локальный телефон Bluetooth, обнаруживать и выполнять сопряжение удаленных устройств."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"создавать подключения Bluetooth"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Позволяет приложению просматривать конфигурацию локального телефона Bluetooth, создавать подключения с сопряженными устройствами."</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"Администрировать NFC"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Разрешает приложению настраивать локальный телефон NFC."</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"Разрешает полный доступ к удаленному устройству с NFC"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Разрешает приложению доступ к удаленным устройствам NFC."</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"Присылать оповещения с удаленных устройств на NFC"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Разрешает приложению получать оповещения об операциях с удаленными устройствами NFC."</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"Присылать оповещения с удаленных устройств LLCP на NFC"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Разрешает приложению получать оповещения об операциях LLCP с удаленными устройствами NFC."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"отключать блокировку клавиатуры"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Позволяет приложению отключить блокировку клавиатуры и другие функции защиты паролем. Примером допустимого использования этой функции является отключение блокировки клавиатуры при получении входящего вызова и включение блокировки после завершения разговора."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"считывать настройки синхронизации"</string>
@@ -437,14 +433,14 @@
     <skip />
     <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
     <skip />
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила задания паролей"</string>
-    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Контролирует длину и символы при вводе паролей снятия блокировки экрана"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
     <string name="policydesc_watchLogin" msgid="7227578260165172673">"Отслеживать количество неверно введенных паролей для снятия блокировки экрана и блокировать телефон либо уничтожить все данные на нем, если было введено слишком много неверных паролей"</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Изменять пароль блокировки экрана"</string>
-    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Изменять пароль блокировки экрана"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Изменять пароль для снятия блокировки экрана"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Изменять пароль для снятия блокировки экрана"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокировать экран"</string>
-    <string name="policydesc_forceLock" msgid="5696964126226028442">"Контролирует способ и время блокировки экрана"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Контролировать способ и время блокировки экрана"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Удалить все данные"</string>
     <string name="policydesc_wipeData" msgid="7669895333814222586">"Уничтожить все данные на телефоне без предупреждения путем сброса настроек"</string>
   <string-array name="phoneTypes">
@@ -831,24 +827,24 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"варианты"</u></string>
-    <!-- outdated translation 4239516675028438997 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Подготавливается общий накопитель"</string>
+    <!-- outdated translation 4239516675028438997 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Подготовка общего накопителя"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Подготовка карты SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Проверка ошибок."</string>
     <!-- outdated translation 3937345577983730873 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Нет данных на общем накопителе"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Пустая карта SD"</string>
-    <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"На общем накопителе нет данных или его файловая система не поддерживается."</string>
+    <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"На общем накопителе нет данных, или его файловая система не поддерживается."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD-карта пуста или использует неподдерживаемую файловую систему"</string>
     <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Общий накопитель поврежден"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Поврежденная карта SD"</string>
     <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Общий накопитель поврежден. Попробуйте отформатировать его."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD-карта повреждена. Попробуйте отформатировать ее."</string>
-    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Общий накопитель неожиданно отключен"</string>
+    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Накопитель неожиданно отключен"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Карта SD неожиданно извлечена"</string>
     <!-- outdated translation 2005396464494648937 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Перед извлечением общего накопителя отключите его во избежание потери данных."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Перед извлечением карты SD отключите ее во избежание потери данных."</string>
-    <!-- outdated translation 36525881018679515 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Общий накопитель безопасно отключен"</string>
+    <!-- outdated translation 36525881018679515 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Накопитель можно отключить"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Безопасное удаление карты SD"</string>
-    <!-- outdated translation 7503769106285188703 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Теперь общий накопитель может быть безопасно отключен."</string>
+    <!-- outdated translation 7503769106285188703 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Теперь общий накопитель можно безопасно отключить."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Можно безопасно извлечь SD-карту."</string>
     <!-- outdated translation 1874889764367085562 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Общий накопитель удален"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Отсутствует карта SD"</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Нажмите, чтобы узнать больше о мобильной передаче данных"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Превышен лимит на мобильные данные"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Нажмите, чтобы узнать больше о мобильной передаче данных"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>

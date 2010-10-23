@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"允許應用程式設定本機藍牙電話，以及偵測與配對其他遠端裝置。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"建立藍牙連線"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"允許應用程式檢視本機藍牙電話設定，並與其他配對裝置連線。"</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"NFC 管理"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"允許應用程式設定本機 NFC 手機。"</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"NFC 可完整存取遠端裝置"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"允許應用程式存取遠端 NFC 裝置。"</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"來自遠端裝置的 NFC 通知"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"執行與遠端 NFC 裝置相關的作業時，允許應用程式收到通知。"</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"來自遠端 LLCP 裝置的 NFC 通知"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"執行與遠端 NFC 裝置相關的 LLCP 作業時，允許應用程式收到通知。"</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"停用按鍵鎖定"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性。例如：收到來電時解除按鍵鎖定，通話結束後重新啟動按鍵鎖定。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
@@ -805,8 +801,8 @@
     <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"已透過 USB 連接手機與電腦。如要在電腦和 Android 的共用儲存裝置之間複製檔案，請選取下方按鈕。"</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"已透過 USB 連接手機與電腦。如要從電腦或 Android 系統的 SD 卡複製檔案，請選取下方按鈕。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"開啟 USB 儲存裝置"</string>
-    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"使用 USB 儲存裝置的共用儲存空間時發生問題。"</string>
-    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"使用 USB 儲存裝置的共用儲存空間時發生問題。"</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"把共用儲存空間當成 USB 儲存裝置時發生問題。"</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"把共用儲存空間當成 USB 儲存裝置時發生問題。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 已連接"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"選取此項將檔案複製到電腦，或從電腦複製。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"關閉 USB 儲存裝置"</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"輕觸即可瞭解更多有關行動資料用量的詳細資訊"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"已達行動資料上限"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"輕觸即可瞭解更多有關行動資料用量的詳細資訊"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>

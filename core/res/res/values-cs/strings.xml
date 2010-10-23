@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"vytvoření připojení Bluetooth"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Umožňuje aplikaci zobrazit konfiguraci místního telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"Správa NFC"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Umožňuje aplikaci nakonfigurovat místní telefon NFC."</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"Úplný přístup NFC ke vzdálenému zařízení"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Umožňuje aplikaci přístup ke vzdáleným zařízením NFC."</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"Oznámení NFC ze vzdáleného zařízení"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Umožňuje aplikaci přijímat oznámení o operacích souvisejících se vzdálenými zařízeními NFC."</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"Oznámení NFC ze vzdáleného zařízení LLCP"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Umožňuje aplikaci přijímat oznámení o operacích LLCP souvisejících se vzdálenými zařízeními NFC."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"vypnutí zámku kláves"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Umožňuje aplikaci vypnout zámek kláves a související zabezpečení heslem. Příkladem oprávněného použití této funkce je vypnutí zámku klávesnice při příchozím hovoru a jeho opětovné zapnutí po skončení hovoru."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čtení nastavení synchronizace"</string>
@@ -438,13 +434,13 @@
     <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
     <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
-    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Ovládat délku hesel pro odemčení obrazovky a v nich používané znaky"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Řídit délku hesel pro odemčení obrazovky a v nich používané znaky"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
     <string name="policydesc_watchLogin" msgid="7227578260165172673">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout telefon nebo odstranit veškerá data telefonu, pokud dojde k příliš mnoha neplatným pokusům o zadání hesla"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Změnit heslo pro odemknutí obrazovky"</string>
     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Změnit heslo pro odemknutí obrazovky"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Uzamknout obrazovku"</string>
-    <string name="policydesc_forceLock" msgid="5696964126226028442">"Ovládat, jak a kdy se obrazovka uzamkne"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Řídit, jak a kdy se obrazovka uzamkne"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazání všech dat"</string>
     <string name="policydesc_wipeData" msgid="7669895333814222586">"Bez upozornění smazat všechna data telefonu obnovením továrních dat"</string>
   <string-array name="phoneTypes">
@@ -802,7 +798,7 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Zobrazit vše"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Úložiště USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB připojeno"</string>
-    <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Připojili jste telefon k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače do sdíleného úložiště zařízení Android či obráceně, vyberte následující tlačítko."</string>
+    <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Připojili jste telefon k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače do sdíleného úložiště zařízení Android či obráceně, sitskněte následující tlačítko."</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Připojili jste svůj telefon k počítači pomocí USB. Chcete-li kopírovat soubory z počítače na kartu SD v zařízení Android či obráceně, vyberte následující tlačítko."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Zapnout úložiště USB"</string>
     <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Při používání sdíleného úložiště jako úložiště USB došlo k problému."</string>
@@ -822,7 +818,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <!-- outdated translation 6577908006949742217 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formátovat sdíl. úl."</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formátovat kartu SD"</string>
-    <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Chcete sdílené úložiště formátovat, a smazat tak všechny soubory, které jsou v něm uložené? Tuto akci nelze vrátit zpět."</string>
+    <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Chcete sdílené úložiště formátovat a smazat tak všechny soubory, které jsou v něm uložené? Tuto akci nelze vrátit zpět."</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Opravdu chcete kartu SD naformátovat? Všechna data na kartě budou ztracena."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes rozhraní USB připojeno"</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Dotykem zobrazíte další informace o využití mobilních dat"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Byl překročen limit mobilních dat"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Dotykem zobrazíte další informace o využití mobilních dat"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>

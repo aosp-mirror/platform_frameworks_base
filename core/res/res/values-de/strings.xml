@@ -169,7 +169,7 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Entwickler-Tools"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funktionen nur für Anwendungsentwickler vorgesehen."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Speicher"</string>
-    <!-- outdated translation 5455804353220581312 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Zugriff auf gem. Speicher"</string>
+    <!-- outdated translation 5455804353220581312 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Zugriff auf freigeg. Speicher"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Greift auf die SD-Karte zu."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Ermöglicht der Anwendung, die Statusanzeige zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen."</string>
@@ -403,14 +403,10 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Ermöglicht einer Anwendung, das lokale Bluetooth-Telefon zu konfigurieren, Remote-Geräte zu erkennen und eine Verbindung zu diesen herzustellen."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth-Verbindungen herstellen"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Ermöglicht einer Anwendung, die Konfiguration des lokalen Bluetooth-Telefons einzusehen und Verbindungen mit Partnergeräten herzustellen und zu akzeptieren."</string>
-    <string name="permlab_nfcAdmin" msgid="2251302233012250056">"NFC-Verwaltung"</string>
-    <string name="permdesc_nfcAdmin" msgid="1935842611464895785">"Ermöglicht einer Anwendung, das lokale NFC-Telefon zu konfigurieren"</string>
-    <string name="permlab_nfcRaw" msgid="4423471711114325708">"NFC-Vollzugriff auf Remote-Gerät"</string>
-    <string name="permdesc_nfcRaw" msgid="5533022736559385665">"Ermöglicht einer Anwendung den Zugriff auf Remote-NFC-Geräte"</string>
-    <string name="permlab_nfcNotify" msgid="478470360082792358">"NFC-Benachrichtigung von Remote-Gerät"</string>
-    <string name="permdesc_nfcNotify" msgid="2990053517962070617">"Hiermit wird eine Anwendung über Operationen im Zusammenhang mit Remote-NFC-Geräten benachrichtigt."</string>
-    <string name="permlab_nfcLlcp" msgid="4972051461007030426">"NFC-Benachrichtigung von Remote-LLCP-Gerät"</string>
-    <string name="permdesc_nfcLlcp" msgid="91592127786004640">"Hiermit wird eine Anwendung über LLCP-Operationen im Zusammenhang mit NFC-Remote-Geräten benachrichtigt."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"Tastensperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Ermöglicht einer Anwendung, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. So wird die Tastensperre vom Telefon deaktiviert, wenn ein Anruf eingeht, und nach Beendigung des Anrufs wieder aktiviert."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Synchronisierungseinstellungen lesen"</string>
@@ -429,7 +425,7 @@
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Ermöglicht einer Anwendung, Ihrem Wörterbuch neue Einträge hinzuzufügen."</string>
     <!-- outdated translation 993707436941016913 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"Speicherinhalt ändern/löschen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SD-Karten-Inhalt ändern/löschen"</string>
-    <!-- outdated translation 4131871541127211526 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Schreiben in gem. Speicher"</string>
+    <!-- outdated translation 4131871541127211526 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Schreiben in freig. Speicher"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Ermöglicht einer Anwendung, auf die SD-Karte zu schreiben"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Zugriff auf das Cache-Dateisystem"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Gewährt einer Anwendung Lese- und Schreibzugriff auf das Cache-Dateisystem."</string>
@@ -802,17 +798,17 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Alle anzeigen"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-Massenspeicher"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-Verbindung"</string>
-    <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Sie haben Ihr Telefon über USB mit Ihrem Computer verbunden. Wählen Sie die Schaltfläche unten aus, wenn Sie Dateien von Ihrem Computer in den gemeinsamen Speicher Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
+    <!-- outdated translation 8231462750010066896 -->     <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Sie haben Ihr Telefon über USB mit Ihrem Computer verbunden. Wählen Sie die Schaltfläche unten aus, wenn Sie Dateien von Ihrem Computer in den freigegebenen Speicher Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
     <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Sie haben Ihr Telefon über USB mit Ihrem Computer verbunden. Wählen Sie die Schaltfläche unten aus, wenn Sie Dateien auf Ihren Computer oder die SD-Karte Ihres Android-Geräts kopieren möchten."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB-Speicher aktivieren"</string>
-    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Bei der Verwendung Ihres gemeinsamen Speichers als USB-Speicher ist ein Problem aufgetreten."</string>
-    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Bei der Verwendung Ihres gemeinsamen Speichers als USB-Speicher ist ein Problem aufgetreten."</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Bei der Verwendung Ihres freigegebenen Speichers als USB-Speicher ist ein Problem aufgetreten."</string>
+    <!-- outdated translation 4818347756402740261 -->     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Bei der Verwendung Ihres freigegebenen Speichers als USB-Speicher ist ein Problem aufgetreten."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB-Verbindung"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Zum Kopieren von Dateien zum/vom Computer"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USB-Speicher deaktivieren"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Auswählen, um USB-Speicher zu deaktivieren."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-Speicher in Verwendung"</string>
-    <!-- outdated translation 8745345260780267185 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Stellen Sie vor dem Deaktivieren des USB-Speichers sicher, dass Sie den gemeinsamen Android-Speicher von Ihrem Computer getrennt (\"ausgeworfen\") haben."</string>
+    <!-- outdated translation 8745345260780267185 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Stellen Sie vor dem Deaktivieren des USB-Speichers sicher, dass Sie den freigegebenen Android-Speicher von Ihrem Computer getrennt (\"ausgeworfen\") haben."</string>
     <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Stellen Sie vor dem Deaktivieren des USB-Speichers sicher, dass Sie Ihre Android-SD-Karte von Ihrem Computer getrennt (\"ausgeworfen\") haben."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USB-Speicher deaktivieren"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Beim Deaktivieren des USB-Speichers ist ein Problem aufgetreten. Überprüfen Sie, ob Sie den USB-Host getrennt haben, und versuchen Sie es erneut."</string>
@@ -822,7 +818,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <!-- outdated translation 6577908006949742217 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Speicher formatieren"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD-Karte formatieren"</string>
-    <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Gemeinsamen Speicher formatieren und alle darauf gespeicherten Dateien löschen? Diese Aktion kann nicht rückgängig gemacht werden!"</string>
+    <!-- outdated translation 3470815140068502824 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Freigegebenen Speicher formatieren und alle darauf gespeicherten Dateien löschen? Diese Aktion kann nicht rückgängig gemacht werden!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Möchten Sie die SD-Karte wirklich formatieren? Alle Daten auf Ihrer Karte gehen dann verloren."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging verbunden"</string>
@@ -831,28 +827,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"Kandidaten"</u></string>
-    <!-- outdated translation 4239516675028438997 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Gem. Speicher vorbereiten"</string>
+    <!-- outdated translation 4239516675028438997 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Freig. Speicher vorbereiten"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD-Karte wird vorbereitet"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Suche nach Fehlern"</string>
-    <!-- outdated translation 3937345577983730873 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Gemeinsamer Speicher leer"</string>
+    <!-- outdated translation 3937345577983730873 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Freigegebener Speicher leer"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"SD-Karte leer"</string>
-    <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Gemeinsamer Speicher ist leer oder verfügt über ein nicht unterstütztes Dateisystem"</string>
+    <!-- outdated translation 1606660756124629708 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Freigegebener Speicher ist leer oder verfügt über ein nicht unterstütztes Dateisystem"</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD-Karte ist leer oder verfügt über ein nicht unterstütztes Dateisystem."</string>
-    <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Gem. Speicher beschädigt"</string>
+    <!-- outdated translation 1724619902076528889 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Freig. Speicher beschädigt"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Beschädigte SD-Karte"</string>
-    <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Gemeinsamer Speicher ist beschädigt. Sie müssen ihn neu formatieren."</string>
+    <!-- outdated translation 6460311835130671194 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Freigegebener Speicher ist beschädigt. Sie müssen ihn neu formatieren."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Die SD-Karte ist beschädigt. Sie müssen Ihre Karte eventuell neu formatieren."</string>
-    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Gem. Speicher entfernt"</string>
+    <!-- outdated translation 2582175016060432034 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Freig. Speicher entfernt"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD-Karte unerwartet entfernt"</string>
-    <!-- outdated translation 2005396464494648937 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Trennen Sie den gemeinsamen Speicher vor dem Entfernen, um Datenverlust zu vermeiden."</string>
+    <!-- outdated translation 2005396464494648937 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Trennen Sie den freigegebenen Speicher vor dem Entfernen, um Datenverlust zu vermeiden."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"SD-Karte vor dem Entnehmen trennen, um Datenverlust zu vermeiden."</string>
     <!-- outdated translation 36525881018679515 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Speicher kann entfernt werden."</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD-Karte kann entfernt werden."</string>
-    <!-- outdated translation 7503769106285188703 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Gemeinsamer Speicher kann entfernt werden."</string>
+    <!-- outdated translation 7503769106285188703 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Freigegebener Speicher kann entfernt werden."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Die SD-Karte kann entfernt werden."</string>
-    <!-- outdated translation 1874889764367085562 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Gemeinsamer Speicher entfernt"</string>
+    <!-- outdated translation 1874889764367085562 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Freigegebener Speicher entfernt"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD-Karte entfernt"</string>
-    <!-- outdated translation 2730890441331344776 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Gemeinsamer Speicher entfernt. Neuen Datenträger einlegen"</string>
+    <!-- outdated translation 2730890441331344776 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Freigegebener Speicher entfernt. Neuen Datenträger einlegen"</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-Karte entfernt. Legen Sie eine neue ein."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Keine passenden Aktivitäten gefunden"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"Nutzungsstatistik der Komponente aktualisieren"</string>
@@ -899,4 +895,30 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Weitere Informationen über die Mobildatennutzung durch Berühren aufrufen"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Mobildatenlimit überschritten"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Weitere Informationen über die Mobildatennutzung durch Berühren aufrufen"</string>
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
 </resources>
