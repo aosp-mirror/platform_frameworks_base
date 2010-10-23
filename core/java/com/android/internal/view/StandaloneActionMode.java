@@ -87,7 +87,6 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
         mFinished = true;
 
         mCallback.onDestroyActionMode(this);
-        mContextView.setVisibility(View.GONE);
     }
 
     @Override
