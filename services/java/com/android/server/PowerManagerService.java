@@ -1794,8 +1794,12 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void updateLightsLocked(int newState, int forceState) {
         final int oldState = mPowerState;
-        newState = applyButtonState(newState);
-        newState = applyKeyboardState(newState);
+        if ((newState & SCREEN_ON_BIT) != 0) {
+            // Only turn on the buttons or keyboard if the screen is also on.
+            // We should never see the buttons on but not the screen.
+            newState = applyButtonState(newState);
+            newState = applyKeyboardState(newState);
+        }
         final int realDifference = (newState ^ oldState);
         final int difference = realDifference | forceState;
         if (difference == 0) {
@@ -1896,6 +1900,16 @@ class PowerManagerService extends IPowerManager.Stub
             }
             mScreenBrightness.setTargetLocked(brightness, steps,
                     INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
+        }
+
+        if (mSpew) {
+            Slog.d(TAG, "offMask=0x" + Integer.toHexString(offMask)
+                    + " dimMask=0x" + Integer.toHexString(dimMask)
+                    + " onMask=0x" + Integer.toHexString(onMask)
+                    + " difference=0x" + Integer.toHexString(difference)
+                    + " realDifference=0x" + Integer.toHexString(realDifference)
+                    + " forceState=0x" + Integer.toHexString(forceState)
+                    );
         }
 
         if (offMask != 0) {
