@@ -38,7 +38,7 @@ public class BluetoothTestUtils extends Assert {
     /**
      * Timeout for {@link BluetoothAdapter#disable()} in ms.
      */
-    private static final int DISABLE_TIMEOUT = 5000;
+    private static final int DISABLE_TIMEOUT = 20000;
 
     /**
      * Timeout for {@link BluetoothAdapter#enable()} in ms.
