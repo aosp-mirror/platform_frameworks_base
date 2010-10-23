@@ -58,6 +58,7 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -83,6 +84,7 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -1700,6 +1702,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private ActionMode mActionMode;
         private ActionBarContextView mActionModeView;
+        private PopupWindow mActionModePopup;
 
         public DecorView(Context context, int featureId) {
             super(context);
@@ -2019,9 +2022,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionModeView == null) {
                     if (hasFeature(FEATURE_ACTION_MODE_OVERLAY)) {
                         mActionModeView = new ActionBarContextView(mContext);
-                        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                                MATCH_PARENT, WRAP_CONTENT);
-                        addView(mActionModeView, params);
+                        mActionModePopup = new PopupWindow(mContext);
+                        mActionModePopup.setLayoutInScreenEnabled(true);
+                        mActionModePopup.setClippingEnabled(false);
+                        mActionModePopup.setContentView(mActionModeView);
+                        mActionModePopup.setWidth(MATCH_PARENT);
+
+                        TypedValue heightValue = new TypedValue();
+                        mContext.getTheme().resolveAttribute(
+                                com.android.internal.R.attr.actionBarSize, heightValue, false);
+                        final int height = TypedValue.complexToDimensionPixelSize(heightValue.data,
+                                mContext.getResources().getDisplayMetrics());
+                        mActionModePopup.setHeight(height);
                     } else {
                         ViewStub stub = (ViewStub) findViewById(
                                 com.android.internal.R.id.action_mode_bar_stub);
@@ -2038,6 +2050,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mActionModeView.initForMode(mode);
                         mActionModeView.setVisibility(View.VISIBLE);
                         mActionMode = mode;
+                        if (mActionModePopup != null) {
+                            mActionModePopup.showAtLocation(this,
+                                    Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
+                        }
                     } else {
                         mActionMode = null;
                     }
@@ -2250,6 +2266,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             public void onDestroyActionMode(ActionMode mode) {
                 mWrapped.onDestroyActionMode(mode);
+                if (mActionModePopup != null) {
+                    mActionModePopup.dismiss();
+                } else if (mActionModeView != null) {
+                    mActionModeView.setVisibility(GONE);
+                }
                 if (mActionModeView != null) {
                     mActionModeView.removeAllViews();
                 }

@@ -213,7 +213,7 @@ public class ActionBarContextView extends ViewGroup {
         }
 
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        if (heightMode != MeasureSpec.AT_MOST) {
+        if (heightMode == MeasureSpec.UNSPECIFIED) {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
                     "with android:layout_height=\"wrap_content\"");
         }
