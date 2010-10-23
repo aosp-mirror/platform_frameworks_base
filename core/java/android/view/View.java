@@ -8288,7 +8288,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         (ArrayList<OnLayoutChangeListener>) mOnLayoutChangeListeners.clone();
                 int numListeners = listenersCopy.size();
                 for (int i = 0; i < numListeners; ++i) {
-                    listenersCopy.get(i).onLayoutChange(this, l, r, t, b, oldL, oldT, oldR, oldB);
+                    listenersCopy.get(i).onLayoutChange(this, l, t, r, b, oldL, oldT, oldR, oldB);
                 }
             }
         }

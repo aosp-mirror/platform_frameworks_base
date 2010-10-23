@@ -175,48 +175,6 @@ public final class ObjectAnimator extends ValueAnimator {
     }
 
     /**
-     * Constructs and returns an ObjectAnimator that animates between long values. A single
-     * value implies that that value is the one being animated to. However, this is not typically
-     * useful in a ValueAnimator object because there is no way for the object to determine the
-     * starting value for the animation (unlike ObjectAnimator, which can derive that value
-     * from the target object and property being animated). Therefore, there should typically
-     * be two or more values.
-     *
-     * @param target The object whose property is to be animated. This object should
-     * have a public method on it called <code>setName()</code>, where <code>name</code> is
-     * the value of the <code>propertyName</code> parameter.
-     * @param propertyName The name of the property being animated.
-     * @param values A set of values that the animation will animate between over time.
-     * @return A ValueAnimator object that is set up to animate between the given values.
-     */
-    public static ObjectAnimator ofLong(Object target, String propertyName, long... values) {
-        ObjectAnimator anim = new ObjectAnimator(target, propertyName);
-        anim.setLongValues(values);
-        return anim;
-    }
-
-    /**
-     * Constructs and returns an ObjectAnimator that animates between double values. A single
-     * value implies that that value is the one being animated to. However, this is not typically
-     * useful in a ValueAnimator object because there is no way for the object to determine the
-     * starting value for the animation (unlike ObjectAnimator, which can derive that value
-     * from the target object and property being animated). Therefore, there should typically
-     * be two or more values.
-     *
-     * @param target The object whose property is to be animated. This object should
-     * have a public method on it called <code>setName()</code>, where <code>name</code> is
-     * the value of the <code>propertyName</code> parameter.
-     * @param propertyName The name of the property being animated.
-     * @param values A set of values that the animation will animate between over time.
-     * @return A ValueAnimator object that is set up to animate between the given values.
-     */
-    public static ObjectAnimator ofDouble(Object target, String propertyName, double... values) {
-        ObjectAnimator anim = new ObjectAnimator(target, propertyName);
-        anim.setDoubleValues(values);
-        return anim;
-    }
-
-    /**
      * A constructor that takes <code>PropertyValueHolder</code> values. This constructor should
      * be used when animating several properties at once with the same ObjectAnimator, since
      * PropertyValuesHolder allows you to associate a set of animation values with a property
@@ -283,28 +241,6 @@ public final class ObjectAnimator extends ValueAnimator {
             setValues(PropertyValuesHolder.ofFloat(mPropertyName, values));
         } else {
             super.setFloatValues(values);
-        }
-    }
-
-    @Override
-    public void setDoubleValues(double... values) {
-        if (mValues == null || mValues.length == 0) {
-            // No values yet - this animator is being constructed piecemeal. Init the values with
-            // whatever the current propertyName is
-            setValues(PropertyValuesHolder.ofDouble(mPropertyName, values));
-        } else {
-            super.setDoubleValues(values);
-        }
-    }
-
-    @Override
-    public void setLongValues(long... values) {
-        if (mValues == null || mValues.length == 0) {
-            // No values yet - this animator is being constructed piecemeal. Init the values with
-            // whatever the current propertyName is
-            setValues(PropertyValuesHolder.ofLong(mPropertyName, values));
-        } else {
-            super.setLongValues(values);
         }
     }
 

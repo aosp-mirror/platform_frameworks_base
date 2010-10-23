@@ -51,8 +51,6 @@ public class AnimatorInflater {
      */
     private static final int VALUE_TYPE_FLOAT       = 0;
     private static final int VALUE_TYPE_INT         = 1;
-    private static final int VALUE_TYPE_DOUBLE      = 2;
-    private static final int VALUE_TYPE_LONG        = 3;
     private static final int VALUE_TYPE_COLOR       = 4;
     private static final int VALUE_TYPE_CUSTOM      = 5;
 
@@ -238,42 +236,6 @@ public class AnimatorInflater {
                 } else {
                     valueTo = a.getInteger(com.android.internal.R.styleable.Animator_valueTo, 0);
                     anim.setIntValues(valueTo);
-                }
-            }
-            break;
-
-            case VALUE_TYPE_LONG: {
-                int valueFrom;
-                int valueTo;
-                if (hasFrom) {
-                    valueFrom = a.getInteger(com.android.internal.R.styleable.Animator_valueFrom, 0);
-                    if (hasTo) {
-                        valueTo = a.getInteger(com.android.internal.R.styleable.Animator_valueTo, 0);
-                        anim.setLongValues(valueFrom, valueTo);
-                    } else {
-                        anim.setLongValues(valueFrom);
-                    }
-                } else {
-                    valueTo = a.getInteger(com.android.internal.R.styleable.Animator_valueTo, 0);
-                    anim.setLongValues(valueTo);
-                }
-            }
-            break;
-
-            case VALUE_TYPE_DOUBLE: {
-                double valueFrom;
-                double valueTo;
-                if (hasFrom) {
-                    valueFrom = a.getFloat(com.android.internal.R.styleable.Animator_valueFrom, 0f);
-                    if (hasTo) {
-                        valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                        anim.setDoubleValues(valueFrom, valueTo);
-                    } else {
-                        anim.setDoubleValues(valueFrom);
-                    }
-                } else {
-                    valueTo = a.getFloat(com.android.internal.R.styleable.Animator_valueTo, 0f);
-                    anim.setDoubleValues(valueTo);
                 }
             }
             break;

@@ -297,40 +297,6 @@ public class ValueAnimator extends Animator {
     }
 
     /**
-     * Constructs and returns a ValueAnimator that animates between double values. A single
-     * value implies that that value is the one being animated to. However, this is not typically
-     * useful in a ValueAnimator object because there is no way for the object to determine the
-     * starting value for the animation (unlike ObjectAnimator, which can derive that value
-     * from the target object and property being animated). Therefore, there should typically
-     * be two or more values.
-     *
-     * @param values A set of values that the animation will animate between over time.
-     * @return A ValueAnimator object that is set up to animate between the given values.
-     */
-    public static ValueAnimator ofDouble(double... values) {
-        ValueAnimator anim = new ValueAnimator();
-        anim.setDoubleValues(values);
-        return anim;
-    }
-
-    /**
-     * Constructs and returns a ValueAnimator that animates between long values. A single
-     * value implies that that value is the one being animated to. However, this is not typically
-     * useful in a ValueAnimator object because there is no way for the object to determine the
-     * starting value for the animation (unlike ObjectAnimator, which can derive that value
-     * from the target object and property being animated). Therefore, there should typically
-     * be two or more values.
-     *
-     * @param values A set of values that the animation will animate between over time.
-     * @return A ValueAnimator object that is set up to animate between the given values.
-     */
-    public static ValueAnimator ofLong(long... values) {
-        ValueAnimator anim = new ValueAnimator();
-        anim.setLongValues(values);
-        return anim;
-    }
-
-    /**
      * Constructs and returns a ValueAnimator that animates between the values
      * specified in the PropertyValuesHolder objects.
      *
@@ -419,62 +385,6 @@ public class ValueAnimator extends Animator {
         } else {
             PropertyValuesHolder valuesHolder = mValues[0];
             valuesHolder.setFloatValues(values);
-        }
-        // New property/values/target should cause re-initialization prior to starting
-        mInitialized = false;
-    }
-
-    /**
-     * Sets long values that will be animated between. A single
-     * value implies that that value is the one being animated to. However, this is not typically
-     * useful in a ValueAnimator object because there is no way for the object to determine the
-     * starting value for the animation (unlike ObjectAnimator, which can derive that value
-     * from the target object and property being animated). Therefore, there should typically
-     * be two or more values.
-     *
-     * <p>If there are already multiple sets of values defined for this ValueAnimator via more
-     * than one PropertyValuesHolder object, this method will set the values for the first
-     * of those objects.</p>
-     *
-     * @param values A set of values that the animation will animate between over time.
-     */
-    public void setLongValues(long... values) {
-        if (values == null || values.length == 0) {
-            return;
-        }
-        if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofLong("", values)});
-        } else {
-            PropertyValuesHolder valuesHolder = mValues[0];
-            valuesHolder.setLongValues(values);
-        }
-        // New property/values/target should cause re-initialization prior to starting
-        mInitialized = false;
-    }
-
-    /**
-     * Sets double values that will be animated between. A single
-     * value implies that that value is the one being animated to. However, this is not typically
-     * useful in a ValueAnimator object because there is no way for the object to determine the
-     * starting value for the animation (unlike ObjectAnimator, which can derive that value
-     * from the target object and property being animated). Therefore, there should typically
-     * be two or more values.
-     *
-     * <p>If there are already multiple sets of values defined for this ValueAnimator via more
-     * than one PropertyValuesHolder object, this method will set the values for the first
-     * of those objects.</p>
-     *
-     * @param values A set of values that the animation will animate between over time.
-     */
-    public void setDoubleValues(double... values) {
-        if (values == null || values.length == 0) {
-            return;
-        }
-        if (mValues == null || mValues.length == 0) {
-            setValues(new PropertyValuesHolder[]{PropertyValuesHolder.ofDouble("", values)});
-        } else {
-            PropertyValuesHolder valuesHolder = mValues[0];
-            valuesHolder.setDoubleValues(values);
         }
         // New property/values/target should cause re-initialization prior to starting
         mInitialized = false;
@@ -968,8 +878,9 @@ public class ValueAnimator extends Animator {
             if (mListeners != null) {
                 ArrayList<AnimatorListener> tmpListeners =
                         (ArrayList<AnimatorListener>) mListeners.clone();
-                for (AnimatorListener listener : tmpListeners) {
-                    listener.onAnimationStart(this);
+                int numListeners = tmpListeners.size();
+                for (int i = 0; i < numListeners; ++i) {
+                    tmpListeners.get(i).onAnimationStart(this);
                 }
             }
             // This sets the initial value of the animation, prior to actually starting it running
@@ -1059,8 +970,9 @@ public class ValueAnimator extends Animator {
         if (mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
-            for (AnimatorListener listener : tmpListeners) {
-                listener.onAnimationEnd(this);
+            int numListeners = tmpListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                tmpListeners.get(i).onAnimationEnd(this);
             }
         }
     }
@@ -1077,8 +989,9 @@ public class ValueAnimator extends Animator {
             // just for delayed animations
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
-            for (AnimatorListener listener : tmpListeners) {
-                listener.onAnimationStart(this);
+            int numListeners = tmpListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                tmpListeners.get(i).onAnimationStart(this);
             }
         }
     }
@@ -1147,8 +1060,9 @@ public class ValueAnimator extends Animator {
                 if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
                     // Time to repeat
                     if (mListeners != null) {
-                        for (AnimatorListener listener : mListeners) {
-                            listener.onAnimationRepeat(this);
+                        int numListeners = mListeners.size();
+                        for (int i = 0; i < numListeners; ++i) {
+                            mListeners.get(i).onAnimationRepeat(this);
                         }
                     }
                     ++mCurrentIteration;
