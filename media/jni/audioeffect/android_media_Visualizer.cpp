@@ -131,6 +131,7 @@ static void captureCallback(void* user,
                 samplingrate,
                 0,
                 jArray);
+            env->DeleteLocalRef(jArray);
         }
     }
 
