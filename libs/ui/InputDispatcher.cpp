@@ -124,12 +124,19 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
                 pointerCount, MAX_POINTERS);
         return false;
     }
+    BitSet32 pointerIdBits;
     for (size_t i = 0; i < pointerCount; i++) {
-        if (pointerIds[i] < 0 || pointerIds[i] > MAX_POINTER_ID) {
+        int32_t id = pointerIds[i];
+        if (id < 0 || id > MAX_POINTER_ID) {
             LOGE("Motion event has invalid pointer id %d; value must be between 0 and %d",
-                    pointerIds[i], MAX_POINTER_ID);
+                    id, MAX_POINTER_ID);
             return false;
         }
+        if (pointerIdBits.hasBit(id)) {
+            LOGE("Motion event has duplicate pointer id %d", id);
+            return false;
+        }
+        pointerIdBits.markBit(id);
     }
     return true;
 }
