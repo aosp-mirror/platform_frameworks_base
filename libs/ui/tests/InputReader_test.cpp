@@ -342,6 +342,12 @@ private:
         ADD_FAILURE() << "Should never be called by input reader.";
     }
 
+    virtual bool transferTouchFocus(const sp<InputChannel>& fromChannel,
+            const sp<InputChannel>& toChannel) {
+        ADD_FAILURE() << "Should never be called by input reader.";
+        return 0;
+    }
+
     virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel, bool monitor) {
         ADD_FAILURE() << "Should never be called by input reader.";
         return 0;
@@ -575,6 +581,13 @@ private:
             }
         }
         return result;
+    }
+
+    virtual bool hasLed(int32_t deviceId, int32_t led) const {
+        return false;
+    }
+
+    virtual void setLedState(int32_t deviceId, int32_t led, bool on) {
     }
 
     virtual void dump(String8& dump) {
