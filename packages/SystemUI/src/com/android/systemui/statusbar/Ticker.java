@@ -141,7 +141,7 @@ public abstract class Ticker {
         }
     };
 
-    public Ticker(Context context, View sb) {
+    Ticker(Context context, StatusBarView sb) {
         mContext = context;
         mTickerView = sb.findViewById(R.id.ticker);
 
@@ -163,7 +163,7 @@ public abstract class Ticker {
     }
 
 
-    public void addEntry(StatusBarNotification n) {
+    void addEntry(StatusBarNotification n) {
         int initialCount = mSegments.size();
 
         // If what's being displayed has the same text and icon, just drop it
@@ -212,7 +212,7 @@ public abstract class Ticker {
         }
     }
 
-    public void removeEntry(StatusBarNotification n) {
+    void removeEntry(StatusBarNotification n) {
         for (int i=mSegments.size()-1; i>=0; i--) {
             Segment seg = mSegments.get(i);
             if (n.id == seg.notification.id && n.pkg.equals(seg.notification.pkg)) {
@@ -221,13 +221,13 @@ public abstract class Ticker {
         }
     }
 
-    public void halt() {
+    void halt() {
         mHandler.removeCallbacks(mAdvanceTicker);
         mSegments.clear();
         tickerHalting();
     }
 
-    public void reflowText() {
+    void reflowText() {
         if (mSegments.size() > 0) {
             Segment seg = mSegments.get(0);
             CharSequence text = seg.getText();
@@ -266,8 +266,8 @@ public abstract class Ticker {
         mHandler.postDelayed(mAdvanceTicker, TICKER_SEGMENT_DELAY);
     }
 
-    public abstract void tickerStarting();
-    public abstract void tickerDone();
-    public abstract void tickerHalting();
+    abstract void tickerStarting();
+    abstract void tickerDone();
+    abstract void tickerHalting();
 }
 

@@ -32,7 +32,7 @@ import com.android.internal.statusbar.StatusBarNotification;
  * coalescing these calls so they don't stack up.  For the calls
  * are coalesced, note that they are all idempotent.
  */
-public class CommandQueue extends IStatusBar.Stub {
+class CommandQueue extends IStatusBar.Stub {
     private static final String TAG = "StatusBar.CommandQueue";
 
     private static final int MSG_MASK = 0xffff0000;
@@ -51,10 +51,6 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SET_VISIBILITY = 0x00060000;
     private static final int OP_EXPAND = 1;
     private static final int OP_COLLAPSE = 2;
-
-    private static final int MSG_SET_LIGHTS_ON = 0x00070000;
-
-    private static final int MSG_SHOW_MENU = 0x00080000;
 
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
@@ -79,8 +75,6 @@ public class CommandQueue extends IStatusBar.Stub {
         public void disable(int state);
         public void animateExpand();
         public void animateCollapse();
-        public void setLightsOn(boolean on);
-        public void setMenuKeyVisible(boolean visible);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -149,20 +143,6 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setLightsOn(boolean on) {
-        synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_LIGHTS_ON);
-            mHandler.obtainMessage(MSG_SET_LIGHTS_ON, on ? 1 : 0, 0, null).sendToTarget();
-        }
-    }
-
-    public void setMenuKeyVisible(boolean visible) {
-        synchronized (mList) {
-            mHandler.removeMessages(MSG_SHOW_MENU);
-            mHandler.obtainMessage(MSG_SHOW_MENU, visible ? 1 : 0, 0, null).sendToTarget();
-        }
-    }
-
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -216,13 +196,6 @@ public class CommandQueue extends IStatusBar.Stub {
                     } else {
                         mCallbacks.animateCollapse();
                     }
-                    break;
-                case MSG_SET_LIGHTS_ON:
-                    mCallbacks.setLightsOn(msg.arg1 != 0);
-                    break;
-                case MSG_SHOW_MENU:
-                    mCallbacks.setMenuKeyVisible(msg.arg1 != 0);
-                    break;
             }
         }
     }

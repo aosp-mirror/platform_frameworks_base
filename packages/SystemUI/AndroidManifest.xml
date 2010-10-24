@@ -5,9 +5,6 @@
         >
 
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <application
         android:persistent="true"
@@ -16,12 +13,7 @@
         android:icon="@drawable/ic_launcher_settings">
                  
         <service
-            android:name=".statusbar.PhoneStatusBarService"
-            android:exported="false"
-            />
-
-        <service
-            android:name=".statusbar.tablet.TabletStatusBarService"
+            android:name=".statusbar.StatusBarService"
             android:exported="false"
             />
 
@@ -31,13 +23,6 @@
         <activity android:name="com.android.internal.app.ExternalMediaFormatActivity"
                 android:theme="@*android:style/Theme.Dialog.Alert"
                 android:excludeFromRecents="true">
-        </activity>
-
-        <activity android:name=".recent.RecentApplicationsActivity"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
-            android:exported="true">
         </activity>
 
     </application>

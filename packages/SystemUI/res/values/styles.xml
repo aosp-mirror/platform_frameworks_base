@@ -19,24 +19,10 @@
     <style name="TextAppearance.StatusBar.Title" parent="@android:style/TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@drawable/notification_header_text_color</item>
     </style>
 
     <style name="TextAppearance.StatusBar.IntruderAlert"
         parent="@android:style/TextAppearance.StatusBar">
-    </style>
-
-    <style name="TextAppearance.StatusBar.SystemPanel"
-        parent="@android:style/TextAppearance.StatusBar">
-        <item name="android:textAppearance">?android:attr/textAppearance</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#50FFFFFF</item>
-    </style>
-
-    <style name="TextAppearance.StatusBar.TextButton"
-        parent="@android:style/TextAppearance.StatusBar">
-        <item name="android:textAppearance">?android:attr/textAppearance</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#FFFFFFFF</item>
     </style>
 </resources>
