@@ -23,6 +23,8 @@
 #include <ui/Point.h>
 #include <ui/Rect.h>
 
+#include <hardware/hardware.h>
+
 namespace android {
 
 class Region;
@@ -37,12 +39,11 @@ public:
            explicit Transform(uint32_t orientation);
                     ~Transform();
 
-            // FIXME: must match OVERLAY_TRANSFORM_*, pull from hardware.h
             enum orientation_flags {
                 ROT_0   = 0x00000000,
-                FLIP_H  = 0x00000001,
-                FLIP_V  = 0x00000002,
-                ROT_90  = 0x00000004,
+                FLIP_H  = HAL_TRANSFORM_FLIP_H,
+                FLIP_V  = HAL_TRANSFORM_FLIP_V,
+                ROT_90  = HAL_TRANSFORM_ROT_90,
                 ROT_180 = FLIP_H|FLIP_V,
                 ROT_270 = ROT_180|ROT_90,
                 ROT_INVALID = 0x80
