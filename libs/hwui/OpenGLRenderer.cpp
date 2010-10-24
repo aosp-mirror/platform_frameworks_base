@@ -353,19 +353,22 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Window coordinates of the layer
     Rect bounds(left, top, right, bottom);
-    if (!fboLayer) {
+    if (fboLayer) {
+        // Clear the previous layer regions before we change the viewport
+        clearLayerRegions();
+    } else {
         mSnapshot->transform->mapRect(bounds);
 
         // Layers only make sense if they are in the framebuffer's bounds
         bounds.intersect(*snapshot->clipRect);
 
+        // We cannot work with sub-pixels in this case
+        bounds.snapToPixelBoundaries();
+
         // When the layer is not an FBO, we may use glCopyTexImage so we
         // need to make sure the layer does not extend outside the bounds
         // of the framebuffer
         bounds.intersect(snapshot->previous->viewport);
-
-        // We cannot work with sub-pixels in this case
-        bounds.snapToPixelBoundaries();
     }
 
     if (bounds.isEmpty() || bounds.getWidth() > mMaxTextureSize ||
@@ -454,14 +457,14 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         // Copy the framebuffer into the layer
         glBindTexture(GL_TEXTURE_2D, layer->texture);
 
-         if (layer->empty) {
-             glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-                     layer->width, layer->height, 0);
-             layer->empty = false;
-         } else {
-             glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
-                     bounds.getWidth(), bounds.getHeight());
-          }
+        if (layer->empty) {
+            glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left,
+                    snapshot->height - bounds.bottom, layer->width, layer->height, 0);
+            layer->empty = false;
+        } else {
+            glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
+                    snapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
+        }
 
         // Enqueue the buffer coordinates to clear the corresponding region later
         mLayers.push(new Rect(bounds));
@@ -487,7 +490,8 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     }
 
     // Restore the clip from the previous snapshot
-    const Rect& clip = *previous->clipRect;
+    Rect& clip(*previous->clipRect);
+    clip.snapToPixelBoundaries();
     glScissor(clip.left, previous->height - clip.bottom, clip.getWidth(), clip.getHeight());
 
     Layer* layer = current->layer;
@@ -795,7 +799,8 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
-    const Rect& clip = *mSnapshot->clipRect;
+    Rect& clip(*mSnapshot->clipRect);
+    clip.snapToPixelBoundaries();
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
 
@@ -863,6 +868,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
             paint->getTextSize());
 
     Rect clipRect(*mSnapshot->clipRect);
+    clipRect.snapToPixelBoundaries();
     glScissor(clipRect.left, mSnapshot->height - clipRect.bottom,
             clipRect.getWidth(), clipRect.getHeight());
 
