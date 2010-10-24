@@ -856,6 +856,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public boolean performItemClick(View view, int position, long id) {
         boolean handled = false;
+        boolean dispatchItemClick = true;
 
         if (mChoiceMode != CHOICE_MODE_NONE) {
             handled = true;
@@ -879,6 +880,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (mChoiceActionMode != null) {
                     mMultiChoiceModeCallback.onItemCheckedStateChanged(mChoiceActionMode,
                             position, id, newValue);
+                    dispatchItemClick = false;
                 }
             } else if (mChoiceMode == CHOICE_MODE_SINGLE) {
                 boolean newValue = !mCheckStates.get(position, false);
@@ -900,7 +902,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             requestLayout();
         }
 
-        handled |= super.performItemClick(view, position, id);
+        if (dispatchItemClick) {
+            handled |= super.performItemClick(view, position, id);
+        }
 
         return handled;
     }
