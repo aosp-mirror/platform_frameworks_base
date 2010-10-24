@@ -1332,6 +1332,8 @@
     </style>
 
     <style name="Widget.Holo.ListView" parent="Widget.ListView">
+        <item name="android:divider">?android:attr/listDivider</item>
+        <item name="android:listSelector">?android:attr/listChoiceBackgroundIndicator</item>
     </style>
 
     <style name="Widget.Holo.ListView.White">
@@ -1604,7 +1606,7 @@
     <style name="Widget.Holo.Light.ImageWell" parent="Widget.ImageWell">
     </style>
 
-    <style name="Widget.Holo.Light.ListView" parent="Widget.ListView">
+    <style name="Widget.Holo.Light.ListView" parent="Widget.Holo.ListView">
     </style>
 
     <style name="Widget.Holo.Light.ListView.White">
