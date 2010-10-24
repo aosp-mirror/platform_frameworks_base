@@ -266,7 +266,7 @@ void InputReader::process(const RawEvent* rawEvent) {
         break;
 
     case EventHubInterface::FINISHED_DEVICE_SCAN:
-        handleConfigurationChanged();
+        handleConfigurationChanged(rawEvent->when);
         break;
 
     default:
@@ -404,7 +404,7 @@ void InputReader::consumeEvent(const RawEvent* rawEvent) {
     } // release device registry reader lock
 }
 
-void InputReader::handleConfigurationChanged() {
+void InputReader::handleConfigurationChanged(nsecs_t when) {
     // Reset global meta state because it depends on the list of all configured devices.
     updateGlobalMetaState();
 
@@ -412,7 +412,6 @@ void InputReader::handleConfigurationChanged() {
     updateInputConfiguration();
 
     // Enqueue configuration changed.
-    nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
     mDispatcher->notifyConfigurationChanged(when);
 }
 
@@ -2189,7 +2188,7 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
                 mLocked.currentVirtualKey.down = false;
 #if DEBUG_VIRTUAL_KEYS
                 LOGD("VirtualKeys: Generating key up: keyCode=%d, scanCode=%d",
-                        mCurrentVirtualKey.keyCode, mCurrentVirtualKey.scanCode);
+                        mLocked.currentVirtualKey.keyCode, mLocked.currentVirtualKey.scanCode);
 #endif
                 keyEventAction = AKEY_EVENT_ACTION_UP;
                 keyEventFlags = AKEY_EVENT_FLAG_FROM_SYSTEM | AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
@@ -2214,13 +2213,22 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
             mLocked.currentVirtualKey.down = false;
 #if DEBUG_VIRTUAL_KEYS
             LOGD("VirtualKeys: Canceling key: keyCode=%d, scanCode=%d",
-                    mCurrentVirtualKey.keyCode, mCurrentVirtualKey.scanCode);
+                    mLocked.currentVirtualKey.keyCode, mLocked.currentVirtualKey.scanCode);
 #endif
             keyEventAction = AKEY_EVENT_ACTION_UP;
             keyEventFlags = AKEY_EVENT_FLAG_FROM_SYSTEM | AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY
                     | AKEY_EVENT_FLAG_CANCELED;
-            touchResult = DROP_STROKE;
-            goto DispatchVirtualKey;
+
+            // Check whether the pointer moved inside the display area where we should
+            // start a new stroke.
+            int32_t x = mCurrentTouch.pointers[0].x;
+            int32_t y = mCurrentTouch.pointers[0].y;
+            if (isPointInsideSurfaceLocked(x, y)) {
+                mLastTouch.clear();
+                touchResult = DISPATCH_TOUCH;
+            } else {
+                touchResult = DROP_STROKE;
+            }
         } else {
             if (mCurrentTouch.pointerCount >= 1 && mLastTouch.pointerCount == 0) {
                 // Pointer just went down.  Handle off-screen touches, if needed.
@@ -2238,7 +2246,8 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
                             mLocked.currentVirtualKey.scanCode = virtualKey->scanCode;
 #if DEBUG_VIRTUAL_KEYS
                             LOGD("VirtualKeys: Generating key down: keyCode=%d, scanCode=%d",
-                                    mCurrentVirtualKey.keyCode, mCurrentVirtualKey.scanCode);
+                                    mLocked.currentVirtualKey.keyCode,
+                                    mLocked.currentVirtualKey.scanCode);
 #endif
                             keyEventAction = AKEY_EVENT_ACTION_DOWN;
                             keyEventFlags = AKEY_EVENT_FLAG_FROM_SYSTEM
@@ -2285,14 +2294,35 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
         dispatchTouch(when, policyFlags, & mCurrentTouch,
                 currentIdBits, -1, currentPointerCount, motionEventAction);
     } else {
-        // There may be pointers going up and pointers going down at the same time when pointer
-        // ids are reported by the device driver.
+        // There may be pointers going up and pointers going down and pointers moving
+        // all at the same time.
         BitSet32 upIdBits(lastIdBits.value & ~ currentIdBits.value);
         BitSet32 downIdBits(currentIdBits.value & ~ lastIdBits.value);
         BitSet32 activeIdBits(lastIdBits.value);
         uint32_t pointerCount = lastPointerCount;
 
-        while (! upIdBits.isEmpty()) {
+        // Produce an intermediate representation of the touch data that consists of the
+        // old location of pointers that have just gone up and the new location of pointers that
+        // have just moved but omits the location of pointers that have just gone down.
+        TouchData interimTouch;
+        interimTouch.copyFrom(mLastTouch);
+
+        BitSet32 moveIdBits(lastIdBits.value & currentIdBits.value);
+        bool moveNeeded = false;
+        while (!moveIdBits.isEmpty()) {
+            uint32_t moveId = moveIdBits.firstMarkedBit();
+            moveIdBits.clearBit(moveId);
+
+            int32_t oldIndex = mLastTouch.idToIndex[moveId];
+            int32_t newIndex = mCurrentTouch.idToIndex[moveId];
+            if (mLastTouch.pointers[oldIndex] != mCurrentTouch.pointers[newIndex]) {
+                interimTouch.pointers[oldIndex] = mCurrentTouch.pointers[newIndex];
+                moveNeeded = true;
+            }
+        }
+
+        // Dispatch pointer up events using the interim pointer locations.
+        while (!upIdBits.isEmpty()) {
             uint32_t upId = upIdBits.firstMarkedBit();
             upIdBits.clearBit(upId);
             BitSet32 oldActiveIdBits = activeIdBits;
@@ -2305,12 +2335,21 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
                 motionEventAction = AMOTION_EVENT_ACTION_POINTER_UP;
             }
 
-            dispatchTouch(when, policyFlags, & mLastTouch,
+            dispatchTouch(when, policyFlags, &interimTouch,
                     oldActiveIdBits, upId, pointerCount, motionEventAction);
             pointerCount -= 1;
         }
 
-        while (! downIdBits.isEmpty()) {
+        // Dispatch move events if any of the remaining pointers moved from their old locations.
+        // Although applications receive new locations as part of individual pointer up
+        // events, they do not generally handle them except when presented in a move event.
+        if (moveNeeded) {
+            dispatchTouch(when, policyFlags, &mCurrentTouch,
+                    activeIdBits, -1, pointerCount, AMOTION_EVENT_ACTION_MOVE);
+        }
+
+        // Dispatch pointer down events using the new pointer locations.
+        while (!downIdBits.isEmpty()) {
             uint32_t downId = downIdBits.firstMarkedBit();
             downIdBits.clearBit(downId);
             BitSet32 oldActiveIdBits = activeIdBits;
@@ -2325,7 +2364,7 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
             }
 
             pointerCount += 1;
-            dispatchTouch(when, policyFlags, & mCurrentTouch,
+            dispatchTouch(when, policyFlags, &mCurrentTouch,
                     activeIdBits, downId, pointerCount, motionEventAction);
         }
     }
@@ -3434,8 +3473,8 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
 
         if (fields & Accumulator::FIELD_ABS_MT_PRESSURE) {
             if (inPointer.absMTPressure <= 0) {
-                // Some devices send sync packets with X / Y but with a 0 presure to indicate
-                // a pointer up.  Drop this finger.
+                // Some devices send sync packets with X / Y but with a 0 pressure to indicate
+                // a pointer going up.  Drop this finger.
                 continue;
             }
             outPointer.pressure = inPointer.absMTPressure;

@@ -403,6 +403,7 @@ bool EventHub::getEvent(RawEvent* outEvent)
                 outEvent->deviceId = device->id;
             }
             outEvent->type = DEVICE_REMOVED;
+            outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
             delete device;
             mNeedToSendFinishedDeviceScan = true;
             return true;
@@ -419,6 +420,7 @@ bool EventHub::getEvent(RawEvent* outEvent)
                 outEvent->deviceId = device->id;
             }
             outEvent->type = DEVICE_ADDED;
+            outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
             mNeedToSendFinishedDeviceScan = true;
             return true;
         }
@@ -426,6 +428,7 @@ bool EventHub::getEvent(RawEvent* outEvent)
         if (mNeedToSendFinishedDeviceScan) {
             mNeedToSendFinishedDeviceScan = false;
             outEvent->type = FINISHED_DEVICE_SCAN;
+            outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
             return true;
         }
 
