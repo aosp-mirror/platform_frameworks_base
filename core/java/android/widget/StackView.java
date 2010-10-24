@@ -129,7 +129,7 @@ public class StackView extends AdapterViewAnimator {
     }
 
     private void initStackView() {
-        configureViewAnimator(NUM_ACTIVE_VIEWS, NUM_ACTIVE_VIEWS - 2);
+        configureViewAnimator(NUM_ACTIVE_VIEWS, 1);
         setStaticTransformationsEnabled(true);
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
@@ -165,7 +165,7 @@ public class StackView extends AdapterViewAnimator {
      * Animate the views between different relative indexes within the {@link AdapterViewAnimator}
      */
     void animateViewForTransition(int fromIndex, int toIndex, View view) {
-        if (fromIndex == -1 && toIndex == 0) {
+        if (fromIndex == -1 && toIndex != 0) {
             // Fade item in
             if (view.getAlpha() == 1) {
                 view.setAlpha(0);
@@ -175,7 +175,7 @@ public class StackView extends AdapterViewAnimator {
             ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
             fadeIn.setDuration(DEFAULT_ANIMATION_DURATION);
             fadeIn.start();
-        } else if (fromIndex == mNumActiveViews - 1 && toIndex == mNumActiveViews - 2) {
+        } else if (fromIndex == 0 && toIndex == 1) {
             // Slide item in
             view.setVisibility(VISIBLE);
 
@@ -189,7 +189,7 @@ public class StackView extends AdapterViewAnimator {
             pa.setDuration(duration);
             pa.setInterpolator(new LinearInterpolator());
             pa.start();
-        } else if (fromIndex == mNumActiveViews - 2 && toIndex == mNumActiveViews - 1) {
+        } else if (fromIndex == 1 && toIndex == 0) {
             // Slide item out
             int duration = Math.round(mStackSlider.getDurationForOffscreenPosition(mYVelocity));
 
@@ -201,7 +201,7 @@ public class StackView extends AdapterViewAnimator {
             pa.setDuration(duration);
             pa.setInterpolator(new LinearInterpolator());
             pa.start();
-        } else if (fromIndex == -1 && toIndex == mNumActiveViews - 1) {
+        } else if (fromIndex == -1 && toIndex == 0) {
             // Make sure this view that is "waiting in the wings" is invisible
             view.setAlpha(0.0f);
             view.setVisibility(INVISIBLE);
@@ -223,9 +223,10 @@ public class StackView extends AdapterViewAnimator {
     private void transformViewAtIndex(int index, View view) {
         float maxPerpectiveShift = mMeasuredHeight * PERSPECTIVE_SHIFT_FACTOR;
 
-        if (index == mNumActiveViews -1) index--;
+        index = mMaxNumActiveViews - index - 1;
+        if (index == mMaxNumActiveViews - 1) index--;
 
-        float r = (index * 1.0f) / (mNumActiveViews - 2);
+        float r = (index * 1.0f) / (mMaxNumActiveViews - 2);
 
         float scale = 1 - PERSPECTIVE_SCALE_FACTOR * (1 - r);
         PropertyValuesHolder scaleX = PropertyValuesHolder.ofFloat("scaleX", scale);
@@ -245,8 +246,20 @@ public class StackView extends AdapterViewAnimator {
         pa.start();
     }
 
+    @Override
+    void showOnly(int childIndex, boolean animate, boolean onLayout) {
+        super.showOnly(childIndex, animate, onLayout);
+
+        // Here we need to make sure that the z-order of the children is correct
+	for (int i = mCurrentWindowEnd; i >= mCurrentWindowStart; i--) {
+            int index = modulo(i, getWindowSize());
+            View v = mViewsMap.get(index).view;
+            if (v != null) v.bringToFront();
+        }
+    }
+
     private void updateChildTransforms() {
-        for (int i = 0; i < mNumActiveViews - 1; i++) {
+        for (int i = 0; i < getNumActiveViews(); i++) {
             View v = getViewAtRelativeIndex(i);
             if (v != null) {
                 transformViewAtIndex(i, v);
@@ -341,19 +354,17 @@ public class StackView extends AdapterViewAnimator {
 
             int activeIndex;
             if (mStackMode == ITEMS_SLIDE_UP) {
-                activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ?
-                        mNumActiveViews - 1 : mNumActiveViews - 2;
+                activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ? 0 : 1;
             } else {
-                activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ?
-                        mNumActiveViews - 2 : mNumActiveViews - 1;
+                activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ? 1 : 0;
             }
 
             if (mLoopViews) {
                 mStackSlider.setMode(StackSlider.NORMAL_MODE);
-            } else if (mCurrentWindowStartUnbounded + activeIndex == 0) {
+            } else if (mCurrentWindowStartUnbounded + activeIndex == -1) {
+                activeIndex++;
                 mStackSlider.setMode(StackSlider.BEGINNING_OF_STACK_MODE);
-            } else if (mCurrentWindowStartUnbounded + activeIndex == mAdapter.getCount()) {
-                activeIndex--;
+            } else if (mCurrentWindowStartUnbounded + activeIndex == mAdapter.getCount() - 1) {
                 mStackSlider.setMode(StackSlider.END_OF_STACK_MODE);
             } else {
                 mStackSlider.setMode(StackSlider.NORMAL_MODE);
@@ -439,8 +450,7 @@ public class StackView extends AdapterViewAnimator {
         final int pointerId = ev.getPointerId(activePointerIndex);
         if (pointerId == mActivePointerId) {
 
-            int activeViewIndex = (mSwipeGestureType == GESTURE_SLIDE_DOWN) ? mNumActiveViews - 1
-                    : mNumActiveViews - 2;
+            int activeViewIndex = (mSwipeGestureType == GESTURE_SLIDE_DOWN) ? 0 : 1;
 
             View v = getViewAtRelativeIndex(activeViewIndex);
             if (v == null) return;
@@ -498,18 +508,18 @@ public class StackView extends AdapterViewAnimator {
                 && mStackSlider.mMode == StackSlider.NORMAL_MODE) {
             // Swipe threshold exceeded, swipe down
             if (mStackMode == ITEMS_SLIDE_UP) {
-                showNext();
-            } else {
                 showPrevious();
+            } else {
+                showNext();
             }
             mHighlight.bringToFront();
         } else if (deltaY < -mSwipeThreshold && mSwipeGestureType == GESTURE_SLIDE_UP
                 && mStackSlider.mMode == StackSlider.NORMAL_MODE) {
             // Swipe threshold exceeded, swipe up
             if (mStackMode == ITEMS_SLIDE_UP) {
-                showPrevious();
-            } else {
                 showNext();
+            } else {
+                showPrevious();
             }
 
             mHighlight.bringToFront();
@@ -643,13 +653,13 @@ public class StackView extends AdapterViewAnimator {
                     mView.setRotationX(stackDirection * 90.0f * rotationInterpolator(r));
                     mHighlight.setRotationX(stackDirection * 90.0f * rotationInterpolator(r));
                     break;
-                case BEGINNING_OF_STACK_MODE:
+                case END_OF_STACK_MODE:
                     r = r * 0.2f;
                     viewLp.setVerticalOffset(Math.round(-stackDirection * r * mSlideAmount));
                     highlightLp.setVerticalOffset(Math.round(-stackDirection * r * mSlideAmount));
                     mHighlight.setAlpha(highlightAlphaInterpolator(r));
                     break;
-                case END_OF_STACK_MODE:
+                case BEGINNING_OF_STACK_MODE:
                     r = (1-r) * 0.2f;
                     viewLp.setVerticalOffset(Math.round(stackDirection * r * mSlideAmount));
                     highlightLp.setVerticalOffset(Math.round(stackDirection * r * mSlideAmount));
@@ -735,12 +745,10 @@ public class StackView extends AdapterViewAnimator {
     public void onRemoteAdapterConnected() {
         super.onRemoteAdapterConnected();
         // On first run, we want to set the stack to the end.
-        if (mAdapter != null && mWhichChild == -1) {
-            mWhichChild = mAdapter.getCount() - 1;
+        if (mWhichChild == -1) {
+            mWhichChild = 0;
         }
-        if (mWhichChild >= 0) {
-            setDisplayedChild(mWhichChild);
-        }
+        setDisplayedChild(mWhichChild);
     }
 
     LayoutParams createOrReuseLayoutParams(View v) {

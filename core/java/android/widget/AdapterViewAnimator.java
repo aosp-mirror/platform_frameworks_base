@@ -69,12 +69,12 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * The number of views that the {@link AdapterViewAnimator} keeps as children at any
      * given time (not counting views that are pending removal, see {@link #mPreviousViews}).
      */
-    int mNumActiveViews = 1;
+    int mMaxNumActiveViews = 1;
 
     /**
      * Map of the children of the {@link AdapterViewAnimator}.
      */
-    private HashMap<Integer, ViewAndIndex> mViewsMap = new HashMap<Integer, ViewAndIndex>();
+    HashMap<Integer, ViewAndIndex> mViewsMap = new HashMap<Integer, ViewAndIndex>();
 
     /**
      * List of views pending removal from the {@link AdapterViewAnimator}
@@ -141,8 +141,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     ObjectAnimator mInAnimation;
     ObjectAnimator mOutAnimation;
 
-    private  ArrayList<View> mViewsToBringToFront;
-
     private static final int DEFAULT_ANIMATION_DURATION = 200;
 
     public AdapterViewAnimator(Context context) {
@@ -188,10 +186,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     private void initViewAnimator() {
         mMainQueue = new Handler(Looper.myLooper());
         mPreviousViews = new ArrayList<Integer>();
-        mViewsToBringToFront = new ArrayList<View>();
     }
 
-    private class ViewAndIndex {
+    class ViewAndIndex {
         ViewAndIndex(View v, int i) {
             view = v;
             index = i;
@@ -217,7 +214,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (activeOffset > numVisibleViews - 1) {
             // Throw an exception here.
         }
-        mNumActiveViews = numVisibleViews;
+        mMaxNumActiveViews = numVisibleViews;
         mActiveOffset = activeOffset;
         mPreviousViews.clear();
         mViewsMap.clear();
@@ -266,10 +263,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     public void setDisplayedChild(int whichChild) {
         if (mAdapter != null) {
             mWhichChild = whichChild;
-            if (whichChild >= mAdapter.getCount()) {
-                mWhichChild = mLoopViews ? 0 : mAdapter.getCount() - 1;
+            if (whichChild >= getWindowSize()) {
+                mWhichChild = mLoopViews ? 0 : getWindowSize() - 1;
             } else if (whichChild < 0) {
-                mWhichChild = mLoopViews ? mAdapter.getCount() - 1 : 0;
+                mWhichChild = mLoopViews ? getWindowSize() - 1 : 0;
             }
 
             boolean hasFocus = getFocusedChild() != null;
@@ -327,7 +324,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         showOnly(childIndex, animate, false);
     }
 
-    private int modulo(int pos, int size) {
+    int modulo(int pos, int size) {
         if (size > 0) {
             return (size + (pos % size)) % size;
         } else {
@@ -342,14 +339,34 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @return View at this index, null if the index is outside the bounds
      */
     View getViewAtRelativeIndex(int relativeIndex) {
-        if (relativeIndex >= 0 && relativeIndex <= mNumActiveViews - 1 && mAdapter != null) {
-            int adapterCount =  mAdapter.getCount();
-            int i = modulo(mCurrentWindowStartUnbounded + relativeIndex, adapterCount);
+        if (relativeIndex >= 0 && relativeIndex <= getNumActiveViews() - 1 && mAdapter != null) {
+            int i = modulo(mCurrentWindowStartUnbounded + relativeIndex, getWindowSize());
             if (mViewsMap.get(i) != null) {
                 return mViewsMap.get(i).view;
             }
         }
         return null;
+    }
+
+    int getNumActiveViews() {
+        if (mAdapter != null) {
+            return Math.min(mAdapter.getCount() + 1, mMaxNumActiveViews);
+        } else {
+            return mMaxNumActiveViews;
+        }
+    }
+
+    int getWindowSize() {
+        if (mAdapter != null) {
+            int adapterCount = mAdapter.getCount();
+            if (adapterCount <= getNumActiveViews() && mLoopViews) {
+                return adapterCount*mMaxNumActiveViews;
+            } else {
+                return adapterCount;
+            }
+        } else {
+            return 0;
+        }
     }
 
     LayoutParams createOrReuseLayoutParams(View v) {
@@ -363,7 +380,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     void refreshChildren() {
         for (int i = mCurrentWindowStart; i <= mCurrentWindowEnd; i++) {
-            int index = modulo(i, mNumActiveViews);
+            int index = modulo(i, mMaxNumActiveViews);
 
             // get the fresh child from the adapter
             View updatedChild = mAdapter.getView(i, null, this);
@@ -412,7 +429,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
         mPreviousViews.clear();
         int newWindowStartUnbounded = childIndex - mActiveOffset;
-        int newWindowEndUnbounded = newWindowStartUnbounded + mNumActiveViews - 1;
+        int newWindowEndUnbounded = newWindowStartUnbounded + getNumActiveViews() - 1;
         int newWindowStart = Math.max(0, newWindowStartUnbounded);
         int newWindowEnd = Math.min(adapterCount - 1, newWindowEndUnbounded);
 
@@ -420,8 +437,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             newWindowStart = newWindowStartUnbounded;
             newWindowEnd = newWindowEndUnbounded;
         }
-        int rangeStart = modulo(newWindowStart, adapterCount);
-        int rangeEnd = modulo(newWindowEnd, adapterCount);
+        int rangeStart = modulo(newWindowStart, getWindowSize());
+        int rangeEnd = modulo(newWindowEnd, getWindowSize());
 
         boolean wrap = false;
         if (rangeStart > rangeEnd) {
@@ -450,11 +467,12 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
 
         // If the window has changed
-        if (!(newWindowStart == mCurrentWindowStart && newWindowEnd == mCurrentWindowEnd)) {
+        if (!(newWindowStart == mCurrentWindowStart && newWindowEnd == mCurrentWindowEnd &&
+              newWindowStartUnbounded == mCurrentWindowStartUnbounded)) {
             // Run through the indices in the new range
             for (int i = newWindowStart; i <= newWindowEnd; i++) {
 
-                int index = modulo(i, adapterCount);
+                int index = modulo(i, getWindowSize());
                 int oldRelativeIndex;
                 if (mViewsMap.containsKey(index)) {
                     oldRelativeIndex = mViewsMap.get(index).index;
@@ -494,13 +512,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                 }
                 mViewsMap.get(index).view.bringToFront();
             }
-
-            for (int i = 0; i < mViewsToBringToFront.size(); i++) {
-                View v = mViewsToBringToFront.get(i);
-                v.bringToFront();
-            }
-            mViewsToBringToFront.clear();
-
             mCurrentWindowStart = newWindowStart;
             mCurrentWindowEnd = newWindowEnd;
             mCurrentWindowStartUnbounded = newWindowStartUnbounded;
