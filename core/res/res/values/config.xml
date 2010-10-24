@@ -329,7 +329,14 @@
          from the touch driver. This code exists for one particular device,
          and should not be enabled for any others. -->
     <bool name="config_filterJumpyTouchEvents">false</bool>
-    
+
+    <!-- Specifies the amount of time to disable virtual keys after the screen is touched
+         in order to filter out accidental virtual key presses due to swiping gestures
+         or taps near the edge of the display.  May be 0 to disable the feature.
+         It is recommended that this value be no more than 250 ms.
+         This feature should be disabled for most devices. -->
+    <integer name="config_virtualKeyQuietTimeMillis">0</integer>
+
     <!-- Component name of the default wallpaper. This will be ImageWallpaper if not 
          specified -->
     <string name="default_wallpaper_component">@null</string>
