@@ -2471,7 +2471,7 @@ public class WebView extends AbsoluteLayout
 
         int viewWidth = getViewWidth();
         int newWidth = Math.round(viewWidth * mZoomManager.getInvScale());
-        int newHeight = Math.round(getViewHeight() * mZoomManager.getInvScale());
+        int newHeight = Math.round((getViewHeightWithTitle() - getTitleHeight()) * mZoomManager.getInvScale());
         /*
          * Because the native side may have already done a layout before the
          * View system was able to measure us, we have to send a height of 0 to
