@@ -112,7 +112,7 @@ import android.util.Log;
                 StrictMode.onSqliteObjectLeaked(
                     "Releasing statement in a finalizer. Please ensure " +
                     "that you explicitly call close() on your cursor: " +
-                    mSqlStmt.substring(0, (len > 100) ? 100 : len),
+                    mSqlStmt.substring(0, (len > 1000) ? 1000 : len),
                     mStackTrace);
             }
             releaseSqlStatement();
