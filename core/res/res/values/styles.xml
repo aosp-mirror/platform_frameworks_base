@@ -1383,7 +1383,7 @@
     <style name="Widget.Holo.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
     </style>
 
-    <style name="Widget.Holo.RatingBar.Small">
+    <style name="Widget.Holo.RatingBar.Small" parent="Widget.RatingBar.Small">
     </style>
 
     <style name="Widget.Holo.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
@@ -1650,7 +1650,7 @@
     <style name="Widget.Holo.Light.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
     </style>
 
-    <style name="Widget.Holo.Light.RatingBar.Small">
+    <style name="Widget.Holo.Light.RatingBar.Small" parent="Widget.RatingBar.Small">
     </style>
 
     <style name="Widget.Holo.Light.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
