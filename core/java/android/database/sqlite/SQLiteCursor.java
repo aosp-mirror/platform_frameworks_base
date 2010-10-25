@@ -513,7 +513,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                     StrictMode.onSqliteObjectLeaked(
                         "Finalizing a Cursor that has not been deactivated or closed. " +
                         "database = " + mQuery.mDatabase.getPath() + ", table = " + mEditTable +
-                        ", query = " + mQuery.mSql.substring(0, (len > 100) ? 100 : len),
+                        ", query = " + mQuery.mSql.substring(0, (len > 1000) ? 1000 : len),
                         mStackTrace);
                 }
                 close();
