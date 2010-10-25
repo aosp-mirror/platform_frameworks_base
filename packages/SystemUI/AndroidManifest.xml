@@ -5,16 +5,22 @@
         >
 
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <application
         android:persistent="true"
         android:allowClearUserData="false"
         android:label="@string/app_label"
         android:icon="@drawable/ic_launcher_settings">
-                 
-        <service
-            android:name=".statusbar.StatusBarService"
-            android:exported="false"
+
+        <!-- Broadcast receiver that gets the broadcast at boot time and starts
+             up everything else.
+             TODO: Should have an android:permission attribute
+             -->
+        <service android:name="SystemUIService"
+            android:exported="true"
             />
 
         <activity android:name=".usb.UsbStorageActivity"
@@ -23,6 +29,13 @@
         <activity android:name="com.android.internal.app.ExternalMediaFormatActivity"
                 android:theme="@*android:style/Theme.Dialog.Alert"
                 android:excludeFromRecents="true">
+        </activity>
+
+        <activity android:name=".recent.RecentApplicationsActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:exported="true">
         </activity>
 
     </application>

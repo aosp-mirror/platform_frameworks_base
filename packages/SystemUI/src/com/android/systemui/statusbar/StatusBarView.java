@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -34,7 +35,7 @@ public class StatusBarView extends FrameLayout {
 
     static final int DIM_ANIM_TIME = 400;
     
-    StatusBarService mService;
+    PhoneStatusBarService mService;
     boolean mTracking;
     int mStartX, mStartY;
     ViewGroup mNotificationIcons;
@@ -42,6 +43,13 @@ public class StatusBarView extends FrameLayout {
     View mDate;
     FixedSizeDrawable mBackground;
     
+    boolean mNightMode = false;
+    int mStartAlpha = 0, mEndAlpha = 0;
+    long mEndTime = 0;
+
+    Rect mButtonBounds = new Rect();
+    boolean mCapturingEvents = true;
+
     public StatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -65,9 +73,32 @@ public class StatusBarView extends FrameLayout {
     }
     
     @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        boolean nightMode = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+        if (mNightMode != nightMode) {
+            mNightMode = nightMode;
+            mStartAlpha = getCurAlpha();
+            mEndAlpha = mNightMode ? 0x80 : 0x00;
+            mEndTime = SystemClock.uptimeMillis() + DIM_ANIM_TIME;
+            invalidate();
+        }
+    }
+
+    int getCurAlpha() {
+        long time = SystemClock.uptimeMillis();
+        if (time > mEndTime) {
+            return mEndAlpha;
+        }
+        return mEndAlpha
+                - (int)(((mEndAlpha-mStartAlpha) * (mEndTime-time) / DIM_ANIM_TIME));
+    }
+    
+    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mService.updateExpandedViewPos(StatusBarService.EXPANDED_LEAVE_ALONE);
+        mService.updateExpandedViewPos(PhoneStatusBarService.EXPANDED_LEAVE_ALONE);
     }
 
     @Override
@@ -98,6 +129,18 @@ public class StatusBarView extends FrameLayout {
 
         mDate.layout(mDate.getLeft(), mDate.getTop(), newDateRight, mDate.getBottom());
         mBackground.setFixedBounds(-mDate.getLeft(), -mDate.getTop(), (r-l), (b-t));
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        int alpha = getCurAlpha();
+        if (alpha != 0) {
+            canvas.drawARGB(alpha, 0, 0, 0);
+        }
+        if (alpha != mEndAlpha) {
+            invalidate();
+        }
     }
 
     /**
@@ -138,6 +181,9 @@ public class StatusBarView extends FrameLayout {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!mCapturingEvents) {
+            return false;
+        }
         if (event.getAction() != MotionEvent.ACTION_DOWN) {
             mService.interceptTouchEvent(event);
         }
@@ -146,6 +192,13 @@ public class StatusBarView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (mButtonBounds.contains((int)event.getX(), (int)event.getY())) {
+                mCapturingEvents = false;
+                return false;
+            }
+        }
+        mCapturingEvents = true;
         return mService.interceptTouchEvent(event)
                 ? true : super.onInterceptTouchEvent(event);
     }

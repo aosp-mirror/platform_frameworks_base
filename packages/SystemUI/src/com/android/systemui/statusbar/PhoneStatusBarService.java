@@ -27,7 +27,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -35,7 +34,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -195,27 +193,23 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     @Override
-    public void onCreate() {
-        mDisplay = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+    public void start() {
+        mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
 
-        super.onCreate();
+        super.start();
 
         addIntruderView();
 
         // Lastly, call to the icon policy to install/update all the icons.
-        mIconPolicy = new StatusBarPolicy(this);
-    }
-
-    @Override
-    public void onDestroy() {
-        // we're never destroyed
+        mIconPolicy = new StatusBarPolicy(mContext);
     }
 
     // ================================================================================
     // Constructing the view
     // ================================================================================
     protected View makeStatusBarView() {
-        final Context context = this;
+        final Context context = mContext;
 
         Resources res = context.getResources();
 
@@ -293,7 +287,7 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     private void addIntruderView() {
-        final Resources res = getResources();
+        final Resources res = mContext.getResources();
         final int height= res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -317,7 +311,7 @@ public class PhoneStatusBarService extends StatusBarService {
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
         if (SPEW) Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " icon=" + icon);
-        StatusBarIconView view = new StatusBarIconView(this, slot);
+        StatusBarIconView view = new StatusBarIconView(mContext, slot);
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
@@ -434,7 +428,7 @@ public class PhoneStatusBarService extends StatusBarService {
             oldEntry.notification = notification;
             try {
                 // Reapply the RemoteViews
-                contentView.reapply(this, oldEntry.content);
+                contentView.reapply(mContext, oldEntry.content);
                 // update the contentIntent
                 final PendingIntent contentIntent = notification.notification.contentIntent;
                 if (contentIntent != null) {
@@ -507,7 +501,8 @@ public class PhoneStatusBarService extends StatusBarService {
         }
 
         // create the row view
-        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_latest_event, parent, false);
 
         // bind the click event to the content area
@@ -525,7 +520,7 @@ public class PhoneStatusBarService extends StatusBarService {
         View expanded = null;
         Exception exception = null;
         try {
-            expanded = remoteViews.apply(this, content);
+            expanded = remoteViews.apply(mContext, content);
         }
         catch (RuntimeException e) {
             exception = e;
@@ -564,7 +559,7 @@ public class PhoneStatusBarService extends StatusBarService {
         final View content = views[1];
         final View expanded = views[2];
         // Construct the icon.
-        final StatusBarIconView iconView = new StatusBarIconView(this,
+        final StatusBarIconView iconView = new StatusBarIconView(mContext,
                 notification.pkg + "/0x" + Integer.toHexString(notification.id));
         final StatusBarIcon ic = new StatusBarIcon(notification.pkg, notification.notification.icon,
                     notification.notification.iconLevel, notification.notification.number);
@@ -1050,7 +1045,7 @@ public class PhoneStatusBarService extends StatusBarService {
                 overlay.setSourceBounds(
                         new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
                 try {
-                    mIntent.send(PhoneStatusBarService.this, 0, overlay);
+                    mIntent.send(mContext, 0, overlay);
                 } catch (PendingIntent.CanceledException e) {
                     // the stack trace isn't very helpful here.  Just log the exception message.
                     Slog.w(TAG, "Sending contentIntent failed: " + e);
@@ -1151,7 +1146,7 @@ public class PhoneStatusBarService extends StatusBarService {
     };
 
     private Animation loadAnim(int id, Animation.AnimationListener listener) {
-        Animation anim = AnimationUtils.loadAnimation(PhoneStatusBarService.this, id);
+        Animation anim = AnimationUtils.loadAnimation(mContext, id);
         if (listener != null) {
             anim.setAnimationListener(listener);
         }
@@ -1163,15 +1158,7 @@ public class PhoneStatusBarService extends StatusBarService {
                 + " " + v.getWidth() + "x" + v.getHeight() + ")";
     }
 
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump StatusBar from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
-
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
             pw.println("  mExpanded=" + mExpanded
@@ -1519,12 +1506,13 @@ public class PhoneStatusBarService extends StatusBarService {
      * meantime, just update the things that we know change.
      */
     void updateResources() {
-        Resources res = getResources();
+        final Context context = mContext;
+        final Resources res = context.getResources();
 
-        mClearButton.setText(getText(R.string.status_bar_clear_all_button));
-        mOngoingTitle.setText(getText(R.string.status_bar_ongoing_events_title));
-        mLatestTitle.setText(getText(R.string.status_bar_latest_events_title));
-        mNoNotificationsTitle.setText(getText(R.string.status_bar_no_notifications_title));
+        mClearButton.setText(context.getText(R.string.status_bar_clear_all_button));
+        mOngoingTitle.setText(context.getText(R.string.status_bar_ongoing_events_title));
+        mLatestTitle.setText(context.getText(R.string.status_bar_latest_events_title));
+        mNoNotificationsTitle.setText(context.getText(R.string.status_bar_no_notifications_title));
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
@@ -1540,7 +1528,8 @@ public class PhoneStatusBarService extends StatusBarService {
     }
 
     void vibrate() {
-        android.os.Vibrator vib = (android.os.Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+        android.os.Vibrator vib = (android.os.Vibrator)mContext.getSystemService(
+                Context.VIBRATOR_SERVICE);
         vib.vibrate(250);
     }
 

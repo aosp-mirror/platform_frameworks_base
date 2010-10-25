@@ -22,7 +22,6 @@
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
     android:clickable="true"
-    android:onClick="systemInfoClicked"
     >
     <com.android.systemui.statusbar.Clock
         style="@*android:style/TextAppearance.StatusBar.Icon"
