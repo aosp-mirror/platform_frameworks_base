@@ -159,56 +159,32 @@ status_t Transform::set(uint32_t flags, float w, float h)
         return BAD_VALUE;
     }
 
-    mType = flags << 8;
-    float sx = (flags & FLIP_H) ? -1 : 1;
-    float sy = (flags & FLIP_V) ? -1 : 1;
-    float a=0, b=0, c=0, d=0, x=0, y=0;
-    int xmask = 0;
-
-    // computation of x,y
-    // x y
-    // 0 0  0
-    // w 0  ROT90
-    // w h  FLIPH|FLIPV
-    // 0 h  FLIPH|FLIPV|ROT90
-
-    if (flags & ROT_90) {
-        mType |= ROTATE;
-        b = -sy;
-        c = sx;
-        xmask = 1;
-    } else {
-        a = sx;
-        d = sy;
-    }
-
+    Transform H, V, R;
     if (flags & FLIP_H) {
-        mType ^= SCALE;
-        xmask ^= 1;
+        H.mType = (FLIP_H << 8) | SCALE;
+        H.mType |= isZero(w) ? IDENTITY : TRANSLATE;
+        mat33& M(H.mMatrix);
+        M[0][0] = -1;
+        M[2][0] = w;
     }
 
     if (flags & FLIP_V) {
-        mType ^= SCALE;
-        y = h;
+        V.mType = (FLIP_V << 8) | SCALE;
+        V.mType |= isZero(h) ? IDENTITY : TRANSLATE;
+        mat33& M(V.mMatrix);
+        M[1][1] = -1;
+        M[2][1] = h;
     }
 
-    if ((flags & ROT_180) == ROT_180) {
-        mType |= ROTATE;
+    if (flags & ROT_90) {
+        R.mType = (ROT_90 << 8) | ROTATE;
+        R.mType |= isZero(w) ? IDENTITY : TRANSLATE;
+        mat33& M(R.mMatrix);
+        M[0][0] = 0;    M[1][0] =-1;    M[2][0] = w;
+        M[0][1] = 1;    M[1][1] = 0;
     }
 
-    if (xmask) {
-        x = w;
-    }
-
-    if (!isZero(x) || !isZero(y)) {
-        mType |= TRANSLATE;
-    }
-
-    mat33& M(mMatrix);
-    M[0][0] = a;    M[1][0] = b;    M[2][0] = x;
-    M[0][1] = c;    M[1][1] = d;    M[2][1] = y;
-    M[0][2] = 0;    M[1][2] = 0;    M[2][2] = 1;
-
+    *this = ((H*V)*R);
     return NO_ERROR;
 }
 
