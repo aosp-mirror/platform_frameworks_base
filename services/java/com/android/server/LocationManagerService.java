@@ -89,7 +89,7 @@ import java.util.Set;
  */
 public class LocationManagerService extends ILocationManager.Stub implements Runnable {
     private static final String TAG = "LocationManagerService";
-    private static final boolean LOCAL_LOGV = true;
+    private static final boolean LOCAL_LOGV = false;
 
     // The last time a location was written, by provider name.
     private HashMap<String,Long> mLastWriteTime = new HashMap<String,Long>();
@@ -1677,6 +1677,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     public Location getLastKnownLocation(String provider) {
+        if (LOCAL_LOGV) {
+            Slog.v(TAG, "getLastKnownLocation: " + provider);
+        }
         try {
             synchronized (mLock) {
                 return _getLastKnownLocationLocked(provider);
