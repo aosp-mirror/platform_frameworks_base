@@ -223,18 +223,34 @@ typedef void ANativeActivity_createFunc(ANativeActivity* activity,
 
 /**
  * The name of the function that NativeInstance looks for when launching its
- * native code.
+ * native code.  This is the default function that is used, you can specify
+ * "android.app.func_name" string meta-data in your manifest to use a different
+ * function.
  */
 extern ANativeActivity_createFunc ANativeActivity_onCreate;
 
 /**
  * Finish the given activity.  Its finish() method will be called, causing it
- * to be stopped and destroyed.
+ * to be stopped and destroyed.  Note that this method can be called from
+ * *any* thread; it will send a message to the main thread of the process
+ * where the Java finish call will take place.
  */
 void ANativeActivity_finish(ANativeActivity* activity);
 
+/**
+ * Change the window format of the given activity.  Calls getWindow().setFormat()
+ * of the given activity.  Note that this method can be called from
+ * *any* thread; it will send a message to the main thread of the process
+ * where the Java finish call will take place.
+ */
 void ANativeActivity_setWindowFormat(ANativeActivity* activity, int32_t format);
 
+/**
+ * Change the window flags of the given activity.  Calls getWindow().setFlags()
+ * of the given activity.  Note that this method can be called from
+ * *any* thread; it will send a message to the main thread of the process
+ * where the Java finish call will take place.  See window.h for flag constants.
+ */
 void ANativeActivity_setWindowFlags(ANativeActivity* activity,
         uint32_t addFlags, uint32_t removeFlags);
 
@@ -247,6 +263,12 @@ enum {
     ANATIVEACTIVITY_SHOW_SOFT_INPUT_FORCED = 0x0002,
 };
 
+/**
+ * Show the IME while in the given activity.  Calls InputMethodManager.showSoftInput()
+ * for the given activity.  Note that this method can be called from
+ * *any* thread; it will send a message to the main thread of the process
+ * where the Java finish call will take place.
+ */
 void ANativeActivity_showSoftInput(ANativeActivity* activity, uint32_t flags);
 
 /**
@@ -258,6 +280,12 @@ enum {
     ANATIVEACTIVITY_HIDE_SOFT_INPUT_NOT_ALWAYS = 0x0002,
 };
 
+/**
+ * Hide the IME while in the given activity.  Calls InputMethodManager.hideSoftInput()
+ * for the given activity.  Note that this method can be called from
+ * *any* thread; it will send a message to the main thread of the process
+ * where the Java finish call will take place.
+ */
 void ANativeActivity_hideSoftInput(ANativeActivity* activity, uint32_t flags);
 
 #ifdef __cplusplus
