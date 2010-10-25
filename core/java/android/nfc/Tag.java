@@ -149,6 +149,12 @@ public class Tag implements Parcelable {
      * Get the low-level bytes returned by this Tag at poll-time.
      * <p>These can be used to help with advanced identification of a Tag.
      * <p>The meaning of these bytes depends on the Tag technology.
+     * <p>ISO14443-3A: ATQA/SENS_RES
+     * <p>ISO14443-3B: Application data (4 bytes) and Protocol Info (3 bytes) from ATQB/SENSB_RES
+     * <p>JIS_X_6319_4: PAD0 (2 byte), PAD1 (2 byte), MRTI(2 byte), PAD2 (1 byte), RC (2 byte)
+     * <p>ISO15693: response flags (1 byte), DSFID (1 byte)
+     * from SENSF_RES
+     *
      * @return poll bytes, or null if they do not exist for this Tag technology
      */
     public byte[] getPollBytes() {
@@ -159,6 +165,12 @@ public class Tag implements Parcelable {
      * Get the low-level bytes returned by this Tag at activation-time.
      * <p>These can be used to help with advanced identification of a Tag.
      * <p>The meaning of these bytes depends on the Tag technology.
+     * <p>ISO14443-3A: SAK/SEL_RES
+     * <p>ISO14443-3B: null
+     * <p>ISO14443-3A & ISO14443-4: SAK/SEL_RES, historical bytes from ATS  <TODO: confirm>
+     * <p>ISO14443-3B & ISO14443-4: ATTRIB response
+     * <p>JIS_X_6319_4: null
+     * <p>ISO15693: response flags (1 byte), DSFID (1 byte): null
      * @return activation bytes, or null if they do not exist for this Tag technology
      */
     public byte[] getActivationBytes() {
