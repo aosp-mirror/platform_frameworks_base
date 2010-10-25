@@ -40,6 +40,8 @@ enum {
     // Not technically an error.
     INFO_FORMAT_CHANGED    = MEDIA_ERROR_BASE - 12,
     INFO_DISCONTINUITY     = MEDIA_ERROR_BASE - 13,
+
+    ERROR_NO_LICENSE       = MEDIA_ERROR_BASE - 14,
 };
 
 }  // namespace android
