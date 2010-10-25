@@ -36,6 +36,7 @@ public class SystemUIService extends Service {
      */
     final Object[] SERVICES = new Object[] {
             R.string.config_statusBarComponent,
+            com.android.systemui.power.PowerUI.class,
         };
 
     /**
@@ -96,9 +97,19 @@ public class SystemUIService extends Service {
             return;
         }
 
-        for (SystemUI ui: mServices) {
-            pw.println("dumping service: " + ui.getClass().getName());
-            ui.dump(fd, pw, args);
+        if (args == null || args.length == 0) {
+            for (SystemUI ui: mServices) {
+                pw.println("dumping service: " + ui.getClass().getName());
+                ui.dump(fd, pw, args);
+            }
+        } else {
+            String svc = args[0];
+            for (SystemUI ui: mServices) {
+                String name = ui.getClass().getName();
+                if (name.endsWith(svc)) {
+                    ui.dump(fd, pw, args);
+                }
+            }
         }
     }
 }
