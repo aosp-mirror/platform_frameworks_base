@@ -645,12 +645,6 @@ page.title=Testing Fundamentals
         more realistic application.
     </li>
     <li>
-        The sample test package
-        <a href="{@docRoot}resources/samples/NotePadTest">Note Pad Test</a> is an example of
-        testing a {@link android.content.ContentProvider}. It contains a set of unit tests for the
-        Note Pad sample application's {@link android.content.ContentProvider}.
-    </li>
-    <li>
         The sample test package <a href="{@docRoot}resources/samples/AlarmServiceTest"}>
         Alarm Service Test</a> is an example of testing a {@link android.app.Service}. It contains
         a set of unit tests for the Alarm Service sample application's {@link android.app.Service}.
