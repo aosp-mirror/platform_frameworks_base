@@ -822,7 +822,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 mDrawingAllowed = true;
             }
 
-            boolean hwIntialized = false;
+            boolean hwInitialized = false;
             boolean contentInsetsChanged = false;
             boolean visibleInsetsChanged;
             boolean hadSurface = mSurface.isValid();
@@ -887,7 +887,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         mPreviousTransparentRegion.setEmpty();
 
                         if (mAttachInfo.mHardwareRenderer != null) {
-                            hwIntialized = mAttachInfo.mHardwareRenderer.initialize(mHolder);
+                            hwInitialized = mAttachInfo.mHardwareRenderer.initialize(mHolder);
                         }
                     }
                 } else if (!mSurface.isValid()) {
@@ -935,6 +935,11 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                             }
                         }
                         surfaceChanged = true;
+
+                        if (mAttachInfo.mHardwareRenderer != null) {
+                            // This will bail out early if already initialized
+                            mAttachInfo.mHardwareRenderer.initialize(mHolder);
+                        }
                     }
                     if (surfaceChanged) {
                         mSurfaceHolderCallback.surfaceChanged(mSurfaceHolder,
@@ -965,7 +970,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 }
             }
 
-            if (hwIntialized || (windowShouldResize && mAttachInfo.mHardwareRenderer != null)) {
+            if (hwInitialized || (windowShouldResize && mAttachInfo.mHardwareRenderer != null)) {
                 mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
             }
 
@@ -1795,7 +1800,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     boolean inTouchMode = msg.arg2 != 0;
                     ensureTouchModeLocally(inTouchMode);
 
-                    if (mAttachInfo.mHardwareRenderer != null) {
+                    if (mAttachInfo.mHardwareRenderer != null &&
+                            mSurface != null && mSurface.isValid()) {
                         mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
                                 mAttachInfo, mHolder);
                     }
