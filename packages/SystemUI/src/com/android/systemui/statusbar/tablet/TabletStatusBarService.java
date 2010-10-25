@@ -39,6 +39,7 @@ import android.view.animation.AnimationUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -181,8 +182,9 @@ public class TabletStatusBarService extends StatusBarService {
         mCurtains = sb.findViewById(R.id.lights_out);
         mSystemInfo = sb.findViewById(R.id.systemInfo);
 
-        mSystemInfo.setOnClickListener(mOnClickListener);
+//        mSystemInfo.setOnClickListener(mOnClickListener);
         mSystemInfo.setOnLongClickListener(new SetLightsOnListener(false));
+        mSystemInfo.setOnTouchListener(new ClockTouchListener());
 
         mRecentButton = sb.findViewById(R.id.recent);
         mRecentButton.setOnClickListener(mOnClickListener);
@@ -591,6 +593,34 @@ public class TabletStatusBarService extends StatusBarService {
             mBarService.onNotificationError(n.pkg, n.tag, n.id, n.uid, n.initialPid, message);
         } catch (RemoteException ex) {
             // The end is nigh.
+        }
+    }
+
+    private class ClockTouchListener implements View.OnTouchListener {
+        VelocityTracker mVT;
+        public boolean onTouch (View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mVT = VelocityTracker.obtain();
+                    // fall through
+                case MotionEvent.ACTION_OUTSIDE:
+                case MotionEvent.ACTION_MOVE:
+                    if (mVT == null) break;
+                    mVT.addMovement(event);
+                    mVT.computeCurrentVelocity(1000);
+                    Slog.d("ClockTouchListener", "dy=" + mVT.getYVelocity());
+                    if (mVT.getYVelocity() < -200 && mSystemPanel.getVisibility() == View.GONE) {
+                        mHandler.removeMessages(MSG_OPEN_SYSTEM_PANEL);
+                        mHandler.sendEmptyMessage(MSG_OPEN_SYSTEM_PANEL);
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    mVT.recycle();
+                    mVT = null;
+                    return true;
+            }
+            return false;
         }
     }
 
