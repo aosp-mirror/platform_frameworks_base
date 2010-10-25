@@ -62,12 +62,6 @@ page.title=Testing
 <h4>Samples</h4>
 <ul>
     <li>
-        <a href="{@docRoot}resources/samples/NotePadTest.html">Note Pad Test</a> is a test
-        package for the <a href="{@docRoot}resources/samples/NotePad.html">Note Pad</a> sample
-        application. It provides a simple example of unit testing
-        a {@link android.content.ContentProvider}.
-    </li>
-    <li>
         The <a href="{@docRoot}resources/samples/AlarmServiceTest.html">Alarm Service Test</a>
         is a test package for the <a href="{@docRoot}resources/samples/Alarm.html">Alarm</a>
         sample application. It provides a simple example of unit
