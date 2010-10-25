@@ -264,7 +264,9 @@ MPEG4Extractor::MPEG4Extractor(const sp<DataSource> &source)
       mHasVideo(false),
       mFirstTrack(NULL),
       mLastTrack(NULL),
-      mFileMetaData(new MetaData) {
+      mFileMetaData(new MetaData),
+      mFirstSINF(NULL),
+      mIsDrm(false) {
 }
 
 MPEG4Extractor::~MPEG4Extractor() {
@@ -276,6 +278,15 @@ MPEG4Extractor::~MPEG4Extractor() {
         track = next;
     }
     mFirstTrack = mLastTrack = NULL;
+
+    SINF *sinf = mFirstSINF;
+    while (sinf) {
+        SINF *next = sinf->next;
+        delete sinf->IPMPData;
+        delete sinf;
+        sinf = next;
+    }
+    mFirstSINF = NULL;
 }
 
 sp<MetaData> MPEG4Extractor::getMetaData() {
@@ -368,6 +379,178 @@ status_t MPEG4Extractor::readMetaData() {
     }
 
     return err;
+}
+
+void MPEG4Extractor::setDrmFlag(bool flag) {
+    mIsDrm = flag;
+}
+
+char* MPEG4Extractor::getDrmTrackInfo(size_t trackID, int *len) {
+    if (mFirstSINF == NULL) {
+        return NULL;
+    }
+
+    SINF *sinf = mFirstSINF;
+    while (sinf && (trackID != sinf->trackID)) {
+        sinf = sinf->next;
+    }
+
+    if (sinf == NULL) {
+        return NULL;
+    }
+
+    *len = sinf->len;
+    return sinf->IPMPData;
+}
+
+// Reads an encoded integer 7 bits at a time until it encounters the high bit clear.
+int32_t readSize(off_t offset,
+        const sp<DataSource> DataSource, uint8_t *numOfBytes) {
+    uint32_t size = 0;
+    uint8_t data;
+    bool moreData = true;
+    *numOfBytes = 0;
+
+    while (moreData) {
+        if (DataSource->readAt(offset, &data, 1) < 1) {
+            return -1;
+        }
+        offset ++;
+        moreData = (data >= 128) ? true : false;
+        size = (size << 7) | (data & 0x7f); // Take last 7 bits
+        (*numOfBytes) ++;
+    }
+
+    return size;
+}
+
+status_t MPEG4Extractor::parseDrmSINF(off_t *offset, off_t data_offset) {
+    uint8_t updateIdTag;
+    if (mDataSource->readAt(data_offset, &updateIdTag, 1) < 1) {
+        return ERROR_IO;
+    }
+    data_offset ++;
+
+    if (0x01/*OBJECT_DESCRIPTOR_UPDATE_ID_TAG*/ != updateIdTag) {
+        return ERROR_MALFORMED;
+    }
+
+    uint8_t numOfBytes;
+    int32_t size = readSize(data_offset, mDataSource, &numOfBytes);
+    if (size < 0) {
+        return ERROR_IO;
+    }
+    int32_t classSize = size;
+    data_offset += numOfBytes;
+
+    while(size >= 11 ) {
+        uint8_t descriptorTag;
+        if (mDataSource->readAt(data_offset, &descriptorTag, 1) < 1) {
+            return ERROR_IO;
+        }
+        data_offset ++;
+
+        if (0x11/*OBJECT_DESCRIPTOR_ID_TAG*/ != descriptorTag) {
+            return ERROR_MALFORMED;
+        }
+
+        uint8_t buffer[8];
+        //ObjectDescriptorID and ObjectDescriptor url flag
+        if (mDataSource->readAt(data_offset, buffer, 2) < 2) {
+            return ERROR_IO;
+        }
+        data_offset += 2;
+
+        if ((buffer[1] >> 5) & 0x0001) { //url flag is set
+            return ERROR_MALFORMED;
+        }
+
+        if (mDataSource->readAt(data_offset, buffer, 8) < 8) {
+            return ERROR_IO;
+        }
+        data_offset += 8;
+
+        if ((0x0F/*ES_ID_REF_TAG*/ != buffer[1])
+                || ( 0x0A/*IPMP_DESCRIPTOR_POINTER_ID_TAG*/ != buffer[5])) {
+            return ERROR_MALFORMED;
+        }
+
+        SINF *sinf = new SINF;
+        sinf->trackID = U16_AT(&buffer[3]);
+        sinf->IPMPDescriptorID = buffer[7];
+        sinf->next = mFirstSINF;
+        mFirstSINF = sinf;
+
+        size -= (8 + 2 + 1);
+    }
+
+    if (size != 0) {
+        return ERROR_MALFORMED;
+    }
+
+    if (mDataSource->readAt(data_offset, &updateIdTag, 1) < 1) {
+        return ERROR_IO;
+    }
+    data_offset ++;
+
+    if(0x05/*IPMP_DESCRIPTOR_UPDATE_ID_TAG*/ != updateIdTag) {
+        return ERROR_MALFORMED;
+    }
+
+    size = readSize(data_offset, mDataSource, &numOfBytes);
+    if (size < 0) {
+        return ERROR_IO;
+    }
+    classSize = size;
+    data_offset += numOfBytes;
+
+    while (size > 0) {
+        uint8_t tag;
+        int32_t dataLen;
+        if (mDataSource->readAt(data_offset, &tag, 1) < 1) {
+            return ERROR_IO;
+        }
+        data_offset ++;
+
+        if (0x0B/*IPMP_DESCRIPTOR_ID_TAG*/ == tag) {
+            uint8_t id;
+            dataLen = readSize(data_offset, mDataSource, &numOfBytes);
+            if (dataLen < 0) {
+                return ERROR_IO;
+            } else if (dataLen < 4) {
+                return ERROR_MALFORMED;
+            }
+            data_offset += numOfBytes;
+
+            if (mDataSource->readAt(data_offset, &id, 1) < 1) {
+                return ERROR_IO;
+            }
+            data_offset ++;
+
+            SINF *sinf = mFirstSINF;
+            while (sinf && (sinf->IPMPDescriptorID != id)) {
+                sinf = sinf->next;
+            }
+            if (sinf == NULL) {
+                return ERROR_MALFORMED;
+            }
+            sinf->len = dataLen - 3;
+            sinf->IPMPData = new char[sinf->len];
+
+            if (mDataSource->readAt(data_offset + 2, sinf->IPMPData, sinf->len) < sinf->len) {
+                return ERROR_IO;
+            }
+            data_offset += sinf->len;
+
+            size -= (dataLen + numOfBytes + 1);
+        }
+    }
+
+    if (size != 0) {
+        return ERROR_MALFORMED;
+    }
+
+    return UNKNOWN_ERROR;  // Return a dummy error.
 }
 
 static void MakeFourCCString(uint32_t x, char *s) {
@@ -563,7 +746,11 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             } else if (chunk_type == FOURCC('m', 'o', 'o', 'v')) {
                 mHaveMetadata = true;
 
-                return UNKNOWN_ERROR;  // Return a dummy error.
+                if (!mIsDrm) {
+                    return UNKNOWN_ERROR;  // Return a dummy error.
+                } else {
+                    return OK;
+                }
             }
             break;
         }
@@ -618,6 +805,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 height = U32_AT(&buffer[80]);
             }
 
+            mLastTrack->meta->setInt32(kKeyTrackID, id);
             *offset += chunk_size;
             break;
         }
@@ -1048,6 +1236,20 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
             *offset += chunk_size;
             break;
+        }
+
+        case FOURCC('m', 'd', 'a', 't'):
+        {
+            if (!mIsDrm) {
+                *offset += chunk_size;
+                break;
+            }
+
+            if (chunk_size < 8) {
+                return ERROR_MALFORMED;
+            }
+
+            return parseDrmSINF(offset, data_offset);
         }
 
         default:
@@ -1576,9 +1778,15 @@ status_t MPEG4Source::read(
     } else {
         // Whole NAL units are returned but each fragment is prefixed by
         // the start code (0x00 00 00 01).
-
-        ssize_t num_bytes_read =
-            mDataSource->readAt(offset, mSrcBuffer, size);
+        ssize_t num_bytes_read = 0;
+        int32_t drm = 0;
+        bool usesDRM = (mFormat->findInt32(kKeyIsDRM, &drm) && drm != 0);
+        if (usesDRM) {
+            num_bytes_read =
+                mDataSource->readAt(offset, (uint8_t*)mBuffer->data(), size);
+        } else {
+            num_bytes_read = mDataSource->readAt(offset, mSrcBuffer, size);
+        }
 
         if (num_bytes_read < (ssize_t)size) {
             mBuffer->release();
@@ -1587,40 +1795,46 @@ status_t MPEG4Source::read(
             return ERROR_IO;
         }
 
-        uint8_t *dstData = (uint8_t *)mBuffer->data();
-        size_t srcOffset = 0;
-        size_t dstOffset = 0;
+        if (usesDRM) {
+            CHECK(mBuffer != NULL);
+            mBuffer->set_range(0, size);
 
-        while (srcOffset < size) {
-            CHECK(srcOffset + mNALLengthSize <= size);
-            size_t nalLength = parseNALSize(&mSrcBuffer[srcOffset]);
-            srcOffset += mNALLengthSize;
+        } else {
+            uint8_t *dstData = (uint8_t *)mBuffer->data();
+            size_t srcOffset = 0;
+            size_t dstOffset = 0;
 
-            if (srcOffset + nalLength > size) {
-                mBuffer->release();
-                mBuffer = NULL;
+            while (srcOffset < size) {
+                CHECK(srcOffset + mNALLengthSize <= size);
+                size_t nalLength = parseNALSize(&mSrcBuffer[srcOffset]);
+                srcOffset += mNALLengthSize;
 
-                return ERROR_MALFORMED;
+                if (srcOffset + nalLength > size) {
+                    mBuffer->release();
+                    mBuffer = NULL;
+
+                    return ERROR_MALFORMED;
+                }
+
+                if (nalLength == 0) {
+                    continue;
+                }
+
+                CHECK(dstOffset + 4 <= mBuffer->size());
+
+                dstData[dstOffset++] = 0;
+                dstData[dstOffset++] = 0;
+                dstData[dstOffset++] = 0;
+                dstData[dstOffset++] = 1;
+                memcpy(&dstData[dstOffset], &mSrcBuffer[srcOffset], nalLength);
+                srcOffset += nalLength;
+                dstOffset += nalLength;
             }
-
-            if (nalLength == 0) {
-                continue;
-            }
-
-            CHECK(dstOffset + 4 <= mBuffer->size());
-
-            dstData[dstOffset++] = 0;
-            dstData[dstOffset++] = 0;
-            dstData[dstOffset++] = 0;
-            dstData[dstOffset++] = 1;
-            memcpy(&dstData[dstOffset], &mSrcBuffer[srcOffset], nalLength);
-            srcOffset += nalLength;
-            dstOffset += nalLength;
+            CHECK_EQ(srcOffset, size);
+            CHECK(mBuffer != NULL);
+            mBuffer->set_range(0, dstOffset);
         }
-        CHECK_EQ(srcOffset, size);
 
-        CHECK(mBuffer != NULL);
-        mBuffer->set_range(0, dstOffset);
         mBuffer->meta_data()->clear();
         mBuffer->meta_data()->setInt64(
                 kKeyTime, ((int64_t)dts * 1000000) / mTimescale);

@@ -25,6 +25,7 @@
 #include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <utils/threads.h>
+#include <drm/DrmManagerClient.h>
 
 namespace android {
 
@@ -35,6 +36,8 @@ struct MediaExtractor;
 struct MediaSource;
 struct Prefetcher;
 struct TimeSource;
+class DrmManagerClinet;
+class DecryptHandle;
 
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
@@ -194,6 +197,9 @@ private:
             }
         }
     } *mSuspensionState;
+
+    DrmManagerClient *mDrmManagerClient;
+    DecryptHandle *mDecryptHandle;
 
     status_t setDataSource_l(
             const char *uri,

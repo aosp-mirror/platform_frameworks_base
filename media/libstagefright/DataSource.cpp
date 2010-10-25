@@ -19,6 +19,7 @@
 #include "include/MPEG4Extractor.h"
 #include "include/WAVExtractor.h"
 #include "include/OggExtractor.h"
+#include "include/DRMExtractor.h"
 
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
@@ -94,6 +95,7 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffAMR);
     RegisterSniffer(SniffWAV);
     RegisterSniffer(SniffOgg);
+    RegisterSniffer(SniffDRM);
 }
 
 // static
