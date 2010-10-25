@@ -7,6 +7,7 @@ ifneq ($(TARGET_SIMULATOR),true)
 # Build the unit tests.
 test_src_files := \
     InputChannel_test.cpp \
+    InputReader_test.cpp \
     InputDispatcher_test.cpp \
     InputPublisherAndConsumer_test.cpp
 
