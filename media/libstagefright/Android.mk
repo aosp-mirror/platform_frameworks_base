@@ -13,6 +13,7 @@ LOCAL_SRC_FILES:=                         \
         CameraSourceTimeLapse.cpp         \
         VideoSourceDownSampler.cpp        \
         DataSource.cpp                    \
+        DRMExtractor.cpp                  \
         ESDS.cpp                          \
         FileSource.cpp                    \
         HTTPStream.cpp                    \
@@ -63,7 +64,8 @@ LOCAL_SHARED_LIBRARIES := \
         libvorbisidec     \
         libsurfaceflinger_client \
         libstagefright_yuv \
-        libcamera_client
+        libcamera_client \
+        libdrmframework
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_aacdec \
