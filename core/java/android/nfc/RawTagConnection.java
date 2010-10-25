@@ -60,7 +60,6 @@ public class RawTagConnection {
 
         mService = service;
         mTagService = service.getNfcTagInterface();
-        mService.openTagConnection(tag);  // TODO(nxp): don't connect until connect()
         mTag = tag;
         mSelectedTarget = target;
     }
