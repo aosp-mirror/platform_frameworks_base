@@ -23,12 +23,10 @@ package android.bluetooth;
  * @see <a href="https://www.bluetooth.org/technical/assignednumbers/identifiers.htm">
  * The Official Bluetooth SIG Member Website | Company Identifiers</a>
  *
- * @hide
  */
 public class BluetoothAssignedNumbers {
 
-    //// Bluetooth SIG Company ID values
-
+    // Bluetooth SIG Company ID values
     /*
      * Ericsson Technology Licensing.
      */
