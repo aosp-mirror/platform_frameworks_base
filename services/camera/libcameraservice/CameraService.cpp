@@ -151,7 +151,10 @@ sp<ICamera> CameraService::connect(
         LOGE("Fail to open camera hardware (id=%d)", cameraId);
         return NULL;
     }
-    client = new Client(this, cameraClient, hardware, cameraId, callingPid);
+    CameraInfo info;
+    HAL_getCameraInfo(cameraId, &info);
+    client = new Client(this, cameraClient, hardware, cameraId, info.facing,
+                        callingPid);
     mClient[cameraId] = client;
     LOG1("CameraService::connect X");
     return client;
@@ -293,7 +296,7 @@ void CameraService::playSound(sound_kind kind) {
 CameraService::Client::Client(const sp<CameraService>& cameraService,
         const sp<ICameraClient>& cameraClient,
         const sp<CameraHardwareInterface>& hardware,
-        int cameraId, int clientPid) {
+        int cameraId, int cameraFacing, int clientPid) {
     int callingPid = getCallingPid();
     LOG1("Client::Client E (pid %d)", callingPid);
 
@@ -301,6 +304,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mCameraClient = cameraClient;
     mHardware = hardware;
     mCameraId = cameraId;
+    mCameraFacing = cameraFacing;
     mClientPid = clientPid;
     mUseOverlay = mHardware->useOverlay();
     mMsgEnabled = 0;
@@ -318,8 +322,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
 
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
-    mOrientation = 0;
-    mPreviewWindowFlag = 0;
+    mOrientation = getOrientation(0, mCameraFacing == CAMERA_FACING_FRONT);
     mOrientationChanged = false;
     mPlayShutterSound = true;
     cameraService->setCameraBusy(cameraId);
@@ -509,7 +512,7 @@ status_t CameraService::Client::setPreviewDisplay(const sp<Surface>& surface) {
             result = setOverlay();
         } else if (mPreviewWindow != 0) {
             native_window_set_buffers_transform(mPreviewWindow.get(),
-                                                mPreviewWindowFlag);
+                                                mOrientation);
             result = mHardware->setPreviewWindow(mPreviewWindow);
         }
     }
@@ -637,7 +640,7 @@ status_t CameraService::Client::startPreviewMode() {
     } else {
         if (mPreviewWindow != 0) {
             native_window_set_buffers_transform(mPreviewWindow.get(),
-                                                mPreviewWindowFlag);
+                                                mOrientation);
         }
         mHardware->setPreviewWindow(mPreviewWindow);
         result = mHardware->startPreview();
@@ -844,26 +847,10 @@ status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t a
         if (mHardware->previewEnabled()) {
             return INVALID_OPERATION;
         }
-        switch (arg1) {
-            case 0:
-                orientation = ISurface::BufferHeap::ROT_0;
-                mPreviewWindowFlag = 0;
-                break;
-            case 90:
-                orientation = ISurface::BufferHeap::ROT_90;
-                mPreviewWindowFlag = NATIVE_WINDOW_TRANSFORM_ROT_90;
-                break;
-            case 180:
-                orientation = ISurface::BufferHeap::ROT_180;
-                mPreviewWindowFlag = NATIVE_WINDOW_TRANSFORM_ROT_180;
-                break;
-            case 270:
-                orientation = ISurface::BufferHeap::ROT_270;
-                mPreviewWindowFlag = NATIVE_WINDOW_TRANSFORM_ROT_270;
-                break;
-            default:
-                return BAD_VALUE;
-        }
+        // Mirror the preview if the camera is front-facing.
+        orientation = getOrientation(arg1, mCameraFacing == CAMERA_FACING_FRONT);
+        if (orientation == -1) return BAD_VALUE;
+
         if (mOrientation != orientation) {
             mOrientation = orientation;
             if (mOverlayRef != 0) mOrientationChanged = true;
@@ -1225,6 +1212,28 @@ void CameraService::Client::copyFrameAndPostCopiedFrame(
     mLock.unlock();
     client->dataCallback(CAMERA_MSG_PREVIEW_FRAME, frame);
 }
+
+int CameraService::Client::getOrientation(int degrees, bool mirror) {
+    if (!mirror) {
+        if (degrees == 0) return 0;
+        else if (degrees == 90) return HAL_TRANSFORM_ROT_90;
+        else if (degrees == 180) return HAL_TRANSFORM_ROT_180;
+        else if (degrees == 270) return HAL_TRANSFORM_ROT_270;
+    } else {  // Do mirror (horizontal flip)
+        if (degrees == 0) {           // FLIP_H and ROT_0
+            return HAL_TRANSFORM_FLIP_H;
+        } else if (degrees == 90) {   // FLIP_H and ROT_90
+            return HAL_TRANSFORM_FLIP_H | HAL_TRANSFORM_ROT_90;
+        } else if (degrees == 180) {  // FLIP_H and ROT_180
+            return HAL_TRANSFORM_FLIP_V;
+        } else if (degrees == 270) {  // FLIP_H and ROT_270
+            return HAL_TRANSFORM_FLIP_V | HAL_TRANSFORM_ROT_90;
+        }
+    }
+    LOGE("Invalid setDisplayOrientation degrees=%d", degrees);
+    return -1;
+}
+
 
 // ----------------------------------------------------------------------------
 

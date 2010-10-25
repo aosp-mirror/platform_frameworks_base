@@ -18,20 +18,16 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.RemoteException;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Public API for controlling the Bluetooth Headset Service. This includes both
@@ -218,35 +214,35 @@ public final class BluetoothHeadset implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
-    public Set<BluetoothDevice> getConnectedDevices() {
+    public List<BluetoothDevice> getConnectedDevices() {
         if (DBG) log("getConnectedDevices()");
         if (mService != null && isEnabled()) {
             try {
-                return toDeviceSet(mService.getConnectedDevices());
+                return mService.getConnectedDevices();
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
-                return toDeviceSet(new BluetoothDevice[0]);
+                return new ArrayList<BluetoothDevice>();
             }
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        return toDeviceSet(new BluetoothDevice[0]);
+        return new ArrayList<BluetoothDevice>();
     }
 
     /**
      * {@inheritDoc}
      */
-    public Set<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
+    public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (DBG) log("getDevicesMatchingStates()");
         if (mService != null && isEnabled()) {
             try {
-                return toDeviceSet(mService.getDevicesMatchingConnectionStates(states));
+                return mService.getDevicesMatchingConnectionStates(states);
             } catch (RemoteException e) {
                 Log.e(TAG, Log.getStackTraceString(new Throwable()));
-                return toDeviceSet(new BluetoothDevice[0]);
+                return new ArrayList<BluetoothDevice>();
             }
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
-        return toDeviceSet(new BluetoothDevice[0]);
+        return new ArrayList<BluetoothDevice>();
     }
 
     /**
@@ -567,11 +563,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
 
        if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
        return false;
-    }
-
-    private Set<BluetoothDevice> toDeviceSet(BluetoothDevice[] devices) {
-       return Collections.unmodifiableSet(
-          new HashSet<BluetoothDevice>(Arrays.asList(devices)));
     }
 
     private static void log(String msg) {

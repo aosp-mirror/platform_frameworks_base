@@ -6676,6 +6676,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (info.violationNumThisLoop != 0) {
                 sb.append("Loop-Violation-Number: ").append(info.violationNumThisLoop).append("\n");
             }
+            if (info.numAnimationsRunning != 0) {
+                sb.append("Animations-Running: ").append(info.numAnimationsRunning).append("\n");
+            }
             if (info != null && info.durationMillis != -1) {
                 sb.append("Duration-Millis: ").append(info.durationMillis).append("\n");
             }
@@ -7152,7 +7155,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     } else if (adj >= SECONDARY_SERVER_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
                     } else if (adj >= HEAVY_WEIGHT_APP_ADJ) {
-                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_HEAVY_WEIGHT;
+                        currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
                     } else if (adj >= PERCEPTIBLE_APP_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
                     } else if (adj >= VISIBLE_APP_ADJ) {
@@ -7284,7 +7287,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 return;
             } else if ("service".equals(cmd)) {
-                dumpService(fd, pw, args, opti, dumpAll);
+                dumpService(fd, pw, args, opti);
                 return;
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 synchronized (this) {
@@ -7643,8 +7646,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      *  - the first arg isn't the flattened component name of an existing service:
      *    dump all services whose component contains the first arg as a substring
      */
-    protected void dumpService(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll) {
+    protected void dumpService(FileDescriptor fd, PrintWriter pw, String[] args, int opti) {
         String[] newArgs;
         String componentNameString;
         ServiceRecord r;
@@ -7664,7 +7666,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (r != null) {
-            dumpService(fd, pw, r, newArgs, dumpAll);
+            dumpService(fd, pw, r, newArgs);
         } else {
             ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
             synchronized (this) {
@@ -7676,7 +7678,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             for (int i=0; i<services.size(); i++) {
-                dumpService(fd, pw, services.get(i), newArgs, dumpAll);
+                dumpService(fd, pw, services.get(i), newArgs);
             }
         }
     }
@@ -7685,16 +7687,10 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Invokes IApplicationThread.dumpService() on the thread of the specified service if
      * there is a thread associated with the service.
      */
-    private void dumpService(FileDescriptor fd, PrintWriter pw, ServiceRecord r, String[] args,
-            boolean dumpAll) {
-        pw.println("  Service " + r.name.flattenToString());
-        if (dumpAll) {
-            synchronized (this) {
-                pw.print("  * "); pw.println(r);
-                r.dump(pw, "    ");
-            }
-            pw.println("");
-        }
+    private void dumpService(FileDescriptor fd, PrintWriter pw, ServiceRecord r, String[] args) {
+        pw.println("------------------------------------------------------------"
+                + "-------------------");
+        pw.println("APP SERVICE: " + r.name.flattenToString());
         if (r.app != null && r.app.thread != null) {
             try {
                 // flush anything that is already in the PrintWriter since the thread is going

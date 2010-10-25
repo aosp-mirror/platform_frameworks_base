@@ -53,13 +53,13 @@ static int Color_HSVToColor(JNIEnv* env, jobject, int alpha, jfloatArray hsvArra
 
 static void Shader_destructor(JNIEnv* env, jobject o, SkShader* shader, SkiaShader* skiaShader)
 {
+    shader->safeUnref();
+    // skiaShader == NULL when not !USE_OPENGL_RENDERER, so no need to delete it outside the ifdef
 #ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::Caches::hasInstance()) {
-        android::uirenderer::Caches::getInstance().gradientCache.remove(shader);
+        android::uirenderer::Caches::getInstance().resourceCache.destructor(skiaShader);
     }
 #endif
-    delete skiaShader;
-    shader->safeUnref();
 }
 
 static bool Shader_getLocalMatrix(JNIEnv* env, jobject, const SkShader* shader, SkMatrix* matrix)

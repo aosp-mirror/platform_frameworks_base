@@ -414,7 +414,6 @@ public abstract class HardwareRenderer {
         @Override
         void destroy(boolean full) {
             if (full && mCanvas != null) {
-                mCanvas.destroy();
                 mCanvas = null;
             }
             

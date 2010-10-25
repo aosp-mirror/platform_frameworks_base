@@ -703,7 +703,7 @@
         <item name="listPreferredItemHeight">64dip</item>
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
-        <item name="listDivider">@drawable/divider_horizontal_holo_dark</item>
+        <item name="listDivider">@drawable/list_divider_holo_dark</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.Holo.TextView.ListSeparator</item>   
 
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_dark</item>
@@ -713,7 +713,7 @@
 
         <item name="activatedBackgroundIndicator">@android:drawable/activated_background_holo_dark</item>
 
-        <item name="listDividerAlertDialog">@android:drawable/divider_horizontal_holo_dark</item>
+        <item name="listDividerAlertDialog">@android:drawable/list_divider_holo_dark</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>
         <item name="expandableListPreferredChildPaddingLeft">
@@ -936,7 +936,7 @@
         <item name="listPreferredItemHeight">64dip</item>
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
-        <item name="listDivider">@drawable/divider_horizontal_holo_light</item>
+        <item name="listDivider">@drawable/list_divider_holo_light</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.Holo.Light.TextView.ListSeparator</item>   
 
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio_holo_light</item>
@@ -957,7 +957,7 @@
         <item name="expandableListPreferredChildIndicatorRight">
                 ?android:attr/expandableListPreferredItemIndicatorRight</item>
 
-        <item name="listDividerAlertDialog">@android:drawable/divider_horizontal_holo_light</item>
+        <item name="listDividerAlertDialog">@android:drawable/list_divider_holo_light</item>
 
         <!-- Gallery attributes -->
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
@@ -1143,6 +1143,7 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Holo.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
         <item name="android:windowActionBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
 
         <item name="android:colorBackgroundCacheHint">@null</item>
         

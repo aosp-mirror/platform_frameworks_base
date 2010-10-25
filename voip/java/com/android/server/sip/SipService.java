@@ -68,7 +68,7 @@ import javax.sip.SipException;
 public final class SipService extends ISipService.Stub {
     static final String TAG = "SipService";
     static final boolean DEBUGV = false;
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_TIMER = DEBUG && false;
     private static final int EXPIRY_TIME = 3600;
     private static final int SHORT_EXPIRY_TIME = 10;
@@ -79,6 +79,7 @@ public final class SipService extends ISipService.Stub {
     private String mNetworkType;
     private boolean mConnected;
     private WakeupTimer mTimer;
+    private WifiScanProcess mWifiScanProcess;
     private WifiManager.WifiLock mWifiLock;
     private boolean mWifiOnly;
 
@@ -104,7 +105,7 @@ public final class SipService extends ISipService.Stub {
         if (SipManager.isApiSupported(context)) {
             ServiceManager.addService("sip", new SipService(context));
             context.sendBroadcast(new Intent(SipManager.ACTION_SIP_SERVICE_UP));
-            Log.i(TAG, "SIP service started");
+            if (DEBUG) Log.i(TAG, "SIP service started");
         }
     }
 
@@ -222,7 +223,7 @@ public final class SipService extends ISipService.Stub {
         SipSessionGroupExt group = mSipGroups.get(localProfileUri);
         if (group == null) return;
         if (!isCallerCreatorOrRadio(group)) {
-            Log.d(TAG, "only creator or radio can close this profile");
+            Log.w(TAG, "only creator or radio can close this profile");
             return;
         }
 
@@ -244,7 +245,7 @@ public final class SipService extends ISipService.Stub {
         if (isCallerCreatorOrRadio(group)) {
             return group.isOpened();
         } else {
-            Log.i(TAG, "only creator or radio can query on the profile");
+            Log.w(TAG, "only creator or radio can query on the profile");
             return false;
         }
     }
@@ -257,7 +258,7 @@ public final class SipService extends ISipService.Stub {
         if (isCallerCreatorOrRadio(group)) {
             return group.isRegistered();
         } else {
-            Log.i(TAG, "only creator or radio can query on the profile");
+            Log.w(TAG, "only creator or radio can query on the profile");
             return false;
         }
     }
@@ -271,7 +272,7 @@ public final class SipService extends ISipService.Stub {
         if (isCallerCreator(group)) {
             group.setListener(listener);
         } else {
-            Log.i(TAG, "only creator can set listener on the profile");
+            Log.w(TAG, "only creator can set listener on the profile");
         }
     }
 
@@ -285,7 +286,7 @@ public final class SipService extends ISipService.Stub {
             SipSessionGroupExt group = createGroup(localProfile);
             return group.createSession(listener);
         } catch (SipException e) {
-            Log.w(TAG, "createSession()", e);
+            if (DEBUG) Log.d(TAG, "createSession()", e);
             return null;
         }
     }
@@ -303,7 +304,7 @@ public final class SipService extends ISipService.Stub {
             s.connect(InetAddress.getByName("192.168.1.1"), 80);
             return s.getLocalAddress().getHostAddress();
         } catch (IOException e) {
-            Log.w(TAG, "determineLocalIp()", e);
+            if (DEBUG) Log.d(TAG, "determineLocalIp()", e);
             // dont do anything; there should be a connectivity change going
             return null;
         }
@@ -371,6 +372,7 @@ public final class SipService extends ISipService.Stub {
                     mContext.getSystemService(Context.WIFI_SERVICE))
                     .createWifiLock(WifiManager.WIFI_MODE_FULL, TAG);
             mWifiLock.acquire();
+            if (!mConnected) startWifiScanner();
         }
     }
 
@@ -379,6 +381,20 @@ public final class SipService extends ISipService.Stub {
             if (DEBUG) Log.d(TAG, "~~~~~~~~~~~~~~~~~~~~~ release wifi lock");
             mWifiLock.release();
             mWifiLock = null;
+            stopWifiScanner();
+        }
+    }
+
+    private synchronized void startWifiScanner() {
+        if (mWifiScanProcess == null) {
+            mWifiScanProcess = new WifiScanProcess();
+        }
+        mWifiScanProcess.start();
+    }
+
+    private synchronized void stopWifiScanner() {
+        if (mWifiScanProcess != null) {
+            mWifiScanProcess.stop();
         }
     }
 
@@ -413,8 +429,10 @@ public final class SipService extends ISipService.Stub {
                 for (SipSessionGroupExt group : mSipGroups.values()) {
                     group.onConnectivityChanged(true);
                 }
+                if (isWifi && (mWifiLock != null)) stopWifiScanner();
             } else {
                 mMyWakeLock.reset(); // in case there's a leak
+                if (isWifi && (mWifiLock != null)) startWifiScanner();
             }
         } catch (SipException e) {
             Log.e(TAG, "onConnectivityChanged()", e);
@@ -423,12 +441,40 @@ public final class SipService extends ISipService.Stub {
 
     private synchronized void addPendingSession(ISipSession session) {
         try {
+            cleanUpPendingSessions();
             mPendingSessions.put(session.getCallId(), session);
+            if (DEBUG) Log.d(TAG, "#pending sess=" + mPendingSessions.size());
         } catch (RemoteException e) {
             // should not happen with a local call
             Log.e(TAG, "addPendingSession()", e);
         }
     }
+
+    private void cleanUpPendingSessions() throws RemoteException {
+        Map.Entry<String, ISipSession>[] entries =
+                mPendingSessions.entrySet().toArray(
+                new Map.Entry[mPendingSessions.size()]);
+        for (Map.Entry<String, ISipSession> entry : entries) {
+            if (entry.getValue().getState() != SipSession.State.INCOMING_CALL) {
+                mPendingSessions.remove(entry.getKey());
+            }
+        }
+    }
+
+    private synchronized boolean callingSelf(SipSessionGroupExt ringingGroup,
+            SipSessionGroup.SipSessionImpl ringingSession) {
+        String callId = ringingSession.getCallId();
+        for (SipSessionGroupExt group : mSipGroups.values()) {
+            if ((group != ringingGroup) && group.containsSession(callId)) {
+                if (DEBUG) Log.d(TAG, "call self: "
+                        + ringingSession.getLocalProfile().getUriString()
+                        + " -> " + group.getLocalProfile().getUriString());
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private class SipSessionGroupExt extends SipSessionAdapter {
         private SipSessionGroup mSipGroup;
@@ -452,6 +498,10 @@ public final class SipService extends ISipService.Stub {
             return mSipGroup.getLocalProfile();
         }
 
+        public boolean containsSession(String callId) {
+            return mSipGroup.containsSession(callId);
+        }
+
         // network connectivity is tricky because network can be disconnected
         // at any instant so need to deal with exceptions carefully even when
         // you think you are connected
@@ -467,7 +517,7 @@ public final class SipService extends ISipService.Stub {
                     return createSipSessionGroup(null, localProfile, password);
                 } else {
                     // recursive
-                    Log.wtf(TAG, "impossible!");
+                    Log.wtf(TAG, "impossible! recursive!");
                     throw new RuntimeException("createSipSessionGroup");
                 }
             }
@@ -551,7 +601,7 @@ public final class SipService extends ISipService.Stub {
                     (SipSessionGroup.SipSessionImpl) s;
             synchronized (SipService.this) {
                 try {
-                    if (!isRegistered()) {
+                    if (!isRegistered() || callingSelf(this, session)) {
                         session.endCall();
                         return;
                     }
@@ -589,6 +639,36 @@ public final class SipService extends ISipService.Stub {
 
         private String getUri() {
             return mSipGroup.getLocalProfileUri();
+        }
+    }
+
+    private class WifiScanProcess implements Runnable {
+        private static final String TAG = "\\WIFI_SCAN/";
+        private static final int INTERVAL = 60;
+        private boolean mRunning = false;
+
+        private WifiManager mWifiManager;
+
+        public void start() {
+            if (mRunning) return;
+            mRunning = true;
+            mTimer.set(INTERVAL * 1000, this);
+        }
+
+        WifiScanProcess() {
+            mWifiManager = (WifiManager)
+                    mContext.getSystemService(Context.WIFI_SERVICE);
+        }
+
+        public void run() {
+            // scan and associate now
+            if (DEBUGV) Log.v(TAG, "just wake up here for wifi scanning...");
+            mWifiManager.startScanActive();
+        }
+
+        public void stop() {
+            mRunning = false;
+            mTimer.cancel(this);
         }
     }
 
@@ -1027,8 +1107,6 @@ public final class SipService extends ISipService.Stub {
             }
         }
     }
-
-    // TODO: clean up pending SipSession(s) periodically
 
     /**
      * Timer that can schedule events to occur even when the device is in sleep.

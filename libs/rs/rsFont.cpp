@@ -36,8 +36,6 @@ using namespace android::renderscript;
 
 Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mInitialized = false;
     mHasKerning = false;
     mFace = NULL;
@@ -308,7 +306,7 @@ Font * Font::create(Context *rsc, const char *name, uint32_t fontSize, uint32_t 
         return newFont;
     }
 
-    delete newFont;
+    ObjectBase::checkDelete(newFont);
     return NULL;
 
 }

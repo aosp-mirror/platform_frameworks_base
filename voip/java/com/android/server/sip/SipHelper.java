@@ -365,6 +365,10 @@ class SipHelper {
             Response response = mMessageFactory.createResponse(
                     Response.BUSY_HERE, request);
 
+            if (inviteTransaction == null) {
+                inviteTransaction = getServerTransaction(event);
+            }
+
             if (inviteTransaction.getState() != TransactionState.COMPLETED) {
                 if (DEBUG) Log.d(TAG, "send BUSY HERE: " + response);
                 inviteTransaction.sendResponse(response);

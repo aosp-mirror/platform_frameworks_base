@@ -129,57 +129,6 @@ class CertificateChainValidator {
             }
         }
 
-        // Clean up the certificates chain and build a new one.
-        // Theoretically, we shouldn't have to do this, but various web servers
-        // in practice are mis-configured to have out-of-order certificates or
-        // expired self-issued root certificate.
-        int chainLength = serverCertificates.length;
-        if (serverCertificates.length > 1) {
-          // 1. we clean the received certificates chain.
-          // We start from the end-entity certificate, tracing down by matching
-          // the "issuer" field and "subject" field until we can't continue.
-          // This helps when the certificates are out of order or
-          // some certificates are not related to the site.
-          int currIndex;
-          for (currIndex = 0; currIndex < serverCertificates.length; ++currIndex) {
-            boolean foundNext = false;
-            for (int nextIndex = currIndex + 1;
-                 nextIndex < serverCertificates.length;
-                 ++nextIndex) {
-              if (serverCertificates[currIndex].getIssuerDN().equals(
-                  serverCertificates[nextIndex].getSubjectDN())) {
-                foundNext = true;
-                // Exchange certificates so that 0 through currIndex + 1 are in proper order
-                if (nextIndex != currIndex + 1) {
-                  X509Certificate tempCertificate = serverCertificates[nextIndex];
-                  serverCertificates[nextIndex] = serverCertificates[currIndex + 1];
-                  serverCertificates[currIndex + 1] = tempCertificate;
-                }
-                break;
-              }
-            }
-            if (!foundNext) break;
-          }
-
-          // 2. we exam if the last traced certificate is self issued and it is expired.
-          // If so, we drop it and pass the rest to checkServerTrusted(), hoping we might
-          // have a similar but unexpired trusted root.
-          chainLength = currIndex + 1;
-          X509Certificate lastCertificate = serverCertificates[chainLength - 1];
-          Date now = new Date();
-          if (lastCertificate.getSubjectDN().equals(lastCertificate.getIssuerDN())
-              && now.after(lastCertificate.getNotAfter())) {
-            --chainLength;
-          }
-        }
-
-        // 3. Now we copy the newly built chain into an appropriately sized array.
-        X509Certificate[] newServerCertificates = null;
-        newServerCertificates = new X509Certificate[chainLength];
-        for (int i = 0; i < chainLength; ++i) {
-          newServerCertificates[i] = serverCertificates[i];
-        }
-
         // first, we validate the new chain using the standard validation
         // solution; if we do not find any errors, we are done; if we
         // fail the standard validation, we re-validate again below,
@@ -188,7 +137,7 @@ class CertificateChainValidator {
         //
         try {
             SSLParametersImpl.getDefaultTrustManager().checkServerTrusted(
-                newServerCertificates, "RSA");
+                serverCertificates, "RSA");
 
             // no errors!!!
             return null;

@@ -501,6 +501,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mLocalOnly;
         ClipData mData;
         ClipDescription mDataDescription;
+        boolean mDragResult;
         float mCurrentX, mCurrentY;
         float mThumbOffsetX, mThumbOffsetY;
         InputChannel mServerChannel, mClientChannel;
@@ -551,6 +552,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputManager.unregisterInputChannel(mServerChannel);
                 InputQueue.unregisterInputChannel(mClientChannel);
                 mClientChannel.dispose();
+                mServerChannel.dispose();
                 mClientChannel = null;
                 mServerChannel = null;
             }
@@ -594,7 +596,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDragInProgress && newWin.isPotentialDragTarget()) {
                 DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED,
                         touchX - newWin.mFrame.left, touchY - newWin.mFrame.top,
-                        desc, null);
+                        desc, null, false);
                 try {
                     newWin.mClient.dispatchDragEvent(event);
                     // track each window that we've notified that the drag is starting
@@ -623,29 +625,40 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 if (DEBUG_DRAG) {
-                    Slog.d(TAG, "sending DRAG_STARTED to new window " + newWin);
+                    Slog.d(TAG, "need to send DRAG_STARTED to new window " + newWin);
                 }
                 sendDragStartedLw(newWin, mCurrentX, mCurrentY, mDataDescription);
             }
         }
 
-        void broadcastDragEnded() {
+        void broadcastDragEndedLw() {
             if (DEBUG_DRAG) {
                 Slog.d(TAG, "broadcasting DRAG_ENDED");
             }
-            DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED, 0, 0, null, null);
-            synchronized (mWindowMap) {
-                for (WindowState ws: mNotifiedWindows) {
-                    try {
-                        ws.mClient.dispatchDragEvent(evt);
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Unable to drag-end window " + ws);
-                    }
+            DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
+                    0, 0, null, null, mDragResult);
+            for (WindowState ws: mNotifiedWindows) {
+                try {
+                    ws.mClient.dispatchDragEvent(evt);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to drag-end window " + ws);
                 }
-                mNotifiedWindows.clear();
-                mDragInProgress = false;
             }
+            mNotifiedWindows.clear();
+            mDragInProgress = false;
             evt.recycle();
+        }
+
+        void endDragLw() {
+            mDragState.broadcastDragEndedLw();
+
+            // stop intercepting input
+            mDragState.unregister();
+            mInputMonitor.updateInputWindowsLw();
+
+            // free our resources and drop all the object references
+            mDragState.reset();
+            mDragState = null;
         }
 
         void notifyMoveLw(float x, float y) {
@@ -667,7 +680,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // force DRAG_EXITED_EVENT if appropriate
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_EXITED,
                             x - mTargetWindow.mFrame.left, y - mTargetWindow.mFrame.top,
-                            null, null);
+                            null, null, false);
                     mTargetWindow.mClient.dispatchDragEvent(evt);
                     if (myPid != mTargetWindow.mSession.mPid) {
                         evt.recycle();
@@ -679,7 +692,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_LOCATION,
                             x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
-                            null, null);
+                            null, null, false);
                     touchedWin.mClient.dispatchDragEvent(evt);
                     if (myPid != touchedWin.mSession.mPid) {
                         evt.recycle();
@@ -691,26 +704,43 @@ public class WindowManagerService extends IWindowManager.Stub
             mTargetWindow = touchedWin;
         }
 
-        // Tell the drop target about the data, and then broadcast the drag-ended notification
-        void notifyDropLw(float x, float y) {
+        // Tell the drop target about the data.  Returns 'true' if we can immediately
+        // dispatch the global drag-ended message, 'false' if we need to wait for a
+        // result from the recipient.
+        boolean notifyDropLw(float x, float y) {
             WindowState touchedWin = getTouchedWinAtPointLw(x, y);
-            if (touchedWin != null) {
-                if (DEBUG_DRAG) {
-                    Slog.d(TAG, "sending DROP to " + touchedWin);
-                }
-                final int myPid = Process.myPid();
-                DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DROP,
-                        x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
-                        null, mData);
-                try {
-                    touchedWin.mClient.dispatchDragEvent(evt);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "can't send drop notification to win " + touchedWin);
-                }
+            if (touchedWin == null) {
+                // "drop" outside a valid window -- no recipient to apply a
+                // timeout to, and we can send the drag-ended message immediately.
+                mDragResult = false;
+                return true;
+            }
+
+            if (DEBUG_DRAG) {
+                Slog.d(TAG, "sending DROP to " + touchedWin);
+            }
+            final int myPid = Process.myPid();
+            final IBinder token = touchedWin.mClient.asBinder();
+            DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DROP,
+                    x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
+                    null, mData, false);
+            try {
+                touchedWin.mClient.dispatchDragEvent(evt);
+
+                // 5 second timeout for this window to respond to the drop
+                mH.removeMessages(H.DRAG_END_TIMEOUT, token);
+                Message msg = mH.obtainMessage(H.DRAG_END_TIMEOUT, token);
+                mH.sendMessageDelayed(msg, 5000);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "can't send drop notification to win " + touchedWin);
+                return true;
+            } finally {
                 if (myPid != touchedWin.mSession.mPid) {
                     evt.recycle();
                 }
             }
+            mToken = token;
+            return false;
         }
 
         // Find the visible, touch-deliverable window under the given point
@@ -794,9 +824,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_DRAG) Slog.d(TAG, "Got UP on move channel; dropping at "
                                 + newX + "," + newY);
                         synchronized (mWindowMap) {
-                            mDragState.notifyDropLw(newX, newY);
+                            endDrag = mDragState.notifyDropLw(newX, newY);
                         }
-                        endDrag = true;
                     } break;
 
                     case MotionEvent.ACTION_CANCEL: {
@@ -808,17 +837,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (endDrag) {
                         if (DEBUG_DRAG) Slog.d(TAG, "Drag ended; tearing down state");
                         // tell all the windows that the drag has ended
-                        mDragState.broadcastDragEnded();
-
-                        // stop intercepting input
-                        mDragState.unregister();
                         synchronized (mWindowMap) {
-                            mInputMonitor.updateInputWindowsLw();
+                            mDragState.endDragLw();
                         }
-
-                        // free our resources and drop all the object references
-                        mDragState.reset();
-                        mDragState = null;
                     }
                 }
             } catch (Exception e) {
@@ -5356,8 +5377,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // SVGA or larger screens at medium density are the point
                     // at which we consider it to be an extra large screen.
                     mScreenLayout = Configuration.SCREENLAYOUT_SIZE_XLARGE;
-                } else if (longSize >= 640 && shortSize >= 480) {
-                    // VGA or larger screens at medium density are the point
+                } else if (longSize >= 530 && shortSize >= 400) {
+                    // SVGA or larger screens at high density are the point
                     // at which we consider it to be a large screen.
                     mScreenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE;
                 } else {
@@ -6222,8 +6243,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 mDragState.register();
                 mInputMonitor.updateInputWindowsLw();
-                mInputManager.transferTouchFocus(callingWin.mInputChannel,
-                        mDragState.mServerChannel);
+                if (!mInputManager.transferTouchFocus(callingWin.mInputChannel,
+                        mDragState.mServerChannel)) {
+                    Slog.e(TAG, "Unable to transfer touch focus");
+                    mDragState.unregister();
+                    mDragState = null;
+                    mInputMonitor.updateInputWindowsLw();
+                    return false;
+                }
 
                 mDragState.mData = data;
                 mDragState.mCurrentX = touchX;
@@ -6251,15 +6278,43 @@ public class WindowManagerService extends IWindowManager.Stub
             return true;    // success!
         }
 
+        public void reportDropResult(IWindow window, boolean consumed) {
+            IBinder token = window.asBinder();
+            if (DEBUG_DRAG) {
+                Slog.d(TAG, "Drop result=" + consumed + " reported by " + token);
+            }
+
+            synchronized (mWindowMap) {
+                if (mDragState.mToken != token) {
+                    Slog.w(TAG, "Invalid drop-result claim by " + window);
+                    throw new IllegalStateException("reportDropResult() by non-recipient");
+                }
+
+                // The right window has responded, even if it's no longer around,
+                // so be sure to halt the timeout even if the later WindowState
+                // lookup fails.
+                mH.removeMessages(H.DRAG_END_TIMEOUT, window.asBinder());
+
+                WindowState callingWin = windowForClientLocked(null, window, false);
+                if (callingWin == null) {
+                    Slog.w(TAG, "Bad result-reporting window " + window);
+                    return;  // !!! TODO: throw here?
+                }
+
+                mDragState.mDragResult = consumed;
+                mDragState.endDragLw();
+            }
+        }
+
         public void dragRecipientEntered(IWindow window) {
             if (DEBUG_DRAG) {
-                Slog.d(TAG, "Drag into new candidate view @ " + window);
+                Slog.d(TAG, "Drag into new candidate view @ " + window.asBinder());
             }
         }
 
         public void dragRecipientExited(IWindow window) {
             if (DEBUG_DRAG) {
-                Slog.d(TAG, "Drag from old candidate view @ " + window);
+                Slog.d(TAG, "Drag from old candidate view @ " + window.asBinder());
             }
         }
 
@@ -8321,6 +8376,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SEND_NEW_CONFIGURATION = 18;
         public static final int REPORT_WINDOWS_CHANGE = 19;
         public static final int DRAG_START_TIMEOUT = 20;
+        public static final int DRAG_END_TIMEOUT = 21;
 
         private Session mLastReportedHold;
 
@@ -8671,12 +8727,27 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         // !!! TODO: ANR the app that has failed to start the drag in time
                         if (mDragState != null) {
+                            mDragState.unregister();
+                            mInputMonitor.updateInputWindowsLw();
                             mDragState.reset();
                             mDragState = null;
                         }
                     }
+                    break;
                 }
 
+                case DRAG_END_TIMEOUT: {
+                    IBinder win = (IBinder)msg.obj;
+                    if (DEBUG_DRAG) {
+                        Slog.w(TAG, "Timeout ending drag to win " + win);
+                    }
+                    synchronized (mWindowMap) {
+                        // !!! TODO: ANR the drag-receiving app
+                        mDragState.mDragResult = false;
+                        mDragState.endDragLw();
+                    }
+                    break;
+                }
             }
         }
     }

@@ -267,6 +267,7 @@ public class CallerInfo {
         Uri contactUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
 
         CallerInfo info = getCallerInfo(context, contactUri);
+        info = doSecondaryLookupIfNecessary(context, number, info);
 
         // if no query results were returned with a viable number,
         // fill in the original number value we used to query with.
@@ -275,6 +276,30 @@ public class CallerInfo {
         }
 
         return info;
+    }
+
+    /**
+     * Performs another lookup if previous lookup fails and it's a SIP call
+     * and the peer's username is all numeric. Look up the username as it
+     * could be a PSTN number in the contact database.
+     *
+     * @param context the query context
+     * @param number the original phone number, could be a SIP URI
+     * @param previousResult the result of previous lookup
+     * @return previousResult if it's not the case
+     */
+    static CallerInfo doSecondaryLookupIfNecessary(Context context,
+            String number, CallerInfo previousResult) {
+        if (!previousResult.contactExists
+                && PhoneNumberUtils.isUriNumber(number)) {
+            String username = number.substring(0, number.indexOf('@'));
+            if (PhoneNumberUtils.isGlobalPhoneNumber(username)) {
+                previousResult = getCallerInfo(context,
+                        Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
+                                Uri.encode(username)));
+            }
+        }
+        return previousResult;
     }
 
     /**
@@ -409,6 +434,7 @@ public class CallerInfo {
                 .append("\nisCachedPhotoCurrent: " + isCachedPhotoCurrent)
                 .append("\nemergency: " + mIsEmergency)
                 .append("\nvoicemail " + mIsVoiceMail)
+                .append("\ncontactExists " + contactExists)
                 .toString();
     }
 }

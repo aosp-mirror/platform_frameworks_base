@@ -35,8 +35,6 @@ using namespace android::renderscript;
 
 ScriptC::ScriptC(Context *rsc) : Script(rsc)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mBccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
@@ -392,6 +390,9 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
     return NULL;
 }
 
+extern const char rs_runtime_lib_bc[];
+extern unsigned rs_runtime_lib_bc_size;
+
 void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 {
     LOGV("%p ScriptCState::runCompiler ", rsc);
@@ -400,6 +401,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
         s->mBccScript = bccCreateScript();
         s->mEnviroment.mIsThreadable = true;
         bccScriptBitcode(s->mBccScript, s->mEnviroment.mScriptText, s->mEnviroment.mScriptTextLength);
+        //bccLinkBitcode(s->mBccScript, rs_runtime_lib_bc, rs_runtime_lib_bc_size);
         bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
         bccCompileScript(s->mBccScript);
         bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
@@ -524,16 +526,14 @@ RsScript rsi_ScriptCCreate(Context * rsc)
 {
     ScriptCState *ss = &rsc->mScriptC;
 
-    ObjectBaseRef<ScriptC> s = ss->mScript.get();
+    ObjectBaseRef<ScriptC> s(ss->mScript);
     ss->mScript.clear();
+    s->incUserRef();
 
     ss->runCompiler(rsc, s.get());
-    s->incUserRef();
     ss->clear(rsc);
     return s.get();
 }
 
 }
 }
-
-

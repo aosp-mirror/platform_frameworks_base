@@ -1257,6 +1257,8 @@
   <public type="attr" name="textSelectHandle" id="0x010102c7" />
   <public type="attr" name="textSelectHandleWindowStyle" id="0x010102c8" />
   <public type="attr" name="popupAnimationStyle" id="0x010102c9" />
+  <public type="attr" name="screenSize" id="0x010102ca" />
+  <public type="attr" name="screenDensity" id="0x010102cb" />
 
   <!-- presence drawables for videochat or audiochat capable contacts -->
   <public type="drawable" name="presence_video_away" id="0x010800ac" />

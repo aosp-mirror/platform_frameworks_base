@@ -10,7 +10,7 @@ copyndkheaders() {
     local DST_HEADERS=$NDK_PLATFORMS/$CURR_PLATFORM
 
     local SRC_LIB_ANDROID=$ANDROID_PRODUCT_OUT/system/lib/libandroid.so
-    local DST_LIB_ANDROID=$NDK_PLATFORMS/$CURR_PLATFORM/arch-arm/usr/lib/libandroid.so
+    local DST_LIB_ANDROID=$NDK_PLATFORMS/$CURR_PLATFORM/arch-arm/lib/libandroid.so
 
     local didsomething=""
 
@@ -20,9 +20,9 @@ copyndkheaders() {
         local src=$SRC_HEADERS/$i
         local changed=""
         for j in $ALL_PLATFORMS; do
-            local dst=$NDK_PLATFORMS/$j/arch-arm/usr/include/android/$i
+            local dst=$NDK_PLATFORMS/$j/include/android/$i
             if [ "$changed" == "" -a -e $dst ]; then
-                #echo "Exists: $dst"
+                echo "Exists: $dst"
                 if diff $src $dst >/dev/null; then
                     echo "$i: has not changed from $j" >/dev/null
                     changed="false"
@@ -34,13 +34,13 @@ copyndkheaders() {
         done
         if [ "$changed" == "true" -o "$changed" == "" ]; then
             echo "Updating: $i"
-            cp $src $NDK_PLATFORMS/$CURR_PLATFORM/arch-arm/usr/include/android/$i
+            cp $src $NDK_PLATFORMS/$CURR_PLATFORM/include/android/$i
             didsomething="true"
         fi
     done
 
     if diff $SRC_LIB_ANDROID $DST_LIB_ANDROID >/dev/null; then
-        echo "libandroid.so: has not changed" >/dev/null
+        echo "libandroid.so: has not changed"
     else
         echo "Updating: $DST_LIB_ANDROID"
         cp $SRC_LIB_ANDROID $DST_LIB_ANDROID

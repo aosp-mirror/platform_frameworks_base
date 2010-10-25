@@ -779,9 +779,9 @@ public class Camera {
      * Set the clockwise rotation of preview display in degrees. This affects
      * the preview frames and the picture displayed after snapshot. This method
      * is useful for portrait mode applications. Note that preview display of
-     * front-facing cameras is flipped horizontally, that is, the image is
-     * reflected along the central vertical axis of the camera sensor. So the
-     * users can see themselves as looking into a mirror.
+     * front-facing cameras is flipped horizontally before the rotation, that
+     * is, the image is reflected along the central vertical axis of the camera
+     * sensor. So the users can see themselves as looking into a mirror.
      *
      * This does not affect the order of byte array passed in {@link
      * PreviewCallback#onPreviewFrame}, JPEG pictures, or recorded videos. This

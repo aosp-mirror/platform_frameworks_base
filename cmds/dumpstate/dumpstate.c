@@ -84,7 +84,7 @@ static void dumpstate() {
         LOGI("wrote screenshot: %s\n", screenshot_path);
     }
 
-    run_command("SYSTEM LOG", 20, "logcat", "-v", "time", "-d", "*:v", NULL);
+    run_command("SYSTEM LOG", 20, "logcat", "-v", "threadtime", "-d", "*:v", NULL);
 
     /* show the traces we collected in main(), if that was done */
     if (dump_traces_path != NULL) {
@@ -104,8 +104,8 @@ static void dumpstate() {
     }
 
     // dump_file("EVENT LOG TAGS", "/etc/event-log-tags");
-    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "time", "-d", "*:v", NULL);
-    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "time", "-d", "*:v", NULL);
+    run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "threadtime", "-d", "*:v", NULL);
+    run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
 
     run_command("NETWORK INTERFACES", 10, "netcfg", NULL);
     dump_file("NETWORK ROUTES", "/proc/net/route");
@@ -174,6 +174,14 @@ static void dumpstate() {
        to increase its timeout.  we really need to do the timeouts in
        dumpsys itself... */
     run_command("DUMPSYS", 60, "dumpsys", NULL);
+
+    printf("========================================================\n");
+    printf("== Application Services\n");
+    printf("========================================================\n");
+
+    /* Instead of a 60s timeout, we should give each service a 5 second timeout */
+    run_command("APP SERVICES", 60, "dumpsys", "activity", "service", NULL);
+
 }
 
 static void usage() {
@@ -239,19 +247,21 @@ int main(int argc, char *argv[]) {
         fclose(cmdline);
     }
 
-    /* switch to non-root user and group */
-    gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT };
-    if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
-        LOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
-        return -1;
-    }
-    if (setgid(AID_SHELL) != 0) {
-        LOGE("Unable to setgid, aborting: %s\n", strerror(errno));
-        return -1;
-    }
-    if (setuid(AID_SHELL) != 0) {
-        LOGE("Unable to setuid, aborting: %s\n", strerror(errno));
-        return -1;
+    if (getuid() == 0) {
+        /* switch to non-root user and group */
+        gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT };
+        if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
+            LOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
+            return -1;
+        }
+        if (setgid(AID_SHELL) != 0) {
+            LOGE("Unable to setgid, aborting: %s\n", strerror(errno));
+            return -1;
+        }
+        if (setuid(AID_SHELL) != 0) {
+            LOGE("Unable to setuid, aborting: %s\n", strerror(errno));
+            return -1;
+        }
     }
 
     char path[PATH_MAX], tmp_path[PATH_MAX];

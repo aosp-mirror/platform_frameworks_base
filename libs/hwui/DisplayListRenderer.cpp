@@ -100,39 +100,31 @@ DisplayList::DisplayList(const DisplayListRenderer& recorder) {
     mTFPlayback.reset(&recorder.mTFRecorder);
     mTFPlayback.setupBuffer(mReader);
 
-    const SkTDArray<const SkFlatBitmap*>& bitmaps = recorder.getBitmaps();
-    mBitmapCount = bitmaps.count();
-    if (mBitmapCount > 0) {
-        mBitmaps = new SkBitmap[mBitmapCount];
-        for (const SkFlatBitmap** flatBitmapPtr = bitmaps.begin();
-                flatBitmapPtr != bitmaps.end(); flatBitmapPtr++) {
-            const SkFlatBitmap* flatBitmap = *flatBitmapPtr;
-            int index = flatBitmap->index() - 1;
-            flatBitmap->unflatten(&mBitmaps[index], &mRCPlayback);
-        }
-    }
+    Caches& caches = Caches::getInstance();
 
-    const SkTDArray<const SkFlatMatrix*>& matrices = recorder.getMatrices();
-    mMatrixCount = matrices.count();
-    if (mMatrixCount > 0) {
-        mMatrices = new SkMatrix[mMatrixCount];
-        for (const SkFlatMatrix** matrixPtr = matrices.begin();
-                matrixPtr != matrices.end(); matrixPtr++) {
-            const SkFlatMatrix* flatMatrix = *matrixPtr;
-            flatMatrix->unflatten(&mMatrices[flatMatrix->index() - 1]);
-        }
+    const Vector<SkBitmap*> &bitmapResources = recorder.getBitmapResources();
+    for (size_t i = 0; i < bitmapResources.size(); i++) {
+        SkBitmap* resource = bitmapResources.itemAt(i);
+        mBitmapResources.add(resource);
+        caches.resourceCache.incrementRefcount(resource);
     }
-
-    const SkTDArray<const SkFlatPaint*>& paints = recorder.getPaints();
-    mPaintCount = paints.count();
-    if (mPaintCount > 0) {
-        mPaints = new SkPaint[mPaintCount];
-        for (const SkFlatPaint** flatPaintPtr = paints.begin();
-                flatPaintPtr != paints.end(); flatPaintPtr++) {
-            const SkFlatPaint* flatPaint = *flatPaintPtr;
-            int index = flatPaint->index() - 1;
-            flatPaint->unflatten(&mPaints[index], &mRCPlayback, &mTFPlayback);
-        }
+    const Vector<SkMatrix*> &matrixResources = recorder.getMatrixResources();
+    for (size_t i = 0; i < matrixResources.size(); i++) {
+        SkMatrix* resource = matrixResources.itemAt(i);
+        mMatrixResources.add(resource);
+        caches.resourceCache.incrementRefcount(resource);
+    }
+    const Vector<SkPaint*> &paintResources = recorder.getPaintResources();
+    for (size_t i = 0; i < paintResources.size(); i++) {
+        SkPaint* resource = paintResources.itemAt(i);
+        mPaintResources.add(resource);
+        caches.resourceCache.incrementRefcount(resource);
+    }
+    const Vector<SkiaShader*> &shaderResources = recorder.getShaderResources();
+    for (size_t i = 0; i < shaderResources.size(); i++) {
+        SkiaShader* resource = shaderResources.itemAt(i);
+        mShaderResources.add(resource);
+        caches.resourceCache.incrementRefcount(resource);
     }
 
     mPathHeap = recorder.mPathHeap;
@@ -143,23 +135,32 @@ DisplayList::~DisplayList() {
     sk_free((void*) mReader.base());
 
     Caches& caches = Caches::getInstance();
-    for (int i = 0; i < mBitmapCount; i++) {
-        caches.textureCache.remove(&mBitmaps[i]);
+
+    for (size_t i = 0; i < mBitmapResources.size(); i++) {
+        SkBitmap* resource = mBitmapResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
     }
-
-    delete[] mBitmaps;
-    delete[] mMatrices;
-    delete[] mPaints;
-
+    mBitmapResources.clear();
+    for (size_t i = 0; i < mMatrixResources.size(); i++) {
+        SkMatrix* resource = mMatrixResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
+    }
+    mMatrixResources.clear();
+    for (size_t i = 0; i < mPaintResources.size(); i++) {
+        SkPaint* resource = mPaintResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
+    }
+    mPaintResources.clear();
+    for (size_t i = 0; i < mShaderResources.size(); i++) {
+        SkiaShader* resource = mShaderResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
+    }
+    mShaderResources.clear();
     mPathHeap->safeUnref();
 }
 
 void DisplayList::init() {
-    mBitmaps = NULL;
-    mMatrices = NULL;
-    mPaints = NULL;
     mPathHeap = NULL;
-    mBitmapCount = mMatrixCount = mPaintCount = 0;
 }
 
 void DisplayList::replay(OpenGLRenderer& renderer) {
@@ -280,7 +281,7 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
             }
             break;
             case SetupShader: {
-                // TODO: Implement
+                renderer.setupShader(getShader());
             }
             break;
             case ResetColorFilter: {
@@ -309,7 +310,6 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
 
 DisplayListRenderer::DisplayListRenderer():
         mHeap(HEAP_BLOCK_SIZE), mWriter(MIN_WRITER_SIZE) {
-    mBitmapIndex = mMatrixIndex = mPaintIndex = 1;
     mPathHeap = NULL;
 }
 
@@ -323,15 +323,33 @@ void DisplayListRenderer::reset() {
         mPathHeap = NULL;
     }
 
-    mBitmaps.reset();
-    mMatrices.reset();
-    mPaints.reset();
-
     mWriter.reset();
     mHeap.reset();
 
     mRCRecorder.reset();
     mTFRecorder.reset();
+
+    Caches& caches = Caches::getInstance();
+    for (size_t i = 0; i < mBitmapResources.size(); i++) {
+        SkBitmap* resource = mBitmapResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
+    }
+    mBitmapResources.clear();
+    for (size_t i = 0; i < mMatrixResources.size(); i++) {
+        SkMatrix* resource = mMatrixResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
+    }
+    mMatrixResources.clear();
+    for (size_t i = 0; i < mPaintResources.size(); i++) {
+        SkPaint* resource = mPaintResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
+    }
+    mPaintResources.clear();
+    for (size_t i = 0; i < mShaderResources.size(); i++) {
+        SkiaShader* resource = mShaderResources.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
+    }
+    mShaderResources.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -380,7 +398,7 @@ void DisplayListRenderer::restoreToCount(int saveCount) {
 }
 
 int DisplayListRenderer::saveLayer(float left, float top, float right, float bottom,
-        const SkPaint* p, int flags) {
+        SkPaint* p, int flags) {
     addOp(DisplayList::SaveLayer);
     addBounds(left, top, right, bottom);
     addPaint(p);
@@ -427,15 +445,15 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
 }
 
 void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float left, float top,
-        const SkPaint* paint) {
+        SkPaint* paint) {
     addOp(DisplayList::DrawBitmap);
     addBitmap(bitmap);
     addPoint(left, top);
     addPaint(paint);
 }
 
-void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix,
-        const SkPaint* paint) {
+void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix,
+        SkPaint* paint) {
     addOp(DisplayList::DrawBitmapMatrix);
     addBitmap(bitmap);
     addMatrix(matrix);
@@ -444,7 +462,7 @@ void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix,
 
 void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop,
-        float dstRight, float dstBottom, const SkPaint* paint) {
+        float dstRight, float dstBottom, SkPaint* paint) {
     addOp(DisplayList::DrawBitmapRect);
     addBitmap(bitmap);
     addBounds(srcLeft, srcTop, srcRight, srcBottom);
@@ -454,7 +472,7 @@ void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcT
 
 void DisplayListRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
         const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
-        float left, float top, float right, float bottom, const SkPaint* paint) {
+        float left, float top, float right, float bottom, SkPaint* paint) {
     addOp(DisplayList::DrawPatch);
     addBitmap(bitmap);
     addInts(xDivs, width);
@@ -471,7 +489,7 @@ void DisplayListRenderer::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 void DisplayListRenderer::drawRect(float left, float top, float right, float bottom,
-        const SkPaint* paint) {
+        SkPaint* paint) {
     addOp(DisplayList::DrawRect);
     addBounds(left, top, right, bottom);
     addPaint(paint);
@@ -483,7 +501,7 @@ void DisplayListRenderer::drawPath(SkPath* path, SkPaint* paint) {
     addPaint(paint);
 }
 
-void DisplayListRenderer::drawLines(float* points, int count, const SkPaint* paint) {
+void DisplayListRenderer::drawLines(float* points, int count, SkPaint* paint) {
     addOp(DisplayList::DrawLines);
     addFloats(points, count);
     addPaint(paint);
@@ -504,8 +522,8 @@ void DisplayListRenderer::resetShader() {
 }
 
 void DisplayListRenderer::setupShader(SkiaShader* shader) {
-    // TODO: Implement
-    OpenGLRenderer::setupShader(shader);
+    addOp(DisplayList::SetupShader);
+    addShader(shader);
 }
 
 void DisplayListRenderer::resetColorFilter() {
@@ -529,59 +547,6 @@ void DisplayListRenderer::setupShadow(float radius, float dx, float dy, int colo
     addPoint(dx, dy);
     addInt(color);
     OpenGLRenderer::setupShadow(radius, dx, dy, color);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Recording management
-///////////////////////////////////////////////////////////////////////////////
-
-int DisplayListRenderer::find(SkTDArray<const SkFlatPaint*>& paints, const SkPaint* paint) {
-    if (paint == NULL) {
-        return 0;
-    }
-
-    SkFlatPaint* flat = SkFlatPaint::Flatten(&mHeap, *paint, mPaintIndex,
-            &mRCRecorder, &mTFRecorder);
-    int index = SkTSearch<SkFlatData>((const SkFlatData**) paints.begin(),
-            paints.count(), (SkFlatData*) flat, sizeof(flat), &SkFlatData::Compare);
-    if (index >= 0) {
-        (void) mHeap.unalloc(flat);
-        return paints[index]->index();
-    }
-
-    index = ~index;
-    *paints.insert(index) = flat;
-    return mPaintIndex++;
-}
-
-int DisplayListRenderer::find(SkTDArray<const SkFlatMatrix*>& matrices, const SkMatrix* matrix) {
-    if (matrix == NULL) {
-        return 0;
-    }
-
-    SkFlatMatrix* flat = SkFlatMatrix::Flatten(&mHeap, *matrix, mMatrixIndex);
-    int index = SkTSearch<SkFlatData>((const SkFlatData**) matrices.begin(),
-            matrices.count(), (SkFlatData*) flat, sizeof(flat), &SkFlatData::Compare);
-    if (index >= 0) {
-        (void) mHeap.unalloc(flat);
-        return matrices[index]->index();
-    }
-    index = ~index;
-    *matrices.insert(index) = flat;
-    return mMatrixIndex++;
-}
-
-int DisplayListRenderer::find(SkTDArray<const SkFlatBitmap*>& bitmaps, const SkBitmap& bitmap) {
-    SkFlatBitmap* flat = SkFlatBitmap::Flatten(&mHeap, bitmap, mBitmapIndex, &mRCRecorder);
-    int index = SkTSearch<SkFlatData>((const SkFlatData**) bitmaps.begin(),
-            bitmaps.count(), (SkFlatData*) flat, sizeof(flat), &SkFlatData::Compare);
-    if (index >= 0) {
-        (void) mHeap.unalloc(flat);
-        return bitmaps[index]->index();
-    }
-    index = ~index;
-    *bitmaps.insert(index) = flat;
-    return mBitmapIndex++;
 }
 
 }; // namespace uirenderer

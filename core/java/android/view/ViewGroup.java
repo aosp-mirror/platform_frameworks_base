@@ -1700,10 +1700,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         return false;
     }
-    
+
     /**
      * {@inheritDoc}
-     * 
+     *
      * @hide
      */
     @Override
@@ -1715,10 +1715,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             children[i].dispatchStartTemporaryDetach();
         }
     }
-    
+
     /**
      * {@inheritDoc}
-     * 
+     *
      * @hide
      */
     @Override
@@ -1915,7 +1915,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (skipChildren) {
             for (int i = 0; i < count; i++) {
                 getChildAt(i).setVisibility(visibilities[i]);
-            }        
+            }
         }
 
         return b;
@@ -2045,7 +2045,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @param i The current iteration.
      * @return The index of the child to draw this iteration.
-     * 
+     *
      * @see #setChildrenDrawingOrderEnabled(boolean)
      * @see #isChildrenDrawingOrderEnabled()
      */
@@ -2186,7 +2186,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
             return more;
         }
-        
+
         float alpha = child.getAlpha();
         // Bail out early if the view does not need to be drawn
         if (alpha <= ViewConfiguration.ALPHA_THRESHOLD && (child.mPrivateFlags & ALPHA_SET) == 0 &&
@@ -2360,7 +2360,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         final int count = mChildrenCount;
         for (int i = 0; i < count; i++) {
-            
+
             children[i].setSelected(selected);
         }
     }

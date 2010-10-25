@@ -18,10 +18,6 @@ package android.net.sip;
 
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.media.ToneGenerator;
-import android.net.Uri;
 import android.net.rtp.AudioCodec;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
@@ -30,8 +26,6 @@ import android.net.sip.SimpleSessionDescription.Media;
 import android.net.wifi.WifiManager;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.Vibrator;
-import android.provider.Settings;
 import android.util.Log;
 
 import java.io.IOException;
@@ -47,6 +41,16 @@ import java.util.Map;
  * facilitates instantiating a {@code SipAudioCall} object for making/receiving
  * calls. See {@link SipManager#makeAudioCall} and
  * {@link SipManager#takeAudioCall}.
+ *
+ * <p>Requires permissions to use this class:
+ *   {@link android.Manifest.permission#INTERNET} and
+ *   {@link android.Manifest.permission#USE_SIP}.
+ * <br/>Requires permissions to {@link #startAudio}:
+ *   {@link android.Manifest.permission#RECORD_AUDIO},
+ *   {@link android.Manifest.permission#ACCESS_WIFI_STATE} and
+ *   {@link android.Manifest.permission#WAKE_LOCK}.
+ * <br/>Requires permissions to {@link #setSpeakerMode}:
+ *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
  */
 public class SipAudioCall {
     private static final String TAG = SipAudioCall.class.getSimpleName();
@@ -175,11 +179,6 @@ public class SipAudioCall {
     private boolean mMuted = false;
     private boolean mHold = false;
 
-    private boolean mRingbackToneEnabled = true;
-    private boolean mRingtoneEnabled = true;
-    private Ringtone mRingtone;
-    private ToneGenerator mRingbackTone;
-
     private SipProfile mPendingCallRequest;
     private WifiManager mWm;
     private WifiManager.WifiLock mWifiHighPerfLock;
@@ -285,8 +284,6 @@ public class SipAudioCall {
 
     private synchronized void close(boolean closeRtp) {
         if (closeRtp) stopCall(RELEASE_SOCKET);
-        stopRingbackTone();
-        stopRinging();
 
         mInCall = false;
         mHold = false;
@@ -366,7 +363,6 @@ public class SipAudioCall {
             @Override
             public void onRingingBack(SipSession session) {
                 Log.d(TAG, "sip call ringing back: " + session);
-                if (!mInCall) startRingbackTone();
                 Listener listener = mListener;
                 if (listener != null) {
                     try {
@@ -403,8 +399,6 @@ public class SipAudioCall {
             @Override
             public void onCallEstablished(SipSession session,
                     String sessionDescription) {
-                stopRingbackTone();
-                stopRinging();
                 mPeerSd = sessionDescription;
                 Log.v(TAG, "onCallEstablished()" + mPeerSd);
 
@@ -533,10 +527,6 @@ public class SipAudioCall {
             Log.v(TAG, "attachCall()" + mPeerSd);
             try {
                 session.setListener(createListener());
-
-                if (getState() == SipSession.State.INCOMING_CALL) {
-                    startRinging();
-                }
             } catch (Throwable e) {
                 Log.e(TAG, "attachCall()", e);
                 throwSipException(e);
@@ -580,7 +570,6 @@ public class SipAudioCall {
      */
     public void endCall() throws SipException {
         synchronized (this) {
-            stopRinging();
             stopCall(RELEASE_SOCKET);
             mInCall = false;
 
@@ -625,7 +614,6 @@ public class SipAudioCall {
      */
     public void answerCall(int timeout) throws SipException {
         synchronized (this) {
-            stopRinging();
             try {
                 mAudioStream = new AudioStream(InetAddress.getByName(
                         getLocalIp()));
@@ -798,7 +786,11 @@ public class SipAudioCall {
         }
     }
 
-    /** Puts the device to speaker mode. */
+    /**
+     * Puts the device to speaker mode.
+     * <p>Requires permission:
+     *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
+     */
     public void setSpeakerMode(boolean speakerMode) {
         synchronized (this) {
             ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE))
@@ -898,6 +890,10 @@ public class SipAudioCall {
     /**
      * Starts the audio for the established call. This method should be called
      * after {@link Listener#onCallEstablished} is called.
+     * <p>Requires permission:
+     *   {@link android.Manifest.permission#RECORD_AUDIO},
+     *   {@link android.Manifest.permission#ACCESS_WIFI_STATE} and
+     *   {@link android.Manifest.permission#WAKE_LOCK}.
      */
     public void startAudio() {
         try {
@@ -1024,69 +1020,6 @@ public class SipAudioCall {
 
     private String getLocalIp() {
         return mSipSession.getLocalIp();
-    }
-
-
-    /**
-     * Enables/disables the ring-back tone.
-     *
-     * @param enabled true to enable; false to disable
-     */
-    public void setRingbackToneEnabled(boolean enabled) {
-        synchronized (this) {
-            mRingbackToneEnabled = enabled;
-        }
-    }
-
-    /**
-     * Enables/disables the ring tone.
-     *
-     * @param enabled true to enable; false to disable
-     */
-    public void setRingtoneEnabled(boolean enabled) {
-        synchronized (this) {
-            mRingtoneEnabled = enabled;
-        }
-    }
-
-    private void startRingbackTone() {
-        if (!mRingbackToneEnabled) return;
-        if (mRingbackTone == null) {
-            // The volume relative to other sounds in the stream
-            int toneVolume = 80;
-            mRingbackTone = new ToneGenerator(
-                    AudioManager.STREAM_VOICE_CALL, toneVolume);
-        }
-        mRingbackTone.startTone(ToneGenerator.TONE_CDMA_LOW_PBX_L);
-    }
-
-    private void stopRingbackTone() {
-        if (mRingbackTone != null) {
-            mRingbackTone.stopTone();
-            mRingbackTone.release();
-            mRingbackTone = null;
-        }
-    }
-
-    private void startRinging() {
-        if (!mRingtoneEnabled) return;
-        ((Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE))
-                .vibrate(new long[] {0, 1000, 1000}, 1);
-        AudioManager am = (AudioManager)
-                mContext.getSystemService(Context.AUDIO_SERVICE);
-        if (am.getStreamVolume(AudioManager.STREAM_RING) > 0) {
-            String ringtoneUri =
-                    Settings.System.DEFAULT_RINGTONE_URI.toString();
-            mRingtone = RingtoneManager.getRingtone(mContext,
-                    Uri.parse(ringtoneUri));
-            mRingtone.play();
-        }
-    }
-
-    private void stopRinging() {
-        ((Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE))
-                .cancel();
-        if (mRingtone != null) mRingtone.stop();
     }
 
     private void throwSipException(Throwable throwable) throws SipException {

@@ -8,6 +8,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		utils/SortedListImpl.cpp \
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
+		Caches.cpp \
 		DisplayListRenderer.cpp \
 		FboCache.cpp \
 		GradientCache.cpp \
@@ -20,6 +21,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		PathCache.cpp \
 		Program.cpp \
 		ProgramCache.cpp \
+		ResourceCache.cpp \
 		SkiaColorFilter.cpp \
 		SkiaShader.cpp \
 		TextureCache.cpp \

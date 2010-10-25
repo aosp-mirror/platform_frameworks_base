@@ -17,7 +17,7 @@
 
 #define LOG_TAG "AndroidUnicode"
 
-#include <jni.h>
+#include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 #include "utils/misc.h"
 #include "utils/Log.h"
@@ -25,14 +25,6 @@
 
 namespace android {
     
-static void jniThrowException(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    jclass excClazz = env->FindClass(exc);
-    LOG_ASSERT(excClazz, "Unable to find class %s", exc);
-
-    env->ThrowNew(excClazz, msg);
-}
-
 static jint runBidi(JNIEnv* env, jobject obj, jint dir, jcharArray chsArray, 
                     jbyteArray infoArray, int n, jboolean haveInfo)
 {

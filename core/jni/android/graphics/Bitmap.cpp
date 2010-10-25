@@ -255,13 +255,20 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, const SkBitmap* src,
 static void Bitmap_destructor(JNIEnv* env, jobject, SkBitmap* bitmap) {
 #ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::Caches::hasInstance()) {
-        android::uirenderer::Caches::getInstance().textureCache.remove(bitmap);
+        android::uirenderer::Caches::getInstance().resourceCache.destructor(bitmap);
+        return;
     }
-#endif
+#endif // USE_OPENGL_RENDERER
     delete bitmap;
 }
 
 static void Bitmap_recycle(JNIEnv* env, jobject, SkBitmap* bitmap) {
+#ifdef USE_OPENGL_RENDERER
+    if (android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().resourceCache.recycle(bitmap);
+        return;
+    }
+#endif // USE_OPENGL_RENDERER
     bitmap->setPixels(NULL, NULL);
 }
 

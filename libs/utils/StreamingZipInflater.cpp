@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define LOG_NDEBUG 1
 #define LOG_TAG "szipinf"
 #include <utils/Log.h>
 
@@ -157,7 +158,7 @@ ssize_t StreamingZipInflater::read(void* outBuf, size_t count) {
             */
             int result = Z_OK;
             if (mStreamNeedsInit) {
-                LOGI("Initializing zlib to inflate");
+                LOGD("Initializing zlib to inflate");
                 result = inflateInit2(&mInflateState, -MAX_WBITS);
                 mStreamNeedsInit = false;
             }

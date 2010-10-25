@@ -37,7 +37,6 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
@@ -51,6 +50,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -856,6 +856,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public boolean performItemClick(View view, int position, long id) {
         boolean handled = false;
+        boolean dispatchItemClick = true;
 
         if (mChoiceMode != CHOICE_MODE_NONE) {
             handled = true;
@@ -879,6 +880,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (mChoiceActionMode != null) {
                     mMultiChoiceModeCallback.onItemCheckedStateChanged(mChoiceActionMode,
                             position, id, newValue);
+                    dispatchItemClick = false;
                 }
             } else if (mChoiceMode == CHOICE_MODE_SINGLE) {
                 boolean newValue = !mCheckStates.get(position, false);
@@ -900,7 +902,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             requestLayout();
         }
 
-        handled |= super.performItemClick(view, position, id);
+        if (dispatchItemClick) {
+            handled |= super.performItemClick(view, position, id);
+        }
 
         return handled;
     }
@@ -1984,6 +1988,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mAdapter != null && mDataSetObserver == null) {
             mDataSetObserver = new AdapterDataSetObserver();
             mAdapter.registerDataSetObserver(mDataSetObserver);
+
+            // Data may have changed while we were detached. Refresh.
+            mDataChanged = true;
+            mOldItemCount = mItemCount;
+            mItemCount = mAdapter.getCount();
         }
     }
 
@@ -2916,7 +2925,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     delta = Math.max(-(getHeight() - mPaddingBottom - mPaddingTop - 1), delta);
                 }
 
-                final boolean atEnd = trackMotionScroll(delta, delta);
+                // Don't stop just because delta is zero (it could have been rounded)
+                final boolean atEnd = trackMotionScroll(delta, delta) && (delta != 0);
 
                 if (more && !atEnd) {
                     invalidate();
@@ -3353,7 +3363,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         } else {
             mFlingRunnable.endFling();
         }
-        mFlingRunnable.startScroll(distance, duration);
+        // No sense starting to scroll if we're not going anywhere
+        if (distance != 0) {
+            mFlingRunnable.startScroll(distance, duration);
+        }
     }
 
     /**

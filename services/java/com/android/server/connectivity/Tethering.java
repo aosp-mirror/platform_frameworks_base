@@ -136,7 +136,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     static final long USB_DISCONNECT_DELAY = 1000;
 
     public Tethering(Context context, Looper looper) {
-        Log.d(TAG, "Tethering starting");
         mContext = context;
         mLooper = looper;
 

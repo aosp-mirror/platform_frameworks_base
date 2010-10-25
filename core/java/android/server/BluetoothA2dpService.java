@@ -41,6 +41,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
@@ -107,10 +108,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             } else if (action.equals(AudioManager.VOLUME_CHANGED_ACTION)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
                 if (streamType == AudioManager.STREAM_MUSIC) {
-                    BluetoothDevice sinks[] = getConnectedDevices();
+                    List<BluetoothDevice> sinks = getConnectedDevices();
 
-                    if (sinks.length != 0 && isPhoneDocked(sinks[0])) {
-                        String address = sinks[0].getAddress();
+                    if (sinks.size() != 0 && isPhoneDocked(sinks.get(0))) {
+                        String address = sinks.get(0).getAddress();
                         int newVolLevel =
                           intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
                         int oldVolLevel =
@@ -319,7 +320,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (getDevicesMatchingConnectionStates(new int[] {
                 BluetoothA2dp.STATE_CONNECTING,
                 BluetoothA2dp.STATE_CONNECTED,
-                BluetoothA2dp.STATE_DISCONNECTING}).length != 0) {
+                BluetoothA2dp.STATE_DISCONNECTING}).size() != 0) {
             return false;
         }
 
@@ -430,19 +431,16 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         return state;
     }
 
-    public synchronized BluetoothDevice[] getConnectedDevices() {
+    public synchronized List<BluetoothDevice> getConnectedDevices() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        BluetoothDevice[] sinks = getDevicesMatchingConnectionStates(
+        List<BluetoothDevice> sinks = getDevicesMatchingConnectionStates(
                 new int[] {BluetoothA2dp.STATE_CONNECTED});
         return sinks;
     }
 
-    public synchronized BluetoothDevice[] getDevicesMatchingConnectionStates(int[] states) {
+    public synchronized List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        ArrayList<BluetoothDevice> sinks = new ArrayList();
-        if (mAudioDevices.isEmpty()) {
-            return sinks.toArray(new BluetoothDevice[sinks.size()]);
-        }
+        ArrayList<BluetoothDevice> sinks = new ArrayList<BluetoothDevice>();
         for (BluetoothDevice device: mAudioDevices.keySet()) {
             int sinkState = getConnectionState(device);
             for (int state : states) {
@@ -452,7 +450,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 }
             }
         }
-        return sinks.toArray(new BluetoothDevice[sinks.size()]);
+        return sinks;
     }
 
     public synchronized int getPriority(BluetoothDevice device) {

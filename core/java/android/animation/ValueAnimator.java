@@ -523,7 +523,6 @@ public class ValueAnimator extends Animator {
             for (int i = 0; i < numValues; ++i) {
                 mValues[i].init();
             }
-            mCurrentIteration = 0;
             mInitialized = true;
         }
     }
@@ -933,6 +932,7 @@ public class ValueAnimator extends Animator {
             // This sets the initial value of the animation, prior to actually starting it running
             setCurrentPlayTime(getCurrentPlayTime());
         }
+        mCurrentIteration = 0;
         mPlayingState = STOPPED;
         mStartedDelay = false;
         sPendingAnimations.add(this);
@@ -1214,5 +1214,17 @@ public class ValueAnimator extends Animator {
          */
         void onAnimationUpdate(ValueAnimator animation);
 
+    }
+
+    /**
+     * Return the number of animations currently running.
+     *
+     * Used by StrictMode internally to annotate violations.  Only
+     * called on the main thread.
+     *
+     * @hide
+     */
+    public static int getCurrentAnimationsCount() {
+        return sAnimations.size();
     }
 }

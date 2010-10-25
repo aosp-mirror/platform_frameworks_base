@@ -15,12 +15,12 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false" android:color="@android:color/bright_foreground_light_disabled"/>
-    <item android:state_window_focused="false" android:color="@android:color/bright_foreground_light"/>
-    <item android:state_pressed="true" android:color="@android:color/bright_foreground_light"/>
-    <item android:state_selected="true" android:color="@android:color/bright_foreground_light"/>
-    <item android:state_activated="true" android:color="@android:color/bright_foreground_light"/>
-    <item android:color="@android:color/bright_foreground_light"/> <!-- not selected -->
+    <item android:state_enabled="false" android:color="@android:color/bright_foreground_disabled_holo_light"/>
+    <item android:state_window_focused="false" android:color="@android:color/bright_foreground_holo_light"/>
+    <item android:state_pressed="true" android:color="@android:color/bright_foreground_holo_light"/>
+    <item android:state_selected="true" android:color="@android:color/bright_foreground_holo_light"/>
+    <item android:state_activated="true" android:color="@android:color/bright_foreground_holo_light"/>
+    <item android:color="@android:color/bright_foreground_holo_light"/> <!-- not selected -->
     
 </selector>
 

@@ -252,7 +252,7 @@ bool OpenGLRenderer::restoreSnapshot() {
 ///////////////////////////////////////////////////////////////////////////////
 
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
-        const SkPaint* p, int flags) {
+        SkPaint* p, int flags) {
     const GLuint previousFbo = mSnapshot->fbo;
     const int count = saveSnapshot(flags);
 
@@ -353,11 +353,22 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Window coordinates of the layer
     Rect bounds(left, top, right, bottom);
-    if (!fboLayer) {
+    if (fboLayer) {
+        // Clear the previous layer regions before we change the viewport
+        clearLayerRegions();
+    } else {
         mSnapshot->transform->mapRect(bounds);
+
         // Layers only make sense if they are in the framebuffer's bounds
-        bounds.intersect(*mSnapshot->clipRect);
+        bounds.intersect(*snapshot->clipRect);
+
+        // We cannot work with sub-pixels in this case
         bounds.snapToPixelBoundaries();
+
+        // When the layer is not an FBO, we may use glCopyTexImage so we
+        // need to make sure the layer does not extend outside the bounds
+        // of the framebuffer
+        bounds.intersect(snapshot->previous->viewport);
     }
 
     if (bounds.isEmpty() || bounds.getWidth() > mMaxTextureSize ||
@@ -446,14 +457,14 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         // Copy the framebuffer into the layer
         glBindTexture(GL_TEXTURE_2D, layer->texture);
 
-         if (layer->empty) {
-             glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left, mHeight - bounds.bottom,
-                     layer->width, layer->height, 0);
-             layer->empty = false;
-         } else {
-             glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left, mHeight - bounds.bottom,
-                     bounds.getWidth(), bounds.getHeight());
-          }
+        if (layer->empty) {
+            glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left,
+                    snapshot->height - bounds.bottom, layer->width, layer->height, 0);
+            layer->empty = false;
+        } else {
+            glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
+                    snapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
+        }
 
         // Enqueue the buffer coordinates to clear the corresponding region later
         mLayers.push(new Rect(bounds));
@@ -479,7 +490,8 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     }
 
     // Restore the clip from the previous snapshot
-    const Rect& clip = *previous->clipRect;
+    Rect& clip(*previous->clipRect);
+    clip.snapToPixelBoundaries();
     glScissor(clip.left, previous->height - clip.bottom, clip.getWidth(), clip.getHeight());
 
     Layer* layer = current->layer;
@@ -623,7 +635,7 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint) {
+void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
     const float right = left + bitmap->width();
     const float bottom = top + bitmap->height();
 
@@ -639,7 +651,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, const S
     drawTextureRect(left, top, right, bottom, texture, paint);
 }
 
-void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint) {
+void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) {
     Rect r(0.0f, 0.0f, bitmap->width(), bitmap->height());
     const mat4 transform(*matrix);
     transform.mapRect(r);
@@ -659,7 +671,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
          float srcLeft, float srcTop, float srcRight, float srcBottom,
          float dstLeft, float dstTop, float dstRight, float dstBottom,
-         const SkPaint* paint) {
+         SkPaint* paint) {
     if (quickReject(dstLeft, dstTop, dstRight, dstBottom)) {
         return;
     }
@@ -693,7 +705,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 
 void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
         const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
-        float left, float top, float right, float bottom, const SkPaint* paint) {
+        float left, float top, float right, float bottom, SkPaint* paint) {
     if (quickReject(left, top, right, bottom)) {
         return;
     }
@@ -719,7 +731,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     }
 }
 
-void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
+void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     if (mSnapshot->invisible) return;
 
     int alpha;
@@ -787,11 +799,12 @@ void OpenGLRenderer::drawLines(float* points, int count, const SkPaint* paint) {
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
-    const Rect& clip = *mSnapshot->clipRect;
+    Rect& clip(*mSnapshot->clipRect);
+    clip.snapToPixelBoundaries();
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
 
-void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, const SkPaint* p) {
+void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
     if (quickReject(left, top, right, bottom)) {
         return;
     }
@@ -855,6 +868,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
             paint->getTextSize());
 
     Rect clipRect(*mSnapshot->clipRect);
+    clipRect.snapToPixelBoundaries();
     glScissor(clipRect.left, mSnapshot->height - clipRect.bottom,
             clipRect.getWidth(), clipRect.getHeight());
 
@@ -1206,7 +1220,7 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
-        const Texture* texture, const SkPaint* paint) {
+        const Texture* texture, SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
@@ -1334,7 +1348,7 @@ void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, flo
     TextureVertex::setUV(v++, u2, v2);
 }
 
-void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
+void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
     if (paint) {
         if (!mExtensions.hasFramebufferFetch()) {
             const bool isMode = SkXfermode::IsMode(paint->getXfermode(), mode);

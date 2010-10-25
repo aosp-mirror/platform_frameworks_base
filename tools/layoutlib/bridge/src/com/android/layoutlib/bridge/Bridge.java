@@ -1093,6 +1093,11 @@ public final class Bridge implements ILayoutBridge {
         }
 
         @SuppressWarnings("unused")
+        public void reportDropResult(IWindow window, boolean consumed) throws RemoteException {
+            // pass for now
+        }
+
+        @SuppressWarnings("unused")
         public void dragRecipientEntered(IWindow window) throws RemoteException {
             // pass for now
         }

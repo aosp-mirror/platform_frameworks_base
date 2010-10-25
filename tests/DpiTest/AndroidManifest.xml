@@ -18,6 +18,12 @@
     package="com.google.android.test.dpi">
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="3" />
     <supports-screens android:smallScreens="true" />
+    <compatible-screens>
+        <screen android:screenSize="small" android:screenDensity="ldpi" />
+        <screen android:screenSize="small" android:screenDensity="xhdpi" />
+        <screen android:screenSize="large" android:screenDensity="hdpi" />
+        <screen android:screenSize="xlarge" android:screenDensity="mdpi" />
+    </compatible-screens>
     <application android:label="DpiTest">
         <activity android:name="DpiTestActivity">
             <intent-filter>

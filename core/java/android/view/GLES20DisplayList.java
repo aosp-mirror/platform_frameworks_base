@@ -16,6 +16,12 @@
 
 package android.view;
 
+import android.util.Finalizers;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * An implementation of display list for OpenGL ES 2.0.
  */
@@ -33,23 +39,11 @@ class GLES20DisplayList extends DisplayList {
             throw new IllegalStateException("Recording has already started");
         }
 
-        destroyCanvas();
-
         mCanvas = new GLES20Canvas(true, true);
         mStarted = true;
         mRecorded = false;
 
         return mCanvas;
-    }
-
-    private void destroyCanvas() {
-        if (mCanvas != null) {
-            mCanvas.destroyDisplayList(mNativeDisplayList);
-            mCanvas.destroy();
-
-            mCanvas = null;
-            mNativeDisplayList = 0;
-        }
     }
 
     @Override
@@ -59,16 +53,31 @@ class GLES20DisplayList extends DisplayList {
             mRecorded = true;
 
             mNativeDisplayList = mCanvas.getDisplayList();
+            new DisplayListFinalizer(this);
         }
-    }
-
-    @Override
-    void destroy() {
-        destroyCanvas();
     }
 
     @Override
     boolean isReady() {
         return !mStarted && mRecorded;
+    }
+
+    private static class DisplayListFinalizer extends Finalizers.ReclaimableReference<DisplayList> {
+        private static final Set<DisplayListFinalizer> sFinalizers = Collections.synchronizedSet(
+                new HashSet<DisplayListFinalizer>());
+
+        private int mNativeDisplayList;
+
+        DisplayListFinalizer(GLES20DisplayList displayList) {
+            super(displayList, Finalizers.getQueue());
+            mNativeDisplayList = displayList.mNativeDisplayList;
+            sFinalizers.add(this);
+        }
+
+        @Override
+        public void reclaim() {
+            GLES20Canvas.destroyDisplayList(mNativeDisplayList);
+            sFinalizers.remove(this);
+        }
     }
 }

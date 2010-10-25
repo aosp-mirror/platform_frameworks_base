@@ -27,12 +27,12 @@ package android.server;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothDeviceProfileState;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfileState;
-import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
@@ -80,6 +80,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -1415,7 +1416,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ synchronized boolean allowIncomingTethering() {
-        if (isTetheringOn() && getConnectedPanDevices().length < mMaxPanDevices)
+        if (isTetheringOn() && getConnectedPanDevices().size() < mMaxPanDevices)
             return true;
         return false;
     }
@@ -1503,16 +1504,17 @@ public class BluetoothService extends IBluetooth.Stub {
         return true;
     }
 
-    public synchronized BluetoothDevice[] getConnectedPanDevices() {
+    public synchronized List<BluetoothDevice> getConnectedPanDevices() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
 
-        Set<BluetoothDevice> devices = new HashSet<BluetoothDevice>();
+        List<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
+
         for (BluetoothDevice device: mPanDevices.keySet()) {
             if (getPanDeviceState(device) == BluetoothPan.STATE_CONNECTED) {
                 devices.add(device);
             }
         }
-        return devices.toArray(new BluetoothDevice[devices.size()]);
+        return devices;
     }
 
     public synchronized boolean disconnectPanDevice(BluetoothDevice device) {
@@ -1569,7 +1571,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     private String createNewTetheringAddressLocked() {
-        if (getConnectedPanDevices().length == mMaxPanDevices) {
+        if (getConnectedPanDevices().size() == mMaxPanDevices) {
             log("Max PAN device connections reached");
             return null;
         }
@@ -1688,7 +1690,7 @@ public class BluetoothService extends IBluetooth.Stub {
                                                 "Need BLUETOOTH_ADMIN permission");
 
         String objectPath = getObjectPathFromAddress(device.getAddress());
-        if (objectPath == null || getConnectedInputDevices().length == 0) {
+        if (objectPath == null || getConnectedInputDevices().size() == 0) {
             return false;
         }
         BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
@@ -1721,11 +1723,11 @@ public class BluetoothService extends IBluetooth.Stub {
         return mInputDevices.get(device);
     }
 
-    public synchronized BluetoothDevice[] getConnectedInputDevices() {
+    public synchronized List<BluetoothDevice> getConnectedInputDevices() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        Set<BluetoothDevice> devices = lookupInputDevicesMatchingStates(
+        List<BluetoothDevice> devices = lookupInputDevicesMatchingStates(
             new int[] {BluetoothInputDevice.STATE_CONNECTED});
-        return devices.toArray(new BluetoothDevice[devices.size()]);
+        return devices;
     }
 
     public synchronized int getInputDevicePriority(BluetoothDevice device) {
@@ -1746,11 +1748,9 @@ public class BluetoothService extends IBluetooth.Stub {
                 priority);
     }
 
-    /*package*/synchronized Set<BluetoothDevice> lookupInputDevicesMatchingStates(int[] states) {
-        Set<BluetoothDevice> inputDevices = new HashSet<BluetoothDevice>();
-        if (mInputDevices.isEmpty()) {
-            return inputDevices;
-        }
+    /*package*/synchronized List<BluetoothDevice> lookupInputDevicesMatchingStates(int[] states) {
+        List<BluetoothDevice> inputDevices = new ArrayList<BluetoothDevice>();
+
         for (BluetoothDevice device: mInputDevices.keySet()) {
             int inputDeviceState = getInputDeviceState(device);
             for (int state : states) {
@@ -2487,11 +2487,11 @@ public class BluetoothService extends IBluetooth.Stub {
         // dump
         pw.println("\n--Headset Service--");
         if (mBluetoothHeadset != null) {
-           Set<BluetoothDevice> deviceSet = mBluetoothHeadset.getConnectedDevices();
-           if (deviceSet.size() == 0) {
+           List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
+           if (deviceList.size() == 0) {
               pw.println("\n--No headsets connected--");
            }
-           BluetoothDevice device = (BluetoothDevice) deviceSet.toArray()[0];
+           BluetoothDevice device = deviceList.get(0);
 
             switch (mBluetoothHeadset.getConnectionState(device)) {
                 case BluetoothHeadset.STATE_DISCONNECTED:
@@ -2511,11 +2511,11 @@ public class BluetoothService extends IBluetooth.Stub {
                     break;
             }
 
-            deviceSet.clear();
-            deviceSet = mBluetoothHeadset.getDevicesMatchingConnectionStates(new int[] {
+            deviceList.clear();
+            deviceList = mBluetoothHeadset.getDevicesMatchingConnectionStates(new int[] {
                      BluetoothProfile.STATE_CONNECTED, BluetoothProfile.STATE_DISCONNECTED});
             pw.println("\n--Connected and Disconnected Headsets");
-            for (BluetoothDevice dev: deviceSet) {
+            for (BluetoothDevice dev: deviceList) {
                 pw.println(device);
                 if (mBluetoothHeadset.isAudioConnected(device)) {
                     pw.println("SCO audio connected to device:" + device);

@@ -15,6 +15,7 @@
  */
 package android.os;
 
+import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
 import android.app.ApplicationErrorReport;
 import android.util.Log;
@@ -1110,6 +1111,11 @@ public final class StrictMode {
         public int durationMillis = -1;
 
         /**
+         * The number of animations currently running.
+         */
+        public int numAnimationsRunning = 0;
+
+        /**
          * Which violation number this was (1-based) since the last Looper loop,
          * from the perspective of the root caller (if it crossed any processes
          * via Binder calls).  The value is 0 if the root caller wasn't on a Looper
@@ -1138,6 +1144,7 @@ public final class StrictMode {
             crashInfo = new ApplicationErrorReport.CrashInfo(tr);
             violationUptimeMillis = SystemClock.uptimeMillis();
             this.policy = policy;
+            this.numAnimationsRunning = ValueAnimator.getCurrentAnimationsCount();
         }
 
         /**
@@ -1163,6 +1170,7 @@ public final class StrictMode {
             }
             durationMillis = in.readInt();
             violationNumThisLoop = in.readInt();
+            numAnimationsRunning = in.readInt();
             violationUptimeMillis = in.readLong();
         }
 
@@ -1174,6 +1182,7 @@ public final class StrictMode {
             dest.writeInt(policy);
             dest.writeInt(durationMillis);
             dest.writeInt(violationNumThisLoop);
+            dest.writeInt(numAnimationsRunning);
             dest.writeLong(violationUptimeMillis);
         }
 
@@ -1189,6 +1198,9 @@ public final class StrictMode {
             }
             if (violationNumThisLoop != 0) {
                 pw.println(prefix + "violationNumThisLoop: " + violationNumThisLoop);
+            }
+            if (numAnimationsRunning != 0) {
+                pw.println(prefix + "numAnimationsRunning: " + numAnimationsRunning);
             }
             pw.println(prefix + "violationUptimeMillis: " + violationUptimeMillis);
         }

@@ -19,15 +19,13 @@ package android.bluetooth;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
-import android.os.ServiceManager;
-import android.os.RemoteException;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @hide
@@ -154,18 +152,16 @@ public final class BluetoothPan {
    *
    * Does not include devices that are currently connecting or disconnecting
    *
-   * @return a unmodifiable set of connected PAN Devices, or null on error.
+   * @return List of PAN devices or empty on Error
    * @hide
    */
-   public Set<BluetoothDevice> getConnectedDevices() {
+   public List<BluetoothDevice> getConnectedDevices() {
       if (DBG) log("getConnectedDevices");
       try {
-          return Collections.unmodifiableSet(
-                  new HashSet<BluetoothDevice>(
-                      Arrays.asList(mService.getConnectedPanDevices())));
+          return mService.getConnectedPanDevices();
       } catch (RemoteException e) {
           Log.e(TAG, "", e);
-          return null;
+          return new ArrayList<BluetoothDevice>();
       }
    }
 

@@ -412,10 +412,18 @@ void ZipFileRO::addToHash(const char* str, int strLen, unsigned int hash)
 /*
  * Find a matching entry.
  *
- * Returns 0 if not found.
+ * Returns NULL if not found.
  */
 ZipEntryRO ZipFileRO::findEntryByName(const char* fileName) const
 {
+    /*
+     * If the ZipFileRO instance is not initialized, the entry number will
+     * end up being garbage since mHashTableSize is -1.
+     */
+    if (mHashTableSize <= 0) {
+        return NULL;
+    }
+
     int nameLen = strlen(fileName);
     unsigned int hash = computeHash(fileName, nameLen);
     int ent = hash & (mHashTableSize-1);

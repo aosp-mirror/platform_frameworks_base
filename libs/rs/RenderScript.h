@@ -288,7 +288,7 @@ typedef struct {
 
 
 // Async commands for returning new IDS
-void * rsaTypeCreate(RsContext, RsElement, uint32_t dimCount,
+RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimCount,
                      const RsDimension *dims, const uint32_t *vals);
 
 

@@ -33,7 +33,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 static char const * const gVendorString     = "Android";
-static char const * const gRendererString   = "Android PixelFlinger 1.3";
+static char const * const gRendererString   = "Android PixelFlinger 1.4";
 static char const * const gVersionString    = "OpenGL ES-CM 1.0";
 static char const * const gExtensionsString =
     "GL_OES_byte_coordinates "              // OK

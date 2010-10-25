@@ -42,21 +42,21 @@ void OpenGLDebugRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previo
 }
 
 int OpenGLDebugRenderer::saveLayer(float left, float top, float right, float bottom,
-        const SkPaint* p, int flags) {
+        SkPaint* p, int flags) {
     mPrimitivesCount++;
     StopWatch w("saveLayer");
     return OpenGLRenderer::saveLayer(left, top, right, bottom, p, flags);
 }
 
 void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, float left, float top,
-        const SkPaint* paint) {
+        SkPaint* paint) {
     mPrimitivesCount++;
     StopWatch w("drawBitmap");
     OpenGLRenderer::drawBitmap(bitmap, left, top, paint);
 }
 
-void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix,
-        const SkPaint* paint) {
+void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix,
+        SkPaint* paint) {
     mPrimitivesCount++;
     StopWatch w("drawBitmapMatrix");
     OpenGLRenderer::drawBitmap(bitmap, matrix, paint);
@@ -64,7 +64,7 @@ void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix,
 
 void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
         float srcRight, float srcBottom, float dstLeft, float dstTop,
-        float dstRight, float dstBottom, const SkPaint* paint) {
+        float dstRight, float dstBottom, SkPaint* paint) {
     mPrimitivesCount++;
     StopWatch w("drawBitmapRect");
     OpenGLRenderer::drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
@@ -73,7 +73,7 @@ void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcT
 
 void OpenGLDebugRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
         const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
-        float left, float top, float right, float bottom, const SkPaint* paint) {
+        float left, float top, float right, float bottom, SkPaint* paint) {
     mPrimitivesCount++;
     StopWatch w("drawPatch");
     OpenGLRenderer::drawPatch(bitmap, xDivs, yDivs, colors, width, height, numColors,
@@ -87,7 +87,7 @@ void OpenGLDebugRenderer::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 void OpenGLDebugRenderer::drawRect(float left, float top, float right, float bottom,
-        const SkPaint* paint) {
+        SkPaint* paint) {
     mPrimitivesCount++;
     StopWatch w("drawRect");
     OpenGLRenderer::drawRect(left, top, right, bottom, paint);
@@ -99,7 +99,7 @@ void OpenGLDebugRenderer::drawPath(SkPath* path, SkPaint* paint) {
     OpenGLRenderer::drawPath(path, paint);
 }
 
-void OpenGLDebugRenderer::drawLines(float* points, int count, const SkPaint* paint) {
+void OpenGLDebugRenderer::drawLines(float* points, int count, SkPaint* paint) {
     mPrimitivesCount++;
     StopWatch w("drawLines");
     OpenGLRenderer::drawLines(points, count, paint);

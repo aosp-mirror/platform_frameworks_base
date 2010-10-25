@@ -152,6 +152,7 @@ private:
     bool exceedsFileSizeLimit();
     bool use32BitFileOffset() const;
     bool exceedsFileDurationLimit();
+    bool isFileStreamable() const;
     void trackProgressStatus(const Track* track, int64_t timeUs, status_t err = OK);
 
     MPEG4Writer(const MPEG4Writer &);

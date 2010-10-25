@@ -177,12 +177,12 @@ public class SensorEvent {
      *  <h4>{@link android.hardware.Sensor#TYPE_ROTATION_VECTOR Sensor.TYPE_ROTATION_VECTOR}:</h4>
      *  The rotation vector represents the orientation of the device as a combination of an angle
      *  and an axis, in which the device has rotated through an angle theta around an axis
-     *  <x, y, z>. The three elements of the rotation vector are
-     *  <x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>, such that the magnitude of the rotation
+     *  &lt;x, y, z>. The three elements of the rotation vector are
+     *  &lt;x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>, such that the magnitude of the rotation
      *  vector is equal to sin(theta/2), and the direction of the rotation vector is equal to the
      *  direction of the axis of rotation. The three elements of the rotation vector are equal to
      *  the last three components of a unit quaternion
-     *  <cos(theta/2), x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>.  Elements of the rotation
+     *  &lt;cos(theta/2), x*sin(theta/2), y*sin(theta/2), z*sin(theta/2)>.  Elements of the rotation
      *  vector are unitless.  The x,y, and z axis are defined in the same way as the acceleration
      *  sensor.
      *

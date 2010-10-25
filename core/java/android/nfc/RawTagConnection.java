@@ -95,10 +95,16 @@ public class RawTagConnection {
      * returns true.
      */
     public boolean isConnected() {
-        // TODO(nxp): update mIsConnected when tag goes out of range -
-        //            but do not do an active prescence check in
-        //            isConnected()
-        return mIsConnected;
+        if (!mIsConnected) {
+            return false;
+        }
+
+        try {
+            return mTagService.isPresent(mTag.mServiceHandle);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service died", e);
+            return false;
+        }
     }
 
     /**
@@ -129,7 +135,7 @@ public class RawTagConnection {
     public void close() {
         mIsConnected = false;
         try {
-            mTagService.close(mTag.mNativeHandle);
+            mTagService.close(mTag.mServiceHandle);
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service died", e);
         }
@@ -148,7 +154,7 @@ public class RawTagConnection {
      */
     public byte[] transceive(byte[] data) throws IOException {
         try {
-            byte[] response = mTagService.transceive(mTag.mNativeHandle, data);
+            byte[] response = mTagService.transceive(mTag.mServiceHandle, data);
             if (response == null) {
                 throw new IOException("transcieve failed");
             }

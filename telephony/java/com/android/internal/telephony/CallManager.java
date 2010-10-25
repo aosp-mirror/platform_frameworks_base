@@ -1626,7 +1626,15 @@ public final class CallManager {
     }
 
 
-
+    private boolean hasMoreThanOneRingingCall() {
+        int count = 0;
+        for (Call call : mRingingCalls) {
+            if (call.getState().isRinging()) {
+                if (++count > 1) return true;
+            }
+        }
+        return false;
+    }
 
     private Handler mHandler = new Handler() {
 
@@ -1644,7 +1652,17 @@ public final class CallManager {
                     break;
                 case EVENT_NEW_RINGING_CONNECTION:
                     if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_NEW_RINGING_CONNECTION)");
-                    mNewRingingConnectionRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    if (getActiveFgCallState().isDialing() || hasMoreThanOneRingingCall()) {
+                        Connection c = (Connection) ((AsyncResult) msg.obj).result;
+                        try {
+                            Log.d(LOG_TAG, "silently drop incoming call: " + c.getCall());
+                            c.getCall().hangup();
+                        } catch (CallStateException e) {
+                            Log.w(LOG_TAG, "new ringing connection", e);
+                        }
+                    } else {
+                        mNewRingingConnectionRegistrants.notifyRegistrants((AsyncResult) msg.obj);
+                    }
                     break;
                 case EVENT_UNKNOWN_CONNECTION:
                     if (VDBG) Log.d(LOG_TAG, " handleMessage (EVENT_UNKNOWN_CONNECTION)");

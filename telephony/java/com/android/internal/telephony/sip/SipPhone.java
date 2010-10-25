@@ -28,6 +28,7 @@ import android.os.AsyncResult;
 import android.os.Message;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.Call;
@@ -483,7 +484,12 @@ public class SipPhone extends SipPhoneBase {
 
         void merge(SipCall that) throws CallStateException {
             AudioGroup audioGroup = getAudioGroup();
-            for (Connection c : that.connections) {
+
+            // copy to an array to avoid concurrent modification as connections
+            // in that.connections will be removed in add(SipConnection).
+            Connection[] cc = that.connections.toArray(
+                    new Connection[that.connections.size()]);
+            for (Connection c : cc) {
                 SipConnection conn = (SipConnection) c;
                 add(conn);
                 if (conn.getState() == Call.State.HOLDING) {
@@ -676,6 +682,18 @@ public class SipPhone extends SipPhoneBase {
             this(owner, callee, getUriString(callee));
         }
 
+        @Override
+        public String getCnapName() {
+            String displayName = mPeer.getDisplayName();
+            return TextUtils.isEmpty(displayName) ? null
+                                                  : displayName;
+        }
+
+        @Override
+        public int getNumberPresentation() {
+            return Connection.PRESENTATION_ALLOWED;
+        }
+
         void initIncomingCall(SipAudioCall sipAudioCall, Call.State newState) {
             setState(newState);
             mSipAudioCall = sipAudioCall;
@@ -704,7 +722,6 @@ public class SipPhone extends SipPhoneBase {
             setState(Call.State.DIALING);
             mSipAudioCall = mSipManager.makeAudioCall(mProfile, mPeer, null,
                     TIMEOUT_MAKE_CALL);
-            mSipAudioCall.setRingbackToneEnabled(false);
             mSipAudioCall.setListener(mAdapter);
         }
 
@@ -789,7 +806,9 @@ public class SipPhone extends SipPhoneBase {
         @Override
         public void separate() throws CallStateException {
             synchronized (SipPhone.class) {
-                SipCall call = (SipCall) SipPhone.this.getBackgroundCall();
+                SipCall call = (getPhone() == SipPhone.this)
+                        ? (SipCall) SipPhone.this.getBackgroundCall()
+                        : (SipCall) SipPhone.this.getForegroundCall();
                 if (call.getState() != Call.State.IDLE) {
                     throw new CallStateException(
                             "cannot put conn back to a call in non-idle state: "
@@ -799,10 +818,20 @@ public class SipPhone extends SipPhoneBase {
                         + mPeer.getUriString() + " from " + mOwner + " back to "
                         + call);
 
+                // separate the AudioGroup and connection from the original call
+                Phone originalPhone = getPhone();
                 AudioGroup audioGroup = call.getAudioGroup(); // may be null
                 call.add(this);
                 mSipAudioCall.setAudioGroup(audioGroup);
-                call.hold();
+
+                // put the original call to bg; and the separated call becomes
+                // fg if it was in bg
+                originalPhone.switchHoldingAndActive();
+
+                // start audio and notify the phone app of the state change
+                call = (SipCall) SipPhone.this.getForegroundCall();
+                mSipAudioCall.startAudio();
+                call.onConnectionStateChanged(this);
             }
         }
 

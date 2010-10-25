@@ -27,9 +27,8 @@ interface IBluetoothHeadset {
     // Public API
     boolean connect(in BluetoothDevice device);
     boolean disconnect(in BluetoothDevice device);
-    // Change to Set<> when AIDL supports
-    BluetoothDevice[] getConnectedDevices();
-    BluetoothDevice[] getDevicesMatchingConnectionStates(in int[] states);
+    List<BluetoothDevice> getConnectedDevices();
+    List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
     int getConnectionState(in BluetoothDevice device);
     boolean setPriority(in BluetoothDevice device, int priority);
     int getPriority(in BluetoothDevice device);

@@ -16,8 +16,6 @@
 
 package android.nfc;
 
-import java.util.HashMap;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,202 +37,180 @@ import android.os.Parcelable;
  * range. If it is removed and then returned to range, then the most recent
  * {@link Tag} object (in {@link NfcAdapter#ACTION_TAG_DISCOVERED}) should be used to create a
  * {@link RawTagConnection}.
- * <p>This is an immutable data class.
+ * <p>This is an immutable data class. All properties are set at Tag discovery
+ * time and calls on this class will retrieve those read-only properties, and
+ * not cause any further RF activity or block. Note however that arrays passed to and
+ * returned by this class are *not* cloned, so be careful not to modify them.
  */
 public class Tag implements Parcelable {
-
     /**
-     * @hide
+     * ISO 14443-3A technology.
+     * <p>
+     * Includes Topaz (which is -3A compatible)
      */
-    public static final int NFC_TAG_ISO14443_A = 1; /* phNfc_eISO14443_A_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_ISO14443_4A = 2; /* phNfc_eISO14443_4A_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_ISO14443_3A = 3; /* phNfc_eISO14443_3A_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_MIFARE = 4; /* phNfc_eMifare_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_ISO14443_B = 5; /* phNfc_eISO14443_B_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_ISO14443_4B = 6; /* phNfc_eISO14443_4B_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_ISO14443_B_PRIME = 7; /* phNfc_eISO14443_BPrime_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_FELICA = 8; /* phNfc_eFelica_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_JEWEL = 9; /* phNfc_eJewel_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_ISO15693 = 10; /* phNfc_eISO15693_PICC */
-
-    /**
-     * @hide
-     */
-    public static final int NFC_TAG_OTHER = 11; /* phNfc_ePICC_DevType */
-
-
     public static final String TARGET_ISO_14443_3A = "iso14443_3a";
 
+    /**
+     * ISO 14443-3B technology.
+     */
     public static final String TARGET_ISO_14443_3B = "iso14443_3b";
 
-    public static final String TARGET_ISO_14443_3B_PRIME = "iso14443_3b";
-
+    /**
+     * ISO 14443-4 technology.
+     */
     public static final String TARGET_ISO_14443_4 = "iso14443_4";
 
+    /**
+     * ISO 15693 technology, commonly known as RFID.
+     */
     public static final String TARGET_ISO_15693 = "iso15693";
 
+    /**
+     * JIS X-6319-4 technology, commonly known as Felica.
+     */
     public static final String TARGET_JIS_X_6319_4 = "jis_x_6319_4";
 
-    public static final String TARGET_TOPAZ = "topaz";
-
+    /**
+     * Any other technology.
+     */
     public static final String TARGET_OTHER = "other";
 
-    /*package*/ final String mTypeName;
     /*package*/ final boolean mIsNdef;
-    /*package*/ final byte[] mUid;
-    /*package*/ final int mNativeHandle;
-
-    /*package*/ static final String INTERNAL_TARGET_TYPE_ISO14443_3A = "Iso14443-3A";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_ISO14443_3B = "Iso14443-3B";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_ISO14443_4 = "Iso14443-4";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_MIFARE_UL = "MifareUL";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_MIFARE_1K = "Mifare1K";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_MIFARE_4K = "Mifare4K";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_MIFARE_DESFIRE = "MifareDESFIRE";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_MIFARE_UNKNOWN = "Unknown Mifare";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_FELICA = "Felica";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_JEWEL = "Jewel";
-    /*package*/ static final String INTERNAL_TARGET_TYPE_UNKNOWN = "Unknown Type";
-
-	private static final HashMap<String, Integer> INT_TYPES_CONVERTION_TABLE = new HashMap<String, Integer>() {
-		{
-			put(Tag.INTERNAL_TARGET_TYPE_ISO14443_3A, Tag.NFC_TAG_ISO14443_A );
-			put(Tag.INTERNAL_TARGET_TYPE_ISO14443_3B, Tag.NFC_TAG_ISO14443_B );
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_UL, Tag.NFC_TAG_MIFARE );
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_1K, Tag.NFC_TAG_MIFARE );
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_4K, Tag.NFC_TAG_MIFARE );
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_DESFIRE, Tag.NFC_TAG_MIFARE );
-			put(Tag.INTERNAL_TARGET_TYPE_FELICA, Tag.NFC_TAG_FELICA );
-			put(Tag.INTERNAL_TARGET_TYPE_JEWEL, Tag.NFC_TAG_JEWEL );
-		}
-	};
-
-	private int convertToInt(String internalTypeName) {
-		Integer result = INT_TYPES_CONVERTION_TABLE.get(internalTypeName);
-		if (result == null) {
-		    return Tag.NFC_TAG_OTHER;
-		}
-		return result;
-    }
-
-	private static final HashMap<String, String[]> RAW_TYPES_CONVERTION_TABLE = new HashMap<String, String[]>() {
-		{
-			/* TODO: handle multiprotocol */
-			put(Tag.INTERNAL_TARGET_TYPE_ISO14443_3A, new String[] { Tag.TARGET_ISO_14443_3A });
-			put(Tag.INTERNAL_TARGET_TYPE_ISO14443_3B, new String[] { Tag.TARGET_ISO_14443_3B });
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_UL, new String[] { Tag.TARGET_ISO_14443_3A });
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_1K, new String[] { Tag.TARGET_ISO_14443_3A });
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_4K, new String[] { Tag.TARGET_ISO_14443_3A });
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_DESFIRE, new String[] { Tag.TARGET_ISO_14443_3A });
-			put(Tag.INTERNAL_TARGET_TYPE_MIFARE_UNKNOWN, new String[] { Tag.TARGET_ISO_14443_3A });
-			put(Tag.INTERNAL_TARGET_TYPE_FELICA, new String[] { Tag.TARGET_JIS_X_6319_4 });
-			put(Tag.INTERNAL_TARGET_TYPE_JEWEL, new String[] { Tag.TARGET_TOPAZ });
-		}
-	};
-
-	private String[] convertToRaw(String internalTypeName) {
-	    String[] result =  RAW_TYPES_CONVERTION_TABLE.get(internalTypeName);
-	    if (result == null) {
-	        return new String[] { Tag.TARGET_OTHER };
-	    }
-	    return result;
-	}
+    /*package*/ final byte[] mId;
+    /*package*/ final String[] mRawTargets;
+    /*package*/ final byte[] mPollBytes;
+    /*package*/ final byte[] mActivationBytes;
+    /*package*/ final int mServiceHandle;  // for use by NFC service, 0 indicates a mock
 
     /**
-     * Hidden constructor to be used by NFC service only.
+     * Hidden constructor to be used by NFC service and internal classes.
      * @hide
      */
-    public Tag(String typeName, boolean isNdef, byte[] uid, int nativeHandle) {
-        mTypeName = typeName;
+    public Tag(byte[] id, boolean isNdef, String[] rawTargets, byte[] pollBytes,
+            byte[] activationBytes, int serviceHandle) {
+        if (rawTargets == null) {
+            throw new IllegalArgumentException("rawTargets cannot be null");
+        }
         mIsNdef = isNdef;
-        mUid = uid.clone();
-        mNativeHandle = nativeHandle;
+        mId = id;
+        mRawTargets = rawTargets;
+        mPollBytes = pollBytes;
+        mActivationBytes = activationBytes;
+        mServiceHandle = serviceHandle;
+    }
+
+    /**
+     * Construct a mock Tag.
+     * <p>This is an application constructed tag, so NfcAdapter methods on this
+     * Tag such as {@link NfcAdapter#createRawTagConnection} will fail with
+     * {@link IllegalArgumentException} since it does not represent a physical Tag.
+     * <p>This constructor might be useful for mock testing.
+     * @param id The tag identifier, can be null
+     * @param rawTargets must not be null
+     * @param pollBytes can be null
+     * @param activationBytes can be null
+     * @return freshly constructed tag
+     */
+    public static Tag createMockTag(byte[] id, String[] rawTargets, byte[] pollBytes,
+            byte[] activationBytes) {
+        // set serviceHandle to 0 to indicate mock tag
+        return new Tag(id, false, rawTargets, pollBytes, activationBytes, 0);
     }
 
     /**
      * For use by NfcService only.
      * @hide
      */
-    public int getHandle() {
-        return mNativeHandle;
+    public int getServiceHandle() {
+        return mServiceHandle;
     }
 
     /**
      * Return the available targets that this NFC adapter can use to create
      * a RawTagConnection.
      *
-     * @return
+     * @return raw targets, will not be null
      */
     public String[] getRawTargets() {
-        return convertToRaw(mTypeName);
-    }
-
-    /**
-     * Get the Tag type.
-     * <p>
-     * The Tag type is one of the NFC_TAG constants. It is read at discovery
-     * time and this method does not cause any further RF activity and does not
-     * block.
-     *
-     * @return a NFC_TAG constant
-     * @hide
-     */
-    public int getType() {
-        return convertToInt(mTypeName);
+        return mRawTargets;
     }
 
     /**
      * Get the Tag Identifier (if it has one).
-     * <p>
-     * Tag ID is usually a serial number for the tag.
-     * <p>
-     * The Tag ID is read at discovery time and this method does not cause any
-     * further RF activity and does not block.
+     * <p>Tag ID is usually a serial number for the tag.
      *
      * @return ID, or null if it does not exist
      */
     public byte[] getId() {
-        if (mUid.length > 0) {
-            return mUid.clone();
-        } else {
-            return null;
+        return mId;
+    }
+
+    /**
+     * Get the low-level bytes returned by this Tag at poll-time.
+     * <p>These can be used to help with advanced identification of a Tag.
+     * <p>The meaning of these bytes depends on the Tag technology.
+     * <p>ISO14443-3A: ATQA/SENS_RES
+     * <p>ISO14443-3B: Application data (4 bytes) and Protocol Info (3 bytes) from ATQB/SENSB_RES
+     * <p>JIS_X_6319_4: PAD0 (2 byte), PAD1 (2 byte), MRTI(2 byte), PAD2 (1 byte), RC (2 byte)
+     * <p>ISO15693: response flags (1 byte), DSFID (1 byte)
+     * from SENSF_RES
+     *
+     * @return poll bytes, or null if they do not exist for this Tag technology
+     */
+    public byte[] getPollBytes() {
+        return mPollBytes;
+    }
+
+    /**
+     * Get the low-level bytes returned by this Tag at activation-time.
+     * <p>These can be used to help with advanced identification of a Tag.
+     * <p>The meaning of these bytes depends on the Tag technology.
+     * <p>ISO14443-3A: SAK/SEL_RES
+     * <p>ISO14443-3B: null
+     * <p>ISO14443-3A & ISO14443-4: SAK/SEL_RES, historical bytes from ATS  <TODO: confirm>
+     * <p>ISO14443-3B & ISO14443-4: ATTRIB response
+     * <p>JIS_X_6319_4: null
+     * <p>ISO15693: response flags (1 byte), DSFID (1 byte): null
+     * @return activation bytes, or null if they do not exist for this Tag technology
+     */
+    public byte[] getActivationBytes() {
+        return mActivationBytes;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("TAG ")
+            .append("uid = ")
+            .append(mId)
+            .append(" poll ")
+            .append(mPollBytes)
+            .append(" activation ")
+            .append(mActivationBytes)
+            .append(" Raw [");
+        for (String s : mRawTargets) {
+            sb.append(s)
+            .append(", ");
         }
+        return sb.toString();
+    }
+
+    /*package*/ static byte[] readBytesWithNull(Parcel in) {
+        int len = in.readInt();
+        byte[] result = null;
+        if (len > 0) {
+            result = new byte[len];
+            in.readByteArray(result);
+        }
+        return result;
+    }
+
+    /*package*/ static void writeBytesWithNull(Parcel out, byte[] b) {
+        if (b == null) {
+            out.writeInt(-1);
+            return;
+        }
+        out.writeInt(b.length);
+        out.writeByteArray(b);
     }
 
     @Override
@@ -242,29 +218,34 @@ public class Tag implements Parcelable {
         return 0;
     }
 
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        boolean[] booleans = new boolean[] {mIsNdef};
-        dest.writeString(mTypeName);
-        dest.writeBooleanArray(booleans);
-        dest.writeInt(mUid.length);
-        dest.writeByteArray(mUid);
-        dest.writeInt(mNativeHandle);
+        dest.writeInt(mIsNdef ? 1 : 0);
+        writeBytesWithNull(dest, mId);
+        dest.writeInt(mRawTargets.length);
+        dest.writeStringArray(mRawTargets);
+        writeBytesWithNull(dest, mPollBytes);
+        writeBytesWithNull(dest, mActivationBytes);
+        dest.writeInt(mServiceHandle);
     }
 
     public static final Parcelable.Creator<Tag> CREATOR =
             new Parcelable.Creator<Tag>() {
         public Tag createFromParcel(Parcel in) {
-            boolean[] booleans = new boolean[1];
-            String type = in.readString();
-            in.readBooleanArray(booleans);
-            boolean isNdef = booleans[0];
-            int uidLength = in.readInt();
-            byte[] uid = new byte[uidLength];
-            in.readByteArray(uid);
-            int nativeHandle = in.readInt();
+            boolean isNdef = (in.readInt() == 1);
+            if (isNdef) {
+                throw new IllegalArgumentException("Creating Tag from NdefTag parcel");
+            }
+            // Tag fields
+            byte[] id = Tag.readBytesWithNull(in);
+            String[] rawTargets = new String[in.readInt()];
+            in.readStringArray(rawTargets);
+            byte[] pollBytes = Tag.readBytesWithNull(in);
+            byte[] activationBytes = Tag.readBytesWithNull(in);
+            int serviceHandle = in.readInt();
 
-            return new Tag(type, isNdef, uid, nativeHandle);
+            return new Tag(id, isNdef, rawTargets, pollBytes, activationBytes, serviceHandle);
         }
         public Tag[] newArray(int size) {
             return new Tag[size];

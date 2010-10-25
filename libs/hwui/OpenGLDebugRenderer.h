@@ -38,20 +38,20 @@ public:
     void finish();
 
     int saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* p, int flags);
+            SkPaint* p, int flags);
 
-    void drawBitmap(SkBitmap* bitmap, float left, float top, const SkPaint* paint);
-    void drawBitmap(SkBitmap* bitmap, const SkMatrix* matrix, const SkPaint* paint);
+    void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
+    void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint);
+            float dstRight, float dstBottom, SkPaint* paint);
     void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
             const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
-            float left, float top, float right, float bottom, const SkPaint* paint);
+            float left, float top, float right, float bottom, SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
-    void drawRect(float left, float top, float right, float bottom, const SkPaint* paint);
+    void drawRect(float left, float top, float right, float bottom, SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
-    void drawLines(float* points, int count, const SkPaint* paint);
+    void drawLines(float* points, int count, SkPaint* paint);
     void drawText(const char* text, int bytesCount, int count, float x, float y,
             SkPaint* paint);
 

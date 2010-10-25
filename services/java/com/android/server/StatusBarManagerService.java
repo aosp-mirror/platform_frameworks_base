@@ -54,7 +54,7 @@ import java.util.Map;
 public class StatusBarManagerService extends IStatusBarService.Stub
 {
     static final String TAG = "StatusBarManagerService";
-    static final boolean SPEW = true;
+    static final boolean SPEW = false;
 
     final Context mContext;
     Handler mHandler = new Handler();
@@ -111,22 +111,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     // ================================================================================
-    // Constructing the view
-    // ================================================================================
-
-    public void systemReady() {
-    }
-
-    public void systemReady2() {
-        ComponentName cn = ComponentName.unflattenFromString(
-                mContext.getString(com.android.internal.R.string.config_statusBarComponent));
-        Intent intent = new Intent();
-        intent.setComponent(cn);
-        Slog.i(TAG, "Starting service: " + cn);
-        mContext.startService(intent);
-    }
-
-    // ================================================================================
     // From IStatusBarService
     // ================================================================================
     public void expand() {
@@ -161,7 +145,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         synchronized (mDisableRecords) {
             manageDisableListLocked(what, token, pkg);
             final int net = gatherDisableActionsLocked();
-            Slog.d(TAG, "disable... net=0x" + Integer.toHexString(net));
             if (net != mDisabled) {
                 mDisabled = net;
                 mHandler.post(new Runnable() {

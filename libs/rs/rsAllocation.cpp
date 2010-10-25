@@ -57,8 +57,6 @@ Allocation::Allocation(Context *rsc, const Type *type, void *bmp,
 
 void Allocation::init(Context *rsc, const Type *type)
 {
-    mAllocFile = __FILE__;
-    mAllocLine = __LINE__;
     mPtr = NULL;
 
     mCpuWrite = false;
@@ -478,7 +476,7 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream)
     uint32_t dataSize = stream->loadU32();
     if(dataSize != type->getSizeBytes()) {
         LOGE("failed to read allocation because numbytes written is not the same loaded type wants\n");
-        delete type;
+        ObjectBase::checkDelete(type);
         return NULL;
     }
 

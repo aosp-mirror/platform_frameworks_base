@@ -39,12 +39,6 @@ abstract class DisplayList {
     abstract void end();
 
     /**
-     * Frees resources taken by this display list. This method must be called
-     * before releasing all references.
-     */
-    abstract void destroy();
-
-    /**
      * Indicates whether this display list can be replayed or not.
      * 
      * @return True if the display list can be replayed, false otherwise.

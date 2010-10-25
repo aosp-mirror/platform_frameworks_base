@@ -2500,7 +2500,9 @@ class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        Log.d(TAG, "Scanning app dir " + dir);
+        if (false) {
+            Log.d(TAG, "Scanning app dir " + dir);
+        }
 
         int i;
         for (i=0; i<files.length; i++) {
@@ -2866,10 +2868,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 TAG, "Scanning package " + pkg.packageName);
         if (mPackages.containsKey(pkg.packageName)
                 || mSharedLibraries.containsKey(pkg.packageName)) {
-            Slog.w(TAG, "*************************************************");
             Slog.w(TAG, "Application package " + pkg.packageName
                     + " already installed.  Skipping duplicate.");
-            Slog.w(TAG, "*************************************************");
             mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
             return null;
         }
@@ -7166,7 +7166,9 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    resourcePath="); pw.println(ps.resourcePathString);
                     pw.print("    nativeLibraryPath="); pw.println(ps.nativeLibraryPathString);
                     pw.print("    obbPath="); pw.println(ps.obbPathString);
+                    pw.print("    versionCode="); pw.println(ps.versionCode);
                     if (ps.pkg != null) {
+                        pw.print("    versionName="); pw.println(ps.pkg.mVersionName);
                         pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
                         pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
                         if (ps.pkg.mOperationPending) {
@@ -7224,8 +7226,6 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    pkgFlags=0x"); pw.print(Integer.toHexString(ps.pkgFlags));
                             pw.print(" installStatus="); pw.print(ps.installStatus);
                             pw.print(" enabled="); pw.println(ps.enabled);
-                    pw.print("    versionCode="); pw.print(ps.versionCode);
-                            pw.print(" versionName="); pw.println(ps.pkg.mVersionName);
                     if (ps.disabledComponents.size() > 0) {
                         pw.println("    disabledComponents:");
                         for (String s : ps.disabledComponents) {
