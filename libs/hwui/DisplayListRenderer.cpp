@@ -108,23 +108,22 @@ DisplayList::DisplayList(const DisplayListRenderer& recorder) {
         mBitmapResources.add(resource);
         caches.resourceCache.incrementRefcount(resource);
     }
-    const Vector<SkMatrix*> &matrixResources = recorder.getMatrixResources();
-    for (size_t i = 0; i < matrixResources.size(); i++) {
-        SkMatrix* resource = matrixResources.itemAt(i);
-        mMatrixResources.add(resource);
-        caches.resourceCache.incrementRefcount(resource);
-    }
-    const Vector<SkPaint*> &paintResources = recorder.getPaintResources();
-    for (size_t i = 0; i < paintResources.size(); i++) {
-        SkPaint* resource = paintResources.itemAt(i);
-        mPaintResources.add(resource);
-        caches.resourceCache.incrementRefcount(resource);
-    }
+
     const Vector<SkiaShader*> &shaderResources = recorder.getShaderResources();
     for (size_t i = 0; i < shaderResources.size(); i++) {
         SkiaShader* resource = shaderResources.itemAt(i);
         mShaderResources.add(resource);
         caches.resourceCache.incrementRefcount(resource);
+    }
+
+    const Vector<SkPaint*> &paints = recorder.getPaints();
+    for (size_t i = 0; i < paints.size(); i++) {
+        mPaints.add(paints.itemAt(i));
+    }
+
+    const Vector<SkMatrix*> &matrices = recorder.getMatrices();
+    for (size_t i = 0; i < matrices.size(); i++) {
+        mMatrices.add(matrices.itemAt(i));
     }
 
     mPathHeap = recorder.mPathHeap;
@@ -137,25 +136,25 @@ DisplayList::~DisplayList() {
     Caches& caches = Caches::getInstance();
 
     for (size_t i = 0; i < mBitmapResources.size(); i++) {
-        SkBitmap* resource = mBitmapResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(resource);
+        caches.resourceCache.decrementRefcount(mBitmapResources.itemAt(i));
     }
     mBitmapResources.clear();
-    for (size_t i = 0; i < mMatrixResources.size(); i++) {
-        SkMatrix* resource = mMatrixResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(resource);
-    }
-    mMatrixResources.clear();
-    for (size_t i = 0; i < mPaintResources.size(); i++) {
-        SkPaint* resource = mPaintResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(resource);
-    }
-    mPaintResources.clear();
+
     for (size_t i = 0; i < mShaderResources.size(); i++) {
-        SkiaShader* resource = mShaderResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(resource);
+        caches.resourceCache.decrementRefcount(mShaderResources.itemAt(i));
     }
     mShaderResources.clear();
+
+    for (size_t i = 0; i < mPaints.size(); i++) {
+        delete mPaints.itemAt(i);
+    }
+    mPaints.clear();
+
+    for (size_t i = 0; i < mMatrices.size(); i++) {
+        delete  mMatrices.itemAt(i);
+    }
+    mMatrices.clear();
+
     mPathHeap->safeUnref();
 }
 
@@ -335,21 +334,16 @@ void DisplayListRenderer::reset() {
         caches.resourceCache.decrementRefcount(resource);
     }
     mBitmapResources.clear();
-    for (size_t i = 0; i < mMatrixResources.size(); i++) {
-        SkMatrix* resource = mMatrixResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(resource);
-    }
-    mMatrixResources.clear();
-    for (size_t i = 0; i < mPaintResources.size(); i++) {
-        SkPaint* resource = mPaintResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(resource);
-    }
-    mPaintResources.clear();
+
     for (size_t i = 0; i < mShaderResources.size(); i++) {
         SkiaShader* resource = mShaderResources.itemAt(i);
         caches.resourceCache.decrementRefcount(resource);
     }
     mShaderResources.clear();
+
+    mPaints.clear();
+    mPaintMap.clear();
+    mMatrices.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

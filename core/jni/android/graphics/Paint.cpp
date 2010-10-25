@@ -63,12 +63,6 @@ public:
     };
 
     static void finalizer(JNIEnv* env, jobject clazz, SkPaint* obj) {
-#ifdef USE_OPENGL_RENDERER
-        if (android::uirenderer::Caches::hasInstance()) {
-            android::uirenderer::Caches::getInstance().resourceCache.destructor(obj);
-            return;
-        }
-#endif // USE_OPENGL_RENDERER
         delete obj;
     }
 
