@@ -626,7 +626,8 @@ static int mainWorkCallback(int fd, int events, void* data) {
 // ------------------------------------------------------------------------
 
 static jint
-loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQueue,
+loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName,
+        jobject messageQueue,
         jstring internalDataDir, jstring externalDataDir, int sdkVersion,
         jobject jAssetMgr, jbyteArray savedState)
 {
@@ -640,8 +641,11 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jobject messageQ
     env->ReleaseStringUTFChars(path, pathStr);
     
     if (handle != NULL) {
+        const char* funcStr = env->GetStringUTFChars(funcName, NULL);
         code = new NativeCode(handle, (ANativeActivity_createFunc*)
-                dlsym(handle, "ANativeActivity_onCreate"));
+                dlsym(handle, funcStr));
+        env->ReleaseStringUTFChars(funcName, funcStr);
+        
         if (code->createActivityFunc == NULL) {
             LOGW("ANativeActivity_onCreate not found");
             delete code;
@@ -999,7 +1003,7 @@ finishPreDispatchKeyEvent_native(JNIEnv* env, jobject clazz, jint handle,
 }
 
 static const JNINativeMethod g_methods[] = {
-    { "loadNativeCode", "(Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[B)I",
+    { "loadNativeCode", "(Ljava/lang/String;Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[B)I",
             (void*)loadNativeCode_native },
     { "unloadNativeCode", "(I)V", (void*)unloadNativeCode_native },
     { "onStartNative", "(I)V", (void*)onStart_native },
