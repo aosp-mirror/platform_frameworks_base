@@ -90,6 +90,7 @@
         <item name="buttonStyleToggle">@android:style/Widget.Button.Toggle</item>
 
         <item name="groupButtonBackground">@null</item>
+        <item name="selectableItemBackground">@android:drawable/item_background</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
@@ -569,7 +570,7 @@
     <style name="Theme.IconMenu">
         <!-- Menu/item attributes -->
         <item name="android:itemTextAppearance">@android:style/TextAppearance.Widget.IconMenu.Item</item>
-        <item name="android:itemBackground">@android:drawable/menu_selector</item>
+        <item name="android:selectableItemBackground">@android:drawable/menu_selector</item>
         <item name="android:itemIconDisabledAlpha">?android:attr/disabledAlpha</item>
         <item name="android:horizontalDivider">@android:drawable/divider_horizontal_dark</item>
         <item name="android:verticalDivider">@android:drawable/divider_vertical_dark</item>
@@ -638,7 +639,7 @@
         <item name="colorForeground">@android:color/bright_foreground_holo_dark</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_inverse_holo_dark</item>
         <item name="colorBackground">@android:color/background_holo_dark</item>
-        <item name="colorBackgroundCacheHint">?android:attr/colorBackground</item>
+        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -698,6 +699,7 @@
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Button.Toggle</item>
 
         <item name="groupButtonBackground">@android:drawable/group_button_background_holo_dark</item>
+        <item name="selectableItemBackground">@android:drawable/item_background_holo_dark</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
@@ -730,7 +732,7 @@
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
         
         <!-- Window attributes -->
-        <item name="windowBackground">@android:drawable/screen_background_holo_dark</item>
+        <item name="windowBackground">@android:drawable/background_holo_dark</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
@@ -871,7 +873,7 @@
         <item name="colorForeground">@android:color/bright_foreground_holo_light</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_inverse_holo_light</item>
         <item name="colorBackground">@android:color/background_holo_light</item>
-        <item name="colorBackgroundCacheHint">?android:attr/colorBackground</item>
+        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -931,6 +933,7 @@
         <item name="buttonStyleToggle">@android:style/Widget.Holo.Light.Button.Toggle</item>
 
         <item name="groupButtonBackground">@android:drawable/group_button_background_holo_light</item>
+        <item name="selectableItemBackground">@android:drawable/item_background_holo_light</item>
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
@@ -963,7 +966,7 @@
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
         
         <!-- Window attributes -->
-        <item name="windowBackground">@android:drawable/screen_background_holo_light</item>
+        <item name="windowBackground">@android:drawable/background_holo_light</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
@@ -1146,6 +1149,8 @@
         <item name="android:windowActionModeOverlay">true</item>
 
         <item name="android:colorBackgroundCacheHint">@null</item>
+
+        <item name="android:groupButtonBackground">?android:attr/selectableItemBackground</item>
         
         <item name="textAppearance">@android:style/TextAppearance.Holo</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
@@ -1195,6 +1200,8 @@
         <item name="android:windowActionBar">false</item>
 
         <item name="android:colorBackgroundCacheHint">@null</item>
+
+        <item name="android:groupButtonBackground">?android:attr/selectableItemBackground</item>
 
         <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
