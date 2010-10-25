@@ -197,7 +197,7 @@ public class Tag implements Parcelable {
     /*package*/ static byte[] readBytesWithNull(Parcel in) {
         int len = in.readInt();
         byte[] result = null;
-        if (len > 0) {
+        if (len >= 0) {
             result = new byte[len];
             in.readByteArray(result);
         }
