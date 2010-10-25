@@ -79,7 +79,12 @@ public class StackView extends AdapterViewAnimator {
      * Specifies how far you need to swipe (up or down) before it
      * will be consider a completed gesture when you lift your finger
      */
-    private static final float SWIPE_THRESHOLD_RATIO = 0.35f;
+    private static final float SWIPE_THRESHOLD_RATIO = 0.2f;
+
+    /**
+     * Specifies the total distance, relative to the size of the stack,
+     * that views will be slid, either up or down
+     */
     private static final float SLIDE_UP_RATIO = 0.7f;
 
     /**
