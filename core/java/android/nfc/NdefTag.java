@@ -205,6 +205,7 @@ public class NdefTag extends Tag implements Parcelable {
         dest.writeStringArray(mNdefTargets);
         dest.writeInt(mMessages.length);
         for (NdefMessage[] ms : mMessages) {
+            dest.writeInt(ms.length);
             dest.writeTypedArray(ms, flags);
         }
     }
