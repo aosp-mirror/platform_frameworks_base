@@ -151,7 +151,7 @@ public abstract class PreferenceFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(com.android.internal.R.layout.preference_list_content,
+        return inflater.inflate(com.android.internal.R.layout.preference_list_fragment,
                 container, false);
     }
 

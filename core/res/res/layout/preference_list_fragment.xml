@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/assets/res/layout/list_content.xml
-**
-** Copyright 2006, The Android Open Source Project
+/* 
+** Copyright 2010, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -24,51 +23,13 @@
     android:layout_width="match_parent"
     android:background="@android:color/transparent">
 
-    <LinearLayout
-        android:orientation="horizontal"
+    <ListView android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_weight="1">
-
-        <LinearLayout
-            android:id="@+id/headers"
-            android:orientation="vertical"
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="32dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="32dp"
-            android:layout_weight="10">
-
-            <ListView android:id="@android:id/list"
-                android:layout_width="match_parent"
-                android:layout_height="0px"
-                android:layout_weight="1"
-                android:drawSelectorOnTop="false"
-                android:background="#40404040"
-                android:cacheColorHint="@android:color/transparent"
-                android:listPreferredItemHeight="48dp"
-                android:scrollbarAlwaysDrawVerticalTrack="true" />
-
-            <FrameLayout android:id="@+id/list_footer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0" />
-
-        </LinearLayout>
-
-        <FrameLayout android:id="@+id/prefs"
-                android:layout_width="0px"
-                android:layout_height="match_parent"
-                android:layout_weight="25"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:background="#60202040"
-                android:visibility="gone" />
-    </LinearLayout>
+        android:layout_weight="1"
+        android:drawSelectorOnTop="false"
+        android:cacheColorHint="@android:color/transparent"
+        android:scrollbarAlwaysDrawVerticalTrack="true" />
 
     <RelativeLayout android:id="@+id/button_bar"
         android:layout_height="wrap_content"
