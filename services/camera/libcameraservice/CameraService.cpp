@@ -153,7 +153,7 @@ sp<ICamera> CameraService::connect(
     CameraInfo info;
     HAL_getCameraInfo(cameraId, &info);
     client = new Client(this, cameraClient, hardware, cameraId, info.facing,
-                        info.orientation, callingPid);
+                        callingPid);
     mClient[cameraId] = client;
     LOG1("CameraService::connect X");
     return client;
@@ -295,7 +295,7 @@ void CameraService::playSound(sound_kind kind) {
 CameraService::Client::Client(const sp<CameraService>& cameraService,
         const sp<ICameraClient>& cameraClient,
         const sp<CameraHardwareInterface>& hardware,
-        int cameraId, int cameraFacing, int cameraOrientation, int clientPid) {
+        int cameraId, int cameraFacing, int clientPid) {
     int callingPid = getCallingPid();
     LOG1("Client::Client E (pid %d)", callingPid);
 
@@ -304,7 +304,6 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mHardware = hardware;
     mCameraId = cameraId;
     mCameraFacing = cameraFacing;
-    mCameraOrientation = cameraOrientation;
     mClientPid = clientPid;
     mUseOverlay = mHardware->useOverlay();
     mMsgEnabled = 0;
@@ -1203,18 +1202,15 @@ int CameraService::Client::getOrientation(int degrees, bool mirror) {
         else if (degrees == 90) return HAL_TRANSFORM_ROT_90;
         else if (degrees == 180) return HAL_TRANSFORM_ROT_180;
         else if (degrees == 270) return HAL_TRANSFORM_ROT_270;
-    } else {  // mirror (horizontal flip)
-        // Now overlay does ROT_90 before FLIP_V or FLIP_H. It should be FLIP_V
-        // or FLIP_H first.
-        // TODO: change this after overlay is fixed.
+    } else {  // Do mirror (horizontal flip)
         if (degrees == 0) {           // FLIP_H and ROT_0
             return HAL_TRANSFORM_FLIP_H;
         } else if (degrees == 90) {   // FLIP_H and ROT_90
-            return HAL_TRANSFORM_ROT_90 | HAL_TRANSFORM_FLIP_V;
+            return HAL_TRANSFORM_FLIP_H | HAL_TRANSFORM_ROT_90;
         } else if (degrees == 180) {  // FLIP_H and ROT_180
             return HAL_TRANSFORM_FLIP_V;
         } else if (degrees == 270) {  // FLIP_H and ROT_270
-            return HAL_TRANSFORM_ROT_90 | HAL_TRANSFORM_FLIP_H;
+            return HAL_TRANSFORM_FLIP_V | HAL_TRANSFORM_ROT_90;
         }
     }
     LOGE("Invalid setDisplayOrientation degrees=%d", degrees);

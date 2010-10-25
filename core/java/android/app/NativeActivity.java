@@ -5,7 +5,6 @@ import com.android.internal.view.IInputMethodSession;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
@@ -48,9 +47,22 @@ import java.lang.ref.WeakReference;
  */
 public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         InputQueue.Callback, OnGlobalLayoutListener {
+    /**
+     * Optional meta-that can be in the manifest for this component, specifying
+     * the name of the native shared library to load.  If not specified,
+     * "main" is used.
+     */
     public static final String META_DATA_LIB_NAME = "android.app.lib_name";
     
-    public static final String KEY_NATIVE_SAVED_STATE = "android:native_state";
+    /**
+     * Optional meta-that can be in the manifest for this component, specifying
+     * the name of the main entry point for this native activity in the
+     * {@link #META_DATA_LIB_NAME} native code.  If not specified,
+     * "ANativeActivity_onCreate" is used.
+     */
+    public static final String META_DATA_FUNC_NAME = "android.app.func_name";
+    
+    private static final String KEY_NATIVE_SAVED_STATE = "android:native_state";
 
     private NativeContentView mNativeContentView;
     private InputMethodManager mIMM;
@@ -71,7 +83,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
 
     private boolean mDestroyed;
     
-    private native int loadNativeCode(String path, MessageQueue queue,
+    private native int loadNativeCode(String path, String funcname, MessageQueue queue,
             String internalDataPath, String externalDataPath, int sdkVersion,
             AssetManager assetMgr, byte[] savedState);
     private native void unloadNativeCode(int handle);
@@ -131,6 +143,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         String libname = "main";
+        String funcname = "ANativeActivity_onCreate";
         ActivityInfo ai;
         
         mIMM = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -155,6 +168,8 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
             if (ai.metaData != null) {
                 String ln = ai.metaData.getString(META_DATA_LIB_NAME);
                 if (ln != null) libname = ln;
+                ln = ai.metaData.getString(META_DATA_FUNC_NAME);
+                if (ln != null) funcname = ln;
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException("Error getting activity info", e);
@@ -175,7 +190,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         byte[] nativeSavedState = savedInstanceState != null
                 ? savedInstanceState.getByteArray(KEY_NATIVE_SAVED_STATE) : null;
 
-        mNativeHandle = loadNativeCode(path, Looper.myQueue(),
+        mNativeHandle = loadNativeCode(path, funcname, Looper.myQueue(),
                  getFilesDir().toString(),
                  Environment.getExternalStorageAppFilesDirectory(ai.packageName).toString(),
                  Build.VERSION.SDK_INT, getAssets(), nativeSavedState);
