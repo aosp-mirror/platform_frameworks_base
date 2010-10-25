@@ -309,6 +309,8 @@ class BluetoothEventLoop {
             // Note: bluez only sends this property change when it restarts.
             if (propValues[1].equals("true"))
                 onRestartRequired();
+        } else if (name.equals("DiscoverableTimeout")) {
+            mBluetoothService.setProperty(name, propValues[1]);
         }
     }
 
