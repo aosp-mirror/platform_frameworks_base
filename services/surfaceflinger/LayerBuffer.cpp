@@ -132,6 +132,14 @@ void LayerBuffer::unlockPageFlip(const Transform& planeTransform,
     LayerBase::unlockPageFlip(planeTransform, outDirtyRegion);    
 }
 
+void LayerBuffer::validateVisibility(const Transform& globalTransform)
+{
+    sp<Source> source(getSource());
+    if (source != 0)
+        source->onvalidateVisibility(globalTransform);
+    LayerBase::validateVisibility(globalTransform);
+}
+
 void LayerBuffer::drawForSreenShot() const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
@@ -639,6 +647,11 @@ void LayerBuffer::OverlaySource::onTransaction(uint32_t flags)
     if (temp.sequence != front.sequence) {
         mVisibilityChanged = true;
     }
+}
+
+void LayerBuffer::OverlaySource::onvalidateVisibility(const Transform&)
+{
+    mVisibilityChanged = true;
 }
 
 void LayerBuffer::OverlaySource::onVisibilityResolved(
