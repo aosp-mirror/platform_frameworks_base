@@ -1391,16 +1391,19 @@ void OpenGLRenderer::bindTexture(GLuint texture, GLuint textureUnit) {
 
 void OpenGLRenderer::setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT,
         GLuint textureUnit) {
-    glActiveTexture(gTextureUnits[textureUnit]);
     bool bound = false;
     if (wrapS != texture->wrapS) {
+        glActiveTexture(gTextureUnits[textureUnit]);
         glBindTexture(GL_TEXTURE_2D, texture->id);
         bound = true;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
         texture->wrapS = wrapS;
     }
     if (wrapT != texture->wrapT) {
-        if (!bound) glBindTexture(GL_TEXTURE_2D, texture->id);
+        if (!bound) {
+            glActiveTexture(gTextureUnits[textureUnit]);
+            glBindTexture(GL_TEXTURE_2D, texture->id);
+        }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
         texture->wrapT = wrapT;
     }
