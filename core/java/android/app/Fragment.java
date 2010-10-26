@@ -403,7 +403,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     View mView;
     
     LoaderManagerImpl mLoaderManager;
-    boolean mStarted;
+    boolean mLoadersStarted;
     boolean mCheckedForLoaderManager;
     
     /**
@@ -728,7 +728,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
             return mLoaderManager;
         }
         mCheckedForLoaderManager = true;
-        mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted, true);
+        mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, true);
         return mLoaderManager;
     }
     
@@ -880,13 +880,16 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     public void onStart() {
         mCalled = true;
-        mStarted = true;
-        if (!mCheckedForLoaderManager) {
-            mCheckedForLoaderManager = true;
-            mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted, false);
-        }
-        if (mLoaderManager != null) {
-            mLoaderManager.doStart();
+        
+        if (!mLoadersStarted) {
+            mLoadersStarted = true;
+            if (!mCheckedForLoaderManager) {
+                mCheckedForLoaderManager = true;
+                mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, false);
+            }
+            if (mLoaderManager != null) {
+                mLoaderManager.doStart();
+            }
         }
     }
     
@@ -971,7 +974,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         //        + " mLoaderManager=" + mLoaderManager);
         if (!mCheckedForLoaderManager) {
             mCheckedForLoaderManager = true;
-            mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted, false);
+            mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, false);
         }
         if (mLoaderManager != null) {
             mLoaderManager.doDestroy();
@@ -1182,7 +1185,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         }
         if (mLoaderManager != null) {
             writer.print(prefix); writer.print("mLoaderManager="); writer.print(mLoaderManager);
-                    writer.print(" mStarted="); writer.print(mStarted);
+                    writer.print(" mLoadersStarted="); writer.print(mLoadersStarted);
                     writer.print(" mCheckedForLoaderManager=");
                     writer.println(mCheckedForLoaderManager);
         }
@@ -1190,11 +1193,12 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
 
     void performStop() {
         onStop();
-        if (mStarted) {
-            mStarted = false;
+        
+        if (mLoadersStarted) {
+            mLoadersStarted = false;
             if (!mCheckedForLoaderManager) {
                 mCheckedForLoaderManager = true;
-                mLoaderManager = mActivity.getLoaderManager(mIndex, mStarted, false);
+                mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, false);
             }
             if (mLoaderManager != null) {
                 if (mActivity == null || !mActivity.mChangingConfigurations) {
