@@ -380,7 +380,7 @@ public final class CallManager {
                 break;
             case OFFHOOK:
                 Phone fgPhone = getFgPhone();
-                if (!(fgPhone instanceof SipPhone)) {
+                if (hasActiveFgCall() && !(fgPhone instanceof SipPhone)) {
                     mode = AudioManager.MODE_IN_CALL;
                 }
                 break;
