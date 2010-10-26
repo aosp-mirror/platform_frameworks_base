@@ -182,9 +182,10 @@ private:
     PathHeap* mPathHeap;
 
     Vector<SkBitmap*> mBitmapResources;
-    Vector<SkMatrix*> mMatrixResources;
-    Vector<SkPaint*> mPaintResources;
     Vector<SkiaShader*> mShaderResources;
+
+    Vector<SkPaint*> mPaints;
+    Vector<SkMatrix*> mMatrices;
 
     mutable SkFlattenableReadBuffer mReader;
 
@@ -263,16 +264,16 @@ public:
         return mBitmapResources;
     }
 
-    const Vector<SkMatrix*>& getMatrixResources() const {
-        return mMatrixResources;
-    }
-
-    const Vector<SkPaint*>& getPaintResources() const {
-        return mPaintResources;
-    }
-
     const Vector<SkiaShader*>& getShaderResources() const {
         return mShaderResources;
+    }
+
+    const Vector<SkPaint*>& getPaints() const {
+        return mPaints;
+    }
+
+    const Vector<SkMatrix*>& getMatrices() const {
+        return mMatrices;
     }
 
 private:
@@ -334,20 +335,30 @@ private:
     }
 
     inline void addPaint(SkPaint* paint) {
-        addInt((int)paint);
-        mPaintResources.add(paint);
-        Caches& caches = Caches::getInstance();
-        caches.resourceCache.incrementRefcount(paint);
+        if (paint == NULL) {
+            addInt((int)NULL);
+            return;
+        }
+        SkPaint *paintCopy =  mPaintMap.valueFor(paint);
+        if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
+            paintCopy = new SkPaint(*paint);
+            mPaintMap.add(paint, paintCopy);
+            mPaints.add(paintCopy);
+        }
+        addInt((int)paintCopy);
     }
 
     inline void addMatrix(SkMatrix* matrix) {
-        addInt((int)matrix);
-        mMatrixResources.add(matrix);
-        Caches& caches = Caches::getInstance();
-        caches.resourceCache.incrementRefcount(matrix);
+        // Copying the matrix is cheap and prevents against the user changing the original
+        // matrix before the operation that uses it
+        addInt((int) new SkMatrix(*matrix));
     }
 
     inline void addBitmap(SkBitmap* bitmap) {
+        // Note that this assumes the bitmap is immutable. There are cases this won't handle
+        // correctly, such as creating the bitmap from scratch, drawing with it, changing its
+        // contents, and drawing again. The only fix would be to always copy it the first time,
+        // which doesn't seem worth the extra cycles for this unlikely case.
         addInt((int)bitmap);
         mBitmapResources.add(bitmap);
         Caches& caches = Caches::getInstance();
@@ -364,9 +375,11 @@ private:
     SkChunkAlloc mHeap;
 
     Vector<SkBitmap*> mBitmapResources;
-    Vector<SkMatrix*> mMatrixResources;
-    Vector<SkPaint*> mPaintResources;
     Vector<SkiaShader*> mShaderResources;
+
+    Vector<SkPaint*> mPaints;
+    DefaultKeyedVector<SkPaint *, SkPaint *> mPaintMap;
+    Vector<SkMatrix*> mMatrices;
 
     PathHeap* mPathHeap;
     SkWriter32 mWriter;
