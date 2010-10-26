@@ -112,7 +112,12 @@ status_t VorbisDecoder::start(MetaData *params) {
 
     mAnchorTimeUs = 0;
     mNumFramesOutput = 0;
-    mNumFramesLeftOnPage = 0;
+
+    // If the source never limits the number of valid frames contained
+    // in the input data, we'll assume that all of the decoded frames are
+    // valid.
+    mNumFramesLeftOnPage = -1;
+
     mStarted = true;
 
     return OK;
@@ -193,12 +198,14 @@ int VorbisDecoder::decodePacket(MediaBuffer *packet, MediaBuffer *out) {
         }
     }
 
-    if (numFrames > mNumFramesLeftOnPage) {
-        LOGV("discarding %d frames at end of page",
-             numFrames - mNumFramesLeftOnPage);
-        numFrames = mNumFramesLeftOnPage;
+    if (mNumFramesLeftOnPage >= 0) {
+        if (numFrames > mNumFramesLeftOnPage) {
+            LOGV("discarding %d frames at end of page",
+                 numFrames - mNumFramesLeftOnPage);
+            numFrames = mNumFramesLeftOnPage;
+        }
+        mNumFramesLeftOnPage -= numFrames;
     }
-    mNumFramesLeftOnPage -= numFrames;
 
     out->set_range(0, numFrames * sizeof(int16_t) * mNumChannels);
 
@@ -241,6 +248,7 @@ status_t VorbisDecoder::read(
     int32_t numPageSamples;
     if (inputBuffer->meta_data()->findInt32(
                 kKeyValidSamples, &numPageSamples)) {
+        CHECK(numPageSamples >= 0);
         mNumFramesLeftOnPage = numPageSamples;
     }
 
