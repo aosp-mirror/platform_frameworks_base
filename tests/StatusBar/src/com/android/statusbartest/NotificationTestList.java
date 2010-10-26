@@ -44,6 +44,20 @@ public class NotificationTestList extends TestActivity
     long mActivityCreateTime = System.currentTimeMillis();
     long mChronometerBase = 0;
 
+    final int[] kNumberedIconResIDs = {
+        R.drawable.notification0,
+        R.drawable.notification1,
+        R.drawable.notification2,
+        R.drawable.notification3,
+        R.drawable.notification4,
+        R.drawable.notification5,
+        R.drawable.notification6,
+        R.drawable.notification7,
+        R.drawable.notification8,
+        R.drawable.notification9
+    };
+    final int kUnnumberedIconResID = R.drawable.notificationx;
+
     @Override
     protected String tag() {
         return TAG;
@@ -708,7 +722,8 @@ public class NotificationTestList extends TestActivity
         new Test("Ten Notifications") {
             public void run() {
                 for (int i = 0; i < 2; i++) {
-                    Notification n = new Notification(NotificationTestList.this, R.drawable.icon2,
+                    Notification n = new Notification(NotificationTestList.this,
+                            kNumberedIconResIDs[i],
                             null, System.currentTimeMillis(), "Persistent #" + i,
                             "Notify me!!!" + i, null);
                     n.flags |= Notification.FLAG_ONGOING_EVENT;
@@ -716,7 +731,8 @@ public class NotificationTestList extends TestActivity
                     mNM.notify((i+1)*10, n);
                 }
                 for (int i = 2; i < 10; i++) {
-                    Notification n = new Notification(NotificationTestList.this, R.drawable.icon2,
+                    Notification n = new Notification(NotificationTestList.this,
+                            kNumberedIconResIDs[i],
                             null, System.currentTimeMillis(), "Persistent #" + i,
                             "Notify me!!!" + i, null);
                     n.number = i;
@@ -730,6 +746,13 @@ public class NotificationTestList extends TestActivity
                 for (int i = 1; i < 9; i++) {
                     mNM.cancel((i+1)*10);
                 }
+            }
+        },
+        
+        new Test("Cancel the other two notifications") {
+            public void run() {
+                mNM.cancel(10);
+                mNM.cancel(100);
             }
         },
         
@@ -776,8 +799,14 @@ public class NotificationTestList extends TestActivity
     };
 
     private Notification notificationWithNumbers(int num) {
-        Notification n = new Notification(this, R.drawable.icon2, null, System.currentTimeMillis(),
-                "Persistent #2", "Notify me!!!", null);
+        Notification n = new Notification(this,
+                (num >= 0 && num < kNumberedIconResIDs.length)
+                    ? kNumberedIconResIDs[num]
+                    : kUnnumberedIconResID,
+                null,
+                System.currentTimeMillis(),
+                "Notification", "Number=" + num,
+                null);
         n.number = num;
         return n;
     }
