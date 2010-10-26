@@ -18,11 +18,11 @@ package com.android.internal.app;
 
 import com.android.internal.R;
 
-import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.ListFragment;
 import android.app.backup.BackupManager;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -45,23 +45,25 @@ public class LocalePicker extends ListFragment {
         public void onLocaleSelected(Locale locale);
     }
 
-    Loc[] mLocales;
-    String[] mSpecialLocaleCodes;
-    String[] mSpecialLocaleNames;
-
-    private Locale mNewLocale;
-
     LocaleSelectionListener mListener;  // default to null
 
-    private static class Loc implements Comparable<Loc> {
-        static Collator sCollator = Collator.getInstance();
+    public static class LocaleInfo implements Comparable<LocaleInfo> {
+        static final Collator sCollator = Collator.getInstance();
 
         String label;
         Locale locale;
 
-        public Loc(String label, Locale locale) {
+        public LocaleInfo(String label, Locale locale) {
             this.label = label;
             this.locale = locale;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public Locale getLocale() {
+            return locale;
         }
 
         @Override
@@ -70,36 +72,38 @@ public class LocalePicker extends ListFragment {
         }
 
         @Override
-        public int compareTo(Loc another) {
+        public int compareTo(LocaleInfo another) {
             return sCollator.compare(this.label, another.label);
         }
     }
 
-    private void setUpLocaleList() {
-        final Activity activity = getActivity();
-        final Resources resources = activity.getResources();
-        mSpecialLocaleCodes = resources.getStringArray(R.array.special_locale_codes);
-        mSpecialLocaleNames = resources.getStringArray(R.array.special_locale_names);
-
-        final String[] locales = activity.getAssets().getLocales();
+    /**
+     * Constructs an Adapter object containing Locale information. Content is sorted by
+     * {@link LocaleInfo#label}.
+     */
+    public static ArrayAdapter<LocaleInfo> constructAdapter(Context context) {
+        final Resources resources = context.getResources();
+        final String[] locales = context.getAssets().getLocales();
+        final String[] specialLocaleCodes = resources.getStringArray(R.array.special_locale_codes);
+        final String[] specialLocaleNames = resources.getStringArray(R.array.special_locale_names);
         Arrays.sort(locales);
         final int origSize = locales.length;
-        Loc[] preprocess = new Loc[origSize];
+        final LocaleInfo[] preprocess = new LocaleInfo[origSize];
         int finalSize = 0;
         for (int i = 0 ; i < origSize; i++ ) {
-            String s = locales[i];
-            int len = s.length();
+            final String s = locales[i];
+            final int len = s.length();
             if (len == 5) {
                 String language = s.substring(0, 2);
                 String country = s.substring(3, 5);
-                Locale l = new Locale(language, country);
+                final Locale l = new Locale(language, country);
 
                 if (finalSize == 0) {
                     if (DEBUG) {
                         Log.v(TAG, "adding initial "+ toTitleCase(l.getDisplayLanguage(l)));
                     }
                     preprocess[finalSize++] =
-                            new Loc(toTitleCase(l.getDisplayLanguage(l)), l);
+                            new LocaleInfo(toTitleCase(l.getDisplayLanguage(l)), l);
                 } else {
                     // check previous entry:
                     //  same lang and a country -> upgrade to full name and
@@ -110,15 +114,20 @@ public class LocalePicker extends ListFragment {
                         if (DEBUG) {
                             Log.v(TAG, "backing up and fixing "+
                                     preprocess[finalSize-1].label+" to "+
-                                    getDisplayName(preprocess[finalSize-1].locale));
+                                    getDisplayName(preprocess[finalSize-1].locale,
+                                            specialLocaleCodes, specialLocaleNames));
                         }
                         preprocess[finalSize-1].label = toTitleCase(
-                                getDisplayName(preprocess[finalSize-1].locale));
+                                getDisplayName(preprocess[finalSize-1].locale,
+                                        specialLocaleCodes, specialLocaleNames));
                         if (DEBUG) {
-                            Log.v(TAG, "  and adding "+ toTitleCase(getDisplayName(l)));
+                            Log.v(TAG, "  and adding "+ toTitleCase(
+                                    getDisplayName(l, specialLocaleCodes, specialLocaleNames)));
                         }
                         preprocess[finalSize++] =
-                                new Loc(toTitleCase(getDisplayName(l)), l);
+                                new LocaleInfo(toTitleCase(
+                                        getDisplayName(
+                                                l, specialLocaleCodes, specialLocaleNames)), l);
                     } else {
                         String displayName;
                         if (s.equals("zz_ZZ")) {
@@ -129,31 +138,20 @@ public class LocalePicker extends ListFragment {
                         if (DEBUG) {
                             Log.v(TAG, "adding "+displayName);
                         }
-                        preprocess[finalSize++] = new Loc(displayName, l);
+                        preprocess[finalSize++] = new LocaleInfo(displayName, l);
                     }
                 }
             }
         }
-        mLocales = new Loc[finalSize];
-        for (int i = 0; i < finalSize ; i++) {
-            mLocales[i] = preprocess[i];
+
+        final LocaleInfo[] localeInfos = new LocaleInfo[finalSize];
+        for (int i = 0; i < finalSize; i++) {
+            localeInfos[i] = preprocess[i];
         }
-        Arrays.sort(mLocales);
+        Arrays.sort(localeInfos);
         final int layoutId = R.layout.locale_picker_item;
         final int fieldId = R.id.locale;
-        final ArrayAdapter<Loc> adapter =
-                new ArrayAdapter<Loc>(activity, layoutId, fieldId, mLocales);
-        setListAdapter(adapter);
-    }
-
-    @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        setUpLocaleList();
-    }
-
-    public void setLocaleSelectionListener(LocaleSelectionListener listener) {
-        mListener = listener;
+        return new ArrayAdapter<LocaleInfo>(context, layoutId, fieldId, localeInfos);
     }
 
     private static String toTitleCase(String s) {
@@ -164,16 +162,28 @@ public class LocalePicker extends ListFragment {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
-    private String getDisplayName(Locale l) {
+    private static String getDisplayName(
+            Locale l, String[] specialLocaleCodes, String[] specialLocaleNames) {
         String code = l.toString();
 
-        for (int i = 0; i < mSpecialLocaleCodes.length; i++) {
-            if (mSpecialLocaleCodes[i].equals(code)) {
-                return mSpecialLocaleNames[i];
+        for (int i = 0; i < specialLocaleCodes.length; i++) {
+            if (specialLocaleCodes[i].equals(code)) {
+                return specialLocaleNames[i];
             }
         }
 
         return l.getDisplayName(l);
+    }
+
+    @Override
+    public void onActivityCreated(final Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        final ArrayAdapter<LocaleInfo> adapter = constructAdapter(getActivity());
+        setListAdapter(adapter);
+    }
+
+    public void setLocaleSelectionListener(LocaleSelectionListener listener) {
+        mListener = listener;
     }
 
     @Override
@@ -191,7 +201,8 @@ public class LocalePicker extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         if (mListener != null) {
-            mListener.onLocaleSelected(mLocales[position].locale);
+            final Locale locale = ((LocaleInfo)getListAdapter().getItem(position)).locale;
+            mListener.onLocaleSelected(locale);
         }
     }
 
