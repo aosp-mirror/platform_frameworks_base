@@ -1,0 +1,95 @@
+#! /usr/bin/perl
+#
+# Copyright (C) 2010 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+use strict;
+
+sub rtrim($)
+{
+    my $string = shift;
+    $string =~ s/\s+$//;
+    return $string;
+}
+
+while (my $line = <>) {
+  next if $line =~ /^\//;
+  next if $line =~ /^#/;
+  next if $line =~ /^\s*$/;
+  if ($line !~ /^GL_ENTRY\(([^,]+), ([^,]+), ([^\)]+)\)/) {
+    next;
+  }
+  my $type = $1;
+  my $name = $2;
+  my $args = $3;
+  
+  my @args = split ',', $args;
+  my $len = scalar(@args);
+  my $nonVoidArgLen = 0;
+  for (my $num = 0; $num < $len; $num++) {
+    if ($args[$num] ne "void") {
+      $nonVoidArgLen++;
+    }
+  }
+  if ($type eq "void") {
+    printf("TRACE_GL_VOID(");
+  } else {
+    printf("TRACE_GL(%s, ", $type);
+  }
+  
+  printf("%s, (%s), (", $name, $args);
+    for (my $num = 0; $num < $len; $num++) {
+    if ($args[$num] ne "void") {
+      if ($num > 0) {
+        print ", ";
+      }
+      #
+      # extract the name from the parameter
+      # type name
+      # const type *name
+      # type *name
+      # type name[4]
+      #
+      if ($args[$num] =~ /(\S+\s)+\**\s*([\w]+)/) {
+        printf("%s", $2);
+      }
+    }
+  }
+  printf("), %d", $nonVoidArgLen);
+  for (my $num = 0; $num < $len; $num++) {
+    if ($args[$num] ne "void") {
+      #
+      # extract the name from the parameter
+      # type name
+      # const type *name
+      # type *name
+      # type name[4]
+      #
+      my $arg = $args[$num];
+      if ($arg =~ /(\S+\s)+\**\s*([\w]+)/) {
+        my $name = $2;
+        if ($arg =~ /((const )*(\S+\s)+\**)\s*([\w]+)/) {
+          my $type = rtrim($1);
+          printf(", \"%s\", %s", $type, $name);
+        }
+      }
+    }
+  }
+  printf(")\n");
+}
+
+
+
+
+
