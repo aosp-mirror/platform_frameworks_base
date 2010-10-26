@@ -43,7 +43,7 @@ Caches::Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
     glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
 
-    currentBuffer = meshBuffer;
+    mCurrentBuffer = meshBuffer;
 }
 
 /**
@@ -57,9 +57,9 @@ void Caches::bindMeshBuffer() {
  * Binds the specified VBO.
  */
 void Caches::bindMeshBuffer(const GLuint buffer) {
-    if (currentBuffer != buffer) {
+    if (mCurrentBuffer != buffer) {
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        currentBuffer = buffer;
+        mCurrentBuffer = buffer;
     }
 }
 
@@ -67,9 +67,9 @@ void Caches::bindMeshBuffer(const GLuint buffer) {
  * Unbinds the VBO used to render simple textured quads.
  */
 void Caches::unbindMeshBuffer() {
-    if (currentBuffer) {
+    if (mCurrentBuffer) {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        currentBuffer = 0;
+        mCurrentBuffer = 0;
     }
 }
 

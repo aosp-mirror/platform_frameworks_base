@@ -79,7 +79,9 @@ class Caches: public Singleton<Caches> {
 
     friend class Singleton<Caches>;
 
-    CacheLogger logger;
+    CacheLogger mlogger;
+
+    GLuint mCurrentBuffer;
 
 public:
     void bindMeshBuffer();
@@ -92,7 +94,6 @@ public:
     Program* currentProgram;
 
     GLuint meshBuffer;
-    GLuint currentBuffer;
 
     TextureCache textureCache;
     LayerCache layerCache;
