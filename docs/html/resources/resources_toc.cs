@@ -167,14 +167,12 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>resources/tutorials/testing/helloandroid_test.html">
             <span class="en">Hello Testing</span></a>
-            <span class="new">new!</span>
       </li>
       <li><a href="<?cs var:toroot ?>resources/tutorials/notepad/index.html">
             <span class="en">Notepad Tutorial</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>resources/tutorials/testing/activity_test.html">
             <span class="en">Activity Testing</span></a>
-            <span class="new">new!</span>
       </li>
     </ul>
   </li>

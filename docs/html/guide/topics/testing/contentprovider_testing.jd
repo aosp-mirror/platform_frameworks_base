@@ -169,9 +169,7 @@ page.title=Content Provider Testing
                 <a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> sample,
                 for example, features a provider that offers one URI for retrieving a list of notes,
                 another for retrieving an individual note by it's database ID, and a third for
-                displaying notes in a live folder. The sample test package for Note Pad,
-                <a href="{@docRoot}resources/samples/NotePadTest/index.html"> Note Pad Test</a>, has
-                unit tests for two of these URIs.
+                displaying notes in a live folder.
             </li>
             <li>
                 Test invalid URIs: Your unit tests should deliberately call the provider with an
