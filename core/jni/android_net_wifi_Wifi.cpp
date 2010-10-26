@@ -571,6 +571,15 @@ static jboolean android_net_wifi_clearBlacklistCommand(JNIEnv* env, jobject claz
     return doBooleanCommand("BLACKLIST clear", "OK");
 }
 
+static jboolean android_net_wifi_setSuspendOptimizationsCommand(JNIEnv* env, jobject clazz, jboolean enabled)
+{
+    char cmdstr[BUF_SIZE];
+
+    snprintf(cmdstr, sizeof(cmdstr), "DRIVER SETSUSPENDOPT %d", enabled ? 0 : 1);
+    return doBooleanCommand(cmdstr, "OK");
+}
+
+
 static jboolean android_net_wifi_doDhcpRequest(JNIEnv* env, jobject clazz, jobject info)
 {
     jint ipaddr, gateway, mask, dns1, dns2, server, lease;
@@ -657,6 +666,8 @@ static JNINativeMethod gWifiMethods[] = {
         (void*) android_net_wifi_wpsPinFromAccessPointCommand },
     { "startWpsWithPinFromDeviceCommand", "(Ljava/lang/String;)I",
         (void*) android_net_wifi_wpsPinFromDeviceCommand },
+    { "setSuspendOptimizationsCommand", "(Z)Z",
+        (void*) android_net_wifi_setSuspendOptimizationsCommand},
     { "doDhcpRequest", "(Landroid/net/DhcpInfo;)Z", (void*) android_net_wifi_doDhcpRequest },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_wifi_getDhcpError },
 };

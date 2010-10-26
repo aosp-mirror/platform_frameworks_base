@@ -102,6 +102,8 @@ public class WifiService extends IWifiManager.Stub {
 
     private final LockList mLocks = new LockList();
     // some wifi lock statistics
+    private int mFullHighPerfLocksAcquired;
+    private int mFullHighPerfLocksReleased;
     private int mFullLocksAcquired;
     private int mFullLocksReleased;
     private int mScanLocksAcquired;
@@ -1040,12 +1042,15 @@ public class WifiService extends IWifiManager.Stub {
         boolean wifiEnabled = getPersistedWifiEnabled();
         boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden.get();
         boolean lockHeld = mLocks.hasLocks();
-        int strongestLockMode;
+        int strongestLockMode = WifiManager.WIFI_MODE_FULL;
         boolean wifiShouldBeEnabled = wifiEnabled && !airplaneMode;
         boolean wifiShouldBeStarted = !mDeviceIdle || lockHeld;
-        if (mDeviceIdle && lockHeld) {
+
+        if (lockHeld) {
             strongestLockMode = mLocks.getStrongestLockMode();
-        } else {
+        }
+        /* If device is not idle, lockmode cannot be scan only */
+        if (!mDeviceIdle && strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY) {
             strongestLockMode = WifiManager.WIFI_MODE_FULL;
         }
 
@@ -1067,6 +1072,8 @@ public class WifiService extends IWifiManager.Stub {
                 mWifiStateMachine.setDriverStart(true);
                 mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                         System.currentTimeMillis() + scanMs, scanMs, mScanIntent);
+                mWifiStateMachine.setHighPerfModeEnabled(strongestLockMode
+                        == WifiManager.WIFI_MODE_FULL_HIGH_PERF);
             } else {
                 mWifiStateMachine.requestCmWakeLock();
                 mWifiStateMachine.setDriverStart(false);
@@ -1145,8 +1152,10 @@ public class WifiService extends IWifiManager.Stub {
         }
         pw.println();
         pw.println("Locks acquired: " + mFullLocksAcquired + " full, " +
+                mFullHighPerfLocksAcquired + " full high perf, " +
                 mScanLocksAcquired + " scan");
         pw.println("Locks released: " + mFullLocksReleased + " full, " +
+                mFullHighPerfLocksReleased + " full high perf, " +
                 mScanLocksReleased + " scan");
         pw.println();
         pw.println("Locks held:");
@@ -1184,11 +1193,15 @@ public class WifiService extends IWifiManager.Stub {
             if (mList.isEmpty()) {
                 return WifiManager.WIFI_MODE_FULL;
             }
-            for (WifiLock l : mList) {
-                if (l.mMode == WifiManager.WIFI_MODE_FULL) {
-                    return WifiManager.WIFI_MODE_FULL;
-                }
+
+            if (mFullHighPerfLocksAcquired > mFullHighPerfLocksReleased) {
+                return WifiManager.WIFI_MODE_FULL_HIGH_PERF;
             }
+
+            if (mFullLocksAcquired > mFullLocksReleased) {
+                return WifiManager.WIFI_MODE_FULL;
+            }
+
             return WifiManager.WIFI_MODE_SCAN_ONLY;
         }
 
@@ -1235,7 +1248,11 @@ public class WifiService extends IWifiManager.Stub {
 
     public boolean acquireWifiLock(IBinder binder, int lockMode, String tag, WorkSource ws) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-        if (lockMode != WifiManager.WIFI_MODE_FULL && lockMode != WifiManager.WIFI_MODE_SCAN_ONLY) {
+        if (lockMode != WifiManager.WIFI_MODE_FULL &&
+                lockMode != WifiManager.WIFI_MODE_SCAN_ONLY &&
+                lockMode != WifiManager.WIFI_MODE_FULL_HIGH_PERF) {
+            Slog.e(TAG, "Illegal argument, lockMode= " + lockMode);
+            if (DBG) throw new IllegalArgumentException("lockMode=" + lockMode);
             return false;
         }
         if (ws != null && ws.size() == 0) {
@@ -1256,6 +1273,7 @@ public class WifiService extends IWifiManager.Stub {
     private void noteAcquireWifiLock(WifiLock wifiLock) throws RemoteException {
         switch(wifiLock.mMode) {
             case WifiManager.WIFI_MODE_FULL:
+            case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
                 mBatteryStats.noteFullWifiLockAcquiredFromSource(wifiLock.mWorkSource);
                 break;
             case WifiManager.WIFI_MODE_SCAN_ONLY:
@@ -1267,6 +1285,7 @@ public class WifiService extends IWifiManager.Stub {
     private void noteReleaseWifiLock(WifiLock wifiLock) throws RemoteException {
         switch(wifiLock.mMode) {
             case WifiManager.WIFI_MODE_FULL:
+            case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
                 mBatteryStats.noteFullWifiLockReleasedFromSource(wifiLock.mWorkSource);
                 break;
             case WifiManager.WIFI_MODE_SCAN_ONLY:
@@ -1287,6 +1306,10 @@ public class WifiService extends IWifiManager.Stub {
             case WifiManager.WIFI_MODE_FULL:
                 ++mFullLocksAcquired;
                 break;
+            case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
+                ++mFullHighPerfLocksAcquired;
+                break;
+
             case WifiManager.WIFI_MODE_SCAN_ONLY:
                 ++mScanLocksAcquired;
                 break;
@@ -1355,6 +1378,9 @@ public class WifiService extends IWifiManager.Stub {
                 switch(wifiLock.mMode) {
                     case WifiManager.WIFI_MODE_FULL:
                         ++mFullLocksReleased;
+                        break;
+                    case WifiManager.WIFI_MODE_FULL_HIGH_PERF:
+                        ++mFullHighPerfLocksReleased;
                         break;
                     case WifiManager.WIFI_MODE_SCAN_ONLY:
                         ++mScanLocksReleased;
