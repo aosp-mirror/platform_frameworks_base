@@ -2354,6 +2354,14 @@ class PowerManagerService extends IPowerManager.Stub
             Slog.d(TAG, "lightSensorChangedLocked " + value);
         }
 
+        // Don't do anything if the screen is off.
+        if ((mPowerState & SCREEN_ON_BIT) == 0) {
+            if (mDebugLightSensor) {
+                Slog.d(TAG, "dropping lightSensorChangedLocked because screen is off");
+            }
+            return;
+        }
+
         // do not allow light sensor value to decrease
         if (mHighestLightSensorValue < value) {
             mHighestLightSensorValue = value;
