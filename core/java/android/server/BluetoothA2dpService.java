@@ -534,6 +534,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
             if (DBG) log("A2DP state : device: " + device + " State:" + prevState + "->" + state);
+
+            mBluetoothService.sendConnectionStateChange(device, state, prevState);
         }
     }
 
