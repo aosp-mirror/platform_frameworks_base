@@ -26,8 +26,8 @@ import android.widget.FrameLayout;
 public class TabletStatusBarView extends FrameLayout {
     private Handler mHandler;
 
-    private View[] mIgnoreChildren = new View[2];
-    private View[] mPanels = new View[2];
+    private View[] mIgnoreChildren = new View[3];
+    private View[] mPanels = new View[3];
     private int[] mPos = new int[2];
 
     public TabletStatusBarView(Context context) {
@@ -44,9 +44,11 @@ public class TabletStatusBarView extends FrameLayout {
             mHandler.sendEmptyMessage(TabletStatusBarService.MSG_CLOSE_NOTIFICATION_PANEL);
             mHandler.removeMessages(TabletStatusBarService.MSG_CLOSE_SYSTEM_PANEL);
             mHandler.sendEmptyMessage(TabletStatusBarService.MSG_CLOSE_SYSTEM_PANEL);
+            mHandler.removeMessages(TabletStatusBarService.MSG_CLOSE_RECENTS_PANEL);
+            mHandler.sendEmptyMessage(TabletStatusBarService.MSG_CLOSE_RECENTS_PANEL);
 
-            for (int i=0; i<mPanels.length; i++) {
-                if (mPanels[i].getVisibility() == View.VISIBLE) {
+            for (int i=0; i < mPanels.length; i++) {
+                if (mPanels[i] != null && mPanels[i].getVisibility() == View.VISIBLE) {
                     if (eventInside(mIgnoreChildren[i], ev)) {
                         return true;
                     }
