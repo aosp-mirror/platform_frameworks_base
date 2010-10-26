@@ -2137,6 +2137,8 @@
         <attr name="tabStripLeft" format="reference" />
         <!-- Drawable used to draw the right part of the strip underneath the tabs. -->
         <attr name="tabStripRight" format="reference" />
+        <!-- Layout used to organize each tab's content. -->
+        <attr name="tabLayout" format="reference" />
     </declare-styleable>
     <declare-styleable name="TextAppearance">
         <!-- Text color. -->

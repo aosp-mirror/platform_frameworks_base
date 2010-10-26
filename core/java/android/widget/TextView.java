@@ -7142,6 +7142,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     case Gravity.RIGHT:
                         return 0.0f;
                     case Gravity.CENTER_HORIZONTAL:
+                    case Gravity.FILL_HORIZONTAL:
                         return (mLayout.getLineWidth(0) - ((mRight - mLeft) -
                                 getCompoundPaddingLeft() - getCompoundPaddingRight())) /
                                 getHorizontalFadingEdgeLength();
