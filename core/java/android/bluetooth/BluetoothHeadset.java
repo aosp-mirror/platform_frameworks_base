@@ -103,8 +103,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *
      * The category is the Company ID of the vendor defining the
      * vendor-specific command. {@link BluetoothAssignedNumbers}
-     * @see <a href="https://www.bluetooth.org/Technical/AssignedNumbers/identifiers.htm">
-     * Bluetooth SIG Assigned Numbers - Company Identifiers</a>
      *
      * For example, for Plantronics specific events
      * Category will be {@link #VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID_CATEGORY}.55
