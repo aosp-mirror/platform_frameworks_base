@@ -652,7 +652,7 @@ public class SlidingDrawer extends ViewGroup {
         // Try only once... we should really loop but it's not a big deal
         // if the draw was cancelled, it will only be temporary anyway
         content.getViewTreeObserver().dispatchOnPreDraw();
-        content.buildDrawingCache();
+        if (!content.isHardwareAccelerated()) content.buildDrawingCache();
 
         content.setVisibility(View.GONE);        
     }
