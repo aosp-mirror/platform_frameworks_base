@@ -403,6 +403,8 @@
         <item name="android:textSelectHandleLeft">?android:attr/textSelectHandleLeft</item>
         <item name="android:textSelectHandleRight">?android:attr/textSelectHandleRight</item>
         <item name="android:textSelectHandle">?android:attr/textSelectHandle</item>
+        <item name="android:textEditPasteWindowLayout">?android:attr/textEditPasteWindowLayout</item>
+        <item name="android:textEditNoPasteWindowLayout">?android:attr/textEditNoPasteWindowLayout</item>
     </style>
     
     <style name="Widget.TextView.ListSeparator">

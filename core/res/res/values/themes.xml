@@ -166,6 +166,8 @@
         <item name="textSelectHandleRight">@android:drawable/text_select_handle_right</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@android:style/Widget.TextSelectHandle</item>
+        <item name="textEditPasteWindowLayout">@android:layout/text_edit_paste_window</item>
+        <item name="textEditNoPasteWindowLayout">@android:layout/text_edit_no_paste_window</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@android:style/Widget.AbsListView</item>

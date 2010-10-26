@@ -1961,8 +1961,11 @@
     <!-- Item on EditText context menu. This action is used to cut selected the text into the clipboard. -->
     <string name="copy">Copy</string>
 
-    <!-- Item on EditText context menu. This action is used t o paste from the clipboard into the eidt field -->
+    <!-- Item on EditText context menu. This action is used to paste from the clipboard into the eidt field -->
     <string name="paste">Paste</string>
+
+    <!-- Text displayed in a popup dialog in TextEdit when the clipboard is empty. 'paste' is used otherwise. [CHAR LIMIT=20] -->
+    <string name="pasteDisabled">Nothing to paste</string>
 
     <!-- Item on EditText context menu. This action is used to copy a URL from the edit field into the clipboard. -->
     <string name="copyUrl">Copy URL</string>

@@ -300,6 +300,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     int mTextSelectHandleLeftRes;
     int mTextSelectHandleRightRes;
     int mTextSelectHandleRes;
+    int mTextEditPasteWindowLayout;
+    int mTextEditNoPasteWindowLayout;
 
     Drawable mSelectHandleLeft;
     Drawable mSelectHandleRight;
@@ -737,7 +739,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case com.android.internal.R.styleable.TextView_textSelectHandle:
                 mTextSelectHandleRes = a.getResourceId(attr, 0);
                 break;
-                
+
+            case com.android.internal.R.styleable.TextView_textEditPasteWindowLayout:
+                mTextEditPasteWindowLayout = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textEditNoPasteWindowLayout:
+                mTextEditNoPasteWindowLayout = a.getResourceId(attr, 0);
+                break;
+
             case com.android.internal.R.styleable.TextView_textLineHeight:
                 int lineHeight = a.getDimensionPixelSize(attr, 0);
                 if (lineHeight != 0) {
@@ -7736,6 +7746,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * Paste clipboard content between min and max positions.
+     *
+     * @param clipboard getSystemService(Context.CLIPBOARD_SERVICE)
+     */
+    private void paste(ClipboardManager clipboard, int min, int max) {
+        ClipData clip = clipboard.getPrimaryClip();
+        if (clip != null) {
+            boolean didfirst = false;
+            for (int i=0; i<clip.getItemCount(); i++) {
+                CharSequence paste = clip.getItem(i).coerceToText(getContext());
+                if (paste != null) {
+                    if (!didfirst) {
+                        long minMax = prepareSpacesAroundPaste(min, max, paste);
+                        min = extractRangeStartFromLong(minMax);
+                        max = extractRangeEndFromLong(minMax);
+                        Selection.setSelection((Spannable) mText, max);
+                        ((Editable) mText).replace(min, max, paste);
+                    } else {
+                        ((Editable) mText).insert(getSelectionEnd(), "\n");
+                        ((Editable) mText).insert(getSelectionEnd(), paste);
+                    }
+                }
+            }
+            stopSelectionActionMode();
+        }
+    }
+
     private class SelectionActionModeCallback implements ActionMode.Callback {
 
         @Override
@@ -7766,7 +7804,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
-                    setIcon(com.android.internal.R.drawable.ic_menu_select_all).
                     setAlphabeticShortcut('a').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
@@ -7844,26 +7881,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             switch (item.getItemId()) {
                 case ID_PASTE:
-                    ClipData clip = clipboard.getPrimaryClip();
-                    if (clip != null) {
-                        boolean didfirst = false;
-                        for (int i=0; i<clip.getItemCount(); i++) {
-                            CharSequence paste = clip.getItem(i).coerceToText(getContext());
-                            if (paste != null) {
-                                if (!didfirst) {
-                                    long minMax = prepareSpacesAroundPaste(min, max, paste);
-                                    min = extractRangeStartFromLong(minMax);
-                                    max = extractRangeEndFromLong(minMax);
-                                    Selection.setSelection((Spannable) mText, max);
-                                    ((Editable) mText).replace(min, max, paste);
-                                } else {
-                                    ((Editable) mText).insert(getSelectionEnd(), "\n");
-                                    ((Editable) mText).insert(getSelectionEnd(), paste);
-                                }
-                            }
-                        }
-                        stopSelectionActionMode();
-                    }
+                    paste(clipboard, min, max);
                     return true;
 
                 case ID_CUT:
@@ -7931,6 +7949,100 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public boolean onTouchEvent(MotionEvent event);
     }
 
+    private class PastePopupMenu implements OnClickListener {
+        private PopupWindow mContainer;
+        private int mPositionX;
+        private int mPositionY;
+        private View mPasteView, mNoPasteView;
+
+        public PastePopupMenu() {
+            mContainer = new PopupWindow(TextView.this.mContext, null,
+                    com.android.internal.R.attr.textSelectHandleWindowStyle);
+            mContainer.setSplitTouchEnabled(true);
+            mContainer.setClippingEnabled(false);
+            mContainer.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+
+            mContainer.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+            mContainer.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        private void updateContent() {
+            View view = canPaste() ? mPasteView : mNoPasteView;
+
+            if (view == null) {
+                final int layout = canPaste() ? mTextEditPasteWindowLayout :
+                    mTextEditNoPasteWindowLayout;
+                LayoutInflater inflater = (LayoutInflater)TextView.this.mContext.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                if (inflater != null) {
+                    view = inflater.inflate(layout, null);
+                }
+
+                if (view == null) {
+                    throw new IllegalArgumentException("Unable to inflate TextEdit paste window");
+                }
+
+                final int size = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+                view.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                view.measure(size, size);
+
+                view.setOnClickListener(this);
+
+                if (canPaste()) mPasteView = view;
+                else mNoPasteView = view;
+            }
+
+            mContainer.setContentView(view);
+        }
+
+        public void show() {
+            updateContent();
+            final int[] coords = mTempCoords;
+            TextView.this.getLocationInWindow(coords);
+            positionAtCursor();
+            coords[0] += mPositionX;
+            coords[1] += mPositionY;
+            mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
+        }
+
+        public void hide() {
+            mContainer.dismiss();
+        }
+
+        public boolean isShowing() {
+            return mContainer.isShowing();
+        }
+
+        @Override
+        public void onClick(View v) {
+            ClipboardManager clipboard = 
+                (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            paste(clipboard, getSelectionStart(), getSelectionEnd());
+        }
+
+        void positionAtCursor() {
+            final int offset = TextView.this.getSelectionStart();
+            View contentView = mContainer.getContentView();
+            final int width = contentView.getMeasuredWidth();
+            final int height = contentView.getMeasuredHeight();
+            final int line = mLayout.getLineForOffset(offset);
+            final int lineTop = mLayout.getLineTop(line);
+
+            final Rect bounds = sCursorControllerTempRect;
+            bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - width / 2.0f);
+            bounds.top = lineTop - height;
+
+            bounds.right = bounds.left + width;
+            bounds.bottom = bounds.top + height;
+
+            convertFromViewportToContentCoordinates(bounds);
+
+            mPositionX = bounds.left;
+            mPositionY = bounds.top;
+        }
+    }
+
     private class HandleView extends View {
         private boolean mPositionOnTop = false;
         private Drawable mDrawable;
@@ -7947,6 +8059,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private float mTouchOffsetY;
         private int mLastParentX;
         private int mLastParentY;
+        private int mContainerPositionX, mContainerPositionY;
+        private long mTouchTimer;
+        private PastePopupMenu mPastePopupWindow;
 
         public static final int LEFT = 0;
         public static final int CENTER = 1;
@@ -7998,6 +8113,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mDrawable = mSelectHandleCenter;
                 handleWidth = mDrawable.getIntrinsicWidth();
                 mHotspotX = handleWidth / 2;
+                mPastePopupWindow = new PastePopupMenu();
                 break;
             }
             }
@@ -8011,7 +8127,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             setMeasuredDimension(mDrawable.getIntrinsicWidth(),
                     mDrawable.getIntrinsicHeight());
         }
@@ -8024,14 +8140,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainer.setContentView(this);
             final int[] coords = mTempCoords;
             TextView.this.getLocationInWindow(coords);
-            coords[0] += mPositionX;
-            coords[1] += mPositionY;
-            mContainer.showAtLocation(TextView.this, 0, coords[0], coords[1]);
+            mContainerPositionX = coords[0] + mPositionX;
+            mContainerPositionY = coords[1] + mPositionY;
+            mContainer.showAtLocation(TextView.this, 0, mContainerPositionX, mContainerPositionY);
+
+            // Hide paste view when handle is moved.
+            if (mPastePopupWindow != null) {
+                mPastePopupWindow.hide();
+            }
         }
 
         public void hide() {
             mIsDragging = false;
             mContainer.dismiss();
+            if (mPastePopupWindow != null) {
+                mPastePopupWindow.hide();
+            }
         }
 
         public boolean isShowing() {
@@ -8086,8 +8210,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (mContainer.isShowing()){
                     coords = mTempCoords;
                     TextView.this.getLocationInWindow(coords);
-                    mContainer.update(coords[0] + mPositionX, coords[1] + mPositionY,
-                            mRight - mLeft, mBottom - mTop);
+                    final int containerPositionX = coords[0] + mPositionX;
+                    final int containerPositionY = coords[1] + mPositionY;
+
+                    if (containerPositionX != mContainerPositionX || 
+                        containerPositionY != mContainerPositionY) {
+                        mContainerPositionX = containerPositionX;
+                        mContainerPositionY = containerPositionY;
+
+                        mContainer.update(mContainerPositionX, mContainerPositionY,
+                                mRight - mLeft, mBottom - mTop);
+
+                        // Hide paste popup window as soon as a scroll occurs.
+                        if (mPastePopupWindow != null) {
+                            mPastePopupWindow.hide();
+                        }
+                    }
                 } else {
                     show();
                 }
@@ -8103,6 +8241,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mLastParentX = coords[0];
                         mLastParentY = coords[1];
                     }
+                    // Hide paste popup window as soon as the handle is dragged.
+                    if (mPastePopupWindow != null) {
+                        mPastePopupWindow.hide();
+                    }
                 }
             } else {
                 hide();
@@ -8110,7 +8252,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void onDraw(Canvas c) {
+        protected void onDraw(Canvas c) {
             mDrawable.setBounds(0, 0, mRight - mLeft, mBottom - mTop);
             if (mPositionOnTop) {
                 c.save();
@@ -8135,6 +8277,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mLastParentX = coords[0];
                 mLastParentY = coords[1];
                 mIsDragging = true;
+                if (mPastePopupWindow != null) {
+                    mTouchTimer = SystemClock.uptimeMillis();
+                    if (mPastePopupWindow.isShowing()) {
+                        // Tapping on the handle again dismisses the displayed paste view,
+                        mPastePopupWindow.hide();
+                        // and makes sure the action up does not display the paste view.
+                        mTouchTimer = 0;
+                    }
+                }
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -8148,6 +8299,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 break;
             }
             case MotionEvent.ACTION_UP:
+                if (mPastePopupWindow != null) {
+                    long delay = SystemClock.uptimeMillis() - mTouchTimer;
+                    if (delay < ViewConfiguration.getTapTimeout()) {
+                        final float touchOffsetX = ev.getRawX() - mPositionX;
+                        final float touchOffsetY = ev.getRawY() - mPositionY;
+                        final float dx = touchOffsetX - mTouchToWindowOffsetX;
+                        final float dy = touchOffsetY - mTouchToWindowOffsetY;
+                        final float distanceSquared = dx * dx + dy * dy;
+                        final ViewConfiguration viewConfiguration = ViewConfiguration.get(getContext());
+                        final int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
+                        final int slopSquared = doubleTapSlop * doubleTapSlop;
+                        if (distanceSquared < slopSquared) {
+                            mPastePopupWindow.show();
+                        }
+                    }
+                }
+                mIsDragging = false;
+                break;
             case MotionEvent.ACTION_CANCEL:
                 mIsDragging = false;
             }

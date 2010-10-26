@@ -556,6 +556,11 @@
         <!-- Reference to a drawable that will be used to display a text selection
              anchor for positioning the cursor within text. -->
         <attr name="textSelectHandle" format="reference" />
+        <!-- The layout of the view that is displayed on top of the cursor to paste inside a
+             TextEdit field. -->
+        <attr name="textEditPasteWindowLayout" format="reference" />
+        <!-- Variation of textEditPasteWindowLayout displayed when the clipboard is empty. -->
+        <attr name="textEditNoPasteWindowLayout" format="reference" />
 
         <!-- Theme to use for dialogs spawned from this theme. -->
         <attr name="dialogTheme" format="reference" />
@@ -2393,6 +2398,11 @@
         <!-- Reference to a drawable that will be used to display a text selection
              anchor for positioning the cursor within text. -->
         <attr name="textSelectHandle" />
+        <!-- The layout of the view that is displayed on top of the cursor to paste inside a
+             TextEdit field. -->
+        <attr name="textEditPasteWindowLayout" />
+        <!-- Variation of textEditPasteWindowLayout displayed when the clipboard is empty. -->
+        <attr name="textEditNoPasteWindowLayout" />
 
         <!-- Height of a line of text. -->
         <attr name="textLineHeight" />
