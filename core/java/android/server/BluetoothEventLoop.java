@@ -253,6 +253,7 @@ class BluetoothEventLoop {
             // we filled up our cache.
             mBluetoothService.getAllProperties();
         }
+        log("Property Changed: " + propValues[0] + " : " + propValues[1]);
         String name = propValues[0];
         if (name.equals("Name")) {
             mBluetoothService.setProperty(name, propValues[1]);
@@ -321,10 +322,9 @@ class BluetoothEventLoop {
             Log.e(TAG, "onDevicePropertyChanged: Address of the remote device in null");
             return;
         }
-        if (DBG) {
-            log("Device property changed: " + address + " property: "
-                    + name + " value: " + propValues[1]);
-        }
+        log("Device property changed: " + address + " property: "
+            + name + " value: " + propValues[1]);
+
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         if (name.equals("Name")) {
             mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
