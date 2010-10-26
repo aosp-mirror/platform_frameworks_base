@@ -16,12 +16,27 @@
 
 package com.android.layoutlib.bridge;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.IContentProvider;
+import android.content.OperationApplicationException;
+import android.content.res.AssetFileDescriptor;
 import android.database.ContentObserver;
+import android.database.Cursor;
+import android.database.CursorWindow;
+import android.database.IBulkCursor;
+import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
+
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * A mock content resolver for the LayoutLib Bridge.
@@ -32,20 +47,98 @@ import android.os.Bundle;
  */
 public class BridgeContentResolver extends ContentResolver {
 
+    private BridgeContentProvider mProvider = null;
+
+    public static final class BridgeContentProvider implements IContentProvider {
+
+        public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> arg0)
+                throws RemoteException, OperationApplicationException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public int bulkInsert(Uri arg0, ContentValues[] arg1) throws RemoteException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        public IBulkCursor bulkQuery(Uri arg0, String[] arg1, String arg2, String[] arg3,
+                String arg4, IContentObserver arg5, CursorWindow arg6) throws RemoteException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Bundle call(String arg0, String arg1, Bundle arg2) throws RemoteException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public int delete(Uri arg0, String arg1, String[] arg2) throws RemoteException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        public String getType(Uri arg0) throws RemoteException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Uri insert(Uri arg0, ContentValues arg1) throws RemoteException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public AssetFileDescriptor openAssetFile(Uri arg0, String arg1) throws RemoteException,
+                FileNotFoundException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public ParcelFileDescriptor openFile(Uri arg0, String arg1) throws RemoteException,
+                FileNotFoundException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Cursor query(Uri arg0, String[] arg1, String arg2, String[] arg3, String arg4)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3)
+                throws RemoteException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        public IBinder asBinder() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+    }
+
     public BridgeContentResolver(Context context) {
         super(context);
     }
 
     @Override
     public IContentProvider acquireProvider(Context c, String name) {
-        // ignore
-        return null;
+        if (mProvider == null) {
+            mProvider = new BridgeContentProvider();
+        }
+
+        return mProvider;
     }
 
     @Override
     public IContentProvider acquireExistingProvider(Context c, String name) {
-        // ignore
-        return null;
+        if (mProvider == null) {
+            mProvider = new BridgeContentProvider();
+        }
+
+        return mProvider;
     }
 
     @Override
@@ -53,7 +146,7 @@ public class BridgeContentResolver extends ContentResolver {
         // ignore
         return false;
     }
-    
+
     /**
      * Stub for the layoutlib bridge content resolver.
      */
@@ -62,7 +155,7 @@ public class BridgeContentResolver extends ContentResolver {
             ContentObserver observer) {
         // pass
     }
-    
+
     /**
      * Stub for the layoutlib bridge content resolver.
      */
@@ -70,7 +163,7 @@ public class BridgeContentResolver extends ContentResolver {
     public void unregisterContentObserver(ContentObserver observer) {
         // pass
     }
-    
+
     /**
      * Stub for the layoutlib bridge content resolver.
      */
@@ -78,7 +171,7 @@ public class BridgeContentResolver extends ContentResolver {
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
         // pass
     }
-    
+
     /**
      * Stub for the layoutlib bridge content resolver.
      */
@@ -86,7 +179,7 @@ public class BridgeContentResolver extends ContentResolver {
     public void startSync(Uri uri, Bundle extras) {
         // pass
     }
-    
+
     /**
      * Stub for the layoutlib bridge content resolver.
      */
