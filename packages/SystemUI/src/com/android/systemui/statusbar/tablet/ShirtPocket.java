@@ -116,7 +116,7 @@ public class ShirtPocket extends FrameLayout {
         mClipping = clipping;
         if (mClipping != null) {
             Bitmap icon = mClipping.getIcon();
-            mDescription.setText(mClipping.getLabel());
+            mDescription.setText(mClipping.getDescription().getLabel());
             if (icon != null) {
                 mPreviewIcon.setImageBitmap(icon);
                 mPreviewIcon.setVisibility(View.VISIBLE);

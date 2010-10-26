@@ -37,8 +37,9 @@ import java.util.ArrayList;
  * each of which can hold one or more representations of an item of data.
  * For display to the user, it also has a label and iconic representation.</p>
  *
- * <p>A ClipData is a sub-class of {@link ClipDescription}, which describes
- * important meta-data about the clip.  In particular, its {@link #getMimeType(int)}
+ * <p>A ClipData contains a {@link ClipDescription}, which describes
+ * important meta-data about the clip.  In particular, its
+ * {@link ClipDescription#getMimeType(int) getDescription().getMimeType(int)}
  * must return correct MIME type(s) describing the data in the clip.  For help
  * in correctly constructing a clip with the correct MIME type, use
  * {@link #newPlainText(CharSequence, Bitmap, CharSequence)},
@@ -62,8 +63,8 @@ import java.util.ArrayList;
  * <p>If all you want is the textual representation of the clipped data, you
  * can use the convenience method {@link Item#coerceToText Item.coerceToText}.
  * In this case there is generally no need to worry about the MIME types
- * reported by {@link #getMimeType(int)}, since any clip item an always be
- * converted to a string.
+ * reported by {@link ClipDescription#getMimeType(int) getDescription().getMimeType(int)},
+ * since any clip item an always be converted to a string.
  *
  * <p>More complicated exchanges will be done through URIs, in particular
  * "content:" URIs.  A content URI allows the recipient of a ClippedData item
@@ -133,11 +134,16 @@ import java.util.ArrayList;
  * into an editor), then {@link Item#coerceToText(Context)} will ask the content
  * provider for the clip URI as text and successfully paste the entire note.
  */
-public class ClipData extends ClipDescription {
-    static final String[] MIMETYPES_TEXT_PLAIN = new String[] { MIMETYPE_TEXT_PLAIN };
-    static final String[] MIMETYPES_TEXT_URILIST = new String[] { MIMETYPE_TEXT_URILIST };
-    static final String[] MIMETYPES_TEXT_INTENT = new String[] { MIMETYPE_TEXT_INTENT };
+public class ClipData implements Parcelable {
+    static final String[] MIMETYPES_TEXT_PLAIN = new String[] {
+        ClipDescription.MIMETYPE_TEXT_PLAIN };
+    static final String[] MIMETYPES_TEXT_URILIST = new String[] {
+        ClipDescription.MIMETYPE_TEXT_URILIST };
+    static final String[] MIMETYPES_TEXT_INTENT = new String[] {
+        ClipDescription.MIMETYPE_TEXT_INTENT };
 
+    final ClipDescription mClipDescription;
+    
     final Bitmap mIcon;
 
     final ArrayList<Item> mItems = new ArrayList<Item>();
@@ -320,7 +326,7 @@ public class ClipData extends ClipDescription {
      * @param item The contents of the first item in the clip.
      */
     public ClipData(CharSequence label, String[] mimeTypes, Bitmap icon, Item item) {
-        super(label, mimeTypes);
+        mClipDescription = new ClipDescription(label, mimeTypes);
         if (item == null) {
             throw new NullPointerException("item is null");
         }
@@ -329,7 +335,25 @@ public class ClipData extends ClipDescription {
     }
 
     /**
-     * Create a new ClipData holding data of the type {@link #MIMETYPE_TEXT_PLAIN}.
+     * Create a new clip.
+     *
+     * @param description The ClipDescription describing the clip contents.
+     * @param icon Bitmap providing the user with an iconing representation of
+     * the clip.
+     * @param item The contents of the first item in the clip.
+     */
+    public ClipData(ClipDescription description, Bitmap icon, Item item) {
+        mClipDescription = description;
+        if (item == null) {
+            throw new NullPointerException("item is null");
+        }
+        mIcon = icon;
+        mItems.add(item);
+    }
+
+    /**
+     * Create a new ClipData holding data of the type
+     * {@link ClipDescription#MIMETYPE_TEXT_PLAIN}.
      *
      * @param label User-visible label for the clip data.
      * @param icon Iconic representation of the clip data.
@@ -342,7 +366,8 @@ public class ClipData extends ClipDescription {
     }
 
     /**
-     * Create a new ClipData holding an Intent with MIME type {@link #MIMETYPE_TEXT_INTENT}.
+     * Create a new ClipData holding an Intent with MIME type
+     * {@link ClipDescription#MIMETYPE_TEXT_INTENT}.
      *
      * @param label User-visible label for the clip data.
      * @param icon Iconic representation of the clip data.
@@ -358,7 +383,7 @@ public class ClipData extends ClipDescription {
      * Create a new ClipData holding a URI.  If the URI is a content: URI,
      * this will query the content provider for the MIME type of its data and
      * use that as the MIME type.  Otherwise, it will use the MIME type
-     * {@link #MIMETYPE_TEXT_URILIST}.
+     * {@link ClipDescription#MIMETYPE_TEXT_URILIST}.
      *
      * @param resolver ContentResolver used to get information about the URI.
      * @param label User-visible label for the clip data.
@@ -375,7 +400,7 @@ public class ClipData extends ClipDescription {
             mimeTypes = resolver.getStreamTypes(uri, "*/*");
             if (mimeTypes == null) {
                 if (realType != null) {
-                    mimeTypes = new String[] { realType, MIMETYPE_TEXT_URILIST };
+                    mimeTypes = new String[] { realType, ClipDescription.MIMETYPE_TEXT_URILIST };
                 }
             } else {
                 String[] tmp = new String[mimeTypes.length + (realType != null ? 2 : 1)];
@@ -385,7 +410,7 @@ public class ClipData extends ClipDescription {
                     i++;
                 }
                 System.arraycopy(mimeTypes, 0, tmp, i, mimeTypes.length);
-                tmp[i + mimeTypes.length] = MIMETYPE_TEXT_URILIST;
+                tmp[i + mimeTypes.length] = ClipDescription.MIMETYPE_TEXT_URILIST;
                 mimeTypes = tmp;
             }
         }
@@ -396,7 +421,8 @@ public class ClipData extends ClipDescription {
     }
 
     /**
-     * Create a new ClipData holding an URI with MIME type {@link #MIMETYPE_TEXT_URILIST}.
+     * Create a new ClipData holding an URI with MIME type
+     * {@link ClipDescription#MIMETYPE_TEXT_URILIST}.
      * Unlike {@link #newUri(ContentResolver, CharSequence, Bitmap, Uri)}, nothing
      * is inferred about the URI -- if it is a content: URI holding a bitmap,
      * the reported type will still be uri-list.  Use this with care!
@@ -411,6 +437,14 @@ public class ClipData extends ClipDescription {
         return new ClipData(label, MIMETYPES_TEXT_URILIST, icon, item);
     }
 
+    /**
+     * Return the {@link ClipDescription} associated with this data, describing
+     * what it contains.
+     */
+    public ClipDescription getDescription() {
+        return mClipDescription;
+    }
+    
     public void addItem(Item item) {
         if (item == null) {
             throw new NullPointerException("item is null");
@@ -437,7 +471,7 @@ public class ClipData extends ClipDescription {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+        mClipDescription.writeToParcel(dest, flags);
         if (mIcon != null) {
             dest.writeInt(1);
             mIcon.writeToParcel(dest, flags);
@@ -465,7 +499,7 @@ public class ClipData extends ClipDescription {
     }
 
     ClipData(Parcel in) {
-        super(in);
+        mClipDescription = new ClipDescription(in);
         if (in.readInt() != 0) {
             mIcon = Bitmap.CREATOR.createFromParcel(in);
         } else {

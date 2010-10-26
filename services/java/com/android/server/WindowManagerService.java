@@ -569,7 +569,7 @@ public class WindowManagerService extends IWindowManager.Stub
         void broadcastDragStartedLw(final float touchX, final float touchY) {
             // Cache a base-class instance of the clip metadata so that parceling
             // works correctly in calling out to the apps.
-            mDataDescription = new ClipDescription(mData);
+            mDataDescription = mData.getDescription();
             mNotifiedWindows.clear();
             mDragInProgress = true;
 
