@@ -114,6 +114,7 @@ public class StackView extends AdapterViewAnimator {
     private int mTouchSlop;
     private int mMaximumVelocity;
     private VelocityTracker mVelocityTracker;
+    private boolean mTransitionIsSetup = false;
 
     private static HolographicHelper sHolographicHelper;
     private ImageView mHighlight;
@@ -225,6 +226,48 @@ public class StackView extends AdapterViewAnimator {
         }
     }
 
+    private void setupStackSlider(View v, int mode) {
+        mStackSlider.setMode(mode);
+        if (v != null) {
+            mHighlight.setImageBitmap(sHolographicHelper.createOutline(v));
+            mHighlight.setRotation(v.getRotation());
+            mHighlight.setTranslationY(v.getTranslationY());
+            mHighlight.bringToFront();
+            v.bringToFront();
+            mStackSlider.setView(v);
+
+            v.setVisibility(VISIBLE);
+        }
+    }
+
+    @Override
+    @android.view.RemotableViewMethod
+    public void showNext() {
+        if (!mTransitionIsSetup) {
+            View v = getViewAtRelativeIndex(1);
+            if (v != null) {
+                setupStackSlider(v, StackSlider.NORMAL_MODE);
+                mStackSlider.setYProgress(0);
+                mStackSlider.setXProgress(0);
+            }
+        }
+        super.showNext();
+    }
+
+    @Override
+    @android.view.RemotableViewMethod
+    public void showPrevious() {
+        if (!mTransitionIsSetup) {
+            View v = getViewAtRelativeIndex(0);
+            if (v != null) {
+                setupStackSlider(v, StackSlider.NORMAL_MODE);
+                mStackSlider.setYProgress(1);
+                mStackSlider.setXProgress(0);
+            }
+        }
+        super.showPrevious();
+    }
+
     private void transformViewAtIndex(int index, View view) {
         float maxPerpectiveShift = mMeasuredHeight * PERSPECTIVE_SHIFT_FACTOR;
 
@@ -256,11 +299,12 @@ public class StackView extends AdapterViewAnimator {
         super.showOnly(childIndex, animate, onLayout);
 
         // Here we need to make sure that the z-order of the children is correct
-	for (int i = mCurrentWindowEnd; i >= mCurrentWindowStart; i--) {
+        for (int i = mCurrentWindowEnd; i >= mCurrentWindowStart; i--) {
             int index = modulo(i, getWindowSize());
             View v = mViewsMap.get(index).view;
             if (v != null) v.bringToFront();
         }
+        mTransitionIsSetup = false;
     }
 
     private void updateChildTransforms() {
@@ -364,29 +408,24 @@ public class StackView extends AdapterViewAnimator {
                 activeIndex = (swipeGestureType == GESTURE_SLIDE_DOWN) ? 1 : 0;
             }
 
+            int stackMode;
             if (mLoopViews) {
-                mStackSlider.setMode(StackSlider.NORMAL_MODE);
+                stackMode = StackSlider.NORMAL_MODE;
             } else if (mCurrentWindowStartUnbounded + activeIndex == -1) {
                 activeIndex++;
-                mStackSlider.setMode(StackSlider.BEGINNING_OF_STACK_MODE);
+                stackMode = StackSlider.BEGINNING_OF_STACK_MODE;
             } else if (mCurrentWindowStartUnbounded + activeIndex == mAdapter.getCount() - 1) {
-                mStackSlider.setMode(StackSlider.END_OF_STACK_MODE);
+                stackMode = StackSlider.END_OF_STACK_MODE;
             } else {
-                mStackSlider.setMode(StackSlider.NORMAL_MODE);
+                stackMode = StackSlider.NORMAL_MODE;
             }
+
+            mTransitionIsSetup = stackMode == StackSlider.NORMAL_MODE;
 
             View v = getViewAtRelativeIndex(activeIndex);
             if (v == null) return;
 
-            mHighlight.setImageBitmap(sHolographicHelper.createOutline(v));
-            mHighlight.setRotation(v.getRotation());
-            mHighlight.setTranslationY(v.getTranslationY());
-            mHighlight.bringToFront();
-            v.bringToFront();
-            mStackSlider.setView(v);
-
-            if (swipeGestureType == GESTURE_SLIDE_DOWN)
-                v.setVisibility(VISIBLE);
+            setupStackSlider(v, stackMode);
 
             // We only register this gesture if we've made it this far without a problem
             mSwipeGestureType = swipeGestureType;
