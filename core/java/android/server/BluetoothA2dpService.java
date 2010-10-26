@@ -498,6 +498,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                     handleSinkPlayingStateChange(device, BluetoothA2dp.STATE_NOT_PLAYING,
                         BluetoothA2dp.STATE_PLAYING);
                 } else {
+                   mPlayingA2dpDevice = null;
                    int prevState = mAudioDevices.get(device);
                    handleSinkStateChange(device, prevState, state);
                 }
@@ -512,7 +513,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 mSinkCount--;
             } else if (state == BluetoothA2dp.STATE_CONNECTED) {
                 mSinkCount ++;
-                mPlayingA2dpDevice = null;
             }
             mAudioDevices.put(device, state);
 
