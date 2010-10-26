@@ -47,6 +47,8 @@ interface IBluetooth
     boolean isDiscovering();
     byte[] readOutOfBandData();
 
+    int getAdapterConnectionState();
+
     boolean createBond(in String address);
     boolean createBondOutOfBand(in String address, in byte[] hash, in byte[] randomizer);
     boolean cancelBondProcess(in String address);
