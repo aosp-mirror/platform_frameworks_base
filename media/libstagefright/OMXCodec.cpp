@@ -450,7 +450,16 @@ void OMXCodec::findMatchingCodecs(
             continue;
         }
 
-        matchingCodecs->push(String8(componentName));
+        // When requesting software-only codecs, only push software codecs
+        // When requesting hardware-only codecs, only push hardware codecs
+        // When there is request neither for software-only nor for
+        // hardware-only codecs, push all codecs
+        if (((flags & kSoftwareCodecsOnly) &&   IsSoftwareCodec(componentName)) ||
+            ((flags & kHardwareCodecsOnly) &&  !IsSoftwareCodec(componentName)) ||
+            (!(flags & (kSoftwareCodecsOnly | kHardwareCodecsOnly)))) {
+
+            matchingCodecs->push(String8(componentName));
+        }
     }
 
     if (flags & kPreferSoftwareCodecs) {
