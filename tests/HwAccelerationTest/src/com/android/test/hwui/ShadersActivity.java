@@ -51,27 +51,28 @@ public class ShadersActivity extends Activity {
         private LinearGradient mHorGradient;
         private LinearGradient mDiagGradient;
         private LinearGradient mVertGradient;
+        private Bitmap mTexture;
 
         ShadersView(Context c) {
             super(c);
 
-            Bitmap texture = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
-            mTexWidth = texture.getWidth();
-            mTexHeight = texture.getHeight();
+            mTexture = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
+            mTexWidth = mTexture.getWidth();
+            mTexHeight = mTexture.getHeight();
             mDrawWidth = mTexWidth * 2.2f;
             mDrawHeight = mTexHeight * 1.2f;
 
-            mRepeatShader = new BitmapShader(texture, Shader.TileMode.REPEAT,
+            mRepeatShader = new BitmapShader(mTexture, Shader.TileMode.REPEAT,
                     Shader.TileMode.REPEAT);
 
-            mTranslatedShader = new BitmapShader(texture, Shader.TileMode.REPEAT,
+            mTranslatedShader = new BitmapShader(mTexture, Shader.TileMode.REPEAT,
                     Shader.TileMode.REPEAT);
             Matrix m1 = new Matrix();
             m1.setTranslate(mTexWidth / 2.0f, mTexHeight / 2.0f);
             m1.postRotate(45, 0, 0);
             mTranslatedShader.setLocalMatrix(m1);
             
-            mScaledShader = new BitmapShader(texture, Shader.TileMode.MIRROR,
+            mScaledShader = new BitmapShader(mTexture, Shader.TileMode.MIRROR,
                     Shader.TileMode.MIRROR);
             Matrix m2 = new Matrix();
             m2.setScale(0.5f, 0.5f);
@@ -98,6 +99,7 @@ public class ShadersActivity extends Activity {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
             //canvas.drawRGB(255, 255, 255);
+            canvas.drawBitmap(mTexture, 0.0f, 0.0f, null);
 
             // Bitmap shaders
             canvas.save();
