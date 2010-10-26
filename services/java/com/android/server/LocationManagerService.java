@@ -574,15 +574,16 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                  || LocationManager.PASSIVE_PROVIDER.equals(provider))
             && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
-            throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
+            throw new SecurityException("Provider " + provider
+                    + " requires ACCESS_FINE_LOCATION permission");
         }
         if (LocationManager.NETWORK_PROVIDER.equals(provider)
             && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
             && (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
-            throw new SecurityException(
-                "Requires ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permission");
+            throw new SecurityException("Provider " + provider
+                    + " requires ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permission");
         }
     }
 
@@ -741,9 +742,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private LocationProviderInterface best(List<String> providerNames) {
         ArrayList<LocationProviderInterface> providers;
         synchronized (mLock) {
-            providers = new ArrayList<LocationProviderInterface>(mProviders.size());
-            for (int i = mProviders.size() - 1; i >= 0; i--) {
-                providers.add(mProviders.get(i));
+            providers = new ArrayList<LocationProviderInterface>(providerNames.size());
+            for (String name : providerNames) {
+                providers.add(mProvidersByName.get(name));
             }
         }
 
