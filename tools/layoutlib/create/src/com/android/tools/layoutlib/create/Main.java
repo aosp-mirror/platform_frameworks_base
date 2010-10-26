@@ -67,6 +67,7 @@ public class Main {
                         "com.android.internal.R**",
                         "android.pim.*", // for datepicker
                         "android.os.*",  // for android.os.Handler
+                        "android.database.ContentObserver", // for Digital clock
                         });
             aa.analyze();
             agen.generate();
