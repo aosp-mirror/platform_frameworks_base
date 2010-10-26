@@ -28,9 +28,6 @@ namespace renderscript {
 class Type : public ObjectBase
 {
 public:
-    Type(Context *);
-    virtual ~Type();
-
     Type * createTex2D(const Element *, size_t w, size_t h, bool mip);
 
 
@@ -58,15 +55,6 @@ public:
     uint32_t getLODCount() const {return mLODCount;}
     bool getIsNp2() const;
 
-
-    void setElement(const Element *e) {mElement.set(e);}
-    void setDimX(uint32_t v) {mDimX = v;}
-    void setDimY(uint32_t v) {mDimY = v;}
-    void setDimZ(uint32_t v) {mDimZ = v;}
-    void setDimFaces(bool v) {mFaces = v;}
-    void setDimLOD(bool v) {mDimLOD = v;}
-
-
     void clear();
     void compute();
 
@@ -81,6 +69,10 @@ public:
 
     Type * cloneAndResize1D(Context *rsc, uint32_t dimX) const;
     Type * cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const;
+
+    static Type * getType(Context *rsc, const Element *e,
+                      uint32_t dimX, uint32_t dimY, uint32_t dimZ,
+                      bool dimLOD, bool dimFaces);
 
 protected:
     struct LOD {
@@ -124,10 +116,13 @@ protected:
     bool isValidGLComponent(uint32_t fieldIdx);
     void makeGLComponents();
 
+
 protected:
     virtual void preDestroy();
+    virtual ~Type();
 
 private:
+    Type(Context *);
     Type(const Type &);
 };
 

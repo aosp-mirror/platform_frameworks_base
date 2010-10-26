@@ -194,11 +194,15 @@ public class Allocation extends BaseObj {
         mRS.nAllocationRead(mID, d);
     }
 
-    public void resize(int dimX) {
+    public synchronized void resize(int dimX) {
         if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.getFaces() || mType.getLOD()) {
             throw new IllegalStateException("Resize only support for 1D allocations at this time.");
         }
         mRS.nAllocationResize1D(mID, dimX);
+
+        int typeID = mRS.nAllocationGetType(mID);
+        mType = new Type(typeID, mRS);
+        mType.updateFromNative();
     }
 
     /*

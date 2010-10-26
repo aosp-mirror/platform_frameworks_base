@@ -257,10 +257,7 @@ void ProgramVertexState::init(Context *rsc)
     rsc->mStateElement.elementBuilderAdd(f2Elem, "texture0", 1);
     const Element *attrElem = rsc->mStateElement.elementBuilderCreate(rsc);
 
-    Type *inputType = new Type(rsc);
-    inputType->setElement(constInput);
-    inputType->setDimX(1);
-    inputType->compute();
+    Type *inputType = Type::getType(rsc, constInput, 1, 0, 0, false, false);
 
     String8 shaderString(RS_SHADER_INTERNAL);
     shaderString.append("varying vec4 varColor;\n");

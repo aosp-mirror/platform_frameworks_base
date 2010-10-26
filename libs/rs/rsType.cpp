@@ -276,20 +276,12 @@ Type *Type::createFromStream(Context *rsc, IStream *stream)
         return NULL;
     }
 
-    Type *type = new Type(rsc);
-    type->mDimX = stream->loadU32();
-    type->mDimY = stream->loadU32();
-    type->mDimZ = stream->loadU32();
-
-    uint8_t temp = stream->loadU8();
-    type->mDimLOD = temp != 0;
-
-    temp = stream->loadU8();
-    type->mFaces = temp != 0;
-
-    type->setElement(elem);
-
-    return type;
+    uint32_t x = stream->loadU32();
+    uint32_t y = stream->loadU32();
+    uint32_t z = stream->loadU32();
+    uint8_t lod = stream->loadU8();
+    uint8_t faces = stream->loadU8();
+    return Type::getType(rsc, elem, x, y, z, lod != 0, faces !=0 );
 }
 
 bool Type::getIsNp2() const
@@ -325,56 +317,55 @@ bool Type::isEqual(const Type *other) const {
     return false;
 }
 
-Type * Type::cloneAndResize1D(Context *rsc, uint32_t dimX) const
+Type * Type::getType(Context *rsc, const Element *e,
+                     uint32_t dimX, uint32_t dimY, uint32_t dimZ,
+                     bool dimLOD, bool dimFaces)
 {
     TypeState * stc = &rsc->mStateType;
+
+    ObjectBase::asyncLock();
     for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
         Type *t = stc->mTypes[ct];
-        if (t->getElement() != mElement.get()) continue;
+        if (t->getElement() != e) continue;
         if (t->getDimX() != dimX) continue;
-        if (t->getDimY() != mDimY) continue;
-        if (t->getDimZ() != mDimZ) continue;
-        if (t->getDimLOD() != mDimLOD) continue;
-        if (t->getDimFaces() != mFaces) continue;
+        if (t->getDimY() != dimY) continue;
+        if (t->getDimZ() != dimZ) continue;
+        if (t->getDimLOD() != dimLOD) continue;
+        if (t->getDimFaces() != dimFaces) continue;
         t->incUserRef();
+        ObjectBase::asyncUnlock();
         return t;
     }
+    ObjectBase::asyncUnlock();
+
 
     Type *nt = new Type(rsc);
-    nt->mElement.set(mElement);
+    nt->mElement.set(e);
     nt->mDimX = dimX;
-    nt->mDimY = mDimY;
-    nt->mDimZ = mDimZ;
-    nt->mDimLOD = mDimLOD;
-    nt->mFaces = mFaces;
+    nt->mDimY = dimY;
+    nt->mDimZ = dimZ;
+    nt->mDimLOD = dimLOD;
+    nt->mFaces = dimFaces;
     nt->compute();
+    nt->incUserRef();
+
+    ObjectBase::asyncLock();
+    stc->mTypes.push(nt);
+    ObjectBase::asyncUnlock();
+
     return nt;
+}
+
+Type * Type::cloneAndResize1D(Context *rsc, uint32_t dimX) const
+{
+    return getType(rsc, mElement.get(), dimX,
+                   mDimY, mDimZ, mDimLOD, mFaces);
 }
 
 Type * Type::cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const
 {
-    TypeState * stc = &rsc->mStateType;
-    for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
-        Type *t = stc->mTypes[ct];
-        if (t->getElement() != mElement.get()) continue;
-        if (t->getDimX() != dimX) continue;
-        if (t->getDimY() != dimY) continue;
-        if (t->getDimZ() != mDimZ) continue;
-        if (t->getDimLOD() != mDimLOD) continue;
-        if (t->getDimFaces() != mFaces) continue;
-        t->incUserRef();
-        return t;
-    }
-
-    Type *nt = new Type(rsc);
-    nt->mElement.set(mElement);
-    nt->mDimX = dimX;
-    nt->mDimY = dimY;
-    nt->mDimZ = mDimZ;
-    nt->mDimLOD = mDimLOD;
-    nt->mFaces = mFaces;
-    nt->compute();
-    return nt;
+    return getType(rsc, mElement.get(), dimX, dimY,
+                   mDimZ, mDimLOD, mFaces);
 }
 
 
@@ -396,7 +387,7 @@ void rsi_TypeGetNativeData(Context *rsc, RsType type, uint32_t *typeData, uint32
     (*typeData++) = t->getDimLOD();
     (*typeData++) = t->getDimFaces() ? 1 : 0;
     (*typeData++) = (uint32_t)t->getElement();
-
+    t->getElement()->incUserRef();
 }
 
 
@@ -430,34 +421,6 @@ RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
         }
     }
 
-    ObjectBase::asyncLock();
-    for (uint32_t ct=0; ct < stc->mTypes.size(); ct++) {
-        Type *t = stc->mTypes[ct];
-        if (t->getElement() != e) continue;
-        if (t->getDimX() != dimX) continue;
-        if (t->getDimY() != dimY) continue;
-        if (t->getDimZ() != dimZ) continue;
-        if (t->getDimLOD() != dimLOD) continue;
-        if (t->getDimFaces() != dimFaces) continue;
-        t->incUserRef();
-        ObjectBase::asyncUnlock();
-        return t;
-    }
-    ObjectBase::asyncUnlock();
-
-    Type * st = new Type(rsc);
-    st->incUserRef();
-    st->setDimX(dimX);
-    st->setDimY(dimY);
-    st->setDimZ(dimZ);
-    st->setElement(e);
-    st->setDimLOD(dimLOD);
-    st->setDimFaces(dimFaces);
-    st->compute();
-
-    ObjectBase::asyncLock();
-    stc->mTypes.push(st);
-    ObjectBase::asyncUnlock();
-    return st;
+    return Type::getType(rsc, e, dimX, dimY, dimZ, dimLOD, dimFaces);
 }
 
