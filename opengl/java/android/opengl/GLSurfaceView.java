@@ -530,7 +530,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mGLThread.requestExitAndWait();
     }
 
     // ----------------------------------------------------------------------
