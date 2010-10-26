@@ -231,7 +231,7 @@ private:
      * @param paint The paint containing the alpha, blending mode, etc.
      */
     void drawTextureRect(float left, float top, float right, float bottom,
-            const Texture* texture, SkPaint* paint);
+            Texture* texture, SkPaint* paint);
 
     /**
      * Draws a textured mesh with the specified texture. If the indices are omitted,
@@ -360,9 +360,11 @@ private:
     inline void getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
 
     /**
-     * Binds the specified texture with the specified wrap modes.
+     * Binds the specified texture to the specified texture unit.
      */
-    inline void bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit = 0);
+    inline void bindTexture(GLuint texture, GLuint textureUnit = 0);
+    inline void setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT,
+            GLuint textureUnit = 0);
 
     /**
      * Enable or disable blending as necessary. This function sets the appropriate
