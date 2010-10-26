@@ -1867,12 +1867,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if ((mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE) {
             final int count = mChildrenCount;
             final View[] children = mChildren;
+            final boolean buildCache = !isHardwareAccelerated();
 
             for (int i = 0; i < count; i++) {
                 final View child = children[i];
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
                     child.setDrawingCacheEnabled(true);
-                    child.buildDrawingCache(true);
+                    if (buildCache) {
+                        child.buildDrawingCache(true);
+                    }
                 }
             }
 
@@ -1933,6 +1936,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if ((flags & FLAG_RUN_ANIMATION) != 0 && canAnimate()) {
             final boolean cache = (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
 
+            final boolean buildCache = !isHardwareAccelerated();
             for (int i = 0; i < count; i++) {
                 final View child = children[i];
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
@@ -1941,7 +1945,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     bindLayoutAnimation(child);
                     if (cache) {
                         child.setDrawingCacheEnabled(true);
-                        child.buildDrawingCache(true);
+                        if (buildCache) {                        
+                            child.buildDrawingCache(true);
+                        }
                     }
                 }
             }
@@ -2205,8 +2211,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (!canvas.isHardwareAccelerated()) {
                 cache = child.getDrawingCache(true);
             } else {
-                // TODO: bring back
-                // displayList = child.getDisplayList();
+                displayList = child.getDisplayList();
             }
         }
 

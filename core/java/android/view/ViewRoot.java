@@ -561,6 +561,11 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             scheduleTraversals();
         }
     }
+    
+    void invalidate() {
+        mDirty.set(0, 0, mWidth, mHeight);
+        scheduleTraversals();
+    }
 
     public ViewParent getParent() {
         return null;

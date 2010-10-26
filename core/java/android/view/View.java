@@ -7579,6 +7579,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * the auto scaling to true. Doing so, however, will generate a bitmap of a different
      * size than the view. This implies that your application must be able to handle this
      * size.</p>
+     * 
+     * <p>You should avoid calling this method when hardware acceleration is enabled. If
+     * you do not need the drawing cache bitmap, calling this method will increase memory
+     * usage and cause the view to be rendered in software once, thus negatively impacting 
+     * performance.</p>
      *
      * @see #getDrawingCache()
      * @see #destroyDrawingCache()
@@ -7699,7 +7704,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             canvas.translate(-mScrollX, -mScrollY);
 
             mPrivateFlags |= DRAWN;
-            mPrivateFlags |= DRAWING_CACHE_VALID;
+            if (mAttachInfo == null || !mAttachInfo.mHardwareAccelerated) {
+                mPrivateFlags |= DRAWING_CACHE_VALID;
+            }
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
