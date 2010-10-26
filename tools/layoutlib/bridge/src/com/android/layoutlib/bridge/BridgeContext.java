@@ -998,7 +998,8 @@ public final class BridgeContext extends Context {
 
     @Override
     public ApplicationInfo getApplicationInfo() {
-        return new ApplicationInfo();
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
