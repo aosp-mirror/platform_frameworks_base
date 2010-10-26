@@ -120,8 +120,15 @@ bool ObjectBase::checkDelete(const ObjectBase *ref)
 
 bool ObjectBase::decUserRef() const
 {
-    //LOGV("ObjectBase %p decU ref %i, %i", this, mUserRefCount, mSysRefCount);
     rsAssert(mUserRefCount > 0);
+#if RS_OBJECT_DEBUG
+    LOGV("ObjectBase %p decU ref %i, %i", this, mUserRefCount, mSysRefCount);
+    if (mUserRefCount <= 0) {
+        mStack.dump();
+    }
+#endif
+
+
     if ((android_atomic_dec(&mUserRefCount) <= 1) &&
         (android_atomic_acquire_load(&mSysRefCount) <= 0)) {
         return checkDelete(this);

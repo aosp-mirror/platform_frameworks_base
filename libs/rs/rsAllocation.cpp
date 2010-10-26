@@ -563,24 +563,6 @@ void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY)
 namespace android {
 namespace renderscript {
 
-RsAllocation rsi_AllocationCreateTyped(Context *rsc, RsType vtype)
-{
-    const Type * type = static_cast<const Type *>(vtype);
-
-    Allocation * alloc = new Allocation(rsc, type);
-    alloc->incUserRef();
-    return alloc;
-}
-
-RsAllocation rsi_AllocationCreateSized(Context *rsc, RsElement e, size_t count)
-{
-    Type * type = new Type(rsc);
-    type->setDimX(count);
-    type->setElement(static_cast<Element *>(e));
-    type->compute();
-    return rsi_AllocationCreateTyped(rsc, type);
-}
-
 void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, bool genmip, uint32_t baseMipLevel)
 {
     Allocation *alloc = static_cast<Allocation *>(va);
@@ -786,42 +768,6 @@ void rsi_AllocationUpdateFromBitmap(Context *rsc, RsAllocation va, RsElement _sr
     }
 }
 
-RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data)
-{
-    const Element *src = static_cast<const Element *>(_src);
-    const Element *dst = static_cast<const Element *>(_dst);
-
-    //LOGE("%p rsi_AllocationCreateFromBitmap %i %i %i", rsc, w, h, genMips);
-    RsDimension dims[] = {RS_DIMENSION_X, RS_DIMENSION_Y, RS_DIMENSION_LOD};
-    uint32_t dimValues[] = {w, h, genMips};
-    RsType type = rsaTypeCreate(rsc, _dst, 3, dims, dimValues);
-
-    RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, type);
-    Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
-    if (texAlloc == NULL) {
-        LOGE("Memory allocation failure");
-        return NULL;
-    }
-
-    ElementConverter_t cvt = pickConverter(dst, src);
-    if (cvt) {
-        cvt(texAlloc->getPtr(), data, w * h);
-        if (genMips) {
-            Adapter2D adapt(rsc, texAlloc);
-            Adapter2D adapt2(rsc, texAlloc);
-            for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
-                adapt.setLOD(lod);
-                adapt2.setLOD(lod + 1);
-                mip(adapt2, adapt);
-            }
-        }
-    } else {
-        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
-    }
-
-    return texAlloc;
-}
-
 void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
@@ -882,3 +828,49 @@ const void* rsi_AllocationGetType(Context *rsc, RsAllocation va)
 
 }
 }
+
+RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype)
+{
+    Context *rsc = static_cast<Context *>(con);
+    Allocation * alloc = new Allocation(rsc, static_cast<Type *>(vtype));
+    alloc->incUserRef();
+    return alloc;
+}
+
+RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data)
+{
+    Context *rsc = static_cast<Context *>(con);
+    const Element *src = static_cast<const Element *>(_src);
+    const Element *dst = static_cast<const Element *>(_dst);
+
+    //LOGE("%p rsi_AllocationCreateFromBitmap %i %i %i", rsc, w, h, genMips);
+    RsDimension dims[] = {RS_DIMENSION_X, RS_DIMENSION_Y, RS_DIMENSION_LOD};
+    uint32_t dimValues[] = {w, h, genMips};
+    RsType type = rsaTypeCreate(rsc, _dst, 3, dims, dimValues);
+
+    RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, type);
+    Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
+    if (texAlloc == NULL) {
+        LOGE("Memory allocation failure");
+        return NULL;
+    }
+
+    ElementConverter_t cvt = pickConverter(dst, src);
+    if (cvt) {
+        cvt(texAlloc->getPtr(), data, w * h);
+        if (genMips) {
+            Adapter2D adapt(rsc, texAlloc);
+            Adapter2D adapt2(rsc, texAlloc);
+            for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
+                adapt.setLOD(lod);
+                adapt2.setLOD(lod + 1);
+                mip(adapt2, adapt);
+            }
+        }
+    } else {
+        rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
+    }
+
+    return texAlloc;
+}
+

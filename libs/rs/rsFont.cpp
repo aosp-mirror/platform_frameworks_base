@@ -511,10 +511,7 @@ void FontState::initRenderState()
     mRSC->mStateElement.elementBuilderAdd(gammaElem, "Gamma", 1);
     const Element *constInput = mRSC->mStateElement.elementBuilderCreate(mRSC);
 
-    Type *inputType = new Type(mRSC);
-    inputType->setElement(constInput);
-    inputType->setDimX(1);
-    inputType->compute();
+    Type *inputType = Type::getType(mRSC, constInput, 1, 0, 0, false, false);
 
     uint32_t tmp[4];
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
@@ -546,11 +543,7 @@ void FontState::initTextTexture()
     const Element *alphaElem = Element::create(mRSC, RS_TYPE_UNSIGNED_8, RS_KIND_PIXEL_A, true, 1);
 
     // We will allocate a texture to initially hold 32 character bitmaps
-    Type *texType = new Type(mRSC);
-    texType->setElement(alphaElem);
-    texType->setDimX(1024);
-    texType->setDimY(256);
-    texType->compute();
+    Type *texType = Type::getType(mRSC, alphaElem, 1024, 256, 0, false, false);
 
     Allocation *cacheAlloc = new Allocation(mRSC, texType);
     mTextTexture.set(cacheAlloc);
@@ -578,11 +571,8 @@ void FontState::initVertexArrayBuffers()
 {
     // Now lets write index data
     const Element *indexElem = Element::create(mRSC, RS_TYPE_UNSIGNED_16, RS_KIND_USER, false, 1);
-    Type *indexType = new Type(mRSC);
     uint32_t numIndicies = mMaxNumberOfQuads * 6;
-    indexType->setDimX(numIndicies);
-    indexType->setElement(indexElem);
-    indexType->compute();
+    Type *indexType = Type::getType(mRSC, indexElem, numIndicies, 0, 0, false, false);
 
     Allocation *indexAlloc = new Allocation(mRSC, indexType);
     uint16_t *indexPtr = (uint16_t*)indexAlloc->getPtr();
@@ -612,10 +602,9 @@ void FontState::initVertexArrayBuffers()
     mRSC->mStateElement.elementBuilderAdd(texElem, "texture0", 1);
     const Element *vertexDataElem = mRSC->mStateElement.elementBuilderCreate(mRSC);
 
-    Type *vertexDataType = new Type(mRSC);
-    vertexDataType->setDimX(mMaxNumberOfQuads * 4);
-    vertexDataType->setElement(vertexDataElem);
-    vertexDataType->compute();
+    Type *vertexDataType = Type::getType(mRSC, vertexDataElem,
+                                         mMaxNumberOfQuads * 4,
+                                         0, 0, false, false);
 
     Allocation *vertexAlloc = new Allocation(mRSC, vertexDataType);
     mTextMeshPtr = (float*)vertexAlloc->getPtr();

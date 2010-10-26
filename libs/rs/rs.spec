@@ -104,17 +104,6 @@ TypeGetNativeData {
 	param uint32_t typeDataSize
 	}
 
-AllocationCreateTyped {
-	param RsType type
-	ret RsAllocation
-	}
-
-AllocationCreateSized {
-	param RsElement e
-	param size_t count
-	ret RsAllocation
-	}
-
 AllocationUpdateFromBitmap {
 	param RsAllocation alloc
 	param RsElement srcFmt
@@ -128,17 +117,6 @@ AllocationCreateBitmapRef {
 	param RsBitmapCallback_t callback
 	ret RsAllocation
 	}
-
-AllocationCreateFromBitmap {
-	param uint32_t width
-	param uint32_t height
-	param RsElement dstFmt
-	param RsElement srcFmt
-	param bool genMips
-	param const void * data
-	ret RsAllocation
-	}
-
 
 AllocationUploadToTexture {
 	param RsAllocation alloc
