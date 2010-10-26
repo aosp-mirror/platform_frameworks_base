@@ -1155,14 +1155,18 @@ public class VideoEditorTestImpl implements VideoEditor {
     private void removeAdjacentTransitions(MediaItem mediaItem) {
         final Transition beginTransition = mediaItem.getBeginTransition();
         if (beginTransition != null) {
-            beginTransition.getAfterMediaItem().setEndTransition(null);
+            if (beginTransition.getAfterMediaItem() != null) {
+                beginTransition.getAfterMediaItem().setEndTransition(null);
+            }
             beginTransition.invalidate();
             mTransitions.remove(beginTransition);
         }
 
         final Transition endTransition = mediaItem.getEndTransition();
         if (endTransition != null) {
-            endTransition.getBeforeMediaItem().setBeginTransition(null);
+            if (endTransition.getBeforeMediaItem() != null) {
+                endTransition.getBeforeMediaItem().setBeginTransition(null);
+            }
             endTransition.invalidate();
             mTransitions.remove(endTransition);
         }
