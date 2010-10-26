@@ -1250,15 +1250,19 @@
         <item name="android:minHeight">48dip</item>
         <item name="android:paddingLeft">32dip</item>
         <item name="android:paddingRight">32dip</item>
+        <item name="android:paddingTop">4dip</item>
+        <item name="android:paddingBottom">4dip</item>
     </style>
 
     <style name="Widget.Holo.Button.Small">
         <item name="android:background">@android:drawable/btn_default_holo_dark</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@android:color/primary_text_holo_dark</item>
-        <item name="android:minHeight">40dip</item>
+        <item name="android:minHeight">48dip</item>
         <item name="android:paddingLeft">24dip</item>
         <item name="android:paddingRight">24dip</item>
+        <item name="android:paddingTop">4dip</item>
+        <item name="android:paddingBottom">4dip</item>
     </style>
 
     <style name="Widget.Holo.Button.Inset">
@@ -1279,6 +1283,7 @@
     <style name="Widget.Holo.ButtonGroup" parent="Widget.ButtonGroup">
         <item name="divider">?android:attr/dividerVertical</item>
         <item name="showDividers">middle</item>
+        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.ButtonGroup.AlertDialog">
@@ -1383,7 +1388,7 @@
     <style name="Widget.Holo.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
     </style>
 
-    <style name="Widget.Holo.RatingBar.Small">
+    <style name="Widget.Holo.RatingBar.Small" parent="Widget.RatingBar.Small">
     </style>
 
     <style name="Widget.Holo.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
@@ -1483,6 +1488,7 @@
 
     <style name="Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_dark</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Holo.ActionButton.TextButton" parent="Widget.Holo.ButtonBar.Button">
@@ -1529,14 +1535,18 @@
         <item name="android:minHeight">48dip</item>
         <item name="android:paddingLeft">32dip</item>
         <item name="android:paddingRight">32dip</item>
+        <item name="android:paddingTop">4dip</item>
+        <item name="android:paddingBottom">4dip</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Small">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@android:color/primary_text_holo_light</item>
-        <item name="android:minHeight">40dip</item>
+        <item name="android:minHeight">48dip</item>
         <item name="android:paddingLeft">24dip</item>
         <item name="android:paddingRight">24dip</item>
+        <item name="android:paddingTop">4dip</item>
+        <item name="android:paddingBottom">4dip</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Inset">
@@ -1554,6 +1564,7 @@
     </style>
 
     <style name="Widget.Holo.Light.ButtonGroup" parent="Widget.Holo.ButtonGroup">
+        <item name="android:background">@android:drawable/btn_default_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.ButtonGroup.AlertDialog">
@@ -1650,7 +1661,7 @@
     <style name="Widget.Holo.Light.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
     </style>
 
-    <style name="Widget.Holo.Light.RatingBar.Small">
+    <style name="Widget.Holo.Light.RatingBar.Small" parent="Widget.RatingBar.Small">
     </style>
 
     <style name="Widget.Holo.Light.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
@@ -1737,6 +1748,7 @@
 
     <style name="Widget.Holo.Light.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_light</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">

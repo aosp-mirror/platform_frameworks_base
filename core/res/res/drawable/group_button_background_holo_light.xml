@@ -19,10 +19,10 @@
     <item android:state_window_focused="false" android:drawable="@color/transparent" />
 
     <!-- Even though these two point to the same resource, have two states so the drawable will invalidate itself when coming out of pressed state. -->
-    <item android:state_focused="true"  android:state_enabled="false" android:state_pressed="true" android:drawable="@color/group_button_background_pressed_holo_light" />
-    <item android:state_focused="true"  android:state_enabled="false"                              android:drawable="@color/group_button_background_focused_holo_light" />
-    <item android:state_focused="true"                                android:state_pressed="true" android:drawable="@color/group_button_background_pressed_holo_light" />
-    <item android:state_focused="false"                               android:state_pressed="true" android:drawable="@color/group_button_background_pressed_holo_light" />
-    <item android:state_focused="true"                                                             android:drawable="@color/group_button_background_focused_holo_light" />
+    <item android:state_focused="true"  android:state_enabled="false" android:state_pressed="true" android:drawable="@drawable/btn_group_disabled_holo_light" />
+    <item android:state_focused="true"  android:state_enabled="false"                              android:drawable="@drawable/btn_group_disabled_holo_light" />
+    <item android:state_focused="true"                                android:state_pressed="true" android:drawable="@drawable/btn_group_pressed_holo_light" />
+    <item android:state_focused="false"                               android:state_pressed="true" android:drawable="@drawable/btn_group_pressed_holo_light" />
+    <item android:state_focused="true"                                                             android:drawable="@drawable/btn_group_focused_holo_light" />
     <item                                                                                          android:drawable="@color/transparent" />
 </selector>

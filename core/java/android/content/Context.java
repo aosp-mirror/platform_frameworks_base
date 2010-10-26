@@ -82,7 +82,8 @@ public abstract class Context {
     /**
      * Flag for {@link #bindService}: automatically create the service as long
      * as the binding exists.  Note that while this will create the service,
-     * its {@link android.app.Service#onStart} method will still only be called due to an
+     * its {@link android.app.Service#onStartCommand}
+     * method will still only be called due to an
      * explicit call to {@link #startService}.  Even without that, though,
      * this still provides you with access to the service object while the
      * service is created.
@@ -136,13 +137,13 @@ public abstract class Context {
      * services, etc).
      */
     public abstract Looper getMainLooper();
-    
+
     /**
      * Return the context of the single, global Application object of the
      * current process.  This generally should only be used if you need a
      * Context whose lifecycle is separate from the current context, that is
      * tied to the lifetime of the process rather than the current component.
-     * 
+     *
      * <p>Consider for example how this interacts with
      * {@ #registerReceiver(BroadcastReceiver, IntentFilter)}:
      * <ul>
@@ -271,7 +272,7 @@ public abstract class Context {
 
     /** Return the full application info for this context's package. */
     public abstract ApplicationInfo getApplicationInfo();
-    
+
     /**
      * Return the full path to this context's primary Android package.
      * The Android package is a ZIP file which contains the application's
@@ -414,18 +415,18 @@ public abstract class Context {
      * @see #getDir
      */
     public abstract File getFilesDir();
-    
+
     /**
      * Returns the absolute path to the directory on the external filesystem
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
      * Environment.getExternalStorageDirectory()}) where the application can
      * place persistent files it owns.  These files are private to the
      * applications, and not typically visible to the user as media.
-     * 
+     *
      * <p>This is like {@link #getFilesDir()} in that these
      * files will be deleted when the application is uninstalled, however there
      * are some important differences:
-     * 
+     *
      * <ul>
      * <li>External files are not always available: they will disappear if the
      * user mounts the external storage on a computer or removes it.  See the
@@ -433,10 +434,10 @@ public abstract class Context {
      * <li>There is no security enforced with these files.  All applications
      * can read and write files placed here.
      * </ul>
-     * 
+     *
      * <p>Here is an example of typical code to manipulate a file in
      * an application's private storage:</p>
-     * 
+     *
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * private_file}
      *
@@ -456,13 +457,13 @@ public abstract class Context {
      * {@link android.os.Environment#getExternalStoragePublicDirectory
      * Environment.getExternalStoragePublicDirectory()}, the directory
      * returned here will be automatically created for you.
-     * 
+     *
      * <p>Here is an example of typical code to manipulate a picture in
      * an application's private storage and add it to the media database:</p>
-     * 
+     *
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * private_picture}
-     * 
+     *
      * @param type The type of files directory to return.  May be null for
      * the root of the files directory or one of
      * the following Environment constants for a subdirectory:
@@ -473,7 +474,7 @@ public abstract class Context {
      * {@link android.os.Environment#DIRECTORY_NOTIFICATIONS},
      * {@link android.os.Environment#DIRECTORY_PICTURES}, or
      * {@link android.os.Environment#DIRECTORY_MOVIES}.
-     * 
+     *
      * @return Returns the path of the directory holding application files
      * on external storage.  Returns null if external storage is not currently
      * mounted so it could not ensure the path exists; you will need to call
@@ -483,18 +484,18 @@ public abstract class Context {
      * @see android.os.Environment#getExternalStoragePublicDirectory
      */
     public abstract File getExternalFilesDir(String type);
-    
+
     /**
-     * Returns the absolute path to the application specific cache directory 
+     * Returns the absolute path to the application specific cache directory
      * on the filesystem. These files will be ones that get deleted first when the
      * device runs low on storage.
      * There is no guarantee when these files will be deleted.
-     * 
+     *
      * <strong>Note: you should not <em>rely</em> on the system deleting these
      * files for you; you should always have a reasonable maximum, such as 1 MB,
      * for the amount of space you consume with cache files, and prune those
      * files when exceeding that space.</strong>
-     * 
+     *
      * @return Returns the path of the directory holding application cache files.
      *
      * @see #openFileOutput
@@ -508,11 +509,11 @@ public abstract class Context {
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
      * Environment.getExternalStorageDirectory()} where the application can
      * place cache files it owns.
-     * 
+     *
      * <p>This is like {@link #getCacheDir()} in that these
      * files will be deleted when the application is uninstalled, however there
      * are some important differences:
-     * 
+     *
      * <ul>
      * <li>The platform does not monitor the space available in external storage,
      * and thus will not automatically delete these files.  Note that you should
@@ -533,7 +534,7 @@ public abstract class Context {
      * @see #getCacheDir
      */
     public abstract File getExternalCacheDir();
-    
+
     /**
      * Returns an array of strings naming the private files associated with
      * this Context's application package.
@@ -730,7 +731,7 @@ public abstract class Context {
      * here; otherwise, its associated action will be executed (such as
      * sending a broadcast) as if you had called
      * {@link IntentSender#sendIntent IntentSender.sendIntent} on it.
-     * 
+     *
      * @param intent The IntentSender to launch.
      * @param fillInIntent If non-null, this will be provided as the
      * intent parameter to {@link IntentSender#sendIntent}.
@@ -883,7 +884,7 @@ public abstract class Context {
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     public abstract void sendStickyBroadcast(Intent intent);
-    
+
     /**
      * Version of {@link #sendStickyBroadcast} that allows you to
      * receive data back from the broadcast.  This is accomplished by
@@ -1039,7 +1040,7 @@ public abstract class Context {
      * process for it if needed); if it is running then it remains running.
      *
      * <p>Every call to this method will result in a corresponding call to
-     * the target service's {@link android.app.Service#onStart} method,
+     * the target service's {@link android.app.Service#onStartCommand} method,
      * with the <var>intent</var> given here.  This provides a convenient way
      * to submit jobs to a service without having to bind and call on to its
      * interface.
@@ -1136,8 +1137,9 @@ public abstract class Context {
      *      description (action, category, etc) to match an
      *      {@link IntentFilter} published by a service.
      * @param conn Receives information as the service is started and stopped.
-     * @param flags Operation options for the binding.  May be 0 or
-     *          {@link #BIND_AUTO_CREATE}.
+     * @param flags Operation options for the binding.  May be 0,
+     *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND}, or
+     *          {@link #BIND_NOT_FOREGROUND}.
      * @return If you have successfully bound to the service, true is returned;
      *         false is returned if the connection is not made so you will not
      *         receive the service object.
@@ -1147,6 +1149,8 @@ public abstract class Context {
      * @see #unbindService
      * @see #startService
      * @see #BIND_AUTO_CREATE
+     * @see #BIND_DEBUG_UNBIND
+     * @see #BIND_NOT_FOREGROUND
      */
     public abstract boolean bindService(Intent service, ServiceConnection conn,
             int flags);
@@ -1193,7 +1197,7 @@ public abstract class Context {
      * Return the handle to a system-level service by name. The class of the
      * returned object varies by the requested name. Currently available names
      * are:
-     * 
+     *
      * <dl>
      *  <dt> {@link #WINDOW_SERVICE} ("window")
      *  <dd> The top-level window manager in which you can place custom
@@ -1237,16 +1241,16 @@ public abstract class Context {
      * <dt> {@link #DOWNLOAD_SERVICE} ("download")
      * <dd> A {@link android.app.DownloadManager} for requesting HTTP downloads
      * </dl>
-     * 
+     *
      * <p>Note:  System services obtained via this API may be closely associated with
      * the Context in which they are obtained from.  In general, do not share the
      * service objects between various different contexts (Activities, Applications,
      * Services, Providers, etc.)
      *
      * @param name The name of the desired service.
-     * 
+     *
      * @return The service or null if the name does not exist.
-     * 
+     *
      * @see #WINDOW_SERVICE
      * @see android.view.WindowManager
      * @see #LAYOUT_INFLATER_SERVICE
@@ -1295,7 +1299,7 @@ public abstract class Context {
      * you're running long tasks.
      */
     public static final String POWER_SERVICE = "power";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.WindowManager} for accessing the system's window
@@ -1305,7 +1309,7 @@ public abstract class Context {
      * @see android.view.WindowManager
      */
     public static final String WINDOW_SERVICE = "window";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.LayoutInflater} for inflating layout resources in this
@@ -1315,7 +1319,7 @@ public abstract class Context {
      * @see android.view.LayoutInflater
      */
     public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.accounts.AccountManager} for receiving intents at a
@@ -1325,7 +1329,7 @@ public abstract class Context {
      * @see android.accounts.AccountManager
      */
     public static final String ACCOUNT_SERVICE = "account";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.ActivityManager} for interacting with the global
@@ -1335,7 +1339,7 @@ public abstract class Context {
      * @see android.app.ActivityManager
      */
     public static final String ACTIVITY_SERVICE = "activity";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.AlarmManager} for receiving intents at a
@@ -1345,7 +1349,7 @@ public abstract class Context {
      * @see android.app.AlarmManager
      */
     public static final String ALARM_SERVICE = "alarm";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.NotificationManager} for informing the user of
@@ -1355,7 +1359,7 @@ public abstract class Context {
      * @see android.app.NotificationManager
      */
     public static final String NOTIFICATION_SERVICE = "notification";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.accessibility.AccessibilityManager} for giving the user
@@ -1365,7 +1369,7 @@ public abstract class Context {
      * @see android.view.accessibility.AccessibilityManager
      */
     public static final String ACCESSIBILITY_SERVICE = "accessibility";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.NotificationManager} for controlling keyguard.
@@ -1374,7 +1378,7 @@ public abstract class Context {
      * @see android.app.KeyguardManager
      */
     public static final String KEYGUARD_SERVICE = "keyguard";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.location.LocationManager} for controlling location
@@ -1402,7 +1406,7 @@ public abstract class Context {
      * @see android.app.SearchManager
      */
     public static final String SEARCH_SERVICE = "search";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.hardware.SensorManager} for accessing sensors.
@@ -1411,7 +1415,7 @@ public abstract class Context {
      * @see android.hardware.SensorManager
      */
     public static final String SENSOR_SERVICE = "sensor";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.os.storage.StorageManager} for accessing system storage
@@ -1429,7 +1433,7 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String WALLPAPER_SERVICE = "wallpaper";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.os.Vibrator} for interacting with the vibration hardware.
@@ -1490,22 +1494,22 @@ public abstract class Context {
      * @see android.net.wifi.WifiManager
      */
     public static final String WIFI_SERVICE = "wifi";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.AudioManager} for handling management of volume,
      * ringer modes and audio routing.
-     * 
+     *
      * @see #getSystemService
      * @see android.media.AudioManager
      */
     public static final String AUDIO_SERVICE = "audio";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.telephony.TelephonyManager} for handling management the
      * telephony features of the device.
-     * 
+     *
      * @see #getSystemService
      * @see android.telephony.TelephonyManager
      */
@@ -1515,14 +1519,14 @@ public abstract class Context {
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.text.ClipboardManager} for accessing and modifying
      * the contents of the global clipboard.
-     * 
+     *
      * @see #getSystemService
      * @see android.text.ClipboardManager
      */
     public static final String CLIPBOARD_SERVICE = "clipboard";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a 
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.inputmethod.InputMethodManager} for accessing input
      * methods.
      *
@@ -1544,7 +1548,7 @@ public abstract class Context {
      * {@link android.app.backup.IBackupManager IBackupManager} for communicating
      * with the backup mechanism.
      * @hide
-     * 
+     *
      * @see #getSystemService
      */
     public static final String BACKUP_SERVICE = "backup";
@@ -1558,7 +1562,7 @@ public abstract class Context {
     public static final String DROPBOX_SERVICE = "dropbox";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a 
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.admin.DevicePolicyManager} for working with global
      * device policy management.
      *
@@ -1898,7 +1902,7 @@ public abstract class Context {
      * #enforceCallingUriPermission}, except it grants your own
      * permissions if you are not currently processing an IPC.  Use
      * with care!
-     * 
+     *
      * @param uri The uri that is being checked.
      * @param modeFlags The type of access to grant.  May be one or both of
      * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
@@ -1914,7 +1918,7 @@ public abstract class Context {
      * Enforce both a Uri and normal permission.  This allows you to perform
      * both {@link #enforcePermission} and {@link #enforceUriPermission} in one
      * call.
-     * 
+     *
      * @param uri The Uri whose permission is to be checked, or null to not
      * do this check.
      * @param readPermission The permission that provides overall read access,
@@ -1957,7 +1961,7 @@ public abstract class Context {
      * with extreme care!
      */
     public static final int CONTEXT_IGNORE_SECURITY = 0x00000002;
-    
+
     /**
      * Flag for use with {@link #createPackageContext}: a restricted context may
      * disable specific features. For instance, a View associated with a restricted
@@ -1995,9 +1999,9 @@ public abstract class Context {
 
     /**
      * Indicates whether this Context is restricted.
-     * 
+     *
      * @return True if this Context is restricted, false otherwise.
-     * 
+     *
      * @see #CONTEXT_RESTRICTED
      */
     public boolean isRestricted() {

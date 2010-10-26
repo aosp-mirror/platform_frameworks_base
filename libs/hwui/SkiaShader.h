@@ -97,7 +97,7 @@ struct SkiaShader {
     void computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView);
 
 protected:
-    inline void bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit);
+    inline void bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit);
 
     Type mType;
     SkShader* mKey;
@@ -138,7 +138,7 @@ private:
     }
 
     SkBitmap* mBitmap;
-    const Texture* mTexture;
+    Texture* mTexture;
     GLenum mWrapS;
     GLenum mWrapT;
 }; // struct SkiaBitmapShader

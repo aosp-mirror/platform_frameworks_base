@@ -379,11 +379,13 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     }
 
     void refreshChildren() {
+        if (mAdapter == null) return;
         for (int i = mCurrentWindowStart; i <= mCurrentWindowEnd; i++) {
-            int index = modulo(i, mMaxNumActiveViews);
+            int index = modulo(i, getWindowSize());
 
+            int adapterCount = mAdapter.getCount();
             // get the fresh child from the adapter
-            View updatedChild = mAdapter.getView(i, null, this);
+            View updatedChild = mAdapter.getView(modulo(i, adapterCount), null, this);
 
             if (mViewsMap.containsKey(index)) {
                 FrameLayout fl = (FrameLayout) mViewsMap.get(index).view;

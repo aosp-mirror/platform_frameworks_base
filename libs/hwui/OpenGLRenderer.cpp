@@ -644,7 +644,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint
     }
 
     glActiveTexture(GL_TEXTURE0);
-    const Texture* texture = mCaches.textureCache.get(bitmap);
+    Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -661,7 +661,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* pai
     }
 
     glActiveTexture(GL_TEXTURE0);
-    const Texture* texture = mCaches.textureCache.get(bitmap);
+    Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -677,9 +677,10 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     }
 
     glActiveTexture(GL_TEXTURE0);
-    const Texture* texture = mCaches.textureCache.get(bitmap);
+    Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
+    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
     const float width = texture->width;
     const float height = texture->height;
@@ -711,9 +712,10 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     }
 
     glActiveTexture(GL_TEXTURE0);
-    const Texture* texture = mCaches.textureCache.get(bitmap);
+    Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
+    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -1046,7 +1048,7 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      // Build and use the appropriate shader
      useProgram(mCaches.programCache.get(description));
 
-     bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, textureUnit);
+     bindTexture(texture, textureUnit);
      glUniform1i(mCaches.currentProgram->getUniform("sampler"), textureUnit);
 
      int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
@@ -1220,10 +1222,12 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
-        const Texture* texture, SkPaint* paint) {
+        Texture* texture, SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
+
+    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
     drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
             texture->blend, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
@@ -1263,7 +1267,7 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     }
 
     // Texture
-    bindTexture(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, 0);
+    bindTexture(texture);
     glUniform1i(mCaches.currentProgram->getUniform("sampler"), 0);
 
     // Always premultiplied
@@ -1380,11 +1384,29 @@ SkXfermode::Mode OpenGLRenderer::getXfermode(SkXfermode* mode) {
     return mode->fMode;
 }
 
-void OpenGLRenderer::bindTexture(GLuint texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit) {
+void OpenGLRenderer::bindTexture(GLuint texture, GLuint textureUnit) {
     glActiveTexture(gTextureUnits[textureUnit]);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+}
+
+void OpenGLRenderer::setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT,
+        GLuint textureUnit) {
+    bool bound = false;
+    if (wrapS != texture->wrapS) {
+        glActiveTexture(gTextureUnits[textureUnit]);
+        glBindTexture(GL_TEXTURE_2D, texture->id);
+        bound = true;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+        texture->wrapS = wrapS;
+    }
+    if (wrapT != texture->wrapT) {
+        if (!bound) {
+            glActiveTexture(gTextureUnits[textureUnit]);
+            glBindTexture(GL_TEXTURE_2D, texture->id);
+        }
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+        texture->wrapT = wrapT;
+    }
 }
 
 }; // namespace uirenderer

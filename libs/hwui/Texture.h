@@ -29,6 +29,8 @@ struct Texture {
     Texture() {
         cleanup = false;
         bitmapSize = 0;
+        wrapS = GL_CLAMP_TO_EDGE;
+        wrapT = GL_CLAMP_TO_EDGE;
     }
 
     /**
@@ -59,6 +61,12 @@ struct Texture {
      * Optional, size of the original bitmap.
      */
     uint32_t bitmapSize;
+
+    /**
+     * Last wrap modes set on this texture. Defaults to GL_CLAMP_TO_EDGE.
+     */
+    GLenum wrapS;
+    GLenum wrapT;
 }; // struct Texture
 
 class AutoTexture {

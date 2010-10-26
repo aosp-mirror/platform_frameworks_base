@@ -30,6 +30,7 @@
        <item><xliff:g id="id">sync_active</xliff:g></item>
        <item><xliff:g id="id">gps</xliff:g></item>
        <item><xliff:g id="id">bluetooth</xliff:g></item>
+       <item><xliff:g id="id">nfc</xliff:g></item>
        <item><xliff:g id="id">tty</xliff:g></item>
        <item><xliff:g id="id">speakerphone</xliff:g></item>
        <item><xliff:g id="id">mute</xliff:g></item>

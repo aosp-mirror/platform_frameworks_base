@@ -813,7 +813,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
 
-    LOGE("%s: Received signal %s:%s from %s", __FUNCTION__,
+    LOGV("%s: Received signal %s:%s from %s", __FUNCTION__,
         dbus_message_get_interface(msg), dbus_message_get_member(msg),
         dbus_message_get_path(msg));
 

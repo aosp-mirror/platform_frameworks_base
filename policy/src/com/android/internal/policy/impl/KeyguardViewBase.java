@@ -142,6 +142,8 @@ public abstract class KeyguardViewBase extends FrameLayout {
         final int keyCode = event.getKeyCode();
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
+                case KeyEvent.KEYCODE_MEDIA_PLAY:
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                     /* Suppress PLAYPAUSE toggle when phone is ringing or
                      * in-call to avoid music playback */

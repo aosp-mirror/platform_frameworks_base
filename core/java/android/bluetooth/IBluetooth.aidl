@@ -92,4 +92,6 @@ interface IBluetooth
     List<BluetoothDevice> getConnectedPanDevices();
     boolean connectPanDevice(in BluetoothDevice device);
     boolean disconnectPanDevice(in BluetoothDevice device);
+
+    void sendConnectionStateChange(in BluetoothDevice device, int state, int prevState);
 }

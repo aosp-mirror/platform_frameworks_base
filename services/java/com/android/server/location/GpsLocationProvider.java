@@ -82,7 +82,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private static final String TAG = "GpsLocationProvider";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final boolean VERBOSE = false;
 
     // these need to match GpsPositionMode enum in gps.h
@@ -1250,7 +1250,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         native_agps_data_conn_failed();
                     }
                 } else if (result == Phone.APN_REQUEST_STARTED) {
-                    if (DEBUG) Log.d(TAG, "Phone.APN_ALREADYAPN_REQUEST_STARTED_ACTIVE");
+                    if (DEBUG) Log.d(TAG, "Phone.APN_REQUEST_STARTED");
                     // Nothing to do here
                 } else {
                     if (DEBUG) Log.d(TAG, "startUsingNetworkFeature failed");
@@ -1492,8 +1492,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private final class ProviderHandler extends Handler {
         @Override
-        public void handleMessage(Message msg)
-        {
+        public void handleMessage(Message msg) {
             int message = msg.what;
             switch (message) {
                 case ENABLE:

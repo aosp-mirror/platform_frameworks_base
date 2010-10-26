@@ -313,6 +313,20 @@ status_t CameraSource::configureCamera(
     }
 
     if (frameRate != -1) {
+        CHECK(frameRate > 0 && frameRate <= 120);
+        const char* supportedFrameRates =
+                params->get(CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES);
+        CHECK(supportedFrameRates != NULL);
+        LOGV("Supported frame rates: %s", supportedFrameRates);
+        char buf[4];
+        snprintf(buf, 4, "%d", frameRate);
+        if (strstr(supportedFrameRates, buf) == NULL) {
+            LOGE("Requested frame rate (%d) is not supported: %s",
+                frameRate, supportedFrameRates);
+            return BAD_VALUE;
+        }
+
+        // The frame rate is supported, set the camera to the requested value.
         params->setPreviewFrameRate(frameRate);
         isCameraParamChanged = true;
     } else {  // frameRate == -1
@@ -517,6 +531,7 @@ status_t CameraSource::init(
     mMeta->setInt32(kKeyHeight,      mVideoSize.height);
     mMeta->setInt32(kKeyStride,      mVideoSize.width);
     mMeta->setInt32(kKeySliceHeight, mVideoSize.height);
+    mMeta->setInt32(kKeySampleRate,  mVideoFrameRate);
     return OK;
 }
 

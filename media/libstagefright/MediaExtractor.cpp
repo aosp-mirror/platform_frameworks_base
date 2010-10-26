@@ -24,6 +24,7 @@
 #include "include/WAVExtractor.h"
 #include "include/OggExtractor.h"
 #include "include/MPEG2TSExtractor.h"
+#include "include/DRMExtractor.h"
 
 #include "matroska/MatroskaExtractor.h"
 
@@ -61,6 +62,18 @@ sp<MediaExtractor> MediaExtractor::Create(
         mime = tmp.string();
         LOGV("Autodetected media content as '%s' with confidence %.2f",
              mime, confidence);
+    }
+
+    if (!strncmp(mime, "drm", 3)) {
+        char *originalMime = strrchr(mime, '+') + 1;
+
+        if (!strncmp(mime, "drm+es_based", 12)) {
+            return new DRMExtractor(source, originalMime);
+        } else if (!strncmp(mime, "drm+container_based", 19)) {
+            mime = originalMime;
+        } else {
+            return NULL;
+        }
     }
 
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)

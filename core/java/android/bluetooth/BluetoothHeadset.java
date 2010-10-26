@@ -86,12 +86,33 @@ public final class BluetoothHeadset implements BluetoothProfile {
 
 
     /**
-     * Broadcast Action: Indicates a headset has posted a vendor-specific event.
-     * <p>Always contains the extra fields {@link #EXTRA_DEVICE},
-     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD}, and
-     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS}.
+     * Intent used to broadcast that the headset has posted a
+     * vendor-specific event.
+     *
+     * <p>This intent will have 4 extras and 1 category.
+     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote Bluetooth Device
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD} - The vendor specific
+     *                                                    command
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE} - The AT command
+     *                                                         type.
+     * Can be one of  {@link #AT_CMD_TYPE_READ}, {@link #AT_CMD_TYPE_TEST},
+     * or {@link #AT_CMD_TYPE_SET}, {@link #AT_CMD_TYPE_BASIC},
+     * {@link #AT_CMD_TYPE_ACTION}.
+     *
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS} - Command arguments.
+     *
+     * The category is the Company ID of the vendor defining the
+     * vendor-specific command. {@link BluetoothAssignedNumbers}
+     *
+     * For example, for Plantronics specific events
+     * Category will be {@link #VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID_CATEGORY}.55
+     *
+     * <p> For example, an AT+XEVENT=foo,3 will get translated into
+     * EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD = +XEVENT
+     * EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE = AT_CMD_TYPE_SET
+     * EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS = foo, 3
+     *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VENDOR_SPECIFIC_HEADSET_EVENT =
@@ -100,30 +121,67 @@ public final class BluetoothHeadset implements BluetoothProfile {
     /**
      * A String extra field in {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT}
      * intents that contains the name of the vendor-specific command.
-     * @hide
      */
     public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD =
             "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_CMD";
 
     /**
      * An int extra field in {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT}
-     * intents that contains the Company ID of the vendor defining the vendor-specific
-     * command.
-     * @see <a href="https://www.bluetooth.org/Technical/AssignedNumbers/identifiers.htm">
-     * Bluetooth SIG Assigned Numbers - Company Identifiers</a>
-     * @hide
+     * intents that contains the AT command type of the vendor-specific command.
      */
-    public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID =
-            "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID";
+    public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE =
+            "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE";
+
+    /**
+     * AT command type READ used with
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE}
+     * For example, AT+VGM?. There are no arguments for this command type.
+     */
+    public static final int AT_CMD_TYPE_READ = 0;
+
+    /**
+     * AT command type TEST used with
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE}
+     * For example, AT+VGM=?. There are no arguments for this command type.
+     */
+    public static final int AT_CMD_TYPE_TEST = 1;
+
+    /**
+     * AT command type SET used with
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE}
+     * For example, AT+VGM=<args>.
+     */
+    public static final int AT_CMD_TYPE_SET = 2;
+
+    /**
+     * AT command type BASIC used with
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE}
+     * For example, ATD. Single character commands and everything following the
+     * character are arguments.
+     */
+    public static final int AT_CMD_TYPE_BASIC = 3;
+
+    /**
+     * AT command type ACTION used with
+     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE}
+     * For example, AT+CHUP. There are no arguments for action commands.
+     */
+    public static final int AT_CMD_TYPE_ACTION = 4;
 
     /**
      * A Parcelable String array extra field in
      * {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT} intents that contains
      * the arguments to the vendor-specific command.
-     * @hide
      */
     public static final String EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS =
             "android.bluetooth.headset.extra.VENDOR_SPECIFIC_HEADSET_EVENT_ARGS";
+
+    /**
+     * The intent category to be used with {@link #ACTION_VENDOR_SPECIFIC_HEADSET_EVENT}
+     * for the companyId
+     */
+    public static final String VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID_CATEGORY  =
+            "android.bluetooth.headset.intent.category.companyid";
 
     /*
      * Headset state when SCO audio is connected

@@ -1163,7 +1163,10 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
         // If the pointer is not currently down, then ignore the event.
         if (! mTempTouchState.down) {
-            LOGI("Dropping event because the pointer is not down.");
+#if DEBUG_INPUT_DISPATCHER_POLICY
+            LOGD("Dropping event because the pointer is not down or we previously "
+                    "dropped the pointer down event.");
+#endif
             injectionResult = INPUT_EVENT_INJECTION_FAILED;
             goto Failed;
         }
@@ -2775,7 +2778,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
         dump.append(INDENT "ActiveConnections:\n");
         for (size_t i = 0; i < mActiveConnections.size(); i++) {
             const Connection* connection = mActiveConnections[i];
-            dump.appendFormat(INDENT2 "%d: '%s', status=%s, outboundQueueLength=%u"
+            dump.appendFormat(INDENT2 "%d: '%s', status=%s, outboundQueueLength=%u, "
                     "inputState.isNeutral=%s\n",
                     i, connection->getInputChannelName(), connection->getStatusLabel(),
                     connection->outboundQueue.count(),
