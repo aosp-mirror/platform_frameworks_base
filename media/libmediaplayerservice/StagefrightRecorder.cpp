@@ -165,7 +165,8 @@ status_t StagefrightRecorder::setVideoSize(int width, int height) {
 
 status_t StagefrightRecorder::setVideoFrameRate(int frames_per_second) {
     LOGV("setVideoFrameRate: %d", frames_per_second);
-    if (frames_per_second <= 0 || frames_per_second > 30) {
+    if ((frames_per_second <= 0 && frames_per_second != -1) ||
+        frames_per_second > 120) {
         LOGE("Invalid video frame rate: %d", frames_per_second);
         return BAD_VALUE;
     }
@@ -960,7 +961,7 @@ void StagefrightRecorder::clipVideoFrameRate() {
                         "enc.vid.fps.min", mVideoEncoder);
     int maxFrameRate = mEncoderProfiles->getVideoEncoderParamByName(
                         "enc.vid.fps.max", mVideoEncoder);
-    if (mFrameRate < minFrameRate) {
+    if (mFrameRate < minFrameRate && mFrameRate != -1) {
         LOGW("Intended video encoding frame rate (%d fps) is too small"
              " and will be set to (%d fps)", mFrameRate, minFrameRate);
         mFrameRate = minFrameRate;
@@ -1035,6 +1036,10 @@ void StagefrightRecorder::clipVideoFrameHeight() {
 }
 
 status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) {
+    status_t err = OK;
+    if ((err = checkVideoEncoderCapabilities()) != OK) {
+        return err;
+    }
     Size videoSize;
     videoSize.width = mVideoWidth;
     videoSize.height = mVideoHeight;
@@ -1050,6 +1055,18 @@ status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) 
     }
     CHECK(*cameraSource != NULL);
 
+    // When frame rate is not set, the actual frame rate will be set to
+    // the current frame rate being used.
+    if (mFrameRate == -1) {
+        int32_t frameRate = 0;
+        CHECK ((*cameraSource)->getFormat()->findInt32(
+                    kKeySampleRate, &frameRate));
+        LOGI("Frame rate is not explicitly set. Use the current frame "
+             "rate (%d fps)", frameRate);
+        mFrameRate = frameRate;
+    }
+
+    CHECK(mFrameRate != -1);
     return OK;
 }
 
@@ -1371,7 +1388,7 @@ status_t StagefrightRecorder::reset() {
     mVideoHeight   = 144;
     mAuxVideoWidth    = 176;
     mAuxVideoHeight   = 144;
-    mFrameRate     = 20;
+    mFrameRate     = -1;
     mVideoBitRate  = 192000;
     mAuxVideoBitRate = 192000;
     mSampleRate    = 8000;
