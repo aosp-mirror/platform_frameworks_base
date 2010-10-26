@@ -259,7 +259,8 @@ private:
             bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0);
 
     /**
-     * Prepares the renderer to draw the specified shadow.
+     * Prepares the renderer to draw the specified shadow. The active texture
+     * unit must be 0 and the other units must be unbound.
      *
      * @param texture The shadow texture
      * @param x The x coordinate of the shadow
@@ -360,11 +361,18 @@ private:
     inline void getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode);
 
     /**
-     * Binds the specified texture to the specified texture unit.
+     * Binds the specified texture. The texture unit must have been selected
+     * prior to calling this method.
      */
-    inline void bindTexture(GLuint texture, GLuint textureUnit = 0);
-    inline void setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT,
-            GLuint textureUnit = 0);
+    inline void bindTexture(GLuint texture) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+    }
+
+    /**
+     * Sets the wrap modes for the specified texture. The wrap modes are modified
+     * only when needed.
+     */
+    inline void setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT);
 
     /**
      * Enable or disable blending as necessary. This function sets the appropriate
@@ -391,6 +399,18 @@ private:
      */
     inline bool useProgram(Program* program);
 
+    /**
+     * Invoked before any drawing operation. This sets required state.
+     */
+    void setupDraw();
+
+    /**
+     * Should be invoked every time the glScissor is modified.
+     */
+    inline void dirtyClip() {
+        mDirtyClip = true;
+    }
+
     // Dimensions of the drawing surface
     int mWidth, mHeight;
 
@@ -416,9 +436,6 @@ private:
     // Used to draw textured quads
     TextureVertex mMeshVertices[4];
 
-    // GL extensions
-    Extensions mExtensions;
-
     // Drop shadow
     bool mHasShadow;
     float mShadowRadius;
@@ -432,11 +449,11 @@ private:
     // List of rectangles to clear due to calls to saveLayer()
     Vector<Rect*> mLayers;
 
-    // Misc
-    GLint mMaxTextureSize;
-
     // Indentity matrix
     const mat4 mIdentity;
+
+    // Indicates whether the clip must be restored
+    bool mDirtyClip;
 
     friend class DisplayListRenderer;
 
