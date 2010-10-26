@@ -155,7 +155,11 @@ public class MediaVideoItem extends MediaItem {
         mBeginBoundaryTimeMs = beginMs;
         mEndBoundaryTimeMs = endMs;
 
-        adjustElementsDuration();
+        adjustTransitions();
+
+        // Note that the start and duration of any effects and overlays are
+        // not adjusted nor are they automatically removed if they fall
+        // outside the new boundaries.
     }
 
     /**
