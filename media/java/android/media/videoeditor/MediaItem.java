@@ -40,12 +40,20 @@ public abstract class MediaItem {
      * clip are rendered black.
      */
     public static final int RENDERING_MODE_BLACK_BORDER = 0;
+
     /**
      * When using the RENDERING_MODE_STRETCH rendering mode video frames are
      * stretched horizontally or vertically to match the current aspect ratio of
-     * the movie.
+     * the video editor.
      */
     public static final int RENDERING_MODE_STRETCH = 1;
+
+    /**
+     * When using the RENDERING_MODE_CROPPING rendering mode video frames are
+     * scaled horizontally or vertically by preserving the original aspect
+     * ratio of the media item.
+     */
+    public static final int RENDERING_MODE_CROPPING = 2;
 
 
     // The unique id of the MediaItem
@@ -476,10 +484,9 @@ public abstract class MediaItem {
     }
 
     /**
-     * Adjust the duration of effects, overlays and transitions.
-     * This method will be called after a media item duration is changed.
+     * Adjust the duration transitions.
      */
-    protected void adjustElementsDuration() {
+    protected void adjustTransitions() {
         // Check if the duration of transitions need to be adjusted
         if (mBeginTransition != null) {
             final long maxDurationMs = mBeginTransition.getMaximumDuration();
@@ -494,31 +501,12 @@ public abstract class MediaItem {
                 mEndTransition.setDuration(maxDurationMs);
             }
         }
+    }
 
-        final List<Overlay> overlays = getAllOverlays();
-        for (Overlay overlay : overlays) {
-            // Adjust the start time if necessary
-            final long overlayStartTimeMs;
-            if (overlay.getStartTime() > getTimelineDuration()) {
-                overlayStartTimeMs = 0;
-            } else {
-                overlayStartTimeMs = overlay.getStartTime();
-            }
-
-            // Adjust the duration if necessary
-            final long overlayDurationMs;
-            if (overlayStartTimeMs + overlay.getDuration() > getTimelineDuration()) {
-                overlayDurationMs = getTimelineDuration() - overlayStartTimeMs;
-            } else {
-                overlayDurationMs = overlay.getDuration();
-            }
-
-            if (overlayStartTimeMs != overlay.getStartTime() ||
-                    overlayDurationMs != overlay.getDuration()) {
-                overlay.setStartTimeAndDuration(overlayStartTimeMs, overlayDurationMs);
-            }
-        }
-
+    /**
+     * Adjust the start time and/or duration of effects.
+     */
+    protected void adjustEffects() {
         final List<Effect> effects = getAllEffects();
         for (Effect effect : effects) {
             // Adjust the start time if necessary
@@ -540,6 +528,35 @@ public abstract class MediaItem {
             if (effectStartTimeMs != effect.getStartTime() ||
                     effectDurationMs != effect.getDuration()) {
                 effect.setStartTimeAndDuration(effectStartTimeMs, effectDurationMs);
+            }
+        }
+    }
+
+    /**
+     * Adjust the start time and/or duration of overlays.
+     */
+    protected void adjustOverlays() {
+        final List<Overlay> overlays = getAllOverlays();
+        for (Overlay overlay : overlays) {
+            // Adjust the start time if necessary
+            final long overlayStartTimeMs;
+            if (overlay.getStartTime() > getTimelineDuration()) {
+                overlayStartTimeMs = 0;
+            } else {
+                overlayStartTimeMs = overlay.getStartTime();
+            }
+
+            // Adjust the duration if necessary
+            final long overlayDurationMs;
+            if (overlayStartTimeMs + overlay.getDuration() > getTimelineDuration()) {
+                overlayDurationMs = getTimelineDuration() - overlayStartTimeMs;
+            } else {
+                overlayDurationMs = overlay.getDuration();
+            }
+
+            if (overlayStartTimeMs != overlay.getStartTime() ||
+                    overlayDurationMs != overlay.getDuration()) {
+                overlay.setStartTimeAndDuration(overlayStartTimeMs, overlayDurationMs);
             }
         }
     }

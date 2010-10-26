@@ -163,7 +163,9 @@ public class MediaImageItem extends MediaItem {
     public void setDuration(long durationMs) {
         mDurationMs = durationMs;
 
-        adjustElementsDuration();
+        adjustTransitions();
+        adjustOverlays();
+        adjustEffects();
     }
 
     /*
