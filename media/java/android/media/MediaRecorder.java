@@ -480,16 +480,6 @@ public class MediaRecorder
     }
 
     /**
-     * Sets the level of the encoder. Call this before prepare().
-     *
-     * @param encoderLevel the video encoder level.
-     * @hide
-     */
-    public void setVideoEncoderLevel(int encoderLevel) {
-        setParameter(String.format("video-param-encoder-level=%d", encoderLevel));
-    }
-
-    /**
      * Sets the auxiliary time lapse video's resolution and bitrate.
      *
      * The auxiliary video's resolution and bitrate are determined by the CamcorderProfile
