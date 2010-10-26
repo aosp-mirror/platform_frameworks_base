@@ -483,6 +483,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
         if (name.equals(PROPERTY_STATE)) {
             int state = convertBluezSinkStringtoState(propValues[1]);
+            log("A2DP: onSinkPropertyChanged newState is: " + state + "mPlayingA2dpDevice: " + mPlayingA2dpDevice);
+
             if (mAudioDevices.get(device) == null) {
                 // This is for an incoming connection for a device not known to us.
                 // We have authorized it and bluez state has changed.
