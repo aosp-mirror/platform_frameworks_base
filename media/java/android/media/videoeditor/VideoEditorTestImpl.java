@@ -892,13 +892,7 @@ public class VideoEditorTestImpl implements VideoEditor {
         }
 
         final Transition transition;
-        if (TransitionStartCurtainOpening.class.getSimpleName().equals(type)) {
-            transition = new TransitionStartCurtainOpening(transitionId, beforeMediaItem,
-                    durationMs, behavior);
-        } else if (TransitionStartFadeFromBlack.class.getSimpleName().equals(type)) {
-            transition = new TransitionStartFadeFromBlack(transitionId, beforeMediaItem,
-                    durationMs, behavior);
-        } else if (TransitionAlpha.class.getSimpleName().equals(type)) {
+        if (TransitionAlpha.class.getSimpleName().equals(type)) {
             final int blending = Integer.parseInt(parser.getAttributeValue("", ATTR_BLENDING));
             final String maskFilename = parser.getAttributeValue("", ATTR_MASK);
             final boolean invert = Boolean.getBoolean(parser.getAttributeValue("", ATTR_INVERT));
@@ -911,15 +905,9 @@ public class VideoEditorTestImpl implements VideoEditor {
             final int direction = Integer.parseInt(parser.getAttributeValue("", ATTR_DIRECTION));
             transition = new TransitionSliding(transitionId, afterMediaItem, beforeMediaItem,
                     durationMs, behavior, direction);
-        } else if (TransitionFadeToBlack.class.getSimpleName().equals(type)) {
-            transition = new TransitionFadeToBlack(transitionId, afterMediaItem, beforeMediaItem,
+        } else if (TransitionFadeBlack.class.getSimpleName().equals(type)) {
+            transition = new TransitionFadeBlack(transitionId, afterMediaItem, beforeMediaItem,
                     durationMs, behavior);
-        } else if (TransitionEndCurtainClosing.class.getSimpleName().equals(type)) {
-            transition = new TransitionEndCurtainClosing(transitionId, afterMediaItem, durationMs,
-                    behavior);
-        } else if (TransitionEndFadeToBlack.class.getSimpleName().equals(type)) {
-            transition = new TransitionEndFadeToBlack(transitionId, afterMediaItem, durationMs,
-                    behavior);
         } else {
             transition = null;
         }
@@ -1132,17 +1120,14 @@ public class VideoEditorTestImpl implements VideoEditor {
      */
     private void computeTimelineDuration() {
         mDurationMs = 0;
-        for (MediaItem mediaItem : mMediaItems) {
+        final int mediaItemsCount = mMediaItems.size();
+        for (int i = 0; i < mediaItemsCount; i++) {
+            final MediaItem mediaItem = mMediaItems.get(i);
             mDurationMs += mediaItem.getTimelineDuration();
-        }
-
-        // Subtract the transition times
-        for (Transition transition : mTransitions) {
-            if (!(transition instanceof TransitionStartCurtainOpening)
-                    && !(transition instanceof TransitionStartFadeFromBlack)
-                    && !(transition instanceof TransitionEndFadeToBlack)
-                    && !(transition instanceof TransitionEndCurtainClosing)) {
-                mDurationMs -= transition.getDuration();
+            if (mediaItem.getEndTransition() != null) {
+                if (i < mediaItemsCount - 1) {
+                    mDurationMs -= mediaItem.getEndTransition().getDuration();
+                }
             }
         }
     }
