@@ -28,25 +28,10 @@
 using namespace android;
 
 #define SUCCESS 0
-#define DRM_DIRECTORY_PERMISSION 0700
-#define DRM_PLUGINS_ROOT "/data/drm/plugins"
-#define DRM_PLUGINS_NATIVE "/data/drm/plugins/native"
-#define DRM_PLUGINS_NATIVE_DATABASES "/data/drm/plugins/native/databases"
 
 void DrmManagerService::instantiate() {
     LOGV("instantiate");
-
-    int res = mkdir(DRM_PLUGINS_ROOT, DRM_DIRECTORY_PERMISSION);
-    if (SUCCESS == res || EEXIST == errno) {
-        res = mkdir(DRM_PLUGINS_NATIVE, DRM_DIRECTORY_PERMISSION);
-        if (SUCCESS == res || EEXIST == errno) {
-            res = mkdir(DRM_PLUGINS_NATIVE_DATABASES, DRM_DIRECTORY_PERMISSION);
-            if (SUCCESS == res || EEXIST == errno) {
-                defaultServiceManager()
-                    ->addService(String16("drm.drmManager"), new DrmManagerService());
-            }
-        }
-    }
+    defaultServiceManager()->addService(String16("drm.drmManager"), new DrmManagerService());
 }
 
 DrmManagerService::DrmManagerService() {
