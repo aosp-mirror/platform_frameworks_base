@@ -23,6 +23,7 @@
 
 #include <utils/Singleton.h>
 
+#include "Extensions.h"
 #include "FontRenderer.h"
 #include "GammaFontRenderer.h"
 #include "TextureCache.h"
@@ -93,7 +94,14 @@ public:
     GLenum lastDstMode;
     Program* currentProgram;
 
+    // VBO to draw with
     GLuint meshBuffer;
+
+    // GL extensions
+    Extensions extensions;
+
+    // Misc
+    GLint maxTextureSize;
 
     TextureCache textureCache;
     LayerCache layerCache;

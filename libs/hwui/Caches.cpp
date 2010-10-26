@@ -43,6 +43,8 @@ Caches::Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
     glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
 
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+
     mCurrentBuffer = meshBuffer;
 }
 
