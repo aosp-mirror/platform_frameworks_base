@@ -1029,7 +1029,7 @@ static const char* const kNativeActivityPathName = "android/app/NativeActivity";
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
+        LOG_FATAL_IF(! var, "Unable to find class %s", className); \
         var = jclass(env->NewGlobalRef(var));
 
 #define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
