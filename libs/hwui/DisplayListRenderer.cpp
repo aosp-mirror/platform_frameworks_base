@@ -288,7 +288,7 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
             }
             break;
             case SetupColorFilter: {
-                // TODO: Implement
+                renderer.setupColorFilter(getColorFilter());
             }
             break;
             case ResetShadow: {
@@ -512,7 +512,6 @@ void DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
 
 void DisplayListRenderer::resetShader() {
     addOp(DisplayList::ResetShader);
-    OpenGLRenderer::resetShader();
 }
 
 void DisplayListRenderer::setupShader(SkiaShader* shader) {
@@ -522,17 +521,15 @@ void DisplayListRenderer::setupShader(SkiaShader* shader) {
 
 void DisplayListRenderer::resetColorFilter() {
     addOp(DisplayList::ResetColorFilter);
-    OpenGLRenderer::resetColorFilter();
 }
 
 void DisplayListRenderer::setupColorFilter(SkiaColorFilter* filter) {
-    // TODO: Implement
-    OpenGLRenderer::setupColorFilter(filter);
+    addOp(DisplayList::SetupColorFilter);
+    addColorFilter(filter);
 }
 
 void DisplayListRenderer::resetShadow() {
     addOp(DisplayList::ResetShadow);
-    OpenGLRenderer::resetShadow();
 }
 
 void DisplayListRenderer::setupShadow(float radius, float dx, float dy, int color) {
@@ -540,7 +537,6 @@ void DisplayListRenderer::setupShadow(float radius, float dx, float dy, int colo
     addFloat(radius);
     addPoint(dx, dy);
     addInt(color);
-    OpenGLRenderer::setupShadow(radius, dx, dy, color);
 }
 
 }; // namespace uirenderer

@@ -24,6 +24,7 @@
 #include "SkPorterDuff.h"
 
 #include <SkiaColorFilter.h>
+#include <Caches.h>
 
 namespace android {
 
@@ -32,28 +33,37 @@ using namespace uirenderer;
 class SkColorFilterGlue {
 public:
     static void finalizer(JNIEnv* env, jobject clazz, SkColorFilter* obj, SkiaColorFilter* f) {
-        delete f;
         obj->safeUnref();
+        // f == NULL when not !USE_OPENGL_RENDERER, so no need to delete outside the ifdef
+#ifdef USE_OPENGL_RENDERER
+        if (android::uirenderer::Caches::hasInstance()) {
+            android::uirenderer::Caches::getInstance().resourceCache.destructor(f);
+        } else {
+            delete f;
+        }
+#endif
     }
 
-    static SkiaColorFilter* glCreatePorterDuffFilter(JNIEnv* env, jobject, jint srcColor,
-            SkPorterDuff::Mode mode) {
+    static SkiaColorFilter* glCreatePorterDuffFilter(JNIEnv* env, jobject, SkColorFilter *skFilter,
+            jint srcColor, SkPorterDuff::Mode mode) {
 #ifdef USE_OPENGL_RENDERER
-        return new SkiaBlendFilter(srcColor, SkPorterDuff::ToXfermodeMode(mode));
+        return new SkiaBlendFilter(skFilter, srcColor, SkPorterDuff::ToXfermodeMode(mode));
 #else
         return NULL;
 #endif
     }
 
-    static SkiaColorFilter* glCreateLightingFilter(JNIEnv* env, jobject, jint mul, jint add) {
+    static SkiaColorFilter* glCreateLightingFilter(JNIEnv* env, jobject, SkColorFilter *skFilter,
+            jint mul, jint add) {
 #ifdef USE_OPENGL_RENDERER
-        return new SkiaLightingFilter(mul, add);
+        return new SkiaLightingFilter(skFilter, mul, add);
 #else
         return NULL;
 #endif
     }
 
-    static SkiaColorFilter* glCreateColorMatrixFilter(JNIEnv* env, jobject, jfloatArray jarray) {
+    static SkiaColorFilter* glCreateColorMatrixFilter(JNIEnv* env, jobject, SkColorFilter *skFilter,
+            jfloatArray jarray) {
 #ifdef USE_OPENGL_RENDERER
         AutoJavaFloatArray autoArray(env, jarray, 20);
         const float* src = autoArray.ptr();
@@ -70,7 +80,7 @@ public:
         colorVector[2] = src[14];
         colorVector[3] = src[19];
 
-        return new SkiaColorMatrixFilter(colorMatrix, colorVector);
+        return new SkiaColorMatrixFilter(skFilter, colorMatrix, colorVector);
 #else
         return NULL;
 #endif
@@ -107,17 +117,17 @@ static JNINativeMethod colorfilter_methods[] = {
 
 static JNINativeMethod porterduff_methods[] = {
     { "native_CreatePorterDuffFilter", "(II)I", (void*) SkColorFilterGlue::CreatePorterDuffFilter   },
-    { "nCreatePorterDuffFilter",       "(II)I", (void*) SkColorFilterGlue::glCreatePorterDuffFilter }
+    { "nCreatePorterDuffFilter",       "(III)I", (void*) SkColorFilterGlue::glCreatePorterDuffFilter }
 };
 
 static JNINativeMethod lighting_methods[] = {
     { "native_CreateLightingFilter", "(II)I", (void*) SkColorFilterGlue::CreateLightingFilter   },
-    { "nCreateLightingFilter",       "(II)I", (void*) SkColorFilterGlue::glCreateLightingFilter },
+    { "nCreateLightingFilter",       "(III)I", (void*) SkColorFilterGlue::glCreateLightingFilter },
 };
 
 static JNINativeMethod colormatrix_methods[] = {
     { "nativeColorMatrixFilter", "([F)I", (void*) SkColorFilterGlue::CreateColorMatrixFilter   },
-    { "nColorMatrixFilter",      "([F)I", (void*) SkColorFilterGlue::glCreateColorMatrixFilter }
+    { "nColorMatrixFilter",      "(I[F)I", (void*) SkColorFilterGlue::glCreateColorMatrixFilter }
 };
 
 #define REG(env, name, array) \

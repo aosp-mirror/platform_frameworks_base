@@ -135,6 +135,10 @@ private:
         return (SkiaShader*) getInt();
     }
 
+    SkiaColorFilter* getColorFilter() {
+        return (SkiaColorFilter*) getInt();
+    }
+
     inline int getIndex() {
         return mReader.readInt();
     }
@@ -183,6 +187,7 @@ private:
 
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkiaShader*> mShaderResources;
+    Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;
     Vector<SkMatrix*> mMatrices;
@@ -274,6 +279,10 @@ public:
 
     const Vector<SkMatrix*>& getMatrices() const {
         return mMatrices;
+    }
+
+    const Vector<SkiaColorFilter*>& getFilterResources() const {
+        return mFilterResources;
     }
 
 private:
@@ -372,10 +381,18 @@ private:
         caches.resourceCache.incrementRefcount(shader);
     }
 
+    inline void addColorFilter(SkiaColorFilter* colorFilter) {
+        addInt((int)colorFilter);
+        mFilterResources.add(colorFilter);
+        Caches& caches = Caches::getInstance();
+        caches.resourceCache.incrementRefcount(colorFilter);
+    }
+
     SkChunkAlloc mHeap;
 
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkiaShader*> mShaderResources;
+    Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;
     DefaultKeyedVector<SkPaint *, SkPaint *> mPaintMap;
