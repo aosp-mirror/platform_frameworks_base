@@ -63,10 +63,10 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/ringtones/Pegasus.ogg:system/media/audio/ringtones/Pegasus.ogg \
 	$(LOCAL_PATH)/ringtones/PERSEUS.ogg:system/media/audio/ringtones/PERSEUS.ogg \
 	$(LOCAL_PATH)/ringtones/Pyxis.ogg:system/media/audio/ringtones/Pyxis.ogg \
-	$(LOCAL_PATH)/ringtones/Rigel.ogg:system/media/audio/notifications/Rigel.ogg \
-	$(LOCAL_PATH)/ringtones/Scarabaeus.ogg:system/media/audio/notifications/Scarabaeus.ogg \
-	$(LOCAL_PATH)/ringtones/Sceptrum.ogg:system/media/audio/notifications/Sceptrum.ogg \
-	$(LOCAL_PATH)/ringtones/Solarium.ogg:system/media/audio/notifications/Solarium.ogg \
-	$(LOCAL_PATH)/ringtones/Testudo.ogg:system/media/audio/notifications/Testudo.ogg \
+	$(LOCAL_PATH)/ringtones/Rigel.ogg:system/media/audio/ringtones/Rigel.ogg \
+	$(LOCAL_PATH)/ringtones/Scarabaeus.ogg:system/media/audio/ringtones/Scarabaeus.ogg \
+	$(LOCAL_PATH)/ringtones/Sceptrum.ogg:system/media/audio/ringtones/Sceptrum.ogg \
+	$(LOCAL_PATH)/ringtones/Solarium.ogg:system/media/audio/ringtones/Solarium.ogg \
+	$(LOCAL_PATH)/ringtones/Testudo.ogg:system/media/audio/ringtones/Testudo.ogg \
 	$(LOCAL_PATH)/ringtones/URSAMINOR.ogg:system/media/audio/ringtones/URSAMINOR.ogg \
 	$(LOCAL_PATH)/ringtones/Vespa.ogg:system/media/audio/ringtones/Vespa.ogg
