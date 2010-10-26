@@ -24,16 +24,16 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 /**
  * Base class for a {@link AdapterView} that will perform animations
@@ -140,6 +140,20 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      */
     ObjectAnimator mInAnimation;
     ObjectAnimator mOutAnimation;
+
+    /**
+     * Current touch state.
+     */
+    private int mTouchMode = TOUCH_MODE_NONE;
+
+    /**
+     * Private touch states.
+     */
+    static final int TOUCH_MODE_NONE = 0;
+    static final int TOUCH_MODE_DOWN_IN_CURRENT_VIEW = 1;
+    static final int TOUCH_MODE_HANDLED = 2;
+
+    private Runnable mPendingCheckForTap;
 
     private static final int DEFAULT_ANIMATION_DURATION = 200;
 
@@ -528,7 +542,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             // above the layout will end up being ignored since we are currently laying out, so
             // we post a delayed requestLayout and invalidate
             mMainQueue.post(new Runnable() {
-                @Override
                 public void run() {
                     requestLayout();
                     invalidate();
@@ -549,6 +562,89 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             mReferenceChildWidth = child.getMeasuredWidth();
             mReferenceChildHeight = child.getMeasuredHeight();
         }
+    }
+
+    void showTapFeedback(View v) {
+        v.setPressed(true);
+    }
+
+    void hideTapFeedback(View v) {
+        v.setPressed(false);
+    }
+
+    void cancelHandleClick() {
+        View v = getCurrentView();
+        if (v != null) {
+            hideTapFeedback(v);
+        }
+        mTouchMode = TOUCH_MODE_NONE;
+    }
+
+    final class CheckForTap implements Runnable {
+        public void run() {
+            if (mTouchMode == TOUCH_MODE_DOWN_IN_CURRENT_VIEW) {
+                View v = getCurrentView();
+                showTapFeedback(v);
+            }
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        int action = ev.getAction();
+        boolean handled = false;
+        switch (action) {
+            case MotionEvent.ACTION_DOWN: {
+                View v = getCurrentView();
+                if (v != null) {
+                    if (isTransformedTouchPointInView(ev.getX(), ev.getY(), v, null)) {
+                        if (mPendingCheckForTap == null) {
+                            mPendingCheckForTap = new CheckForTap();
+                        }
+                        mTouchMode = TOUCH_MODE_DOWN_IN_CURRENT_VIEW;
+                        postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
+                    }
+                }
+                break;
+            }
+            case MotionEvent.ACTION_MOVE: break;
+            case MotionEvent.ACTION_POINTER_UP: break;
+            case MotionEvent.ACTION_UP: {
+                if (mTouchMode == TOUCH_MODE_DOWN_IN_CURRENT_VIEW) {
+                    final View v = getCurrentView();
+                    if (v != null) {
+                        if (isTransformedTouchPointInView(ev.getX(), ev.getY(), v, null)) {
+                            final Handler handler = getHandler();
+                            if (handler != null) {
+                                handler.removeCallbacks(mPendingCheckForTap);
+                            }
+                            showTapFeedback(v);
+                            postDelayed(new Runnable() {
+                                public void run() {
+                                    hideTapFeedback(v);
+                                    post(new Runnable() {
+                                        public void run() {
+                                            performItemClick(v, 0, 0);
+                                        }
+                                    });
+                                }
+                            }, ViewConfiguration.getPressedStateDuration());
+                            handled = true;
+                        }
+                    }
+                }
+                mTouchMode = TOUCH_MODE_NONE;
+                break;
+            }
+            case MotionEvent.ACTION_CANCEL: {
+                View v = getCurrentView();
+                if (v != null) {
+                    hideTapFeedback(v);
+                }
+                mTouchMode = TOUCH_MODE_NONE;
+            }
+        }
+        return handled;
     }
 
     private void measureChildren() {

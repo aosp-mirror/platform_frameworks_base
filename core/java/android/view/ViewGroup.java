@@ -1298,8 +1298,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Returns true if a child view contains the specified point when transformed
      * into its coordinate space.
      * Child must not be null.
+     * @hide
      */
-    private boolean isTransformedTouchPointInView(float x, float y, View child,
+    protected boolean isTransformedTouchPointInView(float x, float y, View child,
             PointF outLocalPoint) {
         float localX = x + mScrollX - child.mLeft;
         float localY = y + mScrollY - child.mTop;
