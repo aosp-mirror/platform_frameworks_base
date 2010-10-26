@@ -105,7 +105,7 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffAMR);
     RegisterSniffer(SniffMPEG2TS);
     RegisterSniffer(SniffMP3);
-    RegisterSniffer(SniffDRM);
+    //RegisterSniffer(SniffDRM);
 }
 
 // static
