@@ -78,8 +78,9 @@ public class LlcpServiceSocket {
 	 * @param handle
 	 *            The handle returned by the NFC service and used to identify
 	 *            the socket in subsequent calls.
+	 * @hide
 	 */
-	LlcpServiceSocket(ILlcpServiceSocket service, ILlcpSocket socketService, int handle) {
+	public LlcpServiceSocket(ILlcpServiceSocket service, ILlcpSocket socketService, int handle) {
 		this.mService = service;
 		this.mHandle = handle;
 		this.mLlcpSocketService = socketService;
