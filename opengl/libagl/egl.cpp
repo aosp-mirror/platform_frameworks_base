@@ -833,6 +833,9 @@ struct config_management_t {
     static bool mask(GLint reqValue, GLint confValue) {
         return (confValue & reqValue) == reqValue;
     }
+    static bool ignore(GLint reqValue, GLint confValue) {
+        return true;
+    }
 };
 
 // ----------------------------------------------------------------------------
@@ -1060,11 +1063,11 @@ static config_management_t const gConfigManagement[] = {
         { EGL_CONFIG_CAVEAT,              config_management_t::exact   },
         { EGL_CONFIG_ID,                  config_management_t::exact   },
         { EGL_LEVEL,                      config_management_t::exact   },
-        { EGL_MAX_PBUFFER_HEIGHT,         config_management_t::exact   },
-        { EGL_MAX_PBUFFER_PIXELS,         config_management_t::exact   },
-        { EGL_MAX_PBUFFER_WIDTH,          config_management_t::exact   },
+        { EGL_MAX_PBUFFER_HEIGHT,         config_management_t::ignore   },
+        { EGL_MAX_PBUFFER_PIXELS,         config_management_t::ignore   },
+        { EGL_MAX_PBUFFER_WIDTH,          config_management_t::ignore   },
         { EGL_NATIVE_RENDERABLE,          config_management_t::exact   },
-        { EGL_NATIVE_VISUAL_ID,           config_management_t::exact   },
+        { EGL_NATIVE_VISUAL_ID,           config_management_t::ignore   },
         { EGL_NATIVE_VISUAL_TYPE,         config_management_t::exact   },
         { EGL_SAMPLES,                    config_management_t::exact   },
         { EGL_SAMPLE_BUFFERS,             config_management_t::exact   },
