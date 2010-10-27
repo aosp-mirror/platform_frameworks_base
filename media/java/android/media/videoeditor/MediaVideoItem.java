@@ -46,6 +46,8 @@ public class MediaVideoItem extends MediaItem {
     private int mVolumePercentage;
     private boolean mMuted;
     private String mAudioWaveformFilename;
+    // The audio waveform data
+    private WaveformData mWaveformData;
 
     /**
      * An object of this type cannot be instantiated with a default constructor
@@ -115,6 +117,11 @@ public class MediaVideoItem extends MediaItem {
         mVolumePercentage = volumePercent;
         mMuted = muted;
         mAudioWaveformFilename = audioWaveformFilename;
+        if (audioWaveformFilename != null) {
+            mWaveformData = new WaveformData(audioWaveformFilename);
+        } else {
+            mWaveformData = null;
+        }
     }
 
     /**
@@ -286,6 +293,7 @@ public class MediaVideoItem extends MediaItem {
     public void extractAudioWaveform(ExtractAudioWaveformProgressListener listener)
             throws IOException {
         // TODO: Set mAudioWaveformFilename at the end once the export is complete
+        mWaveformData = new WaveformData(mAudioWaveformFilename);
     }
 
     /**
@@ -299,8 +307,15 @@ public class MediaVideoItem extends MediaItem {
      * @return the name of the file, null if the file has not been computed or
      *         if there is no Audio track in the mediaItem
      */
-    public String getAudioWaveformFilename() {
+    String getAudioWaveformFilename() {
         return mAudioWaveformFilename;
+    }
+
+    /**
+     * @return The waveform data
+     */
+    public WaveformData getWaveformData() {
+        return mWaveformData;
     }
 
     /**
