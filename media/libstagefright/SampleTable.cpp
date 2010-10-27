@@ -281,7 +281,7 @@ status_t SampleTable::setSyncSampleParams(off_t data_offset, size_t data_size) {
     mNumSyncSamples = U32_AT(&header[4]);
 
     if (mNumSyncSamples < 2) {
-        LOGW("Table of sync samples is empty or has only a single entry!");
+        LOGV("Table of sync samples is empty or has only a single entry!");
     }
 
     mSyncSamples = new uint32_t[mNumSyncSamples];
