@@ -135,6 +135,8 @@
     <string name="power_off" msgid="4266614107412865048">"關機"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"關機中..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"手機即將關機。"</string>
+    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"最新的"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"最近沒有存取應用程式。"</string>
     <string name="global_actions" msgid="2406416831541615258">"電話選項"</string>
@@ -169,7 +171,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"開發工具"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"只有開發者需要此功能。"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"存取 SD 卡。"</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"存取 USB 儲存裝置。"</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"存取 SD 卡。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"允許應用程式停用狀態列或新增、移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"狀態列"</string>
@@ -266,10 +269,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"允許應用程式刪除快取目錄裡的檔案，釋放儲存空間。此操作通常受到系統程序嚴格限制。"</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"移動應用程式資源"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"允許應用程式將應用程式資源從內部媒體移到外部媒體，反之亦可。"</string>
-    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
-    <skip />
-    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
-    <skip />
+    <string name="permlab_readLogs" msgid="6615778543198967614">"讀取機密記錄資料"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"允許應用程式讀取系統的各種記錄檔。這會允許應用程式搜尋一般性的電話使用資訊，可能包含您的個人或私人資訊。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"讀寫 diag 擁有的資源"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"允許應用程式讀寫 diag 群組的資源；例如：/dev 裡的檔案。這可能會影響系統穩定性與安全性。此功能僅供製造商或技術人員用於硬體規格偵測。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"啟用或停用應用程式元件"</string>
@@ -322,16 +323,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"允許應用程式掛載/卸載抽取式儲存設備的檔案系統。"</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"將外接式儲存裝置格式化"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"允許應用程式將可移除式儲存裝置格式化。"</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"取得安全儲存空間的資訊"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"允許應用程式取得安全儲存空間的資訊。"</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"建立安全儲存空間"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"允許應用程式建立安全儲存空間。"</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"銷毀安全儲存空間"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"允許應用程式銷毀安全儲存空間。"</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"掛載/卸載安全儲存空間"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"允許應用程式掛載/卸載安全儲存空間。"</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"重新命名安全儲存空間"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"允許應用程式重新命名安全儲存空間。"</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"取得內存空間的資訊"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"允許應用程式取得內存空間的資訊。"</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"建立內存空間"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"允許應用程式建立內存空間。"</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"銷毀內存空間"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"允許應用程式銷毀內存空間。"</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"掛接/卸載內存空間"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"允許應用程式掛接/卸載內存空間。"</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"重新命名內存空間"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"允許應用程式重新命名內存空間。"</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"允許應用程式控制震動。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制閃光燈"</string>
@@ -404,6 +405,8 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"允許應用程式設定本機藍牙電話，以及偵測與配對其他遠端裝置。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"建立藍牙連線"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"允許應用程式檢視本機藍牙電話設定，並與其他配對裝置連線。"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"控制近距離無線通訊"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"允許應用程式使用近距離無線通訊 (NFC) 標記、卡片及讀取程式進行通訊。"</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"停用按鍵鎖定"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性。例如：收到來電時解除按鍵鎖定，通話結束後重新啟動按鍵鎖定。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
@@ -420,22 +423,25 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"允許應用程式讀取使用者儲存在使用者字典內的任何私人字詞、名稱和詞組。"</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"寫入使用者定義的字典"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"允許應用程式將新字詞寫入使用者的字典。"</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"修改/刪除 SD 卡的內容"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"允許應用程式寫入 SD 卡。"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"修改/刪除 USB 儲存裝置內容"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"修改/刪除 SD 卡的內容"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"允許應用程式寫入 USB 儲存裝置。"</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"允許應用程式寫入 SD 卡。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"存取快取檔案系統"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"允許應用程式讀取及寫入快取檔案系統。"</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"限制密碼設定規則"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"限制允許使用的密碼類型。"</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"查看登入嘗試記錄"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"監視者無法登入裝置執行部分動作。"</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"重設密碼"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"強制重新設定密碼。您必須取得以管理員提供的新密碼，才能登入。"</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"強制鎖定"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"裝置鎖定時可取得控制，但必須重新輸入密碼。"</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"撥打/接聽網路電話"</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"允許應用程式使用 SIP 服務撥打/接聽網路電話。"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"控制螢幕解鎖密碼所允許的長度和字元"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"監視螢幕解鎖時密碼輸入錯誤的次數，如果密碼輸入錯誤的次數過多，則會鎖定手機或清除手機的所有資料"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"變更螢幕解鎖密碼"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"變更螢幕解鎖密碼"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"鎖定螢幕"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"控制鎖定螢幕的方式和時間"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有資料"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"重設為原廠設定 (系統會刪除所有資料，且不會向您進行確認)。"</string>
-    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
-    <skip />
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"執行重設為原廠設定時，系統會直接清除手機資料而不提出警告"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"設定裝置全域 Proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"設定政策啟用時所要使用的裝置全域 Proxy，只有第一個裝置管理員所設定的全域 Proxy 具有效力。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住家電話"</item>
@@ -530,14 +536,10 @@
     <string name="orgTypeWork" msgid="29268870505363872">"公司"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"其他"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"自訂"</string>
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"自訂"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"住家"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"公司"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"輸入 PIN 碼"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"輸入密碼即可解鎖"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"輸入 PIN 進行解鎖"</string>
@@ -598,12 +600,13 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"離開此頁？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n" 選取 [確定] 離開此頁；或 [取消] 留在此頁。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"提示：輕按兩下可放大縮小。"</string>
-    <!-- no translation found for autofill_this_form (8940110866775097494) -->
-    <skip />
+    <string name="autofill_this_form" msgid="8940110866775097494">"自動填寫此表單"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"讀取瀏覽器的記錄與書籤"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"允許應用程式讀取瀏覽器曾經造訪過的所有網址，以及瀏覽器的所有書籤。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"寫入瀏覽器的記錄與書籤"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"允許應用程式修改儲存在電話上的瀏覽記錄或書籤。請注意：惡意應用程式可能會使用此選項來清除或修改您瀏覽器的資料。"</string>
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"在鬧鐘應用程式中設定鬧鈴"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"允許應用程式設定您所安裝的鬧鐘應用程式執行鬧鈴功能 (有些鬧鐘應用程式並不支援此功能)。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"修改瀏覽器地理資訊的權限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"允許應用程式修改瀏覽器的地理位置權限，惡意應用程式可能會透過此方式允許將您的位置資訊任意傳送給某些網站。"</string>
     <string name="save_password_message" msgid="767344687139195790">"是否記住此密碼？"</string>
@@ -750,12 +753,9 @@
     <string name="force_close" msgid="3653416315450806396">"強制關閉"</string>
     <string name="report" msgid="4060218260984795706">"回報"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"應用程式已重新導向"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在正在執行。"</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」原先已啟動。"</string>
     <string name="smv_application" msgid="295583804361236288">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (處理程序 <xliff:g id="PROCESS">%2$s</xliff:g>) 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 執行中"</string>
@@ -802,23 +802,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"顯示全部"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB 大量儲存裝置"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 已連接"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"已透過 USB 連接手機與電腦。如要從電腦或 Android 系統的 SD 卡複製檔案，請選取下方按鈕。"</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"已透過 USB 連接手機與電腦。如要在電腦和 Android 的 USB 儲存裝置之間複製檔案，請選取下方按鈕。"</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"已透過 USB 連接手機與電腦。如要從電腦或 Android 系統的 SD 卡複製檔案，請選取下方按鈕。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"開啟 USB 儲存裝置"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"把 SD 卡當成 USB 儲存裝置時發生問題。"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"使用您的 USB 儲存裝置作為 USB 大量儲存裝置時發生問題。"</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"使用您的 SD 卡作為 USB 大量儲存裝置時發生問題。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 已連接"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"選取此項將檔案複製到電腦，或從電腦複製。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"關閉 USB 儲存裝置"</string>
-    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"選取此處關閉 USB 儲存裝置。"</string>
+    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"選取此處可關閉 USB 儲存裝置。"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB 儲存空間使用中"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"關閉 USB 儲存裝置前，請務必先將 Android 系統的 SD 卡從電腦上卸下 (退出)。"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"關閉 USB 儲存裝置前，請務必先從電腦卸載 (退出) Android 手機的 USB 儲存裝置。"</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"關閉 USB 儲存裝置前，請務必先將 Android 系統的 SD 卡從電腦上卸下 (退出)。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"關閉 USB 儲存裝置"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"關閉 USB 儲存裝置時發生問題。請檢查您是否已卸載 USB Host，然後再試一次。"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"開啟 USB 儲存裝置"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"如果您開啟 USB 儲存裝置，則您正在使用的某些應用程式會停止運作，而且可能無法使用，待您將 USB 儲存裝置關閉才會恢復正常。"</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB 操作失敗"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"確定"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"將 SD 卡格式化"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"確定要將 SD 卡格式化嗎？該 SD 卡中的所有資料將會遺失。"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"格式化 USB 儲存空間"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"將 SD 卡格式化"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"格式化 USB 儲存裝置時，是否清除其中儲存的所有檔案？這項動作無法復原！"</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"確定要將 SD 卡格式化嗎？該 SD 卡中的所有資料將會遺失。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 偵錯模式已啟用"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"選取以停用 USB 偵錯。"</string>
@@ -826,18 +831,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"正在準備 SD 卡"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"正在準備 USB 儲存裝置"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"正在準備 SD 卡"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"正在檢查錯誤。"</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"SD 卡為空白"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD 卡內無檔案系統，或檔案系統不受支援。"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"SD 卡已損壞"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SD 卡已毀損，您可能必須予以重新格式化。"</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD 卡未正常移除"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"請先卸載 SD 卡，再將其移除，以免資料遺失。"</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"可安全移除 SD 卡"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"您現在可以安全地移除 SD 卡。"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"已移除 SD 卡"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD 卡已移除，請插入新的 SD 卡。"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"USB 儲存裝置無內容"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"SD 卡為空白"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"USB 儲存裝置無內容或使用不受支援的檔案系統。"</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD 卡內無檔案系統，或檔案系統不受支援。"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USB 儲存裝置已毀損"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"SD 卡已損壞"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB 儲存裝置已損壞，您可能必須重新格式化。"</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD 卡已毀損，您可能必須予以重新格式化。"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB 儲存裝置已意外移除"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD 卡未正常移除"</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"請先卸載 USB 儲存裝置，再將其移除，以免資料遺失。"</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"請先卸載 SD 卡，再將其移除，以免資料遺失。"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB 儲存裝置已可安全移除"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"可安全移除 SD 卡"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"您可安全移除 USB 儲存裝置了。"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"您現在可以安全地移除 SD 卡。"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB 儲存裝置已移除"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"已移除 SD 卡"</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB 儲存裝置已移除，請插入新媒體。"</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD 卡已移除，請插入新的 SD 卡。"</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"找不到符合的活動"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"更新元件使用統計資料"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"允許修改收集到的元件使用統計資料。一般應用程式不會使用此功能。"</string>
@@ -892,4 +908,23 @@
     <item quantity="one" msgid="8167147081136579439">"1 個相符項目"</item>
     <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 個相符項目 (共 <xliff:g id="TOTAL">%d</xliff:g> 個相符項目)"</item>
   </plurals>
+    <!-- no translation found for action_mode_done (7217581640461922289) -->
+    <skip />
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"正在卸載 USB 儲存裝置..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"正在卸載 SD 卡..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"正在清除 USB 儲存裝置..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"正在清除 SD 卡..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"無法清除 USB 儲存裝置。"</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"無法清除 SD 卡。"</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"SD 卡尚未卸載就已移除。"</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB 儲存裝置目前正在接受檢查。"</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"SD 卡目前正在接受檢查。"</string>
+    <string name="media_removed" msgid="7001526905057952097">"SD 卡已移除。"</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"電腦目前正在使用 USB 儲存裝置。"</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"電腦目前正在使用 SD 卡。"</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"外部媒體狀態不明。"</string>
+    <!-- no translation found for share (1778686618230011964) -->
+    <skip />
+    <!-- no translation found for find (4808270900322985960) -->
+    <skip />
 </resources>

@@ -135,6 +135,8 @@
     <string name="power_off" msgid="4266614107412865048">"Sluk"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned ..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Din telefon slukkes nu."</string>
+    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Seneste"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Der er ingen nye programmer."</string>
     <string name="global_actions" msgid="2406416831541615258">"Indstillinger for telefon"</string>
@@ -169,7 +171,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Udviklingsværktøjer"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funktioner kun til programudviklere."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Få adgang til USB-lager."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiver eller rediger statuslinje"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Tillader, at et program deaktiverer statuslinjen eller tilføjer eller fjerner systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbjælke"</string>
@@ -266,10 +269,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Tillader, at et program frigør plads på telefonen ved at slette filer i programmets cachemappe. Adgang er normalt meget begrænset til systemprocesser."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Flyt programressourcer"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Tillader, at et program flytter programressourcer fra interne til eksterne medier og omvendt."</string>
-    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
-    <skip />
-    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
-    <skip />
+    <string name="permlab_readLogs" msgid="6615778543198967614">"læse følsomme logdata"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Tillader, at et program læser fra systemets forskellige logfiler. Dermed kan generelle oplysninger om, hvad du laver med telefonen, registreres, også personlige eller private oplysninger."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"læs/skriv til ressourcer ejet af diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Tillader, at et program læser og skriver til alle ressourcer, der ejes af diag-gruppen, som f.eks. flier i /dev. Dette kan muligvis påvirke systemets stabilitet og sikkerhed. Dette bør KUN bruges til hardwarespecifikke diagnosticeringer foretaget af producent eller udbyder."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktiver eller deaktiver programkomponenter"</string>
@@ -322,16 +323,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Tillader, at programmet monterer eller demonterer filsystemer til flytbar lagring."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formater ekstern lagring"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Tillader, at et program formaterer flytbart lager."</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"hente oplysninger om sikkert lager"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"Tillader programmet at få oplysninger om sikkert lager."</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"opret sikkert lager"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"Tillader programmet at oprette sikkert lager."</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"ødelægge sikkert lager"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Tillader programmet at ødelægge sikkert lager."</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"montere/demontere sikkert lager"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Tillader programmet at montere/demontere sikkert lager."</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"omdøbe sikkert lager"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Tillader programmet at omdøbe sikkert lager."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"hente oplysninger om internt lager"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Tillader, at programmet får oplysninger om internt lager."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"oprette internt lager"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Tillader, at programmet opretter internt lager."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"ødelægge internt lager"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Tillader, at programmet ødelægger internt lager."</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"montere/demontere internt lager"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Tillader, at programmet monterer/demonterer internt lager."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"omdøbe internt lager"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Tillader, at programmet omdøber internt lager."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"kontroller vibrator"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Lader programmet kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontroller lommelygte"</string>
@@ -404,6 +405,8 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Tillader, at et program konfigurerer den lokale Bluetooth-telefon samt opdager og parrer med fjerne enheder."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opret Bluetooth-forbindelser"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Tillader, at et program viser konfigurationen af den lokale Bluetooth-telefon samt opretter og accepterer forbindelse med parrede enheder."</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"kontrollere Near Field Communication"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Tillader, at et program kommunikerer med tags, kort og læsere i Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"deaktiver tastaturlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Tillader, at et program deaktiverer tastaturlåsen og al associeret adgangskodesikkerhed. Et legitimt eksempel på dette er, at telefonen deaktiverer tastaturlåsen, når der modtages et indgående telefonopkald, og genaktiverer tastaturlåsen, når opkaldet er afsluttet."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"læs indstillinger for synkronisering"</string>
@@ -420,22 +423,25 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Tillader, at et program læser alle private ord, navne og sætninger, som brugeren eventuelt har gemt i brugerordbogen."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"skriv til den brugerdefinerede ordbog"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Tillader, at et program skriver nye ord i brugerordbogen."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"ret/slet indholdet på SD-kortet"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Tillader, at et program skriver til SD-kortet."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"rette/slette i USB-lager"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"ret/slet indholdet på SD-kortet"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Tillad skriv til USB-lager."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Tillader, at et program skriver til SD-kortet."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"få adgang til cache-filsystemet"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Tillader, at et program læser og skriver til cache-filsystemet."</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"Begræns adgangskode"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Begræns de adgangskodetyper, du har tilladelse til at bruge."</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"Vis forsøg på at logge ind"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Overvåg mislykkede forsøg på at logge ind på enheden for at foretage en handling."</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"Nulstil adgangskode"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Tving din adgangskode til en ny værdi. Dette kræver, at administratoren giver den til dig, før du kan kogge ind."</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"Tvangslås"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"Kontrol når enheden låses, så du skal indtaste adgangskoden igen."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"foretage/modtage internetopkald"</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Tillader, at et program anvender SIP-tjenesten til at foretage/modtage internetopkald."</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærm"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"Overvåg antallet af forkerte adgangskoder, som indtastes ved oplåsning af skærmen, og lås telefonen, eller slet alle telefonens data, hvis der er for mange forkerte forsøg"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Skift adgangskode til oplåsning af skærm"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Skift adgangskode til oplåsning af skærm"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skærmen"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Bestem, hvordan og hvornår skærmen låses"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slet alle data"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"Foretag en fabriksnulstilling, der sletter alle dine data uden bekræftelse."</string>
-    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
-    <skip />
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"Slet telefonens data uden varsel ved at gendanne fabriksindstillinger"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Angiv enhedens globale proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Angiv enhedens globale proxy, der skal bruges, mens politikken er aktiveret. Kun den første enhedsadministrator angiver den effektive globale proxy."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjem"</item>
@@ -530,14 +536,10 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Arbejde"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Andre"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Tilpasset"</string>
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Tilpasset"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Hjem"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbejde"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Andre"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Indtast PIN-kode"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Indtast adgangskode for at låse op"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Indtast pinkode for at låse op"</string>
@@ -598,12 +600,13 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Naviger væk fra denne side?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n" Vælg OK for at fortsætte eller Annuller for at blive på den aktuelle side."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekræft"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dobbeltklik for at zoome ind eller ud."</string>
-    <!-- no translation found for autofill_this_form (8940110866775097494) -->
-    <skip />
+    <string name="autofill_this_form" msgid="8940110866775097494">"Autofuldfør denne formular"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"læs browserens oversigt og bogmærker"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillader, at programmet læser alle de webadresser, browseren har besøgt, og alle browserens bogmærker."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skriv browserens oversigt og bogmærker"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Tillader, at et program ændrer browseroversigten eller bogmærker, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre din browsers data."</string>
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"angiv alarm i alarmprogram"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Tillader, at programmet angiver en alarm i et installeret alarmprogram. Nogle alarmprogrammer kan ikke implementere denne funktion."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Skift browsertilladelser for geografisk placering"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Giver et program tilladelse til at ændre browserens tilladelser for geografisk placering. Skadelige programmer kan bruge dette til at tillade, at placeringsoplysninger sendes til vilkårlige websteder."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
@@ -750,12 +753,9 @@
     <string name="force_close" msgid="3653416315450806396">"Tving til at lukke"</string>
     <string name="report" msgid="4060218260984795706">"Rapporter"</string>
     <string name="wait" msgid="7147118217226317732">"Vent"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Programmet er omdirigeret"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> kører nu."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> blev oprindeligt åbnet."</string>
     <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) har overtrådt sin egen StrictMode-politik."</string>
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har overtrådt sin egen StrictMode-politik."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> er i gang"</string>
@@ -802,23 +802,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Vis alle"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-masselagring"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB er tilsluttet"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"Du har forbundet din telefon til din computer via USB. Vælg knappen nedenfor, hvis du ønsker at kopiere filer mellem din computer og din Androids SD-kort."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Du har forbundet din telefon til din computer via USB. Vælg knappen nedenfor, hvis du vil kopiere filer mellem din computer og din Androids USB-lager."</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Du har forbundet din telefon til din computer via USB. Vælg knappen nedenfor, hvis du ønsker at kopiere filer mellem din computer og din Androids SD-kort."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Slå USB-lagringen til"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"Der opstod et problem med at bruge dit SD-kort til USB-lagring."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Der opstod et problem med at bruge USB-lager til USB-masselager."</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Der opstod et problem med at bruge dit SD-kort til USB-masselager."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB er tilsluttet"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Vælg for at kopiere filer til/fra din computer."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Slå USB-lagringen fra"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Vælg for at slå USB-lagring fra."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-lager i brug"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Sørg for, at du har demonteret (\"udskubbet\") din Androids SD-kort fra computeren, før du slår USB-lagring fra."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Sørg for, at du har demonteret (\"udskubbet\") din Androids USB-lager fra computeren, før du slår USB-lager fra."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Sørg for, at du har demonteret (\"udskubbet\") din Androids SD-kort fra computeren, før du slår USB-lagring fra."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Slå USB-lagring fra"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Der opstod et problem med at slå USB-lagringen fra. Sørg for, at du har demonteret USB-værten, og prøv så igen."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Slå USB-lagring til"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Hvis du slår USB-lagring til, vil nogle af de programmer, som du bruger, stoppe, og de kan være utilgængelige, indtil du slår USB-lagring til igen."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB-handlingen mislykkedes"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"Formater SD-kort"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"Er du sikker på, du ønsker at formatere SD-kortet? Alle data på kortet mistes."</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formater USB-lager"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formater SD-kort"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vil du formatere USB-lager og slette alle filer, som er gemt der? Handlingen kan ikke fortrydes!"</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Er du sikker på, du ønsker at formatere SD-kortet? Alle data på kortet mistes."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formater"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning er tilsluttet"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Vælg for at deaktivere USB-fejlretning."</string>
@@ -826,18 +831,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"Forbereder SD-kortet"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Forbereder USB-lager"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Forbereder SD-kortet"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Kontrollerer for fejl."</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Tomt SD-kort"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD-kortet er tomt eller har et ikke understøttet filsystem."</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Beskadiget SD-kort"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SD-kortet er beskadiget. Du bliver muligvis nødt til at formatere det igen."</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD-kortet blev fjernet uventet"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Demonter SD-kortet inden fjernelse for at undgå tab af data."</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"SD-kortet kan fjernes sikkert"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"Du kan nu fjerne SD-kortet."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"SD-kortet er fjernet"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD-kortet er fjernet. Indsæt et nyt."</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Tomt USB-lager"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Tomt SD-kort"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"USB-lager er tomt eller har et ikke-understøttet filsystem."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD-kortet er tomt eller har et ikke understøttet filsystem."</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Beskadiget USB-lager"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Beskadiget SD-kort"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB-lager er beskadiget. Du skal muligvis formatere det igen."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD-kortet er beskadiget. Du bliver muligvis nødt til at formatere det igen."</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB-lager blev fjernet uventet"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD-kortet blev fjernet uventet"</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Demonter USB-lager inden fjernelse for at undgå tab af data."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Demonter SD-kortet inden fjernelse for at undgå tab af data."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Sikkert at fjerne USB-lager"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD-kortet kan fjernes sikkert"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Det er nu sikkert at fjerne USB-lager."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Du kan nu fjerne SD-kortet."</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Fjernet USB-lager"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD-kortet er fjernet"</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB-lager er fjernet. Indsæt nyt medie."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-kortet er fjernet. Indsæt et nyt."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Der blev ikke fundet nogen matchende aktiviteter"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"opdater brugerstatistikker for komponenter"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Tillader ændring af indsamlede brugerstatistikker for komponenter. Ikke til brug til normale programmer."</string>
@@ -892,4 +908,23 @@
     <item quantity="one" msgid="8167147081136579439">"1 match"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> af <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
+    <!-- no translation found for action_mode_done (7217581640461922289) -->
+    <skip />
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Demonterer USB-lager..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Demonterer SD-kort..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Sletter USB-lager..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Sletter SD-kort..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"USB-lager kunne ikke slettes."</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"SD-kortet kunne ikke slettes."</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"SD-kortet blev fjernet, før det blev demonteret."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-lager bliver kontrolleret."</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"SD-kortet bliver kontrolleret."</string>
+    <string name="media_removed" msgid="7001526905057952097">"SD-kortet er fjernet."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB-lager er i øjeblikket i brug af en computer."</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"SD-kortet er i øjeblikket i brug af en computer."</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"Eksternt medie i ukendt tilstand."</string>
+    <!-- no translation found for share (1778686618230011964) -->
+    <skip />
+    <!-- no translation found for find (4808270900322985960) -->
+    <skip />
 </resources>
