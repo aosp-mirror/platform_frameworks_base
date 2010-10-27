@@ -58,11 +58,6 @@ AssignName {
 	param size_t len
 	}
 
-GetName {
-	param void *obj
-	param const char **name
-	}
-
 ObjDestroy {
 	param RsAsyncVoidPtr objPtr
 	}
@@ -82,26 +77,6 @@ ElementCreate2 {
 	param const size_t * nameLengths
 	param const uint32_t * arraySize
 	ret RsElement
-	}
-
-ElementGetNativeData {
-	param RsElement elem
-	param uint32_t *elemData
-	param uint32_t elemDataSize
-	}
-
-ElementGetSubElements {
-	param RsElement elem
-	param uint32_t *ids
-	param const char **names
-	param uint32_t dataSize
-	}
-
-
-TypeGetNativeData {
-	param RsType type
-	param uint32_t * typeData
-	param uint32_t typeDataSize
 	}
 
 AllocationUpdateFromBitmap {
@@ -235,11 +210,6 @@ Adapter2DSubData {
 	param uint32_t w
 	param uint32_t h
 	param const void *data
-	}
-
-AllocationGetType {
-	param RsAllocation va
-	ret const void*
 	}
 
 AllocationResize1D {
@@ -433,33 +403,10 @@ ProgramVertexCreate {
 	ret RsProgramVertex
 	}
 
-FileA3DCreateFromAssetStream {
-	param const void * data
-	param size_t len
-	ret RsFile
-	}
-
 FileOpen {
 	ret RsFile
 	param const char *name
 	param size_t len
-	}
-
-FileA3DGetNumIndexEntries {
-	param int32_t * numEntries
-	param RsFile file
-	}
-
-FileA3DGetIndexEntries {
-	param RsFileIndexEntry * fileEntries
-	param uint32_t numEntries
-	param RsFile fileA3D
-	}
-
-FileA3DGetEntryByIndex {
-	param uint32_t index
-	param RsFile file
-	ret RsObjectBase
 	}
 
 FontCreateFromFile {
@@ -486,29 +433,6 @@ MeshBindVertex {
 	param RsMesh mesh
 	param RsAllocation vtx
 	param uint32_t slot
-	}
-
-MeshGetVertexBufferCount {
-	param RsMesh mesh
-	param int32_t *numVtx
-	}
-
-MeshGetIndexCount {
-	param RsMesh mesh
-	param int32_t *numIdx
-	}
-
-MeshGetVertices {
-	param RsMesh mv
-	param RsAllocation *vtxData
-	param uint32_t vtxDataCount
-	}
-
-MeshGetIndices {
-	param RsMesh mv
-	param RsAllocation *va
-	param uint32_t *primType
-	param uint32_t idxDataCount
 	}
 
 AnimationCreate {

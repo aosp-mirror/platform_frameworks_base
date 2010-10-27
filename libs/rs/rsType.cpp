@@ -374,23 +374,6 @@ Type * Type::cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const
 namespace android {
 namespace renderscript {
 
-void rsi_TypeGetNativeData(Context *rsc, RsType type, uint32_t *typeData, uint32_t typeDataSize)
-{
-    rsAssert(typeDataSize == 6);
-    // Pack the data in the follofing way mDimX; mDimY; mDimZ;
-    // mDimLOD; mDimFaces; mElement; into typeData
-    Type *t = static_cast<Type *>(type);
-
-    (*typeData++) = t->getDimX();
-    (*typeData++) = t->getDimY();
-    (*typeData++) = t->getDimZ();
-    (*typeData++) = t->getDimLOD();
-    (*typeData++) = t->getDimFaces() ? 1 : 0;
-    (*typeData++) = (uint32_t)t->getElement();
-    t->getElement()->incUserRef();
-}
-
-
 }
 }
 
@@ -424,3 +407,18 @@ RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
     return Type::getType(rsc, e, dimX, dimY, dimZ, dimLOD, dimFaces);
 }
 
+void rsaTypeGetNativeData(RsContext con, RsType type, uint32_t *typeData, uint32_t typeDataSize)
+{
+    rsAssert(typeDataSize == 6);
+    // Pack the data in the follofing way mDimX; mDimY; mDimZ;
+    // mDimLOD; mDimFaces; mElement; into typeData
+    Type *t = static_cast<Type *>(type);
+
+    (*typeData++) = t->getDimX();
+    (*typeData++) = t->getDimY();
+    (*typeData++) = t->getDimZ();
+    (*typeData++) = t->getDimLOD();
+    (*typeData++) = t->getDimFaces() ? 1 : 0;
+    (*typeData++) = (uint32_t)t->getElement();
+    t->getElement()->incUserRef();
+}
