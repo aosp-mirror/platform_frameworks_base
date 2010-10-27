@@ -65,6 +65,11 @@ public final class CookieSyncManager extends WebSyncManager {
     // time when last update happened
     private long mLastUpdate;
 
+    // Used by the Chromium HTTP stack. Everything else in this class is used only by the Android
+    // Java HTTP stack.
+    private static String sDatabaseDirectory;
+    private static String sCacheDirectory;
+
     private CookieSyncManager(Context context) {
         super(context, "CookieSyncManager");
     }
@@ -77,11 +82,7 @@ public final class CookieSyncManager extends WebSyncManager {
      * @return CookieSyncManager
      */
     public static synchronized CookieSyncManager getInstance() {
-        if (sRef == null) {
-            throw new IllegalStateException(
-                    "CookieSyncManager::createInstance() needs to be called "
-                            + "before CookieSyncManager::getInstance()");
-        }
+        checkInstanceIsCreated();
         return sRef;
     }
 
@@ -92,8 +93,11 @@ public final class CookieSyncManager extends WebSyncManager {
      */
     public static synchronized CookieSyncManager createInstance(
             Context context) {
+        Context appContext = context.getApplicationContext();
         if (sRef == null) {
-            sRef = new CookieSyncManager(context.getApplicationContext());
+            sRef = new CookieSyncManager(appContext);
+            sDatabaseDirectory = appContext.getDatabasePath("dummy").getParent();
+            sCacheDirectory = appContext.getCacheDir().getAbsolutePath();
         }
         return sRef;
     }
@@ -209,5 +213,31 @@ public final class CookieSyncManager extends WebSyncManager {
                 }
             }
         }
+    }
+
+    private static void checkInstanceIsCreated() {
+        if (sRef == null) {
+            throw new IllegalStateException(
+                    "CookieSyncManager::createInstance() needs to be called "
+                            + "before CookieSyncManager::getInstance()");
+        }
+    }
+
+    /**
+     * Called by JNI. Gets the application's database directory, excluding the trailing slash.
+     * @return String The application's database directory
+     */
+    private static synchronized String getDatabaseDirectory() {
+        checkInstanceIsCreated();
+        return sDatabaseDirectory;
+    }
+
+    /**
+     * Called by JNI. Gets the application's cache directory, excluding the trailing slash.
+     * @return String The application's cache directory
+     */
+    private static synchronized String getCacheDirectory() {
+        checkInstanceIsCreated();
+        return sCacheDirectory;
     }
 }

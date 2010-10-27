@@ -155,6 +155,8 @@ import android.view.SurfaceView;
  *
  */
 public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+    private final static String TAG = "GLSurfaceView";
+    private final static boolean LOG_ATTACH_DETACH = false;
     private final static boolean LOG_THREADS = false;
     private final static boolean LOG_PAUSE_RESUME = false;
     private final static boolean LOG_SURFACE = false;
@@ -306,6 +308,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         if (mEGLWindowSurfaceFactory == null) {
             mEGLWindowSurfaceFactory = new DefaultWindowSurfaceFactory();
         }
+        mRenderer = renderer;
         mGLThread = new GLThread(renderer);
         mGLThread.start();
     }
@@ -525,10 +528,34 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     /**
      * This method is used as part of the View class and is not normally
      * called or subclassed by clients of GLSurfaceView.
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (LOG_ATTACH_DETACH) {
+            Log.d(TAG, "onAttachedToWindow reattach =" + mDetached);
+        }
+        if (mDetached && (mRenderer != null)) {
+            mGLThread = new GLThread(mRenderer);
+            mGLThread.start();
+        }
+        mDetached = false;
+    }
+
+    /**
+     * This method is used as part of the View class and is not normally
+     * called or subclassed by clients of GLSurfaceView.
      * Must not be called before a renderer has been set.
      */
     @Override
     protected void onDetachedFromWindow() {
+        if (LOG_ATTACH_DETACH) {
+            Log.d(TAG, "onDetachedFromWindow");
+        }
+        if (mGLThread != null) {
+            mGLThread.requestExitAndWait();
+        }
+        mDetached = true;
         super.onDetachedFromWindow();
     }
 
@@ -1726,6 +1753,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private boolean mSizeChanged = true;
 
     private GLThread mGLThread;
+    private Renderer mRenderer;
+    private boolean mDetached;
     private EGLConfigChooser mEGLConfigChooser;
     private EGLContextFactory mEGLContextFactory;
     private EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;

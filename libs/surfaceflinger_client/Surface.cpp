@@ -867,7 +867,18 @@ int Surface::setBuffersGeometry(int w, int h, int format)
         return BAD_VALUE;
 
     Mutex::Autolock _l(mSurfaceLock);
+    if (mConnected == NATIVE_WINDOW_API_EGL) {
+        return INVALID_OPERATION;
+    }
+
     mBufferInfo.set(w, h, format);
+    if (format != 0) {
+        // we update the format of the surface as reported by query().
+        // this is to allow applications to change the format of a surface's
+        // buffer, and have it reflected in EGL; which is needed for
+        // EGLConfig validation.
+        mFormat = format;
+    }
     return NO_ERROR;
 }
 

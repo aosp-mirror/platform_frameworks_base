@@ -62,17 +62,14 @@ void ResourceCache::incrementRefcount(SkBitmap* bitmapResource) {
     incrementRefcount((void*)bitmapResource, kBitmap);
 }
 
-void ResourceCache::incrementRefcount(SkMatrix* matrixResource) {
-    incrementRefcount((void*)matrixResource, kMatrix);
-}
-
-void ResourceCache::incrementRefcount(SkPaint* paintResource) {
-    incrementRefcount((void*)paintResource, kPaint);
-}
-
 void ResourceCache::incrementRefcount(SkiaShader* shaderResource) {
     shaderResource->getSkShader()->safeRef();
     incrementRefcount((void*)shaderResource, kShader);
+}
+
+void ResourceCache::incrementRefcount(SkiaColorFilter* filterResource) {
+    filterResource->getSkColorFilter()->safeRef();
+    incrementRefcount((void*)filterResource, kColorFilter);
 }
 
 void ResourceCache::decrementRefcount(void* resource) {
@@ -96,6 +93,11 @@ void ResourceCache::decrementRefcount(SkBitmap* bitmapResource) {
 void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
     shaderResource->getSkShader()->safeUnref();
     decrementRefcount((void*)shaderResource);
+}
+
+void ResourceCache::decrementRefcount(SkiaColorFilter* filterResource) {
+    filterResource->getSkColorFilter()->safeUnref();
+    decrementRefcount((void*)filterResource);
 }
 
 void ResourceCache::recycle(SkBitmap* resource) {
@@ -136,34 +138,6 @@ void ResourceCache::destructor(SkBitmap* resource) {
     }
 }
 
-void ResourceCache::destructor(SkMatrix* resource) {
-    ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
-    if (ref == NULL) {
-        // If we're not tracking this resource, just delete it
-        delete resource;
-        return;
-    }
-    ref->destroyed = true;
-    if (ref->refCount == 0) {
-        deleteResourceReference(resource, ref);
-        return;
-    }
-}
-
-void ResourceCache::destructor(SkPaint* resource) {
-    ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
-    if (ref == NULL) {
-        // If we're not tracking this resource, just delete it
-        delete resource;
-        return;
-    }
-    ref->destroyed = true;
-    if (ref->refCount == 0) {
-        deleteResourceReference(resource, ref);
-        return;
-    }
-}
-
 void ResourceCache::destructor(SkiaShader* resource) {
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
@@ -171,6 +145,20 @@ void ResourceCache::destructor(SkiaShader* resource) {
         if (Caches::hasInstance()) {
             Caches::getInstance().gradientCache.remove(resource->getSkShader());
         }
+        delete resource;
+        return;
+    }
+    ref->destroyed = true;
+    if (ref->refCount == 0) {
+        deleteResourceReference(resource, ref);
+        return;
+    }
+}
+
+void ResourceCache::destructor(SkiaColorFilter* resource) {
+    ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
+    if (ref == NULL) {
+        // If we're not tracking this resource, just delete it
         delete resource;
         return;
     }
@@ -196,19 +184,21 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
                 delete bitmap;
             }
             break;
-            case kMatrix:
-                delete (SkMatrix*) resource;
-                break;
-            case kPaint:
-                delete (SkPaint*) resource;
-                break;
             case kShader:
+            {
                 SkiaShader* shader = (SkiaShader*)resource;
                 if (Caches::hasInstance()) {
                     Caches::getInstance().gradientCache.remove(shader->getSkShader());
                 }
                 delete shader;
-                break;
+            }
+            break;
+            case kColorFilter:
+            {
+                SkiaColorFilter* filter = (SkiaColorFilter*)resource;
+                delete filter;
+            }
+            break;
         }
     }
     mCache->removeItem(resource);

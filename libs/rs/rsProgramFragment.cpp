@@ -198,10 +198,7 @@ void ProgramFragmentState::init(Context *rsc)
     rsc->mStateElement.elementBuilderAdd(colorElem, "Color", 1);
     const Element *constInput = rsc->mStateElement.elementBuilderCreate(rsc);
 
-    Type *inputType = new Type(rsc);
-    inputType->setElement(constInput);
-    inputType->setDimX(1);
-    inputType->compute();
+    Type *inputType = Type::getType(rsc, constInput, 1, 0, 0, false, false);
 
     uint32_t tmp[4];
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;

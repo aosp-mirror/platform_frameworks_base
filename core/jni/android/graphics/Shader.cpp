@@ -58,6 +58,8 @@ static void Shader_destructor(JNIEnv* env, jobject o, SkShader* shader, SkiaShad
 #ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::Caches::hasInstance()) {
         android::uirenderer::Caches::getInstance().resourceCache.destructor(skiaShader);
+    } else {
+        delete skiaShader;
     }
 #endif
 }

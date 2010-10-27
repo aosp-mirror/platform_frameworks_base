@@ -648,7 +648,6 @@ public class TabletStatusBarService extends StatusBarService {
                     if (mVT == null) break;
                     mVT.addMovement(event);
                     mVT.computeCurrentVelocity(1000);
-                    Slog.d("ClockTouchListener", "dy=" + mVT.getYVelocity());
                     if (mVT.getYVelocity() < -200 && mSystemPanel.getVisibility() == View.GONE) {
                         mHandler.removeMessages(MSG_OPEN_SYSTEM_PANEL);
                         mHandler.sendEmptyMessage(MSG_OPEN_SYSTEM_PANEL);

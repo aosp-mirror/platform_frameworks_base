@@ -23,7 +23,8 @@ namespace uirenderer {
 // Base color filter
 ///////////////////////////////////////////////////////////////////////////////
 
-SkiaColorFilter::SkiaColorFilter(Type type, bool blend): mType(type), mBlend(blend) {
+SkiaColorFilter::SkiaColorFilter(SkColorFilter *skFilter, Type type, bool blend):
+        mType(type), mBlend(blend), mSkFilter(skFilter) {
 }
 
 SkiaColorFilter::~SkiaColorFilter() {
@@ -33,8 +34,8 @@ SkiaColorFilter::~SkiaColorFilter() {
 // Color matrix filter
 ///////////////////////////////////////////////////////////////////////////////
 
-SkiaColorMatrixFilter::SkiaColorMatrixFilter(float* matrix, float* vector):
-        SkiaColorFilter(kColorMatrix, true), mMatrix(matrix), mVector(vector) {
+SkiaColorMatrixFilter::SkiaColorMatrixFilter(SkColorFilter *skFilter, float* matrix, float* vector):
+        SkiaColorFilter(skFilter, kColorMatrix, true), mMatrix(matrix), mVector(vector) {
 }
 
 SkiaColorMatrixFilter::~SkiaColorMatrixFilter() {
@@ -56,8 +57,8 @@ void SkiaColorMatrixFilter::setupProgram(Program* program) {
 // Lighting color filter
 ///////////////////////////////////////////////////////////////////////////////
 
-SkiaLightingFilter::SkiaLightingFilter(int multiply, int add):
-        SkiaColorFilter(kLighting, true) {
+SkiaLightingFilter::SkiaLightingFilter(SkColorFilter *skFilter, int multiply, int add):
+        SkiaColorFilter(skFilter, kLighting, true) {
     mMulR = ((multiply >> 16) & 0xFF) / 255.0f;
     mMulG = ((multiply >>  8) & 0xFF) / 255.0f;
     mMulB = ((multiply      ) & 0xFF) / 255.0f;
@@ -80,8 +81,8 @@ void SkiaLightingFilter::setupProgram(Program* program) {
 // Blend color filter
 ///////////////////////////////////////////////////////////////////////////////
 
-SkiaBlendFilter::SkiaBlendFilter(int color, SkXfermode::Mode mode):
-        SkiaColorFilter(kBlend, true), mMode(mode) {
+SkiaBlendFilter::SkiaBlendFilter(SkColorFilter *skFilter, int color, SkXfermode::Mode mode):
+        SkiaColorFilter(skFilter, kBlend, true), mMode(mode) {
     const int alpha = (color >> 24) & 0xFF;
     mA = alpha / 255.0f;
     mR = mA * ((color >> 16) & 0xFF) / 255.0f;

@@ -645,11 +645,13 @@ public class Activity extends ContextThemeWrapper
     Activity mParent;
     boolean mCalled;
     boolean mCheckedForLoaderManager;
-    boolean mStarted;
+    boolean mLoadersStarted;
     private boolean mResumed;
     private boolean mStopped;
     boolean mFinished;
     boolean mStartedActivity;
+    /** true if the activity is going through a transient pause */
+    /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
     /*package*/ boolean mChangingConfigurations = false;
     /*package*/ int mConfigChangeFlags;
@@ -768,7 +770,7 @@ public class Activity extends ContextThemeWrapper
             return mLoaderManager;
         }
         mCheckedForLoaderManager = true;
-        mLoaderManager = getLoaderManager(-1, mStarted, true);
+        mLoaderManager = getLoaderManager(-1, mLoadersStarted, true);
         return mLoaderManager;
     }
     
@@ -777,9 +779,13 @@ public class Activity extends ContextThemeWrapper
             mAllLoaderManagers = new SparseArray<LoaderManagerImpl>();
         }
         LoaderManagerImpl lm = mAllLoaderManagers.get(index);
-        if (lm == null && create) {
-            lm = new LoaderManagerImpl(started);
-            mAllLoaderManagers.put(index, lm);
+        if (lm == null) {
+            if (create) {
+                lm = new LoaderManagerImpl(this, started);
+                mAllLoaderManagers.put(index, lm);
+            }
+        } else {
+            lm.updateActivity(this);
         }
         return lm;
     }
@@ -979,13 +985,16 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onStart() {
         mCalled = true;
-        mStarted = true;
-        if (mLoaderManager != null) {
-            mLoaderManager.doStart();
-        } else if (!mCheckedForLoaderManager) {
-            mLoaderManager = getLoaderManager(-1, mStarted, false);
+        
+        if (!mLoadersStarted) {
+            mLoadersStarted = true;
+            if (mLoaderManager != null) {
+                mLoaderManager.doStart();
+            } else if (!mCheckedForLoaderManager) {
+                mLoaderManager = getLoaderManager(-1, mLoadersStarted, false);
+            }
+            mCheckedForLoaderManager = true;
         }
-        mCheckedForLoaderManager = true;
     }
 
     /**
@@ -4249,7 +4258,7 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performStart() {
-        mFragments.mStateSaved = false;
+        mFragments.noteStateNotSaved();
         mCalled = false;
         mFragments.execPendingActions();
         mInstrumentation.callActivityOnStart(this);
@@ -4267,7 +4276,7 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performRestart() {
-        mFragments.mStateSaved = false;
+        mFragments.noteStateNotSaved();
 
         synchronized (mManagedCursors) {
             final int N = mManagedCursors.size();
@@ -4347,8 +4356,8 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performStop() {
-        if (mStarted) {
-            mStarted = false;
+        if (mLoadersStarted) {
+            mLoadersStarted = false;
             if (mLoaderManager != null) {
                 if (!mChangingConfigurations) {
                     mLoaderManager.doStop();
@@ -4407,7 +4416,7 @@ public class Activity extends ContextThemeWrapper
         if (Config.LOGV) Log.v(
             TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode
             + ", resCode=" + resultCode + ", data=" + data);
-        mFragments.mStateSaved = false;
+        mFragments.noteStateNotSaved();
         if (who == null) {
             onActivityResult(requestCode, resultCode, data);
         } else {

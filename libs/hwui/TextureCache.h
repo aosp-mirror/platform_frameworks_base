@@ -25,6 +25,20 @@
 namespace android {
 namespace uirenderer {
 
+///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+// Debug
+#define DEBUG_TEXTURES 0
+
+// Debug
+#if DEBUG_TEXTURES
+    #define TEXTURE_LOGD(...) LOGD(__VA_ARGS__)
+#else
+    #define TEXTURE_LOGD(...)
+#endif
+
 /**
  * A simple LRU texture cache. The cache has a maximum size expressed in bytes.
  * Any texture added to the cache causing the cache to grow beyond the maximum

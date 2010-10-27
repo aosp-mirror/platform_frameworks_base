@@ -112,12 +112,10 @@ public class Script extends BaseObj {
 
     public static class FieldBase {
         protected Element mElement;
-        protected Type mType;
         protected Allocation mAllocation;
 
         protected void init(RenderScript rs, int dimx) {
             mAllocation = Allocation.createSized(rs, mElement, dimx);
-            mType = mAllocation.getType();
         }
 
         protected FieldBase() {
@@ -128,7 +126,7 @@ public class Script extends BaseObj {
         }
 
         public Type getType() {
-            return mType;
+            return mAllocation.getType();
         }
 
         public Allocation getAllocation() {
@@ -138,19 +136,6 @@ public class Script extends BaseObj {
         //@Override
         public void updateAllocation() {
         }
-
-
-        //
-        /*
-        public class ScriptField_UserField
-            extends android.renderscript.Script.FieldBase {
-
-            protected
-
-        }
-
-        */
-
     }
 }
 

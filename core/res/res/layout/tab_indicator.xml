@@ -20,7 +20,6 @@
     android:layout_weight="1"
     android:layout_marginLeft="-3dip"
     android:layout_marginRight="-3dip"
-    android:orientation="vertical"
     android:background="@android:drawable/tab_indicator">
 
     <ImageView android:id="@+id/icon"

@@ -18,8 +18,7 @@
 #define ANDROID_UI_RESOURCE_CACHE_H
 
 #include <SkBitmap.h>
-#include <SkMatrix.h>
-#include <SkPaint.h>
+#include <SkiaColorFilter.h>
 #include <SkiaShader.h>
 #include <utils/KeyedVector.h>
 
@@ -31,9 +30,8 @@ namespace uirenderer {
  */
 enum ResourceType {
     kBitmap,
-    kMatrix,
-    kPaint,
     kShader,
+    kColorFilter,
 };
 
 class ResourceReference {
@@ -56,19 +54,18 @@ public:
     ResourceCache();
     ~ResourceCache();
     void incrementRefcount(SkBitmap* resource);
-    void incrementRefcount(SkMatrix* resource);
-    void incrementRefcount(SkPaint* resource);
     void incrementRefcount(SkiaShader* resource);
+    void incrementRefcount(SkiaColorFilter* resource);
     void incrementRefcount(const void* resource, ResourceType resourceType);
     void decrementRefcount(void* resource);
     void decrementRefcount(SkBitmap* resource);
     void decrementRefcount(SkiaShader* resource);
+    void decrementRefcount(SkiaColorFilter* resource);
     void recycle(void* resource);
     void recycle(SkBitmap* resource);
     void destructor(SkBitmap* resource);
-    void destructor(SkMatrix* resource);
-    void destructor(SkPaint* resource);
     void destructor(SkiaShader* resource);
+    void destructor(SkiaColorFilter* resource);
 private:
     void deleteResourceReference(void* resource, ResourceReference* ref);
     void incrementRefcount(void* resource, ResourceType resourceType);

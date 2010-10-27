@@ -86,6 +86,15 @@ public interface FragmentManager {
     /**
      * Start a series of edit operations on the Fragments associated with
      * this FragmentManager.
+     * 
+     * <p>Note: A fragment transaction can only be created/committed prior
+     * to an activity saving its state.  If you try to commit a transaction
+     * after {@link Activity#onSaveInstanceState Activity.onSaveInstanceState()}
+     * (and prior to a following {@link Activity#onStart Activity.onStart}
+     * or {@link Activity#onResume Activity.onResume()}, you will get an error.
+     * This is because the framework takes care of saving your current fragments
+     * in the state, and if changes are made after the state is saved then they
+     * will be lost.</p>
      */
     public FragmentTransaction openTransaction();
 
@@ -271,6 +280,7 @@ final class FragmentManagerImpl implements FragmentManager {
     
     boolean mNeedMenuInvalidate;
     boolean mStateSaved;
+    String mNoTransactionsBecause;
     
     // Temporary vars for state save and restore.
     Bundle mStateBundle = null;
@@ -843,6 +853,10 @@ final class FragmentManagerImpl implements FragmentManager {
             throw new IllegalStateException(
                     "Can not perform this action after onSaveInstanceState");
         }
+        if (mNoTransactionsBecause != null) {
+            throw new IllegalStateException(
+                    "Can not perform this action inside of " + mNoTransactionsBecause);
+        }
         synchronized (this) {
             if (mPendingActions == null) {
                 mPendingActions = new ArrayList<Runnable>();
@@ -1269,6 +1283,10 @@ final class FragmentManagerImpl implements FragmentManager {
     public void attachActivity(Activity activity) {
         if (mActivity != null) throw new IllegalStateException();
         mActivity = activity;
+    }
+    
+    public void noteStateNotSaved() {
+        mStateSaved = false;
     }
     
     public void dispatchCreate() {

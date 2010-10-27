@@ -115,7 +115,7 @@ public class ClipboardService extends IClipboard.Stub {
 
     public ClipDescription getPrimaryClipDescription() {
         synchronized (this) {
-            return new ClipDescription(mPrimaryClip);
+            return mPrimaryClip.getDescription();
         }
     }
 

@@ -1757,6 +1757,7 @@ public final class ActivityThread {
         for (int i=0; i<N; i++) {
             Intent intent = intents.get(i);
             intent.setExtrasClassLoader(r.activity.getClassLoader());
+            r.activity.mFragments.noteStateNotSaved();
             mInstrumentation.callActivityOnNewIntent(r.activity, intent);
         }
     }
@@ -1767,11 +1768,13 @@ public final class ActivityThread {
         if (r != null) {
             final boolean resumed = !r.paused;
             if (resumed) {
+                r.activity.mTemporaryPause = true;
                 mInstrumentation.callActivityOnPause(r.activity);
             }
             deliverNewIntents(r, intents);
             if (resumed) {
                 mInstrumentation.callActivityOnResume(r.activity);
+                r.activity.mTemporaryPause = false;
             }
         }
     }
@@ -2594,6 +2597,7 @@ public final class ActivityThread {
                 try {
                     // Now we are idle.
                     r.activity.mCalled = false;
+                    r.activity.mTemporaryPause = true;
                     mInstrumentation.callActivityOnPause(r.activity);
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(
@@ -2614,6 +2618,7 @@ public final class ActivityThread {
             deliverResults(r, res.results);
             if (resumed) {
                 mInstrumentation.callActivityOnResume(r.activity);
+                r.activity.mTemporaryPause = false;
             }
         }
     }

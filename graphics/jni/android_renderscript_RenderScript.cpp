@@ -377,7 +377,7 @@ static jint
 nAllocationCreateTyped(JNIEnv *_env, jobject _this, RsContext con, jint e)
 {
     LOG_API("nAllocationCreateTyped, con(%p), e(%p)", con, (RsElement)e);
-    return (jint) rsAllocationCreateTyped(con, (RsElement)e);
+    return (jint) rsaAllocationCreateTyped(con, (RsElement)e);
 }
 
 static void
@@ -428,7 +428,7 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint dst
         const int w = bitmap.width();
         const int h = bitmap.height();
         const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
+        jint id = (jint)rsaAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
         bitmap.unlockPixels();
         return id;
     }
@@ -488,7 +488,7 @@ nAllocationCreateFromAssetStream(JNIEnv *_env, jobject _this, RsContext con, jin
         const int w = bitmap.width();
         const int h = bitmap.height();
         const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
+        jint id = (jint)rsaAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
         bitmap.unlockPixels();
         return id;
     }

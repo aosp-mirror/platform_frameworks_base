@@ -33,6 +33,34 @@ public class ErrorCodes {
         }
     }
 
+    public static String asString(int code) {
+        switch (code) {
+            case SUCCESS: return "SUCCESS";
+            case ERROR_IO: return "IO";
+            case ERROR_CANCELLED: return "CANCELLED";
+            case ERROR_TIMEOUT: return "TIMEOUT";
+            case ERROR_BUSY: return "BUSY";
+            case ERROR_CONNECT: return "CONNECT/DISCONNECT";
+//            case ERROR_DISCONNECT: return "DISCONNECT";
+            case ERROR_READ: return "READ";
+            case ERROR_WRITE: return "WRITE";
+            case ERROR_INVALID_PARAM: return "INVALID_PARAM";
+            case ERROR_INSUFFICIENT_RESOURCES: return "INSUFFICIENT_RESOURCES";
+            case ERROR_SOCKET_CREATION: return "SOCKET_CREATION";
+            case ERROR_SOCKET_NOT_CONNECTED: return "SOCKET_NOT_CONNECTED";
+            case ERROR_BUFFER_TO_SMALL: return "BUFFER_TO_SMALL";
+            case ERROR_SAP_USED: return "SAP_USED";
+            case ERROR_SERVICE_NAME_USED: return "SERVICE_NAME_USED";
+            case ERROR_SOCKET_OPTIONS: return "SOCKET_OPTIONS";
+            case ERROR_NFC_ON: return "NFC_ON";
+            case ERROR_NOT_INITIALIZED: return "NOT_INITIALIZED";
+            case ERROR_SE_ALREADY_SELECTED: return "SE_ALREADY_SELECTED";
+            case ERROR_SE_CONNECTED: return "SE_CONNECTED";
+            case ERROR_NO_SE_CONNECTED: return "NO_SE_CONNECTED";
+            default: return "UNKNOWN ERROR";
+        }
+    }
+
     public static final int SUCCESS = 0;
 
     public static final int ERROR_IO = -1;

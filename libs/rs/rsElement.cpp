@@ -399,6 +399,7 @@ void rsi_ElementGetSubElements(Context *rsc, RsElement elem, uint32_t *ids, cons
     rsAssert(e->getFieldCount() == dataSize);
 
     for(uint32_t i = 0; i < dataSize; i ++) {
+        e->getField(i)->incUserRef();
         ids[i] = (uint32_t)e->getField(i);
         names[i] = e->getFieldName(i);
     }

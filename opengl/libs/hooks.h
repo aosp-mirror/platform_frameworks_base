@@ -141,6 +141,11 @@ static gl_hooks_t const* getGlThreadSpecific() {
 
 #endif
 
+#if EGL_TRACE
+
+extern gl_hooks_t const* getGLTraceThreadSpecific();
+
+#endif
 
 // ----------------------------------------------------------------------------
 }; // namespace android

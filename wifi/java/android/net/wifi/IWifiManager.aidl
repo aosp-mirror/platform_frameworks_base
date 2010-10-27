@@ -108,6 +108,8 @@ interface IWifiManager
 
     void startWpsPbc(String bssid);
 
-    void startWpsPin(String bssid, int apPin);
+    void startWpsWithPinFromAccessPoint(String bssid, int apPin);
+
+    int startWpsWithPinFromDevice(String bssid);
 }
 

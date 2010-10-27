@@ -107,8 +107,6 @@ OpenGLRenderer::OpenGLRenderer(): mCaches(Caches::getInstance()) {
     memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
 
     mFirstSnapshot = new Snapshot;
-
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -129,6 +127,8 @@ void OpenGLRenderer::setViewport(int width, int height) {
 
     mFirstSnapshot->height = height;
     mFirstSnapshot->viewport.set(0, 0, width, height);
+
+    mDirtyClip = false;
 }
 
 void OpenGLRenderer::prepare(bool opaque) {
@@ -139,15 +139,17 @@ void OpenGLRenderer::prepare(bool opaque) {
     glViewport(0, 0, mWidth, mHeight);
 
     glDisable(GL_DITHER);
-    glDisable(GL_SCISSOR_TEST);
 
     if (!opaque) {
+        glDisable(GL_SCISSOR_TEST);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        glEnable(GL_SCISSOR_TEST);
+    } else {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(0, 0, mWidth, mHeight);
+        dirtyClip();
     }
-
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(0, 0, mWidth, mHeight);
 
     mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
 }
@@ -175,7 +177,7 @@ void OpenGLRenderer::releaseContext() {
     glViewport(0, 0, mSnapshot->viewport.getWidth(), mSnapshot->viewport.getHeight());
 
     glEnable(GL_SCISSOR_TEST);
-    setScissorFromClip();
+    dirtyClip();
 
     glDisable(GL_DITHER);
 
@@ -241,7 +243,7 @@ bool OpenGLRenderer::restoreSnapshot() {
     }
 
     if (restoreClip) {
-        setScissorFromClip();
+        dirtyClip();
     }
 
     return restoreClip;
@@ -261,7 +263,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 
     if (p) {
         alpha = p->getAlpha();
-        if (!mExtensions.hasFramebufferFetch()) {
+        if (!mCaches.extensions.hasFramebufferFetch()) {
             const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
             if (!isMode) {
                 // Assume SRC_OVER
@@ -371,8 +373,8 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         bounds.intersect(snapshot->previous->viewport);
     }
 
-    if (bounds.isEmpty() || bounds.getWidth() > mMaxTextureSize ||
-            bounds.getHeight() > mMaxTextureSize) {
+    if (bounds.isEmpty() || bounds.getWidth() > mCaches.maxTextureSize ||
+            bounds.getHeight() > mCaches.maxTextureSize) {
         snapshot->invisible = true;
     } else {
         // TODO: Should take the mode into account
@@ -448,7 +450,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        setScissorFromClip();
+        dirtyClip();
 
         // Change the ortho projection
         glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
@@ -506,6 +508,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     mCaches.unbindMeshBuffer();
     resetDrawTextureTexCoords(texCoords.left, texCoords.top, texCoords.right, texCoords.bottom);
 
+    glActiveTexture(gTextureUnits[0]);
     if (fboLayer) {
         drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
                 layer->alpha / 255.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
@@ -528,11 +531,20 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         mCaches.fboCache.put(current->fbo);
     }
 
+    dirtyClip();
+
     // Failing to add the layer to the cache should happen only if the layer is too large
     if (!mCaches.layerCache.put(layer)) {
         LAYER_LOGD("Deleting layer");
         glDeleteTextures(1, &layer->texture);
         delete layer;
+    }
+}
+
+void OpenGLRenderer::setupDraw() {
+    clearLayerRegions();
+    if (mDirtyClip) {
+        setScissorFromClip();
     }
 }
 
@@ -553,7 +565,7 @@ void OpenGLRenderer::clearLayerRegions() {
     mLayers.clear();
 
     // Restore the clip
-    setScissorFromClip();
+    dirtyClip();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -602,6 +614,7 @@ void OpenGLRenderer::setScissorFromClip() {
     Rect clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
     glScissor(clip.left, mSnapshot->height - clip.bottom, clip.getWidth(), clip.getHeight());
+    mDirtyClip = false;
 }
 
 const Rect& OpenGLRenderer::getClipBounds() {
@@ -626,7 +639,7 @@ bool OpenGLRenderer::quickReject(float left, float top, float right, float botto
 bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
     bool clipped = mSnapshot->clip(left, top, right, bottom, op);
     if (clipped) {
-        setScissorFromClip();
+        dirtyClip();
     }
     return !mSnapshot->clipRect->isEmpty();
 }
@@ -676,7 +689,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
         return;
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(gTextureUnits[0]);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -711,7 +724,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
         return;
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(gTextureUnits[0]);
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -749,6 +762,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     const bool isAA = paint->isAntiAlias();
     if (isAA) {
         GLuint textureUnit = 0;
+        glActiveTexture(gTextureUnits[textureUnit]);
         setupTextureAlpha8(mCaches.line.getTexture(), 0, 0, textureUnit, 0.0f, 0.0f, r, g, b, a,
                 mode, false, true, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
                 mCaches.line.getMeshBuffer());
@@ -812,7 +826,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     }
 
     SkXfermode::Mode mode;
-    if (!mExtensions.hasFramebufferFetch()) {
+    if (!mCaches.extensions.hasFramebufferFetch()) {
         const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
         if (!isMode) {
             // Assume SRC_OVER
@@ -869,10 +883,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     fontRenderer.setFont(paint, SkTypeface::UniqueID(paint->getTypeface()),
             paint->getTextSize());
 
-    Rect clipRect(*mSnapshot->clipRect);
-    clipRect.snapToPixelBoundaries();
-    glScissor(clipRect.left, mSnapshot->height - clipRect.bottom,
-            clipRect.getWidth(), clipRect.getHeight());
+    setupDraw();
 
     if (mHasShadow) {
         glActiveTexture(gTextureUnits[0]);
@@ -897,7 +908,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
             x, y, r, g, b, a, mode, false, true, NULL, NULL);
 
     const Rect& clip = mSnapshot->getLocalClip();
-    clearLayerRegions();
 
     mCaches.unbindMeshBuffer();
     fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
@@ -906,8 +916,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
 
     drawTextDecorations(text, bytesCount, length, x, y, paint);
-
-    setScissorFromClip();
 }
 
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
@@ -939,7 +947,7 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
 
     setupTextureAlpha8(texture, textureUnit, x, y, r, g, b, a, mode, true, true);
 
-    clearLayerRegions();
+    setupDraw();
 
     // Draw the mesh
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -1035,10 +1043,10 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
 
      if (applyFilters) {
          if (mShader) {
-             mShader->describe(description, mExtensions);
+             mShader->describe(description, mCaches.extensions);
          }
          if (mColorFilter) {
-             mColorFilter->describe(description, mExtensions);
+             mColorFilter->describe(description, mCaches.extensions);
          }
      }
 
@@ -1048,7 +1056,7 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      // Build and use the appropriate shader
      useProgram(mCaches.programCache.get(description));
 
-     bindTexture(texture, textureUnit);
+     bindTexture(texture);
      glUniform1i(mCaches.currentProgram->getUniform("sampler"), textureUnit);
 
      int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
@@ -1155,7 +1163,7 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         int color, SkXfermode::Mode mode, bool ignoreTransform) {
-    clearLayerRegions();
+    setupDraw();
 
     // If a shader is set, preserve only the alpha
     if (mShader) {
@@ -1184,10 +1192,10 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
     const bool setColor = description.setColor(r, g, b, a);
 
     if (mShader) {
-        mShader->describe(description, mExtensions);
+        mShader->describe(description, mCaches.extensions);
     }
     if (mColorFilter) {
-        mColorFilter->describe(description, mExtensions);
+        mColorFilter->describe(description, mCaches.extensions);
     }
 
     // Setup the blending mode
@@ -1244,13 +1252,13 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
         bool swapSrcDst, bool ignoreTransform, GLuint vbo) {
-    clearLayerRegions();
+    setupDraw();
 
     ProgramDescription description;
     description.hasTexture = true;
     const bool setColor = description.setColor(alpha, alpha, alpha, alpha);
     if (mColorFilter) {
-        mColorFilter->describe(description, mExtensions);
+        mColorFilter->describe(description, mCaches.extensions);
     }
 
     mModelView.loadTranslate(left, top, 0.0f);
@@ -1318,7 +1326,7 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
             // These blend modes are not supported by OpenGL directly and have
             // to be implemented using shaders. Since the shader will perform
             // the blending, turn blending off here
-            if (mExtensions.hasFramebufferFetch()) {
+            if (mCaches.extensions.hasFramebufferFetch()) {
                 description.framebufferMode = mode;
                 description.swapSrcDst = swapSrcDst;
             }
@@ -1354,7 +1362,7 @@ void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, flo
 
 void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
     if (paint) {
-        if (!mExtensions.hasFramebufferFetch()) {
+        if (!mCaches.extensions.hasFramebufferFetch()) {
             const bool isMode = SkXfermode::IsMode(paint->getXfermode(), mode);
             if (!isMode) {
                 // Assume SRC_OVER
@@ -1384,16 +1392,9 @@ SkXfermode::Mode OpenGLRenderer::getXfermode(SkXfermode* mode) {
     return mode->fMode;
 }
 
-void OpenGLRenderer::bindTexture(GLuint texture, GLuint textureUnit) {
-    glActiveTexture(gTextureUnits[textureUnit]);
-    glBindTexture(GL_TEXTURE_2D, texture);
-}
-
-void OpenGLRenderer::setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT,
-        GLuint textureUnit) {
+void OpenGLRenderer::setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT) {
     bool bound = false;
     if (wrapS != texture->wrapS) {
-        glActiveTexture(gTextureUnits[textureUnit]);
         glBindTexture(GL_TEXTURE_2D, texture->id);
         bound = true;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
@@ -1401,7 +1402,6 @@ void OpenGLRenderer::setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum 
     }
     if (wrapT != texture->wrapT) {
         if (!bound) {
-            glActiveTexture(gTextureUnits[textureUnit]);
             glBindTexture(GL_TEXTURE_2D, texture->id);
         }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);

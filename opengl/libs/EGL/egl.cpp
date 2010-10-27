@@ -285,6 +285,58 @@ EGLAPI gl_hooks_t gHooks[2][IMPL_NUM_IMPLEMENTATIONS];
 EGLAPI gl_hooks_t gHooksNoContext;
 EGLAPI pthread_key_t gGLWrapperKey = -1;
 
+#if EGL_TRACE
+
+EGLAPI pthread_key_t gGLTraceKey = -1;
+
+// ----------------------------------------------------------------------------
+
+static int gEGLTraceLevel;
+static int gEGLApplicationTraceLevel;
+extern EGLAPI gl_hooks_t gHooksTrace;
+
+static inline void setGlTraceThreadSpecific(gl_hooks_t const *value) {
+    pthread_setspecific(gGLTraceKey, value);
+}
+
+gl_hooks_t const* getGLTraceThreadSpecific() {
+    return static_cast<gl_hooks_t*>(pthread_getspecific(gGLTraceKey));
+}
+
+static void initEglTraceLevel() {
+    char value[PROPERTY_VALUE_MAX];
+    property_get("debug.egl.trace", value, "0");
+    int propertyLevel = atoi(value);
+    int applicationLevel = gEGLApplicationTraceLevel;
+    gEGLTraceLevel = propertyLevel > applicationLevel ? propertyLevel : applicationLevel;
+}
+
+static void setGLHooksThreadSpecific(gl_hooks_t const *value) {
+    if (gEGLTraceLevel > 0) {
+        setGlTraceThreadSpecific(value);
+        setGlThreadSpecific(&gHooksTrace);
+    } else {
+        setGlThreadSpecific(value);
+    }
+}
+
+/*
+ * Global entry point to allow applications to modify their own trace level.
+ * The effective trace level is the max of this level and the value of debug.egl.trace.
+ */
+extern "C"
+void setGLTraceLevel(int level) {
+    gEGLApplicationTraceLevel = level;
+}
+
+#else
+
+static inline void setGLHooksThreadSpecific(gl_hooks_t const *value) {
+    setGlThreadSpecific(value);
+}
+
+#endif
+
 // ----------------------------------------------------------------------------
 
 static __attribute__((noinline))
@@ -459,13 +511,17 @@ static void early_egl_init(void)
 #if !USE_FAST_TLS_KEY
     pthread_key_create(&gGLWrapperKey, NULL);
 #endif
+#if EGL_TRACE
+    pthread_key_create(&gGLTraceKey, NULL);
+    initEglTraceLevel();
+#endif
     uint32_t addr = (uint32_t)((void*)gl_no_context);
     android_memset32(
             (uint32_t*)(void*)&gHooksNoContext, 
             addr, 
             sizeof(gHooksNoContext));
 
-    setGlThreadSpecific(&gHooksNoContext);
+    setGLHooksThreadSpecific(&gHooksNoContext);
 }
 
 static pthread_once_t once_control = PTHREAD_ONCE_INIT;
@@ -677,9 +733,17 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
         dp->refs++;
         return EGL_TRUE;
     }
-    
-    setGlThreadSpecific(&gHooksNoContext);
-    
+
+#if EGL_TRACE
+
+    // Called both at early_init time and at this time. (Early_init is pre-zygote, so
+    // the information from that call may be stale.)
+    initEglTraceLevel();
+
+#endif
+
+    setGLHooksThreadSpecific(&gHooksNoContext);
+
     // initialize each EGL and
     // build our own extension string first, based on the extension we know
     // and the extension supported by our client implementation
@@ -1238,11 +1302,11 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
 
         // cur_c has to be valid here (but could be terminated)
         if (ctx != EGL_NO_CONTEXT) {
-            setGlThreadSpecific(c->cnx->hooks[c->version]);
+            setGLHooksThreadSpecific(c->cnx->hooks[c->version]);
             setContext(ctx);
             _c.acquire();
         } else {
-            setGlThreadSpecific(&gHooksNoContext);
+            setGLHooksThreadSpecific(&gHooksNoContext);
             setContext(EGL_NO_CONTEXT);
         }
         _cur_c.release();
@@ -1434,6 +1498,9 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
                     // Extensions are independent of the bound context
                     cnx->hooks[GLESv1_INDEX]->ext.extensions[slot] =
                     cnx->hooks[GLESv2_INDEX]->ext.extensions[slot] =
+#if EGL_TRACE
+                    gHooksTrace.ext.extensions[slot] =
+#endif
                             cnx->egl.eglGetProcAddress(procname);
                 }
             }

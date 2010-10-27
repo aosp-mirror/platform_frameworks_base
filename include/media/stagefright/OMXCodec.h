@@ -39,6 +39,11 @@ struct OMXCodec : public MediaSource,
         // The client wants to access the output buffer's video
         // data for example for thumbnail extraction.
         kClientNeedsFramebuffer  = 4,
+
+        // Request for software or hardware codecs. If request
+        // can not be fullfilled, Create() returns NULL.
+        kSoftwareCodecsOnly      = 8,
+        kHardwareCodecsOnly      = 16,
     };
     static sp<MediaSource> Create(
             const sp<IOMX> &omx,

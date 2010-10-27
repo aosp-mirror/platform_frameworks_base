@@ -153,11 +153,15 @@ public class WifiNative {
 
     public native static boolean startWpsPbcCommand(String bssid);
 
-    public native static boolean startWpsPinCommand(String bssid, int apPin);
+    public native static boolean startWpsWithPinFromAccessPointCommand(String bssid, int apPin);
+
+    public native static int startWpsWithPinFromDeviceCommand(String bssid);
 
     public native static boolean doDhcpRequest(DhcpInfo results);
 
     public native static String getDhcpError();
+
+    public native static boolean setSuspendOptimizationsCommand(boolean enabled);
 
     /**
      * Wait for the supplicant to send an event, returning the event string.

@@ -25,7 +25,6 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
-import com.android.internal.view.InputMethodAndSubtypeEnabler;
 
 import com.android.server.StatusBarManagerService;
 
@@ -1549,10 +1548,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private void showInputMethodAndSubtypeEnabler() {
-        Intent intent = new Intent();
-        intent.setClassName("android", InputMethodAndSubtypeEnabler.class.getCanonicalName());
+        Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_AND_SUBTYPE_ENABLER);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         mContext.startActivity(intent);
     }
 

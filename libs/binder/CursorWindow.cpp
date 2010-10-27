@@ -115,7 +115,7 @@ field_slot_t * CursorWindow::allocRow()
     uint32_t fieldDirOffset = alloc(fieldDirSize);
     if (!fieldDirOffset) {
         mHeader->numRows--;
-        LOGE("The row failed, so back out the new row accounting from allocRowSlot %d", mHeader->numRows);
+        LOG_WINDOW("The row failed, so back out the new row accounting from allocRowSlot %d", mHeader->numRows);
         return NULL;
     }
     field_slot_t * fieldDir = (field_slot_t *)offsetToPtr(fieldDirOffset);
