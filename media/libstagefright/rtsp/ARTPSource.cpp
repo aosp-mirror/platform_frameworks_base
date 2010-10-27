@@ -57,7 +57,7 @@ ARTPSource::ARTPSource(
         mAssembler = new AAVCAssembler(notify);
         mIssueFIRRequests = true;
     } else if (!strncmp(desc.c_str(), "MP4A-LATM/", 10)) {
-        mAssembler = new AMPEG4AudioAssembler(notify);
+        mAssembler = new AMPEG4AudioAssembler(notify, params);
     } else if (!strncmp(desc.c_str(), "H263-1998/", 10)
             || !strncmp(desc.c_str(), "H263-2000/", 10)) {
         mAssembler = new AH263Assembler(notify);
