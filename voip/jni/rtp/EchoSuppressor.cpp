@@ -160,22 +160,27 @@ void EchoSuppressor::run(int16_t *playbacked, int16_t *recorded)
     }
 
     // Compute correlations.
-    float corr2 = 0.0f;
     int latency = 0;
+    float corr2 = 0.0f;
+    float varX = 0.0f;
     float varY = mY2Sum - mWeight * mYSum * mYSum;
     for (int i = mTailLength - 1; i >= 0; --i) {
-        float varX = mX2Sums[i] - mWeight * mXSums[i] * mXSums[i];
         float cov = mXYSums[i] - mWeight * mXSums[i] * mYSum;
-        float c2 = cov * cov / (varX * varY + 1);
-        if (c2 > corr2) {
-            corr2 = c2;
-            latency = i;
+        if (cov > 0.0f) {
+            float varXi = mX2Sums[i] - mWeight * mXSums[i] * mXSums[i];
+            float corr2i = cov * cov / (varXi * varY + 1);
+            if (corr2i > corr2) {
+                varX = varXi;
+                corr2 = corr2i;
+                latency = i;
+            }
         }
     }
-    //LOGI("correlation^2 = %.10f, latency = %d", corr2, latency * mScale);
+    //LOGI("corr^2 %.5f, var %8.0f %8.0f, latency %d", corr2, varX, varY,
+    //        latency * mScale);
 
     // Do echo suppression.
-    if (corr2 > 0.1f) {
+    if (corr2 > 0.1f && varX > 10000.0f) {
         int factor = (corr2 > 1.0f) ? 0 : (1.0f - sqrtf(corr2)) * 4096;
         for (int i = 0; i < mSampleCount; ++i) {
             recorded[i] = recorded[i] * factor >> 16;
