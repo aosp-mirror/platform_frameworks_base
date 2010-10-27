@@ -8,6 +8,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= 	       \
 	EGL/egl.cpp 	       \
+	EGL/trace.cpp              \
 	EGL/getProcAddress.cpp.arm \
 	EGL/hooks.cpp 	       \
 	EGL/Loader.cpp 	       \
@@ -33,6 +34,7 @@ endif
 LOCAL_CFLAGS += -DLOG_TAG=\"libEGL\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 LOCAL_CFLAGS += -fvisibility=hidden
+LOCAL_CFLAGS += -DEGL_TRACE=1
 
 ifeq ($(TARGET_BOARD_PLATFORM),msm7k)
 LOCAL_CFLAGS += -DADRENO130=1
