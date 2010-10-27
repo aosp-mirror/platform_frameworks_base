@@ -26,7 +26,6 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.BaseColumns;
 import android.provider.Downloads;
 import android.util.Pair;
 
@@ -337,11 +336,32 @@ public class DownloadManager {
         private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
         private CharSequence mTitle;
         private CharSequence mDescription;
-        private boolean mShowNotification = true;
         private String mMimeType;
         private boolean mRoamingAllowed = true;
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
         private boolean mIsVisibleInDownloadsUi = true;
+
+        /**
+         * This download is visible but only shows in the notifications
+         * while it's in progress.
+         */
+        public static final int VISIBILITY_VISIBLE = 0;
+
+        /**
+         * This download is visible and shows in the notifications while
+         * in progress and after completion.
+         */
+        public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED = 1;
+
+        /**
+         * This download doesn't show in the UI or in the notifications.
+         */
+        public static final int VISIBILITY_HIDDEN = 2;
+
+        /** can take any of the following values: {@link #VISIBILITY_HIDDEN}
+         * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}, {@link #VISIBILITY_VISIBLE}
+         */
+        private int mNotificationVisibility = VISIBILITY_VISIBLE;
 
         /**
          * @param uri the HTTP URI to download.
@@ -475,9 +495,33 @@ public class DownloadManager {
          *
          * @param show whether the download manager should show a notification for this download.
          * @return this object
+         * @deprecated use {@link #setNotificationVisibility(int)}
          */
+        @Deprecated
         public Request setShowRunningNotification(boolean show) {
-            mShowNotification = show;
+            return (show) ? setNotificationVisibility(VISIBILITY_VISIBLE) :
+                    setNotificationVisibility(VISIBILITY_HIDDEN);
+        }
+
+        /**
+         * Control whether a system notification is posted by the download manager while this
+         * download is running or when it is completed.
+         * If enabled, the download manager posts notifications about downloads
+         * through the system {@link android.app.NotificationManager}.
+         * By default, a notification is shown only when the download is in progress.
+         *<p>
+         * It can take the following values: {@link #VISIBILITY_HIDDEN},
+         * {@link #VISIBILITY_VISIBLE},
+         * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}.
+         *<p>
+         * If set to {@link #VISIBILITY_HIDDEN}, this requires the permission
+         * android.permission.DOWNLOAD_WITHOUT_NOTIFICATION.
+         *
+         * @param visibility the visibility setting value
+         * @return this object
+         */
+        public Request setNotificationVisibility(int visibility) {
+            mNotificationVisibility = visibility;
             return this;
         }
 
@@ -540,10 +584,7 @@ public class DownloadManager {
             putIfNonNull(values, Downloads.Impl.COLUMN_DESCRIPTION, mDescription);
             putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mMimeType);
 
-            values.put(Downloads.Impl.COLUMN_VISIBILITY,
-                    mShowNotification ? Downloads.Impl.VISIBILITY_VISIBLE
-                            : Downloads.Impl.VISIBILITY_HIDDEN);
-
+            values.put(Downloads.Impl.COLUMN_VISIBILITY, mNotificationVisibility);
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
             values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
