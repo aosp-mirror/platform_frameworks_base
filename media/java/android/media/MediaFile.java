@@ -229,6 +229,12 @@ public class MediaFile {
         return sFileTypeMap.get(path.substring(lastDot + 1).toUpperCase());
     }
 
+    public static boolean isMimeTypeMedia(String mimeType) {
+        int fileType = getFileTypeForMimeType(mimeType);
+        return isAudioFileType(fileType) || isVideoFileType(fileType)
+                || isImageFileType(fileType) || isPlayListFileType(fileType);
+    }
+
     // generates a title based on file name
     public static String getFileTitle(String path) {
         // extract file name after last slash
