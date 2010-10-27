@@ -2265,6 +2265,9 @@ public final class ActivityThread {
             r.activity.mConfigChangeFlags |= configChanges;
             Bundle state = performPauseActivity(token, finished, true);
 
+            // Make sure any pending writes are now committed.
+            QueuedWork.waitToFinish();
+            
             // Tell the activity manager we have paused.
             try {
                 ActivityManagerNative.getDefault().activityPaused(token, state);
