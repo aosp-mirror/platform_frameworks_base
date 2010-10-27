@@ -17,11 +17,14 @@
 package android.content;
 
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.QueuedWork;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Slog;
 
 /**
  * Base class for code that will receive intents sent by sendBroadcast().
@@ -160,6 +163,226 @@ import android.util.Log;
  * the containing process active for the entire time of your operation.
  */
 public abstract class BroadcastReceiver {
+    private PendingResult mPendingResult;
+    private boolean mDebugUnregister;
+    
+    /**
+     * State for a result that is pending for a broadcast receiver.  Returned
+     * by {@link BroadcastReceiver#goAsync() goAsync()}
+     * while in {@link BroadcastReceiver#onReceive BroadcastReceiver.onReceive()}.
+     */
+    public static class PendingResult {
+        /** @hide */
+        public static final int TYPE_COMPONENT = 0;
+        /** @hide */
+        public static final int TYPE_REGISTERED = 1;
+        /** @hide */
+        public static final int TYPE_UNREGISTERED = 2;
+        
+        final int mType;
+        final boolean mOrderedHint;
+        final boolean mInitialStickyHint;
+        final IBinder mToken;
+        
+        int mResultCode;
+        String mResultData;
+        Bundle mResultExtras;
+        boolean mAbortBroadcast;
+        boolean mFinished;
+        
+        /** @hide */
+        public PendingResult(int resultCode, String resultData, Bundle resultExtras,
+                int type, boolean ordered, boolean sticky, IBinder token) {
+            mResultCode = resultCode;
+            mResultData = resultData;
+            mResultExtras = resultExtras;
+            mType = type;
+            mOrderedHint = ordered;
+            mInitialStickyHint = sticky;
+            mToken = token;
+        }
+        
+        /**
+         * Version of {@link BroadcastReceiver#setResultCode(int)
+         * BroadcastReceiver.setResultCode(int)} for
+         * asynchronous broadcast handling.
+         */
+        public final void setResultCode(int code) {
+            checkSynchronousHint();
+            mResultCode = code;
+        }
+
+        /**
+         * Version of {@link BroadcastReceiver#getResultCode()
+         * BroadcastReceiver.getResultCode()} for
+         * asynchronous broadcast handling.
+         */
+        public final int getResultCode() {
+            return mResultCode;
+        }
+
+        /**
+         * Version of {@link BroadcastReceiver#setResultData(String)
+         * BroadcastReceiver.setResultData(String)} for
+         * asynchronous broadcast handling.
+         */
+        public final void setResultData(String data) {
+            checkSynchronousHint();
+            mResultData = data;
+        }
+
+        /**
+         * Version of {@link BroadcastReceiver#getResultData()
+         * BroadcastReceiver.getResultData()} for
+         * asynchronous broadcast handling.
+         */
+        public final String getResultData() {
+            return mResultData;
+        }
+
+        /**
+         * Version of {@link BroadcastReceiver#setResultExtras(Bundle)
+         * BroadcastReceiver.setResultExtras(Bundle)} for
+         * asynchronous broadcast handling.
+         */
+        public final void setResultExtras(Bundle extras) {
+            checkSynchronousHint();
+            mResultExtras = extras;
+        }
+
+        /**
+         * Version of {@link BroadcastReceiver#getResultExtras(boolean)
+         * BroadcastReceiver.getResultExtras(boolean)} for
+         * asynchronous broadcast handling.
+         */
+        public final Bundle getResultExtras(boolean makeMap) {
+            Bundle e = mResultExtras;
+            if (!makeMap) return e;
+            if (e == null) mResultExtras = e = new Bundle();
+            return e;
+        }
+
+        /**
+         * Version of {@link BroadcastReceiver#setResult(int, String, Bundle)
+         * BroadcastReceiver.setResult(int, String, Bundle)} for
+         * asynchronous broadcast handling.
+         */
+        public final void setResult(int code, String data, Bundle extras) {
+            checkSynchronousHint();
+            mResultCode = code;
+            mResultData = data;
+            mResultExtras = extras;
+        }
+     
+        /**
+         * Version of {@link BroadcastReceiver#getAbortBroadcast()
+         * BroadcastReceiver.getAbortBroadcast()} for
+         * asynchronous broadcast handling.
+         */
+        public final boolean getAbortBroadcast() {
+            return mAbortBroadcast;
+        }
+
+        /**
+         * Version of {@link BroadcastReceiver#abortBroadcast()
+         * BroadcastReceiver.abortBroadcast()} for
+         * asynchronous broadcast handling.
+         */
+        public final void abortBroadcast() {
+            checkSynchronousHint();
+            mAbortBroadcast = true;
+        }
+        
+        /**
+         * Version of {@link BroadcastReceiver#clearAbortBroadcast()
+         * BroadcastReceiver.clearAbortBroadcast()} for
+         * asynchronous broadcast handling.
+         */
+        public final void clearAbortBroadcast() {
+            mAbortBroadcast = false;
+        }
+        
+        /**
+         * Finish the broadcast.  The current result will be sent and the
+         * next broadcast will proceed.
+         */
+        public final void finish() {
+            if (mType == TYPE_COMPONENT) {
+                final IActivityManager mgr = ActivityManagerNative.getDefault();
+                if (QueuedWork.hasPendingWork()) {
+                    // If this is a broadcast component, we need to make sure any
+                    // queued work is complete before telling AM we are done, so
+                    // we don't have our process killed before that.  We now know
+                    // there is pending work; put another piece of work at the end
+                    // of the list to finish the broadcast, so we don't block this
+                    // thread (which may be the main thread) to have it finished.
+                    //
+                    // Note that we don't need to use QueuedWork.add() with the
+                    // runnable, since we know the AM is waiting for us until the
+                    // executor gets to it.
+                    QueuedWork.singleThreadExecutor().execute( new Runnable() {
+                        @Override public void run() {
+                            if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                                    "Finishing broadcast after work to component " + mToken);
+                            sendFinished(mgr);
+                        }
+                    });
+                } else {
+                    if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                            "Finishing broadcast to component " + mToken);
+                    sendFinished(mgr);
+                }
+            } else if (mOrderedHint && mType != TYPE_UNREGISTERED) {
+                if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                        "Finishing broadcast to " + mToken);
+                final IActivityManager mgr = ActivityManagerNative.getDefault();
+                sendFinished(mgr);
+            }
+        }
+        
+        /** @hide */
+        public void setExtrasClassLoader(ClassLoader cl) {
+            if (mResultExtras != null) {
+                mResultExtras.setClassLoader(cl);
+            }
+        }
+        
+        /** @hide */
+        public void sendFinished(IActivityManager am) {
+            synchronized (this) {
+                if (mFinished) {
+                    throw new IllegalStateException("Broadcast already finished");
+                }
+                mFinished = true;
+            
+                try {
+                    if (mOrderedHint) {
+                        am.finishReceiver(mToken, mResultCode, mResultData, mResultExtras,
+                                mAbortBroadcast);
+                    } else {
+                        // This broadcast was sent to a component; it is not ordered,
+                        // but we still need to tell the activity manager we are done.
+                        am.finishReceiver(mToken, 0, null, null, false);
+                    }
+                } catch (RemoteException ex) {
+                }
+            }
+        }
+        
+        void checkSynchronousHint() {
+            // Note that we don't assert when receiving the initial sticky value,
+            // since that may have come from an ordered broadcast.  We'll catch
+            // them later when the real broadcast happens again.
+            if (mOrderedHint || mInitialStickyHint) {
+                return;
+            }
+            RuntimeException e = new RuntimeException(
+                    "BroadcastReceiver trying to return result during a non-ordered broadcast");
+            e.fillInStackTrace();
+            Log.e("BroadcastReceiver", e.getMessage(), e);
+        }
+    }
+    
     public BroadcastReceiver() {
     }
 
@@ -197,6 +420,26 @@ public abstract class BroadcastReceiver {
     public abstract void onReceive(Context context, Intent intent);
 
     /**
+     * This can be called by an application in {@link #onReceive} to allow
+     * it to keep the broadcast active after returning from that function.
+     * This does <em>not</em> change the expectation of being relatively
+     * responsive to the broadcast (finishing it within 10s), but does allow
+     * the implementation to move work related to it over to another thread
+     * to avoid glitching the main UI thread due to disk IO.
+     * 
+     * @return Returns a {@link PendingResult} representing the result of
+     * the active broadcast.  The BroadcastRecord itself is no longer active;
+     * all data and other interaction must go through {@link PendingResult}
+     * APIs.  The {@link PendingResult#finish PendingResult.finish()} method
+     * must be called once processing of the broadcast is done.
+     */
+    public final PendingResult goAsync() {
+        PendingResult res = mPendingResult;
+        mPendingResult = null;
+        return res;
+    }
+    
+    /**
      * Provide a binder to an already-running service.  This method is synchronous
      * and will not start the target service if it is not present, so it is safe
      * to call from {@link #onReceive}.
@@ -225,9 +468,9 @@ public abstract class BroadcastReceiver {
      * {@link android.app.Activity#RESULT_OK} constants, though the
      * actual meaning of this value is ultimately up to the broadcaster.
      * 
-     * <p><strong>This method does not work with non-ordered broadcasts such
+     * <p class="note">This method does not work with non-ordered broadcasts such
      * as those sent with {@link Context#sendBroadcast(Intent)
-     * Context.sendBroadcast}</strong></p>
+     * Context.sendBroadcast}</p>
      * 
      * @param code The new result code.
      * 
@@ -235,7 +478,7 @@ public abstract class BroadcastReceiver {
      */
     public final void setResultCode(int code) {
         checkSynchronousHint();
-        mResultCode = code;
+        mPendingResult.mResultCode = code;
     }
 
     /**
@@ -244,7 +487,7 @@ public abstract class BroadcastReceiver {
      * @return int The current result code.
      */
     public final int getResultCode() {
-        return mResultCode;
+        return mPendingResult != null ? mPendingResult.mResultCode : 0;
     }
 
     /**
@@ -264,7 +507,7 @@ public abstract class BroadcastReceiver {
      */
     public final void setResultData(String data) {
         checkSynchronousHint();
-        mResultData = data;
+        mPendingResult.mResultData = data;
     }
 
     /**
@@ -274,7 +517,7 @@ public abstract class BroadcastReceiver {
      * @return String The current result data; may be null.
      */
     public final String getResultData() {
-        return mResultData;
+        return mPendingResult != null ? mPendingResult.mResultData : null;
     }
 
     /**
@@ -296,7 +539,7 @@ public abstract class BroadcastReceiver {
      */
     public final void setResultExtras(Bundle extras) {
         checkSynchronousHint();
-        mResultExtras = extras;
+        mPendingResult.mResultExtras = extras;
     }
 
     /**
@@ -311,9 +554,12 @@ public abstract class BroadcastReceiver {
      * @return Map The current extras map.
      */
     public final Bundle getResultExtras(boolean makeMap) {
-        Bundle e = mResultExtras;
+        if (mPendingResult == null) {
+            return null;
+        }
+        Bundle e = mPendingResult.mResultExtras;
         if (!makeMap) return e;
-        if (e == null) mResultExtras = e = new Bundle();
+        if (e == null) mPendingResult.mResultExtras = e = new Bundle();
         return e;
     }
 
@@ -341,9 +587,9 @@ public abstract class BroadcastReceiver {
      */
     public final void setResult(int code, String data, Bundle extras) {
         checkSynchronousHint();
-        mResultCode = code;
-        mResultData = data;
-        mResultExtras = extras;
+        mPendingResult.mResultCode = code;
+        mPendingResult.mResultData = data;
+        mPendingResult.mResultExtras = extras;
     }
  
     /**
@@ -353,7 +599,7 @@ public abstract class BroadcastReceiver {
      * @return True if the broadcast should be aborted.
      */
     public final boolean getAbortBroadcast() {
-        return mAbortBroadcast;
+        return mPendingResult != null ? mPendingResult.mAbortBroadcast : false;
     }
 
     /**
@@ -372,7 +618,7 @@ public abstract class BroadcastReceiver {
      */
     public final void abortBroadcast() {
         checkSynchronousHint();
-        mAbortBroadcast = true;
+        mPendingResult.mAbortBroadcast = true;
     }
     
     /**
@@ -380,7 +626,9 @@ public abstract class BroadcastReceiver {
      * broadcast.
      */
     public final void clearAbortBroadcast() {
-        mAbortBroadcast = false;
+        if (mPendingResult != null) {
+            mPendingResult.mAbortBroadcast = false;
+        }
     }
     
     /**
@@ -388,7 +636,7 @@ public abstract class BroadcastReceiver {
      * broadcast.
      */
     public final boolean isOrderedBroadcast() {
-        return mOrderedHint;
+        return mPendingResult != null ? mPendingResult.mOrderedHint : false;
     }
     
     /**
@@ -398,7 +646,7 @@ public abstract class BroadcastReceiver {
      * not directly the result of a broadcast right now.
      */
     public final boolean isInitialStickyBroadcast() {
-        return mInitialStickyHint;
+        return mPendingResult != null ? mPendingResult.mInitialStickyHint : false;
     }
     
     /**
@@ -406,15 +654,21 @@ public abstract class BroadcastReceiver {
      * running in ordered mode.
      */
     public final void setOrderedHint(boolean isOrdered) {
-        mOrderedHint = isOrdered;
+        // Accidentally left in the SDK.
     }
     
     /**
-     * For internal use, sets the hint about whether this BroadcastReceiver is
-     * receiving the initial sticky broadcast value. @hide
+     * For internal use to set the result data that is active. @hide
      */
-    public final void setInitialStickyHint(boolean isInitialSticky) {
-        mInitialStickyHint = isInitialSticky;
+    public final void setPendingResult(PendingResult result) {
+        mPendingResult = result;
+    }
+    
+    /**
+     * For internal use to set the result data that is active. @hide
+     */
+    public final PendingResult getPendingResult() {
+        return mPendingResult;
     }
     
     /**
@@ -440,10 +694,14 @@ public abstract class BroadcastReceiver {
     }
     
     void checkSynchronousHint() {
+        if (mPendingResult == null) {
+            throw new IllegalStateException("Call while result is not pending");
+        }
+        
         // Note that we don't assert when receiving the initial sticky value,
         // since that may have come from an ordered broadcast.  We'll catch
         // them later when the real broadcast happens again.
-        if (mOrderedHint || mInitialStickyHint) {
+        if (mPendingResult.mOrderedHint || mPendingResult.mInitialStickyHint) {
             return;
         }
         RuntimeException e = new RuntimeException(
@@ -451,13 +709,5 @@ public abstract class BroadcastReceiver {
         e.fillInStackTrace();
         Log.e("BroadcastReceiver", e.getMessage(), e);
     }
-    
-    private int mResultCode;
-    private String mResultData;
-    private Bundle mResultExtras;
-    private boolean mAbortBroadcast;
-    private boolean mDebugUnregister;
-    private boolean mOrderedHint;
-    private boolean mInitialStickyHint;
 }
 

@@ -117,12 +117,14 @@ final class RemoteServiceException extends AndroidRuntimeException {
  * {@hide}
  */
 public final class ActivityThread {
-    static final String TAG = "ActivityThread";
+    /** @hide */
+    public static final String TAG = "ActivityThread";
     private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
     private static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
     static final boolean DEBUG_MESSAGES = false;
-    static final boolean DEBUG_BROADCAST = false;
+    /** @hide */
+    public static final boolean DEBUG_BROADCAST = false;
     private static final boolean DEBUG_RESULTS = false;
     private static final boolean DEBUG_BACKUP = false;
     private static final boolean DEBUG_CONFIGURATION = false;
@@ -262,18 +264,20 @@ public final class ActivityThread {
         }
     }
 
-    private static final class ReceiverData {
+    private static final class ReceiverData extends BroadcastReceiver.PendingResult {
+        public ReceiverData(Intent intent, int resultCode, String resultData, Bundle resultExtras,
+                boolean ordered, boolean sticky, IBinder token) {
+            super(resultCode, resultData, resultExtras, TYPE_COMPONENT, ordered, sticky, token);
+            this.intent = intent;
+        }
+        
         Intent intent;
         ActivityInfo info;
-        int resultCode;
-        String resultData;
-        Bundle resultExtras;
-        boolean sync;
-        boolean resultAbort;
         public String toString() {
             return "ReceiverData{intent=" + intent + " packageName=" +
-            info.packageName + " resultCode=" + resultCode
-            + " resultData=" + resultData + " resultExtras=" + resultExtras + "}";
+                    info.packageName + " resultCode=" + getResultCode()
+                    + " resultData=" + getResultData() + " resultExtras="
+                    + getResultExtras(false) + "}";
         }
     }
 
@@ -466,15 +470,9 @@ public final class ActivityThread {
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
                 int resultCode, String data, Bundle extras, boolean sync) {
-            ReceiverData r = new ReceiverData();
-
-            r.intent = intent;
+            ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
+                    sync, false, mAppThread.asBinder());
             r.info = info;
-            r.resultCode = resultCode;
-            r.resultData = data;
-            r.resultExtras = extras;
-            r.sync = sync;
-
             queueOrSendMessage(H.RECEIVER, r);
         }
 
@@ -1799,18 +1797,12 @@ public final class ActivityThread {
         try {
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
             data.intent.setExtrasClassLoader(cl);
-            if (data.resultExtras != null) {
-                data.resultExtras.setClassLoader(cl);
-            }
+            data.setExtrasClassLoader(cl);
             receiver = (BroadcastReceiver)cl.loadClass(component).newInstance();
         } catch (Exception e) {
-            try {
-                if (DEBUG_BROADCAST) Slog.i(TAG,
-                        "Finishing failed broadcast to " + data.intent.getComponent());
-                mgr.finishReceiver(mAppThread.asBinder(), data.resultCode,
-                                   data.resultData, data.resultExtras, data.resultAbort);
-            } catch (RemoteException ex) {
-            }
+            if (DEBUG_BROADCAST) Slog.i(TAG,
+                    "Finishing failed broadcast to " + data.intent.getComponent());
+            data.sendFinished(mgr);
             throw new RuntimeException(
                 "Unable to instantiate receiver " + component
                 + ": " + e.toString(), e);
@@ -1828,20 +1820,13 @@ public final class ActivityThread {
                 + ", dir=" + packageInfo.getAppDir());
 
             ContextImpl context = (ContextImpl)app.getBaseContext();
-            receiver.setOrderedHint(true);
-            receiver.setResult(data.resultCode, data.resultData,
-                data.resultExtras);
-            receiver.setOrderedHint(data.sync);
+            receiver.setPendingResult(data);
             receiver.onReceive(context.getReceiverRestrictedContext(),
                     data.intent);
         } catch (Exception e) {
-            try {
-                if (DEBUG_BROADCAST) Slog.i(TAG,
-                        "Finishing failed broadcast to " + data.intent.getComponent());
-                mgr.finishReceiver(mAppThread.asBinder(), data.resultCode,
-                    data.resultData, data.resultExtras, data.resultAbort);
-            } catch (RemoteException ex) {
-            }
+            if (DEBUG_BROADCAST) Slog.i(TAG,
+                    "Finishing failed broadcast to " + data.intent.getComponent());
+            data.sendFinished(mgr);
             if (!mInstrumentation.onException(receiver, e)) {
                 throw new RuntimeException(
                     "Unable to start receiver " + component
@@ -1849,22 +1834,8 @@ public final class ActivityThread {
             }
         }
 
-        QueuedWork.waitToFinish();
-
-        try {
-            if (data.sync) {
-                if (DEBUG_BROADCAST) Slog.i(TAG,
-                        "Finishing ordered broadcast to " + data.intent.getComponent());
-                mgr.finishReceiver(
-                    mAppThread.asBinder(), receiver.getResultCode(),
-                    receiver.getResultData(), receiver.getResultExtras(false),
-                        receiver.getAbortBroadcast());
-            } else {
-                if (DEBUG_BROADCAST) Slog.i(TAG,
-                        "Finishing broadcast to " + data.intent.getComponent());
-                mgr.finishReceiver(mAppThread.asBinder(), 0, null, null, false);
-            }
-        } catch (RemoteException ex) {
+        if (receiver.getPendingResult() != null) {
+            data.finish();
         }
     }
 
