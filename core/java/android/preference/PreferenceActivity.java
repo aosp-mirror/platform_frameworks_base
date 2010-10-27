@@ -893,13 +893,13 @@ public abstract class PreferenceActivity extends ListActivity implements
         }
     }
 
-    public void switchToHeaderInner(String fragmentName, Bundle args, boolean next) {
+    private void switchToHeaderInner(String fragmentName, Bundle args, int direction) {
         getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
         Fragment f = Fragment.instantiate(this, fragmentName, args);
         FragmentTransaction transaction = getFragmentManager().openTransaction();
-        transaction.setTransition(next ?
-                FragmentTransaction.TRANSIT_FRAGMENT_NEXT :
-                FragmentTransaction.TRANSIT_FRAGMENT_PREV);
+        transaction.setTransition(direction == 0 ? FragmentTransaction.TRANSIT_NONE
+                : direction > 0 ? FragmentTransaction.TRANSIT_FRAGMENT_NEXT
+                        : FragmentTransaction.TRANSIT_FRAGMENT_PREV);
         transaction.replace(com.android.internal.R.id.prefs, f);
         transaction.commit();
     }
@@ -913,7 +913,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void switchToHeader(String fragmentName, Bundle args) {
         setSelectedHeader(null);
-        switchToHeaderInner(fragmentName, args, true);
+        switchToHeaderInner(fragmentName, args, 0);
     }
 
     /**
@@ -923,8 +923,8 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param header The new header to display.
      */
     public void switchToHeader(Header header) {
-        switchToHeaderInner(header.fragment, header.fragmentArguments,
-                mHeaders.indexOf(header) > mHeaders.indexOf(mCurHeader));
+        int direction = mHeaders.indexOf(header) - mHeaders.indexOf(mCurHeader);
+        switchToHeaderInner(header.fragment, header.fragmentArguments, direction);
         setSelectedHeader(header);
     }
 
