@@ -835,7 +835,7 @@ class ZoomManager {
         }
 
         if (!mWebView.drawHistory()) {
-            final float scale;
+            float scale;
             final boolean reflowText;
             WebSettings settings = mWebView.getSettings();
 
@@ -847,12 +847,13 @@ class ZoomManager {
                 scale = viewState.mViewScale;
                 reflowText = false;
             } else {
+                scale = getZoomOverviewScale();
                 if (settings.getUseWideViewPort()
-                    && (settings.getLoadWithOverviewMode() || settings.getUseFixedViewport())) {
+                    && settings.getLoadWithOverviewMode()) {
                     mInitialZoomOverview = true;
-                    scale = (float) mWebView.getViewWidth() / mZoomOverviewWidth;
                 } else {
-                    scale = viewState.mTextWrapScale;
+                    scale = Math.max(viewState.mTextWrapScale, scale);
+                    mInitialZoomOverview = !exceedsMinScaleIncrement(scale, getZoomOverviewScale());
                 }
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
             }
