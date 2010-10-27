@@ -24,10 +24,10 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 
 import java.util.ArrayList;
 
@@ -169,6 +169,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             final MenuItemImpl itemData = itemsToShow.get(i);
             final View actionView = itemData.getActionView();
             if (actionView != null) {
+                final ViewParent parent = actionView.getParent();
+                if (parent instanceof ViewGroup) {
+                    ((ViewGroup) parent).removeView(actionView);
+                }
                 addView(actionView, makeActionViewLayoutParams());
             } else {
                 needsDivider = addItemView(i == 0 || !needsDivider,

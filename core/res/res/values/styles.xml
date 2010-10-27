@@ -911,7 +911,7 @@
 
     <style name="Widget.ActionBar">
         <item name="android:background">@android:drawable/action_bar_background</item>
-        <item name="android:displayOptions">useLogo</item>
+        <item name="android:displayOptions">useLogo|showHome|showTitle</item>
         <item name="android:divider">@android:drawable/action_bar_divider</item>
         <item name="android:height">?android:attr/actionBarSize</item>
         <item name="android:paddingLeft">0dip</item>
@@ -1536,6 +1536,7 @@
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
         <item name="android:background">@null</item>
         <item name="android:divider">?android:attr/dividerVertical</item>
+        <item name="android:homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
     </style>
 
     <!-- Light widget styles -->
@@ -1788,6 +1789,7 @@
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
         <item name="android:background">@null</item>
+        <item name="android:homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
     </style>
 
     <!-- Animation Styles -->

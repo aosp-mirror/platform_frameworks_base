@@ -16,8 +16,16 @@
 
 package android.app;
 
+import android.app.ActionBar.Tab;
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewDebug;
+import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.Window;
 import android.widget.SpinnerAdapter;
 
@@ -37,9 +45,16 @@ public abstract class ActionBar {
     public static final int NAVIGATION_MODE_STANDARD = 0;
     
     /**
-     * Dropdown list navigation mode. Instead of static title text this mode
-     * presents a dropdown menu for navigation within the activity.
+     * List navigation mode. Instead of static title text this mode
+     * presents a list menu for navigation within the activity.
+     * e.g. this might be presented to the user as a dropdown list.
      */
+    public static final int NAVIGATION_MODE_LIST = 1;
+
+    /**
+     * @deprecated use NAVIGATION_MODE_LIST
+     */
+    @Deprecated
     public static final int NAVIGATION_MODE_DROPDOWN_LIST = 1;
     
     /**
@@ -47,24 +62,77 @@ public abstract class ActionBar {
      * presents a series of tabs for navigation within the activity.
      */
     public static final int NAVIGATION_MODE_TABS = 2;
-    
-    /**
-     * Custom navigation mode. This navigation mode is set implicitly whenever
-     * a custom navigation view is set. See {@link #setCustomNavigationMode(View)}.
-     */
-    public static final int NAVIGATION_MODE_CUSTOM = 3;
 
     /**
      * Use logo instead of icon if available. This flag will cause appropriate
      * navigation modes to use a wider logo in place of the standard icon.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
      */
     public static final int DISPLAY_USE_LOGO = 0x1;
     
     /**
-     * Hide 'home' elements in this action bar, leaving more space for other
+     * Show 'home' elements in this action bar, leaving more space for other
      * navigation elements. This includes logo and icon.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
      */
-    public static final int DISPLAY_HIDE_HOME = 0x2;
+    public static final int DISPLAY_SHOW_HOME = 0x2;
+
+    /**
+     * @deprecated Display flags are now positive for consistency - 'show' instead of 'hide'.
+     *             Use DISPLAY_SHOW_HOME.
+     */
+    @Deprecated
+    public static final int DISPLAY_HIDE_HOME = 0x1000;
+
+    /**
+     * Display the 'home' element such that it appears as an 'up' affordance.
+     * e.g. show an arrow to the left indicating the action that will be taken.
+     *
+     * Set this flag if selecting the 'home' button in the action bar to return
+     * up by a single level in your UI rather than back to the top level or front page.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     */
+    public static final int DISPLAY_HOME_AS_UP = 0x4;
+
+    /**
+     * Show the activity title and subtitle, if present.
+     *
+     * @see #setTitle(CharSequence)
+     * @see #setTitle(int)
+     * @see #setSubtitle(CharSequence)
+     * @see #setSubtitle(int)
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     */
+    public static final int DISPLAY_SHOW_TITLE = 0x8;
+
+    /**
+     * Show the custom view if one has been set.
+     * @see #setCustomView(View)
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     */
+    public static final int DISPLAY_SHOW_CUSTOM = 0x10;
+
+    /**
+     * Set the action bar into custom navigation mode, supplying a view
+     * for custom navigation.
+     *
+     * Custom navigation views appear between the application icon and
+     * any action buttons and may use any space available there. Common
+     * use cases for custom navigation views might include an auto-suggesting
+     * address bar for a browser or other navigation mechanisms that do not
+     * translate well to provided navigation modes.
+     *
+     * @param view Custom navigation view to place in the ActionBar.
+     */
+    public abstract void setCustomView(View view);
 
     /**
      * Set the action bar into custom navigation mode, supplying a view
@@ -77,7 +145,15 @@ public abstract class ActionBar {
      * translate well to provided navigation modes.
      * 
      * @param view Custom navigation view to place in the ActionBar.
+     * @param layoutParams How this custom view should layout in the bar.
      */
+    public abstract void setCustomView(View view, LayoutParams layoutParams);
+
+    /**
+     * @param view
+     * @deprecated Use {@link #setCustomView(View)} and {@link #setDisplayOptions(int)} instead.
+     */
+    @Deprecated
     public abstract void setCustomNavigationMode(View view);
     
     /**
@@ -89,8 +165,28 @@ public abstract class ActionBar {
      *                within the dropdown navigation menu.
      * @param callback A NavigationCallback that will receive events when the user
      *                 selects a navigation item.
+     * @deprecated See setListNavigationCallbacks.
      */
+    @Deprecated
     public abstract void setDropdownNavigationMode(SpinnerAdapter adapter,
+            NavigationCallback callback);
+
+    /**
+     * Set the adapter and navigation callback for list navigation mode.
+     *
+     * The supplied adapter will provide views for the expanded list as well as
+     * the currently selected item. (These may be displayed differently.)
+     *
+     * The supplied NavigationCallback will alert the application when the user
+     * changes the current list selection.
+     *
+     * @param adapter An adapter that will provide views both to display
+     *                the current navigation selection and populate views
+     *                within the dropdown navigation menu.
+     * @param callback A NavigationCallback that will receive events when the user
+     *                 selects a navigation item.
+     */
+    public abstract void setListNavigationCallbacks(SpinnerAdapter adapter,
             NavigationCallback callback);
 
     /**
@@ -104,23 +200,41 @@ public abstract class ActionBar {
      *                 selects a navigation item.
      * @param defaultSelectedPosition Position within the provided adapter that should be
      *                                selected from the outset.
+     * @deprecated See setListNavigationCallbacks and setSelectedNavigationItem.
      */
+    @Deprecated
     public abstract void setDropdownNavigationMode(SpinnerAdapter adapter,
             NavigationCallback callback, int defaultSelectedPosition);
 
     /**
-     * Set the selected navigation item in dropdown or tabbed navigation modes.
+     * Set the selected navigation item in list or tabbed navigation modes.
      *
      * @param position Position of the item to select.
      */
     public abstract void setSelectedNavigationItem(int position);
 
     /**
-     * Get the position of the selected navigation item in dropdown or tabbed navigation modes.
+     * Get the position of the selected navigation item in list or tabbed navigation modes.
+     *
+     * @return Position of the selected item.
+     * @deprecated Use {@link #getSelectedNavigationIndex()} instead.
+     */
+    @Deprecated
+    public abstract int getSelectedNavigationItem();
+
+    /**
+     * Get the position of the selected navigation item in list or tabbed navigation modes.
      *
      * @return Position of the selected item.
      */
-    public abstract int getSelectedNavigationItem();
+    public abstract int getSelectedNavigationIndex();
+
+    /**
+     * Get the number of navigation items present in the current navigation mode.
+     *
+     * @return Number of navigation items.
+     */
+    public abstract int getNavigationItemCount();
 
     /**
      * Set the action bar into standard navigation mode, using the currently set title
@@ -128,7 +242,9 @@ public abstract class ActionBar {
      *
      * Standard navigation mode is default. The title is automatically set to the name of
      * your Activity on startup if an action bar is present.
+     * @deprecated See setNavigationMode
      */
+    @Deprecated
     public abstract void setStandardNavigationMode();
 
     /**
@@ -181,10 +297,10 @@ public abstract class ActionBar {
      * Set selected display options. Only the options specified by mask will be changed.
      * To change all display option bits at once, see {@link #setDisplayOptions(int)}.
      * 
-     * <p>Example: setDisplayOptions(0, DISPLAY_HIDE_HOME) will disable the
-     * {@link #DISPLAY_HIDE_HOME} option.
-     * setDisplayOptions(DISPLAY_HIDE_HOME, DISPLAY_HIDE_HOME | DISPLAY_USE_LOGO)
-     * will enable {@link #DISPLAY_HIDE_HOME} and disable {@link #DISPLAY_USE_LOGO}.
+     * <p>Example: setDisplayOptions(0, DISPLAY_SHOW_HOME) will disable the
+     * {@link #DISPLAY_SHOW_HOME} option.
+     * setDisplayOptions(DISPLAY_SHOW_HOME, DISPLAY_HIDE_HOME | DISPLAY_USE_LOGO)
+     * will enable {@link #DISPLAY_SHOW_HOME} and disable {@link #DISPLAY_USE_LOGO}.
      * 
      * @param options A combination of the bits defined by the DISPLAY_ constants
      *                defined in ActionBar.
@@ -226,9 +342,8 @@ public abstract class ActionBar {
      * Returns the current navigation mode. The result will be one of:
      * <ul>
      * <li>{@link #NAVIGATION_MODE_STANDARD}</li>
-     * <li>{@link #NAVIGATION_MODE_DROPDOWN_LIST}</li>
+     * <li>{@link #NAVIGATION_MODE_LIST}</li>
      * <li>{@link #NAVIGATION_MODE_TABS}</li>
-     * <li>{@link #NAVIGATION_MODE_CUSTOM}</li>
      * </ul>
      *
      * @return The current navigation mode.
@@ -241,7 +356,17 @@ public abstract class ActionBar {
      * @see #setCustomNavigationMode(View)
      */
     public abstract int getNavigationMode();
-    
+
+    /**
+     * Set the current navigation mode.
+     *
+     * @param mode The new mode to set.
+     * @see #NAVIGATION_MODE_STANDARD
+     * @see #NAVIGATION_MODE_LIST
+     * @see #NAVIGATION_MODE_TABS
+     */
+    public abstract void setNavigationMode(int mode);
+
     /**
      * @return The current set of display options. 
      */
@@ -254,6 +379,8 @@ public abstract class ActionBar {
      * @see #insertTab(Tab, int)
      * @see #removeTab(Tab)
      * @see #removeTabAt(int)
+     *
+     * @deprecated See {@link #setNavigationMode(int)}
      */
     public abstract void setTabNavigationMode();
 
@@ -285,21 +412,30 @@ public abstract class ActionBar {
     public abstract void addTab(Tab tab, int position);
 
     /**
-     * Remove a tab from the action bar.
+     * Remove a tab from the action bar. If the removed tab was selected it will be deselected
+     * and another tab will be selected if present.
      *
      * @param tab The tab to remove
      */
     public abstract void removeTab(Tab tab);
 
     /**
-     * Remove a tab from the action bar.
+     * Remove a tab from the action bar. If the removed tab was selected it will be deselected
+     * and another tab will be selected if present.
      *
      * @param position Position of the tab to remove
      */
     public abstract void removeTabAt(int position);
 
     /**
+     * Remove all tabs from the action bar and deselect the current tab.
+     */
+    public abstract void removeAllTabs();
+
+    /**
      * Select the specified tab. If it is not a child of this action bar it will be added.
+     *
+     * <p>Note: If you want to select by index, use {@link #setSelectedNavigationItem(int)}.</p>
      *
      * @param tab Tab to select
      */
@@ -312,6 +448,14 @@ public abstract class ActionBar {
      * @return The currently selected tab or null
      */
     public abstract Tab getSelectedTab();
+
+    /**
+     * Returns the tab at the specified index.
+     *
+     * @param index Index value in the range 0-get
+     * @return
+     */
+    public abstract Tab getTabAt(int index);
 
     /**
      * Retrieve the current height of the ActionBar.
@@ -395,24 +539,27 @@ public abstract class ActionBar {
          * Set the icon displayed on this tab.
          *
          * @param icon The drawable to use as an icon
+         * @return The current instance for call chaining
          */
-        public abstract void setIcon(Drawable icon);
+        public abstract Tab setIcon(Drawable icon);
 
         /**
          * Set the text displayed on this tab. Text may be truncated if there is not
          * room to display the entire string.
          *
          * @param text The text to display
+         * @return The current instance for call chaining
          */
-        public abstract void setText(CharSequence text);
+        public abstract Tab setText(CharSequence text);
 
         /**
          * Set a custom view to be used for this tab. This overrides values set by
          * {@link #setText(CharSequence)} and {@link #setIcon(Drawable)}.
          *
          * @param view Custom view to be used as a tab.
+         * @return The current instance for call chaining
          */
-        public abstract void setCustomView(View view);
+        public abstract Tab setCustomView(View view);
 
         /**
          * Retrieve a previously set custom view for this tab.
@@ -425,8 +572,9 @@ public abstract class ActionBar {
          * Give this Tab an arbitrary object to hold for later use.
          *
          * @param obj Object to store
+         * @return The current instance for call chaining
          */
-        public abstract void setTag(Object obj);
+        public abstract Tab setTag(Object obj);
 
         /**
          * @return This Tab's tag object.
@@ -438,8 +586,9 @@ public abstract class ActionBar {
          * All tabs must have a TabListener set before being added to the ActionBar.
          *
          * @param listener Listener to handle tab selection events
+         * @return The current instance for call chaining
          */
-        public abstract void setTabListener(TabListener listener);
+        public abstract Tab setTabListener(TabListener listener);
 
         /**
          * Select this tab. Only valid if the tab has been added to the action bar.
@@ -480,5 +629,66 @@ public abstract class ActionBar {
          *        once this method returns.
          */
         public void onTabReselected(Tab tab, FragmentTransaction ft);
+    }
+
+    /**
+     * Per-child layout information associated with action bar custom views.
+     *
+     * @attr ref android.R.styleable#ActionBar_LayoutParams_layout_gravity
+     */
+    public static class LayoutParams extends MarginLayoutParams {
+        /**
+         * Gravity for the view associated with these LayoutParams.
+         *
+         * @see android.view.Gravity
+         */
+        @ViewDebug.ExportedProperty(category = "layout", mapping = {
+            @ViewDebug.IntToString(from =  -1,                       to = "NONE"),
+            @ViewDebug.IntToString(from = Gravity.NO_GRAVITY,        to = "NONE"),
+            @ViewDebug.IntToString(from = Gravity.TOP,               to = "TOP"),
+            @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
+            @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
+            @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
+            @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
+            @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
+            @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),
+            @ViewDebug.IntToString(from = Gravity.FILL_HORIZONTAL,   to = "FILL_HORIZONTAL"),
+            @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
+            @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
+        })
+        public int gravity = -1;
+
+        public LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+
+            TypedArray a = c.obtainStyledAttributes(attrs,
+                    com.android.internal.R.styleable.ActionBar_LayoutParams);
+            gravity = a.getInt(
+                    com.android.internal.R.styleable.ActionBar_LayoutParams_layout_gravity, -1);
+        }
+
+        public LayoutParams(int width, int height) {
+            super(width, height);
+            this.gravity = Gravity.CENTER_VERTICAL | Gravity.LEFT;
+        }
+
+        public LayoutParams(int width, int height, int gravity) {
+            super(width, height);
+            this.gravity = gravity;
+        }
+
+        public LayoutParams(int gravity) {
+            this(WRAP_CONTENT, MATCH_PARENT, gravity);
+        }
+
+        public LayoutParams(LayoutParams source) {
+            super(source);
+
+            this.gravity = source.gravity;
+        }
+
+        public LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+        }
     }
 }
