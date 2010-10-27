@@ -752,6 +752,14 @@ class BrowserFrame extends Handler {
             }
         } else if (type == CONTENT) {
             try {
+                // Strip off mimetype, for compatibility with ContentLoader.java
+                // If we don't do this, we can fail to load Gmail attachments,
+                // because the URL being loaded doesn't exactly match the URL we
+                // have permission to read.
+                int mimeIndex = url.lastIndexOf('?');
+                if (mimeIndex != -1) {
+                    url = url.substring(0, mimeIndex);
+                }
                 Uri uri = Uri.parse(url);
                 return mContext.getContentResolver().openInputStream(uri);
             } catch (Exception e) {
