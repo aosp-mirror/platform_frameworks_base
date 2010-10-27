@@ -300,6 +300,7 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
             if (duration <= 0){
                 assertTrue("stressRecordAndPlayback", false);
             }
+            mp.release();
         } catch (Exception e) {
             assertTrue("stressRecordAndPlayback", false);
         }
