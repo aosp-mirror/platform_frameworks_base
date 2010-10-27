@@ -249,7 +249,7 @@ public class Paint extends _Original_Paint {
     private void updateFontObject() {
         if (mTypeface != null) {
             // Get the fonts from the TypeFace object.
-            List<Font> fonts = mTypeface.getFonts();
+            List<Font> fonts = Typeface_Delegate.getFonts(mTypeface);
 
             // create new font objects as well as FontMetrics, based on the current text size
             // and skew info.
