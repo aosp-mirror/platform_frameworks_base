@@ -122,6 +122,7 @@ public class PowerUI extends SystemUI {
             mLowBatteryDialog = d;
         }
 
+if (false) { // getRingtone ANRs
         final ContentResolver cr = mContext.getContentResolver();
         if (Settings.System.getInt(cr, Settings.System.POWER_SOUNDS_ENABLED, 1) == 1) {
             final String soundPath = Settings.System.getString(cr,
@@ -137,6 +138,7 @@ public class PowerUI extends SystemUI {
                 }
             }
         }
+}
     }
 
     private DialogInterface.OnDismissListener mLowBatteryListener
