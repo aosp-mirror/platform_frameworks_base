@@ -148,8 +148,7 @@ public final class ResourceHelper {
                     parser.setInput(new FileReader(f));
 
                     d = Drawable.createFromXml(context.getResources(),
-                            // FIXME: we need to know if this resource is platform or not
-                            new BridgeXmlBlockParser(parser, context, false));
+                            new BridgeXmlBlockParser(parser, context, isFramework));
                     return d;
                 } catch (XmlPullParserException e) {
                     context.getLogger().error(e);

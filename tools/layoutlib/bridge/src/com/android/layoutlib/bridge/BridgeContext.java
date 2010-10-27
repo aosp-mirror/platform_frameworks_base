@@ -267,7 +267,7 @@ public final class BridgeContext extends Context {
             customStyle = parser.getAttributeValue(null /* namespace*/, "style");
         }
         if (customStyle != null) {
-            IResourceValue item = findResValue(customStyle);
+            IResourceValue item = findResValue(customStyle, false /*forceFrameworkOnly*/);
 
             if (item instanceof IStyleResourceValue) {
                 defStyleValues = (IStyleResourceValue)item;
@@ -284,7 +284,7 @@ public final class BridgeContext extends Context {
 
                 if (item != null) {
                     // item is a reference to a style entry. Search for it.
-                    item = findResValue(item.getValue());
+                    item = findResValue(item.getValue(), false /*forceFrameworkOnly*/);
 
                     if (item instanceof IStyleResourceValue) {
                         defStyleValues = (IStyleResourceValue)item;
@@ -414,7 +414,7 @@ public final class BridgeContext extends Context {
         }
 
         // get the IResourceValue referenced by this value
-        IResourceValue resValue = findResValue(value);
+        IResourceValue resValue = findResValue(value, false /*forceFrameworkOnly*/);
 
         // if resValue is null, but value is not null, this means it was not a reference.
         // we return the name/value wrapper in a IResourceValue
@@ -450,7 +450,7 @@ public final class BridgeContext extends Context {
         }
 
         // else attempt to find another IResourceValue referenced by this one.
-        IResourceValue resolvedValue = findResValue(value.getValue());
+        IResourceValue resolvedValue = findResValue(value.getValue(), value.isFramework());
 
         // if the value did not reference anything, then we simply return the input value
         if (resolvedValue == null) {
@@ -477,9 +477,11 @@ public final class BridgeContext extends Context {
      * only support the android namespace.
      *
      * @param reference the resource reference to search for.
+     * @param forceFrameworkOnly if true all references are considered to be toward framework
+     *      resource even if the reference does not include the android: prefix.
      * @return a {@link IResourceValue} or <code>null</code>.
      */
-    IResourceValue findResValue(String reference) {
+    IResourceValue findResValue(String reference, boolean forceFrameworkOnly) {
         if (reference == null) {
             return null;
         }
@@ -561,7 +563,8 @@ public final class BridgeContext extends Context {
                 segments[1] = segments[1].substring(BridgeConstants.PREFIX_ANDROID.length());
             }
 
-            return findResValue(segments[0], segments[1], frameworkOnly);
+            return findResValue(segments[0], segments[1],
+                    forceFrameworkOnly ? true :frameworkOnly);
         }
 
         // Looks like the value didn't reference anything. Return null.
