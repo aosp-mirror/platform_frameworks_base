@@ -35,15 +35,20 @@ import android.util.Log;
  */
 public class RawTagConnection {
 
-    /*package*/ final INfcAdapter mService;
-    /*package*/ final INfcTag mTagService;
     /*package*/ final Tag mTag;
     /*package*/ boolean mIsConnected;
     /*package*/ String mSelectedTarget;
+    private final NfcAdapter mAdapter;
+
+    // Following fields are final after construction, except for
+    // during attemptDeadServiceRecovery() when NFC crashes.
+    // Not locked - we accept a best effort attempt when NFC crashes.
+    /*package*/ INfcAdapter mService;
+    /*package*/ INfcTag mTagService;
 
     private static final String TAG = "NFC";
 
-    /* package private */ RawTagConnection(INfcAdapter service, Tag tag, String target) throws RemoteException {
+    /*package*/ RawTagConnection(NfcAdapter adapter, Tag tag, String target) throws RemoteException {
         String[] targets = tag.getRawTargets();
         int i;
 
@@ -58,14 +63,28 @@ public class RawTagConnection {
             throw new IllegalArgumentException();
         }
 
-        mService = service;
-        mTagService = service.getNfcTagInterface();
+        mAdapter = adapter;
+        mService = mAdapter.mService;
+        mTagService = mService.getNfcTagInterface();
         mTag = tag;
         mSelectedTarget = target;
     }
 
-    /* package private */ RawTagConnection(INfcAdapter service, Tag tag) throws RemoteException {
-        this(service, tag, tag.getRawTargets()[0]);
+    /*package*/ RawTagConnection(NfcAdapter adapter, Tag tag) throws RemoteException {
+        this(adapter, tag, tag.getRawTargets()[0]);
+    }
+
+    /** NFC service dead - attempt best effort recovery */
+    /*package*/ void attemptDeadServiceRecovery(Exception e) {
+        mAdapter.attemptDeadServiceRecovery(e);
+        /* assigning to mService is not thread-safe, but this is best-effort code
+         * and on a well-behaved system should never happen */
+        mService = mAdapter.mService;
+        try {
+            mTagService = mService.getNfcTagInterface();
+        } catch (RemoteException e2) {
+            Log.e(TAG, "second RemoteException trying to recover from dead NFC service", e2);
+        }
     }
 
     /**
@@ -101,7 +120,7 @@ public class RawTagConnection {
         try {
             return mTagService.isPresent(mTag.mServiceHandle);
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
             return false;
         }
     }
@@ -136,7 +155,7 @@ public class RawTagConnection {
         try {
             mTagService.close(mTag.mServiceHandle);
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
         }
     }
 
@@ -159,7 +178,7 @@ public class RawTagConnection {
             }
             return response;
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
             throw new IOException("NFC service died");
         }
     }
