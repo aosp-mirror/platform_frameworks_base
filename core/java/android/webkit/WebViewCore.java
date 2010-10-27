@@ -260,9 +260,11 @@ final class WebViewCore {
      * Given mimeType, check whether it's supported in Android media framework.
      * mimeType could be such as "audio/ogg" and "video/mp4".
      */
-    /* package */ static boolean supportsMimeType(String mimeType) {
-        return MediaFile.getFileTypeForMimeType(mimeType) > 0;
+    /* package */ static boolean isSupportedMediaMimeType(String mimeType) {
+        int fileType = MediaFile.getFileTypeForMimeType(mimeType);
+        return MediaFile.isAudioFileType(fileType) || MediaFile.isVideoFileType(fileType);
     }
+
     /**
      * Add an error message to the client's console.
      * @param message The message to add
