@@ -621,6 +621,51 @@ public final class BluetoothHeadset implements BluetoothProfile {
         return BluetoothHeadset.STATE_AUDIO_DISCONNECTED;
     }
 
+    /**
+     * Initiates a Virtual Voice Call to the handsfree device (if connected).
+     * Allows the handsfree device to be used for routing non-cellular call audio
+     *
+     * @param device Remote Bluetooth Device
+     * @return true if successful, false if there was some error.
+     * @hide
+     */
+    public boolean startVirtualVoiceCall(BluetoothDevice device) {
+        if (DBG) log("startVirtualVoiceCall()");
+        if (mService != null && isEnabled() && isValidDevice(device)) {
+            try {
+                return mService.startVirtualVoiceCall(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
+     * Terminates an ongoing Virtual Voice Call to the handsfree device (if connected).
+     *
+     * @param device Remote Bluetooth Device
+     * @return true if successful, false if there was some error.
+     * @hide
+     */
+    public boolean stopVirtualVoiceCall(BluetoothDevice device) {
+        if (DBG) log("stopVirtualVoiceCall()");
+        if (mService != null && isEnabled() && isValidDevice(device)) {
+            try {
+                return mService.stopVirtualVoiceCall(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
