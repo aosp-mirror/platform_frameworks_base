@@ -17,14 +17,11 @@
 package com.android.systemui.statusbar.policy;
 
 import android.app.StatusBarManager;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothPbap;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
@@ -33,8 +30,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -59,11 +54,8 @@ import android.text.SpannableStringBuilder;
 import android.util.Slog;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.IccCard;
@@ -95,23 +87,11 @@ public class StatusBarPolicy {
 
     private final Context mContext;
     private final StatusBarManager mService;
-    private final Handler mHandler = new StatusBarHandler();
+    private final Handler mHandler = new Handler();
     private final IBatteryStats mBatteryStats;
 
     // storage
     private StorageManager mStorageManager;
-
-    // battery
-    private boolean mBatteryFirst = true;
-    private boolean mBatteryPlugged;
-    private int mBatteryLevel;
-    private AlertDialog mLowBatteryDialog;
-    private TextView mBatteryLevelTextView;
-    private View mBatteryView;
-    private int mBatteryViewSequence;
-    private boolean mBatteryShowLowOnEndCall = false;
-    private static final boolean SHOW_LOW_BATTERY_WARNING = true;
-    private static final boolean SHOW_BATTERY_WARNINGS_IN_CALL = true;
 
     // phone
     private TelephonyManager mPhone;
@@ -357,13 +337,6 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_SYNC_STATE_CHANGED)) {
                 updateSyncState(intent);
             }
-            else if (action.equals(Intent.ACTION_BATTERY_LOW)) {
-                onBatteryLow(intent);
-            }
-            else if (action.equals(Intent.ACTION_BATTERY_OKAY)
-                    || action.equals(Intent.ACTION_POWER_CONNECTED)) {
-                onBatteryOkay(intent);
-            }
             else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
                     action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
                 updateBluetooth(intent);
@@ -473,9 +446,6 @@ public class StatusBarPolicy {
 
         // Register for Intent broadcasts for...
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(Intent.ACTION_BATTERY_LOW);
-        filter.addAction(Intent.ACTION_BATTERY_OKAY);
-        filter.addAction(Intent.ACTION_POWER_CONNECTED);
         filter.addAction(Intent.ACTION_ALARM_CHANGED);
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
@@ -520,179 +490,6 @@ public class StatusBarPolicy {
         final int id = intent.getIntExtra("icon-small", 0);
         int level = intent.getIntExtra("level", 0);
         mService.setIcon("battery", id, level);
-
-        boolean plugged = intent.getIntExtra("plugged", 0) != 0;
-        level = intent.getIntExtra("level", -1);
-        if (false) {
-            Slog.d(TAG, "updateBattery level=" + level
-                    + " plugged=" + plugged
-                    + " mBatteryPlugged=" + mBatteryPlugged
-                    + " mBatteryLevel=" + mBatteryLevel
-                    + " mBatteryFirst=" + mBatteryFirst);
-        }
-
-        boolean oldPlugged = mBatteryPlugged;
-
-        mBatteryPlugged = plugged;
-        mBatteryLevel = level;
-
-        if (mBatteryFirst) {
-            mBatteryFirst = false;
-        }
-        /*
-         * No longer showing the battery view because it draws attention away
-         * from the USB storage notification. We could still show it when
-         * connected to a brick, but that could lead to the user into thinking
-         * the device does not charge when plugged into USB (since he/she would
-         * not see the same battery screen on USB as he sees on brick).
-         */
-        if (false) {
-            Slog.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level);
-        }
-    }
-
-    private void onBatteryLow(Intent intent) {
-        if (SHOW_LOW_BATTERY_WARNING) {
-            if (false) {
-                Slog.d(TAG, "mPhoneState=" + mPhoneState
-                      + " mLowBatteryDialog=" + mLowBatteryDialog
-                      + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
-            }
-
-            if (SHOW_BATTERY_WARNINGS_IN_CALL || mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
-                showLowBatteryWarning();
-            } else {
-                mBatteryShowLowOnEndCall = true;
-            }
-        }
-    }
-
-    private void onBatteryOkay(Intent intent) {
-        if (mLowBatteryDialog != null
-                && SHOW_LOW_BATTERY_WARNING) {
-            mLowBatteryDialog.dismiss();
-            mBatteryShowLowOnEndCall = false;
-        }
-    }
-
-    private void setBatteryLevel(View parent, int id, int height, int background, int level) {
-        ImageView v = (ImageView)parent.findViewById(id);
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams)v.getLayoutParams();
-        lp.weight = height;
-        if (background != 0) {
-            v.setBackgroundResource(background);
-            Drawable bkg = v.getBackground();
-            bkg.setLevel(level);
-        }
-    }
-
-    private void showLowBatteryWarning() {
-        closeLastBatteryView();
-
-        // Show exact battery level.
-        CharSequence levelText = mContext.getString(
-                    R.string.battery_low_percent_format, mBatteryLevel);
-
-        if (mBatteryLevelTextView != null) {
-            mBatteryLevelTextView.setText(levelText);
-        } else {
-            View v = View.inflate(mContext, R.layout.battery_low, null);
-            mBatteryLevelTextView=(TextView)v.findViewById(R.id.level_percent);
-
-            mBatteryLevelTextView.setText(levelText);
-
-            AlertDialog.Builder b = new AlertDialog.Builder(mContext);
-                b.setCancelable(true);
-                b.setTitle(R.string.battery_low_title);
-                b.setView(v);
-                b.setIcon(android.R.drawable.ic_dialog_alert);
-                b.setPositiveButton(android.R.string.ok, null);
-
-                final Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                        | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                if (intent.resolveActivity(mContext.getPackageManager()) != null) {
-                    b.setNegativeButton(R.string.battery_low_why,
-                            new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            mContext.startActivity(intent);
-                            if (mLowBatteryDialog != null) {
-                                mLowBatteryDialog.dismiss();
-                            }
-                        }
-                    });
-                }
-
-            AlertDialog d = b.create();
-            d.setOnDismissListener(mLowBatteryListener);
-            d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-            d.show();
-            mLowBatteryDialog = d;
-        }
-
-        final ContentResolver cr = mContext.getContentResolver();
-        if (Settings.System.getInt(cr,
-                Settings.System.POWER_SOUNDS_ENABLED, 1) == 1)
-        {
-            final String soundPath = Settings.System.getString(cr,
-                Settings.System.LOW_BATTERY_SOUND);
-            if (soundPath != null) {
-                final Uri soundUri = Uri.parse("file://" + soundPath);
-                if (soundUri != null) {
-                    final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                    if (sfx != null) {
-                        sfx.setStreamType(AudioManager.STREAM_SYSTEM);
-                        sfx.play();
-                    }
-                }
-            }
-        }
-    }
-
-    private final void updateCallState(int state) {
-        mPhoneState = state;
-        if (false) {
-            Slog.d(TAG, "mPhoneState=" + mPhoneState
-                    + " mLowBatteryDialog=" + mLowBatteryDialog
-                    + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
-        }
-        if (mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
-            if (mBatteryShowLowOnEndCall) {
-                if (!mBatteryPlugged) {
-                    showLowBatteryWarning();
-                }
-                mBatteryShowLowOnEndCall = false;
-            }
-        } else {
-            if (mLowBatteryDialog != null) {
-                mLowBatteryDialog.dismiss();
-                mBatteryShowLowOnEndCall = true;
-            }
-        }
-    }
-
-    private DialogInterface.OnDismissListener mLowBatteryListener
-            = new DialogInterface.OnDismissListener() {
-        public void onDismiss(DialogInterface dialog) {
-            mLowBatteryDialog = null;
-            mBatteryLevelTextView = null;
-        }
-    };
-
-    private void scheduleCloseBatteryView() {
-        Message m = mHandler.obtainMessage(EVENT_BATTERY_CLOSE);
-        m.arg1 = (++mBatteryViewSequence);
-        mHandler.sendMessageDelayed(m, 3000);
-    }
-
-    private void closeLastBatteryView() {
-        if (mBatteryView != null) {
-            //mBatteryView.debug();
-            WindowManagerImpl.getDefault().removeView(mBatteryView);
-            mBatteryView = null;
-        }
     }
 
     private void updateConnectivity(Intent intent) {
@@ -753,7 +550,6 @@ public class StatusBarPolicy {
 
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
-            updateCallState(state);
             // In cdma, if a voice call is made, RSSI should switch to 1x.
             if (isCdma()) {
                 updateSignalStrength();
@@ -1180,19 +976,5 @@ public class StatusBarPolicy {
 
         }
         mService.setIcon("phone_signal", mPhoneSignalIconId, 0);
-    }
-
-
-    private class StatusBarHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case EVENT_BATTERY_CLOSE:
-                if (msg.arg1 == mBatteryViewSequence) {
-                    closeLastBatteryView();
-                }
-                break;
-            }
-        }
     }
 }
