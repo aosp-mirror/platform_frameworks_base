@@ -25,9 +25,9 @@ package android.media.videoeditor;
  */
 public class WaveformData {
     // Instance variables
-    final int mFrameDurationMs;
-    final int mFramesCount;
-    final short[] mGains;
+    private final int mFrameDurationMs;
+    private final int mFramesCount;
+    private final short[] mGains;
 
     /**
      * This constructor shall not be used
