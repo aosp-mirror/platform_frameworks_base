@@ -45,7 +45,7 @@ class BroadcastRecord extends Binder {
     final boolean initialSticky; // initial broadcast from register to sticky?
     final String requiredPermission; // a permission the caller has required
     final List receivers;   // contains BroadcastFilter and ResolveInfo
-    final IIntentReceiver resultTo; // who receives final result if non-null
+    IIntentReceiver resultTo; // who receives final result if non-null
     long dispatchTime;      // when dispatch started on this set of receivers
     long receiverTime;      // when current receiver started for timeouts.
     long finishTime;        // when we finished the broadcast.
