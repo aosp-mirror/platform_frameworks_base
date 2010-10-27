@@ -9775,6 +9775,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_SERVICE) Slog.v(TAG,
                         "doneExecuting remove stopping " + r);
                 mStoppingServices.remove(r);
+                r.bindings.clear();
             }
             updateOomAdjLocked(r.app);
         }
