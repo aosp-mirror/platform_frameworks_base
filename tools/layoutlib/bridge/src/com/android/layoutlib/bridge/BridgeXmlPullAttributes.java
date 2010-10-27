@@ -41,7 +41,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
     /*
      * (non-Javadoc)
      * @see android.util.XmlPullAttributes#getAttributeNameResource(int)
-     * 
+     *
      * This methods must return com.android.internal.R.attr.<name> matching
      * the name of the attribute.
      * It returns 0 if it doesn't find anything.
@@ -50,19 +50,19 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
     public int getAttributeNameResource(int index) {
         // get the attribute name.
         String name = getAttributeName(index);
-        
+
         // get the attribute namespace
         String ns = mParser.getAttributeNamespace(index);
-        
+
         if (BridgeConstants.NS_RESOURCES.equals(ns)) {
             Integer v = Bridge.getResourceValue(BridgeConstants.RES_ATTR, name);
             if (v != null) {
                 return v.intValue();
             }
-            
+
             return 0;
         }
-        
+
         // this is not an attribute in the android namespace, we query the customviewloader, if
         // the namespaces match.
         if (mContext.getProjectCallback().getNamespace().equals(ns)) {
@@ -75,7 +75,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
 
         return 0;
     }
-    
+
     /*
      * (non-Javadoc)
      * @see android.util.XmlPullAttributes#getAttributeResourceValue(int, int)
@@ -83,7 +83,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
     @Override
     public int getAttributeResourceValue(int index, int defaultValue) {
         String value = getAttributeValue(index);
-        
+
         return resolveResourceValue(value, defaultValue);
     }
 
@@ -94,14 +94,15 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
     @Override
     public int getAttributeResourceValue(String namespace, String attribute, int defaultValue) {
         String value = getAttributeValue(namespace, attribute);
-        
+
         return resolveResourceValue(value, defaultValue);
     }
 
     private int resolveResourceValue(String value, int defaultValue) {
         // now look for this particular value
-        IResourceValue resource = mContext.resolveResValue(mContext.findResValue(value));
-        
+        IResourceValue resource = mContext.resolveResValue(
+                mContext.findResValue(value, mPlatformFile));
+
         if (resource != null) {
             Integer id = null;
             if (mPlatformFile || resource.isFramework()) {
@@ -115,7 +116,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
                 return id;
             }
         }
-        
+
         return defaultValue;
     }
 
