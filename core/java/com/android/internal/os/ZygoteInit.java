@@ -508,18 +508,6 @@ public class ZygoteInit {
     private static void handleSystemServerProcess(
             ZygoteConnection.Arguments parsedArgs)
             throws ZygoteInit.MethodAndArgsCaller {
-        /*
-         * First, set the capabilities if necessary
-         */
-
-        if (parsedArgs.uid != 0) {
-            try {
-                setCapabilities(parsedArgs.permittedCapabilities,
-                                parsedArgs.effectiveCapabilities);
-            } catch (IOException ex) {
-                Log.e(TAG, "Error setting capabilities", ex);
-            }
-        }
 
         closeServerSocket();
 
@@ -565,7 +553,9 @@ public class ZygoteInit {
             /* Request to fork the system server process */
             pid = Zygote.forkSystemServer(
                     parsedArgs.uid, parsedArgs.gid,
-                    parsedArgs.gids, debugFlags, null);
+                    parsedArgs.gids, debugFlags, null,
+                    parsedArgs.permittedCapabilities,
+                    parsedArgs.effectiveCapabilities);
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex);
         }
