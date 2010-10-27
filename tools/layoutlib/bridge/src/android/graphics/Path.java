@@ -31,13 +31,13 @@ import java.awt.geom.Rectangle2D;
  * text on a path.
  */
 public class Path {
-    
+
     private FillType mFillType = FillType.WINDING;
     private GeneralPath mPath = new GeneralPath();
-    
+
     private float mLastX = 0;
     private float mLastY = 0;
-    
+
     //---------- Custom methods ----------
 
     public Shape getAwtShape() {
@@ -60,7 +60,7 @@ public class Path {
     public Path(Path src) {
         mPath.append(src.mPath, false /* connect */);
     }
-    
+
     /**
      * Clear any lines and curves from the path, making it empty.
      * This does NOT change the fill-type setting.
@@ -92,7 +92,7 @@ public class Path {
         EVEN_ODD        (GeneralPath.WIND_EVEN_ODD, false),
         INVERSE_WINDING (GeneralPath.WIND_NON_ZERO, true),
         INVERSE_EVEN_ODD(GeneralPath.WIND_EVEN_ODD, true);
-        
+
         FillType(int rule, boolean inverse) {
             this.rule = rule;
             this.inverse = inverse;
@@ -101,7 +101,7 @@ public class Path {
         final int rule;
         final boolean inverse;
     }
-    
+
     /**
      * Return the path's fill type. This defines how "inside" is
      * computed. The default value is WINDING.
@@ -121,7 +121,7 @@ public class Path {
         mFillType = ft;
         mPath.setWindingRule(ft.rule);
     }
-    
+
     /**
      * Returns true if the filltype is one of the INVERSE variants
      *
@@ -130,7 +130,7 @@ public class Path {
     public boolean isInverseFillType() {
         return mFillType.inverse;
     }
-    
+
     /**
      * Toggles the INVERSE state of the filltype
      */
@@ -150,7 +150,7 @@ public class Path {
                 break;
         }
     }
-    
+
     /**
      * Returns true if the path is empty (contains no lines or curves)
      *
@@ -350,7 +350,7 @@ public class Path {
                       boolean forceMoveTo) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Append the specified arc to the path as a new contour. If the start of
      * the path is different from the path's current last point, then an
@@ -365,7 +365,7 @@ public class Path {
     public void arcTo(RectF oval, float startAngle, float sweepAngle) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Close the current contour. If the current point is not equal to the
      * first point of the contour, a line segment is automatically added.
@@ -383,13 +383,13 @@ public class Path {
         CW  (0),    // must match enum in SkPath.h
         /** counter-clockwise */
         CCW (1);    // must match enum in SkPath.h
-        
+
         Direction(int ni) {
             nativeInt = ni;
         }
         final int nativeInt;
     }
-    
+
     /**
      * Add a closed rectangle contour to the path
      *
@@ -400,7 +400,7 @@ public class Path {
         if (rect == null) {
             throw new NullPointerException("need rect parameter");
         }
-        
+
         addRect(rect.left, rect.top, rect.right, rect.bottom, dir);
     }
 
@@ -446,7 +446,7 @@ public class Path {
 
         // FIXME Need to support direction
         Ellipse2D ovalShape = new Ellipse2D.Float(oval.left, oval.top, oval.width(), oval.height());
-        
+
         mPath.append(ovalShape, false /* connect */);
     }
 
@@ -493,7 +493,7 @@ public class Path {
         // FIXME
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Add a closed round-rectangle contour to the path. Each corner receives
      * two radius values [X, Y]. The corners are ordered top-left, top-right,
@@ -513,7 +513,7 @@ public class Path {
         // FIXME
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Add a copy of src to the path, offset by (dx,dy)
      *
@@ -554,11 +554,11 @@ public class Path {
      */
     public void offset(float dx, float dy, Path dst) {
         GeneralPath newPath = new GeneralPath();
-        
+
         PathIterator iterator = mPath.getPathIterator(new AffineTransform(0, 0, dx, 0, 0, dy));
-        
+
         newPath.append(iterator, false /* connect */);
-        
+
         if (dst != null) {
             dst.mPath = newPath;
         } else {
