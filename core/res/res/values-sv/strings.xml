@@ -135,6 +135,8 @@
     <string name="power_off" msgid="4266614107412865048">"Stäng av"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Din telefon stängs av."</string>
+    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Senaste"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Inga nya program."</string>
     <string name="global_actions" msgid="2406416831541615258">"Telefonalternativ"</string>
@@ -169,7 +171,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Utvecklingsverktyg"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funktioner som endast behövs för programutvecklare."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"Få åtkomst till SD-kortet."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Få åtkomst till USB-enheten."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få åtkomst till SD-kortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Tillåter att programmet inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusfält"</string>
@@ -266,10 +269,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Tillåter att ett program frigör lagringsutrymme i telefonen genom att ta bort filer i programmets katalog för cachelagring. Åtkomst är mycket begränsad, vanligtvis till systemprocesser."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Flytta programresurser"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Tillåter att ett program flyttar programresurser från interna till externa medier och tvärt om."</string>
-    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
-    <skip />
-    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
-    <skip />
+    <string name="permlab_readLogs" msgid="6615778543198967614">"läsa känsliga loggdata"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Tillåter att ett program läser från systemets olika loggfiler. Det innebär att programmet kan upptäcka allmän information om vad du gör med telefonen, vilket kan inkludera personlig eller privat information."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"läsa/skriva till resurser som ägs av diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Tillåter att ett program läser och skriver till en resurs som ägs av diag-gruppen; till exempel filer i /dev. Detta kan eventuellt påverka systemets stabilitet och säkerhet. Detta bör ENDAST används av tillverkaren eller operatören för maskinvaruspecifik diagnostik."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivera eller inaktivera programkomponenter"</string>
@@ -322,16 +323,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Tillåter att programmet monterar och demonterar filsystem för flyttbara lagringsmedia."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formatera extern lagring"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Tillåter att programmet formaterar flyttbara lagringsmedia."</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"få information om säker lagring"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"Tillåter att programmet får information om säker lagring."</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"skapa säker lagring"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"Tillåter att programmet skapar säker lagring."</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"förstör säker lagring"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Tillåter att programmet förstör säker lagring."</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"montera/avmontera säker lagring"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Tillåter att programmet monterar/avmonterar säker lagring."</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"byt namn på säker lagring"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Tillåter att programmet byter namn på säker lagring."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"få information om intern lagring"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Tillåter att appen får information om intern lagring."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"skapa intern lagring"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Tillåter att appen skapar intern lagring."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"förstör intern lagring"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Tillåter att appen förstör intern lagring."</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"montera/demontera intern lagring"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Tillåter att appen monterar/demonterar intern lagring."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"byt namn på intern lagring"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Tillåter att appen byter namn på intern lagring."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"kontrollera vibration"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Tillåter att programmet styr vibratorn."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"styra lampa"</string>
@@ -404,6 +405,8 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Tillåter att ett program konfigurerar den lokala Bluetooth-telefonen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"skapa Bluetooth-anslutningar"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Tillåter att ett program ser den lokala Bluetooth-telefonens konfiguration, och skapar och accepterar anslutningar med parkopplade enheter."</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"kontrollera närfältskommunikationen"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Tillåter att en app kommunicerar med taggar, kort och läsare för närfältskommunikation (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"inaktivera tangentlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Tillåter att ett program inaktiverar tangentlåset och tillhörande lösenordsskydd. Ett exempel på detta är att telefonen inaktiverar tangentlåset vid inkommande samtal och sedan aktiverar det igen när samtalet är avslutat."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"läsa synkroniseringsinställningar"</string>
@@ -420,22 +423,25 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Tillåt att ett program läser alla privata ord, namn och fraser som användaren lagrar i sin ordlista."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"skriva till användardefinierad ordlista"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Tillåter att ett program skriver in nya ord i användarordlistan."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"ändra/ta bort innehåll på SD-kortet"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Tillåter att ett program skriver till SD-kortet."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"ändra/ta bort från USB-enhet"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"ändra/ta bort innehåll på SD-kortet"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Får skriva till USB-enheten."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Tillåter att ett program skriver till SD-kortet."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"åtkomst till cachefilsystemet"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Tillåter att ett program läser och skriver till cachefilsystemet."</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"Begränsa lösenord"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Begränsar vilka typer av lösenord som får användas."</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"Visa inloggningsförsök"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Övervaka misslyckade inloggningsförsök på enheten för att utföra åtgärder."</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"Återställ lösenord"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Framtvinga ett nytt värde för ditt lösenord. Kräver att administratören tillhandahåller det innan du kan logga in."</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"Framtvinga låsning"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"Kontrollera när enheten låses, vilket kräver att du anger lösenordet igen."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"ringa/ta emot Internetsamtal"</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Tillåter att appen använder SIP-tjänsten för att ringa och ta emot Internetsamtal."</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Bestäm hur många och vilka tecken som är tillåtna i skärmlåsets lösenord"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"Övervaka antalet felaktiga lösenord som angivits för skärmlåset och lås telefonen eller ta bort alla data från telefonen om för många felaktiga försök görs"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Ändra skärmlåsets lösenord"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Ändra skärmlåsets lösenord"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skärmen"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Kontrollera hur och när skärmlåset aktiveras"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Radera alla data"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"Återställ fabriksinställningarna och ta bort alla data utan någon bekräftelse."</string>
-    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
-    <skip />
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"Ta bort data från telefonen utan förvarning genom att återställa standardinställningarna"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ange global proxyserver"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Ange vilken global proxyserver som ska användas när policyn är aktiverad. Endast den första enhetsadministratören anger den faktiska globala proxyservern."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hem"</item>
@@ -530,14 +536,10 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Arbete"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Övrigt"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Anpassad"</string>
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Anpassad"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Startsida"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbete"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Övrigt"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ange PIN-kod"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Ange lösenord för att låsa upp"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Ange PIN-kod för att låsa upp"</string>
@@ -598,12 +600,13 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Vill du lämna den här den här sidan?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tryck på OK om du vill fortsätta eller på Avbryt om du vill vara kvar på den aktuella sidan."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekräfta"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tips! Dubbelklicka om du vill zooma in eller ut."</string>
-    <!-- no translation found for autofill_this_form (8940110866775097494) -->
-    <skip />
+    <string name="autofill_this_form" msgid="8940110866775097494">"Autofyll formuläret"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"läsa webbläsarhistorik och bokmärken"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillåter att program läser alla webbadresser som webbläsaren har öppnat och alla webbläsarens bokmärken."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skriva webbläsarhistorik och bokmärken"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Tillåter att ett program ändrar webbläsarhistoriken och bokmärkena i din telefon. Skadliga program kan använda detta för att ta bort eller ändra data i webbläsaren."</string>
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"ställa in alarm i alarmklocka"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Tillåter att programmet ställer in ett alarm i ett installerat alarmprogram. Vissa alarmprogram har inte den här funktionen."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Ändra geografisk plats för webbläsaren"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Tillåter att ett program ändrar webbläsarens behörigheter för geografisk plats. Skadliga program kan använda detta för att tillåta att platsinformation skickas till godtyckliga webbplatser."</string>
     <string name="save_password_message" msgid="767344687139195790">"Vill du att webbläsaren ska komma ihåg lösenordet?"</string>
@@ -750,12 +753,9 @@
     <string name="force_close" msgid="3653416315450806396">"Tvinga fram en stängning"</string>
     <string name="report" msgid="4060218260984795706">"Rapportera"</string>
     <string name="wait" msgid="7147118217226317732">"Vänta"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Programmet omdirigerades"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> körs."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> startades först."</string>
     <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (processen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutit mot sin egen StrictMode-policy."</string>
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har brutit mot sin egen StrictMode-policy."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> körs"</string>
@@ -802,23 +802,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Visa alla"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-masslagring"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-ansluten"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"Du har anslutit telefonen till datorn via USB. Välj knappen nedan om du vill kopiera filer mellan datorn och SD-kortet i din Android."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Du har anslutit telefonen till datorn via USB. Välj knappen nedan om du vill kopiera filer mellan datorn och Android-telefonens USB-lagringsenhet."</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Du har anslutit telefonen till datorn via USB. Välj knappen nedan om du vill kopiera filer mellan datorn och SD-kortet i din Android."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Aktivera USB-lagring"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"Det gick inte att använda ditt SD-kort för USB-lagring."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Det gick inte att använda din USB-lagringsenhet för USB-masslagring."</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Det gick inte att använda ditt SD-kort för USB-masslagring."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB-ansluten"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Välj om du vill kopiera filer till/från din dator."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Inaktivera USB-lagring"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Välj om USB-lagring ska inaktiveras."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USB-lagret används"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Kontrollera att du har demonterat (\"matat ut\") Android-telefonens SD-kort från datorn, innan du inaktiverar USB-lagring."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Kontrollera att du har demonterat(matat ut) Android-telefonens USB-lagringsenhet från datorn innan du inaktiverar USB-lagring."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Kontrollera att du har demonterat (\"matat ut\") Android-telefonens SD-kort från datorn, innan du inaktiverar USB-lagring."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Inaktivera USB-lagring"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Ett problem uppstod när USB-lagringsplatsen skulle inaktiveras. Kontrollera att USB-värden har demonterats och försök igen."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Aktivera USB-lagring"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Om du aktiverar USB-lagring avbryts några av de program som körs och de kanske inte blir tillgängliga igen förrän du inaktiverar USB-lagring."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB-åtgärd misslyckades"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"Formatera SD-kort"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"Vill du formatera SD-kortet? Alla data på ditt kort kommer att gå förlorade."</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatera USB-enhet"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatera SD-kort"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Formatera SD-kort och radera alla filer? Åtgärden kan inte ångras!"</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Vill du formatera SD-kortet? Alla data på ditt kort kommer att gå förlorade."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Välj att inaktivera USB-felsökning."</string>
@@ -826,18 +831,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"Förbereder SD-kort"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Förbereder USB-lagring"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Förbereder SD-kort"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Söker efter fel."</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Tomt SD-kort"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD-kortet är tomt eller så har det ett filsystem som inte stöds."</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Skadat SD-kort"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SD-kortet är skadat. Du måste eventuellt formatera om det."</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD-kort togs oväntat bort"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Demontera SD-kort innan borttagning för att undvika dataförlust."</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"Säkert att ta bort SD-kort"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"Det är nu säkert att ta bort SD-kortet."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"Borttaget SD-kort"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD-kortet har tagits bort. Sätt i ett nytt."</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Tom USB-lagringsenhet"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Tomt SD-kort"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"USB-lagringsenheten är tom eller så har den ett filsystem som inte stöds."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SD-kortet är tomt eller så har det ett filsystem som inte stöds."</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Skadad USB-lagringsenhet"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Skadat SD-kort"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB-lagringsenheten är skadad. Du måste eventuellt formatera om den."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD-kortet är skadat. Du måste eventuellt formatera om det."</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB-enheten togs oväntat bort"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD-kort togs oväntat bort"</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Demontera USB-lagringsenheten före borttagning för att undvika dataförlust."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Demontera SD-kort innan borttagning för att undvika dataförlust."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Säkert att ta bort USB-enhet"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Säkert att ta bort SD-kort"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Det är nu säkert att ta bort USB-lagringsenheten."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Det är nu säkert att ta bort SD-kortet."</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB-lagringsenheten togs bort"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Borttaget SD-kort"</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB-lagringsenheten har tagits bort. Sätt i en ny."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-kortet har tagits bort. Sätt i ett nytt."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Inga matchande aktiviteter hittades"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"uppdatera statistik över användning av komponenter"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Tillåter att samlad komponentstatistik ändras. Används inte av vanliga program."</string>
@@ -892,4 +908,23 @@
     <item quantity="one" msgid="8167147081136579439">"1 träff"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> av <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
+    <!-- no translation found for action_mode_done (7217581640461922289) -->
+    <skip />
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Demontera USB-lagringsenhet..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Demonterar SD-kort..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Raderar USB-lagring..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Raderar SD-kort..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Det gick inte att radera USB-lagring"</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"Det gick inte att radera SD-kortet."</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"SD-kortet demonterades inte innan det togs bort."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB-lagringsenheten kontrolleras."</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"SD-kortet kontrolleras."</string>
+    <string name="media_removed" msgid="7001526905057952097">"SD-kortet har tagits bort."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB-lagringsenheten används av en dator."</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"SD-kortet används för närvarande av en dator."</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"Externa media i okänt tillstånd."</string>
+    <!-- no translation found for share (1778686618230011964) -->
+    <skip />
+    <!-- no translation found for find (4808270900322985960) -->
+    <skip />
 </resources>

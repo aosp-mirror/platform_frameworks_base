@@ -135,6 +135,8 @@
     <string name="power_off" msgid="4266614107412865048">"電源を切る"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"携帯電話の電源を切ります。"</string>
+    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"新着"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"最近使ったアプリケーションはありません。"</string>
     <string name="global_actions" msgid="2406416831541615258">"携帯電話オプション"</string>
@@ -169,7 +171,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"開発ツール"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"アプリケーションのデベロッパーにのみ必要な機能です。"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"SDカードにアクセスします。"</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USBストレージへのアクセス"</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SDカードにアクセスします。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"ステータスバーの無効化やシステムアイコンの追加や削除をアプリケーションに許可します。"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"ステータスバーへの表示"</string>
@@ -266,10 +269,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"アプリケーションのキャッシュディレクトリからファイルを削除して携帯電話のメモリを解放することをアプリケーションに許可します。通常、アクセスはシステムプロセスのみに制限されます。"</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"アプリケーションリソースの移動"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"内部と外部のメディア間でのアプリケーションリソースの移動をアプリケーションに許可します。"</string>
-    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
-    <skip />
-    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
-    <skip />
+    <string name="permlab_readLogs" msgid="6615778543198967614">"機密ログデータの読み取り"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"システムの各種ログファイルの読み取りをアプリケーションに許可します。許可すると端末の使用状況に関する全般的な情報が読み取られます。この情報には個人情報や機密情報が含まれる場合があります。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diagが所有するリソースの読み書き"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"diagグループが所有するリソース（例:/dev内のファイル）への読み書きをアプリケーションに許可します。システムの安定性とセキュリティに影響する恐れがあります。メーカー/オペレーターによるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"アプリケーションのコンポーネントを有効/無効にする"</string>
@@ -322,16 +323,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"リムーバブルメモリのファイルシステムのマウントとマウント解除をアプリケーションに許可します。"</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"外部ストレージのフォーマット"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"アプリケーションがリムーバブルストレージをフォーマットすることを許可します。"</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"セキュアストレージ上の情報の取得"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"セキュアストレージ上の情報の取得をアプリケーションに許可します。"</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"セキュアストレージの作成"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"セキュアストレージの作成をアプリケーションに許可します。"</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"セキュアストレージの破棄"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"セキュアストレージの破棄をアプリケーションに許可します。"</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"セキュアストレージのマウント/マウント解除"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"セキュアストレージのマウント/マウント解除をアプリケーションに許可します。"</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"セキュアストレージ名の変更"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"セキュアストレージ名の変更をアプリケーションに許可します。"</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"内部ストレージ上の情報の取得"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"内部ストレージ上の情報の取得をアプリケーションに許可します。"</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"内部ストレージの作成"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"内部ストレージの作成をアプリケーションに許可します。"</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"内部ストレージの破棄"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"内部ストレージの破棄をアプリケーションに許可します。"</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"内部ストレージのマウント/マウント解除"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"内部ストレージのマウント/マウント解除をアプリケーションに許可します。"</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"内部ストレージ名の変更"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"内部ストレージ名の変更をアプリケーションに許可します。"</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"バイブレーション制御"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"バイブレーションの制御をアプリケーションに許可します。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ライトのコントロール"</string>
@@ -404,6 +405,8 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"このBluetooth端末の設定、およびリモート端末を検出してペアに設定することをアプリケーションに許可します。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth接続の作成"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"このBluetooth端末の設定表示、および別の端末をペアとして設定し接続を承認することをアプリケーションに許可します。"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"NFCの管理"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"NFCタグ、カード、リーダーとの通信をアプリケーションに許可します。"</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"キーロックを無効にする"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"キーロックや関連するパスワードセキュリティを無効にすることをアプリケーションに許可します。正当な利用の例では、かかってきた電話を受信する際にキーロックを無効にし、通話の終了時にキーロックを有効にし直します。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"同期設定の読み取り"</string>
@@ -416,26 +419,29 @@
     <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"現在同期しているフィードの詳細の取得をアプリケーションに許可します。"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"登録したフィードの書き込み"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"現在同期しているフィードの変更をアプリケーションに許可します。悪意のあるアプリケーションが同期フィードを変更する恐れがあります。"</string>
-    <string name="permlab_readDictionary" msgid="432535716804748781">"ユーザー定義辞書の読み込み"</string>
-    <string name="permdesc_readDictionary" msgid="1082972603576360690">"アプリケーションがユーザー辞書に登録されている個人的な語句や名前を読み込むことを許可します。"</string>
-    <string name="permlab_writeDictionary" msgid="6703109511836343341">"ユーザー定義辞書への書き込み"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"アプリケーションがユーザー辞書に新しい語句を書き込むことを許可します。"</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"SDカードのコンテンツを修正/削除する"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"SDカードへの書き込みをアプリケーションに許可します。"</string>
+    <string name="permlab_readDictionary" msgid="432535716804748781">"単語リストの読み込み"</string>
+    <string name="permdesc_readDictionary" msgid="1082972603576360690">"アプリケーションが単語リストに登録されている個人的な語句や名前を読み込むことを許可します。"</string>
+    <string name="permlab_writeDictionary" msgid="6703109511836343341">"単語リストへの書き込み"</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"アプリケーションが単語リストに新しい語句を書き込むことを許可します。"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"USBストレージのコンテンツの変更/削除"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SDカードのコンテンツを修正/削除する"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"USBストレージへの書き込みをアプリケーションに許可します。"</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"SDカードへの書き込みをアプリケーションに許可します。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"キャッシュファイルシステムにアクセス"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"キャッシュファイルシステムへの読み書きをアプリケーションに許可します。"</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"パスワードの制限"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"使用できるパスワードの種類を制限します。"</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"ログインの監視"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"携帯電話へのログインの失敗を監視し、何らかの処置をとります。"</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"パスワードのリセット"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"パスワードを強制的に新しい値に変更します。ログインするには管理者からその値を通知してもらう必要があります。"</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"強制ロック"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"携帯電話のロック時を管理します。パスワードの再入力が必要となります。"</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"インターネット通話の発着信"</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"インターネット通話の発着信にSIPサービスを使用することをアプリケーションに許可します。"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"画面ロック解除パスワードの長さと使用できる文字数を制御する"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"画面ロック解除のために入力されたパスワードが間違っていた回数を監視し、回数が多すぎる場合は端末をロックするか、端末内のデータをすべて削除します。"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"画面ロック解除パスワードの変更"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"画面ロック解除パスワードの変更"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"画面のロック"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"画面をロックする方法とタイミングを制御する"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"すべてのデータを消去"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"出荷時設定にリセットします。確認なしでデータがすべて削除されます。"</string>
-    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
-    <skip />
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"警告せずにデータの初期化を実行して端末内のデータを消去します。"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"端末のグローバルプロキシを設定"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。有効なグローバルプロキシを設定できるのは最初のデバイス管理者だけです。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"自宅"</item>
@@ -530,14 +536,10 @@
     <string name="orgTypeWork" msgid="29268870505363872">"勤務先"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"その他"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"カスタム"</string>
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"カスタム"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"自宅"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"勤務先"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"その他"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PINコードを入力"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"ロックを解除するにはパスワードを入力"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"ロックを解除するにはPINを入力"</string>
@@ -598,12 +600,13 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"このページから移動しますか？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"移動する場合は[OK]、今のページに残る場合は[キャンセル]を選択してください。"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"ヒント: ダブルタップで拡大/縮小できます。"</string>
-    <!-- no translation found for autofill_this_form (8940110866775097494) -->
-    <skip />
+    <string name="autofill_this_form" msgid="8940110866775097494">"このフォームを自動入力"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ブラウザの履歴とブックマークを読み取る"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"ブラウザでアクセスしたすべてのURLおよびブラウザのすべてのブックマークの読み取りをアプリケーションに許可します。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"ブラウザの履歴とブックマークを書き込む"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"携帯電話に保存されているブラウザの履歴やブックマークの修正をアプリケーショに許可します。これにより悪意のあるアプリケーションが、ブラウザのデータを消去または変更する恐れがあります。"</string>
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"アラームの設定"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"インストール済みアラームアプリケーションのアラーム設定をアプリケーションに許可します。この機能が実装されていないアラームアプリケーションもあります。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"ブラウザの位置情報へのアクセス権を変更"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"ブラウザの位置情報に対するアクセス権の変更をアプリケーションに許可します。この設定では、悪意のあるアプリケーションが任意のウェブサイトに位置情報を送信する可能性があります。"</string>
     <string name="save_password_message" msgid="767344687139195790">"このパスワードをブラウザで保存しますか？"</string>
@@ -750,12 +753,9 @@
     <string name="force_close" msgid="3653416315450806396">"強制終了"</string>
     <string name="report" msgid="4060218260984795706">"レポート"</string>
     <string name="wait" msgid="7147118217226317732">"待機"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"アプリのリダイレクト"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>が実行中です。"</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g>が最初に起動していました。"</string>
     <string name="smv_application" msgid="295583804361236288">"アプリケーション<xliff:g id="APPLICATION">%1$s</xliff:g>（プロセス<xliff:g id="PROCESS">%2$s</xliff:g>）でStrictModeポリシー違反がありました。"</string>
     <string name="smv_process" msgid="5120397012047462446">"プロセス<xliff:g id="PROCESS">%1$s</xliff:g>でStrictModeポリシー違反がありました。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>を実行中"</string>
@@ -802,23 +802,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"すべて表示"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USBマスストレージ"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB接続"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"携帯電話をUSBでパソコンに接続しています。パソコンとAndroidのSDカード間でファイルをコピーするには、下のボタンを選択します。"</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"携帯端末をUSBでパソコンに接続しています。パソコンとAndroidのUSBストレージの間でファイルをコピーするには、下のボタンを選択します。"</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"携帯電話をUSBでパソコンに接続しています。パソコンとAndroidのSDカード間でファイルをコピーするには、下のボタンを選択します。"</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USBストレージをONにする"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"USBメモリにSDカードを使用する際に問題が発生しました。"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"USBストレージをUSBマスストレージとして使用する際に問題が発生しました。"</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"USBをUSBマスストレージとして使用する際に問題が発生しました。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB接続"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"パソコンとの間でファイルをコピーします。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"USBストレージをOFFにする"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"USBストレージをOFFにする場合に選択します。"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"USBストレージを使用中"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"USBストレージをOFFにする前に、パソコンで必ずAndroidのSDカードのマウントを解除して（カードを取り出して）ください。"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"USBストレージをOFFにする前に、パソコンで必ずAndroidのUSBストレージのマウントを解除して（ストレージを取り出して）ください。"</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"USBストレージをOFFにする前に、パソコンで必ずAndroidのSDカードのマウントを解除して（カードを取り出して）ください。"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"USBストレージをOFFにする"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"USBストレージをOFFにする際に問題が発生しました。USBホストのマウントが解除されていることを確認してからもう一度お試しください。"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USBストレージをONにする"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USBストレージをONにすると、使用中のアプリケーションの一部が停止し、USBストレージをOFFにするまで使用できなくなる場合があります。"</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB操作に失敗しました"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"SDカードをフォーマット"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"SDカードをフォーマットしてもよろしいですか？カード内のすべてのデータが失われます。"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USBストレージのフォーマット"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SDカードをフォーマット"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"USBストレージをフォーマットして、保存されているすべてのファイルを消去しますか？この操作は元に戻せません。"</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"SDカードをフォーマットしてもよろしいですか？カード内のすべてのデータが失われます。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"フォーマット"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"USBデバッグを無効にする場合に選択します。"</string>
@@ -826,18 +831,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候補"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"SDカードの準備中"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USBストレージの準備中"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SDカードの準備中"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"エラーを確認しています。"</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"空のSDカード"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SDカードが空か、サポート対象外のファイルシステムを使用しています。"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"破損したSDカード"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SDカードが破損しています。カードのフォーマットが必要な可能性があります。"</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SDカードが予期せず取り外されました"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"データの喪失を防ぐためSDカードを取り外す前にマウントを解除してください。"</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"SDカードを安全に取り外しました"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"SDカードは安全に取り外せます。"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"SDカードが取り外されています"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SDカードが取り外されました。新しいカードを挿入してください。"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"空のUSBストレージ"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"空のSDカード"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"USBストレージが空であるか、サポートされていないファイルシステムを使用しています。"</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"SDカードが空か、サポート対象外のファイルシステムを使用しています。"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"破損したUSBストレージ"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"破損したSDカード"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USBストレージが破損しています。ストレージの再フォーマットが必要な可能性があります。"</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SDカードが破損しています。カードのフォーマットが必要な可能性があります。"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USBストレージが不適切に取り外されました"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SDカードが予期せず取り外されました"</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"データの喪失を防ぐためUSBストレージを取り外す前にマウントを解除してください。"</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"データの喪失を防ぐためSDカードを取り外す前にマウントを解除してください。"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USBストレージの安全な取り外し"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SDカードを安全に取り外しました"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"USBストレージを安全に取り外せます。"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"SDカードは安全に取り外せます。"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USBストレージ取り外し済み"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SDカードが取り外されています"</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USBストレージが取り外されています。新しいメディアを挿入してください。"</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SDカードが取り外されました。新しいカードを挿入してください。"</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"一致するアクティビティが見つかりません"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"コンポーネント使用状況に関する統計情報の更新"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"収集されたコンポーネント使用状況に関する統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>
@@ -892,4 +908,23 @@
     <item quantity="one" msgid="8167147081136579439">"1件一致"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g>件"</item>
   </plurals>
+    <!-- no translation found for action_mode_done (7217581640461922289) -->
+    <skip />
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"USBストレージのマウント解除中..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"SDカードのマウント解除中..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"USBストレージ内のデータを消去中..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"SDカード内のデータを消去中..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"USBストレージ内のデータを消去できませんでした。"</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"SDカード内のデータを消去できませんでした。"</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"SDカードがマウント解除される前に取り外されました。"</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USBストレージは現在確認中です。"</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"SDカードは現在確認中です。"</string>
+    <string name="media_removed" msgid="7001526905057952097">"SDカードが取り外されました。"</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USBストレージは現在パソコンで使用中です。"</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"SDカードは現在パソコンで使用中です。"</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"外部メディアの状態は不明です。"</string>
+    <!-- no translation found for share (1778686618230011964) -->
+    <skip />
+    <!-- no translation found for find (4808270900322985960) -->
+    <skip />
 </resources>
