@@ -243,19 +243,22 @@ extern "C" int Visualizer_process(
     // derive capture scaling factor from peak value in current buffer
     // this gives more interesting captures for display.
     int32_t shift = 32;
-    for (size_t i = 0; i < inBuffer->frameCount; i++) {
+    int len = inBuffer->frameCount * 2;
+    for (size_t i = 0; i < len; i++) {
         int32_t smp = inBuffer->s16[i];
-        if (smp < 0) smp = -smp;
+        if (smp < 0) smp = -smp - 1; // take care to keep the max negative in range
         int32_t clz = __builtin_clz(smp);
         if (shift > clz) shift = clz;
     }
-    // never scale by less than 8 to avoid returning unaltered PCM signal.
-    // add one to combine the division by 2 needed after summing left and right channels below
-    if (20 > shift) {
-        shift = (31 - 8 + 1) - shift;
-    } else {
-        shift = (3 + 1);
+    // A maximum amplitude signal will have 17 leading zeros, which we want to
+    // translate to a shift of 8 (for converting 16 bit to 8 bit)
+     shift = 25 - shift;
+    // Never scale by less than 8 to avoid returning unaltered PCM signal.
+    if (shift < 3) {
+        shift = 3;
     }
+    // add one to combine the division by 2 needed after summing left and right channels below
+    shift++;
 
     uint32_t captIdx;
     uint32_t inIdx;
@@ -264,7 +267,7 @@ extern "C" int Visualizer_process(
          inIdx < inBuffer->frameCount && captIdx < pContext->mCaptureSize;
          inIdx++, captIdx++) {
         int32_t smp = inBuffer->s16[2 * inIdx] + inBuffer->s16[2 * inIdx + 1];
-        smp = (smp + (1 << (shift - 1))) >> shift;
+        smp = smp >> shift;
         buf[captIdx] = ((uint8_t)smp)^0x80;
     }
     pContext->mCaptureIdx = captIdx;
