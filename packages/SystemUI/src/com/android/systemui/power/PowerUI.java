@@ -28,6 +28,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -46,18 +47,58 @@ public class PowerUI extends SystemUI {
 
     Handler mHandler = new Handler();
 
+    int mBatteryLevel = 100;
+    int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+    int mPlugType = 0;
+    int mInvalidCharger = 0;
+
+    int mLowBatteryAlertCloseLevel;
+    int[] mLowBatteryReminderLevels = new int[2];
+
+    AlertDialog mInvalidChargerDialog;
     AlertDialog mLowBatteryDialog;
-    int mBatteryLevel;
     TextView mBatteryLevelTextView;
 
     public void start() {
+
+        mLowBatteryAlertCloseLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryCloseWarningLevel);
+        mLowBatteryReminderLevels[0] = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        mLowBatteryReminderLevels[1] = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_criticalBatteryWarningLevel);
+
         // Register for Intent broadcasts for...
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(Intent.ACTION_BATTERY_LOW);
-        filter.addAction(Intent.ACTION_BATTERY_OKAY);
         filter.addAction(Intent.ACTION_POWER_CONNECTED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+    }
+
+    /**
+     * Buckets the battery level.
+     *
+     * The code in this function is a little weird because I couldn't comprehend
+     * the bucket going up when the battery level was going down. --joeo
+     *
+     * 1 means that the battery is "ok"
+     * 0 means that the battery is between "ok" and what we should warn about.
+     * less than 0 means that the battery is low
+     */
+    private int findBatteryLevelBucket(int level) {
+        if (level >= mLowBatteryAlertCloseLevel) {
+            return 1;
+        }
+        if (level >= mLowBatteryReminderLevels[0]) {
+            return 0;
+        }
+        final int N = mLowBatteryReminderLevels.length;
+        for (int i=N-1; i>=0; i--) {
+            if (level <= mLowBatteryReminderLevels[i]) {
+                return -1-i;
+            }
+        }
+        throw new RuntimeException("not possible!");
     }
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
@@ -65,19 +106,69 @@ public class PowerUI extends SystemUI {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                mBatteryLevel = intent.getIntExtra("level", -1);
-            } else if (action.equals(Intent.ACTION_BATTERY_LOW)) {
-                showLowBatteryWarning();
-            } else if (action.equals(Intent.ACTION_BATTERY_OKAY)
-                    || action.equals(Intent.ACTION_POWER_CONNECTED)) {
-                if (mLowBatteryDialog != null) {
-                    mLowBatteryDialog.dismiss();
+                final int oldBatteryLevel = mBatteryLevel;
+                mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 100);
+                final int oldBatteryStatus = mBatteryStatus;
+                mBatteryStatus = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
+                        BatteryManager.BATTERY_STATUS_UNKNOWN);
+                final int oldPlugType = mPlugType;
+                mPlugType = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
+                final int oldInvalidCharger = mInvalidCharger;
+                mInvalidCharger = intent.getIntExtra(BatteryManager.EXTRA_INVALID_CHARGER, 0);
+
+                final boolean plugged = mPlugType != 0;
+                final boolean oldPlugged = oldPlugType != 0;
+
+                int oldBucket = findBatteryLevelBucket(oldBatteryLevel);
+                int bucket = findBatteryLevelBucket(mBatteryLevel);
+
+                if (false) {
+                    Slog.d(TAG, "buckets   ....." + mLowBatteryAlertCloseLevel
+                            + " .. " + mLowBatteryReminderLevels[0]
+                            + " .. " + mLowBatteryReminderLevels[1]);
+                    Slog.d(TAG, "level          " + oldBatteryLevel + " --> " + mBatteryLevel);
+                    Slog.d(TAG, "status         " + oldBatteryStatus + " --> " + mBatteryStatus);
+                    Slog.d(TAG, "plugType       " + oldPlugType + " --> " + mPlugType);
+                    Slog.d(TAG, "invalidCharger " + oldInvalidCharger + " --> " + mInvalidCharger);
+                    Slog.d(TAG, "bucket         " + oldBucket + " --> " + bucket);
+                    Slog.d(TAG, "plugged        " + oldPlugged + " --> " + plugged);
+                }
+
+                if (oldInvalidCharger == 0 && mInvalidCharger != 0) {
+                    Slog.d(TAG, "showing invalid charger warning");
+                    showInvalidChargerDialog();
+                    return;
+                } else if (oldInvalidCharger != 0 && mInvalidCharger == 0) {
+                    Slog.d(TAG, "closing invalid charger warning");
+                    dismissInvalidChargerDialog();
+                } else if (mInvalidChargerDialog != null) {
+                    // if invalid charger is showing, don't show low battery
+                    return;
+                }
+
+                if (!plugged
+                        && (bucket < oldBucket || oldPlugged)
+                        && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
+                        && bucket < 0) {
+                    Slog.d(TAG, "showing low battery warning: level=" + mBatteryLevel);
+                    showLowBatteryWarning();
+                } else if (plugged || (bucket > oldBucket && bucket > 0)) {
+                    Slog.d(TAG, "closing low battery warning: level=" + mBatteryLevel);
+                    dismissLowBatteryWarning();
+                } else if (mBatteryLevelTextView != null) {
+                    showLowBatteryWarning();
                 }
             } else {
                 Slog.w(TAG, "unknown intent: " + intent);
             }
         }
     };
+
+    void dismissLowBatteryWarning() {
+        if (mLowBatteryDialog != null) {
+            mLowBatteryDialog.dismiss();
+        }
+    }
 
     void showLowBatteryWarning() {
         CharSequence levelText = mContext.getString(
@@ -98,25 +189,30 @@ public class PowerUI extends SystemUI {
                 b.setIcon(android.R.drawable.ic_dialog_alert);
                 b.setPositiveButton(android.R.string.ok, null);
 
-                final Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                        | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                if (intent.resolveActivity(mContext.getPackageManager()) != null) {
-                    b.setNegativeButton(R.string.battery_low_why,
-                            new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            mContext.startActivity(intent);
-                            if (mLowBatteryDialog != null) {
-                                mLowBatteryDialog.dismiss();
-                            }
+            final Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                    | Intent.FLAG_ACTIVITY_NO_HISTORY);
+            if (intent.resolveActivity(mContext.getPackageManager()) != null) {
+                b.setNegativeButton(R.string.battery_low_why,
+                        new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        mContext.startActivity(intent);
+                        if (mLowBatteryDialog != null) {
+                            mLowBatteryDialog.dismiss();
                         }
-                    });
-                }
+                    }
+                });
+            }
 
             AlertDialog d = b.create();
-            d.setOnDismissListener(mLowBatteryListener);
+            d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    public void onDismiss(DialogInterface dialog) {
+                        mLowBatteryDialog = null;
+                        mBatteryLevelTextView = null;
+                    }
+                });
             d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
             d.show();
             mLowBatteryDialog = d;
@@ -141,45 +237,53 @@ if (false) { // getRingtone ANRs
 }
     }
 
-    private DialogInterface.OnDismissListener mLowBatteryListener
-            = new DialogInterface.OnDismissListener() {
-        public void onDismiss(DialogInterface dialog) {
-            mLowBatteryDialog = null;
-            mBatteryLevelTextView = null;
+    void dismissInvalidChargerDialog() {
+        if (mInvalidChargerDialog != null) {
+            mInvalidChargerDialog.dismiss();
         }
-    };
+    }
 
+    void showInvalidChargerDialog() {
+        dismissLowBatteryWarning();
+
+        AlertDialog.Builder b = new AlertDialog.Builder(mContext);
+            b.setCancelable(true);
+            b.setMessage(mContext.getString(R.string.invalid_charger));
+            b.setIcon(android.R.drawable.ic_dialog_alert);
+            b.setPositiveButton(android.R.string.ok, null);
+
+        AlertDialog d = b.create();
+            d.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    public void onDismiss(DialogInterface dialog) {
+                        mInvalidChargerDialog = null;
+                        mBatteryLevelTextView = null;
+                    }
+                });
+
+        d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        d.show();
+        mInvalidChargerDialog = d;
+    }
     
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (false) {
-            pw.println("args=" + Arrays.toString(args));
-        }
-        if (args == null || args.length == 0) {
-            pw.print("mLowBatteryDialog=");
-            pw.println(mLowBatteryDialog == null ? "null" : mLowBatteryDialog.toString());
-            pw.print("mBatteryLevel=");
-            pw.println(Integer.toString(mBatteryLevel));
-        }
-
-        // DO NOT SUBMIT with this turned on.
-        if (false) {
-            if (args.length == 3 && "level".equals(args[1])) {
-                try {
-                    final int level = Integer.parseInt(args[2]);
-                    Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
-                    intent.putExtra("level", level);
-                    mIntentReceiver.onReceive(mContext, intent);
-                } catch (NumberFormatException ex) {
-                    pw.println(ex);
-                }
-            } else if (args.length == 2 && "low".equals(args[1])) {
-                Intent intent = new Intent(Intent.ACTION_BATTERY_LOW);
-                mIntentReceiver.onReceive(mContext, intent);
-            } else if (args.length == 2 && "ok".equals(args[1])) {
-                Intent intent = new Intent(Intent.ACTION_BATTERY_OKAY);
-                mIntentReceiver.onReceive(mContext, intent);
-            }
-        }
+        pw.print("mLowBatteryAlertCloseLevel=");
+        pw.println(mLowBatteryAlertCloseLevel);
+        pw.print("mLowBatteryReminderLevels=");
+        pw.println(Arrays.toString(mLowBatteryReminderLevels));
+        pw.print("mInvalidChargerDialog=");
+        pw.println(mInvalidChargerDialog == null ? "null" : mInvalidChargerDialog.toString());
+        pw.print("mLowBatteryDialog=");
+        pw.println(mLowBatteryDialog == null ? "null" : mLowBatteryDialog.toString());
+        pw.print("mBatteryLevel=");
+        pw.println(Integer.toString(mBatteryLevel));
+        pw.print("mBatteryStatus=");
+        pw.println(Integer.toString(mBatteryStatus));
+        pw.print("mPlugType=");
+        pw.println(Integer.toString(mPlugType));
+        pw.print("mInvalidCharger=");
+        pw.println(Integer.toString(mInvalidCharger));
+        pw.print("bucket: ");
+        pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
     }
 }
 
