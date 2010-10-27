@@ -168,7 +168,10 @@ public final class NfcAdapter {
     private static boolean sIsInitialized = false;
     private static NfcAdapter sAdapter;
 
-    private final INfcAdapter mService;
+    // Final after construction, except for attemptDeadServiceRecovery()
+    // when NFC crashes.
+    // Not locked - we accept a best effort attempt when NFC crashes.
+    /*package*/ INfcAdapter mService;
 
     private NfcAdapter(INfcAdapter service) {
         mService = service;
@@ -194,6 +197,16 @@ public final class NfcAdapter {
         }
     }
 
+    /** get handle to NFC service interface */
+    private static synchronized INfcAdapter getServiceInterface() {
+        /* get a handle to NFC service */
+        IBinder b = ServiceManager.getService("nfc");
+        if (b == null) {
+            return null;
+        }
+        return INfcAdapter.Stub.asInterface(b);
+    }
+
     /**
      * Get a handle to the default NFC Adapter on this Android device.
      * <p>
@@ -214,16 +227,29 @@ public final class NfcAdapter {
                 return null;
             }
 
-            /* get a handle to NFC service */
-            IBinder b = ServiceManager.getService("nfc");
-            if (b == null) {
+            INfcAdapter service = getServiceInterface();
+            if (service == null) {
                 Log.e(TAG, "could not retrieve NFC service");
                 return null;
             }
 
-            sAdapter = new NfcAdapter(INfcAdapter.Stub.asInterface(b));
+            sAdapter = new NfcAdapter(service);
             return sAdapter;
         }
+    }
+
+    /** NFC service dead - attempt best effort recovery */
+    /*package*/ void attemptDeadServiceRecovery(Exception e) {
+        Log.e(TAG, "NFC service dead - attempting to recover", e);
+        INfcAdapter service = getServiceInterface();
+        if (service == null) {
+            Log.e(TAG, "could not retrieve NFC service during service recovery");
+            return;
+        }
+        /* assigning to mService is not thread-safe, but this is best-effort code
+         * and on a well-behaved system should never happen */
+        mService = service;
+        return;
     }
 
     /**
@@ -241,7 +267,7 @@ public final class NfcAdapter {
         try {
             return mService.isEnabled();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in isEnabled()", e);
+            attemptDeadServiceRecovery(e);
             return false;
         }
     }
@@ -258,7 +284,7 @@ public final class NfcAdapter {
         try {
             return mService.enable();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in enable()", e);
+            attemptDeadServiceRecovery(e);
             return false;
         }
     }
@@ -277,7 +303,7 @@ public final class NfcAdapter {
         try {
             return mService.disable();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in disable()", e);
+            attemptDeadServiceRecovery(e);
             return false;
         }
     }
@@ -303,7 +329,7 @@ public final class NfcAdapter {
         try {
             mService.localSet(message);
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
         }
     }
 
@@ -317,7 +343,7 @@ public final class NfcAdapter {
         try {
             return mService.localGet();
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
             return null;
         }
     }
@@ -331,9 +357,9 @@ public final class NfcAdapter {
             throw new IllegalArgumentException("mock tag cannot be used for connections");
         }
         try {
-            return new RawTagConnection(mService, tag);
+            return new RawTagConnection(this, tag);
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
             return null;
         }
     }
@@ -347,9 +373,9 @@ public final class NfcAdapter {
             throw new IllegalArgumentException("mock tag cannot be used for connections");
         }
         try {
-            return new RawTagConnection(mService, tag, target);
+            return new RawTagConnection(this, tag, target);
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
             return null;
         }
     }
@@ -363,9 +389,9 @@ public final class NfcAdapter {
             throw new IllegalArgumentException("mock tag cannot be used for connections");
         }
         try {
-            return new NdefTagConnection(mService, tag);
+            return new NdefTagConnection(this, tag);
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
             return null;
         }
     }
@@ -379,9 +405,9 @@ public final class NfcAdapter {
             throw new IllegalArgumentException("mock tag cannot be used for connections");
         }
         try {
-            return new NdefTagConnection(mService, tag, target);
+            return new NdefTagConnection(this, tag, target);
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died", e);
+            attemptDeadServiceRecovery(e);
             return null;
         }
     }
