@@ -31,37 +31,29 @@ import android.util.Log;
  * Use the static {@link #getDefaultAdapter} method to get the default NFC
  * Adapter for this Android device. Most Android devices will have only one NFC
  * Adapter, and {@link #getDefaultAdapter} returns the singleton object.
- * <p>
- * {@link NfcAdapter} can be used to create {@link RawTagConnection} or
- * {@link NdefTagConnection} connections to modify or perform low level access
- * to NFC Tags.
- * <p class="note">
- * <strong>Note:</strong> Some methods require the
- * {@link android.Manifest.permission#NFC} permission.
  */
 public final class NfcAdapter {
     /**
-     * Intent to start an activity when a non-NDEF tag is discovered.
-     * TODO(npelly) finalize decision on using CATEGORY or DATA URI to provide a
-     * hint for applications to filter the tag type.
-     * TODO(npelly) probably combine these two intents since tags aren't that simple
+     * Intent to start an activity when a tag is discovered.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
 
     /**
-     * Intent to start an activity when a NDEF tag is discovered. TODO(npelly)
-     * finalize decision on using CATEGORY or DATA URI to provide a hint for
-     * applications to filter the tag type.
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_NDEF_TAG_DISCOVERED =
-            "android.nfc.action.NDEF_TAG_DISCOVERED";
-
-    /**
-     * Mandatory Tag extra for the ACTION_TAG and ACTION_NDEF_TAG intents.
+     * Mandatory Tag extra for the ACTION_TAG intents.
+     * @hide
      */
     public static final String EXTRA_TAG = "android.nfc.extra.TAG";
+
+    /**
+     * Optional NdefMessage[] extra for the ACTION_TAG intents.
+     */
+    public static final String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
+
+    /**
+     * Optional byte[] extra for the tag identifier.
+     */
+    public static final String EXTRA_ID = "android.nfc.extra.ID";
 
     /**
      * Broadcast Action: a transaction with a secure element has been detected.
@@ -324,6 +316,7 @@ public final class NfcAdapter {
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      *
      * @param message NDEF message to make public
+     * @hide
      */
     public void setLocalNdefMessage(NdefMessage message) {
         try {
@@ -338,6 +331,7 @@ public final class NfcAdapter {
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
      *
      * @return NDEF Message that is publicly readable
+     * @hide
      */
     public NdefMessage getLocalNdefMessage() {
         try {
@@ -351,6 +345,7 @@ public final class NfcAdapter {
     /**
      * Create a raw tag connection to the default Target
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * @hide
      */
     public RawTagConnection createRawTagConnection(Tag tag) {
         if (tag.mServiceHandle == 0) {
@@ -367,6 +362,7 @@ public final class NfcAdapter {
     /**
      * Create a raw tag connection to the specified Target
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * @hide
      */
     public RawTagConnection createRawTagConnection(Tag tag, String target) {
         if (tag.mServiceHandle == 0) {
@@ -383,6 +379,7 @@ public final class NfcAdapter {
     /**
      * Create an NDEF tag connection to the default Target
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * @hide
      */
     public NdefTagConnection createNdefTagConnection(NdefTag tag) {
         if (tag.mServiceHandle == 0) {
@@ -399,6 +396,7 @@ public final class NfcAdapter {
     /**
      * Create an NDEF tag connection to the specified Target
      * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * @hide
      */
     public NdefTagConnection createNdefTagConnection(NdefTag tag, String target) {
         if (tag.mServiceHandle == 0) {
