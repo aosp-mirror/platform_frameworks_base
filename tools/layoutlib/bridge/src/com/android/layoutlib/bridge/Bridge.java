@@ -24,6 +24,7 @@ import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IStyleResourceValue;
 import com.android.layoutlib.api.IXmlPullParser;
+import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
 import com.android.layoutlib.api.ILayoutResult.ILayoutViewInfo;
 import com.android.layoutlib.bridge.LayoutResult.LayoutViewInfo;
 import com.android.ninepatch.NinePatch;
@@ -33,7 +34,9 @@ import com.android.tools.layoutlib.create.OverrideMethod;
 import android.content.ClipData;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
+import android.graphics.Canvas_Delegate;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface_Delegate;
@@ -64,6 +67,7 @@ import android.widget.FrameLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -450,13 +454,28 @@ public final class Bridge implements ILayoutBridge {
             view.layout(0, screenOffset, screenWidth, screenHeight);
 
             // draw the views
-            Canvas canvas = new Canvas(screenWidth, screenHeight - screenOffset, logger);
+            // create the BufferedImage into which the layout will be rendered.
+            BufferedImage image = new BufferedImage(screenWidth, screenHeight - screenOffset,
+                    BufferedImage.TYPE_INT_ARGB);
+
+            // create an Android bitmap around the BufferedImage
+            Bitmap bitmap = Bitmap_Delegate.createBitmap(image, Density.getEnum(density));
+
+            // create a Canvas around the Android bitmap
+            Canvas canvas = new Canvas(bitmap);
+
+            // to set the logger, get the native delegate
+            Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(canvas);
+            canvasDelegate.setLogger(logger);
+
 
             root.draw(canvas);
-            canvas.dispose();
+            canvasDelegate.dispose();
 
-            return new LayoutResult(visit(((ViewGroup)view).getChildAt(0), context),
-                    canvas.getImage());
+            return new LayoutResult(
+                    visit(((ViewGroup)view).getChildAt(0), context),
+                    image);
+
         } catch (PostInflateException e) {
             return new LayoutResult(ILayoutResult.ERROR, "Error during post inflation process:\n"
                     + e.getMessage());

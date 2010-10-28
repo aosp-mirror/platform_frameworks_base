@@ -19,6 +19,7 @@ package com.android.layoutlib.bridge;
 import com.android.ninepatch.NinePatch;
 
 import android.graphics.Canvas;
+import android.graphics.Canvas_Delegate;
 import android.graphics.ColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -80,7 +81,8 @@ public class NinePatchDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
         Rect r = getBounds();
-        m9Patch.draw(canvas.getGraphics2d(), r.left, r.top, r.width(), r.height());
+        Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(canvas);
+        m9Patch.draw(canvasDelegate.getGraphics2d(), r.left, r.top, r.width(), r.height());
 
         return;
     }
