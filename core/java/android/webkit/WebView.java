@@ -917,6 +917,8 @@ public class WebView extends AbsoluteLayout
         if (privateBrowsing) {
             startPrivateBrowsing();
         }
+
+        L10nUtils.loadStrings(context);
     }
 
     /*
