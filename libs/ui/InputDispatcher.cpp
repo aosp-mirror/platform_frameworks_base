@@ -1305,6 +1305,9 @@ Failed:
     }
 
 Unresponsive:
+    // Reset temporary touch state to ensure we release unnecessary references to input channels.
+    mTempTouchState.reset();
+
     nsecs_t timeSpentWaitingForApplication = getTimeSpentWaitingForApplicationLocked(currentTime);
     updateDispatchStatisticsLocked(currentTime, entry,
             injectionResult, timeSpentWaitingForApplication);
@@ -2589,8 +2592,12 @@ void InputDispatcher::setInputDispatchMode(bool enabled, bool frozen) {
         AutoMutex _l(mLock);
 
         if (mDispatchEnabled != enabled || mDispatchFrozen != frozen) {
-            if (mDispatchFrozen && ! frozen) {
+            if (mDispatchFrozen && !frozen) {
                 resetANRTimeoutsLocked();
+            }
+
+            if (mDispatchEnabled && !enabled) {
+                resetAndDropEverythingLocked("dispatcher is being disabled");
             }
 
             mDispatchEnabled = enabled;
@@ -2685,6 +2692,21 @@ bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,
     // Wake up poll loop since it may need to make new input dispatching choices.
     mLooper->wake();
     return true;
+}
+
+void InputDispatcher::resetAndDropEverythingLocked(const char* reason) {
+#if DEBUG_FOCUS
+    LOGD("Resetting and dropping all events (%s).", reason);
+#endif
+
+    synthesizeCancelationEventsForAllConnectionsLocked(InputState::CANCEL_ALL_EVENTS, reason);
+
+    resetKeyRepeatLocked();
+    releasePendingEventLocked();
+    drainInboundQueueLocked();
+    resetTargetsLocked();
+
+    mTouchState.reset();
 }
 
 void InputDispatcher::logDispatchStateLocked() {

@@ -1046,6 +1046,9 @@ private:
     // Splitting motion events across windows.
     MotionEntry* splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet32 pointerIds);
 
+    // Reset and drop everything the dispatcher is doing.
+    void resetAndDropEverythingLocked(const char* reason);
+
     // Dump state.
     void dumpDispatchStateLocked(String8& dump);
     void logDispatchStateLocked();
