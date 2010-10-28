@@ -94,6 +94,45 @@ public class EditorInfo implements InputType, Parcelable {
     public static final int IME_ACTION_DONE = 0x00000006;
     
     /**
+     * Bits of {@link #IME_MASK_ACTION}: Like {@link #IME_ACTION_NEXT}, but
+     * for moving to the previous field.  This will normally not be used to
+     * specify an action (since it precludes {@link #IME_ACTION_NEXT}, but
+     * can be returned to the app if it sets {@link #IME_FLAG_NAVIGATE_PREVIOUS}.
+     */
+    public static final int IME_ACTION_PREVIOUS = 0x00000007;
+
+    /**
+     * Flag of {@link #imeOptions}: used to request that the IME never go
+     * into fullscreen mode.  Applications need to be aware that the flag is not
+     * a guarantee, and not all IMEs will respect it.
+     */
+    public static final int IME_FLAG_NO_FULLSCREEN = 0x2000000;
+
+    /**
+     * Flag of {@link #imeOptions}: like {@link #IME_FLAG_NAVIGATE_NEXT}, but
+     * specifies there is something interesting that a backward navigation
+     * can focus on.  If the user selects the IME's facility to backward
+     * navigate, this will show up in the application as an {@link #IME_ACTION_PREVIOUS}
+     * at {@link InputConnection#performEditorAction(int)
+     * InputConnection.performEditorAction(int)}.
+     */
+    public static final int IME_FLAG_NAVIGATE_PREVIOUS = 0x4000000;
+
+    /**
+     * Flag of {@link #imeOptions}: used to specify that there is something
+     * interesting that a forward navigation can focus on. This is like using
+     * {@link #IME_ACTION_NEXT}, except allows the IME to be multiline (with
+     * an enter key) as well as provide forward navigation.  Note that some
+     * IMEs may not be able to do this, especially when running on a small
+     * screen where there is little space.  In that case it does not need to
+     * present a UI for this option.  Like {@link #IME_ACTION_NEXT}, if the
+     * user selects the IME's facility to forward navigate, this will show up
+     * in the application at {@link InputConnection#performEditorAction(int)
+     * InputConnection.performEditorAction(int)}.
+     */
+    public static final int IME_FLAG_NAVIGATE_NEXT = 0x8000000;
+
+    /**
      * Flag of {@link #imeOptions}: used to specify that the IME does not need
      * to show its extracted text UI.  For input methods that may be fullscreen,
      * often when in landscape mode, this allows them to be smaller and let part
@@ -127,14 +166,6 @@ public class EditorInfo implements InputType, Parcelable {
      * flag for you on multi-line text views.
      */
     public static final int IME_FLAG_NO_ENTER_ACTION = 0x40000000;
-
-    /**
-     * Flag of {@link #imeOptions}: used to request that the IME never go
-     * into fullscreen mode.  Applications need to be aware that the flag is not
-     * a guarantee, and not all IMEs will respect it.
-     * @hide
-     */
-    public static final int IME_FLAG_NO_FULLSCREEN = 0x80000000;
 
     /**
      * Generic unspecified type for {@link #imeOptions}.
@@ -239,6 +270,34 @@ public class EditorInfo implements InputType, Parcelable {
      */
     public Bundle extras;
     
+    /**
+     * Ensure that the data in this EditorInfo is compatible with an application
+     * that was developed against the given target API version.  This can
+     * impact the following input types:
+     * {@link InputType#TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS},
+     * {@link InputType#TYPE_TEXT_VARIATION_WEB_PASSWORD}.
+     *
+     * <p>This is called by the framework for input method implementations;
+     * you should not generally need to call it yourself.
+     *
+     * @param targetSdkVersion The API version number that the compatible
+     * application was developed against.
+     */
+    public final void makeCompatible(int targetSdkVersion) {
+        if (targetSdkVersion < android.os.Build.VERSION_CODES.HONEYCOMB) {
+            switch (inputType&(TYPE_MASK_CLASS|TYPE_MASK_VARIATION)) {
+                case TYPE_CLASS_TEXT|TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS:
+                    inputType = TYPE_CLASS_TEXT|TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                            | (inputType&(~TYPE_MASK_FLAGS));
+                    break;
+                case TYPE_CLASS_TEXT|TYPE_TEXT_VARIATION_WEB_PASSWORD:
+                    inputType = TYPE_CLASS_TEXT|TYPE_TEXT_VARIATION_PASSWORD
+                            | (inputType&(~TYPE_MASK_FLAGS));
+                    break;
+            }
+        }
+    }
+
     /**
      * Write debug output of this object.
      */

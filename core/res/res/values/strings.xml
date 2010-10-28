@@ -2326,6 +2326,9 @@
     <!-- Long label for a button on a full-screen input method for the "Done" action. -->
     <string name="ime_action_done">Done</string>
 
+    <!-- [CHAR LIMIT=6] Long label for a button on a full-screen input method for the "Previous" action. -->
+    <string name="ime_action_previous">Prev</string>
+
     <!-- Long label for a button on a full-screen input method for an unknown action. -->
     <string name="ime_action_default">Execute</string>
 

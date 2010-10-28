@@ -3229,7 +3229,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * for this text view.  The default implementation will call your action
      * listener supplied to {@link #setOnEditorActionListener}, or perform
      * a standard operation for {@link EditorInfo#IME_ACTION_NEXT
-     * EditorInfo.IME_ACTION_NEXT} or {@link EditorInfo#IME_ACTION_DONE
+     * EditorInfo.IME_ACTION_NEXT}, {@link EditorInfo#IME_ACTION_PREVIOUS
+     * EditorInfo.IME_ACTION_PREVIOUS}, or {@link EditorInfo#IME_ACTION_DONE
      * EditorInfo.IME_ACTION_DONE}.
      * 
      * <p>For backwards compatibility, if no IME options have been set and the
@@ -3266,6 +3267,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 return;
                 
+            } else if (actionCode == EditorInfo.IME_ACTION_PREVIOUS) {
+                View v = focusSearch(FOCUS_UP);
+                if (v != null) {
+                    if (!v.requestFocus(FOCUS_UP)) {
+                        throw new IllegalStateException("focus search returned a view " +
+                                "that wasn't able to take focus!");
+                    }
+                }
+                return;
+
             } else if (actionCode == EditorInfo.IME_ACTION_DONE) {
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null) {
@@ -4680,9 +4691,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 outAttrs.imeOptions = EditorInfo.IME_NULL;
             }
+            if (focusSearch(FOCUS_DOWN) != null) {
+                outAttrs.imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
+            }
+            if (focusSearch(FOCUS_UP) != null) {
+                outAttrs.imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_PREVIOUS;
+            }
             if ((outAttrs.imeOptions&EditorInfo.IME_MASK_ACTION)
                     == EditorInfo.IME_ACTION_UNSPECIFIED) {
-                if (focusSearch(FOCUS_DOWN) != null) {
+                if ((outAttrs.imeOptions&EditorInfo.IME_FLAG_NAVIGATE_NEXT) != 0) {
                     // An action has not been set, but the enter key will move to
                     // the next focus, so set the action to that.
                     outAttrs.imeOptions |= EditorInfo.IME_ACTION_NEXT;
