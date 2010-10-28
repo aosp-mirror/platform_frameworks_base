@@ -273,6 +273,11 @@ public final class CookieManager {
      * @param accept TRUE if accept cookie
      */
     public synchronized void setAcceptCookie(boolean accept) {
+        if (useChromiumHttpStack()) {
+            nativeSetAcceptCookie(accept);
+            return;
+        }
+
         mAcceptCookie = accept;
     }
 
@@ -281,6 +286,10 @@ public final class CookieManager {
      * @return TRUE if accept cookie
      */
     public synchronized boolean acceptCookie() {
+        if (useChromiumHttpStack()) {
+            return nativeAcceptCookie();
+        }
+
         return mAcceptCookie;
     }
 
@@ -418,6 +427,10 @@ public final class CookieManager {
      * @return The cookies in the format of NAME=VALUE [; NAME=VALUE]
      */
     public String getCookie(String url) {
+        if (useChromiumHttpStack()) {
+            return nativeGetCookie(url);
+        }
+
         WebAddress uri;
         try {
             uri = new WebAddress(url);
@@ -1035,5 +1048,8 @@ public final class CookieManager {
 
     // Native functions
     private static native boolean nativeUseChromiumHttpStack();
+    private static native boolean nativeAcceptCookie();
+    private static native String nativeGetCookie(String url);
     private static native void nativeRemoveAllCookie();
+    private static native void nativeSetAcceptCookie(boolean accept);
 }

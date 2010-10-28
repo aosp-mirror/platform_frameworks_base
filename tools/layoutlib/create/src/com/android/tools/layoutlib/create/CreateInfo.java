@@ -16,6 +16,8 @@
 
 package com.android.tools.layoutlib.create;
 
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+
 /**
  * Describes the work to be done by {@link AsmGenerator}.
  */
@@ -83,7 +85,9 @@ public final class CreateInfo implements ICreateInfo {
             OverrideMethod.class,
             MethodListener.class,
             MethodAdapter.class,
-            CreateInfo.class
+            ICreateInfo.class,
+            CreateInfo.class,
+            LayoutlibDelegate.class
         };
 
     /**
@@ -99,8 +103,7 @@ public final class CreateInfo implements ICreateInfo {
      * The list of classes on which to delegate all native methods.
      */
     private final static String[] DELEGATE_CLASS_NATIVES = new String[] {
-        // TODO: comment out once DelegateClass is working
-        // "android.graphics.Paint"
+        "android.graphics.Matrix",
     };
 
     /**
@@ -126,7 +129,6 @@ public final class CreateInfo implements ICreateInfo {
             "android.graphics.ComposeShader",       "android.graphics._Original_ComposeShader",
             "android.graphics.DashPathEffect",       "android.graphics._Original_DashPathEffect",
             "android.graphics.LinearGradient",      "android.graphics._Original_LinearGradient",
-            "android.graphics.Matrix",              "android.graphics._Original_Matrix",
             "android.graphics.Paint",               "android.graphics._Original_Paint",
             "android.graphics.Path",                "android.graphics._Original_Path",
             "android.graphics.PorterDuffXfermode",  "android.graphics._Original_PorterDuffXfermode",

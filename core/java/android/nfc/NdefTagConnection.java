@@ -42,8 +42,8 @@ public class NdefTagConnection extends RawTagConnection {
      * Internal constructor, to be used by NfcAdapter
      * @hide
      */
-    /* package private */ NdefTagConnection(INfcAdapter service, NdefTag tag, String target) throws RemoteException {
-        super(service, tag);
+    /* package private */ NdefTagConnection(NfcAdapter adapter, NdefTag tag, String target) throws RemoteException {
+        super(adapter, tag);
         String[] targets = tag.getNdefTargets();
         int i;
 
@@ -63,8 +63,8 @@ public class NdefTagConnection extends RawTagConnection {
      * Internal constructor, to be used by NfcAdapter
      * @hide
      */
-    /* package private */ NdefTagConnection(INfcAdapter service, NdefTag tag) throws RemoteException {
-        this(service, tag, tag.getNdefTargets()[0]);
+    /* package private */ NdefTagConnection(NfcAdapter adapter, NdefTag tag) throws RemoteException {
+        this(adapter, tag, tag.getNdefTargets()[0]);
     }
 
     /**
@@ -97,7 +97,7 @@ public class NdefTagConnection extends RawTagConnection {
             msgArray[0] = msg;
             return msgArray;
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died");
+            attemptDeadServiceRecovery(e);
             return null;
         }
     }
@@ -134,7 +134,7 @@ public class NdefTagConnection extends RawTagConnection {
                     throw new IOException();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died");
+            attemptDeadServiceRecovery(e);
         }
     }
 
@@ -161,7 +161,7 @@ public class NdefTagConnection extends RawTagConnection {
                     throw new IOException();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died");
+            attemptDeadServiceRecovery(e);
             return false;
         }
     }
@@ -188,7 +188,7 @@ public class NdefTagConnection extends RawTagConnection {
             return result;
 
         } catch (RemoteException e) {
-            Log.e(TAG, "NFC service died");
+            attemptDeadServiceRecovery(e);
             return NDEF_MODE_UNKNOWN;
         }
     }

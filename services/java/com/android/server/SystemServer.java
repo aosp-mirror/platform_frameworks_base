@@ -170,12 +170,12 @@ class ServerThread extends Thread {
             Slog.i(TAG, "System Content Providers");
             ActivityManagerService.installSystemProviders();
 
-            Slog.i(TAG, "Battery Service");
-            battery = new BatteryService(context);
-            ServiceManager.addService("battery", battery);
-
             Slog.i(TAG, "Lights Service");
             lights = new LightsService(context);
+
+            Slog.i(TAG, "Battery Service");
+            battery = new BatteryService(context, lights);
+            ServiceManager.addService("battery", battery);
 
             Slog.i(TAG, "Vibrator Service");
             ServiceManager.addService("vibrator", new VibratorService(context));

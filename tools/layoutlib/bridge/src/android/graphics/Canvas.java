@@ -18,13 +18,6 @@ package android.graphics;
 
 import com.android.layoutlib.api.ILayoutLog;
 
-import android.graphics.DrawFilter;
-import android.graphics.Picture;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Region;
-import android.graphics.Xfermode;
 import android.graphics.Paint.Align;
 import android.graphics.Paint.FontInfo;
 import android.graphics.Paint.Style;
@@ -41,8 +34,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Stack;
-
-import javax.microedition.khronos.opengles.GL;
 
 /**
  * Re-implementation of the Canvas, 100% in java on top of a BufferedImage.
@@ -509,7 +500,7 @@ public class Canvas extends _Original_Canvas {
             // get the Graphics2D current matrix
             AffineTransform currentTx = g.getTransform();
             // get the AffineTransform from the matrix
-            AffineTransform matrixTx = matrix.getTransform();
+            AffineTransform matrixTx = Matrix_Delegate.getAffineTransform(matrix);
 
             // combine them so that the matrix is applied after.
             currentTx.preConcatenate(matrixTx);
@@ -969,9 +960,9 @@ public class Canvas extends _Original_Canvas {
         Graphics2D g = getGraphics2d();
 
         // and apply the matrix
-        g.setTransform(matrix.getTransform());
+        g.setTransform(Matrix_Delegate.getAffineTransform(matrix));
 
-        if (mLogger != null && matrix.hasPerspective()) {
+        if (mLogger != null && Matrix_Delegate.hasPerspective(matrix)) {
             mLogger.warning("android.graphics.Canvas#setMatrix(android.graphics.Matrix) only supports affine transformations in the Layout Editor.");
         }
     }
@@ -987,7 +978,7 @@ public class Canvas extends _Original_Canvas {
         // get its current matrix
         AffineTransform currentTx = g.getTransform();
         // get the AffineTransform of the given matrix
-        AffineTransform matrixTx = matrix.getTransform();
+        AffineTransform matrixTx = Matrix_Delegate.getAffineTransform(matrix);
 
         // combine them so that the given matrix is applied after.
         currentTx.preConcatenate(matrixTx);

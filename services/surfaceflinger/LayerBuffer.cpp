@@ -676,8 +676,8 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
                 overlay_dev->setPosition(overlay_dev, mOverlay, x,y,w,h);
                 // we need to combine the layer orientation and the
                 // user-requested orientation.
-                Transform finalTransform = Transform(mOrientation) *
-                        Transform(mLayer.getOrientation());
+                Transform finalTransform(Transform(mLayer.getOrientation()) *
+                        Transform(mOrientation));
                 overlay_dev->setParameter(overlay_dev, mOverlay,
                         OVERLAY_TRANSFORM, finalTransform.getOrientation());
                 overlay_dev->commit(overlay_dev, mOverlay);

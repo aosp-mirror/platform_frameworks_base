@@ -18,6 +18,7 @@ package com.android.internal.view;
 
 import android.os.ResultReceiver;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.IInputContext;
@@ -54,6 +55,7 @@ interface IInputMethodManager {
     void hideMySoftInput(in IBinder token, int flags);
     void showMySoftInput(in IBinder token, int flags);
     void updateStatusIcon(in IBinder token, String packageName, int iconId);
+    InputMethodSubtype getCurrentInputMethodSubtype();
     
     boolean setInputMethodEnabled(String id, boolean enabled);
 }

@@ -536,7 +536,14 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             Log.d(TAG, "onAttachedToWindow reattach =" + mDetached);
         }
         if (mDetached && (mRenderer != null)) {
+            int renderMode = RENDERMODE_CONTINUOUSLY;
+            if (mGLThread != null) {
+                renderMode = mGLThread.getRenderMode();
+            }
             mGLThread = new GLThread(mRenderer);
+            if (renderMode != RENDERMODE_CONTINUOUSLY) {
+                mGLThread.setRenderMode(renderMode);
+            }
             mGLThread.start();
         }
         mDetached = false;

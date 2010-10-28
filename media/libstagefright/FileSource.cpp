@@ -21,7 +21,7 @@ namespace android {
 
 FileSource::FileSource(const char *filename)
     : mFile(fopen(filename, "rb")),
-      mFd(fileno(mFile)),
+      mFd(mFile == NULL ? -1 : fileno(mFile)),
       mOffset(0),
       mLength(-1),
       mDecryptHandle(NULL),

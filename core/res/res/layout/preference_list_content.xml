@@ -21,7 +21,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:background="@android:color/transparent">
 
     <LinearLayout
         android:orientation="horizontal"
@@ -34,6 +35,10 @@
             android:orientation="vertical"
             android:layout_width="0px"
             android:layout_height="match_parent"
+            android:layout_marginLeft="32dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="32dp"
             android:layout_weight="10">
 
             <ListView android:id="@android:id/list"
@@ -41,6 +46,9 @@
                 android:layout_height="0px"
                 android:layout_weight="1"
                 android:drawSelectorOnTop="false"
+                android:background="#40404040"
+                android:cacheColorHint="@android:color/transparent"
+                android:listPreferredItemHeight="48dp"
                 android:scrollbarAlwaysDrawVerticalTrack="true" />
 
             <FrameLayout android:id="@+id/list_footer"
@@ -53,7 +61,12 @@
         <FrameLayout android:id="@+id/prefs"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
-                android:layout_weight="33"
+                android:layout_weight="25"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="#60202040"
                 android:visibility="gone" />
     </LinearLayout>
 

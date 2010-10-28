@@ -6047,7 +6047,7 @@ public class WebView extends AbsoluteLayout
     }
 
     private void doMotionUp(int contentX, int contentY) {
-        if (mLogEvent && nativeMotionUp(contentX, contentY, mNavSlop)) {
+        if (nativeMotionUp(contentX, contentY, mNavSlop) && mLogEvent) {
             EventLog.writeEvent(EventLogTags.BROWSER_SNAP_CENTER);
         }
         if (nativeHasCursorNode() && !nativeCursorIsTextInput()) {

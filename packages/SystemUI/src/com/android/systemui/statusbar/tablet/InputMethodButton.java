@@ -17,25 +17,38 @@
 package com.android.systemui.statusbar.tablet;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
+import android.provider.Settings;
+import android.util.Log;
 import android.util.Slog;
-import android.view.View;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.android.server.InputMethodManagerService;
+import com.android.systemui.R;
+
+import java.util.List;
 
 public class InputMethodButton extends ImageView {
 
+    private static final String  TAG = "StatusBar/InputMethodButton";
+
+    private boolean mKeyboardShown;
+    private ImageView mIcon;
     // other services we wish to talk to
-    InputMethodManager mImm;
+    private InputMethodManager mImm;
 
     public InputMethodButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        mKeyboardShown = false;
         // IME hookup
         mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        
         // TODO: read the current icon & visibility state directly from the service
 
         // TODO: register for notifications about changes to visibility & subtype from service
@@ -47,5 +60,80 @@ public class InputMethodButton extends ImageView {
             }
         });
     }
-}
 
+    protected void onAttachedToWindow() {
+        mIcon = (ImageView) findViewById(R.id.imeButton);
+        refreshStatusIcon(mKeyboardShown);
+    }
+
+    private InputMethodInfo getCurrentInputMethodInfo() {
+        String curInputMethodId = Settings.Secure.getString(getContext()
+                .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
+        if (curInputMethodId != null) {
+            for (InputMethodInfo imi: imis) {
+                if (imi.getId().equals(curInputMethodId)) {
+                    return imi;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Drawable getCurrentSubtypeIcon() {
+        final PackageManager pm = getContext().getPackageManager();
+        InputMethodInfo imi = getCurrentInputMethodInfo();
+        InputMethodSubtype subtype = mImm.getCurrentInputMethodSubtype();
+        Drawable icon = null;
+        if (imi != null) {
+            if (subtype != null) {
+                return pm.getDrawable(imi.getPackageName(), subtype.getIconResId(),
+                        imi.getServiceInfo().applicationInfo);
+            } else if (imi.getSubtypes().size() > 0) {
+                return pm.getDrawable(imi.getPackageName(),
+                        imi.getSubtypes().get(0).getIconResId(),
+                        imi.getServiceInfo().applicationInfo);
+            } else {
+                try {
+                    return pm.getApplicationInfo(imi.getPackageName(), 0).loadIcon(pm);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.w(TAG, "Current IME cann't be found: " + imi.getPackageName());
+                }
+            }
+        }
+        return null;
+    }
+
+    private void refreshStatusIcon(boolean keyboardShown) {
+        if (!keyboardShown) {
+            setVisibility(View.INVISIBLE);
+            return;
+        } else {
+            setVisibility(View.VISIBLE);
+        }
+        Drawable icon = getCurrentSubtypeIcon();
+        if (icon == null) {
+            mIcon.setImageResource(R.drawable.ic_sysbar_ime_default);
+        } else {
+            mIcon.setImageDrawable(icon);
+        }
+    }
+
+    private void postRefreshStatusIcon() {
+        getHandler().post(new Runnable() {
+            public void run() {
+                refreshStatusIcon(mKeyboardShown);
+            }
+        });
+    }
+
+    public void showSoftInput() {
+        mKeyboardShown = true;
+        postRefreshStatusIcon();
+    }
+
+    public void hideSoftInput() {
+        mKeyboardShown = false;
+        postRefreshStatusIcon();
+    }
+}

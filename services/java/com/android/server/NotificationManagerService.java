@@ -93,7 +93,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     private WorkerHandler mHandler;
     private StatusBarManagerService mStatusBar;
     private LightsService mLightsService;
-    private LightsService.Light mBatteryLight;
     private LightsService.Light mNotificationLight;
     private LightsService.Light mAttentionLight;
 
@@ -128,17 +127,7 @@ public class NotificationManagerService extends INotificationManager.Stub
     private ArrayList<ToastRecord> mToastQueue;
 
     private ArrayList<NotificationRecord> mLights = new ArrayList<NotificationRecord>();
-
-    private boolean mBatteryCharging;
-    private boolean mBatteryLow;
-    private boolean mBatteryFull;
     private NotificationRecord mLedNotification;
-
-    private static int mBatteryLowARGB;
-    private static int mBatteryMediumARGB;
-    private static int mBatteryFullARGB;
-    private static int mBatteryLedOn;
-    private static int mBatteryLedOff;
 
     private static String idDebugString(Context baseContext, String packageName, int id) {
         Context c = null;
@@ -342,22 +331,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
             boolean queryRestart = false;
             
-            if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                boolean batteryCharging = (intent.getIntExtra("plugged", 0) != 0);
-                int level = intent.getIntExtra("level", -1);
-                boolean batteryLow = (level >= 0 && level <= Power.LOW_BATTERY_THRESHOLD);
-                int status = intent.getIntExtra("status", BatteryManager.BATTERY_STATUS_UNKNOWN);
-                boolean batteryFull = (status == BatteryManager.BATTERY_STATUS_FULL || level >= 90);
-
-                if (batteryCharging != mBatteryCharging ||
-                        batteryLow != mBatteryLow ||
-                        batteryFull != mBatteryFull) {
-                    mBatteryCharging = batteryCharging;
-                    mBatteryLow = batteryLow;
-                    mBatteryFull = batteryFull;
-                    updateLights();
-                }
-            } else if (action.equals(Usb.ACTION_USB_STATE)) {
+            if (action.equals(Usb.ACTION_USB_STATE)) {
                 Bundle extras = intent.getExtras();
                 boolean usbConnected = extras.getBoolean(Usb.USB_CONNECTED);
                 boolean adbEnabled = (Usb.USB_FUNCTION_ENABLED.equals(
@@ -435,7 +409,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     {
         super();
         mContext = context;
-        mLightsService = lights;
         mAm = ActivityManagerNative.getDefault();
         mSound = new NotificationPlayer(TAG);
         mSound.setUsesWakeLock(context);
@@ -445,7 +418,6 @@ public class NotificationManagerService extends INotificationManager.Stub
         mStatusBar = statusBar;
         statusBar.setNotificationCallbacks(mNotificationCallbacks);
 
-        mBatteryLight = lights.getLight(LightsService.LIGHT_ID_BATTERY);
         mNotificationLight = lights.getLight(LightsService.LIGHT_ID_NOTIFICATIONS);
         mAttentionLight = lights.getLight(LightsService.LIGHT_ID_ATTENTION);
 
@@ -456,17 +428,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                 com.android.internal.R.integer.config_defaultNotificationLedOn);
         mDefaultNotificationLedOff = resources.getInteger(
                 com.android.internal.R.integer.config_defaultNotificationLedOff);
-
-        mBatteryLowARGB = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_notificationsBatteryLowARGB);
-        mBatteryMediumARGB = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_notificationsBatteryMediumARGB);
-        mBatteryFullARGB = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_notificationsBatteryFullARGB);
-        mBatteryLedOn = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_notificationsBatteryLedOn);
-        mBatteryLedOff = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_notificationsBatteryLedOff);
 
         // Don't start allowing notifications until the setup wizard has run once.
         // After that, including subsequent boots, init with notifications turned on.
@@ -479,7 +440,6 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         // register for battery changed notifications
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Usb.ACTION_USB_STATE);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -1076,25 +1036,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     // lock on mNotificationList
     private void updateLightsLocked()
     {
-        // Battery low always shows, other states only show if charging.
-        if (mBatteryLow) {
-            if (mBatteryCharging) {
-                mBatteryLight.setColor(mBatteryLowARGB);
-            } else {
-                // Flash when battery is low and not charging
-                mBatteryLight.setFlashing(mBatteryLowARGB, LightsService.LIGHT_FLASH_TIMED,
-                        mBatteryLedOn, mBatteryLedOff);
-            }
-        } else if (mBatteryCharging) {
-            if (mBatteryFull) {
-                mBatteryLight.setColor(mBatteryFullARGB);
-            } else {
-                mBatteryLight.setColor(mBatteryMediumARGB);
-            }
-        } else {
-            mBatteryLight.turnOff();
-        }
-
         // clear pending pulse notification if screen is on
         if (mScreenOn || mLedNotification == null) {
             mPendingPulseNotification = false;

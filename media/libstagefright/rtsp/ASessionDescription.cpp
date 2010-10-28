@@ -53,7 +53,6 @@ bool ASessionDescription::parse(const void *data, size_t size) {
     mFormats.push(AString("[root]"));
 
     AString desc((const char *)data, size);
-    LOGI("%s", desc.c_str());
 
     size_t i = 0;
     for (;;) {
@@ -75,6 +74,8 @@ bool ASessionDescription::parse(const void *data, size_t size) {
         if (line.size() < 2 || line.c_str()[1] != '=') {
             return false;
         }
+
+        LOGI("%s", line.c_str());
 
         switch (line.c_str()[0]) {
             case 'v':

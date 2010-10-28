@@ -61,10 +61,36 @@ static const char* GLEnumToString(GLenum e) {
     return NULL;
 }
 
+static const char* GLbooleanToString(GLboolean arg) {
+    return arg ? "GL_TRUE" : "GL_FALSE";
+}
+
 static GLenumString g_bitfieldNames[] = {
     {0x00004000, "GL_COLOR_BUFFER_BIT"},
     {0x00000400, "GL_STENCIL_BUFFER_BIT"},
     {0x00000100, "GL_DEPTH_BUFFER_BIT"}
+};
+
+class StringBuilder {
+    static const int lineSize = 500;
+    char line[lineSize];
+    int line_index;
+public:
+    StringBuilder() {
+        line_index = 0;
+        line[0] = '\0';
+    }
+    void append(const char* fmt, ...) {
+        va_list argp;
+        va_start(argp, fmt);
+        line_index += vsnprintf(line + line_index, lineSize-line_index, fmt, argp);
+        va_end(argp);
+    }
+    const char* getString() {
+        line_index = 0;
+        line[lineSize-1] = '\0';
+        return line;
+    }
 };
 
 
@@ -98,10 +124,62 @@ static void TraceGLShaderSource(GLuint shader, GLsizei count,
     }
 }
 
+static void TraceValue(int elementCount, char type,
+        GLsizei chunkCount, GLsizei chunkSize, const void* value) {
+    StringBuilder stringBuilder;
+    GLsizei count = chunkCount * chunkSize;
+    bool isFloat = type == 'f';
+    const char* typeString = isFloat ? "GLfloat" : "GLint";
+    LOGD("const %s value[] = {", typeString);
+    for (GLsizei i = 0; i < count; i++) {
+        StringBuilder builder;
+        builder.append("    ");
+        for (int e = 0; e < elementCount; e++) {
+            const char* comma = ", ";
+            if (e == elementCount-1) {
+                if (i == count - 1) {
+                    comma = "";
+                } else {
+                    comma = ",";
+                }
+            }
+            if (isFloat) {
+                builder.append("%g%s", * (GLfloat*) value, comma);
+                value = (void*) (((GLfloat*) value) + 1);
+            } else {
+                builder.append("%d%s", * (GLint*) value, comma);
+                value = (void*) (((GLint*) value) + 1);
+            }
+        }
+        LOGD("%s", builder.getString());
+        if (chunkSize > 1 && i < count-1
+                && (i % chunkSize) == (chunkSize-1)) {
+            LOGD("%s", ""); // Print a blank line.
+        }
+    }
+    LOGD("};");
+}
+
+static void TraceUniformv(int elementCount, char type,
+        GLuint location, GLsizei count, const void* value) {
+    TraceValue(elementCount, type, count, 1, value);
+    LOGD("glUniform%d%c(%u, %u, value);", elementCount, type, location, count);
+}
+
+static void TraceUniformMatrix(int matrixSideLength,
+        GLuint location, GLsizei count, GLboolean transpose, const void* value) {
+    TraceValue(matrixSideLength, 'f', count, matrixSideLength, value);
+    LOGD("glUniformMatrix%dfv(%u, %u, %s, value);", matrixSideLength, location, count,
+            GLbooleanToString(transpose));
+}
+
 static void TraceGL(const char* name, int numArgs, ...) {
     va_list argp;
     va_start(argp, numArgs);
-    if (strcmp(name, "glShaderSource") == 0) {
+    int nameLen = strlen(name);
+
+    // glShaderSource
+    if (nameLen == 14 && strcmp(name, "glShaderSource") == 0) {
         va_arg(argp, const char*);
         GLuint shader = va_arg(argp, GLuint);
         va_arg(argp, const char*);
@@ -110,26 +188,57 @@ static void TraceGL(const char* name, int numArgs, ...) {
         const GLchar** string = (const GLchar**) va_arg(argp, void*);
         va_arg(argp, const char*);
         const GLint* length = (const GLint*) va_arg(argp, void*);
-        TraceGLShaderSource(shader, count, string, length);
         va_end(argp);
+        TraceGLShaderSource(shader, count, string, length);
         return;
     }
-    const int lineSize = 500;
-    char line[lineSize];
-    int line_index = 0;
-    #define APPEND(...) \
-        line_index += snprintf(line + line_index, lineSize-line_index, __VA_ARGS__);
-    APPEND("%s(", name);
+
+    // glUniformXXv
+
+    if (nameLen == 12 && strncmp(name, "glUniform", 9) == 0 && name[11] == 'v') {
+        int elementCount = name[9] - '0'; // 1..4
+        char type = name[10]; // 'f' or 'i'
+        va_arg(argp, const char*);
+        GLuint location = va_arg(argp, GLuint);
+        va_arg(argp, const char*);
+        GLsizei count = va_arg(argp, GLsizei);
+        va_arg(argp, const char*);
+        const void* value = (const void*) va_arg(argp, void*);
+        va_end(argp);
+        TraceUniformv(elementCount, type, location, count, value);
+        return;
+    }
+
+    // glUniformMatrixXfv
+
+    if (nameLen == 18 && strncmp(name, "glUniformMatrix", 15) == 0
+            && name[16] == 'f' && name[17] == 'v') {
+        int matrixSideLength = name[15] - '0'; // 2..4
+        va_arg(argp, const char*);
+        GLuint location = va_arg(argp, GLuint);
+        va_arg(argp, const char*);
+        GLsizei count = va_arg(argp, GLsizei);
+        va_arg(argp, const char*);
+        GLboolean transpose = (GLboolean) va_arg(argp, int);
+        va_arg(argp, const char*);
+        const void* value = (const void*) va_arg(argp, void*);
+        va_end(argp);
+        TraceUniformMatrix(matrixSideLength, location, count, transpose, value);
+        return;
+    }
+
+    StringBuilder builder;
+    builder.append("%s(", name);
     for (int i = 0; i < numArgs; i++) {
         if (i > 0) {
-            APPEND(", ");
+            builder.append(", ");
         }
         const char* type = va_arg(argp, const char*);
         bool isPtr = type[strlen(type)-1] == '*'
             || strcmp(type, "GLeglImageOES") == 0;
         if (isPtr) {
             const void* arg = va_arg(argp, const void*);
-            APPEND("(%s) 0x%08x", type, (size_t) arg);
+            builder.append("(%s) 0x%08x", type, (size_t) arg);
         } else if (strcmp(type, "GLbitfield") == 0) {
             size_t arg = va_arg(argp, size_t);
             bool first = true;
@@ -139,38 +248,38 @@ static void TraceGL(const char* name, int numArgs, ...) {
                     if (first) {
                         first = false;
                     } else {
-                        APPEND(" | ");
+                        builder.append(" | ");
                     }
-                    APPEND("%s", b->s);
+                    builder.append("%s", b->s);
                     arg &= ~b->e;
                 }
             }
             if (first || arg != 0) {
                 if (!first) {
-                    APPEND(" | ");
+                    builder.append(" | ");
                 }
-                APPEND("0x%08x", arg);
+                builder.append("0x%08x", arg);
             }
         } else if (strcmp(type, "GLboolean") == 0) {
-            int arg = va_arg(argp, int);
-            APPEND("%s", arg ? "GL_TRUE" : "GL_FALSE");
+            GLboolean arg = va_arg(argp, int);
+            builder.append("%s", GLbooleanToString(arg));
         } else if (strcmp(type, "GLclampf") == 0) {
             double arg = va_arg(argp, double);
-            APPEND("%g", arg);
+            builder.append("%g", arg);
         } else if (strcmp(type, "GLenum") == 0) {
             GLenum arg = va_arg(argp, int);
             const char* s = GLEnumToString(arg);
             if (s) {
-                APPEND("%s", s);
+                builder.append("%s", s);
             } else {
-                APPEND("0x%x", arg);
+                builder.append("0x%x", arg);
             }
         } else if (strcmp(type, "GLfixed") == 0) {
             int arg = va_arg(argp, int);
-            APPEND("0x%08x", arg);
+            builder.append("0x%08x", arg);
         } else if (strcmp(type, "GLfloat") == 0) {
             double arg = va_arg(argp, double);
-            APPEND("%g", arg);
+            builder.append("%g", arg);
         } else if (strcmp(type, "GLint") == 0) {
             int arg = va_arg(argp, int);
             const char* s = NULL;
@@ -178,30 +287,29 @@ static void TraceGL(const char* name, int numArgs, ...) {
                 s = GLEnumToString(arg);
             }
             if (s) {
-                APPEND("%s", s);
+                builder.append("%s", s);
             } else {
-                APPEND("%d", arg);
+                builder.append("%d", arg);
             }
         } else if (strcmp(type, "GLintptr") == 0) {
             int arg = va_arg(argp, unsigned int);
-            APPEND("%u", arg);
+            builder.append("%u", arg);
         } else if (strcmp(type, "GLsizei") == 0) {
             int arg = va_arg(argp, size_t);
-            APPEND("%u", arg);
+            builder.append("%u", arg);
         } else if (strcmp(type, "GLsizeiptr") == 0) {
             int arg = va_arg(argp, size_t);
-            APPEND("%u", arg);
+            builder.append("%u", arg);
         } else if (strcmp(type, "GLuint") == 0) {
             int arg = va_arg(argp, unsigned int);
-            APPEND("%u", arg);
+            builder.append("%u", arg);
         } else {
-            APPEND("/* ??? %s */", type);
+            builder.append("/* ??? %s */", type);
             break;
         }
     }
-    APPEND(");");
-    line[lineSize-1] = '\0';
-    LOGD("%s", line);
+    builder.append(");");
+    LOGD("%s", builder.getString());
     va_end(argp);
 }
 

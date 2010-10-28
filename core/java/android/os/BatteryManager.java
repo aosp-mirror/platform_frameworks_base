@@ -87,7 +87,7 @@ public class BatteryManager {
 
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
-     * Boolean value set to true if an unsupported charger is attached
+     * Int value set to nonzero if an unsupported charger is attached
      * to the device.
      * {@hide}
      */

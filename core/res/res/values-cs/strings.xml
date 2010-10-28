@@ -135,6 +135,8 @@
     <string name="power_off" msgid="4266614107412865048">"Vypnout"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Vypínání..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Váš telefon bude vypnut."</string>
+    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
+    <skip />
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nejnovější"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Žádné nedávno použité aplikace."</string>
     <string name="global_actions" msgid="2406416831541615258">"Možnosti telefonu"</string>
@@ -169,7 +171,8 @@
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Nástroje pro vývojáře"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funkce pouze pro vývojáře aplikací"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložiště"</string>
-    <string name="permgroupdesc_storage" msgid="9203302214915355774">"Přístup ke kartě SD."</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Přístup do úložiště USB."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Přístup ke kartě SD."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázání či změny stavového řádku"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Umožňuje aplikaci zakázat stavový řádek nebo přidat či odebrat systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"stavový řádek"</string>
@@ -266,10 +269,8 @@
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Umožňuje aplikaci uvolnit paměť telefonu smazáním souborů v adresáři mezipaměti aplikace. Přístup je velmi omezený, většinou pouze pro systémové procesy."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Přesun zdrojů aplikace"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Umožňuje aplikaci přesunout své zdroje z interní paměti na externí médium a opačně."</string>
-    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
-    <skip />
-    <!-- no translation found for permdesc_readLogs (8896449437464867766) -->
-    <skip />
+    <string name="permlab_readLogs" msgid="6615778543198967614">"číst citlivá data v protokolech"</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto nastavení aplikaci umožní získat obecné informace o činnostech s telefonem, které by mohly obsahovat osobní či soukromé informace."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat pouze výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"povolení či zakázání komponent aplikací"</string>
@@ -322,16 +323,16 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Umožňuje aplikaci připojit či odpojit souborové systémy ve vyměnitelných úložištích."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formátovat externí úložiště"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Umožňuje aplikaci formátovat vyměnitelná úložiště."</string>
-    <string name="permlab_asec_access" msgid="1070364079249834666">"získat informace o zabezpečeném úložišti"</string>
-    <string name="permdesc_asec_access" msgid="7691616292170590244">"Umožňuje aplikaci získat informace o zabezpečeném úložišti."</string>
-    <string name="permlab_asec_create" msgid="7312078032326928899">"vytvořit zabezpečené úložiště"</string>
-    <string name="permdesc_asec_create" msgid="7041802322759014035">"Umožňuje aplikaci vytvořit zabezpečené úložiště."</string>
-    <string name="permlab_asec_destroy" msgid="7787322878955261006">"zničit zabezpečené úložiště"</string>
-    <string name="permdesc_asec_destroy" msgid="5740754114967893169">"Umožňuje aplikaci zničit zabezpečené úložiště."</string>
-    <string name="permlab_asec_mount_unmount" msgid="7517449694667828592">"připojit nebo odpojit zabezpečené úložiště"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5438078121718738625">"Umožňuje aplikaci připojit nebo odpojit zabezpečené úložiště."</string>
-    <string name="permlab_asec_rename" msgid="5685344390439934495">"přejmenovat zabezpečené úložiště"</string>
-    <string name="permdesc_asec_rename" msgid="1387881770708872470">"Umožňuje aplikaci přejmenovat zabezpečeného úložiště."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"získat informace o interním úložišti"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Umožňuje aplikaci získat informace o interním úložišti."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"vytvořit interní úložiště"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Umožňuje aplikaci vytvořit interní úložiště."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"trvale smazat interní úložiště"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Umožňuje aplikaci trvale smazat interní úložiště."</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"připojit nebo odpojit interní úložiště"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Umožňuje aplikaci připojit nebo odpojit interní úložiště."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"přejmenovat interní úložiště"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Umožňuje aplikaci přejmenovat interní úložiště."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"ovládání vibrací"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ovládání kontrolky"</string>
@@ -404,6 +405,8 @@
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"vytvoření připojení Bluetooth"</string>
     <string name="permdesc_bluetooth" msgid="762515380679392945">"Umožňuje aplikaci zobrazit konfiguraci místního telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"ovládat technologii NFC"</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Umožňuje aplikaci komunikovat se štítky, kartami a čtečkami s podporou technologie NFC."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"vypnutí zámku kláves"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Umožňuje aplikaci vypnout zámek kláves a související zabezpečení heslem. Příkladem oprávněného použití této funkce je vypnutí zámku klávesnice při příchozím hovoru a jeho opětovné zapnutí po skončení hovoru."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čtení nastavení synchronizace"</string>
@@ -420,23 +423,26 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Umožní aplikaci číst soukromá slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"zápis do slovníku definovaného uživatelem"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Umožní aplikaci zapisovat nová slova do uživatelského slovníku."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"změna/smazání obsahu karty SD"</string>
-    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Umožní aplikaci zápis na kartu SD."</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"upravit/smazat obsah úlož. USB"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"změna/smazání obsahu karty SD"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Umožní zápis do úložiště USB."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Umožní aplikaci zápis na kartu SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"přistupovat do souborového systému mezipaměti"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Umožňuje aplikaci číst a zapisovat do souborového systému mezipaměti."</string>
-    <string name="policylab_limitPassword" msgid="4307861496302850201">"Omezení hesla"</string>
-    <string name="policydesc_limitPassword" msgid="1719877245692318299">"Omezuje typ hesel, která lze použít."</string>
-    <string name="policylab_watchLogin" msgid="7374780712664285321">"Sledování pokusů o přihlášení"</string>
-    <string name="policydesc_watchLogin" msgid="1961251179624843483">"Sleduje nezdařené pokusy o přihlášení do zařízení a umožňuje provedení určité akce."</string>
-    <string name="policylab_resetPassword" msgid="9084772090797485420">"Obnovení hesla"</string>
-    <string name="policydesc_resetPassword" msgid="3332167600331799991">"Vynutí nastavení hesla na novou hodnotu, kterou vám před přihlášením musí sdělit správce."</string>
-    <string name="policylab_forceLock" msgid="5760466025247634488">"Vynucení uzamčení"</string>
-    <string name="policydesc_forceLock" msgid="2819868664946089740">"Určuje, kdy dojde k uzamčení zařízení a bude požadováno opětovné zadání hesla."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"uskutečňovat a přijímat internetové hovory"</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Umožňuje aplikaci uskutečnit a přijímat internetové hovory pomocí služby SIP."</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Řídit délku hesel pro odemčení obrazovky a v nich používané znaky"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout telefon nebo odstranit veškerá data telefonu, pokud dojde k příliš mnoha neplatným pokusům o zadání hesla"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Změnit heslo pro odemknutí obrazovky"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Změnit heslo pro odemknutí obrazovky"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Uzamknout obrazovku"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Řídit, jak a kdy se obrazovka uzamkne"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazání všech dat"</string>
-    <string name="policydesc_wipeData" msgid="2314060933796396205">"Bez dalšího potvrzení obnoví výchozí nastavení z výroby a smaže všechna data."</string>
-    <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
-    <skip />
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Nastavte globální server proxy, který je používán, když jsou zásady aktivní. Platný globální server proxy nastavuje pouze první správce zařízení."</string>
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"Bez upozornění smazat všechna data telefonu obnovením továrních dat"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastavit globální proxy server zařízení"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globální proxy server, který se bude používat, když jsou zásady aktivní. Aktuální globální proxy server nastavuje pouze první správce zařízení."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domů"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -530,14 +536,10 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Práce"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Jiné"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Vlastní"</string>
-    <!-- no translation found for sipAddressTypeCustom (2473580593111590945) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeHome (6093598181069359295) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeWork (6920725730797099047) -->
-    <skip />
-    <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
-    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Vlastní"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Plocha"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Práce"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Jiné"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Zadejte kód PIN"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Zadejte heslo pro odblokování"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Zadejte kód PIN pro odblokování"</string>
@@ -598,12 +600,13 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li na stránce zůstat."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
-    <!-- no translation found for autofill_this_form (8940110866775097494) -->
-    <skip />
+    <string name="autofill_this_form" msgid="8940110866775097494">"Automaticky vyplnit tento formulář"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
     <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data Prohlížeče."</string>
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"nastavit budík v budíku"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Dovoluje aplikaci nastavit budík v nainstalované aplikaci budíku. Některé budíkové aplikace nemusí tuto funkci implementovat."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Změnit oprávnění prohlížeče poskytovat informace o zeměpisné poloze"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Umožňuje aplikaci změnit oprávnění prohlížeče poskytovat informace o zeměpisné poloze. Škodlivé aplikace mohou toto nastavení použít k odesílání informací o umístění na libovolné webové stránky."</string>
     <string name="save_password_message" msgid="767344687139195790">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
@@ -750,12 +753,9 @@
     <string name="force_close" msgid="3653416315450806396">"Ukončit aplikaci"</string>
     <string name="report" msgid="4060218260984795706">"Nahlásit"</string>
     <string name="wait" msgid="7147118217226317732">"Počkat"</string>
-    <!-- no translation found for launch_warning_title (8323761616052121936) -->
-    <skip />
-    <!-- no translation found for launch_warning_replace (6202498949970281412) -->
-    <skip />
-    <!-- no translation found for launch_warning_original (188102023021668683) -->
-    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Aplikace přesměrována"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"Je spuštěna aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"Původně byla spuštěna aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="smv_application" msgid="295583804361236288">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Běží aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -802,23 +802,28 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Zobrazit vše"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Úložiště USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB připojeno"</string>
-    <string name="usb_storage_message" msgid="4796759646167247178">"Připojili jste svůj telefon k počítači pomocí USB. Chcete-li kopírovat soubory z počítače na kartu SD v zařízení Android či obráceně, vyberte následující tlačítko."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="115779324551502062">"Připojili jste telefon k počítači pomocí rozhraní USB. Chcete-li kopírovat soubory z počítače do úložiště USB zařízení Android či obráceně, vyberte následující tlačítko."</string>
+    <string name="usb_storage_message" product="default" msgid="4796759646167247178">"Připojili jste svůj telefon k počítači pomocí USB. Chcete-li kopírovat soubory z počítače na kartu SD v zařízení Android či obráceně, vyberte následující tlačítko."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"Zapnout úložiště USB"</string>
-    <string name="usb_storage_error_message" msgid="2534784751603345363">"Při používání vaší karty SD jako úložiště USB došlo k problému."</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Problém s použitím úložiště USB jako velkokapacitního úložiště."</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Problém s použitím karty SD jako velkokapacitního úložiště USB."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB připojeno"</string>
     <string name="usb_storage_notification_message" msgid="7380082404288219341">"Vyberte, chcete-li kopírovat soubory do nebo z počítače."</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Vypnout úložiště USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Vyberte, chcete-li vypnout úložiště USB."</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"Úložiště USB je používáno"</string>
-    <string name="usb_storage_stop_message" msgid="3613713396426604104">"Před vypnutím úložiště USB zkontrolujte, zda jste odpojili (vyjmuli) kartu SD zařízení Android z počítače."</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Před vypnutím úložiště USB zkontrolujte, zda jste úložiště USB zařízení Android odpojili z počítače."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Před vypnutím úložiště USB zkontrolujte, zda jste odpojili (vyjmuli) kartu SD zařízení Android z počítače."</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Vypnout úložiště USB"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Při vypínání úložiště USB došlo k problémům. Zkontrolujte, zda byl hostitel USB odpojen, a zkuste to znovu."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Zapnout úložiště USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Pokud zapnete úložiště USB, dojde k zastavení některých používaných aplikací. Tyto aplikace pravděpodobně nebudou k dispozici až do vypnutí úložiště USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Chyba operace na rozhraní USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="extmedia_format_title" msgid="8663247929551095854">"Formátovat kartu SD"</string>
-    <string name="extmedia_format_message" msgid="3621369962433523619">"Opravdu chcete kartu SD naformátovat? Všechna data na kartě budou ztracena."</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formátovat úložiště USB"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formátovat kartu SD"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Chcete úložiště USB zformátovat a tím smazat všechny soubory, které v něm jsou uloženy? Tuto akci nelze vrátit zpět."</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Opravdu chcete kartu SD naformátovat? Všechna data na kartě budou ztracena."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes rozhraní USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Vyberte, chcete-li zakázat ladění USB."</string>
@@ -826,18 +831,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidáti"</u></string>
-    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"Příprava karty SD"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Příprava úložiště USB"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Příprava karty SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Kontrola chyb."</string>
-    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Prázdná karta SD"</string>
-    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"Karta SD je prázdná nebo obsahuje nepodporovaný systém souborů."</string>
-    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Poškozená karta SD"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"Karta SD je poškozená. Bude pravděpodobně nutné ji přeformátovat."</string>
-    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"Karta SD byla neočekávaně odebrána"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Chcete-li zabránit ztrátě dat, kartu SD před odebráním odpojte."</string>
-    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"Kartu SD je možné bezpečně odebrat"</string>
-    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"Kartu SD lze bezpečně odebrat."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"Karta SD byla odstraněna"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"Karta SD byla odebrána. Vložte novou kartu."</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Prázdné úložiště USB"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Prázdná karta SD"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Úložiště USB je prázdné nebo obsahuje nepodporovaný systém souborů."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"Karta SD je prázdná nebo obsahuje nepodporovaný systém souborů."</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Úložiště USB je poškozeno"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Poškozená karta SD"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Úložiště USB je poškozené. Bude pravděpodobně nutné je přeformátovat."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Karta SD je poškozená. Bude pravděpodobně nutné ji přeformátovat."</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Úložiště USB nečekaně odebráno"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Karta SD byla neočekávaně odebrána"</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Před odebráním úložiště USB ho nejprve odpojte. Zabráníte tak ztrátě dat."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Chcete-li zabránit ztrátě dat, kartu SD před odebráním odpojte."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Úložiště USB lze odebrat"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Kartu SD je možné bezpečně odebrat"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Úložiště USB lze bezpečně odebrat."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Kartu SD lze bezpečně odebrat."</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Úložiště USB odebráno"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Karta SD byla odstraněna"</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Úložiště USB odebráno. Vložte nové médium."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Karta SD byla odebrána. Vložte novou kartu."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Nebyly nalezeny žádné odpovídající aktivity."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"aktualizovat statistiku použití součástí"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Umožňuje změnu shromážděných statistických údajů o použití součástí. Není určeno pro běžné aplikace."</string>
@@ -892,4 +908,23 @@
     <item quantity="one" msgid="8167147081136579439">"1 shoda"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
+    <!-- no translation found for action_mode_done (7217581640461922289) -->
+    <skip />
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Odpojování úložiště USB..."</string>
+    <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Odpojování karty SD..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Mazání úložiště USB..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Mazání karty SD..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Smazání úložiště USB se nezdařilo."</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"Smazání karty SD se nezdařilo."</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"Karta SD nebyla před odebráním odpojena."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Probíhá kontrola úložiště USB."</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"Probíhá kontrola karty SD."</string>
+    <string name="media_removed" msgid="7001526905057952097">"Karta SD byla odebrána."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Úložiště USB je momentálně používáno počítačem."</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"Karta SD je momentálně používána počítačem."</string>
+    <string name="media_unknown_state" msgid="729192782197290385">"Neznámý stav externího média."</string>
+    <!-- no translation found for share (1778686618230011964) -->
+    <skip />
+    <!-- no translation found for find (4808270900322985960) -->
+    <skip />
 </resources>

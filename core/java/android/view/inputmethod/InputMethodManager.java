@@ -33,6 +33,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewRoot;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.view.IInputConnectionWrapper;
@@ -1407,6 +1408,17 @@ public final class InputMethodManager {
                 mService.showInputMethodAndSubtypeEnablerFromClient(mClient, topId);
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
+            }
+        }
+    }
+
+    public InputMethodSubtype getCurrentInputMethodSubtype() {
+        synchronized (mH) {
+            try {
+                return mService.getCurrentInputMethodSubtype();
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return null;
             }
         }
     }

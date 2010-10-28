@@ -408,7 +408,7 @@
     <style name="Widget.TextView.ListSeparator">
         <item name="android:background">@android:drawable/dark_header_dither</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">25dip</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?textColorSecondary</item>
         <item name="android:textSize">14sp</item>

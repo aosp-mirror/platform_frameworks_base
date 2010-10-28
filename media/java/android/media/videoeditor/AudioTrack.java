@@ -48,6 +48,8 @@ public class AudioTrack {
 
     // The audio waveform filename
     private String mAudioWaveformFilename;
+    // The audio waveform data
+    private WaveformData mWaveformData;
 
     /**
      * An object of this type cannot be instantiated by using the default
@@ -103,6 +105,7 @@ public class AudioTrack {
 
         // The audio waveform file is generated later
         mAudioWaveformFilename = null;
+        mWaveformData = null;
     }
 
     /**
@@ -161,6 +164,11 @@ public class AudioTrack {
         mDuckedTrackVolume = duckedTrackVolume;
 
         mAudioWaveformFilename = audioWaveformFilename;
+        if (audioWaveformFilename != null) {
+            mWaveformData = new WaveformData(audioWaveformFilename);
+        } else {
+            mWaveformData = null;
+        }
     }
 
     /**
@@ -416,6 +424,7 @@ public class AudioTrack {
             throws IOException {
         // TODO: Set mAudioWaveformFilename at the end once the extract is
         // complete
+        mWaveformData = new WaveformData(mAudioWaveformFilename);
     }
 
     /**
@@ -431,8 +440,15 @@ public class AudioTrack {
      *
      * @return the name of the file, null if the file does not exist
      */
-    public String getAudioWaveformFilename() {
+    String getAudioWaveformFilename() {
         return mAudioWaveformFilename;
+    }
+
+    /**
+     * @return The waveform data
+     */
+    public WaveformData getWaveformData() {
+        return mWaveformData;
     }
 
     /*
