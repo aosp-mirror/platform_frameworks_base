@@ -181,6 +181,13 @@ public final class Bundle implements Parcelable, Cloneable {
     }
 
     /**
+     * Return the ClassLoader currently associated with this Bundle.
+     */
+    public ClassLoader getClassLoader() {
+        return mClassLoader;
+    }
+    
+    /**
      * Clones the current Bundle. The internal map is cloned, but the keys and
      * values to which it refers are copied by reference.
      */
