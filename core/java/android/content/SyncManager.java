@@ -728,10 +728,16 @@ public class SyncManager implements OnAccountsUpdateListener {
             newDelayInMs = maxSyncRetryTimeInSeconds * 1000;
         }
 
+        final long backoff = now + newDelayInMs;
+
         mSyncStorageEngine.setBackoff(op.account, op.authority,
-                now + newDelayInMs, newDelayInMs);
+                backoff, newDelayInMs);
+
+        op.backoff = backoff;
+        op.updateEffectiveRunTime();
+
         synchronized (mSyncQueue) {
-            mSyncQueue.onBackoffChanged(op.account, op.authority, now + newDelayInMs);
+            mSyncQueue.onBackoffChanged(op.account, op.authority, backoff);
         }
     }
 
