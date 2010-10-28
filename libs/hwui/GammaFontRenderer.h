@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_GAMMA_FONT_RENDERER_H
-#define ANDROID_UI_GAMMA_FONT_RENDERER_H
+#ifndef ANDROID_HWUI_GAMMA_FONT_RENDERER_H
+#define ANDROID_HWUI_GAMMA_FONT_RENDERER_H
 
 #include <SkPaint.h>
 
@@ -45,4 +45,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_GAMMA_FONT_RENDERER_H
+#endif // ANDROID_HWUI_GAMMA_FONT_RENDERER_H

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_SORTED_LIST_H
-#define ANDROID_UI_SORTED_LIST_H
+#ifndef ANDROID_HWUI_SORTED_LIST_H
+#define ANDROID_HWUI_SORTED_LIST_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -239,4 +239,4 @@ int SortedList<TYPE>::do_compare(const void* lhs, const void* rhs) const {
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_SORTED_LIST_H
+#endif // ANDROID_HWUI_SORTED_LIST_H

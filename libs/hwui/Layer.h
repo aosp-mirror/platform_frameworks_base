@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_LAYER_H
-#define ANDROID_UI_LAYER_H
+#ifndef ANDROID_HWUI_LAYER_H
+#define ANDROID_HWUI_LAYER_H
 
 #include <sys/types.h>
 
 #include <GLES2/gl2.h>
+
+#include <ui/Region.h>
 
 #include <SkXfermode.h>
 
@@ -85,9 +87,15 @@ struct Layer {
      * Height of the layer texture.
      */
     uint32_t height;
+
+    /**
+     * Dirty region indicating what parts of the layer
+     * have been drawn.
+     */
+    Region region;
 }; // struct Layer
 
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_LAYER_H
+#endif // ANDROID_HWUI_LAYER_H

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_CACHES_H
-#define ANDROID_UI_CACHES_H
+#ifndef ANDROID_HWUI_CACHES_H
+#define ANDROID_HWUI_CACHES_H
 
 #ifndef LOG_TAG
     #define LOG_TAG "OpenGLRenderer"
@@ -45,6 +45,8 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define REQUIRED_TEXTURE_UNITS_COUNT 3
+
+#define REGION_MESH_QUAD_COUNT 512
 
 // Generates simple and textured vertices
 #define FV(x, y, u, v) { { x, y }, { u, v } }
@@ -77,6 +79,7 @@ struct CacheLogger {
 
 class Caches: public Singleton<Caches> {
     Caches();
+    ~Caches();
 
     friend class Singleton<Caches>;
 
@@ -84,10 +87,32 @@ class Caches: public Singleton<Caches> {
 
     GLuint mCurrentBuffer;
 
+    // Used to render layers
+    TextureVertex* mRegionMesh;
+    GLuint mRegionMeshIndices;
+
 public:
+    /**
+     * Binds the VBO used to render simple textured quads.
+     */
     void bindMeshBuffer();
+
+    /**
+     * Binds the specified VBO if needed.
+     */
     void bindMeshBuffer(const GLuint buffer);
+
+    /**
+     * Unbinds the VBO used to render simple textured quads.
+     */
     void unbindMeshBuffer();
+
+    /**
+     * Returns the mesh used to draw regions. Calling this method will
+     * bind a VBO of type GL_ELEMENT_ARRAY_BUFFER that contains the
+     * indices for the region mesh.
+     */
+    TextureVertex* getRegionMesh();
 
     bool blend;
     GLenum lastSrcMode;
@@ -118,7 +143,6 @@ public:
 }; // class Caches
 
 }; // namespace uirenderer
-
 }; // namespace android
 
-#endif // ANDROID_UI_CACHES_H
+#endif // ANDROID_HWUI_CACHES_H

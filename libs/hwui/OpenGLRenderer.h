@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_OPENGL_RENDERER_H
-#define ANDROID_UI_OPENGL_RENDERER_H
+#ifndef ANDROID_HWUI_OPENGL_RENDERER_H
+#define ANDROID_HWUI_OPENGL_RENDERER_H
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -49,6 +49,10 @@ namespace uirenderer {
 
 // Debug
 #define DEBUG_OPENGL 1
+
+// If turned on, layers drawn inside FBOs are optimized with regions
+#define RENDER_LAYERS_AS_REGIONS 0
+#define DEBUG_LAYERS_AS_REGIONS 0
 
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer
@@ -176,6 +180,34 @@ private:
             int alpha, SkXfermode::Mode mode, int flags, GLuint previousFbo);
 
     /**
+     * Creates a new layer stored in the specified snapshot as an FBO.
+     *
+     * @param layer The layer to store as an FBO
+     * @param snapshot The snapshot associated with the new layer
+     * @param bounds The bounds of the layer
+     * @param previousFbo The name of the current framebuffer
+     */
+    bool createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> snapshot,
+            GLuint previousFbo);
+
+    /**
+     * Compose the specified layer as a region.
+     *
+     * @param layer The layer to compose
+     * @param rect The layer's bounds
+     */
+    void composeLayerRegion(Layer* layer, const Rect& rect);
+
+    /**
+     * Compose the specified layer as a simple rectangle.
+     *
+     * @param layer The layer to compose
+     * @param rect The layer's bounds
+     * @param swap If true, the source and destination are swapped
+     */
+    void composeLayerRect(Layer* layer, const Rect& rect, bool swap = false);
+
+    /**
      * Clears all the regions corresponding to the current list of layers.
      * This method MUST be invoked before any drawing operation.
      */
@@ -192,7 +224,7 @@ private:
      * @param color The rectangle's ARGB color, defined as a packed 32 bits word
      * @param mode The Skia xfermode to use
      * @param ignoreTransform True if the current transform should be ignored
-     * @paran ignoreBlending True if the blending is set by the caller
+     * @param ignoreBlending True if the blending is set by the caller
      */
     void drawColorRect(float left, float top, float right, float bottom,
             int color, SkXfermode::Mode mode, bool ignoreTransform = false);
@@ -252,11 +284,14 @@ private:
      * @param swapSrcDst Whether or not the src and dst blending operations should be swapped
      * @param ignoreTransform True if the current transform should be ignored
      * @param vbo The VBO used to draw the mesh
+     * @param ignoreScale True if the model view matrix should not be scaled
+     * @param dirty True if calling this method should dirty the current layer
      */
     void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
             float alpha, SkXfermode::Mode mode, bool blend,
             GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-            bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0);
+            bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
+            bool ignoreScale = false, bool dirty = true);
 
     /**
      * Prepares the renderer to draw the specified shadow. The active texture
@@ -411,6 +446,18 @@ private:
         mDirtyClip = true;
     }
 
+    /**
+     * Mark the layer as dirty at the specified coordinates. The coordinates
+     * are transformed with the supplied matrix.
+     */
+    void dirtyLayer(const float left, const float top, const float right, const float bottom,
+            const mat4 transform);
+
+    /**
+     * Mark the layer as dirty at the specified coordinates.
+     */
+    void dirtyLayer(const float left, const float top, const float right, const float bottom);
+
     // Dimensions of the drawing surface
     int mWidth, mHeight;
 
@@ -462,4 +509,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_OPENGL_RENDERER_H
+#endif // ANDROID_HWUI_OPENGL_RENDERER_H

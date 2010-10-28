@@ -26,6 +26,8 @@
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
 
+#include <ui/Rect.h>
+
 #include "OpenGLRenderer.h"
 
 namespace android {
@@ -285,7 +287,7 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
 
 int OpenGLRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
         int alpha, int flags) {
-    if (alpha == 0xff) {
+    if (alpha >= 255 - ALPHA_THRESHOLD) {
         return saveLayer(left, top, right, bottom, NULL, flags);
     } else {
         SkPaint paint;
@@ -377,7 +379,6 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
             bounds.getHeight() > mCaches.maxTextureSize) {
         snapshot->invisible = true;
     } else {
-        // TODO: Should take the mode into account
         snapshot->invisible = snapshot->previous->invisible ||
                 (alpha <= ALPHA_THRESHOLD && fboLayer);
     }
@@ -387,8 +388,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         return false;
     }
 
-    glActiveTexture(GL_TEXTURE0);
-
+    glActiveTexture(gTextureUnits[0]);
     Layer* layer = mCaches.layerCache.get(bounds.getWidth(), bounds.getHeight());
     if (!layer) {
         return false;
@@ -405,56 +405,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     snapshot->layer = layer;
 
     if (fboLayer) {
-        layer->fbo = mCaches.fboCache.get();
-
-        snapshot->flags |= Snapshot::kFlagIsFboLayer;
-        snapshot->fbo = layer->fbo;
-        snapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
-        snapshot->resetClip(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
-        snapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
-        snapshot->height = bounds.getHeight();
-        snapshot->flags |= Snapshot::kFlagDirtyOrtho;
-        snapshot->orthoMatrix.load(mOrthoMatrix);
-
-        // Bind texture to FBO
-        glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
-        glBindTexture(GL_TEXTURE_2D, layer->texture);
-
-        // Initialize the texture if needed
-        if (layer->empty) {
-            layer->empty = false;
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layer->width, layer->height, 0,
-                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        }
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                layer->texture, 0);
-
-#if DEBUG_LAYERS
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            LOGE("Framebuffer incomplete (GL error code 0x%x)", status);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-            glDeleteTextures(1, &layer->texture);
-            mCaches.fboCache.put(layer->fbo);
-
-            delete layer;
-
-            return false;
-        }
-#endif
-
-        // Clear the FBO
-        glScissor(0.0f, 0.0f, bounds.getWidth() + 1.0f, bounds.getHeight() + 1.0f);
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        dirtyClip();
-
-        // Change the ortho projection
-        glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
-        mOrthoMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
+        return createFboLayer(layer, bounds, snapshot, previousFbo);
     } else {
         // Copy the framebuffer into the layer
         glBindTexture(GL_TEXTURE_2D, layer->texture);
@@ -475,6 +426,82 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     return true;
 }
 
+bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> snapshot,
+        GLuint previousFbo) {
+    layer->fbo = mCaches.fboCache.get();
+
+#if RENDER_LAYERS_AS_REGIONS
+    snapshot->region = &snapshot->layer->region;
+    snapshot->flags |= Snapshot::kFlagFboTarget;
+#endif
+
+    Rect clip(bounds);
+    snapshot->transform->mapRect(clip);
+    clip.intersect(*snapshot->clipRect);
+    clip.snapToPixelBoundaries();
+    clip.intersect(snapshot->previous->viewport);
+
+    mat4 inverse;
+    inverse.loadInverse(*mSnapshot->transform);
+
+    inverse.mapRect(clip);
+    clip.snapToPixelBoundaries();
+    clip.intersect(bounds);
+
+    snapshot->flags |= Snapshot::kFlagIsFboLayer;
+    snapshot->fbo = layer->fbo;
+    snapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
+    //snapshot->resetClip(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
+    snapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
+    snapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
+    snapshot->height = bounds.getHeight();
+    snapshot->flags |= Snapshot::kFlagDirtyOrtho;
+    snapshot->orthoMatrix.load(mOrthoMatrix);
+
+    // Bind texture to FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
+    glBindTexture(GL_TEXTURE_2D, layer->texture);
+
+    // Initialize the texture if needed
+    if (layer->empty) {
+        layer->empty = false;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layer->width, layer->height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    }
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+            layer->texture, 0);
+
+#if DEBUG_LAYERS_AS_REGIONS
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOGE("Framebuffer incomplete (GL error code 0x%x)", status);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+        glDeleteTextures(1, &layer->texture);
+        mCaches.fboCache.put(layer->fbo);
+
+        delete layer;
+
+        return false;
+    }
+#endif
+
+    // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
+    glScissor(clip.left - 1.0f, bounds.getHeight() - clip.bottom - 1.0f,
+            clip.getWidth() + 2.0f, clip.getHeight() + 2.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    dirtyClip();
+
+    // Change the ortho projection
+    glViewport(0, 0, bounds.getWidth(), bounds.getHeight());
+    mOrthoMatrix.loadOrtho(0.0f, bounds.getWidth(), bounds.getHeight(), 0.0f, -1.0f, 1.0f);
+
+    return true;
+}
+
 /**
  * Read the documentation of createLayer() before doing anything in this method.
  */
@@ -484,17 +511,12 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         return;
     }
 
-    const bool fboLayer = current->flags & SkCanvas::kClipToLayer_SaveFlag;
+    const bool fboLayer = current->flags & Snapshot::kFlagIsFboLayer;
 
     if (fboLayer) {
         // Unbind current FBO and restore previous one
         glBindFramebuffer(GL_FRAMEBUFFER, previous->fbo);
     }
-
-    // Restore the clip from the previous snapshot
-    Rect& clip(*previous->clipRect);
-    clip.snapToPixelBoundaries();
-    glScissor(clip.left, previous->height - clip.bottom, clip.getWidth(), clip.getHeight());
 
     Layer* layer = current->layer;
     const Rect& rect = layer->layer;
@@ -502,24 +524,23 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     if (!fboLayer && layer->alpha < 255) {
         drawColorRect(rect.left, rect.top, rect.right, rect.bottom,
                 layer->alpha << 24, SkXfermode::kDstIn_Mode, true);
+        // Required below, composeLayerRect() will divide by 255
+        layer->alpha = 255;
     }
 
-    const Rect& texCoords = layer->texCoords;
     mCaches.unbindMeshBuffer();
-    resetDrawTextureTexCoords(texCoords.left, texCoords.top, texCoords.right, texCoords.bottom);
 
     glActiveTexture(gTextureUnits[0]);
-    if (fboLayer) {
-        drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
-                layer->alpha / 255.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
-                &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount);
-    } else {
-        drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
-                1.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
-                &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount, true, true);
-    }
 
-    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+    // When the layer is stored in an FBO, we can save a bit of fillrate by
+    // drawing only the dirty region
+    if (fboLayer) {
+        dirtyLayer(rect.left, rect.top, rect.right, rect.bottom, *previous->transform);
+        composeLayerRegion(layer, rect);
+    } else {
+        dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
+        composeLayerRect(layer, rect, true);
+    }
 
     if (fboLayer) {
         // Detach the texture from the FBO
@@ -541,6 +562,159 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     }
 }
 
+void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
+    const Rect& texCoords = layer->texCoords;
+    resetDrawTextureTexCoords(texCoords.left, texCoords.top, texCoords.right, texCoords.bottom);
+
+    drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
+            layer->alpha / 255.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
+            &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount, swap, swap);
+
+    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+}
+
+void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
+#if RENDER_LAYERS_AS_REGIONS
+    if (layer->region.isRect()) {
+        composeLayerRect(layer, rect);
+        layer->region.clear();
+        return;
+    }
+
+    if (!layer->region.isEmpty()) {
+        size_t count;
+        const android::Rect* rects = layer->region.getArray(&count);
+
+        setupDraw();
+
+        ProgramDescription description;
+        description.hasTexture = true;
+
+        const float alpha = layer->alpha / 255.0f;
+        const bool setColor = description.setColor(alpha, alpha, alpha, alpha);
+        chooseBlending(layer->blend || layer->alpha < 255, layer->mode, description, false);
+
+        useProgram(mCaches.programCache.get(description));
+
+        // Texture
+        bindTexture(layer->texture);
+        glUniform1i(mCaches.currentProgram->getUniform("sampler"), 0);
+
+        // Always premultiplied
+        if (setColor) {
+            mCaches.currentProgram->setColor(alpha, alpha, alpha, alpha);
+        }
+
+        // Mesh
+        int texCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
+        glEnableVertexAttribArray(texCoordsSlot);
+
+        mModelView.loadIdentity();
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+
+        const float texX = 1.0f / float(layer->width);
+        const float texY = 1.0f / float(layer->height);
+
+        TextureVertex* mesh = mCaches.getRegionMesh();
+        GLsizei numQuads = 0;
+
+        glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
+                gMeshStride, &mesh[0].position[0]);
+        glVertexAttribPointer(texCoordsSlot, 2, GL_FLOAT, GL_FALSE,
+                gMeshStride, &mesh[0].texture[0]);
+
+        for (size_t i = 0; i < count; i++) {
+            const android::Rect* r = &rects[i];
+
+            const float u1 = r->left * texX;
+            const float v1 = (rect.getHeight() - r->top) * texY;
+            const float u2 = r->right * texX;
+            const float v2 = (rect.getHeight() - r->bottom) * texY;
+
+            // TODO: Reject quads outside of the clip
+            TextureVertex::set(mesh++, r->left, r->top, u1, v1);
+            TextureVertex::set(mesh++, r->right, r->top, u2, v1);
+            TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
+            TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
+
+            numQuads++;
+
+            if (numQuads >= REGION_MESH_QUAD_COUNT) {
+                glDrawElements(GL_TRIANGLES, numQuads * 6, GL_UNSIGNED_SHORT, NULL);
+                numQuads = 0;
+                mesh = mCaches.getRegionMesh();
+            }
+        }
+
+        if (numQuads > 0) {
+            glDrawElements(GL_TRIANGLES, numQuads * 6, GL_UNSIGNED_SHORT, NULL);
+        }
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glDisableVertexAttribArray(texCoordsSlot);
+
+#if DEBUG_LAYERS_AS_REGIONS
+        uint32_t colors[] = {
+                0x7fff0000, 0x7f00ff00,
+                0x7f0000ff, 0x7fff00ff,
+        };
+
+        int offset = 0;
+        int32_t top = rects[0].top;
+        int i = 0;
+
+        for (size_t i = 0; i < count; i++) {
+            if (top != rects[i].top) {
+                offset ^= 0x2;
+                top = rects[i].top;
+            }
+
+            Rect r(rects[i].left, rects[i].top, rects[i].right, rects[i].bottom);
+            drawColorRect(r.left, r.top, r.right, r.bottom, colors[offset + (i & 0x1)],
+                    SkXfermode::kSrcOver_Mode);
+        }
+#endif
+
+        layer->region.clear();
+    }
+#else
+    composeLayerRect(layer, rect);
+#endif
+}
+
+void OpenGLRenderer::dirtyLayer(const float left, const float top,
+        const float right, const float bottom, const mat4 transform) {
+#if RENDER_LAYERS_AS_REGIONS
+    if ((mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region) {
+        Rect bounds(left, top, right, bottom);
+        transform.mapRect(bounds);
+        bounds.intersect(*mSnapshot->clipRect);
+        bounds.snapToPixelBoundaries();
+
+        android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
+        if (!dirty.isEmpty()) {
+            mSnapshot->region->orSelf(dirty);
+        }
+    }
+#endif
+}
+
+void OpenGLRenderer::dirtyLayer(const float left, const float top,
+        const float right, const float bottom) {
+#if RENDER_LAYERS_AS_REGIONS
+    if ((mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region) {
+        Rect bounds(left, top, right, bottom);
+        bounds.intersect(*mSnapshot->clipRect);
+        bounds.snapToPixelBoundaries();
+
+        android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
+        if (!dirty.isEmpty()) {
+            mSnapshot->region->orSelf(dirty);
+        }
+    }
+#endif
+}
+
 void OpenGLRenderer::setupDraw() {
     clearLayerRegions();
     if (mDirtyClip) {
@@ -551,21 +725,26 @@ void OpenGLRenderer::setupDraw() {
 void OpenGLRenderer::clearLayerRegions() {
     if (mLayers.size() == 0 || mSnapshot->invisible) return;
 
+    Rect clipRect(*mSnapshot->clipRect);
+    clipRect.snapToPixelBoundaries();
+
     for (uint32_t i = 0; i < mLayers.size(); i++) {
         Rect* bounds = mLayers.itemAt(i);
+        if (clipRect.intersects(*bounds)) {
+            // Clear the framebuffer where the layer will draw
+            glScissor(bounds->left, mSnapshot->height - bounds->bottom,
+                    bounds->getWidth(), bounds->getHeight());
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        // Clear the framebuffer where the layer will draw
-        glScissor(bounds->left, mSnapshot->height - bounds->bottom,
-                bounds->getWidth(), bounds->getHeight());
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+            // Restore the clip
+            dirtyClip();
+        }
 
         delete bounds;
     }
-    mLayers.clear();
 
-    // Restore the clip
-    dirtyClip();
+    mLayers.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -678,7 +857,12 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* pai
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    drawTextureRect(r.left, r.top, r.right, r.bottom, texture, paint);
+    // This could be done in a cheaper way, all we need is pass the matrix
+    // to the vertex shader. The save/restore is a bit overkill.
+    save(SkCanvas::kMatrix_SaveFlag);
+    concatMatrix(matrix);
+    drawTextureRect(0.0f, 0.0f, bitmap->width(), bitmap->height(), texture, paint);
+    restore();
 }
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
@@ -738,11 +922,21 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
             right - left, bottom - top, xDivs, yDivs, colors, width, height, numColors);
 
     if (mesh) {
-        // Specify right and bottom as +1.0f from left/top to prevent scaling since the
-        // patch mesh already defines the final size
-        drawTextureMesh(left, top, left + 1.0f, top + 1.0f, texture->id, alpha / 255.0f,
+        // Mark the current layer dirty where we are going to draw the patch
+        if ((mSnapshot->flags & Snapshot::kFlagFboTarget) &&
+                mSnapshot->region && mesh->hasEmptyQuads) {
+            const size_t count = mesh->quads.size();
+            for (size_t i = 0; i < count; i++) {
+                Rect bounds = mesh->quads.itemAt(i);
+                dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
+                        *mSnapshot->transform);
+            }
+        }
+
+        drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f,
                 mode, texture->blend, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
-                GL_TRIANGLES, mesh->verticesCount, false, false, mesh->meshBuffer);
+                GL_TRIANGLES, mesh->verticesCount, false, false, mesh->meshBuffer,
+                true, !mesh->hasEmptyQuads);
     }
 }
 
@@ -801,6 +995,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             mModelView.scale(length, strokeWidth, 1.0f);
         }
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+        // TODO: Add bounds to the layer's region
 
         if (mShader) {
             mShader->updateTransforms(mCaches.currentProgram, mModelView, *mSnapshot);
@@ -904,13 +1099,34 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     // Assume that the modelView matrix does not force scales, rotates, etc.
     const bool linearFilter = mSnapshot->transform->changesBounds();
+
+    // Dimensions are set to (0,0), the layer (if any) won't be dirtied
     setupTextureAlpha8(fontRenderer.getTexture(linearFilter), 0, 0, textureUnit,
             x, y, r, g, b, a, mode, false, true, NULL, NULL);
 
     const Rect& clip = mSnapshot->getLocalClip();
+    Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
+
+#if RENDER_LAYERS_AS_REGIONS
+    bool hasLayer = (mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region;
+#else
+    bool hasLayer = false;
+#endif
 
     mCaches.unbindMeshBuffer();
-    fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y);
+    if (fontRenderer.renderText(paint, &clip, text, 0, bytesCount, count, x, y,
+            hasLayer ? &bounds : NULL)) {
+#if RENDER_LAYERS_AS_REGIONS
+        if (hasLayer) {
+            mSnapshot->transform->mapRect(bounds);
+            bounds.intersect(*mSnapshot->clipRect);
+            bounds.snapToPixelBoundaries();
+
+            android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
+            mSnapshot->region->orSelf(dirty);
+        }
+#endif
+    }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(mCaches.currentProgram->getAttrib("texCoords"));
@@ -1081,7 +1297,12 @@ void OpenGLRenderer::setupTextureAlpha8(GLuint texture, uint32_t width, uint32_t
      } else {
          mModelView.loadIdentity();
      }
+
      mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+     if (width > 0 && height > 0) {
+         dirtyLayer(x, y, x + width, y + height, *mSnapshot->transform);
+     }
+
      if (setColor) {
          mCaches.currentProgram->setColor(r, g, b, a);
      }
@@ -1214,9 +1435,11 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
     mModelView.scale(right - left, bottom - top, 1.0f);
     if (!ignoreTransform) {
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     } else {
         mat4 identity;
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
+        dirtyLayer(left, top, right, bottom);
     }
     mCaches.currentProgram->setColor(r, g, b, a);
 
@@ -1251,7 +1474,7 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
 void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
         GLuint texture, float alpha, SkXfermode::Mode mode, bool blend,
         GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool swapSrcDst, bool ignoreTransform, GLuint vbo) {
+        bool swapSrcDst, bool ignoreTransform, GLuint vbo, bool ignoreScale, bool dirty) {
     setupDraw();
 
     ProgramDescription description;
@@ -1262,16 +1485,20 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     }
 
     mModelView.loadTranslate(left, top, 0.0f);
-    mModelView.scale(right - left, bottom - top, 1.0f);
+    if (!ignoreScale) {
+        mModelView.scale(right - left, bottom - top, 1.0f);
+    }
 
     chooseBlending(blend || alpha < 1.0f, mode, description, swapSrcDst);
 
     useProgram(mCaches.programCache.get(description));
     if (!ignoreTransform) {
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+        if (dirty) dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     } else {
-        mat4 m;
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, m);
+        mat4 identity;
+        mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
+        if (dirty) dirtyLayer(left, top, right, bottom);
     }
 
     // Texture
