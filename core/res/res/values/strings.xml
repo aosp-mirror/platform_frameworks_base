@@ -1440,6 +1440,37 @@
     <!-- Custom organization type -->
     <string name="orgTypeCustom">Custom</string>
 
+    <!-- Custom relationship custom [CHAR LIMIT=20] -->
+    <string name="relationTypeCustom">Custom</string>
+    <!-- Assistant relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeAssistant">Assistant</string>
+    <!-- Brother relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeBrother">Brother</string>
+    <!-- Child relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeChild">Child</string>
+    <!-- Domestic Partner relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeDomesticPartner">Domestic Partner</string>
+    <!-- Father relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeFather">Father</string>
+    <!-- Friend relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeFriend">Friend</string>
+    <!-- Manager relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeManager">Manager</string>
+    <!-- Mother relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeMother">Mother</string>
+    <!-- Parent relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeParent">Parent</string>
+    <!-- Partner relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypePartner">Partner</string>
+    <!-- Referred by relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeReferredBy">Referred by</string>
+    <!-- Relative relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeRelative">Relative</string>
+    <!-- Sister relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeSister">Sister</string>
+    <!-- Spouse relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeSpouse">Spouse</string>
+    
     <!-- Custom SIP address type -->
     <string name="sipAddressTypeCustom">Custom</string>
     <!-- Home SIP address type -->

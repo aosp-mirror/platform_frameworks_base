@@ -5127,6 +5127,47 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String NAME = DATA;
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link #TYPE}. Will always return a valid resource.
+             */
+            public static final int getTypeLabelResource(int type) {
+                switch (type) {
+                    case TYPE_ASSISTANT: return com.android.internal.R.string.relationTypeAssistant;
+                    case TYPE_BROTHER: return com.android.internal.R.string.relationTypeBrother;
+                    case TYPE_CHILD: return com.android.internal.R.string.relationTypeChild;
+                    case TYPE_DOMESTIC_PARTNER:
+                            return com.android.internal.R.string.relationTypeDomesticPartner;
+                    case TYPE_FATHER: return com.android.internal.R.string.relationTypeFather;
+                    case TYPE_FRIEND: return com.android.internal.R.string.relationTypeFriend;
+                    case TYPE_MANAGER: return com.android.internal.R.string.relationTypeManager;
+                    case TYPE_MOTHER: return com.android.internal.R.string.relationTypeMother;
+                    case TYPE_PARENT: return com.android.internal.R.string.relationTypeParent;
+                    case TYPE_PARTNER: return com.android.internal.R.string.relationTypePartner;
+                    case TYPE_REFERRED_BY:
+                            return com.android.internal.R.string.relationTypeReferredBy;
+                    case TYPE_RELATIVE: return com.android.internal.R.string.relationTypeRelative;
+                    case TYPE_SISTER: return com.android.internal.R.string.relationTypeSister;
+                    case TYPE_SPOUSE: return com.android.internal.R.string.relationTypeSpouse;
+                    default: return com.android.internal.R.string.orgTypeCustom;
+                }
+            }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given type,
+             * possibly substituting the given {@link #LABEL} value
+             * for {@link #TYPE_CUSTOM}.
+             */
+            public static final CharSequence getTypeLabel(Resources res, int type,
+                    CharSequence label) {
+                if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getTypeLabelResource(type);
+                    return res.getText(labelRes);
+                }
+            }
         }
 
         /**
