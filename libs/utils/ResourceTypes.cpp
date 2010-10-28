@@ -1896,7 +1896,7 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
     return false;
 }
 
-ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag,
+ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag, uint16_t density,
         uint32_t* outSpecFlags, ResTable_config* outConfig) const
 {
     if (mError != NO_ERROR) {
@@ -1926,7 +1926,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
     memset(&bestItem, 0, sizeof(bestItem)); // make the compiler shut up
 
     if (outSpecFlags != NULL) *outSpecFlags = 0;
-    
+
     // Look through all resource packages, starting with the most
     // recently added.
     const PackageGroup* const grp = mPackageGroups[p];
@@ -1934,6 +1934,22 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         LOGW("Bad identifier when getting value for resource number 0x%08x", resID);
         return BAD_INDEX;
     }
+
+    // Allow overriding density
+    const ResTable_config* desiredConfig = &mParams;
+    ResTable_config* overrideConfig = NULL;
+    if (density > 0) {
+        overrideConfig = (ResTable_config*) malloc(sizeof(ResTable_config));
+        if (overrideConfig == NULL) {
+            LOGE("Couldn't malloc ResTable_config for overrides: %s", strerror(errno));
+            return BAD_INDEX;
+        }
+        memcpy(overrideConfig, &mParams, sizeof(ResTable_config));
+        overrideConfig->density = density;
+        desiredConfig = overrideConfig;
+    }
+
+    ssize_t rc = BAD_INDEX;
     size_t ip = grp->packages.size();
     while (ip > 0) {
         ip--;
@@ -1943,12 +1959,13 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         const ResTable_type* type;
         const ResTable_entry* entry;
         const Type* typeClass;
-        ssize_t offset = getEntry(package, t, e, &mParams, &type, &entry, &typeClass);
+        ssize_t offset = getEntry(package, t, e, desiredConfig, &type, &entry, &typeClass);
         if (offset <= 0) {
             if (offset < 0) {
                 LOGW("Failure getting entry for 0x%08x (t=%d e=%d) in package %zd (error %d)\n",
                         resID, t, e, ip, (int)offset);
-                return offset;
+                rc = offset;
+                goto out;
             }
             continue;
         }
@@ -1963,13 +1980,14 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
 
         TABLE_NOISY(aout << "Resource type data: "
               << HexDump(type, dtohl(type->header.size)) << endl);
-        
+
         if ((size_t)offset > (dtohl(type->header.size)-sizeof(Res_value))) {
             LOGW("ResTable_item at %d is beyond type chunk data %d",
                  (int)offset, dtohl(type->header.size));
-            return BAD_TYPE;
+            rc = BAD_TYPE;
+            goto out;
         }
-        
+
         const Res_value* item =
             (const Res_value*)(((const uint8_t*)type) + offset);
         ResTable_config thisConfig;
@@ -2011,10 +2029,16 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
                          outValue->data, &len)).string()
                      : "",
                      outValue->data));
-        return bestPackage->header->index;
+        rc = bestPackage->header->index;
+        goto out;
     }
 
-    return BAD_VALUE;
+out:
+    if (overrideConfig != NULL) {
+        free(overrideConfig);
+    }
+
+    return rc;
 }
 
 ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
@@ -2027,7 +2051,7 @@ ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
         if (outLastRef) *outLastRef = value->data;
         uint32_t lastRef = value->data;
         uint32_t newFlags = 0;
-        const ssize_t newIndex = getResource(value->data, value, true, &newFlags,
+        const ssize_t newIndex = getResource(value->data, value, true, 0, &newFlags,
                 outConfig);
         if (newIndex == BAD_INDEX) {
             return BAD_INDEX;

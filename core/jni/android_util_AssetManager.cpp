@@ -701,6 +701,7 @@ static jstring android_content_AssetManager_getResourceEntryName(JNIEnv* env, jo
 
 static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject clazz,
                                                            jint ident,
+                                                           jshort density,
                                                            jobject outValue,
                                                            jboolean resolve)
 {
@@ -713,7 +714,7 @@ static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject 
     Res_value value;
     ResTable_config config;
     uint32_t typeSpecFlags;
-    ssize_t block = res.getResource(ident, &value, false, &typeSpecFlags, &config);
+    ssize_t block = res.getResource(ident, &value, false, density, &typeSpecFlags, &config);
 #if THROW_ON_BAD_ID
     if (block == BAD_INDEX) {
         jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
@@ -1703,7 +1704,7 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getResourceTypeName },
     { "getResourceEntryName","(I)Ljava/lang/String;",
         (void*) android_content_AssetManager_getResourceEntryName },
-    { "loadResourceValue","(ILandroid/util/TypedValue;Z)I",
+    { "loadResourceValue","(ISLandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadResourceValue },
     { "loadResourceBagValue","(IILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadResourceBagValue },
