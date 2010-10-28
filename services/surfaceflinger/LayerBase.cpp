@@ -415,6 +415,20 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
         cb = (texture.NPOTAdjust ? texture.hScale : 1.0f);
     }
 
+    /*
+     * For the buffer transformation, we apply the rotation last.
+     * Since we're transforming the texture-coordinates, we need
+     * to apply the inverse of the buffer transformation:
+     *   inverse( FLIP_V -> FLIP_H -> ROT_90 )
+     *   <=> inverse( ROT_90 * FLIP_H * FLIP_V )
+     *    =  inverse(FLIP_V) * inverse(FLIP_H) * inverse(ROT_90)
+     *    =  FLIP_V * FLIP_H * ROT_270
+     *   <=> ROT_270 -> FLIP_H -> FLIP_V
+     *
+     * The rotation is performed first, in the texture coordinate space.
+     *
+     */
+
     struct TexCoords {
         GLfloat u;
         GLfloat v;

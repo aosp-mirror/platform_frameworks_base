@@ -28,24 +28,38 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-template <typename T> inline T min(T a, T b) {
+template <typename T>
+static inline T min(T a, T b) {
     return a<b ? a : b;
 }
-template <typename T> inline T min(T a, T b, T c) {
+template <typename T>
+static inline T min(T a, T b, T c) {
     return min(a, min(b, c));
 }
-template <typename T> inline T min(T a, T b, T c, T d) {
+template <typename T>
+static inline T min(T a, T b, T c, T d) {
     return min(a, b, min(c, d));
 }
 
-template <typename T> inline T max(T a, T b) {
+template <typename T>
+static inline T max(T a, T b) {
     return a>b ? a : b;
 }
-template <typename T> inline T max(T a, T b, T c) {
+template <typename T>
+static inline T max(T a, T b, T c) {
     return max(a, max(b, c));
 }
-template <typename T> inline T max(T a, T b, T c, T d) {
+template <typename T>
+static inline T max(T a, T b, T c, T d) {
     return max(a, b, max(c, d));
+}
+
+template <typename T>
+static inline
+void swap(T& a, T& b) {
+    T t(a);
+    a = b;
+    b = t;
 }
 
 // ---------------------------------------------------------------------------
@@ -160,6 +174,11 @@ status_t Transform::set(uint32_t flags, float w, float h)
     }
 
     Transform H, V, R;
+    if (flags & ROT_90) {
+        // w & h are inverted when rotating by 90 degrees
+        swap(w, h);
+    }
+
     if (flags & FLIP_H) {
         H.mType = (FLIP_H << 8) | SCALE;
         H.mType |= isZero(w) ? IDENTITY : TRANSLATE;
@@ -177,14 +196,15 @@ status_t Transform::set(uint32_t flags, float w, float h)
     }
 
     if (flags & ROT_90) {
+        const float original_w = h;
         R.mType = (ROT_90 << 8) | ROTATE;
-        R.mType |= isZero(w) ? IDENTITY : TRANSLATE;
+        R.mType |= isZero(original_w) ? IDENTITY : TRANSLATE;
         mat33& M(R.mMatrix);
-        M[0][0] = 0;    M[1][0] =-1;    M[2][0] = w;
+        M[0][0] = 0;    M[1][0] =-1;    M[2][0] = original_w;
         M[0][1] = 1;    M[1][1] = 0;
     }
 
-    *this = ((H*V)*R);
+    *this = (R*(H*V));
     return NO_ERROR;
 }
 
@@ -282,8 +302,8 @@ uint32_t Transform::type() const
             }
         } else if (isZero(a) && isZero(d)) {
             flags |= ROT_90;
-            if (b>0)    flags |= FLIP_H;
-            if (c<0)    flags |= FLIP_V;
+            if (b>0)    flags |= FLIP_V;
+            if (c<0)    flags |= FLIP_H;
             if (!absIsOne(b) || !absIsOne(c)) {
                 scale = true;
             }
