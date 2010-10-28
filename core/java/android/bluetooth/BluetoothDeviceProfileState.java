@@ -80,6 +80,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     public static final int UNPAIR = 100;
     public static final int AUTO_CONNECT_PROFILES = 101;
     public static final int TRANSITION_TO_STABLE = 102;
+    public static final int CONNECT_OTHER_PROFILES = 103;
 
     private static final int AUTO_CONNECT_DELAY = 6000; // 6 secs
 
@@ -149,10 +150,6 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     sendMessage(TRANSITION_TO_STABLE);
                 }
             } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
-                if (!getCurrentState().equals(mBondedDevice)) {
-                    Log.e(TAG, "State is: " + getCurrentState());
-                    return;
-                }
                 Message msg = new Message();
                 msg.what = AUTO_CONNECT_PROFILES;
                 sendMessageDelayed(msg, AUTO_CONNECT_DELAY);
@@ -330,6 +327,27 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                         }
                     }
                     break;
+                case CONNECT_OTHER_PROFILES:
+                    if (isPhoneDocked(mDevice)) {
+                       break;
+                    }
+                    if (message.arg1 == CONNECT_A2DP_OUTGOING) {
+                        if (mA2dpService != null &&
+                            mA2dpService.getConnectedDevices().size() == 0) {
+                            Log.i(TAG, "A2dp:Connect Other Profiles");
+                            mA2dpService.connect(mDevice);
+                        }
+                    } else if (message.arg1 == CONNECT_HFP_OUTGOING) {
+                        if (mHeadsetService == null) {
+                            deferMessage(message);
+                        } else {
+                            if (mHeadsetService.getConnectedDevices().size() == 0) {
+                                Log.i(TAG, "Headset:Connect Other Profiles");
+                                mHeadsetService.connect(mDevice);
+                            }
+                        }
+                    }
+                    break;
                 case TRANSITION_TO_STABLE:
                     // ignore.
                     break;
@@ -440,6 +458,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_PBAP_OUTGOING:
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
+                case CONNECT_OTHER_PROFILES:
                     deferMessage(message);
                     break;
                 case TRANSITION_TO_STABLE:
@@ -519,6 +538,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_PBAP_OUTGOING:
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
+                case CONNECT_OTHER_PROFILES:
                     deferMessage(message);
                     break;
                 case TRANSITION_TO_STABLE:
@@ -628,6 +648,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_PBAP_OUTGOING:
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
+                case CONNECT_OTHER_PROFILES:
                     deferMessage(message);
                     break;
                 case TRANSITION_TO_STABLE:
@@ -705,6 +726,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 case DISCONNECT_PBAP_OUTGOING:
                 case UNPAIR:
                 case AUTO_CONNECT_PROFILES:
+                case CONNECT_OTHER_PROFILES:
                     deferMessage(message);
                     break;
                 case TRANSITION_TO_STABLE:
@@ -890,6 +912,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 } else if (mHeadsetState == BluetoothHeadset.STATE_CONNECTING) {
                     return mHeadsetService.acceptIncomingConnect(mDevice);
                 } else if (mHeadsetState == BluetoothHeadset.STATE_DISCONNECTED) {
+                    handleConnectionOfOtherProfiles(command);
                     return mHeadsetService.createIncomingConnect(mDevice);
                 }
                 break;
@@ -899,6 +922,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 }
                 break;
             case CONNECT_A2DP_INCOMING:
+                handleConnectionOfOtherProfiles(command);
                 // ignore, Bluez takes care
                 return true;
             case CONNECT_HID_OUTGOING:
@@ -960,6 +984,60 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         return false;
     }
 
+    private void handleConnectionOfOtherProfiles(int command) {
+        // The white paper recommendations mentions that when there is a
+        // link loss, it is the responsibility of the remote device to connect.
+        // Many connect only 1 profile - and they connect the second profile on
+        // some user action (like play being pressed) and so we need this code.
+        // Auto Connect code only connects to the last connected device - which
+        // is useful in cases like when the phone reboots. But consider the
+        // following case:
+        // User is connected to the car's phone and  A2DP profile.
+        // User comes to the desk  and places the phone in the dock
+        // (or any speaker or music system or even another headset) and thus
+        // gets connected to the A2DP profile.  User goes back to the car.
+        // Ideally the car's system is supposed to send incoming connections
+        // from both Handsfree and A2DP profile. But they don't. The Auto
+        // connect code, will not work here because we only auto connect to the
+        // last connected device for that profile which in this case is the dock.
+        // Now suppose a user is using 2 headsets simultaneously, one for the
+        // phone profile one for the A2DP profile. If this is the use case, we
+        // expect the user to use the preference to turn off the A2DP profile in
+        // the Settings screen for the first headset. Else, after link loss,
+        // there can be an incoming connection from the first headset which
+        // might result in the connection of the A2DP profile (if the second
+        // headset is slower) and thus the A2DP profile on the second headset
+        // will never get connected.
+        //
+        // TODO(): Handle other profiles here.
+        switch (command) {
+            case CONNECT_HFP_INCOMING:
+                // Connect A2DP if there is no incoming connection
+                // If the priority is OFF - don't auto connect.
+                // If the priority is AUTO_CONNECT, auto connect code takes care.
+                if (mA2dpService.getPriority(mDevice) == BluetoothProfile.PRIORITY_ON) {
+                    Message msg = new Message();
+                    msg.what = CONNECT_OTHER_PROFILES;
+                    msg.arg1 = CONNECT_A2DP_OUTGOING;
+                    sendMessageDelayed(msg, AUTO_CONNECT_DELAY);
+                }
+                break;
+            case CONNECT_A2DP_INCOMING:
+                // This is again against spec. HFP incoming connections should be made
+                // before A2DP, so we should not hit this case. But many devices
+                // don't follow this.
+                if (mHeadsetService.getPriority(mDevice) == BluetoothProfile.PRIORITY_ON) {
+                    Message msg = new Message();
+                    msg.what = CONNECT_OTHER_PROFILES;
+                    msg.arg1 = CONNECT_HFP_OUTGOING;
+                    sendMessageDelayed(msg, AUTO_CONNECT_DELAY);
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
 
     /*package*/ BluetoothDevice getDevice() {
         return mDevice;
