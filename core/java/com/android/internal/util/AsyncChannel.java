@@ -246,7 +246,6 @@ public class AsyncChannel {
                 mToken = token;
             }
 
-            @Override
             public void run() {
                 connectSrcHandlerToPackage(mSrcCtx, mSrcHdlr, mDstPackageName, mDstClassName,
                         mToken);
