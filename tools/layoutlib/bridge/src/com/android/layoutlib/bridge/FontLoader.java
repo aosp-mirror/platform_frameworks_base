@@ -134,6 +134,15 @@ public final class FontLoader {
         return mFallBackFonts;
     }
 
+    /**
+     * Returns a {@link Font} object given a family name and a style value (constant in
+     * {@link Typeface}).
+     * @param family the family name
+     * @param style a 1-item array containing the requested style. Based on the font being read
+     *              the actual style may be different. The array contains the actual style after
+     *              the method returns.
+     * @return the font object or null if no match could be found.
+     */
     public synchronized Font getFont(String family, int[] style) {
         if (family == null) {
             return null;
