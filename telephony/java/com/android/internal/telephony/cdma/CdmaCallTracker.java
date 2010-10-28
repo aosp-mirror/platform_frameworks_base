@@ -354,6 +354,24 @@ public final class CdmaCallTracker extends CallTracker {
                     || (foregroundCall.getState() == CdmaCall.State.ACTIVE)
                     || !backgroundCall.getState().isAlive());
 
+        if (!ret) {
+            log(String.format("canDial is false\n" +
+                              "((serviceState=%d) != ServiceState.STATE_POWER_OFF)::=%s\n" +
+                              "&& pendingMO == null::=%s\n" +
+                              "&& !ringingCall.isRinging()::=%s\n" +
+                              "&& !disableCall.equals(\"true\")::=%s\n" +
+                              "&& (!foregroundCall.getState().isAlive()::=%s\n" +
+                              "   || foregroundCall.getState() == CdmaCall.State.ACTIVE::=%s\n" +
+                              "   ||!backgroundCall.getState().isAlive())::=%s)",
+                    serviceState,
+                    serviceState != ServiceState.STATE_POWER_OFF,
+                    pendingMO == null,
+                    !ringingCall.isRinging(),
+                    !disableCall.equals("true"),
+                    !foregroundCall.getState().isAlive(),
+                    foregroundCall.getState() == CdmaCall.State.ACTIVE,
+                    !backgroundCall.getState().isAlive()));
+        }
         return ret;
     }
 
