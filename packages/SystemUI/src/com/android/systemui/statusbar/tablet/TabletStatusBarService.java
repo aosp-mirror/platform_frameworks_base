@@ -308,6 +308,7 @@ public class TabletStatusBarService extends StatusBarService {
                 case MSG_CLOSE_SYSTEM_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing system panel");
                     mSystemPanel.setVisibility(View.GONE);
+                    break;
                 case MSG_OPEN_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening recents panel");
                     if (mRecentsPanel != null) mRecentsPanel.setVisibility(View.VISIBLE);
