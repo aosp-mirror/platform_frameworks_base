@@ -173,6 +173,12 @@ public final class StrictMode {
     public static final int PENALTY_GATHER = 0x100;
 
     /**
+     * Mask of all the penalty bits.
+     */
+    private static final int PENALTY_MASK =
+            PENALTY_LOG | PENALTY_DIALOG | PENALTY_DEATH | PENALTY_DROPBOX | PENALTY_GATHER;
+
+    /**
      * The current VmPolicy in effect.
      */
     private static volatile int sVmPolicyMask = 0;
@@ -882,7 +888,7 @@ public final class StrictMode {
                 }
             }
 
-            // The violationMask, passed to ActivityManager, is a
+            // The violationMaskSubset, passed to ActivityManager, is a
             // subset of the original StrictMode policy bitmask, with
             // only the bit violated and penalty bits to be executed
             // by the ActivityManagerService remaining set.
@@ -900,7 +906,35 @@ public final class StrictMode {
             if (violationMaskSubset != 0) {
                 int violationBit = parseViolationFromMessage(info.crashInfo.exceptionMessage);
                 violationMaskSubset |= violationBit;
+                final int violationMaskSubsetFinal = violationMaskSubset;
                 final int savedPolicyMask = getThreadPolicyMask();
+
+                final boolean justDropBox = (info.policy & PENALTY_MASK) == PENALTY_DROPBOX;
+                if (justDropBox) {
+                    // If all we're going to ask the activity manager
+                    // to do is dropbox it (the common case during
+                    // platform development), we can avoid doing this
+                    // call synchronously which Binder data suggests
+                    // isn't always super fast, despite the implementation
+                    // in the ActivityManager trying to be mostly async.
+                    new Thread("callActivityManagerForStrictModeDropbox") {
+                        public void run() {
+                            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                            try {
+                                ActivityManagerNative.getDefault().
+                                        handleApplicationStrictModeViolation(
+                                            RuntimeInit.getApplicationObject(),
+                                            violationMaskSubsetFinal,
+                                            info);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "RemoteException handling StrictMode violation", e);
+                            }
+                        }
+                    }.start();
+                    return;
+                }
+
+                // Normal synchronous call to the ActivityManager.
                 try {
                     // First, remove any policy before we call into the Activity Manager,
                     // otherwise we'll infinite recurse as we try to log policy violations
