@@ -141,9 +141,11 @@ public class FileA3D extends BaseObj {
     }
 
     IndexEntry[] mFileEntries;
+    InputStream mInputStream;
 
-    FileA3D(int id, RenderScript rs) {
+    FileA3D(int id, RenderScript rs, InputStream stream) {
         super(id, rs);
+        mInputStream = stream;
     }
 
     private void initEntries() {
@@ -193,20 +195,12 @@ public class FileA3D extends BaseObj {
             if(fileId == 0) {
                 throw new IllegalStateException("Load failed.");
             }
-            FileA3D fa3d = new FileA3D(fileId, rs);
+            FileA3D fa3d = new FileA3D(fileId, rs, is);
             fa3d.initEntries();
             return fa3d;
 
         } catch (Exception e) {
             // Ignore
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
         }
 
         return null;

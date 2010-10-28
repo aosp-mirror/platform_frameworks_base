@@ -115,18 +115,9 @@ bool FileA3D::load(const void *data, size_t length)
         return false;
     }
 
-    uint8_t *headerData = (uint8_t *)malloc(headerSize);
-    if(!headerData) {
-        return false;
-    }
-
-    memcpy(headerData, localData, headerSize);
-
     // Now open the stream to parse the header
-    IStream headerStream(headerData, false);
+    IStream headerStream(localData, false);
     parseHeader(&headerStream);
-
-    free(headerData);
 
     localData += headerSize;
     lengthRemaining -= headerSize;
@@ -145,13 +136,7 @@ bool FileA3D::load(const void *data, size_t length)
     }
 
     // We should know enough to read the file in at this point.
-    mAlloc = malloc(mDataSize);
-    if (!mAlloc) {
-        return false;
-    }
-    mData = (uint8_t *)mAlloc;
-    memcpy(mAlloc, localData, mDataSize);
-
+    mData = (uint8_t *)localData;
     mReadStream = new IStream(mData, mUse64BitOffsets);
 
     return true;
@@ -383,7 +368,41 @@ void FileA3D::appendToFile(ObjectBase *obj) {
 namespace android {
 namespace renderscript {
 
-void rsi_FileA3DGetNumIndexEntries(Context *rsc, int32_t *numEntries, RsFile file)
+RsFile rsi_FileOpen(Context *rsc, char const *path, unsigned int len)
+{
+    FileA3D *fa3d = new FileA3D(rsc);
+
+    FILE *f = fopen("/sdcard/test.a3d", "rb");
+    if (f) {
+        fa3d->load(f);
+        fclose(f);
+        fa3d->incUserRef();
+        return fa3d;
+    }
+    delete fa3d;
+    return NULL;
+}
+
+
+}
+}
+
+RsObjectBase rsaFileA3DGetEntryByIndex(RsContext con, uint32_t index, RsFile file)
+{
+    FileA3D *fa3d = static_cast<FileA3D *>(file);
+    if(!fa3d) {
+        LOGE("Can't load entry. No valid file");
+        return NULL;
+    }
+
+    ObjectBase *obj = fa3d->initializeFromEntry(index);
+    LOGV("Returning object with name %s", obj->getName());
+
+    return obj;
+}
+
+
+void rsaFileA3DGetNumIndexEntries(RsContext con, int32_t *numEntries, RsFile file)
 {
     FileA3D *fa3d = static_cast<FileA3D *>(file);
 
@@ -395,7 +414,7 @@ void rsi_FileA3DGetNumIndexEntries(Context *rsc, int32_t *numEntries, RsFile fil
     }
 }
 
-void rsi_FileA3DGetIndexEntries(Context *rsc, RsFileIndexEntry *fileEntries, uint32_t numEntries, RsFile file)
+void rsaFileA3DGetIndexEntries(RsContext con, RsFileIndexEntry *fileEntries, uint32_t numEntries, RsFile file)
 {
     FileA3D *fa3d = static_cast<FileA3D *>(file);
 
@@ -418,51 +437,17 @@ void rsi_FileA3DGetIndexEntries(Context *rsc, RsFileIndexEntry *fileEntries, uin
 
 }
 
-RsObjectBase rsi_FileA3DGetEntryByIndex(Context *rsc, uint32_t index, RsFile file)
-{
-    FileA3D *fa3d = static_cast<FileA3D *>(file);
-    if(!fa3d) {
-        LOGE("Can't load entry. No valid file");
-        return NULL;
-    }
-
-    ObjectBase *obj = fa3d->initializeFromEntry(index);
-    LOGV("Returning object with name %s", obj->getName());
-
-    return obj;
-}
-
-RsFile rsi_FileA3DCreateFromAssetStream(Context *rsc, const void *data, uint32_t len)
+RsFile rsaFileA3DCreateFromAssetStream(RsContext con, const void *data, uint32_t len)
 {
     if (data == NULL) {
         LOGE("File load failed. Asset stream is NULL");
         return NULL;
     }
 
+    Context *rsc = static_cast<Context *>(con);
     FileA3D *fa3d = new FileA3D(rsc);
-
-    fa3d->load(data, len);
     fa3d->incUserRef();
 
+    fa3d->load(data, len);
     return fa3d;
-}
-
-
-RsFile rsi_FileOpen(Context *rsc, char const *path, unsigned int len)
-{
-    FileA3D *fa3d = new FileA3D(rsc);
-
-    FILE *f = fopen("/sdcard/test.a3d", "rb");
-    if (f) {
-        fa3d->load(f);
-        fclose(f);
-        fa3d->incUserRef();
-        return fa3d;
-    }
-    delete fa3d;
-    return NULL;
-}
-
-
-}
 }

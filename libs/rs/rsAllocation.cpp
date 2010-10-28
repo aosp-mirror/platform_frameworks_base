@@ -816,17 +816,17 @@ void rsi_AllocationResize2D(Context *rsc, RsAllocation va, uint32_t dimX, uint32
     a->resize2D(rsc, dimX, dimY);
 }
 
-const void* rsi_AllocationGetType(Context *rsc, RsAllocation va)
+#endif //ANDROID_RS_BUILD_FOR_HOST
+
+}
+}
+
+const void * rsaAllocationGetType(RsContext con, RsAllocation va)
 {
     Allocation *a = static_cast<Allocation *>(va);
     a->getType()->incUserRef();
 
     return a->getType();
-}
-
-#endif //ANDROID_RS_BUILD_FOR_HOST
-
-}
 }
 
 RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype)
@@ -873,4 +873,3 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h
 
     return texAlloc;
 }
-

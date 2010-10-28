@@ -76,7 +76,11 @@ void Sampler::setupGL(const Context *rsc, const Allocation *tex)
     };
 
     if (!rsc->ext_OES_texture_npot() && tex->getType()->getIsNp2()) {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
+        if (tex->getHasGraphicsMipmaps() && rsc->ext_GL_NV_texture_npot_2D_mipmap()) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
+        }
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, transNP[mMagFilter]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, transNP[mWrapS]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, transNP[mWrapT]);

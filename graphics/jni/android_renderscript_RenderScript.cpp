@@ -104,7 +104,10 @@ nGetName(JNIEnv *_env, jobject _this, RsContext con, jint obj)
 {
     LOG_API("nGetName, con(%p), obj(%p)", con, (void *)obj);
     const char *name = NULL;
-    rsGetName(con, (void *)obj, &name);
+    rsaGetName(con, (void *)obj, &name);
+    if(name == NULL || strlen(name) == 0) {
+        return NULL;
+    }
     return _env->NewStringUTF(name);
 }
 
@@ -306,7 +309,7 @@ nElementGetNativeData(JNIEnv *_env, jobject _this, RsContext con, jint id, jintA
     assert(dataSize == 5);
 
     uint32_t elementData[5];
-    rsElementGetNativeData(con, (RsElement)id, elementData, dataSize);
+    rsaElementGetNativeData(con, (RsElement)id, elementData, dataSize);
 
     for(jint i = 0; i < dataSize; i ++) {
         _env->SetIntArrayRegion(_elementData, i, 1, (const jint*)&elementData[i]);
@@ -323,7 +326,7 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, RsContext con, jint id, jint
     uint32_t *ids = (uint32_t *)malloc((uint32_t)dataSize * sizeof(uint32_t));
     const char **names = (const char **)malloc((uint32_t)dataSize * sizeof(const char *));
 
-    rsElementGetSubElements(con, (RsElement)id, ids, names, (uint32_t)dataSize);
+    rsaElementGetSubElements(con, (RsElement)id, ids, names, (uint32_t)dataSize);
 
     for(jint i = 0; i < dataSize; i++) {
         _env->SetObjectArrayElement(_names, i, _env->NewStringUTF(names[i]));
@@ -364,7 +367,7 @@ nTypeGetNativeData(JNIEnv *_env, jobject _this, RsContext con, jint id, jintArra
     LOG_API("nTypeCreate, con(%p)", con);
 
     uint32_t typeData[6];
-    rsTypeGetNativeData(con, (RsType)id, typeData, 6);
+    rsaTypeGetNativeData(con, (RsType)id, typeData, 6);
 
     for(jint i = 0; i < elementCount; i ++) {
         _env->SetIntArrayRegion(_typeData, i, 1, (const jint*)&typeData[i]);
@@ -590,7 +593,7 @@ static jint
 nAllocationGetType(JNIEnv *_env, jobject _this, RsContext con, jint a)
 {
     LOG_API("nAllocationGetType, con(%p), a(%p)", con, (RsAllocation)a);
-    return (jint) rsAllocationGetType(con, (RsAllocation)a);
+    return (jint) rsaAllocationGetType(con, (RsAllocation)a);
 }
 
 static void
@@ -616,7 +619,7 @@ nFileA3DCreateFromAssetStream(JNIEnv *_env, jobject _this, RsContext con, jint n
 
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
 
-    jint id = (jint)rsFileA3DCreateFromAssetStream(con, asset->getBuffer(false), asset->getLength());
+    jint id = (jint)rsaFileA3DCreateFromAssetStream(con, asset->getBuffer(false), asset->getLength());
     return id;
 }
 
@@ -624,7 +627,7 @@ static int
 nFileA3DGetNumIndexEntries(JNIEnv *_env, jobject _this, RsContext con, jint fileA3D)
 {
     int32_t numEntries = 0;
-    rsFileA3DGetNumIndexEntries(con, &numEntries, (RsFile)fileA3D);
+    rsaFileA3DGetNumIndexEntries(con, &numEntries, (RsFile)fileA3D);
     return numEntries;
 }
 
@@ -634,7 +637,7 @@ nFileA3DGetIndexEntries(JNIEnv *_env, jobject _this, RsContext con, jint fileA3D
     LOGV("______nFileA3D %u", (uint32_t) fileA3D);
     RsFileIndexEntry *fileEntries = (RsFileIndexEntry*)malloc((uint32_t)numEntries * sizeof(RsFileIndexEntry));
 
-    rsFileA3DGetIndexEntries(con, fileEntries, (uint32_t)numEntries, (RsFile)fileA3D);
+    rsaFileA3DGetIndexEntries(con, fileEntries, (uint32_t)numEntries, (RsFile)fileA3D);
 
     for(jint i = 0; i < numEntries; i ++) {
         _env->SetObjectArrayElement(_entries, i, _env->NewStringUTF(fileEntries[i].objectName));
@@ -648,7 +651,7 @@ static int
 nFileA3DGetEntryByIndex(JNIEnv *_env, jobject _this, RsContext con, jint fileA3D, jint index)
 {
     LOGV("______nFileA3D %u", (uint32_t) fileA3D);
-    jint id = (jint)rsFileA3DGetEntryByIndex(con, (uint32_t)index, (RsFile)fileA3D);
+    jint id = (jint)rsaFileA3DGetEntryByIndex(con, (uint32_t)index, (RsFile)fileA3D);
     return id;
 }
 
@@ -1166,7 +1169,7 @@ nMeshGetVertexBufferCount(JNIEnv *_env, jobject _this, RsContext con, jint mesh)
 {
     LOG_API("nMeshGetVertexBufferCount, con(%p), Mesh(%p)", con, (RsMesh)mesh);
     jint vtxCount = 0;
-    rsMeshGetVertexBufferCount(con, (RsMesh)mesh, &vtxCount);
+    rsaMeshGetVertexBufferCount(con, (RsMesh)mesh, &vtxCount);
     return vtxCount;
 }
 
@@ -1175,7 +1178,7 @@ nMeshGetIndexCount(JNIEnv *_env, jobject _this, RsContext con, jint mesh)
 {
     LOG_API("nMeshGetIndexCount, con(%p), Mesh(%p)", con, (RsMesh)mesh);
     jint idxCount = 0;
-    rsMeshGetIndexCount(con, (RsMesh)mesh, &idxCount);
+    rsaMeshGetIndexCount(con, (RsMesh)mesh, &idxCount);
     return idxCount;
 }
 
@@ -1185,7 +1188,7 @@ nMeshGetVertices(JNIEnv *_env, jobject _this, RsContext con, jint mesh, jintArra
     LOG_API("nMeshGetVertices, con(%p), Mesh(%p)", con, (RsMesh)mesh);
 
     RsAllocation *allocs = (RsAllocation*)malloc((uint32_t)numVtxIDs * sizeof(RsAllocation));
-    rsMeshGetVertices(con, (RsMesh)mesh, allocs, (uint32_t)numVtxIDs);
+    rsaMeshGetVertices(con, (RsMesh)mesh, allocs, (uint32_t)numVtxIDs);
 
     for(jint i = 0; i < numVtxIDs; i ++) {
         _env->SetIntArrayRegion(_ids, i, 1, (const jint*)&allocs[i]);
@@ -1202,7 +1205,7 @@ nMeshGetIndices(JNIEnv *_env, jobject _this, RsContext con, jint mesh, jintArray
     RsAllocation *allocs = (RsAllocation*)malloc((uint32_t)numIndices * sizeof(RsAllocation));
     uint32_t *prims= (uint32_t*)malloc((uint32_t)numIndices * sizeof(uint32_t));
 
-    rsMeshGetIndices(con, (RsMesh)mesh, allocs, prims, (uint32_t)numIndices);
+    rsaMeshGetIndices(con, (RsMesh)mesh, allocs, prims, (uint32_t)numIndices);
 
     for(jint i = 0; i < numIndices; i ++) {
         _env->SetIntArrayRegion(_idxIds, i, 1, (const jint*)&allocs[i]);
