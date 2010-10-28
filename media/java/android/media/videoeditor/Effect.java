@@ -57,7 +57,7 @@ public abstract class Effect {
             throw new IllegalArgumentException("Media item cannot be null");
         }
 
-        if (startTimeMs + durationMs > mediaItem.getTimelineDuration()) {
+        if (startTimeMs + durationMs > mediaItem.getDuration()) {
             throw new IllegalArgumentException("Invalid start time and duration");
         }
 
@@ -81,7 +81,7 @@ public abstract class Effect {
      * @param durationMs of the effect in milliseconds
      */
     public void setDuration(long durationMs) {
-        if (mStartTimeMs + durationMs > mMediaItem.getTimelineDuration()) {
+        if (mStartTimeMs + durationMs > mMediaItem.getDuration()) {
             throw new IllegalArgumentException("Duration is too large");
         }
 
@@ -107,7 +107,7 @@ public abstract class Effect {
      *            of the media item in milliseconds
      */
     public void setStartTime(long startTimeMs) {
-        if (startTimeMs + mDurationMs > mMediaItem.getTimelineDuration()) {
+        if (startTimeMs + mDurationMs > mMediaItem.getDuration()) {
             throw new IllegalArgumentException("Start time is too large");
         }
 
@@ -130,7 +130,7 @@ public abstract class Effect {
      * @param durationMs The duration in milliseconds
      */
     public void setStartTimeAndDuration(long startTimeMs, long durationMs) {
-        if (startTimeMs + durationMs > mMediaItem.getTimelineDuration()) {
+        if (startTimeMs + durationMs > mMediaItem.getDuration()) {
             throw new IllegalArgumentException("Invalid start time or duration");
         }
 
