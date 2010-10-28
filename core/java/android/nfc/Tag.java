@@ -41,6 +41,7 @@ import android.os.Parcelable;
  * time and calls on this class will retrieve those read-only properties, and
  * not cause any further RF activity or block. Note however that arrays passed to and
  * returned by this class are *not* cloned, so be careful not to modify them.
+ * @hide
  */
 public class Tag implements Parcelable {
     /**
@@ -156,6 +157,7 @@ public class Tag implements Parcelable {
      * from SENSF_RES
      *
      * @return poll bytes, or null if they do not exist for this Tag technology
+     * @hide
      */
     public byte[] getPollBytes() {
         return mPollBytes;
@@ -172,6 +174,7 @@ public class Tag implements Parcelable {
      * <p>JIS_X_6319_4: null
      * <p>ISO15693: response flags (1 byte), DSFID (1 byte): null
      * @return activation bytes, or null if they do not exist for this Tag technology
+     * @hide
      */
     public byte[] getActivationBytes() {
         return mActivationBytes;
