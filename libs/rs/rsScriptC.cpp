@@ -78,10 +78,6 @@ void ScriptC::setupScript(Context *rsc)
 
         if (dest) {
             *dest = ptr;
-        } else {
-            if (rsc->props.mLogScripts) {
-                LOGV("ScriptC::setupScript, NULL var binding address.");
-            }
         }
     }
 }
@@ -425,7 +421,6 @@ extern unsigned rs_runtime_lib_bc_size;
 
 void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 {
-    LOGV("%p ScriptCState::runCompiler ", rsc);
     {
         StopWatch compileTimer("RenderScript compile time");
         s->mBccScript = bccCreateScript();
