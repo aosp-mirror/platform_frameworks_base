@@ -301,6 +301,11 @@ public final class CookieManager {
      * @param value The value for set-cookie: in http response header
      */
     public void setCookie(String url, String value) {
+        if (useChromiumHttpStack()) {
+            nativeSetCookie(url, value);
+            return;
+        }
+
         WebAddress uri;
         try {
             uri = new WebAddress(url);
@@ -522,6 +527,11 @@ public final class CookieManager {
      * Remove all session cookies, which are cookies without expiration date
      */
     public void removeSessionCookie() {
+        if (useChromiumHttpStack()) {
+            nativeRemoveSessionCookie();
+            return;
+        }
+
         final Runnable clearCache = new Runnable() {
             public void run() {
                 synchronized(CookieManager.this) {
@@ -569,6 +579,10 @@ public final class CookieManager {
      *  Return true if there are stored cookies.
      */
     public synchronized boolean hasCookies() {
+        if (useChromiumHttpStack()) {
+            return nativeHasCookies();
+        }
+
         return CookieSyncManager.getInstance().hasCookies();
     }
 
@@ -576,6 +590,11 @@ public final class CookieManager {
      * Remove all expired cookies
      */
     public void removeExpiredCookie() {
+        if (useChromiumHttpStack()) {
+            nativeRemoveExpiredCookie();
+            return;
+        }
+
         final Runnable clearCache = new Runnable() {
             public void run() {
                 synchronized(CookieManager.this) {
@@ -1050,6 +1069,10 @@ public final class CookieManager {
     private static native boolean nativeUseChromiumHttpStack();
     private static native boolean nativeAcceptCookie();
     private static native String nativeGetCookie(String url);
+    private static native boolean nativeHasCookies();
     private static native void nativeRemoveAllCookie();
+    private static native void nativeRemoveExpiredCookie();
+    private static native void nativeRemoveSessionCookie();
     private static native void nativeSetAcceptCookie(boolean accept);
+    private static native void nativeSetCookie(String url, String value);
 }
