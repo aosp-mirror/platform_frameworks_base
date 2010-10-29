@@ -16,7 +16,6 @@
 
 package android.nfc;
 
-//TODO(npelly) javadoc or consider alternatives
 public class FormatException extends Exception {
     public FormatException() {
         super();

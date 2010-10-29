@@ -28,6 +28,7 @@ import android.util.Log;
  * <p class="note"><strong>Note:</strong>
  * Use of this class requires the {@link android.Manifest.permission#NFC}
  * permission.
+ * @hide
  */
 public class NdefTagConnection extends RawTagConnection {
     public static final int NDEF_MODE_READ_ONCE = 1;
