@@ -35,6 +35,7 @@ import android.os.Parcelable;
  * time and calls on this class will retrieve those read-only properties, and
  * not cause any further RF activity or block. Note however that arrays passed to and
  * returned by this class are *not* cloned, so be careful not to modify them.
+ * @hide
  */
 public class NdefTag extends Tag implements Parcelable {
     /**

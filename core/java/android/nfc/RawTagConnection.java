@@ -32,6 +32,7 @@ import android.util.Log;
  * <p class="note"><strong>Note:</strong>
  * Use of this class requires the {@link android.Manifest.permission#NFC}
  * permission.
+ * @hide
  */
 public class RawTagConnection {
 
