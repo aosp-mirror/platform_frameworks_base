@@ -470,7 +470,7 @@ void * Context::threadProc(void *vrsc)
              rsc->timerPrint();
              rsc->timerReset();
          }
-         if (rsc->mThreadPriority > 0 && targetTime) {
+         if (targetTime > 1) {
              int32_t t = (targetTime - (int32_t)(rsc->mTimeMSLastScript + rsc->mTimeMSLastSwap)) * 1000;
              if (t > 0) {
                  usleep(t);
