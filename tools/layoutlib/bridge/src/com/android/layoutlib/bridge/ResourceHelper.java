@@ -17,8 +17,8 @@
 package com.android.layoutlib.bridge;
 
 import com.android.layoutlib.api.IDensityBasedResourceValue;
-import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
+import com.android.layoutlib.api.IResourceValue;
 import com.android.ninepatch.NinePatch;
 
 import org.kxml2.io.KXmlParser;
@@ -26,6 +26,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap_Delegate;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -105,7 +106,8 @@ public final class ResourceHelper {
      * @param isFramework indicates whether the resource is a framework resources.
      * Framework resources are cached, and loaded only once.
      */
-    public static Drawable getDrawable(IResourceValue value, BridgeContext context, boolean isFramework) {
+    public static Drawable getDrawable(IResourceValue value, BridgeContext context,
+            boolean isFramework) {
         Drawable d = null;
 
         String stringValue = value.getValue();
@@ -168,14 +170,8 @@ public final class ResourceHelper {
                             isFramework ? null : context.getProjectKey());
 
                     if (bitmap == null) {
-                        bitmap = new Bitmap(bmpFile);
-                        try {
-                            bitmap.setDensity(Density.MEDIUM.getValue());
-                        } catch (NoClassDefFoundError error) {
-                            // look like we're running in an older version of ADT that doesn't
-                            // include the new layoutlib_api. Let's just ignore this, the drawing
-                            // will just be wrong.
-                        }
+                        // always create the cache copy in the original density.
+                        bitmap = Bitmap_Delegate.createBitmap(bmpFile, Density.MEDIUM);
                         Bridge.setCachedBitmap(stringValue, bitmap,
                                 isFramework ? null : context.getProjectKey());
                     }

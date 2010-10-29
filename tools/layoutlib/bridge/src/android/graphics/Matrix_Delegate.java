@@ -76,7 +76,7 @@ public final class Matrix_Delegate {
 
     // ---- native methods ----
 
-    public static int native_create(int native_src_or_zero) {
+    /*package*/ static int native_create(int native_src_or_zero) {
         // create the delegate
         Matrix_Delegate newDelegate = new Matrix_Delegate();
 
@@ -94,7 +94,7 @@ public final class Matrix_Delegate {
         return sManager.addDelegate(newDelegate);
     }
 
-    public static boolean native_isIdentity(int native_object) {
+    /*package*/ static boolean native_isIdentity(int native_object) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -112,7 +112,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_rectStaysRect(int native_object) {
+    /*package*/ static boolean native_rectStaysRect(int native_object) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -122,7 +122,7 @@ public final class Matrix_Delegate {
         return (d.computeTypeMask() & kRectStaysRect_Mask) != 0;
     }
 
-    public static void native_reset(int native_object) {
+    /*package*/ static void native_reset(int native_object) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -132,7 +132,7 @@ public final class Matrix_Delegate {
         reset(d.mValues);
     }
 
-    public static void native_set(int native_object, int other) {
+    /*package*/ static void native_set(int native_object, int other) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -148,7 +148,7 @@ public final class Matrix_Delegate {
         System.arraycopy(src.mValues, 0, d.mValues, 0, MATRIX_SIZE);
     }
 
-    public static void native_setTranslate(int native_object, float dx, float dy) {
+    /*package*/ static void native_setTranslate(int native_object, float dx, float dy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -158,7 +158,7 @@ public final class Matrix_Delegate {
         setTranslate(d.mValues, dx, dy);
     }
 
-    public static void native_setScale(int native_object, float sx, float sy, float px, float py) {
+    /*package*/ static void native_setScale(int native_object, float sx, float sy, float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -168,7 +168,7 @@ public final class Matrix_Delegate {
         d.mValues = getScale(sx, sy, px, py);
     }
 
-    public static void native_setScale(int native_object, float sx, float sy) {
+    /*package*/ static void native_setScale(int native_object, float sx, float sy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -186,7 +186,7 @@ public final class Matrix_Delegate {
         d.mValues[8] = 1;
     }
 
-    public static void native_setRotate(int native_object, float degrees, float px, float py) {
+    /*package*/ static void native_setRotate(int native_object, float degrees, float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -196,7 +196,7 @@ public final class Matrix_Delegate {
         d.mValues = getRotate(degrees, px, py);
     }
 
-    public static void native_setRotate(int native_object, float degrees) {
+    /*package*/ static void native_setRotate(int native_object, float degrees) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -206,7 +206,7 @@ public final class Matrix_Delegate {
         setRotate(d.mValues, degrees);
     }
 
-    public static void native_setSinCos(int native_object, float sinValue, float cosValue,
+    /*package*/ static void native_setSinCos(int native_object, float sinValue, float cosValue,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -225,7 +225,7 @@ public final class Matrix_Delegate {
         d.postTransform(getTranslate(px, py));
     }
 
-    public static void native_setSinCos(int native_object, float sinValue, float cosValue) {
+    /*package*/ static void native_setSinCos(int native_object, float sinValue, float cosValue) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -235,7 +235,7 @@ public final class Matrix_Delegate {
         setRotate(d.mValues, sinValue, cosValue);
     }
 
-    public static void native_setSkew(int native_object, float kx, float ky, float px, float py) {
+    /*package*/ static void native_setSkew(int native_object, float kx, float ky, float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -245,7 +245,7 @@ public final class Matrix_Delegate {
         d.mValues = getSkew(kx, ky, px, py);
     }
 
-    public static void native_setSkew(int native_object, float kx, float ky) {
+    /*package*/ static void native_setSkew(int native_object, float kx, float ky) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -263,7 +263,7 @@ public final class Matrix_Delegate {
         d.mValues[8] = 1;
     }
 
-    public static boolean native_setConcat(int native_object, int a, int b) {
+    /*package*/ static boolean native_setConcat(int native_object, int a, int b) {
         if (a == native_object) {
             return native_preConcat(native_object, b);
         } else if (b == native_object) {
@@ -293,7 +293,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_preTranslate(int native_object, float dx, float dy) {
+    /*package*/ static boolean native_preTranslate(int native_object, float dx, float dy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -304,7 +304,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_preScale(int native_object, float sx, float sy,
+    /*package*/ static boolean native_preScale(int native_object, float sx, float sy,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -316,7 +316,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_preScale(int native_object, float sx, float sy) {
+    /*package*/ static boolean native_preScale(int native_object, float sx, float sy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -327,7 +327,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_preRotate(int native_object, float degrees, float px, float py) {
+    /*package*/ static boolean native_preRotate(int native_object, float degrees, float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -338,7 +338,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_preRotate(int native_object, float degrees) {
+    /*package*/ static boolean native_preRotate(int native_object, float degrees) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -353,7 +353,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_preSkew(int native_object, float kx, float ky,
+    /*package*/ static boolean native_preSkew(int native_object, float kx, float ky,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -365,7 +365,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_preSkew(int native_object, float kx, float ky) {
+    /*package*/ static boolean native_preSkew(int native_object, float kx, float ky) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -376,7 +376,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_preConcat(int native_object, int other_matrix) {
+    /*package*/ static boolean native_preConcat(int native_object, int other_matrix) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -393,7 +393,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_postTranslate(int native_object, float dx, float dy) {
+    /*package*/ static boolean native_postTranslate(int native_object, float dx, float dy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -404,7 +404,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_postScale(int native_object, float sx, float sy,
+    /*package*/ static boolean native_postScale(int native_object, float sx, float sy,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -416,7 +416,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_postScale(int native_object, float sx, float sy) {
+    /*package*/ static boolean native_postScale(int native_object, float sx, float sy) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -427,7 +427,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_postRotate(int native_object, float degrees, float px, float py) {
+    /*package*/ static boolean native_postRotate(int native_object, float degrees, float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -438,7 +438,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_postRotate(int native_object, float degrees) {
+    /*package*/ static boolean native_postRotate(int native_object, float degrees) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -449,7 +449,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_postSkew(int native_object, float kx, float ky,
+    /*package*/ static boolean native_postSkew(int native_object, float kx, float ky,
             float px, float py) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -461,7 +461,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_postSkew(int native_object, float kx, float ky) {
+    /*package*/ static boolean native_postSkew(int native_object, float kx, float ky) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -472,7 +472,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_postConcat(int native_object, int other_matrix) {
+    /*package*/ static boolean native_postConcat(int native_object, int other_matrix) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -489,7 +489,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_setRectToRect(int native_object, RectF src, RectF dst, int stf) {
+    /*package*/ static boolean native_setRectToRect(int native_object, RectF src, RectF dst, int stf) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -553,13 +553,13 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static boolean native_setPolyToPoly(int native_object, float[] src, int srcIndex,
+    /*package*/ static boolean native_setPolyToPoly(int native_object, float[] src, int srcIndex,
             float[] dst, int dstIndex, int pointCount) {
         // FIXME
-        throw new UnsupportedOperationException("NATIVE DELEGATE NEEDED");
+        throw new UnsupportedOperationException("Native delegate needed: Matrix_Delegate.native_setPolyToPoly");
     }
 
-    public static boolean native_invert(int native_object, int inverse) {
+    /*package*/ static boolean native_invert(int native_object, int inverse) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -589,7 +589,7 @@ public final class Matrix_Delegate {
         }
     }
 
-    public static void native_mapPoints(int native_object, float[] dst, int dstIndex,
+    /*package*/ static void native_mapPoints(int native_object, float[] dst, int dstIndex,
             float[] src, int srcIndex, int ptCount, boolean isPts) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
@@ -602,11 +602,11 @@ public final class Matrix_Delegate {
         } else {
             // src is vectors
             // FIXME
-            throw new UnsupportedOperationException("NATIVE DELEGATE NEEDED");
+            throw new UnsupportedOperationException("Native delegate needed: Matrix_Delegate.native_mapPoints");
         }
     }
 
-    public static boolean native_mapRect(int native_object, RectF dst, RectF src) {
+    /*package*/ static boolean native_mapRect(int native_object, RectF dst, RectF src) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -635,12 +635,12 @@ public final class Matrix_Delegate {
         return (d.computeTypeMask() & kRectStaysRect_Mask) != 0;
     }
 
-    public static float native_mapRadius(int native_object, float radius) {
+    /*package*/ static float native_mapRadius(int native_object, float radius) {
         // FIXME
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Native delegate needed: Matrix_Delegate.native_mapRadius");
     }
 
-    public static void native_getValues(int native_object, float[] values) {
+    /*package*/ static void native_getValues(int native_object, float[] values) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -650,7 +650,7 @@ public final class Matrix_Delegate {
         System.arraycopy(d.mValues, 0, d.mValues, 0, MATRIX_SIZE);
     }
 
-    public static void native_setValues(int native_object, float[] values) {
+    /*package*/ static void native_setValues(int native_object, float[] values) {
         Matrix_Delegate d = sManager.getDelegate(native_object);
         if (d == null) {
             assert false;
@@ -660,7 +660,7 @@ public final class Matrix_Delegate {
         System.arraycopy(values, 0, d.mValues, 0, MATRIX_SIZE);
     }
 
-    public static boolean native_equals(int native_a, int native_b) {
+    /*package*/ static boolean native_equals(int native_a, int native_b) {
         Matrix_Delegate a = sManager.getDelegate(native_a);
         if (a == null) {
             assert false;
@@ -682,7 +682,7 @@ public final class Matrix_Delegate {
         return true;
     }
 
-    public static void finalizer(int native_instance) {
+    /*package*/ static void finalizer(int native_instance) {
         sManager.removeDelegate(native_instance);
     }
 

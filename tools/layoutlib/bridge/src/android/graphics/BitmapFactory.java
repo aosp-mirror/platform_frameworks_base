@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
+
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
@@ -454,7 +456,7 @@ public class BitmapFactory {
             // into is.read(...) This number is not related to the value passed
             // to mark(...) above.
             try {
-                bm = new Bitmap(is);
+                bm = Bitmap_Delegate.createBitmap(is, Density.MEDIUM);
             } catch (IOException e) {
                 return null;
             }
