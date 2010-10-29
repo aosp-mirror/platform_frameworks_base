@@ -696,7 +696,6 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     public void setIMEButtonVisible(boolean visible) {
-
         if (DEBUG) {
             Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
         }
