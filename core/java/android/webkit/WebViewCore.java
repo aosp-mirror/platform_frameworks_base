@@ -732,6 +732,29 @@ final class WebViewCore {
         int mSlop;
     }
 
+    static class AutoFillData {
+        public AutoFillData() {
+            mQueryId = WebTextView.FORM_NOT_AUTOFILLABLE;
+            mPreview = "";
+        }
+
+        public AutoFillData(int queryId, String preview) {
+            mQueryId = queryId;
+            mPreview = preview;
+        }
+
+        public int getQueryId() {
+            return mQueryId;
+        }
+
+        public String getPreviewString() {
+            return mPreview;
+        }
+
+        private int mQueryId;
+        private String mPreview;
+    }
+
     // mAction of TouchEventData can be MotionEvent.getAction() which uses the
     // last two bytes or one of the following values
     static final int ACTION_LONGPRESS = 0x100;
@@ -2431,10 +2454,11 @@ final class WebViewCore {
         }
     }
 
-    private void setWebTextViewAutoFillable(int queryId) {
+    private void setWebTextViewAutoFillable(int queryId, String preview) {
         if (mWebView != null) {
-            Message.obtain(mWebView.mPrivateHandler, WebView.SET_AUTOFILLABLE, queryId,
-                    /* unused */0).sendToTarget();
+            Message.obtain(mWebView.mPrivateHandler, WebView.SET_AUTOFILLABLE,
+                    new AutoFillData(queryId, preview))
+                    .sendToTarget();
         }
     }
 
