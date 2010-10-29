@@ -655,7 +655,10 @@ public abstract class WallpaperService extends Service {
             if (!mDestroyed) {
                 if (DEBUG) Log.v(TAG, "onDesiredSizeChanged("
                         + desiredWidth + "," + desiredHeight + "): " + this);
+                mIWallpaperEngine.mReqWidth = desiredWidth;
+                mIWallpaperEngine.mReqHeight = desiredHeight;
                 onDesiredSizeChanged(desiredWidth, desiredHeight);
+                doOffsetsChanged();
             }
         }
         
