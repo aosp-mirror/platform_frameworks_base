@@ -65,7 +65,7 @@ public abstract class StatusBarService extends SystemUI implements CommandQueue.
         mCommandQueue = new CommandQueue(this, iconList);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        boolean[] switches = new boolean[2];
+        boolean[] switches = new boolean[3];
         try {
             mBarService.registerStatusBar(mCommandQueue, iconList, notificationKeys, notifications,
                     switches);
@@ -75,6 +75,7 @@ public abstract class StatusBarService extends SystemUI implements CommandQueue.
 
         setLightsOn(switches[0]);
         setMenuKeyVisible(switches[1]);
+        setIMEButtonVisible(switches[2]);
 
         // Set up the initial icon state
         int N = iconList.size();
@@ -119,6 +120,7 @@ public abstract class StatusBarService extends SystemUI implements CommandQueue.
                    + " icons=" + iconList.size()
                    + " lights=" + (switches[0]?"on":"off")
                    + " menu=" + (switches[1]?"visible":"invisible")
+                   + " imeButton=" + (switches[2]?"visible":"invisible")
                    );
         }
     }

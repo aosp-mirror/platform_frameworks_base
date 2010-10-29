@@ -95,6 +95,8 @@ public class TabletStatusBarService extends StatusBarService {
     View mMenuButton;
     View mRecentButton;
 
+    InputMethodButton mInputMethodButton;
+
     NotificationPanel mNotificationPanel;
     SystemPanel mSystemPanel;
     NotificationPanel mNotificationPeekWindow;
@@ -304,6 +306,9 @@ public class TabletStatusBarService extends StatusBarService {
         // The navigation buttons
         mNavigationArea = sb.findViewById(R.id.navigationArea);
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
+
+        // The bar contents buttons
+        mInputMethodButton = (InputMethodButton) mBarContents.findViewById(R.id.imeButton);
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -688,6 +693,14 @@ public class TabletStatusBarService extends StatusBarService {
         setViewVisibility(mMenuButton,
                 visible ? View.VISIBLE : View.INVISIBLE,
                 visible ? R.anim.navigation_in : R.anim.navigation_out);
+    }
+
+    public void setIMEButtonVisible(boolean visible) {
+
+        if (DEBUG) {
+            Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
+        }
+        mInputMethodButton.setIMEButtonVisible(visible);
     }
 
     private void setAreThereNotifications() {

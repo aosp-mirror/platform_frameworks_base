@@ -74,6 +74,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
     boolean mMenuVisible = false;
 
+    boolean mIMEButtonVisible = false;
+
     private class DisableRecord implements IBinder.DeathRecipient {
         String pkg;
         int what;
@@ -257,6 +259,28 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    public void setIMEButtonVisible(final boolean visible) {
+        enforceStatusBar();
+
+        if (SPEW) Slog.d(TAG, (visible?"showing":"hiding") + " IME Button");
+
+        synchronized(mLock) {
+            if (mIMEButtonVisible != visible) {
+                mIMEButtonVisible = visible;
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        if (mBar != null) {
+                            try {
+                                mBar.setIMEButtonVisible(visible);
+                            } catch (RemoteException ex) {
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }
+
     /**
      * This is used for the automatic version of lights-out mode.  Only call this from
      * the window manager.
@@ -345,6 +369,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         synchronized (mLock) {
             switches[0] = mLightsOn;
             switches[1] = mMenuVisible;
+            switches[2] = mIMEButtonVisible;
         }
     }
 

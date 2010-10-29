@@ -32,6 +32,7 @@ interface IStatusBarService
     void removeIcon(String slot);
     void setActiveWindowIsFullscreen(boolean fullscreen);
     void setMenuKeyVisible(boolean visible);
+    void setIMEButtonVisible(boolean visible);
 
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
