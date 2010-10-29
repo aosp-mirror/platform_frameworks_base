@@ -26,20 +26,21 @@ import android.app.ActionBar.NavigationCallback;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.TypedArray;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -63,19 +64,27 @@ public class ActionBarView extends ViewGroup {
      * Display options that require re-layout as opposed to a simple invalidate
      */
     private static final int DISPLAY_RELAYOUT_MASK =
-            ActionBar.DISPLAY_HIDE_HOME |
-            ActionBar.DISPLAY_USE_LOGO;
+            ActionBar.DISPLAY_SHOW_HOME |
+            ActionBar.DISPLAY_USE_LOGO |
+            ActionBar.DISPLAY_HOME_AS_UP |
+            ActionBar.DISPLAY_SHOW_CUSTOM |
+            ActionBar.DISPLAY_SHOW_TITLE;
+
+    private static final int DEFAULT_CUSTOM_GRAVITY = Gravity.LEFT | Gravity.CENTER_VERTICAL;
     
     private final int mContentHeight;
 
     private int mNavigationMode;
-    private int mDisplayOptions;
+    private int mDisplayOptions = ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP;
     private CharSequence mTitle;
     private CharSequence mSubtitle;
     private Drawable mIcon;
     private Drawable mLogo;
     private Drawable mDivider;
+    private Drawable mHomeAsUpIndicator;
 
+    private LinearLayout mHomeLayout;
+    private ImageView mHomeAsUpView;
     private ImageView mIconView;
     private ImageView mLogoView;
     private LinearLayout mTitleLayout;
@@ -98,7 +107,8 @@ public class ActionBarView extends ViewGroup {
     private ActionBarContextView mContextView;
 
     private ActionMenuItem mLogoNavItem;
-    
+
+    private SpinnerAdapter mSpinnerAdapter;
     private NavigationCallback mCallback;
 
     private final AdapterView.OnItemSelectedListener mNavItemSelectedListener =
@@ -122,30 +132,56 @@ public class ActionBarView extends ViewGroup {
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar);
 
-        final int colorFilter = a.getColor(R.styleable.ActionBar_colorFilter, 0);
-
-        if (colorFilter != 0) {
-            final Drawable d = getBackground();
-            d.setDither(true);
-            d.setColorFilter(new PorterDuffColorFilter(colorFilter, PorterDuff.Mode.OVERLAY));
-        }
-
-        ApplicationInfo info = context.getApplicationInfo();
+        ApplicationInfo appInfo = context.getApplicationInfo();
         PackageManager pm = context.getPackageManager();
         mNavigationMode = a.getInt(R.styleable.ActionBar_navigationMode,
                 ActionBar.NAVIGATION_MODE_STANDARD);
         mTitle = a.getText(R.styleable.ActionBar_title);
         mSubtitle = a.getText(R.styleable.ActionBar_subtitle);
-        mDisplayOptions = a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT);
         
         mLogo = a.getDrawable(R.styleable.ActionBar_logo);
         if (mLogo == null) {
-            mLogo = info.loadLogo(pm);
+            if (context instanceof Activity) {
+                try {
+                    mLogo = pm.getActivityLogo(((Activity) context).getComponentName());
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, "Activity component name not found!", e);
+                }
+            }
+            if (mLogo == null) {
+                mLogo = appInfo.loadLogo(pm);
+            }
         }
+
         mIcon = a.getDrawable(R.styleable.ActionBar_icon);
         if (mIcon == null) {
-            mIcon = info.loadIcon(pm);
+            if (context instanceof Activity) {
+                try {
+                    mIcon = pm.getActivityIcon(((Activity) context).getComponentName());
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, "Activity component name not found!", e);
+                }
+            }
+            if (mIcon == null) {
+                mIcon = appInfo.loadIcon(pm);
+            }
         }
+
+        mHomeLayout = new LinearLayout(context, null,
+                com.android.internal.R.attr.actionButtonStyle);
+        mHomeLayout.setClickable(true);
+        mHomeLayout.setFocusable(true);
+        mHomeLayout.setOnClickListener(mHomeClickListener);
+        mHomeLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT));
+
+        mHomeAsUpIndicator = a.getDrawable(R.styleable.ActionBar_homeAsUpIndicator);
+
+        mHomeAsUpView = new ImageView(context);
+        mHomeAsUpView.setImageDrawable(mHomeAsUpIndicator);
+        mHomeAsUpView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT));
+        mHomeLayout.addView(mHomeAsUpView);
         
         Drawable background = a.getDrawable(R.styleable.ActionBar_background);
         if (background != null) {
@@ -155,11 +191,14 @@ public class ActionBarView extends ViewGroup {
         mTitleStyleRes = a.getResourceId(R.styleable.ActionBar_titleTextStyle, 0);
         mSubtitleStyleRes = a.getResourceId(R.styleable.ActionBar_subtitleTextStyle, 0);
 
+        setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT));
+
         final int customNavId = a.getResourceId(R.styleable.ActionBar_customNavigationLayout, 0);
         if (customNavId != 0) {
             LayoutInflater inflater = LayoutInflater.from(context);
             mCustomNavView = (View) inflater.inflate(customNavId, null);
-            mNavigationMode = ActionBar.NAVIGATION_MODE_CUSTOM;
+            mNavigationMode = ActionBar.NAVIGATION_MODE_STANDARD;
+            setDisplayOptions(mDisplayOptions | ActionBar.DISPLAY_SHOW_CUSTOM);
         }
 
         mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
@@ -241,9 +280,13 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void setCustomNavigationView(View view) {
+        final boolean showCustom = (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0;
+        if (mCustomNavView != null && showCustom) {
+            removeView(mCustomNavView);
+        }
         mCustomNavView = view;
-        if (view != null) {
-            setNavigationMode(ActionBar.NAVIGATION_MODE_CUSTOM);
+        if (mCustomNavView != null && showCustom) {
+            addView(mCustomNavView);
         }
     }
 
@@ -296,15 +339,43 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void setDisplayOptions(int options) {
+        // TODO Remove this once DISPLAY_HIDE_HOME is removed
+        if ((options & ActionBar.DISPLAY_HIDE_HOME) != 0) {
+            options &= ~(ActionBar.DISPLAY_HIDE_HOME | ActionBar.DISPLAY_SHOW_HOME);
+        }
+        // End TODO
+
         final int flagsChanged = options ^ mDisplayOptions;
         mDisplayOptions = options;
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
-            final int vis = (options & ActionBar.DISPLAY_HIDE_HOME) != 0 ? GONE : VISIBLE;
-            if (mLogoView != null) {
-                mLogoView.setVisibility(vis);
+            final int vis = (options & ActionBar.DISPLAY_SHOW_HOME) != 0 ? VISIBLE : GONE;
+            mHomeLayout.setVisibility(vis);
+
+            if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+                mHomeAsUpView.setVisibility((options & ActionBar.DISPLAY_HOME_AS_UP) != 0
+                        ? VISIBLE : GONE);
             }
-            if (mIconView != null) {
-                mIconView.setVisibility(vis);
+
+            if (mLogoView != null && (flagsChanged & ActionBar.DISPLAY_USE_LOGO) != 0) {
+                final boolean logoVis = (options & ActionBar.DISPLAY_USE_LOGO) != 0;
+                mLogoView.setVisibility(logoVis ? VISIBLE : GONE);
+                mIconView.setVisibility(logoVis ? GONE : VISIBLE);
+            }
+
+            if ((flagsChanged & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
+                if ((options & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
+                    initTitle();
+                } else {
+                    removeView(mTitleLayout);
+                }
+            }
+
+            if ((flagsChanged & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 && mCustomNavView != null) {
+                if ((options & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
+                    addView(mCustomNavView);
+                } else {
+                    removeView(mCustomNavView);
+                }
             }
             
             requestLayout();
@@ -317,52 +388,27 @@ public class ActionBarView extends ViewGroup {
         final int oldMode = mNavigationMode;
         if (mode != oldMode) {
             switch (oldMode) {
-            case ActionBar.NAVIGATION_MODE_STANDARD:
-                if (mTitleLayout != null) {
-                    removeView(mTitleLayout);
-                    mTitleLayout = null;
-                    mTitleView = null;
-                    mSubtitleView = null;
-                }
-                break;
-            case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+            case ActionBar.NAVIGATION_MODE_LIST:
                 if (mSpinner != null) {
                     removeView(mSpinner);
-                    mSpinner = null;
-                }
-                break;
-            case ActionBar.NAVIGATION_MODE_CUSTOM:
-                if (mCustomNavView != null) {
-                    removeView(mCustomNavView);
-                    mCustomNavView = null;
                 }
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
                 if (mTabLayout != null) {
                     removeView(mTabScrollView);
-                    mTabLayout = null;
-                    mTabScrollView = null;
                 }
             }
             
             switch (mode) {
-            case ActionBar.NAVIGATION_MODE_STANDARD:
-                initTitle();
-                break;
-            case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+            case ActionBar.NAVIGATION_MODE_LIST:
                 mSpinner = new Spinner(mContext, null,
                         com.android.internal.R.attr.actionDropDownStyle);
+                mSpinner.setAdapter(mSpinnerAdapter);
                 mSpinner.setOnItemSelectedListener(mNavItemSelectedListener);
                 addView(mSpinner);
                 break;
-            case ActionBar.NAVIGATION_MODE_CUSTOM:
-                addView(mCustomNavView);
-                break;
             case ActionBar.NAVIGATION_MODE_TABS:
-                mTabScrollView = new HorizontalScrollView(getContext());
-                mTabLayout = new LinearLayout(getContext(), null,
-                        com.android.internal.R.attr.actionBarTabBarStyle);
-                mTabScrollView.addView(mTabLayout);
+                ensureTabsExist();
                 addView(mTabScrollView);
                 break;
             }
@@ -371,8 +417,24 @@ public class ActionBarView extends ViewGroup {
         }
     }
     
+    private void ensureTabsExist() {
+        if (mTabScrollView == null) {
+            mTabScrollView = new HorizontalScrollView(getContext());
+            mTabLayout = new LinearLayout(getContext(), null,
+                    com.android.internal.R.attr.actionBarTabBarStyle);
+            mTabScrollView.addView(mTabLayout);
+        }
+    }
+
     public void setDropdownAdapter(SpinnerAdapter adapter) {
-        mSpinner.setAdapter(adapter);
+        mSpinnerAdapter = adapter;
+        if (mSpinner != null) {
+            mSpinner.setAdapter(adapter);
+        }
+    }
+
+    public SpinnerAdapter getDropdownAdapter() {
+        return mSpinnerAdapter;
     }
 
     public void setDropdownSelectedPosition(int position) {
@@ -407,6 +469,7 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void addTab(ActionBar.Tab tab) {
+        ensureTabsExist();
         final boolean isFirst = mTabLayout.getChildCount() == 0;
         View tabView = createTabView(tab);
         mTabLayout.addView(tabView);
@@ -416,6 +479,7 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void addTab(ActionBar.Tab tab, int position) {
+        ensureTabsExist();
         final boolean isFirst = mTabLayout.getChildCount() == 0;
         final TabView tabView = createTabView(tab);
         mTabLayout.addView(tabView, position);
@@ -425,45 +489,49 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void removeTabAt(int position) {
-        mTabLayout.removeViewAt(position);
+        if (mTabLayout != null) {
+            mTabLayout.removeViewAt(position);
+        }
     }
 
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
         // Used by custom nav views if they don't supply layout params. Everything else
         // added to an ActionBarView should have them already.
-        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        return new ActionBar.LayoutParams(DEFAULT_CUSTOM_GRAVITY);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        if ((mDisplayOptions & ActionBar.DISPLAY_HIDE_HOME) == 0) {
-            if (mLogo != null && (mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) != 0) {
-                mLogoView = new ImageView(getContext(), null,
-                        com.android.internal.R.attr.actionButtonStyle);
-                mLogoView.setAdjustViewBounds(true);
-                mLogoView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.MATCH_PARENT));
-                mLogoView.setImageDrawable(mLogo);
-                mLogoView.setClickable(true);
-                mLogoView.setFocusable(true);
-                mLogoView.setOnClickListener(mHomeClickListener);
-                addView(mLogoView);
-            } else if (mIcon != null) {
-                mIconView = new ImageView(getContext(), null,
-                        com.android.internal.R.attr.actionButtonStyle);
-                mIconView.setAdjustViewBounds(true);
-                mIconView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                        LayoutParams.MATCH_PARENT));
-                mIconView.setImageDrawable(mIcon);
-                mIconView.setClickable(true);
-                mIconView.setFocusable(true);
-                mIconView.setOnClickListener(mHomeClickListener);
-                addView(mIconView);
-            }
+        final Context context = getContext();
+
+        if (mLogo != null) {
+            mLogoView = new ImageView(context);
+            mLogoView.setScaleType(ImageView.ScaleType.CENTER);
+            mLogoView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                    LayoutParams.MATCH_PARENT));
+            mLogoView.setImageDrawable(mLogo);
+            mLogoView.setVisibility((mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) != 0
+                    ? VISIBLE : GONE);
+            mHomeLayout.addView(mLogoView);
         }
+
+        if (mIcon != null) {
+            mIconView = new ImageView(context, null,
+                    com.android.internal.R.attr.actionButtonStyle);
+            mIconView.setScaleType(ImageView.ScaleType.CENTER);
+            mIconView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                    LayoutParams.MATCH_PARENT));
+            mIconView.setImageDrawable(mIcon);
+            mIconView.setVisibility(
+                    (mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) == 0 || mLogo == null
+                    ? VISIBLE : GONE);
+            mHomeLayout.addView(mIconView);
+        }
+
+        addView(mHomeLayout);
 
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_STANDARD:
@@ -472,19 +540,23 @@ public class ActionBarView extends ViewGroup {
             }
             break;
             
-        case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+        case ActionBar.NAVIGATION_MODE_LIST:
             throw new UnsupportedOperationException(
-                    "Inflating dropdown list navigation isn't supported yet!");
+                    "Inflating list navigation isn't supported yet!");
             
         case ActionBar.NAVIGATION_MODE_TABS:
             throw new UnsupportedOperationException(
                     "Inflating tab navigation isn't supported yet!");
-            
-        case ActionBar.NAVIGATION_MODE_CUSTOM:
-            if (mCustomNavView != null) {
+        }
+
+        if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
+            final ViewParent parent = mCustomNavView.getParent();
+            if (parent != this) {
+                if (parent instanceof ViewGroup) {
+                    ((ViewGroup) parent).removeView(mCustomNavView);
+                }
                 addView(mCustomNavView);
             }
-            break;
         }
     }
     
@@ -513,6 +585,7 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void setTabSelected(int position) {
+        ensureTabsExist();
         final int tabCount = mTabLayout.getChildCount();
         for (int i = 0; i < tabCount; i++) {
             final View child = mTabLayout.getChildAt(i);
@@ -544,57 +617,40 @@ public class ActionBarView extends ViewGroup {
                 mContentHeight : MeasureSpec.getSize(heightMeasureSpec);
         
         final int verticalPadding = getPaddingTop() + getPaddingBottom();
-        int availableWidth = contentWidth - getPaddingLeft() - getPaddingRight();
+        final int paddingLeft = getPaddingLeft();
+        final int paddingRight = getPaddingRight();
         final int height = maxHeight - verticalPadding;
         final int childSpecHeight = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
 
-        if (mLogoView != null && mLogoView.getVisibility() != GONE) {
-            availableWidth = measureChildView(mLogoView, availableWidth, childSpecHeight, 0);
-        }
-        if (mIconView != null && mIconView.getVisibility() != GONE) {
-            availableWidth = measureChildView(mIconView, availableWidth, childSpecHeight, 0);
+        int availableWidth = contentWidth - paddingLeft - paddingRight;
+        int leftOfCenter = availableWidth / 2;
+        int rightOfCenter = leftOfCenter;
+
+        if (mHomeLayout.getVisibility() != GONE) {
+            availableWidth = measureChildView(mHomeLayout, availableWidth, childSpecHeight, 0);
+            leftOfCenter -= mHomeLayout.getMeasuredWidth();
         }
         
         if (mMenuView != null) {
             availableWidth = measureChildView(mMenuView, availableWidth,
                     childSpecHeight, 0);
+            rightOfCenter -= mMenuView.getMeasuredWidth();
         }
-        
+
+        if (mTitleLayout != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
+            availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
+            leftOfCenter -= mTitleLayout.getMeasuredWidth();
+        }
+
         switch (mNavigationMode) {
-        case ActionBar.NAVIGATION_MODE_STANDARD:
-            if (mTitleLayout != null) {
-                measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
-            }
-            break;
-        case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+        case ActionBar.NAVIGATION_MODE_LIST:
             if (mSpinner != null) {
                 mSpinner.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
-            }
-            break;
-        case ActionBar.NAVIGATION_MODE_CUSTOM:
-            if (mCustomNavView != null) {
-                LayoutParams lp = mCustomNavView.getLayoutParams();
-                final int customNavWidthMode = lp.width != LayoutParams.WRAP_CONTENT ?
-                        MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
-                final int customNavWidth = lp.width >= 0 ?
-                        Math.min(lp.width, availableWidth) : availableWidth;
-
-                // If the action bar is wrapping to its content height, don't allow a custom
-                // view to MATCH_PARENT.
-                int customNavHeightMode;
-                if (mContentHeight <= 0) {
-                    customNavHeightMode = MeasureSpec.AT_MOST;
-                } else {
-                    customNavHeightMode = lp.height != LayoutParams.WRAP_CONTENT ?
-                            MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
-                }
-                final int customNavHeight = lp.height >= 0 ?
-                        Math.min(lp.height, height) : height;
-                mCustomNavView.measure(
-                        MeasureSpec.makeMeasureSpec(customNavWidth, customNavWidthMode),
-                        MeasureSpec.makeMeasureSpec(customNavHeight, customNavHeightMode));
+                final int spinnerWidth = mSpinner.getMeasuredWidth();
+                availableWidth -= spinnerWidth;
+                leftOfCenter -= spinnerWidth;
             }
             break;
         case ActionBar.NAVIGATION_MODE_TABS:
@@ -602,8 +658,54 @@ public class ActionBarView extends ViewGroup {
                 mTabScrollView.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+                final int tabWidth = mTabScrollView.getMeasuredWidth();
+                availableWidth -= tabWidth;
+                leftOfCenter -= tabWidth;
             }
             break;
+        }
+
+        if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 && mCustomNavView != null) {
+            final LayoutParams lp = generateLayoutParams(mCustomNavView.getLayoutParams());
+            final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
+                    (ActionBar.LayoutParams) lp : null;
+
+            int horizontalMargin = 0;
+            int verticalMargin = 0;
+            if (ablp != null) {
+                horizontalMargin = ablp.leftMargin + ablp.rightMargin;
+                verticalMargin = ablp.topMargin + ablp.bottomMargin;
+            }
+
+            // If the action bar is wrapping to its content height, don't allow a custom
+            // view to MATCH_PARENT.
+            int customNavHeightMode;
+            if (mContentHeight <= 0) {
+                customNavHeightMode = MeasureSpec.AT_MOST;
+            } else {
+                customNavHeightMode = lp.height != LayoutParams.WRAP_CONTENT ?
+                        MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+            }
+            final int customNavHeight = Math.max(0,
+                    (lp.height >= 0 ? Math.min(lp.height, height) : height) - verticalMargin);
+
+            final int customNavWidthMode = lp.width != LayoutParams.WRAP_CONTENT ?
+                    MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+            int customNavWidth = Math.max(0,
+                    (lp.width >= 0 ? Math.min(lp.width, availableWidth) : availableWidth)
+                    - horizontalMargin);
+            final int hgrav = (ablp != null ? ablp.gravity : DEFAULT_CUSTOM_GRAVITY) &
+                    Gravity.HORIZONTAL_GRAVITY_MASK;
+
+            // Centering a custom view is treated specially; we try to center within the whole
+            // action bar rather than in the available space.
+            if (hgrav == Gravity.CENTER_HORIZONTAL && lp.width == LayoutParams.MATCH_PARENT) {
+                customNavWidth = Math.min(leftOfCenter, rightOfCenter) * 2;
+            }
+
+            mCustomNavView.measure(
+                    MeasureSpec.makeMeasureSpec(customNavWidth, customNavWidthMode),
+                    MeasureSpec.makeMeasureSpec(customNavHeight, customNavHeightMode));
         }
 
         if (mContentHeight <= 0) {
@@ -642,27 +744,20 @@ public class ActionBarView extends ViewGroup {
         final int y = getPaddingTop();
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
 
-        if (mLogoView != null && mLogoView.getVisibility() != GONE) {
-            x += positionChild(mLogoView, x, y, contentHeight);
-        }
-        if (mIconView != null && mIconView.getVisibility() != GONE) {
-            x += positionChild(mIconView, x, y, contentHeight);
+        if (mHomeLayout.getVisibility() != GONE) {
+            x += positionChild(mHomeLayout, x, y, contentHeight);
         }
         
+        if (mTitleLayout != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
+            x += positionChild(mTitleLayout, x, y, contentHeight);
+        }
+
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_STANDARD:
-            if (mTitleLayout != null) {
-                x += positionChild(mTitleLayout, x, y, contentHeight);
-            }
             break;
-        case ActionBar.NAVIGATION_MODE_DROPDOWN_LIST:
+        case ActionBar.NAVIGATION_MODE_LIST:
             if (mSpinner != null) {
                 x += positionChild(mSpinner, x, y, contentHeight);
-            }
-            break;
-        case ActionBar.NAVIGATION_MODE_CUSTOM:
-            if (mCustomNavView != null) {
-                x += positionChild(mCustomNavView, x, y, contentHeight);
             }
             break;
         case ActionBar.NAVIGATION_MODE_TABS:
@@ -671,10 +766,67 @@ public class ActionBarView extends ViewGroup {
             }
         }
 
-        x = r - l - getPaddingRight();
-
+        int menuLeft = r - l - getPaddingRight();
         if (mMenuView != null) {
-            x -= positionChildInverse(mMenuView, x, y, contentHeight);
+            positionChildInverse(mMenuView, menuLeft, y, contentHeight);
+            menuLeft -= mMenuView.getMeasuredWidth();
+        }
+
+        if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
+            LayoutParams lp = mCustomNavView.getLayoutParams();
+            final ActionBar.LayoutParams ablp = lp instanceof ActionBar.LayoutParams ?
+                    (ActionBar.LayoutParams) lp : null;
+
+            final int gravity = ablp != null ? ablp.gravity : DEFAULT_CUSTOM_GRAVITY;
+            final int navWidth = mCustomNavView.getMeasuredWidth();
+
+            int topMargin = 0;
+            int bottomMargin = 0;
+            if (ablp != null) {
+                x += ablp.leftMargin;
+                menuLeft -= ablp.rightMargin;
+                topMargin = ablp.topMargin;
+                bottomMargin = ablp.bottomMargin;
+            }
+
+            int hgravity = gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+            // See if we actually have room to truly center; if not push against left or right.
+            if (hgravity == Gravity.CENTER_HORIZONTAL) {
+                final int centeredLeft = ((mRight - mLeft) - navWidth) / 2;
+                if (centeredLeft < x) {
+                    hgravity = Gravity.LEFT;
+                } else if (centeredLeft + navWidth > menuLeft) {
+                    hgravity = Gravity.RIGHT;
+                }
+            }
+
+            int xpos = 0;
+            switch (hgravity) {
+                case Gravity.CENTER_HORIZONTAL:
+                    xpos = ((mRight - mLeft) - navWidth) / 2;
+                    break;
+                case Gravity.LEFT:
+                    xpos = x;
+                    break;
+                case Gravity.RIGHT:
+                    xpos = menuLeft - navWidth;
+                    break;
+            }
+
+            int ypos = 0;
+            switch (gravity & Gravity.VERTICAL_GRAVITY_MASK) {
+                case Gravity.CENTER_VERTICAL:
+                    ypos = ((mBottom - mTop) - mCustomNavView.getMeasuredHeight()) / 2;
+                    break;
+                case Gravity.TOP:
+                    ypos = getPaddingTop() + topMargin;
+                    break;
+                case Gravity.BOTTOM:
+                    ypos = getHeight() - getPaddingBottom() - mCustomNavView.getMeasuredHeight()
+                            - bottomMargin;
+                    break;
+            }
+            x += positionChild(mCustomNavView, xpos, ypos, contentHeight);
         }
     }
 

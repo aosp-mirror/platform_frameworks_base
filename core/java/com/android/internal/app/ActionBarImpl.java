@@ -52,9 +52,6 @@ import java.util.ArrayList;
 public class ActionBarImpl extends ActionBar {
     private static final int NORMAL_VIEW = 0;
     private static final int CONTEXT_VIEW = 1;
-    
-    private static final int TAB_SWITCH_SHOW_HIDE = 0;
-    private static final int TAB_SWITCH_ADD_REMOVE = 1;
 
     private Context mContext;
     private Activity mActivity;
@@ -67,9 +64,7 @@ public class ActionBarImpl extends ActionBar {
 
     private ArrayList<TabImpl> mTabs = new ArrayList<TabImpl>();
 
-    private int mTabContainerViewId = android.R.id.content;
     private TabImpl mSelectedTab;
-    private int mTabSwitchMode = TAB_SWITCH_ADD_REMOVE;
     
     private ActionMode mActionMode;
     
@@ -133,7 +128,9 @@ public class ActionBarImpl extends ActionBar {
 
     public void setCustomNavigationMode(View view) {
         cleanupTabs();
-        mActionView.setCustomNavigationView(view);
+        setCustomView(view);
+        setDisplayOptions(DISPLAY_SHOW_CUSTOM, DISPLAY_SHOW_CUSTOM | DISPLAY_SHOW_TITLE);
+        mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
         mActionView.setCallback(null);
     }
 
@@ -144,16 +141,17 @@ public class ActionBarImpl extends ActionBar {
     public void setDropdownNavigationMode(SpinnerAdapter adapter, NavigationCallback callback,
             int defaultSelectedPosition) {
         cleanupTabs();
-        mActionView.setNavigationMode(NAVIGATION_MODE_DROPDOWN_LIST);
-        mActionView.setDropdownAdapter(adapter);
+        setDisplayOptions(0, DISPLAY_SHOW_CUSTOM | DISPLAY_SHOW_TITLE);
+        mActionView.setNavigationMode(NAVIGATION_MODE_LIST);
+        setListNavigationCallbacks(adapter, callback);
         if (defaultSelectedPosition >= 0) {
             mActionView.setDropdownSelectedPosition(defaultSelectedPosition);
         }
-        mActionView.setCallback(callback);
     }
 
     public void setStandardNavigationMode() {
         cleanupTabs();
+        setDisplayOptions(DISPLAY_SHOW_TITLE, DISPLAY_SHOW_TITLE | DISPLAY_SHOW_CUSTOM);
         mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
         mActionView.setCallback(null);
     }
@@ -163,24 +161,21 @@ public class ActionBarImpl extends ActionBar {
         case NAVIGATION_MODE_TABS:
             selectTab(mTabs.get(position));
             break;
-        case NAVIGATION_MODE_DROPDOWN_LIST:
+        case NAVIGATION_MODE_LIST:
             mActionView.setDropdownSelectedPosition(position);
             break;
         default:
             throw new IllegalStateException(
-                    "setSelectedNavigationItem not valid for current navigation mode");
+                    "setSelectedNavigationIndex not valid for current navigation mode");
         }
     }
 
     public int getSelectedNavigationItem() {
-        switch (mActionView.getNavigationMode()) {
-        case NAVIGATION_MODE_TABS:
-            return mSelectedTab.getPosition();
-        case NAVIGATION_MODE_DROPDOWN_LIST:
-            return mActionView.getDropdownSelectedPosition();
-        default:
-            return -1;
-        }
+        return getSelectedNavigationIndex();
+    }
+
+    public void removeAllTabs() {
+        cleanupTabs();
     }
 
     private void cleanupTabs() {
@@ -321,6 +316,7 @@ public class ActionBarImpl extends ActionBar {
             throw new IllegalStateException(
                     "Tab navigation mode cannot be used outside of an Activity");
         }
+        setDisplayOptions(0, DISPLAY_SHOW_TITLE | DISPLAY_SHOW_CUSTOM);
         mActionView.setNavigationMode(NAVIGATION_MODE_TABS);
     }
 
@@ -510,8 +506,9 @@ public class ActionBarImpl extends ActionBar {
         }
 
         @Override
-        public void setTag(Object tag) {
+        public Tab setTag(Object tag) {
             mTag = tag;
+            return this;
         }
 
         public ActionBar.TabListener getCallback() {
@@ -519,8 +516,9 @@ public class ActionBarImpl extends ActionBar {
         }
 
         @Override
-        public void setTabListener(ActionBar.TabListener callback) {
+        public Tab setTabListener(ActionBar.TabListener callback) {
             mCallback = callback;
+            return this;
         }
 
         @Override
@@ -529,8 +527,9 @@ public class ActionBarImpl extends ActionBar {
         }
 
         @Override
-        public void setCustomView(View view) {
+        public Tab setCustomView(View view) {
             mCustomView = view;
+            return this;
         }
 
         @Override
@@ -553,18 +552,72 @@ public class ActionBarImpl extends ActionBar {
         }
 
         @Override
-        public void setIcon(Drawable icon) {
+        public Tab setIcon(Drawable icon) {
             mIcon = icon;
+            return this;
         }
 
         @Override
-        public void setText(CharSequence text) {
+        public Tab setText(CharSequence text) {
             mText = text;
+            return this;
         }
 
         @Override
         public void select() {
             selectTab(this);
         }
+    }
+
+    @Override
+    public void setCustomView(View view) {
+        mActionView.setCustomNavigationView(view);
+    }
+
+    @Override
+    public void setCustomView(View view, LayoutParams layoutParams) {
+        view.setLayoutParams(layoutParams);
+        mActionView.setCustomNavigationView(view);
+    }
+
+    @Override
+    public void setListNavigationCallbacks(SpinnerAdapter adapter, NavigationCallback callback) {
+        mActionView.setDropdownAdapter(adapter);
+        mActionView.setCallback(callback);
+    }
+
+    @Override
+    public int getSelectedNavigationIndex() {
+        switch (mActionView.getNavigationMode()) {
+            case NAVIGATION_MODE_TABS:
+                return mSelectedTab.getPosition();
+            case NAVIGATION_MODE_LIST:
+                return mActionView.getDropdownSelectedPosition();
+            default:
+                return -1;
+        }
+    }
+
+    @Override
+    public int getNavigationItemCount() {
+        switch (mActionView.getNavigationMode()) {
+            case NAVIGATION_MODE_TABS:
+                return mTabs.size();
+            case NAVIGATION_MODE_LIST:
+                SpinnerAdapter adapter = mActionView.getDropdownAdapter();
+                return adapter != null ? adapter.getCount() : 0;
+            default:
+                return 0;
+        }
+    }
+
+    @Override
+    public void setNavigationMode(int mode) {
+        mActionView.setNavigationMode(mode);
+    }
+
+    @Override
+    public Tab getTabAt(int index) {
+        return mTabs.get(index);
     }
 }
