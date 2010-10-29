@@ -738,6 +738,27 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Get the current connection state of the local Bluetooth adapter.
+     * This can be used to check whether the local Bluetooth adapter is connected
+     * to any profile of any other remote Bluetooth Device.
+     *
+     * <p> Use this function along with {@link #ACTION_CONNECTION_STATE_CHANGED}
+     * intent to get the connection state of the adapter.
+     *
+     * @return One of {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTED},
+     * {@link #STATE_CONNECTING} or {@link #STATE_DISCONNECTED}
+     *
+     * @hide
+     */
+    public int getConnectionState() {
+        if (getState() != STATE_ON) return BluetoothAdapter.STATE_DISCONNECTED;
+        try {
+            return mService.getAdapterConnectionState();
+        } catch (RemoteException e) {Log.e(TAG, "getConnectionState:", e);}
+        return BluetoothAdapter.STATE_DISCONNECTED;
+    }
+
+    /**
      * Picks RFCOMM channels until none are left.
      * Avoids reserved channels.
      */
@@ -878,6 +899,7 @@ public final class BluetoothAdapter {
         socket.setCloseHandler(mHandler, handle);
         return socket;
     }
+
 
     /**
      * Construct an unencrypted, unauthenticated, RFCOMM server socket.
