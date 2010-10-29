@@ -37,20 +37,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class that handles an Internet audio call over SIP. {@link SipManager}
- * facilitates instantiating a {@code SipAudioCall} object for making/receiving
- * calls. See {@link SipManager#makeAudioCall} and
- * {@link SipManager#takeAudioCall}.
+ * Handles an Internet audio call over SIP. You can instantiate this class with {@link SipManager},
+ * using {@link SipManager#makeAudioCall makeAudioCall()} and  {@link SipManager#takeAudioCall
+ * takeAudioCall()}.
  *
- * <p>Requires permissions to use this class:
+ * <p class="note"><strong>Note:</strong> Using this class require the
  *   {@link android.Manifest.permission#INTERNET} and
- *   {@link android.Manifest.permission#USE_SIP}.
- * <br/>Requires permissions to {@link #startAudio}:
+ *   {@link android.Manifest.permission#USE_SIP} permissions.<br/><br/>In addition, {@link
+ *   #startAudio} requires the
  *   {@link android.Manifest.permission#RECORD_AUDIO},
- *   {@link android.Manifest.permission#ACCESS_WIFI_STATE} and
- *   {@link android.Manifest.permission#WAKE_LOCK}.
- * <br/>Requires permissions to {@link #setSpeakerMode}:
- *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
+ *   {@link android.Manifest.permission#ACCESS_WIFI_STATE}, and
+ *   {@link android.Manifest.permission#WAKE_LOCK} permissions; and {@link #setSpeakerMode
+ *   setSpeakerMode()} requires the
+ *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS} permission.</p>
  */
 public class SipAudioCall {
     private static final String TAG = SipAudioCall.class.getSimpleName();
@@ -58,7 +57,10 @@ public class SipAudioCall {
     private static final boolean DONT_RELEASE_SOCKET = false;
     private static final int SESSION_TIMEOUT = 5; // in seconds
 
-    /** Listener class for all event callbacks. */
+    /** Listener for events relating to a SIP call, such as when a call is being
+     * recieved ("on ringing") or a call is outgoing ("on calling").
+     * <p>Many of these events are also received by {@link SipSession.Listener}.</p>
+     */
     public static class Listener {
         /**
          * Called when the call object is ready to make another call.
@@ -199,7 +201,7 @@ public class SipAudioCall {
 
     /**
      * Sets the listener to listen to the audio call events. The method calls
-     * {@code setListener(listener, false)}.
+     * {@link #setListener setListener(listener, false)}.
      *
      * @param listener to listen to the audio call events of this object
      * @see #setListener(Listener, boolean)
@@ -537,14 +539,14 @@ public class SipAudioCall {
     /**
      * Initiates an audio call to the specified profile. The attempt will be
      * timed out if the call is not established within {@code timeout} seconds
-     * and {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * and {@link Listener#onError onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
      * will be called.
      *
      * @param peerProfile the SIP profile to make the call to
      * @param sipSession the {@link SipSession} for carrying out the call
      * @param timeout the timeout value in seconds. Default value (defined by
      *        SIP protocol) is used if {@code timeout} is zero or negative.
-     * @see Listener.onError
+     * @see Listener#onError
      * @throws SipException if the SIP service fails to create a session for the
      *        call
      */
@@ -582,12 +584,12 @@ public class SipAudioCall {
      * Puts a call on hold.  When succeeds, {@link Listener#onCallHeld} is
      * called. The attempt will be timed out if the call is not established
      * within {@code timeout} seconds and
-     * {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * {@link Listener#onError onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
      * will be called.
      *
      * @param timeout the timeout value in seconds. Default value (defined by
      *        SIP protocol) is used if {@code timeout} is zero or negative.
-     * @see Listener.onError
+     * @see Listener#onError
      * @throws SipException if the SIP service fails to hold the call
      */
     public void holdCall(int timeout) throws SipException {
@@ -604,12 +606,12 @@ public class SipAudioCall {
     /**
      * Answers a call. The attempt will be timed out if the call is not
      * established within {@code timeout} seconds and
-     * {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * {@link Listener#onError onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
      * will be called.
      *
      * @param timeout the timeout value in seconds. Default value (defined by
      *        SIP protocol) is used if {@code timeout} is zero or negative.
-     * @see Listener.onError
+     * @see Listener#onError
      * @throws SipException if the SIP service fails to answer the call
      */
     public void answerCall(int timeout) throws SipException {
@@ -628,12 +630,12 @@ public class SipAudioCall {
      * Continues a call that's on hold. When succeeds,
      * {@link Listener#onCallEstablished} is called. The attempt will be timed
      * out if the call is not established within {@code timeout} seconds and
-     * {@code Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * {@link Listener#onError onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
      * will be called.
      *
      * @param timeout the timeout value in seconds. Default value (defined by
      *        SIP protocol) is used if {@code timeout} is zero or negative.
-     * @see Listener.onError
+     * @see Listener#onError
      * @throws SipException if the SIP service fails to unhold the call
      */
     public void continueCall(int timeout) throws SipException {
@@ -786,8 +788,8 @@ public class SipAudioCall {
 
     /**
      * Puts the device to speaker mode.
-     * <p>Requires permission:
-     *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
+     * <p class="note"><strong>Note:</strong> Requires the
+     *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS} permission.</p>
      */
     public void setSpeakerMode(boolean speakerMode) {
         synchronized (this) {
@@ -797,20 +799,21 @@ public class SipAudioCall {
     }
 
     /**
-     * Sends a DTMF code. According to RFC2833, event 0--9 maps to decimal
+     * Sends a DTMF code. According to <a href="http://tools.ietf.org/html/rfc2833">RFC 2883</a>,
+     * event 0--9 maps to decimal
      * value 0--9, '*' to 10, '#' to 11, event 'A'--'D' to 12--15, and event
      * flash to 16. Currently, event flash is not supported.
      *
      * @param code the DTMF code to send. Value 0 to 15 (inclusive) are valid
      *        inputs.
-     * @see http://tools.ietf.org/html/rfc2833
      */
     public void sendDtmf(int code) {
         sendDtmf(code, null);
     }
 
     /**
-     * Sends a DTMF code. According to RFC2833, event 0--9 maps to decimal
+     * Sends a DTMF code. According to <a href="http://tools.ietf.org/html/rfc2833">RFC 2883</a>,
+     * event 0--9 maps to decimal
      * value 0--9, '*' to 10, '#' to 11, event 'A'--'D' to 12--15, and event
      * flash to 16. Currently, event flash is not supported.
      *
@@ -888,10 +891,10 @@ public class SipAudioCall {
     /**
      * Starts the audio for the established call. This method should be called
      * after {@link Listener#onCallEstablished} is called.
-     * <p>Requires permission:
+     * <p class="note"><strong>Note:</strong> Requires the
      *   {@link android.Manifest.permission#RECORD_AUDIO},
      *   {@link android.Manifest.permission#ACCESS_WIFI_STATE} and
-     *   {@link android.Manifest.permission#WAKE_LOCK}.
+     *   {@link android.Manifest.permission#WAKE_LOCK} permissions.</p>
      */
     public void startAudio() {
         try {

@@ -17,11 +17,11 @@
 package android.net.sip;
 
 /**
- * Defines error code returned in
- * {@link SipRegistrationListener#onRegistrationFailed},
- * {@link SipSession.Listener#onError},
- * {@link SipSession.Listener#onCallChangeFailed} and
- * {@link SipSession.Listener#onRegistrationFailed}.
+ * Defines error codes returned during SIP actions. For example, during
+ * {@link SipRegistrationListener#onRegistrationFailed onRegistrationFailed()},
+ * {@link SipSession.Listener#onError onError()},
+ * {@link SipSession.Listener#onCallChangeFailed onCallChangeFailed()} and
+ * {@link SipSession.Listener#onRegistrationFailed onRegistrationFailed()}.
  */
 public class SipErrorCode {
     /** Not an error. */
