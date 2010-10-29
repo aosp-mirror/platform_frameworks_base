@@ -1192,6 +1192,13 @@ void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
     mFlags |= FIRST_FRAME;
     mSeeking = false;
     mSeekNotificationSent = false;
+
+    if (mDecryptHandle != NULL) {
+        mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
+                Playback::PAUSE, 0);
+        mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
+                Playback::START, videoTimeUs / 1000);
+    }
 }
 
 void AwesomePlayer::onVideoEvent() {
@@ -1294,13 +1301,6 @@ void AwesomePlayer::onVideoEvent() {
     finishSeekIfNecessary(timeUs);
 
     TimeSource *ts = (mFlags & AUDIO_AT_EOS) ? &mSystemTimeSource : mTimeSource;
-
-    if (mDecryptHandle != NULL) {
-        mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
-                Playback::PAUSE, 0);
-        mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
-                Playback::START, timeUs / 1000);
-    }
 
     if (mFlags & FIRST_FRAME) {
         mFlags &= ~FIRST_FRAME;
