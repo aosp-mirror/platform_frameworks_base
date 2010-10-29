@@ -29,30 +29,29 @@ import android.util.Log;
 import java.text.ParseException;
 
 /**
- * The class provides API for various SIP related tasks. Specifically, the API
- * allows an application to:
+ * Provides APIs for SIP tasks, such as initiating SIP connections, and provides access to related
+ * SIP services. This class is the starting point for any SIP actions. You can acquire an instance
+ * of it with {@link #newInstance newInstance()}.</p>
+ * <p>The APIs in this class allows you to:</p>
  * <ul>
- * <li>open a {@link SipProfile} to get ready for making outbound calls or have
- *      the background SIP service listen to incoming calls and broadcast them
- *      with registered command string. See
- *      {@link #open(SipProfile, PendingIntent, SipRegistrationListener)},
- *      {@link #open(SipProfile)}, {@link #close}, {@link #isOpened} and
- *      {@link #isRegistered}. It also facilitates handling of the incoming call
- *      broadcast intent. See
- *      {@link #isIncomingCallIntent}, {@link #getCallId},
- *      {@link #getOfferSessionDescription} and {@link #takeAudioCall}.</li>
- * <li>make/take SIP-based audio calls. See
- *      {@link #makeAudioCall} and {@link #takeAudioCall}.</li>
- * <li>register/unregister with a SIP service provider manually. See
- *      {@link #register} and {@link #unregister}.</li>
- * <li>process SIP events directly with a {@link SipSession} created by
- *      {@link #createSipSession}.</li>
+ * <li>Create a {@link SipSession} to get ready for making calls or listen for incoming calls. See
+ * {@link #createSipSession createSipSession()} and {@link #getSessionFor getSessionFor()}.</li>
+ * <li>Initiate and receive generic SIP calls or audio-only SIP calls. Generic SIP calls may
+ * be video, audio, or other, and are initiated with {@link #open open()}. Audio-only SIP calls
+ * should be handled with a {@link SipAudioCall}, which you can acquire with {@link
+ * #makeAudioCall makeAudioCall()} and {@link #takeAudioCall takeAudioCall()}.</li>
+ * <li>Register and unregister with a SIP service provider, with
+ *      {@link #register register()} and {@link #unregister unregister()}.</li>
+ * <li>Verify session connectivity, with {@link #isOpened isOpened()} and
+ *      {@link #isRegistered isRegistered()}.</li>
  * </ul>
- * {@code SipManager} can only be instantiated if SIP API is supported by the
- * device. (See {@link #isApiSupported}).
- * <p>Requires permissions to use this class:
- *   {@link android.Manifest.permission#INTERNET} and
- *   {@link android.Manifest.permission#USE_SIP}.
+ * <p class="note"><strong>Note:</strong> Not all Android-powered devices support VOIP calls using
+ * SIP. You should always call {@link android.net.sip.SipManager#isVoipSupported
+ * isVoipSupported()} to verify that the device supports VOIP calling and {@link
+ * android.net.sip.SipManager#isApiSupported isApiSupported()} to verify that the device supports
+ * the SIP APIs.<br/><br/>Your application must also request the {@link
+ * android.Manifest.permission#INTERNET} and {@link android.Manifest.permission#USE_SIP}
+ * permissions.</p>
  */
 public class SipManager {
     /**
@@ -160,7 +159,7 @@ public class SipManager {
     }
 
     /**
-     * Opens the profile for making calls. The caller may make subsequent calls
+     * Opens the profile for making generic SIP calls. The caller may make subsequent calls
      * through {@link #makeAudioCall}. If one also wants to receive calls on the
      * profile, use
      * {@link #open(SipProfile, PendingIntent, SipRegistrationListener)}
@@ -179,7 +178,7 @@ public class SipManager {
     }
 
     /**
-     * Opens the profile for making calls and/or receiving calls. The caller may
+     * Opens the profile for making calls and/or receiving generic SIP calls. The caller may
      * make subsequent calls through {@link #makeAudioCall}. If the
      * auto-registration option is enabled in the profile, the SIP service
      * will register the profile to the corresponding SIP provider periodically
@@ -296,7 +295,7 @@ public class SipManager {
     /**
      * Creates a {@link SipAudioCall} to make a call. The attempt will be timed
      * out if the call is not established within {@code timeout} seconds and
-     * {@code SipAudioCall.Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * {@link SipAudioCall.Listener#onError onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
      * will be called.
      *
      * @param localProfile the SIP profile to make the call from
@@ -307,7 +306,7 @@ public class SipManager {
      *        SIP protocol) is used if {@code timeout} is zero or negative.
      * @return a {@link SipAudioCall} object
      * @throws SipException if calling the SIP service results in an error
-     * @see SipAudioCall.Listener.onError
+     * @see SipAudioCall.Listener#onError
      */
     public SipAudioCall makeAudioCall(SipProfile localProfile,
             SipProfile peerProfile, SipAudioCall.Listener listener, int timeout)
@@ -327,7 +326,7 @@ public class SipManager {
      * Creates a {@link SipAudioCall} to make an audio call. The attempt will be
      * timed out if the call is not established within {@code timeout} seconds
      * and
-     * {@code SipAudioCall.Listener.onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
+     * {@link SipAudioCall.Listener#onError onError(SipAudioCall, SipErrorCode.TIME_OUT, String)}
      * will be called.
      *
      * @param localProfileUri URI of the SIP profile to make the call from
@@ -338,7 +337,7 @@ public class SipManager {
      *        SIP protocol) is used if {@code timeout} is zero or negative.
      * @return a {@link SipAudioCall} object
      * @throws SipException if calling the SIP service results in an error
-     * @see SipAudioCall.Listener.onError
+     * @see SipAudioCall.Listener#onError
      */
     public SipAudioCall makeAudioCall(String localProfileUri,
             String peerProfileUri, SipAudioCall.Listener listener, int timeout)
@@ -449,7 +448,7 @@ public class SipManager {
      * receiving calls.
      * {@link #open(SipProfile, PendingIntent, SipRegistrationListener)} is
      * still needed to be called at least once in order for the SIP service to
-     * notify the caller with the {@code PendingIntent} when an incoming call is
+     * notify the caller with the {@link android.app.PendingIntent} when an incoming call is
      * received.
      *
      * @param localProfile the SIP profile to register with
