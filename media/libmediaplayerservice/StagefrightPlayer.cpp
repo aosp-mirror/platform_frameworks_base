@@ -147,16 +147,6 @@ player_type StagefrightPlayer::playerType() {
     return STAGEFRIGHT_PLAYER;
 }
 
-status_t StagefrightPlayer::suspend() {
-    LOGV("suspend");
-    return mPlayer->suspend();
-}
-
-status_t StagefrightPlayer::resume() {
-    LOGV("resume");
-    return mPlayer->resume();
-}
-
 status_t StagefrightPlayer::invoke(const Parcel &request, Parcel *reply) {
     return INVALID_OPERATION;
 }

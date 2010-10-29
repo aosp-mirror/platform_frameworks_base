@@ -62,9 +62,6 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private static final int STATE_PLAYING            = 3;
     private static final int STATE_PAUSED             = 4;
     private static final int STATE_PLAYBACK_COMPLETED = 5;
-    private static final int STATE_SUSPEND            = 6;
-    private static final int STATE_RESUME             = 7;
-    private static final int STATE_SUSPEND_UNSUPPORTED = 8;
 
     // mCurrentState is a VideoView object's current state.
     // mTargetState is the state that a method caller intends to reach.
@@ -90,7 +87,6 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private boolean     mCanPause;
     private boolean     mCanSeekBack;
     private boolean     mCanSeekForward;
-    private int         mStateWhenSuspended;  //state before calling suspend()
 
     public VideoView(Context context) {
         super(context);
@@ -470,14 +466,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         public void surfaceCreated(SurfaceHolder holder)
         {
             mSurfaceHolder = holder;
-            //resume() was called before surfaceCreated()
-            if (mMediaPlayer != null && mCurrentState == STATE_SUSPEND
-                   && mTargetState == STATE_RESUME) {
-                mMediaPlayer.setDisplay(mSurfaceHolder);
-                resume();
-            } else {
-                openVideo();
-            }
+            openVideo();
         }
 
         public void surfaceDestroyed(SurfaceHolder holder)
@@ -485,9 +474,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             // after we return from this we can't use the surface any more
             mSurfaceHolder = null;
             if (mMediaController != null) mMediaController.hide();
-            if (mCurrentState != STATE_SUSPEND) {
-                release(true);
-            }
+            release(true);
         }
     };
 
@@ -581,39 +568,14 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     }
 
     public void suspend() {
-        if (isInPlaybackState()) {
-            if (mMediaPlayer.suspend()) {
-                mStateWhenSuspended = mCurrentState;
-                mCurrentState = STATE_SUSPEND;
-                mTargetState = STATE_SUSPEND;
-            } else {
-                release(false);
-                mCurrentState = STATE_SUSPEND_UNSUPPORTED;
-                Log.w(TAG, "Unable to suspend video. Release MediaPlayer.");
-            }
-        }
+        release(false);
     }
 
     public void resume() {
-        if (mSurfaceHolder == null && mCurrentState == STATE_SUSPEND){
-            mTargetState = STATE_RESUME;
-            return;
-        }
-        if (mMediaPlayer != null && mCurrentState == STATE_SUSPEND) {
-            if (mMediaPlayer.resume()) {
-                mCurrentState = mStateWhenSuspended;
-                mTargetState = mStateWhenSuspended;
-            } else {
-                Log.w(TAG, "Unable to resume video");
-            }
-            return;
-        }
-        if (mCurrentState == STATE_SUSPEND_UNSUPPORTED) {
-            openVideo();
-        }
+        openVideo();
     }
 
-   // cache duration as mDuration for faster access
+    // cache duration as mDuration for faster access
     public int getDuration() {
         if (isInPlaybackState()) {
             if (mDuration > 0) {

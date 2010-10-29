@@ -974,20 +974,6 @@ status_t MediaPlayerService::Client::getMetadata(
     return OK;
 }
 
-status_t MediaPlayerService::Client::suspend() {
-    sp<MediaPlayerBase> p = getPlayer();
-    if (p == 0) return UNKNOWN_ERROR;
-
-    return p->suspend();
-}
-
-status_t MediaPlayerService::Client::resume() {
-    sp<MediaPlayerBase> p = getPlayer();
-    if (p == 0) return UNKNOWN_ERROR;
-
-    return p->resume();
-}
-
 status_t MediaPlayerService::Client::prepareAsync()
 {
     LOGV("[%d] prepareAsync", mConnId);
