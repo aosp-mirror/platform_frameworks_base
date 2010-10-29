@@ -32,6 +32,104 @@
 
 namespace android {
 
+static status_t ConvertOmxProfileLevel(
+        MP4EncodingMode mode,
+        int32_t omxProfile,
+        int32_t omxLevel,
+        ProfileLevelType* pvProfileLevel) {
+    LOGV("ConvertOmxProfileLevel: %d/%d/%d", mode, omxProfile, omxLevel);
+    ProfileLevelType profileLevel;
+    if (mode == H263_MODE) {
+        switch (omxProfile) {
+            case OMX_VIDEO_H263ProfileBaseline:
+                if (omxLevel > OMX_VIDEO_H263Level45) {
+                    LOGE("Unsupported level (%d) for H263", omxLevel);
+                    return BAD_VALUE;
+                } else {
+                    LOGW("PV does not support level configuration for H263");
+                    profileLevel = CORE_PROFILE_LEVEL2;
+                    break;
+                }
+            default:
+                LOGE("Unsupported profile (%d) for H263", omxProfile);
+                return BAD_VALUE;
+        }
+    } else {  // MPEG4
+        switch (omxProfile) {
+            case OMX_VIDEO_MPEG4ProfileSimple:
+                switch (omxLevel) {
+                    case OMX_VIDEO_MPEG4Level0b:
+                        profileLevel = SIMPLE_PROFILE_LEVEL0;
+                        break;
+                    case OMX_VIDEO_MPEG4Level1:
+                        profileLevel = SIMPLE_PROFILE_LEVEL1;
+                        break;
+                    case OMX_VIDEO_MPEG4Level2:
+                        profileLevel = SIMPLE_PROFILE_LEVEL2;
+                        break;
+                    case OMX_VIDEO_MPEG4Level3:
+                        profileLevel = SIMPLE_PROFILE_LEVEL3;
+                        break;
+                    default:
+                        LOGE("Unsupported level (%d) for MPEG4 simple profile",
+                            omxLevel);
+                        return BAD_VALUE;
+            }
+            case OMX_VIDEO_MPEG4ProfileSimpleScalable:
+                switch (omxLevel) {
+                    case OMX_VIDEO_MPEG4Level0b:
+                        profileLevel = SIMPLE_SCALABLE_PROFILE_LEVEL0;
+                        break;
+                    case OMX_VIDEO_MPEG4Level1:
+                        profileLevel = SIMPLE_SCALABLE_PROFILE_LEVEL1;
+                        break;
+                    case OMX_VIDEO_MPEG4Level2:
+                        profileLevel = SIMPLE_SCALABLE_PROFILE_LEVEL2;
+                        break;
+                    default:
+                        LOGE("Unsupported level (%d) for MPEG4 simple "
+                             "scalable profile", omxLevel);
+                        return BAD_VALUE;
+                }
+            case OMX_VIDEO_MPEG4ProfileCore:
+                switch (omxLevel) {
+                    case OMX_VIDEO_MPEG4Level1:
+                        profileLevel = CORE_PROFILE_LEVEL1;
+                        break;
+                    case OMX_VIDEO_MPEG4Level2:
+                        profileLevel = CORE_PROFILE_LEVEL2;
+                        break;
+                    default:
+                        LOGE("Unsupported level (%d) for MPEG4 core "
+                             "profile", omxLevel);
+                        return BAD_VALUE;
+                }
+            case OMX_VIDEO_MPEG4ProfileCoreScalable:
+                switch (omxLevel) {
+                    case OMX_VIDEO_MPEG4Level1:
+                        profileLevel = CORE_SCALABLE_PROFILE_LEVEL1;
+                        break;
+                    case OMX_VIDEO_MPEG4Level2:
+                        profileLevel = CORE_SCALABLE_PROFILE_LEVEL2;
+                        break;
+                    case OMX_VIDEO_MPEG4Level3:
+                        profileLevel = CORE_SCALABLE_PROFILE_LEVEL3;
+                        break;
+                    default:
+                        LOGE("Unsupported level (%d) for MPEG4 core "
+                             "scalable profile", omxLevel);
+                        return BAD_VALUE;
+                }
+            default:
+                LOGE("Unsupported MPEG4 profile (%d)", omxProfile);
+                return BAD_VALUE;
+        }
+    }
+
+    *pvProfileLevel = profileLevel;
+    return OK;
+}
+
 inline static void ConvertYUV420SemiPlanarToYUV420Planar(
         uint8_t *inyuv, uint8_t* outyuv,
         int32_t width, int32_t height) {
@@ -150,9 +248,14 @@ status_t M4vH263Encoder::initCheck(const sp<MetaData>& meta) {
     // If profile and level setting is not correct, failure
     // is reported when the encoder is initialized.
     mEncParams->profile_level = CORE_PROFILE_LEVEL2;
-    int32_t profileLevel;
-    if (meta->findInt32(kKeyVideoLevel, &profileLevel)) {
-        mEncParams->profile_level = (ProfileLevelType)profileLevel;
+    int32_t profile, level;
+    if (meta->findInt32(kKeyVideoProfile, &profile) &&
+        meta->findInt32(kKeyVideoLevel, &level)) {
+        if (OK != ConvertOmxProfileLevel(
+                        mEncParams->encMode, profile, level,
+                        &mEncParams->profile_level)) {
+            return BAD_VALUE;
+        }
     }
 
     mEncParams->packetSize = 32;
