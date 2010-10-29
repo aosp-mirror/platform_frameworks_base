@@ -169,8 +169,6 @@ public:
             status_t        invoke(const Parcel& request, Parcel *reply);
             status_t        setMetadataFilter(const Parcel& filter);
             status_t        getMetadata(bool update_only, bool apply_filter, Parcel *metadata);
-            status_t        suspend();
-            status_t        resume();
             status_t        setAudioSessionId(int sessionId);
             int             getAudioSessionId();
             status_t        setAuxEffectSendLevel(float level);

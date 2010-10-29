@@ -120,8 +120,6 @@ public:
     virtual status_t    reset() = 0;
     virtual status_t    setLooping(int loop) = 0;
     virtual player_type playerType() = 0;
-    virtual status_t    suspend() { return INVALID_OPERATION; }
-    virtual status_t    resume() { return INVALID_OPERATION; }
 
     virtual void        setNotifyCallback(void* cookie, notify_callback_f notifyFunc) {
                             mCookie = cookie; mNotify = notifyFunc; }

@@ -48,8 +48,6 @@ public:
     virtual status_t        setAudioStreamType(int type) = 0;
     virtual status_t        setLooping(int loop) = 0;
     virtual status_t        setVolume(float leftVolume, float rightVolume) = 0;
-    virtual status_t        suspend() = 0;
-    virtual status_t        resume() = 0;
     virtual status_t        setAuxEffectSendLevel(float level) = 0;
     virtual status_t        attachAuxEffect(int effectId) = 0;
 
