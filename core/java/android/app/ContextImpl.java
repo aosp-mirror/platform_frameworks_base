@@ -265,7 +265,11 @@ class ContextImpl extends Context {
     public Resources.Theme getTheme() {
         if (mTheme == null) {
             if (mThemeResource == 0) {
-                mThemeResource = com.android.internal.R.style.Theme;
+                final Context outerContext = getOuterContext();
+                mThemeResource = (outerContext.getApplicationInfo().targetSdkVersion
+                        >= Build.VERSION_CODES.HONEYCOMB)
+                                ? com.android.internal.R.style.Theme_Holo
+                                : com.android.internal.R.style.Theme;
             }
             mTheme = mResources.newTheme();
             mTheme.applyStyle(mThemeResource, true);
