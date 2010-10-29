@@ -149,7 +149,7 @@ public final class AssetManager {
     /*package*/ final CharSequence getResourceText(int ident) {
         synchronized (this) {
             TypedValue tmpValue = mValue;
-            int block = loadResourceValue(ident, tmpValue, true);
+            int block = loadResourceValue(ident, (short) 0, tmpValue, true);
             if (block >= 0) {
                 if (tmpValue.type == TypedValue.TYPE_STRING) {
                     return mStringBlocks[block].get(tmpValue.data);
@@ -190,10 +190,11 @@ public final class AssetManager {
 
 
     /*package*/ final boolean getResourceValue(int ident,
+                                               int density,
                                                TypedValue outValue,
                                                boolean resolveRefs)
     {
-        int block = loadResourceValue(ident, outValue, resolveRefs);
+        int block = loadResourceValue(ident, (short) density, outValue, resolveRefs);
         if (block >= 0) {
             if (outValue.type != TypedValue.TYPE_STRING) {
                 return true;
@@ -681,8 +682,8 @@ public final class AssetManager {
 
     /** Returns true if the resource was found, filling in mRetStringBlock and
      *  mRetData. */
-    private native final int loadResourceValue(int ident, TypedValue outValue,
-                                               boolean resolve);
+    private native final int loadResourceValue(int ident, short density, TypedValue outValue,
+            boolean resolve);
     /** Returns true if the resource was found, filling in mRetStringBlock and
      *  mRetData. */
     private native final int loadResourceBagValue(int ident, int bagEntryId, TypedValue outValue,

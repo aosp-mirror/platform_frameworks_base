@@ -1771,12 +1771,14 @@ public:
      *
      * @return ssize_t Either a >= 0 table index or a negative error code.
      */
-    ssize_t getResource(uint32_t resID, Res_value* outValue, bool mayBeBag=false,
-            uint32_t* outSpecFlags=NULL, ResTable_config* outConfig=NULL) const;
+    ssize_t getResource(uint32_t resID, Res_value* outValue, bool mayBeBag = false,
+                    uint16_t density = 0,
+                    uint32_t* outSpecFlags = NULL,
+                    ResTable_config* outConfig = NULL) const;
 
     inline ssize_t getResource(const ResTable_ref& res, Res_value* outValue,
             uint32_t* outSpecFlags=NULL) const {
-        return getResource(res.ident, outValue, false, outSpecFlags, NULL);
+        return getResource(res.ident, outValue, false, 0, outSpecFlags, NULL);
     }
 
     ssize_t resolveReference(Res_value* inOutValue,
