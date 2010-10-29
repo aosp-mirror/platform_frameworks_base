@@ -793,9 +793,9 @@ class ZoomManager {
                 // bound to match the default scale for mobile sites.
                 setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth,
                     Math.max((int) (viewWidth * mInvDefaultScale),
-                            Math.max(drawData.mMinPrefWidth, drawData.mViewPoint.x))));
+                            Math.max(drawData.mMinPrefWidth, drawData.mViewSize.x))));
             } else {
-                final int contentWidth = drawData.mWidthHeight.x;
+                final int contentWidth = drawData.mContentSize.x;
                 setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
             }
         }
@@ -826,16 +826,16 @@ class ZoomManager {
         assert mWebView.getSettings() != null;
 
         WebViewCore.ViewState viewState = drawData.mViewState;
-        final Point viewSize = drawData.mViewPoint;
+        final Point viewSize = drawData.mViewSize;
         updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
         if (mWebView.getSettings().getUseWideViewPort() &&
             mWebView.getSettings().getUseFixedViewport()) {
-            final int contentWidth = drawData.mWidthHeight.x;
+            final int contentWidth = drawData.mContentSize.x;
             setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
         }
 
         if (!mWebView.drawHistory()) {
-            final float scale;
+            float scale;
             final boolean reflowText;
             WebSettings settings = mWebView.getSettings();
 
@@ -847,12 +847,13 @@ class ZoomManager {
                 scale = viewState.mViewScale;
                 reflowText = false;
             } else {
+                scale = getZoomOverviewScale();
                 if (settings.getUseWideViewPort()
-                    && (settings.getLoadWithOverviewMode() || settings.getUseFixedViewport())) {
+                    && settings.getLoadWithOverviewMode()) {
                     mInitialZoomOverview = true;
-                    scale = (float) mWebView.getViewWidth() / mZoomOverviewWidth;
                 } else {
-                    scale = viewState.mTextWrapScale;
+                    scale = Math.max(viewState.mTextWrapScale, scale);
+                    mInitialZoomOverview = !exceedsMinScaleIncrement(scale, getZoomOverviewScale());
                 }
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
             }

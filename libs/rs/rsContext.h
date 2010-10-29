@@ -190,6 +190,7 @@ public:
     mutable const ObjectBase * mObjHead;
 
     bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
+    bool ext_GL_NV_texture_npot_2D_mipmap() const {return mGL.GL_NV_texture_npot_2D_mipmap;}
     float ext_texture_max_aniso() const {return mGL.EXT_texture_max_aniso; }
     uint32_t getMaxFragmentTextures() const {return mGL.mMaxFragmentTextureImageUnits;}
     uint32_t getMaxFragmentUniformVectors() const {return mGL.mMaxFragmentUniformVectors;}
@@ -232,6 +233,7 @@ protected:
         int32_t mMaxVertexTextureUnits;
 
         bool OES_texture_npot;
+        bool GL_NV_texture_npot_2D_mipmap;
         float EXT_texture_max_aniso;
     } mGL;
 

@@ -1440,6 +1440,37 @@
     <!-- Custom organization type -->
     <string name="orgTypeCustom">Custom</string>
 
+    <!-- Custom relationship custom [CHAR LIMIT=20] -->
+    <string name="relationTypeCustom">Custom</string>
+    <!-- Assistant relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeAssistant">Assistant</string>
+    <!-- Brother relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeBrother">Brother</string>
+    <!-- Child relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeChild">Child</string>
+    <!-- Domestic Partner relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeDomesticPartner">Domestic Partner</string>
+    <!-- Father relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeFather">Father</string>
+    <!-- Friend relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeFriend">Friend</string>
+    <!-- Manager relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeManager">Manager</string>
+    <!-- Mother relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeMother">Mother</string>
+    <!-- Parent relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeParent">Parent</string>
+    <!-- Partner relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypePartner">Partner</string>
+    <!-- Referred by relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeReferredBy">Referred by</string>
+    <!-- Relative relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeRelative">Relative</string>
+    <!-- Sister relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeSister">Sister</string>
+    <!-- Spouse relationship type [CHAR LIMIT=20] -->
+    <string name="relationTypeSpouse">Spouse</string>
+    
     <!-- Custom SIP address type -->
     <string name="sipAddressTypeCustom">Custom</string>
     <!-- Home SIP address type -->
@@ -1652,7 +1683,21 @@
     <string name="double_tap_toast">Tip: double-tap to zoom in and out.</string>
 
     <!-- Text to show in the auto complete drop down list on a text view when the browser can auto fill the entire form -->
-    <string name="autofill_this_form">AutoFill this form</string>
+    <string name="autofill_this_form">AutoFill</string>
+
+    <!-- String used to separate FirstName and LastName when writing out a local name
+         e.g. John<separator>Smith [CHAR-LIMIT=NONE]-->
+    <string name="autofill_address_name_separator">\u0020</string>
+    <!-- Format string for displaying a name. $1 is First Name, $2 is autofill_address_name_separator, $3 is Last Name.
+         e.g. (John)( )(Smith) -->
+    <string name="autofill_address_summary_name_format">$1$2$3</string>
+
+    <!-- String used to separate Name and Address Line 1
+         e.g. John Smith<separator>123 Main Street [CHAR-LIMIT=NONE]-->
+    <string name="autofill_address_summary_separator">,\u0020</string>
+    <!-- Format string for displaying a name and address summary. $1 is the Full Name, $2 is autofill_address_summary_separator, $3 is the Address
+         e.g. (John Smith)(, )(123 Main Street) -->
+    <string name="autofill_address_summary_format">$1$2$3</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->

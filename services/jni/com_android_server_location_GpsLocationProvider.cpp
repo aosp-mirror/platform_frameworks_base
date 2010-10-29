@@ -199,8 +199,6 @@ GpsNiCallbacks sGpsNiCallbacks = {
 
 static void agps_request_set_id(uint32_t flags)
 {
-    LOGD("agps_request_set_id: flags (%d)", flags);
-
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mCallbacksObj, method_requestSetID, flags);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -208,8 +206,6 @@ static void agps_request_set_id(uint32_t flags)
 
 static void agps_request_ref_location(uint32_t flags)
 {
-    LOGD("agps_ref_location: flags (%d)", flags);
-
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->CallVoidMethod(mCallbacksObj, method_requestRefLocation, flags);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);

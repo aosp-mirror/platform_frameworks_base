@@ -1200,6 +1200,7 @@ final class FragmentManagerImpl implements FragmentManager {
                 f.mInLayout = false;
                 f.mAdded = false;
                 if (fs.mSavedFragmentState != null) {
+                    fs.mSavedFragmentState.setClassLoader(mActivity.getClassLoader());
                     f.mSavedViewState = fs.mSavedFragmentState.getSparseParcelableArray(
                             FragmentManagerImpl.VIEW_STATE_TAG);
                 }

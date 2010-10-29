@@ -1826,12 +1826,13 @@ final class WebViewCore {
         DrawData() {
             mBaseLayer = 0;
             mInvalRegion = new Region();
-            mWidthHeight = new Point();
+            mContentSize = new Point();
         }
         int mBaseLayer;
         Region mInvalRegion;
-        Point mViewPoint;
-        Point mWidthHeight;
+        // view size that was used by webkit during the most recent layout
+        Point mViewSize;
+        Point mContentSize;
         int mMinPrefWidth;
         // only non-null if it is for the first picture set after the first layout
         ViewState mViewState;
@@ -1842,16 +1843,14 @@ final class WebViewCore {
         mDrawIsScheduled = false;
         DrawData draw = new DrawData();
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw start");
-        draw.mBaseLayer = nativeRecordContent(draw.mInvalRegion, draw.mWidthHeight);
+        draw.mBaseLayer = nativeRecordContent(draw.mInvalRegion, draw.mContentSize);
         if (draw.mBaseLayer == 0) {
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw abort");
             return;
         }
         if (mWebView != null) {
-            // Send the native view size that was used during the most recent
-            // layout.
             draw.mFocusSizeChanged = nativeFocusBoundsChanged();
-            draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
+            draw.mViewSize = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (mSettings.getUseWideViewPort()) {
                 draw.mMinPrefWidth = Math.max(
                         mViewportWidth == -1 ? WebView.DEFAULT_VIEWPORT_WIDTH

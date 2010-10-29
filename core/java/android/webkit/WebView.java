@@ -917,6 +917,8 @@ public class WebView extends AbsoluteLayout
         if (privateBrowsing) {
             startPrivateBrowsing();
         }
+
+        L10nUtils.loadStrings(context);
     }
 
     /*
@@ -6447,7 +6449,7 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = false;
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
                     setBaseLayer(draw.mBaseLayer, draw.mInvalRegion.getBounds());
-                    final Point viewSize = draw.mViewPoint;
+                    final Point viewSize = draw.mViewSize;
                     WebViewCore.ViewState viewState = draw.mViewState;
                     boolean isPictureAfterFirstLayout = viewState != null;
                     if (isPictureAfterFirstLayout) {
@@ -6470,8 +6472,8 @@ public class WebView extends AbsoluteLayout
                     // received in the fixed dimension.
                     final boolean updateLayout = viewSize.x == mLastWidthSent
                             && viewSize.y == mLastHeightSent;
-                    recordNewContentSize(draw.mWidthHeight.x,
-                            draw.mWidthHeight.y, updateLayout);
+                    recordNewContentSize(draw.mContentSize.x,
+                            draw.mContentSize.y, updateLayout);
                     if (DebugFlags.WEB_VIEW) {
                         Rect b = draw.mInvalRegion.getBounds();
                         Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +

@@ -286,13 +286,31 @@ typedef struct {
 
 } RsScriptCall;
 
+// A3D loading and object update code.
+// Should only be called at object creation, not thread safe
+RsObjectBase rsaFileA3DGetEntryByIndex(RsContext, uint32_t idx, RsFile);
+RsFile rsaFileA3DCreateFromAssetStream(RsContext, const void *data, uint32_t len);
+void rsaFileA3DGetNumIndexEntries(RsContext, int32_t *numEntries, RsFile);
+void rsaFileA3DGetIndexEntries(RsContext, RsFileIndexEntry *fileEntries,uint32_t numEntries, RsFile);
+void rsaGetName(RsContext, void * obj, const char **name);
+// Mesh update functions
+void rsaMeshGetVertexBufferCount(RsContext, RsMesh, int32_t *vtxCount);
+void rsaMeshGetIndexCount(RsContext, RsMesh, int32_t *idxCount);
+void rsaMeshGetVertices(RsContext, RsMesh, RsAllocation *vtxData, uint32_t vtxDataCount);
+void rsaMeshGetIndices(RsContext, RsMesh, RsAllocation *va, uint32_t *primType, uint32_t idxDataCount);
+// Allocation update
+const void* rsaAllocationGetType(RsContext con, RsAllocation va);
+// Type update
+void rsaTypeGetNativeData(RsContext, RsType, uint32_t *typeData, uint32_t typeDataSize);
+// Element update
+void rsaElementGetNativeData(RsContext, RsElement, uint32_t *elemData, uint32_t elemDataSize);
+void rsaElementGetSubElements(RsContext, RsElement, uint32_t *ids, const char **names, uint32_t dataSize);
 
 // Async commands for returning new IDS
 RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimCount,
                      const RsDimension *dims, const uint32_t *vals);
 RsAllocation rsaAllocationCreateTyped(RsContext rsc, RsType vtype);
 RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data);
-
 
 #ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"

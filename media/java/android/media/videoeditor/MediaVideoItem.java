@@ -243,16 +243,16 @@ public class MediaVideoItem extends MediaItem {
         return mHeight;
     }
 
-    /**
-     * @return The duration of the video clip
+    /*
+     * {@inheritDoc}
      */
+    @Override
     public long getDuration() {
         return mDurationMs;
     }
 
-    /**
-     * @return The timeline duration. This is the actual duration in the
-     *      timeline (trimmed duration)
+    /*
+     * {@inheritDoc}
      */
     @Override
     public long getTimelineDuration() {

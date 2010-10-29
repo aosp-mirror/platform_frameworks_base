@@ -172,6 +172,14 @@ public class MediaImageItem extends MediaItem {
      * {@inheritDoc}
      */
     @Override
+    public long getDuration() {
+        return mDurationMs;
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
     public long getTimelineDuration() {
         return mDurationMs;
     }

@@ -174,6 +174,11 @@ public abstract class MediaItem {
     public abstract long getTimelineDuration();
 
     /**
+     * @return The is the full duration of the media item (not trimmed)
+     */
+    public abstract long getDuration();
+
+    /**
      * @return The source file type
      */
     public abstract int getFileType();
@@ -223,7 +228,7 @@ public abstract class MediaItem {
             throw new IllegalArgumentException("Effect already exists: " + effect.getId());
         }
 
-        if (effect.getStartTime() + effect.getDuration() > getTimelineDuration()) {
+        if (effect.getStartTime() + effect.getDuration() > getDuration()) {
             throw new IllegalArgumentException(
                     "Effect start time + effect duration > media clip duration");
         }
@@ -300,7 +305,7 @@ public abstract class MediaItem {
             throw new IllegalArgumentException("Overlay already exists: " + overlay.getId());
         }
 
-        if (overlay.getStartTime() + overlay.getDuration() > getTimelineDuration()) {
+        if (overlay.getStartTime() + overlay.getDuration() > getDuration()) {
             throw new IllegalArgumentException(
                     "Overlay start time + overlay duration > media clip duration");
         }
@@ -455,7 +460,7 @@ public abstract class MediaItem {
         }
 
         if (mEndTransition != null) {
-            if (effect.getStartTime() + effect.getDuration() > getTimelineDuration()
+            if (effect.getStartTime() + effect.getDuration() > getDuration()
                     - mEndTransition.getDuration()) {
                 mEndTransition.invalidate();
             }
@@ -476,7 +481,7 @@ public abstract class MediaItem {
         }
 
         if (mEndTransition != null) {
-            if (overlay.getStartTime() + overlay.getDuration() > getTimelineDuration()
+            if (overlay.getStartTime() + overlay.getDuration() > getDuration()
                     - mEndTransition.getDuration()) {
                 mEndTransition.invalidate();
             }
@@ -511,7 +516,7 @@ public abstract class MediaItem {
         for (Effect effect : effects) {
             // Adjust the start time if necessary
             final long effectStartTimeMs;
-            if (effect.getStartTime() > getTimelineDuration()) {
+            if (effect.getStartTime() > getDuration()) {
                 effectStartTimeMs = 0;
             } else {
                 effectStartTimeMs = effect.getStartTime();
@@ -519,8 +524,8 @@ public abstract class MediaItem {
 
             // Adjust the duration if necessary
             final long effectDurationMs;
-            if (effectStartTimeMs + effect.getDuration() > getTimelineDuration()) {
-                effectDurationMs = getTimelineDuration() - effectStartTimeMs;
+            if (effectStartTimeMs + effect.getDuration() > getDuration()) {
+                effectDurationMs = getDuration() - effectStartTimeMs;
             } else {
                 effectDurationMs = effect.getDuration();
             }
@@ -540,7 +545,7 @@ public abstract class MediaItem {
         for (Overlay overlay : overlays) {
             // Adjust the start time if necessary
             final long overlayStartTimeMs;
-            if (overlay.getStartTime() > getTimelineDuration()) {
+            if (overlay.getStartTime() > getDuration()) {
                 overlayStartTimeMs = 0;
             } else {
                 overlayStartTimeMs = overlay.getStartTime();
@@ -548,8 +553,8 @@ public abstract class MediaItem {
 
             // Adjust the duration if necessary
             final long overlayDurationMs;
-            if (overlayStartTimeMs + overlay.getDuration() > getTimelineDuration()) {
-                overlayDurationMs = getTimelineDuration() - overlayStartTimeMs;
+            if (overlayStartTimeMs + overlay.getDuration() > getDuration()) {
+                overlayDurationMs = getDuration() - overlayStartTimeMs;
             } else {
                 overlayDurationMs = overlay.getDuration();
             }

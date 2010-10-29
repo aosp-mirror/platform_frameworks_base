@@ -84,6 +84,10 @@ final class FragmentState implements Parcelable {
             return mInstance;
         }
         
+        if (mArguments != null) {
+            mArguments.setClassLoader(activity.getClassLoader());
+        }
+        
         mInstance = Fragment.instantiate(activity, mClassName, mArguments);
         
         if (mSavedFragmentState != null) {

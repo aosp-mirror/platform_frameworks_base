@@ -222,6 +222,7 @@ void Context::initGLThread()
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &mGL.mMaxFragmentUniformVectors);
 
     mGL.OES_texture_npot = NULL != strstr((const char *)mGL.mExtensions, "GL_OES_texture_npot");
+    mGL.GL_NV_texture_npot_2D_mipmap = NULL != strstr((const char *)mGL.mExtensions, "GL_NV_texture_npot_2D_mipmap");
     mGL.EXT_texture_max_aniso = 1.0f;
     bool hasAniso = NULL != strstr((const char *)mGL.mExtensions, "GL_EXT_texture_filter_anisotropic");
     if(hasAniso) {
@@ -970,12 +971,6 @@ void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len)
     rsc->assignName(ob, name, len);
 }
 
-void rsi_GetName(Context *rsc, void * obj, const char **name)
-{
-    ObjectBase *ob = static_cast<ObjectBase *>(obj);
-    (*name) = ob->getName();
-}
-
 void rsi_ObjDestroy(Context *rsc, void *optr)
 {
     ObjectBase *ob = static_cast<ObjectBase *>(optr);
@@ -1062,3 +1057,10 @@ void rsContextDeinitToClient(RsContext vrsc)
     rsc->deinitToClient();
 }
 
+// Only to be called at a3d load time, before object is visible to user
+// not thread safe
+void rsaGetName(RsContext con, void * obj, const char **name)
+{
+    ObjectBase *ob = static_cast<ObjectBase *>(obj);
+    (*name) = ob->getName();
+}

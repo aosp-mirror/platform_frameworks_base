@@ -23,14 +23,12 @@ import android.database.CursorWindow;
  */
 public abstract class SQLiteClosable {
     private int mReferenceCount = 1;
-    private Object mLock = new Object(); // STOPSHIP remove this line
 
     protected abstract void onAllReferencesReleased();
     protected void onAllReferencesReleasedFromContainer() {}
 
     public void acquireReference() {
-        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
-            checkRefCount();
+        synchronized(this) {
             if (mReferenceCount <= 0) {
                 throw new IllegalStateException(
                         "attempt to re-open an already-closed object: " + getObjInfo());
@@ -40,8 +38,7 @@ public abstract class SQLiteClosable {
     }
 
     public void releaseReference() {
-        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
-            checkRefCount();
+        synchronized(this) {
             mReferenceCount--;
             if (mReferenceCount == 0) {
                 onAllReferencesReleased();
@@ -50,8 +47,7 @@ public abstract class SQLiteClosable {
     }
 
     public void releaseReferenceFromContainer() {
-        synchronized(mLock) { // STOPSHIP change 'mLock' to 'this'
-            checkRefCount();
+        synchronized(this) {
             mReferenceCount--;
             if (mReferenceCount == 0) {
                 onAllReferencesReleasedFromContainer();
@@ -75,13 +71,5 @@ public abstract class SQLiteClosable {
         }
         buff.append(") ");
         return buff.toString();
-    }
-
-    // STOPSHIP remove this method before shipping
-    private void checkRefCount() {
-        if (mReferenceCount > 1000) {
-            throw new IllegalStateException("bad refcount: " + mReferenceCount +
-                    ". file bug against frameworks->database" + getObjInfo());
-        }
     }
 }

@@ -256,8 +256,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
     
-    // The current size of the screen.
-    int mW, mH;
+    // The current size of the screen; these may be different than (0,0)-(dw,dh)
+    // if the status bar can't be hidden; in that case it effectively carves out
+    // that area of the display from all other windows.
+    int mScreenLeft, mScreenTop, mScreenWidth, mScreenHeight;
     // During layout, the current screen borders with all outer decoration
     // (status bar, input method dock) accounted for.
     int mCurLeft, mCurTop, mCurRight, mCurBottom;
@@ -1316,10 +1318,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset) {
         final int fl = attrs.flags;
         
-        if (mStatusBarCanHide && (fl &
-                (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
+        if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
                 == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
-            contentInset.set(mCurLeft, mCurTop, mW - mCurRight, mH - mCurBottom);
+            contentInset.set(mCurLeft, mCurTop,
+                    (mScreenLeft+mScreenWidth) - mCurRight,
+                    (mScreenTop+mScreenHeight) - mCurBottom);
         } else {
             contentInset.setEmpty();
         }
@@ -1327,8 +1330,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     /** {@inheritDoc} */
     public void beginLayoutLw(int displayWidth, int displayHeight) {
-        mW = displayWidth;
-        mH = displayHeight;
+        mScreenLeft = mScreenTop = 0;
+        mScreenWidth = displayWidth;
+        mScreenHeight = displayHeight;
         mDockLeft = mContentLeft = mCurLeft = 0;
         mDockTop = mContentTop = mCurTop = 0;
         mDockRight = mContentRight = mCurRight = displayWidth;
@@ -1350,16 +1354,34 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
                 final Rect r = mStatusBar.getFrameLw();
-                if (mDockTop == r.top) mDockTop = r.bottom;
-                else if (mDockBottom == r.bottom) mDockBottom = r.top;
-                mContentTop = mCurTop = mDockTop;
-                mContentBottom = mCurBottom = mDockBottom;
-                if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mDockTop=" + mDockTop
-                        + " mContentTop=" + mContentTop
-                        + " mCurTop=" + mCurTop
-                        + " mDockBottom=" + mDockBottom
-                        + " mContentBottom=" + mContentBottom
-                        + " mCurBottom=" + mCurBottom);
+                if (mStatusBarCanHide) {
+                    // Status bar may go away, so the screen area it occupies
+                    // is available to apps but just covering them when the
+                    // status bar is visible.
+                    if (mDockTop == r.top) mDockTop = r.bottom;
+                    else if (mDockBottom == r.bottom) mDockBottom = r.top;
+                    mContentTop = mCurTop = mDockTop;
+                    mContentBottom = mCurBottom = mDockBottom;
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mDockTop=" + mDockTop
+                            + " mContentTop=" + mContentTop
+                            + " mCurTop=" + mCurTop
+                            + " mDockBottom=" + mDockBottom
+                            + " mContentBottom=" + mContentBottom
+                            + " mCurBottom=" + mCurBottom);
+                } else {
+                    // Status bar can't go away; the part of the screen it
+                    // covers does not exist for anything behind it.
+                    if (mScreenTop == r.top) {
+                        mScreenTop = r.bottom;
+                        mScreenHeight -= (r.bottom-r.top);
+                    } else if ((mScreenHeight-mScreenTop) == r.bottom) {
+                        mScreenHeight -= (r.bottom-r.top);
+                    }
+                    mContentTop = mCurTop = mDockTop = mScreenTop;
+                    mContentBottom = mCurBottom = mDockBottom = mScreenTop+mScreenHeight;
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Status bar: mScreenTop=" + mScreenTop
+                            + " mScreenHeight=" + mScreenHeight);
+                }
             }
         }
     }
@@ -1444,8 +1466,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();
         } else {
-            if (mStatusBarCanHide && (fl &
-                    (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
+            if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
                     == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
                 // This is the case for a normal activity window: we want it
                 // to cover all of the screen space, and it can take care of
@@ -1456,10 +1477,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // frame is the same as the one we are attached to.
                     setAttachedWindowFrames(win, fl, sim, attached, true, pf, df, cf, vf);
                 } else {
-                    pf.left = df.left = 0;
-                    pf.top = df.top = 0;
-                    pf.right = df.right = mW;
-                    pf.bottom = df.bottom = mH;
+                    pf.left = df.left = mScreenLeft;
+                    pf.top = df.top = mScreenTop;
+                    pf.right = df.right = mScreenLeft+mScreenWidth;
+                    pf.bottom = df.bottom = mScreenTop+mScreenHeight;
                     if ((sim & SOFT_INPUT_MASK_ADJUST) != SOFT_INPUT_ADJUST_RESIZE) {
                         cf.left = mDockLeft;
                         cf.top = mDockTop;
@@ -1476,13 +1497,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     vf.right = mCurRight;
                     vf.bottom = mCurBottom;
                 }
-            } else if (mStatusBarCanHide && (fl & FLAG_LAYOUT_IN_SCREEN) != 0) {
+            } else if ((fl & FLAG_LAYOUT_IN_SCREEN) != 0) {
                 // A window that has requested to fill the entire screen just
                 // gets everything, period.
-                pf.left = df.left = cf.left = 0;
-                pf.top = df.top = cf.top = 0;
-                pf.right = df.right = cf.right = mW;
-                pf.bottom = df.bottom = cf.bottom = mH;
+                pf.left = df.left = cf.left = mScreenLeft;
+                pf.top = df.top = cf.top = mScreenTop;
+                pf.right = df.right = cf.right = mScreenLeft+mScreenWidth;
+                pf.bottom = df.bottom = cf.bottom = mScreenTop+mScreenHeight;
                 vf.left = mCurLeft;
                 vf.top = mCurTop;
                 vf.right = mCurRight;
@@ -1743,9 +1764,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     rect.union(w.getShownFrameLw());
                 }
             }
-            final int insetw = mW/10;
-            final int inseth = mH/10;
-            if (rect.contains(insetw, inseth, mW-insetw, mH-inseth)) {
+            final int insetw = mScreenWidth/10;
+            final int inseth = mScreenHeight/10;
+            if (rect.contains(insetw, inseth, mScreenWidth-insetw, mScreenHeight-inseth)) {
                 // All of the status bar windows put together cover the
                 // screen, so the app can't be seen.  (Note this test doesn't
                 // work if the rects of these windows are at off offsets or

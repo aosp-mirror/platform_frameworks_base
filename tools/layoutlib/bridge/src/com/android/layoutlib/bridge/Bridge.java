@@ -31,13 +31,12 @@ import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.graphics.Typeface;
+import android.graphics.Typeface_Delegate;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,9 +48,9 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.BridgeInflater;
 import android.view.DragEvent;
-import android.view.InputChannel;
 import android.view.IWindow;
 import android.view.IWindowSession;
+import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -220,7 +219,7 @@ public final class Bridge implements ILayoutBridge {
         // load the fonts.
         FontLoader fontLoader = FontLoader.create(fontOsLocation);
         if (fontLoader != null) {
-            Typeface.init(fontLoader);
+            Typeface_Delegate.init(fontLoader);
         } else {
             return false;
         }
@@ -1007,7 +1006,7 @@ public final class Bridge implements ILayoutBridge {
             // pass for now.
             return 0;
         }
-        
+
         @SuppressWarnings("unused")
         public void finishDrawing(IWindow arg0) throws RemoteException {
             // pass for now.
