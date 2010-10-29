@@ -17,7 +17,9 @@ package android.os;
 
 import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
+import android.content.Intent;
 import android.util.Log;
 import android.util.Printer;
 
@@ -1205,6 +1207,12 @@ public final class StrictMode {
         public long violationUptimeMillis;
 
         /**
+         * The action of the Intent being broadcast to somebody's onReceive
+         * on this thread right now, or null.
+         */
+        public String broadcastIntentAction;
+
+        /**
          * Create an uninitialized instance of ViolationInfo
          */
         public ViolationInfo() {
@@ -1220,6 +1228,10 @@ public final class StrictMode {
             violationUptimeMillis = SystemClock.uptimeMillis();
             this.policy = policy;
             this.numAnimationsRunning = ValueAnimator.getCurrentAnimationsCount();
+            Intent broadcastIntent = ActivityThread.getIntentBeingBroadcast();
+            if (broadcastIntent != null) {
+                broadcastIntentAction = broadcastIntent.getAction();
+            }
         }
 
         /**
@@ -1247,6 +1259,7 @@ public final class StrictMode {
             violationNumThisLoop = in.readInt();
             numAnimationsRunning = in.readInt();
             violationUptimeMillis = in.readLong();
+            broadcastIntentAction = in.readString();
         }
 
         /**
@@ -1259,6 +1272,7 @@ public final class StrictMode {
             dest.writeInt(violationNumThisLoop);
             dest.writeInt(numAnimationsRunning);
             dest.writeLong(violationUptimeMillis);
+            dest.writeString(broadcastIntentAction);
         }
 
 
@@ -1278,6 +1292,9 @@ public final class StrictMode {
                 pw.println(prefix + "numAnimationsRunning: " + numAnimationsRunning);
             }
             pw.println(prefix + "violationUptimeMillis: " + violationUptimeMillis);
+            if (broadcastIntentAction != null) {
+                pw.println(prefix + "broadcastIntentAction: " + broadcastIntentAction);
+            }
         }
 
     }
