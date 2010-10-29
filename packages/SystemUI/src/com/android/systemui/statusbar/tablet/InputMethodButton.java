@@ -127,7 +127,9 @@ public class InputMethodButton extends ImageView {
     }
 
     private void postRefreshStatusIcon() {
-        getHandler().post(new Runnable() {
+        Handler h = getHandler();
+        if (h == null) return;
+        h.post(new Runnable() {
             public void run() {
                 refreshStatusIcon(mKeyboardShown);
             }
