@@ -37,11 +37,11 @@ namespace android {
 // buffers.  This is the mode that will be used when CPU access to the buffer is
 // required.
 //
-// When Android native buffer use has been enabled, the OMX node must support
-// only color formats in the range [OMX_COLOR_FormatAndroidPrivateStart,
-// OMX_COLOR_FormatAndroidPrivateEnd).  The node should then expect to receive
+// When Android native buffer use has been enabled for a given port, the video
+// color format for the port is to be interpreted as an Android pixel format
+// rather than an OMX color format.  The node should then expect to receive
 // UseAndroidNativeBuffer calls (via OMX_SetParameter) rather than UseBuffer
-// calls.
+// calls for that port.
 struct EnableAndroidNativeBuffersParams {
     OMX_U32 nSize;
     OMX_VERSIONTYPE nVersion;
@@ -73,16 +73,6 @@ struct StoreMetaDataInBuffersParams {
     OMX_VERSIONTYPE nVersion;
     OMX_U32 nPortIndex;
     OMX_BOOL bStoreMetaData;
-};
-
-// Color formats in the range [OMX_COLOR_FormatAndroidPrivateStart,
-// OMX_COLOR_FormatAndroidPrivateEnd) will be converted to a gralloc pixel
-// format when used to allocate Android native buffers via gralloc.  The
-// conversion is done by subtracting OMX_COLOR_FormatAndroidPrivateStart from
-// the color format reported by the codec.
-enum {
-    OMX_COLOR_FormatAndroidPrivateStart = 0xA0000000,
-    OMX_COLOR_FormatAndroidPrivateEnd = 0xB0000000,
 };
 
 // A pointer to this struct is passed to OMX_SetParameter when the extension
