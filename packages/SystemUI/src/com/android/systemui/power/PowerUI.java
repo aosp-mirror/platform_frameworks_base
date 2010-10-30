@@ -248,7 +248,7 @@ if (false) { // getRingtone ANRs
 
         AlertDialog.Builder b = new AlertDialog.Builder(mContext);
             b.setCancelable(true);
-            b.setMessage(mContext.getString(R.string.invalid_charger));
+            b.setMessage(R.string.invalid_charger);
             b.setIcon(android.R.drawable.ic_dialog_alert);
             b.setPositiveButton(android.R.string.ok, null);
 
