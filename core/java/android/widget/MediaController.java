@@ -413,33 +413,46 @@ public class MediaController extends FrameLayout {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         int keyCode = event.getKeyCode();
-        if (event.getRepeatCount() == 0 && event.isDown() && (
-                keyCode ==  KeyEvent.KEYCODE_HEADSETHOOK ||
-                keyCode ==  KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ||
-                keyCode ==  KeyEvent.KEYCODE_SPACE)) {
-            doPauseResume();
-            show(sDefaultTimeout);
-            if (mPauseButton != null) {
-                mPauseButton.requestFocus();
+        final boolean uniqueDown = event.getRepeatCount() == 0
+                && event.getAction() == KeyEvent.ACTION_DOWN;
+        if (keyCode ==  KeyEvent.KEYCODE_HEADSETHOOK
+                || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+                || keyCode == KeyEvent.KEYCODE_SPACE) {
+            if (uniqueDown) {
+                doPauseResume();
+                show(sDefaultTimeout);
+                if (mPauseButton != null) {
+                    mPauseButton.requestFocus();
+                }
             }
             return true;
-        } else if (keyCode ==  KeyEvent.KEYCODE_MEDIA_STOP) {
-            if (mPlayer.isPlaying()) {
+        } else if (keyCode == KeyEvent.KEYCODE_MEDIA_PLAY) {
+            if (uniqueDown && !mPlayer.isPlaying()) {
+                mPlayer.start();
+                updatePausePlay();
+                show(sDefaultTimeout);
+            }
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_MEDIA_STOP
+                || keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE) {
+            if (uniqueDown && mPlayer.isPlaying()) {
                 mPlayer.pause();
                 updatePausePlay();
+                show(sDefaultTimeout);
             }
             return true;
-        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
-                keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
+                || keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             // don't show the controls for volume adjustment
             return super.dispatchKeyEvent(event);
         } else if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU) {
-            hide();
-
+            if (uniqueDown) {
+                hide();
+            }
             return true;
-        } else {
-            show(sDefaultTimeout);
         }
+
+        show(sDefaultTimeout);
         return super.dispatchKeyEvent(event);
     }
 

@@ -1252,7 +1252,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_MEDIA_PLAY:
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                /* Suppress PLAYPAUSE toggle when phone is ringing or in-call
+                /* Suppress PLAY/PAUSE toggle when phone is ringing or in-call
                  * to avoid music playback */
                 if (mTelephonyManager == null) {
                     mTelephonyManager = (TelephonyManager) getContext().getSystemService(
@@ -1268,6 +1268,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_MEDIA_NEXT:
             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
             case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
                 Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
                 intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
@@ -1448,6 +1449,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MUTE:
             case KeyEvent.KEYCODE_MEDIA_PLAY:
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
@@ -1455,6 +1457,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_MEDIA_NEXT:
             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
             case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
                 Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
                 intent.putExtra(Intent.EXTRA_KEY_EVENT, event);

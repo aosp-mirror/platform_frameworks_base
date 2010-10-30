@@ -529,10 +529,19 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                     mMediaController.hide();
                 }
                 return true;
+            } else if (keyCode == KeyEvent.KEYCODE_MEDIA_PLAY) {
+                if (mMediaPlayer.isPlaying()) {
+                    start();
+                    mMediaController.hide();
+                }
+                return true;
             } else if (keyCode == KeyEvent.KEYCODE_MEDIA_STOP
-                    && mMediaPlayer.isPlaying()) {
-                pause();
-                mMediaController.show();
+                    || keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE) {
+                if (!mMediaPlayer.isPlaying()) {
+                    pause();
+                    mMediaController.show();
+                }
+                return true;
             } else {
                 toggleMediaControlsVisiblity();
             }
