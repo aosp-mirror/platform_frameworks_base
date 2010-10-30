@@ -674,9 +674,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
         "META_META_LEFT_ON",
         "META_META_RIGHT_ON",
         "0x00080000",
-        "META_CAPS_LOCK_LATCHED",
-        "META_NUM_LOCK_LATCHED",
-        "META_SCROLL_LOCK_LATCHED",
+        "META_CAPS_LOCK_ON",
+        "META_NUM_LOCK_ON",
+        "META_SCROLL_LOCK_ON",
         "0x00800000",
         "0x01000000",
         "0x02000000",
@@ -872,31 +872,31 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int META_META_RIGHT_ON = 0x40000;
 
     /**
-     * <p>This mask is used to check whether the CAPS LOCK meta key is latched.</p>
+     * <p>This mask is used to check whether the CAPS LOCK meta key is on.</p>
      *
-     * @see #isCapsLockLatched()
+     * @see #isCapsLockOn()
      * @see #getMetaState()
      * @see #KEYCODE_CAPS_LOCK
      */
-    public static final int META_CAPS_LOCK_LATCHED = 0x100000;
+    public static final int META_CAPS_LOCK_ON = 0x100000;
 
     /**
-     * <p>This mask is used to check whether the NUM LOCK meta key is latched.</p>
+     * <p>This mask is used to check whether the NUM LOCK meta key is on.</p>
      *
-     * @see #isNumLockLatched()
+     * @see #isNumLockOn()
      * @see #getMetaState()
      * @see #KEYCODE_NUM_LOCK
      */
-    public static final int META_NUM_LOCK_LATCHED = 0x200000;
+    public static final int META_NUM_LOCK_ON = 0x200000;
 
     /**
-     * <p>This mask is used to check whether the SCROLL LOCK meta key is latched.</p>
+     * <p>This mask is used to check whether the SCROLL LOCK meta key is on.</p>
      *
-     * @see #isScrollLockLatched()
+     * @see #isScrollLockOn()
      * @see #getMetaState()
      * @see #KEYCODE_SCROLL_LOCK
      */
-    public static final int META_SCROLL_LOCK_LATCHED = 0x400000;
+    public static final int META_SCROLL_LOCK_ON = 0x400000;
 
     /**
      * This mask is set if the device woke because of this key event.
@@ -1411,9 +1411,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @see #isCtrlPressed()
      * @see #isMetaPressed()
      * @see #isFunctionPressed()
-     * @see #isCapsLockLatched()
-     * @see #isNumLockLatched()
-     * @see #isScrollLockLatched()
+     * @see #isCapsLockOn()
+     * @see #isNumLockOn()
+     * @see #isScrollLockOn()
      * @see #META_ALT_ON
      * @see #META_ALT_LEFT_ON
      * @see #META_ALT_RIGHT_ON
@@ -1428,9 +1428,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @see #META_META_ON
      * @see #META_META_LEFT_ON
      * @see #META_META_RIGHT_ON
-     * @see #META_CAPS_LOCK_LATCHED
-     * @see #META_NUM_LOCK_LATCHED
-     * @see #META_SCROLL_LOCK_LATCHED
+     * @see #META_CAPS_LOCK_ON
+     * @see #META_NUM_LOCK_ON
+     * @see #META_SCROLL_LOCK_ON
      */
     public final int getMetaState() {
         return mMetaState;
@@ -1551,39 +1551,39 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * <p>Returns the latched state of the CAPS LOCK meta key.</p>
+     * <p>Returns the locked state of the CAPS LOCK meta key.</p>
      *
-     * @return true if the CAPS LOCK key is latched, false otherwise
+     * @return true if the CAPS LOCK key is on, false otherwise
      *
      * @see #KEYCODE_CAPS_LOCK
-     * @see #META_CAPS_LOCK_LATCHED
+     * @see #META_CAPS_LOCK_ON
      */
-    public final boolean isCapsLockLatched() {
-        return (mMetaState & META_CAPS_LOCK_LATCHED) != 0;
+    public final boolean isCapsLockOn() {
+        return (mMetaState & META_CAPS_LOCK_ON) != 0;
     }
 
     /**
-     * <p>Returns the latched state of the NUM LOCK meta key.</p>
+     * <p>Returns the locked state of the NUM LOCK meta key.</p>
      *
-     * @return true if the NUM LOCK key is latched, false otherwise
+     * @return true if the NUM LOCK key is on, false otherwise
      *
      * @see #KEYCODE_NUM_LOCK
-     * @see #META_NUM_LOCK_LATCHED
+     * @see #META_NUM_LOCK_ON
      */
-    public final boolean isNumLockLatched() {
-        return (mMetaState & META_NUM_LOCK_LATCHED) != 0;
+    public final boolean isNumLockOn() {
+        return (mMetaState & META_NUM_LOCK_ON) != 0;
     }
 
     /**
-     * <p>Returns the latched state of the SCROLL LOCK meta key.</p>
+     * <p>Returns the locked state of the SCROLL LOCK meta key.</p>
      *
-     * @return true if the SCROLL LOCK key is latched, false otherwise
+     * @return true if the SCROLL LOCK key is on, false otherwise
      *
      * @see #KEYCODE_SCROLL_LOCK
-     * @see #META_SCROLL_LOCK_LATCHED
+     * @see #META_SCROLL_LOCK_ON
      */
-    public final boolean isScrollLockLatched() {
-        return (mMetaState & META_SCROLL_LOCK_LATCHED) != 0;
+    public final boolean isScrollLockOn() {
+        return (mMetaState & META_SCROLL_LOCK_ON) != 0;
     }
 
     /**
