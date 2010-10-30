@@ -1945,6 +1945,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 return getText(com.android.internal.R.string.ime_action_next);
             case EditorInfo.IME_ACTION_DONE:
                 return getText(com.android.internal.R.string.ime_action_done);
+            case EditorInfo.IME_ACTION_PREVIOUS:
+                return getText(com.android.internal.R.string.ime_action_previous);
             default:
                 return getText(com.android.internal.R.string.ime_action_default);
         }

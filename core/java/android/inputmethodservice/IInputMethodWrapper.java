@@ -70,6 +70,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     final WeakReference<AbstractInputMethodService> mTarget;
     final HandlerCaller mCaller;
     final WeakReference<InputMethod> mInputMethod;
+    final int mTargetSdkVersion;
     
     static class Notifier {
         boolean notified;
@@ -102,6 +103,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         mTarget = new WeakReference<AbstractInputMethodService>(context);
         mCaller = new HandlerCaller(context.getApplicationContext(), this);
         mInputMethod = new WeakReference<InputMethod>(inputMethod);
+        mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
     }
 
     public InputMethod getInternalInputMethod() {
@@ -151,7 +153,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(inputContext) : null;
-                inputMethod.startInput(ic, (EditorInfo)args.arg2);
+                EditorInfo info = (EditorInfo)args.arg2;
+                info.makeCompatible(mTargetSdkVersion);
+                inputMethod.startInput(ic, info);
                 return;
             }
             case DO_RESTART_INPUT: {
@@ -159,7 +163,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
                         ? new InputConnectionWrapper(inputContext) : null;
-                inputMethod.restartInput(ic, (EditorInfo)args.arg2);
+                EditorInfo info = (EditorInfo)args.arg2;
+                info.makeCompatible(mTargetSdkVersion);
+                inputMethod.restartInput(ic, info);
                 return;
             }
             case DO_CREATE_SESSION: {

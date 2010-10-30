@@ -84,6 +84,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
@@ -1386,7 +1387,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    void setAttachedWindowFrames(WindowState win, int fl, int sim,
+    void setAttachedWindowFrames(WindowState win, int fl, int adjust,
             WindowState attached, boolean insetDecors, Rect pf, Rect df, Rect cf, Rect vf) {
         if (win.getSurfaceLayer() > mDockLayer && attached.getSurfaceLayer() < mDockLayer) {
             // Here's a special case: if this attached window is a panel that is
@@ -1407,7 +1408,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // window is positioned within that content.  Otherwise we can use
             // the display frame and let the attached window take care of
             // positioning its content appropriately.
-            if ((sim & SOFT_INPUT_MASK_ADJUST) != SOFT_INPUT_ADJUST_RESIZE) {
+            if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                 cf.set(attached.getDisplayFrameLw());
             } else {
                 // If the window is resizing, then we want to base the content
@@ -1466,6 +1467,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();
         } else {
+            final int adjust = sim & SOFT_INPUT_MASK_ADJUST;
+
             if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_FULLSCREEN | FLAG_LAYOUT_INSET_DECOR))
                     == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
                 // This is the case for a normal activity window: we want it
@@ -1481,7 +1484,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.top = df.top = mScreenTop;
                     pf.right = df.right = mScreenLeft+mScreenWidth;
                     pf.bottom = df.bottom = mScreenTop+mScreenHeight;
-                    if ((sim & SOFT_INPUT_MASK_ADJUST) != SOFT_INPUT_ADJUST_RESIZE) {
+                    if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                         cf.left = mDockLeft;
                         cf.top = mDockTop;
                         cf.right = mDockRight;
@@ -1492,10 +1495,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         cf.right = mContentRight;
                         cf.bottom = mContentBottom;
                     }
-                    vf.left = mCurLeft;
-                    vf.top = mCurTop;
-                    vf.right = mCurRight;
-                    vf.bottom = mCurBottom;
+                    if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
+                        vf.left = mCurLeft;
+                        vf.top = mCurTop;
+                        vf.right = mCurRight;
+                        vf.bottom = mCurBottom;
+                    } else {
+                        vf.set(cf);
+                    }
                 }
             } else if ((fl & FLAG_LAYOUT_IN_SCREEN) != 0) {
                 // A window that has requested to fill the entire screen just
@@ -1504,14 +1511,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pf.top = df.top = cf.top = mScreenTop;
                 pf.right = df.right = cf.right = mScreenLeft+mScreenWidth;
                 pf.bottom = df.bottom = cf.bottom = mScreenTop+mScreenHeight;
-                vf.left = mCurLeft;
-                vf.top = mCurTop;
-                vf.right = mCurRight;
-                vf.bottom = mCurBottom;
+                if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
+                    vf.left = mCurLeft;
+                    vf.top = mCurTop;
+                    vf.right = mCurRight;
+                    vf.bottom = mCurBottom;
+                } else {
+                    vf.set(cf);
+                }
             } else if (attached != null) {
                 // A child window should be placed inside of the same visible
                 // frame that its parent had.
-                setAttachedWindowFrames(win, fl, sim, attached, false, pf, df, cf, vf);
+                setAttachedWindowFrames(win, fl, adjust, attached, false, pf, df, cf, vf);
             } else {
                 // Otherwise, a normal window must be placed inside the content
                 // of all screen decorations.
@@ -1519,7 +1530,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pf.top = mContentTop;
                 pf.right = mContentRight;
                 pf.bottom = mContentBottom;
-                if ((sim & SOFT_INPUT_MASK_ADJUST) != SOFT_INPUT_ADJUST_RESIZE) {
+                if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                     df.left = cf.left = mDockLeft;
                     df.top = cf.top = mDockTop;
                     df.right = cf.right = mDockRight;
@@ -1530,10 +1541,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     df.right = cf.right = mContentRight;
                     df.bottom = cf.bottom = mContentBottom;
                 }
-                vf.left = mCurLeft;
-                vf.top = mCurTop;
-                vf.right = mCurRight;
-                vf.bottom = mCurBottom;
+                if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
+                    vf.left = mCurLeft;
+                    vf.top = mCurTop;
+                    vf.right = mCurRight;
+                    vf.bottom = mCurBottom;
+                } else {
+                    vf.set(cf);
+                }
             }
         }
         

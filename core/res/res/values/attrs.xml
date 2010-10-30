@@ -326,6 +326,9 @@
                  need to close the input area to get at and interact with
                  parts of the window. -->
             <flag name="adjustPan" value="0x20" />
+            <!-- Don't resize <em>or</em> pan the window to make room for the
+                 soft input area; the window is never adjusted for it. -->
+            <flag name="adjustNothing" value="0x30" />
         </attr>
 
         <!-- Flag allowing you to disable the preview animation for a window.
@@ -737,6 +740,14 @@
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_PHONETIC}. -->
         <flag name="textPhonetic" value="0x000000c1" />
+        <!-- Text that will be used as an e-mail address on a web form.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS}. -->
+        <flag name="textWebEmailAddress" value="0x000000d1" />
+        <!-- Text that will be used as a password on a web form.  Corresponds to
+             {@link android.text.InputType#TYPE_CLASS_TEXT} |
+             {@link android.text.InputType#TYPE_TEXT_VARIATION_WEB_PASSWORD}. -->
+        <flag name="textWebPassword" value="0x000000e1" />
         <!-- A numeric only field.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_NUMBER}. -->
         <flag name="number" value="0x00000002" />
@@ -811,6 +822,40 @@
              Corresponds to
              {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE}. -->
         <flag name="actionDone" value="0x00000006" />
+        <!-- The action key performs a "previous"
+             operation, taking the user to the previous field that will accept text.
+             Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_ACTION_PREVIOUS}. -->
+        <flag name="actionPrevious" value="0x00000007" />
+        <!-- Used to request that the IME never go
+             into fullscreen mode.  Applications need to be aware that the flag is not
+             a guarantee, and not all IMEs will respect it.
+             <p>Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_FULLSCREEN}. -->
+        <flag name="flagNoFullscreen" value="0x2000000" />
+        <!-- Like flagNavigateNext, but
+             specifies there is something interesting that a backward navigation
+             can focus on.  If the user selects the IME's facility to backward
+             navigate, this will show up in the application as an actionPrevious
+             at {@link android.view.inputmethod.InputConnection#performEditorAction(int)
+             InputConnection.performEditorAction(int)}.
+             <p>Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_FULLSCREEN}. -->
+        <flag name="flagNavigatePrevious" value="0x4000000" />
+        <!-- Used to specify that there is something
+             interesting that a forward navigation can focus on. This is like using
+             actionNext, except allows the IME to be multiline (with
+             an enter key) as well as provide forward navigation.  Note that some
+             IMEs may not be able to do this, especially when running on a small
+             screen where there is little space.  In that case it does not need to
+             present a UI for this option.  Like actionNext, if the
+             user selects the IME's facility to forward navigate, this will show up
+             in the application at
+             {@link android.view.inputmethod.InputConnection#performEditorAction(int)
+             InputConnection.performEditorAction(int)}.
+             <p>Corresponds to
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NAVIGATE_NEXT}. -->
+        <flag name="flagNavigateNext" value="0x8000000" />
         <!-- Used to specify that the IME does not need
              to show its extracted text UI.  For input methods that may be fullscreen,
              often when in landscape mode, this allows them to be smaller and let part
