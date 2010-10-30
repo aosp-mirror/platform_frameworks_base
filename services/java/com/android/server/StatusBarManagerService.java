@@ -71,9 +71,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     Object mLock = new Object();
     // We usually call it lights out mode, but double negatives are annoying
     boolean mLightsOn = true;
-
     boolean mMenuVisible = false;
-
     boolean mIMEButtonVisible = false;
 
     private class DisableRecord implements IBinder.DeathRecipient {
@@ -352,7 +350,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
             List<IBinder> notificationKeys, List<StatusBarNotification> notifications,
-            boolean switches[]) {
+            int switches[]) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
@@ -367,9 +365,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             }
         }
         synchronized (mLock) {
-            switches[0] = mLightsOn;
-            switches[1] = mMenuVisible;
-            switches[2] = mIMEButtonVisible;
+            switches[0] = gatherDisableActionsLocked();
+            switches[1] = mLightsOn ? 1 : 0;
+            switches[2] = mMenuVisible ? 1 : 0;
+            switches[3] = mIMEButtonVisible ? 1 : 0;
         }
     }
 
