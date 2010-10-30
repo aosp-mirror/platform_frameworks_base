@@ -857,7 +857,7 @@ void NativeInputManager::interceptKeyBeforeQueueing(nsecs_t when,
         JNIEnv* env = jniEnv();
         jint wmActions = env->CallIntMethod(mCallbacksObj,
                 gCallbacksClassInfo.interceptKeyBeforeQueueing,
-                when, keyCode, action == AKEY_EVENT_ACTION_DOWN, policyFlags, isScreenOn);
+                when, action, flags, keyCode, scanCode, policyFlags, isScreenOn);
         if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
             wmActions = 0;
         }
@@ -926,7 +926,7 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& i
         jboolean consumed = env->CallBooleanMethod(mCallbacksObj,
                 gCallbacksClassInfo.interceptKeyBeforeDispatching,
                 inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
-                keyEvent->getKeyCode(), keyEvent->getMetaState(),
+                keyEvent->getKeyCode(), keyEvent->getScanCode(), keyEvent->getMetaState(),
                 keyEvent->getRepeatCount(), policyFlags);
         bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
 
@@ -1337,10 +1337,10 @@ int register_android_server_InputManager(JNIEnv* env) {
             "notifyANR", "(Ljava/lang/Object;Landroid/view/InputChannel;)J");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, gCallbacksClassInfo.clazz,
-            "interceptKeyBeforeQueueing", "(JIZIZ)I");
+            "interceptKeyBeforeQueueing", "(JIIIIIZ)I");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, gCallbacksClassInfo.clazz,
-            "interceptKeyBeforeDispatching", "(Landroid/view/InputChannel;IIIIII)Z");
+            "interceptKeyBeforeDispatching", "(Landroid/view/InputChannel;IIIIIII)Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, gCallbacksClassInfo.clazz,
             "checkInjectEventsPermission", "(II)Z");

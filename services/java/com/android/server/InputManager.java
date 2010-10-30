@@ -379,17 +379,18 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
-        public int interceptKeyBeforeQueueing(long whenNanos, int keyCode, boolean down,
-                int policyFlags, boolean isScreenOn) {
+        public int interceptKeyBeforeQueueing(long whenNanos, int action, int flags,
+                int keyCode, int scanCode, int policyFlags, boolean isScreenOn) {
             return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(
-                    whenNanos, keyCode, down, policyFlags, isScreenOn);
+                    whenNanos, action, flags, keyCode, scanCode, policyFlags, isScreenOn);
         }
         
         @SuppressWarnings("unused")
         public boolean interceptKeyBeforeDispatching(InputChannel focus, int action,
-                int flags, int keyCode, int metaState, int repeatCount, int policyFlags) {
+                int flags, int keyCode, int scanCode, int metaState, int repeatCount,
+                int policyFlags) {
             return mWindowManagerService.mInputMonitor.interceptKeyBeforeDispatching(focus,
-                    action, flags, keyCode, metaState, repeatCount, policyFlags);
+                    action, flags, keyCode, scanCode, metaState, repeatCount, policyFlags);
         }
         
         @SuppressWarnings("unused")
