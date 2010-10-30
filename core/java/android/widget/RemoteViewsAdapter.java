@@ -470,7 +470,9 @@ public class RemoteViewsAdapter extends BaseAdapter {
             int mem = 0;
             for (Integer i : mIndexRemoteViews.keySet()) {
                 final RemoteViews v = mIndexRemoteViews.get(i);
-                mem += v.estimateBitmapMemoryUsage();
+                if (v != null) {
+                    mem += v.estimateBitmapMemoryUsage();
+                }
             }
             return mem;
         }
