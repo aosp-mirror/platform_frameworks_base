@@ -101,7 +101,7 @@
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
-      <span class="new">new!</span></li>
+      </li>
     </ul>
   </li>
   <li>
