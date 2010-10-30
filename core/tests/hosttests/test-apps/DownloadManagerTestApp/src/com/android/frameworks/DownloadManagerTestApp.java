@@ -53,6 +53,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
     protected static long DOWNLOAD_500K_FILESIZE = 570927;
     protected static String DOWNLOAD_1MB_FILENAME = "External1mb.apk";
     protected static long DOWNLOAD_1MB_FILESIZE = 1041262;
+    protected static String DOWNLOAD_5MB_FILENAME = "External5mb.apk";
+    protected static long DOWNLOAD_5MB_FILESIZE = 5138700;
     protected static String DOWNLOAD_10MB_FILENAME = "External10mb.apk";
     protected static long DOWNLOAD_10MB_FILESIZE = 10258741;
 
@@ -135,7 +137,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void initiateDownload() throws Exception {
-        String filename = DOWNLOAD_1MB_FILENAME;
+        String filename = DOWNLOAD_5MB_FILENAME;
         mContext.deleteFile(DOWNLOAD_STARTED_FLAG);
         FileOutputStream fileOutput = mContext.openFileOutput(DOWNLOAD_STARTED_FLAG, 0);
         DataOutputStream outputFile = null;
@@ -171,8 +173,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
      * @throws Exception if unsuccessful
      */
     public void verifyFileDownloadSucceeded() throws Exception {
-        String filename = DOWNLOAD_1MB_FILENAME;
-        long filesize = DOWNLOAD_1MB_FILESIZE;
+        String filename = DOWNLOAD_5MB_FILENAME;
+        long filesize = DOWNLOAD_5MB_FILESIZE;
         long dlRequest = -1;
         boolean rebootMarkerValid = false;
         DataInputStream dataInputFile = null;
@@ -205,7 +207,8 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             int status = cursor.getInt(columnIndex);
             int currentWaitTime = 0;
 
-            // Wait until the download finishes
+            // Wait until the download finishes; don't wait for a notification b/c
+            // the download may well have been completed before the last reboot.
             waitForDownloadOrTimeout(dlRequest);
 
             Log.i(LOG_TAG, "Verifying download information...");
