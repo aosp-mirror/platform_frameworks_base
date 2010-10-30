@@ -132,14 +132,34 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(LOG_TAG, "Received Notification:");
             if (intent.getAction().equalsIgnoreCase(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
                 synchronized(this) {
-                    ++mNumDownloadsCompleted;
-                    Log.i(LOG_TAG, "MultipleDownloadsCompletedReceiver got intent: " +
-                            intent.getAction() + " --> total count: " + mNumDownloadsCompleted);
-                    Bundle extras = intent.getExtras();
-                    downloadIds.add(new Long(extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID)));
+                    long id = intent.getExtras().getLong(DownloadManager.EXTRA_DOWNLOAD_ID);
+                    Log.i(LOG_TAG, "Received Notification for download: " + id);
+                    if (!downloadIds.contains(id)) {
+                        ++mNumDownloadsCompleted;
+                        Log.i(LOG_TAG, "MultipleDownloadsCompletedReceiver got intent: " +
+                                intent.getAction() + " --> total count: " + mNumDownloadsCompleted);
+                        downloadIds.add(id);
+
+                        DownloadManager dm = (DownloadManager)context.getSystemService(
+                                Context.DOWNLOAD_SERVICE);
+
+                        Cursor cursor = dm.query(new Query().setFilterById(id));
+                        try {
+                            if (cursor.moveToFirst()) {
+                                int status = cursor.getInt(cursor.getColumnIndex(
+                                        DownloadManager.COLUMN_STATUS));
+                                Log.i(LOG_TAG, "Download status is: " + status);
+                            } else {
+                                fail("No status found for completed download!");
+                            }
+                        } finally {
+                            cursor.close();
+                        }
+                    } else {
+                        Log.i(LOG_TAG, "Notification for id: " + id + " has already been made.");
+                    }
                 }
             }
         }
@@ -621,15 +641,32 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     /**
      * Helper to wait for a particular download to finish, or else a timeout to occur
      *
+     * Does not wait for a receiver notification of the download.
+     *
      * @param id The download id to query on (wait for)
      */
-    protected void waitForDownloadOrTimeout(long id) throws TimeoutException,
+    protected void waitForDownloadOrTimeout_skipNotification(long id) throws TimeoutException,
             InterruptedException {
         waitForDownloadOrTimeout(id, WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
     }
 
     /**
      * Helper to wait for a particular download to finish, or else a timeout to occur
+     *
+     * Also guarantees a notification has been posted for the download.
+     *
+     * @param id The download id to query on (wait for)
+     */
+    protected void waitForDownloadOrTimeout(long id) throws TimeoutException,
+            InterruptedException {
+        waitForDownloadOrTimeout_skipNotification(id);
+        waitForReceiverNotifications(1);
+    }
+
+    /**
+     * Helper to wait for a particular download to finish, or else a timeout to occur
+     *
+     * Also guarantees a notification has been posted for the download.
      *
      * @param id The download id to query on (wait for)
      * @param poll The amount of time to wait
@@ -638,10 +675,13 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     protected void waitForDownloadOrTimeout(long id, long poll, long timeoutMillis)
             throws TimeoutException, InterruptedException {
         doWaitForDownloadsOrTimeout(new Query().setFilterById(id), poll, timeoutMillis);
+        waitForReceiverNotifications(1);
     }
 
     /**
      * Helper to wait for all downloads to finish, or else a specified timeout to occur
+     *
+     * Makes no guaranee that notifications have been posted for all downloads.
      *
      * @param poll The amount of time to wait
      * @param timeoutMillis The max time (in ms) to wait for the download(s) to complete
@@ -654,6 +694,8 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     /**
      * Helper to wait for all downloads to finish, or else a timeout to occur, but does not throw
      *
+     * Also guarantees a notification has been posted for the download.
+     *
      * @param id The id of the download to query against
      * @param poll The amount of time to wait
      * @param timeoutMillis The max time (in ms) to wait for the download(s) to complete
@@ -662,6 +704,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
     protected boolean waitForDownloadOrTimeoutNoThrow(long id, long poll, long timeoutMillis) {
         try {
             doWaitForDownloadsOrTimeout(new Query().setFilterById(id), poll, timeoutMillis);
+            waitForReceiverNotifications(1);
         } catch (TimeoutException e) {
             return false;
         }
@@ -717,9 +760,8 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
             Cursor cursor = mDownloadManager.query(query);
 
             try {
-                // @TODO: there may be a little cleaner way to check for success, perhaps
-                // via STATUS_SUCCESSFUL and/or STATUS_FAILED
-                if (cursor.getCount() == 0 && mReceiver.numDownloadsCompleted() > 0) {
+                if (cursor.getCount() == 0) {
+                    Log.i(LOG_TAG, "All downloads should be done...");
                     break;
                 }
                 currentWaitTime = timeoutWait(currentWaitTime, poll, timeoutMillis,
@@ -775,6 +817,36 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
                     value == DownloadManager.STATUS_FAILED);
         } finally {
             cursor.close();
+        }
+    }
+
+    /**
+     * Convenience function to wait for just 1 notification of a download.
+     *
+     * @throws Exception if timed out while waiting
+     */
+    protected void waitForReceiverNotification() throws Exception {
+        waitForReceiverNotifications(1);
+    }
+
+    /**
+     * Synchronously waits for our receiver to receive notification for a given number of
+     * downloads.
+     *
+     * @param targetNumber The number of notifications for unique downloads to wait for; pass in
+     *         -1 to not wait for notification.
+     * @throws Exception if timed out while waiting
+     */
+    protected void waitForReceiverNotifications(int targetNumber) throws TimeoutException {
+        int count = mReceiver.numDownloadsCompleted();
+        int currentWaitTime = 0;
+
+        while (count < targetNumber) {
+            Log.i(LOG_TAG, "Waiting for notification of downloads...");
+            currentWaitTime = timeoutWait(currentWaitTime, WAIT_FOR_DOWNLOAD_POLL_TIME,
+                    MAX_WAIT_FOR_DOWNLOAD_TIME, "Timed out waiting for download notifications!"
+                    + " Received " + count + "notifications.");
+            count = mReceiver.numDownloadsCompleted();
         }
     }
 
