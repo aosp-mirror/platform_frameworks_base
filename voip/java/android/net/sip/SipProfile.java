@@ -32,7 +32,10 @@ import javax.sip.address.SipURI;
 import javax.sip.address.URI;
 
 /**
- * Class containing a SIP account, domain and server information.
+ * Defines a SIP profile, including a SIP account, domain and server information.
+ * <p>You can create a {@link SipProfile} using {@link
+ * SipProfile.Builder}. You can also retrieve one from a {@link SipSession}, using {@link
+ * SipSession#getLocalProfile} and {@link SipSession#getPeerProfile}.</p>
  */
 public class SipProfile implements Parcelable, Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
@@ -59,7 +62,7 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
             };
 
     /**
-     * Class to help create a {@code SipProfile}.
+     * Helper class for creating a {@link SipProfile}.
      */
     public static class Builder {
         private AddressFactory mAddressFactory;

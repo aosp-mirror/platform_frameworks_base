@@ -20,14 +20,17 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * A SIP session that is associated with a SIP dialog or a standalone
+ * Represents a SIP session that is associated with a SIP dialog or a standalone
  * transaction not within a dialog.
+ * <p>You can get a {@link SipSession} from {@link SipManager} with {@link
+ * SipManager#createSipSession createSipSession()} (when initiating calls) or {@link
+ * SipManager#getSessionFor getSessionFor()} (when receiving calls).</p>
  */
 public final class SipSession {
     private static final String TAG = "SipSession";
 
     /**
-     * Defines {@link SipSession} states.
+     * Defines SIP session states, such as "registering", "outgoing call", and "in call".
      */
     public static class State {
         /** When session is ready to initiate a call or transaction. */
@@ -98,7 +101,9 @@ public final class SipSession {
     }
 
     /**
-     * Listener class that listens to {@link SipSession} events.
+     * Listener for events relating to a SIP session, such as when a session is being registered
+     * ("on registering") or a call is outgoing ("on calling").
+     * <p>Many of these events are also received by {@link SipAudioCall.Listener}.</p>
      */
     public static class Listener {
         /**

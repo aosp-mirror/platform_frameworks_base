@@ -1,26 +1,26 @@
 page.title=Android SDK
 sdk.redirect=0
 
-sdk.win_download=android-sdk_r07-windows.zip
-sdk.win_bytes=23669664
-sdk.win_checksum=69c40c2d2e408b623156934f9ae574f0
+sdk.win_installer=installer_r08-windows.exe
+sdk.win_installer_bytes=TODO
+sdk.win_installer_checksum=TODO
 
-sdk.mac_download=android-sdk_r07-mac_x86.zip
-sdk.mac_bytes=19229546
-sdk.mac_checksum=0f330ed3ebb36786faf6dc72b8acf819
+sdk.win_download=android-sdk_r08-windows.zip
+sdk.win_bytes=TODO
+sdk.win_checksum=TODO
 
-sdk.linux_download=android-sdk_r07-linux_x86.tgz
-sdk.linux_bytes=17114517
-sdk.linux_checksum=e10c75da3d1aa147ddd4a5c58bfc3646
+sdk.mac_download=android-sdk_r08-mac_x86.zip
+sdk.mac_bytes=TODO
+sdk.mac_checksum=TODO
+
+sdk.linux_download=android-sdk_r08-linux_x86.tgz
+sdk.linux_bytes=TODO
+sdk.linux_checksum=TODO
 
 @jd:body
 
 
 <h2 id="quickstart">Quick Start</h2>
-
-<p>The steps below provide an overview of how to get started with the Android
-SDK. For detailed instructions, start with the <a
-href="{@docRoot}sdk/installing.html">Installing the SDK</a> guide. </p>
 
 <p><strong>1. Prepare your development computer</strong></p>
 
@@ -34,38 +34,37 @@ install the <a href="http://java.sun.com/javase/downloads/index.jsp">JDK</a>
 
 <p><strong>2. Download and install the SDK starter package</strong></p>
 
-<p>Select a starter package from the table at the top of this page and download
-it to your development computer. To install the SDK, simply unpack the starter
-package to a safe location and then add the location to your PATH. </p>
+<p>Download a starter package from the table above onto your development computer.
+If you're using Windows, we recommend that you download the installer (the {@code .exe} file),
+which will launch a Wizard to guide you through the installation and check your computer for
+required software. Otherwise, download the SDK starter package ({@code .zip} or {@code .tgz})
+appropriate for your system, unpack it to a safe location, then add the location to your PATH
+environment variable. </p>
 
 <p><strong>3. Install the ADT Plugin for Eclipse</strong></p>
 
-<p>If you are developing in Eclipse, set up a remote update site at
-<code>https://dl-ssl.google.com/android/eclipse/</code>. Install the Android 
-Development Tools (ADT) Plugin, restart Eclipse, and set the "Android" 
-preferences in Eclipse to point to the SDK install location. For detailed
-instructions, see <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin 
+<p>If you are developing in Eclipse, add a new remote update site with the URL
+<code>https://dl-ssl.google.com/android/eclipse/</code>. Install the Android
+Development Tools (ADT) Plugin from that site, restart Eclipse, and set the "Android"
+preferences in Eclipse to point to the Android SDK directory (installed in the previous step). For
+detailed instructions to setup Eclipse, see <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin
 for Eclipse</a>.</p>
 
 <p><strong>4. Add Android platforms and other components to your SDK</strong></p>
 
-<p>Use the Android SDK and AVD Manager, included in the SDK starter package, to
-add one or more Android platforms (for example, Android 1.6 or Android 2.2) and
-other components to your SDK. If you aren't sure what to add, see <a
+<p>Launch the <em>Android SDK and AVD Manager</em> by executing {@code SDK Manager.exe} (Windows) or
+{@code android} (Mac/Linux) from the SDK's {@code tools/} directory (if you used the Windows
+installer, this is launched for you when the Wizard is complete). Add some Android platforms
+(such as Android 1.6 and Android 2.3) and other components (such as documentation) to your SDK. If
+you aren't sure what to add, see <a
 href="installing.html#which">Which components do I need?</a></p>
-
-<p>To launch the Android SDK and AVD Manager on Windows, execute <code>SDK
-Setup.exe</code>, at the root of the SDK directory. On Mac OS X or Linux,
-execute the <code>android</code> tool in the <code>&lt;sdk&gt;/tools/</code>
-folder. For detailed instructions, see <a
-href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
 
 <p><strong>Done!</strong></p>
 
-<p>If you are new to Android, you can use the <a
-href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> tutorial to
-get started quickly. <a href="{@docRoot}sdk/installing.html#NextSteps">Next
-Steps</a> offers other suggestions of how to begin.</p>
+<p>To write your first Android application, see the <a
+href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> tutorial. Also see <a
+href="{@docRoot}sdk/installing.html#NextSteps">Next
+Steps</a> for other suggestions about how to get started.</p>
 
-<p>For a more detailed guide to installing and setting up the SDK, read <a 
+<p>For a more detailed guide to installing and setting up the SDK, read <a
 href="installing.html">Installing the SDK</a>.</p>
