@@ -1402,6 +1402,8 @@
   <public type="style" name="Theme.Holo.Light" />
   <public type="style" name="Theme.Holo.Dialog" />
   <public type="style" name="Theme.Holo.Light.Dialog" />
+  <public type="style" name="Theme.Holo.Extended" />
+  <public type="style" name="Theme.Holo.Light.Extended" />
 
   <public type="style" name="Widget.ListPopupWindow" />
   <public type="style" name="Widget.PopupMenu" />
