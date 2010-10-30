@@ -103,6 +103,7 @@ public final class CreateInfo implements ICreateInfo {
      * The list of classes on which to delegate all native methods.
      */
     private final static String[] DELEGATE_CLASS_NATIVES = new String[] {
+        "android.graphics.Bitmap",
         "android.graphics.Matrix",
         "android.graphics.Typeface",
     };
@@ -123,7 +124,6 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] RENAMED_CLASSES =
         new String[] {
-            "android.graphics.Bitmap",              "android.graphics._Original_Bitmap",
             "android.graphics.BitmapFactory",       "android.graphics._Original_BitmapFactory",
             "android.graphics.BitmapShader",        "android.graphics._Original_BitmapShader",
             "android.graphics.Canvas",              "android.graphics._Original_Canvas",
