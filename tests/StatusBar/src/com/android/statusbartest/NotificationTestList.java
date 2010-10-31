@@ -100,6 +100,19 @@ public class NotificationTestList extends TestActivity
             }
         },
 
+        new Test("Button") {
+            public void run() {
+                Notification n = new Notification(R.drawable.icon1, null,
+                        mActivityCreateTime);
+                n.contentView = new RemoteViews(getPackageName(), R.layout.button_notification);
+                n.flags |= Notification.FLAG_ONGOING_EVENT;
+                n.contentIntent = makeIntent();
+                n.contentView.setOnClickPendingIntent(R.id.button, makeIntent2());
+
+                mNM.notify(1, n);
+            }
+        },
+
         new Test("custom intent on text view") {
             public void run() {
                 Notification n = new Notification(R.drawable.icon1, null,
