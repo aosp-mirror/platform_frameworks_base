@@ -187,7 +187,7 @@ public class AbsoluteLayout extends ViewGroup {
          * </ul>
          *
          * @param c the application environment
-         * @param attrs the set of attributes fom which to extract the layout
+         * @param attrs the set of attributes from which to extract the layout
          *              parameters values
          */
         public LayoutParams(Context c, AttributeSet attrs) {
