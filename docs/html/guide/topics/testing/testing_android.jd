@@ -38,7 +38,7 @@ page.title=Testing Fundamentals
         <a href="#TestResults">Seeing Test Results</a>
     </li>
     <li>
-        <a href="#Monkeys">Monkey and MonkeyRunner</a>
+        <a href="#Monkeys">monkey and monkeyrunner</a>
     </li>
     <li>
        <a href="#PackageNames">Working With Package Names</a>
@@ -77,6 +77,13 @@ page.title=Testing Fundamentals
           <a href="{@docRoot}guide/developing/testing/testing_otheride.html">
           Testing in Other IDEs</a>
         </li>
+        <li>
+          <a href="{@docRoot}guide/developing/tools/monkeyrunner_concepts.html">
+          monkeyrunner</a>
+        </li>
+        <li>
+     <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a>
+        </li>
       </ol>
   </div>
 </div>
@@ -112,10 +119,10 @@ page.title=Testing Fundamentals
     </li>
     <li>
         The SDK also provides
-        <a href="{@docRoot}guide/topics/testing/monkeyrunner.html">MonkeyRunner</a>, an API for
-        testing devices with Jython scripts, and <a
-        href="{@docRoot}guide/developing/tools/monkey.html">Monkey</a>, a command-line tool for
-        stress-testing UIs by sending pseudo-random events to a device.
+  <a href="{@docRoot}guide/developing/tools/monkeyrunner_concepts.html">monkeyrunner</a>, an API
+        testing devices with Python programs, and <a
+        href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a>,
+        a command-line tool for stress-testing UIs by sending pseudo-random events to a device.
     </li>
 </ul>
 <p>
@@ -540,25 +547,28 @@ page.title=Testing Fundamentals
     <a href="{@docRoot}guide/developing/testing/testing_otheride.html#RunTestsCommand">
     Testing in Other IDEs</a>.
 </p>
-<h2 id="Monkeys">Monkey and MonkeyRunner</h2>
+<h2 id="Monkeys">monkey and monkeyrunner</h2>
 <p>
     The SDK provides two tools for functional-level application testing:
 </p>
     <ul>
         <li>
-            <a href="{@docRoot}guide/developing/tools/monkey.html">Monkey</a> is a command-line
-            tool that sends pseudo-random streams of keystrokes, touches, and gestures to a
-            device. You run it with the <a href="{@docRoot}guide/developing/tools/adb.html">
-            Android Debug Bridge</a> (adb) tool. You use it to stress-test your application and
-            report back errors that are encountered. You can repeat a stream of events by
-            running the tool each time with the same random number seed.
+The <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a>,
+            usually called "monkey", is a command-line tool that sends pseudo-random streams of
+            keystrokes, touches, and gestures to a device. You run it with the
+            <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb) tool.
+            You use it to stress-test your application and report back errors that are encountered.
+            You can repeat a stream of events by running the tool each time with the same random
+            number seed.
         </li>
         <li>
-            <a href="{@docRoot}guide/topics/testing/monkeyrunner.html">MonkeyRunner</a> is a
-            Jython API that you use in test programs written in Python. The API includes functions
-            for connecting to a device, installing and uninstalling packages, taking screenshots,
-            comparing two images, and running a test package against an application. Using the API
-            with Python, you can write a wide range of large, powerful, and complex tests.
+    The <a href="{@docRoot}guide/developing/tools/monkeyrunner_concepts.html">monkeyrunner</a> tool
+            is an API and execution environment for test programs written in Python. The API
+            includes functions for connecting to a device, installing and uninstalling packages,
+            taking screenshots, comparing two images, and running a test package against an
+            application. Using the API, you can write a wide range of large, powerful, and complex
+            tests. You run programs that use the API with the <code>monkeyrunner</code> command-line
+            tool.
         </li>
     </ul>
 <h2 id="PackageNames">Working With Package names</h2>
