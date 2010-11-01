@@ -142,6 +142,8 @@
         <attr name="editTextColor" format="reference|color" />
         <!-- EditText background drawable. -->
         <attr name="editTextBackground" format="reference" />
+        <!-- EditText background drawable for multiline EditText. -->
+        <attr name="editTextMultilineBackground" format="reference" />
 
         <!-- A styled string, specifying the style to be used for showing
              inline candidate text when composing with an input method.  The
@@ -2508,7 +2510,8 @@
         <attr name="textLineHeight" />
         <!-- Indicates that a non-editable text can be selected. -->
         <attr name="textIsSelectable" />
-
+        <!--  A specific background drawable used by multi-line EditText only. -->
+        <attr name="multilineBackground" format="reference"/>
     </declare-styleable>
     <!-- An <code>input-extras</code> is a container for extra data to supply to
          an input method.  Contains

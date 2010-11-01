@@ -72,6 +72,7 @@
         
         <item name="editTextColor">?android:attr/textColorPrimaryInverse</item>
         <item name="editTextBackground">@android:drawable/edit_text</item>
+        <item name="editTextMultilineBackground">@android:drawable/edit_text</item>
         
         <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
         
@@ -685,6 +686,7 @@
         
         <item name="editTextColor">?android:attr/textColorPrimary</item>
         <item name="editTextBackground">@android:drawable/edit_text_holo_dark</item>
+        <item name="editTextMultilineBackground">@android:drawable/edit_text_multiline_holo_dark</item>
         
         <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
         
@@ -917,10 +919,11 @@
         <item name="textAppearanceSearchResultSubtitle">@android:style/TextAppearance.Holo.Light.SearchResult.Subtitle</item>
         
         <item name="textAppearanceButton">@android:style/TextAppearance.Holo.Light.Widget.Button</item>
-        
+
         <item name="editTextColor">?android:attr/textColorPrimary</item>
         <item name="editTextBackground">@android:drawable/edit_text_holo_light</item>
-        
+        <item name="editTextMultilineBackground">@android:drawable/edit_text_multiline_holo_light</item>
+
         <item name="candidatesTextStyleSpans">@android:string/candidates_style</item>
         
         <item name="textCheckMark">@android:drawable/indicator_check_mark_light</item>
