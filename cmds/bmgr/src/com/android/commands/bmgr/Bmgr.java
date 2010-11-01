@@ -389,11 +389,13 @@ public final class Bmgr {
             if (err == 0) {
                 observer.waitForCompletion();
                 sets = observer.sets;
-                for (RestoreSet s : sets) {
-                    if (s.token == token) {
-                        System.out.println("Scheduling restore: " + s.name);
-                        didRestore = (mRestore.restoreAll(token, observer) == 0);
-                        break;
+                if (sets != null) {
+                    for (RestoreSet s : sets) {
+                        if (s.token == token) {
+                            System.out.println("Scheduling restore: " + s.name);
+                            didRestore = (mRestore.restoreAll(token, observer) == 0);
+                            break;
+                        }
                     }
                 }
             }
