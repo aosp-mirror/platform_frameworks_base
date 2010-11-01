@@ -3539,6 +3539,9 @@ public class WebView extends AbsoluteLayout
         if (AUTO_REDRAW_HACK && mAutoRedraw) {
             invalidate();
         }
+        if (inEditingMode()) {
+            mWebTextView.onDrawSubstitute();
+        }
         mWebViewCore.signalRepaintDone();
     }
 

@@ -4178,6 +4178,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         canvas.restore();
 
+        updateCursorControllerPositions();
+    }
+
+    /**
+     * Update the positions of the CursorControllers.  Needed by WebTextView,
+     * which does not draw.
+     * @hide
+     */
+    protected void updateCursorControllerPositions() {
         if (mInsertionPointCursorController != null &&
                 mInsertionPointCursorController.isShowing()) {
             mInsertionPointCursorController.updatePosition();
