@@ -472,6 +472,11 @@ final class WebViewCore {
      */
     private native int nativeRecordContent(Region invalRegion, Point wh);
 
+    /**
+     * Update the layers' content
+     */
+    private native int nativeUpdateLayers();
+
     private native boolean nativeFocusBoundsChanged();
 
     /**
@@ -798,6 +803,7 @@ final class WebViewCore {
             "FREE_MEMORY",  // = 145
             "VALID_NODE_BOUNDS", // = 146
             "SAVE_WEBARCHIVE", // = 147
+            "WEBKIT_DRAW_LAYERS", // = 148;
         };
 
     class EventHub {
@@ -867,6 +873,9 @@ final class WebViewCore {
 
         // Load and save web archives
         static final int SAVE_WEBARCHIVE = 147;
+
+        // Update layers
+        static final int WEBKIT_DRAW_LAYERS = 148;
 
         // Network-based messaging
         static final int CLEAR_SSL_PREF_TABLE = 150;
@@ -951,6 +960,10 @@ final class WebViewCore {
                     switch (msg.what) {
                         case WEBKIT_DRAW:
                             webkitDraw();
+                            break;
+
+                        case WEBKIT_DRAW_LAYERS:
+                            webkitDrawLayers();
                             break;
 
                         case DESTROY:
@@ -1800,6 +1813,7 @@ final class WebViewCore {
 
     // Used to avoid posting more than one draw message.
     private boolean mDrawIsScheduled;
+    private boolean mDrawLayersIsScheduled;
 
     // Used to avoid posting more than one split picture message.
     private boolean mSplitPictureIsScheduled;
@@ -1839,6 +1853,20 @@ final class WebViewCore {
         boolean mFocusSizeChanged;
     }
 
+    // Only update the layers' content, not the base surface
+    // PictureSet.
+    private void webkitDrawLayers() {
+        mDrawLayersIsScheduled = false;
+        if (mDrawIsScheduled) {
+            removeMessages(EventHub.WEBKIT_DRAW);
+            webkitDraw();
+            return;
+        }
+        DrawData draw = new DrawData();
+        draw.mBaseLayer = nativeUpdateLayers();
+        webkitDraw(draw);
+    }
+
     private void webkitDraw() {
         mDrawIsScheduled = false;
         DrawData draw = new DrawData();
@@ -1848,6 +1876,10 @@ final class WebViewCore {
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw abort");
             return;
         }
+        webkitDraw(draw);
+    }
+
+    private void webkitDraw(DrawData draw) {
         if (mWebView != null) {
             draw.mFocusSizeChanged = nativeFocusBoundsChanged();
             draw.mViewSize = new Point(mCurrentViewWidth, mCurrentViewHeight);
@@ -1954,6 +1986,15 @@ final class WebViewCore {
             mDrawIsScheduled = true;
             if (mDrawIsPaused) return;
             mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW));
+        }
+    }
+
+    // called from JNI
+    void layersDraw() {
+        synchronized (this) {
+            if (mDrawLayersIsScheduled) return;
+            mDrawLayersIsScheduled = true;
+            mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW_LAYERS));
         }
     }
 
