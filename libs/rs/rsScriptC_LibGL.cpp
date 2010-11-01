@@ -441,53 +441,53 @@ static void SC_FontColor(float r, float g, float b, float a)
 //                 ::= d  # double
 
 static ScriptCState::SymbolTable_t gSyms[] = {
-    { "_Z22rsgBindProgramFragment19rs_program_fragment", (void *)&SC_bindProgramFragment },
-    { "_Z19rsgBindProgramStore16rs_program_store", (void *)&SC_bindProgramStore },
-    { "_Z20rsgBindProgramVertex17rs_program_vertex", (void *)&SC_bindProgramVertex },
-    { "_Z20rsgBindProgramRaster17rs_program_raster", (void *)&SC_bindProgramRaster },
-    { "_Z14rsgBindSampler19rs_program_fragmentj10rs_sampler", (void *)&SC_bindSampler },
-    { "_Z14rsgBindTexture19rs_program_fragmentj13rs_allocation", (void *)&SC_bindTexture },
+    { "_Z22rsgBindProgramFragment19rs_program_fragment", (void *)&SC_bindProgramFragment, false },
+    { "_Z19rsgBindProgramStore16rs_program_store", (void *)&SC_bindProgramStore, false },
+    { "_Z20rsgBindProgramVertex17rs_program_vertex", (void *)&SC_bindProgramVertex, false },
+    { "_Z20rsgBindProgramRaster17rs_program_raster", (void *)&SC_bindProgramRaster, false },
+    { "_Z14rsgBindSampler19rs_program_fragmentj10rs_sampler", (void *)&SC_bindSampler, false },
+    { "_Z14rsgBindTexture19rs_program_fragmentj13rs_allocation", (void *)&SC_bindTexture, false },
 
-    { "_Z36rsgProgramVertexLoadProjectionMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadProjectionMatrix },
-    { "_Z31rsgProgramVertexLoadModelMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadModelMatrix },
-    { "_Z33rsgProgramVertexLoadTextureMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadTextureMatrix },
+    { "_Z36rsgProgramVertexLoadProjectionMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadProjectionMatrix, false },
+    { "_Z31rsgProgramVertexLoadModelMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadModelMatrix, false },
+    { "_Z33rsgProgramVertexLoadTextureMatrixPK12rs_matrix4x4", (void *)&SC_vpLoadTextureMatrix, false },
 
-    { "_Z35rsgProgramVertexGetProjectionMatrixP12rs_matrix4x4", (void *)&SC_vpGetProjectionMatrix },
+    { "_Z35rsgProgramVertexGetProjectionMatrixP12rs_matrix4x4", (void *)&SC_vpGetProjectionMatrix, false },
 
-    { "_Z31rsgProgramFragmentConstantColor19rs_program_fragmentffff", (void *)&SC_pfConstantColor },
+    { "_Z31rsgProgramFragmentConstantColor19rs_program_fragmentffff", (void *)&SC_pfConstantColor, false },
 
-    { "_Z11rsgGetWidthv", (void *)&SC_getWidth },
-    { "_Z12rsgGetHeightv", (void *)&SC_getHeight },
+    { "_Z11rsgGetWidthv", (void *)&SC_getWidth, false },
+    { "_Z12rsgGetHeightv", (void *)&SC_getHeight, false },
 
-    { "_Z18rsgUploadToTexture13rs_allocationj", (void *)&SC_uploadToTexture2 },
-    { "_Z18rsgUploadToTexture13rs_allocation", (void *)&SC_uploadToTexture },
-    { "_Z23rsgUploadToBufferObject13rs_allocation", (void *)&SC_uploadToBufferObject },
+    { "_Z18rsgUploadToTexture13rs_allocationj", (void *)&SC_uploadToTexture2, false },
+    { "_Z18rsgUploadToTexture13rs_allocation", (void *)&SC_uploadToTexture, false },
+    { "_Z23rsgUploadToBufferObject13rs_allocation", (void *)&SC_uploadToBufferObject, false },
 
-    { "_Z11rsgDrawRectfffff", (void *)&SC_drawRect },
-    { "_Z11rsgDrawQuadffffffffffff", (void *)&SC_drawQuad },
-    { "_Z20rsgDrawQuadTexCoordsffffffffffffffffffff", (void *)&SC_drawQuadTexCoords },
-    { "_Z24rsgDrawSpriteScreenspacefffff", (void *)&SC_drawSpriteScreenspace },
+    { "_Z11rsgDrawRectfffff", (void *)&SC_drawRect, false },
+    { "_Z11rsgDrawQuadffffffffffff", (void *)&SC_drawQuad, false },
+    { "_Z20rsgDrawQuadTexCoordsffffffffffffffffffff", (void *)&SC_drawQuadTexCoords, false },
+    { "_Z24rsgDrawSpriteScreenspacefffff", (void *)&SC_drawSpriteScreenspace, false },
 
-    { "_Z11rsgDrawMesh7rs_mesh", (void *)&SC_drawMesh },
-    { "_Z11rsgDrawMesh7rs_meshj", (void *)&SC_drawMeshPrimitive },
-    { "_Z11rsgDrawMesh7rs_meshjjj", (void *)&SC_drawMeshPrimitiveRange },
-    { "_Z25rsgMeshComputeBoundingBox7rs_meshPfS0_S0_S0_S0_S0_", (void *)&SC_meshComputeBoundingBox },
+    { "_Z11rsgDrawMesh7rs_mesh", (void *)&SC_drawMesh, false },
+    { "_Z11rsgDrawMesh7rs_meshj", (void *)&SC_drawMeshPrimitive, false },
+    { "_Z11rsgDrawMesh7rs_meshjjj", (void *)&SC_drawMeshPrimitiveRange, false },
+    { "_Z25rsgMeshComputeBoundingBox7rs_meshPfS0_S0_S0_S0_S0_", (void *)&SC_meshComputeBoundingBox, false },
 
-    { "_Z13rsgClearColorffff", (void *)&SC_ClearColor },
-    { "_Z13rsgClearDepthf", (void *)&SC_ClearDepth },
+    { "_Z13rsgClearColorffff", (void *)&SC_ClearColor, false },
+    { "_Z13rsgClearDepthf", (void *)&SC_ClearDepth, false },
 
-    { "_Z11rsgDrawTextPKcii", (void *)&SC_DrawText },
-    { "_Z11rsgDrawText13rs_allocationii", (void *)&SC_DrawTextAlloc },
-    { "_Z14rsgMeasureTextPKcPiS1_S1_S1_", (void *)&SC_MeasureText },
-    { "_Z14rsgMeasureText13rs_allocationPiS0_S0_S0_", (void *)&SC_MeasureTextAlloc },
+    { "_Z11rsgDrawTextPKcii", (void *)&SC_DrawText, false },
+    { "_Z11rsgDrawText13rs_allocationii", (void *)&SC_DrawTextAlloc, false },
+    { "_Z14rsgMeasureTextPKcPiS1_S1_S1_", (void *)&SC_MeasureText, false },
+    { "_Z14rsgMeasureText13rs_allocationPiS0_S0_S0_", (void *)&SC_MeasureTextAlloc, false },
 
-    { "_Z11rsgBindFont7rs_font", (void *)&SC_BindFont },
-    { "_Z12rsgFontColorffff", (void *)&SC_FontColor },
+    { "_Z11rsgBindFont7rs_font", (void *)&SC_BindFont, false },
+    { "_Z12rsgFontColorffff", (void *)&SC_FontColor, false },
 
     // misc
-    { "_Z5colorffff", (void *)&SC_color },
+    { "_Z5colorffff", (void *)&SC_color, false },
 
-    { NULL, NULL }
+    { NULL, NULL, false }
 };
 
 const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbolGL(const char *sym)
