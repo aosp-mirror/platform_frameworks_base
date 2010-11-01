@@ -26,6 +26,9 @@ struct NuHTTPDataSource : public DataSource {
     virtual status_t getSize(off_t *size);
     virtual uint32_t flags();
 
+    virtual DecryptHandle* DrmInitialization(DrmManagerClient *client);
+    virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client);
+
 protected:
     virtual ~NuHTTPDataSource();
 
@@ -44,11 +47,15 @@ private:
     unsigned mPort;
     String8 mPath;
     String8 mHeaders;
+    String8 mUri;
 
     HTTPStream mHTTP;
     off_t mOffset;
     off_t mContentLength;
     bool mContentLengthValid;
+
+    DecryptHandle *mDecryptHandle;
+    DrmManagerClient *mDrmManagerClient;
 
     status_t connect(
             const char *uri, const String8 &headers, off_t offset);

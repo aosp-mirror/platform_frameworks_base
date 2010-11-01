@@ -67,7 +67,9 @@ NuHTTPDataSource::NuHTTPDataSource()
       mPort(0),
       mOffset(0),
       mContentLength(0),
-      mContentLengthValid(false) {
+      mContentLengthValid(false),
+      mDecryptHandle(NULL),
+      mDrmManagerClient(NULL) {
 }
 
 NuHTTPDataSource::~NuHTTPDataSource() {
@@ -89,6 +91,9 @@ status_t NuHTTPDataSource::connect(
         off_t offset) {
     String8 host, path;
     unsigned port;
+
+    mUri = uri;
+
     if (!ParseURL(uri, &host, &port, &path)) {
         return ERROR_MALFORMED;
     }
@@ -338,6 +343,32 @@ void NuHTTPDataSource::applyTimeoutResponse() {
         LOGI("overriding default timeout, new timeout is %ld seconds", tmp);
         mHTTP.setReceiveTimeout(tmp);
     }
+}
+
+DecryptHandle* NuHTTPDataSource::DrmInitialization(DrmManagerClient* client) {
+    if (client == NULL) {
+        return NULL;
+    }
+    mDrmManagerClient = client;
+
+    if (mDecryptHandle == NULL) {
+        /* Note if redirect occurs, mUri is the redirect uri instead of the
+         * original one
+         */
+        mDecryptHandle = mDrmManagerClient->openDecryptSession(mUri);
+    }
+
+    if (mDecryptHandle == NULL) {
+        mDrmManagerClient = NULL;
+    }
+
+    return mDecryptHandle;
+}
+
+void NuHTTPDataSource::getDrmInfo(DecryptHandle **handle, DrmManagerClient **client) {
+    *handle = mDecryptHandle;
+
+    *client = mDrmManagerClient;
 }
 
 }  // namespace android

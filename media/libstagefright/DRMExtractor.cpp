@@ -280,18 +280,23 @@ bool SniffDRM(
         if (gDrmManagerClient == NULL) {
             gDrmManagerClient = new DrmManagerClient();
         }
+
+        if (gDrmManagerClient == NULL) {
+            return false;
+        }
     }
 
     DecryptHandle *decryptHandle = source->DrmInitialization(gDrmManagerClient);
 
     if (decryptHandle != NULL) {
         if (decryptHandle->decryptApiType == DecryptApiType::CONTAINER_BASED) {
-            *mimeType = String8("drm+container_based+");
+            *mimeType = String8("drm+container_based+") + decryptHandle->mimeType;
         } else if (decryptHandle->decryptApiType == DecryptApiType::ELEMENTARY_STREAM_BASED) {
-            *mimeType = String8("drm+es_based+");
+            *mimeType = String8("drm+es_based+") + decryptHandle->mimeType;
+        } else if (decryptHandle->decryptApiType == DecryptApiType::WV_BASED) {
+            *mimeType = MEDIA_MIMETYPE_CONTAINER_WVM;
+            LOGW("SniffWVM: found match\n");
         }
-
-        *mimeType += decryptHandle->mimeType;
         *confidence = 10.0f;
 
         return true;
