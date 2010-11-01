@@ -129,9 +129,8 @@ Menu. See <a href="menu-resource.html">Menu Resource</a>.</td>
 
   <tr>
     <td><code>raw/</code></td>
-    <td><p>Arbitrary files to save in their raw form. Files in here are not compressed by the
-system. To open these resources with a raw {@link java.io.InputStream}, call {@link
-android.content.res.Resources#openRawResource(int)
+    <td><p>Arbitrary files to save in their raw form. To open these resources with a raw
+{@link java.io.InputStream}, call {@link android.content.res.Resources#openRawResource(int)
 Resources.openRawResource()} with the resource ID, which is {@code R.raw.<em>filename</em>}.</p>
       <p>However, if you need access to original file names and file hierarchy, you might consider
 saving some resources in the {@code
