@@ -447,7 +447,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             drawableBottom = null;
         int drawablePadding = 0;
         int ellipsize = -1;
-        boolean singleLine = false;
+        boolean singleLine = true;
         int maxlength = -1;
         CharSequence text = "";
         CharSequence hint = null;
@@ -796,10 +796,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     ? inputType : EditorInfo.TYPE_CLASS_TEXT;
         } else if (inputType != EditorInfo.TYPE_NULL) {
             setInputType(inputType, true);
-            singleLine = (inputType&(EditorInfo.TYPE_MASK_CLASS
-                            | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE)) !=
-                    (EditorInfo.TYPE_CLASS_TEXT
-                            | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
+            singleLine = !isMultilineInputType(inputType);
         } else if (phone) {
             mInput = DialerKeyListener.getInstance();
             mInputType = inputType = EditorInfo.TYPE_CLASS_PHONE;
@@ -818,10 +815,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             TextKeyListener.Capitalize cap;
 
             inputType = EditorInfo.TYPE_CLASS_TEXT;
-            if (!singleLine) {
-                inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
-            }
-
             switch (autocap) {
             case 1:
                 cap = TextKeyListener.Capitalize.SENTENCES;
@@ -848,9 +841,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else if (editable) {
             mInput = TextKeyListener.getInstance();
             mInputType = EditorInfo.TYPE_CLASS_TEXT;
-            if (!singleLine) {
-                mInputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
-            }
         } else {
             mInput = null;
 
@@ -867,8 +857,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (password && (mInputType&EditorInfo.TYPE_MASK_CLASS)
-                == EditorInfo.TYPE_CLASS_TEXT) {
+        if (password && (mInputType&EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
             mInputType = (mInputType & ~(EditorInfo.TYPE_MASK_VARIATION))
                 | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
         }
@@ -884,12 +873,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             drawableLeft, drawableTop, drawableRight, drawableBottom);
         setCompoundDrawablePadding(drawablePadding);
 
-        if (singleLine) {
-            setSingleLine();
-
-            if (mInput == null && ellipsize < 0) {
+        setSingleLine(singleLine);
+        if (singleLine && mInput == null && ellipsize < 0) {
                 ellipsize = 3; // END
-            }
         }
 
         switch (ellipsize) {
@@ -1153,14 +1139,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } catch (IncompatibleClassChangeError e) {
                 mInputType = EditorInfo.TYPE_CLASS_TEXT;
             }
-            if ((mInputType&EditorInfo.TYPE_MASK_CLASS)
-                    == EditorInfo.TYPE_CLASS_TEXT) {
-                if (mSingleLine) {
-                    mInputType &= ~EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
-                } else {
-                    mInputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
-                }
-            }
+            setSingleLine(mSingleLine);
         } else {
             mInputType = EditorInfo.TYPE_NULL;
         }
@@ -2988,6 +2967,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mHint;
     }
 
+    private boolean isMultilineInputType(int type) {
+        return (type & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE)) ==
+                       (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
+    }
+
     /**
      * Set the type of the content with a constant as defined for
      * {@link EditorInfo#inputType}.  This will take care of changing
@@ -3024,17 +3008,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         
-        boolean multiLine = (type&(EditorInfo.TYPE_MASK_CLASS
-                        | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE)) ==
-                (EditorInfo.TYPE_CLASS_TEXT
-                        | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
+        boolean singleLine = !isMultilineInputType(type);
         
         // We need to update the single line mode if it has changed or we
         // were previously in password mode.
-        if (mSingleLine == multiLine || forceUpdate) {
+        if (mSingleLine != singleLine || forceUpdate) {
             // Change single line mode, but only change the transformation if
             // we are not in password mode.
-            applySingleLine(!multiLine, !isPassword);
+            applySingleLine(singleLine, !isPassword);
         }
         
         InputMethodManager imm = InputMethodManager.peekInstance();
@@ -4721,10 +4702,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                 }
             }
-            if ((outAttrs.inputType & (InputType.TYPE_MASK_CLASS
-                    | InputType.TYPE_TEXT_FLAG_MULTI_LINE))
-                    == (InputType.TYPE_CLASS_TEXT
-                            | InputType.TYPE_TEXT_FLAG_MULTI_LINE)) {
+            if (isMultilineInputType(outAttrs.inputType)) {
                 // Multi-line text editors should always show an enter key.
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
             }
@@ -6067,8 +6045,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setSingleLine(boolean singleLine) {
-        if ((mInputType&EditorInfo.TYPE_MASK_CLASS)
-                == EditorInfo.TYPE_CLASS_TEXT) {
+        if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
             if (singleLine) {
                 mInputType &= ~EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
             } else {
@@ -6084,8 +6061,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setLines(1);
             setHorizontallyScrolling(true);
             if (applyTransformation) {
-                setTransformationMethod(SingleLineTransformationMethod.
-                                        getInstance());
+                setTransformationMethod(SingleLineTransformationMethod.getInstance());
             }
         } else {
             setMaxLines(Integer.MAX_VALUE);
