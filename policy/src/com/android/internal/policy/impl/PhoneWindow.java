@@ -627,13 +627,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // should be executed...  do it!
             mPanelChordingKey = 0;
             mPanelMayLongPress = false;
-            InputMethodManager imm = (InputMethodManager)
-                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            }
-            
         }
 
         return false;
