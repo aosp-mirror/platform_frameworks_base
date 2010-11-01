@@ -27,6 +27,14 @@ import android.content.res.Configuration;
  * AndroidManifest.xml's &lt;application&gt; tag, which will cause that class
  * to be instantiated for you when the process for your application/package is
  * created.
+ * 
+ * <p class="note">There is normally no need to subclass Application.  In
+ * most situation, static singletons can provide the same functionality in a
+ * more modular way.  If your singleton needs a global context (for example
+ * to register broadcast receivers), the function to retrieve it can be
+ * given a {@link android.content.Context} which internally uses
+ * {@link android.content.Context#getApplicationContext() Context.getApplicationContext()}
+ * when first constructing the singleton.</p>
  */
 public class Application extends ContextWrapper implements ComponentCallbacks {
     
@@ -46,12 +54,10 @@ public class Application extends ContextWrapper implements ComponentCallbacks {
     }
 
     /**
-     * Called when the application is stopping.  There are no more application
-     * objects running and the process will exit.  <em>Note: never depend on
-     * this method being called; in many cases an unneeded application process
-     * will simply be killed by the kernel without executing any application
-     * code.</em>
-     * If you override this method, be sure to call super.onTerminate().
+     * This method is for use in emulated process environments.  It will
+     * never be called on a production Android device, where processes are
+     * removed by simply killing them; no user code (including this callback)
+     * is executed when doing so.
      */
     public void onTerminate() {
     }
