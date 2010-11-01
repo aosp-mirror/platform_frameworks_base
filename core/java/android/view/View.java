@@ -6296,8 +6296,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (invalidateCache) {
                 mPrivateFlags &= ~DRAWING_CACHE_VALID;
             }
-            final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
+            final ViewParent p = mParent;
+            if (ai != null && ai.mHardwareAccelerated) {
+                // fast-track for GL-enabled applications; just invalidate the whole hierarchy
+                // with a null dirty rect, which tells the ViewRoot to redraw everything
+                p.invalidateChild(this, null);
+                return;
+            }
             if (p != null && ai != null) {
                 final Rect r = ai.mTmpInvalRect;
                 r.set(0, 0, mRight - mLeft, mBottom - mTop);
@@ -6321,7 +6327,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     @ViewDebug.ExportedProperty(category = "drawing")
     public boolean isOpaque() {
-        return (mPrivateFlags & OPAQUE_MASK) == OPAQUE_MASK;
+        return (mPrivateFlags & OPAQUE_MASK) == OPAQUE_MASK &&
+                (mAlpha >= 1.0f - ViewConfiguration.ALPHA_THRESHOLD);
     }
 
     private void computeOpaqueFlags() {
@@ -8618,7 +8625,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     @RemotableViewMethod
     public void setBackgroundColor(int color) {
-        setBackgroundDrawable(new ColorDrawable(color));
+        if (mBGDrawable instanceof ColorDrawable) {
+            ((ColorDrawable) mBGDrawable).setColor(color);
+        } else {
+            setBackgroundDrawable(new ColorDrawable(color));
+        }
     }
 
     /**
