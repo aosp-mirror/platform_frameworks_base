@@ -169,7 +169,7 @@ class DelegateMethodAdapter implements MethodVisitor {
         // Construct the descriptor of the delegate. For a static method, it's the same
         // however for an instance method we need to pass the 'this' reference first
         String desc = mDesc;
-        if (!mIsStatic && argTypes.length > 0) {
+        if (!mIsStatic) {
             Type[] argTypes2 = new Type[argTypes.length + 1];
 
             argTypes2[0] = Type.getObjectType(mClassName);

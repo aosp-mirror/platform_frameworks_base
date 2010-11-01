@@ -72,7 +72,11 @@ public final class Typeface_Delegate {
     }
 
     public static List<Font> getFonts(Typeface typeface) {
-        Typeface_Delegate delegate = sManager.getDelegate(typeface.native_instance);
+        return getFonts(typeface.native_instance);
+    }
+
+    public static List<Font> getFonts(int native_int) {
+        Typeface_Delegate delegate = sManager.getDelegate(native_int);
         if (delegate == null) {
             assert false;
             return null;

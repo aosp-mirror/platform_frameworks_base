@@ -87,7 +87,11 @@ public class TestNativeDelegate extends TestCase {
 
             try {
                 // try to load the method with the given parameter types.
-                delegateClass.getDeclaredMethod(originalMethod.getName(), parameters);
+                Method delegateMethod = delegateClass.getDeclaredMethod(originalMethod.getName(),
+                        parameters);
+
+                // check that the method is static
+                assertTrue((delegateMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC);
             } catch (NoSuchMethodException e) {
                 // compute a full class name that's long but not too long.
                 StringBuilder sb = new StringBuilder(originalMethod.getName() + "(");

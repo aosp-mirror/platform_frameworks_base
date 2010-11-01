@@ -60,6 +60,20 @@ public class Bitmap_Delegate {
     // ---- Public Helper methods ----
 
     /**
+     * Returns the native delegate associated to a given {@link Bitmap_Delegate} object.
+     */
+    public static Bitmap_Delegate getDelegate(Bitmap bitmap) {
+        return sManager.getDelegate(bitmap.mNativeBitmap);
+    }
+
+    /**
+     * Returns the native delegate associated to a given an int referencing a {@link Bitmap} object.
+     */
+    public static Bitmap_Delegate getDelegate(int native_bitmap) {
+        return sManager.getDelegate(native_bitmap);
+    }
+
+    /**
      * Creates and returns a {@link Bitmap} initialized with the given file content.
      */
     public static Bitmap createBitmap(File input, Density density) throws IOException {
@@ -118,6 +132,13 @@ public class Bitmap_Delegate {
         return BufferedImage.TYPE_INT_ARGB;
     }
 
+    /**
+     * Returns the {@link BufferedImage} used by the delegate of the given {@link Bitmap}.
+     */
+    public BufferedImage getImage() {
+        return mImage;
+    }
+
     // ---- native methods ----
 
     /*package*/ static Bitmap nativeCreate(int[] colors, int offset, int stride, int width,
@@ -127,8 +148,7 @@ public class Bitmap_Delegate {
         // create the image
         BufferedImage image = new BufferedImage(width, height, imageType);
 
-        // fill it
-        //image.setRGB(x, y, rgb)
+        // FIXME fill the bitmap!
 
         // create a delegate with the content of the stream.
         Bitmap_Delegate delegate = new Bitmap_Delegate(image);
