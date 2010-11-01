@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.animation.LayoutTransition;
 import android.app.FragmentManager.BackStackEntry;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -69,6 +70,7 @@ public class FragmentBreadCrumbs extends ViewGroup
         addView(mContainer);
         a.getFragmentManager().addOnBackStackChangedListener(this);
         updateCrumbs();
+        setLayoutTransition(new LayoutTransition());
     }
 
     /**

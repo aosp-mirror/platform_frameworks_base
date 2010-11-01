@@ -268,6 +268,7 @@ final class FragmentManagerImpl implements FragmentManager {
     ArrayList<Fragment> mAdded;
     ArrayList<Integer> mAvailIndices;
     ArrayList<BackStackRecord> mBackStack;
+    ArrayList<Fragment> mCreatedMenus;
     
     // Must be accessed while locked.
     ArrayList<BackStackRecord> mBackStackIndices;
@@ -1325,15 +1326,32 @@ final class FragmentManagerImpl implements FragmentManager {
     
     public boolean dispatchCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         boolean show = false;
+        ArrayList<Fragment> newMenus = null;
         if (mActive != null) {
             for (int i=0; i<mAdded.size(); i++) {
                 Fragment f = mAdded.get(i);
                 if (f != null && !f.mHidden && f.mHasMenu) {
                     show = true;
                     f.onCreateOptionsMenu(menu, inflater);
+                    if (newMenus == null) {
+                        newMenus = new ArrayList<Fragment>();
+                    }
+                    newMenus.add(f);
                 }
             }
         }
+        
+        if (mCreatedMenus != null) {
+            for (int i=0; i<mCreatedMenus.size(); i++) {
+                Fragment f = mCreatedMenus.get(i);
+                if (newMenus == null || !newMenus.contains(f)) {
+                    f.onDestroyOptionsMenu();
+                }
+            }
+        }
+        
+        mCreatedMenus = newMenus;
+        
         return show;
     }
     
