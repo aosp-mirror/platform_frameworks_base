@@ -674,13 +674,16 @@ class BrowserFrame extends Handler {
      * @param url The url to load.
      * @return An InputStream to the android resource
      */
-    private InputStream inputStreamForAndroidResource(String url, int type) {
-        final int RESOURCE = 1;
-        final int ASSET = 2;
-        final int CONTENT = 3;
+    private InputStream inputStreamForAndroidResource(String url) {
+        // This list needs to be kept in sync with the list in
+        // external/webkit/WebKit/android/WebCoreSupport/WebUrlLoaderClient.cpp
+        final String ANDROID_ASSET = "file:///android_asset/";
+        final String ANDROID_RESOURCE = "file:///android_res/";
+        final String ANDROID_CONTENT = "content:";
 
-        if (type == RESOURCE) {
-            // file:///android_res
+        // file:///android_res
+        if (url.startsWith(ANDROID_RESOURCE)) {
+            url = url.replaceFirst(ANDROID_RESOURCE, "");
             if (url == null || url.length() == 0) {
                 Log.e(LOGTAG, "url has length 0 " + url);
                 return null;
@@ -717,15 +720,18 @@ class BrowserFrame extends Handler {
                 return null;
             }
 
-        } else if (type == ASSET) {
-            // file:///android_asset
+        // file:///android_asset
+        } else if (url.startsWith(ANDROID_ASSET)) {
+            url = url.replaceFirst(ANDROID_ASSET, "");
             try {
                 AssetManager assets = mContext.getAssets();
                 return assets.open(url, AssetManager.ACCESS_STREAMING);
             } catch (IOException e) {
                 return null;
             }
-        } else if (type == CONTENT) {
+
+        // content://
+        } else if (url.startsWith(ANDROID_CONTENT)) {
             try {
                 // Strip off mimetype, for compatibility with ContentLoader.java
                 // If we don't do this, we can fail to load Gmail attachments,
