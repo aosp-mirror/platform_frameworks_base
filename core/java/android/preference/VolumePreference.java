@@ -92,6 +92,11 @@ public class VolumePreference extends SeekBarPreference implements
                     mSeekBarVolumizer.changeVolumeBy(1);
                 }
                 return true;
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                if (isdown) {
+                    mSeekBarVolumizer.muteVolume();
+                }
+                return true;
             default:
                 return false;
         }
@@ -225,6 +230,7 @@ public class VolumePreference extends SeekBarPreference implements
     
         private int mLastProgress = -1;
         private SeekBar mSeekBar;
+        private int mVolumeBeforeMute = -1;
         
         private ContentObserver mVolumeObserver = new ContentObserver(mHandler) {
             @Override
@@ -336,6 +342,21 @@ public class VolumePreference extends SeekBarPreference implements
                 sample();
             }
             postSetVolume(mSeekBar.getProgress());
+            mVolumeBeforeMute = -1;
+        }
+
+        public void muteVolume() {
+            if (mVolumeBeforeMute != -1) {
+                mSeekBar.setProgress(mVolumeBeforeMute);
+                sample();
+                postSetVolume(mVolumeBeforeMute);
+                mVolumeBeforeMute = -1;
+            } else {
+                mVolumeBeforeMute = mSeekBar.getProgress();
+                mSeekBar.setProgress(0);
+                stopSample();
+                postSetVolume(0);
+            }
         }
 
         public void onSaveInstanceState(VolumeStore volumeStore) {

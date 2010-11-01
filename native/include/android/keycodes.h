@@ -207,7 +207,7 @@ enum {
     AKEYCODE_NUMPAD_EQUALS   = 161,
     AKEYCODE_NUMPAD_LEFT_PAREN = 162,
     AKEYCODE_NUMPAD_RIGHT_PAREN = 163,
-
+    AKEYCODE_VOLUME_MUTE     = 164,
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.

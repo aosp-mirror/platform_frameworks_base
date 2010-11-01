@@ -188,6 +188,7 @@ static const KeycodeLabel KEYCODES[] = {
     { "NUMPAD_EQUALS", 161 },
     { "NUMPAD_LEFT_PAREN", 162 },
     { "NUMPAD_RIGHT_PAREN", 163 },
+    { "VOLUME_MUTE", 164 },
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.

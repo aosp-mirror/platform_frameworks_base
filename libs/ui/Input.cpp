@@ -33,6 +33,7 @@ bool KeyEvent::hasDefaultAction(int32_t keyCode) {
         case AKEYCODE_ENDCALL:
         case AKEYCODE_VOLUME_UP:
         case AKEYCODE_VOLUME_DOWN:
+        case AKEYCODE_VOLUME_MUTE:
         case AKEYCODE_POWER:
         case AKEYCODE_CAMERA:
         case AKEYCODE_HEADSETHOOK:
@@ -40,11 +41,14 @@ bool KeyEvent::hasDefaultAction(int32_t keyCode) {
         case AKEYCODE_NOTIFICATION:
         case AKEYCODE_FOCUS:
         case AKEYCODE_SEARCH:
+        case AKEYCODE_MEDIA_PLAY:
+        case AKEYCODE_MEDIA_PAUSE:
         case AKEYCODE_MEDIA_PLAY_PAUSE:
         case AKEYCODE_MEDIA_STOP:
         case AKEYCODE_MEDIA_NEXT:
         case AKEYCODE_MEDIA_PREVIOUS:
         case AKEYCODE_MEDIA_REWIND:
+        case AKEYCODE_MEDIA_RECORD:
         case AKEYCODE_MEDIA_FAST_FORWARD:
         case AKEYCODE_MUTE:
             return true;
@@ -67,14 +71,18 @@ bool KeyEvent::isSystemKey(int32_t keyCode) {
         case AKEYCODE_ENDCALL:
         case AKEYCODE_VOLUME_UP:
         case AKEYCODE_VOLUME_DOWN:
+        case AKEYCODE_VOLUME_MUTE:
         case AKEYCODE_MUTE:
         case AKEYCODE_POWER:
         case AKEYCODE_HEADSETHOOK:
+        case AKEYCODE_MEDIA_PLAY:
+        case AKEYCODE_MEDIA_PAUSE:
         case AKEYCODE_MEDIA_PLAY_PAUSE:
         case AKEYCODE_MEDIA_STOP:
         case AKEYCODE_MEDIA_NEXT:
         case AKEYCODE_MEDIA_PREVIOUS:
         case AKEYCODE_MEDIA_REWIND:
+        case AKEYCODE_MEDIA_RECORD:
         case AKEYCODE_MEDIA_FAST_FORWARD:
         case AKEYCODE_CAMERA:
         case AKEYCODE_FOCUS:
