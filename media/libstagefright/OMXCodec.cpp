@@ -2109,6 +2109,17 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
                     CODEC_LOGV(
                             "output crop (%ld, %ld, %ld, %ld)",
                             rect.nLeft, rect.nTop, rect.nWidth, rect.nHeight);
+
+                    if (mNativeWindow != NULL) {
+                        android_native_rect_t crop;
+                        crop.left = rect.nLeft;
+                        crop.top = rect.nTop;
+                        crop.right = crop.left + rect.nWidth - 1;
+                        crop.bottom = crop.top + rect.nHeight - 1;
+
+                        CHECK_EQ(0, native_window_set_crop(
+                                    mNativeWindow.get(), &crop));
+                    }
                 } else {
                     CODEC_LOGE("getConfig(OMX_IndexConfigCommonOutputCrop) "
                                "returned error 0x%08x", err);
