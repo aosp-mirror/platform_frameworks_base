@@ -1231,6 +1231,11 @@
     <string name="permdesc_sdcardWrite" product="default">Allows an application to write to the SD card.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_mediaStorageWrite" product="default">modify/delete internal media storage contents</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_mediaStorageWrite" product="default">Allows an application to modify the contents of the internal media storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_cache_filesystem">access the cache filesystem</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_cache_filesystem">Allows an application to read and write the cache filesystem.</string>
@@ -1961,8 +1966,11 @@
     <!-- Item on EditText context menu. This action is used to cut selected the text into the clipboard. -->
     <string name="copy">Copy</string>
 
-    <!-- Item on EditText context menu. This action is used t o paste from the clipboard into the eidt field -->
+    <!-- Item on EditText context menu. This action is used to paste from the clipboard into the eidt field -->
     <string name="paste">Paste</string>
+
+    <!-- Text displayed in a popup dialog in TextEdit when the clipboard is empty. 'paste' is used otherwise. [CHAR LIMIT=20] -->
+    <string name="pasteDisabled">Nothing to paste</string>
 
     <!-- Item on EditText context menu. This action is used to copy a URL from the edit field into the clipboard. -->
     <string name="copyUrl">Copy URL</string>
@@ -2317,6 +2325,9 @@
 
     <!-- Long label for a button on a full-screen input method for the "Done" action. -->
     <string name="ime_action_done">Done</string>
+
+    <!-- [CHAR LIMIT=6] Long label for a button on a full-screen input method for the "Previous" action. -->
+    <string name="ime_action_previous">Prev</string>
 
     <!-- Long label for a button on a full-screen input method for an unknown action. -->
     <string name="ime_action_default">Execute</string>

@@ -16,9 +16,13 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
@@ -32,7 +36,9 @@ import android.widget.ImageView;
 import com.android.server.InputMethodManagerService;
 import com.android.systemui.R;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 public class InputMethodButton extends ImageView {
 
@@ -61,8 +67,10 @@ public class InputMethodButton extends ImageView {
         });
     }
 
+    @Override
     protected void onAttachedToWindow() {
         mIcon = (ImageView) findViewById(R.id.imeButton);
+
         refreshStatusIcon(mKeyboardShown);
     }
 
@@ -119,21 +127,8 @@ public class InputMethodButton extends ImageView {
         }
     }
 
-    private void postRefreshStatusIcon() {
-        getHandler().post(new Runnable() {
-            public void run() {
-                refreshStatusIcon(mKeyboardShown);
-            }
-        });
-    }
-
-    public void showSoftInput() {
-        mKeyboardShown = true;
-        postRefreshStatusIcon();
-    }
-
-    public void hideSoftInput() {
-        mKeyboardShown = false;
-        postRefreshStatusIcon();
+    public void setIMEButtonVisible(boolean visible) {
+        mKeyboardShown = visible;
+        refreshStatusIcon(mKeyboardShown);
     }
 }

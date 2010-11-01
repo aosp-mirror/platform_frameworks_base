@@ -141,6 +141,13 @@ public class RenderScriptGL extends RenderScript {
         nContextSetSurface(w, h, mSurface);
     }
 
+    public int getHeight() {
+        return mHeight;
+    }
+
+    public int getWidth() {
+        return mWidth;
+    }
 
     void pause() {
         validate();

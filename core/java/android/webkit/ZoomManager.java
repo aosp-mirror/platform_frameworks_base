@@ -348,7 +348,8 @@ class ZoomManager {
         mZoomCenterY = mWebView.getViewHeight() * .5f;
         mAnchorX = mWebView.viewToContentX((int) mZoomCenterX + mWebView.getScrollX());
         mAnchorY = mWebView.viewToContentY((int) mZoomCenterY + mWebView.getScrollY());
-        return startZoomAnimation(mActualScale * zoomMultiplier, true);
+        return startZoomAnimation(mActualScale * zoomMultiplier, 
+            !mWebView.getSettings().getUseFixedViewport());
     }
 
     /**
@@ -460,7 +461,7 @@ class ZoomManager {
             mInZoomOverview = !exceedsMinScaleIncrement(scale, getZoomOverviewScale());
         }
 
-        if (reflowText) {
+        if (reflowText && !mWebView.getSettings().getUseFixedViewport()) {
             mTextWrapScale = scale;
         }
 
@@ -519,7 +520,7 @@ class ZoomManager {
      *
      * (2) HTML/OTHER: If the taps occur outside a plugin then the following
      * heuristic is used.
-     *   A. If the current scale is not the same as the text wrap scale and the
+     *   A. If the current text wrap scale differs from newly calculated and the
      *      layout algorithm specifies the use of NARROW_COLUMNS, then fit to
      *      column by reflowing the text.
      *   B. If the page is not in overview mode then change to overview mode.
@@ -553,8 +554,15 @@ class ZoomManager {
             return;
         }
 
-        if (settings.getLayoutAlgorithm() == WebSettings.LayoutAlgorithm.NARROW_COLUMNS
-                && willScaleTriggerZoom(mTextWrapScale)) {
+        final float newTextWrapScale;
+        if (settings.getUseFixedViewport()) {
+            newTextWrapScale = Math.max(mActualScale, getReadingLevelScale());
+        } else {
+            newTextWrapScale = mActualScale;
+        }
+        if (settings.isNarrowColumnLayout()
+                && exceedsMinScaleIncrement(mTextWrapScale, newTextWrapScale)) {
+            mTextWrapScale = newTextWrapScale;
             refreshZoomScale(true);
         } else if (!mInZoomOverview) {
             zoomToOverview();
@@ -584,7 +592,8 @@ class ZoomManager {
         if (scrollY < mWebView.getTitleHeight()) {
             mWebView.updateScrollCoordinates(mWebView.getScrollX(), 0);
         }
-        startZoomAnimation(getZoomOverviewScale(), true);
+        startZoomAnimation(getZoomOverviewScale(), 
+            !mWebView.getSettings().getUseFixedViewport());
     }
 
     private void zoomToReadingLevel() {
@@ -603,7 +612,8 @@ class ZoomManager {
                 mZoomCenterX = 0;
             }
         }
-        startZoomAnimation(readingScale, true);
+        startZoomAnimation(readingScale,
+            !mWebView.getSettings().getUseFixedViewport());
     }
 
     public void updateMultiTouchSupport(Context context) {
@@ -683,11 +693,12 @@ class ZoomManager {
                 mAnchorX = mWebView.viewToContentX((int) mZoomCenterX + mWebView.getScrollX());
                 mAnchorY = mWebView.viewToContentY((int) mZoomCenterY + mWebView.getScrollY());
                 // don't reflow when zoom in; when zoom out, do reflow if the
-                // new scale is almost minimum scale;
+                // new scale is almost minimum scale.
                 boolean reflowNow = !canZoomOut() || (mActualScale <= 0.8 * mTextWrapScale);
                 // force zoom after mPreviewZoomOnly is set to false so that the
                 // new view size will be passed to the WebKit
-                refreshZoomScale(reflowNow);
+                refreshZoomScale(reflowNow &&
+                    !mWebView.getSettings().getUseFixedViewport());
                 // call invalidate() to draw without zoom filter
                 mWebView.invalidate();
             }
@@ -730,7 +741,8 @@ class ZoomManager {
         // cause its child View to reposition itself through ViewManager's
         // scaleAll(), we need to post a Runnable to ensure requestLayout().
         // Additionally, only update the text wrap scale if the width changed.
-        mWebView.post(new PostScale(w != ow));
+        mWebView.post(new PostScale(w != ow &&
+            !mWebView.getSettings().getUseFixedViewport()));
     }
 
     private class PostScale implements Runnable {
@@ -808,7 +820,8 @@ class ZoomManager {
         if (!mWebView.drawHistory() && (mInitialZoomOverview || (mInZoomOverview
                 && Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1))) {
             mInitialZoomOverview = false;
-            setZoomScale(zoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale));
+            setZoomScale(zoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale) &&
+                !mWebView.getSettings().getUseFixedViewport());
         }
     }
 
@@ -854,6 +867,11 @@ class ZoomManager {
                 } else {
                     scale = Math.max(viewState.mTextWrapScale, scale);
                     mInitialZoomOverview = !exceedsMinScaleIncrement(scale, getZoomOverviewScale());
+                }
+                if (settings.isNarrowColumnLayout() && settings.getUseFixedViewport()) {
+                    // When first layout, reflow using the reading level scale to avoid
+                    // reflow when double tapped.
+                    mTextWrapScale = getReadingLevelScale();
                 }
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
             }

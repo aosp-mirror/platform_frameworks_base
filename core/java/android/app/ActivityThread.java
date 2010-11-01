@@ -1781,6 +1781,17 @@ public final class ActivityThread {
         performNewIntents(data.token, data.intents);
     }
 
+    private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
+
+    /**
+     * Return the Intent that's currently being handled by a
+     * BroadcastReceiver on this thread, or null if none.
+     * @hide
+     */
+    public static Intent getIntentBeingBroadcast() {
+        return sCurrentBroadcastIntent.get();
+    }
+
     private final void handleReceiver(ReceiverData data) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
@@ -1820,6 +1831,7 @@ public final class ActivityThread {
                 + ", dir=" + packageInfo.getAppDir());
 
             ContextImpl context = (ContextImpl)app.getBaseContext();
+            sCurrentBroadcastIntent.set(data.intent);
             receiver.setPendingResult(data);
             receiver.onReceive(context.getReceiverRestrictedContext(),
                     data.intent);
@@ -1832,6 +1844,8 @@ public final class ActivityThread {
                     "Unable to start receiver " + component
                     + ": " + e.toString(), e);
             }
+        } finally {
+            sCurrentBroadcastIntent.set(null);
         }
 
         if (receiver.getPendingResult() != null) {
@@ -3185,6 +3199,17 @@ public final class ActivityThread {
              (ApplicationInfo.FLAG_SYSTEM |
               ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
             StrictMode.conditionallyEnableDebugLogging();
+        }
+
+        /**
+         * For apps targetting SDK Honeycomb or later, we don't allow
+         * network usage on the main event loop / UI thread.
+         *
+         * Note to those grepping:  this is what ultimately throws
+         * NetworkOnMainThreadException ...
+         */
+        if (data.appInfo.targetSdkVersion > 9) {
+            StrictMode.enableDeathOnNetwork();
         }
 
         /**

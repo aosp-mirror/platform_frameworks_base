@@ -28,7 +28,7 @@ import android.os.Parcelable;
  * message always contains zero or more NDEF records.</p>
  * <p>This is an immutable data class.
  */
-public class NdefMessage implements Parcelable {
+public final class NdefMessage implements Parcelable {
     private static final byte FLAG_MB = (byte) 0x80;
     private static final byte FLAG_ME = (byte) 0x40;
 
@@ -69,9 +69,9 @@ public class NdefMessage implements Parcelable {
      * Returns a byte array representation of this entire NDEF message.
      */
     public byte[] toByteArray() {
-        //TODO(nxp): do not return null
-        //TODO(nxp): allocate the byte array once, copy each record once
-        //TODO(nxp): process MB and ME flags outside loop
+        //TODO: do not return null
+        //TODO: allocate the byte array once, copy each record once
+        //TODO: process MB and ME flags outside loop
         if ((mRecords == null) || (mRecords.length == 0))
             return null;
 

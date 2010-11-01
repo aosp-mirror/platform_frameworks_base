@@ -167,6 +167,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private static String mDockAddress;
     private String mDockPin;
 
+    private int mAdapterConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
+
     private static class RemoteService {
         public String address;
         public ParcelUuid uuid;
@@ -415,6 +417,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mProfilesConnected = 0;
         mProfilesConnecting = 0;
         mProfilesDisconnecting = 0;
+        mAdapterConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
 
         if (saveSetting) {
             persistBluetoothOnSetting(false);
@@ -2737,11 +2740,18 @@ public class BluetoothService extends IBluetooth.Stub {
         }
     }
 
+    public int getAdapterConnectionState() {
+        return mAdapterConnectionState;
+    }
+
     public synchronized void sendConnectionStateChange(BluetoothDevice device, int state,
                                                         int prevState) {
         if (updateCountersAndCheckForConnectionStateChange(device, state, prevState)) {
-            state = getAdapterConnectionState(state);
-            prevState = getAdapterConnectionState(prevState);
+            state = translateToAdapterConnectionState(state);
+            prevState = translateToAdapterConnectionState(prevState);
+
+            mAdapterConnectionState = state;
+
             Intent intent = new Intent(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
             intent.putExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, state);
@@ -2751,7 +2761,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
     }
 
-    private int getAdapterConnectionState(int state) {
+    private int translateToAdapterConnectionState(int state) {
         switch (state) {
             case BluetoothProfile.STATE_CONNECTING:
                 return BluetoothAdapter.STATE_CONNECTING;

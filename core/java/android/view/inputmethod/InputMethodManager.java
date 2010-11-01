@@ -519,6 +519,15 @@ public final class InputMethodManager {
     }
 
     /** @hide */
+    public void setIMEButtonVisible(IBinder imeToken, boolean visible) {
+        try {
+            mService.setIMEButtonVisible(imeToken, visible);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** @hide */
     public void setFullscreenMode(boolean fullScreen) {
         mFullscreenMode = fullScreen;
     }

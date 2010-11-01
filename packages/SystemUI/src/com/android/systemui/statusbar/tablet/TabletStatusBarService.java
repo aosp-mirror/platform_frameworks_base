@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.tablet;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
+import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
 import android.app.PendingIntent;
 import android.app.Notification;
@@ -41,6 +44,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -65,6 +69,8 @@ public class TabletStatusBarService extends StatusBarService {
 
     public static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     public static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
+    public static final int MSG_OPEN_NOTIFICATION_PEEK = 1002;
+    public static final int MSG_CLOSE_NOTIFICATION_PEEK = 1003;
     public static final int MSG_OPEN_SYSTEM_PANEL = 1010;
     public static final int MSG_CLOSE_SYSTEM_PANEL = 1011;
     public static final int MSG_OPEN_RECENTS_PANEL = 1020;
@@ -89,8 +95,17 @@ public class TabletStatusBarService extends StatusBarService {
     View mMenuButton;
     View mRecentButton;
 
+    InputMethodButton mInputMethodButton;
+
     NotificationPanel mNotificationPanel;
     SystemPanel mSystemPanel;
+    NotificationPanel mNotificationPeekWindow;
+    ViewGroup mNotificationPeekRow;
+    int mNotificationPeekIndex;
+    LayoutTransition mNotificationPeekScrubLeft, mNotificationPeekScrubRight;
+
+    int mNotificationPeekTapDuration;
+    int mNotificationFlingVelocity;
 
     ViewGroup mPile;
     TextView mClearButton;
@@ -132,7 +147,7 @@ public class TabletStatusBarService extends StatusBarService {
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                400, // ViewGroup.LayoutParams.WRAP_CONTENT,
+                512, // ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -143,6 +158,41 @@ public class TabletStatusBarService extends StatusBarService {
         lp.windowAnimations = com.android.internal.R.style.Animation_SlidingCard;
 
         WindowManagerImpl.getDefault().addView(mNotificationPanel, lp);
+
+        // Notification preview window
+        mNotificationPeekWindow = (NotificationPanel) View.inflate(context,
+                R.layout.sysbar_panel_notification_peek, null);
+        mNotificationPeekRow = (ViewGroup) mNotificationPeekWindow.findViewById(R.id.content);
+        mNotificationPeekWindow.setVisibility(View.GONE);
+        mNotificationPeekWindow.setOnTouchListener(
+                new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPeekWindow));
+        mNotificationPeekScrubRight = new LayoutTransition();
+        mNotificationPeekScrubRight.setAnimator(LayoutTransition.APPEARING, 
+                ObjectAnimator.ofInt(null, "left", -512, 0));
+        mNotificationPeekScrubRight.setAnimator(LayoutTransition.DISAPPEARING, 
+                ObjectAnimator.ofInt(null, "left", -512, 0));
+        mNotificationPeekScrubRight.setDuration(500);
+
+        mNotificationPeekScrubLeft = new LayoutTransition();
+        mNotificationPeekScrubLeft.setAnimator(LayoutTransition.APPEARING, 
+                ObjectAnimator.ofInt(null, "left", 512, 0));
+        mNotificationPeekScrubLeft.setAnimator(LayoutTransition.DISAPPEARING, 
+                ObjectAnimator.ofInt(null, "left", 512, 0));
+        mNotificationPeekScrubLeft.setDuration(500);
+
+        // XXX: setIgnoreChildren?
+        lp = new WindowManager.LayoutParams(
+                512, // ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.setTitle("NotificationPeekWindow");
+        lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
+
+        WindowManagerImpl.getDefault().addView(mNotificationPeekWindow, lp);
 
         // System Panel
         mSystemPanel = (SystemPanel) View.inflate(context, R.layout.sysbar_panel_system, null);
@@ -238,9 +288,13 @@ public class TabletStatusBarService extends StatusBarService {
         mDoNotDisturbButton = (TextView)mNotificationButtons.findViewById(R.id.do_not_disturb);
         mDoNotDisturbButton.setOnClickListener(mOnClickListener);
 
-
         // where the icons go
         mIconLayout = (NotificationIconArea.IconLayout) sb.findViewById(R.id.icons);
+        mIconLayout.setOnTouchListener(new NotificationIconTouchListener());
+
+        ViewConfiguration vc = ViewConfiguration.get(context);
+        mNotificationPeekTapDuration = vc.getTapTimeout();
+        mNotificationFlingVelocity = 300; // px/s
 
         mTicker = new TabletTicker(context, (FrameLayout)sb.findViewById(R.id.ticker));
 
@@ -252,6 +306,9 @@ public class TabletStatusBarService extends StatusBarService {
         // The navigation buttons
         mNavigationArea = sb.findViewById(R.id.navigationArea);
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
+
+        // The bar contents buttons
+        mInputMethodButton = (InputMethodButton) mBarContents.findViewById(R.id.imeButton);
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -276,9 +333,57 @@ public class TabletStatusBarService extends StatusBarService {
     private class H extends Handler {
         public void handleMessage(Message m) {
             switch (m.what) {
+                case MSG_OPEN_NOTIFICATION_PEEK:
+                    if (DEBUG) Slog.d(TAG, "opening notification peek window; arg=" + m.arg1);
+                    if (m.arg1 >= 0) {
+                        final int N = mNotns.size();
+                        if (mNotificationPeekIndex < N) {
+                            NotificationData.Entry entry = mNotns.get(N-1-mNotificationPeekIndex);
+                            entry.icon.setBackgroundColor(0);
+                        }
+
+                        final int peekIndex = m.arg1;
+                        if (peekIndex < N) {
+                            Slog.d(TAG, "loading peek: " + peekIndex);
+                            NotificationData.Entry entry = mNotns.get(N-1-peekIndex);
+                            NotificationData.Entry copy = new NotificationData.Entry(
+                                    entry.key, 
+                                    entry.notification, 
+                                    entry.icon);
+                            inflateViews(copy, mNotificationPeekRow);
+
+                            entry.icon.setBackgroundColor(0x20FFFFFF);
+
+//                          mNotificationPeekRow.setLayoutTransition(
+//                              peekIndex < mNotificationPeekIndex 
+//                                  ? mNotificationPeekScrubLeft
+//                                  : mNotificationPeekScrubRight);
+
+                            mNotificationPeekRow.removeAllViews();
+                            mNotificationPeekRow.addView(copy.row);
+
+                            mNotificationPeekWindow.setVisibility(View.VISIBLE);
+                            mNotificationPanel.setVisibility(View.GONE);
+
+                            mNotificationPeekIndex = peekIndex;
+                        }
+                    }
+                    break;
+                case MSG_CLOSE_NOTIFICATION_PEEK:
+                    if (DEBUG) Slog.d(TAG, "closing notification peek window");
+                    mNotificationPeekWindow.setVisibility(View.GONE);
+                    mNotificationPeekRow.removeAllViews();
+                    final int N = mNotns.size();
+                    if (mNotificationPeekIndex < N) {
+                        NotificationData.Entry entry = mNotns.get(N-1-mNotificationPeekIndex);
+                        entry.icon.setBackgroundColor(0);
+                    }
+                    break;
                 case MSG_OPEN_NOTIFICATION_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening notifications panel");
                     if (mNotificationPanel.getVisibility() == View.GONE) {
+                        mNotificationPeekWindow.setVisibility(View.GONE);
+
                         mDoNotDisturbButton.setText(mNotificationsOn
                                 ? R.string.status_bar_do_not_disturb_button
                                 : R.string.status_bar_please_disturb_button);
@@ -336,7 +441,7 @@ public class TabletStatusBarService extends StatusBarService {
         }
         mNotificationTrigger.setImageResource(resId);
     }
-    
+
     public void setBatteryMeter(int level, boolean plugged) {
         if (DEBUG) Slog.d(TAG, "battery=" + level + (plugged ? " - plugged" : " - unplugged"));
         mBatteryMeter.setImageResource(R.drawable.sysbar_batterymini);
@@ -590,6 +695,13 @@ public class TabletStatusBarService extends StatusBarService {
                 visible ? R.anim.navigation_in : R.anim.navigation_out);
     }
 
+    public void setIMEButtonVisible(boolean visible) {
+        if (DEBUG) {
+            Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
+        }
+        mInputMethodButton.setIMEButtonVisible(visible);
+    }
+
     private void setAreThereNotifications() {
         final boolean hasClearable = mNotns.hasClearableItems();
 
@@ -812,6 +924,72 @@ public class TabletStatusBarService extends StatusBarService {
         return entry.notification;
     }
 
+    private class NotificationIconTouchListener implements View.OnTouchListener {
+        VelocityTracker mVT;
+
+        public NotificationIconTouchListener() {
+        }
+
+        public boolean onTouch(View v, MotionEvent event) {
+            boolean peeking = mNotificationPeekWindow.getVisibility() != View.GONE;
+            boolean panelShowing = mNotificationPanel.getVisibility() != View.GONE;
+            if (panelShowing) return false;
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mVT = VelocityTracker.obtain();
+
+                    // fall through
+                case MotionEvent.ACTION_OUTSIDE:
+                case MotionEvent.ACTION_MOVE:
+                    // peek and switch icons if necessary
+                    int numIcons = mIconLayout.getChildCount();
+                    int peekIndex = 
+                            (int)((float)event.getX() * numIcons / mIconLayout.getWidth());
+                    if (peekIndex > numIcons - 1) peekIndex = numIcons - 1;
+                    else if (peekIndex < 0) peekIndex = 0;
+
+                    if (!peeking || mNotificationPeekIndex != peekIndex) {
+                        if (DEBUG) Slog.d(TAG, "will peek at notification #" + peekIndex);
+                        Message peekMsg = mHandler.obtainMessage(MSG_OPEN_NOTIFICATION_PEEK);
+                        peekMsg.arg1 = peekIndex;
+
+                        mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
+
+                        // no delay if we're scrubbing left-right
+                        mHandler.sendMessageDelayed(peekMsg,
+                                peeking ? 0 : mNotificationPeekTapDuration);
+                    }
+
+                    // check for fling
+                    if (mVT != null) {
+                        mVT.addMovement(event);
+                        mVT.computeCurrentVelocity(1000);
+                        // require a little more oomph once we're already in peekaboo mode
+                        if (!panelShowing && (
+                               (peeking && mVT.getYVelocity() < -mNotificationFlingVelocity*3)
+                            || (mVT.getYVelocity() < -mNotificationFlingVelocity))) {
+                            mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
+                            mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PANEL);
+                            mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PEEK);
+                            mHandler.sendEmptyMessage(MSG_OPEN_NOTIFICATION_PANEL);
+                        }
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
+                    if (peeking) {
+                        mHandler.sendEmptyMessageDelayed(MSG_CLOSE_NOTIFICATION_PEEK, 250);
+                    }
+                    mVT.recycle();
+                    mVT = null;
+                    return true;
+            }
+            return false;
+        }
+    }
+
     StatusBarIconView addNotificationViews(IBinder key, StatusBarNotification notification) {
         if (DEBUG) {
             Slog.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
@@ -836,6 +1014,7 @@ public class TabletStatusBarService extends StatusBarService {
                     + notification);
             return null;
         }
+
         // Add the icon.
         mNotns.add(entry);
         refreshIcons();
@@ -847,26 +1026,74 @@ public class TabletStatusBarService extends StatusBarService {
         // XXX: need to implement a new limited linear layout class
         // to avoid removing & readding everything
 
+        final int ICON_LIMIT = 4;
+        final LinearLayout.LayoutParams params
+            = new LinearLayout.LayoutParams(mIconSize, mIconSize);
+
         int N = mNotns.size();
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(mIconSize, mIconSize);
 
         if (DEBUG) {
-            Slog.d(TAG, "refreshing icons (" + N + " notifications, mIconLayout="
-                    + mIconLayout + ", mPile=" + mPile);
+            Slog.d(TAG, "refreshing icons: " + N + " notifications, mIconLayout=" + mIconLayout);
         }
 
-        mIconLayout.removeAllViews();
-        for (int i=0; i<4; i++) {
+        ArrayList<View> toShow = new ArrayList<View>();
+
+        for (int i=0; i<ICON_LIMIT; i++) {
             if (i>=N) break;
-            mIconLayout.addView(mNotns.get(N-i-1).icon, i, params);
+            toShow.add(mNotns.get(N-i-1).icon);
         }
 
-        mPile.removeAllViews();
-        for (int i=0; i<N; i++) {
-            mPile.addView(mNotns.get(N-i-1).row);
+        ArrayList<View> toRemove = new ArrayList<View>();
+        for (int i=0; i<mIconLayout.getChildCount(); i++) {
+            View child = mIconLayout.getChildAt(i);
+            if (!toShow.contains(child)) {
+                toRemove.add(child);
+            }
         }
 
+        for (View remove : toRemove) {
+            mIconLayout.removeView(remove);
+        }
+
+        for (int i=0; i<toShow.size(); i++) {
+            View v = toShow.get(i);
+            if (v.getParent() == null) {
+                mIconLayout.addView(toShow.get(i), i, params);
+            }
+        }
+
+        loadNotificationPanel();
         refreshNotificationTrigger();
+    }
+
+    private void loadNotificationPanel() {
+        int N = mNotns.size();
+
+        ArrayList<View> toShow = new ArrayList<View>();
+
+        for (int i=0; i<N; i++) {
+            View row = mNotns.get(N-i-1).row;
+            toShow.add(row);
+        }
+
+        ArrayList<View> toRemove = new ArrayList<View>();
+        for (int i=0; i<mPile.getChildCount(); i++) {
+            View child = mPile.getChildAt(i);
+            if (!toShow.contains(child)) {
+                toRemove.add(child);
+            }
+        }
+
+        for (View remove : toRemove) {
+            mPile.removeView(remove);
+        }
+
+        for (int i=0; i<toShow.size(); i++) {
+            View v = toShow.get(i);
+            if (v.getParent() == null) {
+                mPile.addView(toShow.get(i));
+            }
+        }
     }
 
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {

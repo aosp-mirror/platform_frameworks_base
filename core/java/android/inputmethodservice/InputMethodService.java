@@ -1296,7 +1296,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mInShowWindow = false;
         }
     }
-    
+
     void showWindowInner(boolean showInput) {
         boolean doShowInput = false;
         boolean wasVisible = mWindowVisible;
@@ -1311,7 +1311,7 @@ public class InputMethodService extends AbstractInputMethodService {
         } else {
             showInput = true;
         }
-        
+
         if (DEBUG) Log.v(TAG, "showWindow: updating UI");
         initialize();
         updateFullscreenMode();
@@ -1343,14 +1343,15 @@ public class InputMethodService extends AbstractInputMethodService {
         if (doShowInput) {
             startExtractingText(false);
         }
-        
+
         if (!wasVisible) {
             if (DEBUG) Log.v(TAG, "showWindow: showing!");
+            mImm.setIMEButtonVisible(mToken, true);
             onWindowShown();
             mWindow.show();
         }
     }
-    
+
     public void hideWindow() {
         if (mInputViewStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishInputView");
@@ -1364,11 +1365,12 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mWindowVisible) {
             mWindow.hide();
             mWindowVisible = false;
+            mImm.setIMEButtonVisible(mToken, false);
             onWindowHidden();
             mWindowWasVisible = false;
         }
     }
-    
+
     /**
      * Called when the input method window has been shown to the user, after
      * previously not being visible.  This is done after all of the UI setup
@@ -1943,6 +1945,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 return getText(com.android.internal.R.string.ime_action_next);
             case EditorInfo.IME_ACTION_DONE:
                 return getText(com.android.internal.R.string.ime_action_done);
+            case EditorInfo.IME_ACTION_PREVIOUS:
+                return getText(com.android.internal.R.string.ime_action_previous);
             default:
                 return getText(com.android.internal.R.string.ime_action_default);
         }

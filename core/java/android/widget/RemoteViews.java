@@ -190,6 +190,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root) {
             final View target = root.findViewById(viewId);
+            if (target == null) return;
 
             if (!mIsWidgetCollectionChild) {
                 Log.e("RemoteViews", "The method setOnClickFillInIntent is available " +
@@ -277,6 +278,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root) {
             final View target = root.findViewById(viewId);
+            if (target == null) return;
 
             if (!mIsWidgetCollectionChild) {
                 Log.e("RemoteViews", "The method setOnClickExtras is available " +
@@ -367,6 +369,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root) {
             final View target = root.findViewById(viewId);
+            if (target == null) return;
 
             // If the view isn't an AdapterView, setting a PendingIntent template doesn't make sense
             if (target instanceof AdapterView<?>) {
@@ -410,6 +413,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root) {
             final View target = root.findViewById(viewId);
+            if (target == null) return;
 
             // If the view is an AdapterView, setting a PendingIntent on click doesn't make much
             // sense, do they mean to set a PendingIntent template for the AdapterView's children?
@@ -513,9 +517,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root) {
             final View target = root.findViewById(viewId);
-            if (target == null) {
-                return;
-            }
+            if (target == null) return;
             
             // Pick the correct drawable to modify for this view
             Drawable targetDrawable = null;
@@ -575,9 +577,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root) {
             final View view = root.findViewById(viewId);
-            if (view == null) {
-                throw new ActionException("can't find view: 0x" + Integer.toHexString(viewId));
-            }
+            if (view == null) return;
 
             Class klass = view.getClass();
             Method method;
@@ -793,9 +793,7 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root) {
             final View view = root.findViewById(viewId);
-            if (view == null) {
-                throw new ActionException("can't find view: 0x" + Integer.toHexString(viewId));
-            }
+            if (view == null) return;
 
             Class param = getParameterType();
             if (param == null) {
@@ -888,10 +886,11 @@ public class RemoteViews implements Parcelable, Filter {
         public void apply(View root) {
             final Context context = root.getContext();
             final ViewGroup target = (ViewGroup) root.findViewById(viewId);
+            if (target == null) return;
             if (nestedViews != null) {
                 // Inflate nested views and add as children
                 target.addView(nestedViews.apply(context, target));
-            } else if (target != null) {
+            } else {
                 // Clear all children when nested views omitted
                 target.removeAllViews();
             }

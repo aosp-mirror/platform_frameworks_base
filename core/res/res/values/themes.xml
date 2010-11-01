@@ -166,6 +166,8 @@
         <item name="textSelectHandleRight">@android:drawable/text_select_handle_right</item>
         <item name="textSelectHandle">@android:drawable/text_select_handle_middle</item>
         <item name="textSelectHandleWindowStyle">@android:style/Widget.TextSelectHandle</item>
+        <item name="textEditPasteWindowLayout">@android:layout/text_edit_paste_window</item>
+        <item name="textEditNoPasteWindowLayout">@android:layout/text_edit_no_paste_window</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@android:style/Widget.AbsListView</item>
@@ -639,7 +641,7 @@
         <item name="colorForeground">@android:color/bright_foreground_holo_dark</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_inverse_holo_dark</item>
         <item name="colorBackground">@android:color/background_holo_dark</item>
-        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
+        <item name="colorBackgroundCacheHint">?android:attr/colorBackground</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -732,7 +734,7 @@
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
         
         <!-- Window attributes -->
-        <item name="windowBackground">@android:drawable/background_holo_dark</item>
+        <item name="windowBackground">?android:attr/colorBackground</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
@@ -873,7 +875,7 @@
         <item name="colorForeground">@android:color/bright_foreground_holo_light</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_inverse_holo_light</item>
         <item name="colorBackground">@android:color/background_holo_light</item>
-        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
+        <item name="colorBackgroundCacheHint">?android:attr/colorBackground</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -966,7 +968,7 @@
         <item name="galleryItemBackground">@android:drawable/gallery_item_background</item>
         
         <!-- Window attributes -->
-        <item name="windowBackground">@android:drawable/background_holo_light</item>
+        <item name="windowBackground">?android:attr/colorBackground</item>
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">false</item>
         <item name="windowFullscreen">false</item>
@@ -1126,6 +1128,20 @@
     <style name="Theme.Light.Holo.NoActionBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Variant of the holographic dark theme that includes extra decorations
+         appropriate for when hardware acceleration is in use. -->
+    <style name="Theme.Holo.Extended">
+        <item name="windowBackground">@android:drawable/background_holo_dark</item>
+        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
+    </style>
+
+    <!-- Variant of the holographic light theme that includes extra decorations
+         appropriate for when hardware acceleration is in use. -->
+    <style name="Theme.Holo.Light.Extended">
+        <item name="windowBackground">@android:drawable/background_holo_light</item>
+        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
     </style>
  
     <!-- Dialog themes for Holo -->

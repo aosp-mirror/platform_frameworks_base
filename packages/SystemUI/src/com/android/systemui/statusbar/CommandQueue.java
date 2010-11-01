@@ -55,6 +55,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SET_LIGHTS_ON = 0x00070000;
 
     private static final int MSG_SHOW_MENU = 0x00080000;
+    private static final int MSG_SHOW_IME_BUTTON = 0x00090000;
 
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
@@ -81,6 +82,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void animateCollapse();
         public void setLightsOn(boolean on);
         public void setMenuKeyVisible(boolean visible);
+        public void setIMEButtonVisible(boolean visible);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -163,6 +165,13 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void setIMEButtonVisible(boolean visible) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_SHOW_IME_BUTTON);
+            mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, visible ? 1 : 0, 0, null).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -222,6 +231,9 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SHOW_MENU:
                     mCallbacks.setMenuKeyVisible(msg.arg1 != 0);
+                    break;
+                case MSG_SHOW_IME_BUTTON:
+                    mCallbacks.setIMEButtonVisible(msg.arg1 != 0);
                     break;
             }
         }

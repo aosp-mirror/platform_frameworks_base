@@ -1483,6 +1483,10 @@ public class WebSettings {
         return mAcceptLanguage;
     }
 
+    /* package */ boolean isNarrowColumnLayout() {
+        return getLayoutAlgorithm() == LayoutAlgorithm.NARROW_COLUMNS;
+    }
+
     /**
      * Tell the WebView whether it needs to set a node to have focus when
      * {@link WebView#requestFocus(int, android.graphics.Rect)} is called.

@@ -1087,53 +1087,6 @@ public class MediaPlayer
     private native void _reset();
 
     /**
-     * Suspends the MediaPlayer. The only methods that may be called while
-     * suspended are {@link #reset()}, {@link #release()} and {@link #resume()}.
-     * MediaPlayer will release its hardware resources as far as
-     * possible and reasonable. A successfully suspended MediaPlayer will
-     * cease sending events.
-     * If suspension is successful, this method returns true, otherwise
-     * false is returned and the player's state is not affected.
-     * @hide
-     */
-    public boolean suspend() {
-        if (native_suspend_resume(true) < 0) {
-            return false;
-        }
-
-        stayAwake(false);
-
-        // make sure none of the listeners get called anymore
-        mEventHandler.removeCallbacksAndMessages(null);
-
-        return true;
-    }
-
-    /**
-     * Resumes the MediaPlayer. Only to be called after a previous (successful)
-     * call to {@link #suspend()}.
-     * MediaPlayer will return to a state close to what it was in before
-     * suspension.
-     * @hide
-     */
-    public boolean resume() {
-        if (native_suspend_resume(false) < 0) {
-            return false;
-        }
-
-        if (isPlaying()) {
-            stayAwake(true);
-        }
-
-        return true;
-    }
-
-    /**
-     * @hide
-     */
-    private native int native_suspend_resume(boolean isSuspend);
-
-    /**
      * Sets the audio stream type for this MediaPlayer. See {@link AudioManager}
      * for a list of stream types. Must call this method before prepare() or
      * prepareAsync() in order for the target stream type to become effective

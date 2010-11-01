@@ -197,7 +197,7 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
     public void testMultipleDownloads() throws Exception {
         // need to be sure all current downloads have stopped first
         removeAllCurrentDownloads();
-        int NUM_FILES = 50;
+        int NUM_FILES = 10;
         int MAX_FILE_SIZE = 500 * 1024; // 500 kb
 
         Random r = new LoggingRng();
@@ -205,15 +205,15 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
             int size = r.nextInt(MAX_FILE_SIZE);
             byte[] blobData = generateData(size, DataType.TEXT);
 
-            Uri uri = getServerUri(DEFAULT_FILENAME);
+            Uri uri = getServerUri(DEFAULT_FILENAME + i);
             Request request = new Request(uri);
-            request.setTitle(String.format("%s--%d", DEFAULT_FILENAME, i));
+            request.setTitle(String.format("%s--%d", DEFAULT_FILENAME + i, i));
 
             // Prepare the mock server with a standard response
             enqueueResponse(HTTP_OK, blobData);
 
-            Log.i(LOG_TAG, "request: " + i);
-            mDownloadManager.enqueue(request);
+            long requestID = mDownloadManager.enqueue(request);
+            Log.i(LOG_TAG, "request: " + i + " -- requestID: " + requestID);
         }
 
         waitForDownloadsOrTimeout(WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
@@ -236,6 +236,8 @@ public class DownloadManagerIntegrationTest extends DownloadManagerBaseTest {
 
             assertEquals(NUM_FILES, mReceiver.numDownloadsCompleted());
         } finally {
+            Log.i(LOG_TAG, "All download IDs: " + mReceiver.getDownloadIds().toString());
+            Log.i(LOG_TAG, "Total downloads completed: " + mReceiver.getDownloadIds().size());
             cursor.close();
         }
     }

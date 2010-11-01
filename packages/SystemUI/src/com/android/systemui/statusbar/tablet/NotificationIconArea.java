@@ -24,6 +24,7 @@ import android.util.Slog;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ImageView;
+import android.view.MotionEvent;
 
 import com.android.systemui.R;
 
@@ -43,12 +44,12 @@ public class NotificationIconArea extends LinearLayout {
         public IconLayout(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
-    }
 
-    static class DraggerView extends View {
-        public DraggerView(Context context, AttributeSet attrs) {
-            super(context, attrs);
+        public boolean onInterceptTouchEvent(MotionEvent e) {
+            return true;
         }
     }
 }
+
+
 

@@ -35,7 +35,7 @@ import java.lang.UnsupportedOperationException;
  * large.
  * <p>This is an immutable data class.
  */
-public class NdefRecord implements Parcelable {
+public final class NdefRecord implements Parcelable {
     /**
      * Indicates no type, id, or payload is associated with this NDEF Record.
      * <p>

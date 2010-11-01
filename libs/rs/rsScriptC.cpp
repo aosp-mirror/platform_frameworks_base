@@ -217,6 +217,32 @@ static void wc_xy(void *usr, uint32_t idx)
 
 }
 
+static void wc_x(void *usr, uint32_t idx)
+{
+    MTLaunchStruct *mtls = (MTLaunchStruct *)usr;
+
+    while (1) {
+        uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
+        uint32_t xStart = mtls->xStart + slice * mtls->mSliceSize;
+        uint32_t xEnd = xStart + mtls->mSliceSize;
+        xEnd = rsMin(xEnd, mtls->xEnd);
+        if (xEnd <= xStart) {
+            return;
+        }
+
+        //LOGE("usr idx %i, x %i,%i  y %i,%i", idx, mtls->xStart, mtls->xEnd, yStart, yEnd);
+        //LOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
+        uint8_t *xPtrOut = mtls->ptrOut + (mtls->eStrideOut * xStart);
+        const uint8_t *xPtrIn = mtls->ptrIn + (mtls->eStrideIn * xStart);
+        for (uint32_t x = xStart; x < xEnd; x++) {
+            ((rs_t)mtls->script->mProgram.mRoot) (xPtrIn, xPtrOut, mtls->usr, x, 0, 0, 0);
+            xPtrIn += mtls->eStrideIn;
+            xPtrOut += mtls->eStrideOut;
+        }
+    }
+
+}
+
 void ScriptC::runForEach(Context *rsc,
                          const Allocation * ain,
                          Allocation * aout,
@@ -296,10 +322,14 @@ void ScriptC::runForEach(Context *rsc,
         mtls.eStrideOut = aout->getType()->getElementSizeBytes();
     }
 
-    if ((rsc->getWorkerPoolSize() > 1) && mEnviroment.mIsThreadable && (mtls.dimY > 1)) {
+    if ((rsc->getWorkerPoolSize() > 1) && mEnviroment.mIsThreadable) {
+        if (mtls.dimY > 1) {
+            rsc->launchThreads(wc_xy, &mtls);
+        } else {
+            rsc->launchThreads(wc_x, &mtls);
+        }
 
         //LOGE("launch 1");
-        rsc->launchThreads(wc_xy, &mtls);
     } else {
         //LOGE("launch 3");
         for (uint32_t ar = mtls.arrayStart; ar < mtls.arrayEnd; ar++) {

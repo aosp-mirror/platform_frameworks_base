@@ -17,7 +17,9 @@ package android.os;
 
 import android.animation.ValueAnimator;
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
+import android.content.Intent;
 import android.util.Log;
 import android.util.Printer;
 
@@ -150,9 +152,18 @@ public final class StrictMode {
     public static final int PENALTY_DIALOG = 0x20;
 
     /**
+     * Death on any detected violation.
+     *
      * @hide
      */
     public static final int PENALTY_DEATH = 0x40;
+
+    /**
+     * Death just for detected network usage.
+     *
+     * @hide
+     */
+    public static final int PENALTY_DEATH_ON_NETWORK = 0x200;
 
     /**
      * @hide
@@ -176,7 +187,8 @@ public final class StrictMode {
      * Mask of all the penalty bits.
      */
     private static final int PENALTY_MASK =
-            PENALTY_LOG | PENALTY_DIALOG | PENALTY_DEATH | PENALTY_DROPBOX | PENALTY_GATHER;
+            PENALTY_LOG | PENALTY_DIALOG | PENALTY_DEATH | PENALTY_DROPBOX | PENALTY_GATHER |
+            PENALTY_DEATH_ON_NETWORK;
 
     /**
      * The current VmPolicy in effect.
@@ -323,9 +335,25 @@ public final class StrictMode {
              * Crash the whole process on violation.  This penalty runs at
              * the end of all enabled penalties so you'll still get
              * see logging or other violations before the process dies.
+             *
+             * <p>Unlike {@link #penaltyDeathOnNetwork}, this applies
+             * to disk reads, disk writes, and network usage if their
+             * corresponding detect flags are set.
              */
             public Builder penaltyDeath() {
                 return enable(PENALTY_DEATH);
+            }
+
+            /**
+             * Crash the whole process on any network usage.  Unlike
+             * {@link #penaltyDeath}, this penalty runs
+             * <em>before</em> anything else.  You must still have
+             * called {@link #detectNetwork} to enable this.
+             *
+             * <p>In the Honeycomb or later SDKs, this is on by default.
+             */
+            public Builder penaltyDeathOnNetwork() {
+                return enable(PENALTY_DEATH_ON_NETWORK);
             }
 
             /**
@@ -649,6 +677,18 @@ public final class StrictMode {
     }
 
     /**
+     * Used by the framework to make network usage on the main
+     * thread a fatal error.
+     *
+     * @hide
+     */
+    public static void enableDeathOnNetwork() {
+        int oldPolicy = getThreadPolicyMask();
+        int newPolicy = oldPolicy | DETECT_NETWORK | PENALTY_DEATH_ON_NETWORK;
+        setThreadPolicyMask(newPolicy);
+    }
+
+    /**
      * Parses the BlockGuard policy mask out from the Exception's
      * getMessage() String value.  Kinda gross, but least
      * invasive.  :/
@@ -757,6 +797,9 @@ public final class StrictMode {
         public void onNetwork() {
             if ((mPolicyMask & DETECT_NETWORK) == 0) {
                 return;
+            }
+            if ((mPolicyMask & PENALTY_DEATH_ON_NETWORK) != 0) {
+                throw new NetworkOnMainThreadException();
             }
             if (tooManyViolationsThisLoop()) {
                 return;
@@ -1164,6 +1207,12 @@ public final class StrictMode {
         public long violationUptimeMillis;
 
         /**
+         * The action of the Intent being broadcast to somebody's onReceive
+         * on this thread right now, or null.
+         */
+        public String broadcastIntentAction;
+
+        /**
          * Create an uninitialized instance of ViolationInfo
          */
         public ViolationInfo() {
@@ -1179,6 +1228,10 @@ public final class StrictMode {
             violationUptimeMillis = SystemClock.uptimeMillis();
             this.policy = policy;
             this.numAnimationsRunning = ValueAnimator.getCurrentAnimationsCount();
+            Intent broadcastIntent = ActivityThread.getIntentBeingBroadcast();
+            if (broadcastIntent != null) {
+                broadcastIntentAction = broadcastIntent.getAction();
+            }
         }
 
         /**
@@ -1206,6 +1259,7 @@ public final class StrictMode {
             violationNumThisLoop = in.readInt();
             numAnimationsRunning = in.readInt();
             violationUptimeMillis = in.readLong();
+            broadcastIntentAction = in.readString();
         }
 
         /**
@@ -1218,6 +1272,7 @@ public final class StrictMode {
             dest.writeInt(violationNumThisLoop);
             dest.writeInt(numAnimationsRunning);
             dest.writeLong(violationUptimeMillis);
+            dest.writeString(broadcastIntentAction);
         }
 
 
@@ -1237,6 +1292,9 @@ public final class StrictMode {
                 pw.println(prefix + "numAnimationsRunning: " + numAnimationsRunning);
             }
             pw.println(prefix + "violationUptimeMillis: " + violationUptimeMillis);
+            if (broadcastIntentAction != null) {
+                pw.println(prefix + "broadcastIntentAction: " + broadcastIntentAction);
+            }
         }
 
     }

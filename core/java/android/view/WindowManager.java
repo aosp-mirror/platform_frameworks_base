@@ -762,6 +762,12 @@ public interface WindowManager extends ViewManager {
          */
         public static final int SOFT_INPUT_ADJUST_PAN = 0x20;
         
+        /** Adjustment option for {@link #softInputMode}: set to have a window
+         * not adjust for a shown input method.  The window will not be resized,
+         * and it will not be panned to make its focus visible.
+         */
+        public static final int SOFT_INPUT_ADJUST_NOTHING = 0x30;
+
         /**
          * Bit for {@link #softInputMode}: set when the user has navigated
          * forward to the window.  This is normally set automatically for
@@ -770,27 +776,6 @@ public interface WindowManager extends ViewManager {
          * be cleared automatically after the window is displayed.
          */
         public static final int SOFT_INPUT_IS_FORWARD_NAVIGATION = 0x100;
-
-        /**
-         * Default value for {@link #screenBrightness} and {@link #buttonBrightness}
-         * indicating that the brightness value is not overridden for this window
-         * and normal brightness policy should be used.
-         */
-        public static final float BRIGHTNESS_OVERRIDE_NONE = -1.0f;
-
-        /**
-         * Value for {@link #screenBrightness} and {@link #buttonBrightness}
-         * indicating that the screen or button backlight brightness should be set
-         * to the lowest value when this window is in front.
-         */
-        public static final float BRIGHTNESS_OVERRIDE_OFF = 0.0f;
-
-        /**
-         * Value for {@link #screenBrightness} and {@link #buttonBrightness}
-         * indicating that the screen or button backlight brightness should be set
-         * to the hightest value when this window is in front.
-         */
-        public static final float BRIGHTNESS_OVERRIDE_FULL = 1.0f;
 
         /**
          * Desired operating mode for any soft input area.  May any combination
@@ -852,6 +837,27 @@ public interface WindowManager extends ViewManager {
          * dim.
          */
         public float dimAmount = 1.0f;
+
+        /**
+         * Default value for {@link #screenBrightness} and {@link #buttonBrightness}
+         * indicating that the brightness value is not overridden for this window
+         * and normal brightness policy should be used.
+         */
+        public static final float BRIGHTNESS_OVERRIDE_NONE = -1.0f;
+
+        /**
+         * Value for {@link #screenBrightness} and {@link #buttonBrightness}
+         * indicating that the screen or button backlight brightness should be set
+         * to the lowest value when this window is in front.
+         */
+        public static final float BRIGHTNESS_OVERRIDE_OFF = 0.0f;
+
+        /**
+         * Value for {@link #screenBrightness} and {@link #buttonBrightness}
+         * indicating that the screen or button backlight brightness should be set
+         * to the hightest value when this window is in front.
+         */
+        public static final float BRIGHTNESS_OVERRIDE_FULL = 1.0f;
     
         /**
          * This can be used to override the user's preferred brightness of

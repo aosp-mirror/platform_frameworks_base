@@ -51,7 +51,7 @@ public class Canvas extends _Original_Canvas {
 
     public Canvas(Bitmap bitmap) {
         mLogger = null;
-        mBufferedImage = bitmap.getImage();
+        mBufferedImage = Bitmap_Delegate.getImage(bitmap);
         mGraphicsStack.push(mBufferedImage.createGraphics());
     }
 
@@ -227,7 +227,7 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void setBitmap(Bitmap bitmap) {
-        mBufferedImage = bitmap.getImage();
+        mBufferedImage = Bitmap_Delegate.getImage(bitmap);
         mGraphicsStack.push(mBufferedImage.createGraphics());
     }
 
@@ -557,7 +557,7 @@ public class Canvas extends _Original_Canvas {
 
     private void drawBitmap(Bitmap bitmap, int sleft, int stop, int sright, int sbottom, int dleft,
             int dtop, int dright, int dbottom, Paint paint) {
-        BufferedImage image = bitmap.getImage();
+        BufferedImage image = Bitmap_Delegate.getImage(bitmap);
 
         Graphics2D g = getGraphics2d();
 

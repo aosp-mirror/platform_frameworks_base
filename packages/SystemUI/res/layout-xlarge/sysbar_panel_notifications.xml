@@ -23,20 +23,23 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:background="#FF000000"
+    android:background="@*android:drawable/dialog_full_holo_dark"
     android:orientation="vertical"
+    android:animateLayoutChanges="true"
     >
 
     <ScrollView
         android:id="@+id/notificationScroller"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:animateLayoutChanges="true"
         >
         <LinearLayout 
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal|bottom"
+            android:animateLayoutChanges="true"
             android:animationCache="false"
             android:orientation="vertical"
             android:background="@drawable/status_bar_background"

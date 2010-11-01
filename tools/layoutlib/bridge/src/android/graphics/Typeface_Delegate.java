@@ -34,7 +34,7 @@ import java.util.List;
  *
  * This class behaves like the original native implementation, but in Java, keeping previously
  * native data into its own objects and mapping them to int that are sent back and forth between
- * it and the original Matrix class.
+ * it and the original Typeface class.
  *
  * @see DelegateManager
  *
@@ -84,7 +84,7 @@ public final class Typeface_Delegate {
 
     // ---- native methods ----
 
-    public static synchronized int nativeCreate(String familyName, int style) {
+    /*package*/ static synchronized int nativeCreate(String familyName, int style) {
         if (familyName == null) {
             familyName = DEFAULT_FAMILY;
         }
@@ -102,7 +102,7 @@ public final class Typeface_Delegate {
         return sManager.addDelegate(newDelegate);
     }
 
-    public static synchronized int nativeCreateFromTypeface(int native_instance, int style) {
+    /*package*/ static synchronized int nativeCreateFromTypeface(int native_instance, int style) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
             assert false;
@@ -122,21 +122,21 @@ public final class Typeface_Delegate {
         return sManager.addDelegate(newDelegate);
     }
 
-    public static synchronized int nativeCreateFromAsset(AssetManager mgr, String path) {
+    /*package*/ static synchronized int nativeCreateFromAsset(AssetManager mgr, String path) {
         // FIXME
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Native delegate needed: Typeface_Delegate.nativeCreateFromAsset");
     }
 
-    public static synchronized int nativeCreateFromFile(String path) {
+    /*package*/ static synchronized int nativeCreateFromFile(String path) {
         // FIXME
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Native delegate needed: Typeface_Delegate.nativeCreateFromFile");
     }
 
-    public static void nativeUnref(int native_instance) {
+    /*package*/ static void nativeUnref(int native_instance) {
         sManager.removeDelegate(native_instance);
     }
 
-    public static int nativeGetStyle(int native_instance) {
+    /*package*/ static int nativeGetStyle(int native_instance) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
             assert false;
@@ -146,7 +146,7 @@ public final class Typeface_Delegate {
         return delegate.mStyle;
     }
 
-    public static void setGammaForText(float blackGamma, float whiteGamma) {
+    /*package*/ static void setGammaForText(float blackGamma, float whiteGamma) {
         // This is for device testing only: pass
     }
 

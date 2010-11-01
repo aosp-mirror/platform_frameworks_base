@@ -1357,6 +1357,7 @@
   <public type="attr" name="dividerVertical" />
   <public type="attr" name="buttonGroupStyle" />
   <public type="attr" name="alertDialogButtonGroupStyle" />
+  <public type="attr" name="homeAsUpIndicator" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1401,6 +1402,8 @@
   <public type="style" name="Theme.Holo.Light" />
   <public type="style" name="Theme.Holo.Dialog" />
   <public type="style" name="Theme.Holo.Light.Dialog" />
+  <public type="style" name="Theme.Holo.Extended" />
+  <public type="style" name="Theme.Holo.Light.Extended" />
 
   <public type="style" name="Widget.ListPopupWindow" />
   <public type="style" name="Widget.PopupMenu" />
@@ -1415,5 +1418,6 @@
   <public type="attr" name="actionModeCutDrawable" />
   <public type="attr" name="actionModeCopyDrawable" />
   <public type="attr" name="actionModePasteDrawable" />
-
+  <public type="attr" name="textEditPasteWindowLayout" />
+  <public type="attr" name="textEditNoPasteWindowLayout" />
 </resources>

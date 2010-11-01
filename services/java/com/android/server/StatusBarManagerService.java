@@ -71,8 +71,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     Object mLock = new Object();
     // We usually call it lights out mode, but double negatives are annoying
     boolean mLightsOn = true;
-
     boolean mMenuVisible = false;
+    boolean mIMEButtonVisible = false;
 
     private class DisableRecord implements IBinder.DeathRecipient {
         String pkg;
@@ -257,6 +257,28 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    public void setIMEButtonVisible(final boolean visible) {
+        enforceStatusBar();
+
+        if (SPEW) Slog.d(TAG, (visible?"showing":"hiding") + " IME Button");
+
+        synchronized(mLock) {
+            if (mIMEButtonVisible != visible) {
+                mIMEButtonVisible = visible;
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        if (mBar != null) {
+                            try {
+                                mBar.setIMEButtonVisible(visible);
+                            } catch (RemoteException ex) {
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }
+
     /**
      * This is used for the automatic version of lights-out mode.  Only call this from
      * the window manager.
@@ -328,7 +350,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
             List<IBinder> notificationKeys, List<StatusBarNotification> notifications,
-            boolean switches[]) {
+            int switches[]) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
@@ -343,8 +365,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             }
         }
         synchronized (mLock) {
-            switches[0] = mLightsOn;
-            switches[1] = mMenuVisible;
+            switches[0] = gatherDisableActionsLocked();
+            switches[1] = mLightsOn ? 1 : 0;
+            switches[2] = mMenuVisible ? 1 : 0;
+            switches[3] = mIMEButtonVisible ? 1 : 0;
         }
     }
 

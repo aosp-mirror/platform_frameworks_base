@@ -680,19 +680,6 @@ android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
     android_media_MediaPlayer_release(env, thiz);
 }
 
-static jint
-android_media_MediaPlayer_native_suspend_resume(
-        JNIEnv *env, jobject thiz, jboolean isSuspend) {
-    LOGV("suspend_resume(%d)", isSuspend);
-    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return UNKNOWN_ERROR;
-    }
-
-    return isSuspend ? mp->suspend() : mp->resume();
-}
-
 static void android_media_MediaPlayer_set_audio_session_id(JNIEnv *env,  jobject thiz, jint sessionId) {
     LOGV("set_session_id(): %d", sessionId);
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -767,7 +754,6 @@ static JNINativeMethod gMethods[] = {
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
-    {"native_suspend_resume", "(Z)I",                           (void *)android_media_MediaPlayer_native_suspend_resume},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
     {"setAuxEffectSendLevel", "(F)V",                           (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
