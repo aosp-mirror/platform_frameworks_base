@@ -82,8 +82,8 @@ public class SamplingProfilerIntegration {
         }
         ThreadGroup group = Thread.currentThread().getThreadGroup();
         SamplingProfiler.ThreadSet threadSet = SamplingProfiler.newThreadGroupTheadSet(group);
-        INSTANCE = new SamplingProfiler(4, threadSet);
-        INSTANCE.start(samplingProfilerHz);
+        INSTANCE = new SamplingProfiler(4, threadSet); // TODO parameter for depth
+        INSTANCE.start(1000/samplingProfilerHz);
     }
 
     /**
