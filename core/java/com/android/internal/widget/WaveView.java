@@ -53,8 +53,10 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
     private static final int STATE_UNLOCK_SUCCESS = 5;
 
     // Animation properties.
-    private static final long DURATION = 500; // duration of transitional animations
-    private static final long FINAL_DELAY = 1300; // delay for final animations
+    private static final long DURATION = 300; // duration of transitional animations
+    private static final long FINAL_DURATION = 200; // duration of final animations when unlocking
+    private static final long RING_DELAY = 1300; // when to start fading animated rings
+    private static final long FINAL_DELAY = 200; // delay for unlock success animation
     private static final long SHORT_DELAY = 100; // for starting one animation after another.
     private static final long WAVE_DURATION = 2000; // amount of time for way to expand/decay
     private static final long RESET_TIMEOUT = 3000; // elapsed time of inactivity before we reset
@@ -299,11 +301,11 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                         // x:ringX, y:ringY, scaleX: .1, scaleY: .1, ease:Quint.easeOut});
                         DrawableHolder wave = mLightWaves.get(n);
                         long delay = 1000L*(6 + n - mCurrentWave)/10L;
-                        wave.addAnimTo(DURATION, delay, "x", ringX, true);
-                        wave.addAnimTo(DURATION, delay, "y", ringY, true);
-                        wave.addAnimTo(DURATION, delay, "scaleX", 0.1f, true);
-                        wave.addAnimTo(DURATION, delay, "scaleY", 0.1f, true);
-                        wave.addAnimTo(DURATION, delay, "alpha", 0.0f, true);
+                        wave.addAnimTo(FINAL_DURATION, delay, "x", ringX, true);
+                        wave.addAnimTo(FINAL_DURATION, delay, "y", ringY, true);
+                        wave.addAnimTo(FINAL_DURATION, delay, "scaleX", 0.1f, true);
+                        wave.addAnimTo(FINAL_DURATION, delay, "scaleY", 0.1f, true);
+                        wave.addAnimTo(FINAL_DURATION, delay, "alpha", 0.0f, true);
                     }
                     for (int i = 0; i < mLightWaves.size(); i++) {
                         mLightWaves.get(i).startAnimations(this);
@@ -311,14 +313,14 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
 
                     //TweenMax.to(unlockRing, .5, {x:ringX, y: ringY, scaleX: .1, scaleY: .1,
                     // alpha: 0, ease: Quint.easeOut   });
-                    mUnlockRing.addAnimTo(DURATION, 0, "x", ringX, false);
-                    mUnlockRing.addAnimTo(DURATION, 0, "y", ringY, false);
-                    mUnlockRing.addAnimTo(DURATION, 0, "scaleX", 0.1f, false);
-                    mUnlockRing.addAnimTo(DURATION, 0, "scaleY", 0.1f, false);
-                    mUnlockRing.addAnimTo(DURATION, 0, "alpha", 0.0f, false);
+                    mUnlockRing.addAnimTo(FINAL_DURATION, 0, "x", ringX, false);
+                    mUnlockRing.addAnimTo(FINAL_DURATION, 0, "y", ringY, false);
+                    mUnlockRing.addAnimTo(FINAL_DURATION, 0, "scaleX", 0.1f, false);
+                    mUnlockRing.addAnimTo(FINAL_DURATION, 0, "scaleY", 0.1f, false);
+                    mUnlockRing.addAnimTo(FINAL_DURATION, 0, "alpha", 0.0f, false);
 
                     //TweenMax.to(unlockRing, .5, { delay: 1.3, alpha: 0  , ease: Quint.easeOut });
-                    mUnlockRing.addAnimTo(DURATION, FINAL_DELAY, "alpha", 0.0f, false);
+                    mUnlockRing.addAnimTo(FINAL_DURATION, FINAL_DELAY, "alpha", 0.0f, false);
 
                     //TweenMax.to(unlockDefault, 0, { x:ringX, y: ringY, scaleX: .1, scaleY: .1,
                     // alpha: 0  , overwrite: true });
@@ -332,27 +334,27 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
 
                     //TweenMax.to(unlockDefault, .5, { x:ringX, y: ringY, scaleX: 1, scaleY: 1,
                     // alpha: 1  , ease: Quint.easeOut  , overwrite: true });
-                    mUnlockDefault.addAnimTo(DURATION, 0, "x", ringX, true);
-                    mUnlockDefault.addAnimTo(DURATION, 0, "y", ringY, true);
-                    mUnlockDefault.addAnimTo(DURATION, 0, "scaleX", 1.0f, true);
-                    mUnlockDefault.addAnimTo(DURATION, 0, "scaleY", 1.0f, true);
-                    mUnlockDefault.addAnimTo(DURATION, 0, "alpha", 1.0f, true);
+                    mUnlockDefault.addAnimTo(FINAL_DURATION, 0, "x", ringX, true);
+                    mUnlockDefault.addAnimTo(FINAL_DURATION, 0, "y", ringY, true);
+                    mUnlockDefault.addAnimTo(FINAL_DURATION, 0, "scaleX", 1.0f, true);
+                    mUnlockDefault.addAnimTo(FINAL_DURATION, 0, "scaleY", 1.0f, true);
+                    mUnlockDefault.addAnimTo(FINAL_DURATION, 0, "alpha", 1.0f, true);
 
                     //TweenMax.to(unlockDefault, .5, { delay: 1.3, scaleX: 3, scaleY: 3,
                     // alpha: 1, ease: Quint.easeOut });
-                    mUnlockDefault.addAnimTo(DURATION, FINAL_DELAY, "scaleX", 3.0f, false);
-                    mUnlockDefault.addAnimTo(DURATION, FINAL_DELAY, "scaleY", 3.0f, false);
-                    mUnlockDefault.addAnimTo(DURATION, FINAL_DELAY, "alpha", 1.0f, false);
+                    mUnlockDefault.addAnimTo(FINAL_DURATION, FINAL_DELAY, "scaleX", 3.0f, false);
+                    mUnlockDefault.addAnimTo(FINAL_DURATION, FINAL_DELAY, "scaleY", 3.0f, false);
+                    mUnlockDefault.addAnimTo(FINAL_DURATION, FINAL_DELAY, "alpha", 0.0f, false);
 
                     //TweenMax.to(unlockHalo, .5, { x:ringX, y: ringY , ease: Back.easeOut    });
-                    mUnlockHalo.addAnimTo(DURATION, 0, "x", ringX, false);
-                    mUnlockHalo.addAnimTo(DURATION, 0, "y", ringY, false);
+                    mUnlockHalo.addAnimTo(FINAL_DURATION, 0, "x", ringX, false);
+                    mUnlockHalo.addAnimTo(FINAL_DURATION, 0, "y", ringY, false);
 
                     //TweenMax.to(unlockHalo, .5, { delay: 1.3, scaleX: 3, scaleY: 3,
                     // alpha: 1, ease: Quint.easeOut   });
-                    mUnlockHalo.addAnimTo(DURATION, FINAL_DELAY, "scaleX", 3.0f, false);
-                    mUnlockHalo.addAnimTo(DURATION, FINAL_DELAY, "scaleY", 3.0f, false);
-                    mUnlockHalo.addAnimTo(DURATION, FINAL_DELAY, "alpha", 1.0f, false);
+                    mUnlockHalo.addAnimTo(FINAL_DURATION, FINAL_DELAY, "scaleX", 3.0f, false);
+                    mUnlockHalo.addAnimTo(FINAL_DURATION, FINAL_DELAY, "scaleY", 3.0f, false);
+                    mUnlockHalo.addAnimTo(FINAL_DURATION, FINAL_DELAY, "alpha", 0.0f, false);
 
                     removeCallbacks(mLockTimerActions);
 
@@ -437,7 +439,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
 
                 //TweenMax.to(this["lightWave"+currentWave], 1, { delay: 1.3
                 // , alpha: 0  , ease:Quint.easeOut});
-                wave.addAnimTo(1000, FINAL_DELAY, "alpha", 0.0f, false);
+                wave.addAnimTo(1000, RING_DELAY, "alpha", 0.0f, false);
                 wave.startAnimations(WaveView.this);
 
                 mCurrentWave = (mCurrentWave+1) % mWaveCount;
