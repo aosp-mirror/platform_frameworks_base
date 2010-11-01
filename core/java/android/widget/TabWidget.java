@@ -109,7 +109,6 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     }
 
     private void initTabWidget() {
-        setOrientation(LinearLayout.HORIZONTAL);
         mGroupFlags |= FLAG_USE_CHILD_DRAWING_ORDER;
 
         final Context context = mContext;
