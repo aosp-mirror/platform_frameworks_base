@@ -1027,6 +1027,16 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     }
 
     /**
+     * Called when this fragment's option menu items are no longer being
+     * included in the overall options menu.  Receiving this call means that
+     * the menu needed to be rebuilt, but this fragment's items were not
+     * included in the newly built menu (its {@link #onCreateOptionsMenu(Menu, MenuInflater)}
+     * was not called).
+     */
+    public void onDestroyOptionsMenu() {
+    }
+    
+    /**
      * This hook is called whenever an item in your options menu is selected.
      * The default implementation simply returns false to have the normal
      * processing happen (calling the item's Runnable or sending a message to

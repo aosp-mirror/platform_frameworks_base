@@ -794,7 +794,17 @@ public interface WindowManager extends ViewManager {
         public int softInputMode;
         
         /**
-         * Placement of window within the screen as per {@link Gravity}
+         * Placement of window within the screen as per {@link Gravity}.  Both
+         * {@link Gravity#apply(int, int, int, android.graphics.Rect, int, int,
+         * android.graphics.Rect) Gravity.apply} and
+         * {@link Gravity#applyDisplay(int, android.graphics.Rect, android.graphics.Rect)
+         * Gravity.applyDisplay} are used during window layout, with this value
+         * given as the desired gravity.  For example you can specify
+         * {@link Gravity#DISPLAY_CLIP_HORIZONTAL Gravity.DISPLAY_CLIP_HORIZONTAL} and
+         * {@link Gravity#DISPLAY_CLIP_VERTICAL Gravity.DISPLAY_CLIP_VERTICAL} here
+         * to control the behavior of
+         * {@link Gravity#applyDisplay(int, android.graphics.Rect, android.graphics.Rect)
+         * Gravity.applyDisplay}.
          *
          * @see Gravity
          */
@@ -802,13 +812,19 @@ public interface WindowManager extends ViewManager {
     
         /**
          * The horizontal margin, as a percentage of the container's width,
-         * between the container and the widget.
+         * between the container and the widget.  See
+         * {@link Gravity#apply(int, int, int, android.graphics.Rect, int, int,
+         * android.graphics.Rect) Gravity.apply} for how this is used.  This
+         * field is added with {@link #x} to supply the <var>xAdj</var> parameter.
          */
         public float horizontalMargin;
     
         /**
          * The vertical margin, as a percentage of the container's height,
-         * between the container and the widget.
+         * between the container and the widget.  See
+         * {@link Gravity#apply(int, int, int, android.graphics.Rect, int, int,
+         * android.graphics.Rect) Gravity.apply} for how this is used.  This
+         * field is added with {@link #y} to supply the <var>yAdj</var> parameter.
          */
         public float verticalMargin;
     
@@ -1168,13 +1184,21 @@ public interface WindowManager extends ViewManager {
             sb.append('x');
             sb.append((height== MATCH_PARENT ?"fill":(height==WRAP_CONTENT?"wrap":height)));
             sb.append(")");
-            if (softInputMode != 0) {
-                sb.append(" sim=#");
-                sb.append(Integer.toHexString(softInputMode));
+            if (horizontalMargin != 0) {
+                sb.append(" hm=");
+                sb.append(horizontalMargin);
+            }
+            if (verticalMargin != 0) {
+                sb.append(" vm=");
+                sb.append(verticalMargin);
             }
             if (gravity != 0) {
                 sb.append(" gr=#");
                 sb.append(Integer.toHexString(gravity));
+            }
+            if (softInputMode != 0) {
+                sb.append(" sim=#");
+                sb.append(Integer.toHexString(softInputMode));
             }
             sb.append(" ty=");
             sb.append(type);
@@ -1189,6 +1213,18 @@ public interface WindowManager extends ViewManager {
             if (screenOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
                 sb.append(" or=");
                 sb.append(screenOrientation);
+            }
+            if (alpha != 1.0f) {
+                sb.append(" alpha=");
+                sb.append(alpha);
+            }
+            if (screenBrightness != BRIGHTNESS_OVERRIDE_NONE) {
+                sb.append(" sbrt=");
+                sb.append(screenBrightness);
+            }
+            if (buttonBrightness != BRIGHTNESS_OVERRIDE_NONE) {
+                sb.append(" bbrt=");
+                sb.append(buttonBrightness);
             }
             if ((flags & FLAG_COMPATIBLE_WINDOW) != 0) {
                 sb.append(" compatible=true");

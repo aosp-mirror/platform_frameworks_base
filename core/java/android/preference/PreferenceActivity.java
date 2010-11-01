@@ -825,7 +825,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     /**
      * Called when the user selects an item in the header list.  The default
-     * implementation will call either {@link #startWithFragment(String, Bundle)}
+     * implementation will call either {@link #startWithFragment(String, Bundle, Fragment, int)}
      * or {@link #switchToHeader(Header)} as appropriate.
      *
      * @param header The header that was selected.
@@ -834,7 +834,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     public void onHeaderClick(Header header, int position) {
         if (header.fragment != null) {
             if (mSinglePane) {
-                startWithFragment(header.fragment, header.fragmentArguments);
+                startWithFragment(header.fragment, header.fragmentArguments, null, 0);
             } else {
                 switchToHeader(header);
             }
@@ -852,13 +852,18 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param fragmentName The name of the fragment to display.
      * @param args Optional arguments to supply to the fragment.
      */
-    public void startWithFragment(String fragmentName, Bundle args) {
+    public void startWithFragment(String fragmentName, Bundle args,
+            Fragment resultTo, int resultRequestCode) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClass(this, getClass());
         intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
         intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
         intent.putExtra(EXTRA_NO_HEADERS, true);
-        startActivity(intent);
+        if (resultTo == null) {
+            startActivity(intent);
+        } else {
+            resultTo.startActivityForResult(intent, resultRequestCode);
+        }
     }
 
     /**
@@ -923,9 +928,15 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param header The new header to display.
      */
     public void switchToHeader(Header header) {
-        int direction = mHeaders.indexOf(header) - mHeaders.indexOf(mCurHeader);
-        switchToHeaderInner(header.fragment, header.fragmentArguments, direction);
-        setSelectedHeader(header);
+        if (mCurHeader == header) {
+            // This is the header we are currently displaying.  Just make sure
+            // to pop the stack up to its root state.
+            getFragmentManager().popBackStack(BACK_STACK_PREFS, POP_BACK_STACK_INCLUSIVE);
+        } else {
+            int direction = mHeaders.indexOf(header) - mHeaders.indexOf(mCurHeader);
+            switchToHeaderInner(header.fragment, header.fragmentArguments, direction);
+            setSelectedHeader(header);
+        }
     }
 
     Header findBestMatchingHeader(Header cur, ArrayList<Header> from) {
@@ -982,7 +993,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     public void startPreferenceFragment(Fragment fragment, boolean push) {
         FragmentTransaction transaction = getFragmentManager().openTransaction();
-        startPreferenceFragment(fragment, transaction);
+        transaction.replace(com.android.internal.R.id.prefs, fragment);
         if (push) {
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             transaction.addToBackStack(BACK_STACK_PREFS);
@@ -993,25 +1004,74 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
-     * Start a new fragment.
-     *
-     * @param fragment The fragment to start
-     * @param ft The FragmentTransaction in which to perform this operation.
-     * Will not be added to the back stack or committed for you; you use do that.
+     * Start a new fragment containing a preference panel.  If the prefences
+     * are being displayed in multi-pane mode, the given fragment class will
+     * be instantiated and placed in the appropriate pane.  If running in
+     * single-pane mode, a new activity will be launched in which to show the
+     * fragment.
+     * 
+     * @param fragmentClass Full name of the class implementing the fragment.
+     * @param args Any desired arguments to supply to the fragment.
+     * @param titleRes Optional resource identifier of the title of this
+     * fragment.
+     * @param titleText Optional text of the title of this fragment.
+     * @param resultTo Optional fragment that result data should be sent to.
+     * If non-null, resultTo.onActivityResult() will be called when this
+     * preference panel is done.  The launched panel must use
+     * {@link #finishPreferencePanel(Fragment, int, Intent)} when done.
+     * @param resultRequestCode If resultTo is non-null, this is the caller's
+     * request code to be received with the resut.
      */
-    public void startPreferenceFragment(Fragment fragment, FragmentTransaction ft) {
-        ft.replace(com.android.internal.R.id.prefs, fragment);
+    public void startPreferencePanel(String fragmentClass, Bundle args, int titleRes,
+            CharSequence titleText, Fragment resultTo, int resultRequestCode) {
+        if (mSinglePane) {
+            startWithFragment(fragmentClass, args, resultTo, resultRequestCode);
+        } else {
+            Fragment f = Fragment.instantiate(this, fragmentClass, args);
+            if (resultTo != null) {
+                f.setTargetFragment(resultTo, resultRequestCode);
+            }
+            FragmentTransaction transaction = getFragmentManager().openTransaction();
+            transaction.replace(com.android.internal.R.id.prefs, f);
+            if (titleRes != 0) {
+                transaction.setBreadCrumbTitle(titleRes);
+            } else if (titleText != null) {
+                transaction.setBreadCrumbTitle(titleText);
+            }
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            transaction.addToBackStack(BACK_STACK_PREFS);
+            transaction.commit();
+        }
     }
-
+    
+    /**
+     * Called by a preference panel fragment to finish itself.
+     * 
+     * @param caller The fragment that is asking to be finished.
+     * @param resultCode Optional result code to send back to the original
+     * launching fragment.
+     * @param resultData Optional result data to send back to the original
+     * launching fragment.
+     */
+    public void finishPreferencePanel(Fragment caller, int resultCode, Intent resultData) {
+        if (mSinglePane) {
+            setResult(resultCode, resultData);
+            finish();
+        } else {
+            if (caller != null) {
+                if (caller.getTargetFragment() != null) {
+                    caller.getTargetFragment().onActivityResult(caller.getTargetRequestCode(),
+                            resultCode, resultData);
+                }
+            }
+            // XXX be smarter about popping the stack.
+            onBackPressed();
+        }
+    }
+    
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
-        Fragment f = Fragment.instantiate(this, pref.getFragment(), pref.getExtras());
-        FragmentTransaction transaction = getFragmentManager().openTransaction();
-        startPreferenceFragment(f, transaction);
-        transaction.setBreadCrumbTitle(pref.getTitle());
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.addToBackStack(BACK_STACK_PREFS);
-        transaction.commit();
+        startPreferencePanel(pref.getFragment(), pref.getExtras(), 0, pref.getTitle(), null, 0);
         return true;
     }
 

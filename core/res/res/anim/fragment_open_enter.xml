@@ -24,7 +24,7 @@
         android:propertyName="alpha"
         android:duration="@android:integer/config_mediumAnimTime"/>
     <objectAnimator
-        android:valueFrom="400"
+        android:valueFrom="100"
         android:valueTo="0"
         android:valueType="floatType"
         android:propertyName="translationX"
