@@ -132,6 +132,25 @@ public class RemoteViews implements Parcelable, Filter {
             // here
             return;
         }
+
+        protected boolean startIntentSafely(Context context, PendingIntent pendingIntent,
+                Intent fillInIntent) {
+            try {
+                // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+                context.startIntentSender(
+                        pendingIntent.getIntentSender(), fillInIntent,
+                        Intent.FLAG_ACTIVITY_NEW_TASK,
+                        Intent.FLAG_ACTIVITY_NEW_TASK, 0);
+            } catch (IntentSender.SendIntentException e) {
+                android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
+                return false;
+            } catch (Exception e) {
+                android.util.Log.e(LOG_TAG, "Cannot send pending intent due to " +
+                        "unknown exception: ", e);
+                return false;
+            }
+            return true;
+        }
     }
 
     private class SetEmptyView extends Action {
@@ -236,15 +255,7 @@ public class RemoteViews implements Parcelable, Filter {
                         rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
 
                         fillInIntent.setSourceBounds(rect);
-                        try {
-                            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
-                            v.getContext().startIntentSender(
-                                    pendingIntent.getIntentSender(), fillInIntent,
-                                    Intent.FLAG_ACTIVITY_NEW_TASK,
-                                    Intent.FLAG_ACTIVITY_NEW_TASK, 0);
-                        } catch (IntentSender.SendIntentException e) {
-                            android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
-                        }
+                        startIntentSafely(v.getContext(), pendingIntent, fillInIntent);
                     }
 
                 };
@@ -326,16 +337,7 @@ public class RemoteViews implements Parcelable, Filter {
                         final Intent intent = new Intent();
                         intent.setSourceBounds(rect);
                         intent.putExtras(extras);
-
-                        try {
-                            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
-                            v.getContext().startIntentSender(
-                                    pendingIntent.getIntentSender(), intent,
-                                    Intent.FLAG_ACTIVITY_NEW_TASK,
-                                    Intent.FLAG_ACTIVITY_NEW_TASK, 0);
-                        } catch (IntentSender.SendIntentException e) {
-                            android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
-                        }
+                        startIntentSafely(v.getContext(), pendingIntent, intent);
                     }
 
                 };
@@ -441,15 +443,7 @@ public class RemoteViews implements Parcelable, Filter {
 
                         final Intent intent = new Intent();
                         intent.setSourceBounds(rect);
-                        try {
-                            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
-                            v.getContext().startIntentSender(
-                                    pendingIntent.getIntentSender(), intent,
-                                    Intent.FLAG_ACTIVITY_NEW_TASK,
-                                    Intent.FLAG_ACTIVITY_NEW_TASK, 0);
-                        } catch (IntentSender.SendIntentException e) {
-                            android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
-                        }
+                        startIntentSafely(v.getContext(), pendingIntent, intent);
                     }
                 };
                 target.setOnClickListener(listener);
