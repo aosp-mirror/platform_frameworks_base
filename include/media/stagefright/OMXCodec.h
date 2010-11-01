@@ -241,6 +241,8 @@ private:
     status_t freeBuffersOnPort(
             OMX_U32 portIndex, bool onlyThoseWeOwn = false);
 
+    status_t freeBuffer(OMX_U32 portIndex, size_t bufIndex);
+
     void drainInputBuffer(IOMX::buffer_id buffer);
     void fillOutputBuffer(IOMX::buffer_id buffer);
     void drainInputBuffer(BufferInfo *info);
