@@ -436,120 +436,120 @@ void SC_ForEach2(RsScript vs,
 //                 ::= d  # double
 
 static ScriptCState::SymbolTable_t gSyms[] = {
-    { "__divsi3", (void *)&SC_divsi3 },
+    { "__divsi3", (void *)&SC_divsi3, true },
 
     // allocation
-    { "_Z19rsAllocationGetDimX13rs_allocation", (void *)&SC_allocGetDimX },
-    { "_Z19rsAllocationGetDimY13rs_allocation", (void *)&SC_allocGetDimY },
-    { "_Z19rsAllocationGetDimZ13rs_allocation", (void *)&SC_allocGetDimZ },
-    { "_Z21rsAllocationGetDimLOD13rs_allocation", (void *)&SC_allocGetDimLOD },
-    { "_Z23rsAllocationGetDimFaces13rs_allocation", (void *)&SC_allocGetDimFaces },
-    { "_Z15rsGetAllocationPKv", (void *)&SC_getAllocation },
+    { "_Z19rsAllocationGetDimX13rs_allocation", (void *)&SC_allocGetDimX, true },
+    { "_Z19rsAllocationGetDimY13rs_allocation", (void *)&SC_allocGetDimY, true },
+    { "_Z19rsAllocationGetDimZ13rs_allocation", (void *)&SC_allocGetDimZ, true },
+    { "_Z21rsAllocationGetDimLOD13rs_allocation", (void *)&SC_allocGetDimLOD, true },
+    { "_Z23rsAllocationGetDimFaces13rs_allocation", (void *)&SC_allocGetDimFaces, true },
+    { "_Z15rsGetAllocationPKv", (void *)&SC_getAllocation, true },
 
-    { "_Z14rsGetElementAt13rs_allocationj", (void *)&SC_getElementAtX },
-    { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY },
-    { "_Z14rsGetElementAt13rs_allocationjjj", (void *)&SC_getElementAtXYZ },
+    { "_Z14rsGetElementAt13rs_allocationj", (void *)&SC_getElementAtX, true },
+    { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY, true },
+    { "_Z14rsGetElementAt13rs_allocationjjj", (void *)&SC_getElementAtXYZ, true },
 
-    { "_Z11rsSetObjectP10rs_elementS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP10rs_element", (void *)&SC_clearObject },
-    { "_Z10rsIsObject10rs_element", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP10rs_elementS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP10rs_element", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject10rs_element", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP7rs_typeS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP7rs_type", (void *)&SC_clearObject },
-    { "_Z10rsIsObject7rs_type", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP7rs_typeS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP7rs_type", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject7rs_type", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP13rs_allocationS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP13rs_allocation", (void *)&SC_clearObject },
-    { "_Z10rsIsObject13rs_allocation", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP13rs_allocationS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP13rs_allocation", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject13rs_allocation", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP10rs_samplerS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP10rs_sampler", (void *)&SC_clearObject },
-    { "_Z10rsIsObject10rs_sampler", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP10rs_samplerS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP10rs_sampler", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject10rs_sampler", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP9rs_scriptS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP9rs_script", (void *)&SC_clearObject },
-    { "_Z10rsIsObject9rs_script", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP9rs_scriptS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP9rs_script", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject9rs_script", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP7rs_meshS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP7rs_mesh", (void *)&SC_clearObject },
-    { "_Z10rsIsObject7rs_mesh", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP7rs_meshS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP7rs_mesh", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject7rs_mesh", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP19rs_program_fragmentS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP19rs_program_fragment", (void *)&SC_clearObject },
-    { "_Z10rsIsObject19rs_program_fragment", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP19rs_program_fragmentS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP19rs_program_fragment", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject19rs_program_fragment", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP17rs_program_vertexS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP17rs_program_vertex", (void *)&SC_clearObject },
-    { "_Z10rsIsObject17rs_program_vertex", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP17rs_program_vertexS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP17rs_program_vertex", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject17rs_program_vertex", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP17rs_program_rasterS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP17rs_program_raster", (void *)&SC_clearObject },
-    { "_Z10rsIsObject17rs_program_raster", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP17rs_program_rasterS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP17rs_program_raster", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject17rs_program_raster", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP16rs_program_storeS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP16rs_program_store", (void *)&SC_clearObject },
-    { "_Z10rsIsObject16rs_program_store", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP16rs_program_storeS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP16rs_program_store", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject16rs_program_store", (void *)&SC_isObject, true },
 
-    { "_Z11rsSetObjectP7rs_fontS_", (void *)&SC_setObject },
-    { "_Z13rsClearObjectP7rs_font", (void *)&SC_clearObject },
-    { "_Z10rsIsObject7rs_font", (void *)&SC_isObject },
+    { "_Z11rsSetObjectP7rs_fontS_", (void *)&SC_setObject, true },
+    { "_Z13rsClearObjectP7rs_font", (void *)&SC_clearObject, true },
+    { "_Z10rsIsObject7rs_font", (void *)&SC_isObject, true },
 
 
-    { "_Z21rsAllocationMarkDirty13rs_allocation", (void *)&SC_allocationMarkDirty },
+    { "_Z21rsAllocationMarkDirty13rs_allocation", (void *)&SC_allocationMarkDirty, true },
 
 
     // Debug
-    { "_Z7rsDebugPKcf", (void *)&SC_debugF },
-    { "_Z7rsDebugPKcff", (void *)&SC_debugFv2 },
-    { "_Z7rsDebugPKcfff", (void *)&SC_debugFv3 },
-    { "_Z7rsDebugPKcffff", (void *)&SC_debugFv4 },
-    { "_Z7rsDebugPKcd", (void *)&SC_debugD },
-    { "_Z7rsDebugPKcPK12rs_matrix4x4", (void *)&SC_debugFM4v4 },
-    { "_Z7rsDebugPKcPK12rs_matrix3x3", (void *)&SC_debugFM3v3 },
-    { "_Z7rsDebugPKcPK12rs_matrix2x2", (void *)&SC_debugFM2v2 },
-    { "_Z7rsDebugPKci", (void *)&SC_debugI32 },
-    { "_Z7rsDebugPKcj", (void *)&SC_debugU32 },
+    { "_Z7rsDebugPKcf", (void *)&SC_debugF, true },
+    { "_Z7rsDebugPKcff", (void *)&SC_debugFv2, true },
+    { "_Z7rsDebugPKcfff", (void *)&SC_debugFv3, true },
+    { "_Z7rsDebugPKcffff", (void *)&SC_debugFv4, true },
+    { "_Z7rsDebugPKcd", (void *)&SC_debugD, true },
+    { "_Z7rsDebugPKcPK12rs_matrix4x4", (void *)&SC_debugFM4v4, true },
+    { "_Z7rsDebugPKcPK12rs_matrix3x3", (void *)&SC_debugFM3v3, true },
+    { "_Z7rsDebugPKcPK12rs_matrix2x2", (void *)&SC_debugFM2v2, true },
+    { "_Z7rsDebugPKci", (void *)&SC_debugI32, true },
+    { "_Z7rsDebugPKcj", (void *)&SC_debugU32, true },
     // Both "long" and "unsigned long" need to be redirected to their
     // 64-bit counterparts, since we have hacked Slang to use 64-bit
     // for "long" on Arm (to be similar to Java).
-    { "_Z7rsDebugPKcl", (void *)&SC_debugLL64 },
-    { "_Z7rsDebugPKcm", (void *)&SC_debugULL64 },
-    { "_Z7rsDebugPKcx", (void *)&SC_debugLL64 },
-    { "_Z7rsDebugPKcy", (void *)&SC_debugULL64 },
-    { "_Z7rsDebugPKcPKv", (void *)&SC_debugP },
+    { "_Z7rsDebugPKcl", (void *)&SC_debugLL64, true },
+    { "_Z7rsDebugPKcm", (void *)&SC_debugULL64, true },
+    { "_Z7rsDebugPKcx", (void *)&SC_debugLL64, true },
+    { "_Z7rsDebugPKcy", (void *)&SC_debugULL64, true },
+    { "_Z7rsDebugPKcPKv", (void *)&SC_debugP, true },
 
     // RS Math
-    { "_Z6rsRandi", (void *)&SC_randi },
-    { "_Z6rsRandii", (void *)&SC_randi2 },
-    { "_Z6rsRandf", (void *)&SC_randf },
-    { "_Z6rsRandff", (void *)&SC_randf2 },
-    { "_Z6rsFracf", (void *)&SC_frac },
+    { "_Z6rsRandi", (void *)&SC_randi, true },
+    { "_Z6rsRandii", (void *)&SC_randi2, true },
+    { "_Z6rsRandf", (void *)&SC_randf, true },
+    { "_Z6rsRandff", (void *)&SC_randf2, true },
+    { "_Z6rsFracf", (void *)&SC_frac, true },
 
     // time
-    { "_Z8rsSecondv", (void *)&SC_second },
-    { "_Z8rsMinutev", (void *)&SC_minute },
-    { "_Z6rsHourv", (void *)&SC_hour },
-    { "_Z5rsDayv", (void *)&SC_day },
-    { "_Z7rsMonthv", (void *)&SC_month },
-    { "_Z6rsYearv", (void *)&SC_year },
-    { "_Z14rsUptimeMillisv", (void*)&SC_uptimeMillis },
-    { "_Z13rsUptimeNanosv", (void*)&SC_uptimeNanos },
-    { "_Z7rsGetDtv", (void*)&SC_getDt },
+    { "_Z8rsSecondv", (void *)&SC_second, true },
+    { "_Z8rsMinutev", (void *)&SC_minute, true },
+    { "_Z6rsHourv", (void *)&SC_hour, true },
+    { "_Z5rsDayv", (void *)&SC_day, true },
+    { "_Z7rsMonthv", (void *)&SC_month, true },
+    { "_Z6rsYearv", (void *)&SC_year, true },
+    { "_Z14rsUptimeMillisv", (void*)&SC_uptimeMillis, true },
+    { "_Z13rsUptimeNanosv", (void*)&SC_uptimeNanos, true },
+    { "_Z7rsGetDtv", (void*)&SC_getDt, false },
 
-    { "_Z14rsSendToClienti", (void *)&SC_toClient },
-    { "_Z14rsSendToClientiPKvj", (void *)&SC_toClient2 },
-    { "_Z22rsSendToClientBlockingi", (void *)&SC_toClientBlocking },
-    { "_Z22rsSendToClientBlockingiPKvj", (void *)&SC_toClientBlocking2 },
+    { "_Z14rsSendToClienti", (void *)&SC_toClient, false },
+    { "_Z14rsSendToClientiPKvj", (void *)&SC_toClient2, false },
+    { "_Z22rsSendToClientBlockingi", (void *)&SC_toClientBlocking, false },
+    { "_Z22rsSendToClientBlockingiPKvj", (void *)&SC_toClientBlocking2, false },
 
-    { "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach },
-    //{ "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach2 },
+    { "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach, false },
+    //{ "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach2, true },
 
 ////////////////////////////////////////////////////////////////////
 
-    //{ "sinf_fast", (void *)&SC_sinf_fast },
-    //{ "cosf_fast", (void *)&SC_cosf_fast },
+    //{ "sinf_fast", (void *)&SC_sinf_fast, true },
+    //{ "cosf_fast", (void *)&SC_cosf_fast, true },
 
-    { NULL, NULL }
+    { NULL, NULL, false }
 };
 
 const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbol(const char *sym)

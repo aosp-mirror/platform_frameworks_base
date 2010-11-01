@@ -400,16 +400,14 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
     const ScriptCState::SymbolTable_t *sym;
     ScriptC *s = (ScriptC *)pContext;
     sym = ScriptCState::lookupSymbol(name);
-    if (sym) {
-        return sym->mPtr;
+    if (!sym) {
+        sym = ScriptCState::lookupSymbolCL(name);
     }
-    sym = ScriptCState::lookupSymbolCL(name);
-    if (sym) {
-        return sym->mPtr;
+    if (!sym) {
+        sym = ScriptCState::lookupSymbolGL(name);
     }
-    s->mEnviroment.mIsThreadable = false;
-    sym = ScriptCState::lookupSymbolGL(name);
     if (sym) {
+        s->mEnviroment.mIsThreadable &= sym->threadable;
         return sym->mPtr;
     }
     LOGE("ScriptC sym lookup failed for %s", name);
