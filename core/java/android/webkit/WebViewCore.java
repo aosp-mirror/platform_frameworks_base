@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
@@ -125,6 +126,9 @@ final class WebViewCore {
     private DeviceMotionService mDeviceMotionService;
     private DeviceOrientationService mDeviceOrientationService;
 
+    private int mLowMemoryUsageThresholdMb;
+    private int mHighMemoryUsageThresholdMb;
+
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
     /* package */ static final String THREAD_NAME = "WebViewCoreThread";
@@ -170,6 +174,23 @@ final class WebViewCore {
         WebStorage.getInstance().createUIHandler();
         // Create the UI handler for GeolocationPermissions
         GeolocationPermissions.getInstance().createUIHandler();
+
+        // Get the memory class of the current device. V8 will use these values
+        // to GC more effectively.
+        ActivityManager manager = (ActivityManager) mContext.getSystemService(
+                Context.ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+        manager.getMemoryInfo(memInfo);
+
+        // Allow us to use up to our memory class value before V8's GC kicks in.
+        // These values have been determined by experimentation.
+        mLowMemoryUsageThresholdMb = manager.getMemoryClass();
+        // If things get crazy, allow V8 to use up to 3 times our memory class, or a third of the
+        // device's total available memory, whichever is smaller. At that point V8 will start
+        // attempting more aggressive garbage collection.
+        mHighMemoryUsageThresholdMb = Math.min(mLowMemoryUsageThresholdMb * 3,
+                (int) (memInfo.availMem / 3) >> 20);
+
         // Send a message to initialize the WebViewCore.
         Message init = sWebCoreHandler.obtainMessage(
                 WebCoreThread.INITIALIZE, this);
