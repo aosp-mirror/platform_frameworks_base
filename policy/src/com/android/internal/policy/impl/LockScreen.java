@@ -209,7 +209,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 mSlidingTab.setRightHintText(mSilentMode ? R.string.lockscreen_sound_on_label
                         : R.string.lockscreen_sound_off_label);
             }
-            mCallback.pokeWakelock();
+            // Don't poke the wake lock when returning to a state where the handle is
+            // not grabbed since that can happen when the system (instead of the user)
+            // cancels the grab.
+            if (grabbedState != SlidingTab.OnTriggerListener.NO_HANDLE) {
+                mCallback.pokeWakelock();
+            }
         }
     }
 
@@ -231,10 +236,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
         /** {@inheritDoc} */
         public void onGrabbedStateChange(View v, int grabbedState) {
+            // Don't poke the wake lock when returning to a state where the handle is
+            // not grabbed since that can happen when the system (instead of the user)
+            // cancels the grab.
             if (grabbedState == WaveView.OnTriggerListener.CENTER_HANDLE) {
                 mCallback.pokeWakelock(STAY_ON_WHILE_GRABBED_TIMEOUT);
-            } else {
-                mCallback.pokeWakelock();
             }
         }
     }
