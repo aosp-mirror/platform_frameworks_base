@@ -937,28 +937,28 @@ public class WebView extends AbsoluteLayout
      * @param context A Context object used to access application assets.
      * @param attrs An AttributeSet passed to our parent.
      * @param defStyle The default style resource ID.
-     * @param javascriptInterfaces is a Map of interface names, as keys, and
+     * @param javaScriptInterfaces is a Map of interface names, as keys, and
      * object implementing those interfaces, as values.
      * @hide pending API council approval.
      */
     protected WebView(Context context, AttributeSet attrs, int defStyle,
-            Map<String, Object> javascriptInterfaces, boolean privateBrowsing) {
+            Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
         super(context, attrs, defStyle);
 
         // Used by the chrome stack to find application paths
         JniUtil.setContext(context);
 
         if (AccessibilityManager.getInstance(context).isEnabled()) {
-            if (javascriptInterfaces == null) {
-                javascriptInterfaces = new HashMap<String, Object>();
+            if (javaScriptInterfaces == null) {
+                javaScriptInterfaces = new HashMap<String, Object>();
             }
-            exposeAccessibilityJavaScriptApi(javascriptInterfaces);
+            exposeAccessibilityJavaScriptApi(javaScriptInterfaces);
         }
 
         mCallbackProxy = new CallbackProxy(context, this);
         mViewManager = new ViewManager(this);
         L10nUtils.loadStrings(context);
-        mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javascriptInterfaces);
+        mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javaScriptInterfaces);
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new OverScroller(context, null, 0, 0, false); //TODO Use OverScroller's flywheel
         mZoomManager = new ZoomManager(this, mCallbackProxy);
@@ -1105,10 +1105,10 @@ public class WebView extends AbsoluteLayout
      * interfaces map provided by the WebView client. In case of conflicting
      * alias with the one of the accessibility API the user specified one wins.
      *
-     * @param javascriptInterfaces A map with interfaces to be exposed to JavaScript.
+     * @param javaScriptInterfaces A map with interfaces to be exposed to JavaScript.
      */
-    private void exposeAccessibilityJavaScriptApi(Map<String, Object> javascriptInterfaces) {
-        if (javascriptInterfaces.containsKey(ALIAS_ACCESSIBILITY_JS_INTERFACE)) {
+    private void exposeAccessibilityJavaScriptApi(Map<String, Object> javaScriptInterfaces) {
+        if (javaScriptInterfaces.containsKey(ALIAS_ACCESSIBILITY_JS_INTERFACE)) {
             Log.w(LOGTAG, "JavaScript interface mapped to \"" + ALIAS_ACCESSIBILITY_JS_INTERFACE
                     + "\" overrides the accessibility API JavaScript interface. No accessibility"
                     + "API will be exposed to JavaScript!");
@@ -1116,7 +1116,7 @@ public class WebView extends AbsoluteLayout
         }
 
         // expose the TTS for now ...
-        javascriptInterfaces.put(ALIAS_ACCESSIBILITY_JS_INTERFACE,
+        javaScriptInterfaces.put(ALIAS_ACCESSIBILITY_JS_INTERFACE,
                 new TextToSpeech(getContext(), null));
     }
 
@@ -1394,7 +1394,7 @@ public class WebView extends AbsoluteLayout
             mPrivateHandler.removeCallbacksAndMessages(null);
             mCallbackProxy.removeCallbacksAndMessages(null);
             // Wake up the WebCore thread just in case it is waiting for a
-            // javascript dialog.
+            // JavaScript dialog.
             synchronized (mCallbackProxy) {
                 mCallbackProxy.notify();
             }
@@ -1433,7 +1433,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Inform WebView of the network state. This is used to set
-     * the javascript property window.navigator.isOnline and
+     * the JavaScript property window.navigator.isOnline and
      * generates the online/offline event as specified in HTML5, sec. 5.7.7
      * @param networkUp boolean indicating if network is available
      */
@@ -2100,9 +2100,9 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Return a HitTestResult based on the current cursor node. If a HTML::a tag
-     * is found and the anchor has a non-javascript url, the HitTestResult type
+     * is found and the anchor has a non-JavaScript url, the HitTestResult type
      * is set to SRC_ANCHOR_TYPE and the url is set in the "extra" field. If the
-     * anchor does not have a url or if it is a javascript url, the type will
+     * anchor does not have a url or if it is a JavaScript url, the type will
      * be UNKNOWN_TYPE and the url has to be retrieved through
      * {@link #requestFocusNodeHref} asynchronously. If a HTML::img tag is
      * found, the HitTestResult type is set to IMAGE_TYPE and the url is set in
@@ -2757,7 +2757,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Pause all layout, parsing, and javascript timers for all webviews. This
+     * Pause all layout, parsing, and JavaScript timers for all webviews. This
      * is a global requests, not restricted to just this webview. This can be
      * useful if the application has been paused.
      */
@@ -2766,7 +2766,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Resume all layout, parsing, and javascript timers for all webviews.
+     * Resume all layout, parsing, and JavaScript timers for all webviews.
      * This will resume dispatching all timers.
      */
     public void resumeTimers() {
@@ -2774,13 +2774,12 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Call this to pause any extra processing associated with this view and
-     * its associated DOM/plugins/javascript/etc. For example, if the view is
-     * taken offscreen, this could be called to reduce unnecessary CPU and/or
-     * network traffic. When the view is again "active", call onResume().
+     * Call this to pause any extra processing associated with this WebView and
+     * its associated DOM, plugins, JavaScript etc. For example, if the WebView
+     * is taken offscreen, this could be called to reduce unnecessary CPU or
+     * network traffic. When the WebView is again "active", call onResume().
      *
-     * Note that this differs from pauseTimers(), which affects all views/DOMs
-     * @hide
+     * Note that this differs from pauseTimers(), which affects all WebViews.
      */
     public void onPause() {
         if (!mIsPaused) {
@@ -2790,8 +2789,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Call this to balanace a previous call to onPause()
-     * @hide
+     * Call this to resume a WebView after a previous call to onPause().
      */
     public void onResume() {
         if (mIsPaused) {
@@ -3443,7 +3441,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Set the chrome handler. This is an implementation of WebChromeClient for
-     * use in handling Javascript dialogs, favicons, titles, and the progress.
+     * use in handling JavaScript dialogs, favicons, titles, and the progress.
      * This will replace the current handler.
      * @param client An implementation of WebChromeClient.
      */
@@ -3506,8 +3504,8 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Use this function to bind an object to Javascript so that the
-     * methods can be accessed from Javascript.
+     * Use this function to bind an object to JavaScript so that the
+     * methods can be accessed from JavaScript.
      * <p><strong>IMPORTANT:</strong>
      * <ul>
      * <li> Using addJavascriptInterface() allows JavaScript to control your
@@ -3521,7 +3519,7 @@ public class WebView extends AbsoluteLayout
      * <li> The Java object that is bound runs in another thread and not in
      * the thread that it was constructed in.</li>
      * </ul></p>
-     * @param obj The class instance to bind to Javascript, null instances are
+     * @param obj The class instance to bind to JavaScript, null instances are
      *            ignored.
      * @param interfaceName The name to used to expose the instance in
      *                      JavaScript.
