@@ -6298,7 +6298,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             }
             final AttachInfo ai = mAttachInfo;
             final ViewParent p = mParent;
-            if (ai != null && ai.mHardwareAccelerated) {
+            if (p != null && ai != null && ai.mHardwareAccelerated) {
                 // fast-track for GL-enabled applications; just invalidate the whole hierarchy
                 // with a null dirty rect, which tells the ViewRoot to redraw everything
                 p.invalidateChild(this, null);
