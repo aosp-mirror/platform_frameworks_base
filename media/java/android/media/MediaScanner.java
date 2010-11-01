@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.IContentProvider;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.drm.DrmManagerClient;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Process;
@@ -360,6 +361,7 @@ public class MediaScanner
     private ArrayList<FileCacheEntry> mPlayLists;
     private HashMap<String, Uri> mGenreCache;
 
+    private DrmManagerClient mDrmManagerClient = null;
 
     public MediaScanner(Context c) {
         native_setup();
@@ -445,6 +447,11 @@ public class MediaScanner
                     mFileType = mediaFileType.fileType;
                     mMimeType = mediaFileType.mimeType;
                 }
+            }
+
+            if (System.getProperty("drm.service.enabled").equals("true")
+                    && MediaFile.isDrmFileType(mFileType)) {
+                mFileType = getFileTypeFromDrm(path);
             }
 
             String key = path;
@@ -872,6 +879,27 @@ public class MediaScanner
             } catch (RemoteException e) {
                 throw new RuntimeException();
             }
+        }
+
+        private int getFileTypeFromDrm(String path) {
+            if (!System.getProperty("drm.service.enabled").equals("true")) {
+                return 0;
+            }
+
+            int resultFileType = 0;
+
+            if (mDrmManagerClient == null) {
+                mDrmManagerClient = new DrmManagerClient(mContext);
+            }
+
+            if (mDrmManagerClient.canHandle(path, null)) {
+                String drmMimetype = mDrmManagerClient.getOriginalMimeType(path);
+                if (drmMimetype != null) {
+                    mMimeType = drmMimetype;
+                    resultFileType = MediaFile.getFileTypeForMimeType(drmMimetype);
+                }
+            }
+            return resultFileType;
         }
 
     }; // end of anonymous MediaScannerClient instance
