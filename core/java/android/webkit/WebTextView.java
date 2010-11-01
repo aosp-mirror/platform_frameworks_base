@@ -334,6 +334,10 @@ import java.util.ArrayList;
         }
     }
 
+    public void onDrawSubstitute() {
+      updateCursorControllerPositions();
+    }
+
     @Override
     public void onEditorAction(int actionCode) {
         switch (actionCode) {
