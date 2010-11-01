@@ -61,6 +61,7 @@ import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.PhoneSubInfo;
+import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.UUSInfo;
@@ -82,10 +83,6 @@ import java.util.regex.Pattern;
 public class CDMAPhone extends PhoneBase {
     static final String LOG_TAG = "CDMA";
     private static final boolean DBG = true;
-
-    // Min values used to by needsActivation
-    private static final String UNACTIVATED_MIN2_VALUE = "000000";
-    private static final String UNACTIVATED_MIN_VALUE = "1111110111";
 
     // Default Emergency Callback Mode exit timer
     private static final int DEFAULT_ECM_EXIT_TIMER_VALUE = 300000;
@@ -1170,19 +1167,7 @@ public class CDMAPhone extends PhoneBase {
      */
     @Override
     public boolean needsOtaServiceProvisioning() {
-        String cdmaMin = getCdmaMin();
-        boolean needsProvisioning;
-        if (cdmaMin == null || (cdmaMin.length() < 6)) {
-            if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: illegal cdmaMin='"
-                                    + cdmaMin + "' assume provisioning needed.");
-            needsProvisioning = true;
-        } else {
-            needsProvisioning = (cdmaMin.equals(UNACTIVATED_MIN_VALUE)
-                    || cdmaMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
-                    || SystemProperties.getBoolean("test_cdma_setup", false);
-        }
-        if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: ret=" + needsProvisioning);
-        return needsProvisioning;
+        return mSST.getOtasp() != ServiceStateTracker.OTASP_NOT_NEEDED;
     }
 
     private static final String IS683A_FEATURE_CODE = "*228";

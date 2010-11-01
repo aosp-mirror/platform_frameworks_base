@@ -148,6 +148,14 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
         }
     }
 
+    public void notifyOtaspChanged(Phone sender, int otaspMode) {
+        try {
+            mRegistry.notifyOtaspChanged(otaspMode);
+        } catch (RemoteException ex) {
+            // system process is dead
+        }
+    }
+
     private void log(String s) {
         Log.d(LOG_TAG, "[PhoneNotifier] " + s);
     }

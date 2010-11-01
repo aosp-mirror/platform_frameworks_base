@@ -38,4 +38,5 @@ interface ITelephonyRegistry {
             in LinkCapabilities linkCapabilities, int networkType);
     void notifyDataConnectionFailed(String reason, String apnType);
     void notifyCellLocation(in Bundle cellLocation);
+    void notifyOtaspChanged(in int otaspMode);
 }

@@ -53,6 +53,12 @@ public abstract class ServiceStateTracker extends Handler {
 
     public SignalStrength mSignalStrength;
 
+    /* The otaspMode passed to PhoneStateListener#onOtaspChanged */
+    static public final int OTASP_UNINITIALIZED = 0;
+    static public final int OTASP_UNKNOWN = 1;
+    static public final int OTASP_NEEDED = 2;
+    static public final int OTASP_NOT_NEEDED = 3;
+
     /**
      * A unique identifier to track requests associated with a poll
      * and ignore stale responses.  The value is a count-down of
@@ -268,9 +274,11 @@ public abstract class ServiceStateTracker extends Handler {
 
     public abstract void handleMessage(Message msg);
 
+    protected abstract Phone getPhone();
     protected abstract void handlePollStateResult(int what, AsyncResult ar);
     protected abstract void updateSpnDisplay();
     protected abstract void setPowerStateToDesired();
+    protected abstract void log(String s);
 
     /**
      * Clean up existing voice and data connection then turn off radio power.

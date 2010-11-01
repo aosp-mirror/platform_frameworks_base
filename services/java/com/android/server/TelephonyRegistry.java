@@ -103,6 +103,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mDataConnectionNetworkType;
 
+    private int mOtaspMode;
+
     static final int PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
                 PhoneStateListener.LISTEN_CALL_STATE |
@@ -221,6 +223,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
                         try {
                             r.callback.onSignalStrengthsChanged(mSignalStrength);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_OTASP_CHANGED) != 0) {
+                        try {
+                            r.callback.onOtaspChanged(mOtaspMode);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -461,6 +470,25 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         mRemoveList.add(r.binder);
                     }
 
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    public void notifyOtaspChanged(int otaspMode) {
+        if (!checkNotifyPermission("notifyOtaspChanged()" )) {
+            return;
+        }
+        synchronized (mRecords) {
+            mOtaspMode = otaspMode;
+            for (Record r : mRecords) {
+                if ((r.events & PhoneStateListener.LISTEN_OTASP_CHANGED) != 0) {
+                    try {
+                        r.callback.onOtaspChanged(otaspMode);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
                 }
             }
             handleRemoveListLocked();

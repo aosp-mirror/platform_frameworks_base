@@ -22,6 +22,7 @@ import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.MccTable;
+import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
@@ -64,6 +65,13 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     CDMAPhone phone;
     CdmaCellLocation cellLoc;
     CdmaCellLocation newCellLoc;
+
+    // Min values used to by getOtasp()
+    private static final String UNACTIVATED_MIN2_VALUE = "000000";
+    private static final String UNACTIVATED_MIN_VALUE = "1111110111";
+
+    // Current Otasp value
+    int mCurrentOtaspMode = OTASP_UNINITIALIZED;
 
      /** if time between NITZ updates is less than mNitzUpdateSpacing the update may be ignored. */
     private static final int NITZ_UPDATE_SPACING_DEFAULT = 1000 * 60 * 10;
@@ -446,6 +454,13 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     if (!mIsMinInfoReady) {
                         mIsMinInfoReady = true;
                     }
+                    int otaspMode = getOtasp();
+                    if (mCurrentOtaspMode != otaspMode) {
+                        Log.d(LOG_TAG, "call phone.notifyOtaspChanged old otaspMode=" +
+                                mCurrentOtaspMode + " new otaspMode=" + otaspMode);
+                        mCurrentOtaspMode = otaspMode;
+                        phone.notifyOtaspChanged(mCurrentOtaspMode);
+                    }
                     phone.getIccCard().broadcastIccStateChangedIntent(IccCard.INTENT_VALUE_ICC_IMSI,
                             null);
                 } else {
@@ -640,6 +655,11 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         curSpnRule = rule;
         curSpn = spn;
         curPlmn = plmn;
+    }
+
+    @Override
+    protected Phone getPhone() {
+        return phone;
     }
 
     /**
@@ -1641,10 +1661,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         return false;
     }
 
-    protected void log(String s) {
-        Log.d(LOG_TAG, "[CdmaServiceStateTracker] " + s);
-    }
-
     public String getMdnNumber() {
         return mMdn;
     }
@@ -1698,6 +1714,32 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             }
             return false;
         }
+    }
+
+    /**
+     * Returns OTASP_UNKNOWN, OTASP_NEEDED or OTASP_NOT_NEEDED
+     */
+    int getOtasp() {
+        int provisioningState;
+        if (mMin == null || (mMin.length() < 6)) {
+            if (DBG) Log.d(LOG_TAG, "getOtasp: bad mMin='" + mMin + "'");
+            provisioningState = OTASP_UNKNOWN;
+        } else {
+            if ((mMin.equals(UNACTIVATED_MIN_VALUE)
+                    || mMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
+                    || SystemProperties.getBoolean("test_cdma_setup", false)) {
+                provisioningState = OTASP_NEEDED;
+            } else {
+                provisioningState = OTASP_NOT_NEEDED;
+            }
+        }
+        if (DBG) Log.d(LOG_TAG, "getOtasp: state=" + provisioningState);
+        return provisioningState;
+    }
+
+    @Override
+    protected void log(String s) {
+        Log.d(LOG_TAG, "[CdmaServiceStateTracker] " + s);
     }
 
     private void hangupAndPowerOff() {

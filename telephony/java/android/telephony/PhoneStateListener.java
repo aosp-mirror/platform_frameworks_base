@@ -148,6 +148,14 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
 
+    /**
+     * Listen for changes to OTASP mode.
+     *
+     * @see #onOtaspChanged
+     * @hide
+     */
+    public static final int LISTEN_OTASP_CHANGED                            = 0x00000200;
+
     public PhoneStateListener() {
     }
 
@@ -252,6 +260,21 @@ public class PhoneStateListener {
         // default implementation empty
     }
 
+
+    /**
+     * The Over The Air Service Provisioning (OTASP) has changed. Requires
+     * the READ_PHONE_STATE permission.
+     * @param otaspMode is integer <code>OTASP_UNKNOWN=1<code>
+     *   means the value is currently unknown and the system should wait until
+     *   <code>OTASP_NEEDED=2<code> or <code>OTASP_NOT_NEEDED=3<code> is received before
+     *   making the decisision to perform OTASP or not.
+     *
+     * @hide
+     */
+    public void onOtaspChanged(int otaspMode) {
+        // default implementation empty
+    }
+
     /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
@@ -292,8 +315,13 @@ public class PhoneStateListener {
         public void onDataActivity(int direction) {
             Message.obtain(mHandler, LISTEN_DATA_ACTIVITY, direction, 0, null).sendToTarget();
         }
+
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
             Message.obtain(mHandler, LISTEN_SIGNAL_STRENGTHS, 0, 0, signalStrength).sendToTarget();
+        }
+
+        public void onOtaspChanged(int otaspMode) {
+            Message.obtain(mHandler, LISTEN_OTASP_CHANGED, otaspMode, 0).sendToTarget();
         }
     };
 
@@ -328,6 +356,9 @@ public class PhoneStateListener {
                     break;
                 case LISTEN_SIGNAL_STRENGTHS:
                     PhoneStateListener.this.onSignalStrengthsChanged((SignalStrength)msg.obj);
+                    break;
+                case LISTEN_OTASP_CHANGED:
+                    PhoneStateListener.this.onOtaspChanged(msg.arg1);
                     break;
             }
         }
