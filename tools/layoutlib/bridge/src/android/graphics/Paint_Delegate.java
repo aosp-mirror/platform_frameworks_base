@@ -20,7 +20,9 @@ import com.android.layoutlib.bridge.DelegateManager;
 
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.FontMetricsInt;
+import android.text.TextUtils;
 
+import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
@@ -47,7 +49,7 @@ public class Paint_Delegate {
     /**
      * Class associating a {@link Font} and it's {@link java.awt.FontMetrics}.
      */
-    public static final class FontInfo {
+    /*package*/ static final class FontInfo {
         Font mFont;
         java.awt.FontMetrics mMetrics;
     }
@@ -67,7 +69,7 @@ public class Paint_Delegate {
     private int mStyle;
     private int mCap;
     private int mJoin;
-    private int mAlign;
+    private int mTextAlign;
     private int mTypeface;
     private float mStrokeWidth;
     private float mStrokeMiter;
@@ -78,6 +80,10 @@ public class Paint_Delegate {
 
     // ---- Public Helper methods ----
 
+    public static Paint_Delegate getDelegate(int native_paint) {
+        return sManager.getDelegate(native_paint);
+    }
+
     /**
      * Returns the list of {@link Font} objects. The first item is the main font, the rest
      * are fall backs for characters not present in the main font.
@@ -86,6 +92,57 @@ public class Paint_Delegate {
         return mFonts;
     }
 
+    public boolean isFilterBitmap() {
+        return (mFlags & Paint.FILTER_BITMAP_FLAG) != 0;
+    }
+
+    public int getStyle() {
+        return mStyle;
+    }
+
+    public int getColor() {
+        return mColor;
+    }
+
+    public int getAlpha() {
+        return mColor >>> 24;
+    }
+
+    public int getTextAlign() {
+        return mTextAlign;
+    }
+
+    public float getStrokeWidth() {
+        return mStrokeWidth;
+    }
+
+    public float getStrokeMiter() {
+        return mStrokeMiter;
+    }
+
+    public int getJavaCap() {
+        switch (Paint.sCapArray[mCap]) {
+            case BUTT:
+                return BasicStroke.CAP_BUTT;
+            case ROUND:
+                return BasicStroke.CAP_ROUND;
+            default:
+            case SQUARE:
+                return BasicStroke.CAP_SQUARE;
+        }
+    }
+
+    public int getJavaJoin() {
+        switch (Paint.sJoinArray[mJoin]) {
+            default:
+            case MITER:
+                return BasicStroke.JOIN_MITER;
+            case ROUND:
+                return BasicStroke.JOIN_ROUND;
+            case BEVEL:
+                return BasicStroke.JOIN_BEVEL;
+        }
+    }
 
     // ---- native methods ----
 
@@ -112,8 +169,7 @@ public class Paint_Delegate {
     }
 
     /*package*/ static void setFilterBitmap(Paint thisPaint, boolean filter) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        setFlag(thisPaint, Paint.FILTER_BITMAP_FLAG, filter);
     }
 
     /*package*/ static void setAntiAlias(Paint thisPaint, boolean aa) {
@@ -174,7 +230,7 @@ public class Paint_Delegate {
             return 0;
         }
 
-        return delegate.mColor >>> 24;
+        return delegate.getAlpha();
     }
 
     /*package*/ static void setAlpha(Paint thisPaint, int a) {
@@ -315,13 +371,53 @@ public class Paint_Delegate {
     }
 
     /*package*/ static float getFontMetrics(Paint thisPaint, FontMetrics metrics) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        if (delegate == null) {
+            assert false;
+            return 0;
+        }
+
+        if (delegate.mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = delegate.mFonts.get(0).mMetrics;
+            if (metrics != null) {
+                // Android expects negative ascent so we invert the value from Java.
+                metrics.top = - javaMetrics.getMaxAscent();
+                metrics.ascent = - javaMetrics.getAscent();
+                metrics.descent = javaMetrics.getDescent();
+                metrics.bottom = javaMetrics.getMaxDescent();
+                metrics.leading = javaMetrics.getLeading();
+            }
+
+            return javaMetrics.getHeight();
+        }
+
+        return 0;
     }
 
     /*package*/ static int getFontMetricsInt(Paint thisPaint, FontMetricsInt fmi) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        if (delegate == null) {
+            assert false;
+            return 0;
+        }
+
+        if (delegate.mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = delegate.mFonts.get(0).mMetrics;
+            if (fmi != null) {
+                // Android expects negative ascent so we invert the value from Java.
+                fmi.top = - javaMetrics.getMaxAscent();
+                fmi.ascent = - javaMetrics.getAscent();
+                fmi.descent = javaMetrics.getDescent();
+                fmi.bottom = javaMetrics.getMaxDescent();
+                fmi.leading = javaMetrics.getLeading();
+            }
+
+            return javaMetrics.getHeight();
+        }
+
+        return 0;
     }
 
     /*package*/ static float native_measureText(Paint thisPaint, char[] text, int index,
@@ -336,56 +432,7 @@ public class Paint_Delegate {
             return 0;
         }
 
-        if (delegate.mFonts.size() > 0) {
-            FontInfo mainFont = delegate.mFonts.get(0);
-            int i = index;
-            int lastIndex = index + count;
-            float total = 0f;
-            while (i < lastIndex) {
-                // always start with the main font.
-                int upTo = mainFont.mFont.canDisplayUpTo(text, i, lastIndex);
-                if (upTo == -1) {
-                    // shortcut to exit
-                    return total + mainFont.mMetrics.charsWidth(text, i, lastIndex - i);
-                } else if (upTo > 0) {
-                    total += mainFont.mMetrics.charsWidth(text, i, upTo - i);
-                    i = upTo;
-                    // don't call continue at this point. Since it is certain the main font
-                    // cannot display the font a index upTo (now ==i), we move on to the
-                    // fallback fonts directly.
-                }
-
-                // no char supported, attempt to read the next char(s) with the
-                // fallback font. In this case we only test the first character
-                // and then go back to test with the main font.
-                // Special test for 2-char characters.
-                boolean foundFont = false;
-                for (int f = 1 ; f < delegate.mFonts.size() ; f++) {
-                    FontInfo fontInfo = delegate.mFonts.get(f);
-
-                    // need to check that the font can display the character. We test
-                    // differently if the char is a high surrogate.
-                    int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
-                    upTo = fontInfo.mFont.canDisplayUpTo(text, i, i + charCount);
-                    if (upTo == -1) {
-                        total += fontInfo.mMetrics.charsWidth(text, i, charCount);
-                        i += charCount;
-                        foundFont = true;
-                        break;
-
-                    }
-                }
-
-                // in case no font can display the char, measure it with the main font.
-                if (foundFont == false) {
-                    int size = Character.isHighSurrogate(text[i]) ? 2 : 1;
-                    total += mainFont.mMetrics.charsWidth(text, i, size);
-                    i += size;
-                }
-            }
-        }
-
-        return 0;
+        return delegate.measureText(text, index, count);
     }
 
     /*package*/ static float native_measureText(Paint thisPaint, String text, int start, int end) {
@@ -576,7 +623,7 @@ public class Paint_Delegate {
             return 0;
         }
 
-        return delegate.mAlign;
+        return delegate.mTextAlign;
     }
 
     /*package*/ static void native_setTextAlign(int native_object, int align) {
@@ -587,7 +634,7 @@ public class Paint_Delegate {
             return;
         }
 
-        delegate.mAlign = align;
+        delegate.mTextAlign = align;
     }
 
     /*package*/ static float native_getFontMetrics(int native_paint, FontMetrics metrics) {
@@ -610,15 +657,58 @@ public class Paint_Delegate {
     /*package*/ static float native_getTextRunAdvances(int native_object,
             char[] text, int index, int count, int contextIndex, int contextCount,
             int flags, float[] advances, int advancesIndex) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            assert false;
+            return 0.f;
+        }
+
+        if (delegate.mFonts.size() > 0) {
+            // FIXME: handle multi-char characters.
+            // see measureText.
+            float totalAdvance = 0;
+            for (int i = 0; i < count; i++) {
+                char c = text[i + index];
+                boolean found = false;
+                for (FontInfo info : delegate.mFonts) {
+                    if (info.mFont.canDisplay(c)) {
+                        float adv = info.mMetrics.charWidth(c);
+                        totalAdvance += adv;
+                        if (advances != null) {
+                            advances[i] = adv;
+                        }
+
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found == false) {
+                    // no advance for this char.
+                    if (advances != null) {
+                        advances[i] = 0.f;
+                    }
+                }
+            }
+
+            return totalAdvance;
+        }
+
+        return 0;
+
     }
 
     /*package*/ static float native_getTextRunAdvances(int native_object,
             String text, int start, int end, int contextStart, int contextEnd,
             int flags, float[] advances, int advancesIndex) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // FIXME: support contextStart, contextEnd and direction flag
+        int count = end - start;
+        char[] buffer = TemporaryBuffer.obtain(count);
+        TextUtils.getChars(text, start, end, buffer, 0);
+
+        return native_getTextRunAdvances(native_object, buffer, 0, count, contextStart,
+                contextEnd - contextStart, flags, advances, advancesIndex);
     }
 
     /*package*/ static int native_getTextRunCursor(Paint thisPaint, int native_object, char[] text,
@@ -681,7 +771,7 @@ public class Paint_Delegate {
         mStyle = paint.mStyle;
         mCap = paint.mCap;
         mJoin = paint.mJoin;
-        mAlign = paint.mAlign;
+        mTextAlign = paint.mTextAlign;
         mTypeface = paint.mTypeface;
         mStrokeWidth = paint.mStrokeWidth;
         mStrokeMiter = paint.mStrokeMiter;
@@ -696,7 +786,7 @@ public class Paint_Delegate {
         mStyle = 0;
         mCap = 0;
         mJoin = 0;
-        mAlign = 0;
+        mTextAlign = 0;
         mTypeface = 0;
         mStrokeWidth = 1.f;
         mStrokeMiter = 2.f;
@@ -732,6 +822,61 @@ public class Paint_Delegate {
             mFonts = Collections.unmodifiableList(infoList);
         }
     }
+
+    /*package*/ float measureText(char[] text, int index, int count) {
+        if (mFonts.size() > 0) {
+            FontInfo mainFont = mFonts.get(0);
+            int i = index;
+            int lastIndex = index + count;
+            float total = 0f;
+            while (i < lastIndex) {
+                // always start with the main font.
+                int upTo = mainFont.mFont.canDisplayUpTo(text, i, lastIndex);
+                if (upTo == -1) {
+                    // shortcut to exit
+                    return total + mainFont.mMetrics.charsWidth(text, i, lastIndex - i);
+                } else if (upTo > 0) {
+                    total += mainFont.mMetrics.charsWidth(text, i, upTo - i);
+                    i = upTo;
+                    // don't call continue at this point. Since it is certain the main font
+                    // cannot display the font a index upTo (now ==i), we move on to the
+                    // fallback fonts directly.
+                }
+
+                // no char supported, attempt to read the next char(s) with the
+                // fallback font. In this case we only test the first character
+                // and then go back to test with the main font.
+                // Special test for 2-char characters.
+                boolean foundFont = false;
+                for (int f = 1 ; f < mFonts.size() ; f++) {
+                    FontInfo fontInfo = mFonts.get(f);
+
+                    // need to check that the font can display the character. We test
+                    // differently if the char is a high surrogate.
+                    int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
+                    upTo = fontInfo.mFont.canDisplayUpTo(text, i, i + charCount);
+                    if (upTo == -1) {
+                        total += fontInfo.mMetrics.charsWidth(text, i, charCount);
+                        i += charCount;
+                        foundFont = true;
+                        break;
+
+                    }
+                }
+
+                // in case no font can display the char, measure it with the main font.
+                if (foundFont == false) {
+                    int size = Character.isHighSurrogate(text[i]) ? 2 : 1;
+                    total += mainFont.mMetrics.charsWidth(text, i, size);
+                    i += size;
+                }
+            }
+        }
+
+        return 0;
+
+    }
+
 
     private static void setFlag(Paint thisPaint, int flagMask, boolean flagValue) {
         // get the delegate from the native int.
