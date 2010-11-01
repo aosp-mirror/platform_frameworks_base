@@ -385,11 +385,23 @@ public class BluetoothService extends IBluetooth.Stub {
         // Allow 3 seconds for profiles to gracefully disconnect
         // TODO: Introduce a callback mechanism so that each profile can notify
         // BluetoothService when it is done shutting down
+        disconnectDevices();
+
         mHandler.sendMessageDelayed(
                 mHandler.obtainMessage(MESSAGE_FINISH_DISABLE, saveSetting ? 1 : 0, 0), 3000);
         return true;
     }
 
+    private synchronized void disconnectDevices() {
+        // Disconnect devices handled by BluetoothService.
+        for (BluetoothDevice device: getConnectedInputDevices()) {
+            disconnectInputDevice(device);
+        }
+
+        for (BluetoothDevice device: getConnectedPanDevices()) {
+            disconnectPanDevice(device);
+        }
+    }
 
     private synchronized void finishDisable(boolean saveSetting) {
         if (mBluetoothState != BluetoothAdapter.STATE_TURNING_OFF) {
