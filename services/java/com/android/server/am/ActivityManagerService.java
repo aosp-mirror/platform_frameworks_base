@@ -959,6 +959,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int CANCEL_HEAVY_NOTIFICATION_MSG = 25;
     static final int SHOW_STRICT_MODE_VIOLATION_MSG = 26;
     static final int CHECK_EXCESSIVE_WAKE_LOCKS_MSG = 27;
+    static final int CLEAR_DNS_CACHE = 28;
 
     AlertDialog mUidAlert;
 
@@ -1105,6 +1106,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 r.thread.updateTimeZone();
                             } catch (RemoteException ex) {
                                 Slog.w(TAG, "Failed to update time zone for: " + r.info.processName);
+                            }
+                        }
+                    }
+                }
+            } break;
+            case CLEAR_DNS_CACHE: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+                        ProcessRecord r = mLruProcesses.get(i);
+                        if (r.thread != null) {
+                            try {
+                                r.thread.clearDnsCache();
+                            } catch (RemoteException ex) {
+                                Slog.w(TAG, "Failed to clear dns cache for: " + r.info.processName);
                             }
                         }
                     }
@@ -10371,6 +10386,10 @@ public final class ActivityManagerService extends ActivityManagerNative
          */
         if (intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
             mHandler.sendEmptyMessage(UPDATE_TIME_ZONE);
+        }
+
+        if (intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
+            mHandler.sendEmptyMessage(CLEAR_DNS_CACHE);
         }
 
         /*
