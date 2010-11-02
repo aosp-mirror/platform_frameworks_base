@@ -51,8 +51,8 @@
 
 namespace android {
 
-// Delay between reporting long touch events to the power manager.
-const nsecs_t EVENT_IGNORE_DURATION = 300 * 1000000LL; // 300 ms
+// Delay before reporting long touch events to the power manager.
+const nsecs_t LONG_TOUCH_DELAY = 300 * 1000000LL; // 300 ms
 
 // Default input dispatching timeout if there is no focused application or paused window
 // from which to determine an appropriate dispatching timeout.
@@ -1424,7 +1424,7 @@ void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
                 eventType = POWER_MANAGER_TOUCH_UP_EVENT;
                 break;
             default:
-                if (motionEntry->eventTime - motionEntry->downTime >= EVENT_IGNORE_DURATION) {
+                if (motionEntry->eventTime - motionEntry->downTime < LONG_TOUCH_DELAY) {
                     eventType = POWER_MANAGER_TOUCH_EVENT;
                 } else {
                     eventType = POWER_MANAGER_LONG_TOUCH_EVENT;
