@@ -20,8 +20,6 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
 
-import java.util.Map;
-
 /**
  * This interface provides random read-write access to the result set returned
  * by a database query.
@@ -344,7 +342,10 @@ public interface Cursor {
      *
      * @return true if the requery succeeded, false if not, in which case the
      *         cursor becomes invalid.
+     * @deprecated Don't use this. Just request a new cursor, so you can do this
+     * asynchronously and update your list view once the new cursor comes back.
      */
+    @Deprecated
     boolean requery();
 
     /**

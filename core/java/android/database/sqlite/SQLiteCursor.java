@@ -16,13 +16,10 @@
 
 package android.database.sqlite;
 
-import android.app.ActivityThread;
 import android.database.AbstractWindowedCursor;
 import android.database.CursorWindow;
 import android.database.DataSetObserver;
-import android.database.RequeryOnUiThreadException;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.StrictMode;
@@ -75,11 +72,6 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     private ReentrantLock mLock = null;
     private boolean mPendingData = false;
 
-    /**
-     * Used by {@link #requery()} to remember for which database we've already shown the warning.
-     */
-    private static final HashMap<String, Boolean> sAlreadyWarned = new HashMap<String, Boolean>();
-    
     /**
      *  support for a cursor variant that doesn't always read all results
      *  initialRead is the initial number of items that cursor window reads 
@@ -401,35 +393,11 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         }
     }
 
-    /**
-     * Show a warning against the use of requery() if called on the main thread.
-     * This warning is shown per database per process.
-     */
-    private void warnIfUiThread() {
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            String databasePath = getQuery().mDatabase.getPath();
-            // We show the warning once per database in order not to spam logcat.
-            if (!sAlreadyWarned.containsKey(databasePath)) {
-                sAlreadyWarned.put(databasePath, true);
-                String packageName = ActivityThread.currentPackageName();
-                Throwable t = null;
-                // BEGIN STOPSHIP remove the following line
-                t = new RequeryOnUiThreadException(packageName);
-                // END STOPSHIP
-                String s = packageName == null ? "'unknown'" : packageName;
-                Log.w(TAG, "should not attempt requery on main (UI) thread: app = " + s +
-                        " (database: " + mQuery.mDatabase.getPath() +
-                        ", query: " + mQuery.mSql + ")", t);
-            }
-        }
-    }
-
     @Override
     public boolean requery() {
         if (isClosed()) {
             return false;
         }
-        warnIfUiThread();
         long timeStart = 0;
         if (Config.LOGV) {
             timeStart = System.currentTimeMillis();
