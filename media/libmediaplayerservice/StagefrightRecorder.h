@@ -103,6 +103,7 @@ private:
     String8 mParams;
     int mOutputFd, mOutputFdAux;
 
+    bool mIsMetaDataStoredInVideoBuffers;
     MediaProfiles *mEncoderProfiles;
 
     status_t setupMPEG4Recording(

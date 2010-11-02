@@ -1035,7 +1035,8 @@ void StagefrightRecorder::clipVideoFrameHeight() {
     }
 }
 
-status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) {
+status_t StagefrightRecorder::setupCameraSource(
+        sp<CameraSource> *cameraSource) {
     status_t err = OK;
     if ((err = checkVideoEncoderCapabilities()) != OK) {
         return err;
@@ -1051,7 +1052,8 @@ status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) 
         *cameraSource = mCameraSourceTimeLapse;
     } else {
         *cameraSource = CameraSource::CreateFromCamera(
-                mCamera, mCameraId, videoSize, mFrameRate, mPreviewSurface);
+                mCamera, mCameraId, videoSize, mFrameRate,
+                mPreviewSurface, true /*storeMetaDataInVideoBuffers*/);
     }
     CHECK(*cameraSource != NULL);
 
@@ -1067,6 +1069,10 @@ status_t StagefrightRecorder::setupCameraSource(sp<CameraSource> *cameraSource) 
     }
 
     CHECK(mFrameRate != -1);
+
+    mIsMetaDataStoredInVideoBuffers =
+        (*cameraSource)->isMetaDataStoredInVideoBuffers();
+
     return OK;
 }
 
@@ -1135,6 +1141,9 @@ status_t StagefrightRecorder::setupVideoEncoder(
 
     // Use software codec for time lapse
     uint32_t encoder_flags = (mCaptureTimeLapse) ? OMXCodec::kPreferSoftwareCodecs : 0;
+    if (mIsMetaDataStoredInVideoBuffers) {
+        encoder_flags |= OMXCodec::kStoreMetaDataInVideoBuffers;
+    }
     sp<MediaSource> encoder = OMXCodec::Create(
             client.interface(), enc_meta,
             true /* createEncoder */, cameraSource,
@@ -1412,6 +1421,7 @@ status_t StagefrightRecorder::reset() {
     mCaptureAuxVideo = false;
     mCameraSourceSplitter = NULL;
     mCameraSourceTimeLapse = NULL;
+    mIsMetaDataStoredInVideoBuffers = false;
     mEncoderProfiles = MediaProfiles::getInstance();
 
     mOutputFd = -1;
