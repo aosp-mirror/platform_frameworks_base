@@ -1949,7 +1949,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         desiredConfig = overrideConfig;
     }
 
-    ssize_t rc = BAD_INDEX;
+    ssize_t rc = BAD_VALUE;
     size_t ip = grp->packages.size();
     while (ip > 0) {
         ip--;
