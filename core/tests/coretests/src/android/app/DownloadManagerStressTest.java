@@ -24,7 +24,6 @@ import android.app.DownloadManager.Request;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 
@@ -38,6 +37,7 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
     public void setUp() throws Exception {
         super.setUp();
         mServer.play(0);
+        setWiFiStateOn(true);
         removeAllCurrentDownloads();
     }
 
@@ -71,7 +71,8 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
             }
 
             // wait for the download to complete or timeout
-            waitForDownloadsOrTimeout(WAIT_FOR_DOWNLOAD_POLL_TIME, MAX_WAIT_FOR_DOWNLOAD_TIME);
+            waitForDownloadsOrTimeout(WAIT_FOR_DOWNLOAD_POLL_TIME,
+                    MAX_WAIT_FOR_LARGE_DOWNLOAD_TIME);
             cursor = mDownloadManager.query(new Query());
             assertEquals(NUM_FILES, cursor.getCount());
             Log.i(LOG_TAG, "Verified number of downloads in download manager is what we expect.");
@@ -130,10 +131,11 @@ public class DownloadManagerStressTest extends DownloadManagerBaseTest {
     }
 
     /**
-     * Tests trying to download a large file (~300M bytes) when there's not enough space in cache
+     * Tests trying to download a large file (~600M bytes) when there's not enough space in cache
      */
     public void testInsufficientSpace() throws Exception {
-        long fileSize = 300000000L;
+        // @TODO: Rework this to fill up cache partition with a dynamically calculated size
+        long fileSize = 600000000L;
         File largeFile = createFileOnSD(null, fileSize, DataType.TEXT, null);
 
         Cursor cursor = null;

@@ -83,6 +83,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
 
     protected static final int WAIT_FOR_DOWNLOAD_POLL_TIME = 1 * 1000;  // 1 second
     protected static final int MAX_WAIT_FOR_DOWNLOAD_TIME = 5 * 60 * 1000; // 5 minutes
+    protected static final int MAX_WAIT_FOR_LARGE_DOWNLOAD_TIME = 15 * 60 * 1000; // 15 minutes
 
     // Just a few popular file types used to return from a download
     protected enum DownloadFileType {
@@ -180,7 +181,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
          * @return A Set<Long> with the ids of the completed downloads.
          */
         public Set<Long> getDownloadIds() {
-            synchronized(downloadIds) {
+            synchronized(this) {
                 Set<Long> returnIds = new HashSet<Long>(downloadIds);
                 return returnIds;
             }
@@ -224,6 +225,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
             ConnectivityManager connManager = (ConnectivityManager)mContext.getSystemService(
                     Context.CONNECTIVITY_SERVICE);
             NetworkInfo info = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            Log.i(LOG_TAG, "WiFi Connection state is currently: " + info.isConnected());
             return info.isConnected();
         }
     }
@@ -511,6 +513,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
      * @param enable true if it should be enabled, false if it should be disabled
      */
     protected void setWiFiStateOn(boolean enable) throws Exception {
+        Log.i(LOG_TAG, "Setting WiFi State to: " + enable);
         WifiManager manager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
 
         manager.setWifiEnabled(enable);
@@ -528,7 +531,7 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
 
             while (receiver.getWiFiIsOn() != enable && !timedOut) {
                 try {
-                    receiver.wait(DEFAULT_MAX_WAIT_TIME);
+                    receiver.wait(DEFAULT_WAIT_POLL_TIME);
 
                     if (SystemClock.elapsedRealtime() > timeoutTime) {
                         timedOut = true;
