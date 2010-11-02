@@ -279,18 +279,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int CMD_ENABLE_RSSI_POLL                 = 82;
     /* RSSI poll */
     private static final int CMD_RSSI_POLL                        = 83;
-    /* Get current RSSI */
-    private static final int CMD_GET_RSSI                         = 84;
-    /* Get approx current RSSI */
-    private static final int CMD_GET_RSSI_APPROX                  = 85;
-    /* Get link speed on connection */
-    private static final int CMD_GET_LINK_SPEED                   = 86;
-    /* Radio mac address */
-    private static final int CMD_GET_MAC_ADDR                     = 87;
     /* Set up packet filtering */
-    private static final int CMD_START_PACKET_FILTERING           = 88;
+    private static final int CMD_START_PACKET_FILTERING           = 84;
     /* Clear packet filter */
-    private static final int CMD_STOP_PACKET_FILTERING            = 89;
+    private static final int CMD_STOP_PACKET_FILTERING            = 85;
     /* Connect to a specified network (network id
      * or WifiConfiguration) This involves increasing
      * the priority of the network, enabling the network
@@ -299,21 +291,23 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * an existing network. All the networks get enabled
      * upon a successful connection or a failure.
      */
-    private static final int CMD_CONNECT_NETWORK                  = 90;
+    private static final int CMD_CONNECT_NETWORK                  = 86;
     /* Save the specified network. This involves adding
      * an enabled network (if new) and updating the
      * config and issuing a save on supplicant config.
      */
-    private static final int CMD_SAVE_NETWORK                     = 91;
+    private static final int CMD_SAVE_NETWORK                     = 87;
     /* Delete the specified network. This involves
      * removing the network and issuing a save on
      * supplicant config.
      */
-    private static final int CMD_FORGET_NETWORK                   = 92;
+    private static final int CMD_FORGET_NETWORK                   = 88;
     /* Start Wi-Fi protected setup push button configuration */
-    private static final int CMD_START_WPS_PBC                    = 93;
-    /* Start Wi-Fi protected setup pin method configuration */
-    private static final int CMD_START_WPS_PIN                    = 94;
+    private static final int CMD_START_WPS_PBC                    = 89;
+    /* Start Wi-Fi protected setup pin method configuration with pin obtained from AP */
+    private static final int CMD_START_WPS_PIN_FROM_AP            = 90;
+    /* Start Wi-Fi protected setup pin method configuration with pin obtained from device */
+    private static final int CMD_START_WPS_PIN_FROM_DEVICE        = 91;
     /**
      * Interval in milliseconds between polling for connection
      * status items that are not sent via asynchronous events.
@@ -333,6 +327,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int BAND_5G = 1;
     /* 2.4GHz allows 802.11B/G operation */
     private static final int BAND_2G = 2;
+
+    private static final int SUCCESS = 1;
+    private static final int FAILURE = -1;
 
     /**
      * The maximum number of times we will retry a connection to an access point
@@ -519,8 +516,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /**
      * TODO: doc
      */
-    public boolean syncPingSupplicant() {
-        return sendSyncMessage(CMD_PING_SUPPLICANT).boolValue;
+    public boolean syncPingSupplicant(AsyncChannel channel) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_PING_SUPPLICANT);
+        boolean result = (resultMsg.arg1 != FAILURE);
+        resultMsg.recycle();
+        return result;
     }
 
     /**
@@ -698,8 +698,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * @return network id of the new network
      */
-    public int syncAddOrUpdateNetwork(WifiConfiguration config) {
-        return sendSyncMessage(CMD_ADD_OR_UPDATE_NETWORK, config).intValue;
+    public int syncAddOrUpdateNetwork(AsyncChannel channel, WifiConfiguration config) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_ADD_OR_UPDATE_NETWORK, config);
+        int result = resultMsg.arg1;
+        resultMsg.recycle();
+        return result;
     }
 
     public List<WifiConfiguration> syncGetConfiguredNetworks() {
@@ -713,29 +716,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      */
     public boolean syncRemoveNetwork(AsyncChannel channel, int networkId) {
         Message resultMsg = channel.sendMessageSynchronously(CMD_REMOVE_NETWORK, networkId);
-        boolean result = resultMsg.arg1 != 0;
+        boolean result = (resultMsg.arg1 != FAILURE);
         resultMsg.recycle();
         return result;
     }
 
-    /**
-     * Return the result of a removeNetwork
-     *
-     * @param srcMsg is the original message
-     * @param result is true if successfully removed
-     */
-    private void removeNetworkReply(Message srcMsg, boolean result) {
-        mReplyChannel.replyToMessage(srcMsg, CMD_REMOVE_NETWORK, result ? 1 : 0);
-    }
-
-    private class EnableNetParams {
-        private int netId;
-        private boolean disableOthers;
-        EnableNetParams(int n, boolean b) {
-            netId = n;
-            disableOthers = b;
-        }
-    }
     /**
      * Enable a network
      *
@@ -743,9 +728,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * @param disableOthers true, if all other networks have to be disabled
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
-    public boolean syncEnableNetwork(int netId, boolean disableOthers) {
-        return sendSyncMessage(CMD_ENABLE_NETWORK,
-                new EnableNetParams(netId, disableOthers)).boolValue;
+    public boolean syncEnableNetwork(AsyncChannel channel, int netId, boolean disableOthers) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_ENABLE_NETWORK, netId,
+                disableOthers ? 1 : 0);
+        boolean result = (resultMsg.arg1 != FAILURE);
+        resultMsg.recycle();
+        return result;
     }
 
     /**
@@ -754,8 +742,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * @param netId network id of the network
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
-    public boolean syncDisableNetwork(int netId) {
-        return sendSyncMessage(obtainMessage(CMD_DISABLE_NETWORK, netId, 0)).boolValue;
+    public boolean syncDisableNetwork(AsyncChannel channel, int netId) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_DISABLE_NETWORK, netId);
+        boolean result = (resultMsg.arg1 != FAILURE);
+        resultMsg.recycle();
+        return result;
     }
 
     /**
@@ -801,11 +792,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     public void startWpsWithPinFromAccessPoint(String bssid, int apPin) {
-        sendMessage(obtainMessage(CMD_START_WPS_PIN, apPin, 0, bssid));
+        sendMessage(obtainMessage(CMD_START_WPS_PIN_FROM_AP, apPin, 0, bssid));
     }
 
     public int syncStartWpsWithPinFromDevice(AsyncChannel channel, String bssid) {
-        Message resultMsg = channel.sendMessageSynchronously(CMD_START_WPS_PIN, bssid);
+        Message resultMsg = channel.sendMessageSynchronously(CMD_START_WPS_PIN_FROM_DEVICE, bssid);
         int result = resultMsg.arg1;
         resultMsg.recycle();
         return result;
@@ -813,41 +804,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     public void enableRssiPolling(boolean enabled) {
        sendMessage(obtainMessage(CMD_ENABLE_RSSI_POLL, enabled ? 1 : 0, 0));
-    }
-    /**
-     * Get RSSI to currently connected network
-     *
-     * @return RSSI value, -1 on failure
-     */
-    public int syncGetRssi() {
-        return sendSyncMessage(CMD_GET_RSSI).intValue;
-    }
-
-    /**
-     * Get approx RSSI to currently connected network
-     *
-     * @return RSSI value, -1 on failure
-     */
-    public int syncGetRssiApprox() {
-        return sendSyncMessage(CMD_GET_RSSI_APPROX).intValue;
-    }
-
-    /**
-     * Get link speed to currently connected network
-     *
-     * @return link speed, -1 on failure
-     */
-    public int syncGetLinkSpeed() {
-        return sendSyncMessage(CMD_GET_LINK_SPEED).intValue;
-    }
-
-    /**
-     * Get MAC address of radio
-     *
-     * @return MAC address, null on failure
-     */
-    public String syncGetMacAddress() {
-        return sendSyncMessage(CMD_GET_MAC_ADDR).stringValue;
     }
 
     /**
@@ -943,8 +899,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      *
      * TODO: deprecate this
      */
-    public boolean syncSaveConfig() {
-        return sendSyncMessage(CMD_SAVE_CONFIG).boolValue;
+    public boolean syncSaveConfig(AsyncChannel channel) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_SAVE_CONFIG);
+        boolean result = (resultMsg.arg1 != FAILURE);
+        resultMsg.recycle();
+        return result;
     }
 
     /**
@@ -1017,73 +976,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /*********************************************************
      * Internal private functions
      ********************************************************/
-
-    class SyncReturn {
-        boolean boolValue;
-        int intValue;
-        String stringValue;
-        Object objValue;
-    }
-
-    class SyncParams {
-        Object mParameter;
-        SyncReturn mSyncReturn;
-        SyncParams() {
-            mSyncReturn = new SyncReturn();
-        }
-        SyncParams(Object p) {
-            mParameter = p;
-            mSyncReturn = new SyncReturn();
-        }
-    }
-
-    /**
-     * message.obj is used to store SyncParams
-     */
-    private SyncReturn syncedSend(Message msg) {
-        SyncParams syncParams = (SyncParams) msg.obj;
-        synchronized(syncParams) {
-            if (DBG) Log.d(TAG, "syncedSend " + msg);
-            sendMessage(msg);
-            try {
-                syncParams.wait();
-            } catch (InterruptedException e) {
-                Log.e(TAG, "sendSyncMessage: unexpected interruption of wait()");
-                return null;
-            }
-        }
-        return syncParams.mSyncReturn;
-    }
-
-    private SyncReturn sendSyncMessage(Message msg) {
-        SyncParams syncParams = new SyncParams();
-        msg.obj = syncParams;
-        return syncedSend(msg);
-    }
-
-    private SyncReturn sendSyncMessage(int what, Object param) {
-        SyncParams syncParams = new SyncParams(param);
-        Message msg = obtainMessage(what, syncParams);
-        return syncedSend(msg);
-    }
-
-
-    private SyncReturn sendSyncMessage(int what) {
-        return sendSyncMessage(obtainMessage(what));
-    }
-
-    private void notifyOnMsgObject(Message msg) {
-        SyncParams syncParams = (SyncParams) msg.obj;
-        if (syncParams != null) {
-            synchronized(syncParams) {
-                if (DBG) Log.d(TAG, "notifyOnMsgObject " + msg);
-                syncParams.notify();
-            }
-        }
-        else {
-            Log.e(TAG, "Error! syncParams in notifyOnMsgObject is null");
-        }
-    }
 
     private void setWifiState(int wifiState) {
         final int previousWifiState = mWifiState.get();
@@ -1620,7 +1512,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-            SyncParams syncParams;
             switch (message.what) {
                 case CMD_SET_BLUETOOTH_HEADSET_PROXY:
                     mBluetoothHeadset = (BluetoothHeadset) message.obj;
@@ -1633,19 +1524,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_ENABLE_NETWORK:
                 case CMD_DISABLE_NETWORK:
                 case CMD_ADD_OR_UPDATE_NETWORK:
-                case CMD_GET_RSSI:
-                case CMD_GET_RSSI_APPROX:
-                case CMD_GET_LINK_SPEED:
-                case CMD_GET_MAC_ADDR:
-                case CMD_SAVE_CONFIG:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.boolValue = false;
-                    syncParams.mSyncReturn.intValue = -1;
-                    syncParams.mSyncReturn.stringValue = null;
-                    notifyOnMsgObject(message);
-                    break;
                 case CMD_REMOVE_NETWORK:
-                    removeNetworkReply(message, false);
+                case CMD_SAVE_CONFIG:
+                case CMD_START_WPS_PIN_FROM_DEVICE:
+                    mReplyChannel.replyToMessage(message, message.what, FAILURE);
                     break;
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
@@ -1687,7 +1569,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SAVE_NETWORK:
                 case CMD_FORGET_NETWORK:
                 case CMD_START_WPS_PBC:
-                case CMD_START_WPS_PIN:
+                case CMD_START_WPS_PIN_FROM_AP:
                     break;
                 default:
                     Log.e(TAG, "Error! unhandled message" + message);
@@ -2032,7 +1914,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-            SyncParams syncParams;
             WifiConfiguration config;
             switch(message.what) {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
@@ -2060,36 +1941,29 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     sendScanResultsAvailableBroadcast();
                     break;
                 case CMD_PING_SUPPLICANT:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.boolValue = WifiNative.pingCommand();
-                    notifyOnMsgObject(message);
+                    boolean ok = WifiNative.pingCommand();
+                    mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ADD_OR_UPDATE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    syncParams = (SyncParams) message.obj;
-                    config = (WifiConfiguration) syncParams.mParameter;
-                    syncParams.mSyncReturn.intValue = WifiConfigStore.addOrUpdateNetwork(config);
-                    notifyOnMsgObject(message);
+                    config = (WifiConfiguration) message.obj;
+                    mReplyChannel.replyToMessage(message, CMD_ADD_OR_UPDATE_NETWORK,
+                            WifiConfigStore.addOrUpdateNetwork(config));
                     break;
                 case CMD_REMOVE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    boolean ok = WifiConfigStore.removeNetwork(message.arg1);
-                    removeNetworkReply(message, ok);
+                    ok = WifiConfigStore.removeNetwork(message.arg1);
+                    mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_ENABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    syncParams = (SyncParams) message.obj;
-                    EnableNetParams enableNetParams = (EnableNetParams) syncParams.mParameter;
-                    syncParams.mSyncReturn.boolValue = WifiConfigStore.enableNetwork(
-                            enableNetParams.netId, enableNetParams.disableOthers);
-                    notifyOnMsgObject(message);
+                    ok = WifiConfigStore.enableNetwork(message.arg1, message.arg2 == 1);
+                    mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_DISABLE_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.boolValue = WifiConfigStore.disableNetwork(
-                            message.arg1);
-                    notifyOnMsgObject(message);
+                    ok = WifiConfigStore.disableNetwork(message.arg1);
+                    mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_BLACKLIST_NETWORK:
                     EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
@@ -2099,9 +1973,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     WifiNative.clearBlacklistCommand();
                     break;
                 case CMD_SAVE_CONFIG:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.boolValue = WifiConfigStore.saveConfig();
-                    notifyOnMsgObject(message);
+                    ok = WifiConfigStore.saveConfig();
+                    mReplyChannel.replyToMessage(message, CMD_SAVE_CONFIG, ok ? SUCCESS : FAILURE);
+
                     // Inform the backup manager about a data change
                     IBackupManager ibm = IBackupManager.Stub.asInterface(
                             ServiceManager.getService(Context.BACKUP_SERVICE));
@@ -2112,11 +1986,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                             // Try again later
                         }
                     }
-                    break;
-                case CMD_GET_MAC_ADDR:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.stringValue = WifiNative.getMacAddressCommand();
-                    notifyOnMsgObject(message);
                     break;
                     /* Cannot start soft AP while in client mode */
                 case CMD_START_AP:
@@ -2207,7 +2076,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-            SyncParams syncParams;
             switch(message.what) {
                 case CMD_SET_SCAN_TYPE:
                     if (message.arg1 == SCAN_ACTIVE) {
@@ -2333,7 +2201,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-            SyncParams syncParams;
             switch(message.what) {
                 case CMD_SET_SCAN_MODE:
                     if (message.arg1 == SCAN_ONLY_MODE) {
@@ -2374,7 +2241,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         @Override
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
-            SyncParams syncParams;
             StateChangeResult stateChangeResult;
             switch(message.what) {
                 case PASSWORD_MAY_BE_INCORRECT_EVENT:
@@ -2449,18 +2315,25 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         transitionTo(mDisconnectingState);
                     }
                     break;
-                case CMD_START_WPS_PIN:
+                case CMD_START_WPS_PIN_FROM_AP:
                     bssid = (String) message.obj;
                     int apPin = message.arg1;
-                    int pin;
-                    if (apPin != 0) {
-                        /* WPS pin from access point */
-                        success = WifiConfigStore.startWpsWithPinFromAccessPoint(bssid, apPin);
-                    } else {
-                        pin = WifiConfigStore.startWpsWithPinFromDevice(bssid);
-                        success = (pin != -1);
-                        mReplyChannel.replyToMessage(message, CMD_START_WPS_PIN, pin);
+
+                    /* WPS pin from access point */
+                    success = WifiConfigStore.startWpsWithPinFromAccessPoint(bssid, apPin);
+
+                    if (success) {
+                        mWpsStarted = true;
+                        /* Expect a disconnection from the old connection */
+                        transitionTo(mDisconnectingState);
                     }
+                    break;
+                case CMD_START_WPS_PIN_FROM_DEVICE:
+                    bssid = (String) message.obj;
+                    int pin = WifiConfigStore.startWpsWithPinFromDevice(bssid);
+                    success = (pin != FAILURE);
+                    mReplyChannel.replyToMessage(message, CMD_START_WPS_PIN_FROM_DEVICE, pin);
+
                     if (success) {
                         mWpsStarted = true;
                         /* Expect a disconnection from the old connection */
@@ -2490,21 +2363,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     Log.d(TAG,"Network connection lost");
                     handleNetworkDisconnect();
                     transitionTo(mDisconnectedState);
-                    break;
-                case CMD_GET_RSSI:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.intValue = WifiNative.getRssiCommand();
-                    notifyOnMsgObject(message);
-                    break;
-                case CMD_GET_RSSI_APPROX:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.intValue = WifiNative.getRssiApproxCommand();
-                    notifyOnMsgObject(message);
-                    break;
-                case CMD_GET_LINK_SPEED:
-                    syncParams = (SyncParams) message.obj;
-                    syncParams.mSyncReturn.intValue = WifiNative.getLinkSpeedCommand();
-                    notifyOnMsgObject(message);
                     break;
                 default:
                     return NOT_HANDLED;

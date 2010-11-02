@@ -423,7 +423,12 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean pingSupplicant() {
         enforceAccessPermission();
-        return mWifiStateMachine.syncPingSupplicant();
+        if (mChannel != null) {
+            return mWifiStateMachine.syncPingSupplicant(mChannel);
+        } else {
+            Slog.e(TAG, "mChannel is not initialized");
+            return false;
+        }
     }
 
     /**
@@ -634,7 +639,12 @@ public class WifiService extends IWifiManager.Stub {
      */
     public int addOrUpdateNetwork(WifiConfiguration config) {
         enforceChangePermission();
-        return mWifiStateMachine.syncAddOrUpdateNetwork(config);
+        if (mChannel != null) {
+            return mWifiStateMachine.syncAddOrUpdateNetwork(mChannel, config);
+        } else {
+            Slog.e(TAG, "mChannel is not initialized");
+            return -1;
+        }
     }
 
      /**
@@ -662,7 +672,12 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean enableNetwork(int netId, boolean disableOthers) {
         enforceChangePermission();
-        return mWifiStateMachine.syncEnableNetwork(netId, disableOthers);
+        if (mChannel != null) {
+            return mWifiStateMachine.syncEnableNetwork(mChannel, netId, disableOthers);
+        } else {
+            Slog.e(TAG, "mChannel is not initialized");
+            return false;
+        }
     }
 
     /**
@@ -673,7 +688,12 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean disableNetwork(int netId) {
         enforceChangePermission();
-        return mWifiStateMachine.syncDisableNetwork(netId);
+        if (mChannel != null) {
+            return mWifiStateMachine.syncDisableNetwork(mChannel, netId);
+        } else {
+            Slog.e(TAG, "mChannel is not initialized");
+            return false;
+        }
     }
 
     /**
@@ -708,7 +728,12 @@ public class WifiService extends IWifiManager.Stub {
     public boolean saveConfiguration() {
         boolean result = true;
         enforceChangePermission();
-        return mWifiStateMachine.syncSaveConfig();
+        if (mChannel != null) {
+            return mWifiStateMachine.syncSaveConfig(mChannel);
+        } else {
+            Slog.e(TAG, "mChannel is not initialized");
+            return false;
+        }
     }
 
     /**
