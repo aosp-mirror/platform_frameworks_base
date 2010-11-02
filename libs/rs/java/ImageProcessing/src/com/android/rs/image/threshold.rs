@@ -64,7 +64,8 @@ static void computeGaussianWeights() {
 
 
 static void copyInput() {
-    rs_allocation ain = rsGetAllocation(InPixel);
+    rs_allocation ain = {0};
+    rsSetObject(&ain,rsGetAllocation(InPixel));
     uint32_t dimx = rsAllocationGetDimX(ain);
     uint32_t dimy = rsAllocationGetDimY(ain);
     for(uint32_t y = 0; y < dimy; y++) {
@@ -72,6 +73,7 @@ static void copyInput() {
             ScratchPixel1[x + y * dimx] = convert_float4(InPixel[x + y * dimx]);
         }
     }
+    rsClearObject(&ain);
 }
 
 void filter() {
