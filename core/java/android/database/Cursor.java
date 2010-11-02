@@ -211,7 +211,9 @@ public interface Cursor {
     /**
      * Returns the value of the requested column as a byte array.
      *
-     * <p>If the native content of that column is not blob exception may throw
+     * <p>The result and whether this method throws an exception when the
+     * column value is null or the column type is not a blob type is
+     * implementation-defined.
      *
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a byte array.
@@ -221,8 +223,9 @@ public interface Cursor {
     /**
      * Returns the value of the requested column as a String.
      *
-     * <p>If the native content of that column is not text the result will be
-     * the result of passing the column value to String.valueOf(x).
+     * <p>The result and whether this method throws an exception when the
+     * column value is null or the column type is not a string type is
+     * implementation-defined.
      *
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a String.
@@ -242,8 +245,10 @@ public interface Cursor {
     /**
      * Returns the value of the requested column as a short.
      *
-     * <p>If the native content of that column is not numeric the result will be
-     * the result of passing the column value to Short.valueOf(x).
+     * <p>The result and whether this method throws an exception when the
+     * column value is null, the column type is not an integral type, or the
+     * integer value is outside the range [<code>Short.MIN_VALUE</code>,
+     * <code>Short.MAX_VALUE</code>] is implementation-defined.
      *
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a short.
@@ -253,8 +258,10 @@ public interface Cursor {
     /**
      * Returns the value of the requested column as an int.
      *
-     * <p>If the native content of that column is not numeric the result will be
-     * the result of passing the column value to Integer.valueOf(x).
+     * <p>The result and whether this method throws an exception when the
+     * column value is null, the column type is not an integral type, or the
+     * integer value is outside the range [<code>Integer.MIN_VALUE</code>,
+     * <code>Integer.MAX_VALUE</code>] is implementation-defined.
      *
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as an int.
@@ -264,8 +271,10 @@ public interface Cursor {
     /**
      * Returns the value of the requested column as a long.
      *
-     * <p>If the native content of that column is not numeric the result will be
-     * the result of passing the column value to Long.valueOf(x).
+     * <p>The result and whether this method throws an exception when the
+     * column value is null, the column type is not an integral type, or the
+     * integer value is outside the range [<code>Long.MIN_VALUE</code>,
+     * <code>Long.MAX_VALUE</code>] is implementation-defined.
      *
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a long.
@@ -275,8 +284,10 @@ public interface Cursor {
     /**
      * Returns the value of the requested column as a float.
      *
-     * <p>If the native content of that column is not numeric the result will be
-     * the result of passing the column value to Float.valueOf(x).
+     * <p>The result and whether this method throws an exception when the
+     * column value is null, the column type is not a floating-point type, or the
+     * floating-point value is not representable as a <code>float</code> value is
+     * implementation-defined.
      *
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a float.
@@ -286,8 +297,10 @@ public interface Cursor {
     /**
      * Returns the value of the requested column as a double.
      *
-     * <p>If the native content of that column is not numeric the result will be
-     * the result of passing the column value to Double.valueOf(x).
+     * <p>The result and whether this method throws an exception when the
+     * column value is null, the column type is not a floating-point type, or the
+     * floating-point value is not representable as a <code>double</code> value is
+     * implementation-defined.
      *
      * @param columnIndex the zero-based index of the target column.
      * @return the value of that column as a double.
@@ -573,7 +586,8 @@ public interface Cursor {
      * that are required to fetch data for the cursor.
      *
      * <p>These values may only change when requery is called.
-     * @return cursor-defined values, or Bundle.EMTPY if there are no values. Never null.
+     * @return cursor-defined values, or {@link android.os.Bundle#EMPTY Bundle.EMPTY} if there
+     *         are no values. Never <code>null</code>.
      */
     Bundle getExtras();
 
@@ -583,8 +597,10 @@ public interface Cursor {
      *
      * <p>One use of this is to tell a cursor that it should retry its network request after it
      * reported an error.
-     * @param extras extra values, or Bundle.EMTPY. Never null.
-     * @return extra values, or Bundle.EMTPY. Never null.
+     * @param extras extra values, or {@link android.os.Bundle#EMPTY Bundle.EMPTY}.
+     *         Never <code>null</code>.
+     * @return extra values, or {@link android.os.Bundle#EMPTY Bundle.EMPTY}.
+     *         Never <code>null</code>.
      */
     Bundle respond(Bundle extras);
 }
