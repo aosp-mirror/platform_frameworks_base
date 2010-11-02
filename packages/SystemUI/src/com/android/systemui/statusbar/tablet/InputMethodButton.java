@@ -16,10 +16,7 @@
 
 package com.android.systemui.statusbar.tablet;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -36,13 +33,12 @@ import android.widget.ImageView;
 import com.android.server.InputMethodManagerService;
 import com.android.systemui.R;
 
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 public class InputMethodButton extends ImageView {
 
     private static final String  TAG = "StatusBar/InputMethodButton";
+    private static final boolean DEBUG = false;
 
     private boolean mKeyboardShown;
     private ImageView mIcon;
@@ -94,6 +90,9 @@ public class InputMethodButton extends ImageView {
         InputMethodSubtype subtype = mImm.getCurrentInputMethodSubtype();
         Drawable icon = null;
         if (imi != null) {
+            if (DEBUG) {
+                Log.d(TAG, "--- Update icons of IME: " + imi.getPackageName() + "," + subtype);
+            }
             if (subtype != null) {
                 return pm.getDrawable(imi.getPackageName(), subtype.getIconResId(),
                         imi.getServiceInfo().applicationInfo);
