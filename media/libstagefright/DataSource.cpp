@@ -28,6 +28,8 @@
 #include <media/stagefright/MediaErrors.h>
 #include <utils/String8.h>
 
+#include <cutils/properties.h>
+
 namespace android {
 
 bool DataSource::getUInt16(off_t offset, uint16_t *x) {
@@ -95,7 +97,12 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffAMR);
     RegisterSniffer(SniffWAV);
     RegisterSniffer(SniffOgg);
-    RegisterSniffer(SniffDRM);
+
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("drm.service.enabled", value, NULL)
+            && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        RegisterSniffer(SniffDRM);
+    }
 }
 
 // static
