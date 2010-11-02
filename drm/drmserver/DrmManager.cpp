@@ -383,7 +383,6 @@ DecryptHandle* DrmManager::openDecryptSession(int uniqueId, int fd, int offset, 
 
     if (DRM_NO_ERROR != result) {
         delete handle; handle = NULL;
-        LOGE("DrmManager::openDecryptSession: no capable plug-in found");
     }
 
     return handle;
