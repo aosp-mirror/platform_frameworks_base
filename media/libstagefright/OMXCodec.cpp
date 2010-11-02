@@ -1710,16 +1710,11 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
         return err;
     }
 
-    // Check that the color format is in the correct range.
-    CHECK(OMX_COLOR_FormatAndroidPrivateStart <= def.format.video.eColorFormat);
-    CHECK(def.format.video.eColorFormat < OMX_COLOR_FormatAndroidPrivateEnd);
-
     err = native_window_set_buffers_geometry(
             mNativeWindow.get(),
             def.format.video.nFrameWidth,
             def.format.video.nFrameHeight,
-            def.format.video.eColorFormat
-                - OMX_COLOR_FormatAndroidPrivateStart);
+            def.format.video.eColorFormat);
 
     if (err != 0) {
         LOGE("native_window_set_buffers_geometry failed: %s (%d)",
