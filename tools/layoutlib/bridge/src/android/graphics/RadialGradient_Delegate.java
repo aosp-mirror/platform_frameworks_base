@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,77 @@
 
 package android.graphics;
 
-public class RadialGradient extends GradientShader {
+import com.android.layoutlib.bridge.DelegateManager;
 
-    private RadialGradientPaint mPaint;
+import android.graphics.Shader.TileMode;
+
+import java.awt.Paint;
+
+/**
+ * Delegate implementing the native methods of android.graphics.RadialGradient
+ *
+ * Through the layoutlib_create tool, the original native methods of RadialGradient have been
+ * replaced by calls to methods of the same name in this delegate class.
+ *
+ * This class behaves like the original native implementation, but in Java, keeping previously
+ * native data into its own objects and mapping them to int that are sent back and forth between
+ * it and the original RadialGradient class.
+ *
+ * Because this extends {@link Shader_Delegate}, there's no need to use a {@link DelegateManager},
+ * as all the Shader classes will be added to the manager owned by {@link Shader_Delegate}.
+ *
+ * @see Shader_Delegate
+ *
+ */
+public class RadialGradient_Delegate extends Gradient_Delegate {
+
+    // ---- delegate data ----
+    private java.awt.Paint mJavaPaint;
+
+    // ---- Public Helper methods ----
+
+    @Override
+    public Paint getJavaPaint() {
+        return mJavaPaint;
+    }
+
+    // ---- native methods ----
+
+    /*package*/ static int nativeCreate1(float x, float y, float radius,
+            int colors[], float positions[], int tileMode) {
+        // figure out the tile
+        TileMode tile = null;
+        for (TileMode tm : TileMode.values()) {
+            if (tm.nativeInt == tileMode) {
+                tile = tm;
+                break;
+            }
+        }
+
+        RadialGradient_Delegate newDelegate = new RadialGradient_Delegate(x, y, radius,
+                colors, positions, tile);
+        return sManager.addDelegate(newDelegate);
+    }
+
+    /*package*/ static int nativeCreate2(float x, float y, float radius,
+            int color0, int color1, int tileMode) {
+        return nativeCreate1(x, y, radius, new int[] { color0, color1 }, null /*positions*/,
+                tileMode);
+    }
+
+    /*package*/ static int nativePostCreate1(int native_shader, float x, float y, float radius,
+            int colors[], float positions[], int tileMode) {
+        // nothing to be done here.
+        return 0;
+    }
+
+    /*package*/ static int nativePostCreate2(int native_shader, float x, float y, float radius,
+            int color0, int color1, int tileMode) {
+        // nothing to be done here.
+        return 0;
+    }
+
+    // ---- Private delegate/helper methods ----
 
     /**
      * Create a shader that draws a radial gradient given the center and radius.
@@ -34,34 +102,11 @@ public class RadialGradient extends GradientShader {
      *            distributed evenly between the center and edge of the circle.
      * @param tile The Shader tiling mode
      */
-    public RadialGradient(float x, float y, float radius, int colors[], float positions[],
+    private RadialGradient_Delegate(float x, float y, float radius, int colors[], float positions[],
             TileMode tile) {
         super(colors, positions);
-        if (radius <= 0) {
-            throw new IllegalArgumentException("radius must be > 0");
-        }
 
-        mPaint = new RadialGradientPaint(x, y, radius, mColors, mPositions, tile);
-    }
-
-    /**
-     * Create a shader that draws a radial gradient given the center and radius.
-     *
-     * @param x The x-coordinate of the center of the radius
-     * @param y The y-coordinate of the center of the radius
-     * @param radius Must be positive. The radius of the circle for this
-     *            gradient
-     * @param color0 The color at the center of the circle.
-     * @param color1 The color at the edge of the circle.
-     * @param tile The Shader tiling mode
-     */
-    public RadialGradient(float x, float y, float radius, int color0, int color1, TileMode tile) {
-        this(x, y, radius, new int[] { color0, color1 }, null /* positions */, tile);
-    }
-
-    @Override
-    java.awt.Paint getJavaPaint() {
-        return mPaint;
+        mJavaPaint = new RadialGradientPaint(x, y, radius, mColors, mPositions, tile);
     }
 
     private static class RadialGradientPaint extends GradientPaint {
@@ -70,7 +115,8 @@ public class RadialGradient extends GradientShader {
         private final float mY;
         private final float mRadius;
 
-        public RadialGradientPaint(float x, float y, float radius, int[] colors, float[] positions, TileMode mode) {
+        public RadialGradientPaint(float x, float y, float radius, int[] colors, float[] positions,
+                TileMode mode) {
             super(colors, positions, mode);
             mX = x;
             mY = y;

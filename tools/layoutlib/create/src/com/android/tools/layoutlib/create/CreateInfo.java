@@ -105,8 +105,12 @@ public final class CreateInfo implements ICreateInfo {
     private final static String[] DELEGATE_CLASS_NATIVES = new String[] {
         "android.graphics.Bitmap",
         "android.graphics.Canvas",
+        "android.graphics.LinearGradient",
         "android.graphics.Matrix",
         "android.graphics.Paint",
+        "android.graphics.RadialGradient",
+        "android.graphics.Shader",
+        "android.graphics.SweepGradient",
         "android.graphics.Typeface",
     };
 
@@ -127,15 +131,9 @@ public final class CreateInfo implements ICreateInfo {
     private final static String[] RENAMED_CLASSES =
         new String[] {
             "android.graphics.BitmapFactory",       "android.graphics._Original_BitmapFactory",
-            "android.graphics.BitmapShader",        "android.graphics._Original_BitmapShader",
-            "android.graphics.ComposeShader",       "android.graphics._Original_ComposeShader",
             "android.graphics.DashPathEffect",       "android.graphics._Original_DashPathEffect",
-            "android.graphics.LinearGradient",      "android.graphics._Original_LinearGradient",
             "android.graphics.Path",                "android.graphics._Original_Path",
             "android.graphics.PorterDuffXfermode",  "android.graphics._Original_PorterDuffXfermode",
-            "android.graphics.RadialGradient",      "android.graphics._Original_RadialGradient",
-            "android.graphics.Shader",              "android.graphics._Original_Shader",
-            "android.graphics.SweepGradient",       "android.graphics._Original_SweepGradient",
             "android.os.ServiceManager",            "android.os._Original_ServiceManager",
             "android.util.FloatMath",               "android.util._Original_FloatMath",
             "android.view.SurfaceView",             "android.view._Original_SurfaceView",

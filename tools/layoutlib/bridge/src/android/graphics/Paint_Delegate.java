@@ -154,6 +154,26 @@ public class Paint_Delegate {
         }
     }
 
+    public int getXfermode() {
+        return mXfermode;
+    }
+
+    public int getColorFilter() {
+        return mColorFilter;
+    }
+
+    public int getShader() {
+        return mShader;
+    }
+
+    public int getPathEffect() {
+        return mPathEffect;
+    }
+
+    public int getMaskFilter() {
+        return mMaskFilter;
+    }
+
     // ---- native methods ----
 
     /*package*/ static int getFlags(Paint thisPaint) {
@@ -705,8 +725,7 @@ public class Paint_Delegate {
         }
 
         if (delegate.mFonts.size() > 0) {
-            // FIXME: handle multi-char characters.
-            // see measureText.
+            // FIXME: handle multi-char characters (see measureText)
             float totalAdvance = 0;
             for (int i = 0; i < count; i++) {
                 char c = text[i + index];

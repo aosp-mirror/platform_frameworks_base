@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,62 @@
 
 package android.graphics;
 
-public class SweepGradient extends GradientShader {
+import com.android.layoutlib.bridge.DelegateManager;
 
-    private SweepGradientPaint mPaint;
+import java.awt.Paint;
+
+/**
+ * Delegate implementing the native methods of android.graphics.SweepGradient
+ *
+ * Through the layoutlib_create tool, the original native methods of SweepGradient have been
+ * replaced by calls to methods of the same name in this delegate class.
+ *
+ * This class behaves like the original native implementation, but in Java, keeping previously
+ * native data into its own objects and mapping them to int that are sent back and forth between
+ * it and the original SweepGradient class.
+ *
+ * Because this extends {@link Shader_Delegate}, there's no need to use a {@link DelegateManager},
+ * as all the Shader classes will be added to the manager owned by {@link Shader_Delegate}.
+ *
+ * @see Shader_Delegate
+ *
+ */
+public class SweepGradient_Delegate extends Gradient_Delegate {
+
+    // ---- delegate data ----
+    private java.awt.Paint mJavaPaint;
+
+    // ---- Public Helper methods ----
+
+    @Override
+    public Paint getJavaPaint() {
+        return mJavaPaint;
+    }
+
+    // ---- native methods ----
+
+    /*package*/ static int nativeCreate1(float x, float y, int colors[], float positions[]) {
+        SweepGradient_Delegate newDelegate = new SweepGradient_Delegate(x, y, colors, positions);
+        return sManager.addDelegate(newDelegate);
+    }
+
+    /*package*/ static int nativeCreate2(float x, float y, int color0, int color1) {
+        return nativeCreate1(x, y, new int[] { color0, color1 }, null /*positions*/);
+    }
+
+    /*package*/ static int nativePostCreate1(int native_shader, float cx, float cy,
+            int[] colors, float[] positions) {
+        // nothing to be done here.
+        return 0;
+    }
+
+    /*package*/ static int nativePostCreate2(int native_shader, float cx, float cy,
+            int color0, int color1) {
+        // nothing to be done here.
+        return 0;
+    }
+
+    // ---- Private delegate/helper methods ----
 
     /**
      * A subclass of Shader that draws a sweep gradient around a center point.
@@ -34,28 +87,11 @@ public class SweepGradient extends GradientShader {
      *                 If positions is NULL, then the colors are automatically
      *                 spaced evenly.
      */
-    public SweepGradient(float cx, float cy,
+    private SweepGradient_Delegate(float cx, float cy,
                          int colors[], float positions[]) {
         super(colors, positions);
 
-        mPaint = new SweepGradientPaint(cx, cy, mColors, mPositions);
-    }
-
-    /**
-     * A subclass of Shader that draws a sweep gradient around a center point.
-     *
-     * @param cx       The x-coordinate of the center
-     * @param cy       The y-coordinate of the center
-     * @param color0   The color to use at the start of the sweep
-     * @param color1   The color to use at the end of the sweep
-     */
-    public SweepGradient(float cx, float cy, int color0, int color1) {
-        this(cx, cy, new int[] { color0, color1}, null /*positions*/);
-    }
-
-    @Override
-    java.awt.Paint getJavaPaint() {
-        return mPaint;
+        mJavaPaint = new SweepGradientPaint(cx, cy, mColors, mPositions);
     }
 
     private static class SweepGradientPaint extends GradientPaint {
@@ -135,6 +171,4 @@ public class SweepGradient extends GradientShader {
 
         }
     }
-
 }
-
