@@ -46,14 +46,6 @@ void DrmManagerClientImpl::remove(int uniqueId) {
     getDrmManagerService()->removeUniqueId(uniqueId);
 }
 
-DrmManagerClientImpl::DrmManagerClientImpl() {
-
-}
-
-DrmManagerClientImpl::~DrmManagerClientImpl() {
-
-}
-
 const sp<IDrmManagerService>& DrmManagerClientImpl::getDrmManagerService() {
     mMutex.lock();
     if (NULL == mDrmManagerService.get()) {
@@ -77,16 +69,12 @@ const sp<IDrmManagerService>& DrmManagerClientImpl::getDrmManagerService() {
     return mDrmManagerService;
 }
 
-status_t DrmManagerClientImpl::loadPlugIns(int uniqueId) {
-    return getDrmManagerService()->loadPlugIns(uniqueId);
+void DrmManagerClientImpl::addClient(int uniqueId) {
+    getDrmManagerService()->addClient(uniqueId);
 }
 
-status_t DrmManagerClientImpl::loadPlugIns(int uniqueId, const String8& plugInDirPath) {
-    status_t status = DRM_ERROR_UNKNOWN;
-    if (EMPTY_STRING != plugInDirPath) {
-        status = getDrmManagerService()->loadPlugIns(uniqueId, plugInDirPath);
-    }
-    return status;
+void DrmManagerClientImpl::removeClient(int uniqueId) {
+    getDrmManagerService()->removeClient(uniqueId);
 }
 
 status_t DrmManagerClientImpl::setOnInfoListener(
@@ -94,10 +82,6 @@ status_t DrmManagerClientImpl::setOnInfoListener(
     Mutex::Autolock _l(mLock);
     mOnInfoListener = infoListener;
     return getDrmManagerService()->setDrmServiceListener(uniqueId, this);
-}
-
-status_t DrmManagerClientImpl::unloadPlugIns(int uniqueId) {
-    return getDrmManagerService()->unloadPlugIns(uniqueId);
 }
 
 status_t DrmManagerClientImpl::installDrmEngine(int uniqueId, const String8& drmEngineFile) {
@@ -249,6 +233,14 @@ status_t DrmManagerClientImpl::getAllSupportInfo(
 DecryptHandle* DrmManagerClientImpl::openDecryptSession(
             int uniqueId, int fd, int offset, int length) {
     return getDrmManagerService()->openDecryptSession(uniqueId, fd, offset, length);
+}
+
+DecryptHandle* DrmManagerClientImpl::openDecryptSession(int uniqueId, const char* uri) {
+    DecryptHandle* handle = NULL;
+    if (NULL != uri) {
+        handle = getDrmManagerService()->openDecryptSession(uniqueId, uri);
+    }
+    return handle;
 }
 
 status_t DrmManagerClientImpl::closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {

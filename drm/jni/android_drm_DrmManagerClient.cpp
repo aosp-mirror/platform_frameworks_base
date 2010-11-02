@@ -15,7 +15,7 @@
  */
 
 //#define LOG_NDEBUG 0
-#define LOG_TAG "DrmManager-JNI"
+#define LOG_TAG "android_drm_DrmManagerClient"
 #include <utils/Log.h>
 
 #include <jni.h>
@@ -223,38 +223,32 @@ static sp<DrmManagerClientImpl> getDrmManagerClientImpl(JNIEnv* env, jobject thi
     return sp<DrmManagerClientImpl>(client);
 }
 
-static jint android_drm_DrmManagerClient_loadPlugIns(
+static void android_drm_DrmManagerClient_initialize(
         JNIEnv* env, jobject thiz, jint uniqueId, jobject weak_thiz) {
-    LOGV("load plugins - Enter");
+    LOGV("initialize - Enter");
 
     sp<DrmManagerClientImpl> drmManager = DrmManagerClientImpl::create(&uniqueId);
+    drmManager->addClient(uniqueId);
 
     // Set the listener to DrmManager
     sp<DrmManagerClient::OnInfoListener> listener = new JNIOnInfoListener(env, thiz, weak_thiz);
     drmManager->setOnInfoListener(uniqueId, listener);
 
     setDrmManagerClientImpl(env, thiz, drmManager);
-
-    LOGV("load plugins - Exit");
-    return getDrmManagerClientImpl(env, thiz)->loadPlugIns(uniqueId);
+    LOGV("initialize - Exit");
 }
 
-static jint android_drm_DrmManagerClient_unloadPlugIns(JNIEnv* env, jobject thiz, jint uniqueId) {
-    LOGV("unload plugins - Enter");
-    sp<DrmManagerClientImpl> client = getDrmManagerClientImpl(env, thiz);
-
+static void android_drm_DrmManagerClient_finalize(JNIEnv* env, jobject thiz, jint uniqueId) {
+    LOGV("finalize - Enter");
     DrmManagerClientImpl::remove(uniqueId);
-    int result = client->unloadPlugIns(uniqueId);
-    if (DRM_NO_ERROR == result) {
-        client->setOnInfoListener(uniqueId, NULL);
+    getDrmManagerClientImpl(env, thiz)->setOnInfoListener(uniqueId, NULL);
 
-        sp<DrmManagerClientImpl> oldClient = setDrmManagerClientImpl(env, thiz, NULL);
-        if (oldClient != NULL) {
-            oldClient->setOnInfoListener(uniqueId, NULL);
-        }
+    sp<DrmManagerClientImpl> oldClient = setDrmManagerClientImpl(env, thiz, NULL);
+    if (oldClient != NULL) {
+        oldClient->setOnInfoListener(uniqueId, NULL);
+        oldClient->removeClient(uniqueId);
     }
-    LOGV("unload plugins - Exit");
-    return result;
+    LOGV("finalize - Exit");
 }
 
 static jobject android_drm_DrmManagerClient_getConstraintsFromContent(
@@ -441,6 +435,7 @@ static jobject android_drm_DrmManagerClient_processDrmInfo(
 
     if (NULL != localRef && NULL != pDrmInfoStatus) {
         int statusCode = pDrmInfoStatus->statusCode;
+        int infoType = pDrmInfoStatus->infoType;
 
         jbyteArray dataArray = NULL;
         if (NULL != pDrmInfoStatus->drmBuffer) {
@@ -461,10 +456,10 @@ static jobject android_drm_DrmManagerClient_processDrmInfo(
 
         constructorId
             = env->GetMethodID(localRef,
-                "<init>", "(ILandroid/drm/ProcessedData;Ljava/lang/String;)V");
+                "<init>", "(IILandroid/drm/ProcessedData;Ljava/lang/String;)V");
 
-        drmInfoStatus = env->NewObject(localRef, constructorId, statusCode, processedData,
-                                env->NewStringUTF(pDrmInfoStatus->mimeType.string()));
+        drmInfoStatus = env->NewObject(localRef, constructorId, statusCode, infoType,
+                processedData, env->NewStringUTF(pDrmInfoStatus->mimeType.string()));
     }
 
     delete mData; mData = NULL;
@@ -678,11 +673,11 @@ static jobject android_drm_DrmManagerClient_closeConvertSession(
 
 static JNINativeMethod nativeMethods[] = {
 
-    {"_loadPlugIns", "(ILjava/lang/Object;)I",
-                                    (void*)android_drm_DrmManagerClient_loadPlugIns},
+    {"_initialize", "(ILjava/lang/Object;)V",
+                                    (void*)android_drm_DrmManagerClient_initialize},
 
-    {"_unloadPlugIns", "(I)I",
-                                    (void*)android_drm_DrmManagerClient_unloadPlugIns},
+    {"_finalize", "(I)V",
+                                    (void*)android_drm_DrmManagerClient_finalize},
 
     {"_getConstraints", "(ILjava/lang/String;I)Landroid/content/ContentValues;",
                                     (void*)android_drm_DrmManagerClient_getConstraintsFromContent},
