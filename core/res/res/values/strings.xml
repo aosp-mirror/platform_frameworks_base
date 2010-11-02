@@ -1381,12 +1381,14 @@
     <!-- MMS phone number type -->
     <string name="phoneTypeMms">MMS</string>
 
-    <!-- Label for a birthday event -->
+    <!-- Label for custom events  [CHAR LIMIT=20] -->
+    <string name="eventTypeCustom">Custom</string>
+    <!-- Label for a birthday event  [CHAR LIMIT=20] -->
     <string name="eventTypeBirthday">Birthday</string>
-    <!-- Label for an anniversary event -->
+    <!-- Label for an anniversary event  [CHAR LIMIT=20] -->
     <string name="eventTypeAnniversary">Anniversary</string>
-    <!-- Label for other events -->
-    <string name="eventTypeOther">Event</string>
+    <!-- Label for other events  [CHAR LIMIT=20] -->
+    <string name="eventTypeOther">Other</string>
 
     <!-- Custom email type -->
     <string name="emailTypeCustom">Custom</string>
