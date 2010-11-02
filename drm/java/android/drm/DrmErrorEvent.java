@@ -45,35 +45,19 @@ public class DrmErrorEvent extends DrmEvent {
      */
     public static final int TYPE_NO_INTERNET_CONNECTION = 2005;
     /**
-     * TYPE_REGISTRATION_FAILED, when failed to register with the service.
+     * TYPE_PROCESS_DRM_INFO_FAILED, when failed to process DrmInfo.
      */
-    public static final int TYPE_REGISTRATION_FAILED = 2006;
-    /**
-     * TYPE_UNREGISTRATION_FAILED, when failed to unregister with the service.
-     */
-    public static final int TYPE_UNREGISTRATION_FAILED = 2007;
-    /**
-     * TYPE_RIGHTS_ACQUISITION_FAILED, when failed to acquire the rights information required.
-     */
-    public static final int TYPE_RIGHTS_ACQUISITION_FAILED = 2008;
-    /**
-     * TYPE_INITIALIZE_FAILED, when failed to load and initialize the available plugins.
-     */
-    public static final int TYPE_INITIALIZE_FAILED = 2009;
-    /**
-     * TYPE_FINALIZE_FAILED, when failed to unload and finalize the loaded plugins.
-     */
-    public static final int TYPE_FINALIZE_FAILED = 2010;
+    public static final int TYPE_PROCESS_DRM_INFO_FAILED = 2006;
     /**
      * TYPE_REMOVE_ALL_RIGHTS_FAILED, when failed to remove all the rights objects
      * associated with all DRM schemes.
      */
-    public static final int TYPE_REMOVE_ALL_RIGHTS_FAILED = 2011;
+    public static final int TYPE_REMOVE_ALL_RIGHTS_FAILED = 2007;
     /**
      * TYPE_DRM_INFO_ACQUISITION_FAILED, when failed to get the required information to
      * communicate with the service.
      */
-    public static final int TYPE_DRM_INFO_ACQUISITION_FAILED = 2012;
+    public static final int TYPE_DRM_INFO_ACQUISITION_FAILED = 2008;
 
     /**
      * constructor to create DrmErrorEvent object with given parameters

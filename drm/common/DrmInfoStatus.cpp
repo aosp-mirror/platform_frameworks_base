@@ -19,8 +19,9 @@
 using namespace android;
 
 DrmInfoStatus::DrmInfoStatus(
-    int _statusCode, const DrmBuffer* _drmBuffer, const String8& _mimeType) :
+    int _statusCode, int _infoType, const DrmBuffer* _drmBuffer, const String8& _mimeType) :
     statusCode(_statusCode),
+    infoType(_infoType),
     drmBuffer(_drmBuffer),
     mimeType(_mimeType) {
 

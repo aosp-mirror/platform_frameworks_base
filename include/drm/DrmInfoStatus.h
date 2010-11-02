@@ -41,10 +41,11 @@ public:
      * Constructor for DrmInfoStatus
      *
      * @param[in] _statusCode Status of the communication
+     * @param[in] _infoType Type of the DRM information processed
      * @param[in] _drmBuffer Rights information
      * @param[in] _mimeType MIME type
      */
-    DrmInfoStatus(int _statusCode, const DrmBuffer* _drmBuffer, const String8& _mimeType);
+    DrmInfoStatus(int _statusCode, int _infoType, const DrmBuffer* _drmBuffer, const String8& _mimeType);
 
     /**
      * Destructor for DrmInfoStatus
@@ -55,6 +56,7 @@ public:
 
 public:
     int statusCode;
+    int infoType;
     const DrmBuffer* drmBuffer;
     String8 mimeType;
 };

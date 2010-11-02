@@ -53,27 +53,18 @@ void BpDrmManagerService::removeUniqueId(int uniqueId) {
     remote()->transact(REMOVE_UNIQUEID, data, &reply);
 }
 
-status_t BpDrmManagerService::loadPlugIns(int uniqueId) {
-    LOGV("load plugins");
+void BpDrmManagerService::addClient(int uniqueId) {
     Parcel data, reply;
-
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
-
-    remote()->transact(LOAD_PLUGINS, data, &reply);
-    return reply.readInt32();
+    remote()->transact(ADD_CLIENT, data, &reply);
 }
 
-status_t BpDrmManagerService::loadPlugIns(int uniqueId, const String8& plugInDirPath) {
-    LOGV("load plugins from path");
+void BpDrmManagerService::removeClient(int uniqueId) {
     Parcel data, reply;
-
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
-    data.writeString8(plugInDirPath);
-
-    remote()->transact(LOAD_PLUGINS_FROM_PATH, data, &reply);
-    return reply.readInt32();
+    remote()->transact(REMOVE_CLIENT, data, &reply);
 }
 
 status_t BpDrmManagerService::setDrmServiceListener(
@@ -85,17 +76,6 @@ status_t BpDrmManagerService::setDrmServiceListener(
     data.writeInt32(uniqueId);
     data.writeStrongBinder(drmServiceListener->asBinder());
     remote()->transact(SET_DRM_SERVICE_LISTENER, data, &reply);
-    return reply.readInt32();
-}
-
-status_t BpDrmManagerService::unloadPlugIns(int uniqueId) {
-    LOGV("unload plugins");
-    Parcel data, reply;
-
-    data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
-    data.writeInt32(uniqueId);
-
-    remote()->transact(UNLOAD_PLUGINS, data, &reply);
     return reply.readInt32();
 }
 
@@ -191,6 +171,7 @@ DrmInfoStatus* BpDrmManagerService::processDrmInfo(int uniqueId, const DrmInfo* 
     if (0 != reply.dataAvail()) {
         //Filling DRM Info Status
         const int statusCode = reply.readInt32();
+        const int infoType = reply.readInt32();
         const String8 mimeType = reply.readString8();
 
         DrmBuffer* drmBuffer = NULL;
@@ -203,7 +184,7 @@ DrmInfoStatus* BpDrmManagerService::processDrmInfo(int uniqueId, const DrmInfo* 
             }
             drmBuffer = new DrmBuffer(data, bufferSize);
         }
-        drmInfoStatus = new DrmInfoStatus(statusCode, drmBuffer, mimeType);
+        drmInfoStatus = new DrmInfoStatus(statusCode, infoType, drmBuffer, mimeType);
     }
     return drmInfoStatus;
 }
@@ -538,14 +519,41 @@ DecryptHandle* BpDrmManagerService::openDecryptSession(
     LOGV("Entering BpDrmManagerService::openDecryptSession");
     Parcel data, reply;
 
-    const String16 interfaceDescriptor = IDrmManagerService::getInterfaceDescriptor();
-    data.writeInterfaceToken(interfaceDescriptor);
+    data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
     data.writeFileDescriptor(fd);
     data.writeInt32(offset);
     data.writeInt32(length);
 
     remote()->transact(OPEN_DECRYPT_SESSION, data, &reply);
+
+    DecryptHandle* handle = NULL;
+    if (0 != reply.dataAvail()) {
+        handle = new DecryptHandle();
+        handle->decryptId = reply.readInt32();
+        handle->mimeType = reply.readString8();
+        handle->decryptApiType = reply.readInt32();
+        handle->status = reply.readInt32();
+        handle->decryptInfo = NULL;
+        if (0 != reply.dataAvail()) {
+            handle->decryptInfo = new DecryptInfo();
+            handle->decryptInfo->decryptBufferLength = reply.readInt32();
+        }
+    } else {
+        LOGE("no decryptHandle is generated in service side");
+    }
+    return handle;
+}
+
+DecryptHandle* BpDrmManagerService::openDecryptSession(int uniqueId, const char* uri) {
+    LOGV("Entering BpDrmManagerService::openDecryptSession");
+    Parcel data, reply;
+
+    data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
+    data.writeInt32(uniqueId);
+    data.writeString8(String8(uri));
+
+    remote()->transact(OPEN_DECRYPT_SESSION_FROM_URI, data, &reply);
 
     DecryptHandle* handle = NULL;
     if (0 != reply.dataAvail()) {
@@ -746,25 +754,19 @@ status_t BnDrmManagerService::onTransact(
         return DRM_NO_ERROR;
     }
 
-    case LOAD_PLUGINS:
+    case ADD_CLIENT:
     {
-        LOGV("BnDrmManagerService::onTransact :LOAD_PLUGINS");
+        LOGV("BnDrmManagerService::onTransact :ADD_CLIENT");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
-
-        status_t status = loadPlugIns(data.readInt32());
-
-        reply->writeInt32(status);
+        addClient(data.readInt32());
         return DRM_NO_ERROR;
     }
 
-    case LOAD_PLUGINS_FROM_PATH:
+    case REMOVE_CLIENT:
     {
-        LOGV("BnDrmManagerService::onTransact :LOAD_PLUGINS_FROM_PATH");
+        LOGV("BnDrmManagerService::onTransact :REMOVE_CLIENT");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
-
-        status_t status = loadPlugIns(data.readInt32(), data.readString8());
-
-        reply->writeInt32(status);
+        removeClient(data.readInt32());
         return DRM_NO_ERROR;
     }
 
@@ -778,18 +780,6 @@ status_t BnDrmManagerService::onTransact(
             = interface_cast<IDrmServiceListener> (data.readStrongBinder());
 
         status_t status = setDrmServiceListener(uniqueId, drmServiceListener);
-
-        reply->writeInt32(status);
-        return DRM_NO_ERROR;
-    }
-
-    case UNLOAD_PLUGINS:
-    {
-        LOGV("BnDrmManagerService::onTransact :UNLOAD_PLUGINS");
-        CHECK_INTERFACE(IDrmManagerService, data, reply);
-
-        const int uniqueId = data.readInt32();
-        status_t status = unloadPlugIns(uniqueId);
 
         reply->writeInt32(status);
         return DRM_NO_ERROR;
@@ -881,6 +871,7 @@ status_t BnDrmManagerService::onTransact(
         if (NULL != drmInfoStatus) {
             //Filling DRM Info Status contents
             reply->writeInt32(drmInfoStatus->statusCode);
+            reply->writeInt32(drmInfoStatus->infoType);
             reply->writeString8(drmInfoStatus->mimeType);
 
             if (NULL != drmInfoStatus->drmBuffer) {
@@ -1222,6 +1213,32 @@ status_t BnDrmManagerService::onTransact(
 
         DecryptHandle* handle
             = openDecryptSession(uniqueId, fd, data.readInt32(), data.readInt32());
+
+        if (NULL != handle) {
+            reply->writeInt32(handle->decryptId);
+            reply->writeString8(handle->mimeType);
+            reply->writeInt32(handle->decryptApiType);
+            reply->writeInt32(handle->status);
+            if (NULL != handle->decryptInfo) {
+                reply->writeInt32(handle->decryptInfo->decryptBufferLength);
+                delete handle->decryptInfo; handle->decryptInfo = NULL;
+            }
+        } else {
+            LOGE("NULL decryptHandle is returned");
+        }
+        delete handle; handle = NULL;
+        return DRM_NO_ERROR;
+    }
+
+    case OPEN_DECRYPT_SESSION_FROM_URI:
+    {
+        LOGV("BnDrmManagerService::onTransact :OPEN_DECRYPT_SESSION_FROM_URI");
+        CHECK_INTERFACE(IDrmManagerService, data, reply);
+
+        const int uniqueId = data.readInt32();
+        const String8 uri = data.readString8();
+
+        DecryptHandle* handle = openDecryptSession(uniqueId, uri.string());
 
         if (NULL != handle) {
             reply->writeInt32(handle->decryptId);

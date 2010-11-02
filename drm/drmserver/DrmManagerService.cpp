@@ -27,36 +27,21 @@
 
 using namespace android;
 
-#define SUCCESS 0
-#define DRM_DIRECTORY_PERMISSION 0700
-#define DRM_PLUGINS_ROOT "/data/drm/plugins"
-#define DRM_PLUGINS_NATIVE "/data/drm/plugins/native"
-#define DRM_PLUGINS_NATIVE_DATABASES "/data/drm/plugins/native/databases"
-
 void DrmManagerService::instantiate() {
     LOGV("instantiate");
-
-    int res = mkdir(DRM_PLUGINS_ROOT, DRM_DIRECTORY_PERMISSION);
-    if (SUCCESS == res || EEXIST == errno) {
-        res = mkdir(DRM_PLUGINS_NATIVE, DRM_DIRECTORY_PERMISSION);
-        if (SUCCESS == res || EEXIST == errno) {
-            res = mkdir(DRM_PLUGINS_NATIVE_DATABASES, DRM_DIRECTORY_PERMISSION);
-            if (SUCCESS == res || EEXIST == errno) {
-                defaultServiceManager()
-                    ->addService(String16("drm.drmManager"), new DrmManagerService());
-            }
-        }
-    }
+    defaultServiceManager()->addService(String16("drm.drmManager"), new DrmManagerService());
 }
 
-DrmManagerService::DrmManagerService() {
+DrmManagerService::DrmManagerService() :
+        mDrmManager(NULL) {
     LOGV("created");
-    mDrmManager = NULL;
     mDrmManager = new DrmManager();
+    mDrmManager->loadPlugIns();
 }
 
 DrmManagerService::~DrmManagerService() {
     LOGV("Destroyed");
+    mDrmManager->unloadPlugIns();
     delete mDrmManager; mDrmManager = NULL;
 }
 
@@ -68,14 +53,12 @@ void DrmManagerService::removeUniqueId(int uniqueId) {
     mDrmManager->removeUniqueId(uniqueId);
 }
 
-status_t DrmManagerService::loadPlugIns(int uniqueId) {
-    LOGV("Entering load plugins");
-    return mDrmManager->loadPlugIns(uniqueId);
+void DrmManagerService::addClient(int uniqueId) {
+    mDrmManager->addClient(uniqueId);
 }
 
-status_t DrmManagerService::loadPlugIns(int uniqueId, const String8& plugInDirPath) {
-    LOGV("Entering load plugins from path");
-    return mDrmManager->loadPlugIns(uniqueId, plugInDirPath);
+void DrmManagerService::removeClient(int uniqueId) {
+    mDrmManager->removeClient(uniqueId);
 }
 
 status_t DrmManagerService::setDrmServiceListener(
@@ -83,11 +66,6 @@ status_t DrmManagerService::setDrmServiceListener(
     LOGV("Entering setDrmServiceListener");
     mDrmManager->setDrmServiceListener(uniqueId, drmServiceListener);
     return DRM_NO_ERROR;
-}
-
-status_t DrmManagerService::unloadPlugIns(int uniqueId) {
-    LOGV("Entering unload plugins");
-    return mDrmManager->unloadPlugIns(uniqueId);
 }
 
 status_t DrmManagerService::installDrmEngine(int uniqueId, const String8& drmEngineFile) {
@@ -195,6 +173,12 @@ DecryptHandle* DrmManagerService::openDecryptSession(
             int uniqueId, int fd, int offset, int length) {
     LOGV("Entering DrmManagerService::openDecryptSession");
     return mDrmManager->openDecryptSession(uniqueId, fd, offset, length);
+}
+
+DecryptHandle* DrmManagerService::openDecryptSession(
+            int uniqueId, const char* uri) {
+    LOGV("Entering DrmManagerService::openDecryptSession with uri");
+    return mDrmManager->openDecryptSession(uniqueId, uri);
 }
 
 status_t DrmManagerService::closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {

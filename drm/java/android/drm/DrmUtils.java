@@ -167,6 +167,9 @@ public class DrmUtils {
 
                 //Fetch Value
                 String strValue = readMultipleBytes(constraintData, valueLength, index);
+                if (strValue.equals(" ")) {
+                    strValue = "";
+                }
                 index += valueLength;
                 mMap.put(strKey, strValue);
             }
