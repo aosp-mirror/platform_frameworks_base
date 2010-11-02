@@ -5245,7 +5245,7 @@ public final class ContactsContract {
                         return com.android.internal.R.string.eventTypeAnniversary;
                     case TYPE_BIRTHDAY: return com.android.internal.R.string.eventTypeBirthday;
                     case TYPE_OTHER: return com.android.internal.R.string.eventTypeOther;
-                    default: return com.android.internal.R.string.eventTypeOther;
+                    default: return com.android.internal.R.string.eventTypeCustom;
                 }
             }
         }
