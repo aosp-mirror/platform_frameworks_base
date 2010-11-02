@@ -133,7 +133,7 @@
                 android:layout_height="match_parent"
                 android:paddingLeft="15dip"
                 android:paddingRight="15dip"
-                android:src="@drawable/status_bar_back"
+                android:src="@drawable/ic_sysbar_back"
                 android:background="@drawable/ic_sysbar_icon_bg"
                 systemui:keyCode="4"
                 />
