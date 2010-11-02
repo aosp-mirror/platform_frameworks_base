@@ -1315,7 +1315,7 @@
                 android:excludeFromRecents="true">
         </activity>
         <activity android:name="com.android.internal.app.RingtonePickerActivity"
-                android:theme="@style/Theme.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:multiprocess="true">
             <intent-filter>
