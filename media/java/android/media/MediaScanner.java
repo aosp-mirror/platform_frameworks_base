@@ -383,6 +383,11 @@ public class MediaScanner
 
     private MyMediaScannerClient mClient = new MyMediaScannerClient();
 
+    private boolean isDrmEnabled() {
+        String prop = System.getProperty("drm.service.enabled");
+        return prop != null && prop.equals("true");
+    }
+    
     private class MyMediaScannerClient implements MediaScannerClient {
 
         private String mArtist;
@@ -449,8 +454,7 @@ public class MediaScanner
                 }
             }
 
-            if (System.getProperty("drm.service.enabled").equals("true")
-                    && MediaFile.isDrmFileType(mFileType)) {
+            if (isDrmEnabled() && MediaFile.isDrmFileType(mFileType)) {
                 mFileType = getFileTypeFromDrm(path);
             }
 
@@ -882,7 +886,7 @@ public class MediaScanner
         }
 
         private int getFileTypeFromDrm(String path) {
-            if (!System.getProperty("drm.service.enabled").equals("true")) {
+            if (!isDrmEnabled()) {
                 return 0;
             }
 
