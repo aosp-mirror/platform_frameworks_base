@@ -39,13 +39,17 @@ import android.util.Log;
  * </ul>
  *
  * <p>
- * Each of the notify methods takes an int id parameter.  This id identifies
- * this notification from your app to the system, so that id should be unique
- * within your app.  If you call one of the notify methods with an id that is
- * currently active and a new set of notification parameters, it will be
- * updated.  For example, if you pass a new status bar icon, the old icon in
- * the status bar will be replaced with the new one.  This is also the same
- * id you pass to the {@link #cancel} method to clear this notification.
+ * Each of the notify methods takes an int id parameter and optionally a
+ * {@link String} tag parameter, which may be {@code null}.  These parameters
+ * are used to form a pair (tag, id), or ({@code null}, id) if tag is
+ * unspecified.  This pair identifies this notification from your app to the
+ * system, so that pair should be unique within your app.  If you call one
+ * of the notify methods with a (tag, id) pair that is currently active and
+ * a new set of notification parameters, it will be updated.  For example,
+ * if you pass a new status bar icon, the old icon in the status bar will
+ * be replaced with the new one.  This is also the same tag and id you pass
+ * to the {@link #cancel(int)} or {@link #cancel(String, int)} method to clear
+ * this notification.
  *
  * <p>
  * You do not instantiate this class directly; instead, retrieve it through
@@ -94,12 +98,11 @@ public class NotificationManager
     /**
      * Persistent notification on the status bar,
      *
-     * @param tag An string identifier for this notification unique within your
-     *        application.
+     * @param tag A string identifier for this notification.  May be {@code null}.
+     * @param id An identifier for this notification.  The pair (tag, id) must be unique
+     *        within your application.
      * @param notification A {@link Notification} object describing how to
      *        notify the user, other than the view you're providing. Must not be null.
-     * @return the id of the notification that is associated with the string identifier that
-     * can be used to cancel the notification
      */
     public void notify(String tag, int id, Notification notification)
     {
