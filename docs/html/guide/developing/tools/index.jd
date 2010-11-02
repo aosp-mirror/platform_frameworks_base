@@ -90,6 +90,11 @@ efficiency.
       level events.  You can use the Monkey to stress-test applications that you are developing,
       in a random yet repeatable manner.</dd>
 
+  <dt><a href="monkeyrunner_concepts.html">monkeyrunner</a></dt>
+  <dd>
+    The monkeyrunner tool provides an API for writing Python programs that control an Android device
+    or emulator from outside of Android code.
+  </dd>
   <dt><a  href="othertools.html#android">android</a></dt>
             <dd>A script that lets you manage AVDs and generate <a
                         href="http://ant.apache.org/" title="Ant">Ant</a> build files that
