@@ -81,6 +81,10 @@ public:
     virtual sp<Surface> createSurface() const;
     virtual status_t ditch();
     virtual void onRemoved();
+    virtual bool setBypass(bool enable);
+
+    inline sp<GraphicBuffer> getBypassBuffer() const {
+        return mBufferManager.getActiveBuffer(); }
 
     // only for debugging
     inline sp<GraphicBuffer> getBuffer(int i) const {
@@ -232,6 +236,7 @@ private:
     uint32_t mReqFormat;
     bool mNeedsScaling;
     bool mFixedSize;
+    bool mBypassState;
 };
 
 // ---------------------------------------------------------------------------

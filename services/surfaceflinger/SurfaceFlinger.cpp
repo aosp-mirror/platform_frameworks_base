@@ -61,6 +61,10 @@
 #define AID_GRAPHICS 1003
 #endif
 
+#ifdef USE_COMPOSITION_BYPASS
+#warning "using COMPOSITION_BYPASS"
+#endif
+
 #define DISPLAY_COUNT       1
 
 namespace android {
@@ -373,8 +377,15 @@ bool SurfaceFlinger::threadLoop()
 
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     if (LIKELY(hw.canDraw() && !isFrozen())) {
-        // repaint the framebuffer (if needed)
 
+#ifdef USE_COMPOSITION_BYPASS
+        if (handleBypassLayer()) {
+            unlockClients();
+            return true;
+        }
+#endif
+
+        // repaint the framebuffer (if needed)
         const int index = hw.getCurrentBufferIndex();
         GraphicLog& logger(GraphicLog::getInstance());
 
@@ -399,6 +410,20 @@ bool SurfaceFlinger::threadLoop()
         usleep(16667); // 60 fps period
     }
     return true;
+}
+
+bool SurfaceFlinger::handleBypassLayer()
+{
+    sp<Layer> bypassLayer(mBypassLayer.promote());
+    if (bypassLayer != 0) {
+        sp<GraphicBuffer> buffer(bypassLayer->getBypassBuffer());
+        if (buffer!=0 && (buffer->usage & GRALLOC_USAGE_HW_FB)) {
+            const DisplayHardware& hw(graphicPlane(0).displayHardware());
+            hw.postBypassBuffer(buffer->handle);
+            return true;
+        }
+    }
+    return false;
 }
 
 void SurfaceFlinger::postFramebuffer()
@@ -696,6 +721,28 @@ void SurfaceFlinger::commitTransaction()
     mTransactionCV.broadcast();
 }
 
+void SurfaceFlinger::setBypassLayer(const sp<LayerBase>& layer)
+{
+    // if this layer is already the bypass layer, do nothing
+    sp<Layer> cur(mBypassLayer.promote());
+    if (mBypassLayer == layer)
+        return;
+
+    // clear the current bypass layer
+    mBypassLayer.clear();
+    if (cur != 0) {
+        cur->setBypass(false);
+        cur.clear();
+    }
+
+    // set new bypass layer
+    if (layer != 0) {
+        if (layer->setBypass(true)) {
+            mBypassLayer = static_cast<Layer*>(layer.get());
+        }
+    }
+}
+
 void SurfaceFlinger::handlePageFlip()
 {
     bool visibleRegions = mVisibleRegionsDirty;
@@ -720,6 +767,21 @@ void SurfaceFlinger::handlePageFlip()
                 if (!currentLayers[i]->visibleRegionScreen.isEmpty())
                     mVisibleLayersSortedByZ.add(currentLayers[i]);
             }
+
+#ifdef USE_COMPOSITION_BYPASS
+            sp<LayerBase> bypassLayer;
+            const size_t numVisibleLayers = mVisibleLayersSortedByZ.size();
+            if (numVisibleLayers == 1) {
+                const sp<LayerBase>& candidate(mVisibleLayersSortedByZ[0]);
+                const Region& visibleRegion(candidate->visibleRegionScreen);
+                const Region reminder(screenRegion.subtract(visibleRegion));
+                if (reminder.isEmpty()) {
+                    // fullscreen candidate!
+                    bypassLayer = candidate;
+                }
+            }
+            setBypassLayer(bypassLayer);
+#endif
 
             mWormholeRegion = screenRegion.subtract(opaqueRegion);
             mVisibleRegionsDirty = false;
@@ -1416,9 +1478,9 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
         mWormholeRegion.dump(result, "WormholeRegion");
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         snprintf(buffer, SIZE,
-                "  display frozen: %s, freezeCount=%d, orientation=%d, canDraw=%d\n",
+                "  display frozen: %s, freezeCount=%d, orientation=%d, bypass=%p, canDraw=%d\n",
                 mFreezeDisplay?"yes":"no", mFreezeCount,
-                mCurrentState.orientation, hw.canDraw());
+                mCurrentState.orientation, mBypassLayer.unsafe_get(), hw.canDraw());
         result.append(buffer);
         snprintf(buffer, SIZE,
                 "  last eglSwapBuffers() time: %f us\n"
