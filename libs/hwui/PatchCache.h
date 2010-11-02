@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_PATCH_CACHE_H
-#define ANDROID_UI_PATCH_CACHE_H
+#ifndef ANDROID_HWUI_PATCH_CACHE_H
+#define ANDROID_HWUI_PATCH_CACHE_H
 
 #include <utils/KeyedVector.h>
 
@@ -62,4 +62,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_PATCH_CACHE_H
+#endif // ANDROID_HWUI_PATCH_CACHE_H

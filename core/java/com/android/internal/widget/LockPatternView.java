@@ -129,6 +129,7 @@ public class LockPatternView extends View {
     private long[] mVibePattern;
 
     private int mAspect;
+    private final Matrix mArrowMatrix = new Matrix();
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -923,7 +924,6 @@ public class LockPatternView extends View {
         // This assumes that the arrow image is drawn at 12:00 with it's top edge
         // coincident with the circle bitmap's top edge.
         Bitmap arrow = green ? mBitmapArrowGreenUp : mBitmapArrowRedUp;
-        Matrix matrix = new Matrix();
         final int cellWidth = mBitmapCircleDefault.getWidth();
         final int cellHeight = mBitmapCircleDefault.getHeight();
 
@@ -933,10 +933,10 @@ public class LockPatternView extends View {
         final float angle = (float) Math.toDegrees(theta) + 90.0f;
 
         // compose matrix
-        matrix.setTranslate(leftX + offsetX, topY + offsetY); // transform to cell position
-        matrix.preRotate(angle, cellWidth / 2.0f, cellHeight / 2.0f);  // rotate about cell center
-        matrix.preTranslate((cellWidth - arrow.getWidth()) / 2.0f, 0.0f); // translate to 12:00 pos
-        canvas.drawBitmap(arrow, matrix, mPaint);
+        mArrowMatrix.setTranslate(leftX + offsetX, topY + offsetY); // transform to cell position
+        mArrowMatrix.preRotate(angle, cellWidth / 2.0f, cellHeight / 2.0f);  // rotate about cell center
+        mArrowMatrix.preTranslate((cellWidth - arrow.getWidth()) / 2.0f, 0.0f); // translate to 12:00 pos
+        canvas.drawBitmap(arrow, mArrowMatrix, mPaint);
     }
 
     /**

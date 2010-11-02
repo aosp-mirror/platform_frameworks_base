@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_RECT_H
-#define ANDROID_UI_RECT_H
+#ifndef ANDROID_HWUI_RECT_H
+#define ANDROID_HWUI_RECT_H
+
+#include <cmath>
 
 #include <utils/Log.h>
 
@@ -32,25 +34,35 @@ struct Rect {
     float right;
     float bottom;
 
-    Rect():
+    // Used by Region
+    typedef float value_type;
+
+    inline Rect():
             left(0),
             top(0),
             right(0),
             bottom(0) {
     }
 
-    Rect(float left, float top, float right, float bottom):
+    inline Rect(float left, float top, float right, float bottom):
             left(left),
             top(top),
             right(right),
             bottom(bottom) {
     }
 
-    Rect(const Rect& r) {
+    inline Rect(float width, float height):
+            left(0.0f),
+            top(0.0f),
+            right(width),
+            bottom(height) {
+    }
+
+    inline Rect(const Rect& r) {
         set(r);
     }
 
-    Rect(Rect& r) {
+    inline Rect(Rect& r) {
         set(r);
     }
 
@@ -72,22 +84,26 @@ struct Rect {
         return memcmp(&a, &b, sizeof(a));
     }
 
-    bool isEmpty() const {
+    inline void clear() {
+        left = top = right = bottom = 0.0f;
+    }
+
+    inline bool isEmpty() const {
         return left >= right || top >= bottom;
     }
 
-    void setEmpty() {
-        memset(this, 0, sizeof(*this));
+    inline void setEmpty() {
+        left = top = right = bottom = 0.0f;
     }
 
-    void set(float left, float top, float right, float bottom) {
+    inline void set(float left, float top, float right, float bottom) {
         this->left = left;
         this->right = right;
         this->top = top;
         this->bottom = bottom;
     }
 
-    void set(const Rect& r) {
+    inline void set(const Rect& r) {
         set(r.left, r.top, r.right, r.bottom);
     }
 
@@ -148,6 +164,13 @@ struct Rect {
         return false;
     }
 
+    void translate(float dx, float dy) {
+        left += dx;
+        right += dx;
+        top += dy;
+        bottom += dy;
+    }
+
     void snapToPixelBoundaries() {
         left = floorf(left + 0.5f);
         top = floorf(top + 0.5f);
@@ -164,4 +187,4 @@ struct Rect {
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_RECT_H
+#endif // ANDROID_HWUI_RECT_H

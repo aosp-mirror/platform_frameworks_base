@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_PATCH_H
-#define ANDROID_UI_PATCH_H
+#ifndef ANDROID_HWUI_PATCH_H
+#define ANDROID_HWUI_PATCH_H
 
 #include <sys/types.h>
 
 #include <GLES2/gl2.h>
 
+#include <utils/Vector.h>
+
+#include "Rect.h"
 #include "Vertex.h"
 #include "utils/Compare.h"
 
@@ -96,15 +99,17 @@ struct Patch {
 
     GLuint meshBuffer;
     uint32_t verticesCount;
+    Vector<Rect> quads;
+    bool hasEmptyQuads;
 
 private:
     TextureVertex* mVertices;
 
-    static inline void generateRow(TextureVertex*& vertex, float y1, float y2,
+    void generateRow(TextureVertex*& vertex, float y1, float y2,
             float v1, float v2, const int32_t xDivs[], uint32_t xCount,
             float stretchX, float width, float bitmapWidth,
             uint32_t& quadCount, const uint32_t colorKey);
-    static inline void generateQuad(TextureVertex*& vertex,
+    void generateQuad(TextureVertex*& vertex,
             float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2,
             uint32_t& quadCount, const uint32_t colorKey);
@@ -113,4 +118,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_PATCH_H
+#endif // ANDROID_HWUI_PATCH_H

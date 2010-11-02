@@ -38,7 +38,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 
 	LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER
 	LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-	LOCAL_SHARED_LIBRARIES := libcutils libutils libGLESv2 libskia
+	LOCAL_SHARED_LIBRARIES := libcutils libutils libGLESv2 libskia libui
 	LOCAL_MODULE := libhwui
 	LOCAL_MODULE_TAGS := optional
 	LOCAL_PRELINK_MODULE := false

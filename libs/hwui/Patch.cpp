@@ -34,6 +34,7 @@ Patch::Patch(const uint32_t xCount, const uint32_t yCount, const int8_t emptyQua
     // 2 triangles per patch, 3 vertices per triangle
     verticesCount = ((xCount + 1) * (yCount + 1) - emptyQuads) * 2 * 3;
     mVertices = new TextureVertex[verticesCount];
+    hasEmptyQuads = emptyQuads > 0;
 
     glGenBuffers(1, &meshBuffer);
 }
@@ -51,6 +52,8 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         float left, float top, float right, float bottom,
         const int32_t* xDivs, const int32_t* yDivs,
         const uint32_t width, const uint32_t height, const uint32_t colorKey) {
+    if (hasEmptyQuads) quads.clear();
+
     const uint32_t xStretchCount = (width + 1) >> 1;
     const uint32_t yStretchCount = (height + 1) >> 1;
 
@@ -118,7 +121,7 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
                 mVertices, GL_STATIC_DRAW);
 }
 
-inline void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, float v2,
+void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, float v2,
         const int32_t xDivs[], uint32_t xCount, float stretchX, float width, float bitmapWidth,
         uint32_t& quadCount, const uint32_t colorKey) {
     float previousStepX = 0.0f;
@@ -150,10 +153,15 @@ inline void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float
     generateQuad(vertex, x1, y1, width, y2, u1, v1, 1.0f, v2, quadCount, colorKey);
 }
 
-inline void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
+void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2, uint32_t& quadCount, const uint32_t colorKey) {
     if (((colorKey >> quadCount++) & 0x1) == 1) {
         return;
+    }
+
+    if (hasEmptyQuads) {
+        Rect bounds(x1, y1, x2, y2);
+        quads.add(bounds);
     }
 
     // Left triangle

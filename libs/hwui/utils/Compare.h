@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_COMPARE_H
-#define ANDROID_UI_COMPARE_H
+#ifndef ANDROID_HWUI_COMPARE_H
+#define ANDROID_HWUI_COMPARE_H
 
 #include <cmath>
 
@@ -37,4 +37,4 @@
     if (a < rhs.a) return true; \
     if (a == rhs.a)
 
-#endif // ANDROID_UI_COMPARE_H
+#endif // ANDROID_HWUI_COMPARE_H

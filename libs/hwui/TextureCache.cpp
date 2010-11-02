@@ -200,8 +200,12 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         texture->blend = !bitmap->isOpaque();
         break;
     case SkBitmap::kIndex8_Config:
-        uploadPalettedTexture(resize, bitmap, texture->width, texture->height);
+        uploadLoFiTexture(resize, bitmap, texture->width, texture->height);
         texture->blend = false;
+        break;
+    case SkBitmap::kARGB_4444_Config:
+        uploadLoFiTexture(resize, bitmap, texture->width, texture->height);
+        texture->blend = true;
         break;
     default:
         LOGW("Unsupported bitmap config: %d", bitmap->getConfig());
@@ -215,7 +219,7 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-void TextureCache::uploadPalettedTexture(bool resize, SkBitmap* bitmap,
+void TextureCache::uploadLoFiTexture(bool resize, SkBitmap* bitmap,
         uint32_t width, uint32_t height) {
     SkBitmap rgbaBitmap;
     rgbaBitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height);

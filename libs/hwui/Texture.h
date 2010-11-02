@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_TEXTURE_H
-#define ANDROID_UI_TEXTURE_H
+#ifndef ANDROID_HWUI_TEXTURE_H
+#define ANDROID_HWUI_TEXTURE_H
 
 #include <GLES2/gl2.h>
 
@@ -86,4 +86,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_TEXTURE_H
+#endif // ANDROID_HWUI_TEXTURE_H

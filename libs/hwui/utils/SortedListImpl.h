@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_SORTED_LIST_IMPL_H
-#define ANDROID_UI_SORTED_LIST_IMPL_H
+#ifndef ANDROID_HWUI_SORTED_LIST_IMPL_H
+#define ANDROID_HWUI_SORTED_LIST_IMPL_H
 
 #include <utils/VectorImpl.h>
 
@@ -62,4 +62,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_SORTED_LIST_IMPL_H
+#endif // ANDROID_HWUI_SORTED_LIST_IMPL_H

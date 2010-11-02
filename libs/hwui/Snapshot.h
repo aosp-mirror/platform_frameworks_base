@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_SNAPSHOT_H
-#define ANDROID_UI_SNAPSHOT_H
+#ifndef ANDROID_HWUI_SNAPSHOT_H
+#define ANDROID_HWUI_SNAPSHOT_H
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
 #include <utils/RefBase.h>
+#include <ui/Region.h>
 
 #include <SkCanvas.h>
-#include <SkRegion.h>
 
 #include "Layer.h"
 #include "Matrix.h"
@@ -46,6 +46,7 @@ public:
     Snapshot(): flags(0), previous(NULL), layer(NULL), fbo(0), invisible(false) {
         transform = &mTransformRoot;
         clipRect = &mClipRectRoot;
+        region = NULL;
     }
 
     /**
@@ -74,6 +75,13 @@ public:
             mLocalClip.set(s->mLocalClip);
         } else {
             flags |= Snapshot::kFlagDirtyLocalClip;
+        }
+
+        if (s->flags & Snapshot::kFlagFboTarget) {
+            flags |= Snapshot::kFlagFboTarget;
+            region = s->region;
+        } else {
+            region = NULL;
         }
     }
 
@@ -105,6 +113,11 @@ public:
          * Indicates that this snapshot has changed the ortho matrix.
          */
         kFlagDirtyOrtho = 0x10,
+        /**
+         * Indicates that this snapshot or an ancestor snapshot is
+         * an FBO layer.
+         */
+        kFlagFboTarget = 0x20
     };
 
     /**
@@ -243,6 +256,11 @@ public:
      */
     Rect* clipRect;
 
+    /**
+     * The ancestor layer's dirty region..
+     */
+    Region* region;
+
 private:
     mat4 mTransformRoot;
     Rect mClipRectRoot;
@@ -253,4 +271,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_SNAPSHOT_H
+#endif // ANDROID_HWUI_SNAPSHOT_H

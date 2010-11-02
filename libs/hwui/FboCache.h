@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_FBO_CACHE_H
-#define ANDROID_UI_FBO_CACHE_H
+#ifndef ANDROID_HWUI_FBO_CACHE_H
+#define ANDROID_HWUI_FBO_CACHE_H
 
 #include <GLES2/gl2.h>
 
@@ -76,4 +76,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_FBO_CACHE_H
+#endif // ANDROID_HWUI_FBO_CACHE_H

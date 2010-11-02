@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_FONT_RENDERER_H
-#define ANDROID_UI_FONT_RENDERER_H
+#ifndef ANDROID_HWUI_FONT_RENDERER_H
+#define ANDROID_HWUI_FONT_RENDERER_H
 
 #include <utils/String8.h>
 #include <utils/String16.h>
@@ -132,8 +132,8 @@ public:
     }
 
     void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
-    void renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, int x, int y);
+    bool renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
+            uint32_t len, int numGlyphs, int x, int y, Rect* bounds);
 
     struct DropShadow {
         DropShadow() { };
@@ -257,6 +257,8 @@ protected:
     uint32_t mIndexBufferID;
 
     const Rect* mClip;
+    Rect* mBounds;
+    bool mDrawn;
 
     bool mInitialized;
 
@@ -273,4 +275,4 @@ protected:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_FONT_RENDERER_H
+#endif // ANDROID_HWUI_FONT_RENDERER_H
