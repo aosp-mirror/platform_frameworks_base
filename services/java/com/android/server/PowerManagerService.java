@@ -2219,9 +2219,9 @@ class PowerManagerService extends IPowerManager.Stub
             int eventType, boolean force) {
 
         if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)
-                && (eventType == CHEEK_EVENT || eventType == TOUCH_EVENT)) {
+                && (eventType == CHEEK_EVENT)) {
             if (false) {
-                Slog.d(TAG, "dropping cheek or short event mPokey=0x" + Integer.toHexString(mPokey));
+                Slog.d(TAG, "dropping cheek event mPokey=0x" + Integer.toHexString(mPokey));
             }
             return;
         }

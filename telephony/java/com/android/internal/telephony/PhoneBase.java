@@ -750,6 +750,10 @@ public abstract class PhoneBase extends Handler implements Phone {
         mNotifier.notifyDataConnection(this, reason, apnType);
     }
 
+    public void notifyOtaspChanged(int otaspMode) {
+        mNotifier.notifyOtaspChanged(this, otaspMode);
+    }
+
     public abstract String getPhoneName();
 
     public abstract int getPhoneType();

@@ -89,6 +89,7 @@ public:
     struct SymbolTable_t {
         const char * mName;
         void * mPtr;
+        bool threadable;
     };
     //static SymbolTable_t gSyms[];
     static const SymbolTable_t * lookupSymbol(const char *);

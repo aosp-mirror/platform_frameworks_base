@@ -78,10 +78,6 @@ void ScriptC::setupScript(Context *rsc)
 
         if (dest) {
             *dest = ptr;
-        } else {
-            if (rsc->props.mLogScripts) {
-                LOGV("ScriptC::setupScript, NULL var binding address.");
-            }
         }
     }
 }
@@ -404,16 +400,14 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
     const ScriptCState::SymbolTable_t *sym;
     ScriptC *s = (ScriptC *)pContext;
     sym = ScriptCState::lookupSymbol(name);
-    if (sym) {
-        return sym->mPtr;
+    if (!sym) {
+        sym = ScriptCState::lookupSymbolCL(name);
     }
-    sym = ScriptCState::lookupSymbolCL(name);
-    if (sym) {
-        return sym->mPtr;
+    if (!sym) {
+        sym = ScriptCState::lookupSymbolGL(name);
     }
-    s->mEnviroment.mIsThreadable = false;
-    sym = ScriptCState::lookupSymbolGL(name);
     if (sym) {
+        s->mEnviroment.mIsThreadable &= sym->threadable;
         return sym->mPtr;
     }
     LOGE("ScriptC sym lookup failed for %s", name);
@@ -425,7 +419,6 @@ extern unsigned rs_runtime_lib_bc_size;
 
 void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 {
-    LOGV("%p ScriptCState::runCompiler ", rsc);
     {
         StopWatch compileTimer("RenderScript compile time");
         s->mBccScript = bccCreateScript();

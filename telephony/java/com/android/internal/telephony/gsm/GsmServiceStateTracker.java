@@ -22,6 +22,7 @@ import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.MccTable;
+import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
@@ -226,6 +227,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
         phone.getContext().registerReceiver(mIntentReceiver, filter);
+
+        // Gsm doesn't support OTASP so its not needed
+        phone.notifyOtaspChanged(OTASP_NOT_NEEDED);
     }
 
     public void dispose() {
@@ -244,6 +248,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
     protected void finalize() {
         if(DBG) Log.d(LOG_TAG, "GsmServiceStateTracker finalized");
+    }
+
+    @Override
+    public Phone getPhone() {
+        return phone;
     }
 
     /**
@@ -1676,7 +1685,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
     }
 
-    private void log(String s) {
+    @Override
+    protected void log(String s) {
         Log.d(LOG_TAG, "[GsmServiceStateTracker] " + s);
     }
 }

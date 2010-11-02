@@ -429,11 +429,14 @@ public class StackView extends AdapterViewAnimator {
 
             // We only register this gesture if we've made it this far without a problem
             mSwipeGestureType = swipeGestureType;
+            cancelHandleClick();
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        super.onTouchEvent(ev);
+
         int action = ev.getAction();
         int pointerIndex = ev.findPointerIndex(mActivePointerId);
         if (pointerIndex == INVALID_POINTER) {

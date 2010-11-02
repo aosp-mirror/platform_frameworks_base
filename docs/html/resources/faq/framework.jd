@@ -68,12 +68,17 @@ Preferences</a> storage mechanism.</p>
 <p>For sharing complex non-persistent user-defined objects for short
 duration, the following approaches are recommended:
 </p>
-  <h4>The android.app.Application class</h4>
-  <p>The android.app.Application is a base class for those who need to
-maintain global application state. It can be accessed via
-getApplication() from any Activity or Service. It has a couple of
-life-cycle methods and will be instantiated by Android automatically if
-your register it in AndroidManifest.xml.</p>
+  <h4>Singleton class</h4>
+  <p>You can take advantage of the fact that your application
+components run in the same process through the use of a singleton.
+This is a class that is designed to have only one instance.  It
+has a static method with a name such as <code>getInstance()</code>
+that returns the instance; the first time this method is called,
+it creates the global instance.  Because all callers get the same
+instance, they can use this as a point of interaction.  For
+example activity A may retrieve the instance and call setValue(3);
+later activity B may retrieve the instance and call getValue() to
+retrieve the last set value.</p>
 
   <h4>A public static field/method</h4>
   <p>An alternate way to make data accessible across Activities/Services is to use <em>public static</em>
@@ -89,18 +94,6 @@ simply puts the object in the map and sends the key (which is a unique
 Long based on a counter or time stamp) to the recipient activity via
 intent extras. The recipient activity retrieves the object using this
 key.</p>
-
-  <h4>A Singleton class</h4>
-  <p>There are advantages to using a static Singleton, such as you can
-refer to them without casting getApplication() to an
-application-specific class, or going to the trouble of hanging an
-interface on all your Application subclasses so that your various
-modules can refer to that interface instead. </p>
-<p>But, the life cycle of a static is not well under your control; so
-to abide by the life-cycle model, the application class should initiate and
-tear down these static objects in the onCreate() and onTerminate() methods
-of the Application Class</p>
-</p>
 
 <h3>Persistent Objects</h3>
 
@@ -146,15 +139,11 @@ call.</p>
 <h2>If an Activity starts a remote service, is there any way for the
 Service to pass a message back to the Activity?</h2>
 
-<p>The remote service can define a callback interface and register it with the
-clients to callback into the clients. The 
-{@link android.os.RemoteCallbackList RemoteCallbackList} class provides methods to
-register and unregister clients with the service, and send and receive
-messages.</p>
-
-<p>The sample code for remote service callbacks is given in <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">ApiDemos/RemoteService</a></p>
-
+<p>See the {@link android.app.Service} documentation's for examples of
+how clients can interact with a service.  You can take advantage of the
+fact that your components run in the same process to greatly simplify
+service interaction from the generic remote case, as shown by the "Local
+Service Sample".  In some cases techniques like singletons may also make sense.
 
 
 <a name="6" id="6"></a>

@@ -83,6 +83,11 @@ public class MediaFile {
     private static final int FIRST_PLAYLIST_FILE_TYPE = FILE_TYPE_M3U;
     private static final int LAST_PLAYLIST_FILE_TYPE = FILE_TYPE_WPL;
 
+    // Drm file types
+    public static final int FILE_TYPE_FL      = 51;
+    private static final int FIRST_DRM_FILE_TYPE = FILE_TYPE_FL;
+    private static final int LAST_DRM_FILE_TYPE = FILE_TYPE_FL;
+
     // Other popular file types
     public static final int FILE_TYPE_TEXT          = 100;
     public static final int FILE_TYPE_HTML          = 101;
@@ -189,6 +194,8 @@ public class MediaFile {
         addFileType("PLS", FILE_TYPE_PLS, "audio/x-scpls", MtpConstants.FORMAT_PLS_PLAYLIST);
         addFileType("WPL", FILE_TYPE_WPL, "application/vnd.ms-wpl", MtpConstants.FORMAT_WPL_PLAYLIST);
 
+        addFileType("FL", FILE_TYPE_FL, "application/x-android-drm-fl");
+
         addFileType("TXT", FILE_TYPE_TEXT, "text/plain", MtpConstants.FORMAT_TEXT);
         addFileType("HTM", FILE_TYPE_HTML, "text/html", MtpConstants.FORMAT_HTML);
         addFileType("HTML", FILE_TYPE_HTML, "text/html", MtpConstants.FORMAT_HTML);
@@ -220,6 +227,11 @@ public class MediaFile {
     public static boolean isPlayListFileType(int fileType) {
         return (fileType >= FIRST_PLAYLIST_FILE_TYPE &&
                 fileType <= LAST_PLAYLIST_FILE_TYPE);
+    }
+
+    public static boolean isDrmFileType(int fileType) {
+        return (fileType >= FIRST_DRM_FILE_TYPE &&
+                fileType <= LAST_DRM_FILE_TYPE);
     }
 
     public static MediaFileType getFileType(String path) {

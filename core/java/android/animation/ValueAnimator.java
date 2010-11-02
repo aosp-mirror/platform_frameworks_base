@@ -1142,7 +1142,7 @@ public class ValueAnimator extends Animator {
         switch (mPlayingState) {
         case RUNNING:
         case SEEKED:
-            float fraction = (float)(currentTime - mStartTime) / mDuration;
+            float fraction = mDuration > 0 ? (float)(currentTime - mStartTime) / mDuration : 1f;
             if (fraction >= 1f) {
                 if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
                     // Time to repeat

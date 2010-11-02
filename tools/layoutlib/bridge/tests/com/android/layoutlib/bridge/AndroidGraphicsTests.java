@@ -17,8 +17,6 @@
 package com.android.layoutlib.bridge;
 
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics._Original_Paint;
 import android.text.TextPaint;
 
 import junit.framework.TestCase;
@@ -56,14 +54,6 @@ public class AndroidGraphicsTests extends TestCase {
         for (int i = 0 ; i < 9; i++) {
             assertEquals(v1[i], v2[i]);
         }
-    }
-
-    public void testPaint() {
-        _Original_Paint o = new _Original_Paint();
-        assertNotNull(o);
-
-        Paint p = new Paint();
-        assertNotNull(p);
     }
 
     public void textTextPaint() {

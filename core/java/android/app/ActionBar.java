@@ -299,7 +299,7 @@ public abstract class ActionBar {
      * 
      * <p>Example: setDisplayOptions(0, DISPLAY_SHOW_HOME) will disable the
      * {@link #DISPLAY_SHOW_HOME} option.
-     * setDisplayOptions(DISPLAY_SHOW_HOME, DISPLAY_HIDE_HOME | DISPLAY_USE_LOGO)
+     * setDisplayOptions(DISPLAY_SHOW_HOME, DISPLAY_SHOW_HOME | DISPLAY_USE_LOGO)
      * will enable {@link #DISPLAY_SHOW_HOME} and disable {@link #DISPLAY_USE_LOGO}.
      * 
      * @param options A combination of the bits defined by the DISPLAY_ constants

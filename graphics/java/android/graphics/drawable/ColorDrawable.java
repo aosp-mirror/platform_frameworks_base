@@ -51,7 +51,7 @@ public class ColorDrawable extends Drawable {
      */
     public ColorDrawable(int color) {
         this(null);
-        mState.mBaseColor = mState.mUseColor = color;
+        setColor(color);
     }
 
     private ColorDrawable(ColorState state) {
@@ -69,6 +69,25 @@ public class ColorDrawable extends Drawable {
             mPaint.setColor(mState.mUseColor);
             canvas.drawRect(getBounds(), mPaint);
         }
+    }
+
+    /**
+     * Gets the drawable's color value.
+     *
+     * @return int The color to draw.
+     */
+    public int getColor() {
+        return mState.mUseColor;
+    }
+
+    /**
+     * Sets the drawable's color value. This action will clobber the results of prior calls to
+     * {@link #setAlpha(int)} on this object, which side-affected the underlying color.
+     *
+     * @param color The color to draw.
+     */
+    public void setColor(int color) {
+        mState.mBaseColor = mState.mUseColor = color;
     }
 
     /**
@@ -131,7 +150,7 @@ public class ColorDrawable extends Drawable {
     }
 
     final static class ColorState extends ConstantState {
-        int mBaseColor; // initial color. never changes
+        int mBaseColor; // base color, independent of setAlpha()
         int mUseColor;  // basecolor modulated by setAlpha()
         int mChangingConfigurations;
 

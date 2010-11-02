@@ -544,16 +544,18 @@ public interface WindowManagerPolicy {
      * Generally, it's best to keep as little as possible in the queue thread
      * because it's the most fragile.
      * @param whenNanos The event time in uptime nanoseconds.
+     * @param action The key event action.
+     * @param flags The key event flags.
      * @param keyCode The key code.
-     * @param down True if the key is down.
+     * @param scanCode The key's scan code.
      * @param policyFlags The policy flags associated with the key.
      * @param isScreenOn True if the screen is already on
      *
      * @return The bitwise or of the {@link #ACTION_PASS_TO_USER},
      *          {@link #ACTION_POKE_USER_ACTIVITY} and {@link #ACTION_GO_TO_SLEEP} flags.
      */
-    public int interceptKeyBeforeQueueing(long whenNanos, int keyCode, boolean down, int policyFlags,
-            boolean isScreenOn);
+    public int interceptKeyBeforeQueueing(long whenNanos, int action, int flags,
+            int keyCode, int scanCode, int policyFlags, boolean isScreenOn);
     
     /**
      * Called from the input dispatcher thread before a key is dispatched to a window.
@@ -571,6 +573,7 @@ public interface WindowManagerPolicy {
      * @param action The key event action.
      * @param flags The key event flags.
      * @param keyCode The key code.
+     * @param scanCode The key's scan code.
      * @param metaState bit mask of meta keys that are held.
      * @param repeatCount Number of times a key down has repeated.
      * @param policyFlags The policy flags associated with the key.
@@ -578,7 +581,7 @@ public interface WindowManagerPolicy {
      * not be further dispatched.
      */
     public boolean interceptKeyBeforeDispatching(WindowState win, int action, int flags,
-            int keyCode, int metaState, int repeatCount, int policyFlags);
+            int keyCode, int scanCode, int metaState, int repeatCount, int policyFlags);
 
     /**
      * Called when layout of the windows is about to start.

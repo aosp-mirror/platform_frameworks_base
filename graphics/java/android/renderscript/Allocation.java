@@ -199,6 +199,7 @@ public class Allocation extends BaseObj {
             throw new IllegalStateException("Resize only support for 1D allocations at this time.");
         }
         mRS.nAllocationResize1D(mID, dimX);
+        mRS.finish();  // Necessary because resize is fifoed and update is async.
 
         int typeID = mRS.nAllocationGetType(mID);
         mType = new Type(typeID, mRS);

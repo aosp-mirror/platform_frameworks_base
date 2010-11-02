@@ -533,6 +533,8 @@ import java.util.Set;
  *     <li> {@link #CATEGORY_TEST}
  *     <li> {@link #CATEGORY_CAR_DOCK}
  *     <li> {@link #CATEGORY_DESK_DOCK}
+ *     <li> {@link #CATEGORY_LE_DESK_DOCK}
+ *     <li> {@link #CATEGORY_HE_DESK_DOCK}
  *     <li> {@link #CATEGORY_CAR_MODE}
  *     <li> {@link #CATEGORY_APP_MARKET}
  * </ul>
@@ -549,6 +551,8 @@ import java.util.Set;
  *     <li> {@link #EXTRA_CHANGED_COMPONENT_NAME}
  *     <li> {@link #EXTRA_DATA_REMOVED}
  *     <li> {@link #EXTRA_DOCK_STATE}
+ *     <li> {@link #EXTRA_DOCK_STATE_HE_DESK}
+ *     <li> {@link #EXTRA_DOCK_STATE_LE_DESK}
  *     <li> {@link #EXTRA_DOCK_STATE_CAR}
  *     <li> {@link #EXTRA_DOCK_STATE_DESK}
  *     <li> {@link #EXTRA_DOCK_STATE_UNDOCKED}
@@ -1822,6 +1826,36 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.HEADSET_PLUG";
 
     /**
+     * Broadcast Action: An analog audio speaker/headset plugged in or unplugged.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>name</em> - Headset type, human readable string </li>
+     * </ul>
+     * </ul>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USB_ANLG_HEADSET_PLUG =
+            "android.intent.action.DOCK_HEADSET_PLUG";
+
+    /**
+     * Broadcast Action: An analog audio speaker/headset plugged in or unplugged.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>name</em> - Headset type, human readable string </li>
+     * </ul>
+     * </ul>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USB_DGTL_HEADSET_PLUG =
+            "android.intent.action.DOCK_HEADSET_PLUG";
+
+    /**
      * Broadcast Action: An outgoing call is about to be placed.
      *
      * <p>The Intent will have the following extra value:
@@ -2060,6 +2094,21 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_DESK_DOCK = "android.intent.category.DESK_DOCK";
+    /**
+     * An activity to run when device is inserted into a analog (low end) dock.
+     * Used with {@link #ACTION_MAIN} to launch an activity.  For more
+     * information, see {@link android.app.UiModeManager}.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_LE_DESK_DOCK = "android.intent.category.LE_DESK_DOCK";
+
+    /**
+     * An activity to run when device is inserted into a digital (high end) dock.
+     * Used with {@link #ACTION_MAIN} to launch an activity.  For more
+     * information, see {@link android.app.UiModeManager}.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_HE_DESK_DOCK = "android.intent.category.HE_DESK_DOCK";
 
     /**
      * Used to indicate that the activity can be used in a car environment.
@@ -2208,7 +2257,9 @@ public class Intent implements Parcelable, Cloneable {
      * intents to request the dock state.  Possible values are
      * {@link android.content.Intent#EXTRA_DOCK_STATE_UNDOCKED},
      * {@link android.content.Intent#EXTRA_DOCK_STATE_DESK}, or
-     * {@link android.content.Intent#EXTRA_DOCK_STATE_CAR}.
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_CAR}, or
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_LE_DESK}, or
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_HE_DESK}.
      */
     public static final String EXTRA_DOCK_STATE = "android.intent.extra.DOCK_STATE";
 
@@ -2229,6 +2280,18 @@ public class Intent implements Parcelable, Cloneable {
      * to represent that the phone is in a car dock.
      */
     public static final int EXTRA_DOCK_STATE_CAR = 2;
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+     * to represent that the phone is in a analog (low end) dock.
+     */
+    public static final int EXTRA_DOCK_STATE_LE_DESK = 3;
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+     * to represent that the phone is in a digital (high end) dock.
+     */
+    public static final int EXTRA_DOCK_STATE_HE_DESK = 4;
 
     /**
      * Boolean that can be supplied as meta-data with a dock activity, to

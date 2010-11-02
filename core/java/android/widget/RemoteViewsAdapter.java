@@ -319,7 +319,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
                 if (mUserLoadingView != null) {
                     // A user-specified loading view
                     View loadingView = mUserLoadingView.apply(parent.getContext(), parent);
-                    loadingView.setTag(new Integer(0));
+                    loadingView.setTagInternal(com.android.internal.R.id.rowTypeId, new Integer(0));
                     layout.addView(loadingView);
                 } else {
                     // A default loading view
@@ -741,8 +741,11 @@ public class RemoteViewsAdapter extends BaseAdapter {
      */
     private int getConvertViewTypeId(View convertView) {
         int typeId = -1;
-        if (convertView != null && convertView.getTag() != null) {
-            typeId = (Integer) convertView.getTag();
+        if (convertView != null) {
+            Object tag = convertView.getTag(com.android.internal.R.id.rowTypeId);
+            if (tag != null) {
+                typeId = (Integer) tag;
+            }
         }
         return typeId;
     }
@@ -781,7 +784,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
 
                     // Otherwise, create a new view to be returned
                     View newView = rv.apply(context, parent);
-                    newView.setTag(new Integer(typeId));
+                    newView.setTagInternal(com.android.internal.R.id.rowTypeId, new Integer(typeId));
                     if (convertView != null) {
                         layout.removeAllViews();
                     } else {

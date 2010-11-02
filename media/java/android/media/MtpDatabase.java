@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
@@ -45,6 +46,7 @@ public class MtpDatabase {
     private final String mVolumeName;
     private final Uri mObjectsUri;
     private final String mMediaStoragePath;
+    private final String mExternalStoragePath;
 
     // true if the database has been modified in the current MTP session
     private boolean mDatabaseModified;
@@ -77,7 +79,6 @@ public class MtpDatabase {
             Files.FileColumns.DATE_MODIFIED, // 5
     };
     private static final String ID_WHERE = Files.FileColumns._ID + "=?";
-    private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
     private static final String PARENT_WHERE = Files.FileColumns.PARENT + "=?";
     private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
                                             + Files.FileColumns.FORMAT + "=?";
@@ -98,6 +99,7 @@ public class MtpDatabase {
         mMediaProvider = context.getContentResolver().acquireProvider("media");
         mVolumeName = volumeName;
         mMediaStoragePath = storagePath;
+        mExternalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
         mObjectsUri = Files.getMtpObjectsUri(volumeName);
         mMediaScanner = new MediaScanner(context);
         openDevicePropertiesDatabase(context);
@@ -110,6 +112,16 @@ public class MtpDatabase {
         } finally {
             super.finalize();
         }
+    }
+
+    private String externalToMediaPath(String path) {
+        // convert external storage path to media path
+        if (path != null && mMediaStoragePath != null
+                && mExternalStoragePath != null
+                && path.startsWith(mExternalStoragePath)) {
+            path = mMediaStoragePath + path.substring(mExternalStoragePath.length());
+        }
+        return path;
     }
 
     private void openDevicePropertiesDatabase(Context context) {
@@ -482,7 +494,7 @@ public class MtpDatabase {
         try {
             c = mMediaProvider.query(mObjectsUri, PATH_PROJECTION, ID_WHERE, whereArgs, null);
             if (c != null && c.moveToNext()) {
-                path = c.getString(1);
+                path = externalToMediaPath(c.getString(1));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in getObjectFilePath", e);
@@ -763,7 +775,7 @@ public class MtpDatabase {
                 return true;
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getObjectProperty", e);
+            Log.e(TAG, "RemoteException in getObjectInfo", e);
         } finally {
             if (c != null) {
                 c.close();
@@ -786,7 +798,7 @@ public class MtpDatabase {
             c = mMediaProvider.query(mObjectsUri, PATH_SIZE_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null);
             if (c != null && c.moveToNext()) {
-                String path = c.getString(1);
+                String path = externalToMediaPath(c.getString(1));
                 path.getChars(0, path.length(), outFilePath, 0);
                 outFilePath[path.length()] = 0;
                 outFileLength[0] = c.getLong(2);

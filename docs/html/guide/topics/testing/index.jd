@@ -59,6 +59,20 @@ page.title=Testing
         which guides you through a more complex testing scenario.
     </li>
 </ul>
+<h4>Tools</h4>
+<ul>
+    <li>
+        The
+        <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerciser Monkey</a>,
+        usually called Monkey, is a command-line tool that sends pseudo-random
+        streams of keystrokes, touches, and gestures to a device.
+    </li>
+    <li>
+     The <a href="{@docRoot}guide/developing/tools/monkeyrunner_concepts.html">monkeyrunner</a> tool
+        is an API and execution environment. You use monkeyrunner with Python programs
+        to test applications and devices.
+    </li>
+</ul>
 <h4>Samples</h4>
 <ul>
     <li>

@@ -2501,7 +2501,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
                     deltaY -= mMotionCorrection;
                     int incrementalDeltaY = mLastY != Integer.MIN_VALUE ? y - mLastY : deltaY;
-                    
+
                     // No need to do all this work if we're not going to move anyway
                     boolean atEdge = false;
                     if (incrementalDeltaY != 0) {

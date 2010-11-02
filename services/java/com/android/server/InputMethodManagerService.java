@@ -993,6 +993,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (mCurMethod != null) {
                             try {
                                 putSelectedInputMethodSubtype(info, subtypeId);
+                                mCurrentSubtype = subtype;
+                                if (mInputShown) {
+                                    // If mInputShown is false, there is no IME button on the
+                                    // system bar.
+                                    // Thus there is no need to make it invisible explicitly.
+                                    mStatusBar.setIMEButtonVisible(true);
+                                }
                                 mCurMethod.changeInputMethodSubtype(subtype);
                             } catch (RemoteException e) {
                                 return;
@@ -1881,11 +1888,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             String id = pair.first;
             ArrayList<String> subtypes = pair.second;
             builder.append(id);
-            if (subtypes.size() > 0) {
-                builder.append(subtypes.get(0));
-                for (int i = 1; i < subtypes.size(); ++i) {
-                    builder.append(INPUT_METHOD_SUBTYPE_SEPARATER).append(subtypes.get(i));
-                }
+            // Inputmethod and subtypes are saved in the settings as follows:
+            // ime0;subtype0;subtype1:ime1;subtype0:ime2:ime3;subtype0;subtype1
+            for (String subtypeId: subtypes) {
+                builder.append(INPUT_METHOD_SUBTYPE_SEPARATER).append(subtypeId);
             }
         }
 

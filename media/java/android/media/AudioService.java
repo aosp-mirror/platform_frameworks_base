@@ -307,10 +307,13 @@ public class AudioService extends IAudioService.Stub {
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+
         intentFilter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
+        intentFilter.addAction(Intent.ACTION_USB_ANLG_HEADSET_PLUG);
+        intentFilter.addAction(Intent.ACTION_USB_DGTL_HEADSET_PLUG);
         context.registerReceiver(mReceiver, intentFilter);
 
         // Register for media button intent broadcasts.
@@ -1816,6 +1819,12 @@ public class AudioService extends IAudioService.Stub {
                     case Intent.EXTRA_DOCK_STATE_CAR:
                         config = AudioSystem.FORCE_BT_CAR_DOCK;
                         break;
+                    case Intent.EXTRA_DOCK_STATE_LE_DESK:
+                        config = AudioSystem.FORCE_ANALOG_DOCK;
+                        break;
+                    case Intent.EXTRA_DOCK_STATE_HE_DESK:
+                        config = AudioSystem.FORCE_DIGITAL_DOCK;
+                        break;
                     case Intent.EXTRA_DOCK_STATE_UNDOCKED:
                     default:
                         config = AudioSystem.FORCE_NONE;
@@ -1926,6 +1935,32 @@ public class AudioService extends IAudioService.Stub {
                                 "");
                         mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
                     }
+                }
+            } else if (action.equals(Intent.ACTION_USB_ANLG_HEADSET_PLUG)) {
+                int state = intent.getIntExtra("state", 0);
+                Log.v(TAG, "Broadcast Receiver: Got ACTION_USB_ANLG_HEADSET_PLUG, state = "+state);
+                boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
+                if (state == 0 && isConnected) {
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
+                                                         AudioSystem.DEVICE_STATE_UNAVAILABLE, "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
+                } else if (state == 1 && !isConnected)  {
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
+                                                         AudioSystem.DEVICE_STATE_AVAILABLE, "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET), "");
+                }
+            } else if (action.equals(Intent.ACTION_USB_DGTL_HEADSET_PLUG)) {
+                int state = intent.getIntExtra("state", 0);
+                Log.v(TAG, "Broadcast Receiver: Got ACTION_USB_DGTL_HEADSET_PLUG, state = "+state);
+                boolean isConnected = mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
+                if (state == 0 && isConnected) {
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
+                                                         AudioSystem.DEVICE_STATE_UNAVAILABLE, "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
+                } else if (state == 1 && !isConnected)  {
+                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
+                                                         AudioSystem.DEVICE_STATE_AVAILABLE, "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET), "");
                 }
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);

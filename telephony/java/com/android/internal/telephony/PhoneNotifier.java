@@ -42,4 +42,5 @@ public interface PhoneNotifier {
 
     public void notifyDataActivity(Phone sender);
 
+    public void notifyOtaspChanged(Phone sender, int otaspMode);
 }

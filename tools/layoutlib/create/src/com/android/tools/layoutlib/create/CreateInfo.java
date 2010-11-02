@@ -104,7 +104,9 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] DELEGATE_CLASS_NATIVES = new String[] {
         "android.graphics.Bitmap",
+        "android.graphics.Canvas",
         "android.graphics.Matrix",
+        "android.graphics.Paint",
         "android.graphics.Typeface",
     };
 
@@ -126,11 +128,9 @@ public final class CreateInfo implements ICreateInfo {
         new String[] {
             "android.graphics.BitmapFactory",       "android.graphics._Original_BitmapFactory",
             "android.graphics.BitmapShader",        "android.graphics._Original_BitmapShader",
-            "android.graphics.Canvas",              "android.graphics._Original_Canvas",
             "android.graphics.ComposeShader",       "android.graphics._Original_ComposeShader",
             "android.graphics.DashPathEffect",       "android.graphics._Original_DashPathEffect",
             "android.graphics.LinearGradient",      "android.graphics._Original_LinearGradient",
-            "android.graphics.Paint",               "android.graphics._Original_Paint",
             "android.graphics.Path",                "android.graphics._Original_Path",
             "android.graphics.PorterDuffXfermode",  "android.graphics._Original_PorterDuffXfermode",
             "android.graphics.RadialGradient",      "android.graphics._Original_RadialGradient",
@@ -150,13 +150,6 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] DELETE_RETURNS =
         new String[] {
-            "android.graphics.Paint",       // class to delete methods from
-            "android.graphics.Paint$Align", // list of type identifying methods to delete
-            "android.graphics.Paint$Style",
-            "android.graphics.Paint$Join",
-            "android.graphics.Paint$Cap",
-            "android.graphics.Paint$FontMetrics",
-            "android.graphics.Paint$FontMetricsInt",
             null };                         // separator, for next class/methods list.
 }
 

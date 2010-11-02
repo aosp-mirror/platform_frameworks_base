@@ -773,6 +773,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
 
                 case CONNECT_HFP_INCOMING:
                     transitionTo(mIncomingHandsfree);
+                    break;
                 case CONNECT_A2DP_INCOMING:
                     transitionTo(mIncomingA2dp);
 

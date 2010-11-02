@@ -572,7 +572,7 @@
     <style name="Theme.IconMenu">
         <!-- Menu/item attributes -->
         <item name="android:itemTextAppearance">@android:style/TextAppearance.Widget.IconMenu.Item</item>
-        <item name="android:selectableItemBackground">@android:drawable/menu_selector</item>
+        <item name="android:itemBackground">@android:drawable/menu_selector</item>
         <item name="android:itemIconDisabledAlpha">?android:attr/disabledAlpha</item>
         <item name="android:horizontalDivider">@android:drawable/divider_horizontal_dark</item>
         <item name="android:verticalDivider">@android:drawable/divider_vertical_dark</item>

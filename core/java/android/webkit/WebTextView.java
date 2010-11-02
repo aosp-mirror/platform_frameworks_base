@@ -370,6 +370,7 @@ import java.util.ArrayList;
             int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
             imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
         }
+        updateCursorControllerPositions();
     }
 
     @Override

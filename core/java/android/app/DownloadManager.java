@@ -272,6 +272,14 @@ public class DownloadManager {
      */
     public static final String EXTRA_DOWNLOAD_ID = "extra_download_id";
 
+    /**
+     * When clicks on multiple notifications are received, the following
+     * provides an array of download ids corresponding to the download notification that was
+     * clicked. It can be retrieved by the receiver of this
+     * Intent using {@link android.content.Intent#getLongArrayExtra(String)}.
+     */
+    public static final String EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS = "extra_click_download_ids";
+
     // this array must contain all public columns
     private static final String[] COLUMNS = new String[] {
         COLUMN_ID,

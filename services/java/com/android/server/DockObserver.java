@@ -103,7 +103,6 @@ class DockObserver extends UEventObserver {
             FileReader file = new FileReader(DOCK_STATE_PATH);
             int len = file.read(buffer, 0, 1024);
             mPreviousDockState = mDockState = Integer.valueOf((new String(buffer, 0, len)).trim());
-
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "This kernel does not have dock station support");
         } catch (Exception e) {
@@ -158,13 +157,17 @@ class DockObserver extends UEventObserver {
                         {
                             String whichSound = null;
                             if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                                if (mPreviousDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+                                if ((mPreviousDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
+                                    (mPreviousDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
+                                    (mPreviousDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
                                     whichSound = Settings.System.DESK_UNDOCK_SOUND;
                                 } else if (mPreviousDockState == Intent.EXTRA_DOCK_STATE_CAR) {
                                     whichSound = Settings.System.CAR_UNDOCK_SOUND;
                                 }
                             } else {
-                                if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+                                if ((mDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
+                                    (mDockState == Intent.EXTRA_DOCK_STATE_LE_DESK) ||
+                                    (mDockState == Intent.EXTRA_DOCK_STATE_HE_DESK)) {
                                     whichSound = Settings.System.DESK_DOCK_SOUND;
                                 } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
                                     whichSound = Settings.System.CAR_DOCK_SOUND;

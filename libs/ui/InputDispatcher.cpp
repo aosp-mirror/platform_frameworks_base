@@ -51,8 +51,8 @@
 
 namespace android {
 
-// Delay between reporting long touch events to the power manager.
-const nsecs_t EVENT_IGNORE_DURATION = 300 * 1000000LL; // 300 ms
+// Delay before reporting long touch events to the power manager.
+const nsecs_t LONG_TOUCH_DELAY = 300 * 1000000LL; // 300 ms
 
 // Default input dispatching timeout if there is no focused application or paused window
 // from which to determine an appropriate dispatching timeout.
@@ -1408,8 +1408,13 @@ String8 InputDispatcher::getApplicationWindowLabelLocked(const InputApplication*
 
 void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
     int32_t eventType = POWER_MANAGER_BUTTON_EVENT;
-    if (eventEntry->type == EventEntry::TYPE_MOTION) {
+    switch (eventEntry->type) {
+    case EventEntry::TYPE_MOTION: {
         const MotionEntry* motionEntry = static_cast<const MotionEntry*>(eventEntry);
+        if (motionEntry->action == AMOTION_EVENT_ACTION_CANCEL) {
+            return;
+        }
+
         if (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) {
             switch (motionEntry->action) {
             case AMOTION_EVENT_ACTION_DOWN:
@@ -1419,7 +1424,7 @@ void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
                 eventType = POWER_MANAGER_TOUCH_UP_EVENT;
                 break;
             default:
-                if (motionEntry->eventTime - motionEntry->downTime >= EVENT_IGNORE_DURATION) {
+                if (motionEntry->eventTime - motionEntry->downTime < LONG_TOUCH_DELAY) {
                     eventType = POWER_MANAGER_TOUCH_EVENT;
                 } else {
                     eventType = POWER_MANAGER_LONG_TOUCH_EVENT;
@@ -1427,6 +1432,15 @@ void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
                 break;
             }
         }
+        break;
+    }
+    case EventEntry::TYPE_KEY: {
+        const KeyEntry* keyEntry = static_cast<const KeyEntry*>(eventEntry);
+        if (keyEntry->flags & AKEY_EVENT_FLAG_CANCELED) {
+            return;
+        }
+        break;
+    }
     }
 
     CommandEntry* commandEntry = postCommandLocked(
