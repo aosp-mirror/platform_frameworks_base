@@ -384,7 +384,7 @@ public class MediaScanner
     private MyMediaScannerClient mClient = new MyMediaScannerClient();
 
     private boolean isDrmEnabled() {
-        String prop = System.getProperty("drm.service.enabled");
+        String prop = SystemProperties.get("drm.service.enabled");
         return prop != null && prop.equals("true");
     }
     
