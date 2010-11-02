@@ -870,7 +870,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         switch (event.mAction) {
         case DragEvent.ACTION_DRAG_STARTED: {
             // clear state to recalculate which views we drag over
-            root.setDragFocus(event, null);
+            mCurrentDragView = null;
 
             // Now dispatch down to our children, caching the responses
             mChildAcceptsDrag = false;
@@ -915,11 +915,28 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View target = findFrontmostDroppableChildAt(event.mX, event.mY, mLocalPoint);
 
             // If we've changed apparent drag target, tell the view root which view
-            // we're over now.  This will in turn send out DRAG_ENTERED / DRAG_EXITED
-            // notifications as appropriate.
+            // we're over now [for purposes of the eventual drag-recipient-changed
+            // notifications to the framework] and tell the new target that the drag
+            // has entered its bounds.  The root will see setDragFocus() calls all
+            // the way down to the final leaf view that is handling the LOCATION event
+            // before reporting the new potential recipient to the framework.
             if (mCurrentDragView != target) {
-                root.setDragFocus(event, target);
+                root.setDragFocus(target);
+
+                final int action = event.mAction;
+                // If we've dragged off of a child view, send it the EXITED message
+                if (mCurrentDragView != null) {
+                    event.mAction = DragEvent.ACTION_DRAG_EXITED;
+                    mCurrentDragView.dispatchDragEvent(event);
+                }
                 mCurrentDragView = target;
+
+                // If we've dragged over a new child view, send it the ENTERED message
+                if (target != null) {
+                    event.mAction = DragEvent.ACTION_DRAG_ENTERED;
+                    target.dispatchDragEvent(event);
+                }
+                event.mAction = action;  // restore the event's original state
             }
 
             // Dispatch the actual drag location notice, localized into its coordinates
@@ -931,6 +948,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                 event.mX = tx;
                 event.mY = ty;
+            }
+        } break;
+
+        /* Entered / exited dispatch
+         *
+         * DRAG_ENTERED is not dispatched downwards from ViewGroup.  The reason for this is
+         * that we're about to get the corresponding LOCATION event, which we will use to
+         * determine which of our children is the new target; at that point we will
+         * push a DRAG_ENTERED down to the new target child [which may itself be a ViewGroup].
+         *
+         * DRAG_EXITED *is* dispatched all the way down immediately: once we know the
+         * drag has left this ViewGroup, we know by definition that every contained subview
+         * is also no longer under the drag point.
+         */
+
+        case DragEvent.ACTION_DRAG_EXITED: {
+            if (mCurrentDragView != null) {
+                mCurrentDragView.dispatchDragEvent(event);
+                mCurrentDragView = null;
             }
         } break;
 
