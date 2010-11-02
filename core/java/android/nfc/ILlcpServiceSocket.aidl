@@ -23,6 +23,4 @@ interface ILlcpServiceSocket
 {
     int accept(int nativeHandle);
     void close(int nativeHandle);
-    int getAcceptTimeout(int nativeHandle);
-    void setAcceptTimeout(int nativeHandle, int timeout);
 }
