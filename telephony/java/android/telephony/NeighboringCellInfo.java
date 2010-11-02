@@ -127,7 +127,7 @@ public class NeighboringCellInfo implements Parcelable
                 location = "0" + location;
             }
         }
-
+        // TODO - handle LTE and eHRPD (or find they can't be supported)
         try {// set LAC/CID or PSC based on radioType
             switch (radioType) {
             case NETWORK_TYPE_GPRS:
