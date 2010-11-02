@@ -263,19 +263,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         if (SPEW) Slog.d(TAG, (visible?"showing":"hiding") + " IME Button");
 
         synchronized(mLock) {
-            if (mIMEButtonVisible != visible) {
-                mIMEButtonVisible = visible;
-                mHandler.post(new Runnable() {
-                    public void run() {
-                        if (mBar != null) {
-                            try {
-                                mBar.setIMEButtonVisible(visible);
-                            } catch (RemoteException ex) {
-                            }
+            // In case of IME change, we need to call up setIMEButtonVisible() regardless of
+            // mIMEButtonVisible because mIMEButtonVisible may not have been set to false when the
+            // previous IME was destroyed.
+            mIMEButtonVisible = visible;
+            mHandler.post(new Runnable() {
+                public void run() {
+                    if (mBar != null) {
+                        try {
+                            mBar.setIMEButtonVisible(visible);
+                        } catch (RemoteException ex) {
                         }
                     }
-                });
-            }
+                }
+            });
         }
     }
 

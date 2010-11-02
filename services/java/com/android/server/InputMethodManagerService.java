@@ -993,6 +993,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (mCurMethod != null) {
                             try {
                                 putSelectedInputMethodSubtype(info, subtypeId);
+                                mCurrentSubtype = subtype;
+                                if (mInputShown) {
+                                    // If mInputShown is false, there is no IME button on the
+                                    // system bar.
+                                    // Thus there is no need to make it invisible explicitly.
+                                    mStatusBar.setIMEButtonVisible(true);
+                                }
                                 mCurMethod.changeInputMethodSubtype(subtype);
                             } catch (RemoteException e) {
                                 return;
