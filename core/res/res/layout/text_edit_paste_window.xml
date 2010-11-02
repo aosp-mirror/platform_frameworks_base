@@ -40,6 +40,7 @@
         android:layout_centerVertical="true"
         android:textAppearance="?android:attr/textAppearanceMediumInverse"
         android:text="@android:string/paste"
+        android:textColor="@android:color/black"
         android:layout_toRightOf="@id/paste_icon"
     />
 
