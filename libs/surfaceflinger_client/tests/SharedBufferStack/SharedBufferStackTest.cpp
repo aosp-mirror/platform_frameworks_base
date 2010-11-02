@@ -32,7 +32,8 @@ void test0(SharedBufferServer& s, SharedBufferClient& c, size_t num, int* list);
 int main(int argc, char** argv)
 {
     SharedClient client;
-    SharedBufferServer s(&client, 0, 4, 0);
+    sp<SharedBufferServer> ps(new SharedBufferServer(&client, 0, 4, 0));
+    SharedBufferServer& s(*ps);
     SharedBufferClient c(&client, 0, 4, 0);
 
     printf("basic test 0\n");
@@ -66,6 +67,10 @@ int main(int argc, char** argv)
     c.setBufferCount(6, resize);
     int list3[6] = {3, 2, 1, 4, 5, 0};
     test0(s, c, 6, list3);
+
+    c.setBufferCount(4, resize);
+    int list4[4] = {1, 2, 3, 0};
+    test0(s, c, 4, list4);
 
     return 0;
 }

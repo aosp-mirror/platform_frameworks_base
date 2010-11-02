@@ -177,7 +177,8 @@ private:
         sp<GraphicBuffer> detachBuffer(size_t index);
         status_t attachBuffer(size_t index, const sp<GraphicBuffer>& buffer);
         // resize the number of active buffers
-        status_t resize(size_t size);
+        status_t resize(size_t size, const sp<SurfaceFlinger>& flinger,
+                EGLDisplay dpy);
 
         // ----------------------------------------------
         // must be called from GL thread
