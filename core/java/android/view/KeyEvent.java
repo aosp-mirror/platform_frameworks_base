@@ -125,9 +125,11 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Directional Pad Center key.
      * May also be synthesized from trackball motions. */
     public static final int KEYCODE_DPAD_CENTER     = 23;
-    /** Key code constant: Volume Up key. */
+    /** Key code constant: Volume Up key.
+     * Adjusts the speaker volume up. */
     public static final int KEYCODE_VOLUME_UP       = 24;
-    /** Key code constant: Volume Down key. */
+    /** Key code constant: Volume Down key.
+     * Adjusts the speaker volume down. */
     public static final int KEYCODE_VOLUME_DOWN     = 25;
     /** Key code constant: Power key. */
     public static final int KEYCODE_POWER           = 26;
@@ -269,7 +271,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_MEDIA_REWIND    = 89;
     /** Key code constant: Fast Forward media key. */
     public static final int KEYCODE_MEDIA_FAST_FORWARD = 90;
-    /** Key code constant: Mute key. */
+    /** Key code constant: Mute key.
+     * Mutes the microphone, unlike {@link #KEYCODE_VOLUME_MUTE}. */
     public static final int KEYCODE_MUTE            = 91;
     /** Key code constant: Page Up key. */
     public static final int KEYCODE_PAGE_UP         = 92;
@@ -455,8 +458,13 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_NUMPAD_LEFT_PAREN = 162;
     /** Key code constant: Numeric keypad ')' key. */
     public static final int KEYCODE_NUMPAD_RIGHT_PAREN = 163;
+    /** Key code constant: Volume Mute key.
+     * Mutes the speaker, unlike {@link #KEYCODE_MUTE}.
+     * This key should normally be implemented as a toggle such that the first press
+     * mutes the speaker and the second press restores the original volume. */
+    public static final int KEYCODE_VOLUME_MUTE     = 164;
 
-    private static final int LAST_KEYCODE           = KEYCODE_NUMPAD_RIGHT_PAREN;
+    private static final int LAST_KEYCODE           = KEYCODE_VOLUME_MUTE;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -640,6 +648,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         "KEYCODE_NUMPAD_EQUALS",
         "KEYCODE_NUMPAD_LEFT_PAREN",
         "KEYCODE_NUMPAD_RIGHT_PAREN",
+        "KEYCODE_VOLUME_MUTE",
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.

@@ -515,6 +515,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         boolean isKeyCodeSupported = keyCode != KeyEvent.KEYCODE_BACK &&
                                      keyCode != KeyEvent.KEYCODE_VOLUME_UP &&
                                      keyCode != KeyEvent.KEYCODE_VOLUME_DOWN &&
+                                     keyCode != KeyEvent.KEYCODE_VOLUME_MUTE &&
                                      keyCode != KeyEvent.KEYCODE_MENU &&
                                      keyCode != KeyEvent.KEYCODE_CALL &&
                                      keyCode != KeyEvent.KEYCODE_ENDCALL;

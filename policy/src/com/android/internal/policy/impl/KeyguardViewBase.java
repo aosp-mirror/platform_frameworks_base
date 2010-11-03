@@ -170,7 +170,8 @@ public abstract class KeyguardViewBase extends FrameLayout {
                 }
 
                 case KeyEvent.KEYCODE_VOLUME_UP:
-                case KeyEvent.KEYCODE_VOLUME_DOWN: {
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                case KeyEvent.KEYCODE_VOLUME_MUTE: {
                     synchronized (this) {
                         if (mAudioManager == null) {
                             mAudioManager = (AudioManager) getContext().getSystemService(
@@ -179,6 +180,7 @@ public abstract class KeyguardViewBase extends FrameLayout {
                     }
                     // Volume buttons should only function for music.
                     if (mAudioManager.isMusicActive()) {
+                        // TODO: Actually handle MUTE.
                         mAudioManager.adjustStreamVolume(
                                     AudioManager.STREAM_MUSIC,
                                     keyCode == KeyEvent.KEYCODE_VOLUME_UP

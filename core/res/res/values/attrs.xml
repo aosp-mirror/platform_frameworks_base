@@ -1145,27 +1145,28 @@
         <enum name="KEYCODE_F10" value="140" />
         <enum name="KEYCODE_F11" value="141" />
         <enum name="KEYCODE_F12" value="142" />
-        <enum name="NUM_LOCK" value="143" />
-        <enum name="NUMPAD_0" value="144" />
-        <enum name="NUMPAD_1" value="145" />
-        <enum name="NUMPAD_2" value="146" />
-        <enum name="NUMPAD_3" value="147" />
-        <enum name="NUMPAD_4" value="148" />
-        <enum name="NUMPAD_5" value="149" />
-        <enum name="NUMPAD_6" value="150" />
-        <enum name="NUMPAD_7" value="151" />
-        <enum name="NUMPAD_8" value="152" />
-        <enum name="NUMPAD_9" value="153" />
-        <enum name="NUMPAD_DIVIDE" value="154" />
-        <enum name="NUMPAD_MULTIPLY" value="155" />
-        <enum name="NUMPAD_SUBTRACT" value="156" />
-        <enum name="NUMPAD_ADD" value="157" />
-        <enum name="NUMPAD_DOT" value="158" />
-        <enum name="NUMPAD_COMMA" value="159" />
-        <enum name="NUMPAD_ENTER" value="160" />
-        <enum name="NUMPAD_EQUALS" value="161" />
-        <enum name="NUMPAD_LEFT_PAREN" value="162" />
-        <enum name="NUMPAD_RIGHT_PAREN" value="163" />
+        <enum name="KEYCODE_NUM_LOCK" value="143" />
+        <enum name="KEYCODE_NUMPAD_0" value="144" />
+        <enum name="KEYCODE_NUMPAD_1" value="145" />
+        <enum name="KEYCODE_NUMPAD_2" value="146" />
+        <enum name="KEYCODE_NUMPAD_3" value="147" />
+        <enum name="KEYCODE_NUMPAD_4" value="148" />
+        <enum name="KEYCODE_NUMPAD_5" value="149" />
+        <enum name="KEYCODE_NUMPAD_6" value="150" />
+        <enum name="KEYCODE_NUMPAD_7" value="151" />
+        <enum name="KEYCODE_NUMPAD_8" value="152" />
+        <enum name="KEYCODE_NUMPAD_9" value="153" />
+        <enum name="KEYCODE_NUMPAD_DIVIDE" value="154" />
+        <enum name="KEYCODE_NUMPAD_MULTIPLY" value="155" />
+        <enum name="KEYCODE_NUMPAD_SUBTRACT" value="156" />
+        <enum name="KEYCODE_NUMPAD_ADD" value="157" />
+        <enum name="KEYCODE_NUMPAD_DOT" value="158" />
+        <enum name="KEYCODE_NUMPAD_COMMA" value="159" />
+        <enum name="KEYCODE_NUMPAD_ENTER" value="160" />
+        <enum name="KEYCODE_NUMPAD_EQUALS" value="161" />
+        <enum name="KEYCODE_NUMPAD_LEFT_PAREN" value="162" />
+        <enum name="KEYCODE_NUMPAD_RIGHT_PAREN" value="163" />
+        <enum name="KEYCODE_VOLUME_MUTE" value="164" />
     </attr>
 
     <!-- ***************************************************************** -->
