@@ -39,8 +39,6 @@ interface INfcAdapter
 
     // NfcAdapter-class related methods
     boolean isEnabled();
-    NdefMessage localGet();
-    void localSet(in NdefMessage message);
     void openTagConnection(in Tag tag);
 
     // Non-public methods
