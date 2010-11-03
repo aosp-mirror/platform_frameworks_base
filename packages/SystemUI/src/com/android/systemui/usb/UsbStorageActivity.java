@@ -34,6 +34,7 @@ import android.hardware.Usb;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
@@ -71,6 +72,12 @@ public class UsbStorageActivity extends Activity
     private static final int DLG_ERROR_SHARING = 2;
     static final boolean localLOGV = false;
 
+    // UI thread
+    private Handler mUIHandler;
+
+    // thread for working with the storage services, which can be slow
+    private Handler mAsyncStorageHandler;
+
     /** Used to detect when the USB cable is unplugged, so we can call finish() */
     private BroadcastReceiver mUsbStateReceiver = new BroadcastReceiver() {
         @Override
@@ -99,6 +106,12 @@ public class UsbStorageActivity extends Activity
                 Log.w(TAG, "Failed to get StorageManager");
             }
         }
+        
+        mUIHandler = new Handler();
+
+        HandlerThread thr = new HandlerThread("SystemUI UsbStorageActivity");
+        thr.start();
+        mAsyncStorageHandler = new Handler(thr.getLooper());
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setProgressBarIndeterminateVisibility(true);
@@ -123,7 +136,16 @@ public class UsbStorageActivity extends Activity
         mProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress);
     }
 
-    private void switchDisplay(boolean usbStorageInUse) {
+    private void switchDisplay(final boolean usbStorageInUse) {
+        mUIHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                switchDisplayAsync(usbStorageInUse);
+            }
+        });
+    }
+
+    private void switchDisplayAsync(boolean usbStorageInUse) {
         if (usbStorageInUse) {
             mProgressBar.setVisibility(View.GONE);
             mUnmountButton.setVisibility(View.VISIBLE);
@@ -148,7 +170,12 @@ public class UsbStorageActivity extends Activity
         mStorageManager.registerListener(mStorageListener);
         registerReceiver(mUsbStateReceiver, new IntentFilter(Usb.ACTION_USB_STATE));
         try {
-            switchDisplay(mStorageManager.isUsbMassStorageEnabled());
+            mAsyncStorageHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    switchDisplay(mStorageManager.isUsbMassStorageEnabled());
+                }
+            });
         } catch (Exception ex) {
             Log.e(TAG, "Failed to read UMS enable state", ex);
         }
@@ -188,7 +215,7 @@ public class UsbStorageActivity extends Activity
                     .setTitle(R.string.dlg_confirm_kill_storage_users_title)
                     .setPositiveButton(R.string.dlg_ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            switchUsbMassStorageAsync(true);
+                            switchUsbMassStorage(true);
                         }})
                     .setNegativeButton(R.string.cancel, null)
                     .setMessage(R.string.dlg_confirm_kill_storage_users_text)
@@ -210,26 +237,42 @@ public class UsbStorageActivity extends Activity
         showDialog(id);
     }
 
-    private void switchUsbMassStorageAsync(boolean on) {
-        mUnmountButton.setVisibility(View.GONE);
-        mMountButton.setVisibility(View.GONE);
-
-        mProgressBar.setVisibility(View.VISIBLE);
-        // will be hidden once USB mass storage kicks in (or fails)
-        
-        final boolean _on = on;
-        new Thread() {
+    private void switchUsbMassStorage(final boolean on) {
+        // things to do on the UI thread
+        mUIHandler.post(new Runnable() {
+            @Override
             public void run() {
-                if (_on) {
+                mUnmountButton.setVisibility(View.GONE);
+                mMountButton.setVisibility(View.GONE);
+
+                mProgressBar.setVisibility(View.VISIBLE);
+                // will be hidden once USB mass storage kicks in (or fails)
+            }
+        });
+        
+        // things to do elsewhere
+        mAsyncStorageHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (on) {
                     mStorageManager.enableUsbMassStorage();
                 } else {
                     mStorageManager.disableUsbMassStorage();
                 }
             }
-        }.start();
+        });
     }
 
     private void checkStorageUsers() {
+        mAsyncStorageHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                checkStorageUsersAsync();
+            }
+        });
+    }
+
+    private void checkStorageUsersAsync() {
         IMountService ims = getMountService();
         if (ims == null) {
             // Display error dialog
@@ -258,7 +301,7 @@ public class UsbStorageActivity extends Activity
             showDialogInner(DLG_CONFIRM_KILL_STORAGE_USERS);
         } else {
             if (localLOGV) Log.i(TAG, "Enabling UMS");
-            switchUsbMassStorageAsync(true);
+            switchUsbMassStorage(true);
         }
     }
 
@@ -268,7 +311,7 @@ public class UsbStorageActivity extends Activity
             checkStorageUsers();
         } else if (v == mUnmountButton) {
             if (localLOGV) Log.i(TAG, "Disabling UMS");
-            switchUsbMassStorageAsync(false);
+            switchUsbMassStorage(false);
         }
     }
 
