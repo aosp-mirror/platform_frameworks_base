@@ -122,34 +122,6 @@ public class LlcpServiceSocket {
 	}
 
 	/**
-	 * Set the timeout for the accept request
-	 *
-	 * @param timeout
-	 *            value of the timeout for the accept request
-	 */
-	public void setAcceptTimeout(int timeout) {
-		try {
-			mService.setAcceptTimeout(mHandle, timeout);
-		} catch (RemoteException e) {
-			Log.e(TAG, "RemoteException in setAcceptTimeout(): ", e);
-		}
-	}
-
-	/**
-	 * Get the timeout value of the accept request
-	 *
-	 * @return mTimeout
-	 */
-	public int getAcceptTimeout() {
-		try {
-			return mService.getAcceptTimeout(mHandle);
-		} catch (RemoteException e) {
-			Log.e(TAG, "RemoteException in getAcceptTimeout(): ", e);
-			return 0;
-		}
-	}
-
-	/**
 	 * Close the created Llcp Service socket
 	 */
 	public void close() {
