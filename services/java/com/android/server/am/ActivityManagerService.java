@@ -1349,6 +1349,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
+            // For debug builds, log event loop stalls to dropbox for analysis.
+            if (StrictMode.conditionallyEnableDebugLogging()) {
+                Slog.i(TAG, "Enabled StrictMode logging for AThread's Looper");
+            }
+
             Looper.loop();
         }
     }

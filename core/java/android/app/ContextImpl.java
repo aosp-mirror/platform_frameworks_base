@@ -1182,6 +1182,13 @@ class ContextImpl extends Context {
     /* package */ static DropBoxManager createDropBoxManager() {
         IBinder b = ServiceManager.getService(DROPBOX_SERVICE);
         IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
+        if (service == null) {
+            // Don't return a DropBoxManager that will NPE upon use.
+            // This also avoids caching a broken DropBoxManager in
+            // getDropBoxManager during early boot, before the
+            // DROPBOX_SERVICE is registered.
+            return null;
+        }
         return new DropBoxManager(service);
     }
 
