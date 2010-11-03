@@ -572,7 +572,11 @@ class ZoomManager {
     }
 
     private void setZoomOverviewWidth(int width) {
-        mZoomOverviewWidth = width;
+        if (width == 0) {
+            mZoomOverviewWidth = WebView.DEFAULT_VIEWPORT_WIDTH;
+        } else {
+            mZoomOverviewWidth = width;
+        }
         mInvZoomOverviewWidth = 1.0f / width;
     }
 
@@ -807,7 +811,7 @@ class ZoomManager {
                     Math.max((int) (viewWidth * mInvDefaultScale),
                             Math.max(drawData.mMinPrefWidth, drawData.mViewSize.x))));
             } else {
-                final int contentWidth = drawData.mContentSize.x;
+                final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mViewSize.x);
                 setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
             }
         }
@@ -843,7 +847,7 @@ class ZoomManager {
         updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
         if (mWebView.getSettings().getUseWideViewPort() &&
             mWebView.getSettings().getUseFixedViewport()) {
-            final int contentWidth = drawData.mContentSize.x;
+            final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mMinPrefWidth);
             setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
         }
 
