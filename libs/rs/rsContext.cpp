@@ -107,7 +107,7 @@ void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
 }
 
 
-void Context::initGLThread()
+bool Context::initGLThread()
 {
     pthread_mutex_lock(&gInitMutex);
     LOGV("initGLThread start %p", this);
@@ -169,7 +169,9 @@ void Context::initGLThread()
     mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, context_attribs2);
     checkEglError("eglCreateContext");
     if (mEGL.mContext == EGL_NO_CONTEXT) {
+        pthread_mutex_unlock(&gInitMutex);
         LOGE("%p, eglCreateContext returned EGL_NO_CONTEXT", this);
+        return false;
     }
     gGLContextCount++;
 
@@ -179,10 +181,19 @@ void Context::initGLThread()
     checkEglError("eglCreatePbufferSurface");
     if (mEGL.mSurfaceDefault == EGL_NO_SURFACE) {
         LOGE("eglCreatePbufferSurface returned EGL_NO_SURFACE");
+        pthread_mutex_unlock(&gInitMutex);
+        deinitEGL();
+        return false;
     }
 
     EGLBoolean ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurfaceDefault, mEGL.mSurfaceDefault, mEGL.mContext);
-    checkEglError("eglMakeCurrent", ret);
+    if (ret == EGL_FALSE) {
+        LOGE("eglMakeCurrent returned EGL_FALSE");
+        checkEglError("eglMakeCurrent", ret);
+        pthread_mutex_unlock(&gInitMutex);
+        deinitEGL();
+        return false;
+    }
 
     mGL.mVersion = glGetString(GL_VERSION);
     mGL.mVendor = glGetString(GL_VENDOR);
@@ -207,6 +218,9 @@ void Context::initGLThread()
 
     if (!verptr) {
         LOGE("Error, OpenGL ES Lite not supported");
+        pthread_mutex_unlock(&gInitMutex);
+        deinitEGL();
+        return false;
     } else {
         sscanf(verptr, " %i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
     }
@@ -231,15 +245,18 @@ void Context::initGLThread()
 
     LOGV("initGLThread end %p", this);
     pthread_mutex_unlock(&gInitMutex);
+    return true;
 }
 
 void Context::deinitEGL()
 {
     LOGV("%p, deinitEGL", this);
 
-    eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEGL.mContext);
-    eglDestroyContext(mEGL.mDisplay, mEGL.mContext);
-    checkEglError("eglDestroyContext");
+    if (mEGL.mContext != EGL_NO_CONTEXT) {
+        eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEGL.mContext);
+        eglDestroyContext(mEGL.mDisplay, mEGL.mContext);
+        checkEglError("eglDestroyContext");
+    }
 
     gGLContextCount--;
     if (!gGLContextCount) {
@@ -421,6 +438,7 @@ void * Context::threadProc(void *vrsc)
      rsc->mTlsStruct = new ScriptTLSStruct;
      if (!rsc->mTlsStruct) {
          LOGE("Error allocating tls storage");
+         rsc->setError(RS_ERROR_OUT_OF_MEMORY, "Failed allocation for TLS");
          return NULL;
      }
      rsc->mTlsStruct->mContext = rsc;
@@ -430,7 +448,10 @@ void * Context::threadProc(void *vrsc)
          LOGE("pthread_setspecific %i", status);
      }
 
-     rsc->initGLThread();
+     if (!rsc->initGLThread()) {
+         rsc->setError(RS_ERROR_OUT_OF_MEMORY, "Failed initializing GL");
+         return NULL;
+     }
 
      rsc->mScriptC.init(rsc);
      if (rsc->mIsGraphicsContext) {
@@ -580,18 +601,33 @@ void Context::setPriority(int32_t p)
 #endif
 }
 
-Context::Context(Device *dev, const RsSurfaceConfig *sc)
+Context::Context()
 {
-    pthread_mutex_lock(&gInitMutex);
-
-    dev->addContext(this);
-    mDev = dev;
+    mDev = NULL;
     mRunning = false;
     mExit = false;
     mPaused = false;
     mObjHead = NULL;
     mError = RS_ERROR_NONE;
     mErrorMsg = NULL;
+}
+
+Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc)
+{
+    Context * rsc = new Context();
+    if (!rsc->initContext(dev, sc)) {
+        delete rsc;
+        return NULL;
+    }
+    return rsc;
+}
+
+bool Context::initContext(Device *dev, const RsSurfaceConfig *sc)
+{
+    pthread_mutex_lock(&gInitMutex);
+
+    dev->addContext(this);
+    mDev = dev;
     if (sc) {
         mUserSurfaceConfig = *sc;
     } else {
@@ -610,7 +646,7 @@ Context::Context(Device *dev, const RsSurfaceConfig *sc)
         if (status) {
             LOGE("Failed to init thread tls key.");
             pthread_mutex_unlock(&gInitMutex);
-            return;
+            return false;
         }
     }
     gThreadTLSKeyCount++;
@@ -622,7 +658,7 @@ Context::Context(Device *dev, const RsSurfaceConfig *sc)
     status = pthread_attr_init(&threadAttr);
     if (status) {
         LOGE("Failed to init thread attribute.");
-        return;
+        return false;
     }
 
     mWndSurface = NULL;
@@ -642,10 +678,14 @@ Context::Context(Device *dev, const RsSurfaceConfig *sc)
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
     if (status) {
         LOGE("Failed to start rs context thread.");
-        return;
+        return false;
     }
-    while(!mRunning) {
+    while(!mRunning && (mError == RS_ERROR_NONE)) {
         usleep(100);
+    }
+
+    if (mError != RS_ERROR_NONE) {
+        return false;
     }
 
     mWorkers.mCompleteSignal.init();
@@ -660,6 +700,7 @@ Context::Context(Device *dev, const RsSurfaceConfig *sc)
         }
     }
     pthread_attr_destroy(&threadAttr);
+    return true;
 }
 
 Context::~Context()
@@ -1020,7 +1061,7 @@ RsContext rsContextCreate(RsDevice vdev, uint32_t version)
 {
     LOGV("rsContextCreate %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = new Context(dev, NULL);
+    Context *rsc = Context::createContext(dev, NULL);
     return rsc;
 }
 
@@ -1028,7 +1069,7 @@ RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, RsSurfaceConfig sc)
 {
     LOGV("rsContextCreateGL %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = new Context(dev, &sc);
+    Context *rsc = Context::createContext(dev, &sc);
     LOGV("rsContextCreateGL ret %p ", rsc);
     return rsc;
 }
