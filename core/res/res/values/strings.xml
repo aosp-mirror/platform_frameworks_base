@@ -257,7 +257,9 @@
     <string name="contentServiceTooManyDeletesNotificationDesc">Too many <xliff:g id="content_type">%s</xliff:g> deletes.</string>
 
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
-    <string name="low_memory">Phone storage is full! Delete some files to free space.</string>
+    <string name="low_memory" product="tablet">Tablet storage is full! Delete some files to free space.</string>
+    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
+    <string name="low_memory" product="default">Phone storage is full! Delete some files to free space.</string>
 
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
@@ -265,7 +267,9 @@
 
     <!-- Power Dialog --> <skip />
     <!-- Title for the Phone Options dialog to lock the screen, turn off the phone etc. -->
-    <string name="power_dialog">Phone options</string>
+    <string name="power_dialog" product="tablet">Tablet options</string>
+    <!-- Title for the Phone Options dialog to lock the screen, turn off the phone etc. -->
+    <string name="power_dialog" product="default">Phone options</string>
     <!-- Button to turn on silent mode, within the Phone Options dialog -->
     <string name="silent_mode">Silent mode</string>
     <!-- Button to turn on the radio, within the Phone Options dialog -->
@@ -282,7 +286,10 @@
 
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
          be a confirmation dialog.  This is the message. -->
-    <string name="shutdown_confirm">Your phone will shut down.</string>
+    <string name="shutdown_confirm" product="tablet">Your tablet will shut down.</string>
+    <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, there will
+         be a confirmation dialog.  This is the message. -->
+    <string name="shutdown_confirm" product="default">Your phone will shut down.</string>
 
     <!-- Shutdown Confirmation Dialog.  When the user chooses to power off the phone, it asks
          the user if they'd like to shut down.  This is the message.  This is used instead of
@@ -302,7 +309,9 @@
     <string name="no_recent_tasks">No recent applications.</string>
 
     <!-- Title of the Global Actions Dialog -->
-    <string name="global_actions">Phone options</string>
+    <string name="global_actions" product="tablet">Tablet options</string>
+    <!-- Title of the Global Actions Dialog -->
+    <string name="global_actions" product="default">Phone options</string>
 
     <!-- label for item that locks the phone in the phone options dialog -->
     <string name="global_action_lock">Screen lock</string>
@@ -349,7 +358,10 @@
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_personalInfo">Your personal information</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_personalInfo">Direct access to your contacts
+    <string name="permgroupdesc_personalInfo" product="tablet">Direct access to your contacts
+        and calendar stored on the tablet.</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_personalInfo" product="default">Direct access to your contacts
         and calendar stored on the phone.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -449,14 +461,22 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readSms">read SMS or MMS</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readSms">Allows application to read
+    <string name="permdesc_readSms" product="tablet">Allows application to read
+      SMS messages stored on your tablet or SIM card. Malicious applications
+      may read your confidential messages.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readSms" product="default">Allows application to read
       SMS messages stored on your phone or SIM card. Malicious applications
       may read your confidential messages.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeSms">edit SMS or MMS</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeSms">Allows application to write
+    <string name="permdesc_writeSms" product="tablet">Allows application to write
+      to SMS messages stored on your tablet or SIM card. Malicious applications
+      may delete your messages.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_writeSms" product="default">Allows application to write
       to SMS messages stored on your phone or SIM card. Malicious applications
       may delete your messages.</string>
 
@@ -548,7 +568,7 @@
         monitor and control how the system launches activities.
         Malicious applications may completely compromise the system. This
         permission is only needed for development, never for normal
-        phone usage.</string>
+        use.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_broadcastPackageRemoved">send package removed broadcast</string>
@@ -610,7 +630,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_systemAlertWindow">Allows an application to
         show system alert windows. Malicious applications can take over the
-        entire screen of the phone.</string>
+        entire screen.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setAnimationScale">modify global animation speed</string>
@@ -628,7 +648,11 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_injectEvents">press keys and control buttons</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_injectEvents">Allows an application to deliver
+    <string name="permdesc_injectEvents" product="tablet">Allows an application to deliver
+        its own input events (key presses, etc.) to other applications. Malicious
+        applications can use this to take over the tablet.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_injectEvents" product="default">Allows an application to deliver
         its own input events (key presses, etc.) to other applications. Malicious
         applications can use this to take over the phone.</string>
 
@@ -709,7 +733,11 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_clearAppCache">delete all application cache data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_clearAppCache">Allows an application to free phone storage
+    <string name="permdesc_clearAppCache" product="tablet">Allows an application to free tablet storage
+        by deleting files in application cache directory. Access is very
+        restricted usually to system process.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_clearAppCache" product="default">Allows an application to free phone storage
         by deleting files in application cache directory. Access is very
         restricted usually to system process.</string>
 
@@ -721,7 +749,12 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readLogs">read sensitive log data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readLogs">Allows an application to read from the
+    <string name="permdesc_readLogs" product="tablet">Allows an application to read from the
+        system\'s various log files.  This allows it to discover general
+        information about what you are doing with the tablet, potentially
+        including personal or private information.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readLogs" product="default">Allows an application to read from the
         system\'s various log files.  This allows it to discover general
         information about what you are doing with the phone, potentially
         including personal or private information.</string>
@@ -737,9 +770,15 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_changeComponentState">enable or disable application components</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_changeComponentState">Allows an application to change whether a
+    <string name="permdesc_changeComponentState" product="tablet">Allows an application to change whether a
         component of another application is enabled or not. Malicious applications can use this
-        to disable important phone capabilities. Care must be used with permission, as it is
+        to disable important tablet capabilities. Care must be used with this permission, as it is
+        possible to get application components into an unusable, inconsistent, or unstable state.
+    </string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_changeComponentState" product="default">Allows an application to change whether a
+        component of another application is enabled or not. Malicious applications can use this
+        to disable important phone capabilities. Care must be used with this permission, as it is
         possible to get application components into an unusable, inconsistent, or unstable state.
     </string>
 
@@ -771,7 +810,12 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_receiveBootCompleted">automatically start at boot</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_receiveBootCompleted">Allows an application to
+    <string name="permdesc_receiveBootCompleted" product="tablet">Allows an application to
+        have itself started as soon as the system has finished booting.
+        This can make it take longer to start the tablet and allow the
+        application to slow down the overall tablet by always running.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_receiveBootCompleted" product="default">Allows an application to
         have itself started as soon as the system has finished booting.
         This can make it take longer to start the phone and allow the
         application to slow down the overall phone by always running.</string>
@@ -779,7 +823,12 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_broadcastSticky">send sticky broadcast</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_broadcastSticky">Allows an application to send
+    <string name="permdesc_broadcastSticky" product="tablet">Allows an application to send
+        sticky broadcasts, which remain after the broadcast ends.
+        Malicious applications can make the tablet slow or unstable by causing it
+        to use too much memory.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_broadcastSticky" product="default">Allows an application to send
         sticky broadcasts, which remain after the broadcast ends.
         Malicious applications can make the phone slow or unstable by causing it
         to use too much memory.</string>
@@ -787,21 +836,33 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readContacts">read contact data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readContacts">Allows an application to read all
+    <string name="permdesc_readContacts" product="tablet">Allows an application to read all
+        of the contact (address) data stored on your tablet. Malicious applications
+        can use this to send your data to other people.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readContacts" product="default">Allows an application to read all
         of the contact (address) data stored on your phone. Malicious applications
         can use this to send your data to other people.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeContacts">write contact data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeContacts">Allows an application to modify the
+    <string name="permdesc_writeContacts" product="tablet">Allows an application to modify the
+        contact (address) data stored on your tablet. Malicious
+        applications can use this to erase or modify your contact data.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_writeContacts" product="default">Allows an application to modify the
         contact (address) data stored on your phone. Malicious
         applications can use this to erase or modify your contact data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">read calendar events</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readCalendar">Allows an application to read all
+    <string name="permdesc_readCalendar" product="tablet">Allows an application to read all
+        of the calendar events stored on your tablet. Malicious applications
+        can use this to send your calendar events to other people.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readCalendar" product="default">Allows an application to read all
         of the calendar events stored on your phone. Malicious applications
         can use this to send your calendar events to other people.</string>
 
@@ -836,7 +897,12 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">fine (GPS) location</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessFineLocation">Access fine location sources such as the
+    <string name="permdesc_accessFineLocation" product="tablet">Access fine location sources such as the
+        Global Positioning System on the tablet, where available.
+        Malicious applications can use this to determine where you are, and may
+        consume additional battery power.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessFineLocation" product="default">Access fine location sources such as the
         Global Positioning System on the phone, where available.
         Malicious applications can use this to determine where you are, and may
         consume additional battery power.</string>
@@ -844,7 +910,11 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessCoarseLocation">coarse (network-based) location</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessCoarseLocation">Access coarse location sources such as the cellular
+    <string name="permdesc_accessCoarseLocation" product="tablet">Access coarse location sources such as the cellular
+        network database to determine an approximate tablet location, where available. Malicious
+        applications can use this to determine approximately where you are.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessCoarseLocation" product="default">Access coarse location sources such as the cellular
         network database to determine an approximate phone location, where available. Malicious
         applications can use this to determine approximately where you are.</string>
 
@@ -880,15 +950,25 @@
         images the camera is seeing.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_brick">permanently disable phone</string>
+    <string name="permlab_brick" product="tablet">permanently disable tablet</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_brick" product="default">permanently disable phone</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_brick">Allows the application to
+    <string name="permdesc_brick" product="tablet">Allows the application to
+        disable the entire tablet permanently. This is very dangerous.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_brick" product="default">Allows the application to
         disable the entire phone permanently. This is very dangerous.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_reboot">force phone reboot</string>
+    <string name="permlab_reboot" product="tablet">force tablet reboot</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_reboot" product="default">force phone reboot</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_reboot">Allows the application to
+    <string name="permdesc_reboot" product="tablet">Allows the application to
+        force the tablet to reboot.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_reboot" product="default">Allows the application to
         force the phone to reboot.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -967,7 +1047,9 @@
         services.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_performCdmaProvisioning">directly start CDMA phone setup</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet">directly start CDMA tablet setup</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_performCdmaProvisioning" product="default">directly start CDMA phone setup</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_performCdmaProvisioning">Allows the application to start CDMA provisioning.
         Malicious applications may unnecessarily start CDMA provisioning</string>
@@ -1010,21 +1092,35 @@
         is connected to and the like.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_wakeLock">prevent phone from sleeping</string>
+    <string name="permlab_wakeLock" product="tablet">prevent tablet from sleeping</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_wakeLock" product="default">prevent phone from sleeping</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_wakeLock">Allows an application to prevent
+    <string name="permdesc_wakeLock" product="tablet">Allows an application to prevent
+        the tablet from going to sleep.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_wakeLock" product="default">Allows an application to prevent
         the phone from going to sleep.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_devicePower">power phone on or off</string>
+    <string name="permlab_devicePower" product="tablet">power tablet on or off</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_devicePower" product="default">power phone on or off</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_devicePower">Allows the application to turn the
+    <string name="permdesc_devicePower" product="tablet">Allows the application to turn the
+        tablet on or off.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_devicePower" product="default">Allows the application to turn the
         phone on or off.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_factoryTest">run in factory test mode</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_factoryTest">Run as a low-level manufacturer test,
+    <string name="permdesc_factoryTest" product="tablet">Run as a low-level manufacturer test,
+        allowing complete access to the tablet hardware. Only available
+        when a tablet is running in manufacturer test mode.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_factoryTest" product="default">Run as a low-level manufacturer test,
         allowing complete access to the phone hardware. Only available
         when a phone is running in manufacturer test mode.</string>
 
@@ -1050,13 +1146,19 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setTime">set time</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setTime">Allows an application to change
+    <string name="permdesc_setTime" product="tablet">Allows an application to change
+        the tablet\'s clock time.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_setTime" product="default">Allows an application to change
         the phone\'s clock time.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setTimeZone">set time zone</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setTimeZone">Allows an application to change
+    <string name="permdesc_setTimeZone" product="tablet">Allows an application to change
+        the tablet\'s time zone.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_setTimeZone" product="default">Allows an application to change
         the phone\'s time zone.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1068,7 +1170,10 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getAccounts">discover known accounts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_getAccounts">Allows an application to get
+    <string name="permdesc_getAccounts" product="tablet">Allows an application to get
+      the list of accounts known by the tablet.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_getAccounts" product="default">Allows an application to get
       the list of accounts known by the phone.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1154,14 +1259,22 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetoothAdmin">bluetooth administration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetoothAdmin">Allows an application to configure
+    <string name="permdesc_bluetoothAdmin" product="tablet">Allows an application to configure
+      the local Bluetooth tablet, and to discover and pair with remote
+      devices.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bluetoothAdmin" product="default">Allows an application to configure
       the local Bluetooth phone, and to discover and pair with remote
       devices.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetooth">create Bluetooth connections</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetooth">Allows an application to view
+    <string name="permdesc_bluetooth" product="tablet">Allows an application to view
+      configuration of the local Bluetooth tablet, and to make and accept
+      connections with paired devices.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bluetooth" product="default">Allows an application to view
       configuration of the local Bluetooth phone, and to make and accept
       connections with paired devices.</string>
 
@@ -1172,7 +1285,6 @@
       with Near Field Communication (NFC) tags, cards, and readers.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_disableKeyguard">disable keylock</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_disableKeyguard">Allows an application to disable
       the keylock and any associated password security. A legitimate example of
@@ -1255,7 +1367,11 @@
     <!-- Title of policy access to watch user login attempts -->
     <string name="policylab_watchLogin">Monitor screen-unlock attempts</string>
     <!-- Description of policy access to watch user login attempts -->
-    <string name="policydesc_watchLogin">Monitor the number of incorrect passwords 
+    <string name="policydesc_watchLogin" product="tablet">Monitor the number of incorrect passwords 
+    entered when unlocking the screen, and lock the tablet or erase all the tablet\'s 
+    data if too many incorrect passwords are entered</string>
+    <!-- Description of policy access to watch user login attempts -->
+    <string name="policydesc_watchLogin" product="default">Monitor the number of incorrect passwords 
     entered when unlocking the screen, and lock the phone or erase all the phone\'s 
     data if too many incorrect passwords are entered</string>
     <!-- Title of policy access to reset user's password -->
@@ -1269,7 +1385,10 @@
     <!-- Title of policy access to wipe the user's data -->
     <string name="policylab_wipeData">Erase all data</string>
     <!-- Description of policy access to wipe the user's data -->
-    <string name="policydesc_wipeData">Erase the phone\'s data without warning, 
+    <string name="policydesc_wipeData" product="tablet">Erase the tablet\'s data without warning, 
+    by performing a factory data reset</string>
+    <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning, 
     by performing a factory data reset</string>
     <string name="policylab_setGlobalProxy">Set the device global proxy</string>
     <!-- Description of policy access to wipe the user's data -->
@@ -1554,7 +1673,9 @@
     <!-- Shown in the lock screen when there is no SIM card. -->
     <string name="lockscreen_missing_sim_message_short">No SIM card.</string>
     <!-- Shown in the lock screen when there is no SIM card. -->
-    <string name="lockscreen_missing_sim_message">No SIM card in phone.</string>
+    <string name="lockscreen_missing_sim_message" product="tablet">No SIM card in tablet.</string>
+    <!-- Shown in the lock screen when there is no SIM card. -->
+    <string name="lockscreen_missing_sim_message" product="default">No SIM card in phone.</string>
     <!-- Shown in the lock screen to ask the user to insert a SIM card. -->
     <string name="lockscreen_missing_sim_instructions">Please insert a SIM card.</string>
 
@@ -1603,7 +1724,15 @@
 
     <!-- For the unlock screen, Information message shown in dialog when user is almost at the limit
          where they will be locked out and may have to enter an alternate username/password to unlock the phone -->
-    <string name="lockscreen_failed_attempts_almost_glogin">
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet">
+        You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
+       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       you will be asked to unlock your tablet using your Google sign-in.\n\n
+       Please try again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+    <!-- For the unlock screen, Information message shown in dialog when user is almost at the limit
+         where they will be locked out and may have to enter an alternate username/password to unlock the phone -->
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
        After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your phone using your Google sign-in.\n\n
@@ -1718,7 +1847,12 @@
     <string name="permlab_writeHistoryBookmarks">write Browser\'s history and bookmarks</string>
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
-    <string name="permdesc_writeHistoryBookmarks">Allows an application to modify the
+    <string name="permdesc_writeHistoryBookmarks" product="tablet">Allows an application to modify the
+        Browser\'s history or bookmarks stored on your tablet. Malicious applications
+        can use this to erase or modify your Browser\'s data.</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_writeHistoryBookmarks" product="default">Allows an application to modify the
         Browser\'s history or bookmarks stored on your phone. Malicious applications
         can use this to erase or modify your Browser\'s data.</string>
 
@@ -1992,7 +2126,9 @@
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Low on space</string>
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
-    <string name="low_internal_storage_view_text">Phone storage space is getting low.</string>
+    <string name="low_internal_storage_view_text" product="tablet">Tablet storage space is getting low.</string>
+    <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the message of that notification. -->
+    <string name="low_internal_storage_view_text" product="default">Phone storage space is getting low.</string>
 
     <!-- Preference framework strings. -->
     <string name="ok">OK</string>
@@ -2169,9 +2305,11 @@
     <!-- See USB_STORAGE.  USB_STORAGE_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to mount.  This is the title. -->
     <string name="usb_storage_title">USB connected</string>
     <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_message" product="nosdcard">You have connected your phone to your computer via USB. Select the button below if you want to copy files between your computer and your Android\u2018s USB storage.</string>
+    <string name="usb_storage_message" product="tablet">You have connected your tablet to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s USB storage.</string>
+    <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
+    <string name="usb_storage_message" product="nosdcard">You have connected your phone to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s USB storage.</string>
     <!-- See USB_STORAGE.    This is the message. -->
-    <string name="usb_storage_message" product="default">You have connected your phone to your computer via USB. Select the button below if you want to copy files between your computer and your Android\u2018s SD card.</string>
+    <string name="usb_storage_message" product="default">You have connected your phone to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s SD card.</string>
     <!-- See USB_STORAGE.    This is the button text to mount the phone on the computer. -->
     <string name="usb_storage_button_mount">Turn on USB storage</string>
     <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. [CHAR LIMIT=NONE] -->
