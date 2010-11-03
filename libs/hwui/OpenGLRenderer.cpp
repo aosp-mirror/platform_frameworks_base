@@ -240,12 +240,12 @@ bool OpenGLRenderer::restoreSnapshot() {
     mSaveCount--;
     mSnapshot = previous;
 
-    if (restoreLayer) {
-        composeLayer(current, previous);
-    }
-
     if (restoreClip) {
         dirtyClip();
+    }
+
+    if (restoreLayer) {
+        composeLayer(current, previous);
     }
 
     return restoreClip;
@@ -447,6 +447,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
     inverse.mapRect(clip);
     clip.snapToPixelBoundaries();
     clip.intersect(bounds);
+    clip.translate(-bounds.left, -bounds.top);
 
     snapshot->flags |= Snapshot::kFlagIsFboLayer;
     snapshot->fbo = layer->fbo;
