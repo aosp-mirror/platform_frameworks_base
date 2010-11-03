@@ -392,11 +392,11 @@ which you could make use of library projects: </p>
 
 <ul>
 <li>If you are developing multiple related applications that use some of the
-same components, you move the redundant components out of their respective
+same components, you could move the redundant components out of their respective
 application projects and create a single, reuseable set of the same components
 in a library project. </li>
 <li>If you are creating an application that exists in both free and paid
-versions. You move the part of the application that is common to both versions
+versions, you could move the part of the application that is common to both versions
 into a library project. The two dependent projects, with their different package
 names, will reference the library project and provide only the difference
 between the two application versions.</li>
