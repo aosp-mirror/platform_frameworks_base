@@ -2736,7 +2736,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayed = !win.isVisibleLw();
                 if (win.mExiting) {
                     win.mExiting = false;
-                    win.mAnimation = null;
+                    if (win.mAnimation != null) {
+                        win.mAnimation.cancel();
+                        win.mAnimation = null;
+                    }
                 }
                 if (win.mDestroying) {
                     win.mDestroying = false;
@@ -6903,6 +6906,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mAnimation != null) {
                 mAnimating = true;
                 mLocalAnimating = false;
+                mAnimation.cancel();
                 mAnimation = null;
             }
         }
@@ -7174,6 +7178,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // starting window, so there is no need for it to also
                         // be doing its own stuff.
                         if (mAnimation != null) {
+                            mAnimation.cancel();
                             mAnimation = null;
                             // Make sure we clean up the animation.
                             mAnimating = true;
@@ -7219,7 +7224,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_ANIM) Slog.v(
                         TAG, "Finished animation in " + this +
                         " @ " + currentTime);
-                    mAnimation = null;
+
+                    if (mAnimation != null) {
+                        mAnimation.cancel();
+                        mAnimation = null;
+                    }
                     //WindowManagerService.this.dump();
                 }
                 mHasLocalTransformation = false;
@@ -7248,6 +7257,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // clear it and make sure we run the cleanup code.
                 mAnimating = true;
                 mLocalAnimating = true;
+                mAnimation.cancel();
                 mAnimation = null;
             }
 
@@ -7262,7 +7272,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mAnimating = false;
             mLocalAnimating = false;
-            mAnimation = null;
+            if (mAnimation != null) {
+                mAnimation.cancel();
+                mAnimation = null;
+            }
             mAnimLayer = mLayer;
             if (mIsImWindow) {
                 mAnimLayer += mInputMethodAnimLayerAdjustment;
