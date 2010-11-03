@@ -332,4 +332,11 @@
     <!-- 2 means give warning -->
     <integer name="config_datause_notification_type">2</integer>
 
+    <!-- The URL that should be sent in an x-wap-profile header with an HTTP request,
+         as defined in the Open Mobile Alliance User Agent Profile specification
+         OMA-TS-UAProf-V2_0-20060206-A Section 8.1.1.1. If the URL contains a '%s'
+         format string then that substring will be replaced with the value of
+         Build.MODEL. The format string shall not be escaped. -->
+    <string name="config_useragentprofile_url"></string>
+
 </resources>
