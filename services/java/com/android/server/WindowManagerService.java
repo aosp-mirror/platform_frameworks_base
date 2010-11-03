@@ -687,7 +687,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 if (touchedWin != null) {
-                    if (DEBUG_DRAG) {
+                    if (false && DEBUG_DRAG) {
                         Slog.d(TAG, "sending DRAG_LOCATION to " + touchedWin);
                     }
                     DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_LOCATION,
