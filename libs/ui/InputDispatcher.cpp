@@ -619,6 +619,38 @@ bool InputDispatcher::dispatchConfigurationChangedLocked(
 bool InputDispatcher::dispatchKeyLocked(
         nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout,
         DropReason* dropReason, nsecs_t* nextWakeupTime) {
+    // Preprocessing.
+    if (! entry->dispatchInProgress) {
+        if (entry->repeatCount == 0
+                && entry->action == AKEY_EVENT_ACTION_DOWN
+                && (entry->policyFlags & POLICY_FLAG_TRUSTED)
+                && !entry->isInjected()) {
+            if (mKeyRepeatState.lastKeyEntry
+                    && mKeyRepeatState.lastKeyEntry->keyCode == entry->keyCode) {
+                // We have seen two identical key downs in a row which indicates that the device
+                // driver is automatically generating key repeats itself.  We take note of the
+                // repeat here, but we disable our own next key repeat timer since it is clear that
+                // we will not need to synthesize key repeats ourselves.
+                entry->repeatCount = mKeyRepeatState.lastKeyEntry->repeatCount + 1;
+                resetKeyRepeatLocked();
+                mKeyRepeatState.nextRepeatTime = LONG_LONG_MAX; // don't generate repeats ourselves
+            } else {
+                // Not a repeat.  Save key down state in case we do see a repeat later.
+                resetKeyRepeatLocked();
+                mKeyRepeatState.nextRepeatTime = entry->eventTime + keyRepeatTimeout;
+            }
+            mKeyRepeatState.lastKeyEntry = entry;
+            entry->refCount += 1;
+        } else if (! entry->syntheticRepeat) {
+            resetKeyRepeatLocked();
+        }
+
+        entry->dispatchInProgress = true;
+        resetTargetsLocked();
+
+        logOutboundKeyDetailsLocked("dispatchKey - ", entry);
+    }
+
     // Give the policy a chance to intercept the key.
     if (entry->interceptKeyResult == KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN) {
         if (entry->policyFlags & POLICY_FLAG_PASS_TO_USER) {
@@ -647,38 +679,6 @@ bool InputDispatcher::dispatchKeyLocked(
         return true;
     }
 
-    // Preprocessing.
-    if (! entry->dispatchInProgress) {
-        logOutboundKeyDetailsLocked("dispatchKey - ", entry);
-
-        if (entry->repeatCount == 0
-                && entry->action == AKEY_EVENT_ACTION_DOWN
-                && (entry->policyFlags & POLICY_FLAG_TRUSTED)
-                && !entry->isInjected()) {
-            if (mKeyRepeatState.lastKeyEntry
-                    && mKeyRepeatState.lastKeyEntry->keyCode == entry->keyCode) {
-                // We have seen two identical key downs in a row which indicates that the device
-                // driver is automatically generating key repeats itself.  We take note of the
-                // repeat here, but we disable our own next key repeat timer since it is clear that
-                // we will not need to synthesize key repeats ourselves.
-                entry->repeatCount = mKeyRepeatState.lastKeyEntry->repeatCount + 1;
-                resetKeyRepeatLocked();
-                mKeyRepeatState.nextRepeatTime = LONG_LONG_MAX; // don't generate repeats ourselves
-            } else {
-                // Not a repeat.  Save key down state in case we do see a repeat later.
-                resetKeyRepeatLocked();
-                mKeyRepeatState.nextRepeatTime = entry->eventTime + keyRepeatTimeout;
-            }
-            mKeyRepeatState.lastKeyEntry = entry;
-            entry->refCount += 1;
-        } else if (! entry->syntheticRepeat) {
-            resetKeyRepeatLocked();
-        }
-
-        entry->dispatchInProgress = true;
-        resetTargetsLocked();
-    }
-
     // Identify targets.
     if (! mCurrentInputTargetsValid) {
         int32_t injectionResult = findFocusedWindowTargetsLocked(currentTime,
@@ -705,30 +705,30 @@ void InputDispatcher::logOutboundKeyDetailsLocked(const char* prefix, const KeyE
 #if DEBUG_OUTBOUND_EVENT_DETAILS
     LOGD("%seventTime=%lld, deviceId=0x%x, source=0x%x, policyFlags=0x%x, "
             "action=0x%x, flags=0x%x, keyCode=0x%x, scanCode=0x%x, metaState=0x%x, "
-            "downTime=%lld",
+            "repeatCount=%d, downTime=%lld",
             prefix,
             entry->eventTime, entry->deviceId, entry->source, entry->policyFlags,
             entry->action, entry->flags, entry->keyCode, entry->scanCode, entry->metaState,
-            entry->downTime);
+            entry->repeatCount, entry->downTime);
 #endif
 }
 
 bool InputDispatcher::dispatchMotionLocked(
         nsecs_t currentTime, MotionEntry* entry, DropReason* dropReason, nsecs_t* nextWakeupTime) {
+    // Preprocessing.
+    if (! entry->dispatchInProgress) {
+        entry->dispatchInProgress = true;
+        resetTargetsLocked();
+
+        logOutboundMotionDetailsLocked("dispatchMotion - ", entry);
+    }
+
     // Clean up if dropping the event.
     if (*dropReason != DROP_REASON_NOT_DROPPED) {
         resetTargetsLocked();
         setInjectionResultLocked(entry, *dropReason == DROP_REASON_POLICY
                 ? INPUT_EVENT_INJECTION_SUCCEEDED : INPUT_EVENT_INJECTION_FAILED);
         return true;
-    }
-
-    // Preprocessing.
-    if (! entry->dispatchInProgress) {
-        logOutboundMotionDetailsLocked("dispatchMotion - ", entry);
-
-        entry->dispatchInProgress = true;
-        resetTargetsLocked();
     }
 
     bool isPointerEvent = entry->source & AINPUT_SOURCE_CLASS_POINTER;
