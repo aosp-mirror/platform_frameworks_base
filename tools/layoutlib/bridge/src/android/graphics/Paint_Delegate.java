@@ -77,6 +77,12 @@ public class Paint_Delegate {
     private float mTextScaleX;
     private float mTextSkewX;
 
+    private int mXfermode;
+    private int mColorFilter;
+    private int mShader;
+    private int mPathEffect;
+    private int mMaskFilter;
+
 
     // ---- Public Helper methods ----
 
@@ -90,6 +96,10 @@ public class Paint_Delegate {
      */
     public List<FontInfo> getFonts() {
         return mFonts;
+    }
+
+    public boolean isAntiAliased() {
+        return (mFlags & Paint.ANTI_ALIAS_FLAG) != 0;
     }
 
     public boolean isFilterBitmap() {
@@ -574,28 +584,58 @@ public class Paint_Delegate {
     }
 
     /*package*/ static int native_setShader(int native_object, int shader) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            assert false;
+            return shader;
+        }
+
+        return delegate.mShader = shader;
     }
 
     /*package*/ static int native_setColorFilter(int native_object, int filter) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            assert false;
+            return filter;
+        }
+
+        return delegate.mColorFilter = filter;
     }
 
     /*package*/ static int native_setXfermode(int native_object, int xfermode) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            assert false;
+            return xfermode;
+        }
+
+        return delegate.mXfermode = xfermode;
     }
 
     /*package*/ static int native_setPathEffect(int native_object, int effect) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            assert false;
+            return effect;
+        }
+
+        return delegate.mPathEffect = effect;
     }
 
     /*package*/ static int native_setMaskFilter(int native_object, int maskfilter) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            assert false;
+            return maskfilter;
+        }
+
+        return delegate.mMaskFilter = maskfilter;
     }
 
     /*package*/ static int native_setTypeface(int native_object, int typeface) {
@@ -778,6 +818,11 @@ public class Paint_Delegate {
         mTextSize = paint.mTextSize;
         mTextScaleX = paint.mTextScaleX;
         mTextSkewX = paint.mTextSkewX;
+        mXfermode = paint.mXfermode;
+        mColorFilter = paint.mColorFilter;
+        mShader = paint.mShader;
+        mPathEffect = paint.mPathEffect;
+        mMaskFilter = paint.mMaskFilter;
     }
 
     private void reset() {
@@ -793,6 +838,11 @@ public class Paint_Delegate {
         mTextSize = 20.f;
         mTextScaleX = 1.f;
         mTextSkewX = 0.f;
+        mXfermode = 0;
+        mColorFilter = 0;
+        mShader = 0;
+        mPathEffect = 0;
+        mMaskFilter = 0;
     }
 
     /**
@@ -876,7 +926,6 @@ public class Paint_Delegate {
         return 0;
 
     }
-
 
     private static void setFlag(Paint thisPaint, int flagMask, boolean flagValue) {
         // get the delegate from the native int.

@@ -458,8 +458,28 @@ public class Canvas_Delegate {
 
     /*package*/ static void native_drawARGB(int nativeCanvas, int a, int r,
                                                int g, int b) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get a new graphics context.
+        Graphics2D graphics = (Graphics2D)canvasDelegate.getGraphics2d().create();
+        try {
+            // reset its transform just in case
+            graphics.setTransform(new AffineTransform());
+
+            // set the color
+            graphics.setColor(new Color(r, g, b, a));
+
+            graphics.fillRect(0, 0, canvasDelegate.mBufferedImage.getWidth(),
+                    canvasDelegate.mBufferedImage.getHeight());
+        } finally {
+            // dispose Graphics2D object
+            graphics.dispose();
+        }
     }
 
     /*package*/ static void native_drawColor(int nativeCanvas, int color) {
@@ -676,32 +696,34 @@ public class Canvas_Delegate {
             return;
         }
 
-        Graphics2D g = canvasDelegate.getGraphics2d();
-
-        g = (Graphics2D)g.create();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // set the color. because this only handles RGB, the alpha channel is handled
-        // as a composite.
-        g.setColor(new Color(paintDelegate.getColor()));
-        int alpha = paintDelegate.getAlpha();
-        float falpha = alpha / 255.f;
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
-
-
-        // Paint.TextAlign indicates how the text is positioned relative to X.
-        // LEFT is the default and there's nothing to do.
-        if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
-            float m = paintDelegate.measureText(text, index, count);
-            if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
-                x -= m / 2;
-            } else if (paintDelegate.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
-                x -= m;
-            }
-        }
-
-        List<FontInfo> fonts = paintDelegate.getFonts();
+        Graphics2D g = (Graphics2D) canvasDelegate.getGraphics2d().create();
         try {
+            if (paintDelegate.isAntiAliased()) {
+                g.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            }
+
+            // set the color. because this only handles RGB, the alpha channel is handled
+            // as a composite.
+            g.setColor(new Color(paintDelegate.getColor()));
+            int alpha = paintDelegate.getAlpha();
+            float falpha = alpha / 255.f;
+
+            setModeInGraphics(g, PorterDuff.Mode.SRC_OVER, falpha);
+
+            // Paint.TextAlign indicates how the text is positioned relative to X.
+            // LEFT is the default and there's nothing to do.
+            if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
+                float m = paintDelegate.measureText(text, index, count);
+                if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
+                    x -= m / 2;
+                } else if (paintDelegate.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
+                    x -= m;
+                }
+            }
+
+            List<FontInfo> fonts = paintDelegate.getFonts();
+
             if (fonts.size() > 0) {
                 FontInfo mainFont = fonts.get(0);
                 int i = index;
@@ -873,6 +895,11 @@ public class Canvas_Delegate {
         Graphics2D g = getGraphics2d();
         g = (Graphics2D)g.create();
 
+        if (paint.isAntiAliased()) {
+            g.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+
         // configure it
         g.setColor(new Color(paint.getColor()));
         int alpha = paint.getAlpha();
@@ -930,6 +957,55 @@ public class Canvas_Delegate {
         }
 */
         return g;
+    }
+
+    private static void setModeInGraphics(Graphics2D g, PorterDuff.Mode mode, float falpha) {
+        switch (mode) {
+            case CLEAR:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR, falpha));
+                break;
+            case DARKEN:
+                break;
+            case DST:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST, falpha));
+                break;
+            case DST_ATOP:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_ATOP, falpha));
+                break;
+            case DST_IN:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN, falpha));
+                break;
+            case DST_OUT:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OUT, falpha));
+                break;
+            case DST_OVER:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, falpha));
+                break;
+            case LIGHTEN:
+                break;
+            case MULTIPLY:
+                break;
+            case SCREEN:
+                break;
+            case SRC:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, falpha));
+                break;
+            case SRC_ATOP:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, falpha));
+                break;
+            case SRC_IN:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, falpha));
+                break;
+            case SRC_OUT:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OUT, falpha));
+                break;
+            case SRC_OVER:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
+                break;
+            case XOR:
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.XOR, falpha));
+                break;
+        }
     }
 
 
