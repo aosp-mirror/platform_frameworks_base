@@ -1973,6 +1973,10 @@ public class AudioService extends IAudioService.Stub {
                         case BluetoothHeadset.STATE_AUDIO_DISCONNECTED:
                             state = AudioManager.SCO_AUDIO_STATE_DISCONNECTED;
                             break;
+                        case BluetoothHeadset.STATE_AUDIO_CONNECTING:
+                            // Todo(): Handle this, ignore for now as a public
+                            // API will break.
+                            break;
                         default:
                             state = AudioManager.SCO_AUDIO_STATE_ERROR;
                             break;

@@ -46,4 +46,5 @@ interface IBluetoothHeadset {
     boolean connectHeadsetInternal(in BluetoothDevice device);
     boolean disconnectHeadsetInternal(in BluetoothDevice device);
     boolean setAudioState(in BluetoothDevice device, int state);
+    int getAudioState(in BluetoothDevice device);
 }
