@@ -255,7 +255,6 @@ public class ActionBarImpl extends ActionBar {
 
     private void configureTab(Tab tab, int position) {
         final TabImpl tabi = (TabImpl) tab;
-        final boolean isFirstTab = mTabs.isEmpty();
         final ActionBar.TabListener callback = tabi.getCallback();
 
         if (callback == null) {
@@ -265,26 +264,38 @@ public class ActionBarImpl extends ActionBar {
         tabi.setPosition(position);
         mTabs.add(position, tabi);
 
-        if (isFirstTab) {
-            final FragmentTransaction trans = mActivity.getFragmentManager().openTransaction();
-            mSelectedTab = tabi;
-            callback.onTabSelected(tab, trans);
-            if (!trans.isEmpty()) {
-                trans.commit();
-            }
+        final int count = mTabs.size();
+        for (int i = position + 1; i < count; i++) {
+            mTabs.get(i).setPosition(i);
         }
     }
 
     @Override
     public void addTab(Tab tab) {
-        mActionView.addTab(tab);
-        configureTab(tab, mTabs.size());
+        addTab(tab, mTabs.isEmpty());
     }
 
     @Override
     public void addTab(Tab tab, int position) {
-        mActionView.addTab(tab, position);
+        addTab(tab, position, mTabs.isEmpty());
+    }
+
+    @Override
+    public void addTab(Tab tab, boolean setSelected) {
+        mActionView.addTab(tab, setSelected);
+        configureTab(tab, mTabs.size());
+        if (setSelected) {
+            selectTab(tab);
+        }
+    }
+
+    @Override
+    public void addTab(Tab tab, int position, boolean setSelected) {
+        mActionView.addTab(tab, position, setSelected);
         configureTab(tab, position);
+        if (setSelected) {
+            selectTab(tab);
+        }
     }
 
     @Override

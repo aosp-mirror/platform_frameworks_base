@@ -468,22 +468,20 @@ public class ActionBarView extends ViewGroup {
         return tabView;
     }
 
-    public void addTab(ActionBar.Tab tab) {
+    public void addTab(ActionBar.Tab tab, boolean setSelected) {
         ensureTabsExist();
-        final boolean isFirst = mTabLayout.getChildCount() == 0;
         View tabView = createTabView(tab);
         mTabLayout.addView(tabView);
-        if (isFirst) {
+        if (setSelected) {
             tabView.setSelected(true);
         }
     }
 
-    public void addTab(ActionBar.Tab tab, int position) {
+    public void addTab(ActionBar.Tab tab, int position, boolean setSelected) {
         ensureTabsExist();
-        final boolean isFirst = mTabLayout.getChildCount() == 0;
         final TabView tabView = createTabView(tab);
         mTabLayout.addView(tabView, position);
-        if (isFirst) {
+        if (setSelected) {
             tabView.setSelected(true);
         }
     }
