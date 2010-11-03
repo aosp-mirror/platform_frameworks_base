@@ -140,34 +140,6 @@ public class LlcpSocket {
 	}
 
 	/**
-	 * Set the timeout for the connect request
-	 *
-	 * @param timeout
-	 *            timeout value for the connect request
-	 */
-	public void setConnectTimeout(int timeout) {
-		try {
-			mService.setConnectTimeout(mHandle, timeout);
-		} catch (RemoteException e) {
-			Log.e(TAG, "RemoteException in setConnectTimeout(): ", e);
-		}
-	}
-
-	/**
-	 * Get the timeout value of the connect request
-	 *
-	 * @return mTimeout
-	 */
-	public int getConnectTimeout() {
-		try {
-			return mService.getConnectTimeout(mHandle);
-		} catch (RemoteException e) {
-			Log.e(TAG, "RemoteException in getConnectTimeout(): ", e);
-			return 0;
-		}
-	}
-
-	/**
 	 * Disconnect request to the connected LLCP socket and close the created
 	 * socket.
 	 *

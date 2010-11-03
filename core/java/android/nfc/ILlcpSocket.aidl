@@ -24,7 +24,6 @@ interface ILlcpSocket
     int close(int nativeHandle);
     int connect(int nativeHandle, int sap);
     int connectByName(int nativeHandle, String sn);
-    int getConnectTimeout(int nativeHandle);
     int getLocalSap(int nativeHandle);
     int getLocalSocketMiu(int nativeHandle);
     int getLocalSocketRw(int nativeHandle);
@@ -32,5 +31,4 @@ interface ILlcpSocket
     int getRemoteSocketRw(int nativeHandle);
     int receive(int nativeHandle, out byte[] receiveBuffer);
     int send(int nativeHandle, in byte[] data);
-    void setConnectTimeout(int nativeHandle, int timeout);
 }
