@@ -478,6 +478,12 @@ public abstract class ActionBar {
     public abstract Tab getTabAt(int index);
 
     /**
+     * Returns the number of tabs currently registered with the action bar.
+     * @return Tab count
+     */
+    public abstract int getTabCount();
+
+    /**
      * Retrieve the current height of the ActionBar.
      *
      * @return The ActionBar's height
@@ -626,7 +632,8 @@ public abstract class ActionBar {
          * @param tab The tab that was selected
          * @param ft A {@link FragmentTransaction} for queuing fragment operations to execute
          *        during a tab switch. The previous tab's unselect and this tab's select will be
-         *        executed in a single transaction.
+         *        executed in a single transaction. This FragmentTransaction does not support
+         *        being added to the back stack.
          */
         public void onTabSelected(Tab tab, FragmentTransaction ft);
 
@@ -636,7 +643,8 @@ public abstract class ActionBar {
          * @param tab The tab that was unselected
          * @param ft A {@link FragmentTransaction} for queuing fragment operations to execute
          *        during a tab switch. This tab's unselect and the newly selected tab's select
-         *        will be executed in a single transaction.
+         *        will be executed in a single transaction. This FragmentTransaction does not
+         *        support being added to the back stack.
          */
         public void onTabUnselected(Tab tab, FragmentTransaction ft);
 
@@ -646,7 +654,8 @@ public abstract class ActionBar {
          *
          * @param tab The tab that was reselected.
          * @param ft A {@link FragmentTransaction} for queuing fragment operations to execute
-         *        once this method returns.
+         *        once this method returns. This FragmentTransaction does not support
+         *        being added to the back stack.
          */
         public void onTabReselected(Tab tab, FragmentTransaction ft);
     }

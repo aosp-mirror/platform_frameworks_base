@@ -487,6 +487,12 @@ public class ActionBarView extends ViewGroup {
         }
     }
 
+    public void removeAllTabs() {
+        if (mTabLayout != null) {
+            mTabLayout.removeAllViews();
+        }
+    }
+
     @Override
     protected LayoutParams generateDefaultLayoutParams() {
         // Used by custom nav views if they don't supply layout params. Everything else

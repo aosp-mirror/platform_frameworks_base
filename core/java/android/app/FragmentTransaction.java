@@ -144,6 +144,22 @@ public interface FragmentTransaction {
     public FragmentTransaction addToBackStack(String name);
 
     /**
+     * Returns true if this FragmentTransaction is allowed to be added to the back
+     * stack. If this method would return false, {@link #addToBackStack(String)}
+     * will throw {@link IllegalStateException}.
+     *
+     * @return True if {@link #addToBackStack(String)} is permitted on this transaction.
+     */
+    public boolean isAddToBackStackAllowed();
+
+    /**
+     * Disallow calls to {@link #addToBackStack(String)}. Any future calls to
+     * addToBackStack will throw {@link IllegalStateException}. If addToBackStack
+     * has already been called, this method will throw IllegalStateException.
+     */
+    public FragmentTransaction disallowAddToBackStack();
+
+    /**
      * Set the full title to show as a bread crumb when this transaction
      * is on the back stack, as used by {@link FragmentBreadCrumbs}.
      *
