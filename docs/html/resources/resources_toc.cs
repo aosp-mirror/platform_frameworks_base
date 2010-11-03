@@ -236,6 +236,9 @@
           <li><a href="<?cs var:toroot ?>resources/samples/SearchableDictionary/index.html">
                 <span class="en">Searchable Dictionary v2</span>
               </a> <span class="new">new!</span></li>
+	  <li><a href="<?cs var:toroot ?>resources/samples/SipDemo/index.html">
+	        <span class="en">SIP Demo</span>
+	      </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Snake/index.html">
                 <span class="en">Snake</span>
               </a></li>
