@@ -412,6 +412,13 @@ uint32_t OMXCodec::getComponentQuirks(
         quirks |= kOutputBuffersAreUnreadable;
     }
 
+    if (!strncmp(componentName, "OMX.SEC.", 8) && isEncoder) {
+        // These input buffers contain meta data (for instance,
+        // information helps locate the actual YUV data, or
+        // the physical address of the YUV data).
+        quirks |= kStoreMetaDataInInputVideoBuffers;
+    }
+
     return quirks;
 }
 
@@ -1695,7 +1702,15 @@ void OMXCodec::on_message(const omx_message &msg) {
                      "an EMPTY_BUFFER_DONE.", buffer);
             }
 
-            buffers->editItemAt(i).mOwnedByComponent = false;
+            {
+                BufferInfo *info = &buffers->editItemAt(i);
+                info->mOwnedByComponent = false;
+                if (info->mMediaBuffer != NULL) {
+                    // It is time to release the media buffers storing meta data
+                    info->mMediaBuffer->release();
+                    info->mMediaBuffer = NULL;
+                }
+            }
 
             if (mPortStatus[kPortIndexInput] == DISABLING) {
                 CODEC_LOGV("Port is disabled, freeing buffer %p", buffer);
@@ -2202,6 +2217,7 @@ status_t OMXCodec::freeBuffersOnPort(
             CHECK_EQ(info->mMediaBuffer->refcount(), 0);
 
             info->mMediaBuffer->release();
+            info->mMediaBuffer = NULL;
         }
 
         buffers->removeAt(i);
@@ -2434,11 +2450,19 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
             break;
         }
 
+        // Do not release the media buffer if it stores meta data
+        // instead of YUV data. The release is delayed until
+        // EMPTY_BUFFER_DONE callback is received.
+        bool releaseBuffer = true;
         if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
             CHECK(mOMXLivesLocally && offset == 0);
             OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *) info->mBuffer;
             header->pBuffer = (OMX_U8 *) srcBuffer->data() + srcBuffer->range_offset();
         } else {
+            if (mQuirks & kStoreMetaDataInInputVideoBuffers) {
+                releaseBuffer = false;
+                info->mMediaBuffer = srcBuffer;
+            }
             memcpy((uint8_t *)info->mData + offset,
                     (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
                     srcBuffer->range_length());
@@ -2454,8 +2478,10 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
         offset += srcBuffer->range_length();
 
-        srcBuffer->release();
-        srcBuffer = NULL;
+        if (releaseBuffer) {
+            srcBuffer->release();
+            srcBuffer = NULL;
+        }
 
         ++n;
 
