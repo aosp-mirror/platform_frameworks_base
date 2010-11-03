@@ -1,0 +1,334 @@
+page.title=What is the NDK?
+@jd:body
+
+ <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#choosing">When to Develop in Native Code</a></li>
+
+        <li>
+          <a href="#contents">Contents of the NDK</a>
+
+          <ol>
+            <li><a href="#tools">Development tools</a></li>
+
+            <li><a href="#docs">Documentation</a></li>
+
+            <li><a href="#samples">Sample applications</a></li>
+          </ol>
+        </li>
+
+        <li><a href="#reqs">System and Software Requirements</a></li>
+        
+      </ol>
+    </div>
+  </div>
+
+  <p>The Android NDK is a toolset that lets you embed components that make use of native code in
+  your Android applications.</p>
+
+  <p>Android applications run in the Dalvik virtual machine. The NDK allows you to implement parts
+  of your applications using native-code languages such as C and C++. This can provide benefits to
+  certain classes of applications, in the form of reuse of existing code and in some cases
+  increased speed.</p>
+
+  <p>The NDK provides:</p>
+
+  <ul>
+    <li>A set of tools and build files used to generate native code libraries from C and C++
+    sources</li>
+
+    <li>A way to embed the corresponding native libraries into an application package file
+    (<code>.apk</code>) that can be deployed on Android devices</li>
+
+    <li>A set of native system headers and libraries that will be supported in all future versions
+    of the Android platform, starting from Android 1.5. Applications that use native activities
+    must be run on Android 2.3 or later.</li>
+
+    <li>Documentation, samples, and tutorials</li>
+  </ul>
+
+  <p>The latest release of the NDK supports these ARM instruction sets:</p>
+
+  <ul>
+    <li>ARMv5TE (including Thumb-1 instructions)</li>
+
+    <li>ARMv7-A (including Thumb-2 and VFPv3-D16 instructions, with optional support for
+    NEON/VFPv3-D32 instructions)</li>
+  </ul>
+
+  <p>Future releases of the NDK will also support:</p>
+
+  <ul>
+    <li>x86 instructions (see CPU-ARCH-ABIS.HTML for more information)</li>
+  </ul>
+
+  <p>ARMv5TE machine code will run on all ARM-based Android devices. ARMv7-A will run only on
+  devices such as the Verizon Droid or Google Nexus One that have a compatible CPU. The main
+  difference between the two instruction sets is that ARMv7-A supports hardware FPU, Thumb-2, and
+  NEON instructions. You can target either or both of the instruction sets &mdash; ARMv5TE is the
+  default, but switching to ARMv7-A is as easy as adding a single line to the application's
+  <code>Application.mk</code> file, without needing to change anything else in the file. You can also build for
+  both architectures at the same time and have everything stored in the final <code>.apk</code>.
+  Complete information is provided in the CPU-ARCH-ABIS.HTML in the NDK package.</p>
+
+  <p>The NDK provides stable headers for libc (the C library), libm (the Math library), OpenGL ES
+  (3D graphics library), the JNI interface, and other libraries, as listed in the <a href=
+  "#tools">Development Tools</a> section.</p>
+
+  <h2 id="choosing">When to Develop in Native Code</h2>
+
+  <p>The NDK will not benefit most applications. As a developer, you need to balance its benefits
+  against its drawbacks; notably, using native code does not result in an automatic performance
+  increase, but always increases application complexity. In general, you should only use native
+  code if it is essential to your application, not just because you prefer to program in C/C++.</p>
+
+  <p>Typical good candidates for the NDK are self-contained, CPU-intensive operations that don't
+  allocate much memory, such as signal processing, physics simulation, and so on. Simply re-coding
+  a method to run in C usually does not result in a large performance increase. When examining
+  whether or not you should develop in native code, think about your requirements and see if the
+  Android framework APIs provide the functionality that you need. The NDK can, however, can be an
+  effective way to reuse a large corpus of existing C/C++ code.</p>
+
+  <p>The Android framework provides two ways to use native code:</p>
+
+  <ul>
+    <li>Write your application using the Android framework and use JNI to access the APIs provided
+    by the Android NDK. This technique allows you to take advantage of the convenience of the
+    Android framework, but still allows you to write native code when necessary. You can install
+    applications that use native code through the JNI on devices that run Android 1.5 or
+    later.</li>
+
+    <li>
+      <p>Write a native activity, which allows you to potentially create an application completely in native
+      code, because you can implement the lifecycle callbacks natively. The Android SDK provides
+      the {@link android.app.NativeActivity} class, which is a convenience class that notifies your
+      native code of any activity lifecycle callbacks (<code>onCreate()</code>, <code>onPause()</code>,
+      <code>onResume()</code>, etc). You can implement the callbacks in your native code to handle
+      these events when they occur. Applications that use native activities must be run on Android
+      2.3 (API Level 9) or later.</p>
+
+      <p>You cannot access features such as Services and Content Providers natively, so if you want
+      to use them or any other framework API, you can still write JNI code to do so.</p>
+    </li>
+  </ul>
+
+  <h2 id="contents">Contents of the NDK</h2>The NDK contains the APIs, documentation, and sample
+  applications that help you write your native code.
+
+  <h3 id="tools">Development tools</h3>
+
+  <p>The NDK includes a set of cross-toolchains (compilers, linkers, etc..) that can generate
+  native ARM binaries on Linux, OS X, and Windows (with Cygwin) platforms.</p>
+
+  <p>It provides a set of system headers for stable native APIs that are guaranteed to be supported
+  in all later releases of the platform:</p>
+
+  <ul>
+    <li>libc (C library) headers</li>
+
+    <li>libm (math library) headers</li>
+
+    <li>JNI interface headers</li>
+
+    <li>libz (Zlib compression) headers</li>
+
+    <li>liblog (Android logging) header</li>
+
+    <li>OpenGL ES 1.1 and OpenGL ES 2.0 (3D graphics libraries) headers</li>
+
+    <li>libjnigraphics (Pixel buffer access) header (for Android 2.2 and above).</li>
+
+    <li>A Minimal set of headers for C++ support</li>
+  </ul>
+
+  <p>The NDK also provides a build system that lets you work efficiently with your sources, without
+  having to handle the toolchain/platform/CPU/ABI details. You create very short build files to
+  describe which sources to compile and which Android application will use them &mdash; the build
+  system compiles the sources and places the shared libraries directly in your application
+  project.</p>
+
+  <p class="caution"><strong>Important:</strong> With the exception of the libraries listed above,
+  native system libraries in the Android platform are <em>not</em> stable and may change in future
+  platform versions. Your applications should <em>only</em> make use of the stable native system
+  libraries provided in this NDK.</p>
+
+  <h3 id="docs">Documentation</h3>
+
+  <p>The NDK package includes a set of documentation that describes the capabilities of the NDK and
+  how to use it to create shared libraries for your Android applications. In this release, the
+  documentation is provided only in the downloadable NDK package. You can find the documentation in
+  the <code>&lt;ndk&gt;/docs/</code> directory. Included are these files:</p>
+
+  <ul>
+    <li>INSTALL.HTML &mdash; describes how to install the NDK and configure it for your host
+    system</li>
+
+    <li>OVERVIEW.HTML &mdash; provides an overview of the NDK capabilities and usage</li>
+
+    <li>ANDROID-MK.HTML &mdash; describes the use of the Android.mk file, which defines the native
+    sources you want to compile</li>
+
+    <li>APPLICATION-MK.HTML &mdash; describes the use of the Application.mk file, which describes
+    the native sources required by your Android application</li>
+
+    <li>HOWTO.HTML &mdash; information about common tasks associated with NDK development.</li>
+
+    <li>SYSTEM-ISSUES.HTML &mdash; known issues in the Android system images that you should be
+    aware of, if you are developing using the NDK.</li>
+
+    <li>STABLE-APIS.HTML &mdash; a complete list of the stable APIs exposed by headers in the
+    NDK.</li>
+
+    <li>CPU-ARCH-ABIS.HTML &mdash; a description of supported CPU architectures and how to target
+    them.</li>
+
+    <li>CPU-FEATURES.HTML &mdash; a description of the <code>cpufeatures</code> static library that
+    lets your application code detect the target device's CPU family and the optional features at
+    runtime.</li>
+
+    <li>CPU-ARM-NEON.HTML &mdash; a description of how to build with optional ARM NEON / VFPv3-D32
+    instructions.</li>
+
+    <li>CHANGES.HTML &mdash; a complete list of changes to the NDK across all releases.</li>
+  </ul>
+
+  <p>Additionally, the package includes detailed information about the "bionic" C library provided
+  with the Android platform that you should be aware of, if you are developing using the NDK. You
+  can find the documentation in the <code>&lt;ndk&gt;/docs/system/libc/</code> directory:</p>
+
+  <ul>
+    <li>OVERVIEW.HTML &mdash; provides an overview of the "bionic" C library and the features it
+    offers.</li>
+  </ul>
+
+  <h3 id="samples">Sample applications</h3>
+
+  <p>The NDK includes sample Android applications that illustrate how to use native code in your
+  Android applications. For more information, see <a href=
+  "{@docRoot}sdk/ndk/installing.html#samples">Sample Applications</a>.</p>
+
+  <h2 id="reqs">System and Software Requirements</h2>
+
+  <p>The sections below describe the system and software requirements for using the Android NDK, as
+  well as platform compatibility considerations that affect appplications using libraries produced
+  with the NDK.</p>
+
+  <h4>The Android SDK</h4>
+
+  <ul>
+    <li>A complete Android SDK installation (including all dependencies) is required.</li>
+
+    <li>Android 1.5 SDK or later version is required.</li>
+  </ul>
+
+  <h4>Supported operating systems</h4>
+
+  <ul>
+    <li>Windows XP (32-bit) or Vista (32- or 64-bit)</li>
+
+    <li>Mac OS X 10.4.8 or later (x86 only)</li>
+
+    <li>Linux (32- or 64-bit, tested on Linux Ubuntu Dapper Drake)</li>
+  </ul>
+
+  <h4>Required development tools</h4>
+
+  <ul>
+    <li>For all development platforms, GNU Make 3.81 or later is required. Earlier versions of GNU
+    Make might work but have not been tested.</li>
+
+    <li>A recent version of awk (either GNU Awk or Nawk) is also required.</li>
+
+    <li>For Windows, <a href="http://www.cygwin.com">Cygwin</a> 1.7 or higher is required. The NDK
+    will <em>not</em> work with Cygwin 1.5 installations.</li>
+  </ul>
+
+  <h4>Android platform compatibility</h4>
+
+  <ul>
+    <li>The native libraries created by the Android NDK can only be used on devices running the
+    Android 1.5 platform version or later. This is due to toolchain and ABI related changes that
+    make the native libraries incompatible with 1.0 and 1.1 system images.</li>
+
+    <li>For this reason, you should use native libraries produced with the NDK in applications that
+    are deployable to devices running the Android 1.5 platform version or later.</li>
+
+    <li>To ensure compatibility, an application using a native library produced with the NDK
+    <em>must</em> declare a <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>
+      &lt;uses-sdk&gt;</code></a> element in its manifest file, with an
+      <code>android:minSdkVersion</code> attribute value of "3" or higher. For example:
+      <pre style="margin:1em;">
+&lt;manifest&gt;
+  ...
+  &lt;uses-sdk android:minSdkVersion="3" /&gt;
+  ...
+&lt;/manifest&gt;
+</pre>
+    </li>
+
+    <li>If you use this NDK to create a native library that uses the OpenGL ES APIs, the
+    application containing the library can be deployed only to devices running the minimum platform
+    versions described in the table below. To ensure compatibility, make sure that your application
+    declares the proper <code>android:minSdkVersion</code> attribute value, as given in the
+    table.</li>
+
+    <li style="list-style: none; display: inline">
+      <table style="margin:1em;">
+        <tr>
+          <th>OpenGL ES Version Used</th>
+
+          <th>Compatible Android Platform(s)</th>
+
+          <th>Required uses-sdk Attribute</th>
+        </tr>
+
+        <tr>
+          <td>OpenGL ES 1.1</td>
+
+          <td>Android 1.6 and higher</td>
+
+          <td><code>android:minSdkVersion="4"</code></td>
+        </tr>
+
+        <tr>
+          <td>OpenGL ES 2.0</td>
+
+          <td>Android 2.0 and higher</td>
+
+          <td><code>android:minSdkVersion="5"</code></td>
+        </tr>
+      </table>
+
+      <p>For more information about API Level and its relationship to Android platform versions,
+      see <a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a>.</p>
+    </li>
+
+    <li>Additionally, an application using the OpenGL ES APIs should declare a
+    <code>&lt;uses-feature&gt;</code> element in its manifest, with an
+    <code>android:glEsVersion</code> attribute that specifies the minimum OpenGl ES version
+    required by the application. This ensures that Android Market will show your application only
+    to users whose devices are capable of supporting your application. For example:
+      <pre style="margin:1em;">
+&lt;manifest&gt;
+  ...
+<!-- Declare that the application uses the OpenGL ES 2.0 API and is designed
+     to run only on devices that support OpenGL ES 2.0 or higher. -->
+  &lt;uses-feature android:glEsVersion="0x00020000" /&gt;
+  ...
+&lt;/manifest&gt;
+</pre>
+
+      <p>For more information, see the <a href=
+      "{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
+      documentation.</p>
+    </li>
+
+    <li>If you use this NDK to create a native library that uses the API to access Android {@link
+    android.graphics.Bitmap} pixel buffers or utilizes native activities, the application
+    containing the library can be deployed only to devices running Android 2.2 (API level 8) or
+    higher. To ensure compatibility, make sure that your application declares <code>&lt;uses-sdk
+    android:minSdkVersion="8" /&gt;</code> attribute value in its manifest.</li>
+  </ul>
