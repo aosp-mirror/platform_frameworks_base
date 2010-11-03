@@ -431,14 +431,14 @@ public class Canvas_Delegate {
     /*package*/ static boolean native_quickReject(int nativeCanvas,
                                                      RectF rect,
                                                      int native_edgeType) {
-        // FIXME
+        // FIXME properly implement quickReject
         return false;
     }
 
     /*package*/ static boolean native_quickReject(int nativeCanvas,
                                                      int path,
                                                      int native_edgeType) {
-        // FIXME
+        // FIXME properly implement quickReject
         return false;
     }
 
@@ -446,18 +446,26 @@ public class Canvas_Delegate {
                                                      float left, float top,
                                                      float right, float bottom,
                                                      int native_edgeType) {
-        // FIXME
+        // FIXME properly implement quickReject
         return false;
     }
 
-    /*package*/ static void native_drawRGB(int nativeCanvas, int r, int g,
-                                              int b) {
-        // FIXME
-        throw new UnsupportedOperationException();
+    /*package*/ static void native_drawRGB(int nativeCanvas, int r, int g, int b) {
+        native_drawColor(nativeCanvas, 0xFF000000 | r << 16 | (g&0xFF) << 8 | (b&0xFF),
+                PorterDuff.Mode.SRC_OVER.nativeInt);
+
     }
 
-    /*package*/ static void native_drawARGB(int nativeCanvas, int a, int r,
-                                               int g, int b) {
+    /*package*/ static void native_drawARGB(int nativeCanvas, int a, int r, int g, int b) {
+        native_drawColor(nativeCanvas, a << 24 | (r&0xFF) << 16 | (g&0xFF) << 8 | (b&0xFF),
+                PorterDuff.Mode.SRC_OVER.nativeInt);
+    }
+
+    /*package*/ static void native_drawColor(int nativeCanvas, int color) {
+        native_drawColor(nativeCanvas, color, PorterDuff.Mode.SRC_OVER.nativeInt);
+    }
+
+    /*package*/ static void native_drawColor(int nativeCanvas, int color, int mode) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -472,7 +480,13 @@ public class Canvas_Delegate {
             graphics.setTransform(new AffineTransform());
 
             // set the color
-            graphics.setColor(new Color(r, g, b, a));
+            graphics.setColor(new Color(color));
+
+            // set the mode and alpha.
+            int alpha = color >>> 24;
+            float falpha = alpha / 255.f;
+
+            setModeInGraphics(graphics, mode, falpha);
 
             graphics.fillRect(0, 0, canvasDelegate.mBufferedImage.getWidth(),
                     canvasDelegate.mBufferedImage.getHeight());
@@ -480,17 +494,6 @@ public class Canvas_Delegate {
             // dispose Graphics2D object
             graphics.dispose();
         }
-    }
-
-    /*package*/ static void native_drawColor(int nativeCanvas, int color) {
-        // FIXME
-        throw new UnsupportedOperationException();
-    }
-
-    /*package*/ static void native_drawColor(int nativeCanvas, int color,
-                                                int mode) {
-        // FIXME
-        throw new UnsupportedOperationException();
     }
 
     /*package*/ static void native_drawPaint(int nativeCanvas, int paint) {
@@ -501,14 +504,32 @@ public class Canvas_Delegate {
     /*package*/ static void native_drawLine(int nativeCanvas, float startX,
                                                float startY, float stopX,
                                                float stopY, int paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get the delegate from the native int.
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
+        if (paintDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get a Graphics2D object configured with the drawing parameters.
+        Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+
+        g.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
+
+        // dispose Graphics2D object
+        g.dispose();
     }
 
     /*package*/ static void native_drawRect(int nativeCanvas, RectF rect,
                                                int paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        native_drawRect(nativeCanvas, rect.left, rect.top, rect.right, rect.bottom, paint);
     }
 
     /*package*/ static void native_drawRect(int nativeCanvas, float left,
@@ -548,20 +569,52 @@ public class Canvas_Delegate {
             // dispose Graphics2D object
             g.dispose();
         }
-
     }
 
     /*package*/ static void native_drawOval(int nativeCanvas, RectF oval,
                                                int paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get the delegate from the native int.
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
+        if (paintDelegate == null) {
+            assert false;
+            return;
+        }
+
+        if (oval.right > oval.left && oval.bottom > oval.top) {
+            // get a Graphics2D object configured with the drawing parameters.
+            Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+
+            int style = paintDelegate.getStyle();
+
+            // draw
+            if (style == Paint.Style.FILL.nativeInt ||
+                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                g.fillOval((int)oval.left, (int)oval.top, (int)oval.width(), (int)oval.height());
+            }
+
+            if (style == Paint.Style.STROKE.nativeInt ||
+                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                g.drawOval((int)oval.left, (int)oval.top, (int)oval.width(), (int)oval.height());
+            }
+
+            // dispose Graphics2D object
+            g.dispose();
+        }
     }
 
     /*package*/ static void native_drawCircle(int nativeCanvas, float cx,
                                                  float cy, float radius,
                                                  int paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        native_drawOval(nativeCanvas,
+                new RectF(cx - radius, cy - radius, radius*2, radius*2),
+                paint);
     }
 
     /*package*/ static void native_drawArc(int nativeCanvas, RectF oval,
@@ -574,8 +627,44 @@ public class Canvas_Delegate {
     /*package*/ static void native_drawRoundRect(int nativeCanvas,
                                                     RectF rect, float rx,
                                                     float ry, int paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        // get the delegate from the native int.
+        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            assert false;
+            return;
+        }
+
+        // get the delegate from the native int.
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(paint);
+        if (paintDelegate == null) {
+            assert false;
+            return;
+        }
+
+        if (rect.right > rect.left && rect.bottom > rect.top) {
+            // get a Graphics2D object configured with the drawing parameters.
+            Graphics2D g = canvasDelegate.getCustomGraphics(paintDelegate);
+
+            int style = paintDelegate.getStyle();
+
+            // draw
+            if (style == Paint.Style.FILL.nativeInt ||
+                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                g.fillRoundRect(
+                        (int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
+                        (int)rx, (int)ry);
+            }
+
+            if (style == Paint.Style.STROKE.nativeInt ||
+                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                g.drawRoundRect(
+                        (int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
+                        (int)rx, (int)ry);
+            }
+
+            // dispose Graphics2D object
+            g.dispose();
+        }
     }
 
     /*package*/ static void native_drawPath(int nativeCanvas, int path,
@@ -675,7 +764,6 @@ public class Canvas_Delegate {
         throw new UnsupportedOperationException();
     }
 
-
     /*package*/ static void native_drawText(int nativeCanvas, char[] text,
                                                int index, int count, float x,
                                                float y, int flags, int paint) {
@@ -696,21 +784,8 @@ public class Canvas_Delegate {
             return;
         }
 
-        Graphics2D g = (Graphics2D) canvasDelegate.getGraphics2d().create();
+        Graphics2D g = (Graphics2D) canvasDelegate.getCustomGraphics(paintDelegate);
         try {
-            if (paintDelegate.isAntiAliased()) {
-                g.setRenderingHint(
-                        RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            }
-
-            // set the color. because this only handles RGB, the alpha channel is handled
-            // as a composite.
-            g.setColor(new Color(paintDelegate.getColor()));
-            int alpha = paintDelegate.getAlpha();
-            float falpha = alpha / 255.f;
-
-            setModeInGraphics(g, PorterDuff.Mode.SRC_OVER, falpha);
-
             // Paint.TextAlign indicates how the text is positioned relative to X.
             // LEFT is the default and there's nothing to do.
             if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
@@ -898,6 +973,8 @@ public class Canvas_Delegate {
         if (paint.isAntiAliased()) {
             g.setRenderingHint(
                     RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(
+                    RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         }
 
         // configure it
@@ -941,22 +1018,32 @@ public class Canvas_Delegate {
             }
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
         }
-
-        Shader shader = paint.getShader();
-        if (shader != null) {
-            java.awt.Paint shaderPaint = shader.getJavaPaint();
+*/
+        int nativeShader = paint.getShader();
+        Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(nativeShader);
+        if (shaderDelegate != null) {
+            java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
             if (shaderPaint != null) {
                 g.setPaint(shaderPaint);
             } else {
                 if (mLogger != null) {
                     mLogger.warning(String.format(
                             "Shader '%1$s' is not supported in the Layout Editor.",
-                            shader.getClass().getCanonicalName()));
+                            shaderDelegate.getClass().getCanonicalName()));
                 }
             }
         }
-*/
+
         return g;
+    }
+
+    private static void setModeInGraphics(Graphics2D g, int mode, float falpha) {
+        for (PorterDuff.Mode m : PorterDuff.Mode.values()) {
+            if (m.nativeInt == mode) {
+                setModeInGraphics(g, m, falpha);
+                return;
+            }
+        }
     }
 
     private static void setModeInGraphics(Graphics2D g, PorterDuff.Mode mode, float falpha) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,79 @@
 
 package android.graphics;
 
-public class LinearGradient extends GradientShader {
+import com.android.layoutlib.bridge.DelegateManager;
 
+import android.graphics.Shader.TileMode;
+
+import java.awt.Paint;
+
+/**
+ * Delegate implementing the native methods of android.graphics.LinearGradient
+ *
+ * Through the layoutlib_create tool, the original native methods of LinearGradient have been
+ * replaced by calls to methods of the same name in this delegate class.
+ *
+ * This class behaves like the original native implementation, but in Java, keeping previously
+ * native data into its own objects and mapping them to int that are sent back and forth between
+ * it and the original LinearGradient class.
+ *
+ * Because this extends {@link Shader_Delegate}, there's no need to use a {@link DelegateManager},
+ * as all the Shader classes will be added to the manager owned by {@link Shader_Delegate}.
+ *
+ * @see Shader_Delegate
+ *
+ */
+public class LinearGradient_Delegate extends Gradient_Delegate {
+
+    // ---- delegate data ----
     private java.awt.Paint mJavaPaint;
+
+    // ---- Public Helper methods ----
+
+    @Override
+    public Paint getJavaPaint() {
+        return mJavaPaint;
+    }
+
+    // ---- native methods ----
+
+    /*package*/ static int nativeCreate1(LinearGradient thisGradient,
+            float x0, float y0, float x1, float y1,
+            int colors[], float positions[], int tileMode) {
+        // figure out the tile
+        TileMode tile = null;
+        for (TileMode tm : TileMode.values()) {
+            if (tm.nativeInt == tileMode) {
+                tile = tm;
+                break;
+            }
+        }
+
+        LinearGradient_Delegate newDelegate = new LinearGradient_Delegate(x0, y0, x1, y1,
+                colors, positions, tile);
+        return sManager.addDelegate(newDelegate);
+    }
+    /*package*/ static int nativeCreate2(LinearGradient thisGradient,
+            float x0, float y0, float x1, float y1,
+            int color0, int color1, int tileMode) {
+        return nativeCreate1(thisGradient,
+                x0, y0, x1, y1, new int[] { color0, color1}, null /*positions*/,
+                tileMode);
+    }
+    /*package*/ static int nativePostCreate1(LinearGradient thisGradient,
+            int native_shader, float x0, float y0, float x1, float y1,
+            int colors[], float positions[], int tileMode) {
+        // nothing to be done here.
+        return 0;
+    }
+    /*package*/ static int nativePostCreate2(LinearGradient thisGradient,
+            int native_shader, float x0, float y0, float x1, float y1,
+            int color0, int color1, int tileMode) {
+        // nothing to be done here.
+        return 0;
+    }
+
+    // ---- Private delegate/helper methods ----
 
     /**
      * Create a shader that draws a linear gradient along a line.
@@ -33,35 +103,13 @@ public class LinearGradient extends GradientShader {
      *            the colors are distributed evenly along the gradient line.
      * @param tile The Shader tiling mode
      */
-    public LinearGradient(float x0, float y0, float x1, float y1, int colors[], float positions[],
-            TileMode tile) {
+    private LinearGradient_Delegate(float x0, float y0, float x1, float y1,
+            int colors[], float positions[], TileMode tile) {
         super(colors, positions);
         mJavaPaint = new LinearGradientPaint(x0, y0, x1, y1, mColors, mPositions, tile);
     }
 
-    /**
-     * Create a shader that draws a linear gradient along a line.
-     *
-     * @param x0 The x-coordinate for the start of the gradient line
-     * @param y0 The y-coordinate for the start of the gradient line
-     * @param x1 The x-coordinate for the end of the gradient line
-     * @param y1 The y-coordinate for the end of the gradient line
-     * @param color0 The color at the start of the gradient line.
-     * @param color1 The color at the end of the gradient line.
-     * @param tile The Shader tiling mode
-     */
-    public LinearGradient(float x0, float y0, float x1, float y1, int color0, int color1,
-            TileMode tile) {
-        this(x0, y0, x1, y1, new int[] { color0, color1}, null /*positions*/, tile);
-    }
-
-    // ---------- Custom Methods
-
-    @Override
-    java.awt.Paint getJavaPaint() {
-        return mJavaPaint;
-    }
-
+    // ---- Custom Java Paint ----
     /**
      * Linear Gradient (Java) Paint able to handle more than 2 points, as
      * {@link java.awt.GradientPaint} only supports 2 points and does not support Android's tile
@@ -101,7 +149,7 @@ public class LinearGradient extends GradientShader {
 
             public LinearGradientPaintContext(java.awt.image.ColorModel colorModel) {
                 mColorModel = colorModel;
-                // FIXME: so far all this is always the same rect gotten in getRaster with an indentity matrix?
+                // FIXME: so far all this is always the same rect gotten in getRaster with an identity matrix?
             }
 
             public void dispose() {
