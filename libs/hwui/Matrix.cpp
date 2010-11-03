@@ -271,6 +271,19 @@ void Matrix4::mapRect(Rect& r) const {
         MUL_ADD_STORE(r.right, data[kScaleX], data[kTranslateX]);
         MUL_ADD_STORE(r.top, data[kScaleY], data[kTranslateY]);
         MUL_ADD_STORE(r.bottom, data[kScaleY], data[kTranslateY]);
+
+        if (r.left > r.right) {
+            float x = r.left;
+            r.left = r.right;
+            r.right = x;
+        }
+
+        if (r.top > r.bottom) {
+            float y = r.top;
+            r.top = r.bottom;
+            r.bottom = y;
+        }
+
         return;
     }
 

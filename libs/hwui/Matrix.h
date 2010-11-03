@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_MATRIX_H
-#define ANDROID_UI_MATRIX_H
+#ifndef ANDROID_HWUI_MATRIX_H
+#define ANDROID_HWUI_MATRIX_H
 
 #include <SkMatrix.h>
 
@@ -137,4 +137,4 @@ typedef Matrix4 mat4;
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_MATRIX_H
+#endif // ANDROID_HWUI_MATRIX_H

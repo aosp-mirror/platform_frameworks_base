@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_DISPLAY_LIST_RENDERER_H
-#define ANDROID_UI_DISPLAY_LIST_RENDERER_H
+#ifndef ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
+#define ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 
 #include <SkChunkAlloc.h>
 #include <SkFlattenable.h>
@@ -85,6 +85,7 @@ public:
         Restore,
         RestoreToCount,
         SaveLayer,
+        SaveLayerAlpha,
         Translate,
         Rotate,
         Scale,
@@ -222,6 +223,8 @@ public:
 
     int saveLayer(float left, float top, float right, float bottom,
             SkPaint* p, int flags);
+    int saveLayerAlpha(float left, float top, float right, float bottom,
+                int alpha, int flags);
 
     void translate(float dx, float dy);
     void rotate(float degrees);
@@ -411,4 +414,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_DISPLAY_LIST_RENDERER_H
+#endif // ANDROID_HWUI_DISPLAY_LIST_RENDERER_H

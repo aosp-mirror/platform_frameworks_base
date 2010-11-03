@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_OPENGL_DEBUG_RENDERER_H
-#define ANDROID_UI_OPENGL_DEBUG_RENDERER_H
+#ifndef ANDROID_HWUI_OPENGL_DEBUG_RENDERER_H
+#define ANDROID_HWUI_OPENGL_DEBUG_RENDERER_H
 
 #include "OpenGLRenderer.h"
 
@@ -66,4 +66,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_OPENGL_DEBUG_RENDERER_H
+#endif // ANDROID_HWUI_OPENGL_DEBUG_RENDERER_H

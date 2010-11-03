@@ -17,6 +17,7 @@
 package android.media.videoeditor;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 
 import android.graphics.Bitmap;
 import android.view.SurfaceHolder;
@@ -47,7 +48,7 @@ public class MediaVideoItem extends MediaItem {
     private boolean mMuted;
     private String mAudioWaveformFilename;
     // The audio waveform data
-    private WaveformData mWaveformData;
+    private SoftReference<WaveformData> mWaveformData;
 
     /**
      * An object of this type cannot be instantiated with a default constructor
@@ -118,7 +119,8 @@ public class MediaVideoItem extends MediaItem {
         mMuted = muted;
         mAudioWaveformFilename = audioWaveformFilename;
         if (audioWaveformFilename != null) {
-            mWaveformData = new WaveformData(audioWaveformFilename);
+            mWaveformData =
+                new SoftReference<WaveformData>(new WaveformData(audioWaveformFilename));
         } else {
             mWaveformData = null;
         }
@@ -293,7 +295,7 @@ public class MediaVideoItem extends MediaItem {
     public void extractAudioWaveform(ExtractAudioWaveformProgressListener listener)
             throws IOException {
         // TODO: Set mAudioWaveformFilename at the end once the export is complete
-        mWaveformData = new WaveformData(mAudioWaveformFilename);
+        mWaveformData = new SoftReference<WaveformData>(new WaveformData(mAudioWaveformFilename));
     }
 
     /**
@@ -315,7 +317,20 @@ public class MediaVideoItem extends MediaItem {
      * @return The waveform data
      */
     public WaveformData getWaveformData() {
-        return mWaveformData;
+        if (mWaveformData == null) {
+            return null;
+        }
+
+        WaveformData waveformData = mWaveformData.get();
+        if (waveformData != null) {
+            return waveformData;
+        } else if (mAudioWaveformFilename != null) {
+            waveformData = new WaveformData(mAudioWaveformFilename);
+            mWaveformData = new SoftReference<WaveformData>(waveformData);
+            return waveformData;
+        } else {
+            return null;
+        }
     }
 
     /**

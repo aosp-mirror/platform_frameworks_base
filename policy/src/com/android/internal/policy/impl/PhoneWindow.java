@@ -1230,7 +1230,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN: {
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 AudioManager audioManager = (AudioManager) getContext().getSystemService(
                         Context.AUDIO_SERVICE);
                 if (audioManager != null) {
@@ -1238,6 +1239,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                      * Adjust the volume in on key down since it is more
                      * responsive to the user.
                      */
+                    // TODO: Actually handle MUTE.
                     audioManager.adjustSuggestedStreamVolume(
                             keyCode == KeyEvent.KEYCODE_VOLUME_UP
                                     ? AudioManager.ADJUST_RAISE
@@ -1405,7 +1407,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN: {
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (!event.isCanceled()) {
                     AudioManager audioManager = (AudioManager) getContext().getSystemService(
                             Context.AUDIO_SERVICE);
@@ -1414,6 +1417,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                          * Play a sound. This is done on key up since we don't want the
                          * sound to play when a user holds down volume down to mute.
                          */
+                        // TODO: Actually handle MUTE.
                         audioManager.adjustSuggestedStreamVolume(
                                 AudioManager.ADJUST_SAME,
                                 mVolumeControlStreamType,
@@ -1720,6 +1724,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
              * cancel the sound
              */
             if (keyCode != KeyEvent.KEYCODE_VOLUME_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP
+                    && keyCode != KeyEvent.KEYCODE_VOLUME_MUTE
                     && mVolumeKeyUpTime + VolumePanel.PLAY_SOUND_DELAY
                             > SystemClock.uptimeMillis()) {
                 /*

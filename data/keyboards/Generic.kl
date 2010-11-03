@@ -132,7 +132,7 @@ key 109   PAGE_DOWN
 key 110   INSERT
 key 111   FORWARD_DEL
 # key 112 "KEY_MACRO"
-key 113   MUTE
+key 113   VOLUME_MUTE
 key 114   VOLUME_DOWN
 key 115   VOLUME_UP
 key 116   POWER             WAKE

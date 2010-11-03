@@ -169,7 +169,8 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
     int saveCount = renderer.getSaveCount() - 1;
 
     while (!mReader.eof()) {
-        switch (mReader.readInt()) {
+        int op = mReader.readInt();
+        switch (op) {
             case AcquireContext: {
                 renderer.acquireContext();
             }
@@ -193,6 +194,11 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
             case SaveLayer: {
                 renderer.saveLayer(getFloat(), getFloat(), getFloat(), getFloat(),
                         getPaint(), getInt());
+            }
+            break;
+            case SaveLayerAlpha: {
+                renderer.saveLayerAlpha(getFloat(), getFloat(), getFloat(), getFloat(),
+                        getInt(), getInt());
             }
             break;
             case Translate: {
@@ -396,6 +402,15 @@ int DisplayListRenderer::saveLayer(float left, float top, float right, float bot
     addOp(DisplayList::SaveLayer);
     addBounds(left, top, right, bottom);
     addPaint(p);
+    addInt(flags);
+    return OpenGLRenderer::save(flags);
+}
+
+int DisplayListRenderer::saveLayerAlpha(float left, float top, float right, float bottom,
+        int alpha, int flags) {
+    addOp(DisplayList::SaveLayerAlpha);
+    addBounds(left, top, right, bottom);
+    addInt(alpha);
     addInt(flags);
     return OpenGLRenderer::save(flags);
 }

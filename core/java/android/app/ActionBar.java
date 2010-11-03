@@ -397,19 +397,39 @@ public abstract class ActionBar {
 
     /**
      * Add a tab for use in tabbed navigation mode. The tab will be added at the end of the list.
+     * If this is the first tab to be added it will become the selected tab.
      *
      * @param tab Tab to add
      */
     public abstract void addTab(Tab tab);
 
     /**
+     * Add a tab for use in tabbed navigation mode. The tab will be added at the end of the list.
+     *
+     * @param tab Tab to add
+     * @param setSelected True if the added tab should become the selected tab.
+     */
+    public abstract void addTab(Tab tab, boolean setSelected);
+
+    /**
      * Add a tab for use in tabbed navigation mode. The tab will be inserted at
-     * <code>position</code>.
+     * <code>position</code>. If this is the first tab to be added it will become
+     * the selected tab.
      *
      * @param tab The tab to add
      * @param position The new position of the tab
      */
     public abstract void addTab(Tab tab, int position);
+
+    /**
+     * Add a tab for use in tabbed navigation mode. The tab will be insterted at
+     * <code>position</code>.
+     *
+     * @param tab The tab to add
+     * @param position The new position of the tab
+     * @param setSelected True if the added tab should become the selected tab.
+     */
+    public abstract void addTab(Tab tab, int position, boolean setSelected);
 
     /**
      * Remove a tab from the action bar. If the removed tab was selected it will be deselected

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_VERTEX_H
-#define ANDROID_UI_VERTEX_H
+#ifndef ANDROID_HWUI_VERTEX_H
+#define ANDROID_HWUI_VERTEX_H
 
 namespace android {
 namespace uirenderer {
@@ -43,4 +43,4 @@ struct TextureVertex {
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_VERTEX_H
+#endif // ANDROID_HWUI_VERTEX_H

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_EXTENSIONS_H
-#define ANDROID_UI_EXTENSIONS_H
+#ifndef ANDROID_HWUI_EXTENSIONS_H
+#define ANDROID_HWUI_EXTENSIONS_H
 
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
@@ -93,4 +93,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_EXTENSIONS_H
+#endif // ANDROID_HWUI_EXTENSIONS_H

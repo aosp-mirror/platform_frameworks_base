@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_PROGRAM_CACHE_H
-#define ANDROID_UI_PROGRAM_CACHE_H
+#ifndef ANDROID_HWUI_PROGRAM_CACHE_H
+#define ANDROID_HWUI_PROGRAM_CACHE_H
 
 #include <utils/KeyedVector.h>
 #include <utils/Log.h>
@@ -258,4 +258,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_PROGRAM_CACHE_H
+#endif // ANDROID_HWUI_PROGRAM_CACHE_H

@@ -56,16 +56,16 @@ void initParts(int w, int h)
 int root() {
     rsgClearColor(0.f, 0.f, 0.f, 1.f);
 
-    BallControl_t bc;
+    BallControl_t bc = {0};
     Ball_t *bout;
 
     if (frame & 1) {
-        bc.ain = rsGetAllocation(balls2);
-        bc.aout = rsGetAllocation(balls1);
+        rsSetObject(&bc.ain, rsGetAllocation(balls2));
+        rsSetObject(&bc.aout, rsGetAllocation(balls1));
         bout = balls2;
     } else {
-        bc.ain = rsGetAllocation(balls1);
-        bc.aout = rsGetAllocation(balls2);
+        rsSetObject(&bc.ain, rsGetAllocation(balls1));
+        rsSetObject(&bc.aout, rsGetAllocation(balls2));
         bout = balls1;
     }
 
@@ -99,6 +99,8 @@ int root() {
     rsgBindProgramStore(gPS);
     rsgDrawMesh(arcMesh, 0, 0, arcIdx);
     rsgDrawMesh(partMesh);
+    rsClearObject(&bc.ain);
+    rsClearObject(&bc.aout);
     return 1;
 }
 

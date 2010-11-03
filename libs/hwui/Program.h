@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_PROGRAM_H
-#define ANDROID_UI_PROGRAM_H
+#ifndef ANDROID_HWUI_PROGRAM_H
+#define ANDROID_HWUI_PROGRAM_H
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -131,4 +131,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_PROGRAM_H
+#endif // ANDROID_HWUI_PROGRAM_H

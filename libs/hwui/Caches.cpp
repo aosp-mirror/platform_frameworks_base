@@ -46,18 +46,21 @@ Caches::Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 
     mCurrentBuffer = meshBuffer;
+    mRegionMesh = NULL;
 }
 
-/**
- * Binds the VBO used to render simple textured quads.
- */
+Caches::~Caches() {
+    delete[] mRegionMesh;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// VBO
+///////////////////////////////////////////////////////////////////////////////
+
 void Caches::bindMeshBuffer() {
     bindMeshBuffer(meshBuffer);
 }
 
-/**
- * Binds the specified VBO.
- */
 void Caches::bindMeshBuffer(const GLuint buffer) {
     if (mCurrentBuffer != buffer) {
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -65,14 +68,41 @@ void Caches::bindMeshBuffer(const GLuint buffer) {
     }
 }
 
-/**
- * Unbinds the VBO used to render simple textured quads.
- */
 void Caches::unbindMeshBuffer() {
     if (mCurrentBuffer) {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         mCurrentBuffer = 0;
     }
+}
+
+TextureVertex* Caches::getRegionMesh() {
+    // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
+    if (!mRegionMesh) {
+        mRegionMesh = new TextureVertex[REGION_MESH_QUAD_COUNT * 4];
+
+        uint16_t* regionIndices = new uint16_t[REGION_MESH_QUAD_COUNT * 6];
+        for (int i = 0; i < REGION_MESH_QUAD_COUNT; i++) {
+            uint16_t quad = i * 4;
+            int index = i * 6;
+            regionIndices[index    ] = quad;       // top-left
+            regionIndices[index + 1] = quad + 1;   // top-right
+            regionIndices[index + 2] = quad + 2;   // bottom-left
+            regionIndices[index + 3] = quad + 2;   // bottom-left
+            regionIndices[index + 4] = quad + 1;   // top-right
+            regionIndices[index + 5] = quad + 3;   // bottom-right
+        }
+
+        glGenBuffers(1, &mRegionMeshIndices);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mRegionMeshIndices);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, REGION_MESH_QUAD_COUNT * 6 * sizeof(uint16_t),
+                regionIndices, GL_STATIC_DRAW);
+
+        delete[] regionIndices;
+    } else {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mRegionMeshIndices);
+    }
+
+    return mRegionMesh;
 }
 
 }; // namespace uirenderer

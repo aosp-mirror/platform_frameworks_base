@@ -556,6 +556,8 @@ void FontRenderer::issueDrawCommand() {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferID);
     glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, NULL);
+
+    mDrawn = true;
 }
 
 void FontRenderer::appendMeshQuad(float x1, float y1, float z1, float u1, float v1, float x2,
@@ -594,6 +596,13 @@ void FontRenderer::appendMeshQuad(float x1, float y1, float z1, float u1, float 
     (*currentPos++) = v4;
 
     mCurrentQuadIndex++;
+
+    if (mBounds) {
+        mBounds->left = fmin(mBounds->left, x1);
+        mBounds->top = fmin(mBounds->top, y3);
+        mBounds->right = fmax(mBounds->right, x3);
+        mBounds->bottom = fmax(mBounds->bottom, y1);
+    }
 
     if (mCurrentQuadIndex == mMaxNumberOfQuads) {
         issueDrawCommand();
@@ -674,22 +683,27 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     return image;
 }
 
-void FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text,
-        uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y) {
+bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text,
+        uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, Rect* bounds) {
     checkInit();
 
     if (!mCurrentFont) {
         LOGE("No font set");
-        return;
+        return false;
     }
 
+    mDrawn = false;
+    mBounds = bounds;
     mClip = clip;
     mCurrentFont->renderUTF(paint, text, startIndex, len, numGlyphs, x, y);
+    mBounds = NULL;
 
     if (mCurrentQuadIndex != 0) {
         issueDrawCommand();
         mCurrentQuadIndex = 0;
     }
+
+    return mDrawn;
 }
 
 void FontRenderer::computeGaussianWeights(float* weights, int32_t radius) {

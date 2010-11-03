@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UI_SKIA_COLOR_FILTER_H
-#define ANDROID_UI_SKIA_COLOR_FILTER_H
+#ifndef ANDROID_HWUI_SKIA_COLOR_FILTER_H
+#define ANDROID_HWUI_SKIA_COLOR_FILTER_H
 
 #include <GLES2/gl2.h>
 #include <SkColorFilter.h>
@@ -123,4 +123,4 @@ private:
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_UI_SKIA_COLOR_FILTER_H
+#endif // ANDROID_HWUI_SKIA_COLOR_FILTER_H

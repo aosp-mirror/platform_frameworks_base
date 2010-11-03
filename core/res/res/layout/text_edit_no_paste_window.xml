@@ -22,6 +22,10 @@
     <ImageView android:id="@+id/paste_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="16dip"
+        android:paddingRight="8dip"
+        android:paddingTop="8dip"
+        android:paddingBottom="8dip"
         android:layout_centerVertical="true"
         android:background="@android:drawable/ic_menu_paste_dark"
     />
@@ -29,9 +33,14 @@
     <TextView android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="0dip"
+        android:paddingRight="16dip"
+        android:paddingTop="8dip"
+        android:paddingBottom="8dip"
         android:layout_centerVertical="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@android:string/pasteDisabled"
+        android:textColor="@android:color/dim_foreground_dark_inverse_disabled"
         android:layout_toRightOf="@id/paste_icon"
     />
 

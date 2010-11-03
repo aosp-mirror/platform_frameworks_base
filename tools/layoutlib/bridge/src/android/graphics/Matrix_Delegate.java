@@ -689,13 +689,17 @@ public final class Matrix_Delegate {
     // ---- Private helper methods ----
 
     private static AffineTransform getAffineTransform(Matrix_Delegate d) {
+        return getAffineTransform(d.mValues);
+    }
+
+    /*package*/ static AffineTransform getAffineTransform(float[] matrix) {
         // the AffineTransform constructor takes the value in a different order
         // for a matrix [ 0 1 2 ]
         //              [ 3 4 5 ]
         // the order is 0, 3, 1, 4, 2, 5...
         return new AffineTransform(
-                d.mValues[0], d.mValues[3], d.mValues[1],
-                d.mValues[4], d.mValues[2], d.mValues[5]);
+                matrix[0], matrix[3], matrix[1],
+                matrix[4], matrix[2], matrix[5]);
     }
 
 
@@ -862,7 +866,7 @@ public final class Matrix_Delegate {
      * <p/>This in effect does dest = a*b
      * dest cannot be the same as a or b.
      */
-    private static void multiply(float dest[], float[] a, float[] b) {
+     /*package*/ static void multiply(float dest[], float[] a, float[] b) {
         // first row
         dest[0] = b[0] * a[0] + b[1] * a[3] + b[2] * a[6];
         dest[1] = b[0] * a[1] + b[1] * a[4] + b[2] * a[7];
@@ -885,11 +889,11 @@ public final class Matrix_Delegate {
      * @param dy
      * @return
      */
-    private static float[] getTranslate(float dx, float dy) {
+    /*package*/ static float[] getTranslate(float dx, float dy) {
         return setTranslate(new float[9], dx, dy);
     }
 
-    private static float[] setTranslate(float[] dest, float dx, float dy) {
+    /*package*/ static float[] setTranslate(float[] dest, float dx, float dy) {
         dest[0] = 1;
         dest[1] = 0;
         dest[2] = dx;
@@ -902,7 +906,7 @@ public final class Matrix_Delegate {
         return dest;
     }
 
-    private static float[] getScale(float sx, float sy) {
+    /*package*/ static float[] getScale(float sx, float sy) {
         return new float[] { sx, 0, 0, 0, sy, 0, 0, 0, 1 };
     }
 
@@ -913,7 +917,7 @@ public final class Matrix_Delegate {
      * @param px
      * @param py
      */
-    private static float[] getScale(float sx, float sy, float px, float py) {
+    /*package*/ static float[] getScale(float sx, float sy, float px, float py) {
         float[] tmp = new float[9];
         float[] tmp2 = new float[9];
 
@@ -932,7 +936,7 @@ public final class Matrix_Delegate {
     }
 
 
-    private static float[] getRotate(float degrees) {
+    /*package*/ static float[] getRotate(float degrees) {
         double rad = Math.toRadians(degrees);
         float sin = (float)Math.sin(rad);
         float cos = (float)Math.cos(rad);
@@ -940,11 +944,11 @@ public final class Matrix_Delegate {
         return getRotate(sin, cos);
     }
 
-    private static float[] getRotate(float sin, float cos) {
+    /*package*/ static float[] getRotate(float sin, float cos) {
         return setRotate(new float[9], sin, cos);
     }
 
-    private static float[] setRotate(float[] dest, float degrees) {
+    /*package*/ static float[] setRotate(float[] dest, float degrees) {
         double rad = Math.toRadians(degrees);
         float sin = (float)Math.sin(rad);
         float cos = (float)Math.cos(rad);
@@ -952,7 +956,7 @@ public final class Matrix_Delegate {
         return setRotate(dest, sin, cos);
     }
 
-    private static float[] setRotate(float[] dest, float sin, float cos) {
+    /*package*/ static float[] setRotate(float[] dest, float sin, float cos) {
         dest[0] = cos;
         dest[1] = -sin;
         dest[2] = 0;
@@ -965,7 +969,7 @@ public final class Matrix_Delegate {
         return dest;
     }
 
-    private static float[] getRotate(float degrees, float px, float py) {
+    /*package*/ static float[] getRotate(float degrees, float px, float py) {
         float[] tmp = new float[9];
         float[] tmp2 = new float[9];
 
@@ -986,11 +990,11 @@ public final class Matrix_Delegate {
         return tmp;
     }
 
-    private static float[] getSkew(float kx, float ky) {
+    /*package*/ static float[] getSkew(float kx, float ky) {
         return new float[] { 1, kx, 0, ky, 1, 0, 0, 0, 1 };
     }
 
-    private static float[] getSkew(float kx, float ky, float px, float py) {
+    /*package*/ static float[] getSkew(float kx, float ky, float px, float py) {
         float[] tmp = new float[9];
         float[] tmp2 = new float[9];
 
