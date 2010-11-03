@@ -22,34 +22,21 @@
 
 using namespace android;
 
-DrmManagerClient::DrmManagerClient() {
-    int uniqueId = 0;
-    mDrmManagerClientImpl = NULL;
-
-    mDrmManagerClientImpl = DrmManagerClientImpl::create(&uniqueId);
-    mUniqueId = uniqueId;
-
-    loadPlugIns();
+DrmManagerClient::DrmManagerClient():
+        mUniqueId(0), mDrmManagerClientImpl(NULL) {
+    mDrmManagerClientImpl = DrmManagerClientImpl::create(&mUniqueId);
+    mDrmManagerClientImpl->addClient(mUniqueId);
 }
 
 DrmManagerClient::~DrmManagerClient() {
     DrmManagerClientImpl::remove(mUniqueId);
-    unloadPlugIns();
-
+    mDrmManagerClientImpl->removeClient(mUniqueId);
     delete mDrmManagerClientImpl; mDrmManagerClientImpl = NULL;
-}
-
-status_t DrmManagerClient::loadPlugIns() {
-    return mDrmManagerClientImpl->loadPlugIns(mUniqueId);
 }
 
 status_t DrmManagerClient::setOnInfoListener(
                     const sp<DrmManagerClient::OnInfoListener>& infoListener) {
     return mDrmManagerClientImpl->setOnInfoListener(mUniqueId, infoListener);
-}
-
-status_t DrmManagerClient::unloadPlugIns() {
-    return mDrmManagerClientImpl->unloadPlugIns(mUniqueId);
 }
 
 DrmConstraints* DrmManagerClient::getConstraints(const String8* path, const int action) {
@@ -86,6 +73,7 @@ int DrmManagerClient::checkRightsStatus(const String8& path, int action) {
 }
 
 status_t DrmManagerClient::consumeRights(DecryptHandle* decryptHandle, int action, bool reserve) {
+    Mutex::Autolock _l(mDecryptLock);
     return mDrmManagerClientImpl->consumeRights(mUniqueId, decryptHandle, action, reserve);
 }
 
@@ -128,12 +116,17 @@ DecryptHandle* DrmManagerClient::openDecryptSession(int fd, int offset, int leng
     return mDrmManagerClientImpl->openDecryptSession(mUniqueId, fd, offset, length);
 }
 
+DecryptHandle* DrmManagerClient::openDecryptSession(const char* uri) {
+    return mDrmManagerClientImpl->openDecryptSession(mUniqueId, uri);
+}
+
 status_t DrmManagerClient::closeDecryptSession(DecryptHandle* decryptHandle) {
     return mDrmManagerClientImpl->closeDecryptSession(mUniqueId, decryptHandle);
 }
 
 status_t DrmManagerClient::initializeDecryptUnit(
             DecryptHandle* decryptHandle, int decryptUnitId, const DrmBuffer* headerInfo) {
+    Mutex::Autolock _l(mDecryptLock);
     return mDrmManagerClientImpl->initializeDecryptUnit(
             mUniqueId, decryptHandle, decryptUnitId, headerInfo);
 }
@@ -141,16 +134,19 @@ status_t DrmManagerClient::initializeDecryptUnit(
 status_t DrmManagerClient::decrypt(
     DecryptHandle* decryptHandle, int decryptUnitId,
     const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV) {
+    Mutex::Autolock _l(mDecryptLock);
     return mDrmManagerClientImpl->decrypt(
             mUniqueId, decryptHandle, decryptUnitId, encBuffer, decBuffer, IV);
 }
 
 status_t DrmManagerClient::finalizeDecryptUnit(DecryptHandle* decryptHandle, int decryptUnitId) {
+    Mutex::Autolock _l(mDecryptLock);
     return mDrmManagerClientImpl->finalizeDecryptUnit(mUniqueId, decryptHandle, decryptUnitId);
 }
 
 ssize_t DrmManagerClient::pread(
             DecryptHandle* decryptHandle, void* buffer, ssize_t numBytes, off_t offset) {
+    Mutex::Autolock _l(mDecryptLock);
     return mDrmManagerClientImpl->pread(mUniqueId, decryptHandle, buffer, numBytes, offset);
 }
 

@@ -35,36 +35,29 @@ class DrmInfoEvent;
  */
 class DrmManagerClientImpl : public BnDrmServiceListener {
 private:
-    DrmManagerClientImpl();
+    DrmManagerClientImpl() { }
 
 public:
     static DrmManagerClientImpl* create(int* pUniqueId);
 
     static void remove(int uniqueId);
 
-    virtual ~DrmManagerClientImpl();
+    virtual ~DrmManagerClientImpl() { }
 
 public:
     /**
-     * Initialize DRM Manager
-     *     load available plug-ins from default plugInDirPath
+     * Adds the client respective to given unique id.
      *
      * @param[in] uniqueId Unique identifier for a session
-     * @return status_t
-     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    status_t loadPlugIns(int uniqueId);
+    void addClient(int uniqueId);
 
     /**
-     * Finalize DRM Manager
-     *     release resources associated with each plug-in
-     *     unload all plug-ins and etc.
+     * Removes the client respective to given unique id.
      *
      * @param[in] uniqueId Unique identifier for a session
-     * @return status_t
-     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    status_t unloadPlugIns(int uniqueId);
+    void removeClient(int uniqueId);
 
     /**
      * Register a callback to be invoked when the caller required to
@@ -301,6 +294,16 @@ public:
     DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length);
 
     /**
+     * Open the decrypt session to decrypt the given protected content
+     *
+     * @param[in] uniqueId Unique identifier for a session
+     * @param[in] uri Path of the protected content to be decrypted
+     * @return
+     *     Handle for the decryption session
+     */
+    DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
+
+    /**
      * Close the decrypt session for the given handle
      *
      * @param[in] uniqueId Unique identifier for a session
@@ -378,17 +381,6 @@ public:
     status_t notify(const DrmInfoEvent& event);
 
 private:
-    /**
-     * Initialize DRM Manager
-     *     load available plug-ins from plugInDirPath
-     *
-     * @param[in] uniqueId Unique identifier for a session
-     * @param[in] plugInDirPath Directory from where to load plug-ins
-     * @return status_t
-     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
-     */
-    status_t loadPlugIns(int uniqueId, const String8& plugInDirPath);
-
     /**
      * Install new DRM Engine Plug-in at the runtime
      *

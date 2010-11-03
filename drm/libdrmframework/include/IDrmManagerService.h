@@ -46,10 +46,9 @@ public:
     enum {
         ADD_UNIQUEID = IBinder::FIRST_CALL_TRANSACTION,
         REMOVE_UNIQUEID,
-        LOAD_PLUGINS,
-        LOAD_PLUGINS_FROM_PATH,
+        ADD_CLIENT,
+        REMOVE_CLIENT,
         SET_DRM_SERVICE_LISTENER,
-        UNLOAD_PLUGINS,
         INSTALL_DRM_ENGINE,
         GET_CONSTRAINTS_FROM_CONTENT,
         CAN_HANDLE,
@@ -69,6 +68,7 @@ public:
         CLOSE_CONVERT_SESSION,
         GET_ALL_SUPPORT_INFO,
         OPEN_DECRYPT_SESSION,
+        OPEN_DECRYPT_SESSION_FROM_URI,
         CLOSE_DECRYPT_SESSION,
         INITIALIZE_DECRYPT_UNIT,
         DECRYPT,
@@ -84,14 +84,12 @@ public:
 
     virtual void removeUniqueId(int uniqueId) = 0;
 
-    virtual status_t loadPlugIns(int uniqueId) = 0;
+    virtual void addClient(int uniqueId) = 0;
 
-    virtual status_t loadPlugIns(int uniqueId, const String8& plugInDirPath) = 0;
+    virtual void removeClient(int uniqueId) = 0;
 
     virtual status_t setDrmServiceListener(
             int uniqueId, const sp<IDrmServiceListener>& infoListener) = 0;
-
-    virtual status_t unloadPlugIns(int uniqueId) = 0;
 
     virtual status_t installDrmEngine(int uniqueId, const String8& drmEngineFile) = 0;
 
@@ -140,6 +138,8 @@ public:
 
     virtual DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length) = 0;
 
+    virtual DecryptHandle* openDecryptSession(int uniqueId, const char* uri) = 0;
+
     virtual status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) = 0;
 
     virtual status_t initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
@@ -168,14 +168,12 @@ public:
 
     virtual void removeUniqueId(int uniqueId);
 
-    virtual status_t loadPlugIns(int uniqueId);
+    virtual void addClient(int uniqueId);
 
-    virtual status_t loadPlugIns(int uniqueId, const String8& plugInDirPath);
+    virtual void removeClient(int uniqueId);
 
     virtual status_t setDrmServiceListener(
             int uniqueId, const sp<IDrmServiceListener>& infoListener);
-
-    virtual status_t unloadPlugIns(int uniqueId);
 
     virtual status_t installDrmEngine(int uniqueId, const String8& drmEngineFile);
 
@@ -220,6 +218,8 @@ public:
             int uniqueId, int* length, DrmSupportInfo** drmSupportInfoArray);
 
     virtual DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length);
+
+    virtual DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
 
     virtual status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 

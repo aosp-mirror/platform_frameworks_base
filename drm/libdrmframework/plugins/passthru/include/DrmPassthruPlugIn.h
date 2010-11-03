@@ -74,6 +74,9 @@ protected:
     status_t onOpenDecryptSession(
             int uniqueId, DecryptHandle* decryptHandle, int fd, int offset, int length);
 
+    status_t onOpenDecryptSession(
+            int uniqueId, DecryptHandle* decryptHandle, const char* uri);
+
     status_t onCloseDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 
     status_t onInitializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,

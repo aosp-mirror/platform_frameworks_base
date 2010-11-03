@@ -17,6 +17,7 @@
 #ifndef __DRM_MANAGER_CLIENT_H__
 #define __DRM_MANAGER_CLIENT_H__
 
+#include <utils/threads.h>
 #include <binder/IInterface.h>
 #include "drm_framework_common.h"
 
@@ -65,6 +66,15 @@ public:
      *     Handle for the decryption session
      */
     DecryptHandle* openDecryptSession(int fd, int offset, int length);
+
+    /**
+     * Open the decrypt session to decrypt the given protected content
+     *
+     * @param[in] uri Path of the protected content to be decrypted
+     * @return
+     *     Handle for the decryption session
+     */
+    DecryptHandle* openDecryptSession(const char* uri);
 
     /**
      * Close the decrypt session for the given handle
@@ -339,27 +349,8 @@ public:
     status_t getAllSupportInfo(int* length, DrmSupportInfo** drmSupportInfoArray);
 
 private:
-    /**
-     * Initialize DRM Manager
-     *     load available plug-ins from default plugInDirPath
-     *
-     * @return status_t
-     *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
-     */
-    status_t loadPlugIns();
-
-    /**
-     * Finalize DRM Manager
-     *    release resources associated with each plug-in
-     *    unload all plug-ins and etc.
-     *
-     * @return status_t
-     *    Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
-     */
-    status_t unloadPlugIns();
-
-private:
     int mUniqueId;
+    Mutex mDecryptLock;
     DrmManagerClientImpl* mDrmManagerClientImpl;
 };
 
