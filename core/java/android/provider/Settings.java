@@ -1199,12 +1199,6 @@ public final class Settings {
          */
         public static final String WIFI_STATIC_DNS2 = "wifi_static_dns2";
 
-        /**
-         * The number of radio channels that are allowed in the local
-         * 802.11 regulatory domain.
-         * @hide
-         */
-        public static final String WIFI_NUM_ALLOWED_CHANNELS = "wifi_num_allowed_channels";
 
         /**
          * Determines whether remote devices may discover and/or connect to
@@ -2701,11 +2695,11 @@ public final class Settings {
                 "wifi_networks_available_repeat_delay";
 
         /**
-         * The number of radio channels that are allowed in the local
-         * 802.11 regulatory domain.
+         * 802.11 country code in ISO 3166 format
          * @hide
          */
-        public static final String WIFI_NUM_ALLOWED_CHANNELS = "wifi_num_allowed_channels";
+        public static final String WIFI_COUNTRY_CODE = "wifi_country_code";
+
 
         /**
          * When the number of open networks exceeds this number, the
@@ -3638,7 +3632,7 @@ public final class Settings {
             TTS_ENABLED_PLUGINS,
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
-            WIFI_NUM_ALLOWED_CHANNELS,
+            WIFI_COUNTRY_CODE,
             WIFI_NUM_OPEN_NETWORKS_KEPT,
             MOUNT_PLAY_NOTIFICATION_SND,
             MOUNT_UMS_AUTOSTART,

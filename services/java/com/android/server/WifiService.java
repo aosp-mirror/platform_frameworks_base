@@ -134,12 +134,6 @@ public class WifiService extends IWifiManager.Stub {
      */
     private static final long DEFAULT_SCAN_INTERVAL_MS = 60 * 1000; /* 1 minute */
 
-    /**
-     * Number of allowed radio frequency channels in various regulatory domains.
-     * This list is sufficient for 802.11b/g networks (2.4GHz range).
-     */
-    private static int[] sValidRegulatoryChannelCounts = new int[] {11, 13, 14};
-
     private static final String ACTION_DEVICE_IDLE =
             "com.android.server.WifiManager.action.DEVICE_IDLE";
 
@@ -737,82 +731,19 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     /**
-     * Set the number of radio frequency channels that are allowed to be used
-     * in the current regulatory domain. This method should be used only
-     * if the correct number of channels cannot be determined automatically
-     * for some reason. If the operation is successful, the new value may be
-     * persisted as a Secure setting.
-     * @param numChannels the number of allowed channels. Must be greater than 0
-     * and less than or equal to 16.
+     * Set the country code
+     * @param countryCode ISO 3166 country code.
      * @param persist {@code true} if the setting should be remembered.
-     * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
-     * {@code numChannels} is outside the valid range.
+     *
+     * The persist behavior exists so that wifi can fall back to the last
+     * persisted country code on a restart, when the locale information is
+     * not available from telephony.
      */
-    public synchronized boolean setNumAllowedChannels(int numChannels, boolean persist) {
-        Slog.i(TAG, "WifiService trying to setNumAllowed to "+numChannels+
-                " with persist set to "+persist);
+    public void setCountryCode(String countryCode, boolean persist) {
+        Slog.i(TAG, "WifiService trying to set country code to " + countryCode +
+                " with persist set to " + persist);
         enforceChangePermission();
-
-        /*
-         * Validate the argument. We'd like to let the Wi-Fi driver do this,
-         * but if Wi-Fi isn't currently enabled, that's not possible, and
-         * we want to persist the setting anyway,so that it will take
-         * effect when Wi-Fi does become enabled.
-         */
-        boolean found = false;
-        for (int validChan : sValidRegulatoryChannelCounts) {
-            if (validChan == numChannels) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            return false;
-        }
-
-        if (persist) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
-                    numChannels);
-        }
-
-        mWifiStateMachine.setNumAllowedChannels(numChannels);
-
-        return true;
-    }
-
-    /**
-     * Return the number of frequency channels that are allowed
-     * to be used in the current regulatory domain.
-     * @return the number of allowed channels, or {@code -1} if an error occurs
-     */
-    public int getNumAllowedChannels() {
-        int numChannels;
-
-        enforceAccessPermission();
-
-        /*
-         * If we can't get the value from the driver (e.g., because
-         * Wi-Fi is not currently enabled), get the value from
-         * Settings.
-         */
-        numChannels = mWifiStateMachine.getNumAllowedChannels();
-        if (numChannels < 0) {
-            numChannels = Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
-                    -1);
-        }
-        return numChannels;
-    }
-
-    /**
-     * Return the list of valid values for the number of allowed radio channels
-     * for various regulatory domains.
-     * @return the list of channel counts
-     */
-    public int[] getValidChannelCounts() {
-        enforceAccessPermission();
-        return sValidRegulatoryChannelCounts;
+        mWifiStateMachine.setCountryCode(countryCode, persist);
     }
 
     /**

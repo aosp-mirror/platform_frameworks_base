@@ -111,7 +111,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private String mInterfaceName;
 
-    private int mNumAllowedChannels = 0;
     private int mLastSignalLevel = -1;
     private String mLastBssid;
     private int mLastNetworkId;
@@ -271,8 +270,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * false(0)
      */
     private static final int CMD_SET_BLUETOOTH_SCAN_MODE          = 79;
-    /* Set number of allowed channels */
-    private static final int CMD_SET_NUM_ALLOWED_CHANNELS         = 80;
+    /* Set the country code */
+    private static final int CMD_SET_COUNTRY_CODE                 = 80;
     /* Request connectivity manager wake lock before driver stop */
     private static final int CMD_REQUEST_CM_WAKELOCK              = 81;
     /* Enables RSSI poll */
@@ -308,6 +307,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int CMD_START_WPS_PIN_FROM_AP            = 90;
     /* Start Wi-Fi protected setup pin method configuration with pin obtained from device */
     private static final int CMD_START_WPS_PIN_FROM_DEVICE        = 91;
+
     /**
      * Interval in milliseconds between polling for connection
      * status items that are not sent via asynchronous events.
@@ -831,42 +831,17 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
-     * Set the number of allowed radio frequency channels from the system
-     * setting value, if any.
+     * Set the country code
+     * @param countryCode following ISO 3166 format
+     * @param persist {@code true} if the setting should be remembered.
      */
-    public void setNumAllowedChannels() {
-        try {
-            setNumAllowedChannels(
-                    Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
-        } catch (Settings.SettingNotFoundException e) {
-            if (mNumAllowedChannels != 0) {
-                setNumAllowedChannels(mNumAllowedChannels);
-            }
-            // otherwise, use the driver default
+    public void setCountryCode(String countryCode, boolean persist) {
+        if (persist) {
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_COUNTRY_CODE,
+                    countryCode);
         }
-    }
-
-    /**
-     * Set the number of radio frequency channels that are allowed to be used
-     * in the current regulatory domain.
-     * @param numChannels the number of allowed channels. Must be greater than 0
-     * and less than or equal to 16.
-     */
-    public void setNumAllowedChannels(int numChannels) {
-        sendMessage(obtainMessage(CMD_SET_NUM_ALLOWED_CHANNELS, numChannels, 0));
-    }
-
-    /**
-     * Get number of allowed channels
-     *
-     * @return channel count, -1 on failure
-     *
-     * TODO: this is not a public API and needs to be removed in favor
-     * of asynchronous reporting. unused for now.
-     */
-    public int getNumAllowedChannels() {
-        return -1;
+        sendMessage(obtainMessage(CMD_SET_COUNTRY_CODE, countryCode));
     }
 
     /**
@@ -957,7 +932,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sb.append("mWifiInfo ").append(mWifiInfo).append(LS);
         sb.append("mDhcpInfo ").append(mDhcpInfo).append(LS);
         sb.append("mNetworkInfo ").append(mNetworkInfo).append(LS);
-        sb.append("mNumAllowedChannels ").append(mNumAllowedChannels).append(LS);
         sb.append("mLastSignalLevel ").append(mLastSignalLevel).append(LS);
         sb.append("mLastBssid ").append(mLastBssid).append(LS);
         sb.append("mLastNetworkId ").append(mLastNetworkId).append(LS);
@@ -976,6 +950,19 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /*********************************************************
      * Internal private functions
      ********************************************************/
+
+    /**
+     * Set the country code from the system setting value, if any.
+     */
+    private void setCountryCode() {
+        String countryCode = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.WIFI_COUNTRY_CODE);
+        if (countryCode != null && !countryCode.isEmpty()) {
+            setCountryCode(countryCode, false);
+        } else {
+            //use driver default
+        }
+    }
 
     private void setWifiState(int wifiState) {
         final int previousWifiState = mWifiState.get();
@@ -1563,7 +1550,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
-                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_SET_COUNTRY_CODE:
                 case CMD_REQUEST_CM_WAKELOCK:
                 case CMD_CONNECT_NETWORK:
                 case CMD_SAVE_NETWORK:
@@ -1665,7 +1652,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
-                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_SET_COUNTRY_CODE:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                     deferMessage(message);
@@ -1793,7 +1780,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
-                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_SET_COUNTRY_CODE:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                     deferMessage(message);
@@ -1890,7 +1877,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
-                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_SET_COUNTRY_CODE:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                     deferMessage(message);
@@ -2034,7 +2021,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
-                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_SET_COUNTRY_CODE:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                 case CMD_START_SCAN:
@@ -2060,8 +2047,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             mIsRunning = true;
             updateBatteryWorkSource(null);
 
-            /* Initialize channel count */
-            setNumAllowedChannels();
+            /* set country code */
+            setCountryCode();
 
             if (mIsScanMode) {
                 WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
@@ -2093,9 +2080,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                     WifiNative.setBluetoothCoexistenceScanModeCommand(message.arg1 == 1);
                     break;
-                case CMD_SET_NUM_ALLOWED_CHANNELS:
-                    mNumAllowedChannels = message.arg1;
-                    WifiNative.setNumAllowedChannelsCommand(message.arg1);
+                case CMD_SET_COUNTRY_CODE:
+                    String country = (String) message.obj;
+                    Log.d(TAG, "set country code " + country);
+                    if (!WifiNative.setCountryCodeCommand(country.toUpperCase())) {
+                        Log.e(TAG, "Failed to set country code " + country);
+                    }
                     break;
                 case CMD_STOP_DRIVER:
                     mWakeLock.acquire();
@@ -2151,7 +2141,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
-                case CMD_SET_NUM_ALLOWED_CHANNELS:
+                case CMD_SET_COUNTRY_CODE:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                 case CMD_START_SCAN:

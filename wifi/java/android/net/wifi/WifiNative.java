@@ -117,10 +117,6 @@ public class WifiNative {
 
     public native static int getPowerModeCommand();
 
-    public native static boolean setNumAllowedChannelsCommand(int numChannels);
-
-    public native static int getNumAllowedChannelsCommand();
-
     /**
      * Sets the bluetooth coexistence mode.
      * 
@@ -162,6 +158,8 @@ public class WifiNative {
     public native static String getDhcpError();
 
     public native static boolean setSuspendOptimizationsCommand(boolean enabled);
+
+    public native static boolean setCountryCodeCommand(String countryCode);
 
     /**
      * Wait for the supplicant to send an event, returning the event string.

@@ -558,11 +558,6 @@ public abstract class PhoneBase extends Handler implements Phone {
             String c = carrierLocales[i].toString();
             if (carrier.equals(c)) {
                 String l = carrierLocales[i+1].toString();
-                int wifiChannels = 0;
-                try {
-                    wifiChannels = Integer.parseInt(
-                            carrierLocales[i+2].toString());
-                } catch (NumberFormatException e) { }
 
                 String language = l.substring(0, 2);
                 String country = "";
@@ -571,15 +566,15 @@ public abstract class PhoneBase extends Handler implements Phone {
                 }
                 setSystemLocale(language, country);
 
-                if (wifiChannels != 0) {
+                if (!country.isEmpty()) {
                     try {
                         Settings.Secure.getInt(mContext.getContentResolver(),
-                                Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS);
+                                Settings.Secure.WIFI_COUNTRY_CODE);
                     } catch (Settings.SettingNotFoundException e) {
                         // note this is not persisting
                         WifiManager wM = (WifiManager)
                                 mContext.getSystemService(Context.WIFI_SERVICE);
-                        wM.setNumAllowedChannels(wifiChannels, false);
+                        wM.setCountryCode(country, false);
                     }
                 }
                 return;
