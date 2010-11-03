@@ -123,8 +123,6 @@ public class ActionBarView extends ViewGroup {
         }
     };
 
-    private OnClickListener mHomeClickListener = null;
-
     private OnClickListener mTabClickListener = null;
 
     public ActionBarView(Context context, AttributeSet attrs) {
@@ -169,9 +167,6 @@ public class ActionBarView extends ViewGroup {
 
         mHomeLayout = new LinearLayout(context, null,
                 com.android.internal.R.attr.actionButtonStyle);
-        mHomeLayout.setClickable(true);
-        mHomeLayout.setFocusable(true);
-        mHomeLayout.setOnClickListener(mHomeClickListener);
         mHomeLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT));
 
@@ -207,18 +202,18 @@ public class ActionBarView extends ViewGroup {
 
         a.recycle();
         
-        if (mLogo != null || mIcon != null || mTitle != null) {
-            mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
-            mHomeClickListener = new OnClickListener() {
-                public void onClick(View v) {
-                    Context context = getContext();
-                    if (context instanceof Activity) {
-                        Activity activity = (Activity) context;
-                        activity.onOptionsItemSelected(mLogoNavItem);
-                    }
-                }
-            };
-        }
+        mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
+        mHomeLayout.setOnClickListener(new OnClickListener() {
+          public void onClick(View v) {
+            Context context = getContext();
+            if (context instanceof Activity) {
+              Activity activity = (Activity) context;
+              activity.onOptionsItemSelected(mLogoNavItem);
+            }
+          }
+        });
+        mHomeLayout.setClickable(true);
+        mHomeLayout.setFocusable(true);
     }
 
     @Override
