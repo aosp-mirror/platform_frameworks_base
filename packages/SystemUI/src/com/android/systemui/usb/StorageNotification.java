@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -60,6 +62,8 @@ public class StorageNotification extends StorageEventListener {
     private boolean        mUmsAvailable;
     private StorageManager mStorageManager;
 
+    private Handler        mAsyncEventHandler;
+
     public StorageNotification(Context context) {
         mContext = context;
 
@@ -67,6 +71,11 @@ public class StorageNotification extends StorageEventListener {
         final boolean connected = mStorageManager.isUsbMassStorageConnected();
         Slog.d(TAG, String.format( "Startup with UMS connection %s (media state %s)", mUmsAvailable,
                 Environment.getExternalStorageState()));
+        
+        HandlerThread thr = new HandlerThread("SystemUI StorageNotification");
+        thr.start();
+        mAsyncEventHandler = new Handler(thr.getLooper());
+
         onUsbMassStorageConnectionChanged(connected);
     }
 
@@ -74,7 +83,16 @@ public class StorageNotification extends StorageEventListener {
      * @override com.android.os.storage.StorageEventListener
      */
     @Override
-    public void onUsbMassStorageConnectionChanged(boolean connected) {
+    public void onUsbMassStorageConnectionChanged(final boolean connected) {
+        mAsyncEventHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                onUsbMassStorageConnectionChangedAsync(connected);
+            }
+        });
+    }
+
+    private void onUsbMassStorageConnectionChangedAsync(boolean connected) {
         mUmsAvailable = connected;
         /*
          * Even though we may have a UMS host connected, we the SD card
@@ -98,7 +116,16 @@ public class StorageNotification extends StorageEventListener {
      * @override com.android.os.storage.StorageEventListener
      */
     @Override
-    public void onStorageStateChanged(String path, String oldState, String newState) {
+    public void onStorageStateChanged(final String path, final String oldState, final String newState) {
+        mAsyncEventHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                onStorageStateChanged(path, oldState, newState);
+            }
+        });
+    }
+
+    private void onStorageStateChangedAsync(String path, String oldState, String newState) {
         Slog.i(TAG, String.format(
                 "Media {%s} state changed from {%s} -> {%s}", path, oldState, newState));
         if (newState.equals(Environment.MEDIA_SHARED)) {
