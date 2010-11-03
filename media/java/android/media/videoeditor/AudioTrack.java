@@ -17,6 +17,7 @@
 package android.media.videoeditor;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 
 /**
  * This class allows to handle an audio track. This audio file is mixed with the
@@ -49,7 +50,7 @@ public class AudioTrack {
     // The audio waveform filename
     private String mAudioWaveformFilename;
     // The audio waveform data
-    private WaveformData mWaveformData;
+    private SoftReference<WaveformData> mWaveformData;
 
     /**
      * An object of this type cannot be instantiated by using the default
@@ -165,7 +166,8 @@ public class AudioTrack {
 
         mAudioWaveformFilename = audioWaveformFilename;
         if (audioWaveformFilename != null) {
-            mWaveformData = new WaveformData(audioWaveformFilename);
+            mWaveformData =
+                new SoftReference<WaveformData>(new WaveformData(audioWaveformFilename));
         } else {
             mWaveformData = null;
         }
@@ -424,7 +426,7 @@ public class AudioTrack {
             throws IOException {
         // TODO: Set mAudioWaveformFilename at the end once the extract is
         // complete
-        mWaveformData = new WaveformData(mAudioWaveformFilename);
+        mWaveformData = new SoftReference<WaveformData>(new WaveformData(mAudioWaveformFilename));
     }
 
     /**
@@ -448,7 +450,20 @@ public class AudioTrack {
      * @return The waveform data
      */
     public WaveformData getWaveformData() {
-        return mWaveformData;
+        if (mWaveformData == null) {
+            return null;
+        }
+
+        WaveformData waveformData = mWaveformData.get();
+        if (waveformData != null) {
+            return waveformData;
+        } else if (mAudioWaveformFilename != null) {
+            waveformData = new WaveformData(mAudioWaveformFilename);
+            mWaveformData = new SoftReference<WaveformData>(waveformData);
+            return waveformData;
+        } else {
+            return null;
+        }
     }
 
     /*
