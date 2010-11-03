@@ -128,6 +128,9 @@ public class RenderScriptGL extends RenderScript {
                                     mSurfaceConfig.mStencilMin, mSurfaceConfig.mStencilPref,
                                     mSurfaceConfig.mSamplesMin, mSurfaceConfig.mSamplesPref,
                                     mSurfaceConfig.mSamplesQ);
+        if (mContext == 0) {
+            throw new RSDriverException("Failed to create RS context.");
+        }
         mMessageThread = new MessageThread(this);
         mMessageThread.start();
         Element.initPredefined(this);

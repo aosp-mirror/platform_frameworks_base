@@ -69,7 +69,7 @@ namespace renderscript {
 class Context
 {
 public:
-    Context(Device *, const RsSurfaceConfig *sc);
+    static Context * createContext(Device *, const RsSurfaceConfig *sc);
     ~Context();
 
     static pthread_key_t gThreadTLSKey;
@@ -276,9 +276,10 @@ protected:
 
 private:
     Context();
+    bool initContext(Device *, const RsSurfaceConfig *sc);
 
-    void initEGL();
-    void initGLThread();
+
+    bool initGLThread();
     void deinitEGL();
 
     uint32_t runRootScript();

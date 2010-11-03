@@ -33,8 +33,6 @@ public class Type extends BaseObj {
     int mElementCount;
     Element mElement;
 
-    Class mJavaClass;
-
     public Element getElement() {
         return mElement;
     }
@@ -123,12 +121,6 @@ public class Type extends BaseObj {
         }
         calcElementCount();
     }
-
-    public static Type createFromClass(RenderScript rs, Class c, int size, String scriptName) {
-        android.util.Log.e("RenderScript", "Calling depricated createFromClass");
-        return null;
-    }
-
 
     public static class Builder {
         RenderScript mRS;
