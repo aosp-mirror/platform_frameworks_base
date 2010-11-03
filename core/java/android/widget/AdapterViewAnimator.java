@@ -45,7 +45,7 @@ import android.view.ViewGroup;
  * @attr ref android.R.styleable#AdapterViewAnimator_loopViews
  */
 public abstract class AdapterViewAnimator extends AdapterView<Adapter>
-        implements RemoteViewsAdapter.RemoteAdapterConnectionCallback {
+        implements RemoteViewsAdapter.RemoteAdapterConnectionCallback, Advanceable {
     private static final String TAG = "RemoteViewAnimator";
 
     /**
@@ -964,5 +964,12 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             mRemoteViewsAdapter = null;
             setAdapter(mRemoteViewsAdapter);
         }
+    }
+
+    public void advance() {
+        showNext();
+    }
+
+    public void willBeAdvancedByHost() {
     }
 }

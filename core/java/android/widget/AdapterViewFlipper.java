@@ -52,6 +52,7 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     private boolean mStarted = false;
     private boolean mVisible = false;
     private boolean mUserPresent = true;
+    private boolean mAdvancedByHost = false;
 
     public AdapterViewFlipper(Context context) {
         super(context);
@@ -203,7 +204,8 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
      *            true.
      */
     private void updateRunning(boolean flipNow) {
-        boolean running = mVisible && mStarted && mUserPresent && mAdapter != null;
+        boolean running = !mAdvancedByHost && mVisible && mStarted && mUserPresent
+                && mAdapter != null;
         if (running != mRunning) {
             if (running) {
                 showOnly(mWhichChild, flipNow);
@@ -255,4 +257,10 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
             }
         }
     };
+
+    @Override
+    public void willBeAdvancedByHost() {
+        mAdvancedByHost = true;
+        updateRunning(false);
+    }
 }
