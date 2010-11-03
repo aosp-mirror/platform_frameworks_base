@@ -51,8 +51,12 @@ typedef struct android_native_buffer_t
     int stride;
     int format;
     int usage;
-    
-    void* reserved[2];
+
+    /* transformation as defined in hardware.h */
+    uint8_t transform;
+
+    uint8_t reserved_bytes[3];
+    void* reserved[1];
 
     buffer_handle_t handle;
 
