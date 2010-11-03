@@ -89,10 +89,8 @@ public class WifiService extends IWifiManager.Stub {
 
     private AlarmManager mAlarmManager;
     private PendingIntent mIdleIntent;
-    private PendingIntent mScanIntent;
     private BluetoothA2dp mBluetoothA2dp;
     private static final int IDLE_REQUEST = 0;
-    private static final int SCAN_REQUEST = 0;
     private boolean mScreenOff;
     private boolean mDeviceIdle;
     private int mPluggedType;
@@ -128,17 +126,8 @@ public class WifiService extends IWifiManager.Stub {
      */
     private static final long DEFAULT_IDLE_MS = 15 * 60 * 1000; /* 15 minutes */
 
-    /**
-     * See {@link Settings.Secure#WIFI_SCAN_INTERVAL_MS}. This is the default value if a
-     * Settings.Secure value is not present.
-     */
-    private static final long DEFAULT_SCAN_INTERVAL_MS = 60 * 1000; /* 1 minute */
-
     private static final String ACTION_DEVICE_IDLE =
             "com.android.server.WifiManager.action.DEVICE_IDLE";
-
-    private static final String ACTION_START_SCAN =
-        "com.android.server.WifiManager.action.START_SCAN";
 
     private boolean mIsReceiverRegistered = false;
 
@@ -248,9 +237,6 @@ public class WifiService extends IWifiManager.Stub {
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent idleIntent = new Intent(ACTION_DEVICE_IDLE, null);
         mIdleIntent = PendingIntent.getBroadcast(mContext, IDLE_REQUEST, idleIntent, 0);
-
-        Intent scanIntent = new Intent(ACTION_START_SCAN, null);
-        mScanIntent = PendingIntent.getBroadcast(mContext, SCAN_REQUEST, scanIntent, 0);
 
         HandlerThread wifiThread = new HandlerThread("WifiService");
         wifiThread.start();
@@ -936,8 +922,6 @@ public class WifiService extends IWifiManager.Stub {
                 int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
                                                BluetoothA2dp.STATE_NOT_PLAYING);
                 mWifiStateMachine.setBluetoothScanMode(state == BluetoothA2dp.STATE_PLAYING);
-            } else if (action.equals(ACTION_START_SCAN)) {
-                mWifiStateMachine.startScan(true);
             }
         }
 
@@ -1010,10 +994,6 @@ public class WifiService extends IWifiManager.Stub {
             strongestLockMode = WifiManager.WIFI_MODE_FULL;
         }
 
-        /* Scan interval when driver is started */
-        long scanMs = Settings.Secure.getLong(mContext.getContentResolver(),
-                Settings.Secure.WIFI_SCAN_INTERVAL_MS, DEFAULT_SCAN_INTERVAL_MS);
-
         /* Disable tethering when airplane mode is enabled */
         if (airplaneMode) {
             mWifiStateMachine.setWifiApEnabled(null, false);
@@ -1026,14 +1006,11 @@ public class WifiService extends IWifiManager.Stub {
                 mWifiStateMachine.setScanOnlyMode(
                         strongestLockMode == WifiManager.WIFI_MODE_SCAN_ONLY);
                 mWifiStateMachine.setDriverStart(true);
-                mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                        System.currentTimeMillis() + scanMs, scanMs, mScanIntent);
                 mWifiStateMachine.setHighPerfModeEnabled(strongestLockMode
                         == WifiManager.WIFI_MODE_FULL_HIGH_PERF);
             } else {
                 mWifiStateMachine.requestCmWakeLock();
                 mWifiStateMachine.setDriverStart(false);
-                mAlarmManager.cancel(mScanIntent);
             }
         } else {
             mWifiStateMachine.setWifiEnabled(false);
@@ -1046,7 +1023,6 @@ public class WifiService extends IWifiManager.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(ACTION_DEVICE_IDLE);
-        intentFilter.addAction(ACTION_START_SCAN);
         intentFilter.addAction(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
