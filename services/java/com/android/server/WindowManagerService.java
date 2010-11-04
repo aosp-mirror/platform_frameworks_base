@@ -499,6 +499,7 @@ public class WindowManagerService extends IWindowManager.Stub
         IBinder mToken;
         Surface mSurface;
         boolean mLocalOnly;
+        IBinder mLocalWin;
         ClipData mData;
         ClipDescription mDataDescription;
         boolean mDragResult;
@@ -511,10 +512,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         private final Rect tmpRect = new Rect();
 
-        DragState(IBinder token, Surface surface, boolean localOnly) {
+        DragState(IBinder token, Surface surface, boolean localOnly, IBinder localWin) {
             mToken = token;
             mSurface = surface;
             mLocalOnly = localOnly;
+            mLocalWin = localWin;
             mNotifiedWindows = new ArrayList<WindowState>();
         }
 
@@ -524,6 +526,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mSurface = null;
             mLocalOnly = false;
+            mLocalWin = null;
             mToken = null;
             mData = null;
             mThumbOffsetX = mThumbOffsetY = 0;
@@ -593,6 +596,18 @@ public class WindowManagerService extends IWindowManager.Stub
          */
         private void sendDragStartedLw(WindowState newWin, float touchX, float touchY,
                 ClipDescription desc) {
+            // Don't actually send the event if the drag is supposed to be pinned
+            // to the originating window but 'newWin' is not that window.
+            if (mLocalOnly) {
+                final IBinder winBinder = newWin.mClient.asBinder();
+                if (winBinder != mLocalWin) {
+                    if (DEBUG_DRAG) {
+                        Slog.d(TAG, "Not dispatching local DRAG_STARTED to " + newWin);
+                    }
+                    return;
+                }
+            }
+
             if (mDragInProgress && newWin.isPotentialDragTarget()) {
                 DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED,
                         touchX - newWin.mFrame.left, touchY - newWin.mFrame.top,
@@ -671,6 +686,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Tell the affected window
             WindowState touchedWin = getTouchedWinAtPointLw(x, y);
+            if (mLocalOnly) {
+                final IBinder touchedBinder = touchedWin.mClient.asBinder();
+                if (touchedBinder != mLocalWin) {
+                    // This drag is pinned only to the originating window, but the drag
+                    // point is outside that window.  Pretend it's over empty space.
+                    touchedWin = null;
+                }
+            }
             try {
                 // have we dragged over a new window?
                 if ((touchedWin != mTargetWindow) && (mTargetWindow != null)) {
@@ -5454,15 +5477,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         Surface surface = new Surface(session, callerPid, "drag surface", 0,
                                 width, height, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
                         outSurface.copyFrom(surface);
+                        final IBinder winBinder = window.asBinder();
                         token = new Binder();
-                        mDragState = new DragState(token, surface, localOnly);
+                        mDragState = new DragState(token, surface, localOnly, winBinder);
                         mDragState.mSurface = surface;
                         mDragState.mLocalOnly = localOnly;
                         token = mDragState.mToken = new Binder();
 
                         // 5 second timeout for this window to actually begin the drag
-                        mH.removeMessages(H.DRAG_START_TIMEOUT, window);
-                        Message msg = mH.obtainMessage(H.DRAG_START_TIMEOUT, window.asBinder());
+                        mH.removeMessages(H.DRAG_START_TIMEOUT, winBinder);
+                        Message msg = mH.obtainMessage(H.DRAG_START_TIMEOUT, winBinder);
                         mH.sendMessageDelayed(msg, 5000);
                     } else {
                         Slog.w(TAG, "Drag already in progress");
