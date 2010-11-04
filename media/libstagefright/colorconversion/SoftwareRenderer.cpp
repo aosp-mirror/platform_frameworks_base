@@ -30,7 +30,8 @@ SoftwareRenderer::SoftwareRenderer(
         OMX_COLOR_FORMATTYPE colorFormat,
         const sp<ISurface> &surface,
         size_t displayWidth, size_t displayHeight,
-        size_t decodedWidth, size_t decodedHeight)
+        size_t decodedWidth, size_t decodedHeight,
+        int32_t rotationDegrees)
     : mColorFormat(colorFormat),
       mConverter(colorFormat, OMX_COLOR_Format16bitRGB565),
       mISurface(surface),
@@ -56,10 +57,20 @@ SoftwareRenderer::SoftwareRenderer(
     CHECK(mMemoryHeap->heapID() >= 0);
     CHECK(mConverter.isValid());
 
+    uint32_t orientation;
+    switch (rotationDegrees) {
+        case 0: orientation = ISurface::BufferHeap::ROT_0; break;
+        case 90: orientation = ISurface::BufferHeap::ROT_90; break;
+        case 180: orientation = ISurface::BufferHeap::ROT_180; break;
+        case 270: orientation = ISurface::BufferHeap::ROT_270; break;
+        default: orientation = ISurface::BufferHeap::ROT_0; break;
+    }
+
     ISurface::BufferHeap bufferHeap(
             mDisplayWidth, mDisplayHeight,
             mDecodedWidth, mDecodedHeight,
             PIXEL_FORMAT_RGB_565,
+            orientation, 0,
             mMemoryHeap);
 
     status_t err = mISurface->registerBuffers(bufferHeap);

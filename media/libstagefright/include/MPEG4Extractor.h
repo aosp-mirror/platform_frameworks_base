@@ -71,6 +71,8 @@ private:
 
     static status_t verifyTrack(Track *track);
 
+    status_t parseTrackHeader(off_t data_offset, off_t data_size);
+
     MPEG4Extractor(const MPEG4Extractor &);
     MPEG4Extractor &operator=(const MPEG4Extractor &);
 };
