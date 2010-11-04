@@ -173,9 +173,15 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
     bitmap.allocPixels();
     bitmap.eraseColor(0);
 
+    SkPaint pathPaint(*paint);
+    if (!pathPaint.getXfermode()) {
+        SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
+        pathPaint.setXfermode(mode)->safeUnref();
+    }
+
     SkCanvas canvas(bitmap);
     canvas.translate(-bounds.fLeft + offset, -bounds.fTop + offset);
-    canvas.drawPath(*path, *paint);
+    canvas.drawPath(*path, pathPaint);
 
     generateTexture(bitmap, texture);
 
