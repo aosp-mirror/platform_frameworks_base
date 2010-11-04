@@ -17,12 +17,9 @@
 package android.animation;
 
 import android.util.Log;
-import android.animation.Keyframe.IntKeyframe;
-import android.animation.Keyframe.FloatKeyframe;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -39,7 +36,7 @@ public class PropertyValuesHolder implements Cloneable {
      * unless this object is being used with ObjectAnimator. But this is the name by which
      * aniamted values are looked up with getAnimatedValue(String) in ValueAnimator.
      */
-    private String mPropertyName;
+    String mPropertyName;
 
     /**
      * The setter function, if needed. ObjectAnimator hands off this functionality to
@@ -99,10 +96,10 @@ public class PropertyValuesHolder implements Cloneable {
 
     // This lock is used to ensure that only one thread is accessing the property maps
     // at a time.
-    private ReentrantReadWriteLock propertyMapLock = new ReentrantReadWriteLock();
+    final ReentrantReadWriteLock mPropertyMapLock = new ReentrantReadWriteLock();
 
     // Used to pass single value to varargs parameter in setter invocation
-    Object[] mTmpValueArray = new Object[1];
+    final Object[] mTmpValueArray = new Object[1];
 
     /**
      * The type evaluator used to calculate the animated values. This evaluator is determined
@@ -296,10 +293,7 @@ public class PropertyValuesHolder implements Cloneable {
     private Method getPropertyFunction(Class targetClass, String prefix, Class valueType) {
         // TODO: faster implementation...
         Method returnVal = null;
-        String firstLetter = mPropertyName.substring(0, 1);
-        String theRest = mPropertyName.substring(1);
-        firstLetter = firstLetter.toUpperCase();
-        String methodName = prefix + firstLetter + theRest;
+        String methodName = getMethodName(prefix, mPropertyName);
         Class args[] = null;
         if (valueType == null) {
             try {
@@ -361,7 +355,7 @@ public class PropertyValuesHolder implements Cloneable {
             // another thread putting something in there after we've checked it
             // but before we've added an entry to it
             // TODO: can we store the setter/getter per Class instead of per Object?
-            propertyMapLock.writeLock().lock();
+            mPropertyMapLock.writeLock().lock();
             HashMap<String, Method> propertyMap = propertyMapMap.get(targetClass);
             if (propertyMap != null) {
                 setterOrGetter = propertyMap.get(mPropertyName);
@@ -375,7 +369,7 @@ public class PropertyValuesHolder implements Cloneable {
                 propertyMap.put(mPropertyName, setterOrGetter);
             }
         } finally {
-            propertyMapLock.writeLock().unlock();
+            mPropertyMapLock.writeLock().unlock();
         }
         return setterOrGetter;
     }
@@ -384,7 +378,7 @@ public class PropertyValuesHolder implements Cloneable {
      * Utility function to get the setter from targetClass
      * @param targetClass The Class on which the requested method should exist.
      */
-    private void setupSetter(Class targetClass) {
+    void setupSetter(Class targetClass) {
         mSetter = setupSetterOrGetter(targetClass, sSetterPropertyMap, "set", mValueType);
     }
 
@@ -650,7 +644,31 @@ public class PropertyValuesHolder implements Cloneable {
         return mAnimatedValue;
     }
 
+    /**
+     * Utility method to derive a setter/getter method name from a property name, where the
+     * prefix is typically "set" or "get" and the first letter of the property name is
+     * capitalized.
+     *
+     * @param prefix The precursor to the method name, before the property name begins, typically
+     * "set" or "get".
+     * @param propertyName The name of the property that represents the bulk of the method name
+     * after the prefix. The first letter of this word will be capitalized in the resulting
+     * method name.
+     * @return String the property name converted to a method name according to the conventions
+     * specified above.
+     */
+    static String getMethodName(String prefix, String propertyName) {
+        char firstLetter = propertyName.charAt(0);
+        String theRest = propertyName.substring(1);
+        firstLetter = Character.toUpperCase(firstLetter);
+        return prefix + firstLetter + theRest;
+    }
+
     static class IntPropertyValuesHolder extends PropertyValuesHolder {
+
+        private static final HashMap<Class, HashMap<String, Integer>> sJNISetterPropertyMap =
+                new HashMap<Class, HashMap<String, Integer>>();
+        int mJniSetter;
 
         IntKeyframeSet mIntKeyframeSet;
         int mIntAnimatedValue;
@@ -699,6 +717,10 @@ public class PropertyValuesHolder implements Cloneable {
          */
         @Override
         void setAnimatedValue(Object target) {
+            if (mJniSetter != 0) {
+                nCallIntMethod(target, mJniSetter, mIntAnimatedValue);
+                return;
+            }
             if (mSetter != null) {
                 try {
                     mTmpValueArray[0] = mIntAnimatedValue;
@@ -710,9 +732,47 @@ public class PropertyValuesHolder implements Cloneable {
                 }
             }
         }
+
+        @Override
+        void setupSetter(Class targetClass) {
+            // Check new static hashmap<propName, int> for setter method
+            try {
+                mPropertyMapLock.writeLock().lock();
+                HashMap<String, Integer> propertyMap = sJNISetterPropertyMap.get(targetClass);
+                if (propertyMap != null) {
+                    Integer mJniSetterInteger = propertyMap.get(mPropertyName);
+                    if (mJniSetterInteger != null) {
+                        mJniSetter = mJniSetterInteger;
+                    }
+                }
+                if (mJniSetter == 0) {
+                    String methodName = getMethodName("set", mPropertyName);
+                    mJniSetter = nGetIntMethod(targetClass, methodName);
+                    if (mJniSetter != 0) {
+                        if (propertyMap == null) {
+                            propertyMap = new HashMap<String, Integer>();
+                            sJNISetterPropertyMap.put(targetClass, propertyMap);
+                        }
+                        propertyMap.put(mPropertyName, mJniSetter);
+                    }
+                }
+            } catch (NoSuchMethodError e) {
+                // System.out.println("Can't find native method using JNI, use reflection" + e);
+            } finally {
+                mPropertyMapLock.writeLock().unlock();
+            }
+            if (mJniSetter == 0) {
+                // Couldn't find method through fast JNI approach - just use reflection
+                super.setupSetter(targetClass);
+            }
+        }
     }
 
     static class FloatPropertyValuesHolder extends PropertyValuesHolder {
+
+        private static final HashMap<Class, HashMap<String, Integer>> sJNISetterPropertyMap =
+                new HashMap<Class, HashMap<String, Integer>>();
+        int mJniSetter;
 
         FloatKeyframeSet mFloatKeyframeSet;
         float mFloatAnimatedValue;
@@ -761,6 +821,10 @@ public class PropertyValuesHolder implements Cloneable {
          */
         @Override
         void setAnimatedValue(Object target) {
+            if (mJniSetter != 0) {
+                nCallFloatMethod(target, mJniSetter, mFloatAnimatedValue);
+                return;
+            }
             if (mSetter != null) {
                 try {
                     mTmpValueArray[0] = mFloatAnimatedValue;
@@ -773,5 +837,44 @@ public class PropertyValuesHolder implements Cloneable {
             }
         }
 
+        @Override
+        void setupSetter(Class targetClass) {
+            // Check new static hashmap<propName, int> for setter method
+            try {
+                mPropertyMapLock.writeLock().lock();
+                HashMap<String, Integer> propertyMap = sJNISetterPropertyMap.get(targetClass);
+                if (propertyMap != null) {
+                    Integer mJniSetterInteger = propertyMap.get(mPropertyName);
+                    if (mJniSetterInteger != null) {
+                        mJniSetter = mJniSetterInteger;
+                    }
+                }
+                if (mJniSetter == 0) {
+                    String methodName = getMethodName("set", mPropertyName);
+                    mJniSetter = nGetFloatMethod(targetClass, methodName);
+                    if (mJniSetter != 0) {
+                        if (propertyMap == null) {
+                            propertyMap = new HashMap<String, Integer>();
+                            sJNISetterPropertyMap.put(targetClass, propertyMap);
+                        }
+                        propertyMap.put(mPropertyName, mJniSetter);
+                    }
+                }
+            } catch (NoSuchMethodError e) {
+                // System.out.println("Can't find native method using JNI, use reflection" + e);
+            } finally {
+                mPropertyMapLock.writeLock().unlock();
+            }
+            if (mJniSetter == 0) {
+                // Couldn't find method through fast JNI approach - just use reflection
+                super.setupSetter(targetClass);
+            }
+        }
+
     }
+
+    native static private int nGetIntMethod(Class targetClass, String methodName);
+    native static private int nGetFloatMethod(Class targetClass, String methodName);
+    native static private void nCallIntMethod(Object target, int methodID, int arg);
+    native static private void nCallFloatMethod(Object target, int methodID, float arg);
 }
