@@ -815,7 +815,9 @@ public class ActionBarView extends ViewGroup {
             int ypos = 0;
             switch (gravity & Gravity.VERTICAL_GRAVITY_MASK) {
                 case Gravity.CENTER_VERTICAL:
-                    ypos = ((mBottom - mTop) - mCustomNavView.getMeasuredHeight()) / 2;
+                    final int paddedTop = mTop + getPaddingTop();
+                    final int paddedBottom = mBottom - getPaddingBottom();
+                    ypos = ((paddedBottom - paddedTop) - mCustomNavView.getMeasuredHeight()) / 2;
                     break;
                 case Gravity.TOP:
                     ypos = getPaddingTop() + topMargin;
