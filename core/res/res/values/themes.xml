@@ -1129,20 +1129,6 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
-
-    <!-- Variant of the holographic dark theme that includes extra decorations
-         appropriate for when hardware acceleration is in use. -->
-    <style name="Theme.Holo.Extended">
-        <item name="windowBackground">@android:drawable/background_holo_dark</item>
-        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
-    </style>
-
-    <!-- Variant of the holographic light theme that includes extra decorations
-         appropriate for when hardware acceleration is in use. -->
-    <style name="Theme.Holo.Light.Extended">
-        <item name="windowBackground">@android:drawable/background_holo_light</item>
-        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
-    </style>
  
     <!-- Dialog themes for Holo -->
 
