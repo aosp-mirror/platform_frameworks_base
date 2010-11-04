@@ -16,20 +16,22 @@
 
 package android.util;
 
+import com.android.layoutlib.bridge.DelegateManager;
+
 /**
- * Reimplements _Original_FloatMath with the standard libraries.
- * 
- * Math routines similar to those found in {@link java.lang.Math}. Performs
- * computations on {@code float} values directly without incurring the overhead
- * of conversions to and from {@code double}.
+ * Delegate implementing the native methods of android.util.FloatMath
  *
- * <p>On one platform, {@code FloatMath.sqrt(100)} executes in one third of the
- * time required by {@code java.lang.Math.sqrt(100)}.</p>
+ * Through the layoutlib_create tool, the original native methods of FloatMath have been replaced
+ * by calls to methods of the same name in this delegate class.
+ *
+ * Because it's a stateless class to start with, there's no need to keep a {@link DelegateManager}
+ * around to map int to instance of the delegate.
+ *
  */
-public class FloatMath {
+/*package*/ final class FloatMath_Delegate {
 
     /** Prevents instantiation. */
-    private FloatMath() {}
+    private FloatMath_Delegate() {}
 
     /**
      * Returns the float conversion of the most positive (i.e. closest to
@@ -38,7 +40,7 @@ public class FloatMath {
      * @param value to be converted
      * @return the floor of value
      */
-    public static float floor(float value) {
+    /*package*/ static float floor(float value) {
         return (float)Math.floor(value);
     }
 
@@ -49,7 +51,7 @@ public class FloatMath {
      * @param value to be converted
      * @return the ceiling of value
      */
-    public static float ceil(float value) {
+    /*package*/ static float ceil(float value) {
         return (float)Math.ceil(value);
     }
 
@@ -59,7 +61,7 @@ public class FloatMath {
      * @param angle to compute the cosine of, in radians
      * @return the sine of angle
      */
-    public static  float sin(float angle) {
+    /*package*/ static  float sin(float angle) {
         return (float)Math.sin(angle);
     }
 
@@ -69,7 +71,7 @@ public class FloatMath {
      * @param angle to compute the cosine of, in radians
      * @return the cosine of angle
      */
-    public static float cos(float angle) {
+    /*package*/ static float cos(float angle) {
         return (float)Math.cos(angle);
     }
 
@@ -80,7 +82,7 @@ public class FloatMath {
      * @param value to compute sqrt of
      * @return the square root of value
      */
-    public static float sqrt(float value) {
+    /*package*/ static float sqrt(float value) {
         return (float)Math.sqrt(value);
     }
 }
