@@ -38,6 +38,22 @@ public class Vibrator
     }
 
     /**
+     * Check whether the hardware has a vibrator.  Returns true if a vibrator
+     * exists, else false.
+     */
+    public boolean hasVibrator() {
+        if (mService == null) {
+            Log.w(TAG, "Failed to vibrate; no vibrator service.");
+            return false;
+        }
+        try {
+            return mService.hasVibrator();
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+    
+    /**
      * Turn the vibrator on.
      *
      * @param milliseconds How long to vibrate for.

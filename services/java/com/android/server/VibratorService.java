@@ -112,6 +112,10 @@ public class VibratorService extends IVibratorService.Stub {
         context.registerReceiver(mIntentReceiver, filter);
     }
 
+    public boolean hasVibrator() {
+        return vibratorExists();
+    }
+    
     public void vibrate(long milliseconds, IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -380,6 +384,7 @@ public class VibratorService extends IVibratorService.Stub {
 
     volatile VibrateThread mThread;
 
+    native static boolean vibratorExists();
     native static void vibratorOn(long milliseconds);
     native static void vibratorOff();
 }
