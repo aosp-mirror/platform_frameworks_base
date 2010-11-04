@@ -750,6 +750,7 @@ public class StatusBarPolicy {
         case TelephonyManager.NETWORK_TYPE_EVDO_B:
             mDataIconList = sDataNetType_3g[mInetCondition];
             break;
+        // TODO - add support for NETWORK_TYPE_LTE and NETWORK_TYPE_EHRPD
         default:
             mDataIconList = sDataNetType_g[mInetCondition];
         break;
