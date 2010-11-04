@@ -86,7 +86,7 @@ expect from other web browsers.</p>
 <p>If you've implemented a custom {@link android.webkit.WebView} in your application, all the
 same console APIs are supported when debugging your web page in WebView. On Android
 1.6 and lower, console messages are automatically sent to logcat with the
-"WebCore" logging tag. If you're targetting Android 2.1 (API Level 7) or higher, then you must
+"WebCore" logging tag. If you're targeting Android 2.1 (API Level 7) or higher, then you must
 provide a {@link android.webkit.WebChromeClient}
 that implements the {@link android.webkit.WebChromeClient#onConsoleMessage(String,int,String)
 onConsoleMessage()} callback method, in order for console messages to appear in logcat.</p>
