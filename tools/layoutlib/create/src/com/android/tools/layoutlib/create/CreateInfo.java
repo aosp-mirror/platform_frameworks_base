@@ -105,13 +105,17 @@ public final class CreateInfo implements ICreateInfo {
     private final static String[] DELEGATE_CLASS_NATIVES = new String[] {
         "android.graphics.Bitmap",
         "android.graphics.Canvas",
+        "android.graphics.DashPathEffect",
         "android.graphics.LinearGradient",
         "android.graphics.Matrix",
         "android.graphics.Paint",
+        "android.graphics.PathEffect",
+        "android.graphics.PorterDuffXfermode",
         "android.graphics.RadialGradient",
         "android.graphics.Shader",
         "android.graphics.SweepGradient",
         "android.graphics.Typeface",
+        "android.graphics.Xfermode",
     };
 
     /**
@@ -131,9 +135,7 @@ public final class CreateInfo implements ICreateInfo {
     private final static String[] RENAMED_CLASSES =
         new String[] {
             "android.graphics.BitmapFactory",       "android.graphics._Original_BitmapFactory",
-            "android.graphics.DashPathEffect",       "android.graphics._Original_DashPathEffect",
             "android.graphics.Path",                "android.graphics._Original_Path",
-            "android.graphics.PorterDuffXfermode",  "android.graphics._Original_PorterDuffXfermode",
             "android.os.ServiceManager",            "android.os._Original_ServiceManager",
             "android.util.FloatMath",               "android.util._Original_FloatMath",
             "android.view.SurfaceView",             "android.view._Original_SurfaceView",
