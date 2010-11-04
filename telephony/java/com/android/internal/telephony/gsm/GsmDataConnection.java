@@ -23,6 +23,7 @@ import android.util.Patterns;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.RetryManager;
 
 /**
  * {@hide}
@@ -53,23 +54,27 @@ public class GsmDataConnection extends DataConnection {
     private ApnSetting apn;
 
     //***** Constructor
-    private GsmDataConnection(GSMPhone phone, String name) {
-        super(phone, name);
+    private GsmDataConnection(GSMPhone phone, String name, RetryManager rm) {
+        super(phone, name, rm);
     }
 
     /**
      * Create the connection object
      *
-     * @param phone
+     * @param phone the Phone
+     * @param id the connection id
+     * @param rm the RetryManager
      * @return GsmDataConnection that was created.
      */
-    static GsmDataConnection makeDataConnection(GSMPhone phone) {
+    static GsmDataConnection makeDataConnection(GSMPhone phone, int id, RetryManager rm) {
         synchronized (mCountLock) {
             mCount += 1;
         }
-        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDataConnection-" + mCount);
+        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDataConnection-" + mCount, rm);
         gsmDc.start();
         if (DBG) gsmDc.log("Made " + gsmDc.getName());
+        gsmDc.mId = id;
+        gsmDc.mRetryMgr = rm;
         return gsmDc;
     }
 
