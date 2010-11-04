@@ -8042,9 +8042,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onClick(View v) {
-            ClipboardManager clipboard = 
-                (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-            paste(clipboard, getSelectionStart(), getSelectionEnd());
+            if (canPaste()) {
+                ClipboardManager clipboard =
+                    (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                paste(clipboard, getSelectionStart(), getSelectionEnd());
+            }
+            hide();
         }
 
         void positionAtCursor() {
