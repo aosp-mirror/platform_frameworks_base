@@ -85,7 +85,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
@@ -921,11 +920,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 notifyAll();
             }
 
-            // For debug builds, log event loop stalls to dropbox for analysis.
-            if (StrictMode.conditionallyEnableDebugLogging()) {
-                Slog.i(TAG, "Enabled StrictMode logging for WMThread's Looper");
-            }
-
             Looper.loop();
         }
     }
@@ -961,11 +955,6 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (this) {
                 mRunning = true;
                 notifyAll();
-            }
-
-            // For debug builds, log event loop stalls to dropbox for analysis.
-            if (StrictMode.conditionallyEnableDebugLogging()) {
-                Slog.i(TAG, "Enabled StrictMode for PolicyThread's Looper");
             }
 
             Looper.loop();
