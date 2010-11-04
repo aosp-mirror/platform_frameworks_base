@@ -138,7 +138,7 @@ public class SimpleModelRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_simplemodel(mRS, mRes, R.raw.simplemodel, true);
+        mScript = new ScriptC_simplemodel(mRS, mRes, R.raw.simplemodel);
 
         initPFS();
         initPF();

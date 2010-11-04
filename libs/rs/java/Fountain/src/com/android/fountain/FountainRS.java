@@ -45,7 +45,7 @@ public class FountainRS {
         smb.addIndexType(Primitive.POINT);
         Mesh sm = smb.create();
 
-        mScript = new ScriptC_fountain(mRS, mRes, R.raw.fountain, true);
+        mScript = new ScriptC_fountain(mRS, mRes, R.raw.fountain);
         mScript.set_partMesh(sm);
         mScript.bind_point(points);
         mRS.contextBindRootScript(mScript);

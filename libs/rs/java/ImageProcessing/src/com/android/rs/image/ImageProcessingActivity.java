@@ -380,10 +380,10 @@ public class ImageProcessingActivity extends Activity
         mScratchPixelsAllocation1 = Allocation.createTyped(mRS, tb.create());
         mScratchPixelsAllocation2 = Allocation.createTyped(mRS, tb.create());
 
-        mScriptVBlur = new ScriptC_vertical_blur(mRS, getResources(), R.raw.vertical_blur, false);
-        mScriptHBlur = new ScriptC_horizontal_blur(mRS, getResources(), R.raw.horizontal_blur, false);
+        mScriptVBlur = new ScriptC_vertical_blur(mRS, getResources(), R.raw.vertical_blur);
+        mScriptHBlur = new ScriptC_horizontal_blur(mRS, getResources(), R.raw.horizontal_blur);
 
-        mScript = new ScriptC_threshold(mRS, getResources(), R.raw.threshold, false);
+        mScript = new ScriptC_threshold(mRS, getResources(), R.raw.threshold);
         mScript.set_width(mBitmapIn.getWidth());
         mScript.set_height(mBitmapIn.getHeight());
         mScript.set_radius(mRadius);

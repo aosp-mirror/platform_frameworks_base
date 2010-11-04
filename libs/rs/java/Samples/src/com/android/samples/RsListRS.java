@@ -121,7 +121,7 @@ public class RsListRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_rslist(mRS, mRes, R.raw.rslist, true);
+        mScript = new ScriptC_rslist(mRS, mRes, R.raw.rslist);
 
         mListAllocs = new ScriptField_ListAllocs_s(mRS, DATA_LIST.length);
         for(int i = 0; i < DATA_LIST.length; i ++) {
