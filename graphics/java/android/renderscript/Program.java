@@ -47,6 +47,13 @@ public class Program extends BaseObj {
     }
 
     public void bindConstants(Allocation a, int slot) {
+        if (slot < 0 || slot >= mConstants.length) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+        if (a != null &&
+            a.getType().getID() != mConstants[slot].getID()) {
+            throw new IllegalArgumentException("Allocation type does not match slot type.");
+        }
         mRS.nProgramBindConstants(mID, slot, a.mID);
     }
 
@@ -141,7 +148,10 @@ public class Program extends BaseObj {
         public void addInput(Element e) throws IllegalStateException {
             // Should check for consistant and non-conflicting names...
             if(mInputCount >= MAX_INPUT) {
-                throw new IllegalArgumentException("Max input count exceeded.");
+                throw new RSIllegalArgumentException("Max input count exceeded.");
+            }
+            if (e.isComplex()) {
+                throw new RSIllegalArgumentException("Complex elements not allowed.");
             }
             mInputs[mInputCount++] = e;
         }
@@ -149,7 +159,10 @@ public class Program extends BaseObj {
         public void addOutput(Element e) throws IllegalStateException {
             // Should check for consistant and non-conflicting names...
             if(mOutputCount >= MAX_OUTPUT) {
-                throw new IllegalArgumentException("Max output count exceeded.");
+                throw new RSIllegalArgumentException("Max output count exceeded.");
+            }
+            if (e.isComplex()) {
+                throw new RSIllegalArgumentException("Complex elements not allowed.");
             }
             mOutputs[mOutputCount++] = e;
         }
@@ -164,7 +177,10 @@ public class Program extends BaseObj {
         public int addConstant(Type t) throws IllegalStateException {
             // Should check for consistant and non-conflicting names...
             if(mConstantCount >= MAX_CONSTANT) {
-                throw new IllegalArgumentException("Max input count exceeded.");
+                throw new RSIllegalArgumentException("Max input count exceeded.");
+            }
+            if (t.getElement().isComplex()) {
+                throw new RSIllegalArgumentException("Complex elements not allowed.");
             }
             mConstants[mConstantCount] = t;
             return mConstantCount++;

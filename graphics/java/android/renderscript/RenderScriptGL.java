@@ -68,10 +68,10 @@ public class RenderScriptGL extends RenderScript {
 
         private void validateRange(int umin, int upref, int rmin, int rmax) {
             if (umin < rmin || umin > rmax) {
-                throw new IllegalArgumentException("Minimum value provided out of range.");
+                throw new RSIllegalArgumentException("Minimum value provided out of range.");
             }
             if (upref < umin) {
-                throw new IllegalArgumentException("Prefered must be >= Minimum.");
+                throw new RSIllegalArgumentException("Prefered must be >= Minimum.");
             }
         }
 
@@ -93,7 +93,7 @@ public class RenderScriptGL extends RenderScript {
         public void setSamples(int minimum, int prefered, float Q) {
             validateRange(minimum, prefered, 0, 24);
             if (Q < 0.0f || Q > 1.0f) {
-                throw new IllegalArgumentException("Quality out of 0-1 range.");
+                throw new RSIllegalArgumentException("Quality out of 0-1 range.");
             }
             mSamplesMin = minimum;
             mSamplesPref = prefered;
@@ -186,33 +186,6 @@ public class RenderScriptGL extends RenderScript {
     public void contextBindProgramVertex(ProgramVertex p) {
         validate();
         nContextBindProgramVertex(safeID(p));
-    }
-
-
-
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // File
-
-    public class File extends BaseObj {
-        File(int id) {
-            super(id, RenderScriptGL.this);
-        }
-    }
-
-    public File fileOpen(String s) throws IllegalStateException, IllegalArgumentException
-    {
-        if(s.length() < 1) {
-            throw new IllegalArgumentException("fileOpen does not accept a zero length string.");
-        }
-
-        try {
-            byte[] bytes = s.getBytes("UTF-8");
-            int id = nFileOpen(bytes);
-            return new File(id);
-        } catch (java.io.UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

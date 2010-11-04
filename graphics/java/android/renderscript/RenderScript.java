@@ -156,10 +156,6 @@ public class RenderScript {
     synchronized void nObjDestroy(int id) {
         rsnObjDestroy(mContext, id);
     }
-    native int  rsnFileOpen(int con, byte[] name);
-    synchronized int nFileOpen(byte[] name) {
-        return rsnFileOpen(mContext, name);
-    }
 
     native int  rsnElementCreate(int con, int type, int kind, boolean norm, int vecSize);
     synchronized int nElementCreate(int type, int kind, boolean norm, int vecSize) {
@@ -599,7 +595,7 @@ public class RenderScript {
 
     void validate() {
         if (mContext == 0) {
-            throw new IllegalStateException("Calling RS with no Context active.");
+            throw new RSInvalidStateException("Calling RS with no Context active.");
         }
     }
 
