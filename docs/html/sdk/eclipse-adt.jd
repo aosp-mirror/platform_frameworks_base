@@ -632,7 +632,7 @@ href="#installing">Installing the ADT Plugin</a>, above.</p>
 
 <h2 id="uninstalling">Uninstalling the ADT plugin</h2>
 
-<p><p>If you encounter problems when installing or updating ADT, you
+<p>If you encounter problems when installing or updating ADT, you
 can try removing the existing ADT plugin and then performing a fresh
 installation. To remove ADT, follow these steps: </p>
 
