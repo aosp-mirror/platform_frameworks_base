@@ -1622,15 +1622,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (enabledSubtypeSet.contains(String.valueOf(subtype.hashCode()))) {
                             CharSequence title;
                             int nameResId = subtype.getNameResId();
-                            int modeResId = subtype.getModeResId();
+                            String mode = subtype.getMode();
                             if (nameResId != 0) {
                                 title = pm.getText(property.getPackageName(), nameResId,
                                         property.getServiceInfo().applicationInfo);
                             } else {
                                 CharSequence language = subtype.getLocale();
-                                CharSequence mode = modeResId == 0 ? null
-                                        : pm.getText(property.getPackageName(), modeResId,
-                                                property.getServiceInfo().applicationInfo);
                                 // TODO: Use more friendly Title and UI
                                 title = label + "," + (mode == null ? "" : mode) + ","
                                         + (language == null ? "" : language);
@@ -1869,14 +1866,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         int applicableSubtypeId = DEFAULT_SUBTYPE_ID;
         for (int i = 0; i < subtypes.size(); ++i) {
             final String subtypeLocale = subtypes.get(i).getLocale();
-            if (locale.equals(subtypeLocale)) {
-                // Exact match (e.g. system locale is "en_US" and subtype locale is "en_US")
-                applicableSubtypeId = i;
-                break;
-            } else if (!partialMatchFound && subtypeLocale.startsWith(language)) {
-                // Partial match (e.g. system locale is "en_US" and subtype locale is "en")
-                applicableSubtypeId = i;
-                partialMatchFound = true;
+            // An applicable subtype should be a keyboard subtype
+            if (subtypes.get(i).getMode().equalsIgnoreCase("keyboard")) {
+                if (locale.equals(subtypeLocale)) {
+                    // Exact match (e.g. system locale is "en_US" and subtype locale is "en_US")
+                    applicableSubtypeId = i;
+                    break;
+                } else if (!partialMatchFound && subtypeLocale.startsWith(language)) {
+                    // Partial match (e.g. system locale is "en_US" and subtype locale is "en")
+                    applicableSubtypeId = i;
+                    partialMatchFound = true;
+                }
             }
         }
 

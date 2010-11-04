@@ -142,8 +142,8 @@ public final class InputMethodInfo implements Parcelable {
                                     .InputMethod_Subtype_icon, 0),
                             a.getString(com.android.internal.R.styleable
                                     .InputMethod_Subtype_imeSubtypeLocale),
-                            a.getResourceId(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_imeSubtypeMode, 0),
+                            a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeMode),
                             a.getString(com.android.internal.R.styleable
                                     .InputMethod_Subtype_imeSubtypeExtraValue));
                     mSubtypes.add(subtype);

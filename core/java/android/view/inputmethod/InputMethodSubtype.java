@@ -34,7 +34,7 @@ public final class InputMethodSubtype implements Parcelable {
     private final int mSubtypeNameResId;
     private final int mSubtypeIconResId;
     private final String mSubtypeLocale;
-    private final int mSubtypeModeResId;
+    private final String mSubtypeMode;
     private final String mSubtypeExtraValue;
     private final int mSubtypeHashCode;
 
@@ -46,24 +46,24 @@ public final class InputMethodSubtype implements Parcelable {
      * @param modeId The mode supported by the subtype
      * @param extraValue The extra value of the subtype
      */
-    InputMethodSubtype(int nameId, int iconId, String locale, int modeId, String extraValue) {
+    InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue) {
         mSubtypeNameResId = nameId;
         mSubtypeIconResId = iconId;
         mSubtypeLocale = locale;
-        mSubtypeModeResId = modeId;
+        mSubtypeMode = mode;
         mSubtypeExtraValue = extraValue;
         mSubtypeHashCode = hashCodeInternal(mSubtypeNameResId, mSubtypeIconResId, mSubtypeLocale,
-                mSubtypeModeResId, mSubtypeExtraValue);
+                mSubtypeMode, mSubtypeExtraValue);
     }
 
     InputMethodSubtype(Parcel source) {
         mSubtypeNameResId = source.readInt();
         mSubtypeIconResId = source.readInt();
         mSubtypeLocale = source.readString();
-        mSubtypeModeResId = source.readInt();
+        mSubtypeMode = source.readString();
         mSubtypeExtraValue = source.readString();
         mSubtypeHashCode = hashCodeInternal(mSubtypeNameResId, mSubtypeIconResId, mSubtypeLocale,
-                mSubtypeModeResId, mSubtypeExtraValue);
+                mSubtypeMode, mSubtypeExtraValue);
     }
 
     /**
@@ -90,8 +90,8 @@ public final class InputMethodSubtype implements Parcelable {
     /**
      * @return the mode of the subtype
      */
-    public int getModeResId() {
-        return mSubtypeModeResId;
+    public String getMode() {
+        return mSubtypeMode;
     }
 
     /**
@@ -111,7 +111,7 @@ public final class InputMethodSubtype implements Parcelable {
         if (o instanceof InputMethodSubtype) {
             InputMethodSubtype subtype = (InputMethodSubtype) o;
             return (subtype.getNameResId() == getNameResId())
-                && (subtype.getModeResId() == getModeResId())
+                && (subtype.getMode() == getMode())
                 && (subtype.getIconResId() == getIconResId())
                 && (subtype.getLocale().equals(getLocale()))
                 && (subtype.getExtraValue().equals(getExtraValue()));
@@ -127,7 +127,7 @@ public final class InputMethodSubtype implements Parcelable {
         dest.writeInt(mSubtypeNameResId);
         dest.writeInt(mSubtypeIconResId);
         dest.writeString(mSubtypeLocale);
-        dest.writeInt(mSubtypeModeResId);
+        dest.writeString(mSubtypeMode);
         dest.writeString(mSubtypeExtraValue);
     }
 
@@ -143,7 +143,7 @@ public final class InputMethodSubtype implements Parcelable {
     };
 
     private static int hashCodeInternal(int nameResId, int iconResId, String locale,
-            int modeResId, String extraValue) {
-        return Arrays.hashCode(new Object[] {nameResId, iconResId, locale, modeResId, extraValue});
+            String mode, String extraValue) {
+        return Arrays.hashCode(new Object[] {nameResId, iconResId, locale, mode, extraValue});
     }
 }
