@@ -665,6 +665,11 @@ public class PropertyValuesHolder implements Cloneable {
         public IntPropertyValuesHolder(String propertyName, int... values) {
             super(propertyName);
             setIntValues(values);
+        }
+
+        @Override
+        public void setIntValues(int... values) {
+            super.setIntValues(values);
             mIntKeyframeSet = (IntKeyframeSet) mKeyframeSet;
         }
 
@@ -722,6 +727,11 @@ public class PropertyValuesHolder implements Cloneable {
         public FloatPropertyValuesHolder(String propertyName, float... values) {
             super(propertyName);
             setFloatValues(values);
+        }
+
+        @Override
+        public void setFloatValues(float... values) {
+            super.setFloatValues(values);
             mFloatKeyframeSet = (FloatKeyframeSet) mKeyframeSet;
         }
 
