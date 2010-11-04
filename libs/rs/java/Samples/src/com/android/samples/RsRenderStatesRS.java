@@ -332,7 +332,7 @@ public class RsRenderStatesRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_rsrenderstates(mRS, mRes, R.raw.rsrenderstates, true);
+        mScript = new ScriptC_rsrenderstates(mRS, mRes, R.raw.rsrenderstates);
 
         initSamplers();
         initProgramStore();

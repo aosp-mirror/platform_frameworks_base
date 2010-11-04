@@ -16,7 +16,6 @@
 
 package android.nfc;
 
-import android.nfc.NdefRecord;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -69,11 +68,10 @@ public final class NdefMessage implements Parcelable {
      * Returns a byte array representation of this entire NDEF message.
      */
     public byte[] toByteArray() {
-        //TODO: do not return null
         //TODO: allocate the byte array once, copy each record once
         //TODO: process MB and ME flags outside loop
         if ((mRecords == null) || (mRecords.length == 0))
-            return null;
+            return new byte[0];
 
         byte[] msg = {};
 
@@ -104,10 +102,12 @@ public final class NdefMessage implements Parcelable {
         return msg;
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mRecords.length);
         dest.writeTypedArray(mRecords, flags);
@@ -115,12 +115,14 @@ public final class NdefMessage implements Parcelable {
 
     public static final Parcelable.Creator<NdefMessage> CREATOR =
             new Parcelable.Creator<NdefMessage>() {
+        @Override
         public NdefMessage createFromParcel(Parcel in) {
             int recordsLength = in.readInt();
             NdefRecord[] records = new NdefRecord[recordsLength];
             in.readTypedArray(records, NdefRecord.CREATOR);
             return new NdefMessage(records);
         }
+        @Override
         public NdefMessage[] newArray(int size) {
             return new NdefMessage[size];
         }

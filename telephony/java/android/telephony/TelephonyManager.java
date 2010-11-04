@@ -272,13 +272,17 @@ public class TelephonyManager {
     public static final int PHONE_TYPE_GSM = Phone.PHONE_TYPE_GSM;
     /** Phone radio is CDMA. */
     public static final int PHONE_TYPE_CDMA = Phone.PHONE_TYPE_CDMA;
+    /** Phone is via SIP. */
+    public static final int PHONE_TYPE_SIP = Phone.PHONE_TYPE_SIP;
 
     /**
-     * Returns a constant indicating the device phone type.
+     * Returns a constant indicating the device phone type.  This
+     * indicates the type of radio used to transmit voice calls.
      *
      * @see #PHONE_TYPE_NONE
      * @see #PHONE_TYPE_GSM
      * @see #PHONE_TYPE_CDMA
+     * @see #PHONE_TYPE_SIP
      */
     public int getPhoneType() {
         try{
@@ -393,11 +397,15 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_IDEN = 11;
     /** Current network is EVDO revision B*/
     public static final int NETWORK_TYPE_EVDO_B = 12;
+    /** Current network is LTE */
+    public static final int NETWORK_TYPE_LTE = 13;
+    /** Current network is eHRPD */
+    public static final int NETWORK_TYPE_EHRPD = 14;
 
 
     /**
      * Returns a constant indicating the radio technology (network type)
-     * currently in use on the device.
+     * currently in use on the device for data transmission.
      * @return the network type
      *
      * @see #NETWORK_TYPE_UNKNOWN
@@ -412,6 +420,9 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_EVDO_A
      * @see #NETWORK_TYPE_EVDO_B
      * @see #NETWORK_TYPE_1xRTT
+     * @see #NETWORK_TYPE_IDEN
+     * @see #NETWORK_TYPE_LTE
+     * @see #NETWORK_TYPE_EHRPD
      */
     public int getNetworkType() {
         try{
@@ -462,6 +473,10 @@ public class TelephonyManager {
                 return "CDMA - EvDo rev. B";
             case NETWORK_TYPE_1xRTT:
                 return "CDMA - 1xRTT";
+            case NETWORK_TYPE_LTE:
+                return "LTE";
+            case NETWORK_TYPE_EHRPD:
+                return "CDMA - eHRPD";
             default:
                 return "UNKNOWN";
         }

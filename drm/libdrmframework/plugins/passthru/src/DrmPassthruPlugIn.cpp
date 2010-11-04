@@ -74,14 +74,14 @@ DrmInfoStatus* DrmPassthruPlugIn::onProcessDrmInfo(int uniqueId, const DrmInfo* 
         switch (drmInfo->getInfoType()) {
         case DrmInfoRequest::TYPE_REGISTRATION_INFO: {
             const DrmBuffer* emptyBuffer = new DrmBuffer();
-            drmInfoStatus
-                = new DrmInfoStatus(DrmInfoStatus::STATUS_OK, emptyBuffer, drmInfo->getMimeType());
+            drmInfoStatus = new DrmInfoStatus(DrmInfoStatus::STATUS_OK,
+                    DrmInfoRequest::TYPE_REGISTRATION_INFO, emptyBuffer, drmInfo->getMimeType());
             break;
         }
         case DrmInfoRequest::TYPE_UNREGISTRATION_INFO: {
             const DrmBuffer* emptyBuffer = new DrmBuffer();
-            drmInfoStatus
-                = new DrmInfoStatus(DrmInfoStatus::STATUS_OK, emptyBuffer, drmInfo->getMimeType());
+            drmInfoStatus = new DrmInfoStatus(DrmInfoStatus::STATUS_OK,
+                    DrmInfoRequest::TYPE_UNREGISTRATION_INFO, emptyBuffer, drmInfo->getMimeType());
             break;
         }
         case DrmInfoRequest::TYPE_RIGHTS_ACQUISITION_INFO: {
@@ -91,8 +91,8 @@ DrmInfoStatus* DrmPassthruPlugIn::onProcessDrmInfo(int uniqueId, const DrmInfo* 
             data = new char[bufferSize];
             memcpy(data, licenseString.string(), bufferSize);
             const DrmBuffer* buffer = new DrmBuffer(data, bufferSize);
-            drmInfoStatus
-                = new DrmInfoStatus(DrmInfoStatus::STATUS_OK, buffer, drmInfo->getMimeType());
+            drmInfoStatus = new DrmInfoStatus(DrmInfoStatus::STATUS_OK,
+                    DrmInfoRequest::TYPE_RIGHTS_ACQUISITION_INFO, buffer, drmInfo->getMimeType());
             break;
         }
         }
@@ -240,6 +240,11 @@ status_t DrmPassthruPlugIn::onOpenDecryptSession(
     return DRM_NO_ERROR;
 #endif
 
+    return DRM_ERROR_CANNOT_HANDLE;
+}
+
+status_t DrmPassthruPlugIn::onOpenDecryptSession(
+            int uniqueId, DecryptHandle* decryptHandle, const char* uri) {
     return DRM_ERROR_CANNOT_HANDLE;
 }
 

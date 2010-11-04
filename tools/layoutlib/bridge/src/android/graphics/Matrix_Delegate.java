@@ -50,6 +50,10 @@ public final class Matrix_Delegate {
 
     // ---- Public Helper methods ----
 
+    public static Matrix_Delegate getDelegate(int native_instance) {
+        return sManager.getDelegate(native_instance);
+    }
+
     /**
      * Returns an {@link AffineTransform} matching the given Matrix.
      */
@@ -71,6 +75,35 @@ public final class Matrix_Delegate {
         }
 
         return (delegate.mValues[6] != 0 || delegate.mValues[7] != 0 || delegate.mValues[8] != 1);
+    }
+
+    /**
+     * Sets the content of the matrix with the content of another matrix.
+     */
+    public void set(Matrix_Delegate matrix) {
+        System.arraycopy(matrix.mValues, 0, mValues, 0, MATRIX_SIZE);
+    }
+
+    /**
+     * Resets the matrix to be the identity matrix.
+     */
+    public void reset() {
+        reset(mValues);
+    }
+
+    /**
+     * Returns whether or not the matrix is identity.
+     */
+    public boolean isIdentity() {
+        for (int i = 0, k = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++, k++) {
+                if (mValues[k] != ((i==j) ? 1 : 0)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
 
@@ -101,15 +134,7 @@ public final class Matrix_Delegate {
             return false;
         }
 
-        for (int i = 0, k = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++, k++) {
-                if (d.mValues[k] != ((i==j) ? 1 : 0)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return d.isIdentity();
     }
 
     /*package*/ static boolean native_rectStaysRect(int native_object) {

@@ -85,22 +85,31 @@ void DrmManager::removeUniqueId(int uniqueId) {
     }
 }
 
-status_t DrmManager::loadPlugIns(int uniqueId) {
+status_t DrmManager::loadPlugIns() {
     String8 pluginDirPath("/system/lib/drm/plugins/native");
-    return loadPlugIns(uniqueId, pluginDirPath);
+    return loadPlugIns(pluginDirPath);
 }
 
-status_t DrmManager::loadPlugIns(int uniqueId, const String8& plugInDirPath) {
+status_t DrmManager::loadPlugIns(const String8& plugInDirPath) {
     if (mSupportInfoToPlugInIdMap.isEmpty()) {
         mPlugInManager.loadPlugIns(plugInDirPath);
-
-        initializePlugIns(uniqueId);
-
-        populate(uniqueId);
-    } else {
-        initializePlugIns(uniqueId);
+        Vector<String8> plugInPathList = mPlugInManager.getPlugInIdList();
+        for (unsigned int i = 0; i < plugInPathList.size(); ++i) {
+            String8 plugInPath = plugInPathList[i];
+            DrmSupportInfo* info = mPlugInManager.getPlugIn(plugInPath).getSupportInfo(0);
+            if (NULL != info) {
+                mSupportInfoToPlugInIdMap.add(*info, plugInPath);
+            }
+        }
     }
+    return DRM_NO_ERROR;
+}
 
+status_t DrmManager::unloadPlugIns() {
+    mConvertSessionMap.clear();
+    mDecryptSessionMap.clear();
+    mPlugInManager.unloadPlugIns();
+    mSupportInfoToPlugInIdMap.clear();
     return DRM_NO_ERROR;
 }
 
@@ -111,21 +120,23 @@ status_t DrmManager::setDrmServiceListener(
     return DRM_NO_ERROR;
 }
 
-status_t DrmManager::unloadPlugIns(int uniqueId) {
-    Vector<String8> plugInIdList = mPlugInManager.getPlugInIdList();
+void DrmManager::addClient(int uniqueId) {
+    if (!mSupportInfoToPlugInIdMap.isEmpty()) {
+        Vector<String8> plugInIdList = mPlugInManager.getPlugInIdList();
+        for (unsigned int index = 0; index < plugInIdList.size(); index++) {
+            IDrmEngine& rDrmEngine = mPlugInManager.getPlugIn(plugInIdList.itemAt(index));
+            rDrmEngine.initialize(uniqueId);
+            rDrmEngine.setOnInfoListener(uniqueId, this);
+        }
+    }
+}
 
+void DrmManager::removeClient(int uniqueId) {
+    Vector<String8> plugInIdList = mPlugInManager.getPlugInIdList();
     for (unsigned int index = 0; index < plugInIdList.size(); index++) {
         IDrmEngine& rDrmEngine = mPlugInManager.getPlugIn(plugInIdList.itemAt(index));
         rDrmEngine.terminate(uniqueId);
     }
-
-    if (0 >= mUniqueIdVector.size()) {
-        mConvertSessionMap.clear();
-        mDecryptSessionMap.clear();
-        mSupportInfoToPlugInIdMap.clear();
-        mPlugInManager.unloadPlugIns();
-    }
-    return DRM_NO_ERROR;
 }
 
 DrmConstraints* DrmManager::getConstraints(int uniqueId, const String8* path, const int action) {
@@ -144,7 +155,7 @@ status_t DrmManager::installDrmEngine(int uniqueId, const String8& absolutePath)
     rDrmEngine.initialize(uniqueId);
     rDrmEngine.setOnInfoListener(uniqueId, this);
 
-    DrmSupportInfo* info = rDrmEngine.getSupportInfo(uniqueId);
+    DrmSupportInfo* info = rDrmEngine.getSupportInfo(0);
     mSupportInfoToPlugInIdMap.add(*info, absolutePath);
 
     return DRM_NO_ERROR;
@@ -154,7 +165,7 @@ bool DrmManager::canHandle(int uniqueId, const String8& path, const String8& mim
     const String8 plugInId = getSupportedPlugInId(mimeType);
     bool result = (EMPTY_STRING != plugInId) ? true : false;
 
-    if (NULL != path) {
+    if (0 < path.length()) {
         if (result) {
             IDrmEngine& rDrmEngine = mPlugInManager.getPlugIn(plugInId);
             result = rDrmEngine.canHandle(uniqueId, path);
@@ -340,7 +351,7 @@ status_t DrmManager::getAllSupportInfo(
         for (int i = 0; i < size; ++i) {
             String8 plugInPath = plugInPathList[i];
             DrmSupportInfo* drmSupportInfo
-                = mPlugInManager.getPlugIn(plugInPath).getSupportInfo(uniqueId);
+                = mPlugInManager.getPlugIn(plugInPath).getSupportInfo(0);
             if (NULL != drmSupportInfo) {
                 drmSupportInfoList.add(*drmSupportInfo);
                 delete drmSupportInfo; drmSupportInfo = NULL;
@@ -360,12 +371,12 @@ status_t DrmManager::getAllSupportInfo(
 }
 
 DecryptHandle* DrmManager::openDecryptSession(int uniqueId, int fd, int offset, int length) {
+    Mutex::Autolock _l(mDecryptLock);
     status_t result = DRM_ERROR_CANNOT_HANDLE;
     Vector<String8> plugInIdList = mPlugInManager.getPlugInIdList();
 
     DecryptHandle* handle = new DecryptHandle();
     if (NULL != handle) {
-        Mutex::Autolock _l(mDecryptLock);
         handle->decryptId = mDecryptSessionId + 1;
 
         for (unsigned int index = 0; index < plugInIdList.size(); index++) {
@@ -380,15 +391,42 @@ DecryptHandle* DrmManager::openDecryptSession(int uniqueId, int fd, int offset, 
             }
         }
     }
-
     if (DRM_NO_ERROR != result) {
         delete handle; handle = NULL;
     }
+    return handle;
+}
 
+DecryptHandle* DrmManager::openDecryptSession(int uniqueId, const char* uri) {
+    Mutex::Autolock _l(mDecryptLock);
+    status_t result = DRM_ERROR_CANNOT_HANDLE;
+    Vector<String8> plugInIdList = mPlugInManager.getPlugInIdList();
+
+    DecryptHandle* handle = new DecryptHandle();
+    if (NULL != handle) {
+        handle->decryptId = mDecryptSessionId + 1;
+
+        for (unsigned int index = 0; index < plugInIdList.size(); index++) {
+            String8 plugInId = plugInIdList.itemAt(index);
+            IDrmEngine& rDrmEngine = mPlugInManager.getPlugIn(plugInId);
+            result = rDrmEngine.openDecryptSession(uniqueId, handle, uri);
+
+            if (DRM_NO_ERROR == result) {
+                ++mDecryptSessionId;
+                mDecryptSessionMap.add(mDecryptSessionId, &rDrmEngine);
+                break;
+            }
+        }
+    }
+    if (DRM_NO_ERROR != result) {
+        delete handle; handle = NULL;
+        LOGE("DrmManager::openDecryptSession: no capable plug-in found");
+    }
     return handle;
 }
 
 status_t DrmManager::closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle) {
+    Mutex::Autolock _l(mDecryptLock);
     status_t result = DRM_ERROR_UNKNOWN;
     if (mDecryptSessionMap.indexOfKey(decryptHandle->decryptId) != NAME_NOT_FOUND) {
         IDrmEngine* drmEngine = mDecryptSessionMap.valueFor(decryptHandle->decryptId);
@@ -440,28 +478,6 @@ ssize_t DrmManager::pread(int uniqueId, DecryptHandle* decryptHandle,
         result = drmEngine->pread(uniqueId, decryptHandle, buffer, numBytes, offset);
     }
     return result;
-}
-
-void DrmManager::initializePlugIns(int uniqueId) {
-    Vector<String8> plugInIdList = mPlugInManager.getPlugInIdList();
-
-    for (unsigned int index = 0; index < plugInIdList.size(); index++) {
-        IDrmEngine& rDrmEngine = mPlugInManager.getPlugIn(plugInIdList.itemAt(index));
-        rDrmEngine.initialize(uniqueId);
-        rDrmEngine.setOnInfoListener(uniqueId, this);
-    }
-}
-
-void DrmManager::populate(int uniqueId) {
-    Vector<String8> plugInPathList = mPlugInManager.getPlugInIdList();
-
-    for (unsigned int i = 0; i < plugInPathList.size(); ++i) {
-        String8 plugInPath = plugInPathList[i];
-        DrmSupportInfo* info = mPlugInManager.getPlugIn(plugInPath).getSupportInfo(uniqueId);
-        if (NULL != info) {
-            mSupportInfoToPlugInIdMap.add(*info, plugInPath);
-        }
-    }
 }
 
 String8 DrmManager::getSupportedPlugInId(

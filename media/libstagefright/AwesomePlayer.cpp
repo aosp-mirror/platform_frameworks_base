@@ -333,14 +333,9 @@ status_t AwesomePlayer::setDataSource_l(
     }
 
     dataSource->getDrmInfo(&mDecryptHandle, &mDrmManagerClient);
-    if (mDecryptHandle != NULL) {
-        if (RightsStatus::RIGHTS_VALID == mDecryptHandle->status) {
-            if (DecryptApiType::CONTAINER_BASED == mDecryptHandle->decryptApiType) {
-                mDrmManagerClient->consumeRights(mDecryptHandle, Action::PLAY, true);
-            }
-        } else {
-            notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_NO_LICENSE);
-        }
+    if (mDecryptHandle != NULL
+            && RightsStatus::RIGHTS_VALID != mDecryptHandle->status) {
+        notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_NO_LICENSE);
     }
 
     return setDataSource_l(extractor);
@@ -408,11 +403,6 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
     }
 
     mExtractorFlags = extractor->flags();
-    if (mDecryptHandle != NULL) {
-        if (DecryptApiType::ELEMENTARY_STREAM_BASED == mDecryptHandle->decryptApiType) {
-            mDrmManagerClient->consumeRights(mDecryptHandle, Action::PLAY, true);
-        }
-    }
 
     return OK;
 }
@@ -426,8 +416,6 @@ void AwesomePlayer::reset_l() {
     if (mDecryptHandle != NULL) {
             mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
                     Playback::STOP, 0);
-            mDrmManagerClient->consumeRights(mDecryptHandle,
-                    Action::PLAY, false);
             mDecryptHandle = NULL;
             mDrmManagerClient = NULL;
     }
@@ -1679,14 +1667,9 @@ status_t AwesomePlayer::finishSetDataSource_l() {
     }
 
     dataSource->getDrmInfo(&mDecryptHandle, &mDrmManagerClient);
-    if (mDecryptHandle != NULL) {
-        if (RightsStatus::RIGHTS_VALID == mDecryptHandle->status) {
-            if (DecryptApiType::CONTAINER_BASED == mDecryptHandle->decryptApiType) {
-                mDrmManagerClient->consumeRights(mDecryptHandle, Action::PLAY, true);
-            }
-        } else {
-            notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_NO_LICENSE);
-        }
+    if (mDecryptHandle != NULL
+            && RightsStatus::RIGHTS_VALID != mDecryptHandle->status) {
+        notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_NO_LICENSE);
     }
 
     return setDataSource_l(extractor);

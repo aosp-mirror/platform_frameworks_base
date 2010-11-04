@@ -107,7 +107,7 @@ static void dumpstate() {
     run_command("EVENT LOG", 20, "logcat", "-b", "events", "-v", "threadtime", "-d", "*:v", NULL);
     run_command("RADIO LOG", 20, "logcat", "-b", "radio", "-v", "threadtime", "-d", "*:v", NULL);
 
-    run_command("NETWORK INTERFACES", 10, "netcfg", NULL);
+    run_command("NETWORK INTERFACES", 10, "su", "root", "netcfg", NULL);
     dump_file("NETWORK ROUTES", "/proc/net/route");
     dump_file("ARP CACHE", "/proc/net/arp");
 

@@ -172,8 +172,8 @@ public class SceneGraphRS {
 
     private void initRS() {
 
-        mScript = new ScriptC_scenegraph(mRS, mRes, R.raw.scenegraph, true);
-        mTransformScript = new ScriptC_transform(mRS, mRes, R.raw.transform, false);
+        mScript = new ScriptC_scenegraph(mRS, mRes, R.raw.scenegraph);
+        mTransformScript = new ScriptC_transform(mRS, mRes, R.raw.transform);
         mTransformScript.set_transformScript(mTransformScript);
 
         mScript.set_gTransformRS(mTransformScript);

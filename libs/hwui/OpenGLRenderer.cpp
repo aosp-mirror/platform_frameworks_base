@@ -240,12 +240,12 @@ bool OpenGLRenderer::restoreSnapshot() {
     mSaveCount--;
     mSnapshot = previous;
 
-    if (restoreLayer) {
-        composeLayer(current, previous);
-    }
-
     if (restoreClip) {
         dirtyClip();
+    }
+
+    if (restoreLayer) {
+        composeLayer(current, previous);
     }
 
     return restoreClip;
@@ -260,25 +260,25 @@ int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
     const GLuint previousFbo = mSnapshot->fbo;
     const int count = saveSnapshot(flags);
 
-    int alpha = 255;
-    SkXfermode::Mode mode;
+    if (!mSnapshot->invisible) {
+        int alpha = 255;
+        SkXfermode::Mode mode;
 
-    if (p) {
-        alpha = p->getAlpha();
-        if (!mCaches.extensions.hasFramebufferFetch()) {
-            const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
-            if (!isMode) {
-                // Assume SRC_OVER
-                mode = SkXfermode::kSrcOver_Mode;
+        if (p) {
+            alpha = p->getAlpha();
+            if (!mCaches.extensions.hasFramebufferFetch()) {
+                const bool isMode = SkXfermode::IsMode(p->getXfermode(), &mode);
+                if (!isMode) {
+                    // Assume SRC_OVER
+                    mode = SkXfermode::kSrcOver_Mode;
+                }
+            } else {
+                mode = getXfermode(p->getXfermode());
             }
         } else {
-            mode = getXfermode(p->getXfermode());
+            mode = SkXfermode::kSrcOver_Mode;
         }
-    } else {
-        mode = SkXfermode::kSrcOver_Mode;
-    }
 
-    if (!mSnapshot->previous->invisible) {
         createLayer(mSnapshot, left, top, right, bottom, alpha, mode, flags, previousFbo);
     }
 
@@ -379,8 +379,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
             bounds.getHeight() > mCaches.maxTextureSize) {
         snapshot->invisible = true;
     } else {
-        snapshot->invisible = snapshot->previous->invisible ||
-                (alpha <= ALPHA_THRESHOLD && fboLayer);
+        snapshot->invisible = snapshot->invisible || (alpha <= ALPHA_THRESHOLD && fboLayer);
     }
 
     // Bail out if we won't draw in this snapshot
@@ -447,6 +446,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
     inverse.mapRect(clip);
     clip.snapToPixelBoundaries();
     clip.intersect(bounds);
+    clip.translate(-bounds.left, -bounds.top);
 
     snapshot->flags |= Snapshot::kFlagIsFboLayer;
     snapshot->fbo = layer->fbo;
@@ -1010,6 +1010,9 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
+    // No need to check against the clip, we fill the clip region
+    if (mSnapshot->invisible) return;
+
     Rect& clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);

@@ -1358,6 +1358,8 @@
   <public type="attr" name="buttonGroupStyle" />
   <public type="attr" name="alertDialogButtonGroupStyle" />
   <public type="attr" name="homeAsUpIndicator" />
+  <public type="attr" name="enterFadeDuration" />
+  <public type="attr" name="exitFadeDuration" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1404,6 +1406,8 @@
   <public type="style" name="Theme.Holo.Light.Dialog" />
   <public type="style" name="Theme.Holo.Extended" />
   <public type="style" name="Theme.Holo.Light.Extended" />
+  <public type="style" name="Theme.Holo.Dialog.Alert" />
+  <public type="style" name="Theme.Holo.Light.Dialog.Alert" />
 
   <public type="style" name="Widget.ListPopupWindow" />
   <public type="style" name="Widget.PopupMenu" />

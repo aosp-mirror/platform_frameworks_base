@@ -18,7 +18,6 @@ package android.widget;
 
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;

@@ -50,14 +50,12 @@ public:
 
     void removeUniqueId(int uniqueId);
 
-    status_t loadPlugIns(int uniqueId);
+    void addClient(int uniqueId);
 
-    status_t loadPlugIns(int uniqueId, const String8& plugInDirPath);
+    void removeClient(int uniqueId);
 
     status_t setDrmServiceListener(
             int uniqueId, const sp<IDrmServiceListener>& drmServiceListener);
-
-    status_t unloadPlugIns(int uniqueId);
 
     status_t installDrmEngine(int uniqueId, const String8& drmEngineFile);
 
@@ -99,6 +97,8 @@ public:
     status_t getAllSupportInfo(int uniqueId, int* length, DrmSupportInfo** drmSupportInfoArray);
 
     DecryptHandle* openDecryptSession(int uniqueId, int fd, int offset, int length);
+
+    DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
 
     status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
 

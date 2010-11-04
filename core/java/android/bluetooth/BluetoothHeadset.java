@@ -183,7 +183,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public static final String VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID_CATEGORY  =
             "android.bluetooth.headset.intent.category.companyid";
 
-    /*
+    /**
      * Headset state when SCO audio is connected
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
@@ -192,13 +192,21 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public static final int STATE_AUDIO_CONNECTED = 10;
 
     /**
-     * Headset state when SCO audio is NOT connected
+     * Headset state when SCO audio is connecting
+     * This state can be one of
+     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
+     * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
+     * @hide
+     */
+    public static final int STATE_AUDIO_CONNECTING = 12;
+
+    /**
+     * Headset state when SCO audio is not connected
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
      */
     public static final int STATE_AUDIO_DISCONNECTED = 11;
-
 
     private Context mContext;
     private ServiceListener mServiceListener;
@@ -370,7 +378,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *
      * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
      * {@link #EXTRA_STATE} will be set to {@link #STATE_AUDIO_CONNECTED}
-     * when the audio connection is established.
+     * when the audio connection is established,
+     * and to {@link #STATE_AUDIO_DISCONNECTED} in case of failure.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
@@ -591,6 +600,25 @@ public final class BluetoothHeadset implements BluetoothProfile {
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
         return false;
+    }
+
+    /**
+     * Get the current audio state of the Headset.
+     * Note: This is an internal function and shouldn't be exposed
+     *
+     * @hide
+     */
+    public int getAudioState(BluetoothDevice device) {
+        if (DBG) log("getAudioState");
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.getAudioState(device);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return BluetoothHeadset.STATE_AUDIO_DISCONNECTED;
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

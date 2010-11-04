@@ -1853,7 +1853,22 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USB_DGTL_HEADSET_PLUG =
-            "android.intent.action.DOCK_HEADSET_PLUG";
+            "android.intent.action.HDMI_AUDIO_PLUG";
+
+    /**
+     * Broadcast Action: A HMDI cable was plugged or unplugged
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>name</em> - HDMI cable, human readable string </li>
+     * </ul>
+     * </ul>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_HDMI_AUDIO_PLUG =
+            "android.intent.action.HDMI_AUDIO_PLUG";
 
     /**
      * Broadcast Action: An outgoing call is about to be placed.

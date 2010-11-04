@@ -33,11 +33,11 @@ import java.lang.reflect.Modifier;
 public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
 
-    ScriptC(int id, RenderScript rs) {
+    protected ScriptC(int id, RenderScript rs) {
         super(id, rs);
     }
 
-    protected ScriptC(RenderScript rs, Resources resources, int resourceID, boolean isRoot) {
+    protected ScriptC(RenderScript rs, Resources resources, int resourceID) {
         super(0, rs);
         mID = internalCreate(rs, resources, resourceID);
     }

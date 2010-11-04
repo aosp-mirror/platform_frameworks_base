@@ -16,19 +16,12 @@
 
 package android.graphics;
 
+import android.graphics.Shader.TileMode;
 
 /**
- * Base class for Gradient shader. This is not a standard android class and is just used
- * as a base class for the re-implemented gradient classes.
- *
- * It also provides a base class to handle common code between the different shaders'
- * implementations of {@link java.awt.Paint}.
- *
- * @see LinearGradient
- * @see RadialGradient
- * @see SweepGradient
+ * Base class for true Gradient shader delegate.
  */
-public abstract class GradientShader extends Shader {
+public abstract class Gradient_Delegate extends Shader_Delegate {
 
     protected final int[] mColors;
     protected final float[] mPositions;
@@ -41,7 +34,7 @@ public abstract class GradientShader extends Shader {
      *            corresponding color in the colors array. If this is null, the
      *            the colors are distributed evenly along the gradient line.
      */
-    protected GradientShader(int colors[], float positions[]) {
+    protected Gradient_Delegate(int colors[], float positions[]) {
         if (colors.length < 2) {
             throw new IllegalArgumentException("needs >= 2 number of colors");
         }
@@ -199,7 +192,5 @@ public abstract class GradientShader extends Shader {
         private int computeChannel(int c1, int c2, float percent) {
             return c1 + (int)((percent * (c2-c1)) + .5);
         }
-
-
     }
 }

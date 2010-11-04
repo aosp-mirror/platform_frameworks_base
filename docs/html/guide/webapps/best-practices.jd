@@ -58,7 +58,7 @@ target screen density.</p>
 &lt;meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"&gt;
 </pre>
   <p>For more information about how to use viewport meta data for Android-powered devices, read <a
-href="{@docRoot}guide/webapps/targetting.html">Targetting Android Devices</a>.</p>
+href="{@docRoot}guide/webapps/targeting.html">Targeting Screens from Web Apps</a>.</p>
 </li>
 
 

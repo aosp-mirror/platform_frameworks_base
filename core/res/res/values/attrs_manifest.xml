@@ -1445,7 +1445,8 @@
          <code>screen</code> tag, a child of <code>compatible-screens</code>,
          which is itseld a child of the root
          {@link #AndroidManifest manifest} tag. -->
-    <declare-styleable name="AndroidManifestCompatibleScreensScreen">
+    <declare-styleable name="AndroidManifestCompatibleScreensScreen"
+                       parent="AndroidManifest.AndroidManifestCompatibleScreens">
         <!-- Specifies a compatible screen size, as per the device
              configuration screen size bins. -->
         <attr name="screenSize">

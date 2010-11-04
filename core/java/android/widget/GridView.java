@@ -1009,7 +1009,7 @@ public class GridView extends AbsListView {
             childHeight = child.getMeasuredHeight();
 
             if (mRecycler.shouldRecycleViewType(p.viewType)) {
-                mRecycler.addScrapView(child);
+                mRecycler.addScrapView(child, -1);
             }
         }
         
@@ -1148,7 +1148,7 @@ public class GridView extends AbsListView {
 
             if (dataChanged) {
                 for (int i = 0; i < childCount; i++) {
-                    recycleBin.addScrapView(getChildAt(i));
+                    recycleBin.addScrapView(getChildAt(i), firstPosition+i);
                 }
             } else {
                 recycleBin.fillActiveViews(childCount, firstPosition);
@@ -1215,11 +1215,11 @@ public class GridView extends AbsListView {
             recycleBin.scrapActiveViews();
 
             if (sel != null) {
-               positionSelector(sel);
+               positionSelector(INVALID_POSITION, sel);
                mSelectedTop = sel.getTop();
             } else if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
                 View child = getChildAt(mMotionPosition - mFirstPosition);
-                if (child != null) positionSelector(child);                
+                if (child != null) positionSelector(mMotionPosition, child);
             } else {
                 mSelectedTop = 0;
                 mSelectorRect.setEmpty();
@@ -1390,6 +1390,11 @@ public class GridView extends AbsListView {
 
         if (mCachingStarted) {
             child.setDrawingCacheEnabled(true);
+        }
+
+        if (recycled && (((AbsListView.LayoutParams)child.getLayoutParams()).scrappedFromPosition)
+                != position) {
+            child.jumpDrawablesToCurrentState();
         }
     }
 

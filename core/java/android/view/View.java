@@ -8288,7 +8288,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         (ArrayList<OnLayoutChangeListener>) mOnLayoutChangeListeners.clone();
                 int numListeners = listenersCopy.size();
                 for (int i = 0; i < numListeners; ++i) {
-                    listenersCopy.get(i).onLayoutChange(this, l, r, t, b, oldL, oldT, oldR, oldB);
+                    listenersCopy.get(i).onLayoutChange(this, l, t, r, b, oldL, oldT, oldR, oldB);
                 }
             }
         }
@@ -8620,6 +8620,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Call {@link Drawable#jumpToCurrentState() Drawable.jumpToCurrentState()}
+     * on all Drawable objects associated with this view.
+     */
+    public void jumpDrawablesToCurrentState() {
+        if (mBGDrawable != null) {
+            mBGDrawable.jumpToCurrentState();
+        }
+    }
+
+    /**
      * Sets the background color for this view.
      * @param color the color of the background
      */
@@ -8627,6 +8637,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setBackgroundColor(int color) {
         if (mBGDrawable instanceof ColorDrawable) {
             ((ColorDrawable) mBGDrawable).setColor(color);
+            invalidate();
         } else {
             setBackgroundDrawable(new ColorDrawable(color));
         }

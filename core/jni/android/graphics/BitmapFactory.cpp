@@ -146,6 +146,11 @@ static bool optionsShareable(JNIEnv* env, jobject options) {
             env->GetBooleanField(options, gOptions_shareableFieldID);
 }
 
+static bool optionsJustBounds(JNIEnv* env, jobject options) {
+    return options != NULL &&
+            env->GetBooleanField(options, gOptions_justBoundsFieldID);
+}
+
 static bool optionsReportSizeToVM(JNIEnv* env, jobject options) {
     return NULL == options ||
             !env->GetBooleanField(options, gOptions_nativeAllocFieldID);
@@ -183,7 +188,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
-        if (env->GetBooleanField(options, gOptions_justBoundsFieldID)) {
+        if (optionsJustBounds(env, options)) {
             mode = SkImageDecoder::kDecodeBounds_Mode;
         }
         // initialize these, in case we fail later on
@@ -415,13 +420,14 @@ static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
     /*  If optionsShareable() we could decide to just wrap the java array and
         share it, but that means adding a globalref to the java array object
         and managing its lifetime. For now we just always copy the array's data
-        if optionsPurgeable().
+        if optionsPurgeable(), unless we're just decoding bounds.
      */
+    bool purgeable = optionsPurgeable(env, options)
+            && !optionsJustBounds(env, options);
     AutoJavaByteArray ar(env, byteArray);
-    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length,
-                                          optionsPurgeable(env, options));
+    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length, purgeable);
     SkAutoUnref aur(stream);
-    return doDecode(env, stream, NULL, options, true);
+    return doDecode(env, stream, NULL, options, purgeable);
 }
 
 static void nativeRequestCancel(JNIEnv*, jobject joptions) {

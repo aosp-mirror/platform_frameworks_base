@@ -37,20 +37,25 @@ import java.io.FileNotFoundException;
 class WiredAccessoryObserver extends UEventObserver {
     private static final String TAG = WiredAccessoryObserver.class.getSimpleName();
     private static final boolean LOG = true;
-    private static final int MAX_AUDIO_PORTS = 2; /* h2w & USB Audio */
+    private static final int MAX_AUDIO_PORTS = 3; /* h2w, USB Audio & hdmi */
     private static final String uEventInfo[][] = { {"DEVPATH=/devices/virtual/switch/h2w",
                                                     "/sys/class/switch/h2w/state",
                                                     "/sys/class/switch/h2w/name"},
                                                    {"DEVPATH=/devices/virtual/switch/usb_audio",
                                                     "/sys/class/switch/usb_audio/state",
-                                                    "/sys/class/switch/usb_audio/name"} };
+                                                    "/sys/class/switch/usb_audio/name"},
+                                                   {"DEVPATH=/devices/virtual/switch/hdmi",
+                                                    "/sys/class/switch/hdmi/state",
+                                                    "/sys/class/switch/hdmi/name"} };
 
     private static final int BIT_HEADSET = (1 << 0);
     private static final int BIT_HEADSET_NO_MIC = (1 << 1);
     private static final int BIT_USB_HEADSET_ANLG = (1 << 2);
     private static final int BIT_USB_HEADSET_DGTL = (1 << 3);
+    private static final int BIT_HDMI_AUDIO = (1 << 4);
     private static final int SUPPORTED_HEADSETS = (BIT_HEADSET|BIT_HEADSET_NO_MIC|
-                                                   BIT_USB_HEADSET_ANLG|BIT_USB_HEADSET_DGTL);
+                                                   BIT_USB_HEADSET_ANLG|BIT_USB_HEADSET_DGTL|
+                                                   BIT_HDMI_AUDIO);
     private static final int HEADSETS_WITH_MIC = BIT_HEADSET;
 
     private int mHeadsetState;
@@ -92,6 +97,11 @@ class WiredAccessoryObserver extends UEventObserver {
                                    (Integer.parseInt(event.get("SWITCH_STATE")) << 3));
                 }
                 else switchState = (mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC));
+            }
+            else if ((event.get("SWITCH_NAME")).equals("hdmi")) {
+                switchState = ((mHeadsetState & (BIT_HEADSET|BIT_HEADSET_NO_MIC|
+                                                 BIT_USB_HEADSET_DGTL|BIT_USB_HEADSET_ANLG)) |
+                               (Integer.parseInt(event.get("SWITCH_STATE")) << 4));
             }
             else {
                 switchState = ((mHeadsetState & (BIT_USB_HEADSET_ANLG|BIT_USB_HEADSET_DGTL)) |
@@ -204,7 +214,8 @@ class WiredAccessoryObserver extends UEventObserver {
             if ((headsetState & headset) != 0) {
                 state = 1;
             }
-            if((headset == BIT_USB_HEADSET_ANLG) || (headset == BIT_USB_HEADSET_DGTL)) {
+            if((headset == BIT_USB_HEADSET_ANLG) || (headset == BIT_USB_HEADSET_DGTL) ||
+               (headset == BIT_HDMI_AUDIO)) {
                 Intent intent;
 
                 //  Pack up the values and broadcast them to everyone
@@ -216,6 +227,12 @@ class WiredAccessoryObserver extends UEventObserver {
                     ActivityManagerNative.broadcastStickyIntent(intent, null);
                 } else if (headset == BIT_USB_HEADSET_DGTL) {
                     intent = new Intent(Intent.ACTION_USB_DGTL_HEADSET_PLUG);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    intent.putExtra("state", state);
+                    intent.putExtra("name", headsetName);
+                    ActivityManagerNative.broadcastStickyIntent(intent, null);
+                } else if (headset == BIT_HDMI_AUDIO) {
+                    intent = new Intent(Intent.ACTION_HDMI_AUDIO_PLUG);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     intent.putExtra("state", state);
                     intent.putExtra("name", headsetName);

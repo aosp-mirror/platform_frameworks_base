@@ -2786,6 +2786,10 @@
              same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
              an RGB 565 screen). -->
         <attr name="dither" format="boolean" />
+        <!-- Amount of time (in milliseconds) to fade in a new state drawable. -->
+        <attr name="enterFadeDuration" format="integer" />
+        <!-- Amount of time (in milliseconds) to fade out an old state drawable. -->
+        <attr name="exitFadeDuration" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="AnimationDrawable">

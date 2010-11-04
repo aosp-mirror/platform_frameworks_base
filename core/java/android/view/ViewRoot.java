@@ -2493,11 +2493,12 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 // a window boundary, so the current drag target within this one must have
                 // just been exited.  Send it the usual notifications and then we're done
                 // for now.
-                setDragFocus(event, null);
+                mView.dispatchDragEvent(event);
             } else {
                 // Cache the drag description when the operation starts, then fill it in
                 // on subsequent calls as a convenience
                 if (what == DragEvent.ACTION_DRAG_STARTED) {
+                    mCurrentDragView = null;    // Start the current-recipient tracking
                     mDragDescription = event.mClipDescription;
                 } else {
                     event.mClipDescription = mDragDescription;
@@ -2557,22 +2558,10 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         outLocation.y = (int) mLastTouchPoint.y;
     }
 
-    public void setDragFocus(DragEvent event, View newDragTarget) {
-        final int action = event.mAction;
-        // If we've dragged off of a view, send it the EXITED message
+    public void setDragFocus(View newDragTarget) {
         if (mCurrentDragView != newDragTarget) {
-            if (mCurrentDragView != null) {
-                event.mAction = DragEvent.ACTION_DRAG_EXITED;
-                mCurrentDragView.dispatchDragEvent(event);
-            }
             mCurrentDragView = newDragTarget;
         }
-        // If we've dragged over a new view, send it the ENTERED message
-        if (newDragTarget != null) {
-            event.mAction = DragEvent.ACTION_DRAG_ENTERED;
-            newDragTarget.dispatchDragEvent(event);
-        }
-        event.mAction = action;  // restore the event's original state
     }
 
     private AudioManager getAudioManager() {

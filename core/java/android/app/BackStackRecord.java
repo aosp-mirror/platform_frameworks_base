@@ -186,6 +186,7 @@ final class BackStackRecord implements FragmentTransaction,
     int mTransition;
     int mTransitionStyle;
     boolean mAddToBackStack;
+    boolean mAllowAddToBackStack = true;
     String mName;
     boolean mCommitted;
     int mIndex;
@@ -346,8 +347,25 @@ final class BackStackRecord implements FragmentTransaction,
     }
 
     public FragmentTransaction addToBackStack(String name) {
+        if (!mAllowAddToBackStack) {
+            throw new IllegalStateException(
+                    "This FragmentTransaction is not allowed to be added to the back stack.");
+        }
         mAddToBackStack = true;
         mName = name;
+        return this;
+    }
+
+    public boolean isAddToBackStackAllowed() {
+        return mAllowAddToBackStack;
+    }
+
+    public FragmentTransaction disallowAddToBackStack() {
+        if (mAddToBackStack) {
+            throw new IllegalStateException(
+                    "This transaction is already being added to the back stack");
+        }
+        mAllowAddToBackStack = false;
         return this;
     }
 

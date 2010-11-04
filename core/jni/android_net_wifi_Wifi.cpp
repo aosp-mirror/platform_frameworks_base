@@ -198,11 +198,25 @@ static jint android_net_wifi_wpsPinFromDeviceCommand(JNIEnv* env, jobject clazz,
     env->ReleaseStringUTFChars(bssid, bssidStr);
 
     if ((numWritten == -1) || (numWritten >= (int)sizeof(cmdstr))) {
-        return false;
+        return -1;
     }
     return doIntCommand(cmdstr);
 }
 
+static jboolean android_net_wifi_setCountryCodeCommand(JNIEnv* env, jobject clazz, jstring country)
+{
+    char cmdstr[BUF_SIZE];
+    jboolean isCopy;
+
+    const char *countryStr = env->GetStringUTFChars(country, &isCopy);
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "DRIVER COUNTRY %s", countryStr);
+    env->ReleaseStringUTFChars(country, countryStr);
+
+    if ((numWritten == -1) || (numWritten >= (int)sizeof(cmdstr))) {
+        return false;
+    }
+    return doBooleanCommand(cmdstr, "OK");
+}
 
 static jboolean android_net_wifi_setNetworkVariableCommand(JNIEnv* env,
                                                            jobject clazz,
@@ -484,32 +498,6 @@ static jint android_net_wifi_getBandCommand(JNIEnv* env, jobject clazz)
     return (jint)band;
 }
 
-static jboolean android_net_wifi_setNumAllowedChannelsCommand(JNIEnv* env, jobject clazz, jint numChannels)
-{
-    char cmdstr[BUF_SIZE];
-
-    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "DRIVER SCAN-CHANNELS %u", numChannels);
-    int cmdTooLong = numWritten >= (int)sizeof(cmdstr);
-
-    return (jboolean)!cmdTooLong && doBooleanCommand(cmdstr, "OK");
-}
-
-static jint android_net_wifi_getNumAllowedChannelsCommand(JNIEnv* env, jobject clazz)
-{
-    char reply[BUF_SIZE];
-    int numChannels;
-
-    if (doCommand("DRIVER SCAN-CHANNELS", reply, sizeof(reply)) != 0) {
-        return -1;
-    }
-    // reply comes back in the form "Scan-Channels = X" where X is the
-    // number of channels
-    if (sscanf(reply, "%*s = %u", &numChannels) == 1)
-        return numChannels;
-    else
-        return -1;
-}
-
 static jboolean android_net_wifi_setBluetoothCoexistenceModeCommand(JNIEnv* env, jobject clazz, jint mode)
 {
     char cmdstr[BUF_SIZE];
@@ -645,8 +633,6 @@ static JNINativeMethod gWifiMethods[] = {
     { "getPowerModeCommand", "()I", (void*) android_net_wifi_getPowerModeCommand },
     { "setBandCommand", "(I)Z", (void*) android_net_wifi_setBandCommand},
     { "getBandCommand", "()I", (void*) android_net_wifi_getBandCommand},
-    { "setNumAllowedChannelsCommand", "(I)Z", (void*) android_net_wifi_setNumAllowedChannelsCommand },
-    { "getNumAllowedChannelsCommand", "()I", (void*) android_net_wifi_getNumAllowedChannelsCommand },
     { "setBluetoothCoexistenceModeCommand", "(I)Z",
     		(void*) android_net_wifi_setBluetoothCoexistenceModeCommand },
     { "setBluetoothCoexistenceScanModeCommand", "(Z)Z",
@@ -668,6 +654,8 @@ static JNINativeMethod gWifiMethods[] = {
         (void*) android_net_wifi_wpsPinFromDeviceCommand },
     { "setSuspendOptimizationsCommand", "(Z)Z",
         (void*) android_net_wifi_setSuspendOptimizationsCommand},
+    { "setCountryCodeCommand", "(Ljava/lang/String;)Z",
+        (void*) android_net_wifi_setCountryCodeCommand},
     { "doDhcpRequest", "(Landroid/net/DhcpInfo;)Z", (void*) android_net_wifi_doDhcpRequest },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_wifi_getDhcpError },
 };

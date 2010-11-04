@@ -362,14 +362,18 @@ public final class AnimatorSet extends Animator {
         // dependencies on all of the nodes. For example, we don't want to start an animation
         // when some other animation also wants to start when the first animation begins.
         final ArrayList<Node> nodesToStart = new ArrayList<Node>();
-        for (Node node : mSortedNodes) {
+        int numSortedNodes = mSortedNodes.size();
+        for (int i = 0; i < numSortedNodes; ++i) {
+            Node node = mSortedNodes.get(i);
             if (mSetListener == null) {
                 mSetListener = new AnimatorSetListener(this);
             }
             if (node.dependencies == null || node.dependencies.size() == 0) {
                 nodesToStart.add(node);
             } else {
-                for (Dependency dependency : node.dependencies) {
+                int numDependencies = node.dependencies.size();
+                for (int j = 0; j < numDependencies; ++j) {
+                    Dependency dependency = node.dependencies.get(j);
                     dependency.node.animation.addListener(
                             new DependencyListener(this, node, dependency.rule));
                 }
@@ -389,7 +393,9 @@ public final class AnimatorSet extends Animator {
             delayAnim.setDuration(mStartDelay);
             delayAnim.addListener(new AnimatorListenerAdapter() {
                 public void onAnimationEnd(Animator anim) {
-                    for (Node node : nodesToStart) {
+                    int numNodes = nodesToStart.size();
+                    for (int i = 0; i < numNodes; ++i) {
+                        Node node = nodesToStart.get(i);
                         node.animation.start();
                         mPlayingSet.add(node.animation);
                     }
@@ -399,8 +405,9 @@ public final class AnimatorSet extends Animator {
         if (mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
-            for (AnimatorListener listener : tmpListeners) {
-                listener.onAnimationStart(this);
+            int numListeners = tmpListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                tmpListeners.get(i).onAnimationStart(this);
             }
         }
     }
@@ -540,7 +547,9 @@ public final class AnimatorSet extends Animator {
                 return;
             }
             Dependency dependencyToRemove = null;
-            for (Dependency dependency : mNode.tmpDependencies) {
+            int numDependencies = mNode.tmpDependencies.size();
+            for (int i = 0; i < numDependencies; ++i) {
+                Dependency dependency = mNode.tmpDependencies.get(i);
                 if (dependency.rule == mRule &&
                         dependency.node.animation == dependencyAnimation) {
                     // rule fired - remove the dependency and listener and check to
@@ -571,8 +580,9 @@ public final class AnimatorSet extends Animator {
         public void onAnimationCancel(Animator animation) {
             if (mPlayingSet.size() == 0) {
                 if (mListeners != null) {
-                    for (AnimatorListener listener : mListeners) {
-                        listener.onAnimationCancel(mAnimatorSet);
+                    int numListeners = mListeners.size();
+                    for (int i = 0; i < numListeners; ++i) {
+                        mListeners.get(i).onAnimationCancel(mAnimatorSet);
                     }
                 }
             }
@@ -586,8 +596,9 @@ public final class AnimatorSet extends Animator {
             animNode.done = true;
             ArrayList<Node> sortedNodes = mAnimatorSet.mSortedNodes;
             boolean allDone = true;
-            for (Node node : sortedNodes) {
-                if (!node.done) {
+            int numSortedNodes = sortedNodes.size();
+            for (int i = 0; i < numSortedNodes; ++i) {
+                if (!sortedNodes.get(i).done) {
                     allDone = false;
                     break;
                 }
@@ -598,8 +609,9 @@ public final class AnimatorSet extends Animator {
                 if (mListeners != null) {
                     ArrayList<AnimatorListener> tmpListeners =
                             (ArrayList<AnimatorListener>) mListeners.clone();
-                    for (AnimatorListener listener : tmpListeners) {
-                        listener.onAnimationEnd(mAnimatorSet);
+                    int numListeners = tmpListeners.size();
+                    for (int i = 0; i < numListeners; ++i) {
+                        tmpListeners.get(i).onAnimationEnd(mAnimatorSet);
                     }
                 }
             }
@@ -629,17 +641,23 @@ public final class AnimatorSet extends Animator {
         if (mNeedsSort) {
             mSortedNodes.clear();
             ArrayList<Node> roots = new ArrayList<Node>();
-            for (Node node : mNodes) {
+            int numNodes = mNodes.size();
+            for (int i = 0; i < numNodes; ++i) {
+                Node node = mNodes.get(i);
                 if (node.dependencies == null || node.dependencies.size() == 0) {
                     roots.add(node);
                 }
             }
             ArrayList<Node> tmpRoots = new ArrayList<Node>();
             while (roots.size() > 0) {
-                for (Node root : roots) {
+                int numRoots = roots.size();
+                for (int i = 0; i < numRoots; ++i) {
+                    Node root = roots.get(i);
                     mSortedNodes.add(root);
                     if (root.nodeDependents != null) {
-                        for (Node node : root.nodeDependents) {
+                        int numDependents = root.nodeDependents.size();
+                        for (int j = 0; j < numDependents; ++j) {
+                            Node node = root.nodeDependents.get(j);
                             node.nodeDependencies.remove(root);
                             if (node.nodeDependencies.size() == 0) {
                                 tmpRoots.add(node);
@@ -660,9 +678,13 @@ public final class AnimatorSet extends Animator {
             // Doesn't need sorting, but still need to add in the nodeDependencies list
             // because these get removed as the event listeners fire and the dependencies
             // are satisfied
-            for (Node node : mNodes) {
+            int numNodes = mNodes.size();
+            for (int i = 0; i < numNodes; ++i) {
+                Node node = mNodes.get(i);
                 if (node.dependencies != null && node.dependencies.size() > 0) {
-                    for (Dependency dependency : node.dependencies) {
+                    int numDependencies = node.dependencies.size();
+                    for (int j = 0; j < numDependencies; ++j) {
+                        Dependency dependency = node.dependencies.get(j);
                         if (node.nodeDependencies == null) {
                             node.nodeDependencies = new ArrayList<Node>();
                         }

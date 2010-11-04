@@ -58,11 +58,7 @@ interface IWifiManager
 
     int getWifiEnabledState();
 
-    int getNumAllowedChannels();
-
-    boolean setNumAllowedChannels(int numChannels, boolean persist);
-
-    int[] getValidChannelCounts();
+    void setCountryCode(String country, boolean persist);
 
     boolean saveConfiguration();
 

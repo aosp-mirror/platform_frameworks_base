@@ -18,21 +18,13 @@ package com.android.internal.telephony.cdma;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.net.IConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.TrafficStats;
-import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Message;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.preference.PreferenceManager;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
@@ -46,6 +38,7 @@ import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
+import com.android.internal.telephony.RetryManager;
 import com.android.internal.telephony.gsm.ApnSetting;
 import com.android.internal.telephony.Phone;
 
@@ -59,20 +52,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private CDMAPhone mCdmaPhone;
 
-    // Indicates baseband will not auto-attach
-    private boolean noAutoAttach = false;
-    private boolean mIsScreenOn = true;
-
     //useful for debugging
-    boolean failNextConnect = false;
+    boolean mFailNextConnect = false;
 
-    /**
-     * dataConnectionList holds all the Data connection
-     */
-    private ArrayList<DataConnection> dataConnectionList;
-
-    /** Currently active CdmaDataConnection */
-    private CdmaDataConnection mActiveDataConnection;
+    /** The DataConnection being setup */
+    private CdmaDataConnection mPendingDataConnection;
 
     private boolean mPendingRestartRadio = false;
     private static final int TIME_DELAYED_TO_RESTART_RADIO =
@@ -83,10 +67,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      */
     private static final int DATA_CONNECTION_POOL_SIZE = 1;
 
-    private static final int POLL_CONNECTION_MILLIS = 5 * 1000;
     private static final String INTENT_RECONNECT_ALARM =
-            "com.android.internal.telephony.cdma-reconnect";
-    private static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
+        "com.android.internal.telephony.cdma-reconnect";
 
     /**
      * Constants for the data connection activity:
@@ -110,49 +92,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     // if we have no active Apn this is null
     protected ApnSetting mActiveApn;
 
-    // Possibly promote to base class, the only difference is
-    // the INTENT_RECONNECT_ALARM action is a different string.
-    // Do consider technology changes if it is promoted.
-    BroadcastReceiver mIntentReceiver = new BroadcastReceiver ()
-    {
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_SCREEN_ON)) {
-                mIsScreenOn = true;
-                stopNetStatPoll();
-                startNetStatPoll();
-            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                mIsScreenOn = false;
-                stopNetStatPoll();
-                startNetStatPoll();
-            } else if (action.equals((INTENT_RECONNECT_ALARM))) {
-                Log.d(LOG_TAG, "Data reconnect alarm. Previous state was " + state);
-
-                String reason = intent.getStringExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON);
-                if (state == State.FAILED) {
-                    cleanUpConnection(false, reason);
-                }
-                trySetupData(reason);
-            } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-                final android.net.NetworkInfo networkInfo = (NetworkInfo)
-                        intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-                mIsWifiConnected = (networkInfo != null && networkInfo.isConnected());
-            } else if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-                final boolean enabled = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                        WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED;
-
-                if (!enabled) {
-                    // when wifi got disabeled, the NETWORK_STATE_CHANGED_ACTION
-                    // quit and wont report disconnected til next enalbing.
-                    mIsWifiConnected = false;
-                }
-            }
-        }
-    };
-
-
     /* Constructor */
 
     CdmaDataConnectionTracker(CDMAPhone p) {
@@ -172,79 +111,49 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         p.mSST.registerForRoamingOff(this, EVENT_ROAMING_OFF, null);
         p.mCM.registerForCdmaOtaProvision(this, EVENT_CDMA_OTA_PROVISION, null);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(INTENT_RECONNECT_ALARM);
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-
-        // TODO: Why is this registering the phone as the receiver of the intent
-        //       and not its own handler?
-        p.getContext().registerReceiver(mIntentReceiver, filter, null, p);
-
         mDataConnectionTracker = this;
 
         createAllDataConnectionList();
-
-        // This preference tells us 1) initial condition for "dataEnabled",
-        // and 2) whether the RIL will setup the baseband to auto-PS attach.
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(phone.getContext());
-
-        boolean dataEnabledSetting = true;
-        try {
-            dataEnabledSetting = IConnectivityManager.Stub.asInterface(ServiceManager.
-                    getService(Context.CONNECTIVITY_SERVICE)).getMobileDataEnabled();
-        } catch (Exception e) {
-            // nothing to do - use the old behavior and leave data on
-        }
-        dataEnabled[APN_DEFAULT_ID] =
-                !sp.getBoolean(CDMAPhone.DATA_DISABLED_ON_BOOT_KEY, false) &&
-                dataEnabledSetting;
-        if (dataEnabled[APN_DEFAULT_ID]) {
-            enabledCount++;
-        }
-        noAutoAttach = !dataEnabled[APN_DEFAULT_ID];
-
-        if (!mRetryMgr.configure(SystemProperties.get("ro.cdma.data_retry_config"))) {
-            if (!mRetryMgr.configure(DEFAULT_DATA_RETRY_CONFIG)) {
-                // Should never happen, log an error and default to a simple linear sequence.
-                Log.e(LOG_TAG, "Could not configure using DEFAULT_DATA_RETRY_CONFIG="
-                        + DEFAULT_DATA_RETRY_CONFIG);
-                mRetryMgr.configure(20, 2000, 1000);
-            }
-        }
     }
 
+    @Override
     public void dispose() {
+        super.dispose();
+
         // Unregister from all events
-        phone.mCM.unregisterForAvailable(this);
-        phone.mCM.unregisterForOffOrNotAvailable(this);
+        mPhone.mCM.unregisterForAvailable(this);
+        mPhone.mCM.unregisterForOffOrNotAvailable(this);
         mCdmaPhone.mRuimRecords.unregisterForRecordsLoaded(this);
-        phone.mCM.unregisterForNVReady(this);
-        phone.mCM.unregisterForDataStateChanged(this);
+        mPhone.mCM.unregisterForNVReady(this);
+        mPhone.mCM.unregisterForDataStateChanged(this);
         mCdmaPhone.mCT.unregisterForVoiceCallEnded(this);
         mCdmaPhone.mCT.unregisterForVoiceCallStarted(this);
         mCdmaPhone.mSST.unregisterForCdmaDataConnectionAttached(this);
         mCdmaPhone.mSST.unregisterForCdmaDataConnectionDetached(this);
         mCdmaPhone.mSST.unregisterForRoamingOn(this);
         mCdmaPhone.mSST.unregisterForRoamingOff(this);
-        phone.mCM.unregisterForCdmaOtaProvision(this);
+        mPhone.mCM.unregisterForCdmaOtaProvision(this);
 
-        phone.getContext().unregisterReceiver(this.mIntentReceiver);
         destroyAllDataConnectionList();
     }
 
+    @Override
     protected void finalize() {
-        if(DBG) Log.d(LOG_TAG, "CdmaDataConnectionTracker finalized");
+        if(DBG) log("CdmaDataConnectionTracker finalized");
     }
 
+    @Override
+    protected String getActionIntentReconnectAlarm() {
+        return INTENT_RECONNECT_ALARM;
+    }
+
+    @Override
     protected void setState(State s) {
         if (DBG) log ("setState: " + s);
-        if (state != s) {
+        if (mState != s) {
             EventLog.writeEvent(EventLogTags.CDMA_DATA_STATE_CHANGE,
-                    state.toString(), s.toString());
-            state = s;
+                    mState.toString(), s.toString());
+            mState = s;
         }
     }
 
@@ -263,6 +172,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         return false;
     }
 
+    @Override
     protected String[] getActiveApnTypes() {
         String[] result;
         if (mActiveApn != null) {
@@ -274,6 +184,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         return result;
     }
 
+    @Override
     protected String getActiveApnString() {
         return null;
     }
@@ -287,45 +198,51 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      *
      * @return false while no data connection if all above requirements are met.
      */
+    @Override
     public boolean isDataConnectionAsDesired() {
-        boolean roaming = phone.getServiceState().getRoaming();
+        boolean roaming = mPhone.getServiceState().getRoaming();
 
-        if (((phone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY) ||
+        if (((mPhone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY) ||
                  mCdmaPhone.mRuimRecords.getRecordsLoaded()) &&
                 (mCdmaPhone.mSST.getCurrentCdmaDataConnectionState() ==
                  ServiceState.STATE_IN_SERVICE) &&
                 (!roaming || getDataOnRoamingEnabled()) &&
                 !mIsWifiConnected ) {
-            return (state == State.CONNECTED);
+            return (mState == State.CONNECTED);
         }
         return true;
     }
 
+    @Override
     protected boolean isDataAllowed() {
         int psState = mCdmaPhone.mSST.getCurrentCdmaDataConnectionState();
-        boolean roaming = (phone.getServiceState().getRoaming() && !getDataOnRoamingEnabled());
+        boolean roaming = (mPhone.getServiceState().getRoaming() && !getDataOnRoamingEnabled());
         boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
 
-        boolean allowed = (psState == ServiceState.STATE_IN_SERVICE &&
-                (phone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY ||
-                 mCdmaPhone.mRuimRecords.getRecordsLoaded()) &&
-                (mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
-                 phone.getState() == Phone.State.IDLE) &&
-                !roaming &&
-                mMasterDataEnabled &&
-                desiredPowerState &&
-                !mPendingRestartRadio &&
-                !mCdmaPhone.needsOtaServiceProvisioning());
+        boolean allowed =
+                    (psState == ServiceState.STATE_IN_SERVICE ||
+                            mAutoAttachOnCreation) &&
+                    (mPhone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY ||
+                            mCdmaPhone.mRuimRecords.getRecordsLoaded()) &&
+                    (mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
+                            mPhone.getState() == Phone.State.IDLE) &&
+                    !roaming &&
+                    mMasterDataEnabled &&
+                    desiredPowerState &&
+                    !mPendingRestartRadio &&
+                    !mCdmaPhone.needsOtaServiceProvisioning();
         if (!allowed && DBG) {
             String reason = "";
-            if (psState != ServiceState.STATE_IN_SERVICE) reason += " - psState= " + psState;
-            if (phone.mCM.getRadioState() != CommandsInterface.RadioState.NV_READY &&
-                    !mCdmaPhone.mRuimRecords.getRecordsLoaded()) {
-                reason += " - radioState= " + phone.mCM.getRadioState() + " - RUIM not loaded";
+            if (!((psState == ServiceState.STATE_IN_SERVICE) || mAutoAttachOnCreation)) {
+                reason += " - psState= " + psState;
             }
-            if (phone.getState() != Phone.State.IDLE &&
+            if (!(mPhone.mCM.getRadioState() == CommandsInterface.RadioState.NV_READY ||
+                    mCdmaPhone.mRuimRecords.getRecordsLoaded())) {
+                reason += " - radioState= " + mPhone.mCM.getRadioState() + " - RUIM not loaded";
+            }
+            if (mPhone.getState() != Phone.State.IDLE &&
                     mCdmaPhone.mSST.isConcurrentVoiceAndData()) {
-                reason += " - concurrentVoiceAndData not allowed and state= " + phone.getState();
+                reason += " - concurrentVoiceAndData not allowed and state= " + mPhone.getState();
             }
             if (roaming) reason += " - Roaming";
             if (!mMasterDataEnabled) reason += " - mMasterDataEnabled= false";
@@ -340,22 +257,22 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private boolean trySetupData(String reason) {
         if (DBG) log("***trySetupData due to " + (reason == null ? "(unspecified)" : reason));
 
-        if (phone.getSimulatedRadioControl() != null) {
+        if (mPhone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
             // FIXME  this can be improved
             setState(State.CONNECTED);
             notifyDataConnection(reason);
             notifyOffApnsOfAvailability(reason, true);
 
-            Log.i(LOG_TAG, "(fix?) We're on the simulator; assuming data is connected");
+            log("(fix?) We're on the simulator; assuming data is connected");
             return true;
         }
 
         int psState = mCdmaPhone.mSST.getCurrentCdmaDataConnectionState();
-        boolean roaming = phone.getServiceState().getRoaming();
+        boolean roaming = mPhone.getServiceState().getRoaming();
         boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
 
-        if ((state == State.IDLE || state == State.SCANNING) &&
+        if ((mState == State.IDLE || mState == State.SCANNING) &&
                 isDataAllowed() && getAnyDataEnabled()) {
             boolean retValue = setupData(reason);
             notifyOffApnsOfAvailability(reason, retValue);
@@ -367,13 +284,12 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
-     * If tearDown is true, this only tears down a CONNECTED session. Presently,
-     * there is no mechanism for abandoning an INITING/CONNECTING session,
-     * but would likely involve cancelling pending async requests or
-     * setting a flag or new state to ignore them when they came in
-     * @param tearDown true if the underlying DataConnection should be
-     * disconnected.
-     * @param reason reason for the clean up.
+     * Cleanup all connections.
+     *
+     * TODO: Cleanup only a specified connection passed as a parameter.
+     *
+     * @param tearDown true if the underlying DataConnection should be disconnected.
+     * @param reason for the clean up.
      */
     private void cleanUpConnection(boolean tearDown, String reason) {
         if (DBG) log("cleanUpConnection: reason: " + reason);
@@ -381,7 +297,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         // Clear the reconnect alarm, if set.
         if (mReconnectIntent != null) {
             AlarmManager am =
-                (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
+                (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
             am.cancel(mReconnectIntent);
             mReconnectIntent = null;
         }
@@ -390,11 +306,12 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         notifyDataAvailability(reason);
 
         boolean notificationDeferred = false;
-        for (DataConnection conn : dataConnectionList) {
+        for (DataConnection conn : mDataConnections.values()) {
             if(conn != null) {
                 if (tearDown) {
                     if (DBG) log("cleanUpConnection: teardown, call conn.disconnect");
-                    conn.disconnect(obtainMessage(EVENT_DISCONNECT_DONE, reason));
+                    conn.disconnect(obtainMessage(EVENT_DISCONNECT_DONE,
+                            conn.getDataConnectionId(), 0, reason));
                     notificationDeferred = true;
                 } else {
                     if (DBG) log("cleanUpConnection: !tearDown, call conn.resetSynchronously");
@@ -413,10 +330,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     private CdmaDataConnection findFreeDataConnection() {
-        for (DataConnection connBase : dataConnectionList) {
-            CdmaDataConnection conn = (CdmaDataConnection) connBase;
-            if (conn.isInactive()) {
-                return conn;
+        for (DataConnection dc : mDataConnections.values()) {
+            if (dc.isInactive()) {
+                return (CdmaDataConnection) dc;
             }
         }
         return null;
@@ -430,7 +346,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             return false;
         }
 
-        mActiveDataConnection = conn;
+        /** TODO: We probably want the connection being setup to a parameter passed around */
+        mPendingDataConnection = conn;
         String[] types;
         if (mRequestedApnType.equals(Phone.APN_TYPE_DUN)) {
             types = new String[1];
@@ -458,28 +375,31 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     private void resetPollStats() {
-        txPkts = -1;
-        rxPkts = -1;
-        sentSinceLastRecv = 0;
-        netStatPollPeriod = POLL_NETSTAT_MILLIS;
+        mTxPkts = -1;
+        mRxPkts = -1;
+        mSentSinceLastRecv = 0;
+        mNetStatPollPeriod = POLL_NETSTAT_MILLIS;
         mNoRecvPollCount = 0;
     }
 
+    @Override
     protected void startNetStatPoll() {
-        if (state == State.CONNECTED && netStatPollEnabled == false) {
-            Log.d(LOG_TAG, "[DataConnection] Start poll NetStat");
+        if (mState == State.CONNECTED && mNetStatPollEnabled == false) {
+            log("[DataConnection] Start poll NetStat");
             resetPollStats();
-            netStatPollEnabled = true;
+            mNetStatPollEnabled = true;
             mPollNetStat.run();
         }
     }
 
+    @Override
     protected void stopNetStatPoll() {
-        netStatPollEnabled = false;
+        mNetStatPollEnabled = false;
         removeCallbacks(mPollNetStat);
-        Log.d(LOG_TAG, "[DataConnection] Stop poll NetStat");
+        log("[DataConnection] Stop poll NetStat");
     }
 
+    @Override
     protected void restartRadio() {
         if (DBG) log("Cleanup connection and wait " +
                 (TIME_DELAYED_TO_RESTART_RADIO / 1000) + "s to restart radio");
@@ -496,73 +416,73 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
             Activity newActivity;
 
-            preTxPkts = txPkts;
-            preRxPkts = rxPkts;
+            preTxPkts = mTxPkts;
+            preRxPkts = mRxPkts;
 
-            txPkts = TrafficStats.getMobileTxPackets();
-            rxPkts = TrafficStats.getMobileRxPackets();
+            mTxPkts = TrafficStats.getMobileTxPackets();
+            mRxPkts = TrafficStats.getMobileRxPackets();
 
-            //Log.d(LOG_TAG, "rx " + String.valueOf(rxPkts) + " tx " + String.valueOf(txPkts));
+            //log("rx " + String.valueOf(rxPkts) + " tx " + String.valueOf(txPkts));
 
-            if (netStatPollEnabled && (preTxPkts > 0 || preRxPkts > 0)) {
-                sent = txPkts - preTxPkts;
-                received = rxPkts - preRxPkts;
+            if (mNetStatPollEnabled && (preTxPkts > 0 || preRxPkts > 0)) {
+                sent = mTxPkts - preTxPkts;
+                received = mRxPkts - preRxPkts;
 
                 if ( sent > 0 && received > 0 ) {
-                    sentSinceLastRecv = 0;
+                    mSentSinceLastRecv = 0;
                     newActivity = Activity.DATAINANDOUT;
                 } else if (sent > 0 && received == 0) {
-                    if (phone.getState()  == Phone.State.IDLE) {
-                        sentSinceLastRecv += sent;
+                    if (mPhone.getState()  == Phone.State.IDLE) {
+                        mSentSinceLastRecv += sent;
                     } else {
-                        sentSinceLastRecv = 0;
+                        mSentSinceLastRecv = 0;
                     }
                     newActivity = Activity.DATAOUT;
                 } else if (sent == 0 && received > 0) {
-                    sentSinceLastRecv = 0;
+                    mSentSinceLastRecv = 0;
                     newActivity = Activity.DATAIN;
                 } else if (sent == 0 && received == 0) {
-                    newActivity = (activity == Activity.DORMANT) ? activity : Activity.NONE;
+                    newActivity = (mActivity == Activity.DORMANT) ? mActivity : Activity.NONE;
                 } else {
-                    sentSinceLastRecv = 0;
-                    newActivity = (activity == Activity.DORMANT) ? activity : Activity.NONE;
+                    mSentSinceLastRecv = 0;
+                    newActivity = (mActivity == Activity.DORMANT) ? mActivity : Activity.NONE;
                 }
 
-                if (activity != newActivity) {
-                    activity = newActivity;
-                    phone.notifyDataActivity();
+                if (mActivity != newActivity && mIsScreenOn) {
+                    mActivity = newActivity;
+                    mPhone.notifyDataActivity();
                 }
             }
 
-            if (sentSinceLastRecv >= NUMBER_SENT_PACKETS_OF_HANG) {
+            if (mSentSinceLastRecv >= NUMBER_SENT_PACKETS_OF_HANG) {
                 // Packets sent without ack exceeded threshold.
 
                 if (mNoRecvPollCount == 0) {
                     EventLog.writeEvent(
                             EventLogTags.PDP_RADIO_RESET_COUNTDOWN_TRIGGERED,
-                            sentSinceLastRecv);
+                            mSentSinceLastRecv);
                 }
 
                 if (mNoRecvPollCount < NO_RECV_POLL_LIMIT) {
                     mNoRecvPollCount++;
                     // Slow down the poll interval to let things happen
-                    netStatPollPeriod = POLL_NETSTAT_SLOW_MILLIS;
+                    mNetStatPollPeriod = POLL_NETSTAT_SLOW_MILLIS;
                 } else {
-                    if (DBG) log("Sent " + String.valueOf(sentSinceLastRecv) +
+                    if (DBG) log("Sent " + String.valueOf(mSentSinceLastRecv) +
                                         " pkts since last received");
                     // We've exceeded the threshold.  Restart the radio.
-                    netStatPollEnabled = false;
+                    mNetStatPollEnabled = false;
                     stopNetStatPoll();
                     restartRadio();
                     EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, NO_RECV_POLL_LIMIT);
                 }
             } else {
                 mNoRecvPollCount = 0;
-                netStatPollPeriod = POLL_NETSTAT_MILLIS;
+                mNetStatPollPeriod = POLL_NETSTAT_MILLIS;
             }
 
-            if (netStatPollEnabled) {
-                mDataConnectionTracker.postDelayed(this, netStatPollPeriod);
+            if (mNetStatPollEnabled) {
+                mDataConnectionTracker.postDelayed(this, mNetStatPollPeriod);
             }
         }
     };
@@ -594,7 +514,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     private void reconnectAfterFail(FailCause lastFailCauseCode, String reason) {
-        if (state == State.FAILED) {
+        if (mState == State.FAILED) {
             /**
              * For now With CDMA we never try to reconnect on
              * error and instead just continue to retry
@@ -602,15 +522,15 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
              * TODO: Make this configurable?
              */
             int nextReconnectDelay = mRetryMgr.getRetryTimer();
-            Log.d(LOG_TAG, "Data Connection activate failed. Scheduling next attempt for "
+            log("Data Connection activate failed. Scheduling next attempt for "
                     + (nextReconnectDelay / 1000) + "s");
 
             AlarmManager am =
-                (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
+                (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(INTENT_RECONNECT_ALARM);
             intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON, reason);
             mReconnectIntent = PendingIntent.getBroadcast(
-                    phone.getContext(), 0, intent, 0);
+                    mPhone.getContext(), 0, intent, 0);
             am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + nextReconnectDelay,
                     mReconnectIntent);
@@ -618,7 +538,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             mRetryMgr.increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
-                Log.d(LOG_TAG,"NOT Posting Data Connection Unavailable notification "
+                log("NOT Posting Data Connection Unavailable notification "
                                 + "-- likely transient error");
             } else {
                 notifyNoData(lastFailCauseCode);
@@ -639,14 +559,14 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected void onRecordsLoaded() {
-        if (state == State.FAILED) {
+        if (mState == State.FAILED) {
             cleanUpConnection(false, null);
         }
         sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA, Phone.REASON_SIM_LOADED));
     }
 
     protected void onNVReady() {
-        if (state == State.FAILED) {
+        if (mState == State.FAILED) {
             cleanUpConnection(false, null);
         }
         sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
@@ -657,12 +577,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      */
     @Override
     protected void onEnableNewApn() {
-          cleanUpConnection(true, Phone.REASON_APN_SWITCHED);
+        cleanUpConnection(true, Phone.REASON_APN_SWITCHED);
     }
 
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
+    @Override
     protected boolean onTrySetupData(String reason) {
         return trySetupData(reason);
     }
@@ -670,6 +591,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
+    @Override
     protected void onRoamingOff() {
         trySetupData(Phone.REASON_ROAMING_OFF);
     }
@@ -677,6 +599,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
+    @Override
     protected void onRoamingOn() {
         if (getDataOnRoamingEnabled()) {
             trySetupData(Phone.REASON_ROAMING_ON);
@@ -689,19 +612,20 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
+    @Override
     protected void onRadioAvailable() {
-        if (phone.getSimulatedRadioControl() != null) {
+        if (mPhone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
             // FIXME  this can be improved
             setState(State.CONNECTED);
             notifyDataConnection(null);
 
-            Log.i(LOG_TAG, "We're on the simulator; assuming data is connected");
+            log("We're on the simulator; assuming data is connected");
         }
 
         notifyDataAvailability(null);
 
-        if (state != State.IDLE) {
+        if (mState != State.IDLE) {
             cleanUpConnection(true, null);
         }
     }
@@ -709,13 +633,14 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
+    @Override
     protected void onRadioOffOrNotAvailable() {
         mRetryMgr.resetRetryCount();
 
-        if (phone.getSimulatedRadioControl() != null) {
+        if (mPhone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
             // FIXME  this can be improved
-            Log.i(LOG_TAG, "We're on the simulator; assuming radio off is meaningless");
+            log("We're on the simulator; assuming radio off is meaningless");
         } else {
             if (DBG) log("Radio is off and clean up all connection");
             cleanUpConnection(false, Phone.REASON_RADIO_TURNED_OFF);
@@ -725,6 +650,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
+    @Override
     protected void onDataSetupComplete(AsyncResult ar) {
         String reason = null;
         if (ar.userObj instanceof String) {
@@ -733,8 +659,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
         if (ar.exception == null) {
             // TODO: We should clear LinkProperties/Capabilities when torn down or disconnected
-            mLinkProperties = getLinkProperties(mActiveDataConnection);
-            mLinkCapabilities = getLinkCapabilities(mActiveDataConnection);
+            mLinkProperties = getLinkProperties(mPendingDataConnection);
+            mLinkCapabilities = getLinkCapabilities(mPendingDataConnection);
 
             // everything is setup
             notifyDefaultData(reason);
@@ -754,8 +680,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * Called when EVENT_DISCONNECT_DONE is received.
      */
-    protected void onDisconnectDone(AsyncResult ar) {
-        if(DBG) log("EVENT_DISCONNECT_DONE");
+    @Override
+    protected void onDisconnectDone(int connId, AsyncResult ar) {
+        if(DBG) log("EVENT_DISCONNECT_DONE connId=" + connId);
         String reason = null;
         if (ar.userObj instanceof String) {
             reason = (String) ar.userObj;
@@ -799,8 +726,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
+    @Override
     protected void onVoiceCallStarted() {
-        if (state == State.CONNECTED && !mCdmaPhone.mSST.isConcurrentVoiceAndData()) {
+        if (mState == State.CONNECTED && !mCdmaPhone.mSST.isConcurrentVoiceAndData()) {
             stopNetStatPoll();
             notifyDataConnection(Phone.REASON_VOICE_CALL_STARTED);
             notifyDataAvailability(Phone.REASON_VOICE_CALL_STARTED);
@@ -810,8 +738,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
+    @Override
     protected void onVoiceCallEnded() {
-        if (state == State.CONNECTED) {
+        if (mState == State.CONNECTED) {
             if (!mCdmaPhone.mSST.isConcurrentVoiceAndData()) {
                 startNetStatPoll();
                 notifyDataConnection(Phone.REASON_VOICE_CALL_ENDED);
@@ -827,39 +756,49 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
-    /**
-     * @override com.android.internal.telephony.DataConnectionTracker
-     */
+    @Override
     protected void onCleanUpConnection(boolean tearDown, String reason) {
         cleanUpConnection(tearDown, reason);
     }
 
     private void createAllDataConnectionList() {
-       dataConnectionList = new ArrayList<DataConnection>();
         CdmaDataConnection dataConn;
 
-       for (int i = 0; i < DATA_CONNECTION_POOL_SIZE; i++) {
-            dataConn = CdmaDataConnection.makeDataConnection(mCdmaPhone);
-            dataConnectionList.add(dataConn);
-       }
+        /** TODO: Use one retry manager for all connections for now */
+        RetryManager rm = mRetryMgr;
+        if (!rm.configure(SystemProperties.get("ro.cdma.data_retry_config"))) {
+            if (!rm.configure(DEFAULT_DATA_RETRY_CONFIG)) {
+                // Should never happen, log an error and default to a simple linear sequence.
+                log("Could not configure using DEFAULT_DATA_RETRY_CONFIG="
+                        + DEFAULT_DATA_RETRY_CONFIG);
+                rm.configure(20, 2000, 1000);
+            }
+        }
+
+        for (int i = 0; i < DATA_CONNECTION_POOL_SIZE; i++) {
+            int id = mUniqueIdGenerator.getAndIncrement();
+
+            dataConn = CdmaDataConnection.makeDataConnection(mCdmaPhone, id, rm);
+            mDataConnections.put(id, dataConn);
+        }
     }
 
     private void destroyAllDataConnectionList() {
-        if(dataConnectionList != null) {
-            dataConnectionList.removeAll(dataConnectionList);
+        if(mDataConnections != null) {
+            mDataConnections.clear();
         }
     }
 
     private void onCdmaDataDetached() {
-        if (state == State.CONNECTED) {
+        if (mState == State.CONNECTED) {
             startNetStatPoll();
             notifyDataConnection(Phone.REASON_CDMA_DATA_DETACHED);
         } else {
-            if (state == State.FAILED) {
+            if (mState == State.FAILED) {
                 cleanUpConnection(false, Phone.REASON_CDMA_DATA_DETACHED);
                 mRetryMgr.resetRetryCount();
 
-                CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
+                CdmaCellLocation loc = (CdmaCellLocation)(mPhone.getCellLocation());
                 EventLog.writeEvent(EventLogTags.CDMA_DATA_SETUP_FAILED,
                         loc != null ? loc.getBaseStationId() : -1,
                         TelephonyManager.getDefault().getNetworkType());
@@ -886,8 +825,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private void onRestartRadio() {
         if (mPendingRestartRadio) {
-            Log.d(LOG_TAG, "************TURN OFF RADIO**************");
-            phone.mCM.setRadioPower(false, null);
+            log("************TURN OFF RADIO**************");
+            mPhone.mCM.setRadioPower(false, null);
             /* Note: no need to call setRadioPower(true).  Assuming the desired
              * radio power state is still ON (as tracked by ServiceStateTracker),
              * ServiceStateTracker will call setRadioPower when it receives the
@@ -900,7 +839,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     private void writeEventLogCdmaDataDrop() {
-        CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
+        CdmaCellLocation loc = (CdmaCellLocation)(mPhone.getCellLocation());
         EventLog.writeEvent(EventLogTags.CDMA_DATA_DROP,
                 loc != null ? loc.getBaseStationId() : -1,
                 TelephonyManager.getDefault().getNetworkType());
@@ -916,7 +855,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             return;
         }
 
-        if (state == State.CONNECTED) {
+        if (mState == State.CONNECTED) {
             boolean isActiveOrDormantConnectionPresent = false;
             int connectionState = DATA_CONNECTION_ACTIVE_PH_LINK_INACTIVE;
 
@@ -932,7 +871,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
             if (!isActiveOrDormantConnectionPresent) {
                 // No active or dormant connection
-                Log.i(LOG_TAG, "onDataStateChanged: No active connection"
+                log("onDataStateChanged: No active connection"
                         + "state is CONNECTED, disconnecting/cleanup");
                 writeEventLogCdmaDataDrop();
                 cleanUpConnection(true, null);
@@ -941,31 +880,27 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
             switch (connectionState) {
                 case DATA_CONNECTION_ACTIVE_PH_LINK_UP:
-                    Log.v(LOG_TAG, "onDataStateChanged: active=LINK_ACTIVE && CONNECTED, ignore");
-                    activity = Activity.NONE;
-                    phone.notifyDataActivity();
+                    log("onDataStateChanged: active=LINK_ACTIVE && CONNECTED, ignore");
+                    mActivity = Activity.NONE;
+                    mPhone.notifyDataActivity();
                     startNetStatPoll();
                     break;
 
                 case DATA_CONNECTION_ACTIVE_PH_LINK_DOWN:
-                    Log.v(LOG_TAG, "onDataStateChanged active=LINK_DOWN && CONNECTED, dormant");
-                    activity = Activity.DORMANT;
-                    phone.notifyDataActivity();
+                    log("onDataStateChanged active=LINK_DOWN && CONNECTED, dormant");
+                    mActivity = Activity.DORMANT;
+                    mPhone.notifyDataActivity();
                     stopNetStatPoll();
                     break;
 
                 default:
-                    Log.v(LOG_TAG, "onDataStateChanged: IGNORE unexpected DataCallState.active="
+                    log("onDataStateChanged: IGNORE unexpected DataCallState.active="
                             + connectionState);
             }
         } else {
             // TODO: Do we need to do anything?
-            Log.i(LOG_TAG, "onDataStateChanged: not connected, state=" + state + " ignoring");
+            log("onDataStateChanged: not connected, state=" + mState + " ignoring");
         }
-    }
-
-    public ArrayList<DataConnection> getAllDataConnections() {
-        return dataConnectionList;
     }
 
     private void startDelayedRetry(FailCause cause, String reason) {
@@ -973,10 +908,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         reconnectAfterFail(cause, reason);
     }
 
+    @Override
     public void handleMessage (Message msg) {
 
-        if (!phone.mIsTheCurrentActivePhone) {
-            Log.d(LOG_TAG, "Ignore CDMA msgs since CDMA phone is inactive");
+        if (!mPhone.mIsTheCurrentActivePhone) {
+            log("Ignore CDMA msgs since CDMA phone is inactive");
             return;
         }
 
@@ -1013,7 +949,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
+    @Override
     protected void log(String s) {
         Log.d(LOG_TAG, "[CdmaDataConnectionTracker] " + s);
+    }
+
+    @Override
+    protected void loge(String s) {
+        Log.e(LOG_TAG, "[CdmaDataConnectionTracker] " + s);
     }
 }

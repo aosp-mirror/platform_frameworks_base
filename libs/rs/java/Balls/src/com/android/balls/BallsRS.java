@@ -107,9 +107,9 @@ public class BallsRS {
         smb.addIndexType(Primitive.LINE);
         Mesh smA = smb.create();
 
-        mPhysicsScript = new ScriptC_ball_physics(mRS, mRes, R.raw.ball_physics, true);
+        mPhysicsScript = new ScriptC_ball_physics(mRS, mRes, R.raw.ball_physics);
 
-        mScript = new ScriptC_balls(mRS, mRes, R.raw.balls, true);
+        mScript = new ScriptC_balls(mRS, mRes, R.raw.balls);
         mScript.set_partMesh(smP);
         mScript.set_arcMesh(smA);
         mScript.set_physics_script(mPhysicsScript);

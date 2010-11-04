@@ -65,12 +65,15 @@ public class ActionBarImpl extends ActionBar {
     private ArrayList<TabImpl> mTabs = new ArrayList<TabImpl>();
 
     private TabImpl mSelectedTab;
+    private int mSavedTabPosition = INVALID_POSITION;
     
     private ActionMode mActionMode;
     
     private static final int CONTEXT_DISPLAY_NORMAL = 0;
     private static final int CONTEXT_DISPLAY_SPLIT = 1;
     
+    private static final int INVALID_POSITION = -1;
+
     private int mContextDisplayMode;
 
     private boolean mClosingContext;
@@ -183,6 +186,8 @@ public class ActionBarImpl extends ActionBar {
             selectTab(null);
         }
         mTabs.clear();
+        mActionView.removeAllTabs();
+        mSavedTabPosition = INVALID_POSITION;
     }
 
     public void setTitle(CharSequence title) {
@@ -310,6 +315,8 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void removeTabAt(int position) {
+        int selectedTabPosition = mSelectedTab != null
+                ? mSelectedTab.getPosition() : mSavedTabPosition;
         mActionView.removeTabAt(position);
         mTabs.remove(position);
 
@@ -318,7 +325,9 @@ public class ActionBarImpl extends ActionBar {
             mTabs.get(i).setPosition(i);
         }
 
-        selectTab(mTabs.isEmpty() ? null : mTabs.get(Math.max(0, position - 1)));
+        if (selectedTabPosition == position) {
+            selectTab(mTabs.isEmpty() ? null : mTabs.get(Math.max(0, position - 1)));
+        }
     }
 
     @Override
@@ -333,7 +342,13 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void selectTab(Tab tab) {
-        final FragmentTransaction trans = mActivity.getFragmentManager().openTransaction();
+        if (getNavigationMode() != NAVIGATION_MODE_TABS) {
+            mSavedTabPosition = tab != null ? tab.getPosition() : INVALID_POSITION;
+            return;
+        }
+
+        final FragmentTransaction trans = mActivity.getFragmentManager().openTransaction()
+                .disallowAddToBackStack();
 
         if (mSelectedTab == tab) {
             if (mSelectedTab != null) {
@@ -623,12 +638,52 @@ public class ActionBarImpl extends ActionBar {
     }
 
     @Override
+    public int getTabCount() {
+        return mTabs.size();
+    }
+
+    @Override
     public void setNavigationMode(int mode) {
+        final int oldMode = mActionView.getNavigationMode();
+        switch (oldMode) {
+            case NAVIGATION_MODE_TABS:
+                mSavedTabPosition = getSelectedNavigationIndex();
+                selectTab(null);
+                break;
+        }
         mActionView.setNavigationMode(mode);
+        switch (mode) {
+            case NAVIGATION_MODE_TABS:
+                if (mSavedTabPosition != INVALID_POSITION) {
+                    setSelectedNavigationItem(mSavedTabPosition);
+                    mSavedTabPosition = INVALID_POSITION;
+                }
+                break;
+        }
     }
 
     @Override
     public Tab getTabAt(int index) {
         return mTabs.get(index);
+    }
+
+    /**
+     * This fragment is added when we're keeping a back stack in a tab switch
+     * transaction. We use it to change the selected tab in the action bar view
+     * when we back out.
+     */
+    private class SwitchSelectedTabViewFragment extends Fragment {
+        private int mSelectedTabIndex;
+
+        public SwitchSelectedTabViewFragment(int oldSelectedTab) {
+            mSelectedTabIndex = oldSelectedTab;
+        }
+
+        @Override
+        public void onDetach() {
+            if (mSelectedTabIndex >= 0 && mSelectedTabIndex < getTabCount()) {
+                mActionView.setTabSelected(mSelectedTabIndex);
+            }
+        }
     }
 }

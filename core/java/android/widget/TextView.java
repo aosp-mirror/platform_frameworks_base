@@ -6901,7 +6901,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Tapping outside stops selection mode, if any
                 stopSelectionActionMode();
 
-                if (mInsertionPointCursorController != null && mText.length() > 0) {
+                if (mInsertionPointCursorController != null) {
                     mInsertionPointCursorController.show();
                 }
             }
