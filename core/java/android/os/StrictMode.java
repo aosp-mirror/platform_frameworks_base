@@ -26,6 +26,7 @@ import android.util.Printer;
 import com.android.internal.os.RuntimeInit;
 
 import dalvik.system.BlockGuard;
+import dalvik.system.CloseGuard;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -70,6 +71,7 @@ import java.util.HashMap;
  *                 .build());
  *         StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
  *                 .detectLeakedSqlLiteObjects()
+ *                 .detectLeakedClosableObjects()
  *                 .penaltyLog()
  *                 .penaltyDeath()
  *                 .build());
@@ -138,6 +140,12 @@ public final class StrictMode {
      * @hide
      */
     public static final int DETECT_VM_CURSOR_LEAKS = 0x200;  // for ProcessPolicy
+
+    /**
+     * Note, a "VM_" bit, not thread.
+     * @hide
+     */
+    public static final int DETECT_VM_CLOSABLE_LEAKS = 0x400;  // for ProcessPolicy
 
     /**
      * @hide
@@ -450,12 +458,12 @@ public final class StrictMode {
             /**
              * Detect everything that's potentially suspect.
              *
-             * <p>As of the Gingerbread release this only includes
-             * SQLite cursor leaks but will likely expand in future
-             * releases.
+             * <p>In the Honeycomb release this includes leaks of
+             * SQLite cursors and other closable objects but will
+             * likely expand in future releases.
              */
             public Builder detectAll() {
-                return enable(DETECT_VM_CURSOR_LEAKS);
+                return enable(DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS);
             }
 
             /**
@@ -469,6 +477,18 @@ public final class StrictMode {
              */
             public Builder detectLeakedSqlLiteObjects() {
                 return enable(DETECT_VM_CURSOR_LEAKS);
+            }
+
+            /**
+             * Detect when an {@link java.io.Closeable} or other
+             * object with a explict termination method is finalized
+             * without having been closed.
+             *
+             * <p>You always want to explicitly close such objects to
+             * avoid unnecessary resources leaks.
+             */
+            public Builder detectLeakedClosableObjects() {
+                return enable(DETECT_VM_CLOSABLE_LEAKS);
             }
 
             /**
@@ -671,6 +691,7 @@ public final class StrictMode {
             StrictMode.DETECT_NETWORK |
             StrictMode.PENALTY_DROPBOX);
         sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
+                StrictMode.DETECT_VM_CLOSABLE_LEAKS |
                 StrictMode.PENALTY_DROPBOX |
                 StrictMode.PENALTY_LOG;
         return true;
@@ -1030,6 +1051,7 @@ public final class StrictMode {
      */
     public static void setVmPolicy(final VmPolicy policy) {
         sVmPolicyMask = policy.mask;
+        CloseGuard.setEnabled(vmClosableObjectLeaksEnabled());
     }
 
     /**
@@ -1043,8 +1065,9 @@ public final class StrictMode {
      * Enable the recommended StrictMode defaults, with violations just being logged.
      *
      * <p>This catches disk and network access on the main thread, as
-     * well as leaked SQLite cursors.  This is simply a wrapper around
-     * {@link #setVmPolicy} and {@link #setThreadPolicy}.
+     * well as leaked SQLite cursors and unclosed resources.  This is
+     * simply a wrapper around {@link #setVmPolicy} and {@link
+     * #setThreadPolicy}.
      */
     public static void enableDefaults() {
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
@@ -1053,6 +1076,7 @@ public final class StrictMode {
                                    .build());
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
                                .detectLeakedSqlLiteObjects()
+                               .detectLeakedClosableObjects()
                                .penaltyLog()
                                .build());
     }
@@ -1062,6 +1086,13 @@ public final class StrictMode {
      */
     public static boolean vmSqliteObjectLeaksEnabled() {
         return (sVmPolicyMask & DETECT_VM_CURSOR_LEAKS) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean vmClosableObjectLeaksEnabled() {
+        return (sVmPolicyMask & DETECT_VM_CLOSABLE_LEAKS) != 0;
     }
 
     /**
