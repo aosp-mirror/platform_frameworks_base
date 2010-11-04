@@ -515,18 +515,21 @@
     <h2><span class="en">Web Applications</span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>guide/webapps/targetting.html">
-            <span class="en">Targetting Android Devices</span>
-          </a> <span class="new">new!</span><!-- 10/8/10 --></li>
+      <li><a href="<?cs var:toroot ?>guide/webapps/index.html">
+            <span class="en">Web Apps Overview</span>
+          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
+      <li><a href="<?cs var:toroot ?>guide/webapps/targeting.html">
+            <span class="en">Targeting Screens from Web Apps</span>
+          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/webview.html">
             <span class="en">Building Web Apps in WebView</span>
-          </a> <span class="new">new!</span><!-- 10/8/10 --></li>
+          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/debugging.html">
             <span class="en">Debugging Web Apps</span>
-          </a> <span class="new">new!</span><!-- 10/8/10 --></li>
+          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
       <li><a href="<?cs var:toroot ?>guide/webapps/best-practices.html">
             <span class="en">Best Practices for Web Apps</span>
-          </a> <span class="new">new!</span><!-- 10/8/10 --></li>
+          </a> <span class="new">new!</span><!-- 11/1/10 --></li>
     </ul>
   </li>
 
