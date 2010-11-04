@@ -112,6 +112,7 @@ public class SslCertificate {
      * @param validNotAfter The not-after date from the certificate validity period in ISO 8601 format
      * @deprecated Use {@link #SslCertificate(String, String, Date, Date)}
      */
+    @Deprecated
     public SslCertificate(
             String issuedTo, String issuedBy, String validNotBefore, String validNotAfter) {
         this(issuedTo, issuedBy, parseDate(validNotBefore), parseDate(validNotAfter));
@@ -157,6 +158,7 @@ public class SslCertificate {
      *
      * @deprecated Use {@link #getValidNotBeforeDate()}
      */
+    @Deprecated
     public String getValidNotBefore() {
         return formatDate(mValidNotBefore);
     }
@@ -175,6 +177,7 @@ public class SslCertificate {
      *
      * @deprecated Use {@link #getValidNotAfterDate()}
      */
+    @Deprecated
     public String getValidNotAfter() {
         return formatDate(mValidNotAfter);
     }
