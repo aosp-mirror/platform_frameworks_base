@@ -126,7 +126,7 @@ public class GradientDrawable extends Drawable {
     private boolean mRectIsDirty;   // internal state
     private boolean mMutated;
     private Path mRingPath;
-    private boolean mPathIsDirty;
+    private boolean mPathIsDirty = true;
 
     /**
      * Controls how the gradient is oriented relative to the drawable's bounds
@@ -179,6 +179,7 @@ public class GradientDrawable extends Drawable {
      */
     public void setCornerRadii(float[] radii) {
         mGradientState.setCornerRadii(radii);
+        mPathIsDirty = true;
     }
     
     /**
@@ -187,6 +188,7 @@ public class GradientDrawable extends Drawable {
      */
     public void setCornerRadius(float radius) {
         mGradientState.setCornerRadius(radius);
+        mPathIsDirty = true;
     }
     
     /**
@@ -215,11 +217,13 @@ public class GradientDrawable extends Drawable {
     }
     
     public void setSize(int width, int height) {
-        mGradientState.setSize(width, height); 
+        mGradientState.setSize(width, height);
+        mPathIsDirty = true;
     }
     
     public void setShape(int shape) {
         mRingPath = null;
+        mPathIsDirty = true;
         mGradientState.setShape(shape);
     }
 
@@ -312,8 +316,11 @@ public class GradientDrawable extends Drawable {
         switch (st.mShape) {
             case RECTANGLE:
                 if (st.mRadiusArray != null) {
-                    mPath.reset();
-                    mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
+                    if (mPathIsDirty || mRectIsDirty) {
+                        mPath.reset();
+                        mPath.addRoundRect(mRect, st.mRadiusArray, Path.Direction.CW);
+                        mPathIsDirty = mRectIsDirty = false;
+                    }
                     canvas.drawPath(mPath, mFillPaint);
                     if (haveStroke) {
                         canvas.drawPath(mPath, mStrokePaint);
