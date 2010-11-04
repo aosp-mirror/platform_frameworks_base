@@ -119,6 +119,7 @@ class UsbObserver extends UEventObserver {
         try {
             FileReader file = new FileReader(USB_CONFIGURATION_PATH);
             int len = file.read(buffer, 0, 1024);
+            file.close();
             mPreviousUsbConfig = mUsbConfig = Integer.valueOf((new String(buffer, 0, len)).trim());
 
         } catch (FileNotFoundException e) {
@@ -133,6 +134,7 @@ class UsbObserver extends UEventObserver {
                 File file = new File(files[i], "enable");
                 FileReader reader = new FileReader(file);
                 int len = reader.read(buffer, 0, 1024);
+                reader.close();
                 int value = Integer.valueOf((new String(buffer, 0, len)).trim());
                 String functionName = files[i].getName();
                 if (value == 1) {

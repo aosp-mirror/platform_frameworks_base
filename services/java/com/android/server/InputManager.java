@@ -493,7 +493,9 @@ public class InputManager {
                     CALIBRATION_DIR_PATH + deviceName + ".idc");
             if (calibrationFile.exists()) {
                 try {
-                    properties.load(new FileInputStream(calibrationFile));
+                    FileInputStream fis = new FileInputStream(calibrationFile);
+                    properties.load(fis);
+                    fis.close();
                 } catch (IOException ex) {
                     Slog.w(TAG, "Error reading input device calibration properties for device "
                             + deviceName + " from " + calibrationFile + ".", ex);
