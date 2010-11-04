@@ -635,6 +635,17 @@ public class BluetoothTestUtils extends Assert {
     }
 
     public void pair(BluetoothAdapter adapter, BluetoothDevice device, int passkey, byte[] pin) {
+        pairOrAcceptPair(adapter, device, passkey, pin, true);
+    }
+
+    public void acceptPair(BluetoothAdapter adapter, BluetoothDevice device, int passkey,
+            byte[] pin) {
+        pairOrAcceptPair(adapter, device, passkey, pin, false);
+    }
+
+    private void pairOrAcceptPair(BluetoothAdapter adapter, BluetoothDevice device, int passkey,
+            byte[] pin, boolean pair) {
+        String methodName = pair ? "pair()" : "acceptPair()";
         int mask = PairReceiver.PAIR_FLAG;
         int pairMask = PairReceiver.PAIR_STATE_BONDING | PairReceiver.PAIR_STATE_BONDED;
 
@@ -642,7 +653,7 @@ public class BluetoothTestUtils extends Assert {
         mReceivers.add(pairReceiver);
 
         if (!adapter.isEnabled()) {
-            fail("pair() bluetooth not enabled");
+            fail(methodName + " bluetooth not enabled");
         }
 
         int state = device.getBondState();
@@ -656,10 +667,12 @@ public class BluetoothTestUtils extends Assert {
                 break;
             case BluetoothDevice.BOND_NONE:
                 assertFalse(adapter.getBondedDevices().contains(device));
-                assertTrue(device.createBond());
+                if (pair) {
+                    assertTrue(device.createBond());
+                }
                 break;
             default:
-                fail("pair() invalide state: state=" + state);
+                fail(methodName + " invalide state: state=" + state);
         }
 
         long s = System.currentTimeMillis();
@@ -669,8 +682,8 @@ public class BluetoothTestUtils extends Assert {
                 assertTrue(adapter.getBondedDevices().contains(device));
                 if ((pairReceiver.getFiredFlags() & mask) == mask
                         && (pairReceiver.getPairFiredFlags() & pairMask) == pairMask) {
-                    writeOutput(String.format("pair() completed in %d ms: device=%s",
-                            (System.currentTimeMillis() - s), device));
+                    writeOutput(String.format("%s completed in %d ms: device=%s",
+                            methodName, (System.currentTimeMillis() - s), device));
                     mReceivers.remove(pairReceiver);
                     mContext.unregisterReceiver(pairReceiver);
                     return;
@@ -682,9 +695,9 @@ public class BluetoothTestUtils extends Assert {
         int firedFlags = pairReceiver.getFiredFlags();
         int pairFiredFlags = pairReceiver.getPairFiredFlags();
         pairReceiver.resetFiredFlags();
-        fail(String.format("pair() timeout: state=%d (expected %d), flags=0x%x (expected 0x%x), "
-                + "pairFlags=0x%x (expected 0x%x)", state, BluetoothDevice.BOND_BONDED, firedFlags,
-                mask, pairFiredFlags, pairMask));
+        fail(String.format("%s timeout: state=%d (expected %d), flags=0x%x (expected 0x%x), "
+                + "pairFlags=0x%x (expected 0x%x)", methodName, state, BluetoothDevice.BOND_BONDED,
+                firedFlags, mask, pairFiredFlags, pairMask));
     }
 
     public void unpair(BluetoothAdapter adapter, BluetoothDevice device) {
