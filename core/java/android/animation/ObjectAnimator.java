@@ -26,6 +26,9 @@ import java.lang.reflect.Method;
  * as well as the name of the property that will be animated. Appropriate set/get functions
  * are then determined internally and the animation will call these functions as necessary to
  * animate the property.
+ *
+ * @see #setPropertyName(String)
+ *
  */
 public final class ObjectAnimator extends ValueAnimator {
 
@@ -41,6 +44,13 @@ public final class ObjectAnimator extends ValueAnimator {
      * in a call to the function <code>setFoo()</code> on the target object. If either
      * <code>valueFrom</code> or <code>valueTo</code> is null, then a getter function will
      * also be derived and called.
+     *
+     * <p>For best performance of the mechanism that calls the setter function determined by the
+     * name of the property being animated, use <code>float</code> or <code>int</code> typed values,
+     * and make the setter function for those properties have a <code>void</code> return value. This
+     * will cause the code to take an optimized path for these constrained circumstances. Other
+     * property types and return types will work, but will have more overhead in processing
+     * the requests due to normal reflection mechanisms.</p>
      *
      * <p>Note that the setter function derived from this property name
      * must take the same parameter type as the
