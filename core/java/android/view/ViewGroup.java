@@ -4284,6 +4284,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        final View[] children = mChildren;
+        final int count = mChildrenCount;
+        for (int i = 0; i < count; i++) {
+            children[i].jumpDrawablesToCurrentState();
+        }
+    }
+
+    @Override
     protected int[] onCreateDrawableState(int extraSpace) {
         if ((mGroupFlags & FLAG_ADD_STATES_FROM_CHILDREN) == 0) {
             return super.onCreateDrawableState(extraSpace);

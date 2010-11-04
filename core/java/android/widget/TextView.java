@@ -3935,6 +3935,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mDrawables != null) {
+            if (mDrawables.mDrawableLeft != null) {
+                mDrawables.mDrawableLeft.jumpToCurrentState();
+            }
+            if (mDrawables.mDrawableTop != null) {
+                mDrawables.mDrawableTop.jumpToCurrentState();
+            }
+            if (mDrawables.mDrawableRight != null) {
+                mDrawables.mDrawableRight.jumpToCurrentState();
+            }
+            if (mDrawables.mDrawableBottom != null) {
+                mDrawables.mDrawableBottom.jumpToCurrentState();
+            }
+        }
+    }
+
+    @Override
     public void invalidateDrawable(Drawable drawable) {
         if (verifyDrawable(drawable)) {
             final Rect dirty = drawable.getBounds();

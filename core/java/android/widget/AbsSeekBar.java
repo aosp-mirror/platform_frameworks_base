@@ -154,6 +154,12 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mThumb != null) mThumb.jumpToCurrentState();
+    }
+
+    @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
         

@@ -156,6 +156,12 @@ public class FrameLayout extends ViewGroup {
         return super.verifyDrawable(who) || (who == mForeground);
     }
 
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mForeground != null) mForeground.jumpToCurrentState();
+    }
+
     /**
      * {@inheritDoc}
      */

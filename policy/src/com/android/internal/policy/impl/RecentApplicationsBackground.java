@@ -72,6 +72,12 @@ public class RecentApplicationsBackground extends LinearLayout {
     }
 
     @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mBackground != null) mBackground.jumpToCurrentState();
+    }
+
+    @Override
     protected void drawableStateChanged() {
         Drawable d = mBackground;
         if (d != null && d.isStateful()) {

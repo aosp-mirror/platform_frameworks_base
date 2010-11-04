@@ -586,6 +586,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 int totalItemCount);
     }
 
+    /**
+     * The top-level view of a list item can implement this interface to allow
+     * itself to modify the bounds of the selection shown for that item.
+     */
+    public interface SelectionBoundsAdjuster {
+        /**
+         * Called to allow the list item to adjust the bounds shown for
+         * its selection.
+         *
+         * @param bounds On call, this contains the bounds the list has
+         * selected for the item (that is the bounds of the entire view).  The
+         * values can be modified as desired.
+         */
+        public void adjustListItemSelectionBounds(Rect bounds);
+    }
+
     public AbsListView(Context context) {
         super(context);
         initAbsListView();
@@ -1756,6 +1772,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final Rect selectorRect = mSelectorRect;
         selectorRect.set(sel.getLeft(), sel.getTop(), sel.getRight(), sel.getBottom());
+        if (sel instanceof SelectionBoundsAdjuster) {
+            ((SelectionBoundsAdjuster)sel).adjustListItemSelectionBounds(selectorRect);
+        }
         positionSelector(selectorRect.left, selectorRect.top, selectorRect.right,
                 selectorRect.bottom);
 
@@ -2000,6 +2019,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public boolean verifyDrawable(Drawable dr) {
         return mSelector == dr || super.verifyDrawable(dr);
+    }
+
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mSelector != null) mSelector.jumpToCurrentState();
     }
 
     @Override

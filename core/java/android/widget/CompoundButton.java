@@ -279,6 +279,12 @@ public abstract class CompoundButton extends Button implements Checkable {
         return super.verifyDrawable(who) || who == mButtonDrawable;
     }
 
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mButtonDrawable != null) mButtonDrawable.jumpToCurrentState();
+    }
+
     static class SavedState extends BaseSavedState {
         boolean checked;
 
