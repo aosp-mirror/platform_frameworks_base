@@ -60,6 +60,12 @@ interface IWifiManager
 
     void setCountryCode(String country, boolean persist);
 
+    void setFrequencyBand(int band, boolean persist);
+
+    int getFrequencyBand();
+
+    boolean isDualBandSupported();
+
     boolean saveConfiguration();
 
     DhcpInfo getDhcpInfo();

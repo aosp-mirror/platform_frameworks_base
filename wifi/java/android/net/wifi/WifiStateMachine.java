@@ -154,6 +154,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private AlarmManager mAlarmManager;
     private PendingIntent mScanIntent;
+    /* Tracks current frequency mode */
+    private AtomicInteger mFrequencyBand = new AtomicInteger(WifiManager.WIFI_FREQUENCY_BAND_AUTO);
 
     // Channel for sending replies.
     private AsyncChannel mReplyChannel = new AsyncChannel();
@@ -315,6 +317,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int CMD_START_WPS_PIN_FROM_AP            = 90;
     /* Start Wi-Fi protected setup pin method configuration with pin obtained from device */
     private static final int CMD_START_WPS_PIN_FROM_DEVICE        = 91;
+    /* Set the frequency band */
+    private static final int CMD_SET_FREQUENCY_BAND               = 92;
 
     /**
      * Interval in milliseconds between polling for connection
@@ -328,13 +332,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private static final int SCAN_ACTIVE = 1;
     private static final int SCAN_PASSIVE = 2;
-
-    /* Auto allows 802.11A/B/G operation */
-    private static final int BAND_AUTO = 0;
-    /* 5GHz allows 802.11A operation */
-    private static final int BAND_5G = 1;
-    /* 2.4GHz allows 802.11B/G operation */
-    private static final int BAND_2G = 2;
 
     private static final int SUCCESS = 1;
     private static final int FAILURE = -1;
@@ -876,6 +873,27 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
+     * Set the operational frequency band
+     * @param band
+     * @param persist {@code true} if the setting should be remembered.
+     */
+    public void setFrequencyBand(int band, boolean persist) {
+        if (persist) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_FREQUENCY_BAND,
+                    band);
+        }
+        sendMessage(obtainMessage(CMD_SET_FREQUENCY_BAND, band, 0));
+    }
+
+    /**
+     * Returns the operational frequency band
+     */
+    public int getFrequencyBand() {
+        return mFrequencyBand.get();
+    }
+
+    /**
      * Set bluetooth coex mode:
      *
      * @param mode
@@ -993,6 +1011,15 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         } else {
             //use driver default
         }
+    }
+
+    /**
+     * Set the frequency band from the system setting value, if any.
+     */
+    private void setFrequencyBand() {
+        int band = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.WIFI_FREQUENCY_BAND, WifiManager.WIFI_FREQUENCY_BAND_AUTO);
+        setFrequencyBand(band, false);
     }
 
     private void setWifiState(int wifiState) {
@@ -1582,6 +1609,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
                 case CMD_REQUEST_CM_WAKELOCK:
                 case CMD_CONNECT_NETWORK:
                 case CMD_SAVE_NETWORK:
@@ -1684,6 +1712,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                     deferMessage(message);
@@ -1812,6 +1841,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                     deferMessage(message);
@@ -1909,6 +1939,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                     deferMessage(message);
@@ -2053,6 +2084,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                 case CMD_START_SCAN:
@@ -2080,6 +2112,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
             /* set country code */
             setCountryCode();
+            /* set frequency band of operation */
+            setFrequencyBand();
 
             if (mIsScanMode) {
                 WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
@@ -2116,6 +2150,15 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     Log.d(TAG, "set country code " + country);
                     if (!WifiNative.setCountryCodeCommand(country.toUpperCase())) {
                         Log.e(TAG, "Failed to set country code " + country);
+                    }
+                    break;
+                case CMD_SET_FREQUENCY_BAND:
+                    int band =  message.arg1;
+                    Log.d(TAG, "set frequency band " + band);
+                    if (WifiNative.setBandCommand(band)) {
+                        mFrequencyBand.set(band);
+                    } else {
+                        Log.e(TAG, "Failed to set frequency band " + band);
                     }
                     break;
                 case CMD_STOP_DRIVER:
@@ -2173,6 +2216,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_SET_BLUETOOTH_COEXISTENCE:
                 case CMD_SET_BLUETOOTH_SCAN_MODE:
                 case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
                 case CMD_START_PACKET_FILTERING:
                 case CMD_STOP_PACKET_FILTERING:
                 case CMD_START_SCAN:
