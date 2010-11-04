@@ -23,6 +23,7 @@ import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.gsm.ApnSetting;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.RetryManager;
 
 /**
  * {@hide}
@@ -39,23 +40,27 @@ public class CdmaDataConnection extends DataConnection {
 
 
     // ***** Constructor
-    private CdmaDataConnection(CDMAPhone phone, String name) {
-        super(phone, name);
+    private CdmaDataConnection(CDMAPhone phone, String name, RetryManager rm) {
+        super(phone, name, rm);
     }
 
     /**
      * Create the connection object
      *
-     * @param phone
+     * @param phone the Phone
+     * @param id the connection id
+     * @param rm the RetryManager
      * @return CdmaDataConnection that was created.
      */
-    static CdmaDataConnection makeDataConnection(CDMAPhone phone) {
+    static CdmaDataConnection makeDataConnection(CDMAPhone phone, int id, RetryManager rm) {
         synchronized (mCountLock) {
             mCount += 1;
         }
-        CdmaDataConnection cdmaDc = new CdmaDataConnection(phone, "CdmaDataConnection-" + mCount);
+        CdmaDataConnection cdmaDc = new CdmaDataConnection(phone,
+                "CdmaDataConnection-" + mCount, rm);
         cdmaDc.start();
         if (DBG) cdmaDc.log("Made " + cdmaDc.getName());
+        cdmaDc.mId = id;
         return cdmaDc;
     }
 

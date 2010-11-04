@@ -261,8 +261,10 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
 
     //***** Member Variables
+    protected int mId;
     protected int mTag;
     protected PhoneBase phone;
+    protected RetryManager mRetryMgr;
     protected int cid;
     protected LinkProperties mLinkProperties = new LinkProperties();
     protected LinkCapabilities mCapabilities = new LinkCapabilities();
@@ -285,10 +287,11 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
 
    //***** Constructor
-    protected DataConnection(PhoneBase phone, String name) {
+    protected DataConnection(PhoneBase phone, String name, RetryManager rm) {
         super(name);
         if (DBG) log("DataConnection constructor E");
         this.phone = phone;
+        mRetryMgr = rm;
         this.cid = -1;
         clearSettings();
 
@@ -358,8 +361,8 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
         if (dp.onCompletedMsg != null) {
             Message msg = dp.onCompletedMsg;
-            log(String.format("msg.what=%d msg.obj=%s",
-                    msg.what, ((msg.obj instanceof String) ? (String) msg.obj : "<no-reason>")));
+            log(String.format("msg=%s msg.obj=%s", msg.toString(),
+                    ((msg.obj instanceof String) ? (String) msg.obj : "<no-reason>")));
             AsyncResult.forMessage(msg);
             msg.sendToTarget();
         }
@@ -370,6 +373,10 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         }
 
         clearSettings();
+    }
+
+    public RetryManager getRetryMgr() {
+        return mRetryMgr;
     }
 
     /**
@@ -857,13 +864,13 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
     /**
      * Connect to the apn and return an AsyncResult in onCompletedMsg.
-     * Used for cellular networks that use Acess Point Names (APN) such
+     * Used for cellular networks that use Acesss Point Names (APN) such
      * as GSM networks.
      *
      * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
      *        With AsyncResult.userObj set to the original msg.obj,
      *        AsyncResult.result = FailCause and AsyncResult.exception = Exception().
-     * @param apn is the Acces Point Name to connect to
+     * @param apn is the Access Point Name to connect to
      */
     public void connect(Message onCompletedMsg, ApnSetting apn) {
         sendMessage(obtainMessage(EVENT_CONNECT, new ConnectionParams(apn, onCompletedMsg)));
@@ -912,6 +919,13 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     public boolean isActive() {
         boolean retVal = getCurrentState() == mActiveState;
         return retVal;
+    }
+
+    /**
+     * Get the DataConnection ID
+     */
+    public int getDataConnectionId() {
+        return mId;
     }
 
     /**
