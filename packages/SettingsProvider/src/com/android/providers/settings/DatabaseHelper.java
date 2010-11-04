@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 59;
+    private static final int DATABASE_VERSION = 60;
 
     private Context mContext;
 
@@ -773,6 +773,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 59;
+        }
+
+        if (upgradeVersion == 59) {
+            // Persistence for the rotation lock feature.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.System.USER_ROTATION,
+                        R.integer.def_user_rotation); // should be zero degrees
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 60;
         }
 
         // *** Remember to update DATABASE_VERSION above!

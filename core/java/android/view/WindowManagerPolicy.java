@@ -362,6 +362,13 @@ public interface WindowManagerPolicy {
      * modify the rotation.
      */
     public final int USE_LAST_ROTATION = -1000;
+
+    /** When not otherwise specified by the activity's screenOrientation, rotation should be
+     * determined by the system (that is, using sensors). */
+    public final int USER_ROTATION_FREE = 0;
+    /** When not otherwise specified by the activity's screenOrientation, rotation is set by
+     * the user. */
+    public final int USER_ROTATION_LOCKED = 1;
     
     /**
      * Perform initialization of the policy.
@@ -787,4 +794,14 @@ public interface WindowManagerPolicy {
      * Return false to disable key repeat events from being generated.
      */
     public boolean allowKeyRepeat();
+
+    /**
+     * Inform the policy that the user has chosen a preferred orientation ("rotation lock"). 
+     *
+     * @param mode One of {@link WindowManagerPolicy#USER_ROTATION_LOCKED} or
+     *             {@link * WindowManagerPolicy#USER_ROTATION_FREE}. 
+     * @param rotation One of {@link Surface#ROTATION_0}, {@link Surface#ROTATION_90},
+     *                 {@link Surface#ROTATION_180}, {@link Surface#ROTATION_270}. 
+     */
+    public void setUserRotationMode(int mode, int rotation);
 }

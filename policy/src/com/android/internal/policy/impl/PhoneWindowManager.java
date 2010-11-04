@@ -230,6 +230,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidOpenRotation;
     int mCarDockRotation;
     int mDeskDockRotation;
+
+    int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
+    int mUserRotation = Surface.ROTATION_0;
+
     boolean mCarDockEnablesAccelerometer;
     boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
@@ -335,6 +339,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.USER_ROTATION), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_OFF_TIMEOUT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -678,10 +684,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     "fancy_rotation_anim", 0) != 0 ? 0x80 : 0;
             int accelerometerDefault = Settings.System.getInt(resolver,
                     Settings.System.ACCELEROMETER_ROTATION, DEFAULT_ACCELEROMETER_ROTATION);
+            
+            // set up rotation lock state
+            mUserRotationMode = (mAccelerometerDefault == 0)
+                ? WindowManagerPolicy.USER_ROTATION_LOCKED
+                : WindowManagerPolicy.USER_ROTATION_FREE;
+            mUserRotation = Settings.System.getInt(resolver,
+                    Settings.System.USER_ROTATION,
+                    Surface.ROTATION_0);
+
             if (mAccelerometerDefault != accelerometerDefault) {
                 mAccelerometerDefault = accelerometerDefault;
                 updateOrientationListenerLp();
             }
+
             if (mSystemReady) {
                 int pointerLocation = Settings.System.getInt(resolver,
                         Settings.System.POINTER_LOCATION, 0);
@@ -2280,6 +2296,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return mCarDockRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_DESK && mDeskDockRotation >= 0) {
                 return mDeskDockRotation;
+            } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
+                return mUserRotation;
             } else {
                 if (useSensorForOrientationLp(orientation)) {
                     return mOrientationListener.getCurrentRotation(lastRotation);
@@ -2321,6 +2339,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean isAnyPortrait(int sensorRotation) {
         return sensorRotation == mPortraitRotation || sensorRotation == mUpsideDownRotation;
+    }
+
+
+    // User rotation: to be used when all else fails in assigning an orientation to the device
+    public void setUserRotationMode(int mode, int rot) {
+        ContentResolver res = mContext.getContentResolver();
+        mUserRotationMode = mode;
+        if (mode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
+            mUserRotation = rot;
+            Settings.System.putInt(res,
+                    Settings.System.ACCELEROMETER_ROTATION,
+                    0);
+            Settings.System.putInt(res,
+                    Settings.System.USER_ROTATION,
+                    rot);
+        } else {
+            Settings.System.putInt(res,
+                    Settings.System.ACCELEROMETER_ROTATION,
+                    1);
+        }
     }
 
     public boolean detectSafeMode() {

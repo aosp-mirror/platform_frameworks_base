@@ -4842,6 +4842,26 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void freezeRotation() {
+        if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
+                "setRotation()")) {
+            throw new SecurityException("Requires SET_ORIENTATION permission");
+        }
+
+        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED, mRotation);
+        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
+    }
+
+    public void thawRotation() {
+        if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
+                "setRotation()")) {
+            throw new SecurityException("Requires SET_ORIENTATION permission");
+        }
+
+        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE, 0);
+        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
+    }
+
     public void setRotation(int rotation,
             boolean alwaysSendConfiguration, int animFlags) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,

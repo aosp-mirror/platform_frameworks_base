@@ -55,6 +55,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.widget.Button;
@@ -73,6 +74,8 @@ import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.internal.telephony.cdma.TtyIntent;
+
+import com.android.server.WindowManagerService;
 
 import com.android.systemui.statusbar.*;
 import com.android.systemui.R;
@@ -101,6 +104,8 @@ public class SystemPanel extends LinearLayout implements StatusBarPanel {
 
     private TextView mBatteryText;
     private TextView mSignalText;
+
+    private final IWindowManager mWM;
 
     private final AudioManager mAudioManager;
     private final WifiManager mWifiManager;
@@ -397,6 +402,11 @@ public class SystemPanel extends LinearLayout implements StatusBarPanel {
     public SystemPanel(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
+        // our mighty overlord
+        mWM = IWindowManager.Stub.asInterface(
+                    ServiceManager.getService("window"));
+
+
         // get notified of phone state changes
         TelephonyManager telephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -437,6 +447,7 @@ public class SystemPanel extends LinearLayout implements StatusBarPanel {
         });
 
         mSoundButton = (ImageButton)findViewById(R.id.sound);
+        mSoundButton.setAlpha(getSilentMode() ? 0x7F : 0xFF);
         mSoundButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 setSilentMode(!getSilentMode());
@@ -444,9 +455,22 @@ public class SystemPanel extends LinearLayout implements StatusBarPanel {
             }
         });
         mOrientationButton = (ImageButton)findViewById(R.id.orientation);
+        mOrientationButton.setImageResource(
+            getAutoRotate()
+                ? R.drawable.ic_sysbar_rotate_on
+                : R.drawable.ic_sysbar_rotate_off);
         mOrientationButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Orientation control not implemented; please adjust neck angle.", Toast.LENGTH_SHORT).show();
+                setAutoRotate(!getAutoRotate());
+                mOrientationButton.setImageResource(
+                    getAutoRotate()
+                        ? R.drawable.ic_sysbar_rotate_on
+                        : R.drawable.ic_sysbar_rotate_off);
+                Toast.makeText(getContext(), 
+                    getAutoRotate() 
+                        ? R.string.toast_rotation_free
+                        : R.string.toast_rotation_locked,
+                    Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -708,5 +732,32 @@ public class SystemPanel extends LinearLayout implements StatusBarPanel {
         mGpsButton.setBackgroundResource(on
                                          ? R.drawable.sysbar_toggle_bg_on
                                          : R.drawable.sysbar_toggle_bg_off);
+    }
+
+    void setAutoRotate(boolean rot) {
+        try {
+            ContentResolver cr = getContext().getContentResolver();
+            if (rot) {
+                mWM.thawRotation();
+            } else {
+                mWM.freezeRotation();
+            }
+        } catch (android.os.RemoteException exc) {
+        }
+    }
+
+    boolean getAutoRotate() {
+        ContentResolver cr = getContext().getContentResolver();
+        return 1 == Settings.System.getInt(cr,
+                Settings.System.ACCELEROMETER_ROTATION,
+                1);
+    }
+
+    int getDisplayRotation() {
+        try {
+            return mWM.getRotation();
+        } catch (android.os.RemoteException exc) {
+            return 0;
+        }
     }
 }

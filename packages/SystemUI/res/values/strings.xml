@@ -84,5 +84,11 @@
      -->
     <string name="recent_tasks_empty">No recent applications.</string>
 
+    <!-- Rotation lock toast text: shown when rotation lock is turned off (and the screen will
+         auto-rotate based on the accelerometer). -->
+    <string name="toast_rotation_free">Screen will rotate automatically.</string>
     
+    <!-- Rotation lock toast text: shown when rotation lock is turned on and the orientation is
+         undefined.  -->
+    <string name="toast_rotation_locked">Screen rotation is now locked.</string>
 </resources>

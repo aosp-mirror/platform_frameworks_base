@@ -103,4 +103,6 @@
             0x120016=0x03050601:0x03040501:0x03030401:0x03020301:0x03070301:0x03010301:0x03000301;
     </string>
 
+    <!-- Default for Settings.System.USER_ROTATION -->
+    <integer name="def_user_rotation">0</integer>
 </resources>
