@@ -462,6 +462,17 @@ status_t StagefrightRecorder::setParamVideoTimeScale(int32_t timeScale) {
     return OK;
 }
 
+status_t StagefrightRecorder::setParamVideoRotation(int32_t degreesClockwise) {
+    LOGV("setParamVideoRotation: %d", degreesClockwise);
+
+    if (degreesClockwise < 0 || degreesClockwise % 90 != 0) {
+        LOGE("Unsupported video rotation angle: %d", degreesClockwise);
+        return BAD_VALUE;
+    }
+    mClockwiseRotationDegrees = degreesClockwise;
+    return OK;
+}
+
 status_t StagefrightRecorder::setParamAudioTimeScale(int32_t timeScale) {
     LOGV("setParamAudioTimeScale: %d", timeScale);
 
@@ -556,6 +567,11 @@ status_t StagefrightRecorder::setParameter(
         int32_t timeScale;
         if (safe_strtoi32(value.string(), &timeScale)) {
             return setParamVideoTimeScale(timeScale);
+        }
+    } else if (key == "video-param-clockwise-rotation-degrees") {
+        int32_t degrees;
+        if (safe_strtoi32(value.string(), &degrees)) {
+            return setParamVideoRotation(degrees);
         }
     } else {
         LOGE("setParameter: failed to find key %s", key.string());
@@ -921,6 +937,12 @@ status_t StagefrightRecorder::setupCameraSource() {
     CameraParameters params(mCamera->getParameters());
     params.setPreviewSize(mVideoWidth, mVideoHeight);
     params.setPreviewFrameRate(mFrameRate);
+    {
+        // Optional feature: setting the rotation degrees.
+        char degrees[4];
+        snprintf(degrees, 4, "%d", mClockwiseRotationDegrees);
+        params.set(CameraParameters::KEY_ROTATION, degrees);
+    }
     String8 s = params.flatten();
     if (OK != mCamera->setParameters(s)) {
         LOGE("Could not change settings."
@@ -1188,6 +1210,7 @@ status_t StagefrightRecorder::reset() {
     mMaxFileSizeBytes = 0;
     mTrackEveryTimeDurationUs = 0;
     mEncoderProfiles = MediaProfiles::getInstance();
+    mClockwiseRotationDegrees = 0;
 
     mOutputFd = -1;
     mFlags = 0;
@@ -1260,6 +1283,8 @@ status_t StagefrightRecorder::dump(
     snprintf(buffer, SIZE, "     Camera Id: %d\n", mCameraId);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Camera flags: %d\n", mFlags);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Rotation (clockwise) degrees: %d\n", mClockwiseRotationDegrees);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Encoder: %d\n", mVideoEncoder);
     result.append(buffer);

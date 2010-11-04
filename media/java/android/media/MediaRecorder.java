@@ -285,6 +285,18 @@ public class MediaRecorder
     }
 
     /**
+     * Set the rotation degrees for the video recording. This method should be called
+     * before start().
+     *
+     * @param degrees the angle to be rotated clockwise.
+     *
+     * {@hide}
+     */
+    public void setClockwiseRotation(int degrees) {
+        setParameter(String.format("video-param-clockwise-rotation-degrees=%d", degrees));
+    }
+
+    /**
      * Sets the format of the output file produced during recording. Call this
      * after setAudioSource()/setVideoSource() but before prepare().
      *
