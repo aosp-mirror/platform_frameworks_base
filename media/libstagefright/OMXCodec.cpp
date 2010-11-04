@@ -1901,11 +1901,8 @@ void OMXCodec::on_message(const omx_message &msg) {
             if (mPortStatus[kPortIndexInput] == DISABLING) {
                 CODEC_LOGV("Port is disabled, freeing buffer %p", buffer);
 
-                status_t err =
-                    mOMX->freeBuffer(mNode, kPortIndexInput, buffer);
+                status_t err = freeBuffer(kPortIndexInput, i);
                 CHECK_EQ(err, OK);
-
-                buffers->removeAt(i);
             } else if (mState != ERROR
                     && mPortStatus[kPortIndexInput] != SHUTTING_DOWN) {
                 CHECK_EQ(mPortStatus[kPortIndexInput], ENABLED);
@@ -1945,20 +1942,9 @@ void OMXCodec::on_message(const omx_message &msg) {
             if (mPortStatus[kPortIndexOutput] == DISABLING) {
                 CODEC_LOGV("Port is disabled, freeing buffer %p", buffer);
 
-                status_t err =
-                    mOMX->freeBuffer(mNode, kPortIndexOutput, buffer);
+                status_t err = freeBuffer(kPortIndexOutput, i);
                 CHECK_EQ(err, OK);
 
-                // Cancel the buffer if it belongs to an ANativeWindow.
-                if (info->mMediaBuffer != NULL) {
-                    sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
-                    if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
-                        cancelBufferToNativeWindow(info);
-                        // Ignore any errors
-                    }
-                }
-
-                buffers->removeAt(i);
 #if 0
             } else if (mPortStatus[kPortIndexOutput] == ENABLED
                        && (flags & OMX_BUFFERFLAG_EOS)) {
@@ -2436,37 +2422,46 @@ status_t OMXCodec::freeBuffersOnPort(
 
         CODEC_LOGV("freeing buffer %p on port %ld", info->mBuffer, portIndex);
 
-        status_t err =
-            mOMX->freeBuffer(mNode, portIndex, info->mBuffer);
+        status_t err = freeBuffer(portIndex, i);
 
         if (err != OK) {
             stickyErr = err;
         }
 
-        if (info->mMediaBuffer != NULL) {
-            info->mMediaBuffer->setObserver(NULL);
-
-            // Make sure nobody but us owns this buffer at this point.
-            CHECK_EQ(info->mMediaBuffer->refcount(), 0);
-
-            // Cancel the buffer if it belongs to an ANativeWindow.
-            sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
-            if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
-                status_t err = cancelBufferToNativeWindow(info);
-                if (err != OK) {
-                  stickyErr = err;
-                }
-            }
-
-            info->mMediaBuffer->release();
-        }
-
-        buffers->removeAt(i);
     }
 
     CHECK(onlyThoseWeOwn || buffers->isEmpty());
 
     return stickyErr;
+}
+
+status_t OMXCodec::freeBuffer(OMX_U32 portIndex, size_t bufIndex) {
+    Vector<BufferInfo> *buffers = &mPortBuffers[portIndex];
+
+    BufferInfo *info = &buffers->editItemAt(bufIndex);
+
+    status_t err = mOMX->freeBuffer(mNode, portIndex, info->mBuffer);
+
+    if (err == OK && info->mMediaBuffer != NULL) {
+        info->mMediaBuffer->setObserver(NULL);
+
+        // Make sure nobody but us owns this buffer at this point.
+        CHECK_EQ(info->mMediaBuffer->refcount(), 0);
+
+        // Cancel the buffer if it belongs to an ANativeWindow.
+        sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
+        if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
+            err = cancelBufferToNativeWindow(info);
+        }
+
+        info->mMediaBuffer->release();
+    }
+
+    if (err == OK) {
+        buffers->removeAt(bufIndex);
+    }
+
+    return err;
 }
 
 void OMXCodec::onPortSettingsChanged(OMX_U32 portIndex) {
