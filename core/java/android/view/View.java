@@ -8627,6 +8627,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setBackgroundColor(int color) {
         if (mBGDrawable instanceof ColorDrawable) {
             ((ColorDrawable) mBGDrawable).setColor(color);
+            invalidate();
         } else {
             setBackgroundDrawable(new ColorDrawable(color));
         }
