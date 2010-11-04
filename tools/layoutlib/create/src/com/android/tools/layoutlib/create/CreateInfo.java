@@ -116,6 +116,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.SweepGradient",
         "android.graphics.Typeface",
         "android.graphics.Xfermode",
+        "android.util.FloatMath",
     };
 
     /**
@@ -137,7 +138,6 @@ public final class CreateInfo implements ICreateInfo {
             "android.graphics.BitmapFactory",       "android.graphics._Original_BitmapFactory",
             "android.graphics.Path",                "android.graphics._Original_Path",
             "android.os.ServiceManager",            "android.os._Original_ServiceManager",
-            "android.util.FloatMath",               "android.util._Original_FloatMath",
             "android.view.SurfaceView",             "android.view._Original_SurfaceView",
             "android.view.accessibility.AccessibilityManager", "android.view.accessibility._Original_AccessibilityManager",
         };
