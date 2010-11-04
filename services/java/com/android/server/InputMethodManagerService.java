@@ -116,6 +116,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final long TIME_TO_RECONNECT = 10*1000;
 
     private static final int NOT_A_SUBTYPE_ID = -1;
+    // If IME doesn't support the system locale, the default subtype will be the first defined one.
+    private static final int DEFAULT_SUBTYPE_ID = 0;
 
     final Context mContext;
     final Handler mHandler;
@@ -993,7 +995,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (mCurMethod != null) {
                             try {
                                 putSelectedInputMethodSubtype(info, subtypeId);
-                                mCurrentSubtype = subtype;
                                 if (mInputShown) {
                                     // If mInputShown is false, there is no IME button on the
                                     // system bar.
@@ -1016,11 +1017,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurMethodId = id;
             // Set a subtype to this input method.
             // subtypeId the name of a subtype which will be set.
-            if (putSelectedInputMethodSubtype(info, subtypeId)) {
-                mCurrentSubtype = info.getSubtypes().get(subtypeId);
-            } else {
-                mCurrentSubtype = null;
-            }
+            putSelectedInputMethodSubtype(info, subtypeId);
 
             Settings.Secure.putString(mContext.getContentResolver(),
                     Settings.Secure.DEFAULT_INPUT_METHOD, id);
@@ -1820,16 +1817,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, NOT_A_SUBTYPE_ID);
     }
 
-    private boolean putSelectedInputMethodSubtype(InputMethodInfo imi, int subtypeId) {
-        ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
+    private void putSelectedInputMethodSubtype(InputMethodInfo imi, int subtypeId) {
+        final ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
         if (subtypeId >= 0 && subtypeId < subtypes.size()) {
             Settings.Secure.putInt(mContext.getContentResolver(),
                     Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
                     subtypes.get(subtypeId).hashCode());
-            return true;
+            mCurrentSubtype = subtypes.get(subtypeId);
         } else {
             resetSelectedInputMethodSubtype();
-            return false;
+            mCurrentSubtype = null;
         }
     }
 
@@ -1855,10 +1852,64 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return NOT_A_SUBTYPE_ID;
     }
 
+    // If there are no selected subtypes, tries finding the most applicable one according to the
+    // current system locale
+    private int findApplicableSubtype(String id) {
+        InputMethodInfo imi = mMethodMap.get(id);
+        if (imi == null) {
+            return NOT_A_SUBTYPE_ID;
+        }
+        ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
+        if (subtypes == null || subtypes.size() == 0) {
+            return NOT_A_SUBTYPE_ID;
+        }
+        final String locale = mContext.getResources().getConfiguration().locale.toString();
+        final String language = locale.substring(0, 2);
+        boolean partialMatchFound = false;
+        int applicableSubtypeId = DEFAULT_SUBTYPE_ID;
+        for (int i = 0; i < subtypes.size(); ++i) {
+            final String subtypeLocale = subtypes.get(i).getLocale();
+            if (locale.equals(subtypeLocale)) {
+                // Exact match (e.g. system locale is "en_US" and subtype locale is "en_US")
+                applicableSubtypeId = i;
+                break;
+            } else if (!partialMatchFound && subtypeLocale.startsWith(language)) {
+                // Partial match (e.g. system locale is "en_US" and subtype locale is "en")
+                applicableSubtypeId = i;
+                partialMatchFound = true;
+            }
+        }
+
+        // The first subtype applicable to the system locale will be defined as the most applicable
+        // subtype.
+        if (DEBUG) {
+            Slog.d(TAG, "Applicable InputMethodSubtype was found: " + applicableSubtypeId
+                    + subtypes.get(applicableSubtypeId).getLocale());
+        }
+        return applicableSubtypeId;
+    }
+
     /**
      * @return Return the current subtype of this input method.
      */
     public InputMethodSubtype getCurrentInputMethodSubtype() {
+        boolean subtypeIsSelected = false;
+        try {
+            subtypeIsSelected = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE) != NOT_A_SUBTYPE_ID;
+        } catch (SettingNotFoundException e) {
+        }
+        if (!subtypeIsSelected || mCurrentSubtype == null) {
+            String lastInputMethodId = Settings.Secure.getString(mContext
+                    .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+            int subtypeId = getSelectedInputMethodSubtypeId(lastInputMethodId);
+            if (subtypeId == NOT_A_SUBTYPE_ID) {
+                subtypeId = findApplicableSubtype(lastInputMethodId);
+            }
+            if (subtypeId != NOT_A_SUBTYPE_ID) {
+                mCurrentSubtype = mMethodMap.get(lastInputMethodId).getSubtypes().get(subtypeId);
+            }
+        }
         return mCurrentSubtype;
     }
 
