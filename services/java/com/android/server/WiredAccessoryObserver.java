@@ -124,10 +124,12 @@ class WiredAccessoryObserver extends UEventObserver {
             try {
                 FileReader file = new FileReader(uEventInfo[i][1]);
                 int len = file.read(buffer, 0, 1024);
+                file.close();
                 newState = Integer.valueOf((new String(buffer, 0, len)).trim());
 
                 file = new FileReader(uEventInfo[i][2]);
                 len = file.read(buffer, 0, 1024);
+                file.close();
                 newName = new String(buffer, 0, len).trim();
 
             } catch (FileNotFoundException e) {
