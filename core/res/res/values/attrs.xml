@@ -48,7 +48,6 @@
              theme does not set this value, meaning it is based on whether the
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
-        
         <!-- =========== -->
         <!-- Text styles -->
         <!-- =========== -->
@@ -105,7 +104,7 @@
 
         <!-- Color of list item text in alert dialogs. -->
         <attr name="textColorAlertDialogListItem" format="reference|color" />
-        
+
         <!-- Search widget more corpus result item background. -->
         <attr name="searchWidgetCorpusItemBackground" format="reference|color" />
 
@@ -235,7 +234,7 @@
              be a selector that uses state_accelerated to pick a non-solid
              color when running on devices that can draw such a bitmap
              with complex compositing on top at 60fps.
-             
+
              <p>There are a few special considerations to use when setting this
              drawable:
              <ul>
@@ -558,7 +557,7 @@
 
         <!-- PopupWindow style to use for action modes when showing as a window overlay. -->
         <attr name="actionModePopupWindowStyle" format="reference" />
-        
+
         <!-- =================== -->
         <!-- Preference styles   -->
         <!-- =================== -->
@@ -4401,6 +4400,18 @@
         <attr name="accountType"/>
         <attr name="userVisible" format="boolean"/>
         <attr name="supportsUploading" format="boolean"/>
+        <!-- Set to true to tell the SyncManager that this SyncAdapter supports
+             multiple simultaneous syncs for the same account type and authority.
+             Otherwise the SyncManager will be sure not to issue a start sync request
+             to this SyncAdapter if the SyncAdapter is already syncing another account.
+             Defaults to false.
+             -->
+        <attr name="allowParallelSyncs" format="boolean"/>
+        <!-- Set to true to tell the SyncManager to automatically call setIsSyncable(..., ..., 1)
+             for the SyncAdapter instead of issuaing an initialization sync to the SyncAdapter.
+             Defaults to false.
+             -->
+        <attr name="isAlwaysSyncable" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->

@@ -28,6 +28,7 @@ public class SyncOperation implements Comparable {
     public final Account account;
     public int syncSource;
     public String authority;
+    public final boolean allowParallelSyncs;
     public Bundle extras;
     public final String key;
     public long earliestRunTime;
@@ -38,10 +39,11 @@ public class SyncOperation implements Comparable {
     public long effectiveRunTime;
 
     public SyncOperation(Account account, int source, String authority, Bundle extras,
-            long delayInMs, long backoff, long delayUntil) {
+            long delayInMs, long backoff, long delayUntil, boolean allowParallelSyncs) {
         this.account = account;
         this.syncSource = source;
         this.authority = authority;
+        this.allowParallelSyncs = allowParallelSyncs;
         this.extras = new Bundle(extras);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_UPLOAD);
         removeFalseExtra(ContentResolver.SYNC_EXTRAS_MANUAL);
@@ -80,6 +82,7 @@ public class SyncOperation implements Comparable {
         this.earliestRunTime = SystemClock.elapsedRealtime();
         this.backoff = other.backoff;
         this.delayUntil = other.delayUntil;
+        this.allowParallelSyncs = other.allowParallelSyncs;
         this.updateEffectiveRunTime();
         this.key = toKey();
     }
@@ -117,7 +120,7 @@ public class SyncOperation implements Comparable {
     private String toKey() {
         StringBuilder sb = new StringBuilder();
         sb.append("authority: ").append(authority);
-    	sb.append(" account {name=" + account.name + ", type=" + account.type + "}");
+        sb.append(" account {name=" + account.name + ", type=" + account.type + "}");
         sb.append(" extras: ");
         extrasToStringBuilder(extras, sb);
         return sb.toString();

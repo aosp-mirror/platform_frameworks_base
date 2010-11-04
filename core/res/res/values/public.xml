@@ -1399,6 +1399,8 @@
   <public type="attr" name="buttonBarButtonStyle" />
   <public type="attr" name="segmentedButtonStyle" />
   <public type="attr" name="staticWallpaperPreview" />
+  <public type="attr" name="allowParallelSyncs" />
+  <public type="attr" name="isAlwaysSyncable" />
 
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
@@ -1411,7 +1413,7 @@
   <public type="anim" name="accelerate_quint_interpolator" />
   <!-- Acceleration curve matching a quint ease out function. -->
   <public type="anim" name="decelerate_quint_interpolator" />
-  
+
   <public type="id" name="home" />
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
@@ -1569,5 +1571,4 @@
   <public type="style" name="Holo.SegmentedButton" />
   <public type="style" name="Holo.Light.SegmentedButton" />
   <public type="string" name="selectTextMode" />
-
 </resources>

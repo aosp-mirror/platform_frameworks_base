@@ -18,6 +18,7 @@ package android.content;
 
 import com.google.android.collect.Maps;
 
+import android.content.pm.RegisteredServicesCache;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.Pair;
@@ -41,7 +42,7 @@ public class SyncQueue {
     // quick lookup of an enqueued SyncOperation.
     public final HashMap<String, SyncOperation> mOperationsMap = Maps.newHashMap();
 
-    public SyncQueue(SyncStorageEngine syncStorageEngine) {
+    public SyncQueue(SyncStorageEngine syncStorageEngine, final SyncAdaptersCache syncAdapters) {
         mSyncStorageEngine = syncStorageEngine;
         ArrayList<SyncStorageEngine.PendingOperation> ops
                 = mSyncStorageEngine.getPendingOperations();
@@ -49,10 +50,17 @@ public class SyncQueue {
         for (int i=0; i<N; i++) {
             SyncStorageEngine.PendingOperation op = ops.get(i);
             final Pair<Long, Long> backoff = syncStorageEngine.getBackoff(op.account, op.authority);
+            final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
+                    syncAdapters.getServiceInfo(
+                            SyncAdapterType.newKey(op.authority, op.account.type));
+            if (syncAdapterInfo == null) {
+                continue;
+            }
             SyncOperation syncOperation = new SyncOperation(
                     op.account, op.syncSource, op.authority, op.extras, 0 /* delay */,
                     backoff != null ? backoff.first : 0,
-                    syncStorageEngine.getDelayUntilTime(op.account, op.authority));
+                    syncStorageEngine.getDelayUntilTime(op.account, op.authority),
+                    syncAdapterInfo.type.allowParallelSyncs());
             syncOperation.expedited = op.expedited;
             syncOperation.pendingOperation = op;
             add(syncOperation, op);
