@@ -629,11 +629,22 @@ public class BluetoothTestUtils extends Assert {
     }
 
     public void pair(BluetoothAdapter adapter, BluetoothDevice device, int passkey, byte[] pin) {
+        pairOrAcceptPair(adapter, device, passkey, pin, true);
+    }
+
+    public void acceptPair(BluetoothAdapter adapter, BluetoothDevice device, int passkey,
+            byte[] pin) {
+        pairOrAcceptPair(adapter, device, passkey, pin, false);
+    }
+
+    private void pairOrAcceptPair(BluetoothAdapter adapter, BluetoothDevice device, int passkey,
+            byte[] pin, boolean pair) {
         int mask = PairReceiver.STATE_BONDING_FLAG | PairReceiver.STATE_BONDED_FLAG;
         long start = -1;
+        String methodName = pair ? "pair()" : "acceptPair()";
 
         if (!adapter.isEnabled()) {
-            fail("pair() bluetooth not enabled");
+            fail(methodName + " bluetooth not enabled");
         }
 
         PairReceiver receiver = getPairReceiver(device, passkey, pin, mask);
@@ -643,7 +654,9 @@ public class BluetoothTestUtils extends Assert {
             case BluetoothDevice.BOND_NONE:
                 assertFalse(adapter.getBondedDevices().contains(device));
                 start = System.currentTimeMillis();
-                assertTrue(device.createBond());
+                if (pair) {
+                    assertTrue(device.createBond());
+                }
                 break;
             case BluetoothDevice.BOND_BONDING:
                 mask = 0; // Don't check for received intents since we might have missed them.
@@ -652,8 +665,10 @@ public class BluetoothTestUtils extends Assert {
                 assertTrue(adapter.getBondedDevices().contains(device));
                 return;
             default:
+
                 removeReceiver(receiver);
-                fail(String.format("pair() invalid state: device=%s, state=%d", device, state));
+                fail(String.format("%s invalid state: device=%s, state=%d", methodName, device,
+                        state));
         }
 
         long s = System.currentTimeMillis();
@@ -664,10 +679,10 @@ public class BluetoothTestUtils extends Assert {
                 if ((receiver.getFiredFlags() & mask) == mask) {
                     long finish = receiver.getCompletedTime();
                     if (start != -1 && finish != -1) {
-                        writeOutput(String.format("pair() completed in %d ms: device=%s",
+                        writeOutput(String.format("%s completed in %d ms: device=%s", methodName,
                                 (finish - start), device));
                     } else {
-                        writeOutput(String.format("pair() completed: device=%s", device));
+                        writeOutput(String.format("%s completed: device=%s", methodName, device));
                     }
                     removeReceiver(receiver);
                     return;
@@ -678,9 +693,9 @@ public class BluetoothTestUtils extends Assert {
 
         int firedFlags = receiver.getFiredFlags();
         removeReceiver(receiver);
-        fail(String.format("pair() timeout: device=%s, state=%d (expected %d), "
-                + "flags=0x%x (expected 0x%x)", device, state, BluetoothDevice.BOND_BONDED,
-                firedFlags, mask));
+        fail(String.format("%s timeout: device=%s, state=%d (expected %d), "
+                + "flags=0x%x (expected 0x%x)", methodName, device, state,
+                BluetoothDevice.BOND_BONDED, firedFlags, mask));
     }
 
     public void unpair(BluetoothAdapter adapter, BluetoothDevice device) {
