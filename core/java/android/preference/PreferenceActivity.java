@@ -203,7 +203,9 @@ public abstract class PreferenceActivity extends ListActivity implements
                     ArrayList<Header> oldHeaders = new ArrayList<Header>(mHeaders);
                     mHeaders.clear();
                     onBuildHeaders(mHeaders);
-                    mAdapter.notifyDataSetChanged();
+                    if (mAdapter != null) {
+                        mAdapter.notifyDataSetChanged();
+                    }
                     Header header = onGetNewHeader();
                     if (header != null && header.fragment != null) {
                         Header mappedHeader = findBestMatchingHeader(header, oldHeaders);
