@@ -941,7 +941,10 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
 }
 
 void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
+    // TODO: Should do quickReject for each line
     if (mSnapshot->invisible) return;
+
+    setupDraw();
 
     int alpha;
     SkXfermode::Mode mode;
@@ -961,7 +964,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                 mode, false, true, (GLvoid*) 0, (GLvoid*) gMeshTextureOffset,
                 mCaches.line.getMeshBuffer());
     } else {
-        setupColorRect(0.0f, 0.0f, 1.0f, 1.0f, r, g, b, a, mode, false);
+        setupColorRect(0.0f, 0.0f, 1.0f, 1.0f, r, g, b, a, mode, false, true);
     }
 
     const float strokeWidth = paint->getStrokeWidth();
@@ -1408,7 +1411,8 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 }
 
 void OpenGLRenderer::setupColorRect(float left, float top, float right, float bottom,
-        float r, float g, float b, float a, SkXfermode::Mode mode, bool ignoreTransform) {
+        float r, float g, float b, float a, SkXfermode::Mode mode,
+        bool ignoreTransform, bool ignoreMatrix) {
     GLuint textureUnit = 0;
 
     // Describe the required shaders
@@ -1433,21 +1437,24 @@ void OpenGLRenderer::setupColorRect(float left, float top, float right, float bo
     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gMeshStride, 0);
 
-    // Setup uniforms
-    mModelView.loadTranslate(left, top, 0.0f);
-    mModelView.scale(right - left, bottom - top, 1.0f);
-    if (!ignoreTransform) {
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
-        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
-    } else {
-        mat4 identity;
-        mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
-        dirtyLayer(left, top, right, bottom);
+    if (!ignoreMatrix) {
+        // Setup uniforms
+        mModelView.loadTranslate(left, top, 0.0f);
+        mModelView.scale(right - left, bottom - top, 1.0f);
+        if (!ignoreTransform) {
+            mCaches.currentProgram->set(mOrthoMatrix, mModelView, *mSnapshot->transform);
+            dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        } else {
+            mat4 identity;
+            mCaches.currentProgram->set(mOrthoMatrix, mModelView, identity);
+            dirtyLayer(left, top, right, bottom);
+        }
     }
     mCaches.currentProgram->setColor(r, g, b, a);
 
     // Setup attributes and uniforms required by the shaders
     if (mShader) {
+        if (ignoreMatrix) mModelView.loadIdentity();
         mShader->setupProgram(mCaches.currentProgram, mModelView, *mSnapshot, &textureUnit);
     }
     if (mColorFilter) {

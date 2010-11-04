@@ -233,7 +233,8 @@ private:
      * Setups shaders to draw a colored rect.
      */
     void setupColorRect(float left, float top, float right, float bottom,
-            float r, float g, float b, float a, SkXfermode::Mode mode, bool ignoreTransform);
+            float r, float g, float b, float a, SkXfermode::Mode mode,
+            bool ignoreTransform, bool ignoreMatrix = false);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
