@@ -94,6 +94,7 @@ public final class CreateInfo implements ICreateInfo {
      * The list of methods to rewrite as delegates.
      */
     private final static String[] DELEGATE_METHODS = new String[] {
+        "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
         // TODO: comment out once DelegateClass is working
         // "android.view.View#isInEditMode",
         // "android.content.res.Resources$Theme#obtainStyledAttributes",

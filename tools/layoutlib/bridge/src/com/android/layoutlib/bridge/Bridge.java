@@ -31,6 +31,7 @@ import com.android.ninepatch.NinePatch;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
+import android.app.Fragment_Delegate;
 import android.content.ClipData;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -366,6 +367,12 @@ public final class Bridge implements ILayoutBridge {
 
         BridgeContext context = null;
         try {
+            // we need to make sure the Looper has been initialized for this thread.
+            // this is required for View that creates Handler objects.
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
+
             // setup the display Metrics.
             DisplayMetrics metrics = new DisplayMetrics();
             metrics.densityDpi = density;
@@ -380,6 +387,7 @@ public final class Bridge implements ILayoutBridge {
                     frameworkResources, styleParentMap, customViewLoader, logger);
             BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
             context.setBridgeInflater(inflater);
+            inflater.setFactory2(context);
 
             IResourceValue windowBackground = null;
             int screenOffset = 0;
@@ -390,21 +398,21 @@ public final class Bridge implements ILayoutBridge {
                 screenOffset = getScreenOffset(frameworkResources, currentTheme, context);
             }
 
-            // we need to make sure the Looper has been initialized for this thread.
-            // this is required for View that creates Handler objects.
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
-
             BridgeXmlBlockParser parser = new BridgeXmlBlockParser(layoutDescription,
                     context, false /* platformResourceFlag */);
 
             ViewGroup root = new FrameLayout(context);
 
+            // Sets the project callback (custom view loader) to the fragment delegate so that
+            // it can instantiate the custom Fragment.
+            Fragment_Delegate.setProjectCallback(customViewLoader);
+
             View view = inflater.inflate(parser, root);
 
             // post-inflate process. For now this supports TabHost/TabWidget
             postInflateProcess(view, customViewLoader);
+
+            Fragment_Delegate.setProjectCallback(null);
 
             // set the AttachInfo on the root view.
             AttachInfo info = new AttachInfo(new WindowSession(), new Window(),
