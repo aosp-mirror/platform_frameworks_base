@@ -23,10 +23,10 @@
     <scale android:fromXScale="1.0" android:toXScale="1.0"
             android:fromYScale="1.0" android:toYScale=".9"
             android:pivotX="50%p" android:pivotY="50%p"
-            android:interpolator="@anim/decelerate_interpolator"
+            android:interpolator="@anim/decelerate_quint_interpolator"
             android:duration="@android:integer/config_mediumAnimTime" />
     <alpha android:fromAlpha="1.0" android:toAlpha="0"
-            android:interpolator="@anim/accelerate_decelerate_interpolator"
+            android:interpolator="@anim/decelerate_quint_interpolator"
             android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
 

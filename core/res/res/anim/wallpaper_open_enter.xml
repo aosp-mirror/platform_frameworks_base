@@ -19,15 +19,15 @@
 
 <!-- New holo animation, zooming contents on top of wallpaper back up. -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/decelerate_interpolator"
         android:detachWallpaper="true">
     <scale android:fromXScale="0.8" android:toXScale="1.0"
             android:fromYScale="0.8" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"
+            android:interpolator="@anim/decelerate_quint_interpolator"
             android:startOffset="@android:integer/config_mediumAnimTime"
             android:duration="@android:integer/config_mediumAnimTime" />
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
-            android:interpolator="@anim/accelerate_decelerate_interpolator"
+            android:interpolator="@anim/decelerate_cubic_interpolator"
             android:startOffset="@android:integer/config_mediumAnimTime"
             android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
