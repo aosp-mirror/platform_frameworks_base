@@ -65,6 +65,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
@@ -5098,6 +5099,10 @@ public class WebView extends AbsoluteLayout
                 if (mSelectingText && mSelectionStarted) {
                     if (DebugFlags.WEB_VIEW) {
                         Log.v(LOGTAG, "extend=" + contentX + "," + contentY);
+                    }
+                    ViewParent parent = getParent();
+                    if (parent != null) {
+                        parent.requestDisallowInterceptTouchEvent(true);
                     }
                     nativeExtendSelection(contentX, contentY);
                     invalidate();
