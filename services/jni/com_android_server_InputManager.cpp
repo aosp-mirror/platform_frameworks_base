@@ -52,6 +52,7 @@ static struct {
     jmethodID notifyANR;
     jmethodID interceptKeyBeforeQueueing;
     jmethodID interceptKeyBeforeDispatching;
+    jmethodID dispatchUnhandledKey;
     jmethodID checkInjectEventsPermission;
     jmethodID filterTouchEvents;
     jmethodID filterJumpyTouchEvents;
@@ -205,6 +206,8 @@ public:
             uint32_t& policyFlags);
     virtual void interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
+            const KeyEvent* keyEvent, uint32_t policyFlags);
+    virtual bool dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags);
     virtual void pokeUserActivity(nsecs_t eventTime, int32_t eventType);
     virtual bool checkInjectEventsPermissionNonReentrant(
@@ -937,6 +940,29 @@ bool NativeInputManager::interceptKeyBeforeDispatching(const sp<InputChannel>& i
     }
 }
 
+bool NativeInputManager::dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
+        const KeyEvent* keyEvent, uint32_t policyFlags) {
+    // Policy:
+    // - Ignore untrusted events and do not perform default handling.
+    if (policyFlags & POLICY_FLAG_TRUSTED) {
+        JNIEnv* env = jniEnv();
+
+        // Note: inputChannel may be null.
+        jobject inputChannelObj = getInputChannelObjLocal(env, inputChannel);
+        jboolean handled = env->CallBooleanMethod(mCallbacksObj,
+                gCallbacksClassInfo.dispatchUnhandledKey,
+                inputChannelObj, keyEvent->getAction(), keyEvent->getFlags(),
+                keyEvent->getKeyCode(), keyEvent->getScanCode(), keyEvent->getMetaState(),
+                keyEvent->getRepeatCount(), policyFlags);
+        bool error = checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey");
+
+        env->DeleteLocalRef(inputChannelObj);
+        return handled && ! error;
+    } else {
+        return false;
+    }
+}
+
 void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType) {
     android_server_PowerManagerService_userActivity(eventTime, eventType);
 }
@@ -1362,6 +1388,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, gCallbacksClassInfo.clazz,
             "interceptKeyBeforeDispatching", "(Landroid/view/InputChannel;IIIIIII)Z");
+
+    GET_METHOD_ID(gCallbacksClassInfo.dispatchUnhandledKey, gCallbacksClassInfo.clazz,
+            "dispatchUnhandledKey", "(Landroid/view/InputChannel;IIIIIII)Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, gCallbacksClassInfo.clazz,
             "checkInjectEventsPermission", "(II)Z");

@@ -304,6 +304,10 @@ public:
     virtual bool interceptKeyBeforeDispatching(const sp<InputChannel>& inputChannel,
             const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
 
+    /* Allows the policy a chance to perform default processing for an unhandled key. */
+    virtual bool dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
+            const KeyEvent* keyEvent, uint32_t policyFlags) = 0;
+
     /* Notifies the policy about switch events.
      */
     virtual void notifySwitch(nsecs_t when,
@@ -609,6 +613,7 @@ private:
         sp<InputChannel> inputChannel;
         sp<InputApplicationHandle> inputApplicationHandle;
         int32_t userActivityEventType;
+        bool handled;
     };
 
     // Generic queue implementation.
@@ -1030,7 +1035,8 @@ private:
             EventEntry* eventEntry, const InputTarget* inputTarget,
             bool resumeWithAppendedMotionSample);
     void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
-    void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
+    void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
+            bool handled);
     void startNextDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void abortBrokenDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void drainOutboundQueueLocked(Connection* connection);
@@ -1061,7 +1067,7 @@ private:
     void onDispatchCycleStartedLocked(
             nsecs_t currentTime, const sp<Connection>& connection);
     void onDispatchCycleFinishedLocked(
-            nsecs_t currentTime, const sp<Connection>& connection);
+            nsecs_t currentTime, const sp<Connection>& connection, bool handled);
     void onDispatchCycleBrokenLocked(
             nsecs_t currentTime, const sp<Connection>& connection);
     void onANRLocked(
@@ -1073,7 +1079,9 @@ private:
     void doNotifyInputChannelBrokenLockedInterruptible(CommandEntry* commandEntry);
     void doNotifyANRLockedInterruptible(CommandEntry* commandEntry);
     void doInterceptKeyBeforeDispatchingLockedInterruptible(CommandEntry* commandEntry);
+    void doDispatchCycleFinishedLockedInterruptible(CommandEntry* commandEntry);
     void doPokeUserActivityLockedInterruptible(CommandEntry* commandEntry);
+    void initializeKeyEvent(KeyEvent* event, const KeyEntry* entry);
 
     // Statistics gathering.
     void updateDispatchStatisticsLocked(nsecs_t currentTime, const EventEntry* entry,

@@ -83,7 +83,7 @@ public:
 
     bool preDispatchEvent(AInputEvent* event);
 
-    void finishEvent(AInputEvent* event, bool handled);
+    void finishEvent(AInputEvent* event, bool handled, bool didDefaultHandling);
 
     // ----------------------------------------------------------
 

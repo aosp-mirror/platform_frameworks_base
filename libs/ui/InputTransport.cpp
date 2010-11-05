@@ -35,8 +35,12 @@ static const int DEFAULT_MESSAGE_BUFFER_SIZE = 16384;
 static const char INPUT_SIGNAL_DISPATCH = 'D';
 
 // Signal sent by the consumer to the producer to inform it that it has finished
-// consuming the most recent message.
-static const char INPUT_SIGNAL_FINISHED = 'f';
+// consuming the most recent message and it handled it.
+static const char INPUT_SIGNAL_FINISHED_HANDLED = 'f';
+
+// Signal sent by the consumer to the producer to inform it that it has finished
+// consuming the most recent message but it did not handle it.
+static const char INPUT_SIGNAL_FINISHED_UNHANDLED = 'u';
 
 
 // --- InputChannel ---
@@ -497,7 +501,7 @@ status_t InputPublisher::sendDispatchSignal() {
     return mChannel->sendSignal(INPUT_SIGNAL_DISPATCH);
 }
 
-status_t InputPublisher::receiveFinishedSignal() {
+status_t InputPublisher::receiveFinishedSignal(bool& outHandled) {
 #if DEBUG_TRANSPORT_ACTIONS
     LOGD("channel '%s' publisher ~ receiveFinishedSignal",
             mChannel->getName().string());
@@ -506,9 +510,14 @@ status_t InputPublisher::receiveFinishedSignal() {
     char signal;
     status_t result = mChannel->receiveSignal(& signal);
     if (result) {
+        outHandled = false;
         return result;
     }
-    if (signal != INPUT_SIGNAL_FINISHED) {
+    if (signal == INPUT_SIGNAL_FINISHED_HANDLED) {
+        outHandled = true;
+    } else if (signal == INPUT_SIGNAL_FINISHED_UNHANDLED) {
+        outHandled = false;
+    } else {
         LOGE("channel '%s' publisher ~ Received unexpected signal '%c' from consumer",
                 mChannel->getName().string(), signal);
         return UNKNOWN_ERROR;
@@ -626,13 +635,15 @@ status_t InputConsumer::consume(InputEventFactoryInterface* factory, InputEvent*
     return OK;
 }
 
-status_t InputConsumer::sendFinishedSignal() {
+status_t InputConsumer::sendFinishedSignal(bool handled) {
 #if DEBUG_TRANSPORT_ACTIONS
-    LOGD("channel '%s' consumer ~ sendFinishedSignal",
-            mChannel->getName().string());
+    LOGD("channel '%s' consumer ~ sendFinishedSignal: handled=%d",
+            mChannel->getName().string(), handled);
 #endif
 
-    return mChannel->sendSignal(INPUT_SIGNAL_FINISHED);
+    return mChannel->sendSignal(handled
+            ? INPUT_SIGNAL_FINISHED_HANDLED
+            : INPUT_SIGNAL_FINISHED_UNHANDLED);
 }
 
 status_t InputConsumer::receiveDispatchSignal() {

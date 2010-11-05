@@ -419,6 +419,14 @@ public class InputManager {
         }
         
         @SuppressWarnings("unused")
+        public boolean dispatchUnhandledKey(InputChannel focus, int action,
+                int flags, int keyCode, int scanCode, int metaState, int repeatCount,
+                int policyFlags) {
+            return mWindowManagerService.mInputMonitor.dispatchUnhandledKey(focus,
+                    action, flags, keyCode, scanCode, metaState, repeatCount, policyFlags);
+        }
+        
+        @SuppressWarnings("unused")
         public boolean checkInjectEventsPermission(int injectorPid, int injectorUid) {
             return mContext.checkPermission(
                     android.Manifest.permission.INJECT_EVENTS, injectorPid, injectorUid)

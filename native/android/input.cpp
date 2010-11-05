@@ -271,5 +271,5 @@ int32_t AInputQueue_preDispatchEvent(AInputQueue* queue, AInputEvent* event) {
 }
 
 void AInputQueue_finishEvent(AInputQueue* queue, AInputEvent* event, int handled) {
-    queue->finishEvent(event, handled != 0);
+    queue->finishEvent(event, handled != 0, false);
 }

@@ -253,13 +253,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     private final InputHandler mPointerLocationInputHandler = new BaseInputHandler() {
         @Override
-        public void handleMotion(MotionEvent event, Runnable finishedCallback) {
-            finishedCallback.run();
-            
-            synchronized (mLock) {
-                if (mPointerLocationView != null) {
-                    mPointerLocationView.addTouchEvent(event);
+        public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
+            boolean handled = false;
+            try {
+                if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                    synchronized (mLock) {
+                        if (mPointerLocationView != null) {
+                            mPointerLocationView.addTouchEvent(event);
+                            handled = true;
+                        }
+                    }
                 }
+            } finally {
+                finishedCallback.finished(handled);
             }
         }
     };
@@ -1326,6 +1332,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean dispatchUnhandledKey(WindowState win, int action, int flags,
+            int keyCode, int scanCode, int metaState, int repeatCount, int policyFlags) {
+        if (false) {
+            Slog.d(TAG, "Unhandled key: win=" + win + ", action=" + action
+                    + ", flags=" + flags + ", keyCode=" + keyCode
+                    + ", scanCode=" + scanCode + ", metaState=" + metaState
+                    + ", repeatCount=" + repeatCount + ", policyFlags=" + policyFlags);
+        }
         return false;
     }
 

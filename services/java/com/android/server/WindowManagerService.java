@@ -824,13 +824,15 @@ public class WindowManagerService extends IWindowManager.Stub
     DragState mDragState = null;
     private final InputHandler mDragInputHandler = new BaseInputHandler() {
         @Override
-        public void handleMotion(MotionEvent event, Runnable finishedCallback) {
-            boolean endDrag = false;
-            final float newX = event.getRawX();
-            final float newY = event.getRawY();
-
+        public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
+            boolean handled = false;
             try {
-                if (mDragState != null) {
+                if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
+                        && mDragState != null) {
+                    boolean endDrag = false;
+                    final float newX = event.getRawX();
+                    final float newY = event.getRawY();
+
                     switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
                         if (DEBUG_DRAG) {
@@ -866,11 +868,13 @@ public class WindowManagerService extends IWindowManager.Stub
                             mDragState.endDragLw();
                         }
                     }
+
+                    handled = true;
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Exception caught by drag handleMotion", e);
             } finally {
-                finishedCallback.run();
+                finishedCallback.finished(handled);
             }
         }
     };
@@ -5778,6 +5782,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 int policyFlags) {
             WindowState windowState = getWindowStateForInputChannel(focus);
             return mPolicy.interceptKeyBeforeDispatching(windowState, action, flags,
+                    keyCode, scanCode, metaState, repeatCount, policyFlags);
+        }
+        
+        /* Provides an opportunity for the window manager policy to process a key that
+         * the application did not handle. */
+        public boolean dispatchUnhandledKey(InputChannel focus,
+                int action, int flags, int keyCode, int scanCode, int metaState, int repeatCount,
+                int policyFlags) {
+            WindowState windowState = getWindowStateForInputChannel(focus);
+            return mPolicy.dispatchUnhandledKey(windowState, action, flags,
                     keyCode, scanCode, metaState, repeatCount, policyFlags);
         }
         
