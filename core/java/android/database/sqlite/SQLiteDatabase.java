@@ -2116,21 +2116,25 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             int maxCacheSz = (mConnectionNum == 0) ? mMaxSqlCacheSize :
                     mParentConnObj.mMaxSqlCacheSize;
-            if (SQLiteDebug.DEBUG_SQL_CACHE && (mConnectionNum == 0)
-                   ? (!mCacheFullWarning && mCompiledQueries.size() == maxCacheSz)
-                   : (!mParentConnObj.mCacheFullWarning &&
-                   mParentConnObj.mCompiledQueries.size() == maxCacheSz)) {
-                /*
-                 * cache size of {@link #mMaxSqlCacheSize} is not enough for this app.
-                 * log a warning.
-                 * chances are it is NOT using ? for bindargs - or cachesize is too small.
-                 */
-                Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
-                        getPath() + ". Use setMaxSqlCacheSize() to increase cachesize. ");
-                mCacheFullWarning = true;
-                Log.d(TAG, "Here are the SQL statements in Cache of database: " + mPath);
-                for (String s : mCompiledQueries.keySet()) {
-                    Log.d(TAG, "Sql stament in Cache: " + s);
+            
+            if (SQLiteDebug.DEBUG_SQL_CACHE) {
+                boolean printWarning = (mConnectionNum == 0)
+                        ? (!mCacheFullWarning && mCompiledQueries.size() == maxCacheSz)
+                        : (!mParentConnObj.mCacheFullWarning &&
+                        mParentConnObj.mCompiledQueries.size() == maxCacheSz);
+                if (printWarning) {
+                    /*
+                     * cache size of {@link #mMaxSqlCacheSize} is not enough for this app.
+                     * log a warning.
+                     * chances are it is NOT using ? for bindargs - or cachesize is too small.
+                     */
+                    Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
+                            getPath() + ". Use setMaxSqlCacheSize() to increase cachesize. ");
+                    mCacheFullWarning = true;
+                    Log.d(TAG, "Here are the SQL statements in Cache of database: " + mPath);
+                    for (String s : mCompiledQueries.keySet()) {
+                        Log.d(TAG, "Sql stament in Cache: " + s);
+                    }
                 }
             }
             /* add the given SQLiteCompiledSql compiledStatement to cache.
