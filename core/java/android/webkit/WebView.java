@@ -4185,9 +4185,8 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (pageShouldHandleShiftAndArrows()) {
-                mShiftIsPressed = true;
-            } else if (!nativeCursorWantsKeyEvents() && !mSelectingText) {
+            if (!pageShouldHandleShiftAndArrows() && !nativeCursorWantsKeyEvents()
+                    && !mSelectingText) {
                 setUpSelect();
             }
         }
@@ -4206,7 +4205,7 @@ public class WebView extends AbsoluteLayout
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             switchOutDrawHistory();
             if (pageShouldHandleShiftAndArrows()) {
-                letPageHandleNavKey(keyCode, event.getEventTime(), true);
+                letPageHandleNavKey(keyCode, event.getEventTime(), true, event.getMetaState());
                 return true;
             }
             if (mSelectingText) {
@@ -4248,7 +4247,6 @@ public class WebView extends AbsoluteLayout
                 && keyCode != KeyEvent.KEYCODE_SHIFT_RIGHT) {
             // turn off copy select if a shift-key combo is pressed
             selectionDone();
-            mShiftIsPressed = false;
         }
 
         if (getSettings().getNavDump()) {
@@ -4339,9 +4337,7 @@ public class WebView extends AbsoluteLayout
 
         if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
-            if (pageShouldHandleShiftAndArrows()) {
-                mShiftIsPressed = false;
-            } else if (copySelection()) {
+            if (!pageShouldHandleShiftAndArrows() && copySelection()) {
                 selectionDone();
                 return true;
             }
@@ -4350,7 +4346,7 @@ public class WebView extends AbsoluteLayout
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             if (pageShouldHandleShiftAndArrows()) {
-                letPageHandleNavKey(keyCode, event.getEventTime(), false);
+                letPageHandleNavKey(keyCode, event.getEventTime(), false, event.getMetaState());
                 return true;
             }
             // always handle the navigation keys in the UI thread
@@ -4592,7 +4588,6 @@ public class WebView extends AbsoluteLayout
                 mDrawCursorRing = false;
             }
             mGotKeyDown = false;
-            mShiftIsPressed = false;
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
             mTouchMode = TOUCH_DONE_MODE;
             if (mNativeClass != 0) {
@@ -5529,7 +5524,6 @@ public class WebView extends AbsoluteLayout
     private int mSelectX = 0;
     private int mSelectY = 0;
     private boolean mFocusSizeChanged = false;
-    private boolean mShiftIsPressed = false;
     private boolean mTrackballDown = false;
     private long mTrackballUpTime = 0;
     private long mLastCursorTime = 0;
@@ -5600,7 +5594,7 @@ public class WebView extends AbsoluteLayout
             }
             return false; // let common code in onKeyUp at it
         }
-        if ((mMapTrackballToArrowKeys && mShiftIsPressed == false) ||
+        if ((mMapTrackballToArrowKeys && (ev.getMetaState() & KeyEvent.META_SHIFT_ON) == 0) ||
                 (mAccessibilityInjector != null || mAccessibilityScriptInjected)) {
             if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent gmail quit");
             return false;
@@ -5629,7 +5623,7 @@ public class WebView extends AbsoluteLayout
         }
         mTrackballRemainsX += ev.getX();
         mTrackballRemainsY += ev.getY();
-        doTrackball(time);
+        doTrackball(time, ev.getMetaState());
         return true;
     }
 
@@ -5713,7 +5707,7 @@ public class WebView extends AbsoluteLayout
                 "KEYCODE_DPAD_LEFT}.");
     }
 
-    private void doTrackball(long time) {
+    private void doTrackball(long time, int metaState) {
         int elapsed = (int) (mTrackballLastTime - mTrackballFirstTime);
         if (elapsed == 0) {
             elapsed = TRACKBALL_TIMEOUT;
@@ -5771,9 +5765,9 @@ public class WebView extends AbsoluteLayout
             }
             if (mNativeClass != 0 && nativePageShouldHandleShiftAndArrows()) {
                 for (int i = 0; i < count; i++) {
-                    letPageHandleNavKey(selectKeyCode, time, true);
+                    letPageHandleNavKey(selectKeyCode, time, true, metaState);
                 }
-                letPageHandleNavKey(selectKeyCode, time, false);
+                letPageHandleNavKey(selectKeyCode, time, false, metaState);
             } else if (navHandledKey(selectKeyCode, count, false, time)) {
                 playSoundEffect(keyCodeToSoundsEffect(selectKeyCode));
             }
@@ -7282,7 +7276,7 @@ public class WebView extends AbsoluteLayout
      * Pass the key directly to the page.  This assumes that
      * nativePageShouldHandleShiftAndArrows() returned true.
      */
-    private void letPageHandleNavKey(int keyCode, long time, boolean down) {
+    private void letPageHandleNavKey(int keyCode, long time, boolean down, int metaState) {
         int keyEventAction;
         int eventHubAction;
         if (down) {
@@ -7293,10 +7287,11 @@ public class WebView extends AbsoluteLayout
             keyEventAction = KeyEvent.ACTION_UP;
             eventHubAction = EventHub.KEY_UP;
         }
+
         KeyEvent event = new KeyEvent(time, time, keyEventAction, keyCode,
-                1, (mShiftIsPressed ? KeyEvent.META_SHIFT_ON : 0)
-                | (false ? KeyEvent.META_ALT_ON : 0) // FIXME
-                | (false ? KeyEvent.META_SYM_ON : 0) // FIXME
+                1, (metaState & KeyEvent.META_SHIFT_ON)
+                | (metaState & KeyEvent.META_ALT_ON)
+                | (metaState & KeyEvent.META_SYM_ON)
                 , 0, 0, 0);
         mWebViewCore.sendMessage(eventHubAction, event);
     }
