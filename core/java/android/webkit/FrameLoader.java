@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.net.http.EventHandler;
 import android.net.http.RequestHandle;
+import android.os.Build;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
 
@@ -35,6 +36,7 @@ class FrameLoader {
     private int mCacheMode;
     private String mReferrer;
     private String mContentType;
+    private final String mUaprofHeader;
 
     private static final int URI_PROTOCOL = 0x100;
 
@@ -57,6 +59,8 @@ class FrameLoader {
         mMethod = method;
         mCacheMode = WebSettings.LOAD_NORMAL;
         mSettings = settings;
+        mUaprofHeader = mListener.getContext().getResources().getString(
+                com.android.internal.R.string.config_useragentprofile_url, Build.MODEL);
     }
 
     public void setReferrer(String ref) {
@@ -356,6 +360,11 @@ class FrameLoader {
         }
         
         mHeaders.put("User-Agent", mSettings.getUserAgentString());
+
+        // Set the x-wap-profile header
+        if (mUaprofHeader != null && mUaprofHeader.length() > 0) {
+            mHeaders.put("x-wap-profile", mUaprofHeader);
+        }
     }
 
     /**
