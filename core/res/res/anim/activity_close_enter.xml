@@ -18,8 +18,9 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/decelerate_interpolator"
-        android:zAdjustment="top">
-	<translate android:fromXDelta="-100%" android:toXDelta="0"
-        android:duration="@android:integer/config_shortAnimTime"/>
+        android:interpolator="@anim/decelerate_interpolator">
+    <!-- Do nothing. -->
+    <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
+            android:interpolator="@anim/decelerate_interpolator"
+            android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
