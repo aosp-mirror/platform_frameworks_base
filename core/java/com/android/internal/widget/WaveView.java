@@ -269,7 +269,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                 break;
 
             case STATE_ATTEMPTING:
-                if (DBG) Log.v(TAG, "State ATTEMPTING");
+                if (DBG) Log.v(TAG, "State ATTEMPTING (fingerDown = " + fingerDown + ")");
                 //TweenMax.to(unlockHalo, 0.4, { x:mouseX, y:mouseY, scaleX:1, scaleY:1,
                 // alpha: 1, ease:Quint.easeOut });
                 if (dragDistance > mSnapRadius) {
@@ -282,6 +282,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                         mUnlockHalo.addAnimTo(0, 0, "scaleY", 1.0f, true);
                         mUnlockHalo.addAnimTo(0, 0, "alpha", 1.0f, true);
                     }  else {
+                        if (DBG) Log.v(TAG, "up detected, moving to STATE_UNLOCK_ATTEMPT");
                         mLockState = STATE_UNLOCK_ATTEMPT;
                     }
                 } else {
@@ -480,9 +481,16 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                 break;
 
             case MotionEvent.ACTION_UP:
+                if (DBG) Log.v(TAG, "ACTION_UP");
                 mFingerDown = false;
                 postDelayed(mLockTimerActions, RESET_TIMEOUT);
                 setGrabbedState(OnTriggerListener.NO_HANDLE);
+                // Normally the state machine is driven by user interaction causing redraws.
+                // However, when there's no more user interaction and no running animations,
+                // the state machine stops advancing because onDraw() never gets called.
+                // The following ensures we advance to the next state in this case,
+                // either STATE_UNLOCK_ATTEMPT or STATE_RESET_LOCK.
+                waveUpdateFrame(mMouseX, mMouseY, mFingerDown);
                 handled = true;
                 break;
 
