@@ -496,10 +496,7 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsAlert(mWebView, url, message,
                             res)) {
-                        // only display the alert dialog if the mContext is
-                        // Activity and its window has the focus.
-                        if (!(mContext instanceof Activity)
-                                || !((Activity) mContext).hasWindowFocus()) {
+                        if (!canShowAlertDialog()) {
                             res.cancel();
                             res.setReady();
                             break;
@@ -535,10 +532,7 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsConfirm(mWebView, url, message,
                             res)) {
-                        // only display the alert dialog if the mContext is
-                        // Activity and its window has the focus.
-                        if (!(mContext instanceof Activity)
-                                || !((Activity) mContext).hasWindowFocus()) {
+                        if (!canShowAlertDialog()) {
                             res.cancel();
                             res.setReady();
                             break;
@@ -583,10 +577,7 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsPrompt(mWebView, url, message,
                                 defaultVal, res)) {
-                        // only display the alert dialog if the mContext is
-                        // Activity and its window has the focus.
-                        if (!(mContext instanceof Activity)
-                                || !((Activity) mContext).hasWindowFocus()) {
+                        if (!canShowAlertDialog()) {
                             res.cancel();
                             res.setReady();
                             break;
@@ -642,10 +633,7 @@ class CallbackProxy extends Handler {
                     String url = msg.getData().getString("url");
                     if (!mWebChromeClient.onJsBeforeUnload(mWebView, url,
                             message, res)) {
-                        // only display the alert dialog if the mContext is
-                        // Activity and its window has the focus.
-                        if (!(mContext instanceof Activity)
-                                || !((Activity) mContext).hasWindowFocus()) {
+                        if (!canShowAlertDialog()) {
                             res.cancel();
                             res.setReady();
                             break;
@@ -1554,5 +1542,15 @@ class CallbackProxy extends Handler {
             return;
         }
         sendMessage(obtainMessage(SET_INSTALLABLE_WEBAPP));
+    }
+
+    boolean canShowAlertDialog() {
+        // We can only display the alert dialog if mContext is
+        // an Activity context.
+        // FIXME: Should we display dialogs if mContext does
+        // not have the window focus (e.g. if the user is viewing
+        // another Activity when the alert should be displayed?
+        // See bug 3166409
+        return mContext instanceof Activity;
     }
 }
