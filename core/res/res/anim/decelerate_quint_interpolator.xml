@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/*
-** Copyright 2009, The Android Open Source Project
+/* //device/apps/common/res/anim/ease_in_interpolator.xml
+**
+** Copyright 2010, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -17,8 +18,5 @@
 */
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Do nothing. -->
-    <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
-            android:duration="@android:integer/config_mediumAnimTime"/>
-</set>
+<decelerateInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+        android:factor="2.5" />

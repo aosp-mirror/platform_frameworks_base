@@ -925,7 +925,9 @@
   <public type="anim" name="slide_in_left" id="0x010a0002" />
   <public type="anim" name="slide_out_right" id="0x010a0003" />
   <public type="anim" name="accelerate_decelerate_interpolator" id="0x010a0004" />
+  <!-- Acceleration curve matching Flash's quadratic ease out function. -->
   <public type="anim" name="accelerate_interpolator" id="0x010a0005" />
+  <!-- Acceleration curve matching Flash's quadratic ease in function. -->
   <public type="anim" name="decelerate_interpolator" id="0x010a0006" />
 
 <!-- ===============================================================
@@ -1364,6 +1366,15 @@
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
 
+  <!-- Acceleration curve matching Flash's cubic ease out function. -->
+  <public type="anim" name="accelerate_cubic_interpolator" />
+  <!-- Acceleration curve matching Flash's cubic ease in function. -->
+  <public type="anim" name="decelerate_cubic_interpolator" />
+  <!-- Acceleration curve matching Flash's quint ease out function. -->
+  <public type="anim" name="accelerate_quint_interpolator" />
+  <!-- Acceleration curve matching Flash's quint ease in function. -->
+  <public type="anim" name="decelerate_quint_interpolator" />
+  
   <public type="id" name="home" />
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
