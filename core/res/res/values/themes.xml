@@ -233,6 +233,7 @@
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
+        <item name="preferencePanelBackground">@android:drawable/panel_bg_holo_dark</item>
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
@@ -843,6 +844,7 @@
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
+        <item name="preferencePanelBackground">@android:drawable/panel_bg_holo_dark</item>
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
@@ -1077,6 +1079,7 @@
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
+        <item name="preferencePanelBackground">@android:drawable/panel_bg_holo_light</item>
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>

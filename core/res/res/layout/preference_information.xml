@@ -23,21 +23,24 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
     android:paddingRight="?android:attr/scrollbarSize">
-    
+
+    <View
+        android:layout_width="@dimen/preference_widget_width"
+        android:layout_height="match_parent" />
+
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16sp"
         android:layout_marginRight="6sp"
         android:layout_marginTop="6sp"
         android:layout_marginBottom="6sp"
         android:layout_weight="1">
-    
+
         <TextView android:id="@+android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorSecondary" />
             
         <TextView android:id="@+android:id/summary"

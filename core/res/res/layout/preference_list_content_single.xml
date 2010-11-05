@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/assets/res/layout/list_content.xml
-**
-** Copyright 2006, The Android Open Source Project
+/*
+** Copyright 2010, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -32,13 +31,8 @@
         <LinearLayout
             android:id="@+id/headers"
             android:orientation="vertical"
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_marginRight="0dp"
-            android:layout_marginLeft="@dimen/preference_screen_side_margin"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="32dp"
-            android:layout_weight="10">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <ListView android:id="@android:id/list"
                 android:layout_width="match_parent"
@@ -56,20 +50,6 @@
 
         </LinearLayout>
 
-        <FrameLayout android:id="@+id/prefs"
-                android:layout_width="0px"
-                android:layout_height="match_parent"
-                android:layout_weight="20"
-                android:layout_marginLeft="-4dp"
-                android:layout_marginRight="@dimen/preference_screen_side_margin"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:paddingLeft="32dip"
-                android:paddingRight="32dip"
-                android:paddingTop="48dip"
-                android:paddingBottom="48dip"
-                android:background="?attr/preferencePanelBackground"
-                android:visibility="gone" />
     </LinearLayout>
 
     <RelativeLayout android:id="@+id/button_bar"
