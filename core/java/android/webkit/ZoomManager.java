@@ -811,7 +811,7 @@ class ZoomManager {
                     Math.max((int) (viewWidth * mInvDefaultScale),
                             Math.max(drawData.mMinPrefWidth, drawData.mViewSize.x))));
             } else {
-                final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mViewSize.x);
+                final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mMinPrefWidth);
                 setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
             }
         }
