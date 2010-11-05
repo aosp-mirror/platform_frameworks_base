@@ -3570,6 +3570,7 @@ public class WebView extends AbsoluteLayout
         setUpSelect();
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
+            mDrawSelectionPointer = false;
             return true;
         }
         selectionDone();
