@@ -155,7 +155,7 @@ final class BackStackState implements Parcelable {
 /**
  * @hide Entry of an operation on the fragment back stack.
  */
-final class BackStackRecord implements FragmentTransaction,
+final class BackStackRecord extends FragmentTransaction implements
         FragmentManager.BackStackEntry, Runnable {
     static final String TAG = "BackStackEntry";
 
@@ -417,6 +417,14 @@ final class BackStackRecord implements FragmentTransaction,
     }
 
     public int commit() {
+        return commitInternal(false);
+    }
+
+    public int commitAllowingStateLoss() {
+        return commitInternal(true);
+    }
+    
+    int commitInternal(boolean allowStateLoss) {
         if (mCommitted) throw new IllegalStateException("commit already called");
         if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Commit: " + this);
         mCommitted = true;
@@ -425,10 +433,10 @@ final class BackStackRecord implements FragmentTransaction,
         } else {
             mIndex = -1;
         }
-        mManager.enqueueAction(this);
+        mManager.enqueueAction(this, allowStateLoss);
         return mIndex;
     }
-
+    
     public void run() {
         if (FragmentManagerImpl.DEBUG) Log.v(TAG, "Run: " + this);
 

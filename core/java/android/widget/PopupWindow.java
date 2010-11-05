@@ -787,6 +787,8 @@ public class PopupWindow {
         p.gravity = gravity;
         p.x = x;
         p.y = y;
+        if (mHeightMode < 0) p.height = mLastHeight = mHeightMode;
+        if (mWidthMode < 0) p.width = mLastWidth = mWidthMode;
         invokePopup(p);
     }
 

@@ -256,6 +256,10 @@ public class DialogFragment extends Fragment
      * the fragment.
      */
     public void dismiss() {
+        dismissInternal(false);
+    }
+
+    void dismissInternal(boolean allowStateLoss) {
         if (mDialog != null) {
             mDialog.dismiss();
             mDialog = null;
@@ -271,7 +275,7 @@ public class DialogFragment extends Fragment
             ft.commit();
         }
     }
-
+    
     public Dialog getDialog() {
         return mDialog;
     }
@@ -353,7 +357,11 @@ public class DialogFragment extends Fragment
 
     public void onDismiss(DialogInterface dialog) {
         if (!mRemoved) {
-            dismiss();
+            // Note: we need to use allowStateLoss, because the dialog
+            // dispatches this asynchronously so we can receive the call
+            // after the activity is paused.  Worst case, when the user comes
+            // back to the activity they see the dialog again.
+            dismissInternal(true);
         }
     }
 
