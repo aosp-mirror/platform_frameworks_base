@@ -29,6 +29,7 @@ import android.database.SQLException;
 import android.drm.DrmManagerClient;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -126,17 +127,6 @@ public class MediaScanner
     private static final int FILES_PRESCAN_PATH_COLUMN_INDEX = 1;
     private static final int FILES_PRESCAN_FORMAT_COLUMN_INDEX = 2;
     private static final int FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX = 3;
-
-    private static final String[] MEDIA_PRESCAN_PROJECTION = new String[] {
-            MediaStore.MediaColumns._ID, // 0
-            MediaStore.MediaColumns.DATA, // 1
-            MediaStore.MediaColumns.DATE_MODIFIED, // 2
-    };
-
-    private static final int MEDIA_PRESCAN_ID_COLUMN_INDEX = 0;
-    private static final int MEDIA_PRESCAN_PATH_COLUMN_INDEX = 1;
-    private static final int MEDIA_PRESCAN_DATE_MODIFIED_COLUMN_INDEX = 2;
-
 
     private static final String[] PLAYLIST_MEMBERS_PROJECTION = new String[] {
             Audio.Playlists.Members.PLAYLIST_ID, // 0
@@ -301,6 +291,9 @@ public class MediaScanner
     private boolean mProcessPlaylists, mProcessGenres;
     private int mMtpObjectHandle;
 
+    private final String mMediaStoragePath;
+    private final String mExternalStoragePath;
+
     // used when scanning the image database so we know whether we have to prune
     // old thumbnail files
     private int mOriginalCount;
@@ -370,6 +363,14 @@ public class MediaScanner
         mBitmapOptions.inJustDecodeBounds = true;
 
         setDefaultRingtoneFileNames();
+
+        String mediaStoragePath = SystemProperties.get("ro.media.storage");
+        if (mediaStoragePath != null &&  mediaStoragePath.length() > 0) {
+            mMediaStoragePath = mediaStoragePath;
+        } else {
+            mMediaStoragePath = null;
+        }
+        mExternalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
     private void setDefaultRingtoneFileNames() {
@@ -459,6 +460,11 @@ public class MediaScanner
             }
 
             String key = path;
+            if (mMediaStoragePath != null && key.startsWith(mMediaStoragePath)) {
+                // MediaProvider uses external variant of path for _data, so we need to match
+                // against that path instead.
+                key = mExternalStoragePath + key.substring(mMediaStoragePath.length());
+            }
             if (mCaseInsensitivePaths) {
                 key = path.toLowerCase();
             }
@@ -925,6 +931,12 @@ public class MediaScanner
         }
 
         if (filePath != null) {
+            if (mMediaStoragePath != null && filePath.startsWith(mMediaStoragePath)) {
+                // MediaProvider uses external variant of path for _data, so we need to query
+                // using that path instead.
+                filePath = mExternalStoragePath + filePath.substring(mMediaStoragePath.length());
+            }
+
             // query for only one file
             where = Files.FileColumns.DATA + "=?";
             selectionArgs = new String[] { filePath };
