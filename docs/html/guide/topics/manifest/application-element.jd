@@ -3,8 +3,7 @@ page.title=&lt;application&gt;
 
 <dl class="xml">
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;application android:<a href="#clear">allowClearUserData</a>=["true" | "false"]
-             android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
+<dd><pre class="stx">&lt;application android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
              android:<a href="#agent">backupAgent</a>="<i>string</i>"
              android:<a href="#debug">debuggable</a>=["true" | "false"]
              android:<a href="#desc">description</a>="<i>string resource</i>"
@@ -48,12 +47,6 @@ cannot be overridden by the components.</dd>
 
 <dt>attributes</dt>
 <dd><dl class="attr">
-
-<dt><a name="clear"></a>{@code android:allowClearUserData}</dt>
-<dd>Whether or not users are given the option to remove user data &mdash; 
-"{@code true}" if they are, and "{@code false}" if not.  If the value is 
-"{@code true}", as it is by default, the application manager includes an 
-option that allows users to clear the data.</dd>
 
 <dt><a name="reparent"></a>{@code android:allowTaskReparenting}</dt>
 <dd>Whether or not activities that the application defines can move from 
