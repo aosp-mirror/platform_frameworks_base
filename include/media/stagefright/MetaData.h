@@ -90,6 +90,7 @@ enum {
     // Track authoring progress status
     // kKeyTrackTimeStatus is used to track progress in elapsed time
     kKeyTrackTimeStatus   = 'tktm',  // int64_t
+    kKeyRotationDegree    = 'rdge',  // int32_t (clockwise, in degree)
 
     kKeyNotRealTime       = 'ntrt',  // bool (int32_t)
 
