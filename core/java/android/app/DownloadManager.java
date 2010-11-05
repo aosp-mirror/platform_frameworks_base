@@ -352,6 +352,17 @@ public class DownloadManager {
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
         private boolean mIsVisibleInDownloadsUi = true;
         private boolean mScannable = false;
+        /** if a file is designated as a MediaScanner scannable file, the following value is
+         * stored in the database column {@link Downloads.Impl#COLUMN_MEDIA_SCANNED}.
+         */
+        private static final int SCANNABLE_VALUE_YES = 0;
+        // value of 1 is stored in the above column by DownloadProvider after it is scanned by
+        // MediaScanner
+        /** if a file is designated as a file that should not be scanned by MediaScanner,
+         * the following value is stored in the database column
+         * {@link Downloads.Impl#COLUMN_MEDIA_SCANNED}.
+         */
+        private static final int SCANNABLE_VALUE_NO = 2;
 
         /**
          * This download is visible but only shows in the notifications
@@ -605,7 +616,8 @@ public class DownloadManager {
                            Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
             }
             // is the file supposed to be media-scannable?
-            values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (mScannable) ? 0 : 2);
+            values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (mScannable) ? SCANNABLE_VALUE_YES :
+                    SCANNABLE_VALUE_NO);
 
             if (!mRequestHeaders.isEmpty()) {
                 encodeHttpHeaders(values);
@@ -899,7 +911,7 @@ public class DownloadManager {
      * by any app to access the downloaded file.
      *
      * @param id the id of the downloaded file.
-     * @return the {@link Uri} for the given downloaded file id, if donload was successful. null
+     * @return the {@link Uri} for the given downloaded file id, if download was successful. null
      * otherwise.
      */
     public Uri getUriForDownloadedFile(long id) {
@@ -919,7 +931,7 @@ public class DownloadManager {
                             Downloads.Impl.COLUMN_DESTINATION);
                     int destination = cursor.getInt(indx);
                     // TODO: if we ever add API to DownloadManager to let the caller specify
-                    // non-external storage for a donloaded file, then the following code
+                    // non-external storage for a downloaded file, then the following code
                     // should also check for that destination.
                     if (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION ||
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
