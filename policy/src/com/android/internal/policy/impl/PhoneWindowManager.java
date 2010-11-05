@@ -686,7 +686,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.System.ACCELEROMETER_ROTATION, DEFAULT_ACCELEROMETER_ROTATION);
             
             // set up rotation lock state
-            mUserRotationMode = (mAccelerometerDefault == 0)
+            mUserRotationMode = (accelerometerDefault == 0)
                 ? WindowManagerPolicy.USER_ROTATION_LOCKED
                 : WindowManagerPolicy.USER_ROTATION_FREE;
             mUserRotation = Settings.System.getInt(resolver,
