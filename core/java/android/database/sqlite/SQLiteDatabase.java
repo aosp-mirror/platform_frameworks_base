@@ -2116,12 +2116,10 @@ public class SQLiteDatabase extends SQLiteClosable {
 
             int maxCacheSz = (mConnectionNum == 0) ? mMaxSqlCacheSize :
                     mParentConnObj.mMaxSqlCacheSize;
-            boolean printWarning =
-                    (mConnectionNum == 0)
-                            ? (!mCacheFullWarning && mCompiledQueries.size() == maxCacheSz)
-                            : (!mParentConnObj.mCacheFullWarning && 
-                                    mParentConnObj.mCompiledQueries.size() == maxCacheSz);
-           if (printWarning) {
+            if (SQLiteDebug.DEBUG_SQL_CACHE && (mConnectionNum == 0)
+                   ? (!mCacheFullWarning && mCompiledQueries.size() == maxCacheSz)
+                   : (!mParentConnObj.mCacheFullWarning &&
+                   mParentConnObj.mCompiledQueries.size() == maxCacheSz)) {
                 /*
                  * cache size of {@link #mMaxSqlCacheSize} is not enough for this app.
                  * log a warning.
@@ -2130,12 +2128,11 @@ public class SQLiteDatabase extends SQLiteClosable {
                 Log.w(TAG, "Reached MAX size for compiled-sql statement cache for database " +
                         getPath() + ". Use setMaxSqlCacheSize() to increase cachesize. ");
                 mCacheFullWarning = true;
-                // STOPSHIP enclose the following warnings with "if (SQLiteDebug.DEBUG_SQL_CACHE)"
                 Log.d(TAG, "Here are the SQL statements in Cache of database: " + mPath);
                 for (String s : mCompiledQueries.keySet()) {
                     Log.d(TAG, "Sql stament in Cache: " + s);
                 }
-            } 
+            }
             /* add the given SQLiteCompiledSql compiledStatement to cache.
              * no need to worry about the cache size - because {@link #mCompiledQueries}
              * self-limits its size to {@link #mMaxSqlCacheSize}.
