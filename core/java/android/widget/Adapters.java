@@ -53,7 +53,7 @@ import java.util.HashMap;
  * </ul>
  * <p>The complete XML format definition of each adapter type is available below.</p>
  * 
- * <a name="xml-cursor-adapter" />
+ * <a name="xml-cursor-adapter"></a>
  * <h2>Cursor adapter</h2>
  * <p>A cursor adapter XML definition starts with the
  * <a href="#xml-cursor-adapter-tag"><code>&lt;cursor-adapter /&gt;</code></a>
@@ -63,7 +63,7 @@ import java.util.HashMap;
  *  <li><a href="#xml-cursor-adapter-bind-tag"><code>&lt;bind /&gt;</code></a></li>
  * </ul>
  * 
- * <a name="xml-cursor-adapter-tag" />
+ * <a name="xml-cursor-adapter-tag"></a>
  * <h3>&lt;cursor-adapter /&gt;</h3>
  * <p>The <code>&lt;cursor-adapter /&gt;</code> element defines the beginning of the
  * document and supports the following attributes:</p>
@@ -89,7 +89,7 @@ import java.util.HashMap;
  * <a href="#xml-cursor-adapter-bind-tag"><code>&lt;bind /&gt;</code></a> tags as children
  * of <code>&lt;cursor-adapter /&gt;</code>.</p>
  * 
- * <a name="xml-cursor-adapter-select-tag" />
+ * <a name="xml-cursor-adapter-select-tag"></a>
  * <h3>&lt;select /&gt;</h3>
  * <p>The <code>&lt;select /&gt;</code> tag is used to select columns from the cursor
  * when doing the query. This can be very useful when using transformations in the
@@ -105,7 +105,7 @@ import java.util.HashMap;
  * <p><strong>Note:</strong> The column named <code>_id</code> is always implicitly
  * selected.</p>
  * 
- * <a name="xml-cursor-adapter-bind-tag" />
+ * <a name="xml-cursor-adapter-bind-tag"></a>
  * <h3>&lt;bind /&gt;</h3>
  * <p>The <code>&lt;bind /&gt;</code> tag is used to bind a column from the cursor to
  * a {@link android.view.View}. A column bound using this tag is automatically selected
@@ -134,7 +134,7 @@ import java.util.HashMap;
  * <a href="#xml-cursor-adapter-bind-data-transformation">data transformations</a> children
  * tags.</p>
  *
- * <a name="xml-cursor-adapter-bind-data-types" />
+ * <a name="xml-cursor-adapter-bind-data-types"></a>
  * <h4>Binding data types</h4>
  * <p>For a binding to occur the data type of the bound column/view pair must be specified.
  * The following data types are currently supported:</p>
@@ -157,7 +157,7 @@ import java.util.HashMap;
  *  application widget</li>
  * </ul>
  * 
- * <a name="xml-cursor-adapter-bind-transformation" />
+ * <a name="xml-cursor-adapter-bind-transformation"></a>
  * <h4>Binding transformations</h4>
  * <p>When defining a data binding you can specify an optional transformation by using one
  * of the following tags as a child of a <code>&lt;bind /&gt;</code> elements:</p>
@@ -183,7 +183,7 @@ import java.util.HashMap;
  *  data binding is of type <code>drawable</code>. This attribute is mandatory</li>
  * </ul>
  * 
- * <a name="xml-cursor-adapter-bind-transformation-transform" />
+ * <a name="xml-cursor-adapter-bind-transformation-transform"></a>
  * <p><strong>&lt;transform /&gt;</strong></p>
  * <p>A simple transform that occurs either by calling a specified class or by performing
  * simple text substitution. The following attributes are supported:</p>
