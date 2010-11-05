@@ -430,7 +430,7 @@ public final class Bridge implements ILayoutBridge {
                         MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
                 h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
                         MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
-                view.measure(w_spec, h_spec);
+                root.measure(w_spec, h_spec);
 
                 int neededWidth = root.getChildAt(0).getMeasuredWidth();
                 if (neededWidth > screenWidth) {
@@ -448,10 +448,10 @@ public final class Bridge implements ILayoutBridge {
             w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
             h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
                     MeasureSpec.EXACTLY);
-            view.measure(w_spec, h_spec);
+            root.measure(w_spec, h_spec);
 
             // now do the layout.
-            view.layout(0, screenOffset, screenWidth, screenHeight);
+            root.layout(0, screenOffset, screenWidth, screenHeight);
 
             // draw the views
             // create the BufferedImage into which the layout will be rendered.
@@ -467,7 +467,6 @@ public final class Bridge implements ILayoutBridge {
             // to set the logger, get the native delegate
             Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(canvas);
             canvasDelegate.setLogger(logger);
-
 
             root.draw(canvas);
             canvasDelegate.dispose();

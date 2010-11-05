@@ -886,22 +886,21 @@ public class Canvas_Delegate {
         native_drawText(nativeCanvas, buffer, 0, count, x, y, flags, paint);
     }
 
-
     /*package*/ static void native_drawTextRun(int nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
             float x, float y, int flags, int paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
-    }
+        int count = end - start;
+        char[] buffer = TemporaryBuffer.obtain(count);
+        TextUtils.getChars(text, start, end, buffer, 0);
 
+        native_drawText(nativeCanvas, buffer, start, end, x, y, flags, paint);
+    }
 
     /*package*/ static void native_drawTextRun(int nativeCanvas, char[] text,
             int start, int count, int contextStart, int contextCount,
             float x, float y, int flags, int paint) {
-        // FIXME
-        throw new UnsupportedOperationException();
+        native_drawText(nativeCanvas, text, 0, count, x, y, flags, paint);
     }
-
 
     /*package*/ static void native_drawPosText(int nativeCanvas,
                                                   char[] text, int index,
