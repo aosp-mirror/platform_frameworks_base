@@ -17,8 +17,26 @@
 */
 -->
 
+<!-- New holo animation, zooming contents on top of wallpaper down. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+        android:zAdjustment="top">
+    <scale android:fromXScale="1.0" android:toXScale="1.0"
+            android:fromYScale=".9" android:toYScale="1.0"
+            android:pivotX="50%p" android:pivotY="50%p"
+            android:fillEnabled="true" android:fillBefore="true"
+            android:interpolator="@anim/decelerate_interpolator"
+            android:startOffset="@android:integer/config_mediumAnimTime"
+            android:duration="@android:integer/config_mediumAnimTime" />
+    <alpha android:fromAlpha="0" android:toAlpha="1.0"
+            android:fillEnabled="true" android:fillBefore="true"
+            android:interpolator="@anim/decelerate_interpolator"
+            android:startOffset="@android:integer/config_mediumAnimTime"
+            android:duration="@android:integer/config_mediumAnimTime"/>
+</set>
+
 <!-- This version zooms the new non-wallpaper up out of the
      wallpaper, without zooming the wallpaper itself. -->
+<!--
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:zAdjustment="top">
     <scale android:fromXScale=".5" android:toXScale="1.0"
@@ -30,6 +48,7 @@
            android:interpolator="@anim/accelerate_decelerate_interpolator"
            android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
+-->
 
 <!-- This version zooms the new non-wallpaper down on top of the
      wallpaper, without zooming the wallpaper itself. -->
