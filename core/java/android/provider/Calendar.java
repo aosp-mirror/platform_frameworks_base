@@ -861,6 +861,8 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EventsColumns.DELETED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        Events.SYNC_ADAPTER_DATA);
 
                 Entity entity = new Entity(cv);
                 Cursor subCursor;
