@@ -4045,7 +4045,6 @@ public class WebView extends AbsoluteLayout
                         com.android.internal.R.string.autofill_this_form).toString() +
                         " " +
                         mAutoFillData.getPreviewString());
-                }
             }
 
             pastEntries.addAll(mDatabase.getFormData(mUrl, mName));
@@ -4863,7 +4862,7 @@ public class WebView extends AbsoluteLayout
         }
 
         // If the page disallows zoom, pass multi-pointer events to webkit.
-        if (ev.getPointerCount() > 1
+        if (!skipScaleGesture && ev.getPointerCount() > 1
             && (mZoomManager.isZoomScaleFixed() || mDeferMultitouch)) {
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
