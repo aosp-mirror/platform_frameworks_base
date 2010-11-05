@@ -75,6 +75,8 @@ public class TabletStatusBarService extends StatusBarService {
     public static final int MSG_CLOSE_SYSTEM_PANEL = 1011;
     public static final int MSG_OPEN_RECENTS_PANEL = 1020;
     public static final int MSG_CLOSE_RECENTS_PANEL = 1021;
+    public static final int MSG_LIGHTS_ON = 1030;
+    public static final int MSG_LIGHTS_OUT = 1031;
 
     private static final int MAX_IMAGE_LEVEL = 10000;
     private static final boolean USE_2D_RECENTS = true;
@@ -263,8 +265,6 @@ public class TabletStatusBarService extends StatusBarService {
         mSystemInfo = sb.findViewById(R.id.systemInfo);
         mRecentButton = sb.findViewById(R.id.recent_apps);
 
-//        mSystemInfo.setOnClickListener(mOnClickListener);
-        mSystemInfo.setOnLongClickListener(new SetLightsOnListener(false));
         mSystemInfo.setOnTouchListener(new ClockTouchListener());
 
         mRecentButton = sb.findViewById(R.id.recent_apps);
@@ -421,6 +421,15 @@ public class TabletStatusBarService extends StatusBarService {
                 case MSG_CLOSE_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing recents panel");
                     if (mRecentsPanel != null) mRecentsPanel.setVisibility(View.GONE);
+                    break;
+                case MSG_LIGHTS_ON:
+                    setViewVisibility(mCurtains, View.GONE, R.anim.lights_out_out);
+                    setViewVisibility(mBarContents, View.VISIBLE, R.anim.status_bar_in);
+                    break;
+                case MSG_LIGHTS_OUT:
+                    animateCollapse();
+                    setViewVisibility(mCurtains, View.VISIBLE, R.anim.lights_out_in);
+                    setViewVisibility(mBarContents, View.GONE, R.anim.status_bar_out);
                     break;
             }
         }
@@ -675,15 +684,12 @@ public class TabletStatusBarService extends StatusBarService {
         mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
     }
 
+    // called by StatusBarService
+    @Override
     public void setLightsOn(boolean on) {
-        if (on) {
-            setViewVisibility(mCurtains, View.GONE, R.anim.lights_out_out);
-            setViewVisibility(mBarContents, View.VISIBLE, R.anim.status_bar_in);
-        } else {
-            animateCollapse();
-            setViewVisibility(mCurtains, View.VISIBLE, R.anim.lights_out_in);
-            setViewVisibility(mBarContents, View.GONE, R.anim.status_bar_out);
-        }
+        mHandler.removeMessages(MSG_LIGHTS_OUT);
+        mHandler.removeMessages(MSG_LIGHTS_ON);
+        mHandler.sendEmptyMessage(on ? MSG_LIGHTS_ON : MSG_LIGHTS_OUT);
     }
 
     public void setMenuKeyVisible(boolean visible) {
@@ -750,26 +756,41 @@ public class TabletStatusBarService extends StatusBarService {
     }
 
     private class ClockTouchListener implements View.OnTouchListener {
-        VelocityTracker mVT;
+        VelocityTracker mVT = null;
+        int mInitX, mInitY;
         public boolean onTouch (View v, MotionEvent event) {
+            final int x = (int) event.getX();
+            final int y = (int) event.getY();
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mVT = VelocityTracker.obtain();
-                    // fall through
+                    mInitX = x;
+                    mInitY = y;
+                    mHandler.sendEmptyMessageDelayed(MSG_LIGHTS_OUT,
+                            ViewConfiguration.getLongPressTimeout());
+                    break;
                 case MotionEvent.ACTION_OUTSIDE:
                 case MotionEvent.ACTION_MOVE:
+                    final Rect r = new Rect();
+                    final float radius = mSystemInfo.getHeight() / 2;
+                    if (Math.abs(x - mInitX) > radius || Math.abs(y - mInitY) > radius) {
+                        mHandler.removeMessages(MSG_LIGHTS_OUT);
+                    }
                     if (mVT == null) break;
                     mVT.addMovement(event);
                     mVT.computeCurrentVelocity(1000);
                     if (mVT.getYVelocity() < -200 && mSystemPanel.getVisibility() == View.GONE) {
                         mHandler.removeMessages(MSG_OPEN_SYSTEM_PANEL);
                         mHandler.sendEmptyMessage(MSG_OPEN_SYSTEM_PANEL);
+                    } else if (mVT.getYVelocity() > 200) {
+                        mHandler.sendEmptyMessage(MSG_LIGHTS_OUT);
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     mVT.recycle();
                     mVT = null;
+                    mHandler.removeMessages(MSG_LIGHTS_OUT);
                     return true;
             }
             return false;
@@ -784,8 +805,6 @@ public class TabletStatusBarService extends StatusBarService {
                 onClickDoNotDisturb();
             } else if (v == mNotificationTrigger) {
                 onClickNotificationTrigger();
-            } else if (v == mSystemInfo) {
-                onClickSystemInfo();
             } else if (v == mRecentButton) {
                 onClickRecentButton();
             }
@@ -1172,19 +1191,11 @@ public class TabletStatusBarService extends StatusBarService {
         }
 
         public void onClick(View v) {
-            try {
-                mBarService.setLightsOn(mOn);
-            } catch (RemoteException ex) {
-                // system process
-            }
+            setLightsOn(mOn);
         }
 
         public boolean onLongClick(View v) {
-            try {
-                mBarService.setLightsOn(mOn);
-            } catch (RemoteException ex) {
-                // system process
-            }
+            setLightsOn(mOn);
             return true;
         }
 
