@@ -1210,6 +1210,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int position;
         int height;
         String filter;
+        int checkedItemCount;
         SparseBooleanArray checkState;
         LongSparseArray<Boolean> checkIdState;
 
@@ -1231,6 +1232,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             position = in.readInt();
             height = in.readInt();
             filter = in.readString();
+            checkedItemCount = in.readInt();
             checkState = in.readSparseBooleanArray();
             long[] idState = in.createLongArray();
 
@@ -1249,6 +1251,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             out.writeInt(position);
             out.writeInt(height);
             out.writeString(filter);
+            out.writeInt(checkedItemCount);
             out.writeSparseBooleanArray(checkState);
             out.writeLongArray(checkIdState != null ? checkIdState.getKeys() : new long[0]);
         }
@@ -1329,6 +1332,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         ss.checkState = mCheckStates;
         ss.checkIdState = mCheckedIdStates;
+        ss.checkedItemCount = mCheckedItemCount;
 
         return ss;
     }
@@ -1369,6 +1373,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (ss.checkIdState != null) {
             mCheckedIdStates = ss.checkIdState;
         }
+
+        mCheckedItemCount = ss.checkedItemCount;
 
         requestLayout();
     }
