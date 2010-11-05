@@ -1,0 +1,104 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define LOG_TAG "WVMExtractor"
+#include <utils/Log.h>
+
+#include "include/WVMExtractor.h"
+
+#include <arpa/inet.h>
+#include <utils/String8.h>
+#include <media/stagefright/Utils.h>
+#include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaSource.h>
+#include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MetaData.h>
+#include <media/stagefright/MediaErrors.h>
+#include <media/stagefright/MediaBuffer.h>
+#include <media/stagefright/MediaDebug.h>
+#include <dlfcn.h>
+
+#include <utils/Errors.h>
+
+/* The extractor lifetime is short - just long enough to get
+ * the media sources constructed - so the shared lib needs to remain open
+ * beyond the lifetime of the extractor.  So keep the handle as a global
+ * rather than a member of the extractor
+ */
+void *gVendorLibHandle = NULL;
+
+namespace android {
+
+static Mutex gWVMutex;
+
+WVMExtractor::WVMExtractor(const sp<DataSource> &source)
+    : mDataSource(source) {
+    {
+        Mutex::Autolock autoLock(gWVMutex);
+        if (gVendorLibHandle == NULL) {
+            gVendorLibHandle = dlopen("libwvm.so", RTLD_NOW);
+        }
+
+        if (gVendorLibHandle == NULL) {
+            LOGE("Failed to open libwvm.so");
+            return;
+        }
+    }
+
+    typedef MediaExtractor *(*GetInstanceFunc)(sp<DataSource>);
+    GetInstanceFunc getInstanceFunc =
+        (GetInstanceFunc) dlsym(gVendorLibHandle,
+                "_ZN7android11GetInstanceENS_2spINS_10DataSourceEEE");
+
+    if (getInstanceFunc) {
+        LOGD("Calling GetInstanceFunc");
+        mImpl = (*getInstanceFunc)(source);
+        CHECK(mImpl != NULL);
+    } else {
+        LOGE("Failed to locate GetInstance in libwvm.so");
+    }
+}
+
+WVMExtractor::~WVMExtractor() {
+}
+
+size_t WVMExtractor::countTracks() {
+    return (mImpl != NULL) ? mImpl->countTracks() : 0;
+}
+
+sp<MediaSource> WVMExtractor::getTrack(size_t index) {
+    if (mImpl == NULL) {
+        return NULL;
+    }
+    return mImpl->getTrack(index);
+}
+
+sp<MetaData> WVMExtractor::getTrackMetaData(size_t index, uint32_t flags) {
+    if (mImpl == NULL) {
+        return NULL;
+    }
+    return mImpl->getTrackMetaData(index, flags);
+}
+
+sp<MetaData> WVMExtractor::getMetaData() {
+    if (mImpl == NULL) {
+        return NULL;
+    }
+    return mImpl->getMetaData();
+}
+
+} //namespace android
+

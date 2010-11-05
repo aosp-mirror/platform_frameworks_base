@@ -510,5 +510,13 @@ void NuCachedSource2::onSuspend() {
     mSuspended = true;
 }
 
+DecryptHandle* NuCachedSource2::DrmInitialization(DrmManagerClient* client) {
+    return mSource->DrmInitialization(client);
+}
+
+void NuCachedSource2::getDrmInfo(DecryptHandle **handle, DrmManagerClient **client) {
+    mSource->getDrmInfo(handle, client);
+}
+
 }  // namespace android
 

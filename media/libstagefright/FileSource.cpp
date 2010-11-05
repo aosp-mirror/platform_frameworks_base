@@ -55,9 +55,6 @@ FileSource::~FileSource() {
         delete[] mDrmBuf;
         mDrmBuf = NULL;
     }
-    if (mDecryptHandle != NULL) {
-        mDrmManagerClient->closeDecryptSession(mDecryptHandle);
-    }
 }
 
 status_t FileSource::initCheck() const {
@@ -113,7 +110,11 @@ status_t FileSource::getSize(off_t *size) {
 }
 
 DecryptHandle* FileSource::DrmInitialization(DrmManagerClient* client) {
+    if (client == NULL) {
+        return NULL;
+    }
     mDrmManagerClient = client;
+
     if (mDecryptHandle == NULL) {
         mDecryptHandle = mDrmManagerClient->openDecryptSession(
                 mFd, mOffset, mLength);

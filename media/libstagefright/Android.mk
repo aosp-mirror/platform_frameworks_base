@@ -45,6 +45,7 @@ LOCAL_SRC_FILES:=                         \
         TimedEventQueue.cpp               \
         Utils.cpp                         \
         WAVExtractor.cpp                  \
+        WVMExtractor.cpp                  \
         avc_utils.cpp                     \
         string.cpp
 
