@@ -431,6 +431,9 @@ public class SystemPanel extends LinearLayout implements StatusBarPanel {
     }
 
     public void onAttachedToWindow() {
+        DateView date = (DateView)findViewById(R.id.date);
+        date.setUpdates(true);
+
         TextView settingsButton = (TextView)findViewById(R.id.settings_button);
         settingsButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
