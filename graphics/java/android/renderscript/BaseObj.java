@@ -33,7 +33,7 @@ class BaseObj {
 
     public int getID() {
         if (mDestroyed) {
-            throw new IllegalStateException("using a destroyed object.");
+            throw new RSInvalidStateException("using a destroyed object.");
         }
         return mID;
     }
@@ -43,13 +43,12 @@ class BaseObj {
     String mName;
     RenderScript mRS;
 
-    public void setName(String s) throws IllegalStateException, IllegalArgumentException
-    {
+    public void setName(String s) {
         if(s.length() < 1) {
-            throw new IllegalArgumentException("setName does not accept a zero length string.");
+            throw new RSIllegalArgumentException("setName does not accept a zero length string.");
         }
         if(mName != null) {
-            throw new IllegalArgumentException("setName object already has a name.");
+            throw new RSIllegalArgumentException("setName object already has a name.");
         }
 
         try {
@@ -61,8 +60,7 @@ class BaseObj {
         }
     }
 
-    protected void finalize() throws Throwable
-    {
+    protected void finalize() throws Throwable {
         if (!mDestroyed) {
             if(mID != 0 && mRS.isAlive()) {
                 mRS.nObjDestroy(mID);
@@ -78,7 +76,7 @@ class BaseObj {
 
     public void destroy() {
         if(mDestroyed) {
-            throw new IllegalStateException("Object already destroyed.");
+            throw new RSInvalidStateException("Object already destroyed.");
         }
         mDestroyed = true;
         mRS.nObjDestroy(mID);

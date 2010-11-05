@@ -93,6 +93,18 @@ public class Element extends BaseObj {
         }
     }
 
+    public boolean isComplex() {
+        if (mElements == null) {
+            return false;
+        }
+        for (int ct=0; ct < mElements.length; ct++) {
+            if (mElements[ct].mElements != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Element BOOLEAN(RenderScript rs) {
         if(rs.mElement_BOOLEAN == null) {
             rs.mElement_BOOLEAN = createUser(rs, DataType.BOOLEAN);
@@ -397,7 +409,7 @@ public class Element extends BaseObj {
 
     }
 
-    public void destroy() throws IllegalStateException {
+    public void destroy() {
         super.destroy();
     }
 
@@ -412,7 +424,7 @@ public class Element extends BaseObj {
 
     public static Element createVector(RenderScript rs, DataType dt, int size) {
         if (size < 2 || size > 4) {
-            throw new IllegalArgumentException("Bad size");
+            throw new RSIllegalArgumentException("Vector size out of rance 2-4.");
         }
         DataKind dk = DataKind.USER;
         boolean norm = false;
@@ -426,22 +438,22 @@ public class Element extends BaseObj {
               dk == DataKind.PIXEL_LA ||
               dk == DataKind.PIXEL_RGB ||
               dk == DataKind.PIXEL_RGBA)) {
-            throw new IllegalArgumentException("Unsupported DataKind");
+            throw new RSIllegalArgumentException("Unsupported DataKind");
         }
         if (!(dt == DataType.UNSIGNED_8 ||
               dt == DataType.UNSIGNED_5_6_5 ||
               dt == DataType.UNSIGNED_4_4_4_4 ||
               dt == DataType.UNSIGNED_5_5_5_1)) {
-            throw new IllegalArgumentException("Unsupported DataType");
+            throw new RSIllegalArgumentException("Unsupported DataType");
         }
         if (dt == DataType.UNSIGNED_5_6_5 && dk != DataKind.PIXEL_RGB) {
-            throw new IllegalArgumentException("Bad kind and type combo");
+            throw new RSIllegalArgumentException("Bad kind and type combo");
         }
         if (dt == DataType.UNSIGNED_5_5_5_1 && dk != DataKind.PIXEL_RGBA) {
-            throw new IllegalArgumentException("Bad kind and type combo");
+            throw new RSIllegalArgumentException("Bad kind and type combo");
         }
         if (dt == DataType.UNSIGNED_4_4_4_4 && dk != DataKind.PIXEL_RGBA) {
-            throw new IllegalArgumentException("Bad kind and type combo");
+            throw new RSIllegalArgumentException("Bad kind and type combo");
         }
 
         int size = 1;
@@ -477,7 +489,7 @@ public class Element extends BaseObj {
 
         public void add(Element element, String name, int arraySize) {
             if (arraySize < 1) {
-                throw new IllegalArgumentException("Array size cannot be less than 1.");
+                throw new RSIllegalArgumentException("Array size cannot be less than 1.");
             }
             if(mCount == mElements.length) {
                 Element[] e = new Element[mCount + 8];

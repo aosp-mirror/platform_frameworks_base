@@ -118,18 +118,6 @@ nObjDestroy(JNIEnv *_env, jobject _this, RsContext con, jint obj)
     rsObjDestroy(con, (void *)obj);
 }
 
-
-static jint
-nFileOpen(JNIEnv *_env, jobject _this, RsContext con, jbyteArray str)
-{
-    LOG_API("nFileOpen, con(%p)", con);
-    jint len = _env->GetArrayLength(str);
-    jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
-    jint ret = (jint)rsFileOpen(con, (const char *)cptr, len);
-    _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
-    return ret;
-}
-
 // ---------------------------------------------------------------------------
 
 static jint
@@ -1247,7 +1235,6 @@ static JNINativeMethod methods[] = {
 {"rsnGetName",                       "(II)Ljava/lang/String;",                (void*)nGetName },
 {"rsnObjDestroy",                    "(II)V",                                 (void*)nObjDestroy },
 
-{"rsnFileOpen",                      "(I[B)I",                                (void*)nFileOpen },
 {"rsnFileA3DCreateFromAssetStream",  "(II)I",                                 (void*)nFileA3DCreateFromAssetStream },
 {"rsnFileA3DGetNumIndexEntries",     "(II)I",                                 (void*)nFileA3DGetNumIndexEntries },
 {"rsnFileA3DGetIndexEntries",        "(III[I[Ljava/lang/String;)V",           (void*)nFileA3DGetIndexEntries },

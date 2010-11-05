@@ -136,7 +136,7 @@ public class Type extends BaseObj {
 
         public Builder(RenderScript rs, Element e) {
             if(e.mID == 0) {
-                throw new IllegalArgumentException("Invalid element.");
+                throw new RSIllegalArgumentException("Invalid element.");
             }
 
             mRS = rs;
@@ -147,7 +147,7 @@ public class Type extends BaseObj {
 
         public void add(Dimension d, int value) {
             if(value < 1) {
-                throw new IllegalArgumentException("Values of less than 1 for Dimensions are not valid.");
+                throw new RSIllegalArgumentException("Values of less than 1 for Dimensions are not valid.");
             }
             if(mDimensions.length >= mEntryCount) {
                 Dimension[] dn = new Dimension[mEntryCount + 8];
