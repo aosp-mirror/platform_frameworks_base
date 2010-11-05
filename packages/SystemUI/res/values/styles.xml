@@ -30,7 +30,7 @@
         parent="@android:style/TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearance</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#50FFFFFF</item>
+        <item name="android:textColor">#FF808080</item>
     </style>
 
     <style name="TextAppearance.StatusBar.TextButton"

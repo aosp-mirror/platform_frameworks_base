@@ -70,7 +70,7 @@ public final class DateView extends TextView {
         setText(DateFormat.getDateInstance(DateFormat.LONG).format(now));
     }
 
-    void setUpdates(boolean update) {
+    public void setUpdates(boolean update) {
         if (update != mUpdating) {
             mUpdating = update;
             if (update) {
