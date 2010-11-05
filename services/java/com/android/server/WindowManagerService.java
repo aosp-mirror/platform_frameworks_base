@@ -65,6 +65,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
@@ -10709,7 +10710,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return val;
     }
 
-    class Watermark {
+    static class Watermark {
         final String[] mTokens;
         final String mText;
         final Paint mTextPaint;
@@ -10725,9 +10726,9 @@ public class WindowManagerService extends IWindowManager.Stub
         int mLastDH;
         boolean mDrawNeeded;
 
-        Watermark(SurfaceSession session, String[] tokens) {
+        Watermark(Display display, SurfaceSession session, String[] tokens) {
             final DisplayMetrics dm = new DisplayMetrics();
-            mDisplay.getMetrics(dm);
+            display.getMetrics(dm);
 
             if (false) {
                 Log.i(TAG, "*********************** WATERMARK");
@@ -10821,6 +10822,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 } catch (OutOfResourcesException e) {
                 }
                 if (c != null) {
+                    c.drawColor(0, PorterDuff.Mode.CLEAR);
+                    
                     int deltaX = mDeltaX;
                     int deltaY = mDeltaY;
 
@@ -10863,7 +10866,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (line != null) {
                 String[] toks = line.split("%");
                 if (toks != null && toks.length > 0) {
-                    mWatermark = new Watermark(mFxSession, toks);
+                    mWatermark = new Watermark(mDisplay, mFxSession, toks);
                 }
             }
         } catch (FileNotFoundException e) {
