@@ -16,11 +16,11 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     >
-    <translate android:fromYDelta="-100%p" android:toYDelta="0"
+    <translate android:fromYDelta="100%p" android:toYDelta="0"
         android:duration="@android:integer/config_longAnimTime" 
         android:interpolator="@anim/hydraulic_brake_interpolator"
         />
-    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
+    <alpha android:fromAlpha="0.5" android:toAlpha="1.0"
         android:duration="@android:integer/config_longAnimTime" 
         />
 </set>
