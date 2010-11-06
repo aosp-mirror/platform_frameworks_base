@@ -172,14 +172,16 @@ status_t StagefrightMediaScanner::processFile(
             || !strcasecmp(extension, ".rtttl")
             || !strcasecmp(extension, ".rtx")
             || !strcasecmp(extension, ".ota")) {
-        return HandleMIDI(path, &client);
-    }
-
-    if (!strcasecmp(extension, ".ogg")) {
-        return HandleOGG(path, &client);
-    }
-
-    if (mRetriever->setDataSource(path) == OK
+        status_t status = HandleMIDI(path, &client);
+        if (status != OK) {
+            return status;
+        }
+    } else if (!strcasecmp(extension, ".ogg")) {
+        status_t status = HandleOGG(path, &client);
+        if (status != OK) {
+            return status;
+        }
+    } else if (mRetriever->setDataSource(path) == OK
             && mRetriever->setMode(
                 METADATA_MODE_METADATA_RETRIEVAL_ONLY) == OK) {
         const char *value;
