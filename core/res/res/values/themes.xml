@@ -143,6 +143,7 @@
         <item name="dialogTheme">@android:style/Theme.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Dialog.Alert</item>
         <item name="alertDialogButtonGroupStyle">?android:attr/buttonGroupStyle</item>
+        <item name="alertDialogCenterButtons">true</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -590,7 +591,7 @@
     </style>
 
     <!-- @hide -->
-    <style name="Theme.Dialog.AppError">
+    <style name="Theme.Dialog.AppError" parent="Theme.Holo.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
         <item name="windowBackground">@android:color/transparent</item>
@@ -754,6 +755,7 @@
         <item name="dialogTheme">@android:style/Theme.Holo.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Holo.Dialog.Alert</item>
         <item name="alertDialogButtonGroupStyle">@android:style/Widget.Holo.ButtonGroup.AlertDialog</item>
+        <item name="alertDialogCenterButtons">false</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
