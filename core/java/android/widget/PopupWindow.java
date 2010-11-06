@@ -27,7 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.IBinder;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -89,6 +89,7 @@ public class PopupWindow {
     private boolean mClippingEnabled = true;
     private boolean mSplitTouchEnabled;
     private boolean mLayoutInScreen;
+    private boolean mClipToScreen;
 
     private OnTouchListener mTouchInterceptor;
     
@@ -101,7 +102,7 @@ public class PopupWindow {
 
     private int mPopupWidth;
     private int mPopupHeight;
-    
+
     private int[] mDrawingLocation = new int[2];
     private int[] mScreenLocation = new int[2];
     private Rect mTempRect = new Rect();
@@ -582,6 +583,17 @@ public class PopupWindow {
     }
 
     /**
+     * Clip this popup window to the screen, but not to the containing window.
+     *
+     * @param enabled True to clip to the screen.
+     * @hide
+     */
+    public void setClipToScreenEnabled(boolean enabled) {
+        mClipToScreen = enabled;
+        setClippingEnabled(!enabled);
+    }
+    
+    /**
      * <p>Indicates whether the popup window supports splitting touches.</p>
      * 
      * @return true if the touch splitting is enabled, false otherwise
@@ -1057,6 +1069,21 @@ public class PopupWindow {
             } else {
                 p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
             }
+        }
+
+        if (mClipToScreen) {
+            final int displayFrameWidth = displayFrame.right - displayFrame.left;
+
+            int right = p.x + p.width;
+            if (right > displayFrameWidth) {
+                p.x -= right - displayFrameWidth;
+            }
+            if (p.x < displayFrame.left) {
+                p.x = displayFrame.left;
+                p.width = Math.min(p.width, displayFrameWidth);
+            }
+
+            p.y = Math.max(p.y, displayFrame.top);
         }
 
         p.gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
