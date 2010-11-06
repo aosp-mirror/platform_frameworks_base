@@ -134,6 +134,43 @@ public interface VideoEditor {
      * change the contents of the output movie throw an IllegalStateException
      * while an export operation is pending.
      *
+     * The audio and video codecs are automatically selected by the underlying
+     * implementation.
+     *
+     * @param filename The output file name (including the full path)
+     * @param height The height of the output video file. The supported values
+     *            for height are described in the MediaProperties class, for
+     *            example: HEIGHT_480. The width will be automatically computed
+     *            according to the aspect ratio provided by
+     *            {@link #setAspectRatio(int)}
+     * @param bitrate The bitrate of the output video file. This is approximate
+     *            value for the output movie. Supported bitrate values are
+     *            described in the MediaProperties class for example:
+     *            BITRATE_384K
+     * @param listener The listener for progress notifications. Use null if
+     *            export progress notifications are not needed.
+     * @throws IllegalArgumentException if height or bitrate are not supported
+     *             or if the audio or video codecs are not supported
+     * @throws IOException if output file cannot be created
+     * @throws IllegalStateException if a preview or an export is in progress or
+     *             if no MediaItem has been added
+     * @throws CancellationException if export is canceled by calling
+     *             {@link #cancelExport()}
+     * @throws UnsupportOperationException if multiple simultaneous export() are
+     *             not allowed
+     */
+    public void export(String filename, int height, int bitrate, ExportProgressListener listener)
+            throws IOException;
+
+    /**
+     * Create the output movie based on all media items added and the applied
+     * storyboard items. This method can take a long time to execute and is
+     * blocking. The application will receive progress notifications via the
+     * ExportProgressListener. Specific implementations may not support multiple
+     * simultaneous export operations. Note that invoking methods which would
+     * change the contents of the output movie throw an IllegalStateException
+     * while an export operation is pending.
+     *
      * @param filename The output file name (including the full path)
      * @param height The height of the output video file. The supported values
      *            for height are described in the MediaProperties class, for

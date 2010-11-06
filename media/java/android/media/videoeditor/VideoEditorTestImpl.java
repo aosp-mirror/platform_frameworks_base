@@ -1034,6 +1034,13 @@ public class VideoEditorTestImpl implements VideoEditor {
     /*
      * {@inheritDoc}
      */
+    public void export(String filename, int height, int bitrate, ExportProgressListener listener)
+            throws IOException {
+    }
+
+    /*
+     * {@inheritDoc}
+     */
     public void export(String filename, int height, int bitrate, int audioCodec, int videoCodec,
             ExportProgressListener listener) throws IOException {
     }
