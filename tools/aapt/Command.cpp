@@ -1142,8 +1142,8 @@ int doDump(Bundle* bundle)
                 largeScreen = targetSdk >= 4 ? -1 : 0;
             }
             if (xlargeScreen > 0) {
-                // Introduced in Honeycomb.
-                xlargeScreen = targetSdk >= 10 ? -1 : 0;
+                // Introduced in Gingerbread.
+                xlargeScreen = targetSdk >= 9 ? -1 : 0;
             }
             if (anyDensity > 0) {
                 anyDensity = targetSdk >= 4 ? -1 : 0;
