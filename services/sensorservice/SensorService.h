@@ -49,8 +49,8 @@ class SensorService :
 {
    friend class BinderService<SensorService>;
 
-   static const nsecs_t MINIMUM_EVENTS_PERIOD = 10000000; // 10ms
-   static const nsecs_t DEFAULT_EVENTS_PERIOD = 200000000; // 200 ms
+   static const nsecs_t MINIMUM_EVENTS_PERIOD =   1000000; // 1000 Hz
+   static const nsecs_t DEFAULT_EVENTS_PERIOD = 200000000; //    5 Hz
 
             SensorService();
     virtual ~SensorService();
