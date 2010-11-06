@@ -36,7 +36,6 @@ import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
 import android.app.KeyguardManager;
-import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -52,7 +51,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.telephony.TelephonyManager;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.EventLog;
@@ -61,7 +59,6 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.InputQueue;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -170,12 +167,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
     private long mVolumeKeyUpTime;
 
-    private KeyguardManager mKeyguardManager = null;
-    
-    private SearchManager mSearchManager = null;
+    private AudioManager mAudioManager;
+    private KeyguardManager mKeyguardManager;
 
-    private TelephonyManager mTelephonyManager = null;
-    
     public PhoneWindow(Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);
@@ -1223,6 +1217,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @see android.view.KeyEvent
      */
     protected boolean onKeyDown(int featureId, int keyCode, KeyEvent event) {
+        /* ****************************************************************************
+         * HOW TO DECIDE WHERE YOUR KEY HANDLING GOES.
+         *
+         * If your key handling must happen before the app gets a crack at the event,
+         * it goes in PhoneWindowManager.
+         *
+         * If your key handling should happen in all windows, and does not depend on
+         * the state of the current application, other than that the current
+         * application can override the behavior by handling the event itself, it
+         * should go in PhoneFallbackEventHandler.
+         *
+         * Only if your handling depends on the window, and the fact that it has
+         * a DecorView, should it go here.
+         * ****************************************************************************/
+
         final KeyEvent.DispatcherState dispatcher =
                 mDecor != null ? mDecor.getKeyDispatcherState() : null;
         //Log.i(TAG, "Key down: repeat=" + event.getRepeatCount()
@@ -1232,68 +1241,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                AudioManager audioManager = (AudioManager) getContext().getSystemService(
-                        Context.AUDIO_SERVICE);
-                if (audioManager != null) {
-                    /*
-                     * Adjust the volume in on key down since it is more
-                     * responsive to the user.
-                     */
-                    // TODO: Actually handle MUTE.
-                    audioManager.adjustSuggestedStreamVolume(
-                            keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                                    ? AudioManager.ADJUST_RAISE
-                                    : AudioManager.ADJUST_LOWER,
-                            mVolumeControlStreamType,
-                            AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
-                }
-                return true;
-            }
-
-
-            case KeyEvent.KEYCODE_MEDIA_PLAY:
-            case KeyEvent.KEYCODE_MEDIA_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                /* Suppress PLAY/PAUSE toggle when phone is ringing or in-call
-                 * to avoid music playback */
-                if (mTelephonyManager == null) {
-                    mTelephonyManager = (TelephonyManager) getContext().getSystemService(
-                            Context.TELEPHONY_SERVICE);
-                }
-                if (mTelephonyManager != null &&
-                        mTelephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
-                    return true;  // suppress key event
-                }
-            case KeyEvent.KEYCODE_MUTE:
-            case KeyEvent.KEYCODE_HEADSETHOOK:
-            case KeyEvent.KEYCODE_MEDIA_STOP:
-            case KeyEvent.KEYCODE_MEDIA_NEXT:
-            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-            case KeyEvent.KEYCODE_MEDIA_REWIND:
-            case KeyEvent.KEYCODE_MEDIA_RECORD:
-            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
-                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-                getContext().sendOrderedBroadcast(intent, null);
-                return true;
-            }
-
-            case KeyEvent.KEYCODE_CAMERA: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()
-                        || dispatcher == null) {
-                    break;
-                }
-                if (event.getRepeatCount() == 0) {
-                    dispatcher.startTracking(event, this);
-                } else if (event.isLongPress() && dispatcher.isTracking(event)) {
-                    dispatcher.performedLongPress(event);
-                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    sendCloseSystemWindows();
-                    // Broadcast an intent that the Camera button was longpressed
-                    Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
-                    intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-                    getContext().sendOrderedBroadcast(intent, null);
-                }
+                // Similar code is in PhoneFallbackEventHandler in case the window
+                // doesn't have one of these.  In this case, we execute it here and
+                // eat the event instead, because we have mVolumeControlStreamType
+                // and they don't.
+                getAudioManager().handleKeyDown(keyCode, mVolumeControlStreamType);
                 return true;
             }
 
@@ -1310,84 +1262,24 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return true;
             }
 
-            case KeyEvent.KEYCODE_CALL: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()
-                        || dispatcher == null) {
-                    break;
-                }
-                if (event.getRepeatCount() == 0) {
-                    dispatcher.startTracking(event, this);
-                } else if (event.isLongPress() && dispatcher.isTracking(event)) {
-                    dispatcher.performedLongPress(event);
-                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    // launch the VoiceDialer
-                    Intent intent = new Intent(Intent.ACTION_VOICE_COMMAND);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        sendCloseSystemWindows();
-                        getContext().startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        startCallActivity();
-                    }
-                }
-                return true;
-            }
-
-            case KeyEvent.KEYCODE_SEARCH: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()
-                        || dispatcher == null) {
-                    break;
-                }
-                if (event.getRepeatCount() == 0) {
-                    dispatcher.startTracking(event, this);
-                } else if (event.isLongPress() && dispatcher.isTracking(event)) {
-                    Configuration config = getContext().getResources().getConfiguration(); 
-                    if (config.keyboard == Configuration.KEYBOARD_NOKEYS
-                            || config.hardKeyboardHidden
-                                    == Configuration.HARDKEYBOARDHIDDEN_YES) {
-                        // launch the search activity
-                        Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        try {
-                            mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                            sendCloseSystemWindows();
-                            getSearchManager().stopSearch();
-                            getContext().startActivity(intent);
-                            // Only clear this if we successfully start the
-                            // activity; otherwise we will allow the normal short
-                            // press action to be performed.
-                            dispatcher.performedLongPress(event);
-                            return true;
-                        } catch (ActivityNotFoundException e) {
-                            // Ignore
-                        }
-                    }
-                }
-                break;
-            }
         }
 
         return false;
     }
 
-    /**
-     * @return A handle to the keyguard manager.
-     */
     private KeyguardManager getKeyguardManager() {
         if (mKeyguardManager == null) {
-            mKeyguardManager = (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
+            mKeyguardManager = (KeyguardManager) getContext().getSystemService(
+                    Context.KEYGUARD_SERVICE);
         }
         return mKeyguardManager;
     }
-    
-    /**
-     * @return A handle to the search manager.
-     */
-    private SearchManager getSearchManager() {
-        if (mSearchManager == null) {
-            mSearchManager = (SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE);
+
+    AudioManager getAudioManager() {
+        if (mAudioManager == null) {
+            mAudioManager = (AudioManager)getContext().getSystemService(Context.AUDIO_SERVICE);
         }
-        return mSearchManager;
+        return mAudioManager;
     }
 
     /**
@@ -1409,22 +1301,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                if (!event.isCanceled()) {
-                    AudioManager audioManager = (AudioManager) getContext().getSystemService(
-                            Context.AUDIO_SERVICE);
-                    if (audioManager != null) {
-                        /*
-                         * Play a sound. This is done on key up since we don't want the
-                         * sound to play when a user holds down volume down to mute.
-                         */
-                        // TODO: Actually handle MUTE.
-                        audioManager.adjustSuggestedStreamVolume(
-                                AudioManager.ADJUST_SAME,
-                                mVolumeControlStreamType,
-                                AudioManager.FLAG_PLAY_SOUND);
-                        mVolumeKeyUpTime = SystemClock.uptimeMillis();
-                    }
-                }
+                // Similar code is in PhoneFallbackEventHandler in case the window
+                // doesn't have one of these.  In this case, we execute it here and
+                // eat the event instead, because we have mVolumeControlStreamType
+                // and they don't.
+                getAudioManager().handleKeyUp(keyCode, mVolumeControlStreamType);
                 return true;
             }
 
@@ -1452,43 +1333,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 break;
             }
 
-            case KeyEvent.KEYCODE_HEADSETHOOK:
-            case KeyEvent.KEYCODE_MUTE:
-            case KeyEvent.KEYCODE_MEDIA_PLAY:
-            case KeyEvent.KEYCODE_MEDIA_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_STOP:
-            case KeyEvent.KEYCODE_MEDIA_NEXT:
-            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-            case KeyEvent.KEYCODE_MEDIA_REWIND:
-            case KeyEvent.KEYCODE_MEDIA_RECORD:
-            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD: {
-                Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-                getContext().sendOrderedBroadcast(intent, null);
-                return true;
-            }
-
-            case KeyEvent.KEYCODE_CAMERA: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
-                    break;
-                }
-                if (event.isTracking() && !event.isCanceled()) {
-                    // Add short press behavior here if desired
-                }
-                return true;
-            }
-
-            case KeyEvent.KEYCODE_CALL: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
-                    break;
-                }
-                if (event.isTracking() && !event.isCanceled()) {
-                    startCallActivity();
-                }
-                return true;
-            }
-
             case KeyEvent.KEYCODE_SEARCH: {
                 /*
                  * Do this in onKeyUp since the Search key is also used for
@@ -1505,17 +1349,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         return false;
-    }
-
-    private void startCallActivity() {
-        sendCloseSystemWindows();
-        Intent intent = new Intent(Intent.ACTION_CALL_BUTTON);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        try {
-            getContext().startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "No activity found for android.intent.action.CALL_BUTTON.");
-        }
     }
 
     @Override
@@ -1718,26 +1551,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             final int keyCode = event.getKeyCode();
             final int action = event.getAction();
             final boolean isDown = action == KeyEvent.ACTION_DOWN;
-
-            /*
-             * If the user hits another key within the play sound delay, then
-             * cancel the sound
-             */
-            if (keyCode != KeyEvent.KEYCODE_VOLUME_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP
-                    && keyCode != KeyEvent.KEYCODE_VOLUME_MUTE
-                    && mVolumeKeyUpTime + VolumePanel.PLAY_SOUND_DELAY
-                            > SystemClock.uptimeMillis()) {
-                /*
-                 * The user has hit another key during the delay (e.g., 300ms)
-                 * since the last volume key up, so cancel any sounds.
-                 */
-                AudioManager audioManager = (AudioManager) getContext().getSystemService(
-                        Context.AUDIO_SERVICE);
-                if (audioManager != null) {
-                    audioManager.adjustSuggestedStreamVolume(AudioManager.ADJUST_SAME,
-                            mVolumeControlStreamType, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
-                }
-            }
 
             if (isDown && (event.getRepeatCount() == 0)) {
                 // First handle chording of panel key: if a panel key is held
