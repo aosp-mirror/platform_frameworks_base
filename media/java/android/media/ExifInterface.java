@@ -51,6 +51,12 @@ public class ExifInterface {
     public static final String TAG_GPS_LATITUDE_REF = "GPSLatitudeRef";
     /** Type is String. */
     public static final String TAG_GPS_LONGITUDE_REF = "GPSLongitudeRef";
+    /** Type is String. */
+    public static final String TAG_EXPOSURE_TIME = "ExposureTime";
+    /** Type is String. */
+    public static final String TAG_APERTURE = "FNumber";
+    /** Type is String. */
+    public static final String TAG_ISO = "ISOSpeedRatings";
 
     /**
      * The altitude (in meters) based on the reference in TAG_GPS_ALTITUDE_REF.
