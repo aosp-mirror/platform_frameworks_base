@@ -103,12 +103,14 @@ struct AwesomeLocalRenderer : public AwesomeRenderer {
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<ISurface> &surface,
             size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight)
+            size_t decodedWidth, size_t decodedHeight,
+            int32_t rotationDegrees)
         : mTarget(NULL),
           mLibHandle(NULL) {
             init(previewOnly, componentName,
                  colorFormat, surface, displayWidth,
-                 displayHeight, decodedWidth, decodedHeight);
+                 displayHeight, decodedWidth, decodedHeight,
+                 rotationDegrees);
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -141,7 +143,8 @@ private:
             OMX_COLOR_FORMATTYPE colorFormat,
             const sp<ISurface> &surface,
             size_t displayWidth, size_t displayHeight,
-            size_t decodedWidth, size_t decodedHeight);
+            size_t decodedWidth, size_t decodedHeight,
+            int32_t rotationDegrees);
 
     AwesomeLocalRenderer(const AwesomeLocalRenderer &);
     AwesomeLocalRenderer &operator=(const AwesomeLocalRenderer &);;
@@ -153,7 +156,8 @@ void AwesomeLocalRenderer::init(
         OMX_COLOR_FORMATTYPE colorFormat,
         const sp<ISurface> &surface,
         size_t displayWidth, size_t displayHeight,
-        size_t decodedWidth, size_t decodedHeight) {
+        size_t decodedWidth, size_t decodedHeight,
+        int32_t rotationDegrees) {
     if (!previewOnly) {
         // We will stick to the vanilla software-color-converting renderer
         // for "previewOnly" mode, to avoid unneccessarily switching overlays
@@ -162,6 +166,14 @@ void AwesomeLocalRenderer::init(
         mLibHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
 
         if (mLibHandle) {
+            typedef VideoRenderer *(*CreateRendererWithRotationFunc)(
+                    const sp<ISurface> &surface,
+                    const char *componentName,
+                    OMX_COLOR_FORMATTYPE colorFormat,
+                    size_t displayWidth, size_t displayHeight,
+                    size_t decodedWidth, size_t decodedHeight,
+                    int32_t rotationDegrees);
+
             typedef VideoRenderer *(*CreateRendererFunc)(
                     const sp<ISurface> &surface,
                     const char *componentName,
@@ -169,17 +181,36 @@ void AwesomeLocalRenderer::init(
                     size_t displayWidth, size_t displayHeight,
                     size_t decodedWidth, size_t decodedHeight);
 
-            CreateRendererFunc func =
-                (CreateRendererFunc)dlsym(
+            CreateRendererWithRotationFunc funcWithRotation =
+                (CreateRendererWithRotationFunc)dlsym(
                         mLibHandle,
-                        "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
-                        "OMX_COLOR_FORMATTYPEjjjj");
+                        "_Z26createRendererWithRotationRKN7android2spINS_8"
+                        "ISurfaceEEEPKc20OMX_COLOR_FORMATTYPEjjjji");
 
-            if (func) {
+            if (funcWithRotation) {
                 mTarget =
-                    (*func)(surface, componentName, colorFormat,
-                        displayWidth, displayHeight,
-                        decodedWidth, decodedHeight);
+                    (*funcWithRotation)(
+                            surface, componentName, colorFormat,
+                            displayWidth, displayHeight,
+                            decodedWidth, decodedHeight,
+                            rotationDegrees);
+            } else {
+                if (rotationDegrees != 0) {
+                    LOGW("renderer does not support rotation.");
+                }
+
+                CreateRendererFunc func =
+                    (CreateRendererFunc)dlsym(
+                            mLibHandle,
+                            "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
+                            "OMX_COLOR_FORMATTYPEjjjj");
+
+                if (func) {
+                    mTarget =
+                        (*func)(surface, componentName, colorFormat,
+                            displayWidth, displayHeight,
+                            decodedWidth, decodedHeight);
+                }
             }
         }
     }
@@ -187,7 +218,7 @@ void AwesomeLocalRenderer::init(
     if (mTarget == NULL) {
         mTarget = new SoftwareRenderer(
                 colorFormat, surface, displayWidth, displayHeight,
-                decodedWidth, decodedHeight);
+                decodedWidth, decodedHeight, rotationDegrees);
     }
 }
 
@@ -785,6 +816,12 @@ void AwesomePlayer::initRenderer_l() {
         CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
         CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
 
+        int32_t rotationDegrees;
+        if (!mVideoTrack->getFormat()->findInt32(
+                    kKeyRotation, &rotationDegrees)) {
+            rotationDegrees = 0;
+        }
+
         mVideoRenderer.clear();
 
         // Must ensure that mVideoRenderer's destructor is actually executed
@@ -800,7 +837,8 @@ void AwesomePlayer::initRenderer_l() {
                         mISurface, component,
                         (OMX_COLOR_FORMATTYPE)format,
                         decodedWidth, decodedHeight,
-                        mVideoWidth, mVideoHeight));
+                        mVideoWidth, mVideoHeight,
+                        rotationDegrees));
         } else {
             // Other decoders are instantiated locally and as a consequence
             // allocate their buffers in local address space.
@@ -810,7 +848,7 @@ void AwesomePlayer::initRenderer_l() {
                 (OMX_COLOR_FORMATTYPE)format,
                 mISurface,
                 mVideoWidth, mVideoHeight,
-                decodedWidth, decodedHeight);
+                decodedWidth, decodedHeight, rotationDegrees);
         }
     }
 }
@@ -1625,7 +1663,22 @@ void AwesomePlayer::finishAsyncPrepare_l() {
         if (mVideoWidth < 0 || mVideoHeight < 0) {
             notifyListener_l(MEDIA_SET_VIDEO_SIZE, 0, 0);
         } else {
-            notifyListener_l(MEDIA_SET_VIDEO_SIZE, mVideoWidth, mVideoHeight);
+            int32_t rotationDegrees;
+            if (!mVideoTrack->getFormat()->findInt32(
+                        kKeyRotation, &rotationDegrees)) {
+                rotationDegrees = 0;
+            }
+
+#if 1
+            if (rotationDegrees == 90 || rotationDegrees == 270) {
+                notifyListener_l(
+                        MEDIA_SET_VIDEO_SIZE, mVideoHeight, mVideoWidth);
+            } else
+#endif
+            {
+                notifyListener_l(
+                        MEDIA_SET_VIDEO_SIZE, mVideoWidth, mVideoHeight);
+            }
         }
 
         notifyListener_l(MEDIA_PREPARED);
@@ -1757,7 +1810,8 @@ status_t AwesomePlayer::resume() {
                     state->mVideoWidth,
                     state->mVideoHeight,
                     state->mDecodedWidth,
-                    state->mDecodedHeight);
+                    state->mDecodedHeight,
+                    0);
 
         mVideoRendererIsPreview = true;
 

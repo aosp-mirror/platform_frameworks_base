@@ -101,7 +101,7 @@
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
-      </li>
+      <span class="new">new!</span></li>
     </ul>
   </li>
   <li>
@@ -115,9 +115,11 @@
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r4b</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Download the Android NDK, r5</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
     </ul>
   </li>
+
   <li>
     <h2>
       <span class="en">More Information</span>

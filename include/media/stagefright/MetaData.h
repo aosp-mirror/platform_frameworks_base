@@ -32,6 +32,7 @@ enum {
     kKeyMIMEType          = 'mime',  // cstring
     kKeyWidth             = 'widt',  // int32_t
     kKeyHeight            = 'heig',  // int32_t
+    kKeyRotation          = 'rotA',  // int32_t (angle in degrees)
     kKeyIFramesInterval   = 'ifiv',  // int32_t
     kKeyStride            = 'strd',  // int32_t
     kKeySliceHeight       = 'slht',  // int32_t
@@ -90,6 +91,7 @@ enum {
     // Track authoring progress status
     // kKeyTrackTimeStatus is used to track progress in elapsed time
     kKeyTrackTimeStatus   = 'tktm',  // int64_t
+    kKeyRotationDegree    = 'rdge',  // int32_t (clockwise, in degree)
 
     kKeyNotRealTime       = 'ntrt',  // bool (int32_t)
 

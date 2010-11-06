@@ -27,11 +27,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/DataSource.h>
 #include "include/ESDS.h"
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
@@ -579,52 +579,9 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
         case FOURCC('t', 'k', 'h', 'd'):
         {
-            if (chunk_data_size < 4) {
-                return ERROR_MALFORMED;
-            }
-
-            uint8_t version;
-            if (mDataSource->readAt(data_offset, &version, 1) < 1) {
-                return ERROR_IO;
-            }
-
-            uint64_t ctime, mtime, duration;
-            int32_t id;
-            uint32_t width, height;
-
-            if (version == 1) {
-                if (chunk_data_size != 36 + 60) {
-                    return ERROR_MALFORMED;
-                }
-
-                uint8_t buffer[36 + 60];
-                if (mDataSource->readAt(
-                            data_offset, buffer, sizeof(buffer)) < (ssize_t)sizeof(buffer)) {
-                    return ERROR_IO;
-                }
-
-                ctime = U64_AT(&buffer[4]);
-                mtime = U64_AT(&buffer[12]);
-                id = U32_AT(&buffer[20]);
-                duration = U64_AT(&buffer[28]);
-                width = U32_AT(&buffer[88]);
-                height = U32_AT(&buffer[92]);
-            } else if (version == 0) {
-                if (chunk_data_size != 24 + 60) {
-                    return ERROR_MALFORMED;
-                }
-
-                uint8_t buffer[24 + 60];
-                if (mDataSource->readAt(
-                            data_offset, buffer, sizeof(buffer)) < (ssize_t)sizeof(buffer)) {
-                    return ERROR_IO;
-                }
-                ctime = U32_AT(&buffer[4]);
-                mtime = U32_AT(&buffer[8]);
-                id = U32_AT(&buffer[12]);
-                duration = U32_AT(&buffer[20]);
-                width = U32_AT(&buffer[76]);
-                height = U32_AT(&buffer[80]);
+            status_t err;
+            if ((err = parseTrackHeader(data_offset, chunk_data_size)) != OK) {
+                return err;
             }
 
             *offset += chunk_size;
@@ -1073,6 +1030,89 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
     return OK;
 }
 
+status_t MPEG4Extractor::parseTrackHeader(
+        off_t data_offset, off_t data_size) {
+    if (data_size < 4) {
+        return ERROR_MALFORMED;
+    }
+
+    uint8_t version;
+    if (mDataSource->readAt(data_offset, &version, 1) < 1) {
+        return ERROR_IO;
+    }
+
+    size_t dynSize = (version == 1) ? 36 : 24;
+
+    uint8_t buffer[36 + 60];
+
+    if (data_size != (off_t)dynSize + 60) {
+        return ERROR_MALFORMED;
+    }
+
+    if (mDataSource->readAt(
+                data_offset, buffer, data_size) < (ssize_t)data_size) {
+        return ERROR_IO;
+    }
+
+    uint64_t ctime, mtime, duration;
+    int32_t id;
+
+    if (version == 1) {
+        ctime = U64_AT(&buffer[4]);
+        mtime = U64_AT(&buffer[12]);
+        id = U32_AT(&buffer[20]);
+        duration = U64_AT(&buffer[28]);
+    } else if (version == 0) {
+        ctime = U32_AT(&buffer[4]);
+        mtime = U32_AT(&buffer[8]);
+        id = U32_AT(&buffer[12]);
+        duration = U32_AT(&buffer[20]);
+    }
+
+    size_t matrixOffset = dynSize + 16;
+    int32_t a00 = U32_AT(&buffer[matrixOffset]);
+    int32_t a01 = U32_AT(&buffer[matrixOffset + 4]);
+    int32_t dx = U32_AT(&buffer[matrixOffset + 8]);
+    int32_t a10 = U32_AT(&buffer[matrixOffset + 12]);
+    int32_t a11 = U32_AT(&buffer[matrixOffset + 16]);
+    int32_t dy = U32_AT(&buffer[matrixOffset + 20]);
+
+#if 0
+    LOGI("x' = %.2f * x + %.2f * y + %.2f",
+         a00 / 65536.0f, a01 / 65536.0f, dx / 65536.0f);
+    LOGI("y' = %.2f * x + %.2f * y + %.2f",
+         a10 / 65536.0f, a11 / 65536.0f, dy / 65536.0f);
+#endif
+
+    uint32_t rotationDegrees;
+
+    static const int32_t kFixedOne = 0x10000;
+    if (a00 == kFixedOne && a01 == 0 && a10 == 0 && a11 == kFixedOne) {
+        // Identity, no rotation
+        rotationDegrees = 0;
+    } else if (a00 == 0 && a01 == kFixedOne && a10 == -kFixedOne && a11 == 0) {
+        rotationDegrees = 90;
+    } else if (a00 == 0 && a01 == -kFixedOne && a10 == kFixedOne && a11 == 0) {
+        rotationDegrees = 270;
+    } else if (a00 == -kFixedOne && a01 == 0 && a10 == 0 && a11 == -kFixedOne) {
+        rotationDegrees = 180;
+    } else {
+        LOGW("We only support 0,90,180,270 degree rotation matrices");
+        rotationDegrees = 0;
+    }
+
+    if (rotationDegrees != 0) {
+        mLastTrack->meta->setInt32(kKeyRotation, rotationDegrees);
+    }
+
+#if 0
+    uint32_t width = U32_AT(&buffer[dynSize + 52]);
+    uint32_t height = U32_AT(&buffer[dynSize + 56]);
+#endif
+
+    return OK;
+}
+
 status_t MPEG4Extractor::parseMetaData(off_t offset, size_t size) {
     if (size < 4) {
         return ERROR_MALFORMED;
@@ -1386,7 +1426,7 @@ MPEG4Source::MPEG4Source(
         const uint8_t *ptr = (const uint8_t *)data;
 
         CHECK(size >= 7);
-        CHECK_EQ(ptr[0], 1);  // configurationVersion == 1
+        CHECK_EQ((unsigned)ptr[0], 1u);  // configurationVersion == 1
 
         // The number of bytes used to encode the length of a NAL unit.
         mNALLengthSize = 1 + (ptr[4] & 3);
@@ -1534,7 +1574,7 @@ status_t MPEG4Source::read(
         }
 
         uint32_t sampleTime;
-        CHECK_EQ(OK, mSampleTable->getMetaDataForSample(
+        CHECK_EQ((status_t)OK, mSampleTable->getMetaDataForSample(
                     sampleIndex, NULL, NULL, &sampleTime));
 
         if (mode == ReadOptions::SEEK_CLOSEST) {
@@ -1581,7 +1621,7 @@ status_t MPEG4Source::read(
         err = mGroup->acquire_buffer(&mBuffer);
 
         if (err != OK) {
-            CHECK_EQ(mBuffer, NULL);
+            CHECK(mBuffer == NULL);
             return err;
         }
     }
