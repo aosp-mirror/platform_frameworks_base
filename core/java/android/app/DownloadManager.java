@@ -33,10 +33,7 @@ import android.util.Pair;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The download manager is a system service that handles long-running HTTP downloads. Clients may
@@ -281,45 +278,31 @@ public class DownloadManager {
      */
     public static final String EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS = "extra_click_download_ids";
 
-    // this array must contain all public columns
-    private static final String[] COLUMNS = new String[] {
-        COLUMN_ID,
-        COLUMN_MEDIAPROVIDER_URI,
-        Downloads.Impl.COLUMN_DESTINATION,
-        COLUMN_TITLE,
-        COLUMN_DESCRIPTION,
-        COLUMN_URI,
-        COLUMN_MEDIA_TYPE,
-        COLUMN_TOTAL_SIZE_BYTES,
-        COLUMN_LOCAL_URI,
-        COLUMN_STATUS,
-        COLUMN_REASON,
-        COLUMN_BYTES_DOWNLOADED_SO_FAR,
-        COLUMN_LAST_MODIFIED_TIMESTAMP,
-        COLUMN_LOCAL_FILENAME,
-    };
-
-    // columns to request from DownloadProvider
-    private static final String[] UNDERLYING_COLUMNS = new String[] {
+    /**
+     * columns to request from DownloadProvider.
+     * @hide
+     */
+    public static final String[] UNDERLYING_COLUMNS = new String[] {
         Downloads.Impl._ID,
+        Downloads.Impl._DATA,
         Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
         Downloads.Impl.COLUMN_DESTINATION,
         Downloads.Impl.COLUMN_TITLE,
         Downloads.Impl.COLUMN_DESCRIPTION,
         Downloads.Impl.COLUMN_URI,
-        Downloads.Impl.COLUMN_MIME_TYPE,
-        Downloads.Impl.COLUMN_TOTAL_BYTES,
         Downloads.Impl.COLUMN_STATUS,
-        Downloads.Impl.COLUMN_CURRENT_BYTES,
-        Downloads.Impl.COLUMN_LAST_MODIFICATION,
         Downloads.Impl.COLUMN_FILE_NAME_HINT,
-        Downloads.Impl._DATA,
+        Downloads.Impl.COLUMN_MIME_TYPE + " AS " + COLUMN_MEDIA_TYPE,
+        Downloads.Impl.COLUMN_TOTAL_BYTES + " AS " + COLUMN_TOTAL_SIZE_BYTES,
+        Downloads.Impl.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
+        Downloads.Impl.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
+        /* add the following 'computed' columns to the cursor.
+         * they are not 'returned' by the database, but their inclusion
+         * eliminates need to have lot of methods in CursorTranslator
+         */
+        "'placeholder' AS " + COLUMN_LOCAL_URI,
+        "'placeholder' AS " + COLUMN_REASON
     };
-
-    private static final Set<String> LONG_COLUMNS = new HashSet<String>(
-            Arrays.asList(COLUMN_ID, COLUMN_TOTAL_SIZE_BYTES, COLUMN_STATUS, COLUMN_REASON,
-                          COLUMN_BYTES_DOWNLOADED_SO_FAR, COLUMN_LAST_MODIFIED_TIMESTAMP,
-                          Downloads.Impl.COLUMN_DESTINATION));
 
     /**
      * This class contains all the information necessary to request a new download. The URI is the
@@ -871,11 +854,7 @@ public class DownloadManager {
      * @return the number of downloads actually removed
      */
     public int remove(long... ids) {
-        if (ids == null || ids.length == 0) {
-            // called with nothing to remove!
-            throw new IllegalArgumentException("input param 'ids' can't be null");
-        }
-        return mResolver.delete(mBaseUri, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
+        return markRowDeleted(ids);
     }
 
     /**
@@ -1032,117 +1011,32 @@ public class DownloadManager {
         }
 
         @Override
-        public int getColumnIndex(String columnName) {
-            return Arrays.asList(COLUMNS).indexOf(columnName);
-        }
-
-        @Override
-        public int getColumnIndexOrThrow(String columnName) throws IllegalArgumentException {
-            int index = getColumnIndex(columnName);
-            if (index == -1) {
-                throw new IllegalArgumentException("No such column: " + columnName);
-            }
-            return index;
-        }
-
-        @Override
-        public String getColumnName(int columnIndex) {
-            int numColumns = COLUMNS.length;
-            if (columnIndex < 0 || columnIndex >= numColumns) {
-                throw new IllegalArgumentException("Invalid column index " + columnIndex + ", "
-                                                   + numColumns + " columns exist");
-            }
-            return COLUMNS[columnIndex];
-        }
-
-        @Override
-        public String[] getColumnNames() {
-            String[] returnColumns = new String[COLUMNS.length];
-            System.arraycopy(COLUMNS, 0, returnColumns, 0, COLUMNS.length);
-            return returnColumns;
-        }
-
-        @Override
-        public int getColumnCount() {
-            return COLUMNS.length;
-        }
-
-        @Override
-        public byte[] getBlob(int columnIndex) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public double getDouble(int columnIndex) {
-            return getLong(columnIndex);
-        }
-
-        private boolean isLongColumn(String column) {
-            return LONG_COLUMNS.contains(column);
-        }
-
-        @Override
-        public float getFloat(int columnIndex) {
-            return (float) getDouble(columnIndex);
-        }
-
-        @Override
         public int getInt(int columnIndex) {
             return (int) getLong(columnIndex);
         }
 
         @Override
         public long getLong(int columnIndex) {
-            return translateLong(getColumnName(columnIndex));
-        }
-
-        @Override
-        public short getShort(int columnIndex) {
-            return (short) getLong(columnIndex);
+            if (getColumnName(columnIndex).equals(COLUMN_REASON)) {
+                return getReason(super.getInt(getColumnIndex(Downloads.Impl.COLUMN_STATUS)));
+            } else if (getColumnName(columnIndex).equals(COLUMN_STATUS)) {
+                return translateStatus(super.getInt(getColumnIndex(Downloads.Impl.COLUMN_STATUS)));
+            } else {
+                return super.getLong(columnIndex);
+            }
         }
 
         @Override
         public String getString(int columnIndex) {
-            return translateString(getColumnName(columnIndex));
-        }
-
-        private String translateString(String column) {
-            if (isLongColumn(column)) {
-                return Long.toString(translateLong(column));
-            }
-            if (column.equals(COLUMN_TITLE)) {
-                return getUnderlyingString(Downloads.Impl.COLUMN_TITLE);
-            }
-            if (column.equals(COLUMN_DESCRIPTION)) {
-                return getUnderlyingString(Downloads.Impl.COLUMN_DESCRIPTION);
-            }
-            if (column.equals(COLUMN_URI)) {
-                return getUnderlyingString(Downloads.Impl.COLUMN_URI);
-            }
-            if (column.equals(COLUMN_MEDIA_TYPE)) {
-                return getUnderlyingString(Downloads.Impl.COLUMN_MIME_TYPE);
-            }
-            if (column.equals(COLUMN_LOCAL_FILENAME)) {
-                return getUnderlyingString(Downloads.Impl._DATA);
-            }
-            if (column.equals(COLUMN_MEDIAPROVIDER_URI)) {
-                return getUnderlyingString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
-            }
-
-            assert column.equals(COLUMN_LOCAL_URI);
-            return getLocalUri();
+            return (getColumnName(columnIndex).equals(COLUMN_LOCAL_URI)) ? getLocalUri() :
+                    super.getString(columnIndex);
         }
 
         private String getLocalUri() {
-            long destinationType = getUnderlyingLong(Downloads.Impl.COLUMN_DESTINATION);
-            if (destinationType == Downloads.Impl.DESTINATION_FILE_URI) {
-                // return client-provided file URI for external download
-                return getUnderlyingString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
-            }
-
-            if (destinationType == Downloads.Impl.DESTINATION_EXTERNAL) {
-                // return stored destination for legacy external download
-                String localPath = getUnderlyingString(Downloads.Impl._DATA);
+            long destinationType = getLong(getColumnIndex(Downloads.Impl.COLUMN_DESTINATION));
+            if (destinationType == Downloads.Impl.DESTINATION_FILE_URI ||
+                    destinationType == Downloads.Impl.DESTINATION_EXTERNAL) {
+                String localPath = getString(getColumnIndex(Downloads.Impl._DATA));
                 if (localPath == null) {
                     return null;
                 }
@@ -1150,36 +1044,8 @@ public class DownloadManager {
             }
 
             // return content URI for cache download
-            long downloadId = getUnderlyingLong(Downloads.Impl._ID);
+            long downloadId = getLong(getColumnIndex(Downloads.Impl._ID));
             return ContentUris.withAppendedId(mBaseUri, downloadId).toString();
-        }
-
-        private long translateLong(String column) {
-            if (!isLongColumn(column)) {
-                // mimic behavior of underlying cursor -- most likely, throw NumberFormatException
-                return Long.valueOf(translateString(column));
-            }
-
-            if (column.equals(COLUMN_ID)) {
-                return getUnderlyingLong(Downloads.Impl._ID);
-            }
-            if (column.equals(COLUMN_TOTAL_SIZE_BYTES)) {
-                return getUnderlyingLong(Downloads.Impl.COLUMN_TOTAL_BYTES);
-            }
-            if (column.equals(COLUMN_STATUS)) {
-                return translateStatus((int) getUnderlyingLong(Downloads.Impl.COLUMN_STATUS));
-            }
-            if (column.equals(COLUMN_REASON)) {
-                return getReason((int) getUnderlyingLong(Downloads.Impl.COLUMN_STATUS));
-            }
-            if (column.equals(COLUMN_BYTES_DOWNLOADED_SO_FAR)) {
-                return getUnderlyingLong(Downloads.Impl.COLUMN_CURRENT_BYTES);
-            }
-            if (column.equals(Downloads.Impl.COLUMN_DESTINATION)) {
-                return getUnderlyingLong(Downloads.Impl.COLUMN_DESTINATION);
-            }
-            assert column.equals(COLUMN_LAST_MODIFIED_TIMESTAMP);
-            return getUnderlyingLong(Downloads.Impl.COLUMN_LAST_MODIFICATION);
         }
 
         private long getReason(int status) {
@@ -1247,14 +1113,6 @@ public class DownloadManager {
                 default:
                     return ERROR_UNKNOWN;
             }
-        }
-
-        private long getUnderlyingLong(String column) {
-            return super.getLong(super.getColumnIndex(column));
-        }
-
-        private String getUnderlyingString(String column) {
-            return super.getString(super.getColumnIndex(column));
         }
 
         private int translateStatus(int status) {
