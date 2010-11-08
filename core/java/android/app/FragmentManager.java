@@ -850,15 +850,20 @@ final class FragmentManagerImpl extends FragmentManager {
     }
     
     public void enqueueAction(Runnable action, boolean allowStateLoss) {
-        if (!allowStateLoss && mStateSaved) {
-            throw new IllegalStateException(
-                    "Can not perform this action after onSaveInstanceState");
-        }
-        if (mNoTransactionsBecause != null) {
-            throw new IllegalStateException(
-                    "Can not perform this action inside of " + mNoTransactionsBecause);
+        if (!allowStateLoss) {
+            if (mStateSaved) {
+                throw new IllegalStateException(
+                        "Can not perform this action after onSaveInstanceState");
+            }
+            if (mNoTransactionsBecause != null) {
+                throw new IllegalStateException(
+                        "Can not perform this action inside of " + mNoTransactionsBecause);
+            }
         }
         synchronized (this) {
+            if (mActivity == null) {
+                throw new IllegalStateException("Activity has been destroyed");
+            }
             if (mPendingActions == null) {
                 mPendingActions = new ArrayList<Runnable>();
             }
