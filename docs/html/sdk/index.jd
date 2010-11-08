@@ -19,52 +19,15 @@ sdk.linux_checksum=TODO
 
 @jd:body
 
+<p>Here's an overview of the steps you must follow to set up the Android SDK:</p>
 
-<h2 id="quickstart">Quick Start</h2>
+<ol>
+  <li>Prepare your development computer and ensure it meets the system requirements.</li>
+  <li>Install the SDK starter package from the table above.</li>
+  <li>Install the ADT Plugin for Eclipse (if you'll be developing in Eclipse).</li>
+  <li>Add Android platforms and other components to your SDK.</li>
+  <li>Explore the contents of the Android SDK (optional).</li>
+</ol>
 
-<p><strong>1. Prepare your development computer</strong></p>
-
-<p>Read the <a href="{@docRoot}sdk/requirements.html">System Requirements</a>
-document and make sure that your development computer meets the hardware and
-software requirements for the Android SDK. Install any additional software
-needed before downloading the Android SDK. In particular, you may need to
-install the <a href="http://java.sun.com/javase/downloads/index.jsp">JDK</a>
- (version 5 or 6 required) and <a href="http://www.eclipse.org/downloads/">Eclipse</a>
- (version 3.4 or 3.5, needed only if you want develop using the ADT Plugin).
-
-<p><strong>2. Download and install the SDK starter package</strong></p>
-
-<p>Download a starter package from the table above onto your development computer.
-If you're using Windows, we recommend that you download the installer (the {@code .exe} file),
-which will launch a Wizard to guide you through the installation and check your computer for
-required software. Otherwise, download the SDK starter package ({@code .zip} or {@code .tgz})
-appropriate for your system, unpack it to a safe location, then add the location to your PATH
-environment variable. </p>
-
-<p><strong>3. Install the ADT Plugin for Eclipse</strong></p>
-
-<p>If you are developing in Eclipse, add a new remote update site with the URL
-<code>https://dl-ssl.google.com/android/eclipse/</code>. Install the Android
-Development Tools (ADT) Plugin from that site, restart Eclipse, and set the "Android"
-preferences in Eclipse to point to the Android SDK directory (installed in the previous step). For
-detailed instructions to setup Eclipse, see <a href="{@docRoot}sdk/eclipse-adt.html">ADT Plugin
-for Eclipse</a>.</p>
-
-<p><strong>4. Add Android platforms and other components to your SDK</strong></p>
-
-<p>Launch the <em>Android SDK and AVD Manager</em> by executing {@code SDK Manager.exe} (Windows) or
-{@code android} (Mac/Linux) from the SDK's {@code tools/} directory (if you used the Windows
-installer, this is launched for you when the Wizard is complete). Add some Android platforms
-(such as Android 1.6 and Android 2.3) and other components (such as documentation) to your SDK. If
-you aren't sure what to add, see <a
-href="installing.html#which">Recommended Components</a></p>
-
-<p><strong>Done!</strong></p>
-
-<p>To write your first Android application, see the <a
-href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> tutorial. Also see <a
-href="{@docRoot}sdk/installing.html#NextSteps">Next
-Steps</a> for other suggestions about how to get started.</p>
-
-<p>For a more detailed guide to installing and setting up the SDK, read <a
+<p>To get started, download the appropriate package from the table above, then read the guide to <a
 href="installing.html">Installing the SDK</a>.</p>
