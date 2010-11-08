@@ -1175,10 +1175,8 @@ class PowerManagerService extends IPowerManager.Stub
             pw.println("mPokeLocks.size=" + mPokeLocks.size() + ":");
             for (PokeLock p: mPokeLocks.values()) {
                 pw.println("    poke lock '" + p.tag + "':"
-                        + ((p.pokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0
-                                ? " POKE_LOCK_IGNORE_CHEEK_EVENTS" : "")
-                        + ((p.pokey & POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS) != 0
-                                ? " POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS" : "")
+                        + ((p.pokey & POKE_LOCK_IGNORE_TOUCH_EVENTS) != 0
+                                ? " POKE_LOCK_IGNORE_TOUCH_EVENTS" : "")
                         + ((p.pokey & POKE_LOCK_SHORT_TIMEOUT) != 0
                                 ? " POKE_LOCK_SHORT_TIMEOUT" : "")
                         + ((p.pokey & POKE_LOCK_MEDIUM_TIMEOUT) != 0
@@ -2218,29 +2216,11 @@ class PowerManagerService extends IPowerManager.Stub
     private void userActivity(long time, long timeoutOverride, boolean noChangeLights,
             int eventType, boolean force) {
 
-        if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)
-                && (eventType == CHEEK_EVENT)) {
-            if (false) {
-                Slog.d(TAG, "dropping cheek event mPokey=0x" + Integer.toHexString(mPokey));
-            }
-            return;
-        }
-
-        if (((mPokey & POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS) != 0)
-                && (eventType == TOUCH_EVENT || eventType == TOUCH_UP_EVENT
-                    || eventType == LONG_TOUCH_EVENT || eventType == CHEEK_EVENT)) {
+        if (((mPokey & POKE_LOCK_IGNORE_TOUCH_EVENTS) != 0) && (eventType == TOUCH_EVENT)) {
             if (false) {
                 Slog.d(TAG, "dropping touch mPokey=0x" + Integer.toHexString(mPokey));
             }
             return;
-        }
-
-        if (false) {
-            if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)) {
-                Slog.d(TAG, "userActivity !!!");//, new RuntimeException());
-            } else {
-                Slog.d(TAG, "mPokey=0x" + Integer.toHexString(mPokey));
-            }
         }
 
         synchronized (mLocks) {
