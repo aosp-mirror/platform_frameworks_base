@@ -272,7 +272,11 @@ public class DialogFragment extends Fragment
         } else {
             FragmentTransaction ft = getFragmentManager().openTransaction();
             ft.remove(this);
-            ft.commit();
+            if (allowStateLoss) {
+                ft.commitAllowingStateLoss();
+            } else {
+                ft.commit();
+            }
         }
     }
     

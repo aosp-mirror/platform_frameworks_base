@@ -1366,13 +1366,13 @@
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
 
-  <!-- Acceleration curve matching Flash's cubic ease out function. -->
+  <!-- Acceleration curve matching a cubic ease in function. -->
   <public type="anim" name="accelerate_cubic_interpolator" />
-  <!-- Acceleration curve matching Flash's cubic ease in function. -->
+  <!-- Acceleration curve matching a cubic ease out function. -->
   <public type="anim" name="decelerate_cubic_interpolator" />
-  <!-- Acceleration curve matching Flash's quint ease out function. -->
+  <!-- Acceleration curve matching a quint ease in function. -->
   <public type="anim" name="accelerate_quint_interpolator" />
-  <!-- Acceleration curve matching Flash's quint ease in function. -->
+  <!-- Acceleration curve matching a quint ease out function. -->
   <public type="anim" name="decelerate_quint_interpolator" />
   
   <public type="id" name="home" />

@@ -50,11 +50,13 @@ public class DecelerateInterpolator implements Interpolator {
     }
     
     public float getInterpolation(float input) {
+        float result;
         if (mFactor == 1.0f) {
-            return (float)(1.0f - (1.0f - input) * (1.0f - input));
+            result = (float)(1.0f - (1.0f - input) * (1.0f - input));
         } else {
-            return (float)(1.0f - Math.pow((1.0f - input), 2 * mFactor));
+            result = (float)(1.0f - Math.pow((1.0f - input), 2 * mFactor));
         }
+        return result;
     }
     
     private float mFactor = 1.0f;
