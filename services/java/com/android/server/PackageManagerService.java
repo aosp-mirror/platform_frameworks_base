@@ -2853,7 +2853,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 mResolveActivity.processName = mAndroidApplication.processName;
                 mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
                 mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
-                mResolveActivity.theme = com.android.internal.R.style.Theme_Dialog_Alert;
+                mResolveActivity.theme = com.android.internal.R.style.Theme_Holo_Dialog_Alert;
                 mResolveActivity.exported = true;
                 mResolveActivity.enabled = true;
                 mResolveInfo.activityInfo = mResolveActivity;

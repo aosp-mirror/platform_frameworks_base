@@ -39,14 +39,14 @@
         android:layout_height="wrap_content" >
         <!-- Activity name -->
         <TextView android:id="@android:id/text1"
-            android:textAppearance="?android:attr/textAppearanceLargeInverse"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="2"
             android:paddingLeft="10dip" />
         <!-- Extended activity info to distinguish between duplicate activity names -->
         <TextView android:id="@android:id/text2"
-            android:textAppearance="?android:attr/textAppearanceMediumInverse"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="2"
