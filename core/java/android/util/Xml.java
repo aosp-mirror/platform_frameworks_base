@@ -79,15 +79,11 @@ public class Xml {
      */
     public static void parse(InputStream in, Encoding encoding,
             ContentHandler contentHandler) throws IOException, SAXException {
-        try {
-            XMLReader reader = new ExpatReader();
-            reader.setContentHandler(contentHandler);
-            InputSource source = new InputSource(in);
-            source.setEncoding(encoding.expatName);
-            reader.parse(source);
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        XMLReader reader = new ExpatReader();
+        reader.setContentHandler(contentHandler);
+        InputSource source = new InputSource(in);
+        source.setEncoding(encoding.expatName);
+        reader.parse(source);
     }
 
     /**
