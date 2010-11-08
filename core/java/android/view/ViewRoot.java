@@ -59,6 +59,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
+import com.android.internal.policy.PolicyManager;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
@@ -160,6 +161,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     InputChannel mInputChannel;
     InputQueue.Callback mInputQueueCallback;
     InputQueue mInputQueue;
+    FallbackEventHandler mFallbackEventHandler;
     
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
@@ -273,6 +275,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
+        mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -325,6 +328,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         synchronized (this) {
             if (mView == null) {
                 mView = view;
+                mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
                 
@@ -386,6 +390,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     mView = null;
                     mAttachInfo.mRootView = null;
                     mInputChannel = null;
+                    mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
                     throw new RuntimeException("Adding window failed", e);
                 } finally {
@@ -404,6 +409,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     mView = null;
                     mAttachInfo.mRootView = null;
                     mAdded = false;
+                    mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
                     switch (res) {
                         case WindowManagerImpl.ADD_BAD_APP_TOKEN:
@@ -2422,7 +2428,12 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 if (Config.LOGV) {
                     captureKeyLog("captureDispatchKeyEvent", event);
                 }
+                mFallbackEventHandler.preDispatchKeyEvent(event);
                 boolean keyHandled = mView.dispatchKeyEvent(event);
+
+                if (!keyHandled) {
+                    mFallbackEventHandler.dispatchKeyEvent(event);
+                }
 
                 if (!keyHandled && isDown) {
                     int direction = 0;

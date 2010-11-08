@@ -18,6 +18,10 @@ package com.android.internal.policy.impl;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.FallbackEventHandler;
+import android.view.LayoutInflater;
+import android.view.Window;
+import android.view.WindowManagerPolicy;
 
 import com.android.internal.policy.IPolicy;
 import com.android.internal.policy.impl.PhoneLayoutInflater;
@@ -55,15 +59,19 @@ public class Policy implements IPolicy {
         }
     }
 
-    public PhoneWindow makeNewWindow(Context context) {
+    public Window makeNewWindow(Context context) {
         return new PhoneWindow(context);
     }
 
-    public PhoneLayoutInflater makeNewLayoutInflater(Context context) {
+    public LayoutInflater makeNewLayoutInflater(Context context) {
         return new PhoneLayoutInflater(context);
     }
 
-    public PhoneWindowManager makeNewWindowManager() {
+    public WindowManagerPolicy makeNewWindowManager() {
         return new PhoneWindowManager();
+    }
+
+    public FallbackEventHandler makeNewFallbackEventHandler(Context context) {
+        return new PhoneFallbackEventHandler(context);
     }
 }

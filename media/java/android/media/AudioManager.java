@@ -27,10 +27,12 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.VolumePanel;
 
 import java.util.Iterator;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ public class AudioManager {
 
     private final Context mContext;
     private final Handler mHandler;
+    private long mVolumeKeyUpTime;
 
     private static String TAG = "AudioManager";
     private static boolean DEBUG = false;
@@ -355,6 +358,71 @@ public class AudioManager {
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         sService = IAudioService.Stub.asInterface(b);
         return sService;
+    }
+
+    /**
+     * @hide
+     */
+    public void preDispatchKeyEvent(int keyCode, int stream) {
+        /*
+         * If the user hits another key within the play sound delay, then
+         * cancel the sound
+         */
+        if (keyCode != KeyEvent.KEYCODE_VOLUME_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP
+                && keyCode != KeyEvent.KEYCODE_VOLUME_MUTE
+                && mVolumeKeyUpTime + VolumePanel.PLAY_SOUND_DELAY
+                        > SystemClock.uptimeMillis()) {
+            /*
+             * The user has hit another key during the delay (e.g., 300ms)
+             * since the last volume key up, so cancel any sounds.
+             */
+            adjustSuggestedStreamVolume(AudioManager.ADJUST_SAME,
+                        stream, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void handleKeyDown(int keyCode, int stream) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                /*
+                 * Adjust the volume in on key down since it is more
+                 * responsive to the user.
+                 */
+                adjustSuggestedStreamVolume(
+                        keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                ? AudioManager.ADJUST_RAISE
+                                : AudioManager.ADJUST_LOWER,
+                        stream,
+                        AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
+                break;
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                // TODO: Actually handle MUTE.
+                break;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void handleKeyUp(int keyCode, int stream) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                /*
+                 * Play a sound. This is done on key up since we don't want the
+                 * sound to play when a user holds down volume down to mute.
+                 */
+                adjustSuggestedStreamVolume(ADJUST_SAME, stream, FLAG_PLAY_SOUND);
+                mVolumeKeyUpTime = SystemClock.uptimeMillis();
+                break;
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                // TODO: Actually handle MUTE.
+                break;
+        }
     }
 
     /**
