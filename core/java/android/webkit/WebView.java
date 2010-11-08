@@ -919,6 +919,7 @@ public class WebView extends AbsoluteLayout
         }
 
         L10nUtils.loadStrings(context);
+        mAutoFillData = new WebViewCore.AutoFillData();
     }
 
     /*
