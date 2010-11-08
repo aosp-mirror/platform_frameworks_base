@@ -2086,10 +2086,10 @@ public class InputMethodService extends AbstractInputMethodService {
     protected void onCurrentInputMethodSubtypeChanged(InputMethodSubtype newSubtype) {
         if (DEBUG) {
             int nameResId = newSubtype.getNameResId();
-            int modeResId = newSubtype.getModeResId();
+            String mode = newSubtype.getMode();
             String output = "changeInputMethodSubtype:"
                 + (nameResId == 0 ? "<none>" : getString(nameResId)) + ","
-                + (modeResId == 0 ? "<none>" : getString(modeResId)) + ","
+                + mode + ","
                 + newSubtype.getLocale() + "," + newSubtype.getExtraValue();
             Log.v(TAG, "--- " + output);
         }

@@ -741,7 +741,7 @@ public class WebView extends AbsoluteLayout
     // for event log
     private long mLastTouchUpTime = 0;
 
-    private int mAutoFillQueryId = WebTextView.FORM_NOT_AUTOFILLABLE;
+    private WebViewCore.AutoFillData mAutoFillData;
 
     /**
      * URI scheme for telephone number
@@ -919,6 +919,7 @@ public class WebView extends AbsoluteLayout
         }
 
         L10nUtils.loadStrings(context);
+        mAutoFillData = new WebViewCore.AutoFillData();
     }
 
     /*
@@ -3570,6 +3571,7 @@ public class WebView extends AbsoluteLayout
         setUpSelect();
         if (mNativeClass != 0 && nativeWordSelection(x, y)) {
             nativeSetExtendSelection();
+            mDrawSelectionPointer = false;
             return true;
         }
         selectionDone();
@@ -3911,7 +3913,7 @@ public class WebView extends AbsoluteLayout
         // At this point, we know we have found an input field, so go ahead
         // and create the WebTextView if necessary.
         if (mWebTextView == null) {
-            mWebTextView = new WebTextView(mContext, WebView.this, mAutoFillQueryId);
+            mWebTextView = new WebTextView(mContext, WebView.this, mAutoFillData.getQueryId());
             // Initialize our generation number.
             mTextGeneration = 0;
         }
@@ -4042,7 +4044,9 @@ public class WebView extends AbsoluteLayout
                 // on the AutoFill item being at the top of the drop down list. If you change
                 // the order, make sure to do it there too!
                 pastEntries.add(getResources().getText(
-                        com.android.internal.R.string.autofill_this_form).toString());
+                        com.android.internal.R.string.autofill_this_form).toString() +
+                        " " +
+                        mAutoFillData.getPreviewString());
             }
 
             pastEntries.addAll(mDatabase.getFormData(mUrl, mName));
@@ -4860,7 +4864,7 @@ public class WebView extends AbsoluteLayout
         }
 
         // If the page disallows zoom, pass multi-pointer events to webkit.
-        if (ev.getPointerCount() > 1
+        if (!skipScaleGesture && ev.getPointerCount() > 1
             && (mZoomManager.isZoomScaleFixed() || mDeferMultitouch)) {
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
@@ -6843,9 +6847,9 @@ public class WebView extends AbsoluteLayout
                     break;
 
                 case SET_AUTOFILLABLE:
-                    mAutoFillQueryId = msg.arg1;
+                    mAutoFillData = (WebViewCore.AutoFillData) msg.obj;
                     if (mWebTextView != null) {
-                        mWebTextView.setAutoFillable(mAutoFillQueryId);
+                        mWebTextView.setAutoFillable(mAutoFillData.getQueryId());
                         rebuildWebTextView();
                     }
                     break;

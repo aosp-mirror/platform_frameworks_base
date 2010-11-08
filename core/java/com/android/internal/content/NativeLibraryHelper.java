@@ -259,6 +259,7 @@ public class NativeLibraryHelper {
                 File destFile = new File(sharedLibraryDir, entry.second);
                 copyNativeBinaryLI(zipFile, entry.first, sharedLibraryDir, destFile);
             }
+            zipFile.close();
         } catch (ZipException e) {
             Slog.w(TAG, "Failed to extract data from package file", e);
             return PackageManager.INSTALL_FAILED_INVALID_APK;

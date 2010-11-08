@@ -85,6 +85,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -583,6 +584,11 @@ public final class ActivityThread {
 
         public void updateTimeZone() {
             TimeZone.setDefault(null);
+        }
+
+        public void clearDnsCache() {
+            // a non-standard API to get this to libcore
+            InetAddress.clearDnsCache();
         }
 
         public void processInBackground() {

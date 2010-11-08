@@ -38,6 +38,8 @@ import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
 
 import android.app.ActivityManagerNative;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.net.LinkAddress;
 import android.net.NetworkInfo;
 import android.net.DhcpInfo;
@@ -67,8 +69,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.Context;
+import android.content.IntentFilter;
+
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.HierarchicalState;
@@ -146,6 +151,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /* Track if WPS was started since we need to re-enable networks
      * and load configuration afterwards */
     private boolean mWpsStarted = false;
+
+    private AlarmManager mAlarmManager;
+    private PendingIntent mScanIntent;
 
     // Channel for sending replies.
     private AsyncChannel mReplyChannel = new AsyncChannel();
@@ -344,6 +352,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int POWER_MODE_ACTIVE = 1;
     private static final int POWER_MODE_AUTO = 0;
 
+    /**
+     * See {@link Settings.Secure#WIFI_SCAN_INTERVAL_MS}. This is the default value if a
+     * Settings.Secure value is not present.
+     */
+    private static final long DEFAULT_SCAN_INTERVAL_MS = 60 * 1000; /* 1 minute */
+
     /* Default parent state */
     private HierarchicalState mDefaultState = new DefaultState();
     /* Temporary initial state */
@@ -411,6 +425,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private final AtomicInteger mLastEnableUid = new AtomicInteger(Process.myUid());
     private final AtomicInteger mLastApEnableUid = new AtomicInteger(Process.myUid());
 
+    private static final int SCAN_REQUEST = 0;
+    private static final String ACTION_START_SCAN =
+        "com.android.server.WifiManager.action.START_SCAN";
+
     /**
      * Keep track of whether WIFI is running.
      */
@@ -464,6 +482,19 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mLastBssid = null;
         mLastNetworkId = -1;
         mLastSignalLevel = -1;
+
+        mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent scanIntent = new Intent(ACTION_START_SCAN, null);
+        mScanIntent = PendingIntent.getBroadcast(mContext, SCAN_REQUEST, scanIntent, 0);
+
+        mContext.registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        startScan(false);
+                    }
+                },
+                new IntentFilter(ACTION_START_SCAN));
 
         mScanResultCache = new LinkedHashMap<String, ScanResult>(
             SCAN_RESULT_CACHE_SIZE, 0.75f, true) {
@@ -1130,7 +1161,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     if (scanResult != null) {
                         scanList.add(scanResult);
                     } else {
-                        Log.w(TAG, "misformatted scan result for: " + line);
+                        //TODO: hidden network handling
                     }
                 }
                 lineBeg = lineEnd + 1;
@@ -2057,7 +2088,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             } else {
                 WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
                 WifiNative.reconnectCommand();
-                transitionTo(mConnectModeState);
+                transitionTo(mDisconnectedState);
             }
         }
         @Override
@@ -2631,6 +2662,17 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            /**
+             * In a disconnected state, an infrequent scan that wakes
+             * up the device is needed to ensure a user connects to
+             * an access point on the move
+             */
+            long scanMs = Settings.Secure.getLong(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_SCAN_INTERVAL_MS, DEFAULT_SCAN_INTERVAL_MS);
+
+            mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + scanMs, scanMs, mScanIntent);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2653,6 +2695,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             }
             EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
+        }
+
+        @Override
+        public void exit() {
+            mAlarmManager.cancel(mScanIntent);
         }
     }
 

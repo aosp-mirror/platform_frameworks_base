@@ -160,6 +160,12 @@ public class ImageView extends View {
     }
     
     @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mDrawable != null) mDrawable.jumpToCurrentState();
+    }
+
+    @Override
     public void invalidateDrawable(Drawable dr) {
         if (dr == mDrawable) {
             /* we invalidate the whole view in this case because it's very

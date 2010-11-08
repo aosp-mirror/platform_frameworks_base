@@ -1613,7 +1613,7 @@ class PowerManagerService extends IPowerManager.Stub
         if (err == 0) {
             mLastScreenOnTime = (on ? SystemClock.elapsedRealtime() : 0);
             if (mUseSoftwareAutoBrightness) {
-                enableLightSensor(on);
+                enableLightSensorLocked(on);
                 if (!on) {
                     // make sure button and key backlights are off too
                     mButtonLight.turnOff();
@@ -2576,16 +2576,12 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void setScreenBrightnessMode(int mode) {
-        boolean enabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-        if (mUseSoftwareAutoBrightness && mAutoBrightessEnabled != enabled) {
-            mAutoBrightessEnabled = enabled;
-            if (isScreenOn()) {
-                // force recompute of backlight values
-                if (mLightSensorValue >= 0) {
-                    int value = (int)mLightSensorValue;
-                    mLightSensorValue = -1;
-                    lightSensorChangedLocked(value);
-                }
+        synchronized (mLocks) {
+            boolean enabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+            if (mUseSoftwareAutoBrightness && mAutoBrightessEnabled != enabled) {
+                mAutoBrightessEnabled = enabled;
+                // This will get us a new value
+                enableLightSensorLocked(mAutoBrightessEnabled && isScreenOn());
             }
         }
     }
@@ -2737,7 +2733,6 @@ class PowerManagerService extends IPowerManager.Stub
         // don't bother with the light sensor if auto brightness is handled in hardware
         if (mUseSoftwareAutoBrightness) {
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-            enableLightSensor(true);
         }
 
         // wait until sensors are enabled before turning on screen.
@@ -2754,6 +2749,8 @@ class PowerManagerService extends IPowerManager.Stub
         synchronized (mLocks) {
             Slog.d(TAG, "system ready!");
             mDoneBooting = true;
+
+            enableLightSensorLocked(mUseSoftwareAutoBrightness && mAutoBrightessEnabled);
 
             long identity = Binder.clearCallingIdentity();
             try {
@@ -2909,9 +2906,13 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    private void enableLightSensor(boolean enable) {
+    private void enableLightSensorLocked(boolean enable) {
         if (mDebugLightSensor) {
-            Slog.d(TAG, "enableLightSensor " + enable);
+            Slog.d(TAG, "enableLightSensorLocked enable=" + enable
+                    + " mAutoBrightessEnabled=" + mAutoBrightessEnabled);
+        }
+        if (!mAutoBrightessEnabled) {
+            enable = false;
         }
         if (mSensorManager != null && mLightSensorEnabled != enable) {
             mLightSensorEnabled = enable;

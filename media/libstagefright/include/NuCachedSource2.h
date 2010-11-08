@@ -37,6 +37,8 @@ struct NuCachedSource2 : public DataSource {
     virtual status_t getSize(off_t *size);
     virtual uint32_t flags();
 
+    virtual DecryptHandle* DrmInitialization(DrmManagerClient *client);
+    virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client);
     ////////////////////////////////////////////////////////////////////////////
 
     size_t cachedSize();

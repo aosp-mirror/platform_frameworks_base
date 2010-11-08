@@ -119,6 +119,8 @@ static void dumpstate() {
             "su", "root", "dhdutil", "-i", "eth0", "dump", NULL);
     run_command("DUMP WIFI FIRMWARE LOG", 60,
             "su", "root", "dhdutil", "-i", "eth0", "upload", "/data/local/tmp/wlan_crash.dump", NULL);
+    run_command("DUMP WIFI INTERNAL COUNTERS", 20,
+            "su", "root", "wlutil", "counters", NULL);
 #endif
 
     print_properties();

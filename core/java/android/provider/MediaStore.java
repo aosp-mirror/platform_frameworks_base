@@ -266,36 +266,62 @@ public final class MediaStore {
      }
 
     /**
-     * Media provider table containing an index of all files in the storage.
-     * This can be used by applications to find all documents of a particular type
-     * and is also used internally by the device side MTP implementation.
-     * @hide
+     * Media provider table containing an index of all files in the media storage,
+     * including non-media files.  This should be used by applications that work with
+     * non-media file types (text, HTML, PDF, etc) as well as applications that need to
+     * work with multiple media file types in a single query.
      */
     public static final class Files {
 
+        /**
+         * Get the content:// style URI for the files table on the
+         * given volume.
+         *
+         * @param volumeName the name of the volume to get the URI for
+         * @return the URI to the files table on the given volume
+         */
         public static Uri getContentUri(String volumeName) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
                     "/file");
         }
 
+        /**
+         * Get the content:// style URI for a single row in the files table on the
+         * given volume.
+         *
+         * @param volumeName the name of the volume to get the URI for
+         * @param rowId the file to get the URI for
+         * @return the URI to the files table on the given volume
+         */
         public static final Uri getContentUri(String volumeName,
-                long fileId) {
+                long rowId) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                    + "/file/" + fileId);
+                    + "/file/" + rowId);
         }
 
+        /**
+         * For use only by the MTP implementation.
+         * @hide
+         */
         public static Uri getMtpObjectsUri(String volumeName) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
                     "/object");
         }
 
+        /**
+         * For use only by the MTP implementation.
+         * @hide
+         */
         public static final Uri getMtpObjectsUri(String volumeName,
                 long fileId) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
                     + "/object/" + fileId);
         }
 
-        // Used to implement the MTP GetObjectReferences and SetObjectReferences commands.
+        /**
+         * Used to implement the MTP GetObjectReferences and SetObjectReferences commands.
+         * @hide
+         */
         public static final Uri getMtpReferencesUri(String volumeName,
                 long fileId) {
             return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
@@ -310,6 +336,7 @@ public final class MediaStore {
             /**
              * The MTP format code of the file
              * <P>Type: INTEGER</P>
+             * @hide
              */
             public static final String FORMAT = "format";
 

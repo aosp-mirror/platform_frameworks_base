@@ -116,14 +116,14 @@ enum {
     /* This mask is used to check whether the right META meta key is pressed. */
     AMETA_META_RIGHT_ON = 0x40000,
 
-    /* This mask is used to check whether the CAPS LOCK meta key is latched. */
-    AMETA_CAPS_LOCK_LATCHED = 0x100000,
+    /* This mask is used to check whether the CAPS LOCK meta key is on. */
+    AMETA_CAPS_LOCK_ON = 0x100000,
 
-    /* This mask is used to check whether the NUM LOCK meta key is latched. */
-    AMETA_NUM_LOCK_LATCHED = 0x200000,
+    /* This mask is used to check whether the NUM LOCK meta key is on. */
+    AMETA_NUM_LOCK_ON = 0x200000,
 
-    /* This mask is used to check whether the SCROLL LOCK meta key is latched. */
-    AMETA_SCROLL_LOCK_LATCHED = 0x400000,
+    /* This mask is used to check whether the SCROLL LOCK meta key is on. */
+    AMETA_SCROLL_LOCK_ON = 0x400000,
 };
 
 /*

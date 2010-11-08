@@ -416,6 +416,7 @@ void AwesomePlayer::reset_l() {
     if (mDecryptHandle != NULL) {
             mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
                     Playback::STOP, 0);
+            mDrmManagerClient->closeDecryptSession(mDecryptHandle);
             mDecryptHandle = NULL;
             mDrmManagerClient = NULL;
     }
@@ -1667,9 +1668,15 @@ status_t AwesomePlayer::finishSetDataSource_l() {
     }
 
     dataSource->getDrmInfo(&mDecryptHandle, &mDrmManagerClient);
-    if (mDecryptHandle != NULL
-            && RightsStatus::RIGHTS_VALID != mDecryptHandle->status) {
-        notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_NO_LICENSE);
+    if (mDecryptHandle != NULL) {
+        if (RightsStatus::RIGHTS_VALID == mDecryptHandle->status) {
+            if (DecryptApiType::WV_BASED == mDecryptHandle->decryptApiType) {
+                LOGD("Setting mCachedSource to NULL for WVM\n");
+                mCachedSource.clear();
+            }
+        } else {
+            notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, ERROR_NO_LICENSE);
+        }
     }
 
     return setDataSource_l(extractor);

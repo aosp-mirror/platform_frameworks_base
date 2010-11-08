@@ -203,7 +203,9 @@ public abstract class PreferenceActivity extends ListActivity implements
                     ArrayList<Header> oldHeaders = new ArrayList<Header>(mHeaders);
                     mHeaders.clear();
                     onBuildHeaders(mHeaders);
-                    mAdapter.notifyDataSetChanged();
+                    if (mAdapter != null) {
+                        mAdapter.notifyDataSetChanged();
+                    }
                     Header header = onGetNewHeader();
                     if (header != null && header.fragment != null) {
                         Header mappedHeader = findBestMatchingHeader(header, oldHeaders);
@@ -471,6 +473,9 @@ public abstract class PreferenceActivity extends ListActivity implements
         } else {
             // If there are no headers, we are in the old "just show a screen
             // of preferences" mode.
+            setContentView(com.android.internal.R.layout.preference_list_content_single);
+            mListFooter = (FrameLayout) findViewById(com.android.internal.R.id.list_footer);
+            mPrefsContainer = findViewById(com.android.internal.R.id.prefs);
             mPreferenceManager = new PreferenceManager(this, FIRST_REQUEST_CODE);
             mPreferenceManager.setOnPreferenceTreeClickListener(this);
         }

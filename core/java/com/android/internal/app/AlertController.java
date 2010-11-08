@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -163,6 +164,13 @@ public class AlertController {
                     ((DialogInterface) msg.obj).dismiss();
             }
         }
+    }
+
+    private static boolean shouldCenterSingleButton(Context context) {
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogCenterButtons,
+                outValue, true);
+        return outValue.data != 0;
     }
 
     public AlertController(Context context, DialogInterface di, Window window) {
@@ -508,16 +516,18 @@ public class AlertController {
             whichButtons = whichButtons | BIT_BUTTON_NEUTRAL;
         }
 
-        /*
-         * If we only have 1 button it should be centered on the layout and
-         * expand to fill 50% of the available space.
-         */
-        if (whichButtons == BIT_BUTTON_POSITIVE) {
-            centerButton(mButtonPositive);
-        } else if (whichButtons == BIT_BUTTON_NEGATIVE) {
-            centerButton(mButtonNeutral);
-        } else if (whichButtons == BIT_BUTTON_NEUTRAL) {
-            centerButton(mButtonNeutral);
+        if (shouldCenterSingleButton(mContext)) {
+            /*
+             * If we only have 1 button it should be centered on the layout and
+             * expand to fill 50% of the available space.
+             */
+            if (whichButtons == BIT_BUTTON_POSITIVE) {
+                centerButton(mButtonPositive);
+            } else if (whichButtons == BIT_BUTTON_NEGATIVE) {
+                centerButton(mButtonNeutral);
+            } else if (whichButtons == BIT_BUTTON_NEUTRAL) {
+                centerButton(mButtonNeutral);
+            }
         }
         
         return whichButtons != 0;

@@ -65,6 +65,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
@@ -499,6 +500,7 @@ public class WindowManagerService extends IWindowManager.Stub
         IBinder mToken;
         Surface mSurface;
         boolean mLocalOnly;
+        IBinder mLocalWin;
         ClipData mData;
         ClipDescription mDataDescription;
         boolean mDragResult;
@@ -511,10 +513,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         private final Rect tmpRect = new Rect();
 
-        DragState(IBinder token, Surface surface, boolean localOnly) {
+        DragState(IBinder token, Surface surface, boolean localOnly, IBinder localWin) {
             mToken = token;
             mSurface = surface;
             mLocalOnly = localOnly;
+            mLocalWin = localWin;
             mNotifiedWindows = new ArrayList<WindowState>();
         }
 
@@ -524,6 +527,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mSurface = null;
             mLocalOnly = false;
+            mLocalWin = null;
             mToken = null;
             mData = null;
             mThumbOffsetX = mThumbOffsetY = 0;
@@ -593,6 +597,18 @@ public class WindowManagerService extends IWindowManager.Stub
          */
         private void sendDragStartedLw(WindowState newWin, float touchX, float touchY,
                 ClipDescription desc) {
+            // Don't actually send the event if the drag is supposed to be pinned
+            // to the originating window but 'newWin' is not that window.
+            if (mLocalOnly) {
+                final IBinder winBinder = newWin.mClient.asBinder();
+                if (winBinder != mLocalWin) {
+                    if (DEBUG_DRAG) {
+                        Slog.d(TAG, "Not dispatching local DRAG_STARTED to " + newWin);
+                    }
+                    return;
+                }
+            }
+
             if (mDragInProgress && newWin.isPotentialDragTarget()) {
                 DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED,
                         touchX - newWin.mFrame.left, touchY - newWin.mFrame.top,
@@ -671,6 +687,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Tell the affected window
             WindowState touchedWin = getTouchedWinAtPointLw(x, y);
+            if (mLocalOnly) {
+                final IBinder touchedBinder = touchedWin.mClient.asBinder();
+                if (touchedBinder != mLocalWin) {
+                    // This drag is pinned only to the originating window, but the drag
+                    // point is outside that window.  Pretend it's over empty space.
+                    touchedWin = null;
+                }
+            }
             try {
                 // have we dragged over a new window?
                 if ((touchedWin != mTargetWindow) && (mTargetWindow != null)) {
@@ -4831,6 +4855,26 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void freezeRotation() {
+        if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
+                "setRotation()")) {
+            throw new SecurityException("Requires SET_ORIENTATION permission");
+        }
+
+        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED, mRotation);
+        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
+    }
+
+    public void thawRotation() {
+        if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
+                "setRotation()")) {
+            throw new SecurityException("Requires SET_ORIENTATION permission");
+        }
+
+        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE, 0);
+        setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
+    }
+
     public void setRotation(int rotation,
             boolean alwaysSendConfiguration, int animFlags) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
@@ -5434,15 +5478,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         Surface surface = new Surface(session, callerPid, "drag surface", 0,
                                 width, height, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
                         outSurface.copyFrom(surface);
+                        final IBinder winBinder = window.asBinder();
                         token = new Binder();
-                        mDragState = new DragState(token, surface, localOnly);
+                        mDragState = new DragState(token, surface, localOnly, winBinder);
                         mDragState.mSurface = surface;
                         mDragState.mLocalOnly = localOnly;
                         token = mDragState.mToken = new Binder();
 
                         // 5 second timeout for this window to actually begin the drag
-                        mH.removeMessages(H.DRAG_START_TIMEOUT, window);
-                        Message msg = mH.obtainMessage(H.DRAG_START_TIMEOUT, window.asBinder());
+                        mH.removeMessages(H.DRAG_START_TIMEOUT, winBinder);
+                        Message msg = mH.obtainMessage(H.DRAG_START_TIMEOUT, winBinder);
                         mH.sendMessageDelayed(msg, 5000);
                     } else {
                         Slog.w(TAG, "Drag already in progress");
@@ -10665,7 +10710,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return val;
     }
 
-    class Watermark {
+    static class Watermark {
         final String[] mTokens;
         final String mText;
         final Paint mTextPaint;
@@ -10681,9 +10726,9 @@ public class WindowManagerService extends IWindowManager.Stub
         int mLastDH;
         boolean mDrawNeeded;
 
-        Watermark(SurfaceSession session, String[] tokens) {
+        Watermark(Display display, SurfaceSession session, String[] tokens) {
             final DisplayMetrics dm = new DisplayMetrics();
-            mDisplay.getMetrics(dm);
+            display.getMetrics(dm);
 
             if (false) {
                 Log.i(TAG, "*********************** WATERMARK");
@@ -10777,6 +10822,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 } catch (OutOfResourcesException e) {
                 }
                 if (c != null) {
+                    c.drawColor(0, PorterDuff.Mode.CLEAR);
+                    
                     int deltaX = mDeltaX;
                     int deltaY = mDeltaY;
 
@@ -10819,7 +10866,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (line != null) {
                 String[] toks = line.split("%");
                 if (toks != null && toks.length > 0) {
-                    mWatermark = new Watermark(mFxSession, toks);
+                    mWatermark = new Watermark(mDisplay, mFxSession, toks);
                 }
             }
         } catch (FileNotFoundException e) {

@@ -759,11 +759,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         BufferType bufferType = BufferType.EDITABLE;
 
-        if ((inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION))
-                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
-            password = true;
-        }
-
         if (inputMethod != null) {
             Class<?> c;
 
@@ -867,10 +862,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (password && (mInputType&EditorInfo.TYPE_MASK_CLASS)
-                == EditorInfo.TYPE_CLASS_TEXT) {
-            mInputType = (mInputType & ~(EditorInfo.TYPE_MASK_VARIATION))
-                | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
+        if (password) {
+            // Caller used the deprecated xml attribute "password".  Ensure that
+            // the inputType is correct.
+            boolean normalText = (mInputType & EditorInfo.TYPE_MASK_CLASS)
+                    == EditorInfo.TYPE_CLASS_TEXT;
+            if (normalText && !isPasswordInputType(mInputType)) {
+                mInputType = (mInputType & ~(EditorInfo.TYPE_MASK_VARIATION))
+                    | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
+            }
+        } else if (isPasswordInputType(mInputType)) {
+            // Caller did not use the deprecated xml attribute "password", but
+            // did set the input properly.  Set password to true.
+            password = true;
         }
 
         if (selectallonfocus) {
@@ -3065,7 +3069,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 | EditorInfo.TYPE_MASK_VARIATION);
         return variation
                 == (EditorInfo.TYPE_CLASS_TEXT
-                        | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+                        | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)
+                        || variation == (EditorInfo.TYPE_CLASS_TEXT
+                        | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD);
     }
 
     private boolean isVisiblePasswordInputType(int inputType) {
@@ -3944,6 +3950,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     who == mDrawables.mDrawableRight || who == mDrawables.mDrawableBottom;
         }
         return verified;
+    }
+
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mDrawables != null) {
+            if (mDrawables.mDrawableLeft != null) {
+                mDrawables.mDrawableLeft.jumpToCurrentState();
+            }
+            if (mDrawables.mDrawableTop != null) {
+                mDrawables.mDrawableTop.jumpToCurrentState();
+            }
+            if (mDrawables.mDrawableRight != null) {
+                mDrawables.mDrawableRight.jumpToCurrentState();
+            }
+            if (mDrawables.mDrawableBottom != null) {
+                mDrawables.mDrawableBottom.jumpToCurrentState();
+            }
+        }
     }
 
     @Override
@@ -7359,8 +7384,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int variation = mInputType & InputType.TYPE_MASK_VARIATION;
         if (variation == InputType.TYPE_TEXT_VARIATION_URI ||
             variation == InputType.TYPE_TEXT_VARIATION_PASSWORD ||
+            variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
             variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
             variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+            variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS ||
             variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
             return -1;
         }
@@ -8042,9 +8069,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onClick(View v) {
-            ClipboardManager clipboard = 
-                (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-            paste(clipboard, getSelectionStart(), getSelectionEnd());
+            if (canPaste()) {
+                ClipboardManager clipboard =
+                    (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                paste(clipboard, getSelectionStart(), getSelectionEnd());
+            }
+            hide();
         }
 
         void positionAtCursor() {

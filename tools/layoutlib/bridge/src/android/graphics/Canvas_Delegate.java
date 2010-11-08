@@ -970,6 +970,8 @@ public class Canvas_Delegate {
         Graphics2D g = getGraphics2d();
         g = (Graphics2D)g.create();
 
+        // configure it
+
         if (paint.isAntiAliased()) {
             g.setRenderingHint(
                     RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -977,60 +979,74 @@ public class Canvas_Delegate {
                     RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         }
 
-        // configure it
-        g.setColor(new Color(paint.getColor()));
-        int alpha = paint.getAlpha();
-        float falpha = alpha / 255.f;
+        boolean useColorPaint = true;
 
-        int style = paint.getStyle();
-        if (style == Paint.Style.STROKE.nativeInt ||
-                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
-            /* FIXME
-            PathEffect e = paint.getPathEffect();
-            if (e instanceof DashPathEffect) {
-                DashPathEffect dpe = (DashPathEffect)e;
-                g.setStroke(new BasicStroke(
-                        paint.getStrokeWidth(),
-                        paint.getStrokeCap().getJavaCap(),
-                        paint.getStrokeJoin().getJavaJoin(),
-                        paint.getStrokeMiter(),
-                        dpe.getIntervals(),
-                        dpe.getPhase()));
-            } else {*/
-                g.setStroke(new BasicStroke(
-                        paint.getStrokeWidth(),
-                        paint.getJavaCap(),
-                        paint.getJavaJoin(),
-                        paint.getStrokeMiter()));
-          /*  }*/
-        }
-/*
-        Xfermode xfermode = paint.getXfermode();
-        if (xfermode instanceof PorterDuffXfermode) {
-            PorterDuff.Mode mode = ((PorterDuffXfermode)xfermode).getMode();
-
-            setModeInGraphics(mode, g, falpha);
-        } else {
-            if (mLogger != null && xfermode != null) {
-                mLogger.warning(String.format(
-                        "Xfermode '%1$s' is not supported in the Layout Editor.",
-                        xfermode.getClass().getCanonicalName()));
-            }
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
-        }
-*/
-        int nativeShader = paint.getShader();
-        Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(nativeShader);
+        // get the shader first, as it'll replace the color if it can be used it.
+        Shader_Delegate shaderDelegate = Shader_Delegate.getDelegate(paint.getShader());
         if (shaderDelegate != null) {
             java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
             if (shaderPaint != null) {
                 g.setPaint(shaderPaint);
+                useColorPaint = false;
             } else {
                 if (mLogger != null) {
                     mLogger.warning(String.format(
                             "Shader '%1$s' is not supported in the Layout Editor.",
                             shaderDelegate.getClass().getCanonicalName()));
                 }
+            }
+        }
+
+        // need to get the alpha to set it in the composite.
+        float falpha = 1.f;
+
+        if (useColorPaint) {
+            g.setColor(new Color(paint.getColor()));
+
+            // the alpha is taken from the alpha channel of the color
+            int alpha = paint.getAlpha();
+            falpha = alpha / 255.f;
+        }
+
+        int style = paint.getStyle();
+        if (style == Paint.Style.STROKE.nativeInt ||
+                style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+
+            PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(
+                    paint.getPathEffect());
+
+            if (effectDelegate instanceof DashPathEffect_Delegate) {
+                DashPathEffect_Delegate dpe = (DashPathEffect_Delegate)effectDelegate;
+                g.setStroke(new BasicStroke(
+                        paint.getStrokeWidth(),
+                        paint.getJavaCap(),
+                        paint.getJavaJoin(),
+                        paint.getStrokeMiter(),
+                        dpe.getIntervals(),
+                        dpe.getPhase()));
+            } else {
+                g.setStroke(new BasicStroke(
+                        paint.getStrokeWidth(),
+                        paint.getJavaCap(),
+                        paint.getJavaJoin(),
+                        paint.getStrokeMiter()));
+            }
+        }
+
+        Xfermode_Delegate xfermodeDelegate = Xfermode_Delegate.getDelegate(paint.getXfermode());
+        if (xfermodeDelegate instanceof PorterDuffXfermode_Delegate) {
+            int mode = ((PorterDuffXfermode_Delegate)xfermodeDelegate).getMode();
+
+            setModeInGraphics(g, mode, falpha);
+        } else {
+            // default mode is src_over
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
+
+            // if xfermode wasn't null, then it's something we don't support. log it.
+            if (mLogger != null && xfermodeDelegate != null) {
+                mLogger.warning(String.format(
+                        "Xfermode '%1$s' is not supported in the Layout Editor.",
+                        xfermodeDelegate.getClass().getCanonicalName()));
             }
         }
 

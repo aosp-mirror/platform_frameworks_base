@@ -548,6 +548,10 @@ sp<MediaSource> OMXCodec::Create(
 }
 
 status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
+    mIsMetaDataStoredInVideoBuffers = false;
+    if (flags & kStoreMetaDataInVideoBuffers) {
+        mIsMetaDataStoredInVideoBuffers = true;
+    }
     if (!(flags & kIgnoreCodecSpecificData)) {
         uint32_t type;
         const void *data;
@@ -1616,6 +1620,14 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         return err;
     }
 
+    if (mIsMetaDataStoredInVideoBuffers && portIndex == kPortIndexInput) {
+        err = mOMX->storeMetaDataInBuffers(mNode, kPortIndexInput, OMX_TRUE);
+        if (err != OK) {
+            LOGE("Storing meta data in video buffers is not supported");
+            return err;
+        }
+    }
+
     CODEC_LOGI("allocating %lu buffers of size %lu on %s port",
             def.nBufferCountActual, def.nBufferSize,
             portIndex == kPortIndexInput ? "input" : "output");
@@ -1896,16 +1908,20 @@ void OMXCodec::on_message(const omx_message &msg) {
                      "an EMPTY_BUFFER_DONE.", buffer);
             }
 
-            buffers->editItemAt(i).mOwnedByComponent = false;
+            BufferInfo* info = &buffers->editItemAt(i);
+            info->mOwnedByComponent = false;
+
+            // Buffer could not be released until empty buffer done is called.
+            if (info->mMediaBuffer != NULL) {
+                info->mMediaBuffer->release();
+                info->mMediaBuffer = NULL;
+            }
 
             if (mPortStatus[kPortIndexInput] == DISABLING) {
                 CODEC_LOGV("Port is disabled, freeing buffer %p", buffer);
 
-                status_t err =
-                    mOMX->freeBuffer(mNode, kPortIndexInput, buffer);
+                status_t err = freeBuffer(kPortIndexInput, i);
                 CHECK_EQ(err, OK);
-
-                buffers->removeAt(i);
             } else if (mState != ERROR
                     && mPortStatus[kPortIndexInput] != SHUTTING_DOWN) {
                 CHECK_EQ(mPortStatus[kPortIndexInput], ENABLED);
@@ -1945,20 +1961,9 @@ void OMXCodec::on_message(const omx_message &msg) {
             if (mPortStatus[kPortIndexOutput] == DISABLING) {
                 CODEC_LOGV("Port is disabled, freeing buffer %p", buffer);
 
-                status_t err =
-                    mOMX->freeBuffer(mNode, kPortIndexOutput, buffer);
+                status_t err = freeBuffer(kPortIndexOutput, i);
                 CHECK_EQ(err, OK);
 
-                // Cancel the buffer if it belongs to an ANativeWindow.
-                if (info->mMediaBuffer != NULL) {
-                    sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
-                    if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
-                        cancelBufferToNativeWindow(info);
-                        // Ignore any errors
-                    }
-                }
-
-                buffers->removeAt(i);
 #if 0
             } else if (mPortStatus[kPortIndexOutput] == ENABLED
                        && (flags & OMX_BUFFERFLAG_EOS)) {
@@ -2436,37 +2441,46 @@ status_t OMXCodec::freeBuffersOnPort(
 
         CODEC_LOGV("freeing buffer %p on port %ld", info->mBuffer, portIndex);
 
-        status_t err =
-            mOMX->freeBuffer(mNode, portIndex, info->mBuffer);
+        status_t err = freeBuffer(portIndex, i);
 
         if (err != OK) {
             stickyErr = err;
         }
 
-        if (info->mMediaBuffer != NULL) {
-            info->mMediaBuffer->setObserver(NULL);
-
-            // Make sure nobody but us owns this buffer at this point.
-            CHECK_EQ(info->mMediaBuffer->refcount(), 0);
-
-            // Cancel the buffer if it belongs to an ANativeWindow.
-            sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
-            if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
-                status_t err = cancelBufferToNativeWindow(info);
-                if (err != OK) {
-                  stickyErr = err;
-                }
-            }
-
-            info->mMediaBuffer->release();
-        }
-
-        buffers->removeAt(i);
     }
 
     CHECK(onlyThoseWeOwn || buffers->isEmpty());
 
     return stickyErr;
+}
+
+status_t OMXCodec::freeBuffer(OMX_U32 portIndex, size_t bufIndex) {
+    Vector<BufferInfo> *buffers = &mPortBuffers[portIndex];
+
+    BufferInfo *info = &buffers->editItemAt(bufIndex);
+
+    status_t err = mOMX->freeBuffer(mNode, portIndex, info->mBuffer);
+
+    if (err == OK && info->mMediaBuffer != NULL) {
+        info->mMediaBuffer->setObserver(NULL);
+
+        // Make sure nobody but us owns this buffer at this point.
+        CHECK_EQ(info->mMediaBuffer->refcount(), 0);
+
+        // Cancel the buffer if it belongs to an ANativeWindow.
+        sp<GraphicBuffer> graphicBuffer = info->mMediaBuffer->graphicBuffer();
+        if (!info->mOwnedByNativeWindow && graphicBuffer != 0) {
+            err = cancelBufferToNativeWindow(info);
+        }
+
+        info->mMediaBuffer->release();
+    }
+
+    if (err == OK) {
+        buffers->removeAt(bufIndex);
+    }
+
+    return err;
 }
 
 void OMXCodec::onPortSettingsChanged(OMX_U32 portIndex) {
@@ -2696,11 +2710,19 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
             break;
         }
 
+        bool releaseBuffer = true;
         if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
             CHECK(mOMXLivesLocally && offset == 0);
             OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *) info->mBuffer;
             header->pBuffer = (OMX_U8 *) srcBuffer->data() + srcBuffer->range_offset();
+            releaseBuffer = false;
+            info->mMediaBuffer = srcBuffer;
+            // FIXME: we are leaking memory
         } else {
+            if (mIsMetaDataStoredInVideoBuffers) {
+                releaseBuffer = false;
+                info->mMediaBuffer = srcBuffer;
+            }
             memcpy((uint8_t *)info->mData + offset,
                     (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
                     srcBuffer->range_length());
@@ -2716,8 +2738,10 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
         offset += srcBuffer->range_length();
 
-        srcBuffer->release();
-        srcBuffer = NULL;
+        if (releaseBuffer) {
+            srcBuffer->release();
+            srcBuffer = NULL;
+        }
 
         ++n;
 

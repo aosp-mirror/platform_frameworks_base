@@ -376,6 +376,7 @@ class FakeEventHub : public EventHubInterface {
         KeyedVector<int32_t, int32_t> scanCodeStates;
         KeyedVector<int32_t, int32_t> switchStates;
         KeyedVector<int32_t, KeyInfo> keys;
+        KeyedVector<int32_t, bool> leds;
 
         Device(const String8& name, uint32_t classes) :
                 name(name), classes(classes) {
@@ -448,6 +449,16 @@ public:
         info.keyCode = keyCode;
         info.flags = flags;
         device->keys.add(scanCode, info);
+    }
+
+    void addLed(int32_t deviceId, int32_t led, bool initialState) {
+        Device* device = getDevice(deviceId);
+        device->leds.add(led, initialState);
+    }
+
+    bool getLedState(int32_t deviceId, int32_t led) {
+        Device* device = getDevice(deviceId);
+        return device->leds.valueFor(led);
     }
 
     Vector<String8>& getExcludedDevices() {
@@ -584,10 +595,22 @@ private:
     }
 
     virtual bool hasLed(int32_t deviceId, int32_t led) const {
-        return false;
+        Device* device = getDevice(deviceId);
+        return device && device->leds.indexOfKey(led) >= 0;
     }
 
     virtual void setLedState(int32_t deviceId, int32_t led, bool on) {
+        Device* device = getDevice(deviceId);
+        if (device) {
+            ssize_t index = device->leds.indexOfKey(led);
+            if (index >= 0) {
+                device->leds.replaceValueAt(led, on);
+            } else {
+                ADD_FAILURE()
+                        << "Attempted to set the state of an LED that the EventHub declared "
+                        "was not present.  led=" << led;
+            }
+        }
     }
 
     virtual void dump(String8& dump) {
@@ -1701,6 +1724,81 @@ TEST_F(KeyboardInputMapperTest, MarkSupportedKeyCodes) {
     ASSERT_TRUE(mapper->markSupportedKeyCodes(AINPUT_SOURCE_ANY, 1, keyCodes, flags));
     ASSERT_TRUE(flags[0]);
     ASSERT_FALSE(flags[1]);
+}
+
+TEST_F(KeyboardInputMapperTest, Process_LockedKeysShouldToggleMetaStateAndLeds) {
+    mFakeEventHub->addLed(DEVICE_ID, LED_CAPSL, true /*initially on*/);
+    mFakeEventHub->addLed(DEVICE_ID, LED_NUML, false /*initially off*/);
+    mFakeEventHub->addLed(DEVICE_ID, LED_SCROLLL, false /*initially off*/);
+
+    KeyboardInputMapper* mapper = new KeyboardInputMapper(mDevice, -1,
+            AINPUT_SOURCE_KEYBOARD, AINPUT_KEYBOARD_TYPE_ALPHABETIC);
+    addMapperAndConfigure(mapper);
+
+    // Initialization should have turned all of the lights off.
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_CAPSL));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_NUML));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_SCROLLL));
+
+    // Toggle caps lock on.
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_CAPSLOCK, AKEYCODE_CAPS_LOCK, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_CAPSLOCK, AKEYCODE_CAPS_LOCK, 0, 0);
+    ASSERT_TRUE(mFakeEventHub->getLedState(DEVICE_ID, LED_CAPSL));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_NUML));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_SCROLLL));
+    ASSERT_EQ(AMETA_CAPS_LOCK_ON, mapper->getMetaState());
+
+    // Toggle num lock on.
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_NUMLOCK, AKEYCODE_NUM_LOCK, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_NUMLOCK, AKEYCODE_NUM_LOCK, 0, 0);
+    ASSERT_TRUE(mFakeEventHub->getLedState(DEVICE_ID, LED_CAPSL));
+    ASSERT_TRUE(mFakeEventHub->getLedState(DEVICE_ID, LED_NUML));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_SCROLLL));
+    ASSERT_EQ(AMETA_CAPS_LOCK_ON | AMETA_NUM_LOCK_ON, mapper->getMetaState());
+
+    // Toggle caps lock off.
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_CAPSLOCK, AKEYCODE_CAPS_LOCK, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_CAPSLOCK, AKEYCODE_CAPS_LOCK, 1, 0);
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_CAPSL));
+    ASSERT_TRUE(mFakeEventHub->getLedState(DEVICE_ID, LED_NUML));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_SCROLLL));
+    ASSERT_EQ(AMETA_NUM_LOCK_ON, mapper->getMetaState());
+
+    // Toggle scroll lock on.
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_SCROLLLOCK, AKEYCODE_SCROLL_LOCK, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_SCROLLLOCK, AKEYCODE_SCROLL_LOCK, 0, 0);
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_CAPSL));
+    ASSERT_TRUE(mFakeEventHub->getLedState(DEVICE_ID, LED_NUML));
+    ASSERT_TRUE(mFakeEventHub->getLedState(DEVICE_ID, LED_SCROLLL));
+    ASSERT_EQ(AMETA_NUM_LOCK_ON | AMETA_SCROLL_LOCK_ON, mapper->getMetaState());
+
+    // Toggle num lock off.
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_NUMLOCK, AKEYCODE_NUM_LOCK, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_NUMLOCK, AKEYCODE_NUM_LOCK, 0, 0);
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_CAPSL));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_NUML));
+    ASSERT_TRUE(mFakeEventHub->getLedState(DEVICE_ID, LED_SCROLLL));
+    ASSERT_EQ(AMETA_SCROLL_LOCK_ON, mapper->getMetaState());
+
+    // Toggle scroll lock off.
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_SCROLLLOCK, AKEYCODE_SCROLL_LOCK, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID,
+            EV_KEY, KEY_SCROLLLOCK, AKEYCODE_SCROLL_LOCK, 0, 0);
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_CAPSL));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_NUML));
+    ASSERT_FALSE(mFakeEventHub->getLedState(DEVICE_ID, LED_SCROLLL));
+    ASSERT_EQ(AMETA_NONE, mapper->getMetaState());
 }
 
 

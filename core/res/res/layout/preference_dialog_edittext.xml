@@ -17,7 +17,9 @@
 <!-- Layout used as the dialog's content View for EditTextPreference. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginTop="48dp"
+    android:layout_marginBottom="48dp">
 
     <LinearLayout
         android:id="@+android:id/edittext_container"
@@ -28,10 +30,11 @@
 
         <TextView android:id="@+android:id/message"
             style="?android:attr/textAppearanceSmall"
+            android:layout_marginBottom="48dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="?android:attr/textColorSecondary" />
-            
+
     </LinearLayout>
 
 </ScrollView>

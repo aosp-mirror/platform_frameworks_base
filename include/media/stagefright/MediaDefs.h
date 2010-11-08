@@ -44,6 +44,8 @@ extern const char *MEDIA_MIMETYPE_CONTAINER_OGG;
 extern const char *MEDIA_MIMETYPE_CONTAINER_MATROSKA;
 extern const char *MEDIA_MIMETYPE_CONTAINER_MPEG2TS;
 
+extern const char *MEDIA_MIMETYPE_CONTAINER_WVM;
+
 }  // namespace android
 
 #endif  // MEDIA_DEFS_H_

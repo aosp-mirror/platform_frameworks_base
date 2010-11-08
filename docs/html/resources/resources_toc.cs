@@ -87,7 +87,7 @@
 ?>
 
   <li>
-    <h2><span class="en">More</span>
+   <h2><span class="en">More</span>
     </h2>
     <ul>
       <li><a href="<?cs var:toroot ?>resources/faq/commontasks.html">

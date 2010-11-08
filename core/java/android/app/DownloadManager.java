@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
+import android.util.Log;
 import android.util.Pair;
 
 import java.io.File;
@@ -284,6 +285,7 @@ public class DownloadManager {
     private static final String[] COLUMNS = new String[] {
         COLUMN_ID,
         COLUMN_MEDIAPROVIDER_URI,
+        Downloads.Impl.COLUMN_DESTINATION,
         COLUMN_TITLE,
         COLUMN_DESCRIPTION,
         COLUMN_URI,
@@ -294,13 +296,14 @@ public class DownloadManager {
         COLUMN_REASON,
         COLUMN_BYTES_DOWNLOADED_SO_FAR,
         COLUMN_LAST_MODIFIED_TIMESTAMP,
-        COLUMN_LOCAL_FILENAME
+        COLUMN_LOCAL_FILENAME,
     };
 
     // columns to request from DownloadProvider
     private static final String[] UNDERLYING_COLUMNS = new String[] {
         Downloads.Impl._ID,
         Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
+        Downloads.Impl.COLUMN_DESTINATION,
         Downloads.Impl.COLUMN_TITLE,
         Downloads.Impl.COLUMN_DESCRIPTION,
         Downloads.Impl.COLUMN_URI,
@@ -309,14 +312,14 @@ public class DownloadManager {
         Downloads.Impl.COLUMN_STATUS,
         Downloads.Impl.COLUMN_CURRENT_BYTES,
         Downloads.Impl.COLUMN_LAST_MODIFICATION,
-        Downloads.Impl.COLUMN_DESTINATION,
         Downloads.Impl.COLUMN_FILE_NAME_HINT,
         Downloads.Impl._DATA,
     };
 
     private static final Set<String> LONG_COLUMNS = new HashSet<String>(
             Arrays.asList(COLUMN_ID, COLUMN_TOTAL_SIZE_BYTES, COLUMN_STATUS, COLUMN_REASON,
-                          COLUMN_BYTES_DOWNLOADED_SO_FAR, COLUMN_LAST_MODIFIED_TIMESTAMP));
+                          COLUMN_BYTES_DOWNLOADED_SO_FAR, COLUMN_LAST_MODIFIED_TIMESTAMP,
+                          Downloads.Impl.COLUMN_DESTINATION));
 
     /**
      * This class contains all the information necessary to request a new download. The URI is the
@@ -348,6 +351,18 @@ public class DownloadManager {
         private boolean mRoamingAllowed = true;
         private int mAllowedNetworkTypes = ~0; // default to all network types allowed
         private boolean mIsVisibleInDownloadsUi = true;
+        private boolean mScannable = false;
+        /** if a file is designated as a MediaScanner scannable file, the following value is
+         * stored in the database column {@link Downloads.Impl#COLUMN_MEDIA_SCANNED}.
+         */
+        private static final int SCANNABLE_VALUE_YES = 0;
+        // value of 1 is stored in the above column by DownloadProvider after it is scanned by
+        // MediaScanner
+        /** if a file is designated as a file that should not be scanned by MediaScanner,
+         * the following value is stored in the database column
+         * {@link Downloads.Impl#COLUMN_MEDIA_SCANNED}.
+         */
+        private static final int SCANNABLE_VALUE_NO = 2;
 
         /**
          * This download is visible but only shows in the notifications
@@ -389,7 +404,10 @@ public class DownloadManager {
          * Set the local destination for the downloaded file. Must be a file URI to a path on
          * external storage, and the calling application must have the WRITE_EXTERNAL_STORAGE
          * permission.
-         *
+         * <p>
+         * The downloaded file is not scanned by MediaScanner.
+         * But it can be made scannable by calling {@link #allowScanningByMediaScanner()}.
+         * <p>
          * By default, downloads are saved to a generated filename in the shared download cache and
          * may be deleted by the system at any time to reclaim space.
          *
@@ -403,6 +421,9 @@ public class DownloadManager {
         /**
          * Set the local destination for the downloaded file to a path within the application's
          * external files directory (as returned by {@link Context#getExternalFilesDir(String)}.
+         * <p>
+         * The downloaded file is not scanned by MediaScanner.
+         * But it can be made scannable by calling {@link #allowScanningByMediaScanner()}.
          *
          * @param context the {@link Context} to use in determining the external files directory
          * @param dirType the directory type to pass to {@link Context#getExternalFilesDir(String)}
@@ -419,6 +440,9 @@ public class DownloadManager {
          * Set the local destination for the downloaded file to a path within the public external
          * storage directory (as returned by
          * {@link Environment#getExternalStoragePublicDirectory(String)}.
+         *<p>
+         * The downloaded file is not scanned by MediaScanner.
+         * But it can be made scannable by calling {@link #allowScanningByMediaScanner()}.
          *
          * @param dirType the directory type to pass to
          *        {@link Environment#getExternalStoragePublicDirectory(String)}
@@ -435,6 +459,14 @@ public class DownloadManager {
                 throw new NullPointerException("subPath cannot be null");
             }
             mDestinationUri = Uri.withAppendedPath(Uri.fromFile(base), subPath);
+        }
+
+        /**
+         * If the file to be downloaded is to be scanned by MediaScanner, this method
+         * should be called before {@link DownloadManager#enqueue(Request)} is called.
+         */
+        public void allowScanningByMediaScanner() {
+            mScannable = true;
         }
 
         /**
@@ -583,6 +615,9 @@ public class DownloadManager {
                 values.put(Downloads.Impl.COLUMN_DESTINATION,
                            Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
             }
+            // is the file supposed to be media-scannable?
+            values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (mScannable) ? SCANNABLE_VALUE_YES :
+                    SCANNABLE_VALUE_NO);
 
             if (!mRequestHeaders.isEmpty()) {
                 encodeHttpHeaders(values);
@@ -868,6 +903,58 @@ public class DownloadManager {
     }
 
     /**
+     * Returns {@link Uri} for the given downloaded file id, if the file is
+     * downloaded successfully. otherwise, null is returned.
+     *<p>
+     * If the specified downloaded file is in external storage (for example, /sdcard dir),
+     * then it is assumed to be safe for anyone to read and the returned {@link Uri} can be used
+     * by any app to access the downloaded file.
+     *
+     * @param id the id of the downloaded file.
+     * @return the {@link Uri} for the given downloaded file id, if download was successful. null
+     * otherwise.
+     */
+    public Uri getUriForDownloadedFile(long id) {
+        // to check if the file is in cache, get its destination from the database
+        Query query = new Query().setFilterById(id);
+        Cursor cursor = null;
+        try {
+            cursor = query(query);
+            if (cursor == null) {
+                return null;
+            }
+            while (cursor.moveToFirst()) {
+                int status = cursor.getInt(cursor.getColumnIndexOrThrow(
+                        DownloadManager.COLUMN_STATUS));
+                if (DownloadManager.STATUS_SUCCESSFUL == status) {
+                    int indx = cursor.getColumnIndexOrThrow(
+                            Downloads.Impl.COLUMN_DESTINATION);
+                    int destination = cursor.getInt(indx);
+                    // TODO: if we ever add API to DownloadManager to let the caller specify
+                    // non-external storage for a downloaded file, then the following code
+                    // should also check for that destination.
+                    if (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION ||
+                            destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
+                            destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE) {
+                        // return private uri
+                        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
+                    } else {
+                        // return public uri
+                        return ContentUris.withAppendedId(
+                                Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI, id);
+                    }
+                }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        // downloaded file not found or its status is not 'successfully completed'
+        return null;
+    }
+
+    /**
      * Restart the given downloads, which must have already completed (successfully or not).  This
      * method will only work when called from within the download manager's process.
      * @param ids the IDs of the downloads
@@ -1087,6 +1174,9 @@ public class DownloadManager {
             }
             if (column.equals(COLUMN_BYTES_DOWNLOADED_SO_FAR)) {
                 return getUnderlyingLong(Downloads.Impl.COLUMN_CURRENT_BYTES);
+            }
+            if (column.equals(Downloads.Impl.COLUMN_DESTINATION)) {
+                return getUnderlyingLong(Downloads.Impl.COLUMN_DESTINATION);
             }
             assert column.equals(COLUMN_LAST_MODIFIED_TIMESTAMP);
             return getUnderlyingLong(Downloads.Impl.COLUMN_LAST_MODIFICATION);

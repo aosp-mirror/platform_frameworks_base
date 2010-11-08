@@ -419,6 +419,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
 		-samplecode $(sample_dir)/SearchableDictionary \
 		            resources/samples/SearchableDictionary "Searchable Dictionary v2" \
+		-samplecode $(sample_dir)/SipDemo \
+		            resources/samples/SipDemo "SIP Demo" \
 		-samplecode $(sample_dir)/Snake \
 		            resources/samples/Snake "Snake" \
 		-samplecode $(sample_dir)/SoftKeyboard \

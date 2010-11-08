@@ -351,6 +351,7 @@
         <eat-comment />
         <attr name="alertDialogStyle" format="reference" />
         <attr name="alertDialogButtonGroupStyle" format="reference" />
+        <attr name="alertDialogCenterButtons" format="boolean" />
 
         <!-- ============ -->
         <!-- Panel styles -->
@@ -544,6 +545,8 @@
         <attr name="ringtonePreferenceStyle" format="reference" />
         <!-- The preference layout that has the child/tabbed effect. -->
         <attr name="preferenceLayoutChild" format="reference" />
+        <!-- Preference panel background -->
+        <attr name="preferencePanelBackground" format="reference" />
 
         <!-- ============================ -->
         <!-- Text selection handle styles -->

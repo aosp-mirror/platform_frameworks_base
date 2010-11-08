@@ -107,26 +107,6 @@ public class GridView extends AbsListView {
         a.recycle();
     }
 
-    /**
-     * Set how the user may select items from the grid.
-     *
-     * <p>GridView only supports {@link AbsListView#CHOICE_MODE_NONE} and
-     * {@link AbsListView#CHOICE_MODE_MULTIPLE_MODAL}. Attempting to set an unsupported choice
-     * mode will throw an UnsupportedOperationException.
-     */
-    @Override
-    public void setChoiceMode(int choiceMode) {
-        switch (choiceMode) {
-        case CHOICE_MODE_NONE:
-        case CHOICE_MODE_MULTIPLE_MODAL:
-            super.setChoiceMode(choiceMode);
-            break;
-
-        default:
-            throw new UnsupportedOperationException("Unsupported choice mode " + choiceMode);
-        }
-    }
-
     @Override
     public ListAdapter getAdapter() {
         return mAdapter;

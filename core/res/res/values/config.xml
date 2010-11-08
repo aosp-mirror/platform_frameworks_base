@@ -58,13 +58,13 @@
     <bool name="config_sf_slowBlur">false</bool>
     
     <!-- The duration (in milliseconds) of a short animation. -->
-    <integer name="config_shortAnimTime">150</integer>
+    <integer name="config_shortAnimTime">200</integer>
     
     <!-- The duration (in milliseconds) of a medium-length animation. -->
-    <integer name="config_mediumAnimTime">300</integer>
+    <integer name="config_mediumAnimTime">400</integer>
     
     <!-- The duration (in milliseconds) of a long animation. -->
-    <integer name="config_longAnimTime">400</integer>
+    <integer name="config_longAnimTime">500</integer>
 
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
@@ -451,4 +451,12 @@
     <!-- Number of database connections opened and managed by framework layer
          to handle queries on each database. -->
     <integer name="db_connection_pool_size">1</integer>
+
+    <!-- The URL that should be sent in an x-wap-profile header with an HTTP request,
+         as defined in the Open Mobile Alliance User Agent Profile specification
+         OMA-TS-UAProf-V2_0-20060206-A Section 8.1.1.1. If the URL contains a '%s'
+         format string then that substring will be replaced with the value of
+         Build.MODEL. The format string shall not be escaped. -->
+    <string name="config_useragentprofile_url"></string>
+
 </resources>

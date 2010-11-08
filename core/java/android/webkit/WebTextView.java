@@ -124,6 +124,16 @@ import java.util.ArrayList;
     private boolean mAutoFillable; // Is this textview part of an autofillable form?
     private int mQueryId;
 
+    // Types used with setType.  Keep in sync with CachedInput.h
+    private static final int NORMAL_TEXT_FIELD = 0;
+    private static final int TEXT_AREA = 1;
+    private static final int PASSWORD = 2;
+    private static final int SEARCH = 3;
+    private static final int EMAIL = 4;
+    private static final int NUMBER = 5;
+    private static final int TELEPHONE = 6;
+    private static final int URL = 7;
+
     /**
      * Create a new WebTextView.
      * @param   context The Context for this WebTextView.
@@ -788,7 +798,7 @@ import java.util.ArrayList;
     /* package */ void setInPassword(boolean inPassword) {
         if (inPassword) {
             setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.
-                    TYPE_TEXT_VARIATION_PASSWORD);
+                TYPE_TEXT_VARIATION_WEB_PASSWORD);
             createBackground();
         }
         // For password fields, draw the WebTextView.  For others, just show
@@ -940,7 +950,7 @@ import java.util.ArrayList;
     /**
      * Called by WebView.rebuildWebTextView().  Based on the type of the <input>
      * element, set up the WebTextView, its InputType, and IME Options properly.
-     * @param type int corresponding to enum "type" defined in WebView.cpp.
+     * @param type int corresponding to enum "Type" defined in CachedInput.h.
      *              Does not correspond to HTMLInputElement::InputType so this
      *              is unaffected if that changes, and also because that has no
      *              type corresponding to textarea (which is its own tag).
@@ -950,47 +960,47 @@ import java.util.ArrayList;
         boolean single = true;
         boolean inPassword = false;
         int maxLength = -1;
-        int inputType = EditorInfo.TYPE_CLASS_TEXT;
-        if (mWebView.nativeFocusCandidateHasNextTextfield()) {
-            inputType |= EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
-        }
+        int inputType = EditorInfo.TYPE_CLASS_TEXT
+                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
         int imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
                 | EditorInfo.IME_FLAG_NO_FULLSCREEN;
+        if (TEXT_AREA != type
+                && mWebView.nativeFocusCandidateHasNextTextfield()) {
+            imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
+        }
         switch (type) {
-            case 0: // NORMAL_TEXT_FIELD
+            case NORMAL_TEXT_FIELD:
                 imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
-            case 1: // TEXT_AREA
+            case TEXT_AREA:
                 single = false;
-                inputType = EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
+                inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
                         | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
-                        | EditorInfo.TYPE_CLASS_TEXT
                         | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
                 imeOptions |= EditorInfo.IME_ACTION_NONE;
                 break;
-            case 2: // PASSWORD
+            case PASSWORD:
                 inPassword = true;
                 imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
-            case 3: // SEARCH
+            case SEARCH:
                 imeOptions |= EditorInfo.IME_ACTION_SEARCH;
                 break;
-            case 4: // EMAIL
-                // TYPE_TEXT_VARIATION_WEB_EDIT_TEXT prevents EMAIL_ADDRESS
-                // from working, so exclude it for now.
+            case EMAIL:
+                inputType = EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
                 imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
-            case 5: // NUMBER
+            case NUMBER:
                 inputType |= EditorInfo.TYPE_CLASS_NUMBER;
                 // Number and telephone do not have both a Tab key and an
                 // action, so set the action to NEXT
                 imeOptions |= EditorInfo.IME_ACTION_NEXT;
                 break;
-            case 6: // TELEPHONE
+            case TELEPHONE:
                 inputType |= EditorInfo.TYPE_CLASS_PHONE;
                 imeOptions |= EditorInfo.IME_ACTION_NEXT;
                 break;
-            case 7: // URL
+            case URL:
                 // TYPE_TEXT_VARIATION_URI prevents Tab key from showing, so
                 // exclude it for now.
                 imeOptions |= EditorInfo.IME_ACTION_GO;
@@ -1004,7 +1014,7 @@ import java.util.ArrayList;
             mWebView.requestLabel(mWebView.nativeFocusCandidateFramePointer(),
                     mNodePointer);
             maxLength = mWebView.nativeFocusCandidateMaxLength();
-            if (type != 2 /* PASSWORD */) {
+            if (type != PASSWORD) {
                 String name = mWebView.nativeFocusCandidateName();
                 if (name != null && name.length() > 0) {
                     mWebView.requestFormData(name, mNodePointer, mAutoFillable);

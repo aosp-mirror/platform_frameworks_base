@@ -750,7 +750,8 @@ public class VideoEditorTestImpl implements VideoEditor {
         final File file = new File(mProjectPath, PROJECT_FILENAME);
         // Load the metadata
         final XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new FileInputStream(file), "UTF-8");
+        final FileInputStream fis = new FileInputStream(file);
+        parser.setInput(fis, "UTF-8");
         int eventType = parser.getEventType();
         String name;
         MediaItem currentMediaItem = null;
@@ -860,6 +861,7 @@ public class VideoEditorTestImpl implements VideoEditor {
             eventType = parser.next();
         }
 
+        fis.close();
         computeTimelineDuration();
     }
 
@@ -1025,11 +1027,24 @@ public class VideoEditorTestImpl implements VideoEditor {
         }
     }
 
+    /*
+     * {@inheritDoc}
+     */
     public void cancelExport(String filename) {
     }
 
+    /*
+     * {@inheritDoc}
+     */
     public void export(String filename, int height, int bitrate, ExportProgressListener listener)
             throws IOException {
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    public void export(String filename, int height, int bitrate, int audioCodec, int videoCodec,
+            ExportProgressListener listener) throws IOException {
     }
 
     /*

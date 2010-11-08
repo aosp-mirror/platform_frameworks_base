@@ -21,8 +21,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    android:background="@android:color/transparent">
+    android:layout_width="match_parent">
 
     <LinearLayout
         android:orientation="horizontal"
@@ -35,9 +34,9 @@
             android:orientation="vertical"
             android:layout_width="0px"
             android:layout_height="match_parent"
-            android:layout_marginLeft="32dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginLeft="@dimen/preference_screen_side_margin"
             android:layout_marginTop="32dp"
-            android:layout_marginRight="16dp"
             android:layout_marginBottom="32dp"
             android:layout_weight="10">
 
@@ -46,7 +45,6 @@
                 android:layout_height="0px"
                 android:layout_weight="1"
                 android:drawSelectorOnTop="false"
-                android:background="#40404040"
                 android:cacheColorHint="@android:color/transparent"
                 android:listPreferredItemHeight="48dp"
                 android:scrollbarAlwaysDrawVerticalTrack="true" />
@@ -61,12 +59,16 @@
         <FrameLayout android:id="@+id/prefs"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
-                android:layout_weight="25"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
+                android:layout_weight="20"
+                android:layout_marginLeft="-4dp"
+                android:layout_marginRight="@dimen/preference_screen_side_margin"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                android:background="#60202040"
+                android:paddingLeft="32dip"
+                android:paddingRight="32dip"
+                android:paddingTop="48dip"
+                android:paddingBottom="48dip"
+                android:background="?attr/preferencePanelBackground"
                 android:visibility="gone" />
     </LinearLayout>
 

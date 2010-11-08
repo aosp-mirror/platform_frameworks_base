@@ -129,11 +129,11 @@ int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState) {
     case AKEYCODE_META_RIGHT:
         return setEphemeralMetaState(AMETA_META_RIGHT_ON, down, oldMetaState);
     case AKEYCODE_CAPS_LOCK:
-        return toggleLockedMetaState(AMETA_CAPS_LOCK_LATCHED, down, oldMetaState);
+        return toggleLockedMetaState(AMETA_CAPS_LOCK_ON, down, oldMetaState);
     case AKEYCODE_NUM_LOCK:
-        return toggleLockedMetaState(AMETA_NUM_LOCK_LATCHED, down, oldMetaState);
+        return toggleLockedMetaState(AMETA_NUM_LOCK_ON, down, oldMetaState);
     case AKEYCODE_SCROLL_LOCK:
-        return toggleLockedMetaState(AMETA_SCROLL_LOCK_LATCHED, down, oldMetaState);
+        return toggleLockedMetaState(AMETA_SCROLL_LOCK_ON, down, oldMetaState);
     default:
         return oldMetaState;
     }
@@ -966,8 +966,8 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
             // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
             if (mAssociatedDisplayId >= 0) {
                 int32_t orientation;
-                if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
-                    return;
+                if (!getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
+                    orientation = InputReaderPolicyInterface::ROTATION_0;
                 }
 
                 keyCode = rotateKeyCode(keyCode, orientation);
@@ -1058,11 +1058,11 @@ int32_t KeyboardInputMapper::getMetaState() {
 
 void KeyboardInputMapper::updateLedStateLocked(bool reset) {
     updateLedStateForModifierLocked(mLocked.capsLockLedState, LED_CAPSL,
-            AMETA_CAPS_LOCK_LATCHED, reset);
+            AMETA_CAPS_LOCK_ON, reset);
     updateLedStateForModifierLocked(mLocked.numLockLedState, LED_NUML,
-            AMETA_NUM_LOCK_LATCHED, reset);
+            AMETA_NUM_LOCK_ON, reset);
     updateLedStateForModifierLocked(mLocked.scrollLockLedState, LED_SCROLLL,
-            AMETA_SCROLL_LOCK_LATCHED, reset);
+            AMETA_SCROLL_LOCK_ON, reset);
 }
 
 void KeyboardInputMapper::updateLedStateForModifierLocked(LockedState::LedState& ledState,
@@ -1228,7 +1228,7 @@ void TrackballInputMapper::sync(nsecs_t when) {
             // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
             int32_t orientation;
             if (! getPolicy()->getDisplayInfo(mAssociatedDisplayId, NULL, NULL, & orientation)) {
-                return;
+                orientation = InputReaderPolicyInterface::ROTATION_0;
             }
 
             float temp;

@@ -230,7 +230,11 @@ public class ParcelFileDescriptor implements Parcelable {
 
         @Override
         public void close() throws IOException {
-            mFd.close();
+            try {
+                mFd.close();
+            } finally {
+                super.close();
+            }
         }
     }
     
@@ -249,7 +253,11 @@ public class ParcelFileDescriptor implements Parcelable {
 
         @Override
         public void close() throws IOException {
-            mFd.close();
+            try {
+                mFd.close();
+            } finally {
+                super.close();
+            }
         }
     }
     

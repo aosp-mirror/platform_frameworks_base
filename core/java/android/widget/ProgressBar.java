@@ -455,6 +455,13 @@ public class ProgressBar extends View {
     }
 
     @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mProgressDrawable != null) mProgressDrawable.jumpToCurrentState();
+        if (mIndeterminateDrawable != null) mIndeterminateDrawable.jumpToCurrentState();
+    }
+
+    @Override
     public void postInvalidate() {
         if (!mNoInvalidate) {
             super.postInvalidate();

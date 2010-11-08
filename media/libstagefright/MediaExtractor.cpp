@@ -25,6 +25,7 @@
 #include "include/OggExtractor.h"
 #include "include/MPEG2TSExtractor.h"
 #include "include/DRMExtractor.h"
+#include "include/WVMExtractor.h"
 
 #include "matroska/MatroskaExtractor.h"
 
@@ -92,6 +93,8 @@ sp<MediaExtractor> MediaExtractor::Create(
         return new MatroskaExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
         return new MPEG2TSExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WVM)) {
+        return new WVMExtractor(source);
     }
 
     return NULL;

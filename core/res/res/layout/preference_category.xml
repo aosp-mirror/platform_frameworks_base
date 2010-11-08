@@ -18,4 +18,5 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     style="?android:attr/listSeparatorTextViewStyle"
     android:id="@+android:id/title"
+    android:paddingLeft="32dp"
 />

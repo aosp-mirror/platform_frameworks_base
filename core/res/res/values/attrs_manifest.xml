@@ -89,10 +89,9 @@
     <attr name="manageSpaceActivity" format="string" />
 
     <!-- Option to let applications specify that user data can/cannot be 
-         cleared. Some applications might not want to clear user data. Such
-         applications can explicitly set this value to false. This flag is
-         turned on by default unless explicitly set to false 
-         by applications. -->
+         cleared. This flag is turned on by default.
+         <em>This attribute is usable only by applications
+         included in the system image. Third-party apps cannot use it.</em> -->
     <attr name="allowClearUserData" format="boolean" />
 
     <!-- Option to let applications specify that user data should

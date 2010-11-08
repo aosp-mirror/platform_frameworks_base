@@ -44,6 +44,9 @@ struct OMXCodec : public MediaSource,
         // can not be fullfilled, Create() returns NULL.
         kSoftwareCodecsOnly      = 8,
         kHardwareCodecsOnly      = 16,
+
+        // Store meta data in video buffers
+        kStoreMetaDataInVideoBuffers = 32,
     };
     static sp<MediaSource> Create(
             const sp<IOMX> &omx,
@@ -178,6 +181,8 @@ private:
     List<size_t> mFilledBuffers;
     Condition mBufferFilled;
 
+    bool mIsMetaDataStoredInVideoBuffers;
+
     OMXCodec(const sp<IOMX> &omx, IOMX::node_id node, uint32_t quirks,
              bool isEncoder, const char *mime, const char *componentName,
              const sp<MediaSource> &source,
@@ -240,6 +245,8 @@ private:
 
     status_t freeBuffersOnPort(
             OMX_U32 portIndex, bool onlyThoseWeOwn = false);
+
+    status_t freeBuffer(OMX_U32 portIndex, size_t bufIndex);
 
     void drainInputBuffer(IOMX::buffer_id buffer);
     void fillOutputBuffer(IOMX::buffer_id buffer);

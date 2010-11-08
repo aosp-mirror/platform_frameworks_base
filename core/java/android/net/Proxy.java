@@ -299,15 +299,18 @@ public final class Proxy {
             final URI uri = URI.create(url);
             final String host = uri.getHost();
             if (host != null) {
-                // TODO: InetAddress.isLoopbackAddress should be used to check
-                // for localhost. However no public factory methods exist which
-                // can be used without triggering DNS lookup if host is not localhost.
-                if (host.equalsIgnoreCase("localhost") ||
-                        host.equals("127.0.0.1") ||
-                        host.equals("[::1]")) {
+                if (host.equalsIgnoreCase("localhost")) {
                     return true;
                 }
+                // Check we have a numeric address so we don't cause a DNS lookup in getByName.
+                if (InetAddress.isNumeric(host)) {
+                    if (InetAddress.getByName(host).isLoopbackAddress()) {
+                        return true;
+                    }
+                }
             }
+        } catch (UnknownHostException ignored) {
+            // Can't happen for a numeric address (InetAddress.getByName).
         } catch (IllegalArgumentException iex) {
             // Ignore (URI.create)
         }

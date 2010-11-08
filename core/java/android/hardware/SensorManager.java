@@ -1872,25 +1872,25 @@ public class SensorManager
         }
 
         if(prevR.length == 9) {
-            pri0 = R[0];
-            pri1 = R[1];
-            pri2 = R[2];
-            pri3 = R[3];
-            pri4 = R[4];
-            pri5 = R[5];
-            pri6 = R[6];
-            pri7 = R[7];
-            pri8 = R[8];
+            pri0 = prevR[0];
+            pri1 = prevR[1];
+            pri2 = prevR[2];
+            pri3 = prevR[3];
+            pri4 = prevR[4];
+            pri5 = prevR[5];
+            pri6 = prevR[6];
+            pri7 = prevR[7];
+            pri8 = prevR[8];
         } else if(prevR.length == 16) {
-            pri0 = R[0];
-            pri1 = R[1];
-            pri2 = R[2];
-            pri3 = R[4];
-            pri4 = R[5];
-            pri5 = R[6];
-            pri6 = R[8];
-            pri7 = R[9];
-            pri8 = R[10];
+            pri0 = prevR[0];
+            pri1 = prevR[1];
+            pri2 = prevR[2];
+            pri3 = prevR[4];
+            pri4 = prevR[5];
+            pri5 = prevR[6];
+            pri6 = prevR[8];
+            pri7 = prevR[9];
+            pri8 = prevR[10];
         }
 
         // calculate the parts of the rotation difference matrix we need

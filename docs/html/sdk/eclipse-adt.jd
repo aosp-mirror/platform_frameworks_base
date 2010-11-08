@@ -28,7 +28,7 @@ adt.zip.checksum=7deff0c9b25940a74cea7a0815a3bc36
 </div>
 </div>
 
-<p>Android Development Tools (ADT) is a plugin for the Eclipse IDE 
+<p>Android Development Tools (ADT) is a plugin for the Eclipse IDE
 that is designed to give you a powerful, integrated environment in which
 to build Android applications. </p>
 
@@ -48,7 +48,7 @@ before you can install or use ADT, you must have compatible versions of both the
 Eclipse IDE and the Android SDK installed. For details, make sure to read <a
 href="#installing">Installing the ADT Plugin</a>, below. </p>
 
-<p>If you are already using ADT, this document also provides instructions on 
+<p>If you are already using ADT, this document also provides instructions on
 how to update ADT to the latest version or how to uninstall it, if necessary.
 </p>
 
@@ -156,7 +156,7 @@ contextual menu. The Action does a full application package refactoring.
 called <code>src/</code>. There is now support for any number of source folders,
 with no name restriction. They can even be in subfolder such as
 <code>src/java</code>. If you are already working with library projects created
-in ADT 0.9.7, see <a 
+in ADT 0.9.7, see <a
 href="{@docRoot}guide/developing/eclipse-adt.html#libraryMigrating">Migrating
 library projects to ADT 0.9.8</a> for important information about moving
 to the new ADT environment.</li>
@@ -166,7 +166,7 @@ projects.</li>
 <code>car</code>/<code>desk</code>, <code>night</code>/<code>notnight</code> and
 <code>navexposed</code>/<code>navhidden</code>.</li>
 <li>Adds more device screen types in the layout editor. All screen
-resolution/density combinations listed in the <a 
+resolution/density combinations listed in the <a
 href="{@docRoot}guide/practices/screens_support.html#range">Supporting
 Multiple Screens</a> are now available.</li>
 <li>Fixes problems with handling of library project names that
@@ -195,10 +195,10 @@ code and resources in a separate development project. You can then reference the
 library project from other Android projects and, at build time, the tools
 compile the shared code and resources as part of the dependent applications.
 More information about this feature is available in the <a
-href="{@docRoot}guide/developing/eclipse-adt.html#libraryProject">Developing 
+href="{@docRoot}guide/developing/eclipse-adt.html#libraryProject">Developing
 in Eclipse with ADT</a> document. </p>
-<p>If you are not developing in Eclipse, <a 
-href="tools-notes.html">SDK Tools r6</a> provides the equivalent library 
+<p>If you are not developing in Eclipse, <a
+href="tools-notes.html">SDK Tools r6</a> provides the equivalent library
 project support through the Ant build system.</p>
 </dd>
 </dl>
@@ -215,7 +215,7 @@ ADT 0.9.6</a> <em>(March 2010)</em>
 <dl>
 <dt>Dependencies:</dt>
 
-<dd><p>ADT 0.9.6 is designed for use with SDK Tools r5 and later. Before 
+<dd><p>ADT 0.9.6 is designed for use with SDK Tools r5 and later. Before
 updating to ADT 0.9.6, we highly recommend that you use the Android SDK and
 AVD Manager to install SDK Tools r5 into your SDK.</p></dd>
 
@@ -339,7 +339,7 @@ bigger than the screen.</li>
 <ul>
 <li>Includes the improvements from the standlone DDMS, revision 3.</li>
 <li>Adds an option to open HPROF files into eclipse instead of writing them on
-disk. If a profiler such as MAT (<a href="http://eclipse.org/mat">Memory Analyzer 
+disk. If a profiler such as MAT (<a href="http://eclipse.org/mat">Memory Analyzer
 Tool</a>) is installed, it'll open the file.</li>
 </ul>
 </dd>
@@ -347,7 +347,7 @@ Tool</a>) is installed, it'll open the file.</li>
 <dt>Android SDK and AVD Manager integration:</dt>
 <dd>
 <ul>
-<li>Includes the improvements from the standalone Android SDK and AVD Manager, 
+<li>Includes the improvements from the standalone Android SDK and AVD Manager,
 revision 3.</li>
 </ul>
 </dd>
@@ -408,16 +408,16 @@ environment. </p>
 <td width="45%">
 <!-- 3.4 steps -->
 <ol>
-    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates...</strong>. 
+    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates...</strong>.
         In the dialog that appears, click the <strong>Available Software</strong> tab. </li>
     <li>Click <strong>Add Site...</strong> </li>
     <li>In the Add Site dialog that appears, enter this URL in the "Location" field:
       <pre style="margin-left:0">https://dl-ssl.google.com/android/eclipse/</pre>
         <p>Note: If you have trouble acquiring the plugin, try using "http" in the Location URL,
-        instead of "https" (https is preferred for security reasons).</p>   
+        instead of "https" (https is preferred for security reasons).</p>
       <p>Click <strong>OK</strong>.</p></li>
     <li>Back in the Available Software view, you should see the plugin listed by the URL,
-    with "Developer Tools" nested within it. Select the checkbox next to 
+    with "Developer Tools" nested within it. Select the checkbox next to
       Developer Tools and click <strong>Install...</strong></li>
     <li>On the subsequent Install window, "Android DDMS" and "Android Development Tools"
     should both be checked. Click <strong>Next</strong>. </li>
@@ -433,25 +433,25 @@ environment. </p>
         New Software</strong>. </li>
     <li>In the Available Software dialog, click <strong>Add...</strong>.</li>
     <li>In the Add Site dialog that appears, enter a name for the remote site
-        (for example, "Android Plugin") in the "Name" field. 
+        (for example, "Android Plugin") in the "Name" field.
         <p>In the "Location" field, enter this URL:</p>
         <pre>https://dl-ssl.google.com/android/eclipse/</pre>
         <p>Note: If you have trouble acquiring the plugin, you can try
-           using "http" in the URL, instead of "https" (https is preferred for 
+           using "http" in the URL, instead of "https" (https is preferred for
            security reasons).</p>
         <p>Click <strong>OK</strong>.</p>
     </li>
     <li>Back in the Available Software view, you should now see "Developer
-        Tools" added to the list. Select the checkbox next to Developer Tools, 
-        which will automatically select the nested tools Android DDMS and Android 
-        Development Tools. 
+        Tools" added to the list. Select the checkbox next to Developer Tools,
+        which will automatically select the nested tools Android DDMS and Android
+        Development Tools.
         Click <strong>Next</strong>. </li>
-    <li>In the resulting Install Details dialog, the Android DDMS and Android 
-        Development Tools features are listed. Click <strong>Next</strong> to 
-        read and accept the license agreement and install any dependencies, 
+    <li>In the resulting Install Details dialog, the Android DDMS and Android
+        Development Tools features are listed. Click <strong>Next</strong> to
+        read and accept the license agreement and install any dependencies,
         then click <strong>Finish</strong>. </li>
     <li>Restart Eclipse. </li>
-	
+
 </ol>
 </td>
 </tr>
@@ -466,15 +466,15 @@ is to modify your ADT preferences in Eclipse to point to the Android SDK directo
     <li>Select <strong>Window</strong> &gt; <strong>Preferences...</strong> to open the Preferences
         panel (Mac OS X: <strong>Eclipse</strong> &gt; <strong>Preferences</strong>).</li>
     <li>Select <strong>Android</strong> from the left panel. </li>
-    <li>For the <em>SDK Location</em> in the main panel, click <strong>Browse...</strong> and 
+    <li>For the <em>SDK Location</em> in the main panel, click <strong>Browse...</strong> and
         locate your downloaded SDK directory. </li>
     <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
 </ol>
 
 <p>Done! If you haven't encountered any problems, then the installation is
-complete. Now read <a href="installing.html#components">Adding Platforms and
-Other Components</a> for instructions on how to complete the setup of your 
-SDK environment. </p>
+complete. If you're installing the Android SDK for the first time, return to <a
+href="{@docRoot}sdk/installing.html#InstallingADT">Installing the SDK</a> to complete your setup.
+</p>
 
 
 <h3 id="troubleshooting">Troubleshooting ADT Installation</h3>
@@ -486,7 +486,7 @@ steps above, here are some suggestions: </p>
   <li>If Eclipse can not find the remote update site containing the ADT plugin,
 try changing the remote site URL to use http, rather than https. That is, set
 the Location for the remote site to:
-<pre>http://dl-ssl.google.com/android/eclipse/</pre></li> 
+<pre>http://dl-ssl.google.com/android/eclipse/</pre></li>
 <li>If you are behind a firewall (such as a corporate firewall), make sure that
 you have properly configured your proxy settings in Eclipse. In Eclipse 3.3/3.4,
 you can configure proxy information from the main Eclipse menu in
@@ -521,14 +521,14 @@ manually install it:</p>
 </li>
 
 </li>
-  <li>Follow steps 1 and 2 in the <a href="#installing">default install 
+  <li>Follow steps 1 and 2 in the <a href="#installing">default install
       instructions</a> (above).</li>
   <li>In the Add Site dialog, click <strong>Archive</strong>.</li>
   <li>Browse and select the downloaded zip file.</li>
   <li>In Eclipse 3.5 only, enter a name for the local update site (e.g.,
       "Android Plugin") in the "Name" field.</li>
   <li>Click <strong>OK</strong>.
-  <li>Follow the remaining procedures as listed for 
+  <li>Follow the remaining procedures as listed for
       <a href="#installing">default installation</a> above,
       starting from step 4.</li>
 </ol>
@@ -538,16 +538,16 @@ to follow these steps again instead of the default update instructions.</p>
 
 <h4>Other install errors</h4>
 
-<p>Note that there are features of ADT that require some optional 
-Eclipse components (for example, WST). If you encounter an error when 
-installing ADT, your Eclipse installion might not include these components. 
-For information about how to quickly add the necessary components to your 
-Eclipse installation, see the troubleshooting topic 
-<a href="{@docRoot}resources/faq/troubleshooting.html#installeclipsecomponents">ADT 
+<p>Note that there are features of ADT that require some optional
+Eclipse components (for example, WST). If you encounter an error when
+installing ADT, your Eclipse installion might not include these components.
+For information about how to quickly add the necessary components to your
+Eclipse installation, see the troubleshooting topic
+<a href="{@docRoot}resources/faq/troubleshooting.html#installeclipsecomponents">ADT
 Installation Error: "requires plug-in org.eclipse.wst.sse.ui"</a>.</p>
 
 <h4>For Linux users</h4>
-<p>If you encounter this error when installing the ADT Plugin for Eclipse: 
+<p>If you encounter this error when installing the ADT Plugin for Eclipse:
 <pre>
 An error occurred during provisioning.
 Cannot connect to keystore.
@@ -572,12 +572,12 @@ described in <a href="adding-components.html">Adding SDK Components</a>.</p>
 
 <p>To learn about new features of each ADT revision and also any dependencies on
 the SDK Tools, see the listings in the <a href="#notes">Revisions</a>
-section. To determine the version currently installed, open the 
+section. To determine the version currently installed, open the
 Eclipse Installed Software window using <strong>Help</strong>
-&gt; <strong>Software Updates</strong> and refer to the version listed for 
+&gt; <strong>Software Updates</strong> and refer to the version listed for
 "Android Development Tools".</p>
 
-<p>Follow the steps below to check whether an update is available and, if so, 
+<p>Follow the steps below to check whether an update is available and, if so,
 to install it. </p>
 
 <table style="font-size:100%">
@@ -588,13 +588,13 @@ to install it. </p>
 <ol>
     <li>Select <strong>Help</strong> &gt; <strong>Software Updates</strong>.</li>
     <li>Select the <strong>Available Software</strong> tab.</li>
-    <li>Select the checkboxes next to Android DDMS and Android Developer Tools, 
+    <li>Select the checkboxes next to Android DDMS and Android Developer Tools,
       then click  <strong>Update</strong>.</li>
-    <li>In the resulting Available Updates dialog, ensure that both Android DDMS 
-      and Android Development Tools are selected, then click 
+    <li>In the resulting Available Updates dialog, ensure that both Android DDMS
+      and Android Development Tools are selected, then click
       <strong>Next</strong>.</li>
     <li>Read and accept the license agreement and then click <strong>Finish</strong>.
-      This will download and install the latest version of Android DDMS and 
+      This will download and install the latest version of Android DDMS and
       Android Development Tools.</li>
     <li>Restart Eclipse.</li>
 </ol>
@@ -603,17 +603,17 @@ to install it. </p>
 <!-- 3.5 steps -->
 <ol>
     <li>Select <strong>Help</strong> &gt; <strong>Check for Updates</strong>. </li>
-    <li>In the resulting Available Updates dialog, locate the Android DDMS and 
+    <li>In the resulting Available Updates dialog, locate the Android DDMS and
         Android Development Tools features in the list and ensure that the checkboxes
-        next to them are selected. Click <strong>Next</strong>. 
-        <p>If the Available Updates dialog does not list Android DDMS and Android 
-           Development tools, make sure that you have set up a remote update site 
-           for them, as described in 
-           <a href="#installing">Installing the ADT Plugin</a>. 
+        next to them are selected. Click <strong>Next</strong>.
+        <p>If the Available Updates dialog does not list Android DDMS and Android
+           Development tools, make sure that you have set up a remote update site
+           for them, as described in
+           <a href="#installing">Installing the ADT Plugin</a>.
         </p></li>
     <li>In the Update Details dialog, click <strong>Next</strong>.</li>
     <li>Read and accept the license agreement and then click <strong>Finish</strong>.
-      This will download and install the latest version of Android DDMS and 
+      This will download and install the latest version of Android DDMS and
       Android Development Tools.</li>
     <li>Restart Eclipse.</li>
 </ol>
@@ -622,17 +622,17 @@ to install it. </p>
 </table>
 
 
-<p>If you encounter problems during the update of ADT, you 
+<p>If you encounter problems during the update of ADT, you
 can try removing the existing ADT plugin and then performing a fresh
 installation. To remove the plugin, follow the instructions in <a
-href="#uninstalling">Uninstalling the ADT Plugin</a>, below. To reinstall 
+href="#uninstalling">Uninstalling the ADT Plugin</a>, below. To reinstall
 the plugin, follow the instructions in <a
 href="#installing">Installing the ADT Plugin</a>, above.</p>
 
 
 <h2 id="uninstalling">Uninstalling the ADT plugin</h2>
 
-<p><p>If you encounter problems when installing or updating ADT, you 
+<p>If you encounter problems when installing or updating ADT, you
 can try removing the existing ADT plugin and then performing a fresh
 installation. To remove ADT, follow these steps: </p>
 
@@ -642,12 +642,12 @@ installation. To remove ADT, follow these steps: </p>
 <td width="50%">
 <!-- 3.4 steps -->
 <ol>
-    <li>Select <strong>Help</strong> &gt; <strong>Software Updates</strong> &gt; 
+    <li>Select <strong>Help</strong> &gt; <strong>Software Updates</strong> &gt;
       <strong>Manage Configuration</strong>. </li>
     <li>Expand the list in the left panel to reveal the installed tools.</li>
-    <li>Right-click "Android Editors" and click <strong>Uninstall</strong>. Click <strong>OK</strong> 
+    <li>Right-click "Android Editors" and click <strong>Uninstall</strong>. Click <strong>OK</strong>
     to confirm.</li>
-    <li>Restart Eclipse. 
+    <li>Restart Eclipse.
       <p>(Do not uninstall "Android Development Tools".)</p></li>
 </ol>
 </td>

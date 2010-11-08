@@ -586,6 +586,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 int totalItemCount);
     }
 
+    /**
+     * The top-level view of a list item can implement this interface to allow
+     * itself to modify the bounds of the selection shown for that item.
+     */
+    public interface SelectionBoundsAdjuster {
+        /**
+         * Called to allow the list item to adjust the bounds shown for
+         * its selection.
+         *
+         * @param bounds On call, this contains the bounds the list has
+         * selected for the item (that is the bounds of the entire view).  The
+         * values can be modified as desired.
+         */
+        public void adjustListItemSelectionBounds(Rect bounds);
+    }
+
     public AbsListView(Context context) {
         super(context);
         initAbsListView();
@@ -1194,6 +1210,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int position;
         int height;
         String filter;
+        boolean inActionMode;
+        int checkedItemCount;
         SparseBooleanArray checkState;
         LongSparseArray<Boolean> checkIdState;
 
@@ -1215,6 +1233,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             position = in.readInt();
             height = in.readInt();
             filter = in.readString();
+            inActionMode = in.readByte() != 0;
+            checkedItemCount = in.readInt();
             checkState = in.readSparseBooleanArray();
             long[] idState = in.createLongArray();
 
@@ -1233,6 +1253,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             out.writeInt(position);
             out.writeInt(height);
             out.writeString(filter);
+            out.writeByte((byte) (inActionMode ? 1 : 0));
+            out.writeInt(checkedItemCount);
             out.writeSparseBooleanArray(checkState);
             out.writeLongArray(checkIdState != null ? checkIdState.getKeys() : new long[0]);
         }
@@ -1311,8 +1333,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
 
+        ss.inActionMode = mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null;
+
         ss.checkState = mCheckStates;
         ss.checkIdState = mCheckedIdStates;
+        ss.checkedItemCount = mCheckedItemCount;
 
         return ss;
     }
@@ -1352,6 +1377,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (ss.checkIdState != null) {
             mCheckedIdStates = ss.checkIdState;
+        }
+
+        mCheckedItemCount = ss.checkedItemCount;
+
+        if (ss.inActionMode && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL &&
+                mMultiChoiceModeCallback != null) {
+            mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
         }
 
         requestLayout();
@@ -1756,6 +1788,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final Rect selectorRect = mSelectorRect;
         selectorRect.set(sel.getLeft(), sel.getTop(), sel.getRight(), sel.getBottom());
+        if (sel instanceof SelectionBoundsAdjuster) {
+            ((SelectionBoundsAdjuster)sel).adjustListItemSelectionBounds(selectorRect);
+        }
         positionSelector(selectorRect.left, selectorRect.top, selectorRect.right,
                 selectorRect.bottom);
 
@@ -2000,6 +2035,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public boolean verifyDrawable(Drawable dr) {
         return mSelector == dr || super.verifyDrawable(dr);
+    }
+
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (mSelector != null) mSelector.jumpToCurrentState();
     }
 
     @Override

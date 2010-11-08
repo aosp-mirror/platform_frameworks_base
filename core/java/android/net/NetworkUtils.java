@@ -174,28 +174,6 @@ public class NetworkUtils {
         return Integer.reverseBytes(value);
     }
 
-    public static boolean isIpAddress(String address) {
-        //TODO: Add NetworkUtils support for IPv6 configuration and
-        //remove IPv4 validation and use a generic InetAddress validation
-        try {
-            String[] parts = address.split("\\.");
-            if (parts.length != 4) {
-                return false;
-            }
-            int a = Integer.parseInt(parts[0]);
-            if (a < 0 || a > 255) return false;
-            a = Integer.parseInt(parts[1]);
-            if (a < 0 || a > 255) return false;
-            a = Integer.parseInt(parts[2]);
-            if (a < 0 || a > 255) return false;
-            a = Integer.parseInt(parts[3]);
-            if (a < 0 || a > 255) return false;
-        } catch (NumberFormatException ex) {
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Add a default route through the specified gateway.
      * @param interfaceName interface on which the route should be added

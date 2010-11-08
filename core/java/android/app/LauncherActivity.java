@@ -36,7 +36,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ListView;
@@ -101,11 +103,13 @@ public abstract class LauncherActivity extends ListActivity {
         protected List<ListItem> mActivitiesList;
 
         private Filter mFilter;
+        private final boolean mShowIcons;
         
         public ActivityAdapter(IconResizer resizer) {
             mIconResizer = resizer;
             mInflater = (LayoutInflater) LauncherActivity.this.getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
+            mShowIcons = onEvaluateShowIcons();
             mActivitiesList = makeListItems();
         }
 
@@ -158,13 +162,14 @@ public abstract class LauncherActivity extends ListActivity {
         private void bindView(View view, ListItem item) {
             TextView text = (TextView) view;
             text.setText(item.label);
-            if (item.icon == null) {
-                item.icon = mIconResizer.createIconThumbnail(
-                        item.resolveInfo.loadIcon(getPackageManager()));
+            if (mShowIcons) {
+                if (item.icon == null) {
+                    item.icon = mIconResizer.createIconThumbnail(item.resolveInfo.loadIcon(getPackageManager()));
+                }
+                text.setCompoundDrawablesWithIntrinsicBounds(item.icon, null, null, null);
             }
-            text.setCompoundDrawablesWithIntrinsicBounds(item.icon, null, null, null);
         }
-        
+
         public Filter getFilter() {
             if (mFilter == null) {
                 mFilter = new ArrayFilter();
@@ -337,17 +342,50 @@ public abstract class LauncherActivity extends ListActivity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setProgressBarIndeterminateVisibility(true);
         onSetContentView();
-            
+
         mIconResizer = new IconResizer();
         
         mIntent = new Intent(getTargetIntent());
         mIntent.setComponent(null);
         mAdapter = new ActivityAdapter(mIconResizer);
-        
+
         setListAdapter(mAdapter);
         getListView().setTextFilterEnabled(true);
-        
+
+        updateAlertTitle();
+        updateButtonText();
+
         setProgressBarIndeterminateVisibility(false);
+    }
+
+    private void updateAlertTitle() {
+        TextView alertTitle = (TextView) findViewById(com.android.internal.R.id.alertTitle);
+        if (alertTitle != null) {
+            alertTitle.setText(getTitle());
+        }
+    }
+
+    private void updateButtonText() {
+        Button cancelButton = (Button) findViewById(com.android.internal.R.id.button1);
+        if (cancelButton != null) {
+            cancelButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        super.setTitle(title);
+        updateAlertTitle();
+    }
+
+    @Override
+    public void setTitle(int titleId) {
+        super.setTitle(titleId);
+        updateAlertTitle();
     }
 
     /**
@@ -407,7 +445,7 @@ public abstract class LauncherActivity extends ListActivity {
         // Load all matching activities and sort correctly
         List<ResolveInfo> list = onQueryPackageManager(mIntent);
         Collections.sort(list, new ResolveInfo.DisplayNameComparator(mPackageManager));
-        
+
         ArrayList<ListItem> result = new ArrayList<ListItem>(list.size());
         int listSize = list.size();
         for (int i = 0; i < listSize; i++) {
@@ -416,5 +454,14 @@ public abstract class LauncherActivity extends ListActivity {
         }
 
         return result;
+    }
+
+    /**
+     * Whether or not to show icons in the list
+     * @hide keeping this private for now, since only Settings needs it
+     * @return true to show icons beside the activity names, false otherwise
+     */
+    protected boolean onEvaluateShowIcons() {
+        return true;
     }
 }

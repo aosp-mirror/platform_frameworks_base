@@ -1596,6 +1596,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } catch (NumberFormatException e) {}
         }
         SystemProperties.set("net.dnschange", "" + (n+1));
+        /*
+         * Tell the VMs to toss their DNS caches
+         */
+        Intent intent = new Intent(Intent.ACTION_CLEAR_DNS_CACHE);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        mContext.sendBroadcast(intent);
     }
 
     private void handleDnsConfigurationChange(int netType) {

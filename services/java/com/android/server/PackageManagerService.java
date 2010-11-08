@@ -1225,6 +1225,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
 
             }
+            permReader.close();
         } catch (XmlPullParserException e) {
             Slog.w(TAG, "Got execption parsing permissions.", e);
         } catch (IOException e) {

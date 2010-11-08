@@ -1573,6 +1573,16 @@ public final class Settings {
         public static final String ACCELEROMETER_ROTATION = "accelerometer_rotation";
 
         /**
+         * Default screen rotation when no other policy applies.
+         * When {@link #ACCELEROMETER_ROTATION} is zero and no on-screen Activity expresses a
+         * preference, this rotation value will be used. Must be one of the
+         * {@link android.view.Surface#ROTATION_0 Surface rotation constants}. 
+         *
+         * @see Display#getRotation
+         */
+        public static final String USER_ROTATION = "user_rotation";
+
+        /**
          * Whether the audible DTMF tones are played by the dialer when dialing. The value is
          * boolean (1 or 0).
          */
@@ -1806,6 +1816,7 @@ public final class Settings {
             TIME_12_24,
             DATE_FORMAT,
             ACCELEROMETER_ROTATION,
+            USER_ROTATION,
             DTMF_TONE_WHEN_DIALING,
             DTMF_TONE_TYPE_WHEN_DIALING,
             EMERGENCY_TONE,

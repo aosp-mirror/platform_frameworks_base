@@ -172,37 +172,44 @@
         android:layout_width="match_parent"
         android:layout_height="48dip"
         >
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:orientation="horizontal"
-            >
-            <!-- TODO: alarm -->
-            <!-- TODO: sync -->
-            <TextView android:id="@+id/date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                />
-        </LinearLayout>
-
         <TextView android:id="@+id/settings_button"
             style="@style/TextAppearance.StatusBar.TextButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
             android:paddingRight="32dip"
             android:paddingLeft="32dip"
             android:textSize="20sp"
+            android:gravity="center"
             android:text="@string/system_panel_settings_button"
             />
         <View
+            android:id="@+id/settings_left_divider"
             android:layout_height="match_parent"
             android:layout_width="1sp"
             android:layout_toLeftOf="@id/settings_button"
             android:background="@*android:drawable/divider_vertical_dark"
             />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/settings_left_divider"
+            android:orientation="horizontal"
+            android:gravity="left|center_vertical"
+            >
+            <!-- TODO: alarm -->
+            <!-- TODO: sync -->
+            <com.android.systemui.statusbar.DateView
+                android:id="@+id/date"
+                style="@style/TextAppearance.StatusBar.SystemPanel"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:singleLine="true"
+                android:gravity="center"
+                />
+        </LinearLayout>
+
 
     </RelativeLayout>
 </com.android.systemui.statusbar.tablet.SystemPanel>

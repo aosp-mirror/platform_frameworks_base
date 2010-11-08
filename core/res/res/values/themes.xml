@@ -143,6 +143,7 @@
         <item name="dialogTheme">@android:style/Theme.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Dialog.Alert</item>
         <item name="alertDialogButtonGroupStyle">?android:attr/buttonGroupStyle</item>
+        <item name="alertDialogCenterButtons">true</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -232,6 +233,7 @@
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
+        <item name="preferencePanelBackground">@android:drawable/panel_bg_holo_dark</item>
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
@@ -590,7 +592,7 @@
     </style>
 
     <!-- @hide -->
-    <style name="Theme.Dialog.AppError">
+    <style name="Theme.Dialog.AppError" parent="Theme.Holo.Dialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@android:style/DialogWindowTitle</item>
         <item name="windowBackground">@android:color/transparent</item>
@@ -754,6 +756,7 @@
         <item name="dialogTheme">@android:style/Theme.Holo.Dialog</item>
         <item name="alertDialogTheme">@android:style/Theme.Holo.Dialog.Alert</item>
         <item name="alertDialogButtonGroupStyle">@android:style/Widget.Holo.ButtonGroup.AlertDialog</item>
+        <item name="alertDialogCenterButtons">false</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -841,6 +844,7 @@
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
+        <item name="preferencePanelBackground">@android:drawable/panel_bg_holo_dark</item>
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
@@ -1075,6 +1079,7 @@
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
+        <item name="preferencePanelBackground">@android:drawable/panel_bg_holo_light</item>
 
         <!-- Search widget styles -->
         <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
@@ -1128,20 +1133,6 @@
     <style name="Theme.Light.Holo.NoActionBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
-    </style>
-
-    <!-- Variant of the holographic dark theme that includes extra decorations
-         appropriate for when hardware acceleration is in use. -->
-    <style name="Theme.Holo.Extended">
-        <item name="windowBackground">@android:drawable/background_holo_dark</item>
-        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
-    </style>
-
-    <!-- Variant of the holographic light theme that includes extra decorations
-         appropriate for when hardware acceleration is in use. -->
-    <style name="Theme.Holo.Light.Extended">
-        <item name="windowBackground">@android:drawable/background_holo_light</item>
-        <item name="colorBackgroundCacheHint">@android:color/transparent</item>
     </style>
  
     <!-- Dialog themes for Holo -->
