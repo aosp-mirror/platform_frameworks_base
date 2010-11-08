@@ -30,10 +30,6 @@ class ShaderCache;
 class VertexArray
 {
 public:
-    VertexArray();
-    virtual ~VertexArray();
-
-
     class Attrib {
     public:
         uint32_t buffer;
@@ -46,23 +42,12 @@ public:
         String8 name;
 
         Attrib();
-        void set(const Attrib &);
         void clear();
+        void set(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name);
     };
 
-
-    void clearAll();
-    void setActiveBuffer(uint32_t id) {
-        mActiveBuffer = id;
-        mActivePointer = NULL;
-    }
-    void setActiveBuffer(const void *ptr) {
-        mActiveBuffer = 0;
-        mActivePointer = (const uint8_t *)ptr;
-    }
-
-    void add(const Attrib &, uint32_t stride);
-    void add(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name);
+    VertexArray(const Attrib *attribs, uint32_t numAttribs);
+    virtual ~VertexArray();
 
     void setupGL2(const Context *rsc, class VertexArrayState *, ShaderCache *) const;
     void logAttrib(uint32_t idx, uint32_t slot) const;
@@ -73,7 +58,7 @@ protected:
     const uint8_t * mActivePointer;
     uint32_t mCount;
 
-    Attrib mAttribs[RS_MAX_ATTRIBS];
+    const Attrib *mAttribs;
 };
 
 
@@ -82,7 +67,6 @@ public:
     void init(Context *);
 
     uint32_t mLastEnableCount;
-    //VertexArray::Attrib mAttribs[VertexArray::_LAST];
 };
 
 

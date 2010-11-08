@@ -486,6 +486,10 @@ public class RenderScript {
     synchronized void nMeshBindIndex(int id, int alloc, int prim, int slot) {
         rsnMeshBindIndex(mContext, id, alloc, prim, slot);
     }
+    native void rsnMeshInitVertexAttribs(int con, int id);
+    synchronized void nMeshInitVertexAttribs(int id) {
+        rsnMeshInitVertexAttribs(mContext, id);
+    }
     native int  rsnMeshGetVertexBufferCount(int con, int id);
     synchronized int nMeshGetVertexBufferCount(int id) {
         return rsnMeshGetVertexBufferCount(mContext, id);

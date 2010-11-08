@@ -28,41 +28,19 @@ using namespace android;
 using namespace android::renderscript;
 
 
-VertexArray::VertexArray()
+VertexArray::VertexArray(const Attrib *attribs, uint32_t numAttribs)
 {
-    clearAll();
+    mAttribs = attribs;
+    mCount = numAttribs;
 }
 
 VertexArray::~VertexArray()
 {
 }
 
-
-void VertexArray::clearAll()
-{
-    for (uint32_t ct=0; ct < RS_MAX_ATTRIBS; ct++) {
-        mAttribs[ct].clear();
-    }
-    mActiveBuffer = 0;
-    mActivePointer = NULL;
-    mCount = 0;
-}
-
 VertexArray::Attrib::Attrib()
 {
     clear();
-}
-
-void VertexArray::Attrib::set(const Attrib &a)
-{
-    buffer = a.buffer;
-    ptr = a.ptr;
-    offset = a.offset;
-    type = a.type;
-    size = a.size;
-    stride = a.stride;
-    normalized = a.normalized;
-    name.setTo(a.name);
 }
 
 void VertexArray::Attrib::clear()
@@ -77,35 +55,15 @@ void VertexArray::Attrib::clear()
     name.setTo("");
 }
 
-void VertexArray::clear(uint32_t n)
+void VertexArray::Attrib::set(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name)
 {
-    mAttribs[n].clear();
-}
-
-void VertexArray::add(const Attrib &a, uint32_t stride)
-{
-    rsAssert(mCount < RS_MAX_ATTRIBS);
-    mAttribs[mCount].set(a);
-    mAttribs[mCount].buffer = mActiveBuffer;
-    mAttribs[mCount].ptr = mActivePointer;
-    mAttribs[mCount].stride = stride;
-    mCount ++;
-}
-
-void VertexArray::add(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name)
-{
-    rsAssert(mCount < RS_MAX_ATTRIBS);
-    mAttribs[mCount].clear();
-    mAttribs[mCount].type = type;
-    mAttribs[mCount].size = size;
-    mAttribs[mCount].offset = offset;
-    mAttribs[mCount].normalized = normalized;
-    mAttribs[mCount].stride = stride;
-    mAttribs[mCount].name.setTo(name);
-
-    mAttribs[mCount].buffer = mActiveBuffer;
-    mAttribs[mCount].ptr = mActivePointer;
-    mCount ++;
+    clear();
+    this->type = type;
+    this->size = size;
+    this->offset = offset;
+    this->normalized = normalized;
+    this->stride = stride;
+    this->name.setTo(name);
 }
 
 void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {

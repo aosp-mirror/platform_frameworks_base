@@ -37,6 +37,10 @@ Mesh::Mesh(Context *rsc) : ObjectBase(rsc)
     mPrimitivesCount = 0;
     mVertexBuffers = NULL;
     mVertexBufferCount = 0;
+    mAttribs = NULL;
+    mAttribAllocationIndex = NULL;
+
+    mAttribCount = 0;
 }
 
 Mesh::~Mesh()
@@ -50,6 +54,87 @@ Mesh::~Mesh()
             delete mPrimitives[i];
         }
         delete[] mPrimitives;
+    }
+
+    if(mAttribs) {
+        delete[] mAttribs;
+        delete[] mAttribAllocationIndex;
+    }
+}
+
+bool Mesh::isValidGLComponent(const Element *elem, uint32_t fieldIdx) {
+    // Do not create attribs for padding
+    if(elem->getFieldName(fieldIdx)[0] == '#') {
+        return false;
+    }
+
+    // Only GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FIXED, GL_FLOAT are accepted.
+    // Filter rs types accordingly
+    RsDataType dt = elem->getField(fieldIdx)->getComponent().getType();
+    if(dt != RS_TYPE_FLOAT_32 && dt != RS_TYPE_UNSIGNED_8 &&
+       dt != RS_TYPE_UNSIGNED_16 && dt != RS_TYPE_SIGNED_8 &&
+       dt != RS_TYPE_SIGNED_16) {
+        return false;
+    }
+
+    // Now make sure they are not arrays
+    uint32_t arraySize = elem->getFieldArraySize(fieldIdx);
+    if(arraySize != 1) {
+        return false;
+    }
+
+    return true;
+}
+
+void Mesh::initVertexAttribs() {
+    // Count the number of gl attrs to initialize
+    mAttribCount = 0;
+    for (uint32_t ct=0; ct < mVertexBufferCount; ct++) {
+        const Element *elem = mVertexBuffers[ct]->getType()->getElement();
+        for (uint32_t ct=0; ct < elem->getFieldCount(); ct++) {
+            if(isValidGLComponent(elem, ct)) {
+                mAttribCount ++;
+            }
+        }
+    }
+
+    if(mAttribs) {
+        delete [] mAttribs;
+        delete [] mAttribAllocationIndex;
+        mAttribs = NULL;
+        mAttribAllocationIndex = NULL;
+    }
+    if(!mAttribCount) {
+        return;
+    }
+
+    mAttribs = new VertexArray::Attrib[mAttribCount];
+    mAttribAllocationIndex = new uint32_t[mAttribCount];
+
+    uint32_t userNum = 0;
+    for (uint32_t ct=0; ct < mVertexBufferCount; ct++) {
+        const Element *elem = mVertexBuffers[ct]->getType()->getElement();
+        uint32_t stride = elem->getSizeBytes();
+        for (uint32_t fieldI=0; fieldI < elem->getFieldCount(); fieldI++) {
+            const Component &c = elem->getField(fieldI)->getComponent();
+
+            if(!isValidGLComponent(elem, fieldI)) {
+                continue;
+            }
+
+            mAttribs[userNum].size = c.getVectorSize();
+            mAttribs[userNum].offset = elem->getFieldOffsetBytes(fieldI);
+            mAttribs[userNum].type = c.getGLType();
+            mAttribs[userNum].normalized = c.getType() != RS_TYPE_FLOAT_32;//c.getIsNormalized();
+            mAttribs[userNum].stride = stride;
+            String8 tmp(RS_SHADER_ATTR);
+            tmp.append(elem->getFieldName(fieldI));
+            mAttribs[userNum].name.setTo(tmp.string());
+
+            // Remember which allocation this attribute came from
+            mAttribAllocationIndex[userNum] = ct;
+            userNum ++;
+        }
     }
 }
 
@@ -78,21 +163,29 @@ void Mesh::renderPrimitive(Context *rsc, uint32_t primIndex) const {
 
 void Mesh::renderPrimitiveRange(Context *rsc, uint32_t primIndex, uint32_t start, uint32_t len) const
 {
-    if (len < 1 || primIndex >= mPrimitivesCount) {
+    if (len < 1 || primIndex >= mPrimitivesCount || mAttribCount == 0) {
+        LOGE("Invalid mesh or parameters");
         return;
     }
 
     rsc->checkError("Mesh::renderPrimitiveRange 1");
-    VertexArray va;
     for (uint32_t ct=0; ct < mVertexBufferCount; ct++) {
         mVertexBuffers[ct]->uploadCheck(rsc);
-        if (mVertexBuffers[ct]->getIsBufferObject()) {
-            va.setActiveBuffer(mVertexBuffers[ct]->getBufferObjectID());
-        } else {
-            va.setActiveBuffer(mVertexBuffers[ct]->getPtr());
-        }
-        mVertexBuffers[ct]->getType()->enableGLVertexBuffer(&va);
     }
+    // update attributes with either buffer information or data ptr based on their current state
+    for (uint32_t ct=0; ct < mAttribCount; ct++) {
+        uint32_t allocIndex = mAttribAllocationIndex[ct];
+        Allocation *alloc = mVertexBuffers[allocIndex].get();
+        if (alloc->getIsBufferObject()) {
+            mAttribs[ct].buffer = alloc->getBufferObjectID();
+            mAttribs[ct].ptr = NULL;
+        } else {
+            mAttribs[ct].buffer = 0;
+            mAttribs[ct].ptr = (const uint8_t*)alloc->getPtr();
+        }
+    }
+
+    VertexArray va(mAttribs, mAttribCount);
     va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
 
     rsc->checkError("Mesh::renderPrimitiveRange 2");
@@ -215,6 +308,7 @@ Mesh *Mesh::createFromStream(Context *rsc, IStream *stream)
     }
 
     mesh->updateGLPrimitives();
+    mesh->initVertexAttribs();
     mesh->uploadAll(rsc);
 
     return mesh;
@@ -308,6 +402,12 @@ void rsi_MeshBindIndex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t primTy
     sm->mPrimitives[slot]->mIndexBuffer.set((Allocation *)va);
     sm->mPrimitives[slot]->mPrimitive = (RsPrimitive)primType;
     sm->updateGLPrimitives();
+}
+
+void rsi_MeshInitVertexAttribs(Context *rsc, RsMesh mv)
+{
+    Mesh *sm = static_cast<Mesh *>(mv);
+    sm->initVertexAttribs();
 }
 
 }}

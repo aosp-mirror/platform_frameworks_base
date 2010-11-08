@@ -32,8 +32,6 @@ class ShaderCache;
 class Program : public ObjectBase
 {
 public:
-    const static uint32_t MAX_ATTRIBS = 8;
-    const static uint32_t MAX_UNIFORMS = 16;
 
     Program(Context *);
     Program(Context *, const char * shaderText, uint32_t shaderLength,
@@ -55,12 +53,14 @@ public:
     uint32_t getUniformCount() const {return mUniformCount;}
     const String8 & getAttribName(uint32_t i) const {return mAttribNames[i];}
     const String8 & getUniformName(uint32_t i) const {return mUniformNames[i];}
+    uint32_t getUniformArraySize(uint32_t i) const {return mUniformArraySizes[i];}
 
     String8 getGLSLInputString() const;
     String8 getGLSLOutputString() const;
     String8 getGLSLConstantString() const;
 
     bool isValid() const {return mIsValid;}
+    void forceDirty() const {mDirty = true;}
 
 protected:
     // Components not listed in "in" will be passed though
@@ -68,6 +68,7 @@ protected:
     ObjectBaseRef<Element> *mInputElements;
     ObjectBaseRef<Element> *mOutputElements;
     ObjectBaseRef<Type> *mConstantTypes;
+    ObjectBaseRef<Allocation> *mConstants;
     uint32_t mInputCount;
     uint32_t mOutputCount;
     uint32_t mConstantCount;
@@ -77,9 +78,9 @@ protected:
     // Applies to vertex and fragment shaders only
     void appendUserConstants();
     void setupUserConstants(Context *rsc, ShaderCache *sc, bool isFragment);
-    void initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix);
+    void initAddUserElement(const Element *e, String8 *names, uint32_t *arrayLengths, uint32_t *count, const char *prefix);
 
-    ObjectBaseRef<Allocation> mConstants[MAX_UNIFORMS];
+    void initAttribAndUniformArray();
 
     mutable bool mDirty;
     String8 mShader;
@@ -89,8 +90,13 @@ protected:
     uint32_t mTextureCount;
     uint32_t mAttribCount;
     uint32_t mUniformCount;
-    String8 mAttribNames[MAX_ATTRIBS];
-    String8 mUniformNames[MAX_UNIFORMS];
+    String8 *mAttribNames;
+    String8 *mUniformNames;
+    uint32_t *mUniformArraySizes;
+
+    void logUniform(const Element *field, const float *fd, uint32_t arraySize );
+    void setUniform(Context *rsc, const Element *field, const float *fd, int32_t slot, uint32_t arraySize );
+    void initMemberVars();
 
     // The difference between Textures and Constants is how they are accessed
     // Texture lookups go though a sampler which in effect converts normalized
@@ -102,9 +108,6 @@ protected:
     ObjectBaseRef<Sampler> *mSamplers;
 
     bool loadShader(Context *, uint32_t type);
-
-public:
-    void forceDirty() const {mDirty = true;}
 };
 
 

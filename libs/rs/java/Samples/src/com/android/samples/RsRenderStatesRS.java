@@ -43,7 +43,7 @@ public class RsRenderStatesRS {
         mOptionsARGB.inScaled = false;
         mOptionsARGB.inPreferredConfig = Bitmap.Config.ARGB_8888;
         mMode = 0;
-        mMaxModes = 9;
+        mMaxModes = 0;
         initRS();
     }
 
@@ -73,7 +73,12 @@ public class RsRenderStatesRS {
     private ProgramFragment mProgFragmentCustom;
     private ProgramFragment mProgFragmentMultitex;
     private ScriptField_VertexShaderConstants_s mVSConst;
+    private ScriptField_VertexShaderConstants2_s mVSConst2;
     private ScriptField_FragentShaderConstants_s mFSConst;
+    private ScriptField_FragentShaderConstants2_s mFSConst2;
+
+    private ProgramVertex mProgVertexCustom2;
+    private ProgramFragment mProgFragmentCustom2;
 
     private ProgramRaster mCullBack;
     private ProgramRaster mCullFront;
@@ -189,10 +194,14 @@ public class RsRenderStatesRS {
 
     private void initCustomShaders() {
         mVSConst = new ScriptField_VertexShaderConstants_s(mRS, 1);
+        mVSConst2 = new ScriptField_VertexShaderConstants2_s(mRS, 1);
         mFSConst = new ScriptField_FragentShaderConstants_s(mRS, 1);
+        mFSConst2 = new ScriptField_FragentShaderConstants2_s(mRS, 1);
 
         mScript.bind_gVSConstants(mVSConst);
+        mScript.bind_gVSConstants2(mVSConst2);
         mScript.bind_gFSConstants(mFSConst);
+        mScript.bind_gFSConstants2(mFSConst2);
 
         // Initialize the shader builder
         ProgramVertex.ShaderBuilder pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
@@ -217,6 +226,20 @@ public class RsRenderStatesRS {
         // Bind the source of constant data
         mProgFragmentCustom.bindConstants(mFSConst.getAllocation(), 0);
 
+        pvbCustom = new ProgramVertex.ShaderBuilder(mRS);
+        pvbCustom.setShader(mRes, R.raw.shaderarrayv);
+        pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
+        pvbCustom.addConstant(mVSConst2.getAllocation().getType());
+        mProgVertexCustom2 = pvbCustom.create();
+        mProgVertexCustom2.bindConstants(mVSConst2.getAllocation(), 0);
+
+        pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
+        pfbCustom.setShader(mRes, R.raw.shaderarrayf);
+        pfbCustom.setTextureCount(1);
+        pfbCustom.addConstant(mFSConst2.getAllocation().getType());
+        mProgFragmentCustom2 = pfbCustom.create();
+        mProgFragmentCustom2.bindConstants(mFSConst2.getAllocation(), 0);
+
         pfbCustom = new ProgramFragment.ShaderBuilder(mRS);
         pfbCustom.setShader(mRes, R.raw.multitexf);
         pfbCustom.setTextureCount(3);
@@ -225,6 +248,9 @@ public class RsRenderStatesRS {
         mScript.set_gProgVertexCustom(mProgVertexCustom);
         mScript.set_gProgFragmentCustom(mProgFragmentCustom);
         mScript.set_gProgFragmentMultitex(mProgFragmentMultitex);
+
+        mScript.set_gProgVertexCustom2(mProgVertexCustom2);
+        mScript.set_gProgFragmentCustom2(mProgFragmentCustom2);
     }
 
     private Allocation loadTextureRGB(int id) {
@@ -333,6 +359,8 @@ public class RsRenderStatesRS {
     private void initRS() {
 
         mScript = new ScriptC_rsrenderstates(mRS, mRes, R.raw.rsrenderstates);
+
+        mMaxModes = mScript.get_gMaxModes();
 
         initSamplers();
         initProgramStore();

@@ -435,6 +435,10 @@ MeshBindVertex {
 	param uint32_t slot
 	}
 
+MeshInitVertexAttribs {
+	param RsMesh mesh
+	}
+
 AnimationCreate {
 	param const float *inValues
 	param const float *outValues
