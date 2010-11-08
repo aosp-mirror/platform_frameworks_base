@@ -396,15 +396,25 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name) {
 extern const char rs_runtime_lib_bc[];
 extern unsigned rs_runtime_lib_bc_size;
 
-void ScriptCState::runCompiler(Context *rsc, ScriptC *s) {
+void ScriptCState::runCompiler(Context *rsc, ScriptC *s, const char *resName) {
     {
-        StopWatch compileTimer("RenderScript compile time");
         s->mBccScript = bccCreateScript();
         s->mEnviroment.mIsThreadable = true;
-        bccScriptBitcode(s->mBccScript, s->mEnviroment.mScriptText, s->mEnviroment.mScriptTextLength);
-        //bccLinkBitcode(s->mBccScript, rs_runtime_lib_bc, rs_runtime_lib_bc_size);
         bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
-        bccCompileScript(s->mBccScript);
+        // bccReadBC() reads in the BitCode, if no cache file corresponding to
+        // the resName is found. Otherwise, bccReadBC() returns a negative value
+        // and the "else" branch will be taken.
+        if (bccReadBC(s->mBccScript,
+                      s->mEnviroment.mScriptText,
+                      s->mEnviroment.mScriptTextLength,
+                      resName) >= 0) {
+          //bccLinkBC(s->mBccScript, rs_runtime_lib_bc, rs_runtime_lib_bc_size);
+          bccCompileBC(s->mBccScript);
+        } else {
+          // bccReadBC returns a neagative value: Didn't read any script,
+          // So, use cached binary instead
+          bccLoadBinary(s->mBccScript);
+        }
         bccGetScriptLabel(s->mBccScript, "root", (BCCvoid**) &s->mProgram.mRoot);
         bccGetScriptLabel(s->mBccScript, "init", (BCCvoid**) &s->mProgram.mInit);
     }
@@ -518,14 +528,15 @@ void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len) {
     ss->mScript->mEnviroment.mScriptTextLength = len;
 }
 
-RsScript rsi_ScriptCCreate(Context * rsc) {
+RsScript rsi_ScriptCCreate(Context * rsc, const char *resName)
+{
     ScriptCState *ss = &rsc->mScriptC;
 
     ObjectBaseRef<ScriptC> s(ss->mScript);
     ss->mScript.clear();
     s->incUserRef();
 
-    ss->runCompiler(rsc, s.get());
+    ss->runCompiler(rsc, s.get(), resName);
     ss->clear(rsc);
     return s.get();
 }

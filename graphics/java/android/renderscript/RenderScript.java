@@ -402,9 +402,9 @@ public class RenderScript {
     synchronized void nScriptCSetScript(byte[] script, int offset, int length) {
         rsnScriptCSetScript(mContext, script, offset, length);
     }
-    native int  rsnScriptCCreate(int con);
-    synchronized int nScriptCCreate() {
-        return rsnScriptCCreate(mContext);
+    native int  rsnScriptCCreate(int con, String val);
+    synchronized int nScriptCCreate(String val) {
+        return rsnScriptCCreate(mContext, val);
     }
 
     native void rsnSamplerBegin(int con);
@@ -814,6 +814,3 @@ public class RenderScript {
         return 0;
     }
 }
-
-
-

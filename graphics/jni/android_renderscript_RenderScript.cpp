@@ -954,10 +954,11 @@ exit:
 }
 
 static jint
-nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con)
+nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con, jstring resName)
 {
     LOG_API("nScriptCCreate, con(%p)", con);
-    return (jint)rsScriptCCreate(con);
+    const char* resNameUTF = _env->GetStringUTFChars(resName, NULL);
+    return (jint)rsScriptCCreate(con, resNameUTF);
 }
 
 // ---------------------------------------------------------------------------
@@ -1346,7 +1347,7 @@ static JNINativeMethod methods[] = {
 
 {"rsnScriptCBegin",                  "(I)V",                                  (void*)nScriptCBegin },
 {"rsnScriptCSetScript",              "(I[BII)V",                              (void*)nScriptCSetScript },
-{"rsnScriptCCreate",                 "(I)I",                                  (void*)nScriptCCreate },
+{"rsnScriptCCreate",                 "(ILjava/lang/String;)I",                (void*)nScriptCCreate },
 
 {"rsnProgramStoreBegin",             "(III)V",                                (void*)nProgramStoreBegin },
 {"rsnProgramStoreDepthFunc",         "(II)V",                                 (void*)nProgramStoreDepthFunc },

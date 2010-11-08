@@ -320,6 +320,7 @@ ScriptCSetText {
 	}
 
 ScriptCCreate {
+        param const char * resName
 	ret RsScript
 	}
 

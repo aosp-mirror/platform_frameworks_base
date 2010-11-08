@@ -75,7 +75,7 @@ public class ScriptC extends Script {
 
         rs.nScriptCBegin();
         rs.nScriptCSetScript(pgm, 0, pgmLength);
-        return rs.nScriptCCreate();
+        Log.v(TAG, "Create script for resource = " + resources.getResourceName(resourceID));
+        return rs.nScriptCCreate(resources.getResourceName(resourceID));
     }
 }
-
