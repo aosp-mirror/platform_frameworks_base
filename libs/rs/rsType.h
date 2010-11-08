@@ -58,8 +58,6 @@ public:
     void clear();
     void compute();
 
-    void enableGLVertexBuffer(class VertexArray *) const;
-
     void dumpLOGV(const char *prefix) const;
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_TYPE; }
@@ -100,22 +98,12 @@ protected:
     bool mDimLOD;
     bool mFaces;
 
-    // A list of array dimensions.  The count is the number of array dimensions and the
-    // sizes is a per array size.
-    //Vector<size_t> mDimArraysSizes;
-
     // count of mipmap levels, 0 indicates no mipmapping
 
     size_t mMipChainSizeBytes;
     size_t mTotalSizeBytes;
     LOD *mLODs;
     uint32_t mLODCount;
-
-    VertexArray::Attrib *mAttribs;
-    uint32_t mAttribsSize;
-    bool isValidGLComponent(uint32_t fieldIdx);
-    void makeGLComponents();
-
 
 protected:
     virtual void preDestroy();

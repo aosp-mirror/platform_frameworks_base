@@ -1152,6 +1152,14 @@ nMeshBindIndex(JNIEnv *_env, jobject _this, RsContext con, jint mesh, jint alloc
     rsMeshBindIndex(con, (RsMesh)mesh, (RsAllocation)alloc, primID, slot);
 }
 
+static void
+nMeshInitVertexAttribs(JNIEnv *_env, jobject _this, RsContext con, jint mesh)
+{
+    LOG_API("nMeshInitVertexAttribs, con(%p), Mesh(%p)", con, (RsMesh)mesh);
+    rsMeshInitVertexAttribs(con, (RsMesh)mesh);
+}
+
+
 static jint
 nMeshGetVertexBufferCount(JNIEnv *_env, jobject _this, RsContext con, jint mesh)
 {
@@ -1334,6 +1342,7 @@ static JNINativeMethod methods[] = {
 {"rsnMeshCreate",                    "(III)I",                                (void*)nMeshCreate },
 {"rsnMeshBindVertex",                "(IIII)V",                               (void*)nMeshBindVertex },
 {"rsnMeshBindIndex",                 "(IIIII)V",                              (void*)nMeshBindIndex },
+{"rsnMeshInitVertexAttribs",         "(II)V",                                 (void*)nMeshInitVertexAttribs },
 
 {"rsnMeshGetVertexBufferCount",      "(II)I",                                 (void*)nMeshGetVertexBufferCount },
 {"rsnMeshGetIndexCount",             "(II)I",                                 (void*)nMeshGetIndexCount },

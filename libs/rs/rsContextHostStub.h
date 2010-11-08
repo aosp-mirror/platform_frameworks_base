@@ -122,6 +122,7 @@ public:
     mutable const ObjectBase * mObjHead;
 
     bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
+    bool ext_GL_NV_texture_npot_2D_mipmap() const {return false;}
     float ext_texture_max_aniso() const {return 1.0f;}
     uint32_t getMaxFragmentTextures() const {return mGL.mMaxFragmentTextureImageUnits;}
     uint32_t getMaxFragmentUniformVectors() const {return mGL.mMaxFragmentUniformVectors;}

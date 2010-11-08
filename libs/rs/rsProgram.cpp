@@ -31,37 +31,14 @@ using namespace android::renderscript;
 
 Program::Program(Context *rsc) : ObjectBase(rsc)
 {
-    mDirty = true;
-    mShaderID = 0;
-    mAttribCount = 0;
-    mUniformCount = 0;
-    mTextureCount = 0;
-
-    mTextures = NULL;
-    mSamplers = NULL;
-    mInputElements = NULL;
-    mOutputElements = NULL;
-    mConstantTypes = NULL;
-    mInputCount = 0;
-    mOutputCount = 0;
-    mConstantCount = 0;
-    mIsValid = false;
-    mIsInternal = false;
+   initMemberVars();
 }
 
 Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
                  const uint32_t * params, uint32_t paramLength) :
     ObjectBase(rsc)
 {
-    mDirty = true;
-    mShaderID = 0;
-    mAttribCount = 0;
-    mUniformCount = 0;
-    mTextureCount = 0;
-
-    mInputCount = 0;
-    mOutputCount = 0;
-    mConstantCount = 0;
+    initMemberVars();
 
     for (uint32_t ct=0; ct < paramLength; ct+=2) {
         if (params[ct] == RS_PROGRAM_PARAM_INPUT) {
@@ -83,6 +60,7 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
     mInputElements = new ObjectBaseRef<Element>[mInputCount];
     mOutputElements = new ObjectBaseRef<Element>[mOutputCount];
     mConstantTypes = new ObjectBaseRef<Type>[mConstantCount];
+    mConstants = new ObjectBaseRef<Allocation>[mConstantCount];
 
     uint32_t input = 0;
     uint32_t output = 0;
@@ -107,6 +85,8 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
         shaderLength -= internalTokenLen;
     }
     mUserShader.setTo(shaderText, shaderLength);
+
+    initAttribAndUniformArray();
 }
 
 Program::~Program()
@@ -119,7 +99,7 @@ Program::~Program()
         glDeleteShader(mShaderID);
     }
 
-    for (uint32_t ct=0; ct < MAX_UNIFORMS; ct++) {
+    for (uint32_t ct=0; ct < mConstantCount; ct++) {
         bindAllocation(NULL, NULL, ct);
     }
 
@@ -132,11 +112,37 @@ Program::~Program()
     delete[] mInputElements;
     delete[] mOutputElements;
     delete[] mConstantTypes;
+    delete[] mConstants;
+    delete[] mAttribNames;
+    delete[] mUniformNames;
+    delete[] mUniformArraySizes;
     mInputCount = 0;
     mOutputCount = 0;
     mConstantCount = 0;
 }
 
+void Program::initMemberVars() {
+    mDirty = true;
+    mShaderID = 0;
+    mAttribCount = 0;
+    mUniformCount = 0;
+    mTextureCount = 0;
+
+    mTextures = NULL;
+    mSamplers = NULL;
+    mInputElements = NULL;
+    mOutputElements = NULL;
+    mConstantTypes = NULL;
+    mConstants = NULL;
+    mAttribNames = NULL;
+    mUniformNames = NULL;
+    mUniformArraySizes = NULL;
+    mInputCount = 0;
+    mOutputCount = 0;
+    mConstantCount = 0;
+    mIsValid = false;
+    mIsInternal = false;
+}
 
 void Program::bindAllocation(Context *rsc, Allocation *alloc, uint32_t slot)
 {
@@ -314,7 +320,91 @@ void Program::appendUserConstants() {
             }
 
             mShader.append(fn);
+            if(e->getFieldArraySize(field) > 1) {
+                mShader.appendFormat("[%d]", e->getFieldArraySize(field));
+            }
             mShader.append(";\n");
+        }
+    }
+}
+
+void Program::logUniform(const Element *field, const float *fd, uint32_t arraySize ) {
+    RsDataType dataType = field->getType();
+    uint32_t elementSize = field->getSizeBytes() / sizeof(float);
+    for(uint32_t i = 0; i < arraySize; i ++) {
+        if(arraySize > 1) {
+            LOGV("Array Element [%u]", i);
+        }
+        if(dataType == RS_TYPE_MATRIX_4X4) {
+            LOGV("Matrix4x4");
+            LOGV("{%f, %f, %f, %f",  fd[0], fd[4], fd[8], fd[12]);
+            LOGV(" %f, %f, %f, %f",  fd[1], fd[5], fd[9], fd[13]);
+            LOGV(" %f, %f, %f, %f",  fd[2], fd[6], fd[10], fd[14]);
+            LOGV(" %f, %f, %f, %f}", fd[3], fd[7], fd[11], fd[15]);
+        }
+        else if(dataType == RS_TYPE_MATRIX_3X3) {
+            LOGV("Matrix3x3");
+            LOGV("{%f, %f, %f",  fd[0], fd[3], fd[6]);
+            LOGV(" %f, %f, %f",  fd[1], fd[4], fd[7]);
+            LOGV(" %f, %f, %f}", fd[2], fd[5], fd[8]);
+        }
+        else if(dataType == RS_TYPE_MATRIX_2X2) {
+            LOGV("Matrix2x2");
+            LOGV("{%f, %f",  fd[0], fd[2]);
+            LOGV(" %f, %f}", fd[1], fd[3]);
+        }
+        else {
+            switch(field->getComponent().getVectorSize()) {
+            case 1:
+                LOGV("Uniform 1 = %f", fd[0]);
+                break;
+            case 2:
+                LOGV("Uniform 2 = %f %f", fd[0], fd[1]);
+                break;
+            case 3:
+                LOGV("Uniform 3 = %f %f %f", fd[0], fd[1], fd[2]);
+                break;
+            case 4:
+                LOGV("Uniform 4 = %f %f %f %f", fd[0], fd[1], fd[2], fd[3]);
+                break;
+            default:
+                rsAssert(0);
+            }
+        }
+        LOGE("Element size %u data=%p", elementSize, fd);
+        fd += elementSize;
+        LOGE("New data=%p", fd);
+    }
+}
+
+void Program::setUniform(Context *rsc, const Element *field, const float *fd,
+                         int32_t slot, uint32_t arraySize ) {
+    RsDataType dataType = field->getType();
+    if(dataType == RS_TYPE_MATRIX_4X4) {
+        glUniformMatrix4fv(slot, arraySize, GL_FALSE, fd);
+    }
+    else if(dataType == RS_TYPE_MATRIX_3X3) {
+        glUniformMatrix3fv(slot, arraySize, GL_FALSE, fd);
+    }
+    else if(dataType == RS_TYPE_MATRIX_2X2) {
+        glUniformMatrix2fv(slot, arraySize, GL_FALSE, fd);
+    }
+    else {
+        switch(field->getComponent().getVectorSize()) {
+        case 1:
+            glUniform1fv(slot, arraySize, fd);
+            break;
+        case 2:
+            glUniform2fv(slot, arraySize, fd);
+            break;
+        case 3:
+            glUniform3fv(slot, arraySize, fd);
+            break;
+        case 4:
+            glUniform4fv(slot, arraySize, fd);
+            break;
+        default:
+            rsAssert(0);
         }
     }
 }
@@ -343,92 +433,77 @@ void Program::setupUserConstants(Context *rsc, ShaderCache *sc, bool isFragment)
             const float *fd = reinterpret_cast<const float *>(&data[offset]);
 
             int32_t slot = -1;
+            uint32_t arraySize = 1;
             if(!isFragment) {
                 slot = sc->vtxUniformSlot(uidx);
-            }
-            else {
+                arraySize = sc->vtxUniformSize(uidx);
+            } else {
                 slot = sc->fragUniformSlot(uidx);
+                arraySize = sc->fragUniformSize(uidx);
             }
-
             if(rsc->props.mLogShadersUniforms) {
                 LOGV("Uniform  slot=%i, offset=%i, constant=%i, field=%i, uidx=%i, name=%s", slot, offset, ct, field, uidx, fieldName);
             }
-            if (slot >= 0) {
-                if(f->getType() == RS_TYPE_MATRIX_4X4) {
-                    if(rsc->props.mLogShadersUniforms) {
-                        LOGV("Matrix4x4");
-                        LOGV("{%f, %f, %f, %f",  fd[0], fd[4], fd[8], fd[12]);
-                        LOGV(" %f, %f, %f, %f",  fd[1], fd[5], fd[9], fd[13]);
-                        LOGV(" %f, %f, %f, %f",  fd[2], fd[6], fd[10], fd[14]);
-                        LOGV(" %f, %f, %f, %f}", fd[3], fd[7], fd[11], fd[15]);
-                    }
-                    glUniformMatrix4fv(slot, 1, GL_FALSE, fd);
-                }
-                else if(f->getType() == RS_TYPE_MATRIX_3X3) {
-                    if(rsc->props.mLogShadersUniforms) {
-                        LOGV("Matrix3x3");
-                        LOGV("{%f, %f, %f",  fd[0], fd[3], fd[6]);
-                        LOGV(" %f, %f, %f",  fd[1], fd[4], fd[7]);
-                        LOGV(" %f, %f, %f}", fd[2], fd[5], fd[8]);
-                    }
-                    glUniformMatrix3fv(slot, 1, GL_FALSE, fd);
-                }
-                else if(f->getType() == RS_TYPE_MATRIX_2X2) {
-                    if(rsc->props.mLogShadersUniforms){
-                        LOGV("Matrix2x2");
-                        LOGV("{%f, %f",  fd[0], fd[2]);
-                        LOGV(" %f, %f}", fd[1], fd[3]);
-                    }
-                    glUniformMatrix2fv(slot, 1, GL_FALSE, fd);
-                }
-                else {
-                    switch(f->getComponent().getVectorSize()) {
-                    case 1:
-                        if(rsc->props.mLogShadersUniforms) {
-                            LOGV("Uniform 1 = %f", fd[0]);
-                        }
-                        glUniform1fv(slot, 1, fd);
-                        break;
-                    case 2:
-                        if(rsc->props.mLogShadersUniforms) {
-                            LOGV("Uniform 2 = %f %f", fd[0], fd[1]);
-                        }
-                        glUniform2fv(slot, 1, fd);
-                        break;
-                    case 3:
-                        if(rsc->props.mLogShadersUniforms) {
-                            LOGV("Uniform 3 = %f %f %f", fd[0], fd[1], fd[2]);
-                        }
-                        glUniform3fv(slot, 1, fd);
-                        break;
-                    case 4:
-                        if(rsc->props.mLogShadersUniforms) {
-                            LOGV("Uniform 4 = %f %f %f %f", fd[0], fd[1], fd[2], fd[3]);
-                        }
-                        glUniform4fv(slot, 1, fd);
-                        break;
-                    default:
-                        rsAssert(0);
-                    }
-                }
-            }
             uidx ++;
+            if (slot < 0) {
+                continue;
+            }
+
+            if(rsc->props.mLogShadersUniforms) {
+                logUniform(f, fd, arraySize);
+            }
+            setUniform(rsc, f, fd, slot, arraySize);
         }
     }
 }
 
-void Program::initAddUserElement(const Element *e, String8 *names, uint32_t *count, const char *prefix)
+void Program::initAttribAndUniformArray() {
+    mAttribCount = 0;
+    for (uint32_t ct=0; ct < mInputCount; ct++) {
+        const Element *elem = mInputElements[ct].get();
+        for (uint32_t field=0; field < elem->getFieldCount(); field++) {
+            if(elem->getFieldName(field)[0] != '#') {
+                mAttribCount ++;
+            }
+        }
+    }
+
+    mUniformCount = 0;
+    for (uint32_t ct=0; ct < mConstantCount; ct++) {
+        const Element *elem = mConstantTypes[ct]->getElement();
+
+        for (uint32_t field=0; field < elem->getFieldCount(); field++) {
+            if(elem->getFieldName(field)[0] != '#') {
+                mUniformCount ++;
+            }
+        }
+    }
+    mUniformCount += mTextureCount;
+
+    if(mAttribCount) {
+        mAttribNames = new String8[mAttribCount];
+    }
+    if(mUniformCount) {
+        mUniformNames = new String8[mUniformCount];
+        mUniformArraySizes = new uint32_t[mUniformCount];
+    }
+}
+
+void Program::initAddUserElement(const Element *e, String8 *names, uint32_t *arrayLengths, uint32_t *count, const char *prefix)
 {
     rsAssert(e->getFieldCount());
     for (uint32_t ct=0; ct < e->getFieldCount(); ct++) {
         const Element *ce = e->getField(ct);
         if (ce->getFieldCount()) {
-            initAddUserElement(ce, names, count, prefix);
+            initAddUserElement(ce, names, arrayLengths, count, prefix);
         }
         else if(e->getFieldName(ct)[0] != '#') {
             String8 tmp(prefix);
             tmp.append(e->getFieldName(ct));
             names[*count].setTo(tmp.string());
+            if(arrayLengths) {
+                arrayLengths[*count] = e->getFieldArraySize(ct);
+            }
             (*count)++;
         }
     }

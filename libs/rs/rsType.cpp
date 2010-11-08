@@ -29,8 +29,6 @@ Type::Type(Context *rsc) : ObjectBase(rsc)
 {
     mLODs = 0;
     mLODCount = 0;
-    mAttribs = NULL;
-    mAttribsSize = 0;
     clear();
 }
 
@@ -49,10 +47,6 @@ Type::~Type()
     if (mLODs) {
         delete [] mLODs;
         mLODs = NULL;
-    }
-    if(mAttribs) {
-        delete [] mAttribs;
-        mAttribs = NULL;
     }
 }
 
@@ -126,8 +120,6 @@ void Type::compute()
         offset *= 6;
     }
     mTotalSizeBytes = offset;
-
-    makeGLComponents();
 }
 
 uint32_t Type::getLODOffset(uint32_t lod, uint32_t x) const
@@ -150,87 +142,6 @@ uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) co
     offset += (x + y*mLODs[lod].mX + z*mLODs[lod].mX*mLODs[lod].mY) * mElement->getSizeBytes();
     return offset;
 }
-
-bool Type::isValidGLComponent(uint32_t fieldIdx) {
-    // Do not create attribs for padding
-    if(mElement->getFieldName(fieldIdx)[0] == '#') {
-        return false;
-    }
-
-    // Only GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_FIXED, GL_FLOAT are accepted.
-    // Filter rs types accordingly
-    RsDataType dt = mElement->getField(fieldIdx)->getComponent().getType();
-    if(dt != RS_TYPE_FLOAT_32 && dt != RS_TYPE_UNSIGNED_8 &&
-       dt != RS_TYPE_UNSIGNED_16 && dt != RS_TYPE_SIGNED_8 &&
-       dt != RS_TYPE_SIGNED_16) {
-        return false;
-    }
-
-    // Now make sure they are not arrays
-    uint32_t arraySize = mElement->getFieldArraySize(fieldIdx);
-    if(arraySize != 1) {
-        return false;
-    }
-
-    return true;
-}
-
-void Type::makeGLComponents()
-{
-    // Count the number of gl attrs to initialize
-    mAttribsSize = 0;
-
-    for (uint32_t ct=0; ct < mElement->getFieldCount(); ct++) {
-        if(isValidGLComponent(ct)) {
-            mAttribsSize ++;
-        }
-    }
-    if(mAttribs) {
-        delete [] mAttribs;
-        mAttribs = NULL;
-    }
-    if(mAttribsSize) {
-        mAttribs = new VertexArray::Attrib[mAttribsSize];
-    }
-
-    uint32_t userNum = 0;
-    for (uint32_t ct=0; ct < mElement->getFieldCount(); ct++) {
-        const Component &c = mElement->getField(ct)->getComponent();
-
-        if(!isValidGLComponent(ct)) {
-            continue;
-        }
-
-        mAttribs[userNum].size = c.getVectorSize();
-        mAttribs[userNum].offset = mElement->getFieldOffsetBytes(ct);
-        mAttribs[userNum].type = c.getGLType();
-        mAttribs[userNum].normalized = c.getType() != RS_TYPE_FLOAT_32;//c.getIsNormalized();
-        String8 tmp(RS_SHADER_ATTR);
-        tmp.append(mElement->getFieldName(ct));
-        mAttribs[userNum].name.setTo(tmp.string());
-
-        userNum ++;
-    }
-}
-
-
-void Type::enableGLVertexBuffer(VertexArray *va) const
-{
-    uint32_t stride = mElement->getSizeBytes();
-    for (uint32_t ct=0; ct < mAttribsSize; ct++) {
-        // Load up to RS_MAX_ATTRIBS inputs
-        // TODO: grow vertexarray dynamically
-        if(ct >= RS_MAX_ATTRIBS) {
-            LOGE("More GL attributes than we can handle");
-            break;
-        }
-        if (mAttribs[ct].size) {
-            va->add(mAttribs[ct], stride);
-        }
-    }
-}
-
-
 
 void Type::dumpLOGV(const char *prefix) const
 {

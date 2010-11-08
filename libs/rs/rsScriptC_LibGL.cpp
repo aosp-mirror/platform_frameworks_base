@@ -159,9 +159,11 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
     float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
     const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
 
-    VertexArray va;
-    va.add(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "ATTRIB_position");
-    va.add(GL_FLOAT, 2, 8, false, (uint32_t)tex, "ATTRIB_texture0");
+    VertexArray::Attrib attribs[2];
+    attribs[0].set(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "ATTRIB_position");
+    attribs[1].set(GL_FLOAT, 2, 8, false, (uint32_t)tex, "ATTRIB_texture0");
+
+    VertexArray va(attribs, 2);
     va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

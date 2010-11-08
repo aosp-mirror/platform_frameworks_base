@@ -146,17 +146,19 @@ void ProgramFragment::createShader()
 
 void ProgramFragment::init(Context *rsc)
 {
-    mUniformCount = 0;
+    uint32_t uniformIndex = 0;
     if (mUserShader.size() > 0) {
         for (uint32_t ct=0; ct < mConstantCount; ct++) {
-            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, RS_SHADER_UNI);
+            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, mUniformArraySizes, &uniformIndex, RS_SHADER_UNI);
         }
     }
-    mTextureUniformIndexStart = mUniformCount;
+    mTextureUniformIndexStart = uniformIndex;
     char buf[256];
     for (uint32_t ct=0; ct < mTextureCount; ct++) {
         sprintf(buf, "UNI_Tex%i", ct);
-        mUniformNames[mUniformCount++].setTo(buf);
+        mUniformNames[uniformIndex].setTo(buf);
+        mUniformArraySizes[uniformIndex] = 1;
+        uniformIndex++;
     }
 
     createShader();
