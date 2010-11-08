@@ -289,7 +289,7 @@ private:
     void flushSpan() {
         bool merge = false;
         if (tail-head == ssize_t(span.size())) {
-            Rect const* p = cur;
+            Rect const* p = span.editArray();
             Rect const* q = head;
             if (p->top == q->bottom) {
                 merge = true;
