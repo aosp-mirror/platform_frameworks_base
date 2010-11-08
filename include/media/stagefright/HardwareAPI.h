@@ -32,6 +32,14 @@ extern android::VideoRenderer *createRenderer(
         size_t displayWidth, size_t displayHeight,
         size_t decodedWidth, size_t decodedHeight);
 
+extern android::VideoRenderer *createRendererWithRotation(
+        const android::sp<android::ISurface> &surface,
+        const char *componentName,
+        OMX_COLOR_FORMATTYPE colorFormat,
+        size_t displayWidth, size_t displayHeight,
+        size_t decodedWidth, size_t decodedHeight,
+        int32_t rotationDegrees);
+
 extern android::OMXPluginBase *createOMXPlugin();
 
 #endif  // HARDWARE_API_H_

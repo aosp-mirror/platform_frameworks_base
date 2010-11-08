@@ -38,11 +38,13 @@ sp<IOMXRenderer> IOMX::createRenderer(
         const char *componentName,
         OMX_COLOR_FORMATTYPE colorFormat,
         size_t encodedWidth, size_t encodedHeight,
-        size_t displayWidth, size_t displayHeight) {
+        size_t displayWidth, size_t displayHeight,
+        int32_t rotationDegrees) {
     return createRenderer(
             surface->getISurface(),
             componentName, colorFormat, encodedWidth, encodedHeight,
-            displayWidth, displayHeight);
+            displayWidth, displayHeight,
+            rotationDegrees);
 }
 
 sp<IOMXRenderer> IOMX::createRendererFromJavaSurface(
@@ -50,7 +52,8 @@ sp<IOMXRenderer> IOMX::createRendererFromJavaSurface(
         const char *componentName,
         OMX_COLOR_FORMATTYPE colorFormat,
         size_t encodedWidth, size_t encodedHeight,
-        size_t displayWidth, size_t displayHeight) {
+        size_t displayWidth, size_t displayHeight,
+        int32_t rotationDegrees) {
     jclass surfaceClass = env->FindClass("android/view/Surface");
     if (surfaceClass == NULL) {
         LOGE("Can't find android/view/Surface");
@@ -67,7 +70,8 @@ sp<IOMXRenderer> IOMX::createRendererFromJavaSurface(
 
     return createRenderer(
             surface, componentName, colorFormat, encodedWidth,
-            encodedHeight, displayWidth, displayHeight);
+            encodedHeight, displayWidth, displayHeight,
+            rotationDegrees);
 }
 
 class BpOMX : public BpInterface<IOMX> {
@@ -349,7 +353,8 @@ public:
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
             size_t encodedWidth, size_t encodedHeight,
-            size_t displayWidth, size_t displayHeight) {
+            size_t displayWidth, size_t displayHeight,
+            int32_t rotationDegrees) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
 
@@ -360,6 +365,7 @@ public:
         data.writeInt32(encodedHeight);
         data.writeInt32(displayWidth);
         data.writeInt32(displayHeight);
+        data.writeInt32(rotationDegrees);
 
         remote()->transact(CREATE_RENDERER, data, &reply);
 
@@ -682,11 +688,13 @@ status_t BnOMX::onTransact(
             size_t encodedHeight = (size_t)data.readInt32();
             size_t displayWidth = (size_t)data.readInt32();
             size_t displayHeight = (size_t)data.readInt32();
+            int32_t rotationDegrees = data.readInt32();
 
             sp<IOMXRenderer> renderer =
                 createRenderer(isurface, componentName, colorFormat,
                                encodedWidth, encodedHeight,
-                               displayWidth, displayHeight);
+                               displayWidth, displayHeight,
+                               rotationDegrees);
 
             reply->writeStrongBinder(renderer->asBinder());
 
