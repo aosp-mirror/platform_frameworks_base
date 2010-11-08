@@ -29,6 +29,7 @@
 #include <ui/Rect.h>
 
 #include "OpenGLRenderer.h"
+#include "DisplayListRenderer.h"
 
 namespace android {
 namespace uirenderer {
@@ -826,6 +827,14 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
 ///////////////////////////////////////////////////////////////////////////////
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::drawDisplayList(DisplayList* displayList) {
+    // All the usual checks and setup operations (quickReject, setupDraw, etc.)
+    // will be performed by the display list itself
+    if (displayList) {
+        displayList->replay(*this);
+    }
+}
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
     const float right = left + bitmap->width();
