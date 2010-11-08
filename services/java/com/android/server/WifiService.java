@@ -733,6 +733,38 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     /**
+     * Set the operational frequency band
+     * @param band One of
+     *     {@link WifiManager#WIFI_FREQUENCY_BAND_AUTO},
+     *     {@link WifiManager#WIFI_FREQUENCY_BAND_5GHZ},
+     *     {@link WifiManager#WIFI_FREQUENCY_BAND_2GHZ},
+     * @param persist {@code true} if the setting should be remembered.
+     *
+     */
+    public void setFrequencyBand(int band, boolean persist) {
+        enforceChangePermission();
+        if (!isDualBandSupported()) return;
+        Slog.i(TAG, "WifiService trying to set frequency band to " + band +
+                " with persist set to " + persist);
+        mWifiStateMachine.setFrequencyBand(band, persist);
+    }
+
+
+    /**
+     * Get the operational frequency band
+     */
+    public int getFrequencyBand() {
+        enforceAccessPermission();
+        return mWifiStateMachine.getFrequencyBand();
+    }
+
+    public boolean isDualBandSupported() {
+        //TODO: Should move towards adding a driver API that checks at runtime
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_wifi_dual_band_support);
+    }
+
+    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
