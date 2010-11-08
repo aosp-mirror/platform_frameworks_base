@@ -211,8 +211,7 @@ public class Camera {
      * blocking the main application UI thread.
      *
      * @param cameraId the hardware camera to access, between 0 and
-     *     {@link #getNumberOfCameras()}-1.  Use {@link #CAMERA_ID_DEFAULT}
-     *     to access the default camera.
+     *     {@link #getNumberOfCameras()}-1.
      * @return a new Camera object, connected, locked and ready for use.
      * @throws RuntimeException if connection to the camera service fails (for
      *     example, if the camera is in use by another process).
@@ -222,18 +221,21 @@ public class Camera {
     }
 
     /**
-     * The id for the default camera.
-     * @see #open(int)
-     */
-    public static int CAMERA_ID_DEFAULT = 0;
-
-    /**
-     * Equivalent to Camera.open(Camera.CAMERA_ID_DEFAULT).
-     * Creates a new Camera object to access the default camera.
+     * Creates a new Camera object to access the first back-facing camera on the
+     * device. If the device does not have a back-facing camera, this returns
+     * null.
      * @see #open(int)
      */
     public static Camera open() {
-        return new Camera(CAMERA_ID_DEFAULT);
+        int numberOfCameras = getNumberOfCameras();
+        CameraInfo cameraInfo = new CameraInfo();
+        for (int i = 0; i < numberOfCameras; i++) {
+            getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
+                return new Camera(i);
+            }
+        }
+        return null;
     }
 
     Camera(int cameraId) {
