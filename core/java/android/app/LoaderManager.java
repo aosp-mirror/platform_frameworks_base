@@ -25,7 +25,7 @@ import android.util.SparseArray;
  * Interface associated with an {@link Activity} or {@link Fragment} for managing
  * one or more {@link android.content.Loader} instances associated with it.
  */
-public interface LoaderManager {
+public abstract class LoaderManager {
     /**
      * Callback interface for a client to interact with the manager.
      */
@@ -66,7 +66,7 @@ public interface LoaderManager {
      * be called immediately (inside of this function), so you must be prepared
      * for this to happen.
      */
-    public <D> Loader<D> initLoader(int id, Bundle args,
+    public abstract <D> Loader<D> initLoader(int id, Bundle args,
             LoaderManager.LoaderCallbacks<D> callback);
 
     /**
@@ -77,22 +77,22 @@ public interface LoaderManager {
      * its work. The callback will be delivered before the old loader
      * is destroyed.
      */
-    public <D> Loader<D> restartLoader(int id, Bundle args,
+    public abstract <D> Loader<D> restartLoader(int id, Bundle args,
             LoaderManager.LoaderCallbacks<D> callback);
 
     /**
      * Stops and removes the loader with the given ID.
      */
-    public void stopLoader(int id);
+    public abstract void stopLoader(int id);
 
     /**
      * Return the Loader with the given id or null if no matching Loader
      * is found.
      */
-    public <D> Loader<D> getLoader(int id);
+    public abstract <D> Loader<D> getLoader(int id);
 }
 
-class LoaderManagerImpl implements LoaderManager {
+class LoaderManagerImpl extends LoaderManager {
     static final String TAG = "LoaderManagerImpl";
     static final boolean DEBUG = true;
 

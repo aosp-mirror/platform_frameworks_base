@@ -175,7 +175,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     out.endTag(null, "min-password-nonletter");
                 }
             }
-            if (maximumTimeToUnlock != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+            if (maximumTimeToUnlock != 0) {
                 out.startTag(null, "max-time-to-unlock");
                 out.attribute(null, "value", Long.toString(maximumTimeToUnlock));
                 out.endTag(null, "max-time-to-unlock");

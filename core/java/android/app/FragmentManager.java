@@ -40,7 +40,7 @@ import java.util.ArrayList;
  * Interface for interacting with {@link Fragment} objects inside of an
  * {@link Activity}
  */
-public interface FragmentManager {
+public abstract class FragmentManager {
     /**
      * Representation of an entry on the fragment back stack, as created
      * with {@link FragmentTransaction#addToBackStack(String)
@@ -96,7 +96,7 @@ public interface FragmentManager {
      * in the state, and if changes are made after the state is saved then they
      * will be lost.</p>
      */
-    public FragmentTransaction openTransaction();
+    public abstract FragmentTransaction openTransaction();
 
     /**
      * Finds a fragment that was identified by the given id either when inflated
@@ -106,7 +106,7 @@ public interface FragmentManager {
      * on the back stack associated with this ID are searched.
      * @return The fragment if found or null otherwise.
      */
-    public Fragment findFragmentById(int id);
+    public abstract Fragment findFragmentById(int id);
 
     /**
      * Finds a fragment that was identified by the given tag either when inflated
@@ -116,7 +116,7 @@ public interface FragmentManager {
      * on the back stack are searched.
      * @return The fragment if found or null otherwise.
      */
-    public Fragment findFragmentByTag(String tag);
+    public abstract Fragment findFragmentByTag(String tag);
 
     /**
      * Flag for {@link #popBackStack(String, int)}
@@ -132,7 +132,7 @@ public interface FragmentManager {
      * Pop the top state off the back stack.  Returns true if there was one
      * to pop, else false.
      */
-    public boolean popBackStack();
+    public abstract boolean popBackStack();
 
     /**
      * Pop the last fragment transition from the manager's fragment
@@ -143,7 +143,7 @@ public interface FragmentManager {
      * the named state itself is popped. If null, only the top state is popped.
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
      */
-    public boolean popBackStack(String name, int flags);
+    public abstract boolean popBackStack(String name, int flags);
 
     /**
      * Pop all back stack states up to the one with the given identifier.
@@ -155,29 +155,29 @@ public interface FragmentManager {
      * the named state itself is popped.
      * @param flags Either 0 or {@link #POP_BACK_STACK_INCLUSIVE}.
      */
-    public boolean popBackStack(int id, int flags);
+    public abstract boolean popBackStack(int id, int flags);
 
     /**
      * Return the number of entries currently in the back stack.
      */
-    public int countBackStackEntries();
+    public abstract int countBackStackEntries();
 
     /**
      * Return the BackStackEntry at index <var>index</var> in the back stack;
      * entries start index 0 being the bottom of the stack.
      */
-    public BackStackEntry getBackStackEntry(int index);
+    public abstract BackStackEntry getBackStackEntry(int index);
 
     /**
      * Add a new listener for changes to the fragment back stack.
      */
-    public void addOnBackStackChangedListener(OnBackStackChangedListener listener);
+    public abstract void addOnBackStackChangedListener(OnBackStackChangedListener listener);
 
     /**
      * Remove a listener that was previously added with
      * {@link #addOnBackStackChangedListener(OnBackStackChangedListener)}.
      */
-    public void removeOnBackStackChangedListener(OnBackStackChangedListener listener);
+    public abstract void removeOnBackStackChangedListener(OnBackStackChangedListener listener);
 
     /**
      * Put a reference to a fragment in a Bundle.  This Bundle can be
@@ -189,7 +189,7 @@ public interface FragmentManager {
      * @param key The name of the entry in the bundle.
      * @param fragment The Fragment whose reference is to be stored.
      */
-    public void putFragment(Bundle bundle, String key, Fragment fragment);
+    public abstract void putFragment(Bundle bundle, String key, Fragment fragment);
 
     /**
      * Retrieve the current Fragment instance for a reference previously
@@ -200,7 +200,7 @@ public interface FragmentManager {
      * @return Returns the current Fragment instance that is associated with
      * the given reference.
      */
-    public Fragment getFragment(Bundle bundle, String key);
+    public abstract Fragment getFragment(Bundle bundle, String key);
 
     /**
      * Print the FragmentManager's state into the given stream.
@@ -210,7 +210,7 @@ public interface FragmentManager {
      * @param writer A PrintWriter to which the dump is to be set.
      * @param args additional arguments to the dump request.
      */
-    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args);
+    public abstract void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args);
 }
 
 final class FragmentManagerState implements Parcelable {
@@ -252,7 +252,7 @@ final class FragmentManagerState implements Parcelable {
 /**
  * Container for fragments associated with an activity.
  */
-final class FragmentManagerImpl implements FragmentManager {
+final class FragmentManagerImpl extends FragmentManager {
     static final boolean DEBUG = true;
     static final String TAG = "FragmentManager";
     
@@ -849,8 +849,8 @@ final class FragmentManagerImpl implements FragmentManager {
         return null;
     }
     
-    public void enqueueAction(Runnable action) {
-        if (mStateSaved) {
+    public void enqueueAction(Runnable action, boolean allowStateLoss) {
+        if (!allowStateLoss && mStateSaved) {
             throw new IllegalStateException(
                     "Can not perform this action after onSaveInstanceState");
         }
@@ -991,7 +991,7 @@ final class FragmentManagerImpl implements FragmentManager {
                     bss.popFromBackStack(true);
                     reportBackStackChanged();
                 }
-            });
+            }, false);
         } else {
             int index = -1;
             if (name != null || id >= 0) {
@@ -1042,7 +1042,7 @@ final class FragmentManagerImpl implements FragmentManager {
                     }
                     reportBackStackChanged();
                 }
-            });
+            }, false);
         }
         return true;
     }

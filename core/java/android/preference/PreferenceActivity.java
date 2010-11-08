@@ -216,8 +216,6 @@ public abstract class PreferenceActivity extends ListActivity implements
                         Header mappedHeader = findBestMatchingHeader(mCurHeader, mHeaders);
                         if (mappedHeader != null) {
                             setSelectedHeader(mappedHeader);
-                        } else {
-                            switchToHeader(null);
                         }
                     }
                 } break;
