@@ -421,7 +421,7 @@ static void android_view_GLES20Canvas_destroyDisplayList(JNIEnv* env,
 
 static void android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
         jobject canvas, OpenGLRenderer* renderer, DisplayList* displayList) {
-    displayList->replay(*renderer);
+    renderer->drawDisplayList(displayList);
 }
 
 #endif // USE_OPENGL_RENDERER

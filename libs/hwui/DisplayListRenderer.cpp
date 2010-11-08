@@ -226,6 +226,10 @@ void DisplayList::replay(OpenGLRenderer& renderer) {
                         (SkRegion::Op) getInt());
             }
             break;
+            case DrawDisplayList: {
+                renderer.drawDisplayList(getDisplayList());
+            }
+            break;
             case DrawBitmap: {
                 renderer.drawBitmap(getBitmap(), getFloat(), getFloat(), getPaint());
             }
@@ -451,6 +455,11 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
     addBounds(left, top, right, bottom);
     addInt(op);
     return OpenGLRenderer::clipRect(left, top, right, bottom, op);
+}
+
+void DisplayListRenderer::drawDisplayList(DisplayList* displayList) {
+    addOp(DisplayList::DrawDisplayList);
+    addDisplayList(displayList);
 }
 
 void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float left, float top,
