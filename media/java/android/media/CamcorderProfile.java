@@ -183,7 +183,7 @@ public class CamcorderProfile
      * @see #get(int, int)
      */
     public static CamcorderProfile get(int quality) {
-        return get(android.hardware.Camera.CAMERA_ID_DEFAULT, quality);
+        return get(0, quality);
     }
 
     /**
@@ -240,7 +240,7 @@ public class CamcorderProfile
      * @param quality the target quality level for the camcorder profile
      */
     public static boolean hasProfile(int quality) {
-        return hasProfile(android.hardware.Camera.CAMERA_ID_DEFAULT, quality);
+        return hasProfile(0, quality);
     }
 
     /**
