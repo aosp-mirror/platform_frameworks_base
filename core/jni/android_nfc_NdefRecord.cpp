@@ -54,7 +54,7 @@ static jbyteArray android_nfc_NdefRecord_generate(
     if (buf == NULL)
         goto end;
 
-    LOGD("phFriNfc_NdefRecord_Generate()");
+    TRACE("phFriNfc_NdefRecord_Generate()");
 
     status = phFriNfc_NdefRecord_Generate(&record, buf, buf_size,
             &record_size);
@@ -63,7 +63,7 @@ static jbyteArray android_nfc_NdefRecord_generate(
         LOGE("phFriNfc_NdefRecord_Generate() returned 0x%04x", status);
         goto end;
     }
-    LOGD("phFriNfc_NdefRecord_Generate() returned 0x%04x", status);
+    TRACE("phFriNfc_NdefRecord_Generate() returned 0x%04x", status);
 
     result = e->NewByteArray(record_size);
     if (result == NULL)
@@ -104,13 +104,13 @@ static jint android_nfc_NdefRecord_parseNdefRecord(JNIEnv *e, jobject o,
         goto clean_and_return;
     }
 
-    LOGD("phFriNfc_NdefRecord_Parse()");
+    TRACE("phFriNfc_NdefRecord_Parse()");
     status = phFriNfc_NdefRecord_Parse(&record, (uint8_t *)raw_record);
     if (status) {
         LOGE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
         goto clean_and_return;
     }
-    LOGD("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
+    TRACE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
 
     /* Set TNF field */
     mTnf = e->GetFieldID(record_cls, "mTnf", "S");
