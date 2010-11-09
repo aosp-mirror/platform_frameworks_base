@@ -147,13 +147,10 @@ void OpenGLRenderer::prepare(bool opaque) {
         glDisable(GL_SCISSOR_TEST);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glEnable(GL_SCISSOR_TEST);
-    } else {
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(0, 0, mWidth, mHeight);
-        dirtyClip();
     }
 
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0, 0, mWidth, mHeight);
     mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
 }
 
