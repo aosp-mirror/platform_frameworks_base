@@ -1092,6 +1092,10 @@ public class VideoEditorTestImpl implements VideoEditor {
      */
     public void setAspectRatio(int aspectRatio) {
         mAspectRatio = aspectRatio;
+
+        for (Transition transition : mTransitions) {
+            transition.invalidate();
+        }
     }
 
     /*

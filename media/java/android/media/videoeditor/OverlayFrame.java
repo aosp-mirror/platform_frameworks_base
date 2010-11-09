@@ -105,7 +105,7 @@ public class OverlayFrame extends Overlay {
         }
 
         // Invalidate the transitions if necessary
-        getMediaItem().invalidateTransitions(this);
+        getMediaItem().invalidateTransitions(mStartTimeMs, mDurationMs);
     }
 
     /**
