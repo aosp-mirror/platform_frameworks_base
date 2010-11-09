@@ -58,7 +58,7 @@ function toggleDiv(link) {
       <ol>
         <li><a href="#which">Recommended Components</a></li>
       </ol></li>
-    <li><a href="#sdkContents">5. Exploring the SDK</a></li>
+    <li><a href="#sdkContents">5. Exploring the SDK (Optional)</a></li>
     <li><a href="#NextSteps">Next Steps</a></li>
     <li><a href="#troubleshooting">Troubleshooting</a></li>
   </ol>
@@ -112,7 +112,7 @@ RCP version of Eclipse is recommended.</p>
 development environment&mdash;it includes only the core SDK Tools, which you can
 use to download the rest of the SDK components (such as the latest Android platform).</p>
 
-<p>You can get the latest version of the SDK starter package from the <a
+<p>If you haven't already, get the latest version of the SDK starter package from the <a
 href="{@docRoot}sdk/index.html">SDK download page</a>.</p>
 
 <p>If you downloaded a {@code .zip} or {@code .tgz} package (instead of the SDK installer), unpack
@@ -379,10 +379,10 @@ you with the components you've just installed.</p>
 href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a> document. </p>
 
 
-<h2 id="sdkContents">Step 5. Exploring the SDK</h2>
+<h2 id="sdkContents">Step 5. Exploring the SDK (Optional)</h2>
 
 <p>Once you've installed the SDK and downloaded the platforms, documentation,
-and add-ons that you need, open the SDK directory and take a look at what's
+and add-ons that you need, we suggest that you open the SDK directory and take a look at what's
 inside.</p>
 
 <p>The table below describes the full SDK directory contents, with components
