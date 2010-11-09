@@ -22,7 +22,16 @@
 #ifndef __ANDROID_NFC_H__
 #define __ANDROID_NFC_H__
 
+#define LOG_TAG "NdefMessage"
+#include <utils/Log.h>
+
 extern "C" {
+
+#if 0
+  #define TRACE(...) LOG(LOG_DEBUG, "NdefMessage", __VA_ARGS__)
+#else
+  #define TRACE(...)
+#endif
 
 typedef struct phFriNfc_NdefRecord {
     uint8_t                 Flags;
