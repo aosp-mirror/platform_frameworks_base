@@ -113,24 +113,15 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
 
     Element *elem = new Element(rsc);
     elem->mComponent.loadFromStream(stream);
-    elem->mBits = elem->mComponent.getBits();
-    elem->mHasReference = elem->mComponent.isReference();
 
     elem->mFieldCount = stream->loadU32();
     if(elem->mFieldCount) {
-        uint32_t offset = 0;
         elem->mFields = new ElementField_t [elem->mFieldCount];
         for(uint32_t ct = 0; ct < elem->mFieldCount; ct ++) {
             stream->loadString(&elem->mFields[ct].name);
             elem->mFields[ct].arraySize = stream->loadU32();
             Element *fieldElem = Element::createFromStream(rsc, stream);
             elem->mFields[ct].e.set(fieldElem);
-            elem->mFields[ct].offsetBits = offset;
-            offset += fieldElem->getSizeBits();
-            // Check if our sub-elements have references
-            if(fieldElem->mHasReference) {
-                elem->mHasReference = true;
-            }
         }
     }
 
@@ -144,6 +135,7 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
         }
     }
 
+    elem->compute();
     rsc->mStateElement.mElements.push(elem);
     return elem;
 }
@@ -175,6 +167,25 @@ bool Element::isEqual(const Element *other) const {
     return false;
 }
 
+void Element::compute() {
+    if(mFieldCount == 0) {
+        mBits = mComponent.getBits();
+        mHasReference = mComponent.isReference();
+        return;
+    }
+
+    size_t bits = 0;
+    for (size_t ct=0; ct < mFieldCount; ct++) {
+        mFields[ct].offsetBits = bits;
+        bits += mFields[ct].e->getSizeBits() * mFields[ct].arraySize;
+
+        if (mFields[ct].e->mHasReference) {
+            mHasReference = true;
+        }
+    }
+
+}
+
 const Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
                             bool isNorm, uint32_t vecSize)
 {
@@ -194,8 +205,7 @@ const Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
 
     Element *e = new Element(rsc);
     e->mComponent.set(dt, dk, isNorm, vecSize);
-    e->mBits = e->mComponent.getBits();
-    e->mHasReference = e->mComponent.isReference();
+    e->compute();
     rsc->mStateElement.mElements.push(e);
     return e;
 }
@@ -227,18 +237,12 @@ const Element * Element::create(Context *rsc, size_t count, const Element **ein,
     Element *e = new Element(rsc);
     e->mFields = new ElementField_t [count];
     e->mFieldCount = count;
-    size_t bits = 0;
     for (size_t ct=0; ct < count; ct++) {
         e->mFields[ct].e.set(ein[ct]);
         e->mFields[ct].name.setTo(nin[ct], lengths[ct]);
-        e->mFields[ct].offsetBits = bits;
         e->mFields[ct].arraySize = asin[ct];
-        bits += ein[ct]->getSizeBits();
-
-        if (ein[ct]->mHasReference) {
-            e->mHasReference = true;
-        }
     }
+    e->compute();
 
     rsc->mStateElement.mElements.push(e);
     return e;

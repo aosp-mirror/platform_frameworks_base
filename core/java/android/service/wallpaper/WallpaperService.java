@@ -219,14 +219,17 @@ public abstract class WallpaperService extends Service {
         
         final InputHandler mInputHandler = new BaseInputHandler() {
             @Override
-            public void handleMotion(MotionEvent event, Runnable finishedCallback) {
+            public void handleMotion(MotionEvent event,
+                    InputQueue.FinishedCallback finishedCallback) {
+                boolean handled = false;
                 try {
                     int source = event.getSource();
                     if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                         dispatchPointer(event);
+                        handled = true;
                     }
                 } finally {
-                    finishedCallback.run();
+                    finishedCallback.finished(handled);
                 }
             }
         };

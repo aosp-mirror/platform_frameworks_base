@@ -3,16 +3,16 @@ package android.app;
 /**
  * API for performing a set of Fragment operations.
  */
-public interface FragmentTransaction {
+public abstract class FragmentTransaction {
     /**
      * Calls {@link #add(int, Fragment, String)} with a 0 containerViewId.
      */
-    public FragmentTransaction add(Fragment fragment, String tag);
+    public abstract FragmentTransaction add(Fragment fragment, String tag);
     
     /**
      * Calls {@link #add(int, Fragment, String)} with a null tag.
      */
-    public FragmentTransaction add(int containerViewId, Fragment fragment);
+    public abstract FragmentTransaction add(int containerViewId, Fragment fragment);
     
     /**
      * Add a fragment to the activity state.  This fragment may optionally
@@ -29,12 +29,12 @@ public interface FragmentTransaction {
      * 
      * @return Returns the same FragmentTransaction instance.
      */
-    public FragmentTransaction add(int containerViewId, Fragment fragment, String tag);
+    public abstract FragmentTransaction add(int containerViewId, Fragment fragment, String tag);
     
     /**
      * Calls {@link #replace(int, Fragment, String)} with a null tag.
      */
-    public FragmentTransaction replace(int containerViewId, Fragment fragment);
+    public abstract FragmentTransaction replace(int containerViewId, Fragment fragment);
     
     /**
      * Replace an existing fragment that was added to a container.  This is
@@ -52,7 +52,7 @@ public interface FragmentTransaction {
      * 
      * @return Returns the same FragmentTransaction instance.
      */
-    public FragmentTransaction replace(int containerViewId, Fragment fragment, String tag);
+    public abstract FragmentTransaction replace(int containerViewId, Fragment fragment, String tag);
     
     /**
      * Remove an existing fragment.  If it was added to a container, its view
@@ -62,7 +62,7 @@ public interface FragmentTransaction {
      * 
      * @return Returns the same FragmentTransaction instance.
      */
-    public FragmentTransaction remove(Fragment fragment);
+    public abstract FragmentTransaction remove(Fragment fragment);
     
     /**
      * Hides an existing fragment.  This is only relevant for fragments whose
@@ -73,7 +73,7 @@ public interface FragmentTransaction {
      * 
      * @return Returns the same FragmentTransaction instance.
      */
-    public FragmentTransaction hide(Fragment fragment);
+    public abstract FragmentTransaction hide(Fragment fragment);
     
     /**
      * Hides a previously hidden fragment.  This is only relevant for fragments whose
@@ -84,55 +84,55 @@ public interface FragmentTransaction {
      * 
      * @return Returns the same FragmentTransaction instance.
      */
-    public FragmentTransaction show(Fragment fragment);
+    public abstract FragmentTransaction show(Fragment fragment);
 
     /**
      * @return <code>true</code> if this transaction contains no operations,
      * <code>false</code> otherwise.
      */
-    public boolean isEmpty();
+    public abstract boolean isEmpty();
     
     /**
      * Bit mask that is set for all enter transitions.
      */
-    public final int TRANSIT_ENTER_MASK = 0x1000;
+    public static final int TRANSIT_ENTER_MASK = 0x1000;
     
     /**
      * Bit mask that is set for all exit transitions.
      */
-    public final int TRANSIT_EXIT_MASK = 0x2000;
+    public static final int TRANSIT_EXIT_MASK = 0x2000;
     
     /** Not set up for a transition. */
-    public final int TRANSIT_UNSET = -1;
+    public static final int TRANSIT_UNSET = -1;
     /** No animation for transition. */
-    public final int TRANSIT_NONE = 0;
+    public static final int TRANSIT_NONE = 0;
     /** Fragment is being added onto the stack */
-    public final int TRANSIT_FRAGMENT_OPEN = 1 | TRANSIT_ENTER_MASK;
+    public static final int TRANSIT_FRAGMENT_OPEN = 1 | TRANSIT_ENTER_MASK;
     /** Fragment is being removed from the stack */
-    public final int TRANSIT_FRAGMENT_CLOSE = 2 | TRANSIT_EXIT_MASK;
+    public static final int TRANSIT_FRAGMENT_CLOSE = 2 | TRANSIT_EXIT_MASK;
     /** Fragment is being added in a 'next' operation*/
-    public final int TRANSIT_FRAGMENT_NEXT = 3 | TRANSIT_ENTER_MASK;
+    public static final int TRANSIT_FRAGMENT_NEXT = 3 | TRANSIT_ENTER_MASK;
     /** Fragment is being removed in a 'previous' operation */
-    public final int TRANSIT_FRAGMENT_PREV = 4 | TRANSIT_EXIT_MASK;
+    public static final int TRANSIT_FRAGMENT_PREV = 4 | TRANSIT_EXIT_MASK;
 
     /**
      * Set specific animation resources to run for the fragments that are
      * entering and exiting in this transaction.
      */
-    public FragmentTransaction setCustomAnimations(int enter, int exit);
+    public abstract FragmentTransaction setCustomAnimations(int enter, int exit);
     
     /**
      * Select a standard transition animation for this transaction.  May be
      * one of {@link #TRANSIT_NONE}, {@link #TRANSIT_FRAGMENT_OPEN},
      * or {@link #TRANSIT_FRAGMENT_CLOSE}
      */
-    public FragmentTransaction setTransition(int transit);
+    public abstract FragmentTransaction setTransition(int transit);
 
     /**
      * Set a custom style resource that will be used for resolving transit
      * animations.
      */
-    public FragmentTransaction setTransitionStyle(int styleRes);
+    public abstract FragmentTransaction setTransitionStyle(int styleRes);
     
     /**
      * Add this transaction to the back stack.  This means that the transaction
@@ -141,7 +141,7 @@ public interface FragmentTransaction {
      *
      * @param name An optional name for this back stack state, or null.
      */
-    public FragmentTransaction addToBackStack(String name);
+    public abstract FragmentTransaction addToBackStack(String name);
 
     /**
      * Returns true if this FragmentTransaction is allowed to be added to the back
@@ -150,14 +150,14 @@ public interface FragmentTransaction {
      *
      * @return True if {@link #addToBackStack(String)} is permitted on this transaction.
      */
-    public boolean isAddToBackStackAllowed();
+    public abstract boolean isAddToBackStackAllowed();
 
     /**
      * Disallow calls to {@link #addToBackStack(String)}. Any future calls to
      * addToBackStack will throw {@link IllegalStateException}. If addToBackStack
      * has already been called, this method will throw IllegalStateException.
      */
-    public FragmentTransaction disallowAddToBackStack();
+    public abstract FragmentTransaction disallowAddToBackStack();
 
     /**
      * Set the full title to show as a bread crumb when this transaction
@@ -165,14 +165,14 @@ public interface FragmentTransaction {
      *
      * @param res A string resource containing the title.
      */
-    public FragmentTransaction setBreadCrumbTitle(int res);
+    public abstract FragmentTransaction setBreadCrumbTitle(int res);
 
     /**
      * Like {@link #setBreadCrumbTitle(int)} but taking a raw string; this
      * method is <em>not</em> recommended, as the string can not be changed
      * later if the locale changes.
      */
-    public FragmentTransaction setBreadCrumbTitle(CharSequence text);
+    public abstract FragmentTransaction setBreadCrumbTitle(CharSequence text);
 
     /**
      * Set the short title to show as a bread crumb when this transaction
@@ -180,23 +180,39 @@ public interface FragmentTransaction {
      *
      * @param res A string resource containing the title.
      */
-    public FragmentTransaction setBreadCrumbShortTitle(int res);
+    public abstract FragmentTransaction setBreadCrumbShortTitle(int res);
 
     /**
      * Like {@link #setBreadCrumbShortTitle(int)} but taking a raw string; this
      * method is <em>not</em> recommended, as the string can not be changed
      * later if the locale changes.
      */
-    public FragmentTransaction setBreadCrumbShortTitle(CharSequence text);
+    public abstract FragmentTransaction setBreadCrumbShortTitle(CharSequence text);
 
     /**
-     * Schedules a commit of this transaction.  Note that the commit does
+     * Schedules a commit of this transaction.  The commit does
      * not happen immediately; it will be scheduled as work on the main thread
      * to be done the next time that thread is ready.
      *
+     * <p class="note">A transaction can only be committed with this method
+     * prior to its containing activity saving its state.  If the commit is
+     * attempted after that point, an exception will be thrown.  This is
+     * because the state after the commit can be lost if the activity needs to
+     * be restored from its state.  See {@link #commitAllowingStateLoss()} for
+     * situations where it may be okay to lose the commit.</p>
+     * 
      * @return Returns the identifier of this transaction's back stack entry,
      * if {@link #addToBackStack(String)} had been called.  Otherwise, returns
      * a negative number.
      */
-    public int commit();
+    public abstract int commit();
+
+    /**
+     * Like {@link #commit} but allows the commit to be executed after an
+     * activity's state is saved.  This is dangerous because the commit can
+     * be lost if the activity needs to later be restored from its state, so
+     * this should only be used for cases where it is okay for the UI state
+     * to change unexpectedly on the user.
+     */
+    public abstract int commitAllowingStateLoss();
 }

@@ -86,6 +86,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TokenWatcher;
@@ -823,13 +824,15 @@ public class WindowManagerService extends IWindowManager.Stub
     DragState mDragState = null;
     private final InputHandler mDragInputHandler = new BaseInputHandler() {
         @Override
-        public void handleMotion(MotionEvent event, Runnable finishedCallback) {
-            boolean endDrag = false;
-            final float newX = event.getRawX();
-            final float newY = event.getRawY();
-
+        public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
+            boolean handled = false;
             try {
-                if (mDragState != null) {
+                if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
+                        && mDragState != null) {
+                    boolean endDrag = false;
+                    final float newX = event.getRawX();
+                    final float newY = event.getRawY();
+
                     switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
                         if (DEBUG_DRAG) {
@@ -865,11 +868,13 @@ public class WindowManagerService extends IWindowManager.Stub
                             mDragState.endDragLw();
                         }
                     }
+
+                    handled = true;
                 }
             } catch (Exception e) {
                 Slog.e(TAG, "Exception caught by drag handleMotion", e);
             } finally {
-                finishedCallback.run();
+                finishedCallback.finished(handled);
             }
         }
     };
@@ -944,6 +949,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 notifyAll();
             }
 
+            // For debug builds, log event loop stalls to dropbox for analysis.
+            if (StrictMode.conditionallyEnableDebugLogging()) {
+                Slog.i(TAG, "Enabled StrictMode logging for WMThread's Looper");
+            }
+
             Looper.loop();
         }
     }
@@ -979,6 +989,11 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (this) {
                 mRunning = true;
                 notifyAll();
+            }
+
+            // For debug builds, log event loop stalls to dropbox for analysis.
+            if (StrictMode.conditionallyEnableDebugLogging()) {
+                Slog.i(TAG, "Enabled StrictMode for PolicyThread's Looper");
             }
 
             Looper.loop();
@@ -2725,7 +2740,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayed = !win.isVisibleLw();
                 if (win.mExiting) {
                     win.mExiting = false;
-                    win.mAnimation = null;
+                    if (win.mAnimation != null) {
+                        win.mAnimation.cancel();
+                        win.mAnimation = null;
+                    }
                 }
                 if (win.mDestroying) {
                     win.mDestroying = false;
@@ -5767,6 +5785,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     keyCode, scanCode, metaState, repeatCount, policyFlags);
         }
         
+        /* Provides an opportunity for the window manager policy to process a key that
+         * the application did not handle. */
+        public boolean dispatchUnhandledKey(InputChannel focus,
+                int action, int flags, int keyCode, int scanCode, int metaState, int repeatCount,
+                int policyFlags) {
+            WindowState windowState = getWindowStateForInputChannel(focus);
+            return mPolicy.dispatchUnhandledKey(windowState, action, flags,
+                    keyCode, scanCode, metaState, repeatCount, policyFlags);
+        }
+        
         /* Called when the current input focus changes.
          * Layer assignment is assumed to be complete by the time this is called.
          */
@@ -6892,6 +6920,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mAnimation != null) {
                 mAnimating = true;
                 mLocalAnimating = false;
+                mAnimation.cancel();
                 mAnimation = null;
             }
         }
@@ -7163,6 +7192,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // starting window, so there is no need for it to also
                         // be doing its own stuff.
                         if (mAnimation != null) {
+                            mAnimation.cancel();
                             mAnimation = null;
                             // Make sure we clean up the animation.
                             mAnimating = true;
@@ -7208,7 +7238,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_ANIM) Slog.v(
                         TAG, "Finished animation in " + this +
                         " @ " + currentTime);
-                    mAnimation = null;
+
+                    if (mAnimation != null) {
+                        mAnimation.cancel();
+                        mAnimation = null;
+                    }
                     //WindowManagerService.this.dump();
                 }
                 mHasLocalTransformation = false;
@@ -7237,6 +7271,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // clear it and make sure we run the cleanup code.
                 mAnimating = true;
                 mLocalAnimating = true;
+                mAnimation.cancel();
                 mAnimation = null;
             }
 
@@ -7251,7 +7286,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mAnimating = false;
             mLocalAnimating = false;
-            mAnimation = null;
+            if (mAnimation != null) {
+                mAnimation.cancel();
+                mAnimation = null;
+            }
             mAnimLayer = mLayer;
             if (mIsImWindow) {
                 mAnimLayer += mInputMethodAnimLayerAdjustment;

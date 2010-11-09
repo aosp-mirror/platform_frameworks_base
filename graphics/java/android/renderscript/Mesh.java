@@ -212,6 +212,7 @@ public class Mesh extends BaseObj {
                 rs.nMeshBindVertex(id, alloc.getID(), ct);
                 newMesh.mVertexBuffers[ct] = alloc;
             }
+            rs.nMeshInitVertexAttribs(id);
 
             return newMesh;
         }
@@ -294,6 +295,7 @@ public class Mesh extends BaseObj {
                 rs.nMeshBindVertex(id, entry.a.mID, ct);
                 newMesh.mVertexBuffers[ct] = entry.a;
             }
+            rs.nMeshInitVertexAttribs(id);
 
             return newMesh;
         }

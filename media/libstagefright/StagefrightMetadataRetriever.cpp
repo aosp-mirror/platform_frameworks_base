@@ -191,6 +191,11 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
     CHECK(meta->findInt32(kKeyWidth, &width));
     CHECK(meta->findInt32(kKeyHeight, &height));
 
+    int32_t rotationAngle;
+    if (!trackMeta->findInt32(kKeyRotation, &rotationAngle)) {
+        rotationAngle = 0;  // By default, no rotation
+    }
+
     VideoFrame *frame = new VideoFrame;
     frame->mWidth = width;
     frame->mHeight = height;
@@ -198,6 +203,7 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
     frame->mDisplayHeight = height;
     frame->mSize = width * height * 2;
     frame->mData = new uint8_t[frame->mSize];
+    frame->mRotationAngle = rotationAngle;
 
     int32_t srcFormat;
     CHECK(meta->findInt32(kKeyColorFormat, &srcFormat));

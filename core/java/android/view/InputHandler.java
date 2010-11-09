@@ -29,7 +29,7 @@ public interface InputHandler {
      * @param event The key event data.
      * @param finishedCallback The callback to invoke when event processing is finished.
      */
-    public void handleKey(KeyEvent event, Runnable finishedCallback);
+    public void handleKey(KeyEvent event, InputQueue.FinishedCallback finishedCallback);
     
     /**
      * Handle a motion event.
@@ -39,5 +39,5 @@ public interface InputHandler {
      * @param event The motion event data.
      * @param finishedCallback The callback to invoke when event processing is finished.
      */
-    public void handleMotion(MotionEvent event, Runnable finishedCallback);
+    public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback);
 }

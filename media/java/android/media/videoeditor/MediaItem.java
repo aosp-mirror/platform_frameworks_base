@@ -234,7 +234,7 @@ public abstract class MediaItem {
         }
 
         mEffects.add(effect);
-        invalidateTransitions(effect);
+        invalidateTransitions(effect.getStartTime(), effect.getDuration());
     }
 
     /**
@@ -252,7 +252,7 @@ public abstract class MediaItem {
         for (Effect effect : mEffects) {
             if (effect.getId().equals(effectId)) {
                 mEffects.remove(effect);
-                invalidateTransitions(effect);
+                invalidateTransitions(effect.getStartTime(), effect.getDuration());
                 return effect;
             }
         }
@@ -337,7 +337,7 @@ public abstract class MediaItem {
         }
 
         mOverlays.add(overlay);
-        invalidateTransitions(overlay);
+        invalidateTransitions(overlay.getStartTime(), overlay.getDuration());
     }
 
     /**
@@ -358,7 +358,7 @@ public abstract class MediaItem {
                 if (overlay instanceof OverlayFrame) {
                     ((OverlayFrame)overlay).invalidate();
                 }
-                invalidateTransitions(overlay);
+                invalidateTransitions(overlay.getStartTime(), overlay.getDuration());
                 return overlay;
             }
         }
@@ -449,44 +449,10 @@ public abstract class MediaItem {
     /**
      * Invalidate the start and end transitions if necessary
      *
-     * @param effect The effect that was added or removed
+     * @param startTimeMs The start time of the effect or overlay
+     * @param durationMs The duration of the effect or overlay
      */
-    void invalidateTransitions(Effect effect) {
-        // Check if the effect overlaps with the beginning and end transitions
-        if (mBeginTransition != null) {
-            if (effect.getStartTime() < mBeginTransition.getDuration()) {
-                mBeginTransition.invalidate();
-            }
-        }
-
-        if (mEndTransition != null) {
-            if (effect.getStartTime() + effect.getDuration() > getDuration()
-                    - mEndTransition.getDuration()) {
-                mEndTransition.invalidate();
-            }
-        }
-    }
-
-    /**
-     * Invalidate the start and end transitions if necessary
-     *
-     * @param overlay The effect that was added or removed
-     */
-    void invalidateTransitions(Overlay overlay) {
-        // Check if the overlay overlaps with the beginning and end transitions
-        if (mBeginTransition != null) {
-            if (overlay.getStartTime() < mBeginTransition.getDuration()) {
-                mBeginTransition.invalidate();
-            }
-        }
-
-        if (mEndTransition != null) {
-            if (overlay.getStartTime() + overlay.getDuration() > getDuration()
-                    - mEndTransition.getDuration()) {
-                mEndTransition.invalidate();
-            }
-        }
-    }
+    abstract void invalidateTransitions(long startTimeMs, long durationMs);
 
     /**
      * Adjust the duration transitions.

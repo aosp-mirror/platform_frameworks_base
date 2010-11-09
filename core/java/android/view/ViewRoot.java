@@ -53,12 +53,14 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.InputQueue.FinishedCallback;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
+import com.android.internal.policy.PolicyManager;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.IInputMethodCallback;
 import com.android.internal.view.IInputMethodSession;
@@ -160,6 +162,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     InputChannel mInputChannel;
     InputQueue.Callback mInputQueueCallback;
     InputQueue mInputQueue;
+    FallbackEventHandler mFallbackEventHandler;
     
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
@@ -273,6 +276,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
+        mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -325,6 +329,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         synchronized (this) {
             if (mView == null) {
                 mView = view;
+                mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
                 
@@ -386,6 +391,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     mView = null;
                     mAttachInfo.mRootView = null;
                     mInputChannel = null;
+                    mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
                     throw new RuntimeException("Adding window failed", e);
                 } finally {
@@ -404,6 +410,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                     mView = null;
                     mAttachInfo.mRootView = null;
                     mAdded = false;
+                    mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
                     switch (res) {
                         case WindowManagerImpl.ADD_BAD_APP_TOKEN:
@@ -664,7 +671,8 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             // object is not initialized to its backing store, but soon it
             // will be (assuming the window is visible).
             attachInfo.mSurface = mSurface;
-            attachInfo.mTranslucentWindow = PixelFormat.formatHasAlpha(lp.format);
+            attachInfo.mUse32BitDrawingCache = PixelFormat.formatHasAlpha(lp.format) ||
+                    lp.format == PixelFormat.RGBX_8888;
             attachInfo.mHasWindowFocus = false;
             attachInfo.mWindowVisibility = viewVisibility;
             attachInfo.mRecomputeGlobalAttributes = false;
@@ -1209,6 +1217,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             // Need to make sure we re-evaluate the window attributes next
             // time around, to ensure the window has the correct format.
             mWindowAttributesChanged = true;
+            requestLayout();
         }
     }
 
@@ -1736,34 +1745,14 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             handleFinishedEvent(msg.arg1, msg.arg2 != 0);
             break;
         case DISPATCH_KEY:
-            if (LOCAL_LOGV) Log.v(
-                TAG, "Dispatching key "
-                + msg.obj + " to " + mView);
             deliverKeyEvent((KeyEvent)msg.obj, msg.arg1 != 0);
             break;
-        case DISPATCH_POINTER: {
-            MotionEvent event = (MotionEvent) msg.obj;
-            try {
-                deliverPointerEvent(event);
-            } finally {
-                event.recycle();
-                if (msg.arg1 != 0) {
-                    finishInputEvent();
-                }
-                if (LOCAL_LOGV || WATCH_POINTER) Log.i(TAG, "Done dispatching!");
-            }
-        } break;
-        case DISPATCH_TRACKBALL: {
-            MotionEvent event = (MotionEvent) msg.obj;
-            try {
-                deliverTrackballEvent(event);
-            } finally {
-                event.recycle();
-                if (msg.arg1 != 0) {
-                    finishInputEvent();
-                }
-            }
-        } break;
+        case DISPATCH_POINTER:
+            deliverPointerEvent((MotionEvent) msg.obj, msg.arg1 != 0);
+            break;
+        case DISPATCH_TRACKBALL:
+            deliverTrackballEvent((MotionEvent) msg.obj, msg.arg1 != 0);
+            break;
         case DISPATCH_APP_VISIBILITY:
             handleAppVisibility(msg.arg1 != 0);
             break;
@@ -1865,7 +1854,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                 // system!  Bad bad bad!
                 event = KeyEvent.changeFlags(event, event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
             }
-            deliverKeyEventToViewHierarchy((KeyEvent)msg.obj, false);
+            deliverKeyEventPostIme((KeyEvent)msg.obj, false);
         } break;
         case FINISH_INPUT_CONNECTION: {
             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -1891,7 +1880,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         }
     }
     
-    private void startInputEvent(Runnable finishedCallback) {
+    private void startInputEvent(InputQueue.FinishedCallback finishedCallback) {
         if (mFinishedCallback != null) {
             Slog.w(TAG, "Received a new input event from the input queue but there is "
                     + "already an unfinished input event in progress.");
@@ -1900,11 +1889,11 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         mFinishedCallback = finishedCallback;
     }
 
-    private void finishInputEvent() {
+    private void finishInputEvent(boolean handled) {
         if (LOCAL_LOGV) Log.v(TAG, "Telling window manager input event is finished");
 
         if (mFinishedCallback != null) {
-            mFinishedCallback.run();
+            mFinishedCallback.finished(handled);
             mFinishedCallback = null;
         } else {
             Slog.w(TAG, "Attempted to tell the input queue that the current input event "
@@ -2033,105 +2022,134 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         return false;
     }
 
-    private void deliverPointerEvent(MotionEvent event) {
+    private void deliverPointerEvent(MotionEvent event, boolean sendDone) {
+        // If there is no view, then the event will not be handled.
+        if (mView == null || !mAdded) {
+            finishPointerEvent(event, sendDone, false);
+            return;
+        }
+
+        // Translate the pointer event for compatibility, if needed.
         if (mTranslator != null) {
             mTranslator.translateEventInScreenToAppWindow(event);
         }
-        
-        boolean handled;
-        if (mView != null && mAdded) {
 
-            // enter touch mode on the down
-            boolean isDown = event.getAction() == MotionEvent.ACTION_DOWN;
-            if (isDown) {
-                ensureTouchMode(true);
-            }
-            if(Config.LOGV) {
-                captureMotionLog("captureDispatchPointer", event);
-            }
-            if (mCurScrollY != 0) {
-                event.offsetLocation(0, mCurScrollY);
-            }
-            if (MEASURE_LATENCY) {
-                lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
-            }
-            // cache for possible drag-initiation
-            mLastTouchPoint.x = event.getRawX();
-            mLastTouchPoint.y = event.getRawY();
-            handled = mView.dispatchTouchEvent(event);
-            if (MEASURE_LATENCY) {
-                lt.sample("B Dispatched TouchEvents ", System.nanoTime() - event.getEventTimeNano());
-            }
-            if (!handled && isDown) {
-                int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
+        // Enter touch mode on the down.
+        boolean isDown = event.getAction() == MotionEvent.ACTION_DOWN;
+        if (isDown) {
+            ensureTouchMode(true);
+        }
+        if(Config.LOGV) {
+            captureMotionLog("captureDispatchPointer", event);
+        }
 
-                final int edgeFlags = event.getEdgeFlags();
-                int direction = View.FOCUS_UP;
-                int x = (int)event.getX();
-                int y = (int)event.getY();
-                final int[] deltas = new int[2];
+        // Offset the scroll position.
+        if (mCurScrollY != 0) {
+            event.offsetLocation(0, mCurScrollY);
+        }
+        if (MEASURE_LATENCY) {
+            lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
+        }
 
-                if ((edgeFlags & MotionEvent.EDGE_TOP) != 0) {
-                    direction = View.FOCUS_DOWN;
-                    if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                        deltas[0] = edgeSlop;
-                        x += edgeSlop;
-                    } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                        deltas[0] = -edgeSlop;
-                        x -= edgeSlop;
-                    }
-                } else if ((edgeFlags & MotionEvent.EDGE_BOTTOM) != 0) {
-                    direction = View.FOCUS_UP;
-                    if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                        deltas[0] = edgeSlop;
-                        x += edgeSlop;
-                    } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                        deltas[0] = -edgeSlop;
-                        x -= edgeSlop;
-                    }
-                } else if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                    direction = View.FOCUS_RIGHT;
+        // Remember the touch position for possible drag-initiation.
+        mLastTouchPoint.x = event.getRawX();
+        mLastTouchPoint.y = event.getRawY();
+
+        // Dispatch touch to view hierarchy.
+        boolean handled = mView.dispatchTouchEvent(event);
+        if (MEASURE_LATENCY) {
+            lt.sample("B Dispatched TouchEvents ", System.nanoTime() - event.getEventTimeNano());
+        }
+        if (handled) {
+            finishPointerEvent(event, sendDone, true);
+            return;
+        }
+
+        // Apply edge slop and try again, if appropriate.
+        final int edgeFlags = event.getEdgeFlags();
+        if (edgeFlags != 0 && mView instanceof ViewGroup) {
+            final int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
+            int direction = View.FOCUS_UP;
+            int x = (int)event.getX();
+            int y = (int)event.getY();
+            final int[] deltas = new int[2];
+
+            if ((edgeFlags & MotionEvent.EDGE_TOP) != 0) {
+                direction = View.FOCUS_DOWN;
+                if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
+                    deltas[0] = edgeSlop;
+                    x += edgeSlop;
                 } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                    direction = View.FOCUS_LEFT;
+                    deltas[0] = -edgeSlop;
+                    x -= edgeSlop;
                 }
+            } else if ((edgeFlags & MotionEvent.EDGE_BOTTOM) != 0) {
+                direction = View.FOCUS_UP;
+                if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
+                    deltas[0] = edgeSlop;
+                    x += edgeSlop;
+                } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
+                    deltas[0] = -edgeSlop;
+                    x -= edgeSlop;
+                }
+            } else if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
+                direction = View.FOCUS_RIGHT;
+            } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
+                direction = View.FOCUS_LEFT;
+            }
 
-                if (edgeFlags != 0 && mView instanceof ViewGroup) {
-                    View nearest = FocusFinder.getInstance().findNearestTouchable(
-                            ((ViewGroup) mView), x, y, direction, deltas);
-                    if (nearest != null) {
-                        event.offsetLocation(deltas[0], deltas[1]);
-                        event.setEdgeFlags(0);
-                        mView.dispatchTouchEvent(event);
-                    }
+            View nearest = FocusFinder.getInstance().findNearestTouchable(
+                    ((ViewGroup) mView), x, y, direction, deltas);
+            if (nearest != null) {
+                event.offsetLocation(deltas[0], deltas[1]);
+                event.setEdgeFlags(0);
+                if (mView.dispatchTouchEvent(event)) {
+                    finishPointerEvent(event, sendDone, true);
+                    return;
                 }
             }
         }
+
+        // Pointer event was unhandled.
+        finishPointerEvent(event, sendDone, false);
     }
 
-    private void deliverTrackballEvent(MotionEvent event) {
+    private void finishPointerEvent(MotionEvent event, boolean sendDone, boolean handled) {
+        event.recycle();
+        if (sendDone) {
+            finishInputEvent(handled);
+        }
+        if (LOCAL_LOGV || WATCH_POINTER) Log.i(TAG, "Done dispatching!");
+    }
+
+    private void deliverTrackballEvent(MotionEvent event, boolean sendDone) {
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
 
-        boolean handled = false;
-        if (mView != null && mAdded) {
-            handled = mView.dispatchTrackballEvent(event);
-            if (handled) {
-                // If we reach this, we delivered a trackball event to mView and
-                // mView consumed it. Because we will not translate the trackball
-                // event into a key event, touch mode will not exit, so we exit
-                // touch mode here.
-                ensureTouchMode(false);
-                return;
-            }
-            
-            // Otherwise we could do something here, like changing the focus
-            // or something?
+        // If there is no view, then the event will not be handled.
+        if (mView == null || !mAdded) {
+            finishTrackballEvent(event, sendDone, false);
+            return;
         }
 
+        // Deliver the trackball event to the view.
+        if (mView.dispatchTrackballEvent(event)) {
+            // If we reach this, we delivered a trackball event to mView and
+            // mView consumed it. Because we will not translate the trackball
+            // event into a key event, touch mode will not exit, so we exit
+            // touch mode here.
+            ensureTouchMode(false);
+
+            finishTrackballEvent(event, sendDone, true);
+            mLastTrackballTime = Integer.MIN_VALUE;
+            return;
+        }
+
+        // Translate the trackball event into DPAD keys and try to deliver those.
         final TrackballAxis x = mTrackballAxisX;
         final TrackballAxis y = mTrackballAxisY;
 
         long curTime = SystemClock.uptimeMillis();
-        if ((mLastTrackballTime+MAX_TRACKBALL_DELAY) < curTime) {
+        if ((mLastTrackballTime + MAX_TRACKBALL_DELAY) < curTime) {
             // It has been too long since the last movement,
             // so restart at the beginning.
             x.reset(0);
@@ -2219,6 +2237,17 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
                         KeyEvent.ACTION_UP, keycode, 0, metastate), false);
             }
             mLastTrackballTime = curTime;
+        }
+
+        // Unfortunately we can't tell whether the application consumed the keys, so
+        // we always consider the trackball event handled.
+        finishTrackballEvent(event, sendDone, true);
+    }
+
+    private void finishTrackballEvent(MotionEvent event, boolean sendDone, boolean handled) {
+        event.recycle();
+        if (sendDone) {
+            finishInputEvent(handled);
         }
     }
 
@@ -2365,118 +2394,137 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
     }
 
     private void deliverKeyEvent(KeyEvent event, boolean sendDone) {
-        // If mView is null, we just consume the key event because it doesn't
-        // make sense to do anything else with it.
-        boolean handled = mView == null || mView.dispatchKeyEventPreIme(event);
-        if (handled) {
-            if (sendDone) {
-                finishInputEvent();
-            }
+        // If there is no view, then the event will not be handled.
+        if (mView == null || !mAdded) {
+            finishKeyEvent(event, sendDone, false);
             return;
         }
-        // If it is possible for this window to interact with the input
-        // method window, then we want to first dispatch our key events
-        // to the input method.
+
+        if (LOCAL_LOGV) Log.v(TAG, "Dispatching key " + event + " to " + mView);
+
+        // Perform predispatching before the IME.
+        if (mView.dispatchKeyEventPreIme(event)) {
+            finishKeyEvent(event, sendDone, true);
+            return;
+        }
+
+        // Dispatch to the IME before propagating down the view hierarchy.
+        // The IME will eventually call back into handleFinishedEvent.
         if (mLastWasImTarget) {
             InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null && mView != null) {
+            if (imm != null) {
                 int seq = enqueuePendingEvent(event, sendDone);
                 if (DEBUG_IMF) Log.v(TAG, "Sending key event to IME: seq="
                         + seq + " event=" + event);
-                imm.dispatchKeyEvent(mView.getContext(), seq, event,
-                        mInputMethodCallback);
+                imm.dispatchKeyEvent(mView.getContext(), seq, event, mInputMethodCallback);
                 return;
             }
         }
-        deliverKeyEventToViewHierarchy(event, sendDone);
+
+        // Not dispatching to IME, continue with post IME actions.
+        deliverKeyEventPostIme(event, sendDone);
     }
 
-    void handleFinishedEvent(int seq, boolean handled) {
+    private void handleFinishedEvent(int seq, boolean handled) {
         final KeyEvent event = (KeyEvent)retrievePendingEvent(seq);
         if (DEBUG_IMF) Log.v(TAG, "IME finished event: seq=" + seq
                 + " handled=" + handled + " event=" + event);
         if (event != null) {
             final boolean sendDone = seq >= 0;
-            if (!handled) {
-                deliverKeyEventToViewHierarchy(event, sendDone);
-            } else if (sendDone) {
-                finishInputEvent();
+            if (handled) {
+                finishKeyEvent(event, sendDone, true);
             } else {
-                Log.w(TAG, "handleFinishedEvent(seq=" + seq
-                        + " handled=" + handled + " ev=" + event
-                        + ") neither delivering nor finishing key");
+                deliverKeyEventPostIme(event, sendDone);
             }
         }
     }
 
-    private void deliverKeyEventToViewHierarchy(KeyEvent event, boolean sendDone) {
-        try {
-            if (mView != null && mAdded) {
-                final int action = event.getAction();
-                boolean isDown = (action == KeyEvent.ACTION_DOWN);
+    private void deliverKeyEventPostIme(KeyEvent event, boolean sendDone) {
+        // If the view went away, then the event will not be handled.
+        if (mView == null || !mAdded) {
+            finishKeyEvent(event, sendDone, false);
+            return;
+        }
 
-                if (checkForLeavingTouchModeAndConsume(event)) {
-                    return;
-                }
+        // If the key's purpose is to exit touch mode then we consume it and consider it handled.
+        if (checkForLeavingTouchModeAndConsume(event)) {
+            finishKeyEvent(event, sendDone, true);
+            return;
+        }
 
-                if (Config.LOGV) {
-                    captureKeyLog("captureDispatchKeyEvent", event);
-                }
-                boolean keyHandled = mView.dispatchKeyEvent(event);
+        if (Config.LOGV) {
+            captureKeyLog("captureDispatchKeyEvent", event);
+        }
 
-                if (!keyHandled && isDown) {
-                    int direction = 0;
-                    switch (event.getKeyCode()) {
-                    case KeyEvent.KEYCODE_DPAD_LEFT:
-                        direction = View.FOCUS_LEFT;
-                        break;
-                    case KeyEvent.KEYCODE_DPAD_RIGHT:
-                        direction = View.FOCUS_RIGHT;
-                        break;
-                    case KeyEvent.KEYCODE_DPAD_UP:
-                        direction = View.FOCUS_UP;
-                        break;
-                    case KeyEvent.KEYCODE_DPAD_DOWN:
-                        direction = View.FOCUS_DOWN;
-                        break;
-                    }
+        // Deliver the key to the view hierarchy.
+        if (mView.dispatchKeyEvent(event)) {
+            finishKeyEvent(event, sendDone, true);
+            return;
+        }
 
-                    if (direction != 0) {
+        // Apply the fallback event policy.
+        if (mFallbackEventHandler.dispatchKeyEvent(event)) {
+            finishKeyEvent(event, sendDone, true);
+            return;
+        }
 
-                        View focused = mView != null ? mView.findFocus() : null;
-                        if (focused != null) {
-                            View v = focused.focusSearch(direction);
-                            boolean focusPassed = false;
-                            if (v != null && v != focused) {
-                                // do the math the get the interesting rect
-                                // of previous focused into the coord system of
-                                // newly focused view
-                                focused.getFocusedRect(mTempRect);
-                                if (mView instanceof ViewGroup) {
-                                    ((ViewGroup) mView).offsetDescendantRectToMyCoords(
-                                            focused, mTempRect);
-                                    ((ViewGroup) mView).offsetRectIntoDescendantCoords(
-                                            v, mTempRect);
-                                }
-                                focusPassed = v.requestFocus(direction, mTempRect);
-                            }
+        // Handle automatic focus changes.
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            int direction = 0;
+            switch (event.getKeyCode()) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                direction = View.FOCUS_LEFT;
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                direction = View.FOCUS_RIGHT;
+                break;
+            case KeyEvent.KEYCODE_DPAD_UP:
+                direction = View.FOCUS_UP;
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                direction = View.FOCUS_DOWN;
+                break;
+            }
 
-                            if (!focusPassed) {
-                                mView.dispatchUnhandledMove(focused, direction);
-                            } else {
-                                playSoundEffect(SoundEffectConstants.getContantForFocusDirection(direction));
-                            }
+            if (direction != 0) {
+                View focused = mView != null ? mView.findFocus() : null;
+                if (focused != null) {
+                    View v = focused.focusSearch(direction);
+                    if (v != null && v != focused) {
+                        // do the math the get the interesting rect
+                        // of previous focused into the coord system of
+                        // newly focused view
+                        focused.getFocusedRect(mTempRect);
+                        if (mView instanceof ViewGroup) {
+                            ((ViewGroup) mView).offsetDescendantRectToMyCoords(
+                                    focused, mTempRect);
+                            ((ViewGroup) mView).offsetRectIntoDescendantCoords(
+                                    v, mTempRect);
+                        }
+                        if (v.requestFocus(direction, mTempRect)) {
+                            playSoundEffect(
+                                    SoundEffectConstants.getContantForFocusDirection(direction));
+                            finishKeyEvent(event, sendDone, true);
+                            return;
                         }
                     }
+
+                    // Give the focused view a last chance to handle the dpad key.
+                    if (mView.dispatchUnhandledMove(focused, direction)) {
+                        finishKeyEvent(event, sendDone, true);
+                        return;
+                    }
                 }
             }
+        }
 
-        } finally {
-            if (sendDone) {
-                finishInputEvent();
-            }
-            // Let the exception fall through -- the looper will catch
-            // it and take care of the bad app for us.
+        // Key was unhandled.
+        finishKeyEvent(event, sendDone, false);
+    }
+
+    private void finishKeyEvent(KeyEvent event, boolean sendDone, boolean handled) {
+        if (sendDone) {
+            finishInputEvent(handled);
         }
     }
 
@@ -2748,15 +2796,15 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
         sendMessage(msg);
     }
     
-    private Runnable mFinishedCallback;
+    private InputQueue.FinishedCallback mFinishedCallback;
     
     private final InputHandler mInputHandler = new InputHandler() {
-        public void handleKey(KeyEvent event, Runnable finishedCallback) {
+        public void handleKey(KeyEvent event, InputQueue.FinishedCallback finishedCallback) {
             startInputEvent(finishedCallback);
             dispatchKey(event, true);
         }
 
-        public void handleMotion(MotionEvent event, Runnable finishedCallback) {
+        public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
             startInputEvent(finishedCallback);
             dispatchMotion(event, true);
         }
@@ -2803,7 +2851,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             // TODO
             Log.v(TAG, "Dropping unsupported motion event (unimplemented): " + event);
             if (sendDone) {
-                finishInputEvent();
+                finishInputEvent(false);
             }
         }
     }

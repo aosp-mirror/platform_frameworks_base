@@ -16,12 +16,9 @@
 
 package android.net;
 
-import com.android.internal.net.DomainNameValidator;
-
 import android.os.SystemProperties;
 import android.util.Config;
 import android.util.Log;
-
 
 import java.io.IOException;
 import java.net.InetAddress;

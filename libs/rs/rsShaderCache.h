@@ -41,30 +41,86 @@ public:
     void cleanupAll();
 
     int32_t vtxAttribSlot(const String8 &attrName) const;
-    int32_t vtxUniformSlot(uint32_t a) const {return mCurrent->mVtxUniformSlots[a];}
-    int32_t fragAttribSlot(uint32_t a) const {return mCurrent->mFragAttribSlots[a];}
-    int32_t fragUniformSlot(uint32_t a) const {return mCurrent->mFragUniformSlots[a];}
+    int32_t vtxUniformSlot(uint32_t a) const {return mCurrent->vtxUniforms[a].slot;}
+    uint32_t vtxUniformSize(uint32_t a) const {return mCurrent->vtxUniforms[a].arraySize;}
+    int32_t fragUniformSlot(uint32_t a) const {return mCurrent->fragUniforms[a].slot;}
+    uint32_t fragUniformSize(uint32_t a) const {return mCurrent->fragUniforms[a].arraySize;}
 
 protected:
-    typedef struct {
+    struct UniformQueryData {
+        char *name;
+        uint32_t nameLength;
+        int32_t writtenLength;
+        int32_t arraySize;
+        uint32_t type;
+        UniformQueryData(uint32_t maxName) {
+            name = NULL;
+            nameLength = maxName;
+            if(nameLength > 0 ) {
+                name = new char[nameLength];
+            }
+        }
+        ~UniformQueryData() {
+            if(name != NULL) {
+                delete[] name;
+                name = NULL;
+            }
+        }
+    };
+    struct UniformData {
+        int32_t slot;
+        uint32_t arraySize;
+    };
+    struct AttrData {
+        int32_t slot;
+        const char* name;
+    };
+    struct ProgramEntry {
+        ProgramEntry(uint32_t numVtxAttr, uint32_t numVtxUnis,
+                     uint32_t numFragUnis) : vtx(0), frag(0), program(0), vtxAttrCount(0),
+                                             vtxAttrs(0), vtxUniforms(0), fragUniforms(0) {
+            vtxAttrCount = numVtxAttr;
+            if(numVtxAttr) {
+                vtxAttrs = new AttrData[numVtxAttr];
+            }
+            if(numVtxUnis) {
+                vtxUniforms = new UniformData[numVtxUnis];
+            }
+            if(numFragUnis) {
+                fragUniforms = new UniformData[numFragUnis];
+            }
+        }
+        ~ProgramEntry() {
+            if(vtxAttrs) {
+                delete[] vtxAttrs;
+                vtxAttrs = NULL;
+            }
+            if(vtxUniforms) {
+                delete[] vtxUniforms;
+                vtxUniforms = NULL;
+            }
+            if(fragUniforms) {
+                delete[] fragUniforms;
+                fragUniforms = NULL;
+            }
+        }
         uint32_t vtx;
         uint32_t frag;
         uint32_t program;
         uint32_t vtxAttrCount;
-        const char* mVtxAttribNames[Program::MAX_ATTRIBS];
-        int32_t mVtxAttribSlots[Program::MAX_ATTRIBS];
-        int32_t mVtxUniformSlots[Program::MAX_UNIFORMS];
-        int32_t mFragAttribSlots[Program::MAX_ATTRIBS];
-        int32_t mFragUniformSlots[Program::MAX_UNIFORMS];
-        bool mIsValid;
-    } entry_t;
-    //entry_t *mEntries;
-    Vector<entry_t*> mEntries;
-    entry_t *mCurrent;
+        AttrData *vtxAttrs;
+        UniformData *vtxUniforms;
+        UniformData *fragUniforms;
 
-    /*uint32_t mEntryCount;
-    uint32_t mEntryAllocationCount;*/
+    };
+    Vector<ProgramEntry*> mEntries;
+    ProgramEntry *mCurrent;
 
+    bool hasArrayUniforms(ProgramVertex *vtx, ProgramFragment *frag);
+    void populateUniformData(Program *prog, uint32_t linkedID, UniformData *data);
+    void updateUniformArrayData(Context *rsc, Program *prog, uint32_t linkedID,
+                                UniformData *data, const char* logTag,
+                                UniformQueryData **uniformList, uint32_t uniListSize);
 };
 
 

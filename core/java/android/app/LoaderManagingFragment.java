@@ -26,7 +26,10 @@ import java.util.HashMap;
  *
  * @param <D> The type of data returned by the Loader. If you're using multiple Loaders with
  * different return types use Object and case the results.
+ * 
+ * @deprecated This was an old design, it will be removed before Honeycomb ships.
  */
+@Deprecated
 public abstract class LoaderManagingFragment<D> extends Fragment
         implements Loader.OnLoadCompleteListener<D> {
     private boolean mStarted = false;

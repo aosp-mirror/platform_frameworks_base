@@ -202,14 +202,14 @@ void ProgramVertex::transformToScreen(Context *rsc, float *v4out, const float *v
 
 void ProgramVertex::init(Context *rsc)
 {
-    mAttribCount = 0;
+    uint32_t attribCount = 0;
+    uint32_t uniformCount = 0;
     if (mUserShader.size() > 0) {
         for (uint32_t ct=0; ct < mInputCount; ct++) {
-            initAddUserElement(mInputElements[ct].get(), mAttribNames, &mAttribCount, RS_SHADER_ATTR);
+            initAddUserElement(mInputElements[ct].get(), mAttribNames, NULL, &attribCount, RS_SHADER_ATTR);
         }
-        mUniformCount = 0;
         for (uint32_t ct=0; ct < mConstantCount; ct++) {
-            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, &mUniformCount, RS_SHADER_UNI);
+            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, mUniformArraySizes, &uniformCount, RS_SHADER_UNI);
         }
     }
     createShader();

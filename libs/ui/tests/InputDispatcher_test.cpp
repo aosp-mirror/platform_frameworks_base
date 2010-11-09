@@ -67,6 +67,11 @@ private:
         return false;
     }
 
+    virtual bool dispatchUnhandledKey(const sp<InputChannel>& inputChannel,
+            const KeyEvent* keyEvent, uint32_t policyFlags) {
+        return false;
+    }
+
     virtual void notifySwitch(nsecs_t when,
             int32_t switchCode, int32_t switchValue, uint32_t policyFlags) {
     }

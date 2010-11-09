@@ -206,6 +206,25 @@ public class MediaImageItem extends MediaItem {
         return thumbnailArray;
     }
 
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    void invalidateTransitions(long startTimeMs, long durationMs) {
+        // Check if the effect overlaps with the beginning and end transitions
+        if (mBeginTransition != null) {
+            if (startTimeMs < mBeginTransition.getDuration()) {
+                mBeginTransition.invalidate();
+            }
+        }
+
+        if (mEndTransition != null) {
+            if (startTimeMs + durationMs > mDurationMs - mEndTransition.getDuration()) {
+                mEndTransition.invalidate();
+            }
+        }
+    }
+
     /**
      * Resize a bitmap to the specified width and height
      *

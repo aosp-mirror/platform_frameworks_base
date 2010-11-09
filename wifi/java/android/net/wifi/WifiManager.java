@@ -372,7 +372,26 @@ public class WifiManager {
     
     /** Anything better than or equal to this will show the max bars. */
     private static final int MAX_RSSI = -55;
-    
+
+    /**
+     * Auto settings in the driver. The driver could choose to operate on both
+     * 2.4 GHz and 5 GHz or make a dynamic decision on selecting the band.
+     * @hide
+     */
+    public static final int WIFI_FREQUENCY_BAND_AUTO = 0;
+
+    /**
+     * Operation on 5 GHz alone
+     * @hide
+     */
+    public static final int WIFI_FREQUENCY_BAND_5GHZ = 1;
+
+    /**
+     * Operation on 2.4 GHz alone
+     * @hide
+     */
+    public static final int WIFI_FREQUENCY_BAND_2GHZ = 2;
+
     IWifiManager mService;
     Handler mHandler;
 
@@ -682,6 +701,51 @@ public class WifiManager {
         try {
             mService.setCountryCode(country, persist);
         } catch (RemoteException e) { }
+    }
+
+    /**
+     * Set the operational frequency band.
+     * @param band  One of
+     *     {@link #WIFI_FREQUENCY_BAND_AUTO},
+     *     {@link #WIFI_FREQUENCY_BAND_5GHZ},
+     *     {@link #WIFI_FREQUENCY_BAND_2GHZ},
+     * @param persist {@code true} if this needs to be remembered
+     * @hide
+     */
+    public void setFrequencyBand(int band, boolean persist) {
+        try {
+            mService.setFrequencyBand(band, persist);
+        } catch (RemoteException e) { }
+    }
+
+    /**
+     * Get the operational frequency band.
+     * @return One of
+     *     {@link #WIFI_FREQUENCY_BAND_AUTO},
+     *     {@link #WIFI_FREQUENCY_BAND_5GHZ},
+     *     {@link #WIFI_FREQUENCY_BAND_2GHZ} or
+     *     {@code -1} on failure.
+     * @hide
+     */
+    public int getFrequencyBand() {
+        try {
+            return mService.getFrequencyBand();
+        } catch (RemoteException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Check if the chipset supports dual frequency band (2.4 GHz and 5 GHz)
+     * @return {@code true} if supported, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isDualBandSupported() {
+        try {
+            return mService.isDualBandSupported();
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**

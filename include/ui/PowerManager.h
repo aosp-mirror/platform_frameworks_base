@@ -22,14 +22,10 @@ namespace android {
 
 enum {
     POWER_MANAGER_OTHER_EVENT = 0,
-    POWER_MANAGER_CHEEK_EVENT = 1,
-    POWER_MANAGER_TOUCH_EVENT = 2, // touch events are TOUCH for 300ms, and then either
-                                   // up events or LONG_TOUCH events.
-    POWER_MANAGER_LONG_TOUCH_EVENT = 3,
-    POWER_MANAGER_TOUCH_UP_EVENT = 4,
-    POWER_MANAGER_BUTTON_EVENT = 5, // Button and trackball events.
+    POWER_MANAGER_BUTTON_EVENT = 1,
+    POWER_MANAGER_TOUCH_EVENT = 2,
 
-    POWER_MANAGER_LAST_EVENT = POWER_MANAGER_BUTTON_EVENT, // Last valid event code.
+    POWER_MANAGER_LAST_EVENT = POWER_MANAGER_TOUCH_EVENT, // Last valid event code.
 };
 
 } // namespace android

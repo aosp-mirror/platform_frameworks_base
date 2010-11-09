@@ -66,7 +66,10 @@ public class Main {
             AsmGenerator agen = new AsmGenerator(log, osDestJar[0], new CreateInfo());
 
             AsmAnalyzer aa = new AsmAnalyzer(log, osJarPath, agen,
-                    new String[] { "android.view.View" },   // derived from
+                    new String[] {                          // derived from
+                        "android.view.View",
+                        "android.app.Fragment"
+                    },
                     new String[] {                          // include classes
                         "android.*", // for android.R
                         "android.util.*",

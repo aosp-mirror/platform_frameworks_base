@@ -34,6 +34,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -2395,6 +2396,14 @@ public final class Settings {
                 "selected_input_method_subtype";
 
         /**
+         * Setting to record the history of input method subtype, holding the pair of ID of IME
+         * and its last used subtype.
+         * @hide
+         */
+        public static final String INPUT_METHODS_SUBTYPE_HISTORY =
+                "input_methods_subtype_history";
+
+        /**
          * Whether the device has been provisioned (0 = false, 1 = true)
          */
         public static final String DEVICE_PROVISIONED = "device_provisioned";
@@ -2833,6 +2842,16 @@ public final class Settings {
          * A value of N means that we will make N+1 connection attempts in all.
          */
         public static final String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
+
+        /**
+         * The operational wifi frequency band
+         * Set to one of {@link WifiManager#WIFI_FREQUENCY_BAND_AUTO},
+         * {@link WifiManager#WIFI_FREQUENCY_BAND_5GHZ} or
+         * {@link WifiManager#WIFI_FREQUENCY_BAND_2GHZ}
+         *
+         * @hide
+         */
+        public static final String WIFI_FREQUENCY_BAND = "wifi_frequency_band";
 
         /**
          * Maximum amount of time in milliseconds to hold a wakelock while waiting for mobile

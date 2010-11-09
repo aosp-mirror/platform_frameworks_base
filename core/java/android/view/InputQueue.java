@@ -53,7 +53,7 @@ public final class InputQueue {
     private static native void nativeRegisterInputChannel(InputChannel inputChannel,
             InputHandler inputHandler, MessageQueue messageQueue);
     private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
-    private static native void nativeFinished(long finishedToken);
+    private static native void nativeFinished(long finishedToken, boolean handled);
     
     /** @hide */
     public InputQueue(InputChannel channel) {
@@ -116,18 +116,22 @@ public final class InputQueue {
     @SuppressWarnings("unused")
     private static void dispatchKeyEvent(InputHandler inputHandler,
             KeyEvent event, long finishedToken) {
-        Runnable finishedCallback = FinishedCallback.obtain(finishedToken);
+        FinishedCallback finishedCallback = FinishedCallback.obtain(finishedToken);
         inputHandler.handleKey(event, finishedCallback);
     }
 
     @SuppressWarnings("unused")
     private static void dispatchMotionEvent(InputHandler inputHandler,
             MotionEvent event, long finishedToken) {
-        Runnable finishedCallback = FinishedCallback.obtain(finishedToken);
+        FinishedCallback finishedCallback = FinishedCallback.obtain(finishedToken);
         inputHandler.handleMotion(event, finishedCallback);
     }
     
-    private static class FinishedCallback implements Runnable {
+    /**
+     * A callback that must be invoked to when finished processing an event.
+     * @hide
+     */
+    public static final class FinishedCallback {
         private static final boolean DEBUG_RECYCLING = false;
         
         private static final int RECYCLE_MAX_COUNT = 4;
@@ -156,13 +160,13 @@ public final class InputQueue {
             }
         }
         
-        public void run() {
+        public void finished(boolean handled) {
             synchronized (sLock) {
                 if (mFinishedToken == -1) {
                     throw new IllegalStateException("Event finished callback already invoked.");
                 }
                 
-                nativeFinished(mFinishedToken);
+                nativeFinished(mFinishedToken, handled);
                 mFinishedToken = -1;
 
                 if (sRecycleCount < RECYCLE_MAX_COUNT) {

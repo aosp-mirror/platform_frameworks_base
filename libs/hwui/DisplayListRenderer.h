@@ -92,6 +92,7 @@ public:
         SetMatrix,
         ConcatMatrix,
         ClipRect,
+        DrawDisplayList,
         DrawBitmap,
         DrawBitmapMatrix,
         DrawBitmapRect,
@@ -158,6 +159,10 @@ private:
 
     SkPaint* getPaint() {
         return (SkPaint*) getInt();
+    }
+
+    DisplayList* getDisplayList() {
+        return (DisplayList*) getInt();
     }
 
     inline float getFloat() {
@@ -235,6 +240,7 @@ public:
 
     bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
+    void drawDisplayList(DisplayList* displayList);
     void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
@@ -348,16 +354,25 @@ private:
 
     inline void addPaint(SkPaint* paint) {
         if (paint == NULL) {
-            addInt((int)NULL);
+            addInt((int) NULL);
             return;
         }
+
         SkPaint *paintCopy =  mPaintMap.valueFor(paint);
         if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
             paintCopy = new SkPaint(*paint);
             mPaintMap.add(paint, paintCopy);
             mPaints.add(paintCopy);
         }
-        addInt((int)paintCopy);
+
+        addInt((int) paintCopy);
+    }
+
+    inline void addDisplayList(DisplayList* displayList) {
+        // TODO: To be safe, the display list should be ref-counted in the
+        //       resources cache, but we rely on the caller (UI toolkit) to
+        //       do the right thing for now
+        addInt((int) displayList);
     }
 
     inline void addMatrix(SkMatrix* matrix) {
@@ -371,21 +386,21 @@ private:
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        addInt((int)bitmap);
+        addInt((int) bitmap);
         mBitmapResources.add(bitmap);
         Caches& caches = Caches::getInstance();
         caches.resourceCache.incrementRefcount(bitmap);
     }
 
     inline void addShader(SkiaShader* shader) {
-        addInt((int)shader);
+        addInt((int) shader);
         mShaderResources.add(shader);
         Caches& caches = Caches::getInstance();
         caches.resourceCache.incrementRefcount(shader);
     }
 
     inline void addColorFilter(SkiaColorFilter* colorFilter) {
-        addInt((int)colorFilter);
+        addInt((int) colorFilter);
         mFilterResources.add(colorFilter);
         Caches& caches = Caches::getInstance();
         caches.resourceCache.incrementRefcount(colorFilter);
@@ -398,7 +413,7 @@ private:
     Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;
-    DefaultKeyedVector<SkPaint *, SkPaint *> mPaintMap;
+    DefaultKeyedVector<SkPaint*, SkPaint*> mPaintMap;
     Vector<SkMatrix*> mMatrices;
 
     PathHeap* mPathHeap;

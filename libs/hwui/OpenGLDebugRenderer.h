@@ -40,6 +40,7 @@ public:
     int saveLayer(float left, float top, float right, float bottom,
             SkPaint* p, int flags);
 
+    void drawDisplayList(DisplayList* displayList);
     void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,

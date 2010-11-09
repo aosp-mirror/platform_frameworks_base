@@ -66,7 +66,17 @@ public:
     float mBBoxMax[3];
     void computeBBox();
 
+    void initVertexAttribs();
+
 protected:
+    bool isValidGLComponent(const Element *elem, uint32_t fieldIdx);
+    // Attribues that allow us to map to GL
+    VertexArray::Attrib *mAttribs;
+    // This allows us to figure out which allocation the attribute
+    // belongs to. In the event the allocation is uploaded to GL
+    // buffer, it lets us properly map it
+    uint32_t *mAttribAllocationIndex;
+    uint32_t mAttribCount;
 };
 
 class MeshContext

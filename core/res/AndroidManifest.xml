@@ -1293,7 +1293,7 @@
                  android:killAfterRestore="false"
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"
-                android:theme="@style/Theme.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
                 android:multiprocess="true">
@@ -1303,7 +1303,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.android.internal.app.HeavyWeightSwitcherActivity"
-                android:theme="@style/Theme.Dialog"
+                android:theme="@style/Theme.Holo.Dialog"
                 android:label="@string/heavy_weight_switcher_title"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true">
@@ -1348,7 +1348,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
-                android:theme="@style/Theme.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:excludeFromRecents="true">
         </activity>
 

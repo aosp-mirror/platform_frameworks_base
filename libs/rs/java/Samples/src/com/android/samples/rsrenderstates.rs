@@ -19,6 +19,8 @@
 #include "rs_graphics.rsh"
 #include "shader_def.rsh"
 
+const int gMaxModes = 10;
+
 rs_program_vertex gProgVertex;
 rs_program_fragment gProgFragmentColor;
 rs_program_fragment gProgFragmentTexture;
@@ -59,12 +61,16 @@ rs_program_raster gCullNone;
 
 // Custom vertex shader compunents
 VertexShaderConstants *gVSConstants;
+VertexShaderConstants2 *gVSConstants2;
 FragentShaderConstants *gFSConstants;
+FragentShaderConstants2 *gFSConstants2;
 // Export these out to easily set the inputs to shader
 VertexShaderInputs *gVSInputs;
 // Custom shaders we use for lighting
 rs_program_vertex gProgVertexCustom;
 rs_program_fragment gProgFragmentCustom;
+rs_program_vertex gProgVertexCustom2;
+rs_program_fragment gProgFragmentCustom2;
 rs_program_fragment gProgFragmentMultitex;
 
 float gDt = 0;
@@ -367,10 +373,10 @@ float gLight1Rotation = 0;
 void setupCustomShaderLights() {
     float4 light0Pos = {-5.0f, 5.0f, -10.0f, 1.0f};
     float4 light1Pos = {2.0f, 5.0f, 15.0f, 1.0f};
-    float3 light0DiffCol = {0.9f, 0.7f, 0.7f};
-    float3 light0SpecCol = {0.9f, 0.6f, 0.6f};
-    float3 light1DiffCol = {0.5f, 0.5f, 0.9f};
-    float3 light1SpecCol = {0.5f, 0.5f, 0.9f};
+    float4 light0DiffCol = {0.9f, 0.7f, 0.7f, 1.0f};
+    float4 light0SpecCol = {0.9f, 0.6f, 0.6f, 1.0f};
+    float4 light1DiffCol = {0.5f, 0.5f, 0.9f, 1.0f};
+    float4 light1SpecCol = {0.5f, 0.5f, 0.9f, 1.0f};
 
     gLight0Rotation += 50.0f * gDt;
     if(gLight0Rotation > 360.0f) {
@@ -389,20 +395,26 @@ void setupCustomShaderLights() {
     light1Pos = rsMatrixMultiply(&l1Mat, light1Pos);
 
     // Set light 0 properties
-    gVSConstants->light0_Posision.x = light0Pos.x;
-    gVSConstants->light0_Posision.y = light0Pos.y;
-    gVSConstants->light0_Posision.z = light0Pos.z;
+    gVSConstants->light0_Posision = light0Pos;
     gVSConstants->light0_Diffuse = 1.0f;
     gVSConstants->light0_Specular = 0.5f;
-    gVSConstants->light0_CosinePower = 40.0f;
+    gVSConstants->light0_CosinePower = 10.0f;
     // Set light 1 properties
-    gVSConstants->light1_Posision.x = light1Pos.x;
-    gVSConstants->light1_Posision.y = light1Pos.y;
-    gVSConstants->light1_Posision.z = light1Pos.z;
+    gVSConstants->light1_Posision = light1Pos;
     gVSConstants->light1_Diffuse = 1.0f;
     gVSConstants->light1_Specular = 0.7f;
-    gVSConstants->light1_CosinePower = 50.0f;
+    gVSConstants->light1_CosinePower = 25.0f;
     rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
+
+    gVSConstants2->light_Posision[0] = light0Pos;
+    gVSConstants2->light_Diffuse[0] = 1.0f;
+    gVSConstants2->light_Specular[0] = 0.5f;
+    gVSConstants2->light_CosinePower[0] = 10.0f;
+    gVSConstants2->light_Posision[1] = light1Pos;
+    gVSConstants2->light_Diffuse[1] = 1.0f;
+    gVSConstants2->light_Specular[1] = 0.7f;
+    gVSConstants2->light_CosinePower[1] = 25.0f;
+    rsAllocationMarkDirty(rsGetAllocation(gVSConstants2));
 
     // Update fragmetn shader constants
     // Set light 0 colors
@@ -412,6 +424,13 @@ void setupCustomShaderLights() {
     gFSConstants->light1_DiffuseColor = light1DiffCol;
     gFSConstants->light1_SpecularColor = light1SpecCol;
     rsAllocationMarkDirty(rsGetAllocation(gFSConstants));
+
+    gFSConstants2->light_DiffuseColor[0] = light0DiffCol;
+    gFSConstants2->light_SpecularColor[0] = light0SpecCol;
+    // Set light 1 colors
+    gFSConstants2->light_DiffuseColor[1] = light1DiffCol;
+    gFSConstants2->light_SpecularColor[1] = light1SpecCol;
+    rsAllocationMarkDirty(rsGetAllocation(gFSConstants2));
 }
 
 void displayCustomShaderSamples() {
@@ -448,6 +467,43 @@ void displayCustomShaderSamples() {
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgBindFont(gFontMono);
     rsgDrawText("Custom shader sample", 10, rsgGetHeight() - 10);
+}
+
+void displayCustomShaderSamples2() {
+
+    // Update vertex shader constants
+    // Load model matrix
+    // Aplly a rotation to our mesh
+    gTorusRotation += 50.0f * gDt;
+    if(gTorusRotation > 360.0f) {
+        gTorusRotation -= 360.0f;
+    }
+
+    // Position our model on the screen
+    rsMatrixLoadTranslate(&gVSConstants2->model[1], 0.0f, 0.0f, -10.0f);
+    rsMatrixLoadIdentity(&gVSConstants2->model[0]);
+    rsMatrixRotate(&gVSConstants2->model[0], gTorusRotation, 1.0f, 0.0f, 0.0f);
+    rsMatrixRotate(&gVSConstants2->model[0], gTorusRotation, 0.0f, 0.0f, 1.0f);
+    // Setup the projectioni matrix
+    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    rsMatrixLoadPerspective(&gVSConstants2->proj, 30.0f, aspect, 0.1f, 100.0f);
+    setupCustomShaderLights();
+
+    rsgBindProgramVertex(gProgVertexCustom2);
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendNoneDepth);
+    rsgBindProgramFragment(gProgFragmentCustom2);
+    rsgBindSampler(gProgFragmentCustom2, 0, gLinearClamp);
+    rsgBindTexture(gProgFragmentCustom2, 0, gTexTorus);
+
+    // Use back face culling
+    rsgBindProgramRaster(gCullBack);
+    rsgDrawMesh(gTorusMesh);
+
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgBindFont(gFontMono);
+    rsgDrawText("Custom shader sample with array uniforms", 10, rsgGetHeight() - 10);
 }
 
 void displayMultitextureSample() {
@@ -576,6 +632,9 @@ int root(int launchID) {
         break;
     case 8:
         displayAnisoSample();
+        break;
+    case 9:
+        displayCustomShaderSamples2();
         break;
     }
 

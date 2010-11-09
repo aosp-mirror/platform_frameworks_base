@@ -600,6 +600,14 @@ public final class StrictMode {
         }
     }
 
+    // Sets up CloseGuard in Dalvik/libcore
+    private static void setCloseGuardEnabled(boolean enabled) {
+        if (!(CloseGuard.getReporter() instanceof AndroidBlockGuardPolicy)) {
+            CloseGuard.setReporter(new AndroidCloseGuardReporter());
+        }
+        CloseGuard.setEnabled(enabled);
+    }
+
     private static class StrictModeNetworkViolation extends BlockGuard.BlockGuardPolicyException {
         public StrictModeNetworkViolation(int policyMask) {
             super(policyMask, DETECT_NETWORK);
@@ -1026,6 +1034,12 @@ public final class StrictMode {
         }
     }
 
+    private static class AndroidCloseGuardReporter implements CloseGuard.Reporter {
+        public void report (String message, Throwable allocationSite) {
+            onVmPolicyViolation(message, allocationSite);
+        }
+    }
+
     /**
      * Called from Parcel.writeNoException()
      */
@@ -1051,7 +1065,7 @@ public final class StrictMode {
      */
     public static void setVmPolicy(final VmPolicy policy) {
         sVmPolicyMask = policy.mask;
-        CloseGuard.setEnabled(vmClosableObjectLeaksEnabled());
+        setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
     }
 
     /**
@@ -1099,6 +1113,13 @@ public final class StrictMode {
      * @hide
      */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
+        onVmPolicyViolation(message, originStack);
+    }
+
+    /**
+     * @hide
+     */
+    public static void onVmPolicyViolation(String message, Throwable originStack) {
         if ((sVmPolicyMask & PENALTY_LOG) != 0) {
             Log.e(TAG, message, originStack);
         }

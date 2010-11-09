@@ -94,6 +94,8 @@ protected:
 
     Component mComponent;
     uint32_t mBits;
+
+    void compute();
 };
 
 

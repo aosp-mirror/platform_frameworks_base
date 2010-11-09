@@ -21,6 +21,8 @@ import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.api.IStyleResourceValue;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -49,6 +51,7 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.BridgeInflater;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import java.io.File;
@@ -65,7 +68,7 @@ import java.util.Map.Entry;
 /**
  * Custom implementation of Context to handle non compiled resources.
  */
-public final class BridgeContext extends Context {
+public final class BridgeContext extends Activity {
 
     private final Resources mResources;
     private final Theme mTheme;
@@ -129,6 +132,9 @@ public final class BridgeContext extends Context {
         mProjectResources = projectResources;
         mFrameworkResources = frameworkResources;
         mStyleInheritanceMap = styleInheritanceMap;
+
+        mFragments.mCurState = Fragment.CREATED;
+        mFragments.mActivity = this;
     }
 
     public void setBridgeInflater(BridgeInflater inflater) {
@@ -153,6 +159,14 @@ public final class BridgeContext extends Context {
 
     public ILayoutLog getLogger() {
         return mLogger;
+    }
+
+
+    // ------------- Activity Methods
+
+    @Override
+    public LayoutInflater getLayoutInflater() {
+        return mInflater;
     }
 
     // ------------ Context methods

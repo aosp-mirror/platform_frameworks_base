@@ -87,7 +87,7 @@ public abstract class Effect {
 
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(this);
+        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -113,7 +113,7 @@ public abstract class Effect {
 
         mStartTimeMs = startTimeMs;
 
-        mMediaItem.invalidateTransitions(this);
+        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -137,7 +137,7 @@ public abstract class Effect {
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(this);
+        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
     }
 
     /**

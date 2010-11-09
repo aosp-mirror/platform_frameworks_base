@@ -58,7 +58,7 @@ namespace uirenderer {
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
 
-class DisplayListRenderer;
+class DisplayList;
 
 /**
  * OpenGL renderer used to draw accelerated 2D graphics. The API is a
@@ -100,6 +100,7 @@ public:
     bool quickReject(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
+    virtual void drawDisplayList(DisplayList* displayList);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,

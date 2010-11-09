@@ -21,18 +21,13 @@ public interface LocalPowerManager {
     // Note: be sure to update BatteryStats if adding or modifying event constants.
     
     public static final int OTHER_EVENT = 0;
-    public static final int CHEEK_EVENT = 1;
-    public static final int TOUCH_EVENT = 2;  // touch events are TOUCH for 300ms, and then either
-                                              // up events or LONG_TOUCH events.
-    public static final int LONG_TOUCH_EVENT = 3;
-    public static final int TOUCH_UP_EVENT = 4;
-    public static final int BUTTON_EVENT = 5;  // Button and trackball events.
+    public static final int BUTTON_EVENT = 1;
+    public static final int TOUCH_EVENT = 2;
 
-    public static final int POKE_LOCK_IGNORE_CHEEK_EVENTS = 0x1;
+    public static final int POKE_LOCK_IGNORE_TOUCH_EVENTS = 0x1;
+
     public static final int POKE_LOCK_SHORT_TIMEOUT = 0x2;
     public static final int POKE_LOCK_MEDIUM_TIMEOUT = 0x4;
-    public static final int POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS = 0x8;
-
     public static final int POKE_LOCK_TIMEOUT_MASK = 0x6;
 
     void goToSleep(long time);

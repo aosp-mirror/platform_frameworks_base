@@ -120,6 +120,7 @@ public:
     uint32_t mDisplayHeight;
     uint32_t mSize;            // Number of bytes in mData
     uint8_t* mData;            // Actual binary data
+    int32_t  mRotationAngle;   // rotation angle, clockwise
 };
 
 }; // namespace android

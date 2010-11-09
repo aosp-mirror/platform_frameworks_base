@@ -315,7 +315,7 @@ public class MediaRecorder
 
     /**
      * Sets the orientation hint for output video playback.
-     * This method should be called before start(). This method will not
+     * This method should be called before prepare(). This method will not
      * trigger the source video frame to rotate during video recording, but to
      * add a composition matrix containing the rotation angle in the output
      * video if the output format is OutputFormat.THREE_GPP or

@@ -31,6 +31,7 @@ import com.android.ninepatch.NinePatch;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
+import android.app.Fragment_Delegate;
 import android.content.ClipData;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -366,6 +367,12 @@ public final class Bridge implements ILayoutBridge {
 
         BridgeContext context = null;
         try {
+            // we need to make sure the Looper has been initialized for this thread.
+            // this is required for View that creates Handler objects.
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
+
             // setup the display Metrics.
             DisplayMetrics metrics = new DisplayMetrics();
             metrics.densityDpi = density;
@@ -380,6 +387,7 @@ public final class Bridge implements ILayoutBridge {
                     frameworkResources, styleParentMap, customViewLoader, logger);
             BridgeInflater inflater = new BridgeInflater(context, customViewLoader);
             context.setBridgeInflater(inflater);
+            inflater.setFactory2(context);
 
             IResourceValue windowBackground = null;
             int screenOffset = 0;
@@ -390,21 +398,21 @@ public final class Bridge implements ILayoutBridge {
                 screenOffset = getScreenOffset(frameworkResources, currentTheme, context);
             }
 
-            // we need to make sure the Looper has been initialized for this thread.
-            // this is required for View that creates Handler objects.
-            if (Looper.myLooper() == null) {
-                Looper.prepare();
-            }
-
             BridgeXmlBlockParser parser = new BridgeXmlBlockParser(layoutDescription,
                     context, false /* platformResourceFlag */);
 
             ViewGroup root = new FrameLayout(context);
 
+            // Sets the project callback (custom view loader) to the fragment delegate so that
+            // it can instantiate the custom Fragment.
+            Fragment_Delegate.setProjectCallback(customViewLoader);
+
             View view = inflater.inflate(parser, root);
 
             // post-inflate process. For now this supports TabHost/TabWidget
             postInflateProcess(view, customViewLoader);
+
+            Fragment_Delegate.setProjectCallback(null);
 
             // set the AttachInfo on the root view.
             AttachInfo info = new AttachInfo(new WindowSession(), new Window(),
@@ -430,7 +438,7 @@ public final class Bridge implements ILayoutBridge {
                         MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
                 h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
                         MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
-                view.measure(w_spec, h_spec);
+                root.measure(w_spec, h_spec);
 
                 int neededWidth = root.getChildAt(0).getMeasuredWidth();
                 if (neededWidth > screenWidth) {
@@ -448,10 +456,10 @@ public final class Bridge implements ILayoutBridge {
             w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
             h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
                     MeasureSpec.EXACTLY);
-            view.measure(w_spec, h_spec);
+            root.measure(w_spec, h_spec);
 
             // now do the layout.
-            view.layout(0, screenOffset, screenWidth, screenHeight);
+            root.layout(0, screenOffset, screenWidth, screenHeight);
 
             // draw the views
             // create the BufferedImage into which the layout will be rendered.
@@ -467,7 +475,6 @@ public final class Bridge implements ILayoutBridge {
             // to set the logger, get the native delegate
             Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(canvas);
             canvasDelegate.setLogger(logger);
-
 
             root.draw(canvas);
             canvasDelegate.dispose();

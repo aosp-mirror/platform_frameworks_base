@@ -217,6 +217,25 @@ public class MediaVideoItem extends MediaItem {
      * {@inheritDoc}
      */
     @Override
+    void invalidateTransitions(long startTimeMs, long durationMs) {
+        // Check if the effect overlaps with the beginning and end transitions
+        if (mBeginTransition != null) {
+            if (startTimeMs < mBeginTransition.getDuration()) {
+                mBeginTransition.invalidate();
+            }
+        }
+
+        if (mEndTransition != null) {
+            if (startTimeMs + durationMs > mEndBoundaryTimeMs - mEndTransition.getDuration()) {
+                mEndTransition.invalidate();
+            }
+        }
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
     public int getAspectRatio() {
         return mAspectRatio;
     }

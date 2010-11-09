@@ -48,6 +48,12 @@ int OpenGLDebugRenderer::saveLayer(float left, float top, float right, float bot
     return OpenGLRenderer::saveLayer(left, top, right, bottom, p, flags);
 }
 
+void OpenGLDebugRenderer::drawDisplayList(DisplayList* displayList) {
+    mPrimitivesCount++;
+    StopWatch w("drawDisplayList");
+    OpenGLRenderer::drawDisplayList(displayList);
+}
+
 void OpenGLDebugRenderer::drawBitmap(SkBitmap* bitmap, float left, float top,
         SkPaint* paint) {
     mPrimitivesCount++;
