@@ -15,52 +15,9 @@
 -->
 
 <!-- Layout used by DialogPreference in a PreferenceActivity. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-    android:layout_width="match_parent"
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    android:gravity="center_vertical"
-    android:paddingRight="?android:attr/scrollbarSize">
-    
-    <!-- Preference should place its actual preference widget here. -->
-    <LinearLayout android:id="@+android:id/widget_frame"
-        android:layout_width="@dimen/preference_widget_width"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="horizontal" >
-        <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/btn_circle"
-            android:src="@drawable/ic_btn_round_more" />
-    </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="6dip"
-        android:layout_marginTop="6dip"
-        android:layout_marginBottom="6dip"
-        android:layout_weight="1">
-    
-        <TextView android:id="@+android:id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:ellipsize="marquee"
-            android:fadingEdge="horizontal" />
-            
-        <TextView android:id="@+android:id/summary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@android:id/title"
-            android:layout_alignLeft="@android:id/title"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorSecondary"
-            android:maxLines="4" />
-
-    </RelativeLayout>
-</LinearLayout>
-
+    android:layout_gravity="center"
+    android:background="@drawable/btn_circle"
+    android:src="@drawable/ic_btn_round_more" />
