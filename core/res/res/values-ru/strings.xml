@@ -864,7 +864,7 @@
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"отмечено"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"не проверено"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Одна или несколько программ требуют разрешения для доступа к вашему аккаунту сейчас и в дальнейшем."</string>
-    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Разрешить этот запрос?"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Разрешить доступ?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Запрос доступа"</string>
     <string name="allow" msgid="7225948811296386551">"Разрешить"</string>
     <string name="deny" msgid="2081879885755434506">"Отклонить"</string>
