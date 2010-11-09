@@ -84,34 +84,56 @@ padding: .25em 1em;
 
         <dd>
           <ul>
+          
+            <li>A new toolchain (based on GCC 4.4.3), which generates better code, and can also now
+be used as a standalone cross-compiler, for people who want to build their stuff with
+<code>./configure &amp;&amp; make</code>. See
+docs/STANDALONE-TOOLCHAIN.html for the details. The binaries for GCC 4.4.0 are still provided,
+but the 4.2.1 binaries were removed.</li>
+
+            <li>Support for prebuilt static and shared libraries (docs/PREBUILTS.html), module
+exports and imports to make sharing and reuse of third-party modules much easier
+(docs/IMPORT-MODULE.html explains why).</li>
+
+            <li>A C++ STL implementation (based on STLport) is now provided as a helper module. It
+can be used either as a static or shared library (details and usage exemple under
+sources/android/stlport/README). <strong>Note:</strong> For now, C++ Exceptions and RTTI are still
+not supported.</li>
+
+            <li>Improvements to the <code>cpufeatures</code> helper library to deal with buggy
+kernel that incorrectly report they run on an ARMv7 CPU (while the device really is an ARMv6). We
+recommend developers that use it to simply rebuild their applications to benefit from it, then
+upload to Market.</li>
+
             <li>Adds support for native activities, which allows you to write completely native
             applications.</li>
 
             <li>Adds an EGL library that lets you create and manage OpenGL ES textures and
             services.</li>
 
-            <li>Provides an interface that lets you write a native text-to-speech engine.</li>
-
             <li>Adds native support for the following:
 
               <ul>
-                <li>the input subsystem (such as the keyboard and touch screen)</li>
+                <li>Input subsystem (such as the keyboard and touch screen)</li>
 
-                <li>the window and surface subsystem.</li>
+                <li>Window and surface subsystem</li>
 
-                <li>audio APIs based on the OpenSL ES standard that support playback and recording
-                as well as control over platform audio effects.</li>
+                <li>Audio APIs based on the OpenSL ES standard that support playback and recording
+                as well as control over platform audio effects</li>
 
-                <li>event loop APIs to wait for things such as input and sensor events.</li>
+                <li>Event loop APIs to wait for things such as input and sensor events</li>
 
-                <li>accessing assets packaged in an <code>.apk</code> file.</li>
+                <li>Access to assets packaged in the <code>.apk</code></li>
 
-                <li>accessing sensor data (accelerometer, compass, gyroscope, etc).</li>
-
-                <li>provides sample applications, <code>native-plasma</code> and
-                <code>native-activity</code>, to demonstrate how to write a native activity.</li>
+                <li>Access to sensor data (accelerometer, compass, gyroscope, etc.)</li>
               </ul>
             </li>
+
+            <li>New sample applications, <code>native-plasma</code> and
+              <code>native-activity</code>, to demonstrate how to write a native activity.</li>
+            
+            <li>Plus many bugfixes and other small improvements; see docs/CHANGES.html for a more
+detailed list of changes.</li>
           </ul>
         </dd>
       </dl>
