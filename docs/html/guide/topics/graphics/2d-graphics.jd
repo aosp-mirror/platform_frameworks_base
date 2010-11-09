@@ -257,9 +257,9 @@ and saved into the <code>res/drawable/</code> directory of your project.
 <p>
     The border is used to define the stretchable and static areas of 
     the image. You indicate a stretchable section by drawing one (or more) 1-pixel-wide 
-    black line(s) in the left and top part of the border. (You can have as 
-    many stretchable sections as you want.) The relative size of the stretchable 
-    sections stays the same, so the largest sections always remain the largest.
+    black line(s) in the left and top part of the border (the other border pixels should
+    be fully transparent or white). You can have as many stretchable sections as you want:
+    their relative size stays the same, so the largest sections always remain the largest.
 </p>
 <p>
     You can also define an optional drawable section of the image (effectively, 
