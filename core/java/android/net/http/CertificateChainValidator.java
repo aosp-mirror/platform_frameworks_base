@@ -102,14 +102,15 @@ class CertificateChainValidator {
             }
         }
 
-        return verifyServerDomainAndCertificates((X509Certificate[]) peerCertificates, domain);
+        return verifyServerDomainAndCertificates((X509Certificate[]) peerCertificates, domain, "RSA");
     }
 
     /**
      * Similar to doHandshakeAndValidateServerCertificates but exposed to JNI for use
      * by Chromium HTTPS stack to validate the cert chain.
-     * @param certChain The bytes for certificates in ASN.1 DER encoded certficates format.
+     * @param certChain The bytes for certificates in ASN.1 DER encoded certificates format.
      * @param domain The full website hostname and domain
+     * @param authType The authentication type for the cert chain
      * @return An SSL error object if there is an error and null otherwise
      */
     public static SslError verifyServerCertificates(
@@ -126,18 +127,19 @@ class CertificateChainValidator {
             serverCertificates[i] = new X509CertImpl(certChain[i]);
         }
 
-        return verifyServerDomainAndCertificates(serverCertificates, domain);
+        return verifyServerDomainAndCertificates(serverCertificates, domain, authType);
     }
 
     /**
      * Common code of doHandshakeAndValidateServerCertificates and verifyServerCertificates.
-     * Calls DomainNamevalidator to valide the domain, and TrustManager to valide the certs.
+     * Calls DomainNamevalidator to verify the domain, and TrustManager to verify the certs.
      * @param chain the cert chain in X509 cert format.
      * @param domain The full website hostname and domain
+     * @param authType The authentication type for the cert chain
      * @return An SSL error object if there is an error and null otherwise
      */
     private static SslError verifyServerDomainAndCertificates(
-            X509Certificate[] chain, String domain)
+            X509Certificate[] chain, String domain, String authType)
             throws IOException {
         // check if the first certificate in the chain is for this site
         X509Certificate currCertificate = chain[0];
@@ -153,7 +155,7 @@ class CertificateChainValidator {
         }
 
         try {
-            SSLParametersImpl.getDefaultTrustManager().checkServerTrusted(chain, "RSA");
+            SSLParametersImpl.getDefaultTrustManager().checkServerTrusted(chain, authType);
             return null;  // No errors.
         } catch (CertificateException e) {
             if (HttpLog.LOGV) {
