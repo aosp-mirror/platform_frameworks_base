@@ -4,6 +4,7 @@
 #define LOG_TAG "EmojiFactory_jni"
 #include <utils/Log.h>
 #include <utils/String8.h>
+#include <utils/String16.h>
 
 #include "EmojiFactory.h"
 #include <nativehelper/JNIHelp.h>

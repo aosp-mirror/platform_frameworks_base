@@ -18,228 +18,17 @@
 
 #include <utils/Debug.h>
 #include <utils/Log.h>
+#include <utils/Unicode.h>
 #include <utils/String8.h>
 #include <utils/TextOutput.h>
 #include <utils/threads.h>
 
 #include <private/utils/Static.h>
 
-#ifdef HAVE_WINSOCK
-# undef  nhtol
-# undef  htonl
-# undef  nhtos
-# undef  htons
-
-# ifdef HAVE_LITTLE_ENDIAN
-#  define ntohl(x)    ( ((x) << 24) | (((x) >> 24) & 255) | (((x) << 8) & 0xff0000) | (((x) >> 8) & 0xff00) )
-#  define htonl(x)    ntohl(x)
-#  define ntohs(x)    ( (((x) << 8) & 0xff00) | (((x) >> 8) & 255) )
-#  define htons(x)    ntohs(x)
-# else
-#  define ntohl(x)    (x)
-#  define htonl(x)    (x)
-#  define ntohs(x)    (x)
-#  define htons(x)    (x)
-# endif
-#else
-# include <netinet/in.h>
-#endif
-
 #include <memory.h>
 #include <stdio.h>
 #include <ctype.h>
 
-// ---------------------------------------------------------------------------
-
-int strcmp16(const char16_t *s1, const char16_t *s2)
-{
-  char16_t ch;
-  int d = 0;
-
-  while ( 1 ) {
-    d = (int)(ch = *s1++) - (int)*s2++;
-    if ( d || !ch )
-      break;
-  }
-
-  return d;
-}
-
-int strncmp16(const char16_t *s1, const char16_t *s2, size_t n)
-{
-  char16_t ch;
-  int d = 0;
-
-  while ( n-- ) {
-    d = (int)(ch = *s1++) - (int)*s2++;
-    if ( d || !ch )
-      break;
-  }
-
-  return d;
-}
-
-char16_t *strcpy16(char16_t *dst, const char16_t *src)
-{
-  char16_t *q = dst;
-  const char16_t *p = src;
-  char16_t ch;
-
-  do {
-    *q++ = ch = *p++;
-  } while ( ch );
-
-  return dst;
-}
-
-size_t strlen16(const char16_t *s)
-{
-  const char16_t *ss = s;
-  while ( *ss )
-    ss++;
-  return ss-s;
-}
-
-
-char16_t *strncpy16(char16_t *dst, const char16_t *src, size_t n)
-{
-  char16_t *q = dst;
-  const char16_t *p = src;
-  char ch;
-
-  while (n) {
-    n--;
-    *q++ = ch = *p++;
-    if ( !ch )
-      break;
-  }
-
-  *q = 0;
-
-  return dst;
-}
-
-size_t strnlen16(const char16_t *s, size_t maxlen)
-{
-  const char16_t *ss = s;
-
-  /* Important: the maxlen test must precede the reference through ss;
-     since the byte beyond the maximum may segfault */
-  while ((maxlen > 0) && *ss) {
-    ss++;
-    maxlen--;
-  }
-  return ss-s;
-}
-
-int strzcmp16(const char16_t *s1, size_t n1, const char16_t *s2, size_t n2)
-{
-    const char16_t* e1 = s1+n1;
-    const char16_t* e2 = s2+n2;
-
-    while (s1 < e1 && s2 < e2) {
-        const int d = (int)*s1++ - (int)*s2++;
-        if (d) {
-            return d;
-        }
-    }
-
-    return n1 < n2
-        ? (0 - (int)*s2)
-        : (n1 > n2
-           ? ((int)*s1 - 0)
-           : 0);
-}
-
-int strzcmp16_h_n(const char16_t *s1H, size_t n1, const char16_t *s2N, size_t n2)
-{
-    const char16_t* e1 = s1H+n1;
-    const char16_t* e2 = s2N+n2;
-
-    while (s1H < e1 && s2N < e2) {
-        const char16_t c2 = ntohs(*s2N);
-        const int d = (int)*s1H++ - (int)c2;
-        s2N++;
-        if (d) {
-            return d;
-        }
-    }
-
-    return n1 < n2
-        ? (0 - (int)ntohs(*s2N))
-        : (n1 > n2
-           ? ((int)*s1H - 0)
-           : 0);
-}
-
-static inline size_t
-utf8_char_len(uint8_t ch)
-{
-    return ((0xe5000000 >> ((ch >> 3) & 0x1e)) & 3) + 1;
-}
-
-#define UTF8_SHIFT_AND_MASK(unicode, byte)  (unicode)<<=6; (unicode) |= (0x3f & (byte));
-
-static inline uint32_t
-utf8_to_utf32(const uint8_t *src, size_t length)
-{
-    uint32_t unicode;
-
-    switch (length)
-    {
-        case 1:
-            return src[0];
-        case 2:
-            unicode = src[0] & 0x1f;
-            UTF8_SHIFT_AND_MASK(unicode, src[1])
-            return unicode;
-        case 3:
-            unicode = src[0] & 0x0f;
-            UTF8_SHIFT_AND_MASK(unicode, src[1])
-            UTF8_SHIFT_AND_MASK(unicode, src[2])
-            return unicode;
-        case 4:
-            unicode = src[0] & 0x07;
-            UTF8_SHIFT_AND_MASK(unicode, src[1])
-            UTF8_SHIFT_AND_MASK(unicode, src[2])
-            UTF8_SHIFT_AND_MASK(unicode, src[3])
-            return unicode;
-        default:
-            return 0xffff;
-    }
-    
-    //printf("Char at %p: len=%d, utf-16=%p\n", src, length, (void*)result);
-}
-
-void
-utf8_to_utf16(const uint8_t *src, size_t srcLen,
-        char16_t* dst, const size_t dstLen)
-{
-    const uint8_t* const end = src + srcLen;
-    const char16_t* const dstEnd = dst + dstLen;
-    while (src < end && dst < dstEnd) {
-        size_t len = utf8_char_len(*src);
-        uint32_t codepoint = utf8_to_utf32((const uint8_t*)src, len);
-
-        // Convert the UTF32 codepoint to one or more UTF16 codepoints
-        if (codepoint <= 0xFFFF) {
-            // Single UTF16 character
-            *dst++ = (char16_t) codepoint;
-        } else {
-            // Multiple UTF16 characters with surrogates
-            codepoint = codepoint - 0x10000;
-            *dst++ = (char16_t) ((codepoint >> 10) + 0xD800);
-            *dst++ = (char16_t) ((codepoint & 0x3FF) + 0xDC00);
-        }
-
-        src += len;
-    }
-    if (dst < dstEnd) {
-        *dst = 0;
-    }
-}
-
-// ---------------------------------------------------------------------------
 
 namespace android {
 
@@ -270,37 +59,33 @@ void terminate_string16()
 
 // ---------------------------------------------------------------------------
 
-static char16_t* allocFromUTF8(const char* in, size_t len)
+static char16_t* allocFromUTF8(const char* u8str, size_t u8len)
 {
-    if (len == 0) return getEmptyString();
-    
-    size_t chars = 0;
-    const char* end = in+len;
-    const char* p = in;
-    
-    while (p < end) {
-        chars++;
-        int utf8len = utf8_char_len(*p);
-        uint32_t codepoint = utf8_to_utf32((const uint8_t*)p, utf8len);
-        if (codepoint > 0xFFFF) chars++; // this will be a surrogate pair in utf16
-        p += utf8len;
+    if (u8len == 0) return getEmptyString();
+
+    const uint8_t* u8cur = (const uint8_t*) u8str;
+
+    const ssize_t u16len = utf8_to_utf16_length(u8cur, u8len);
+    if (u16len < 0) {
+        return getEmptyString();
     }
-    
-    size_t bufSize = (chars+1)*sizeof(char16_t);
-    SharedBuffer* buf = SharedBuffer::alloc(bufSize);
+
+    const uint8_t* const u8end = u8cur + u8len;
+
+    SharedBuffer* buf = SharedBuffer::alloc(sizeof(char16_t)*(u16len+1));
     if (buf) {
-        p = in;
-        char16_t* str = (char16_t*)buf->data();
-        
-        utf8_to_utf16((const uint8_t*)p, len, str, bufSize);
+        u8cur = (const uint8_t*) u8str;
+        char16_t* u16str = (char16_t*)buf->data();
+
+        utf8_to_utf16(u8cur, u8len, u16str);
 
         //printf("Created UTF-16 string from UTF-8 \"%s\":", in);
         //printHexData(1, str, buf->size(), 16, 1);
         //printf("\n");
         
-        return str;
+        return u16str;
     }
-    
+
     return getEmptyString();
 }
 
