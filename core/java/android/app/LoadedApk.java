@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
 
@@ -285,10 +286,16 @@ final class LoadedApk {
                 if (ActivityThread.localLOGV)
                     Slog.v(ActivityThread.TAG, "Class path: " + zip + ", JNI path: " + mLibDir);
 
+                // Temporarily disable logging of disk reads on the Looper thread
+                // as this is early and necessary.
+                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+
                 mClassLoader =
                     ApplicationLoaders.getDefault().getClassLoader(
                         zip, mLibDir, mBaseClassLoader);
                 initializeJavaContextClassLoader();
+
+                StrictMode.setThreadPolicy(oldPolicy);
             } else {
                 if (mBaseClassLoader == null) {
                     mClassLoader = ClassLoader.getSystemClassLoader();
