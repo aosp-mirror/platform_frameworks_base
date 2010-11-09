@@ -27,7 +27,6 @@ import android.media.Metadata;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
-import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -35,7 +34,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.MediaController.*;
+import android.widget.MediaController.MediaPlayerControl;
 
 import java.io.IOException;
 import java.util.Map;
@@ -462,6 +461,10 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                 }
                 start();
                 if (mMediaController != null) {
+                    if (mMediaController.isShowing()) {
+                        // ensure the controller will get repositioned later
+                        mMediaController.hide();
+                    }
                     mMediaController.show();
                 }
             }
