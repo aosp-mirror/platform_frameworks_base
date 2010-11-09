@@ -681,6 +681,73 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device admin to set the password expiration timeout. Calling this method
+     * will restart the countdown for password expiration for the given admin, as will changing
+     * the device password (for all admins).
+     *
+     * <p>The provided timeout is the time delta in ms and will be added to the current time.
+     * For example, to have the password expire 5 days from now, timeout would be
+     * 5 * 86400 * 1000 = 432000000 ms for timeout.
+     *
+     * <p>To disable password expiration, a value of 0 may be used for timeout.
+     *
+     * <p>Timeout must be at least 1 day or IllegalArgumentException will be thrown.
+     *
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to be able to call this
+     * method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param timeout The limit (in ms) that a password can remain in effect. A value of 0
+     *        means there is no restriction (unlimited).
+     */
+    public void setPasswordExpirationTimeout(ComponentName admin, long timeout) {
+        if (mService != null) {
+            try {
+                mService.setPasswordExpirationTimeout(admin, timeout);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Get the current password expiration timeout for the given admin or the aggregate
+     * of all admins if admin is null.
+     *
+     * @param admin The name of the admin component to check, or null to aggregate all admins.
+     * @return The timeout for the given admin or the minimum of all timeouts
+     */
+    public long getPasswordExpirationTimeout(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordExpirationTimeout(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get the current password expiration time for the given admin or an aggregate of
+     * all admins if admin is null.
+     *
+     * @param admin The name of the admin component to check, or null to aggregate all admins.
+     * @return The password expiration time, in ms.
+     */
+    public long getPasswordExpiration(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordExpiration(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Retrieve the current password history length for all admins
      * or a particular one.
      * @param admin The name of the admin component to check, or null to aggregate

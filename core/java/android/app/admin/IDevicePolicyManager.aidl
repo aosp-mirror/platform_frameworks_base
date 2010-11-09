@@ -52,6 +52,11 @@ interface IDevicePolicyManager {
     void setPasswordHistoryLength(in ComponentName who, int length);
     int getPasswordHistoryLength(in ComponentName who);
 
+    void setPasswordExpirationTimeout(in ComponentName who, long expiration);
+    long getPasswordExpirationTimeout(in ComponentName who);
+
+    long getPasswordExpiration(in ComponentName who);
+
     boolean isActivePasswordSufficient();
     int getCurrentFailedPasswordAttempts();
     

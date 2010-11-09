@@ -112,6 +112,15 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     public static final int USES_POLICY_SETS_GLOBAL_PROXY = 5;
 
+    /**
+     * A type of policy that this device admin can use: force the user to
+     * change their password after an administrator-defined time limit.
+     *
+     * <p>To control this policy, the device admin must have an "expire-password"
+     * tag in the "uses-policies" section of its meta-data.
+     */
+    public static final int USES_POLICY_EXPIRE_PASSWORD = 6;
+
     /** @hide */
     public static class PolicyInfo {
         public final int ident;
@@ -150,7 +159,10 @@ public final class DeviceAdminInfo implements Parcelable {
         sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_SETS_GLOBAL_PROXY, "set-global-proxy",
                 com.android.internal.R.string.policylab_setGlobalProxy,
                 com.android.internal.R.string.policydesc_setGlobalProxy));
-        
+        sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_EXPIRE_PASSWORD, "expire-password",
+                com.android.internal.R.string.policylab_expirePassword,
+                com.android.internal.R.string.policydesc_expirePassword));
+
         for (int i=0; i<sPoliciesDisplayOrder.size(); i++) {
             PolicyInfo pi = sPoliciesDisplayOrder.get(i);
             sRevKnownPolicies.put(pi.ident, pi);

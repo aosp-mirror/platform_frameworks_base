@@ -145,7 +145,19 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PASSWORD_SUCCEEDED
             = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
-    
+
+    /**
+     * Action periodically sent to a device administrator when the device password
+     * is expiring. 
+     *
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to receive
+     * this broadcast.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PASSWORD_EXPIRING
+            = "android.app.action.ACTION_PASSWORD_EXPIRING";
+
     /**
      * Name under which an DevicePolicy component publishes information
      * about itself.  This meta-data must reference an XML resource containing
@@ -251,7 +263,28 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     public void onPasswordSucceeded(Context context, Intent intent) {
     }
-    
+
+    /**
+     * Called periodically when the password is about to expire or has expired.  It will typically
+     * be called on device boot, once per day before the password expires and at the time when it
+     * expires.
+     *
+     * <p>If the password is not updated by the user, this method will continue to be called
+     * once per day until the password is changed or the device admin disables password expiration.
+     *
+     * <p>The admin will typically post a notification requesting the user to change their password
+     * in response to this call. The actual password expiration time can be obtained by calling
+     * {@link DevicePolicyManager#getPasswordExpiration(ComponentName) }
+     *
+     * <p>The admin should be sure to take down any notifications it posted in response to this call
+     * when it receives {@link DeviceAdminReceiver#onPasswordChanged(Context, Intent) }.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     */
+    public void onPasswordExpiring(Context context, Intent intent) {
+    }
+
     /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
@@ -276,6 +309,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             }
         } else if (ACTION_DEVICE_ADMIN_DISABLED.equals(action)) {
             onDisabled(context, intent);
+        } else if (ACTION_PASSWORD_EXPIRING.equals(action)) {
+            onPasswordExpiring(context, intent);
         }
     }
 }
