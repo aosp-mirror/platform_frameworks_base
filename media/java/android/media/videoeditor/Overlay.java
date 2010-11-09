@@ -98,7 +98,7 @@ public abstract class Overlay {
 
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(this);
+        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class Overlay {
 
         mStartTimeMs = startTimeMs;
 
-        mMediaItem.invalidateTransitions(this);
+        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -139,7 +139,7 @@ public abstract class Overlay {
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(this);
+        mMediaItem.invalidateTransitions(mStartTimeMs, mDurationMs);
     }
 
     /**
