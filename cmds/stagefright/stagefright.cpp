@@ -59,6 +59,7 @@ static long gReproduceBug;  // if not -1.
 static bool gPreferSoftwareCodec;
 static bool gPlaybackAudio;
 static bool gWriteMP4;
+static bool gDisplayHistogram;
 static String8 gWriteMP4Filename;
 
 static int64_t getNowUs() {
@@ -66,6 +67,44 @@ static int64_t getNowUs() {
     gettimeofday(&tv, NULL);
 
     return (int64_t)tv.tv_usec + tv.tv_sec * 1000000ll;
+}
+
+static int CompareIncreasing(const int64_t *a, const int64_t *b) {
+    return (*a) < (*b) ? -1 : (*a) > (*b) ? 1 : 0;
+}
+
+static void displayDecodeHistogram(Vector<int64_t> *decodeTimesUs) {
+    printf("decode times:\n");
+
+    decodeTimesUs->sort(CompareIncreasing);
+
+    size_t n = decodeTimesUs->size();
+    int64_t minUs = decodeTimesUs->itemAt(0);
+    int64_t maxUs = decodeTimesUs->itemAt(n - 1);
+
+    printf("min decode time %lld us (%.2f secs)\n", minUs, minUs / 1E6);
+    printf("max decode time %lld us (%.2f secs)\n", maxUs, maxUs / 1E6);
+
+    size_t counts[100];
+    for (size_t i = 0; i < 100; ++i) {
+        counts[i] = 0;
+    }
+
+    for (size_t i = 0; i < n; ++i) {
+        int64_t x = decodeTimesUs->itemAt(i);
+
+        size_t slot = ((x - minUs) * 100) / (maxUs - minUs);
+        if (slot == 100) { slot = 99; }
+
+        ++counts[slot];
+    }
+
+    for (size_t i = 0; i < 100; ++i) {
+        int64_t slotUs = minUs + (i * (maxUs - minUs) / 100);
+
+        double fps = 1E6 / slotUs;
+        printf("[%.2f fps]: %d\n", fps, counts[i]);
+    }
 }
 
 static void playSource(OMXClient *client, sp<MediaSource> &source) {
@@ -201,6 +240,8 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
     int64_t sumDecodeUs = 0;
     int64_t totalBytes = 0;
 
+    Vector<int64_t> decodeTimesUs;
+
     while (numIterationsLeft-- > 0) {
         long numFrames = 0;
 
@@ -224,9 +265,17 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
                 break;
             }
 
-            if (buffer->range_length() > 0 && (n++ % 16) == 0) {
-                printf(".");
-                fflush(stdout);
+            if (buffer->range_length() > 0) {
+                if (gDisplayHistogram && n > 0) {
+                    // Ignore the first time since it includes some setup
+                    // cost.
+                    decodeTimesUs.push(delayDecodeUs);
+                }
+
+                if ((n++ % 16) == 0) {
+                    printf(".");
+                    fflush(stdout);
+                }
             }
 
             sumDecodeUs += delayDecodeUs;
@@ -266,6 +315,10 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
                (double)sumDecodeUs / n);
 
         printf("decoded a total of %d frame(s).\n", n);
+
+        if (gDisplayHistogram) {
+            displayDecodeHistogram(&decodeTimesUs);
+        }
     } else if (!strncasecmp("audio/", mime, 6)) {
         // Frame count makes less sense for audio, as the output buffer
         // sizes may be different across decoders.
@@ -466,6 +519,8 @@ static void usage(const char *me) {
     fprintf(stderr, "       -o playback audio\n");
     fprintf(stderr, "       -w(rite) filename (write to .mp4 file)\n");
     fprintf(stderr, "       -k seek test\n");
+    fprintf(stderr, "       -x display a histogram of decoding times/fps "
+                    "(video only)\n");
 }
 
 int main(int argc, char **argv) {
@@ -482,12 +537,13 @@ int main(int argc, char **argv) {
     gPreferSoftwareCodec = false;
     gPlaybackAudio = false;
     gWriteMP4 = false;
+    gDisplayHistogram = false;
 
     sp<ALooper> looper;
     sp<ARTSPController> rtspController;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:ptsow:k")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:ptsow:kx")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -557,6 +613,12 @@ int main(int argc, char **argv) {
             case 'k':
             {
                 seekTest = true;
+                break;
+            }
+
+            case 'x':
+            {
+                gDisplayHistogram = true;
                 break;
             }
 
