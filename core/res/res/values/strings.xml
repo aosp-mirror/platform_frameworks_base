@@ -2305,11 +2305,9 @@
     <!-- See USB_STORAGE.  USB_STORAGE_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to mount.  This is the title. -->
     <string name="usb_storage_title">USB connected</string>
     <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_message" product="tablet">You have connected your tablet to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s USB storage.</string>
+    <string name="usb_storage_message" product="nosdcard">You have connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s USB storage.</string>
     <!-- See USB_STORAGE.    This is the message. [CHAR LIMIT=NONE] -->
-    <string name="usb_storage_message" product="nosdcard">You have connected your phone to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s USB storage.</string>
-    <!-- See USB_STORAGE.    This is the message. -->
-    <string name="usb_storage_message" product="default">You have connected your phone to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s SD card.</string>
+    <string name="usb_storage_message" product="default">You have connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android\u2018s SD card.</string>
     <!-- See USB_STORAGE.    This is the button text to mount the phone on the computer. -->
     <string name="usb_storage_button_mount">Turn on USB storage</string>
     <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. [CHAR LIMIT=NONE] -->
