@@ -33,8 +33,7 @@ public interface PhoneNotifier {
 
     public void notifyCallForwardingChanged(Phone sender);
 
-    public void notifyDataConnection(Phone sender, String reason, String apnType);
-
+    /** TODO - reason should never be null */
     public void notifyDataConnection(Phone sender, String reason, String apnType,
             Phone.DataState state);
 

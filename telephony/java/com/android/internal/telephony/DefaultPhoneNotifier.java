@@ -94,10 +94,6 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
         }
     }
 
-    public void notifyDataConnection(Phone sender, String reason, String apnType) {
-        doNotifyDataConnection(sender, reason, apnType, sender.getDataConnectionState(apnType));
-    }
-
     public void notifyDataConnection(Phone sender, String reason, String apnType,
             Phone.DataState state) {
         doNotifyDataConnection(sender, reason, apnType, state);
