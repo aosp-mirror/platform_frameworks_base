@@ -1216,6 +1216,7 @@ public final class ViewRoot extends Handler implements ViewParent, View.AttachIn
             // Need to make sure we re-evaluate the window attributes next
             // time around, to ensure the window has the correct format.
             mWindowAttributesChanged = true;
+            requestLayout();
         }
     }
 
