@@ -17,78 +17,74 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Name of the status bar as seen in the applications info settings page. -->
+    <!-- Name of the status bar as seen in the applications info settings page. [CHAR LIMIT=12] -->
     <string name="app_label">Status Bar</string>
 
     <!-- The text for the button in the notification window-shade that clears
-         all of the currently visible notifications. -->
+         all of the currently visible notifications. [CHAR LIMIT=10]-->
     <string name="status_bar_clear_all_button">Clear</string>
 
     <!-- The text for the button in the notification window-shade that turns
          on do not disturb mode, where notifications no longer show their ticker,
          no sound plays, and no icons are visible.  The windowshade continues to show
-         the notifications. -->
+         the notifications. [CHAR LIMIT=25]-->
     <string name="status_bar_do_not_disturb_button">Do not disturb</string>
 
     <!-- The text for the button in the notification window-shade that turns
          off do not disturb mode.  After clicking this, notifications will be
-         shown again. -->
+         shown again. [CHAR LIMIT=25] -->
     <string name="status_bar_please_disturb_button">Show notifications</string>
 
 
     <!-- The label in the bar at the top of the status bar when there are no notifications
-         showing. -->
+         showing.  [CHAR LIMIT=40]-->
     <string name="status_bar_no_notifications_title">No notifications</string>
 
     <!-- The label for the group of notifications for ongoing events in the opened version of
          the status bar.  An ongoing call is the prime example of this.  The MP3 music player
-         might be another example.  -->
+         might be another example.   [CHAR LIMIT=40] -->
     <string name="status_bar_ongoing_events_title">Ongoing</string>
 
     <!-- The label for the group of notifications for recent events in the opened version of
-         the status bar.  Recently received text messsages (SMS), emails, calendar alerts, etc. -->
+         the status bar.  Recently received text messsages (SMS), emails, calendar alerts, etc.
+         [CHAR LIMIT=40] -->
     <string name="status_bar_latest_events_title">Notifications</string>
 
-    <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert. -->
+    <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
     <string name="battery_low_title">Please connect charger</string>
 
-    <!-- When the battery is low, this is displayed to the user in a dialog. The subtitle of the low battery alert. -->
+    <!-- When the battery is low, this is displayed to the user in a dialog. The subtitle of the low battery alert. [CHAR LIMIT=NONE] -->
     <string name="battery_low_subtitle">The battery is getting low.</string>
 
     <!-- A message that appears when the battery level is getting low in a dialog.  This is
-        appened to the subtitle of the low battery alert. -->
+        appened to the subtitle of the low battery alert.  "number" is the percentage of battery
+        remaining [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format"><xliff:g id="number">%d%%</xliff:g> remaining</string>
 
     <!-- A message that appears when a USB charger is plugged in and the device does not
     support charging on it.  That is, a charger that fits into the USB port and goes into
     a wall socket, not into a computer. (This happens because some devices require more
-    current than the USB spec allows.  -->
+    current than the USB spec allows.  [CHAR LIMIT=NONE] -->
     <string name="invalid_charger">USB charging not supported.\nUse only the supplied charger.</string>
 
     <!-- When the battery is low, this is the label of the button to go to the
-         power usage activity to find out what drained the battery. -->
+         power usage activity to find out what drained the battery.  [CHAR LIMIT=30] -->
     <string name="battery_low_why">Battery use</string>
 
-    <!-- Name of the button that links to the Settings app. [MAXCHARS=NONE] -->
+    <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
     <string name="system_panel_settings_button">Settings</string>
 
 
-    <!-- Recent Tasks dialog: title
-     TODO: this should move to SystemUI.apk, but the code for the old 
-            recent dialog is still in the framework
-     -->
+    <!-- Recent Tasks dialog: title [CHAR LIMIT=30] -->
     <string name="recent_tasks_title">Recent</string>
-    <!-- Recent Tasks dialog: message when there are no recent applications
-     TODO: this should move to SystemUI.apk, but the code for the old 
-            recent dialog is still in the framework
-     -->
+    <!-- Recent Tasks dialog: message when there are no recent applications [CHAR LIMIT=NONE]-->
     <string name="recent_tasks_empty">No recent applications.</string>
 
     <!-- Rotation lock toast text: shown when rotation lock is turned off (and the screen will
-         auto-rotate based on the accelerometer). -->
+         auto-rotate based on the accelerometer).  [CHAR LIMIT=NONE]-->
     <string name="toast_rotation_free">Screen will rotate automatically.</string>
     
     <!-- Rotation lock toast text: shown when rotation lock is turned on and the orientation is
-         undefined.  -->
+         undefined.  [CHAR LIMIT=NONE] -->
     <string name="toast_rotation_locked">Screen rotation is now locked.</string>
 </resources>
