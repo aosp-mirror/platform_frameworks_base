@@ -30,7 +30,7 @@ public class ComposeShader extends Shader {
 
     /** Create a new compose shader, given shaders A, B, and a combining mode.
         When the mode is applied, it will be given the result from shader A as its
-        "dst", and the result of from shader B as its "src".
+        "dst", and the result from shader B as its "src".
         @param shaderA  The colors from this shader are seen as the "dst" by the mode
         @param shaderB  The colors from this shader are seen as the "src" by the mode
         @param mode     The mode that combines the colors from the two shaders. If mode
@@ -53,7 +53,7 @@ public class ComposeShader extends Shader {
 
     /** Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
         When the mode is applied, it will be given the result from shader A as its
-        "dst", and the result of from shader B as its "src".
+        "dst", and the result from shader B as its "src".
         @param shaderA  The colors from this shader are seen as the "dst" by the mode
         @param shaderB  The colors from this shader are seen as the "src" by the mode
         @param mode     The PorterDuff mode that combines the colors from the two shaders.

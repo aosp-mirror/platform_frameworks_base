@@ -513,21 +513,27 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Count the number and aggregate size of memory allocations between
-     * two points.
+     * Start counting the number and aggregate size of memory allocations.
      *
-     * The "start" function resets the counts and enables counting.  The
-     * "stop" function disables the counting so that the analysis code
-     * doesn't cause additional allocations.  The "get" function returns
-     * the specified value.
+     * <p>The {@link #startAllocCounting() start} function resets the counts and enables counting.
+     * The {@link #stopAllocCounting() stop} function disables the counting so that the analysis
+     * code doesn't cause additional allocations.  The various <code>get</code> functions return
+     * the specified value. And the various <code>reset</code> functions reset the specified
+     * count.</p>
      *
-     * Counts are kept for the system as a whole and for each thread.
+     * <p>Counts are kept for the system as a whole and for each thread.
      * The per-thread counts for threads other than the current thread
-     * are not cleared by the "reset" or "start" calls.
+     * are not cleared by the "reset" or "start" calls.</p>
      */
     public static void startAllocCounting() {
         VMDebug.startAllocCounting();
     }
+
+    /**
+     * Stop counting the number and aggregate size of memory allocations.
+     *
+     * @see #startAllocCounting()
+     */
     public static void stopAllocCounting() {
         VMDebug.stopAllocCounting();
     }
@@ -671,11 +677,11 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * for catching regressions in code that is expected to operate
      * without causing any allocations.
      *
-     * Pass in the maximum number of allowed allocations.  Use -1 to disable
-     * the limit.  Returns the previous limit.
+     * <p>Pass in the maximum number of allowed allocations.  Use -1 to disable
+     * the limit.  Returns the previous limit.</p>
      *
-     * The preferred way to use this is:
-     *
+     * <p>The preferred way to use this is:
+     * <pre>
      *  int prevLimit = -1;
      *  try {
      *      prevLimit = Debug.setAllocationLimit(0);
@@ -683,16 +689,16 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *  } finally {
      *      Debug.setAllocationLimit(prevLimit);
      *  }
-     *
+     * </pre>
      * This allows limits to be nested.  The try/finally ensures that the
-     * limit is reset if something fails.
+     * limit is reset if something fails.</p>
      *
-     * Exceeding the limit causes a dalvik.system.AllocationLimitError to
+     * <p>Exceeding the limit causes a dalvik.system.AllocationLimitError to
      * be thrown from a memory allocation call.  The limit is reset to -1
-     * when this happens.
+     * when this happens.</p>
      *
-     * The feature may be disabled in the VM configuration.  If so, this
-     * call has no effect, and always returns -1.
+     * <p>The feature may be disabled in the VM configuration.  If so, this
+     * call has no effect, and always returns -1.</p>
      */
     public static int setAllocationLimit(int limit) {
         return VMDebug.setAllocationLimit(limit);
@@ -846,6 +852,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * API for gathering and querying instruction counts.
      *
      * Example usage:
+     * <pre>
      *   Debug.InstructionCount icount = new Debug.InstructionCount();
      *   icount.resetAndStart();
      *    [... do lots of stuff ...]
@@ -855,6 +862,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *       System.out.println("Method invocations: "
      *           + icount.globalMethodInvocations());
      *   }
+     * </pre>
      */
     public static class InstructionCount {
         private static final int NUM_INSTR = 256;
