@@ -94,8 +94,8 @@ void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
     // This will be called already locked
     if (texture) {
         mSize -= texture->bitmapSize;
-        TEXTURE_LOGD("TextureCache::callback: removed size, mSize = %d, %d",
-                texture->bitmapSize, mSize);
+        TEXTURE_LOGD("TextureCache::callback: name, removed size, mSize = %d, %d, %d",
+                texture->id, texture->bitmapSize, mSize);
         glDeleteTextures(1, &texture->id);
         delete texture;
     }
@@ -133,8 +133,8 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
         if (size < mMaxSize) {
             mLock.lock();
             mSize += size;
-            TEXTURE_LOGD("TextureCache::get: create texture(0x%p): size, mSize = %d, %d",
-                     bitmap, size, mSize);
+            TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
+                     bitmap, texture->id, size, mSize);
             mCache.put(bitmap, texture);
             mLock.unlock();
         } else {
