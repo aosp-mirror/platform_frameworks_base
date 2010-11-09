@@ -988,8 +988,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (id.equals(mCurMethodId)) {
-            if (subtypeId != NOT_A_SUBTYPE_ID) {
-                InputMethodSubtype subtype = info.getSubtypes().get(subtypeId);
+            ArrayList<InputMethodSubtype> subtypes = info.getSubtypes();
+            if (subtypeId >= 0 && subtypeId < subtypes.size()) {
+                InputMethodSubtype subtype = subtypes.get(subtypeId);
                 if (subtype != mCurrentSubtype) {
                     synchronized (mMethodMap) {
                         if (mCurMethod != null) {
@@ -1962,6 +1963,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return mCurrentSubtype;
+    }
+
+    public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
+        synchronized (mMethodMap) {
+            if (subtype != null && mCurMethodId != null) {
+                InputMethodInfo imi = mMethodMap.get(mCurMethodId);
+                int subtypeId = getSubtypeIdFromHashCode(imi, subtype.hashCode());
+                if (subtypeId != NOT_A_SUBTYPE_ID) {
+                    setInputMethodLocked(mCurMethodId, subtypeId);
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**

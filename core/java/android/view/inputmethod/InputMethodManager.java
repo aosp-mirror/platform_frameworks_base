@@ -1432,6 +1432,17 @@ public final class InputMethodManager {
         }
     }
 
+    public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
+        synchronized (mH) {
+            try {
+                return mService.setCurrentInputMethodSubtype(subtype);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return false;
+            }
+        }
+    }
+
     public boolean switchToLastInputMethod(IBinder imeToken) {
         synchronized (mH) {
             try {
