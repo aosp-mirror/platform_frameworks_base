@@ -80,6 +80,9 @@
     <!-- Recent Tasks dialog: message when there are no recent applications [CHAR LIMIT=NONE]-->
     <string name="recent_tasks_empty">No recent applications.</string>
 
+    <!-- Recent apps label. Shown as title on recent apps panel -->
+    <string name="recent_tasks_app_label">Apps</string>
+
     <!-- Rotation lock toast text: shown when rotation lock is turned off (and the screen will
          auto-rotate based on the accelerometer).  [CHAR LIMIT=NONE]-->
     <string name="toast_rotation_free">Screen will rotate automatically.</string>
