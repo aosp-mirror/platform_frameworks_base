@@ -103,12 +103,54 @@ padding: .25em 1em;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
-ADT 0.9.9</a> <em>(September 2010)</em>
+ADT 8.0</a> <em>(November 2010)</em>
   <div class="toggleme">
 
+<dl>
 
+<dt>Dependencies:</dt>
+
+<p><p>ADT 8.0 is designed for use with SDK Tools r8. If you haven't
+already installed SDK Tools r8 into your SDK, use the Android SDK and AVD Manager to do
+so.</p></dd>
+
+<dt>General notes:</dt>
+<dd>
+<ul>
+  <li>New version number scheme that follows the SDK Tools revision number. The major version
+number for your ADT plugin should now always match the revision number of your SDK Tools. For
+example, ADT 8.x is for SDK Tools r8.</li>
+  <li>Support for true debug build. You no longer need to change the value of the
+   <code>debuggable</code> attribute in the Android Manifest.
+  <p>Incremental builds automatically insert <code>debuggable="true"</code>, but if you perform
+  "export signed/unsigned application package", ADT does <em>not</em> insert it.
+  If you manually set <code>debuggable="true"</code> in the manifest file, then release builds will
+  actually create a debug build (it does not remove it if you placed it there).</p></li>
+  <li>Automatic <a href="{@docRoot}guide/developing/tools/proguard.html">Proguard</a> support in
+release builds. For it to work, you need to have a <code>proguard.config</code>
+  property in the <code>default.properties</code> file that points to a proguard config file.</li>
+  <li>Completely rewritten Visual Layout Editor. (This is still a work in progress.) Now includes:
+    <ul>
+      <li>Full drag and drop from palette to layout for all Layout classes.</li>
+      <li>Move widgets inside a Layout view, from one Layout view to another and from one layout file to another.</li>
+      <li>Contextual menu with enum/flag type properties.</li>
+      <li>New zoom controls.</li>
+    </ul></li>
+  <li>New HierarchyViewer plug-in integrated in Eclipse.</li>
+  <li>Android launch configurations don't recompile the whole workspace on launch anymore.</li>
+  <li><code>android.jar</code> source and javadoc location can now be configured.</li>
 </ul>
 </dd>
+</dl>
+ </div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+ADT 0.9.9</a> <em>(September 2010)</em>
+  <div class="toggleme">
 
 <dl>
 
