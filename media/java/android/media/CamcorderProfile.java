@@ -16,6 +16,9 @@
 
 package android.media;
 
+import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
+
 /**
  * The CamcorderProfile class is used to retrieve the
  * predefined camcorder profile settings for camcorder applications.
@@ -119,12 +122,21 @@ public class CamcorderProfile
     public int audioChannels;
 
     /**
-     * Returns the camcorder profile for the default camera at the given
-     * quality level.
+     * Returns the camcorder profile for the first back-facing camera on the
+     * device at the given quality level. If the device has no back-facing
+     * camera, this returns null.
      * @param quality the target quality level for the camcorder profile
      */
     public static CamcorderProfile get(int quality) {
-        return get(0, quality);
+        int numberOfCameras = Camera.getNumberOfCameras();
+        CameraInfo cameraInfo = new CameraInfo();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
+                return get(i, quality);
+            }
+        }
+        return null;
     }
 
     /**
