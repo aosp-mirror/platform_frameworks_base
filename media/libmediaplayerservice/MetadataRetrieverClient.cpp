@@ -253,6 +253,8 @@ sp<IMemory> MetadataRetrieverClient::captureFrame()
     frameCopy->mDisplayWidth = frame->mDisplayWidth;
     frameCopy->mDisplayHeight = frame->mDisplayHeight;
     frameCopy->mSize = frame->mSize;
+    frameCopy->mRotationAngle = frame->mRotationAngle;
+    LOGV("rotation: %d", frameCopy->mRotationAngle);
     frameCopy->mData = (uint8_t *)frameCopy + sizeof(VideoFrame);
     memcpy(frameCopy->mData, frame->mData, frame->mSize);
     delete frame;  // Fix memory leakage
