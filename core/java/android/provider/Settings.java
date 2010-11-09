@@ -2396,14 +2396,6 @@ public final class Settings {
                 "selected_input_method_subtype";
 
         /**
-         * Setting to record the history of input method subtype, holding the pair of ID of IME
-         * and its last used subtype.
-         * @hide
-         */
-        public static final String INPUT_METHODS_SUBTYPE_HISTORY =
-                "input_methods_subtype_history";
-
-        /**
          * Whether the device has been provisioned (0 = false, 1 = true)
          */
         public static final String DEVICE_PROVISIONED = "device_provisioned";
