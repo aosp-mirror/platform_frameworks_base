@@ -127,7 +127,6 @@ public class ManagerService extends Service {
         }
     };
 
-    private FileFilter mFileFilter;
     private Summarizer mSummarizer;
 
     private String mCurrentlyRunningTest;
@@ -146,8 +145,7 @@ public class ManagerService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mFileFilter = new FileFilter();
-        mSummarizer = new Summarizer(mFileFilter, RESULTS_ROOT_DIR_PATH, getApplicationContext());
+        mSummarizer = new Summarizer(RESULTS_ROOT_DIR_PATH, getApplicationContext());
     }
 
     @Override

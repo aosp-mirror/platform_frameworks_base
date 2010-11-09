@@ -131,45 +131,72 @@ public class FsUtils {
         return bytes;
     }
 
+    static class UrlDataGetter extends Thread {
+        private URL mUrl;
+        private byte[] mBytes;
+        private boolean mGetComplete;
+        public UrlDataGetter(URL url) {
+            mUrl = url;
+        }
+        public byte[] get() {
+            start();
+            synchronized(this) {
+                while (!mGetComplete) {
+                    try{
+                        wait();
+                    } catch(InterruptedException e) {
+                    }
+                }
+            }
+            return mBytes;
+        }
+        public synchronized void run() {
+            mGetComplete = false;
+            HttpGet httpRequest = new HttpGet(mUrl.toString());
+            ResponseHandler<byte[]> handler = new ResponseHandler<byte[]>() {
+                @Override
+                public byte[] handleResponse(HttpResponse response) throws IOException {
+                    if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                        return null;
+                    }
+                    HttpEntity entity = response.getEntity();
+                    return (entity == null ? null : EntityUtils.toByteArray(entity));
+                }
+            };
+
+            mBytes = null;
+            try {
+                /**
+                 * TODO: Not exactly sure why some requests hang indefinitely, but adding this
+                 * timeout (in static getter for http client) in loop helps.
+                 */
+                boolean timedOut;
+                do {
+                    timedOut = false;
+                    try {
+                        mBytes = getHttpClient().execute(httpRequest, handler);
+                    } catch (SocketTimeoutException e) {
+                        timedOut = true;
+                        Log.w(LOG_TAG, "Expected SocketTimeoutException: " + mUrl, e);
+                    }
+                } while (timedOut);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "url=" + mUrl, e);
+            }
+
+            mGetComplete = true;
+            notify();
+        }
+    }
+
     public static byte[] readDataFromUrl(URL url) {
         if (url == null) {
             Log.w(LOG_TAG, "readDataFromUrl(): url is null!");
             return null;
         }
 
-        HttpGet httpRequest = new HttpGet(url.toString());
-        ResponseHandler<byte[]> handler = new ResponseHandler<byte[]>() {
-            @Override
-            public byte[] handleResponse(HttpResponse response) throws IOException {
-                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    return null;
-                }
-                HttpEntity entity = response.getEntity();
-                return (entity == null ? null : EntityUtils.toByteArray(entity));
-            }
-        };
-
-        byte[] bytes = null;
-        try {
-            /**
-             * TODO: Not exactly sure why some requests hang indefinitely, but adding this
-             * timeout (in static getter for http client) in loop helps.
-             */
-            boolean timedOut;
-            do {
-                timedOut = false;
-                try {
-                    bytes = getHttpClient().execute(httpRequest, handler);
-                } catch (SocketTimeoutException e) {
-                    timedOut = true;
-                    Log.w(LOG_TAG, "Expected SocketTimeoutException: " + url, e);
-                }
-            } while (timedOut);
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "url=" + url, e);
-        }
-
-        return bytes;
+        UrlDataGetter getter = new UrlDataGetter(url);
+        return getter.get();
     }
 
     public static List<String> getLayoutTestsDirContents(String dirRelativePath, boolean recurse,
