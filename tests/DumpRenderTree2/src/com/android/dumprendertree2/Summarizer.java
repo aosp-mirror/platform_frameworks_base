@@ -213,8 +213,8 @@ public class Summarizer {
 
     private SummarizerDBHelper mDbHelper;
 
-    public Summarizer(FileFilter fileFilter, String resultsRootDirPath, Context context) {
-        mFileFilter = fileFilter;
+    public Summarizer(String resultsRootDirPath, Context context) {
+        mFileFilter = new FileFilter();
         mResultsRootDirPath = resultsRootDirPath;
 
         /**

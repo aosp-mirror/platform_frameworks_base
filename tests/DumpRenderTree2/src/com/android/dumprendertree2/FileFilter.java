@@ -243,8 +243,7 @@ public class FileFilter {
      * Currently we run .html and .xhtml tests.
      *
      * @param testName
-     * @return
-     *      if the file is a test
+     * @return if the file is a test
      */
     public static boolean isTestFile(String testName) {
         return testName.endsWith(".html") || testName.endsWith(".xhtml");
@@ -254,9 +253,11 @@ public class FileFilter {
      * Return a URL of the test on the server.
      *
      * @param relativePath
+     * @param allowHttps Whether to allow the use of HTTPS, even if the file is in the SSL
+     *     directory.
      * @return a URL of the test on the server
      */
-    public static URL getUrl(String relativePath) {
+    public static URL getUrl(String relativePath, boolean allowHttps) {
         String urlBase = ForwarderManager.getHostSchemePort(false);
 
         /**
@@ -265,7 +266,7 @@ public class FileFilter {
          */
         if (relativePath.startsWith(HTTP_TESTS_PATH)) {
             relativePath = relativePath.substring(HTTP_TESTS_PATH.length());
-            if (relativePath.startsWith(SSL_PATH)) {
+            if (relativePath.startsWith(SSL_PATH) && allowHttps) {
                 urlBase = ForwarderManager.getHostSchemePort(true);
             }
         } else {
