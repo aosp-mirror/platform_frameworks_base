@@ -148,6 +148,15 @@ public class MediaRecorder
         /** Microphone audio source tuned for voice recognition if available, behaves like
          *  {@link #DEFAULT} otherwise. */
         public static final int VOICE_RECOGNITION = 6;
+
+        /**
+         * @hide
+         * Microphone audio source tuned for voice communications such as VoIP. It
+         * will for instance take advantage of echo cancellation or automatic gain control
+         * if available. It otherwise behaves like {@link #DEFAULT} if no voice processing
+         * is available.
+         */
+        public static final int VOICE_COMMUNICATION = 7;
     }
 
     /**
@@ -253,7 +262,7 @@ public class MediaRecorder
      * Gets the maximum value for audio sources.
      * @see android.media.MediaRecorder.AudioSource
      */
-    public static final int getAudioSourceMax() { return AudioSource.VOICE_RECOGNITION; }
+    public static final int getAudioSourceMax() { return AudioSource.VOICE_COMMUNICATION; }
 
     /**
      * Sets the video source to be used for recording. If this method is not
