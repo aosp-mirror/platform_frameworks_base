@@ -6847,7 +6847,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return superResult;
         }
 
-        if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
+        if ((mMovement != null || onCheckIsTextEditor()) && isEnabled() &&
                 mText instanceof Spannable && mLayout != null) {
             if (hasInsertionController()) {
                 getInsertionController().onTouchEvent(event);
