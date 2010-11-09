@@ -102,6 +102,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private final boolean mSecure;
 
     /** @deprecated Use {@link #getDefault(int)} instead. */
+    @Deprecated
     public SSLCertificateSocketFactory(int handshakeTimeoutMillis) {
         this(handshakeTimeoutMillis, null, true);
     }

@@ -3626,6 +3626,7 @@ public class ListView extends AbsListView {
      *         
      * @deprecated Use {@link #getCheckedItemIds()} instead.
      */
+    @Deprecated
     public long[] getCheckItemIds() {
         // Use new behavior that correctly handles stable ID mapping.
         if (mAdapter != null && mAdapter.hasStableIds()) {
