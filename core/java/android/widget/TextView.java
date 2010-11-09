@@ -3774,7 +3774,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // - ExtractEditText does not call onFocus when it is displayed. Fixing this issue would
         //   allow to test for hasSelection in onFocusChanged, which would trigger a
         //   startTextSelectionMode here. TODO
-        if (selectionController != null && hasSelection()) {
+        if (this instanceof ExtractEditText && selectionController != null && hasSelection()) {
             startTextSelectionMode();
         }
 
@@ -4840,6 +4840,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     public void beginBatchEdit() {
+        mInBatchEditControllers = true;
         final InputMethodState ims = mInputMethodState;
         if (ims != null) {
             int nesting = ++ims.mBatchEditNesting;
@@ -4862,6 +4863,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     
     public void endBatchEdit() {
+        mInBatchEditControllers = false;
         final InputMethodState ims = mInputMethodState;
         if (ims != null) {
             int nesting = --ims.mBatchEditNesting;
@@ -6768,10 +6770,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Restore previous selection
                 Selection.setSelection((Spannable)mText, prevStart, prevEnd);
 
-                if (mSelectionModifierCursorController != null &&
-                        !mSelectionModifierCursorController.isShowing()) {
+                if (hasSelectionController() && !getSelectionController().isShowing()) {
                     // If the anchors aren't showing, revive them.
-                    mSelectionModifierCursorController.show();
+                    getSelectionController().show();
                 } else {
                     // Tapping inside the selection displays the cut/copy/paste context menu
                     // as long as the anchors are already showing.
@@ -6782,12 +6783,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Tapping outside stops selection mode, if any
                 stopTextSelectionMode();
 
-                if (mInsertionPointCursorController != null && mText.length() > 0) {
-                    mInsertionPointCursorController.show();
+                if (hasInsertionController() && mText.length() > 0) {
+                    getInsertionController().show();
                 }
             }
-        } else if (hasSelection() && mSelectionModifierCursorController != null) {
-            mSelectionModifierCursorController.show();
+        } else if (hasSelection() && hasSelectionController()) {
+            getSelectionController().show();
         }
     }
 
@@ -6821,11 +6822,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
-            if (mInsertionPointCursorController != null) {
-                mInsertionPointCursorController.onTouchEvent(event);
+            if (hasInsertionController()) {
+                getInsertionController().onTouchEvent(event);
             }
-            if (mSelectionModifierCursorController != null) {
-                mSelectionModifierCursorController.onTouchEvent(event);
+            if (hasSelectionController()) {
+                getSelectionController().onTouchEvent(event);
             }
 
             // Reset this state; it will be re-set if super.onTouchEvent
@@ -6847,12 +6848,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
-                && mText instanceof Spannable && mLayout != null) {
-            if (mInsertionPointCursorController != null) {
-                mInsertionPointCursorController.onTouchEvent(event);
+                mText instanceof Spannable && mLayout != null) {
+            if (hasInsertionController()) {
+                getInsertionController().onTouchEvent(event);
             }
-            if (mSelectionModifierCursorController != null) {
-                mSelectionModifierCursorController.onTouchEvent(event);
+            if (hasSelectionController()) {
+                getSelectionController().onTouchEvent(event);
             }
 
             boolean handled = false;
@@ -6914,19 +6915,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // TODO Add an extra android:cursorController flag to disable the controller?
-        if (windowSupportsHandles && mCursorVisible && mLayout != null) {
-            if (mInsertionPointCursorController == null) {
-                mInsertionPointCursorController = new InsertionPointCursorController();
-            }
-        } else {
+        mInsertionControllerEnabled = windowSupportsHandles && mCursorVisible && mLayout != null;
+        mSelectionControllerEnabled = windowSupportsHandles && textCanBeSelected() &&
+                mLayout != null;
+
+        if (!mInsertionControllerEnabled) {
             mInsertionPointCursorController = null;
         }
 
-        if (windowSupportsHandles && textCanBeSelected() && mLayout != null) {
-            if (mSelectionModifierCursorController == null) {
-                mSelectionModifierCursorController = new SelectionModifierCursorController();
-            }
-        } else {
+        if (!mSelectionControllerEnabled) {
             // Stop selection mode if the controller becomes unavailable.
             stopTextSelectionMode();
             mSelectionModifierCursorController = null;
@@ -7557,10 +7554,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case ID_SELECT_ALL:
                 Selection.setSelection((Spannable) mText, 0, mText.length());
                 startTextSelectionMode();
+                getSelectionController().show();
                 return true;
 
             case ID_START_SELECTING_TEXT:
                 startTextSelectionMode();
+                getSelectionController().show();
                 return true;
 
             case ID_CUT:                
@@ -7670,7 +7669,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void startTextSelectionMode() {
         if (!mIsInTextSelectionMode) {
-            if (mSelectionModifierCursorController == null) {
+            if (!hasSelectionController()) {
                 Log.w(LOG_TAG, "TextView has no selection controller. Action mode cancelled.");
                 return;
             }
@@ -7680,7 +7679,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             selectCurrentWord();
-            mSelectionModifierCursorController.show();
             mIsInTextSelectionMode = true;
         }
     }
@@ -7859,6 +7857,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
             }
 
+            if (isInBatchEditMode()) {
+                return false;
+            }
+
             final int extendedPaddingTop = getExtendedPaddingTop();
             final int extendedPaddingBottom = getExtendedPaddingBottom();
             final int compoundPaddingLeft = getCompoundPaddingLeft();
@@ -7898,7 +7900,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mPositionY = y - TextView.this.mScrollY;
             if (isPositionVisible()) {
                 int[] coords = null;
-                if (mContainer.isShowing()){
+                if (mContainer.isShowing()) {
                     coords = mTempCoords;
                     TextView.this.getLocationInWindow(coords);
                     mContainer.update(coords[0] + mPositionX, coords[1] + mPositionY,
@@ -8087,6 +8089,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void show() {
+            if (isInBatchEditMode()) {
+                return;
+            }
+
             mIsShowing = true;
             updatePosition();
             mStartHandle.show();
@@ -8150,6 +8156,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void updatePosition() {
+            if (!isShowing()) {
+                return;
+            }
+
             final int selectionStart = getSelectionStart();
             final int selectionEnd = getSelectionEnd();
 
@@ -8310,6 +8320,62 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getOffsetForHorizontal(line, x);
     }
 
+    /**
+     * @return True if this view supports insertion handles.
+     */
+    boolean hasInsertionController() {
+        return mInsertionControllerEnabled;
+    }
+
+    /**
+     * @return True if this view supports selection handles.
+     */
+    boolean hasSelectionController() {
+        return mSelectionControllerEnabled;
+    }
+
+    CursorController getInsertionController() {
+        if (!mInsertionControllerEnabled) {
+            return null;
+        }
+
+        if (mInsertionPointCursorController == null) {
+            mInsertionPointCursorController = new InsertionPointCursorController();
+
+            final ViewTreeObserver observer = getViewTreeObserver();
+            if (observer != null) {
+                observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
+            }
+        }
+
+        return mInsertionPointCursorController;
+    }
+
+    CursorController getSelectionController() {
+        if (!mSelectionControllerEnabled) {
+            return null;
+        }
+
+        if (mSelectionModifierCursorController == null) {
+            mSelectionModifierCursorController = new SelectionModifierCursorController();
+
+            final ViewTreeObserver observer = getViewTreeObserver();
+            if (observer != null) {
+                observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
+            }
+        }
+
+        return mSelectionModifierCursorController;
+    }
+
+    boolean isInBatchEditMode() {
+        final InputMethodState ims = mInputMethodState;
+        if (ims != null) {
+            return ims.mBatchEditNesting > 0;
+        }
+        return mInBatchEditControllers;
+    }
+
     @ViewDebug.ExportedProperty
     private CharSequence            mText;
     private CharSequence            mTransformed;
@@ -8341,6 +8407,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Cursor Controllers. Null when disabled.
     private CursorController        mInsertionPointCursorController;
     private CursorController        mSelectionModifierCursorController;
+    private boolean                 mInsertionControllerEnabled;
+    private boolean                 mSelectionControllerEnabled;
+    private boolean                 mInBatchEditControllers;
     private boolean                 mIsInTextSelectionMode = false;
     // These are needed to desambiguate a long click. If the long click comes from ones of these, we
     // select from the current cursor position. Otherwise, select from long pressed position.
