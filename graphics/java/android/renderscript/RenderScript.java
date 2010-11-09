@@ -62,7 +62,9 @@ public class RenderScript {
     native int  nDeviceCreate();
     native void nDeviceDestroy(int dev);
     native void nDeviceSetConfig(int dev, int param, int value);
-    native int  nContextGetMessage(int con, int[] data, boolean wait);
+    native void nContextGetUserMessage(int con, int[] data);
+    native String nContextGetErrorMessage(int con);
+    native int  nContextPeekMessage(int con, int[] subID, boolean wait);
     native void nContextInitToClient(int con);
     native void nContextDeinitToClient(int con);
 
@@ -582,10 +584,19 @@ public class RenderScript {
     public static class RSMessage implements Runnable {
         protected int[] mData;
         protected int mID;
+        protected int mLength;
         public void run() {
         }
     }
     public RSMessage mMessageCallback = null;
+
+    public static class RSAsyncError implements Runnable {
+        protected String mErrorMessage;
+        protected int mErrorNum;
+        public void run() {
+        }
+    }
+    public RSAsyncError mErrorCallback = null;
 
     public enum Priority {
         LOW (5),     //ANDROID_PRIORITY_BACKGROUND + 5
@@ -611,6 +622,13 @@ public class RenderScript {
     protected static class MessageThread extends Thread {
         RenderScript mRS;
         boolean mRun = true;
+        int[] auxData = new int[2];
+
+        public static final int RS_MESSAGE_TO_CLIENT_NONE = 0;
+        public static final int RS_MESSAGE_TO_CLIENT_EXCEPTION = 1;
+        public static final int RS_MESSAGE_TO_CLIENT_RESIZE = 2;
+        public static final int RS_MESSAGE_TO_CLIENT_ERROR = 3;
+        public static final int RS_MESSAGE_TO_CLIENT_USER = 4;
 
         MessageThread(RenderScript rs) {
             super("RSMessageThread");
@@ -625,28 +643,47 @@ public class RenderScript {
             mRS.nContextInitToClient(mRS.mContext);
             while(mRun) {
                 rbuf[0] = 0;
-                int msg = mRS.nContextGetMessage(mRS.mContext, rbuf, true);
-                if ((msg == 0)) {
-                    // Can happen for two reasons
-                    if (rbuf[0] > 0 && mRun) {
-                        // 1: Buffer needs to be enlarged.
-                        rbuf = new int[rbuf[0] + 2];
+                int msg = mRS.nContextPeekMessage(mRS.mContext, auxData, true);
+                int size = auxData[1];
+                int subID = auxData[0];
+
+                if (msg == RS_MESSAGE_TO_CLIENT_USER) {
+                    if ((size>>2) >= rbuf.length) {
+                        rbuf = new int[(size + 3) >> 2];
+                    }
+                    mRS.nContextGetUserMessage(mRS.mContext, rbuf);
+
+                    if(mRS.mMessageCallback != null) {
+                        mRS.mMessageCallback.mData = rbuf;
+                        mRS.mMessageCallback.mID = subID;
+                        mRS.mMessageCallback.mLength = size;
+                        mRS.mMessageCallback.run();
                     } else {
-                        // 2: teardown.
-                        // But we want to avoid starving other threads during
-                        // teardown by yielding until the next line in the destructor
-                        // can execute to set mRun = false
-                        try {
-                            sleep(1, 0);
-                        } catch(InterruptedException e) {
-                        }
+                        throw new RSInvalidStateException("Received a message from the script with no message handler installed.");
                     }
                     continue;
                 }
-                if(mRS.mMessageCallback != null) {
-                    mRS.mMessageCallback.mData = rbuf;
-                    mRS.mMessageCallback.mID = msg;
-                    mRS.mMessageCallback.run();
+
+                if (msg == RS_MESSAGE_TO_CLIENT_ERROR) {
+                    String e = mRS.nContextGetErrorMessage(mRS.mContext);
+
+                    if(mRS.mErrorCallback != null) {
+                        mRS.mErrorCallback.mErrorMessage = e;
+                        mRS.mErrorCallback.mErrorNum = subID;
+                        mRS.mErrorCallback.run();
+                    } else {
+                        //throw new RSRuntimeException("Received error num " + subID + ", details: " + e);
+                    }
+                    continue;
+                }
+
+                // 2: teardown.
+                // But we want to avoid starving other threads during
+                // teardown by yielding until the next line in the destructor
+                // can execute to set mRun = false
+                try {
+                    sleep(1, 0);
+                } catch(InterruptedException e) {
                 }
             }
             Log.d(LOG_TAG, "MessageThread exiting.");

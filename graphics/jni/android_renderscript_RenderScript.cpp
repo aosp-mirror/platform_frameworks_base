@@ -223,19 +223,48 @@ nContextResume(JNIEnv *_env, jobject _this, RsContext con)
     rsContextResume(con);
 }
 
-static jint
-nContextGetMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray data, jboolean wait)
+
+static jstring
+nContextGetErrorMessage(JNIEnv *_env, jobject _this, RsContext con)
+{
+    LOG_API("nContextGetErrorMessage, con(%p)", con);
+    char buf[1024];
+
+    size_t receiveLen;
+    uint32_t subID;
+    int id = rsContextGetMessage(con, buf, &receiveLen, &subID, sizeof(buf), true);
+    if (!id && receiveLen) {
+        LOGV("message receive buffer too small.  %i", receiveLen);
+    }
+    return _env->NewStringUTF(buf);
+}
+
+static void
+nContextGetUserMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray data)
 {
     jint len = _env->GetArrayLength(data);
     LOG_API("nContextGetMessage, con(%p), len(%i)", con, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
     size_t receiveLen;
-    int id = rsContextGetMessage(con, ptr, &receiveLen, len * 4, wait);
+    uint32_t subID;
+    int id = rsContextGetMessage(con, ptr, &receiveLen, &subID, len * 4, true);
     if (!id && receiveLen) {
         LOGV("message receive buffer too small.  %i", receiveLen);
-        *ptr = (jint)receiveLen;
     }
     _env->ReleaseIntArrayElements(data, ptr, 0);
+}
+
+static jint
+nContextPeekMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray auxData, jboolean wait)
+{
+    LOG_API("nContextPeekMessage, con(%p)", con);
+    jint *auxDataPtr = _env->GetIntArrayElements(auxData, NULL);
+    size_t receiveLen;
+    uint32_t subID;
+    int id = rsContextPeekMessage(con, &receiveLen, &subID, wait);
+    auxDataPtr[0] = (jint)subID;
+    auxDataPtr[1] = (jint)receiveLen;
+    _env->ReleaseIntArrayElements(auxData, auxDataPtr, 0);
     return id;
 }
 
@@ -1218,15 +1247,18 @@ nMeshGetIndices(JNIEnv *_env, jobject _this, RsContext con, jint mesh, jintArray
 static const char *classPathName = "android/renderscript/RenderScript";
 
 static JNINativeMethod methods[] = {
-{"_nInit",                         "()V",                                  (void*)_nInit },
-{"nInitElements",                  "(IIII)V",                              (void*)nInitElements },
+{"_nInit",                         "()V",                                     (void*)_nInit },
+{"nInitElements",                  "(IIII)V",                                 (void*)nInitElements },
 
-{"nDeviceCreate",                  "()I",                                  (void*)nDeviceCreate },
-{"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
-{"nDeviceSetConfig",               "(III)V",                               (void*)nDeviceSetConfig },
-{"nContextGetMessage",             "(I[IZ)I",                               (void*)nContextGetMessage },
-{"nContextInitToClient",           "(I)V",                                  (void*)nContextInitToClient },
-{"nContextDeinitToClient",         "(I)V",                                  (void*)nContextDeinitToClient },
+{"nDeviceCreate",                  "()I",                                     (void*)nDeviceCreate },
+{"nDeviceDestroy",                 "(I)V",                                    (void*)nDeviceDestroy },
+{"nDeviceSetConfig",               "(III)V",                                  (void*)nDeviceSetConfig },
+{"nContextGetUserMessage",         "(I[I)V",                                  (void*)nContextGetUserMessage },
+{"nContextGetErrorMessage",        "(I)Ljava/lang/String;",                   (void*)nContextGetErrorMessage },
+{"nContextPeekMessage",            "(I[IZ)I",                                 (void*)nContextPeekMessage },
+
+{"nContextInitToClient",           "(I)V",                                    (void*)nContextInitToClient },
+{"nContextDeinitToClient",         "(I)V",                                    (void*)nContextDeinitToClient },
 
 
 // All methods below are thread protected in java.

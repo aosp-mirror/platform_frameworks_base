@@ -846,53 +846,69 @@ void Context::removeName(ObjectBase *obj)
     }
 }
 
-uint32_t Context::getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait)
+RsMessageToClientType Context::peekMessageToClient(size_t *receiveLen, uint32_t *subID, bool wait)
+{
+    *receiveLen = 0;
+    if (!wait && mIO.mToClient.isEmpty()) {
+        return RS_MESSAGE_TO_CLIENT_NONE;
+    }
+
+    uint32_t bytesData = 0;
+    uint32_t commandID = 0;
+    const uint32_t *d = (const uint32_t *)mIO.mToClient.get(&commandID, &bytesData);
+    *receiveLen = bytesData - sizeof(uint32_t);
+    if (bytesData) {
+        *subID = d[0];
+    }
+    return (RsMessageToClientType)commandID;
+}
+
+RsMessageToClientType Context::getMessageToClient(void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait)
 {
     //LOGE("getMessageToClient %i %i", bufferLen, wait);
     *receiveLen = 0;
-    if (!wait) {
-        if (mIO.mToClient.isEmpty()) {
-            // No message to get and not going to wait for one.
-            return 0;
-        }
+    if (!wait && mIO.mToClient.isEmpty()) {
+        return RS_MESSAGE_TO_CLIENT_NONE;
     }
 
     //LOGE("getMessageToClient 2 con=%p", this);
     uint32_t bytesData = 0;
     uint32_t commandID = 0;
-    const void *d = mIO.mToClient.get(&commandID, &bytesData);
+    const uint32_t *d = (const uint32_t *)mIO.mToClient.get(&commandID, &bytesData);
     //LOGE("getMessageToClient 3    %i  %i", commandID, bytesData);
 
-    *receiveLen = bytesData;
+    *receiveLen = bytesData - sizeof(uint32_t);
+    *subID = d[0];
+
+    //LOGE("getMessageToClient  %i %i", commandID, *subID);
     if (bufferLen >= bytesData) {
-        memcpy(data, d, bytesData);
+        memcpy(data, d+1, *receiveLen);
         mIO.mToClient.next();
-        return commandID;
+        return (RsMessageToClientType)commandID;
     }
-    return 0;
+    return RS_MESSAGE_TO_CLIENT_RESIZE;
 }
 
-bool Context::sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace)
+bool Context::sendMessageToClient(const void *data, RsMessageToClientType cmdID, uint32_t subID, size_t len, bool waitForSpace)
 {
-    //LOGE("sendMessageToClient %i %i %i", cmdID, len, waitForSpace);
+    //LOGE("sendMessageToClient %i %i %i %i", cmdID, subID, len, waitForSpace);
     if (cmdID == 0) {
         LOGE("Attempting to send invalid command 0 to client.");
         return false;
     }
     if (!waitForSpace) {
-        if (!mIO.mToClient.makeSpaceNonBlocking(len + 8)) {
+        if (!mIO.mToClient.makeSpaceNonBlocking(len + 12)) {
             // Not enough room, and not waiting.
             return false;
         }
     }
     //LOGE("sendMessageToClient 2");
+    uint32_t *p = (uint32_t *)mIO.mToClient.reserve(len + sizeof(subID));
+    p[0] = subID;
     if (len > 0) {
-        void *p = mIO.mToClient.reserve(len);
-        memcpy(p, data, len);
-        mIO.mToClient.commit(cmdID, len);
-    } else {
-        mIO.mToClient.commit(cmdID, 0);
+        memcpy(p+1, data, len);
     }
+    mIO.mToClient.commit(cmdID, len + sizeof(subID));
     //LOGE("sendMessageToClient 3");
     return true;
 }
@@ -923,6 +939,7 @@ void Context::setError(RsError e, const char *msg)
 {
     mError = e;
     mErrorMsg = msg;
+    sendMessageToClient(msg, RS_MESSAGE_TO_CLIENT_ERROR, e, strlen(msg) + 1, true);
 }
 
 
@@ -1080,10 +1097,16 @@ void rsContextDestroy(RsContext vrsc)
     delete rsc;
 }
 
-uint32_t rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, size_t bufferLen, bool wait)
+RsMessageToClientType rsContextPeekMessage(RsContext vrsc, size_t *receiveLen, uint32_t *subID, bool wait)
 {
     Context * rsc = static_cast<Context *>(vrsc);
-    return rsc->getMessageToClient(data, receiveLen, bufferLen, wait);
+    return rsc->peekMessageToClient(receiveLen, subID, wait);
+}
+
+RsMessageToClientType rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait)
+{
+    Context * rsc = static_cast<Context *>(vrsc);
+    return rsc->getMessageToClient(data, receiveLen, subID, bufferLen, wait);
 }
 
 void rsContextInitToClient(RsContext vrsc)

@@ -128,8 +128,9 @@ public:
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
 
-    uint32_t getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait);
-    bool sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace);
+    RsMessageToClientType peekMessageToClient(size_t *receiveLen, uint32_t *subID, bool wait);
+    RsMessageToClientType getMessageToClient(void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait);
+    bool sendMessageToClient(const void *data, RsMessageToClientType cmdID, uint32_t subID, size_t len, bool waitForSpace);
     uint32_t runScript(Script *s);
 
     void initToClient();

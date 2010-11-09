@@ -347,28 +347,28 @@ static uint32_t SC_toClient2(int cmdID, void *data, int len)
 {
     GET_TLS();
     //LOGE("SC_toClient %i %i %i", cmdID, len);
-    return rsc->sendMessageToClient(data, cmdID, len, false);
+    return rsc->sendMessageToClient(data, RS_MESSAGE_TO_CLIENT_USER, cmdID, len, false);
 }
 
 static uint32_t SC_toClient(int cmdID)
 {
     GET_TLS();
     //LOGE("SC_toClient %i", cmdID);
-    return rsc->sendMessageToClient(NULL, cmdID, 0, false);
+    return rsc->sendMessageToClient(NULL, RS_MESSAGE_TO_CLIENT_USER, cmdID, 0, false);
 }
 
 static uint32_t SC_toClientBlocking2(int cmdID, void *data, int len)
 {
     GET_TLS();
     //LOGE("SC_toClientBlocking %i %i", cmdID, len);
-    return rsc->sendMessageToClient(data, cmdID, len, true);
+    return rsc->sendMessageToClient(data, RS_MESSAGE_TO_CLIENT_USER, cmdID, len, true);
 }
 
 static uint32_t SC_toClientBlocking(int cmdID)
 {
     GET_TLS();
     //LOGE("SC_toClientBlocking %i", cmdID);
-    return rsc->sendMessageToClient(NULL, cmdID, 0, true);
+    return rsc->sendMessageToClient(NULL, RS_MESSAGE_TO_CLIENT_USER, cmdID, 0, true);
 }
 
 int SC_divsi3(int a, int b)

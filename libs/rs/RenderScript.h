@@ -79,12 +79,23 @@ RsContext rsContextCreate(RsDevice, uint32_t version);
 RsContext rsContextCreateGL(RsDevice, uint32_t version, RsSurfaceConfig sc);
 void rsContextDestroy(RsContext);
 
-uint32_t rsContextGetMessage(RsContext, void *data, size_t *receiveLen, size_t bufferLen, bool wait);
+enum RsMessageToClientType {
+    RS_MESSAGE_TO_CLIENT_NONE = 0,
+    RS_MESSAGE_TO_CLIENT_EXCEPTION = 1,
+    RS_MESSAGE_TO_CLIENT_RESIZE = 2,
+    RS_MESSAGE_TO_CLIENT_ERROR = 3,
+    RS_MESSAGE_TO_CLIENT_USER = 4
+};
+
+RsMessageToClientType rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait);
+RsMessageToClientType rsContextPeekMessage(RsContext vrsc, size_t *receiveLen, uint32_t *subID, bool wait);
 void rsContextInitToClient(RsContext);
 void rsContextDeinitToClient(RsContext);
 
 #define RS_MAX_TEXTURE 2
 #define RS_MAX_ATTRIBS 16
+
+
 
 enum RsDataType {
     RS_TYPE_NONE,
