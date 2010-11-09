@@ -21,6 +21,8 @@
 #include "include/MP3Extractor.h"
 
 #include "include/ID3.h"
+#include "include/VBRISeeker.h"
+#include "include/XINGSeeker.h"
 
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
@@ -42,10 +44,11 @@ namespace android {
 // Yes ... there are things that must indeed match...
 static const uint32_t kMask = 0xfffe0cc0;
 
-static bool get_mp3_frame_size(
+// static
+bool MP3Extractor::get_mp3_frame_size(
         uint32_t header, size_t *frame_size,
-        int *out_sampling_rate = NULL, int *out_channels = NULL,
-        int *out_bitrate = NULL) {
+        int *out_sampling_rate, int *out_channels,
+        int *out_bitrate) {
     *frame_size = 0;
 
     if (out_sampling_rate) {
@@ -178,136 +181,13 @@ static bool get_mp3_frame_size(
     return true;
 }
 
-static bool parse_xing_header(
-        const sp<DataSource> &source, off_t first_frame_pos,
-        int32_t *frame_number = NULL, int32_t *byte_number = NULL,
-        char *table_of_contents = NULL, int32_t *quality_indicator = NULL,
-        int64_t *duration = NULL) {
-
-    if (frame_number) {
-        *frame_number = 0;
-    }
-    if (byte_number) {
-        *byte_number = 0;
-    }
-    if (table_of_contents) {
-        table_of_contents[0] = 0;
-    }
-    if (quality_indicator) {
-        *quality_indicator = 0;
-    }
-    if (duration) {
-        *duration = 0;
-    }
-
-    uint8_t buffer[4];
-    int offset = first_frame_pos;
-    if (source->readAt(offset, &buffer, 4) < 4) { // get header
-        return false;
-    }
-    offset += 4;
-
-    uint8_t id, layer, sr_index, mode;
-    layer = (buffer[1] >> 1) & 3;
-    id = (buffer[1] >> 3) & 3;
-    sr_index = (buffer[2] >> 2) & 3;
-    mode = (buffer[3] >> 6) & 3;
-    if (layer == 0) {
-        return false;
-    }
-    if (id == 1) {
-        return false;
-    }
-    if (sr_index == 3) {
-        return false;
-    }
-    // determine offset of XING header
-    if(id&1) { // mpeg1
-        if (mode != 3) offset += 32;
-        else offset += 17;
-    } else { // mpeg2
-        if (mode != 3) offset += 17;
-        else offset += 9;
-    }
-
-    if (source->readAt(offset, &buffer, 4) < 4) { // XING header ID
-        return false;
-    }
-    offset += 4;
-    // Check XING ID
-    if ((buffer[0] != 'X') || (buffer[1] != 'i')
-                || (buffer[2] != 'n') || (buffer[3] != 'g')) {
-        if ((buffer[0] != 'I') || (buffer[1] != 'n')
-                    || (buffer[2] != 'f') || (buffer[3] != 'o')) {
-            return false;
-        }
-    }
-
-    if (source->readAt(offset, &buffer, 4) < 4) { // flags
-        return false;
-    }
-    offset += 4;
-    uint32_t flags = U32_AT(buffer);
-
-    if (flags & 0x0001) {  // Frames field is present
-        if (source->readAt(offset, buffer, 4) < 4) {
-             return false;
-        }
-        if (frame_number) {
-           *frame_number = U32_AT(buffer);
-        }
-        int32_t frame = U32_AT(buffer);
-        // Samples per Frame: 1. index = MPEG Version ID, 2. index = Layer
-        const int samplesPerFrames[2][3] =
-        {
-            { 384, 1152, 576  }, // MPEG 2, 2.5: layer1, layer2, layer3
-            { 384, 1152, 1152 }, // MPEG 1: layer1, layer2, layer3
-        };
-        // sampling rates in hertz: 1. index = MPEG Version ID, 2. index = sampling rate index
-        const int samplingRates[4][3] =
-        {
-            { 11025, 12000, 8000,  },    // MPEG 2.5
-            { 0,     0,     0,     },    // reserved
-            { 22050, 24000, 16000, },    // MPEG 2
-            { 44100, 48000, 32000, }     // MPEG 1
-        };
-        if (duration) {
-            *duration = (int64_t)frame * samplesPerFrames[id&1][3-layer] * 1000000LL
-                / samplingRates[id][sr_index];
-        }
-        offset += 4;
-    }
-    if (flags & 0x0002) {  // Bytes field is present
-        if (byte_number) {
-            if (source->readAt(offset, buffer, 4) < 4) {
-                return false;
-            }
-            *byte_number = U32_AT(buffer);
-        }
-        offset += 4;
-    }
-    if (flags & 0x0004) {  // TOC field is present
-       if (table_of_contents) {
-            if (source->readAt(offset + 1, table_of_contents, 99) < 99) {
-                return false;
-            }
-        }
-        offset += 100;
-    }
-    if (flags & 0x0008) {  // Quality indicator field is present
-        if (quality_indicator) {
-            if (source->readAt(offset, buffer, 4) < 4) {
-                return false;
-            }
-            *quality_indicator = U32_AT(buffer);
-        }
-    }
-    return true;
-}
-
 static bool Resync(
         const sp<DataSource> &source, uint32_t match_header,
-        off_t *inout_pos, uint32_t *out_header) {
+        off_t *inout_pos, off_t *post_id3_pos, uint32_t *out_header) {
+    if (post_id3_pos != NULL) {
+        *post_id3_pos = 0;
+    }
+
     if (*inout_pos == 0) {
         // Skip an optional ID3 header if syncing at the very beginning
         // of the datasource.
@@ -340,6 +220,10 @@ static bool Resync(
             LOGV("skipped ID3 tag, new starting offset is %ld (0x%08lx)",
                  *inout_pos, *inout_pos);
         }
+
+        if (post_id3_pos != NULL) {
+            *post_id3_pos = *inout_pos;
+        }
     }
 
     off_t pos = *inout_pos;
@@ -365,8 +249,9 @@ static bool Resync(
 
         size_t frame_size;
         int sample_rate, num_channels, bitrate;
-        if (!get_mp3_frame_size(header, &frame_size,
-                               &sample_rate, &num_channels, &bitrate)) {
+        if (!MP3Extractor::get_mp3_frame_size(
+                    header, &frame_size,
+                    &sample_rate, &num_channels, &bitrate)) {
             ++pos;
             continue;
         }
@@ -396,7 +281,8 @@ static bool Resync(
             }
 
             size_t test_frame_size;
-            if (!get_mp3_frame_size(test_header, &test_frame_size)) {
+            if (!MP3Extractor::get_mp3_frame_size(
+                        test_header, &test_frame_size)) {
                 valid = false;
                 break;
             }
@@ -427,7 +313,7 @@ public:
     MP3Source(
             const sp<MetaData> &meta, const sp<DataSource> &source,
             off_t first_frame_pos, uint32_t fixed_header,
-            int32_t byte_number, const char *table_of_contents);
+            const sp<MP3Seeker> &seeker);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -448,9 +334,7 @@ private:
     off_t mCurrentPos;
     int64_t mCurrentTimeUs;
     bool mStarted;
-    int32_t mByteNumber; // total number of bytes in this MP3
-    // TOC entries in XING header. Skip the first one since it's always 0.
-    char mTableOfContents[99];
+    sp<MP3Seeker> mSeeker;
     MediaBufferGroup *mGroup;
 
     MP3Source(const MP3Source &);
@@ -462,25 +346,28 @@ MP3Extractor::MP3Extractor(
     : mInitCheck(NO_INIT),
       mDataSource(source),
       mFirstFramePos(-1),
-      mFixedHeader(0),
-      mByteNumber(0) {
+      mFixedHeader(0) {
     off_t pos = 0;
+    off_t post_id3_pos;
     uint32_t header;
     bool success;
 
     int64_t meta_offset;
     uint32_t meta_header;
+    int64_t meta_post_id3_offset;
     if (meta != NULL
             && meta->findInt64("offset", &meta_offset)
-            && meta->findInt32("header", (int32_t *)&meta_header)) {
+            && meta->findInt32("header", (int32_t *)&meta_header)
+            && meta->findInt64("post-id3-offset", &meta_post_id3_offset)) {
         // The sniffer has already done all the hard work for us, simply
         // accept its judgement.
         pos = (off_t)meta_offset;
         header = meta_header;
+        post_id3_pos = (off_t)meta_post_id3_offset;
 
         success = true;
     } else {
-        success = Resync(mDataSource, 0, &pos, &header);
+        success = Resync(mDataSource, 0, &pos, &post_id3_pos, &header);
     }
 
     if (!success) {
@@ -505,19 +392,25 @@ MP3Extractor::MP3Extractor(
     mMeta->setInt32(kKeyBitRate, bitrate * 1000);
     mMeta->setInt32(kKeyChannelCount, num_channels);
 
-    int64_t duration;
-    parse_xing_header(
-            mDataSource, mFirstFramePos, NULL, &mByteNumber,
-            mTableOfContents, NULL, &duration);
-    if (duration > 0) {
-        mMeta->setInt64(kKeyDuration, duration);
-    } else {
+    mSeeker = XINGSeeker::CreateFromSource(mDataSource, mFirstFramePos);
+
+    if (mSeeker == NULL) {
+        mSeeker = VBRISeeker::CreateFromSource(mDataSource, post_id3_pos);
+    }
+
+    int64_t durationUs;
+
+    if (mSeeker == NULL || !mSeeker->getDuration(&durationUs)) {
         off_t fileSize;
         if (mDataSource->getSize(&fileSize) == OK) {
-            mMeta->setInt64(
-                    kKeyDuration,
-                    8000LL * (fileSize - mFirstFramePos) / bitrate);
+            durationUs = 8000LL * (fileSize - mFirstFramePos) / bitrate;
+        } else {
+            durationUs = -1;
         }
+    }
+
+    if (durationUs >= 0) {
+        mMeta->setInt64(kKeyDuration, durationUs);
     }
 
     mInitCheck = OK;
@@ -534,7 +427,7 @@ sp<MediaSource> MP3Extractor::getTrack(size_t index) {
 
     return new MP3Source(
             mMeta, mDataSource, mFirstFramePos, mFixedHeader,
-            mByteNumber, mTableOfContents);
+            mSeeker);
 }
 
 sp<MetaData> MP3Extractor::getTrackMetaData(size_t index, uint32_t flags) {
@@ -550,7 +443,7 @@ sp<MetaData> MP3Extractor::getTrackMetaData(size_t index, uint32_t flags) {
 MP3Source::MP3Source(
         const sp<MetaData> &meta, const sp<DataSource> &source,
         off_t first_frame_pos, uint32_t fixed_header,
-        int32_t byte_number, const char *table_of_contents)
+        const sp<MP3Seeker> &seeker)
     : mMeta(meta),
       mDataSource(source),
       mFirstFramePos(first_frame_pos),
@@ -558,9 +451,8 @@ MP3Source::MP3Source(
       mCurrentPos(0),
       mCurrentTimeUs(0),
       mStarted(false),
-      mByteNumber(byte_number),
+      mSeeker(seeker),
       mGroup(NULL) {
-    memcpy (mTableOfContents, table_of_contents, sizeof(mTableOfContents));
 }
 
 MP3Source::~MP3Source() {
@@ -607,43 +499,21 @@ status_t MP3Source::read(
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
     if (options != NULL && options->getSeekTo(&seekTimeUs, &mode)) {
-        int32_t bitrate;
-        if (!mMeta->findInt32(kKeyBitRate, &bitrate)) {
-            // bitrate is in bits/sec.
-            LOGI("no bitrate");
+        int64_t actualSeekTimeUs = seekTimeUs;
+        if (mSeeker == NULL
+                || !mSeeker->getOffsetForTime(&actualSeekTimeUs, &mCurrentPos)) {
+            int32_t bitrate;
+            if (!mMeta->findInt32(kKeyBitRate, &bitrate)) {
+                // bitrate is in bits/sec.
+                LOGI("no bitrate");
 
-            return ERROR_UNSUPPORTED;
-        }
-
-        mCurrentTimeUs = seekTimeUs;
-        // interpolate in TOC to get file seek point in bytes
-        int64_t duration;
-        if ((mByteNumber > 0) && (mTableOfContents[0] > 0)
-            && mMeta->findInt64(kKeyDuration, &duration)) {
-            float percent = (float)seekTimeUs * 100 / duration;
-            float fx;
-            if( percent <= 0.0f ) {
-                fx = 0.0f;
-            } else if( percent >= 100.0f ) {
-                fx = 256.0f;
-            } else {
-                int a = (int)percent;
-                float fa, fb;
-                if ( a == 0 ) {
-                    fa = 0.0f;
-                } else {
-                    fa = (float)mTableOfContents[a-1];
-                }
-                if ( a < 99 ) {
-                    fb = (float)mTableOfContents[a];
-                } else {
-                    fb = 256.0f;
-                }
-                fx = fa + (fb-fa)*(percent-a);
+                return ERROR_UNSUPPORTED;
             }
-            mCurrentPos = mFirstFramePos + (int)((1.0f/256.0f)*fx*mByteNumber);
-        } else {
+
+            mCurrentTimeUs = seekTimeUs;
             mCurrentPos = mFirstFramePos + seekTimeUs * bitrate / 8000000;
+        } else {
+            mCurrentTimeUs = actualSeekTimeUs;
         }
     }
 
@@ -667,7 +537,8 @@ status_t MP3Source::read(
         uint32_t header = U32_AT((const uint8_t *)buffer->data());
 
         if ((header & kMask) == (mFixedHeader & kMask)
-            && get_mp3_frame_size(header, &frame_size, NULL, NULL, &bitrate)) {
+            && MP3Extractor::get_mp3_frame_size(
+                header, &frame_size, NULL, NULL, &bitrate)) {
             break;
         }
 
@@ -675,7 +546,7 @@ status_t MP3Source::read(
         LOGV("lost sync! header = 0x%08x, old header = 0x%08x\n", header, mFixedHeader);
 
         off_t pos = mCurrentPos;
-        if (!Resync(mDataSource, mFixedHeader, &pos, NULL)) {
+        if (!Resync(mDataSource, mFixedHeader, &pos, NULL, NULL)) {
             LOGE("Unable to resync. Signalling end of stream.");
 
             buffer->release();
@@ -781,14 +652,16 @@ bool SniffMP3(
         const sp<DataSource> &source, String8 *mimeType,
         float *confidence, sp<AMessage> *meta) {
     off_t pos = 0;
+    off_t post_id3_pos;
     uint32_t header;
-    if (!Resync(source, 0, &pos, &header)) {
+    if (!Resync(source, 0, &pos, &post_id3_pos, &header)) {
         return false;
     }
 
     *meta = new AMessage;
     (*meta)->setInt64("offset", pos);
     (*meta)->setInt32("header", header);
+    (*meta)->setInt64("post-id3-offset", post_id3_pos);
 
     *mimeType = MEDIA_MIMETYPE_AUDIO_MPEG;
     *confidence = 0.2f;

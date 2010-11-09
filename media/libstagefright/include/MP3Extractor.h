@@ -24,6 +24,7 @@ namespace android {
 
 struct AMessage;
 class DataSource;
+struct MP3Seeker;
 class String8;
 
 class MP3Extractor : public MediaExtractor {
@@ -37,6 +38,11 @@ public:
 
     virtual sp<MetaData> getMetaData();
 
+    static bool get_mp3_frame_size(
+            uint32_t header, size_t *frame_size,
+            int *out_sampling_rate = NULL, int *out_channels = NULL,
+            int *out_bitrate = NULL);
+
 private:
     status_t mInitCheck;
 
@@ -44,8 +50,7 @@ private:
     off_t mFirstFramePos;
     sp<MetaData> mMeta;
     uint32_t mFixedHeader;
-    int32_t mByteNumber; // total number of bytes in this MP3
-    char mTableOfContents[99]; // TOC entries in XING header
+    sp<MP3Seeker> mSeeker;
 
     MP3Extractor(const MP3Extractor &);
     MP3Extractor &operator=(const MP3Extractor &);
