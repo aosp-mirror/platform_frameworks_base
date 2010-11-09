@@ -407,6 +407,10 @@ static const extention_map_t gExtentionMap[] = {
             (__eglMustCastToProperFunctionPointerType)&eglDestroyImageKHR }, 
     { "eglSetSwapRectangleANDROID", 
             (__eglMustCastToProperFunctionPointerType)&eglSetSwapRectangleANDROID }, 
+    { "glEGLImageTargetTexture2DOES",
+            (__eglMustCastToProperFunctionPointerType)NULL },
+    { "glEGLImageTargetRenderbufferStorageOES",
+            (__eglMustCastToProperFunctionPointerType)NULL },
 };
 
 extern const __eglMustCastToProperFunctionPointerType gExtensionForwarders[MAX_NUMBER_OF_GL_EXTENSIONS];
