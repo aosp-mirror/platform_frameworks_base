@@ -93,6 +93,7 @@ private:
     int64_t mMaxFileSizeBytes;
     int64_t mMaxFileDurationUs;
     int64_t mTrackEveryTimeDurationUs;
+    int32_t mRotationDegrees;  // Clockwise
 
     bool mCaptureTimeLapse;
     int64_t mTimeBetweenTimeLapseFrameCaptureUs;
@@ -146,6 +147,7 @@ private:
     status_t setParamVideoEncoderLevel(int32_t level);
     status_t setParamVideoCameraId(int32_t cameraId);
     status_t setParamVideoTimeScale(int32_t timeScale);
+    status_t setParamVideoRotation(int32_t degrees);
     status_t setParamTrackTimeStatus(int64_t timeDurationUs);
     status_t setParamInterleaveDuration(int32_t durationUs);
     status_t setParam64BitFileOffset(bool use64BitFileOffset);
