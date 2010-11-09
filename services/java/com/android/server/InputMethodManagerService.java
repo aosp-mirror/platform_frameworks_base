@@ -116,7 +116,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final long TIME_TO_RECONNECT = 10*1000;
 
     private static final int NOT_A_SUBTYPE_ID = -1;
-    private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
     // If IME doesn't support the system locale, the default subtype will be the first defined one.
     private static final int DEFAULT_SUBTYPE_ID = 0;
 
@@ -367,7 +366,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                     if (!doit) {
                                         return true;
                                     }
-                                    resetSelectedInputMethodAndSubtypeLocked("");
+                                    Settings.Secure.putString(mContext.getContentResolver(),
+                                            Settings.Secure.DEFAULT_INPUT_METHOD, "");
+                                    resetSelectedInputMethodSubtype();
                                     chooseNewDefaultIMELocked();
                                     return true;
                                 }
@@ -424,7 +425,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 changed = true;
                                 curIm = null;
                                 Slog.i(TAG, "Unsetting current input method");
-                                resetSelectedInputMethodAndSubtypeLocked("");
+                                Settings.Secure.putString(mContext.getContentResolver(),
+                                        Settings.Secure.DEFAULT_INPUT_METHOD, "");
+                                resetSelectedInputMethodSubtype();
                             }
                         }
                     }
@@ -507,7 +510,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Slog.i(TAG, "No default found, using " + defIm.getId());
             }
             if (defIm != null) {
-                setSelectSubtypeLocked(defIm, NOT_A_SUBTYPE_ID);
+                Settings.Secure.putString(mContext.getContentResolver(),
+                        Settings.Secure.DEFAULT_INPUT_METHOD, defIm.getId());
+                putSelectedInputMethodSubtype(defIm, NOT_A_SUBTYPE_ID);
             }
         }
 
@@ -989,7 +994,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     synchronized (mMethodMap) {
                         if (mCurMethod != null) {
                             try {
-                                setSelectSubtypeLocked(info, subtypeId);
+                                putSelectedInputMethodSubtype(info, subtypeId);
                                 if (mInputShown) {
                                     // If mInputShown is false, there is no IME button on the
                                     // system bar.
@@ -1009,13 +1014,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
+            mCurMethodId = id;
             // Set a subtype to this input method.
             // subtypeId the name of a subtype which will be set.
-            setSelectedInputMethodAndSubtypeLocked(info, subtypeId);
-            // mCurMethodId should be updated after setSelectedInputMethodAndSubtypeLocked()
-            // because mCurMethodId is stored as a history in
-            // setSelectedInputMethodAndSubtypeLocked().
-            mCurMethodId = id;
+            putSelectedInputMethodSubtype(info, subtypeId);
+
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD, id);
 
             if (ActivityManagerNative.isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
@@ -1482,7 +1487,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
             InputMethodInfo imi = enabled.get(i);
-            resetSelectedInputMethodAndSubtypeLocked(imi.getId());
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD, imi.getId());
+            putSelectedInputMethodSubtype(imi, NOT_A_SUBTYPE_ID);
             return true;
         }
 
@@ -1786,8 +1793,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 String selId = Settings.Secure.getString(mContext.getContentResolver(),
                         Settings.Secure.DEFAULT_INPUT_METHOD);
                 if (id.equals(selId)) {
-                    resetSelectedInputMethodAndSubtypeLocked(enabledInputMethodsList.size() > 0
-                            ? enabledInputMethodsList.get(0).first : "");
+                    Settings.Secure.putString(
+                            mContext.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD,
+                            enabledInputMethodsList.size() > 0
+                                    ? enabledInputMethodsList.get(0).first : "");
+                    resetSelectedInputMethodSubtype();
                 }
                 // Previous state was enabled.
                 return true;
@@ -1799,54 +1809,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private void saveCurrentInputMethodAndSubtypeToHistory() {
-        String subtypeId = NOT_A_SUBTYPE_ID_STR;
-        if (mCurrentSubtype != null) {
-            subtypeId = String.valueOf(mCurrentSubtype.hashCode());
-        }
-        mSettings.addSubtypeToHistory(mCurMethodId, subtypeId);
+    private void resetSelectedInputMethodSubtype() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, NOT_A_SUBTYPE_ID);
     }
 
-    private void setSelectSubtypeLocked(InputMethodInfo imi, int subtypeId) {
-        saveCurrentInputMethodAndSubtypeToHistory();
-        if (imi == null || subtypeId < 0) {
-            mSettings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
-            mCurrentSubtype = null;
+    private void putSelectedInputMethodSubtype(InputMethodInfo imi, int subtypeId) {
+        final ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
+        if (subtypeId >= 0 && subtypeId < subtypes.size()) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
+                    subtypes.get(subtypeId).hashCode());
+            mCurrentSubtype = subtypes.get(subtypeId);
         } else {
-            final ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
-            if (subtypeId < subtypes.size()) {
-                mSettings.putSelectedSubtype(subtypes.get(subtypeId).hashCode());
-                mCurrentSubtype = subtypes.get(subtypeId);
-            } else {
-                mSettings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
-                mCurrentSubtype = null;
-            }
+            resetSelectedInputMethodSubtype();
+            mCurrentSubtype = null;
         }
-        
-    }
-
-    private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId) {
-        setSelectSubtypeLocked(imi, subtypeId);
-        mSettings.putSelectedInputMethod(imi.getId());
-    }
-
-    private void resetSelectedInputMethodAndSubtypeLocked(String newDefaultIme) {
-        InputMethodInfo imi = mMethodMap.get(newDefaultIme);
-        int lastSubtypeId = NOT_A_SUBTYPE_ID;
-        // newDefaultIme is empty when there is no candidate for the selected IME.
-        if (imi != null && !TextUtils.isEmpty(newDefaultIme)) {
-            String subtypeHashCode = mSettings.getLastSubtypeForInputMethodLocked(newDefaultIme);
-            if (subtypeHashCode != null) {
-                try {
-                    lastSubtypeId = getSubtypeIdFromHashCode(
-                            imi, Integer.valueOf(subtypeHashCode));
-                } catch (NumberFormatException e) {
-                    Slog.w(TAG, "HashCode for subtype looks broken: " + subtypeHashCode, e);
-                }
-            }
-        }
-        setSelectSubtypeLocked(imi, lastSubtypeId);
-        mSettings.putSelectedInputMethod(newDefaultIme);
     }
 
     private int getSelectedInputMethodSubtypeId(String id) {
@@ -1854,6 +1832,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (imi == null) {
             return NOT_A_SUBTYPE_ID;
         }
+        ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
         int subtypeId;
         try {
             subtypeId = Settings.Secure.getInt(mContext.getContentResolver(),
@@ -1861,14 +1840,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } catch (SettingNotFoundException e) {
             return NOT_A_SUBTYPE_ID;
         }
-        return getSubtypeIdFromHashCode(imi, subtypeId);
-    }
-
-    private int getSubtypeIdFromHashCode(InputMethodInfo imi, int subtypeHashCode) {
-        ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
         for (int i = 0; i < subtypes.size(); ++i) {
             InputMethodSubtype ims = subtypes.get(i);
-            if (subtypeHashCode == ims.hashCode()) {
+            if (subtypeId == ims.hashCode()) {
                 return i;
             }
         }
@@ -1948,10 +1922,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // example: ("ime0;subtype0;subtype1;subtype2:ime1:ime2;subtype0")
         private static final char INPUT_METHOD_SEPARATER = ':';
         private static final char INPUT_METHOD_SUBTYPE_SEPARATER = ';';
-        private final TextUtils.SimpleStringSplitter mInputMethodSplitter =
+        private final TextUtils.SimpleStringSplitter mStringColonSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATER);
 
-        private final TextUtils.SimpleStringSplitter mSubtypeSplitter =
+        private final TextUtils.SimpleStringSplitter mStringSemiColonSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATER);
 
         private final ContentResolver mResolver;
@@ -2014,16 +1988,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (TextUtils.isEmpty(enabledInputMethodsStr)) {
                 return imsList;
             }
-            mInputMethodSplitter.setString(enabledInputMethodsStr);
-            while (mInputMethodSplitter.hasNext()) {
-                String nextImsStr = mInputMethodSplitter.next();
-                mSubtypeSplitter.setString(nextImsStr);
-                if (mSubtypeSplitter.hasNext()) {
+            mStringColonSplitter.setString(enabledInputMethodsStr);
+            while (mStringColonSplitter.hasNext()) {
+                String nextImsStr = mStringColonSplitter.next();
+                mStringSemiColonSplitter.setString(nextImsStr);
+                if (mStringSemiColonSplitter.hasNext()) {
                     ArrayList<String> subtypeHashes = new ArrayList<String>();
                     // The first element is ime id.
-                    String imeId = mSubtypeSplitter.next();
-                    while (mSubtypeSplitter.hasNext()) {
-                        subtypeHashes.add(mSubtypeSplitter.next());
+                    String imeId = mStringSemiColonSplitter.next();
+                    while (mStringSemiColonSplitter.hasNext()) {
+                        subtypeHashes.add(mStringSemiColonSplitter.next());
                     }
                     imsList.add(new Pair<String, ArrayList<String>>(imeId, subtypeHashes));
                 }
@@ -2109,160 +2083,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private String getEnabledInputMethodsStr() {
             mEnabledInputMethodsStrCache = Settings.Secure.getString(
                     mResolver, Settings.Secure.ENABLED_INPUT_METHODS);
-            if (DEBUG) {
-                Slog.d(TAG, "getEnabledInputMethodsStr: " + mEnabledInputMethodsStrCache);
-            }
             return mEnabledInputMethodsStrCache;
-        }
-
-        private void saveSubtypeHistory(
-                List<Pair<String, String>> savedImes, String newImeId, String newSubtypeId) {
-            StringBuilder builder = new StringBuilder();
-            boolean isImeAdded = false;
-            if (!TextUtils.isEmpty(newImeId) && !TextUtils.isEmpty(newSubtypeId)) {
-                builder.append(newImeId).append(INPUT_METHOD_SUBTYPE_SEPARATER).append(
-                        newSubtypeId);
-                isImeAdded = true;
-            }
-            for (Pair<String, String> ime: savedImes) {
-                String imeId = ime.first;
-                String subtypeId = ime.second;
-                if (TextUtils.isEmpty(subtypeId)) {
-                    subtypeId = NOT_A_SUBTYPE_ID_STR;
-                }
-                if (isImeAdded) {
-                    builder.append(INPUT_METHOD_SEPARATER);
-                } else {
-                    isImeAdded = true;
-                }
-                builder.append(imeId).append(INPUT_METHOD_SUBTYPE_SEPARATER).append(
-                        subtypeId);
-            }
-            // Remove the last INPUT_METHOD_SEPARATER
-            putSubtypeHistoryStr(builder.toString());
-        }
-
-        public void addSubtypeToHistory(String imeId, String subtypeId) {
-            List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
-            for (Pair<String, String> ime: subtypeHistory) {
-                if (ime.first.equals(imeId)) {
-                    if (DEBUG) {
-                        Slog.v(TAG, "Subtype found in the history: " + imeId
-                                + ime.second);
-                    }
-                    // We should break here
-                    subtypeHistory.remove(ime);
-                    break;
-                }
-            }
-            saveSubtypeHistory(subtypeHistory, imeId, subtypeId);
-        }
-
-        private void putSubtypeHistoryStr(String str) {
-            if (DEBUG) {
-                Slog.d(TAG, "putSubtypeHistoryStr: " + str);
-            }
-            Settings.Secure.putString(
-                    mResolver, Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, str);
-        }
-
-        public Pair<String, String> getLastInputMethodAndSubtypeLocked() {
-            // Gets the first one from the history
-            return getLastSubtypeForInputMethodLockedInternal(null);
-        }
-
-        public String getLastSubtypeForInputMethodLocked(String imeId) {
-            Pair<String, String> ime = getLastSubtypeForInputMethodLockedInternal(imeId);
-            if (ime != null) {
-                return ime.second;
-            } else {
-                return null;
-            }
-        }
-
-        private Pair<String, String> getLastSubtypeForInputMethodLockedInternal(String imeId) {
-            List<Pair<String, ArrayList<String>>> enabledImes =
-                    getEnabledInputMethodsAndSubtypeListLocked();
-            List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
-            for (Pair<String, String> imeAndSubtype: subtypeHistory) {
-                final String imeInTheHistory = imeAndSubtype.first;
-                // If imeId is empty, returns the first IME and subtype in the history
-                if (TextUtils.isEmpty(imeId) || imeInTheHistory.equals(imeId)) {
-                    final String subtypeInTheHistory = imeAndSubtype.second;
-                    final String subtypeHashCode = getEnabledSubtypeForInputMethodAndSubtypeLocked(
-                            enabledImes, imeInTheHistory, subtypeInTheHistory);
-                    if (!TextUtils.isEmpty(subtypeHashCode)) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Enabled subtype found in the history:" + subtypeHashCode);
-                        }
-                        return new Pair<String, String>(imeInTheHistory, subtypeHashCode);
-                    }
-                }
-            }
-            if (DEBUG) {
-                Slog.d(TAG, "No enabled IME found in the history");
-            }
-            return null;
-        }
-
-        private String getEnabledSubtypeForInputMethodAndSubtypeLocked(List<Pair<String,
-                ArrayList<String>>> enabledImes, String imeId, String subtypeHashCode) {
-            for (Pair<String, ArrayList<String>> enabledIme: enabledImes) {
-                if (enabledIme.first.equals(imeId)) {
-                    for (String s: enabledIme.second) {
-                        if (s.equals(subtypeHashCode)) {
-                            // If both imeId and subtypeId are enabled, return subtypeId.
-                            return s;
-                        }
-                    }
-                    // If imeId was enabled but subtypeId was disabled.
-                    return NOT_A_SUBTYPE_ID_STR;
-                }
-            }
-            // If both imeId and subtypeId are disabled, return null
-            return null;
-        }
-
-        private List<Pair<String, String>> loadInputMethodAndSubtypeHistoryLocked() {
-            ArrayList<Pair<String, String>> imsList = new ArrayList<Pair<String, String>>();
-            final String subtypeHistoryStr = getSubtypeHistoryStr();
-            if (TextUtils.isEmpty(subtypeHistoryStr)) {
-                return imsList;
-            }
-            mInputMethodSplitter.setString(subtypeHistoryStr);
-            while (mInputMethodSplitter.hasNext()) {
-                String nextImsStr = mInputMethodSplitter.next();
-                mSubtypeSplitter.setString(nextImsStr);
-                if (mSubtypeSplitter.hasNext()) {
-                    String subtypeId = NOT_A_SUBTYPE_ID_STR;
-                    // The first element is ime id.
-                    String imeId = mSubtypeSplitter.next();
-                    while (mSubtypeSplitter.hasNext()) {
-                        subtypeId = mSubtypeSplitter.next();
-                        break;
-                    }
-                    imsList.add(new Pair<String, String>(imeId, subtypeId));
-                }
-            }
-            return imsList;
-        }
-
-        private String getSubtypeHistoryStr() {
-            if (DEBUG) {
-                Slog.d(TAG, "getSubtypeHistoryStr: " + Settings.Secure.getString(
-                        mResolver, Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY));
-            }
-            return Settings.Secure.getString(
-                    mResolver, Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY);
-        }
-
-        public void putSelectedInputMethod(String imeId) {
-            Settings.Secure.putString(mResolver, Settings.Secure.DEFAULT_INPUT_METHOD, imeId);
-        }
-
-        public void putSelectedSubtype(int subtypeId) {
-            Settings.Secure.putInt(
-                    mResolver, Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, subtypeId);
         }
     }
 
