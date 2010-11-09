@@ -33,6 +33,7 @@ struct NuHTTPDataSource : public DataSource {
 
     virtual DecryptHandle* DrmInitialization(DrmManagerClient *client);
     virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client);
+    virtual String8 getUri();
 
 protected:
     virtual ~NuHTTPDataSource();
