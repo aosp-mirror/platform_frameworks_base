@@ -16,6 +16,8 @@
 
 package com.android.internal.service.wallpaper;
 
+import java.io.IOException;
+
 import com.android.internal.view.WindowManagerPolicyThread;
 
 import android.app.WallpaperManager;
@@ -169,10 +171,26 @@ public class ImageWallpaper extends WallpaperService {
 
         void updateWallpaper() {
             synchronized (mLock) {
+                Throwable exception = null;
                 try {
                     mBackground = mWallpaperManager.getFastDrawable();
                 } catch (RuntimeException e) {
-                    Log.w("ImageWallpaper", "Unable to load wallpaper!", e);
+                    exception = e;
+                } catch (OutOfMemoryError e) {
+                    exception = e;
+                }
+                if (exception != null) {
+                    mBackground = null;
+                    // Note that if we do fail at this, and the default wallpaper can't
+                    // be loaded, we will go into a cycle.  Don't do a build where the
+                    // default wallpaper can't be loaded.
+                    Log.w("ImageWallpaper", "Unable to load wallpaper!", exception);
+                    try {
+                        mWallpaperManager.clear();
+                    } catch (IOException ex) {
+                        // now we're really screwed.
+                        Log.w("ImageWallpaper", "Unable reset to default wallpaper!", ex);
+                    }
                 }
             }
         }
