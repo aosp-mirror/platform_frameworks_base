@@ -24,24 +24,18 @@
 using namespace android;
 using namespace android::renderscript;
 
-Device::Device()
-{
+Device::Device() {
     mForceSW = false;
-
 }
 
-Device::~Device()
-{
-
+Device::~Device() {
 }
 
-void Device::addContext(Context *rsc)
-{
+void Device::addContext(Context *rsc) {
     mContexts.push(rsc);
 }
 
-void Device::removeContext(Context *rsc)
-{
+void Device::removeContext(Context *rsc) {
     for (size_t idx=0; idx < mContexts.size(); idx++) {
         if (mContexts[idx] == rsc) {
             mContexts.removeAt(idx);
@@ -50,23 +44,17 @@ void Device::removeContext(Context *rsc)
     }
 }
 
-
-
-RsDevice rsDeviceCreate()
-{
+RsDevice rsDeviceCreate() {
     Device * d = new Device();
     return d;
 }
 
-void rsDeviceDestroy(RsDevice dev)
-{
+void rsDeviceDestroy(RsDevice dev) {
     Device * d = static_cast<Device *>(dev);
     delete d;
-
 }
 
-void rsDeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value)
-{
+void rsDeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value) {
     Device * d = static_cast<Device *>(dev);
     if (p == RS_DEVICE_PARAM_FORCE_SOFTWARE_GL) {
         d->mForceSW = value != 0;

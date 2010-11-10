@@ -21,25 +21,21 @@
 using namespace android;
 using namespace android::renderscript;
 
-ThreadIO::ThreadIO()
-{
+ThreadIO::ThreadIO() {
     mToCore.init(16 * 1024);
     mToClient.init(1024);
 }
 
-ThreadIO::~ThreadIO()
-{
+ThreadIO::~ThreadIO() {
 }
 
-void ThreadIO::shutdown()
-{
+void ThreadIO::shutdown() {
     mToCore.shutdown();
 }
 
-bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand)
-{
+bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand) {
     bool ret = false;
-    while(!mToCore.isEmpty() || waitForCommand) {
+    while (!mToCore.isEmpty() || waitForCommand) {
         uint32_t cmdID = 0;
         uint32_t cmdSize = 0;
         ret = true;

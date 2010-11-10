@@ -64,7 +64,7 @@ public class RsListView extends RSSurfaceView {
 
     @Override
     protected void onDetachedFromWindow() {
-        if(mRS != null) {
+        if (mRS != null) {
             mRS = null;
             destroyRenderScript();
         }
@@ -87,8 +87,7 @@ public class RsListView extends RSSurfaceView {
         if (act == ev.ACTION_DOWN) {
             mRender.onActionDown((int)ev.getX(), (int)ev.getY());
             ret = true;
-        }
-        else if (act == ev.ACTION_MOVE) {
+        } else if (act == ev.ACTION_MOVE) {
             mRender.onActionMove((int)ev.getX(), (int)ev.getY());
             ret = true;
         }

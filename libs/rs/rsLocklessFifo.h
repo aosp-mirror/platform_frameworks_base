@@ -30,8 +30,7 @@ namespace renderscript {
 // will not require locking.  It is not threadsafe for multiple
 // readers or writers by design.
 
-class LocklessCommandFifo
-{
+class LocklessCommandFifo {
 public:
     bool init(uint32_t size);
     void shutdown();
@@ -66,7 +65,6 @@ public:
 
     bool isEmpty() const;
     uint32_t getFreeSpace() const;
-
 
 private:
     void dumpState(const char *) const;

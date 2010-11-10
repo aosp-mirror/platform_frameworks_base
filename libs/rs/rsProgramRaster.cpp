@@ -30,12 +30,10 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramRaster::ProgramRaster(Context *rsc,
-                             bool pointSmooth,
-                             bool lineSmooth,
-                             bool pointSprite) :
-    Program(rsc)
-{
+ProgramRaster::ProgramRaster(Context *rsc, bool pointSmooth,
+                             bool lineSmooth, bool pointSprite)
+    : Program(rsc) {
+
     mPointSmooth = pointSmooth;
     mLineSmooth = lineSmooth;
     mPointSprite = pointSprite;
@@ -43,31 +41,27 @@ ProgramRaster::ProgramRaster(Context *rsc,
     mCull = RS_CULL_BACK;
 }
 
-ProgramRaster::~ProgramRaster()
-{
+ProgramRaster::~ProgramRaster() {
 }
 
-void ProgramRaster::setLineWidth(float s)
-{
+void ProgramRaster::setLineWidth(float s) {
     mLineWidth = s;
     mDirty = true;
 }
 
-void ProgramRaster::setCullMode(RsCullMode mode)
-{
+void ProgramRaster::setCullMode(RsCullMode mode) {
     mCull = mode;
     mDirty = true;
 }
 
-void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state)
-{
+void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state) {
     if (state->mLast.get() == this && !mDirty) {
         return;
     }
     state->mLast.set(this);
     mDirty = false;
 
-    switch(mCull) {
+    switch (mCull) {
         case RS_CULL_BACK:
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
@@ -82,36 +76,28 @@ void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state)
     }
 }
 
-void ProgramRaster::serialize(OStream *stream) const
-{
-
+void ProgramRaster::serialize(OStream *stream) const {
 }
 
-ProgramRaster *ProgramRaster::createFromStream(Context *rsc, IStream *stream)
-{
+ProgramRaster *ProgramRaster::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
 
-ProgramRasterState::ProgramRasterState()
-{
+ProgramRasterState::ProgramRasterState() {
 }
 
-ProgramRasterState::~ProgramRasterState()
-{
+ProgramRasterState::~ProgramRasterState() {
 }
 
-void ProgramRasterState::init(Context *rsc)
-{
+void ProgramRasterState::init(Context *rsc) {
     ProgramRaster *pr = new ProgramRaster(rsc, false, false, false);
     mDefault.set(pr);
 }
 
-void ProgramRasterState::deinit(Context *rsc)
-{
+void ProgramRasterState::deinit(Context *rsc) {
     mDefault.clear();
     mLast.clear();
 }
-
 
 namespace android {
 namespace renderscript {
@@ -119,28 +105,26 @@ namespace renderscript {
 RsProgramRaster rsi_ProgramRasterCreate(Context * rsc,
                                       bool pointSmooth,
                                       bool lineSmooth,
-                                      bool pointSprite)
-{
-    ProgramRaster *pr = new ProgramRaster(rsc,
-                                          pointSmooth,
-                                          lineSmooth,
-                                          pointSprite);
+                                      bool pointSprite) {
+    ProgramRaster *pr = new ProgramRaster(rsc, pointSmooth,
+                                          lineSmooth, pointSprite);
     pr->incUserRef();
     return pr;
 }
 
-void rsi_ProgramRasterSetLineWidth(Context * rsc, RsProgramRaster vpr, float s)
-{
+void rsi_ProgramRasterSetLineWidth(Context * rsc,
+                                   RsProgramRaster vpr,
+                                   float s) {
     ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
     pr->setLineWidth(s);
 }
 
-void rsi_ProgramRasterSetCullMode(Context * rsc, RsProgramRaster vpr, RsCullMode mode)
-{
+void rsi_ProgramRasterSetCullMode(Context * rsc,
+                                  RsProgramRaster vpr,
+                                  RsCullMode mode) {
     ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
     pr->setCullMode(mode);
 }
-
 
 }
 }

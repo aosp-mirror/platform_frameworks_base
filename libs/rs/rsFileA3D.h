@@ -31,8 +31,7 @@ namespace android {
 
 namespace renderscript {
 
-class FileA3D : public ObjectBase
-{
+class FileA3D : public ObjectBase {
 public:
     FileA3D(Context *rsc);
     ~FileA3D();

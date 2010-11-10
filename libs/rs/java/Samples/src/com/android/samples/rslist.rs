@@ -56,12 +56,12 @@ int root(int launchID) {
     int itemHeight = 80;
     int currentYPos = itemHeight + textPos;
 
-    for(int i = 0; i < allocSize; i ++) {
-        if(currentYPos - itemHeight > height) {
+    for (int i = 0; i < allocSize; i ++) {
+        if (currentYPos - itemHeight > height) {
             break;
         }
 
-        if(currentYPos > 0) {
+        if (currentYPos > 0) {
             rsgDrawRect(0, currentYPos - 1, width, currentYPos, 0);
             rsgDrawText(gList[i].text, 30, currentYPos - 32);
         }

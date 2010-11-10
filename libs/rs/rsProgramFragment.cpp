@@ -33,9 +33,9 @@ using namespace android::renderscript;
 
 ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
                                  uint32_t shaderLength, const uint32_t * params,
-                                 uint32_t paramLength) :
-    Program(rsc, shaderText, shaderLength, params, paramLength)
-{
+                                 uint32_t paramLength)
+    : Program(rsc, shaderText, shaderLength, params, paramLength) {
+
     mConstantColor[0] = 1.f;
     mConstantColor[1] = 1.f;
     mConstantColor[2] = 1.f;
@@ -44,21 +44,19 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
     init(rsc);
 }
 
-ProgramFragment::~ProgramFragment()
-{
-    if(mShaderID) {
+ProgramFragment::~ProgramFragment() {
+    if (mShaderID) {
         mRSC->mShaderCache.cleanupFragment(mShaderID);
     }
 }
 
-void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, float a)
-{
-    if(isUserProgram()) {
+void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, float a) {
+    if (isUserProgram()) {
         LOGE("Attempting to set fixed function emulation color on user program");
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot  set fixed function emulation color on user program");
         return;
     }
-    if(mConstants[0].get() == NULL) {
+    if (mConstants[0].get() == NULL) {
         LOGE("Unable to set fixed function emulation color because allocation is missing");
         rsc->setError(RS_ERROR_BAD_SHADER, "Unable to set fixed function emulation color because allocation is missing");
         return;
@@ -71,8 +69,7 @@ void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, 
     mDirty = true;
 }
 
-void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state, ShaderCache *sc)
-{
+void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state, ShaderCache *sc) {
     //LOGE("sgl2 frag1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
         return;
@@ -86,7 +83,7 @@ void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state, Shader
 
     uint32_t numTexturesToBind = mTextureCount;
     uint32_t numTexturesAvailable = rsc->getMaxFragmentTextures();
-    if(numTexturesToBind >= numTexturesAvailable) {
+    if (numTexturesToBind >= numTexturesAvailable) {
         LOGE("Attempting to bind %u textures on shader id %u, but only %u are available",
              mTextureCount, (uint32_t)this, numTexturesAvailable);
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind more textuers than available");
@@ -127,8 +124,7 @@ void ProgramFragment::loadShader(Context *rsc) {
     Program::loadShader(rsc, GL_FRAGMENT_SHADER);
 }
 
-void ProgramFragment::createShader()
-{
+void ProgramFragment::createShader() {
     if (mUserShader.length() > 1) {
         mShader.append("precision mediump float;\n");
         appendUserConstants();
@@ -144,8 +140,7 @@ void ProgramFragment::createShader()
     }
 }
 
-void ProgramFragment::init(Context *rsc)
-{
+void ProgramFragment::init(Context *rsc) {
     uint32_t uniformIndex = 0;
     if (mUserShader.size() > 0) {
         for (uint32_t ct=0; ct < mConstantCount; ct++) {
@@ -164,29 +159,23 @@ void ProgramFragment::init(Context *rsc)
     createShader();
 }
 
-void ProgramFragment::serialize(OStream *stream) const
-{
-
+void ProgramFragment::serialize(OStream *stream) const {
 }
 
-ProgramFragment *ProgramFragment::createFromStream(Context *rsc, IStream *stream)
-{
+ProgramFragment *ProgramFragment::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
 
-ProgramFragmentState::ProgramFragmentState()
-{
+ProgramFragmentState::ProgramFragmentState() {
     mPF = NULL;
 }
 
-ProgramFragmentState::~ProgramFragmentState()
-{
+ProgramFragmentState::~ProgramFragmentState() {
     ObjectBase::checkDelete(mPF);
     mPF = NULL;
 }
 
-void ProgramFragmentState::init(Context *rsc)
-{
+void ProgramFragmentState::init(Context *rsc) {
     String8 shaderString(RS_SHADER_INTERNAL);
     shaderString.append("varying lowp vec4 varColor;\n");
     shaderString.append("varying vec2 varTex0;\n");
@@ -217,20 +206,17 @@ void ProgramFragmentState::init(Context *rsc)
     mDefault.set(pf);
 }
 
-void ProgramFragmentState::deinit(Context *rsc)
-{
+void ProgramFragmentState::deinit(Context *rsc) {
     mDefault.clear();
     mLast.clear();
 }
-
 
 namespace android {
 namespace renderscript {
 
 RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc, const char * shaderText,
                              uint32_t shaderLength, const uint32_t * params,
-                             uint32_t paramLength)
-{
+                             uint32_t paramLength) {
     ProgramFragment *pf = new ProgramFragment(rsc, shaderText, shaderLength, params, paramLength);
     pf->incUserRef();
     //LOGE("rsi_ProgramFragmentCreate %p", pf);

@@ -24,8 +24,7 @@
 namespace android {
 namespace renderscript {
 
-class IStream
-{
+class IStream {
 public:
     IStream(const uint8_t *, bool use64);
 
@@ -70,7 +69,7 @@ public:
     void reset() {
         mPos = 0;
     }
-    
+
     const uint8_t * getPtr() const {
         return mData;
     }
@@ -80,26 +79,25 @@ protected:
     bool mUse64;
 };
 
-class OStream
-{
+class OStream {
 public:
     OStream(uint64_t length, bool use64);
     ~OStream();
-    
+
     void align(uint32_t bytes) {
         mPos = (mPos + (bytes - 1)) & (~(bytes - 1));
-        if(mPos >= mLength) {
+        if (mPos >= mLength) {
             growSize();
         }
     }
-    
+
     void addF(float v) {
         uint32_t uintV = *reinterpret_cast<uint32_t*> (&v);
         addU32(uintV);
     }
     void addI32(int32_t v) {
         mPos = (mPos + 3) & (~3);
-        if(mPos + sizeof(v) >= mLength) {
+        if (mPos + sizeof(v) >= mLength) {
             growSize();
         }
         mData[mPos++] = (uint8_t)(v & 0xff);
@@ -109,7 +107,7 @@ public:
     }
     void addU32(uint32_t v) {
         mPos = (mPos + 3) & (~3);
-        if(mPos + sizeof(v) >= mLength) {
+        if (mPos + sizeof(v) >= mLength) {
             growSize();
         }
         mData[mPos++] = (uint8_t)(v & 0xff);
@@ -119,14 +117,14 @@ public:
     }
     void addU16(uint16_t v) {
         mPos = (mPos + 1) & (~1);
-        if(mPos + sizeof(v) >= mLength) {
+        if (mPos + sizeof(v) >= mLength) {
             growSize();
         }
         mData[mPos++] = (uint8_t)(v & 0xff);
         mData[mPos++] = (uint8_t)(v >> 8);
     }
     inline void addU8(uint8_t v) {
-        if(mPos + 1 >= mLength) {
+        if (mPos + 1 >= mLength) {
             growSize();
         }
         reinterpret_cast<uint8_t *>(&mData[mPos])[0] = v;
@@ -154,7 +152,7 @@ protected:
     uint64_t mPos;
     bool mUse64;
 };
-    
+
 
 } // renderscript
 } // android

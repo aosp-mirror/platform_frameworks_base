@@ -25,15 +25,13 @@
 using namespace android;
 using namespace android::renderscript;
 
-Type::Type(Context *rsc) : ObjectBase(rsc)
-{
+Type::Type(Context *rsc) : ObjectBase(rsc) {
     mLODs = 0;
     mLODCount = 0;
     clear();
 }
 
-void Type::preDestroy()
-{
+void Type::preDestroy() {
     for (uint32_t ct = 0; ct < mRSC->mStateType.mTypes.size(); ct++) {
         if (mRSC->mStateType.mTypes[ct] == this) {
             mRSC->mStateType.mTypes.removeAt(ct);
@@ -42,16 +40,14 @@ void Type::preDestroy()
     }
 }
 
-Type::~Type()
-{
+Type::~Type() {
     if (mLODs) {
         delete [] mLODs;
         mLODs = NULL;
     }
 }
 
-void Type::clear()
-{
+void Type::clear() {
     if (mLODs) {
         delete [] mLODs;
         mLODs = NULL;
@@ -64,22 +60,18 @@ void Type::clear()
     mElement.clear();
 }
 
-TypeState::TypeState()
-{
+TypeState::TypeState() {
 }
 
-TypeState::~TypeState()
-{
+TypeState::~TypeState() {
 }
 
-size_t Type::getOffsetForFace(uint32_t face) const
-{
+size_t Type::getOffsetForFace(uint32_t face) const {
     rsAssert(mFaces);
     return 0;
 }
 
-void Type::compute()
-{
+void Type::compute() {
     uint32_t oldLODCount = mLODCount;
     if (mDimLOD) {
         uint32_t l2x = rsFindHighBit(mDimX) + 1;
@@ -92,7 +84,7 @@ void Type::compute()
         mLODCount = 1;
     }
     if (mLODCount != oldLODCount) {
-        if(mLODs){
+        if (mLODs){
             delete [] mLODs;
         }
         mLODs = new LOD[mLODCount];
@@ -122,29 +114,25 @@ void Type::compute()
     mTotalSizeBytes = offset;
 }
 
-uint32_t Type::getLODOffset(uint32_t lod, uint32_t x) const
-{
+uint32_t Type::getLODOffset(uint32_t lod, uint32_t x) const {
     uint32_t offset = mLODs[lod].mOffset;
     offset += x * mElement->getSizeBytes();
     return offset;
 }
 
-uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y) const
-{
+uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y) const {
     uint32_t offset = mLODs[lod].mOffset;
     offset += (x + y * mLODs[lod].mX) * mElement->getSizeBytes();
     return offset;
 }
 
-uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) const
-{
+uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) const {
     uint32_t offset = mLODs[lod].mOffset;
     offset += (x + y*mLODs[lod].mX + z*mLODs[lod].mX*mLODs[lod].mY) * mElement->getSizeBytes();
     return offset;
 }
 
-void Type::dumpLOGV(const char *prefix) const
-{
+void Type::dumpLOGV(const char *prefix) const {
     char buf[1024];
     ObjectBase::dumpLOGV(prefix);
     LOGV("%s   Type: x=%i y=%i z=%i mip=%i face=%i", prefix, mDimX, mDimY, mDimZ, mDimLOD, mFaces);
@@ -152,8 +140,7 @@ void Type::dumpLOGV(const char *prefix) const
     mElement->dumpLOGV(buf);
 }
 
-void Type::serialize(OStream *stream) const
-{
+void Type::serialize(OStream *stream) const {
     // Need to identify ourselves
     stream->addU32((uint32_t)getClassId());
 
@@ -170,11 +157,10 @@ void Type::serialize(OStream *stream) const
     stream->addU8((uint8_t)(mFaces ? 1 : 0));
 }
 
-Type *Type::createFromStream(Context *rsc, IStream *stream)
-{
+Type *Type::createFromStream(Context *rsc, IStream *stream) {
     // First make sure we are reading the correct object
     RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
-    if(classID != RS_A3D_CLASS_ID_TYPE) {
+    if (classID != RS_A3D_CLASS_ID_TYPE) {
         LOGE("type loading skipped due to invalid class id\n");
         return NULL;
     }
@@ -183,7 +169,7 @@ Type *Type::createFromStream(Context *rsc, IStream *stream)
     stream->loadString(&name);
 
     Element *elem = Element::createFromStream(rsc, stream);
-    if(!elem) {
+    if (!elem) {
         return NULL;
     }
 
@@ -195,8 +181,7 @@ Type *Type::createFromStream(Context *rsc, IStream *stream)
     return Type::getType(rsc, elem, x, y, z, lod != 0, faces !=0 );
 }
 
-bool Type::getIsNp2() const
-{
+bool Type::getIsNp2() const {
     uint32_t x = getDimX();
     uint32_t y = getDimY();
     uint32_t z = getDimZ();
@@ -214,7 +199,7 @@ bool Type::getIsNp2() const
 }
 
 bool Type::isEqual(const Type *other) const {
-    if(other == NULL) {
+    if (other == NULL) {
         return false;
     }
     if (other->getElement()->isEqual(getElement()) &&
@@ -230,8 +215,7 @@ bool Type::isEqual(const Type *other) const {
 
 Type * Type::getType(Context *rsc, const Element *e,
                      uint32_t dimX, uint32_t dimY, uint32_t dimZ,
-                     bool dimLOD, bool dimFaces)
-{
+                     bool dimLOD, bool dimFaces) {
     TypeState * stc = &rsc->mStateType;
 
     ObjectBase::asyncLock();
@@ -267,14 +251,14 @@ Type * Type::getType(Context *rsc, const Element *e,
     return nt;
 }
 
-Type * Type::cloneAndResize1D(Context *rsc, uint32_t dimX) const
-{
+Type * Type::cloneAndResize1D(Context *rsc, uint32_t dimX) const {
     return getType(rsc, mElement.get(), dimX,
                    mDimY, mDimZ, mDimLOD, mFaces);
 }
 
-Type * Type::cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const
-{
+Type * Type::cloneAndResize2D(Context *rsc,
+                              uint32_t dimX,
+                              uint32_t dimY) const {
     return getType(rsc, mElement.get(), dimX, dimY,
                    mDimZ, mDimLOD, mFaces);
 }
@@ -289,8 +273,7 @@ namespace renderscript {
 }
 
 RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
-                     const RsDimension *dims, const uint32_t *vals)
-{
+                     const RsDimension *dims, const uint32_t *vals) {
     Context *rsc = static_cast<Context *>(con);
     Element *e = static_cast<Element *>(_e);
     TypeState * stc = &rsc->mStateType;
@@ -302,7 +285,7 @@ RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
     uint32_t dimFaces = 0;
 
     for (uint32_t ct=0; ct < dimCount; ct++) {
-        switch(dims[ct]) {
+        switch (dims[ct]) {
         case RS_DIMENSION_X: dimX = vals[ct]; break;
         case RS_DIMENSION_Y: dimY = vals[ct]; break;
         case RS_DIMENSION_Z: dimZ = vals[ct]; break;
@@ -318,8 +301,7 @@ RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimCount,
     return Type::getType(rsc, e, dimX, dimY, dimZ, dimLOD, dimFaces);
 }
 
-void rsaTypeGetNativeData(RsContext con, RsType type, uint32_t *typeData, uint32_t typeDataSize)
-{
+void rsaTypeGetNativeData(RsContext con, RsType type, uint32_t *typeData, uint32_t typeDataSize) {
     rsAssert(typeDataSize == 6);
     // Pack the data in the follofing way mDimX; mDimY; mDimZ;
     // mDimLOD; mDimFaces; mElement; into typeData

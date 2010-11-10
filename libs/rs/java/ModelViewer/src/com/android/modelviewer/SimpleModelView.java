@@ -64,7 +64,7 @@ public class SimpleModelView extends RSSurfaceView {
 
     @Override
     protected void onDetachedFromWindow() {
-        if(mRS != null) {
+        if (mRS != null) {
             mRS = null;
             destroyRenderScript();
         }

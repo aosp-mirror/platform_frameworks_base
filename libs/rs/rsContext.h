@@ -51,13 +51,13 @@ namespace renderscript {
 #if 0
 #define CHECK_OBJ(o) { \
     GET_TLS(); \
-    if(!ObjectBase::isValid(rsc, (const ObjectBase *)o)) {  \
+    if (!ObjectBase::isValid(rsc, (const ObjectBase *)o)) {  \
         LOGE("Bad object %p at %s, %i", o, __FILE__, __LINE__);  \
     } \
 }
 #define CHECK_OBJ_OR_NULL(o) { \
     GET_TLS(); \
-    if(o && !ObjectBase::isValid(rsc, (const ObjectBase *)o)) {  \
+    if (o && !ObjectBase::isValid(rsc, (const ObjectBase *)o)) {  \
         LOGE("Bad object %p at %s, %i", o, __FILE__, __LINE__);  \
     } \
 }
@@ -66,8 +66,7 @@ namespace renderscript {
 #define CHECK_OBJ_OR_NULL(o)
 #endif
 
-class Context
-{
+class Context {
 public:
     static Context * createContext(Device *, const RsSurfaceConfig *sc);
     ~Context();
@@ -154,7 +153,6 @@ public:
 
     uint32_t getWidth() const {return mWidth;}
     uint32_t getHeight() const {return mHeight;}
-
 
     ThreadIO mIO;
 

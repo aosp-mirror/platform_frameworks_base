@@ -26,21 +26,18 @@
 using namespace android;
 using namespace android::renderscript;
 
-IStream::IStream(const uint8_t *buf, bool use64)
-{
+IStream::IStream(const uint8_t *buf, bool use64) {
     mData = buf;
     mPos = 0;
     mUse64 = use64;
 }
 
-void IStream::loadByteArray(void *dest, size_t numBytes)
-{
+void IStream::loadByteArray(void *dest, size_t numBytes) {
     memcpy(dest, mData + mPos, numBytes);
     mPos += numBytes;
 }
 
-uint64_t IStream::loadOffset()
-{
+uint64_t IStream::loadOffset() {
     uint64_t tmp;
     if (mUse64) {
         mPos = (mPos + 7) & (~7);
@@ -51,44 +48,37 @@ uint64_t IStream::loadOffset()
     return loadU32();
 }
 
-void IStream::loadString(String8 *s)
-{
+void IStream::loadString(String8 *s) {
     uint32_t len = loadU32();
     s->setTo((const char *)&mData[mPos], len);
     mPos += len;
 }
 
-
 // Output stream implementation
-
-OStream::OStream(uint64_t len, bool use64)
-{
+OStream::OStream(uint64_t len, bool use64) {
     mData = (uint8_t*)malloc(len);
     mLength = len;
     mPos = 0;
     mUse64 = use64;
 }
 
-OStream::~OStream()
-{
+OStream::~OStream() {
     free(mData);
 }
 
-void OStream::addByteArray(const void *src, size_t numBytes)
-{
+void OStream::addByteArray(const void *src, size_t numBytes) {
     // We need to potentially grow more than once if the number of byes we write is substantial
-    while(mPos + numBytes >= mLength) {
+    while (mPos + numBytes >= mLength) {
         growSize();
     }
     memcpy(mData + mPos, src, numBytes);
     mPos += numBytes;
 }
 
-void OStream::addOffset(uint64_t v)
-{
+void OStream::addOffset(uint64_t v) {
     if (mUse64) {
         mPos = (mPos + 7) & (~7);
-        if(mPos + sizeof(v) >= mLength) {
+        if (mPos + sizeof(v) >= mLength) {
             growSize();
         }
         mData[mPos++] = (uint8_t)(v & 0xff);
@@ -99,28 +89,25 @@ void OStream::addOffset(uint64_t v)
         mData[mPos++] = (uint8_t)((v >> 40) & 0xff);
         mData[mPos++] = (uint8_t)((v >> 48) & 0xff);
         mData[mPos++] = (uint8_t)((v >> 56) & 0xff);
-    }
-    else {
+    } else {
         addU32(v);
     }
 }
 
-void OStream::addString(String8 *s)
-{
+void OStream::addString(String8 *s) {
     uint32_t len = s->size();
     addU32(len);
-    if(mPos + len*sizeof(char) >= mLength) {
+    if (mPos + len*sizeof(char) >= mLength) {
         growSize();
     }
     char *stringData = reinterpret_cast<char *>(&mData[mPos]);
-    for(uint32_t i = 0; i < len; i ++) {
+    for (uint32_t i = 0; i < len; i ++) {
         stringData[i] = s->string()[i];
     }
     mPos += len*sizeof(char);
 }
 
-void OStream::growSize()
-{
+void OStream::growSize() {
     uint8_t *newData = (uint8_t*)malloc(mLength*2);
     memcpy(newData, mData, mLength*sizeof(uint8_t));
     mLength = mLength * 2;

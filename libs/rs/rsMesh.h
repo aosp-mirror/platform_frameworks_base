@@ -26,8 +26,7 @@ namespace renderscript {
 
 
 // An element is a group of Components that occupies one cell in a structure.
-class Mesh : public ObjectBase
-{
+class Mesh : public ObjectBase {
 public:
     Mesh(Context *);
     ~Mesh();
@@ -79,14 +78,11 @@ protected:
     uint32_t mAttribCount;
 };
 
-class MeshContext
-{
+class MeshContext {
 public:
     MeshContext();
     ~MeshContext();
-
 };
-
 
 }
 }

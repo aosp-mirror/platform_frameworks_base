@@ -27,8 +27,7 @@ namespace renderscript {
 
 
 // An element is a group of Components that occupies one cell in a structure.
-class ShaderCache
-{
+class ShaderCache {
 public:
     ShaderCache();
     virtual ~ShaderCache();
@@ -56,12 +55,12 @@ protected:
         UniformQueryData(uint32_t maxName) {
             name = NULL;
             nameLength = maxName;
-            if(nameLength > 0 ) {
+            if (nameLength > 0 ) {
                 name = new char[nameLength];
             }
         }
         ~UniformQueryData() {
-            if(name != NULL) {
+            if (name != NULL) {
                 delete[] name;
                 name = NULL;
             }
@@ -80,26 +79,26 @@ protected:
                      uint32_t numFragUnis) : vtx(0), frag(0), program(0), vtxAttrCount(0),
                                              vtxAttrs(0), vtxUniforms(0), fragUniforms(0) {
             vtxAttrCount = numVtxAttr;
-            if(numVtxAttr) {
+            if (numVtxAttr) {
                 vtxAttrs = new AttrData[numVtxAttr];
             }
-            if(numVtxUnis) {
+            if (numVtxUnis) {
                 vtxUniforms = new UniformData[numVtxUnis];
             }
-            if(numFragUnis) {
+            if (numFragUnis) {
                 fragUniforms = new UniformData[numFragUnis];
             }
         }
         ~ProgramEntry() {
-            if(vtxAttrs) {
+            if (vtxAttrs) {
                 delete[] vtxAttrs;
                 vtxAttrs = NULL;
             }
-            if(vtxUniforms) {
+            if (vtxUniforms) {
                 delete[] vtxUniforms;
                 vtxUniforms = NULL;
             }
-            if(fragUniforms) {
+            if (fragUniforms) {
                 delete[] fragUniforms;
                 fragUniforms = NULL;
             }
@@ -111,7 +110,6 @@ protected:
         AttrData *vtxAttrs;
         UniformData *vtxUniforms;
         UniformData *fragUniforms;
-
     };
     Vector<ProgramEntry*> mEntries;
     ProgramEntry *mCurrent;

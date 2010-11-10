@@ -19,35 +19,33 @@
 using namespace android;
 using namespace android::renderscript;
 
-Script::Script(Context *rsc) : ObjectBase(rsc)
-{
+Script::Script(Context *rsc) : ObjectBase(rsc) {
     memset(&mEnviroment, 0, sizeof(mEnviroment));
 
     mSlots = NULL;
     mTypes = NULL;
 }
 
-Script::~Script()
-{
-    if(mSlots) {
+Script::~Script() {
+    if (mSlots) {
         delete [] mSlots;
         mSlots = NULL;
     }
-    if(mTypes) {
+    if (mTypes) {
         delete [] mTypes;
         mTypes = NULL;
     }
 }
 
 void Script::initSlots() {
-    if(mEnviroment.mFieldCount > 0) {
+    if (mEnviroment.mFieldCount > 0) {
         mSlots = new ObjectBaseRef<Allocation>[mEnviroment.mFieldCount];
         mTypes = new ObjectBaseRef<const Type>[mEnviroment.mFieldCount];
     }
 }
 
 void Script::setSlot(uint32_t slot, Allocation *a) {
-    if(slot >= mEnviroment.mFieldCount) {
+    if (slot >= mEnviroment.mFieldCount) {
         LOGE("Script::setSlot unable to set allocation, invalid slot index");
         return;
     }
@@ -55,8 +53,7 @@ void Script::setSlot(uint32_t slot, Allocation *a) {
     mSlots[slot].set(a);
 }
 
-void Script::setVar(uint32_t slot, const void *val, uint32_t len)
-{
+void Script::setVar(uint32_t slot, const void *val, uint32_t len) {
     int32_t *destPtr = ((int32_t **)mEnviroment.mFieldAddress)[slot];
     if (destPtr) {
         //LOGE("setVar f1  %f", ((const float *)destPtr)[0]);
@@ -73,71 +70,59 @@ void Script::setVar(uint32_t slot, const void *val, uint32_t len)
 namespace android {
 namespace renderscript {
 
-
-void rsi_ScriptBindAllocation(Context * rsc, RsScript vs, RsAllocation va, uint32_t slot)
-{
+void rsi_ScriptBindAllocation(Context * rsc, RsScript vs, RsAllocation va, uint32_t slot) {
     Script *s = static_cast<Script *>(vs);
     Allocation *a = static_cast<Allocation *>(va);
     s->setSlot(slot, a);
     //LOGE("rsi_ScriptBindAllocation %i  %p  %p", slot, a, a->getPtr());
 }
 
-void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, uint32_t length)
-{
+void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, uint32_t length) {
     Script *s = static_cast<Script *>(vs);
     s->mEnviroment.mTimeZone = timeZone;
 }
 
-void rsi_ScriptInvoke(Context *rsc, RsScript vs, uint32_t slot)
-{
+void rsi_ScriptInvoke(Context *rsc, RsScript vs, uint32_t slot) {
     Script *s = static_cast<Script *>(vs);
     s->Invoke(rsc, slot, NULL, 0);
 }
 
 
-void rsi_ScriptInvokeData(Context *rsc, RsScript vs, uint32_t slot, void *data)
-{
+void rsi_ScriptInvokeData(Context *rsc, RsScript vs, uint32_t slot, void *data) {
     Script *s = static_cast<Script *>(vs);
     s->Invoke(rsc, slot, NULL, 0);
 }
 
-void rsi_ScriptInvokeV(Context *rsc, RsScript vs, uint32_t slot, const void *data, uint32_t len)
-{
+void rsi_ScriptInvokeV(Context *rsc, RsScript vs, uint32_t slot, const void *data, uint32_t len) {
     Script *s = static_cast<Script *>(vs);
     s->Invoke(rsc, slot, data, len);
 }
 
-void rsi_ScriptSetVarI(Context *rsc, RsScript vs, uint32_t slot, int value)
-{
+void rsi_ScriptSetVarI(Context *rsc, RsScript vs, uint32_t slot, int value) {
     Script *s = static_cast<Script *>(vs);
     s->setVar(slot, &value, sizeof(value));
 }
 
-void rsi_ScriptSetVarJ(Context *rsc, RsScript vs, uint32_t slot, long long value)
-{
+void rsi_ScriptSetVarJ(Context *rsc, RsScript vs, uint32_t slot, long long value) {
     Script *s = static_cast<Script *>(vs);
     s->setVar(slot, &value, sizeof(value));
 }
 
-void rsi_ScriptSetVarF(Context *rsc, RsScript vs, uint32_t slot, float value)
-{
+void rsi_ScriptSetVarF(Context *rsc, RsScript vs, uint32_t slot, float value) {
     Script *s = static_cast<Script *>(vs);
     s->setVar(slot, &value, sizeof(value));
 }
 
-void rsi_ScriptSetVarD(Context *rsc, RsScript vs, uint32_t slot, double value)
-{
+void rsi_ScriptSetVarD(Context *rsc, RsScript vs, uint32_t slot, double value) {
     Script *s = static_cast<Script *>(vs);
     s->setVar(slot, &value, sizeof(value));
 }
 
-void rsi_ScriptSetVarV(Context *rsc, RsScript vs, uint32_t slot, const void *data, uint32_t len)
-{
+void rsi_ScriptSetVarV(Context *rsc, RsScript vs, uint32_t slot, const void *data, uint32_t len) {
     const float *fp = (const float *)data;
     Script *s = static_cast<Script *>(vs);
     s->setVar(slot, data, len);
 }
-
 
 }
 }

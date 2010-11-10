@@ -736,11 +736,11 @@ rsQuaternionNormalize(rs_quaternion *q) {
 
 static void
 rsQuaternionSlerp(rs_quaternion *q, const rs_quaternion *q0, const rs_quaternion *q1, float t) {
-    if(t <= 0.0f) {
+    if (t <= 0.0f) {
         rsQuaternionSet(q, q0);
         return;
     }
-    if(t >= 1.0f) {
+    if (t >= 1.0f) {
         rsQuaternionSet(q, q1);
         return;
     }
@@ -750,7 +750,7 @@ rsQuaternionSlerp(rs_quaternion *q, const rs_quaternion *q0, const rs_quaternion
     rsQuaternionSet(&tempq1, q1);
 
     float angle = rsQuaternionDot(q0, q1);
-    if(angle < 0) {
+    if (angle < 0) {
         rsQuaternionMultiply(&tempq0, -1.0f);
         angle *= -1.0f;
     }
@@ -762,13 +762,11 @@ rsQuaternionSlerp(rs_quaternion *q, const rs_quaternion *q0, const rs_quaternion
             float invSinTheta = 1.0f / sin(theta);
             scale = sin(theta * (1.0f - t)) * invSinTheta;
             invScale = sin(theta * t) * invSinTheta;
-        }
-        else {
+        } else {
             scale = 1.0f - t;
             invScale = t;
         }
-    }
-    else {
+    } else {
         rsQuaternionSet(&tempq1, tempq0.z, -tempq0.y, tempq0.x, -tempq0.w);
         scale = sin(M_PI * (0.5f - t));
         invScale = sin(M_PI * t);
@@ -870,27 +868,27 @@ rsIsSphereInFrustum(float4 *sphere,
                       float4 *near, float4 *far) {
 
     float distToCenter = dot(left->xyz, sphere->xyz) + left->w;
-    if(distToCenter < -sphere->w) {
+    if (distToCenter < -sphere->w) {
         return false;
     }
     distToCenter = dot(right->xyz, sphere->xyz) + right->w;
-    if(distToCenter < -sphere->w) {
+    if (distToCenter < -sphere->w) {
         return false;
     }
     distToCenter = dot(top->xyz, sphere->xyz) + top->w;
-    if(distToCenter < -sphere->w) {
+    if (distToCenter < -sphere->w) {
         return false;
     }
     distToCenter = dot(bottom->xyz, sphere->xyz) + bottom->w;
-    if(distToCenter < -sphere->w) {
+    if (distToCenter < -sphere->w) {
         return false;
     }
     distToCenter = dot(near->xyz, sphere->xyz) + near->w;
-    if(distToCenter < -sphere->w) {
+    if (distToCenter < -sphere->w) {
         return false;
     }
     distToCenter = dot(far->xyz, sphere->xyz) + far->w;
-    if(distToCenter < -sphere->w) {
+    if (distToCenter < -sphere->w) {
         return false;
     }
     return true;

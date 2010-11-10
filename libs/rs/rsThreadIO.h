@@ -42,7 +42,6 @@ public:
     LocklessCommandFifo mToClient;
 
     intptr_t mToCoreRet;
-
 };
 
 

@@ -57,7 +57,7 @@ public class FountainRS {
             return;
         }
         int rate = (int)(pressure * pressure * 500.f);
-        if(rate > 500) {
+        if (rate > 500) {
             rate = 500;
         }
         if (rate > 0) {

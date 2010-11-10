@@ -214,7 +214,7 @@ void displayBlendingSamples() {
     rsgBindProgramFragment(gProgFragmentColor);
 
     rsgBindProgramStore(gProgStoreBlendNone);
-    for(i = 0; i < 3; i ++) {
+    for (i = 0; i < 3; i ++) {
         float iPlusOne = (float)(i + 1);
         rsgProgramFragmentConstantColor(gProgFragmentColor,
                                         0.1f*iPlusOne, 0.2f*iPlusOne, 0.3f*iPlusOne, 1);
@@ -223,7 +223,7 @@ void displayBlendingSamples() {
     }
 
     rsgBindProgramStore(gProgStoreBlendAlpha);
-    for(i = 0; i < 3; i ++) {
+    for (i = 0; i < 3; i ++) {
         float iPlusOne = (float)(i + 1);
         rsgProgramFragmentConstantColor(gProgFragmentColor,
                                         0.2f*iPlusOne, 0.3f*iPlusOne, 0.1f*iPlusOne, 0.5);
@@ -232,7 +232,7 @@ void displayBlendingSamples() {
     }
 
     rsgBindProgramStore(gProgStoreBlendAdd);
-    for(i = 0; i < 3; i ++) {
+    for (i = 0; i < 3; i ++) {
         float iPlusOne = (float)(i + 1);
         rsgProgramFragmentConstantColor(gProgFragmentColor,
                                         0.3f*iPlusOne, 0.1f*iPlusOne, 0.2f*iPlusOne, 0.5);
@@ -342,7 +342,7 @@ void displayCullingSamples() {
 
     // Aplly a rotation to our mesh
     gTorusRotation += 50.0f * gDt;
-    if(gTorusRotation > 360.0f) {
+    if (gTorusRotation > 360.0f) {
         gTorusRotation -= 360.0f;
     }
 
@@ -379,11 +379,11 @@ void setupCustomShaderLights() {
     float4 light1SpecCol = {0.5f, 0.5f, 0.9f, 1.0f};
 
     gLight0Rotation += 50.0f * gDt;
-    if(gLight0Rotation > 360.0f) {
+    if (gLight0Rotation > 360.0f) {
         gLight0Rotation -= 360.0f;
     }
     gLight1Rotation -= 50.0f * gDt;
-    if(gLight1Rotation > 360.0f) {
+    if (gLight1Rotation > 360.0f) {
         gLight1Rotation -= 360.0f;
     }
 
@@ -439,7 +439,7 @@ void displayCustomShaderSamples() {
     // Load model matrix
     // Aplly a rotation to our mesh
     gTorusRotation += 50.0f * gDt;
-    if(gTorusRotation > 360.0f) {
+    if (gTorusRotation > 360.0f) {
         gTorusRotation -= 360.0f;
     }
 
@@ -475,7 +475,7 @@ void displayCustomShaderSamples2() {
     // Load model matrix
     // Aplly a rotation to our mesh
     gTorusRotation += 50.0f * gDt;
-    if(gTorusRotation > 360.0f) {
+    if (gTorusRotation > 360.0f) {
         gTorusRotation -= 360.0f;
     }
 
@@ -558,19 +558,17 @@ void displayAnisoSample() {
 
     rsgBindTexture(gProgFragmentTexture, 0, gTexChecker);
 
-    if(gAnisoTime >= 5.0f) {
+    if (gAnisoTime >= 5.0f) {
         gAnisoTime = 0.0f;
         anisoMode ++;
         anisoMode = anisoMode % 3;
     }
 
-    if(anisoMode == 0) {
+    if (anisoMode == 0) {
         rsgBindSampler(gProgFragmentTexture, 0, gMipLinearAniso8);
-    }
-    else if(anisoMode == 1) {
+    } else if (anisoMode == 1) {
         rsgBindSampler(gProgFragmentTexture, 0, gMipLinearAniso15);
-    }
-    else {
+    } else {
         rsgBindSampler(gProgFragmentTexture, 0, gMipLinearWrap);
     }
 
@@ -587,13 +585,11 @@ void displayAnisoSample() {
 
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgBindFont(gFontMono);
-    if(anisoMode == 0) {
+    if (anisoMode == 0) {
         rsgDrawText("Anisotropic filtering 8", 10, 40);
-    }
-    else if(anisoMode == 1) {
+    } else if (anisoMode == 1) {
         rsgDrawText("Anisotropic filtering 15", 10, 40);
-    }
-    else {
+    } else {
         rsgDrawText("Miplinear filtering", 10, 40);
     }
 }
@@ -605,7 +601,7 @@ int root(int launchID) {
     rsgClearColor(0.2f, 0.2f, 0.2f, 0.0f);
     rsgClearDepth(1.0f);
 
-    switch(gDisplayMode) {
+    switch (gDisplayMode) {
     case 0:
         displayFontSamples();
         break;

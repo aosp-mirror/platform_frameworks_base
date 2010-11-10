@@ -109,7 +109,7 @@ public class RsListRS {
         int dx = mLastX - x;
         int dy = mLastY - y;
 
-        if(Math.abs(dy) <= 2) {
+        if (Math.abs(dy) <= 2) {
             dy = 0;
         }
 
@@ -124,7 +124,7 @@ public class RsListRS {
         mScript = new ScriptC_rslist(mRS, mRes, R.raw.rslist);
 
         mListAllocs = new ScriptField_ListAllocs_s(mRS, DATA_LIST.length);
-        for(int i = 0; i < DATA_LIST.length; i ++) {
+        for (int i = 0; i < DATA_LIST.length; i ++) {
             ScriptField_ListAllocs_s.Item listElem = new ScriptField_ListAllocs_s.Item();
             listElem.text = Allocation.createFromString(mRS, DATA_LIST[i]);
             mListAllocs.set(listElem, i, false);

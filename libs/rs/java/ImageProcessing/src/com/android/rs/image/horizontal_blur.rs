@@ -11,13 +11,13 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
     const float *gPtr = fs->gaussian;
     if ((x > fs->radius) && (x < (fs->width - fs->radius))) {
         const float4 *i = input + (x - fs->radius);
-        for(int r = -fs->radius; r <= fs->radius; r ++) {
+        for (int r = -fs->radius; r <= fs->radius; r ++) {
             blurredPixel += i->xyz * gPtr[0];
             gPtr++;
             i++;
         }
     } else {
-        for(int r = -fs->radius; r <= fs->radius; r ++) {
+        for (int r = -fs->radius; r <= fs->radius; r ++) {
             // Stepping left and right away from the pixel
             int validW = rsClamp(x + r, (uint)0, (uint)(fs->width - 1));
             blurredPixel += input[validW].xyz * gPtr[0];
