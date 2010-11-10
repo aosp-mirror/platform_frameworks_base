@@ -748,121 +748,126 @@ public class VideoEditorTestImpl implements VideoEditor {
      */
     private void load() throws FileNotFoundException, XmlPullParserException, IOException {
         final File file = new File(mProjectPath, PROJECT_FILENAME);
-        // Load the metadata
-        final XmlPullParser parser = Xml.newPullParser();
         final FileInputStream fis = new FileInputStream(file);
-        parser.setInput(fis, "UTF-8");
-        int eventType = parser.getEventType();
-        String name;
-        MediaItem currentMediaItem = null;
-        Overlay currentOverlay = null;
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            switch (eventType) {
-                case XmlPullParser.START_TAG: {
-                    name = parser.getName();
-                    if (TAG_PROJECT.equals(name)) {
-                        mAspectRatio = Integer.parseInt(parser.getAttributeValue("",
-                                ATTR_ASPECT_RATIO));
-                    } else if (TAG_MEDIA_ITEM.equals(name)) {
-                        final String mediaItemId = parser.getAttributeValue("", ATTR_ID);
-                        final String type = parser.getAttributeValue("", ATTR_TYPE);
-                        final String filename = parser.getAttributeValue("", ATTR_FILENAME);
-                        final int renderingMode = Integer.parseInt(parser.getAttributeValue("",
-                                ATTR_RENDERING_MODE));
 
-                        if (MediaImageItem.class.getSimpleName().equals(type)) {
-                            final long durationMs = Long.parseLong(parser.getAttributeValue("",
-                                    ATTR_DURATION));
-                            currentMediaItem = new MediaImageItem(this, mediaItemId, filename,
-                                    durationMs, renderingMode);
-                        } else if (MediaVideoItem.class.getSimpleName().equals(type)) {
-                            final long beginMs = Long.parseLong(parser.getAttributeValue("",
-                                    ATTR_BEGIN_TIME));
-                            final long endMs = Long.parseLong(parser.getAttributeValue("",
-                                    ATTR_END_TIME));
-                            final int volume = Integer.parseInt(parser.getAttributeValue("",
-                                    ATTR_VOLUME));
-                            final boolean muted = Boolean.parseBoolean(parser.getAttributeValue("",
-                                    ATTR_MUTED));
-                            final String audioWaveformFilename = parser.getAttributeValue("",
-                                    ATTR_AUDIO_WAVEFORM_FILENAME);
-                            currentMediaItem = new MediaVideoItem(this, mediaItemId, filename,
-                                    renderingMode, beginMs, endMs, volume, muted,
-                                    audioWaveformFilename);
+        try {
+            // Load the metadata
+            final XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(fis, "UTF-8");
+            int eventType = parser.getEventType();
+            String name;
+            MediaItem currentMediaItem = null;
+            Overlay currentOverlay = null;
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    case XmlPullParser.START_TAG: {
+                        name = parser.getName();
+                        if (TAG_PROJECT.equals(name)) {
+                            mAspectRatio = Integer.parseInt(parser.getAttributeValue("",
+                                    ATTR_ASPECT_RATIO));
+                        } else if (TAG_MEDIA_ITEM.equals(name)) {
+                            final String mediaItemId = parser.getAttributeValue("", ATTR_ID);
+                            final String type = parser.getAttributeValue("", ATTR_TYPE);
+                            final String filename = parser.getAttributeValue("", ATTR_FILENAME);
+                            final int renderingMode = Integer.parseInt(
+                                    parser.getAttributeValue("", ATTR_RENDERING_MODE));
 
-                            final long beginTimeMs = Long.parseLong(parser.getAttributeValue("",
-                                    ATTR_BEGIN_TIME));
-                            final long endTimeMs = Long.parseLong(parser.getAttributeValue("",
-                                    ATTR_END_TIME));
-                            ((MediaVideoItem)currentMediaItem).setExtractBoundaries(beginTimeMs,
-                                    endTimeMs);
+                            if (MediaImageItem.class.getSimpleName().equals(type)) {
+                                final long durationMs = Long.parseLong(
+                                        parser.getAttributeValue("", ATTR_DURATION));
+                                currentMediaItem = new MediaImageItem(this, mediaItemId, filename,
+                                        durationMs, renderingMode);
+                            } else if (MediaVideoItem.class.getSimpleName().equals(type)) {
+                                final long beginMs = Long.parseLong(
+                                        parser.getAttributeValue("", ATTR_BEGIN_TIME));
+                                final long endMs = Long.parseLong(
+                                        parser.getAttributeValue("", ATTR_END_TIME));
+                                final int volume = Integer.parseInt(
+                                        parser.getAttributeValue("", ATTR_VOLUME));
+                                final boolean muted = Boolean.parseBoolean(
+                                        parser.getAttributeValue("", ATTR_MUTED));
+                                final String audioWaveformFilename =
+                                        parser.getAttributeValue("", ATTR_AUDIO_WAVEFORM_FILENAME);
+                                currentMediaItem = new MediaVideoItem(this, mediaItemId, filename,
+                                        renderingMode, beginMs, endMs, volume, muted,
+                                        audioWaveformFilename);
 
-                            final int volumePercent = Integer.parseInt(parser.getAttributeValue("",
-                                    ATTR_VOLUME));
-                            ((MediaVideoItem)currentMediaItem).setVolume(volumePercent);
-                        } else {
-                            Log.e(TAG, "Unknown media item type: " + type);
-                            currentMediaItem = null;
-                        }
+                                final long beginTimeMs = Long.parseLong(
+                                        parser.getAttributeValue("", ATTR_BEGIN_TIME));
+                                final long endTimeMs = Long.parseLong(
+                                        parser.getAttributeValue("", ATTR_END_TIME));
+                                ((MediaVideoItem)currentMediaItem).setExtractBoundaries(
+                                        beginTimeMs, endTimeMs);
 
-                        if (currentMediaItem != null) {
-                            mMediaItems.add(currentMediaItem);
-                        }
-                    } else if (TAG_TRANSITION.equals(name)) {
-                        final Transition transition = parseTransition(parser);
-                        if (transition != null) {
-                            mTransitions.add(transition);
-                        }
-                    } else if (TAG_OVERLAY.equals(name)) {
-                        if (currentMediaItem != null) {
-                            currentOverlay = parseOverlay(parser, currentMediaItem);
+                                final int volumePercent = Integer.parseInt(
+                                        parser.getAttributeValue("", ATTR_VOLUME));
+                                ((MediaVideoItem)currentMediaItem).setVolume(volumePercent);
+                            } else {
+                                Log.e(TAG, "Unknown media item type: " + type);
+                                currentMediaItem = null;
+                            }
+
+                            if (currentMediaItem != null) {
+                                mMediaItems.add(currentMediaItem);
+                            }
+                        } else if (TAG_TRANSITION.equals(name)) {
+                            final Transition transition = parseTransition(parser);
+                            if (transition != null) {
+                                mTransitions.add(transition);
+                            }
+                        } else if (TAG_OVERLAY.equals(name)) {
+                            if (currentMediaItem != null) {
+                                currentOverlay = parseOverlay(parser, currentMediaItem);
+                                if (currentOverlay != null) {
+                                    currentMediaItem.addOverlay(currentOverlay);
+                                }
+                            }
+                        } else if (TAG_OVERLAY_USER_ATTRIBUTES.equals(name)) {
                             if (currentOverlay != null) {
-                                currentMediaItem.addOverlay(currentOverlay);
+                                final int attributesCount = parser.getAttributeCount();
+                                for (int i = 0; i < attributesCount; i++) {
+                                    currentOverlay.setUserAttribute(parser.getAttributeName(i),
+                                            parser.getAttributeValue(i));
+                                }
+                            }
+                        } else if (TAG_EFFECT.equals(name)) {
+                            if (currentMediaItem != null) {
+                                final Effect effect = parseEffect(parser, currentMediaItem);
+                                if (effect != null) {
+                                    currentMediaItem.addEffect(effect);
+                                }
+                            }
+                        } else if (TAG_AUDIO_TRACK.equals(name)) {
+                            final AudioTrack audioTrack = parseAudioTrack(parser);
+                            if (audioTrack != null) {
+                                addAudioTrack(audioTrack);
                             }
                         }
-                    } else if (TAG_OVERLAY_USER_ATTRIBUTES.equals(name)) {
-                        if (currentOverlay != null) {
-                            final int attributesCount = parser.getAttributeCount();
-                            for (int i = 0; i < attributesCount; i++) {
-                                currentOverlay.setUserAttribute(parser.getAttributeName(i),
-                                        parser.getAttributeValue(i));
-                            }
-                        }
-                    } else if (TAG_EFFECT.equals(name)) {
-                        if (currentMediaItem != null) {
-                            final Effect effect = parseEffect(parser, currentMediaItem);
-                            if (effect != null) {
-                                currentMediaItem.addEffect(effect);
-                            }
-                        }
-                    } else if (TAG_AUDIO_TRACK.equals(name)) {
-                        final AudioTrack audioTrack = parseAudioTrack(parser);
-                        if (audioTrack != null) {
-                            addAudioTrack(audioTrack);
-                        }
+                        break;
                     }
-                    break;
-                }
 
-                case XmlPullParser.END_TAG: {
-                    name = parser.getName();
-                    if (TAG_MEDIA_ITEM.equals(name)) {
-                        currentMediaItem = null;
-                    } else if (TAG_OVERLAY.equals(name)) {
-                        currentOverlay = null;
+                    case XmlPullParser.END_TAG: {
+                        name = parser.getName();
+                        if (TAG_MEDIA_ITEM.equals(name)) {
+                            currentMediaItem = null;
+                        } else if (TAG_OVERLAY.equals(name)) {
+                            currentOverlay = null;
+                        }
+                        break;
                     }
-                    break;
-                }
 
-                default: {
-                    break;
+                    default: {
+                        break;
+                    }
                 }
+                eventType = parser.next();
             }
-            eventType = parser.next();
+            computeTimelineDuration();
+        } finally {
+            if (fis != null) {
+                fis.close();
+            }
         }
-
-        fis.close();
-        computeTimelineDuration();
     }
 
     /**
