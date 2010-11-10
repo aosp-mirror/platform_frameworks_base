@@ -3001,7 +3001,7 @@ public final class ActivityThread {
 
         Resources.updateSystemConfiguration(config, dm);
 
-        ContextImpl.ApplicationPackageManager.configurationChanged();
+        ApplicationPackageManager.configurationChanged();
         //Slog.i(TAG, "Configuration changed in " + currentPackageName());
         
         Iterator<WeakReference<Resources>> it =
@@ -3138,7 +3138,7 @@ public final class ActivityThread {
                 mResourcePackages.remove(packages[i]);
             }
         }
-        ContextImpl.ApplicationPackageManager.handlePackageBroadcast(cmd, packages,
+        ApplicationPackageManager.handlePackageBroadcast(cmd, packages,
                 hasPkgInfo);
     }
         
