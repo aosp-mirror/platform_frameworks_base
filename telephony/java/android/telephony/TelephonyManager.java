@@ -802,6 +802,10 @@ public class TelephonyManager {
       }
     }
 
+    /** Data connection state: Unknown.  Used before we know the state.
+     * @hide
+     */
+    public static final int DATA_UNKNOWN        = -1;
     /** Data connection state: Disconnected. IP traffic not available. */
     public static final int DATA_DISCONNECTED   = 0;
     /** Data connection state: Currently setting up a data connection. */
