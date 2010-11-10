@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import com.android.layoutlib.bridge.DelegateManager;
+import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.FontMetricsInt;

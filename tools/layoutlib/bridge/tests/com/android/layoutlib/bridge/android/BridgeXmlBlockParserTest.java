@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.android;
+
+import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 
 import org.kxml2.io.KXmlParser;
 import org.w3c.dom.Node;

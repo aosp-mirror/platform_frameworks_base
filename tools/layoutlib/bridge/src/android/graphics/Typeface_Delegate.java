@@ -16,8 +16,8 @@
 
 package android.graphics;
 
-import com.android.layoutlib.bridge.DelegateManager;
-import com.android.layoutlib.bridge.FontLoader;
+import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.layoutlib.bridge.impl.FontLoader;
 
 import android.content.res.AssetManager;
 

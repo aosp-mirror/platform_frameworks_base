@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.layoutlib.bridge.android;
 
 import com.android.layoutlib.api.IProjectCallback;
 import com.android.layoutlib.api.IResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
-import com.android.layoutlib.bridge.BridgeContext;
-import com.android.layoutlib.bridge.BridgeXmlBlockParser;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.InflateException;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.io.File;
 import java.io.FileReader;

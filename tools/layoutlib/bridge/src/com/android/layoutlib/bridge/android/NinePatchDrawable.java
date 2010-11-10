@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package com.android.layoutlib.bridge.android;
 
 import com.android.ninepatch.NinePatch;
 
@@ -28,7 +28,7 @@ public class NinePatchDrawable extends Drawable {
 
     private NinePatch m9Patch;
 
-    NinePatchDrawable(NinePatch ninePatch) {
+    public NinePatchDrawable(NinePatch ninePatch) {
         m9Patch = ninePatch;
     }
 

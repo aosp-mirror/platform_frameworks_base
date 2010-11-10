@@ -16,7 +16,7 @@
 
 package android.webkit;
 
-import com.android.layoutlib.bridge.MockView;
+import com.android.layoutlib.bridge.android.MockView;
 
 import android.content.Context;
 import android.graphics.Bitmap;

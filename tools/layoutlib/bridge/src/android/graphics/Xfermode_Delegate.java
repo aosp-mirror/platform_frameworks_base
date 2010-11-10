@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import com.android.layoutlib.bridge.DelegateManager;
+import com.android.layoutlib.bridge.impl.DelegateManager;
 
 /**
  * Delegate implementing the native methods of android.graphics.Xfermode
