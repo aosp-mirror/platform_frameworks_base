@@ -3021,6 +3021,10 @@
         </attr>
         <!-- Reference to a drawable resource to draw with the specified scale. -->
         <attr name="drawable" />
+        <!-- Use the drawable's intrinsic width and height as minimum size values.
+             Useful if the target drawable is a 9-patch or otherwise should not be scaled
+             down beyond a minimum size. -->
+        <attr name="useIntrinsicSizeAsMinimum" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="ClipDrawable">
