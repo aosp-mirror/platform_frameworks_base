@@ -27,8 +27,7 @@ namespace renderscript {
 class ShaderCache;
 
 // An element is a group of Components that occupies one cell in a structure.
-class VertexArray
-{
+class VertexArray {
 public:
     class Attrib {
     public:

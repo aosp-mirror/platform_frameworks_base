@@ -26,13 +26,10 @@
 using namespace android;
 using namespace android::renderscript;
 
-void Animation::serialize(OStream *stream) const
-{
-    
+void Animation::serialize(OStream *stream) const {
 }
 
-Animation *Animation::createFromStream(Context *rsc, IStream *stream)
-{
+Animation *Animation::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
 
@@ -133,8 +130,7 @@ RsAnimation rsi_AnimationCreate(Context *rsc,
                                 uint32_t valueCount,
                                 RsAnimationInterpolation interp,
                                 RsAnimationEdge pre,
-                                RsAnimationEdge post)
-{
+                                RsAnimationEdge post) {
     //LOGE("rsi_ElementCreate %i %i %i %i", dt, dk, norm, vecSize);
     Animation *a = NULL;//Animation::create(rsc, inValues, outValues, valueCount, interp, pre, post);
     if (a != NULL) {

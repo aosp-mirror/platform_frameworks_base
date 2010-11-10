@@ -71,8 +71,7 @@ struct Element {
 };
 
 
-static void genHeader(FILE *f, const char *packageName)
-{
+static void genHeader(FILE *f, const char *packageName) {
     fprintf(f, "package %s;\n", packageName);
     fprintf(f, "\n");
     fprintf(f, "import android.renderscript.*;\n");
@@ -80,9 +79,8 @@ static void genHeader(FILE *f, const char *packageName)
     fprintf(f, "\n");
 }
 
-static const char * RSTypeToJava(RsDataType dt)
-{
-    switch(dt) {
+static const char * RSTypeToJava(RsDataType dt) {
+    switch (dt) {
     //case RS_TYPE_FLOAT_16:         return "float";
     case RS_TYPE_FLOAT_32:         return "float";
     //case RS_TYPE_FLOAT_64:         return "double";
@@ -112,9 +110,8 @@ static const char * RSTypeToJava(RsDataType dt)
     return NULL;
 }
 
-static const char * RSTypeToString(RsDataType dt)
-{
-    switch(dt) {
+static const char * RSTypeToString(RsDataType dt) {
+    switch (dt) {
     case RS_TYPE_FLOAT_16:         return "F16";
     case RS_TYPE_FLOAT_32:         return "F32";
     case RS_TYPE_FLOAT_64:         return "F64";
@@ -144,8 +141,7 @@ static const char * RSTypeToString(RsDataType dt)
     return NULL;
 }
 
-bool rsGenerateElementClass(const Element *e, const char *packageName, FILE *f)
-{
+bool rsGenerateElementClass(const Element *e, const char *packageName, FILE *f) {
     genHeader(f, packageName);
 
     fprintf(f, "class Element_%s {\n", e->name);
@@ -197,8 +193,7 @@ bool rsGenerateElementClass(const Element *e, const char *packageName, FILE *f)
     return true;
 }
 
-bool rsGenerateElementClassFile(Element *e, const char *packageName)
-{
+bool rsGenerateElementClassFile(Element *e, const char *packageName) {
     char buf[1024];
     sprintf(buf, "Element_%s.java", e->name);
     printf("Creating file %s \n", buf);
@@ -230,8 +225,7 @@ bool rsGenerateScriptClass(const ScriptC *script, const char *packageName, FILE 
 
 
 
-int main(int argc, const char *argv)
-{
+int main(int argc, const char *argv) {
     Element *u8 = new Element(RS_TYPE_UNSIGNED_8, 1);
     Element *i32 = new Element(RS_TYPE_SIGNED_32, 1);
     Element *f32 = new Element(RS_TYPE_FLOAT_32, 1);
@@ -262,6 +256,5 @@ int main(int argc, const char *argv)
     printf("1\n");
     rsGenerateElementClassFile(e_Pixel, "android");
     rsGenerateElementClassFile(e_Params, "android");
-
 }
 

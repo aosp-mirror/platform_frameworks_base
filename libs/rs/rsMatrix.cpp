@@ -23,10 +23,7 @@
 using namespace android;
 using namespace android::renderscript;
 
-
-
-void Matrix::loadIdentity()
-{
+void Matrix::loadIdentity() {
     set(0, 0, 1);
     set(1, 0, 0);
     set(2, 0, 0);
@@ -48,18 +45,15 @@ void Matrix::loadIdentity()
     set(3, 3, 1);
 }
 
-void Matrix::load(const float *v)
-{
+void Matrix::load(const float *v) {
     memcpy(m, v, sizeof(m));
 }
 
-void Matrix::load(const Matrix *v)
-{
+void Matrix::load(const Matrix *v) {
     memcpy(m, v->m, sizeof(m));
 }
 
-void Matrix::loadRotate(float rot, float x, float y, float z)
-{
+void Matrix::loadRotate(float rot, float x, float y, float z) {
     float c, s;
     m[3] = 0;
     m[7] = 0;
@@ -97,24 +91,21 @@ void Matrix::loadRotate(float rot, float x, float y, float z)
     m[10] = z*z*nc +  c;
 }
 
-void Matrix::loadScale(float x, float y, float z)
-{
+void Matrix::loadScale(float x, float y, float z) {
     loadIdentity();
     m[0] = x;
     m[5] = y;
     m[10] = z;
 }
 
-void Matrix::loadTranslate(float x, float y, float z)
-{
+void Matrix::loadTranslate(float x, float y, float z) {
     loadIdentity();
     m[12] = x;
     m[13] = y;
     m[14] = z;
 }
 
-void Matrix::loadMultiply(const Matrix *lhs, const Matrix *rhs)
-{
+void Matrix::loadMultiply(const Matrix *lhs, const Matrix *rhs) {
     for (int i=0 ; i<4 ; i++) {
         float ri0 = 0;
         float ri1 = 0;

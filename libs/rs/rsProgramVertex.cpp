@@ -34,15 +34,13 @@ using namespace android::renderscript;
 
 ProgramVertex::ProgramVertex(Context *rsc, const char * shaderText,
                              uint32_t shaderLength, const uint32_t * params,
-                             uint32_t paramLength) :
-    Program(rsc, shaderText, shaderLength, params, paramLength)
-{
+                             uint32_t paramLength)
+    : Program(rsc, shaderText, shaderLength, params, paramLength) {
     init(rsc);
 }
 
-ProgramVertex::~ProgramVertex()
-{
-    if(mShaderID) {
+ProgramVertex::~ProgramVertex() {
+    if (mShaderID) {
         mRSC->mShaderCache.cleanupVertex(mShaderID);
     }
 }
@@ -51,8 +49,7 @@ void ProgramVertex::loadShader(Context *rsc) {
     Program::loadShader(rsc, GL_VERTEX_SHADER);
 }
 
-void ProgramVertex::createShader()
-{
+void ProgramVertex::createShader() {
     if (mUserShader.length() > 1) {
 
         appendUserConstants();
@@ -69,7 +66,7 @@ void ProgramVertex::createShader()
 
                 // Cannot be complex
                 rsAssert(!f->getFieldCount());
-                switch(f->getComponent().getVectorSize()) {
+                switch (f->getComponent().getVectorSize()) {
                 case 1: mShader.append("attribute float ATTRIB_"); break;
                 case 2: mShader.append("attribute vec2 ATTRIB_"); break;
                 case 3: mShader.append("attribute vec3 ATTRIB_"); break;
@@ -89,8 +86,7 @@ void ProgramVertex::createShader()
     }
 }
 
-void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCache *sc)
-{
+void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCache *sc) {
     //LOGE("sgl2 vtx1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
         return;
@@ -98,8 +94,8 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCach
 
     rsc->checkError("ProgramVertex::setupGL2 start");
 
-    if(!isUserProgram()) {
-        if(mConstants[0].get() == NULL) {
+    if (!isUserProgram()) {
+        if (mConstants[0].get() == NULL) {
             LOGE("Unable to set fixed function emulation matrices because allocation is missing");
             rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
             return;
@@ -110,7 +106,7 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCach
         Matrix t;
         t.load(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
         mvp.multiply(&t);
-        for(uint32_t i = 0; i < 16; i ++) {
+        for (uint32_t i = 0; i < 16; i ++) {
             f[RS_PROGRAM_VERTEX_MVP_OFFSET + i] = mvp.m[i];
         }
     }
@@ -122,14 +118,13 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCach
     rsc->checkError("ProgramVertex::setupGL2");
 }
 
-void ProgramVertex::setProjectionMatrix(Context *rsc, const rsc_Matrix *m) const
-{
-    if(isUserProgram()) {
+void ProgramVertex::setProjectionMatrix(Context *rsc, const rsc_Matrix *m) const {
+    if (isUserProgram()) {
         LOGE("Attempting to set fixed function emulation matrix projection on user program");
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
         return;
     }
-    if(mConstants[0].get() == NULL) {
+    if (mConstants[0].get() == NULL) {
         LOGE("Unable to set fixed function emulation matrix projection because allocation is missing");
         return;
     }
@@ -138,14 +133,13 @@ void ProgramVertex::setProjectionMatrix(Context *rsc, const rsc_Matrix *m) const
     mDirty = true;
 }
 
-void ProgramVertex::setModelviewMatrix(Context *rsc, const rsc_Matrix *m) const
-{
-    if(isUserProgram()) {
+void ProgramVertex::setModelviewMatrix(Context *rsc, const rsc_Matrix *m) const {
+    if (isUserProgram()) {
         LOGE("Attempting to set fixed function emulation matrix modelview on user program");
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
         return;
     }
-    if(mConstants[0].get() == NULL) {
+    if (mConstants[0].get() == NULL) {
         LOGE("Unable to set fixed function emulation matrix modelview because allocation is missing");
         rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
         return;
@@ -155,14 +149,13 @@ void ProgramVertex::setModelviewMatrix(Context *rsc, const rsc_Matrix *m) const
     mDirty = true;
 }
 
-void ProgramVertex::setTextureMatrix(Context *rsc, const rsc_Matrix *m) const
-{
-    if(isUserProgram()) {
+void ProgramVertex::setTextureMatrix(Context *rsc, const rsc_Matrix *m) const {
+    if (isUserProgram()) {
         LOGE("Attempting to set fixed function emulation matrix texture on user program");
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot set emulation matrix on user shader");
         return;
     }
-    if(mConstants[0].get() == NULL) {
+    if (mConstants[0].get() == NULL) {
         LOGE("Unable to set fixed function emulation matrix texture because allocation is missing");
         rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
         return;
@@ -172,14 +165,13 @@ void ProgramVertex::setTextureMatrix(Context *rsc, const rsc_Matrix *m) const
     mDirty = true;
 }
 
-void ProgramVertex::getProjectionMatrix(Context *rsc, rsc_Matrix *m) const
-{
-    if(isUserProgram()) {
+void ProgramVertex::getProjectionMatrix(Context *rsc, rsc_Matrix *m) const {
+    if (isUserProgram()) {
         LOGE("Attempting to get fixed function emulation matrix projection on user program");
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot get emulation matrix on user shader");
         return;
     }
-    if(mConstants[0].get() == NULL) {
+    if (mConstants[0].get() == NULL) {
         LOGE("Unable to get fixed function emulation matrix projection because allocation is missing");
         rsc->setError(RS_ERROR_BAD_SHADER, "Fixed function allocation missing");
         return;
@@ -188,9 +180,8 @@ void ProgramVertex::getProjectionMatrix(Context *rsc, rsc_Matrix *m) const
     memcpy(m, &f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], sizeof(rsc_Matrix));
 }
 
-void ProgramVertex::transformToScreen(Context *rsc, float *v4out, const float *v3in) const
-{
-    if(isUserProgram()) {
+void ProgramVertex::transformToScreen(Context *rsc, float *v4out, const float *v3in) const {
+    if (isUserProgram()) {
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
@@ -200,8 +191,7 @@ void ProgramVertex::transformToScreen(Context *rsc, float *v4out, const float *v
     mvp.vectorMultiply(v4out, v3in);
 }
 
-void ProgramVertex::init(Context *rsc)
-{
+void ProgramVertex::init(Context *rsc) {
     uint32_t attribCount = 0;
     uint32_t uniformCount = 0;
     if (mUserShader.size() > 0) {
@@ -215,29 +205,23 @@ void ProgramVertex::init(Context *rsc)
     createShader();
 }
 
-void ProgramVertex::serialize(OStream *stream) const
-{
-
+void ProgramVertex::serialize(OStream *stream) const {
 }
 
-ProgramVertex *ProgramVertex::createFromStream(Context *rsc, IStream *stream)
-{
+ProgramVertex *ProgramVertex::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
 
 
 ///////////////////////////////////////////////////////////////////////
 
-ProgramVertexState::ProgramVertexState()
-{
+ProgramVertexState::ProgramVertexState() {
 }
 
-ProgramVertexState::~ProgramVertexState()
-{
+ProgramVertexState::~ProgramVertexState() {
 }
 
-void ProgramVertexState::init(Context *rsc)
-{
+void ProgramVertexState::init(Context *rsc) {
     const Element *matrixElem = Element::create(rsc, RS_TYPE_MATRIX_4X4, RS_KIND_USER, false, 1);
     const Element *f2Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 2);
     const Element *f3Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
@@ -286,11 +270,9 @@ void ProgramVertexState::init(Context *rsc)
     mDefault.set(pv);
 
     updateSize(rsc);
-
 }
 
-void ProgramVertexState::updateSize(Context *rsc)
-{
+void ProgramVertexState::updateSize(Context *rsc) {
     float *f = static_cast<float *>(mDefaultAlloc->getPtr());
 
     Matrix m;
@@ -303,8 +285,7 @@ void ProgramVertexState::updateSize(Context *rsc)
     memcpy(&f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET], m.m, sizeof(m));
 }
 
-void ProgramVertexState::deinit(Context *rsc)
-{
+void ProgramVertexState::deinit(Context *rsc) {
     mDefaultAlloc.clear();
     mDefault.clear();
     mLast.clear();
@@ -316,13 +297,11 @@ namespace renderscript {
 
 RsProgramVertex rsi_ProgramVertexCreate(Context *rsc, const char * shaderText,
                              uint32_t shaderLength, const uint32_t * params,
-                             uint32_t paramLength)
-{
+                             uint32_t paramLength) {
     ProgramVertex *pv = new ProgramVertex(rsc, shaderText, shaderLength, params, paramLength);
     pv->incUserRef();
     return pv;
 }
-
 
 }
 }

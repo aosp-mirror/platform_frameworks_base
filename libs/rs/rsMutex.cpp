@@ -20,17 +20,14 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Mutex::Mutex()
-{
+Mutex::Mutex() {
 }
 
-Mutex::~Mutex()
-{
+Mutex::~Mutex() {
     pthread_mutex_destroy(&mMutex);
 }
 
-bool Mutex::init()
-{
+bool Mutex::init() {
     int status = pthread_mutex_init(&mMutex, NULL);
     if (status) {
         LOGE("Mutex::Mutex init failure");
@@ -39,8 +36,7 @@ bool Mutex::init()
     return true;
 }
 
-bool Mutex::lock()
-{
+bool Mutex::lock() {
     int status;
     status = pthread_mutex_lock(&mMutex);
     if (status) {
@@ -50,8 +46,7 @@ bool Mutex::lock()
     return true;
 }
 
-bool Mutex::unlock()
-{
+bool Mutex::unlock() {
     int status;
     status = pthread_mutex_unlock(&mMutex);
     if (status) {

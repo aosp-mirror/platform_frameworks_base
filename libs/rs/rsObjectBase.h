@@ -30,8 +30,7 @@ class Context;
 class OStream;
 
 // An element is a group of Components that occupies one cell in a structure.
-class ObjectBase
-{
+class ObjectBase {
 public:
     ObjectBase(Context *rsc);
 
@@ -94,8 +93,7 @@ private:
 };
 
 template<class T>
-class ObjectBaseRef
-{
+class ObjectBaseRef {
 public:
     ObjectBaseRef() {
         mRef = NULL;
@@ -154,9 +152,7 @@ public:
 
 protected:
     T * mRef;
-
 };
-
 
 }
 }

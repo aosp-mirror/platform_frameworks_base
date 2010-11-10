@@ -28,7 +28,7 @@ typedef struct {
 void appendTransformation(int type, float4 data, rs_matrix4x4 *mat) {
     rs_matrix4x4 temp;
 
-    switch(type) {
+    switch (type) {
     case TRANSFORM_TRANSLATE:
         rsMatrixLoadTranslate(&temp, data.x, data.y, data.z);
         break;
@@ -60,15 +60,15 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
     //rsDebug("Transform is dirty", data->isDirty);
 
     // Refresh matrices if dirty
-    if(data->isDirty) {
+    if (data->isDirty) {
         data->isDirty = 0;
         toChild.changed = 1;
 
         // Reset our local matrix
         rsMatrixLoadIdentity(localMat);
 
-        for(int i = 0; i < 16; i ++) {
-            if(data->transformTypes[i] == TRANSFORM_NONE) {
+        for (int i = 0; i < 16; i ++) {
+            if (data->transformTypes[i] == TRANSFORM_NONE) {
                 break;
             }
             //rsDebug("Transform adding transformation", transformTypes[i]);
@@ -78,20 +78,19 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
 
     //rsDebug("Transform checking parent", (int)0);
 
-    if(parent) {
-        if(parent->changed) {
+    if (parent) {
+        if (parent->changed) {
             toChild.changed = 1;
 
             rsMatrixLoad(globalMat, parent->mat);
             rsMatrixMultiply(globalMat, localMat);
         }
-    }
-    else {
+    } else {
         rsMatrixLoad(globalMat, localMat);
     }
 
     //rsDebug("Transform calling self with child ", (int)data->children.p);
-    if(data->children.p) {
+    if (data->children.p) {
         rsForEach(transformScript, data->children, data->children, (void*)&toChild);
     }
 }

@@ -28,8 +28,7 @@ using namespace android::renderscript;
 
 pthread_mutex_t ObjectBase::gObjectInitMutex = PTHREAD_MUTEX_INITIALIZER;
 
-ObjectBase::ObjectBase(Context *rsc)
-{
+ObjectBase::ObjectBase(Context *rsc) {
     mUserRefCount = 0;
     mSysRefCount = 0;
     mRSC = rsc;
@@ -45,14 +44,13 @@ ObjectBase::ObjectBase(Context *rsc)
     //LOGV("ObjectBase %p con", this);
 }
 
-ObjectBase::~ObjectBase()
-{
+ObjectBase::~ObjectBase() {
     //LOGV("~ObjectBase %p  ref %i,%i", this, mUserRefCount, mSysRefCount);
 #if RS_OBJECT_DEBUG
     mStack.dump();
 #endif
 
-    if(mPrev || mNext) {
+    if (mPrev || mNext) {
         // While the normal practice is to call remove before we call
         // delete.  Its possible for objects without a re-use list
         // for avoiding duplication to be created on the stack.  In those
@@ -66,8 +64,7 @@ ObjectBase::~ObjectBase()
     rsAssert(!mSysRefCount);
 }
 
-void ObjectBase::dumpLOGV(const char *op) const
-{
+void ObjectBase::dumpLOGV(const char *op) const {
     if (mName.size()) {
         LOGV("%s RSobj %p, name %s, refs %i,%i  links %p,%p,%p",
              op, this, mName.string(), mUserRefCount, mSysRefCount, mNext, mPrev, mRSC);
@@ -77,24 +74,20 @@ void ObjectBase::dumpLOGV(const char *op) const
     }
 }
 
-void ObjectBase::incUserRef() const
-{
+void ObjectBase::incUserRef() const {
     android_atomic_inc(&mUserRefCount);
     //LOGV("ObjectBase %p incU ref %i, %i", this, mUserRefCount, mSysRefCount);
 }
 
-void ObjectBase::incSysRef() const
-{
+void ObjectBase::incSysRef() const {
     android_atomic_inc(&mSysRefCount);
     //LOGV("ObjectBase %p incS ref %i, %i", this, mUserRefCount, mSysRefCount);
 }
 
-void ObjectBase::preDestroy() const
-{
+void ObjectBase::preDestroy() const {
 }
 
-bool ObjectBase::checkDelete(const ObjectBase *ref)
-{
+bool ObjectBase::checkDelete(const ObjectBase *ref) {
     if (!ref) {
         return false;
     }
@@ -117,9 +110,7 @@ bool ObjectBase::checkDelete(const ObjectBase *ref)
     return true;
 }
 
-
-bool ObjectBase::decUserRef() const
-{
+bool ObjectBase::decUserRef() const {
     rsAssert(mUserRefCount > 0);
 #if RS_OBJECT_DEBUG
     LOGV("ObjectBase %p decU ref %i, %i", this, mUserRefCount, mSysRefCount);
@@ -136,8 +127,7 @@ bool ObjectBase::decUserRef() const
     return false;
 }
 
-bool ObjectBase::zeroUserRef() const
-{
+bool ObjectBase::zeroUserRef() const {
     //LOGV("ObjectBase %p zeroU ref %i, %i", this, mUserRefCount, mSysRefCount);
     android_atomic_acquire_store(0, &mUserRefCount);
     if (android_atomic_acquire_load(&mSysRefCount) <= 0) {
@@ -146,8 +136,7 @@ bool ObjectBase::zeroUserRef() const
     return false;
 }
 
-bool ObjectBase::decSysRef() const
-{
+bool ObjectBase::decSysRef() const {
     //LOGV("ObjectBase %p decS ref %i, %i", this, mUserRefCount, mSysRefCount);
     rsAssert(mSysRefCount > 0);
     if ((android_atomic_dec(&mSysRefCount) <= 1) &&
@@ -157,28 +146,23 @@ bool ObjectBase::decSysRef() const
     return false;
 }
 
-void ObjectBase::setName(const char *name)
-{
+void ObjectBase::setName(const char *name) {
     mName.setTo(name);
 }
 
-void ObjectBase::setName(const char *name, uint32_t len)
-{
+void ObjectBase::setName(const char *name, uint32_t len) {
     mName.setTo(name, len);
 }
 
-void ObjectBase::asyncLock()
-{
+void ObjectBase::asyncLock() {
     pthread_mutex_lock(&gObjectInitMutex);
 }
 
-void ObjectBase::asyncUnlock()
-{
+void ObjectBase::asyncUnlock() {
     pthread_mutex_unlock(&gObjectInitMutex);
 }
 
-void ObjectBase::add() const
-{
+void ObjectBase::add() const {
     asyncLock();
 
     rsAssert(!mNext);
@@ -193,8 +177,7 @@ void ObjectBase::add() const
     asyncUnlock();
 }
 
-void ObjectBase::remove() const
-{
+void ObjectBase::remove() const {
     //LOGV("calling remove  rsc %p", mRSC);
     if (!mRSC) {
         rsAssert(!mPrev);
@@ -215,8 +198,7 @@ void ObjectBase::remove() const
     mNext = NULL;
 }
 
-void ObjectBase::zeroAllUserRef(Context *rsc)
-{
+void ObjectBase::zeroAllUserRef(Context *rsc) {
     if (rsc->props.mLogObjects) {
         LOGV("Forcing release of all outstanding user refs.");
     }
@@ -241,8 +223,7 @@ void ObjectBase::zeroAllUserRef(Context *rsc)
     }
 }
 
-void ObjectBase::dumpAll(Context *rsc)
-{
+void ObjectBase::dumpAll(Context *rsc) {
     asyncLock();
 
     LOGV("Dumping all objects");
@@ -256,8 +237,7 @@ void ObjectBase::dumpAll(Context *rsc)
     asyncUnlock();
 }
 
-bool ObjectBase::isValid(const Context *rsc, const ObjectBase *obj)
-{
+bool ObjectBase::isValid(const Context *rsc, const ObjectBase *obj) {
     asyncLock();
 
     const ObjectBase * o = rsc->mObjHead;

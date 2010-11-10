@@ -24,8 +24,7 @@ namespace android {
 namespace renderscript {
 
 
-class Adapter1D : public ObjectBase
-{
+class Adapter1D : public ObjectBase {
 
 public:
     // By policy this allocation will hold a pointer to the type
@@ -62,8 +61,7 @@ protected:
     uint32_t mFace;
 };
 
-class Adapter2D : public ObjectBase
-{
+class Adapter2D : public ObjectBase {
 
 public:
     // By policy this allocation will hold a pointer to the type
@@ -96,7 +94,6 @@ protected:
     uint32_t mLOD;
     uint32_t mFace;
 };
-
 
 }
 }

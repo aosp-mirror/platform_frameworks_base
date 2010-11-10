@@ -44,13 +44,11 @@
 
 // ---------------------------------------------------------------------------
 namespace android {
-
 namespace renderscript {
 
 class Device;
 
-class Context
-{
+class Context {
 public:
     Context(Device *, bool isGraphics, bool useDepth) {
         mObjHead = NULL;

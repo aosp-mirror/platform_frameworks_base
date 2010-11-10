@@ -25,8 +25,7 @@ namespace renderscript {
 
 class Program;
 
-class Allocation : public ObjectBase
-{
+class Allocation : public ObjectBase {
     // The graphics equilivent of malloc.  The allocation contains a structure of elements.
 
 public:

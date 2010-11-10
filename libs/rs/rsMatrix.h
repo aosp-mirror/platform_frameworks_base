@@ -23,8 +23,7 @@
 namespace android {
 namespace renderscript {
 
-struct Matrix
-{
+struct Matrix {
     float m[16];
 
     inline float get(int i, int j) const {
@@ -69,12 +68,7 @@ struct Matrix
         tmp.loadTranslate(x, y, z);
         multiply(&tmp);
     }
-
-
-
 };
-
-
 
 }
 }

@@ -25,8 +25,7 @@ namespace renderscript {
 
 class ProgramVertexState;
 
-class ProgramVertex : public Program
-{
+class ProgramVertex : public Program {
 public:
     ProgramVertex(Context *,const char * shaderText, uint32_t shaderLength,
                   const uint32_t * params, uint32_t paramLength);
@@ -50,9 +49,7 @@ public:
     static ProgramVertex *createFromStream(Context *rsc, IStream *stream);
 };
 
-
-class ProgramVertexState
-{
+class ProgramVertexState {
 public:
     ProgramVertexState();
     ~ProgramVertexState();
@@ -65,7 +62,6 @@ public:
     ObjectBaseRef<ProgramVertex> mLast;
     ObjectBaseRef<Allocation> mDefaultAlloc;
 };
-
 
 }
 }

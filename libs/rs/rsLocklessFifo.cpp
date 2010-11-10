@@ -21,26 +21,22 @@
 using namespace android;
 using namespace android::renderscript;
 
-LocklessCommandFifo::LocklessCommandFifo()
-{
+LocklessCommandFifo::LocklessCommandFifo() {
 }
 
-LocklessCommandFifo::~LocklessCommandFifo()
-{
+LocklessCommandFifo::~LocklessCommandFifo() {
     if (!mInShutdown) {
         shutdown();
     }
     free(mBuffer);
 }
 
-void LocklessCommandFifo::shutdown()
-{
+void LocklessCommandFifo::shutdown() {
     mInShutdown = true;
     mSignalToWorker.set();
 }
 
-bool LocklessCommandFifo::init(uint32_t sizeInBytes)
-{
+bool LocklessCommandFifo::init(uint32_t sizeInBytes) {
     // Add room for a buffer reset command
     mBuffer = static_cast<uint8_t *>(malloc(sizeInBytes + 4));
     if (!mBuffer) {
@@ -63,8 +59,7 @@ bool LocklessCommandFifo::init(uint32_t sizeInBytes)
     return true;
 }
 
-uint32_t LocklessCommandFifo::getFreeSpace() const
-{
+uint32_t LocklessCommandFifo::getFreeSpace() const {
     int32_t freeSpace = 0;
     //dumpState("getFreeSpace");
 
@@ -80,14 +75,12 @@ uint32_t LocklessCommandFifo::getFreeSpace() const
     return freeSpace;
 }
 
-bool LocklessCommandFifo::isEmpty() const
-{
+bool LocklessCommandFifo::isEmpty() const {
     return mPut == mGet;
 }
 
 
-void * LocklessCommandFifo::reserve(uint32_t sizeInBytes)
-{
+void * LocklessCommandFifo::reserve(uint32_t sizeInBytes) {
     // Add space for command header and loop token;
     sizeInBytes += 8;
 
@@ -99,8 +92,7 @@ void * LocklessCommandFifo::reserve(uint32_t sizeInBytes)
     return mPut + 4;
 }
 
-void LocklessCommandFifo::commit(uint32_t command, uint32_t sizeInBytes)
-{
+void LocklessCommandFifo::commit(uint32_t command, uint32_t sizeInBytes) {
     if (mInShutdown) {
         return;
     }
@@ -112,8 +104,7 @@ void LocklessCommandFifo::commit(uint32_t command, uint32_t sizeInBytes)
     mSignalToWorker.set();
 }
 
-void LocklessCommandFifo::commitSync(uint32_t command, uint32_t sizeInBytes)
-{
+void LocklessCommandFifo::commitSync(uint32_t command, uint32_t sizeInBytes) {
     if (mInShutdown) {
         return;
     }
@@ -125,26 +116,23 @@ void LocklessCommandFifo::commitSync(uint32_t command, uint32_t sizeInBytes)
     flush();
 }
 
-void LocklessCommandFifo::flush()
-{
+void LocklessCommandFifo::flush() {
     //dumpState("flush 1");
-    while(mPut != mGet) {
+    while (mPut != mGet) {
         mSignalToControl.wait();
     }
     //dumpState("flush 2");
 }
 
-void LocklessCommandFifo::wait()
-{
-    while(isEmpty() && !mInShutdown) {
+void LocklessCommandFifo::wait() {
+    while (isEmpty() && !mInShutdown) {
         mSignalToControl.set();
         mSignalToWorker.wait();
     }
 }
 
-const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData)
-{
-    while(1) {
+const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData) {
+    while (1) {
         //dumpState("get");
         wait();
         if (mInShutdown) {
@@ -165,8 +153,7 @@ const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData)
     }
 }
 
-void LocklessCommandFifo::next()
-{
+void LocklessCommandFifo::next() {
     uint32_t bytes = reinterpret_cast<const uint16_t *>(mGet)[1];
     mGet += ((bytes + 3) & ~3) + 4;
     if (isEmpty()) {
@@ -175,12 +162,11 @@ void LocklessCommandFifo::next()
     //dumpState("next");
 }
 
-bool LocklessCommandFifo::makeSpaceNonBlocking(uint32_t bytes)
-{
+bool LocklessCommandFifo::makeSpaceNonBlocking(uint32_t bytes) {
     //dumpState("make space non-blocking");
     if ((mPut+bytes) > mEnd) {
         // Need to loop regardless of where get is.
-        if((mGet > mPut) && (mBuffer+4 >= mGet)) {
+        if ((mGet > mPut) && (mBuffer+4 >= mGet)) {
             return false;
         }
 
@@ -192,19 +178,18 @@ bool LocklessCommandFifo::makeSpaceNonBlocking(uint32_t bytes)
     }
 
     // it will fit here so we just need to wait for space.
-    if(getFreeSpace() < bytes) {
+    if (getFreeSpace() < bytes) {
         return false;
     }
 
     return true;
 }
 
-void LocklessCommandFifo::makeSpace(uint32_t bytes)
-{
+void LocklessCommandFifo::makeSpace(uint32_t bytes) {
     //dumpState("make space");
     if ((mPut+bytes) > mEnd) {
         // Need to loop regardless of where get is.
-        while((mGet > mPut) && (mBuffer+4 >= mGet)) {
+        while ((mGet > mPut) && (mBuffer+4 >= mGet)) {
             usleep(100);
         }
 
@@ -216,14 +201,13 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes)
     }
 
     // it will fit here so we just need to wait for space.
-    while(getFreeSpace() < bytes) {
+    while (getFreeSpace() < bytes) {
         usleep(100);
     }
 
 }
 
-void LocklessCommandFifo::dumpState(const char *s) const
-{
+void LocklessCommandFifo::dumpState(const char *s) const {
     LOGV("%s %p  put %p, get %p,  buf %p,  end %p", s, this, mPut, mGet, mBuffer, mEnd);
 }
 

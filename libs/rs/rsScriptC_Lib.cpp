@@ -35,8 +35,7 @@ using namespace android::renderscript;
 // Math routines
 //////////////////////////////////////////////////////////////////////////////
 
-static float SC_sinf_fast(float x)
-{
+static float SC_sinf_fast(float x) {
     const float A =   1.0f / (2.0f * M_PI);
     const float B = -16.0f;
     const float C =   8.0f;
@@ -53,8 +52,7 @@ static float SC_sinf_fast(float x)
     return 0.2215f * (y * fabsf(y) - y) + y;
 }
 
-static float SC_cosf_fast(float x)
-{
+static float SC_cosf_fast(float x) {
     x += float(M_PI / 2);
 
     const float A =   1.0f / (2.0f * M_PI);
@@ -73,31 +71,25 @@ static float SC_cosf_fast(float x)
     return 0.2215f * (y * fabsf(y) - y) + y;
 }
 
-
-static float SC_randf(float max)
-{
+static float SC_randf(float max) {
     float r = (float)rand();
     return r / RAND_MAX * max;
 }
 
-static float SC_randf2(float min, float max)
-{
+static float SC_randf2(float min, float max) {
     float r = (float)rand();
     return r / RAND_MAX * (max - min) + min;
 }
 
-static int SC_randi(int max)
-{
+static int SC_randi(int max) {
     return (int)SC_randf(max);
 }
 
-static int SC_randi2(int min, int max)
-{
+static int SC_randi2(int min, int max) {
     return (int)SC_randf2(min, max);
 }
 
-static float SC_frac(float v)
-{
+static float SC_frac(float v) {
     int i = (int)floor(v);
     return fmin(v - i, 0x1.fffffep-1f);
 }
@@ -106,8 +98,7 @@ static float SC_frac(float v)
 // Time routines
 //////////////////////////////////////////////////////////////////////////////
 
-static int32_t SC_second()
-{
+static int32_t SC_second() {
     GET_TLS();
 
     time_t rawtime;
@@ -118,8 +109,7 @@ static int32_t SC_second()
     return timeinfo->tm_sec;
 }
 
-static int32_t SC_minute()
-{
+static int32_t SC_minute() {
     GET_TLS();
 
     time_t rawtime;
@@ -130,8 +120,7 @@ static int32_t SC_minute()
     return timeinfo->tm_min;
 }
 
-static int32_t SC_hour()
-{
+static int32_t SC_hour() {
     GET_TLS();
 
     time_t rawtime;
@@ -142,8 +131,7 @@ static int32_t SC_hour()
     return timeinfo->tm_hour;
 }
 
-static int32_t SC_day()
-{
+static int32_t SC_day() {
     GET_TLS();
 
     time_t rawtime;
@@ -154,8 +142,7 @@ static int32_t SC_day()
     return timeinfo->tm_mday;
 }
 
-static int32_t SC_month()
-{
+static int32_t SC_month() {
     GET_TLS();
 
     time_t rawtime;
@@ -166,8 +153,7 @@ static int32_t SC_month()
     return timeinfo->tm_mon;
 }
 
-static int32_t SC_year()
-{
+static int32_t SC_year() {
     GET_TLS();
 
     time_t rawtime;
@@ -178,67 +164,57 @@ static int32_t SC_year()
     return timeinfo->tm_year;
 }
 
-static int64_t SC_uptimeMillis()
-{
+static int64_t SC_uptimeMillis() {
     return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
 }
 
-static int64_t SC_uptimeNanos()
-{
+static int64_t SC_uptimeNanos() {
     return systemTime(SYSTEM_TIME_MONOTONIC);
 }
 
-static float SC_getDt()
-{
+static float SC_getDt() {
     GET_TLS();
     int64_t l = sc->mEnviroment.mLastDtTime;
     sc->mEnviroment.mLastDtTime = systemTime(SYSTEM_TIME_MONOTONIC);
     return ((float)(sc->mEnviroment.mLastDtTime - l)) / 1.0e9;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////////
 
-static uint32_t SC_allocGetDimX(RsAllocation va)
-{
+static uint32_t SC_allocGetDimX(RsAllocation va) {
     const Allocation *a = static_cast<const Allocation *>(va);
     CHECK_OBJ(a);
     //LOGE("SC_allocGetDimX a=%p  type=%p", a, a->getType());
     return a->getType()->getDimX();
 }
 
-static uint32_t SC_allocGetDimY(RsAllocation va)
-{
+static uint32_t SC_allocGetDimY(RsAllocation va) {
     const Allocation *a = static_cast<const Allocation *>(va);
     CHECK_OBJ(a);
     return a->getType()->getDimY();
 }
 
-static uint32_t SC_allocGetDimZ(RsAllocation va)
-{
+static uint32_t SC_allocGetDimZ(RsAllocation va) {
     const Allocation *a = static_cast<const Allocation *>(va);
     CHECK_OBJ(a);
     return a->getType()->getDimZ();
 }
 
-static uint32_t SC_allocGetDimLOD(RsAllocation va)
-{
+static uint32_t SC_allocGetDimLOD(RsAllocation va) {
     const Allocation *a = static_cast<const Allocation *>(va);
     CHECK_OBJ(a);
     return a->getType()->getDimLOD();
 }
 
-static uint32_t SC_allocGetDimFaces(RsAllocation va)
-{
+static uint32_t SC_allocGetDimFaces(RsAllocation va) {
     const Allocation *a = static_cast<const Allocation *>(va);
     CHECK_OBJ(a);
     return a->getType()->getDimFaces();
 }
 
-static const void * SC_getElementAtX(RsAllocation va, uint32_t x)
-{
+static const void * SC_getElementAtX(RsAllocation va, uint32_t x) {
     const Allocation *a = static_cast<const Allocation *>(va);
     CHECK_OBJ(a);
     const Type *t = a->getType();
@@ -247,8 +223,7 @@ static const void * SC_getElementAtX(RsAllocation va, uint32_t x)
     return &p[t->getElementSizeBytes() * x];
 }
 
-static const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y)
-{
+static const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y) {
     const Allocation *a = static_cast<const Allocation *>(va);
     CHECK_OBJ(a);
     const Type *t = a->getType();
@@ -257,8 +232,7 @@ static const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y)
     return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
 }
 
-static const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, uint32_t z)
-{
+static const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, uint32_t z) {
     const Allocation *a = static_cast<const Allocation *>(va);
     CHECK_OBJ(a);
     const Type *t = a->getType();
@@ -280,6 +254,7 @@ static void SC_setObject(void **vdst, void * vsrc) {
     *vdst = vsrc;
     //LOGE("SC_setObject *");
 }
+
 static void SC_clearObject(void **vdst) {
     //LOGE("SC_clearObject  %p,%p", vdst, *vdst);
     if (vdst[0]) {
@@ -289,11 +264,10 @@ static void SC_clearObject(void **vdst) {
     *vdst = NULL;
     //LOGE("SC_clearObject *");
 }
+
 static bool SC_isObject(RsAllocation vsrc) {
     return vsrc != NULL;
 }
-
-
 
 static void SC_debugF(const char *s, float f) {
     LOGE("%s %f, 0x%08x", s, f, *((int *) (&f)));
@@ -343,48 +317,41 @@ static void SC_debugP(const char *s, const void *p) {
     LOGE("%s %p", s, p);
 }
 
-static uint32_t SC_toClient2(int cmdID, void *data, int len)
-{
+static uint32_t SC_toClient2(int cmdID, void *data, int len) {
     GET_TLS();
     //LOGE("SC_toClient %i %i %i", cmdID, len);
     return rsc->sendMessageToClient(data, RS_MESSAGE_TO_CLIENT_USER, cmdID, len, false);
 }
 
-static uint32_t SC_toClient(int cmdID)
-{
+static uint32_t SC_toClient(int cmdID) {
     GET_TLS();
     //LOGE("SC_toClient %i", cmdID);
     return rsc->sendMessageToClient(NULL, RS_MESSAGE_TO_CLIENT_USER, cmdID, 0, false);
 }
 
-static uint32_t SC_toClientBlocking2(int cmdID, void *data, int len)
-{
+static uint32_t SC_toClientBlocking2(int cmdID, void *data, int len) {
     GET_TLS();
     //LOGE("SC_toClientBlocking %i %i", cmdID, len);
     return rsc->sendMessageToClient(data, RS_MESSAGE_TO_CLIENT_USER, cmdID, len, true);
 }
 
-static uint32_t SC_toClientBlocking(int cmdID)
-{
+static uint32_t SC_toClientBlocking(int cmdID) {
     GET_TLS();
     //LOGE("SC_toClientBlocking %i", cmdID);
     return rsc->sendMessageToClient(NULL, RS_MESSAGE_TO_CLIENT_USER, cmdID, 0, true);
 }
 
-int SC_divsi3(int a, int b)
-{
+int SC_divsi3(int a, int b) {
     return a / b;
 }
 
-int SC_getAllocation(const void *ptr)
-{
+int SC_getAllocation(const void *ptr) {
     GET_TLS();
     const Allocation *alloc = sc->ptrToAllocation(ptr);
     return (int)alloc;
 }
 
-void SC_allocationMarkDirty(RsAllocation a)
-{
+void SC_allocationMarkDirty(RsAllocation a) {
     Allocation *alloc = static_cast<Allocation *>(a);
     alloc->sendDirty();
 }
@@ -392,8 +359,7 @@ void SC_allocationMarkDirty(RsAllocation a)
 void SC_ForEach(RsScript vs,
                 RsAllocation vin,
                 RsAllocation vout,
-                const void *usr)
-{
+                const void *usr) {
     GET_TLS();
     const Allocation *ain = static_cast<const Allocation *>(vin);
     Allocation *aout = static_cast<Allocation *>(vout);
@@ -405,8 +371,7 @@ void SC_ForEach2(RsScript vs,
                 RsAllocation vin,
                 RsAllocation vout,
                 const void *usr,
-                const RsScriptCall *call)
-{
+                const RsScriptCall *call) {
     GET_TLS();
     const Allocation *ain = static_cast<const Allocation *>(vin);
     Allocation *aout = static_cast<Allocation *>(vout);
@@ -552,8 +517,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { NULL, NULL, false }
 };
 
-const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbol(const char *sym)
-{
+const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbol(const char *sym) {
     ScriptCState::SymbolTable_t *syms = gSyms;
 
     while (syms->mPtr) {

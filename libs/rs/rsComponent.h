@@ -25,8 +25,7 @@ namespace renderscript {
 
 
 // An element is a group of Components that occupies one cell in a structure.
-class Component
-{
+class Component {
 public:
     Component();
     ~Component();

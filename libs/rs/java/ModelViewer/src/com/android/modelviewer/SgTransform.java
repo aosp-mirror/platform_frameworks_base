@@ -70,7 +70,7 @@ public class SgTransform {
     void initData() {
         int numElements = mTransformData.transforms.length;
         mTransformData.transformTypes = new int[numElements];
-        for(int i = 0; i < numElements; i ++) {
+        for (int i = 0; i < numElements; i ++) {
             mTransformData.transforms[i] = new Float4(0, 0, 0, 0);
             mTransformData.transformTypes[i] = TransformType.NONE.mID;
         }
@@ -87,11 +87,11 @@ public class SgTransform {
     }
 
     public ScriptField_SgTransform.Item getData() {
-        if(mChildren.size() != 0) {
+        if (mChildren.size() != 0) {
             mChildField = new ScriptField_SgTransform(mRS, mChildren.size());
             mTransformData.children = mChildField.getAllocation();
 
-            for(int i = 0; i < mChildren.size(); i ++) {
+            for (int i = 0; i < mChildren.size(); i ++) {
                 SgTransform child = (SgTransform)mChildren.get(i);
                 mChildField.set(child.getData(), i, false);
             }

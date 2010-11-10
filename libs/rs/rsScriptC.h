@@ -28,9 +28,7 @@ namespace android {
 namespace renderscript {
 
 
-
-class ScriptC : public Script
-{
+class ScriptC : public Script {
 public:
     typedef int (*RunScript_t)();
     typedef void (*VoidFunc_t)();
@@ -73,8 +71,7 @@ protected:
     Script * setTLS(Script *);
 };
 
-class ScriptCState
-{
+class ScriptCState {
 public:
     ScriptCState();
     ~ScriptCState();

@@ -27,17 +27,14 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Element::Element(Context *rsc) : ObjectBase(rsc)
-{
+Element::Element(Context *rsc) : ObjectBase(rsc) {
     mBits = 0;
     mFields = NULL;
     mFieldCount = 0;
     mHasReference = false;
 }
 
-
-Element::~Element()
-{
+Element::~Element() {
     for (uint32_t ct = 0; ct < mRSC->mStateElement.mElements.size(); ct++) {
         if (mRSC->mStateElement.mElements[ct] == this) {
             mRSC->mStateElement.mElements.removeAt(ct);
@@ -47,16 +44,14 @@ Element::~Element()
     clear();
 }
 
-void Element::clear()
-{
+void Element::clear() {
     delete [] mFields;
     mFields = NULL;
     mFieldCount = 0;
     mHasReference = false;
 }
 
-size_t Element::getSizeBits() const
-{
+size_t Element::getSizeBits() const {
     if (!mFieldCount) {
         return mBits;
     }
@@ -68,8 +63,7 @@ size_t Element::getSizeBits() const
     return total;
 }
 
-void Element::dumpLOGV(const char *prefix) const
-{
+void Element::dumpLOGV(const char *prefix) const {
     ObjectBase::dumpLOGV(prefix);
     LOGV("%s Element: fieldCount: %i,  size bytes: %i", prefix, mFieldCount, getSizeBytes());
     for (uint32_t ct = 0; ct < mFieldCount; ct++) {
@@ -80,8 +74,7 @@ void Element::dumpLOGV(const char *prefix) const
     }
 }
 
-void Element::serialize(OStream *stream) const
-{
+void Element::serialize(OStream *stream) const {
     // Need to identify ourselves
     stream->addU32((uint32_t)getClassId());
 
@@ -92,18 +85,17 @@ void Element::serialize(OStream *stream) const
 
     // Now serialize all the fields
     stream->addU32(mFieldCount);
-    for(uint32_t ct = 0; ct < mFieldCount; ct++) {
+    for (uint32_t ct = 0; ct < mFieldCount; ct++) {
         stream->addString(&mFields[ct].name);
         stream->addU32(mFields[ct].arraySize);
         mFields[ct].e->serialize(stream);
     }
 }
 
-Element *Element::createFromStream(Context *rsc, IStream *stream)
-{
+Element *Element::createFromStream(Context *rsc, IStream *stream) {
     // First make sure we are reading the correct object
     RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
-    if(classID != RS_A3D_CLASS_ID_ELEMENT) {
+    if (classID != RS_A3D_CLASS_ID_ELEMENT) {
         LOGE("element loading skipped due to invalid class id\n");
         return NULL;
     }
@@ -115,9 +107,9 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
     elem->mComponent.loadFromStream(stream);
 
     elem->mFieldCount = stream->loadU32();
-    if(elem->mFieldCount) {
+    if (elem->mFieldCount) {
         elem->mFields = new ElementField_t [elem->mFieldCount];
-        for(uint32_t ct = 0; ct < elem->mFieldCount; ct ++) {
+        for (uint32_t ct = 0; ct < elem->mFieldCount; ct ++) {
             stream->loadString(&elem->mFields[ct].name);
             elem->mFields[ct].arraySize = stream->loadU32();
             Element *fieldElem = Element::createFromStream(rsc, stream);
@@ -128,7 +120,7 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
     // We need to check if this already exists
     for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
         Element *ee = rsc->mStateElement.mElements[ct];
-        if(ee->isEqual(elem)) {
+        if (ee->isEqual(elem)) {
             ObjectBase::checkDelete(elem);
             ee->incUserRef();
             return ee;
@@ -141,11 +133,11 @@ Element *Element::createFromStream(Context *rsc, IStream *stream)
 }
 
 bool Element::isEqual(const Element *other) const {
-    if(other == NULL) {
+    if (other == NULL) {
         return false;
     }
     if (!other->getFieldCount() && !mFieldCount) {
-        if((other->getType() == getType()) &&
+        if ((other->getType() == getType()) &&
            (other->getKind() == getKind()) &&
            (other->getComponent().getIsNormalized() == getComponent().getIsNormalized()) &&
            (other->getComponent().getVectorSize() == getComponent().getVectorSize())) {
@@ -168,7 +160,7 @@ bool Element::isEqual(const Element *other) const {
 }
 
 void Element::compute() {
-    if(mFieldCount == 0) {
+    if (mFieldCount == 0) {
         mBits = mComponent.getBits();
         mHasReference = mComponent.isReference();
         return;
@@ -187,8 +179,7 @@ void Element::compute() {
 }
 
 const Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
-                            bool isNorm, uint32_t vecSize)
-{
+                                bool isNorm, uint32_t vecSize) {
     // Look for an existing match.
     for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
         const Element *ee = rsc->mStateElement.mElements[ct];
@@ -211,8 +202,7 @@ const Element * Element::create(Context *rsc, RsDataType dt, RsDataKind dk,
 }
 
 const Element * Element::create(Context *rsc, size_t count, const Element **ein,
-                            const char **nin, const size_t * lengths, const uint32_t *asin)
-{
+                            const char **nin, const size_t * lengths, const uint32_t *asin) {
     // Look for an existing match.
     for (uint32_t ct=0; ct < rsc->mStateElement.mElements.size(); ct++) {
         const Element *ee = rsc->mStateElement.mElements[ct];
@@ -248,8 +238,7 @@ const Element * Element::create(Context *rsc, size_t count, const Element **ein,
     return e;
 }
 
-String8 Element::getGLSLType(uint32_t indent) const
-{
+String8 Element::getGLSLType(uint32_t indent) const {
     String8 s;
     for (uint32_t ct=0; ct < indent; ct++) {
         s.append(" ");
@@ -267,8 +256,7 @@ String8 Element::getGLSLType(uint32_t indent) const
     return s;
 }
 
-void Element::incRefs(const void *ptr) const
-{
+void Element::incRefs(const void *ptr) const {
     if (!mFieldCount) {
         if (mComponent.isReference()) {
             ObjectBase *const*obp = static_cast<ObjectBase *const*>(ptr);
@@ -290,8 +278,7 @@ void Element::incRefs(const void *ptr) const
     }
 }
 
-void Element::decRefs(const void *ptr) const
-{
+void Element::decRefs(const void *ptr) const {
     if (!mFieldCount) {
         if (mComponent.isReference()) {
             ObjectBase *const*obp = static_cast<ObjectBase *const*>(ptr);
@@ -314,8 +301,7 @@ void Element::decRefs(const void *ptr) const
 }
 
 
-ElementState::ElementState()
-{
+ElementState::ElementState() {
     const uint32_t initialCapacity = 32;
     mBuilderElements.setCapacity(initialCapacity);
     mBuilderNameStrings.setCapacity(initialCapacity);
@@ -323,8 +309,7 @@ ElementState::ElementState()
     mBuilderArrays.setCapacity(initialCapacity);
 }
 
-ElementState::~ElementState()
-{
+ElementState::~ElementState() {
     rsAssert(!mElements.size());
 }
 
@@ -362,8 +347,7 @@ RsElement rsi_ElementCreate(Context *rsc,
                             RsDataType dt,
                             RsDataKind dk,
                             bool norm,
-                            uint32_t vecSize)
-{
+                            uint32_t vecSize) {
     //LOGE("rsi_ElementCreate %i %i %i %i", dt, dk, norm, vecSize);
     const Element *e = Element::create(rsc, dt, dk, norm, vecSize);
     e->incUserRef();
@@ -375,8 +359,7 @@ RsElement rsi_ElementCreate2(Context *rsc,
                              const RsElement * ein,
                              const char ** names,
                              const size_t * nameLengths,
-                             const uint32_t * arraySizes)
-{
+                             const uint32_t * arraySizes) {
     //LOGE("rsi_ElementCreate2 %i", count);
     const Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths, arraySizes);
     e->incUserRef();
@@ -386,8 +369,7 @@ RsElement rsi_ElementCreate2(Context *rsc,
 }
 }
 
-void rsaElementGetNativeData(RsContext con, RsElement elem, uint32_t *elemData, uint32_t elemDataSize)
-{
+void rsaElementGetNativeData(RsContext con, RsElement elem, uint32_t *elemData, uint32_t elemDataSize) {
     rsAssert(elemDataSize == 5);
     // we will pack mType; mKind; mNormalized; mVectorSize; NumSubElements
     Element *e = static_cast<Element *>(elem);
@@ -397,18 +379,15 @@ void rsaElementGetNativeData(RsContext con, RsElement elem, uint32_t *elemData, 
     (*elemData++) = e->getComponent().getIsNormalized() ? 1 : 0;
     (*elemData++) = e->getComponent().getVectorSize();
     (*elemData++) = e->getFieldCount();
-
 }
 
-void rsaElementGetSubElements(RsContext con, RsElement elem, uint32_t *ids, const char **names, uint32_t dataSize)
-{
+void rsaElementGetSubElements(RsContext con, RsElement elem, uint32_t *ids, const char **names, uint32_t dataSize) {
     Element *e = static_cast<Element *>(elem);
     rsAssert(e->getFieldCount() == dataSize);
 
-    for(uint32_t i = 0; i < dataSize; i ++) {
+    for (uint32_t i = 0; i < dataSize; i ++) {
         e->getField(i)->incUserRef();
         ids[i] = (uint32_t)e->getField(i);
         names[i] = e->getFieldName(i);
     }
-
 }

@@ -25,8 +25,7 @@ namespace renderscript {
 
 class ProgramFragmentState;
 
-class ProgramFragment : public Program
-{
+class ProgramFragment : public Program {
 public:
     ProgramFragment(Context *rsc, const char * shaderText,
                              uint32_t shaderLength, const uint32_t * params,
@@ -49,8 +48,7 @@ protected:
     int32_t mTextureUniformIndexStart;
 };
 
-class ProgramFragmentState
-{
+class ProgramFragmentState {
 public:
     ProgramFragmentState();
     ~ProgramFragmentState();
@@ -64,7 +62,6 @@ public:
 
     ObjectBaseRef<ProgramFragment> mLast;
 };
-
 
 }
 }

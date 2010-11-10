@@ -1,16 +1,14 @@
 
 #define DATA_SYNC_SIZE 1024
 
-static inline void rsHCAPI_ContextFinish (RsContext rsc)
-{
+static inline void rsHCAPI_ContextFinish (RsContext rsc) {
     ThreadIO *io = &((Context *)rsc)->mIO;
     uint32_t size = sizeof(RS_CMD_ContextFinish);
     RS_CMD_ContextFinish *cmd = static_cast<RS_CMD_ContextFinish *>(io->mToCore.reserve(size));
     io->mToCore.commitSync(RS_CMD_ID_ContextFinish, size);
 }
 
-static inline void rsHCAPI_ScriptInvokeV (RsContext rsc, RsScript va, uint32_t slot, const void * data, uint32_t sizeBytes)
-{
+static inline void rsHCAPI_ScriptInvokeV (RsContext rsc, RsScript va, uint32_t slot, const void * data, uint32_t sizeBytes) {
     ThreadIO *io = &((Context *)rsc)->mIO;
     uint32_t size = sizeof(RS_CMD_ScriptInvokeV);
     if (sizeBytes < DATA_SYNC_SIZE) {
@@ -31,8 +29,7 @@ static inline void rsHCAPI_ScriptInvokeV (RsContext rsc, RsScript va, uint32_t s
 }
 
 
-static inline void rsHCAPI_ScriptSetVarV (RsContext rsc, RsScript va, uint32_t slot, const void * data, uint32_t sizeBytes)
-{
+static inline void rsHCAPI_ScriptSetVarV (RsContext rsc, RsScript va, uint32_t slot, const void * data, uint32_t sizeBytes) {
     ThreadIO *io = &((Context *)rsc)->mIO;
     uint32_t size = sizeof(RS_CMD_ScriptSetVarV);
     if (sizeBytes < DATA_SYNC_SIZE) {
@@ -52,8 +49,7 @@ static inline void rsHCAPI_ScriptSetVarV (RsContext rsc, RsScript va, uint32_t s
     }
 }
 
-static inline void rsHCAPI_AllocationData (RsContext rsc, RsAllocation va, const void * data, uint32_t sizeBytes)
-{
+static inline void rsHCAPI_AllocationData (RsContext rsc, RsAllocation va, const void * data, uint32_t sizeBytes) {
     ThreadIO *io = &((Context *)rsc)->mIO;
     uint32_t size = sizeof(RS_CMD_AllocationData);
     if (sizeBytes < DATA_SYNC_SIZE) {
@@ -72,9 +68,7 @@ static inline void rsHCAPI_AllocationData (RsContext rsc, RsAllocation va, const
     }
 }
 
-
-static inline void rsHCAPI_Allocation1DSubData (RsContext rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void * data, uint32_t sizeBytes)
-{
+static inline void rsHCAPI_Allocation1DSubData (RsContext rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void * data, uint32_t sizeBytes) {
     ThreadIO *io = &((Context *)rsc)->mIO;
     uint32_t size = sizeof(RS_CMD_Allocation1DSubData);
     if (sizeBytes < DATA_SYNC_SIZE) {
@@ -93,11 +87,9 @@ static inline void rsHCAPI_Allocation1DSubData (RsContext rsc, RsAllocation va, 
     } else {
         io->mToCore.commitSync(RS_CMD_ID_Allocation1DSubData, size);
     }
-
 }
 
-static inline void rsHCAPI_Allocation1DSubElementData (RsContext rsc, RsAllocation va, uint32_t x, const void * data, uint32_t comp_offset, uint32_t sizeBytes)
-{
+static inline void rsHCAPI_Allocation1DSubElementData (RsContext rsc, RsAllocation va, uint32_t x, const void * data, uint32_t comp_offset, uint32_t sizeBytes) {
     ThreadIO *io = &((Context *)rsc)->mIO;
     uint32_t size = sizeof(RS_CMD_Allocation1DSubElementData);
     if (sizeBytes < DATA_SYNC_SIZE) {
@@ -116,6 +108,5 @@ static inline void rsHCAPI_Allocation1DSubElementData (RsContext rsc, RsAllocati
     } else {
         io->mToCore.commitSync(RS_CMD_ID_Allocation1DSubElementData, size);
     }
-
 }
 

@@ -71,15 +71,15 @@ public class SceneGraphRS {
 
     public void touchEvent(int x, int y) {
         int dx = mLastX - x;
-        if(Math.abs(dx) > 50 || Math.abs(dx) < 3) {
+        if (Math.abs(dx) > 50 || Math.abs(dx) < 3) {
             dx = 0;
         }
 
         mRotation -= dx;
-        if(mRotation > 360) {
+        if (mRotation > 360) {
             mRotation -= 360;
         }
-        if(mRotation < 0) {
+        if (mRotation < 0) {
             mRotation += 360;
         }
 
@@ -186,10 +186,9 @@ public class SceneGraphRS {
 
         FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.robot);
         FileA3D.IndexEntry entry = model.getIndexEntry(0);
-        if(entry == null || entry.getClassID() != FileA3D.ClassID.MESH) {
+        if (entry == null || entry.getClassID() != FileA3D.ClassID.MESH) {
             Log.e("rs", "could not load model");
-        }
-        else {
+        } else {
             mMesh = (Mesh)entry.getObject();
             mScript.set_gTestMesh(mMesh);
         }

@@ -107,8 +107,7 @@ void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
 }
 
 
-bool Context::initGLThread()
-{
+bool Context::initGLThread() {
     pthread_mutex_lock(&gInitMutex);
     LOGV("initGLThread start %p", this);
 
@@ -239,7 +238,7 @@ bool Context::initGLThread()
     mGL.GL_NV_texture_npot_2D_mipmap = NULL != strstr((const char *)mGL.mExtensions, "GL_NV_texture_npot_2D_mipmap");
     mGL.EXT_texture_max_aniso = 1.0f;
     bool hasAniso = NULL != strstr((const char *)mGL.mExtensions, "GL_EXT_texture_filter_anisotropic");
-    if(hasAniso) {
+    if (hasAniso) {
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mGL.EXT_texture_max_aniso);
     }
 
@@ -248,8 +247,7 @@ bool Context::initGLThread()
     return true;
 }
 
-void Context::deinitEGL()
-{
+void Context::deinitEGL() {
     LOGV("%p, deinitEGL", this);
 
     if (mEGL.mContext != EGL_NO_CONTEXT) {
@@ -265,8 +263,7 @@ void Context::deinitEGL()
 }
 
 
-uint32_t Context::runScript(Script *s)
-{
+uint32_t Context::runScript(Script *s) {
     ObjectBaseRef<ProgramFragment> frag(mFragment);
     ObjectBaseRef<ProgramVertex> vtx(mVertex);
     ObjectBaseRef<ProgramStore> store(mFragmentStore);
@@ -283,16 +280,14 @@ uint32_t Context::runScript(Script *s)
     return ret;
 }
 
-void Context::checkError(const char *msg) const
-{
+void Context::checkError(const char *msg) const {
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
         LOGE("%p, GL Error, 0x%x, from %s", this, err, msg);
     }
 }
 
-uint32_t Context::runRootScript()
-{
+uint32_t Context::runRootScript() {
     glViewport(0, 0, mWidth, mHeight);
 
     timerSet(RS_TIMER_SCRIPT);
@@ -303,22 +298,19 @@ uint32_t Context::runRootScript()
     return ret;
 }
 
-uint64_t Context::getTime() const
-{
+uint64_t Context::getTime() const {
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
     return t.tv_nsec + ((uint64_t)t.tv_sec * 1000 * 1000 * 1000);
 }
 
-void Context::timerReset()
-{
+void Context::timerReset() {
     for (int ct=0; ct < _RS_TIMER_TOTAL; ct++) {
         mTimers[ct] = 0;
     }
 }
 
-void Context::timerInit()
-{
+void Context::timerInit() {
     mTimeLast = getTime();
     mTimeFrame = mTimeLast;
     mTimeLastFrame = mTimeLast;
@@ -329,15 +321,14 @@ void Context::timerInit()
     timerReset();
 }
 
-void Context::timerFrame()
-{
+void Context::timerFrame() {
     mTimeLastFrame = mTimeFrame;
     mTimeFrame = getTime();
     // Update average fps
     const uint64_t averageFramerateInterval = 1000 * 1000000;
     mAverageFPSFrameCount ++;
     uint64_t inverval = mTimeFrame - mAverageFPSStartTime;
-    if(inverval >= averageFramerateInterval) {
+    if (inverval >= averageFramerateInterval) {
         inverval = inverval / 1000000;
         mAverageFPS = (mAverageFPSFrameCount * 1000) / inverval;
         mAverageFPSFrameCount = 0;
@@ -345,16 +336,14 @@ void Context::timerFrame()
     }
 }
 
-void Context::timerSet(Timers tm)
-{
+void Context::timerSet(Timers tm) {
     uint64_t last = mTimeLast;
     mTimeLast = getTime();
     mTimers[mTimerActive] += mTimeLast - last;
     mTimerActive = tm;
 }
 
-void Context::timerPrint()
-{
+void Context::timerPrint() {
     double total = 0;
     for (int ct = 0; ct < _RS_TIMER_TOTAL; ct++) {
         total += mTimers[ct];
@@ -376,8 +365,7 @@ void Context::timerPrint()
     }
 }
 
-bool Context::setupCheck()
-{
+bool Context::setupCheck() {
     if (!mShaderCache.lookup(this, mVertex.get(), mFragment.get())) {
         LOGE("Context::setupCheck() 1 fail");
         return false;
@@ -394,15 +382,13 @@ void Context::setupProgramStore() {
     mFragmentStore->setupGL2(this, &mStateFragmentStore);
 }
 
-static bool getProp(const char *str)
-{
+static bool getProp(const char *str) {
     char buf[PROPERTY_VALUE_MAX];
     property_get(str, buf, "0");
     return 0 != strcmp(buf, "0");
 }
 
-void Context::displayDebugStats()
-{
+void Context::displayDebugStats() {
     char buffer[128];
     sprintf(buffer, "Avg fps %u, Frame %i ms, Script %i ms", mAverageFPS, mTimeMSLastFrame, mTimeMSLastScript);
     float oldR, oldG, oldB, oldA;
@@ -419,8 +405,7 @@ void Context::displayDebugStats()
     mStateFont.setFontColor(oldR, oldG, oldB, oldA);
 }
 
-void * Context::threadProc(void *vrsc)
-{
+void * Context::threadProc(void *vrsc) {
      Context *rsc = static_cast<Context *>(vrsc);
      rsc->mNativeThreadId = gettid();
 
@@ -479,7 +464,7 @@ void * Context::threadProc(void *vrsc)
          if (mDraw && rsc->mIsGraphicsContext) {
              targetTime = rsc->runRootScript();
 
-             if(rsc->props.mLogVisual) {
+             if (rsc->props.mLogVisual) {
                  rsc->displayDebugStats();
              }
 
@@ -526,8 +511,7 @@ void * Context::threadProc(void *vrsc)
      return NULL;
 }
 
-void * Context::helperThreadProc(void *vrsc)
-{
+void * Context::helperThreadProc(void *vrsc) {
      Context *rsc = static_cast<Context *>(vrsc);
      uint32_t idx = (uint32_t)android_atomic_inc(&rsc->mWorkers.mLaunchCount);
 
@@ -552,7 +536,7 @@ void * Context::helperThreadProc(void *vrsc)
          LOGE("pthread_setspecific %i", status);
      }
 
-     while(rsc->mRunning) {
+     while (rsc->mRunning) {
          rsc->mWorkers.mLaunchSignals[idx].wait();
          if (rsc->mWorkers.mLaunchCallback) {
             rsc->mWorkers.mLaunchCallback(rsc->mWorkers.mLaunchData, idx);
@@ -565,21 +549,19 @@ void * Context::helperThreadProc(void *vrsc)
      return NULL;
 }
 
-void Context::launchThreads(WorkerCallback_t cbk, void *data)
-{
+void Context::launchThreads(WorkerCallback_t cbk, void *data) {
     mWorkers.mLaunchData = data;
     mWorkers.mLaunchCallback = cbk;
     mWorkers.mRunningCount = (int)mWorkers.mCount;
     for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
         mWorkers.mLaunchSignals[ct].set();
     }
-    while(mWorkers.mRunningCount) {
+    while (mWorkers.mRunningCount) {
         mWorkers.mCompleteSignal.wait();
     }
 }
 
-void Context::setPriority(int32_t p)
-{
+void Context::setPriority(int32_t p) {
     // Note: If we put this in the proper "background" policy
     // the wallpapers can become completly unresponsive at times.
     // This is probably not what we want for something the user is actively
@@ -601,8 +583,7 @@ void Context::setPriority(int32_t p)
 #endif
 }
 
-Context::Context()
-{
+Context::Context() {
     mDev = NULL;
     mRunning = false;
     mExit = false;
@@ -612,8 +593,7 @@ Context::Context()
     mErrorMsg = NULL;
 }
 
-Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc)
-{
+Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc) {
     Context * rsc = new Context();
     if (!rsc->initContext(dev, sc)) {
         delete rsc;
@@ -622,8 +602,7 @@ Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc)
     return rsc;
 }
 
-bool Context::initContext(Device *dev, const RsSurfaceConfig *sc)
-{
+bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     pthread_mutex_lock(&gInitMutex);
 
     dev->addContext(this);
@@ -680,7 +659,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc)
         LOGE("Failed to start rs context thread.");
         return false;
     }
-    while(!mRunning && (mError == RS_ERROR_NONE)) {
+    while (!mRunning && (mError == RS_ERROR_NONE)) {
         usleep(100);
     }
 
@@ -703,8 +682,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc)
     return true;
 }
 
-Context::~Context()
-{
+Context::~Context() {
     LOGV("Context::~Context");
     mExit = true;
     mPaused = false;
@@ -726,8 +704,7 @@ Context::~Context()
     pthread_mutex_unlock(&gInitMutex);
 }
 
-void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
-{
+void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur) {
     rsAssert(mIsGraphicsContext);
 
     EGLBoolean ret;
@@ -761,26 +738,22 @@ void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur)
     }
 }
 
-void Context::pause()
-{
+void Context::pause() {
     rsAssert(mIsGraphicsContext);
     mPaused = true;
 }
 
-void Context::resume()
-{
+void Context::resume() {
     rsAssert(mIsGraphicsContext);
     mPaused = false;
 }
 
-void Context::setRootScript(Script *s)
-{
+void Context::setRootScript(Script *s) {
     rsAssert(mIsGraphicsContext);
     mRootScript.set(s);
 }
 
-void Context::setFragmentStore(ProgramStore *pfs)
-{
+void Context::setFragmentStore(ProgramStore *pfs) {
     rsAssert(mIsGraphicsContext);
     if (pfs == NULL) {
         mFragmentStore.set(mStateFragmentStore.mDefault);
@@ -789,8 +762,7 @@ void Context::setFragmentStore(ProgramStore *pfs)
     }
 }
 
-void Context::setFragment(ProgramFragment *pf)
-{
+void Context::setFragment(ProgramFragment *pf) {
     rsAssert(mIsGraphicsContext);
     if (pf == NULL) {
         mFragment.set(mStateFragment.mDefault);
@@ -799,8 +771,7 @@ void Context::setFragment(ProgramFragment *pf)
     }
 }
 
-void Context::setRaster(ProgramRaster *pr)
-{
+void Context::setRaster(ProgramRaster *pr) {
     rsAssert(mIsGraphicsContext);
     if (pr == NULL) {
         mRaster.set(mStateRaster.mDefault);
@@ -809,8 +780,7 @@ void Context::setRaster(ProgramRaster *pr)
     }
 }
 
-void Context::setVertex(ProgramVertex *pv)
-{
+void Context::setVertex(ProgramVertex *pv) {
     rsAssert(mIsGraphicsContext);
     if (pv == NULL) {
         mVertex.set(mStateVertex.mDefault);
@@ -819,8 +789,7 @@ void Context::setVertex(ProgramVertex *pv)
     }
 }
 
-void Context::setFont(Font *f)
-{
+void Context::setFont(Font *f) {
     rsAssert(mIsGraphicsContext);
     if (f == NULL) {
         mFont.set(mStateFont.mDefault);
@@ -829,16 +798,14 @@ void Context::setFont(Font *f)
     }
 }
 
-void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)
-{
+void Context::assignName(ObjectBase *obj, const char *name, uint32_t len) {
     rsAssert(!obj->getName());
     obj->setName(name, len);
     mNames.add(obj);
 }
 
-void Context::removeName(ObjectBase *obj)
-{
-    for(size_t ct=0; ct < mNames.size(); ct++) {
+void Context::removeName(ObjectBase *obj) {
+    for (size_t ct=0; ct < mNames.size(); ct++) {
         if (obj == mNames[ct]) {
             mNames.removeAt(ct);
             return;
@@ -846,8 +813,7 @@ void Context::removeName(ObjectBase *obj)
     }
 }
 
-RsMessageToClientType Context::peekMessageToClient(size_t *receiveLen, uint32_t *subID, bool wait)
-{
+RsMessageToClientType Context::peekMessageToClient(size_t *receiveLen, uint32_t *subID, bool wait) {
     *receiveLen = 0;
     if (!wait && mIO.mToClient.isEmpty()) {
         return RS_MESSAGE_TO_CLIENT_NONE;
@@ -863,8 +829,7 @@ RsMessageToClientType Context::peekMessageToClient(size_t *receiveLen, uint32_t 
     return (RsMessageToClientType)commandID;
 }
 
-RsMessageToClientType Context::getMessageToClient(void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait)
-{
+RsMessageToClientType Context::getMessageToClient(void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait) {
     //LOGE("getMessageToClient %i %i", bufferLen, wait);
     *receiveLen = 0;
     if (!wait && mIO.mToClient.isEmpty()) {
@@ -889,8 +854,7 @@ RsMessageToClientType Context::getMessageToClient(void *data, size_t *receiveLen
     return RS_MESSAGE_TO_CLIENT_RESIZE;
 }
 
-bool Context::sendMessageToClient(const void *data, RsMessageToClientType cmdID, uint32_t subID, size_t len, bool waitForSpace)
-{
+bool Context::sendMessageToClient(const void *data, RsMessageToClientType cmdID, uint32_t subID, size_t len, bool waitForSpace) {
     //LOGE("sendMessageToClient %i %i %i %i", cmdID, subID, len, waitForSpace);
     if (cmdID == 0) {
         LOGE("Attempting to send invalid command 0 to client.");
@@ -913,20 +877,17 @@ bool Context::sendMessageToClient(const void *data, RsMessageToClientType cmdID,
     return true;
 }
 
-void Context::initToClient()
-{
-    while(!mRunning) {
+void Context::initToClient() {
+    while (!mRunning) {
         usleep(100);
     }
 }
 
-void Context::deinitToClient()
-{
+void Context::deinitToClient() {
     mIO.mToClient.shutdown();
 }
 
-const char * Context::getError(RsError *err)
-{
+const char * Context::getError(RsError *err) {
     *err = mError;
     mError = RS_ERROR_NONE;
     if (*err != RS_ERROR_NONE) {
@@ -935,16 +896,14 @@ const char * Context::getError(RsError *err)
     return NULL;
 }
 
-void Context::setError(RsError e, const char *msg)
-{
+void Context::setError(RsError e, const char *msg) {
     mError = e;
     mErrorMsg = msg;
     sendMessageToClient(msg, RS_MESSAGE_TO_CLIENT_ERROR, e, strlen(msg) + 1, true);
 }
 
 
-void Context::dumpDebug() const
-{
+void Context::dumpDebug() const {
     LOGE("RS Context debug %p", this);
     LOGE("RS Context debug");
 
@@ -971,18 +930,15 @@ void Context::dumpDebug() const
 namespace android {
 namespace renderscript {
 
-void rsi_ContextFinish(Context *rsc)
-{
+void rsi_ContextFinish(Context *rsc) {
 }
 
-void rsi_ContextBindRootScript(Context *rsc, RsScript vs)
-{
+void rsi_ContextBindRootScript(Context *rsc, RsScript vs) {
     Script *s = static_cast<Script *>(vs);
     rsc->setRootScript(s);
 }
 
-void rsi_ContextBindSampler(Context *rsc, uint32_t slot, RsSampler vs)
-{
+void rsi_ContextBindSampler(Context *rsc, uint32_t slot, RsSampler vs) {
     Sampler *s = static_cast<Sampler *>(vs);
 
     if (slot > RS_MAX_SAMPLER_SLOT) {
@@ -993,76 +949,63 @@ void rsi_ContextBindSampler(Context *rsc, uint32_t slot, RsSampler vs)
     s->bindToContext(&rsc->mStateSampler, slot);
 }
 
-void rsi_ContextBindProgramStore(Context *rsc, RsProgramStore vpfs)
-{
+void rsi_ContextBindProgramStore(Context *rsc, RsProgramStore vpfs) {
     ProgramStore *pfs = static_cast<ProgramStore *>(vpfs);
     rsc->setFragmentStore(pfs);
 }
 
-void rsi_ContextBindProgramFragment(Context *rsc, RsProgramFragment vpf)
-{
+void rsi_ContextBindProgramFragment(Context *rsc, RsProgramFragment vpf) {
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
     rsc->setFragment(pf);
 }
 
-void rsi_ContextBindProgramRaster(Context *rsc, RsProgramRaster vpr)
-{
+void rsi_ContextBindProgramRaster(Context *rsc, RsProgramRaster vpr) {
     ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
     rsc->setRaster(pr);
 }
 
-void rsi_ContextBindProgramVertex(Context *rsc, RsProgramVertex vpv)
-{
+void rsi_ContextBindProgramVertex(Context *rsc, RsProgramVertex vpv) {
     ProgramVertex *pv = static_cast<ProgramVertex *>(vpv);
     rsc->setVertex(pv);
 }
 
-void rsi_ContextBindFont(Context *rsc, RsFont vfont)
-{
+void rsi_ContextBindFont(Context *rsc, RsFont vfont) {
     Font *font = static_cast<Font *>(vfont);
     rsc->setFont(font);
 }
 
-void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len)
-{
+void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len) {
     ObjectBase *ob = static_cast<ObjectBase *>(obj);
     rsc->assignName(ob, name, len);
 }
 
-void rsi_ObjDestroy(Context *rsc, void *optr)
-{
+void rsi_ObjDestroy(Context *rsc, void *optr) {
     ObjectBase *ob = static_cast<ObjectBase *>(optr);
     rsc->removeName(ob);
     ob->decUserRef();
 }
 
-void rsi_ContextPause(Context *rsc)
-{
+void rsi_ContextPause(Context *rsc) {
     rsc->pause();
 }
 
-void rsi_ContextResume(Context *rsc)
-{
+void rsi_ContextResume(Context *rsc) {
     rsc->resume();
 }
 
-void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, ANativeWindow *sur)
-{
+void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, ANativeWindow *sur) {
     rsc->setSurface(w, h, sur);
 }
 
-void rsi_ContextSetPriority(Context *rsc, int32_t p)
-{
+void rsi_ContextSetPriority(Context *rsc, int32_t p) {
     rsc->setPriority(p);
 }
 
-void rsi_ContextDump(Context *rsc, int32_t bits)
-{
+void rsi_ContextDump(Context *rsc, int32_t bits) {
     ObjectBase::dumpAll(rsc);
 }
 
-const char * rsi_ContextGetError(Context *rsc, RsError *e)
-{
+const char* rsi_ContextGetError(Context *rsc, RsError *e) {
     const char *msg = rsc->getError(e);
     if (*e != RS_ERROR_NONE) {
         LOGE("RS Error %i %s", *e, msg);
@@ -1074,16 +1017,14 @@ const char * rsi_ContextGetError(Context *rsc, RsError *e)
 }
 
 
-RsContext rsContextCreate(RsDevice vdev, uint32_t version)
-{
+RsContext rsContextCreate(RsDevice vdev, uint32_t version) {
     LOGV("rsContextCreate %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, NULL);
     return rsc;
 }
 
-RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, RsSurfaceConfig sc)
-{
+RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, RsSurfaceConfig sc) {
     LOGV("rsContextCreateGL %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, &sc);
@@ -1091,40 +1032,34 @@ RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, RsSurfaceConfig sc)
     return rsc;
 }
 
-void rsContextDestroy(RsContext vrsc)
-{
+void rsContextDestroy(RsContext vrsc) {
     Context * rsc = static_cast<Context *>(vrsc);
     delete rsc;
 }
 
-RsMessageToClientType rsContextPeekMessage(RsContext vrsc, size_t *receiveLen, uint32_t *subID, bool wait)
-{
+RsMessageToClientType rsContextPeekMessage(RsContext vrsc, size_t *receiveLen, uint32_t *subID, bool wait) {
     Context * rsc = static_cast<Context *>(vrsc);
     return rsc->peekMessageToClient(receiveLen, subID, wait);
 }
 
-RsMessageToClientType rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait)
-{
+RsMessageToClientType rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait) {
     Context * rsc = static_cast<Context *>(vrsc);
     return rsc->getMessageToClient(data, receiveLen, subID, bufferLen, wait);
 }
 
-void rsContextInitToClient(RsContext vrsc)
-{
+void rsContextInitToClient(RsContext vrsc) {
     Context * rsc = static_cast<Context *>(vrsc);
     rsc->initToClient();
 }
 
-void rsContextDeinitToClient(RsContext vrsc)
-{
+void rsContextDeinitToClient(RsContext vrsc) {
     Context * rsc = static_cast<Context *>(vrsc);
     rsc->deinitToClient();
 }
 
 // Only to be called at a3d load time, before object is visible to user
 // not thread safe
-void rsaGetName(RsContext con, void * obj, const char **name)
-{
+void rsaGetName(RsContext con, void * obj, const char **name) {
     ObjectBase *ob = static_cast<ObjectBase *>(obj);
     (*name) = ob->getName();
 }

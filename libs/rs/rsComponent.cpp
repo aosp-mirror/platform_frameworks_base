@@ -25,17 +25,14 @@
 using namespace android;
 using namespace android::renderscript;
 
-Component::Component()
-{
+Component::Component() {
     set(RS_TYPE_NONE, RS_KIND_USER, false, 1);
 }
 
-Component::~Component()
-{
+Component::~Component() {
 }
 
-void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize)
-{
+void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize) {
     mType = dt;
     mKind = dk;
     mNormalized = norm;
@@ -48,7 +45,7 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize)
     mIsSigned = false;
     mIsPixel = false;
 
-    switch(mKind) {
+    switch (mKind) {
     case RS_KIND_PIXEL_L:
     case RS_KIND_PIXEL_A:
         mIsPixel = true;
@@ -74,7 +71,7 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize)
         break;
     }
 
-    switch(mType) {
+    switch (mType) {
     case RS_TYPE_NONE:
         return;
     case RS_TYPE_UNSIGNED_5_6_5:
@@ -181,15 +178,11 @@ void Component::set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize)
     mBits = mTypeBits * mVectorSize;
 }
 
-bool Component::isReference() const
-{
+bool Component::isReference() const {
     return (mType >= RS_TYPE_ELEMENT);
 }
 
-
-
-uint32_t Component::getGLType() const
-{
+uint32_t Component::getGLType() const {
     switch (mType) {
     case RS_TYPE_UNSIGNED_5_6_5:    return GL_UNSIGNED_SHORT_5_6_5;
     case RS_TYPE_UNSIGNED_5_5_5_1:  return GL_UNSIGNED_SHORT_5_5_5_1;
@@ -207,8 +200,7 @@ uint32_t Component::getGLType() const
     return 0;
 }
 
-uint32_t Component::getGLFormat() const
-{
+uint32_t Component::getGLFormat() const {
     switch (mKind) {
     case RS_KIND_PIXEL_L: return GL_LUMINANCE;
     case RS_KIND_PIXEL_A: return GL_ALPHA;
@@ -220,10 +212,9 @@ uint32_t Component::getGLFormat() const
     return 0;
 }
 
-String8 Component::getGLSLType() const
-{
+String8 Component::getGLSLType() const {
     if (mType == RS_TYPE_SIGNED_32) {
-        switch(mVectorSize) {
+        switch (mVectorSize) {
         case 1: return String8("int");
         case 2: return String8("ivec2");
         case 3: return String8("ivec3");
@@ -231,7 +222,7 @@ String8 Component::getGLSLType() const
         }
     }
     if (mType == RS_TYPE_FLOAT_32) {
-        switch(mVectorSize) {
+        switch (mVectorSize) {
         case 1: return String8("float");
         case 2: return String8("vec2");
         case 3: return String8("vec3");
@@ -300,8 +291,7 @@ static const char * gKindStrings[] = {
     "PIXEL_RGBA",
 };
 
-void Component::dumpLOGV(const char *prefix) const
-{
+void Component::dumpLOGV(const char *prefix) const {
     if (mType >= RS_TYPE_ELEMENT) {
         LOGV("%s   Component: %s, %s, vectorSize=%i, bits=%i",
              prefix, gTypeObjStrings[mType - RS_TYPE_ELEMENT], gKindStrings[mKind], mVectorSize, mBits);
@@ -311,16 +301,14 @@ void Component::dumpLOGV(const char *prefix) const
     }
 }
 
-void Component::serialize(OStream *stream) const
-{
+void Component::serialize(OStream *stream) const {
     stream->addU8((uint8_t)mType);
     stream->addU8((uint8_t)mKind);
     stream->addU8((uint8_t)(mNormalized ? 1 : 0));
     stream->addU32(mVectorSize);
 }
 
-void Component::loadFromStream(IStream *stream)
-{
+void Component::loadFromStream(IStream *stream) {
     mType = (RsDataType)stream->loadU8();
     mKind = (RsDataKind)stream->loadU8();
     uint8_t temp = stream->loadU8();

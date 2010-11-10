@@ -2,8 +2,7 @@
 #include "spec.h"
 #include <stdio.h>
 
-void printFileHeader(FILE *f)
-{
+void printFileHeader(FILE *f) {
     fprintf(f, "/*\n");
     fprintf(f, " * Copyright (C) 2010 The Android Open Source Project\n");
     fprintf(f, " *\n");
@@ -21,14 +20,13 @@ void printFileHeader(FILE *f)
     fprintf(f, " */\n\n");
 }
 
-void printVarType(FILE *f, const VarType *vt)
-{
+void printVarType(FILE *f, const VarType *vt) {
     int ct;
     if (vt->isConst) {
         fprintf(f, "const ");
     }
 
-    switch(vt->type) {
+    switch (vt->type) {
     case 0:
         fprintf(f, "void");
         break;
@@ -49,22 +47,21 @@ void printVarType(FILE *f, const VarType *vt)
         break;
     }
 
-    if(vt->ptrLevel) {
+    if (vt->ptrLevel) {
         fprintf(f, " ");
-        for(ct=0; ct < vt->ptrLevel; ct++) {
+        for (ct=0; ct < vt->ptrLevel; ct++) {
             fprintf(f, "*");
         }
     }
 
-    if(vt->name[0]) {
+    if (vt->name[0]) {
         fprintf(f, " %s", vt->name);
     }
 }
 
-void printArgList(FILE *f, const ApiEntry * api, int assumePrevious)
-{
+void printArgList(FILE *f, const ApiEntry * api, int assumePrevious) {
     int ct;
-    for(ct=0; ct < api->paramCount; ct++) {
+    for (ct=0; ct < api->paramCount; ct++) {
         if (ct || assumePrevious) {
             fprintf(f, ", ");
         }
@@ -72,23 +69,22 @@ void printArgList(FILE *f, const ApiEntry * api, int assumePrevious)
     }
 }
 
-void printStructures(FILE *f)
-{
+void printStructures(FILE *f) {
     int ct;
     int ct2;
 
-    for(ct=0; ct < apiCount; ct++) {
+    for (ct=0; ct < apiCount; ct++) {
         fprintf(f, "typedef struct RS_CMD_%s_rec RS_CMD_%s;\n", apis[ct].name, apis[ct].name);
     }
     fprintf(f, "\n");
 
-    for(ct=0; ct < apiCount; ct++) {
+    for (ct=0; ct < apiCount; ct++) {
         const ApiEntry * api = &apis[ct];
         fprintf(f, "#define RS_CMD_ID_%s %i\n", api->name, ct+1);
         fprintf(f, "struct RS_CMD_%s_rec {\n", api->name);
         //fprintf(f, "    RsCommandHeader _hdr;\n");
 
-        for(ct2=0; ct2 < api->paramCount; ct2++) {
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
             fprintf(f, "    ");
             printVarType(f, &api->params[ct2]);
             fprintf(f, ";\n");
@@ -97,8 +93,7 @@ void printStructures(FILE *f)
     }
 }
 
-void printFuncDecl(FILE *f, const ApiEntry *api, const char *prefix, int addContext)
-{
+void printFuncDecl(FILE *f, const ApiEntry *api, const char *prefix, int addContext) {
     printVarType(f, &api->ret);
     fprintf(f, " %s%s (", prefix, api->name);
     if (addContext) {
@@ -110,26 +105,23 @@ void printFuncDecl(FILE *f, const ApiEntry *api, const char *prefix, int addCont
     fprintf(f, ")");
 }
 
-void printFuncDecls(FILE *f, const char *prefix, int addContext)
-{
+void printFuncDecls(FILE *f, const char *prefix, int addContext) {
     int ct;
-    for(ct=0; ct < apiCount; ct++) {
+    for (ct=0; ct < apiCount; ct++) {
         printFuncDecl(f, &apis[ct], prefix, addContext);
         fprintf(f, ";\n");
     }
     fprintf(f, "\n\n");
 }
 
-void printPlaybackFuncs(FILE *f, const char *prefix)
-{
+void printPlaybackFuncs(FILE *f, const char *prefix) {
     int ct;
-    for(ct=0; ct < apiCount; ct++) {
+    for (ct=0; ct < apiCount; ct++) {
         fprintf(f, "void %s%s (Context *, const void *);\n", prefix, apis[ct].name);
     }
 }
 
-void printApiCpp(FILE *f)
-{
+void printApiCpp(FILE *f) {
     int ct;
     int ct2;
 
@@ -144,7 +136,7 @@ void printApiCpp(FILE *f)
     fprintf(f, "#include \"rsHandcode.h\"\n");
     fprintf(f, "\n");
 
-    for(ct=0; ct < apiCount; ct++) {
+    for (ct=0; ct < apiCount; ct++) {
         int needFlush = 0;
         const ApiEntry * api = &apis[ct];
 
@@ -152,7 +144,7 @@ void printApiCpp(FILE *f)
         fprintf(f, "\n{\n");
         if (api->handcodeApi) {
             fprintf(f, "    rsHCAPI_%s(rsc", api->name);
-            for(ct2=0; ct2 < api->paramCount; ct2++) {
+            for (ct2=0; ct2 < api->paramCount; ct2++) {
                 const VarType *vt = &api->params[ct2];
                 fprintf(f, ", %s", vt->name);
             }
@@ -163,7 +155,7 @@ void printApiCpp(FILE *f)
             fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
             fprintf(f, "    uint32_t size = sizeof(RS_CMD_%s);\n", api->name);
 
-            for(ct2=0; ct2 < api->paramCount; ct2++) {
+            for (ct2=0; ct2 < api->paramCount; ct2++) {
                 const VarType *vt = &api->params[ct2];
                 needFlush += vt->ptrLevel;
                 fprintf(f, "    cmd->%s = %s;\n", vt->name, vt->name);
@@ -188,8 +180,7 @@ void printApiCpp(FILE *f)
     }
 }
 
-void printPlaybackCpp(FILE *f)
-{
+void printPlaybackCpp(FILE *f) {
     int ct;
     int ct2;
 
@@ -204,7 +195,7 @@ void printPlaybackCpp(FILE *f)
     fprintf(f, "#include \"rsHandcode.h\"\n");
     fprintf(f, "\n");
 
-    for(ct=0; ct < apiCount; ct++) {
+    for (ct=0; ct < apiCount; ct++) {
         const ApiEntry * api = &apis[ct];
 
         fprintf(f, "void rsp_%s(Context *con, const void *vp)\n", api->name);
@@ -219,7 +210,7 @@ void printPlaybackCpp(FILE *f)
                 fprintf(f, "con->mIO.mToCoreRet = (intptr_t)");
             }
             fprintf(f, "rsi_%s(con", api->name);
-            for(ct2=0; ct2 < api->paramCount; ct2++) {
+            for (ct2=0; ct2 < api->paramCount; ct2++) {
                 const VarType *vt = &api->params[ct2];
                 fprintf(f, ",\n           cmd->%s", vt->name);
             }
@@ -230,7 +221,7 @@ void printPlaybackCpp(FILE *f)
 
     fprintf(f, "RsPlaybackFunc gPlaybackFuncs[] = {\n");
     fprintf(f, "    NULL,\n");
-    for(ct=0; ct < apiCount; ct++) {
+    for (ct=0; ct < apiCount; ct++) {
         fprintf(f, "    %s%s,\n", "rsp_", apis[ct].name);
     }
     fprintf(f, "};\n");
@@ -239,8 +230,7 @@ void printPlaybackCpp(FILE *f)
     fprintf(f, "};\n");
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc != 3) {
         fprintf(stderr, "usage: %s commandFile outFile\n", argv[0]);
         return 1;
@@ -263,7 +253,7 @@ int main(int argc, char **argv)
     FILE *f = fopen(outFile, "w");
 
     printFileHeader(f);
-    switch(choice) {
+    switch (choice) {
         case '0': // rsgApiStructs.h
         {
             fprintf(f, "\n");

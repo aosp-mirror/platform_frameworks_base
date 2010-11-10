@@ -48,7 +48,7 @@ static void computeGaussianWeights() {
     float normalizeFactor = 0.0f;
     float floatR = 0.0f;
     int r;
-    for(r = -radius; r <= radius; r ++) {
+    for (r = -radius; r <= radius; r ++) {
         floatR = (float)r;
         gaussian[r + radius] = coeff1 * pow(e, floatR * floatR * coeff2);
         normalizeFactor += gaussian[r + radius];
@@ -56,7 +56,7 @@ static void computeGaussianWeights() {
 
     //Now we need to normalize the weights because all our coefficients need to add up to one
     normalizeFactor = 1.0f / normalizeFactor;
-    for(r = -radius; r <= radius; r ++) {
+    for (r = -radius; r <= radius; r ++) {
         floatR = (float)r;
         gaussian[r + radius] *= normalizeFactor;
     }
@@ -68,8 +68,8 @@ static void copyInput() {
     rsSetObject(&ain,rsGetAllocation(InPixel));
     uint32_t dimx = rsAllocationGetDimX(ain);
     uint32_t dimy = rsAllocationGetDimY(ain);
-    for(uint32_t y = 0; y < dimy; y++) {
-        for(uint32_t x = 0; x < dimx; x++) {
+    for (uint32_t y = 0; y < dimy; y++) {
+        for (uint32_t x = 0; x < dimx; x++) {
             ScratchPixel1[x + y * dimx] = convert_float4(InPixel[x + y * dimx]);
         }
     }

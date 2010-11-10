@@ -33,14 +33,12 @@ using namespace android::renderscript;
     ScriptC * sc = (ScriptC *) tls->mScript
 
 
-ScriptC::ScriptC(Context *rsc) : Script(rsc)
-{
+ScriptC::ScriptC(Context *rsc) : Script(rsc) {
     mBccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
 
-ScriptC::~ScriptC()
-{
+ScriptC::~ScriptC() {
     if (mBccScript) {
         bccDeleteScript(mBccScript);
     }
@@ -48,8 +46,7 @@ ScriptC::~ScriptC()
     mEnviroment.mScriptText = NULL;
 }
 
-void ScriptC::setupScript(Context *rsc)
-{
+void ScriptC::setupScript(Context *rsc) {
     setupGLState(rsc);
     mEnviroment.mStartTimeMillis
                 = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
@@ -82,8 +79,7 @@ void ScriptC::setupScript(Context *rsc)
     }
 }
 
-const Allocation *ScriptC::ptrToAllocation(const void *ptr) const
-{
+const Allocation *ScriptC::ptrToAllocation(const void *ptr) const {
     if (!ptr) {
         return NULL;
     }
@@ -98,8 +94,7 @@ const Allocation *ScriptC::ptrToAllocation(const void *ptr) const
     return NULL;
 }
 
-Script * ScriptC::setTLS(Script *sc)
-{
+Script * ScriptC::setTLS(Script *sc) {
     Context::ScriptTLSStruct * tls = (Context::ScriptTLSStruct *)
                                   pthread_getspecific(Context::gThreadTLSKey);
     rsAssert(tls);
@@ -108,9 +103,7 @@ Script * ScriptC::setTLS(Script *sc)
     return old;
 }
 
-
-void ScriptC::setupGLState(Context *rsc)
-{
+void ScriptC::setupGLState(Context *rsc) {
     if (mEnviroment.mFragmentStore.get()) {
         rsc->setFragmentStore(mEnviroment.mFragmentStore.get());
     }
@@ -125,8 +118,7 @@ void ScriptC::setupGLState(Context *rsc)
     }
 }
 
-uint32_t ScriptC::run(Context *rsc)
-{
+uint32_t ScriptC::run(Context *rsc) {
     if (mProgram.mRoot == NULL) {
         rsc->setError(RS_ERROR_BAD_SCRIPT, "Attempted to run bad script");
         return 0;
@@ -150,7 +142,6 @@ uint32_t ScriptC::run(Context *rsc)
     setTLS(oldTLS);
     return ret;
 }
-
 
 typedef struct {
     Context *rsc;
@@ -183,8 +174,7 @@ typedef struct {
 } MTLaunchStruct;
 typedef int (*rs_t)(const void *, void *, const void *, uint32_t, uint32_t, uint32_t, uint32_t);
 
-static void wc_xy(void *usr, uint32_t idx)
-{
+static void wc_xy(void *usr, uint32_t idx) {
     MTLaunchStruct *mtls = (MTLaunchStruct *)usr;
 
     while (1) {
@@ -210,11 +200,9 @@ static void wc_xy(void *usr, uint32_t idx)
             }
         }
     }
-
 }
 
-static void wc_x(void *usr, uint32_t idx)
-{
+static void wc_x(void *usr, uint32_t idx) {
     MTLaunchStruct *mtls = (MTLaunchStruct *)usr;
 
     while (1) {
@@ -236,15 +224,13 @@ static void wc_x(void *usr, uint32_t idx)
             xPtrOut += mtls->eStrideOut;
         }
     }
-
 }
 
 void ScriptC::runForEach(Context *rsc,
                          const Allocation * ain,
                          Allocation * aout,
                          const void * usr,
-                         const RsScriptCall *sc)
-{
+                         const RsScriptCall *sc) {
     MTLaunchStruct mtls;
     memset(&mtls, 0, sizeof(mtls));
 
@@ -294,7 +280,6 @@ void ScriptC::runForEach(Context *rsc,
 
     setupScript(rsc);
     Script * oldTLS = setTLS(this);
-
 
     mtls.rsc = rsc;
     mtls.ain = ain;
@@ -350,8 +335,7 @@ void ScriptC::runForEach(Context *rsc,
     setTLS(oldTLS);
 }
 
-void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len)
-{
+void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) {
     //LOGE("rsi_ScriptInvoke %i", slot);
     if ((slot >= mEnviroment.mInvokeFunctionCount) ||
         (mEnviroment.mInvokeFunctions[slot] == NULL)) {
@@ -373,30 +357,25 @@ void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len
     setTLS(oldTLS);
 }
 
-ScriptCState::ScriptCState()
-{
+ScriptCState::ScriptCState() {
     mScript.clear();
 }
 
-ScriptCState::~ScriptCState()
-{
+ScriptCState::~ScriptCState() {
     mScript.clear();
 }
 
-void ScriptCState::init(Context *rsc)
-{
+void ScriptCState::init(Context *rsc) {
     clear(rsc);
 }
 
-void ScriptCState::clear(Context *rsc)
-{
+void ScriptCState::clear(Context *rsc) {
     rsAssert(rsc);
     mScript.clear();
     mScript.set(new ScriptC(rsc));
 }
 
-static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
-{
+static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name) {
     const ScriptCState::SymbolTable_t *sym;
     ScriptC *s = (ScriptC *)pContext;
     sym = ScriptCState::lookupSymbol(name);
@@ -417,8 +396,7 @@ static BCCvoid* symbolLookup(BCCvoid* pContext, const BCCchar* name)
 extern const char rs_runtime_lib_bc[];
 extern unsigned rs_runtime_lib_bc_size;
 
-void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
-{
+void ScriptCState::runCompiler(Context *rsc, ScriptC *s) {
     {
         StopWatch compileTimer("RenderScript compile time");
         s->mBccScript = bccCreateScript();
@@ -437,7 +415,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     }
 
     bccGetExportFuncs(s->mBccScript, (BCCsizei*) &s->mEnviroment.mInvokeFunctionCount, 0, NULL);
-    if(s->mEnviroment.mInvokeFunctionCount <= 0)
+    if (s->mEnviroment.mInvokeFunctionCount <= 0)
         s->mEnviroment.mInvokeFunctions = NULL;
     else {
         s->mEnviroment.mInvokeFunctions = (Script::InvokeFunc_t*) calloc(s->mEnviroment.mInvokeFunctionCount, sizeof(Script::InvokeFunc_t));
@@ -445,7 +423,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     }
 
     bccGetExportVars(s->mBccScript, (BCCsizei*) &s->mEnviroment.mFieldCount, 0, NULL);
-    if(s->mEnviroment.mFieldCount <= 0)
+    if (s->mEnviroment.mFieldCount <= 0)
         s->mEnviroment.mFieldAddress = NULL;
     else {
         s->mEnviroment.mFieldAddress = (void **) calloc(s->mEnviroment.mFieldCount, sizeof(void *));
@@ -522,19 +500,15 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     }
 }
 
-
-
 namespace android {
 namespace renderscript {
 
-void rsi_ScriptCBegin(Context * rsc)
-{
+void rsi_ScriptCBegin(Context * rsc) {
     ScriptCState *ss = &rsc->mScriptC;
     ss->clear(rsc);
 }
 
-void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)
-{
+void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len) {
     ScriptCState *ss = &rsc->mScriptC;
 
     char *t = (char *)malloc(len + 1);
@@ -544,9 +518,7 @@ void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)
     ss->mScript->mEnviroment.mScriptTextLength = len;
 }
 
-
-RsScript rsi_ScriptCCreate(Context * rsc)
-{
+RsScript rsi_ScriptCCreate(Context * rsc) {
     ScriptCState *ss = &rsc->mScriptC;
 
     ObjectBaseRef<ScriptC> s(ss->mScript);
