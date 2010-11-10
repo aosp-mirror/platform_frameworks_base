@@ -202,7 +202,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/BackupRestore/index.html">
                 <span class="en">Backup and Restore</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/BluetoothChat/index.html">
                 <span class="en">Bluetooth Chat</span>
               </a></li>
@@ -235,7 +235,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/SearchableDictionary/index.html">
                 <span class="en">Searchable Dictionary v2</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
 	  <li><a href="<?cs var:toroot ?>resources/samples/SipDemo/index.html">
 	        <span class="en">SIP Demo</span>
 	      </a> <span class="new">new!</span></li>
@@ -247,16 +247,16 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Spinner/index.html">
                 <span class="en">Spinner</span>
-                </a> <span class="new">new!</span></li>
+                </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/SpinnerTest/index.html">
                 <span class="en">SpinnerTest</span>
-                </a> <span class="new">new!</span></li>
+                </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/TicTacToeLib/index.html">
                 <span class="en">TicTacToeLib</span>
-                </a> <span class="new">new!</span></li>
+                </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/TicTacToeMain/index.html">
                 <span class="en">TicTacToeMain</span>
-                </a> <span class="new">new!</span></li>
+                </a></li>
           <li><a href="<?cs var:toroot ?>resources/samples/Wiktionary/index.html">
                 <span class="en">Wiktionary</span>
               </a></li>
