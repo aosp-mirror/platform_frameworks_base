@@ -1442,6 +1442,7 @@ status_t StagefrightRecorder::reset() {
     mCameraSourceTimeLapse = NULL;
     mIsMetaDataStoredInVideoBuffers = false;
     mEncoderProfiles = MediaProfiles::getInstance();
+    mRotationDegrees = 0;
 
     mOutputFd = -1;
     mOutputFdAux = -1;
