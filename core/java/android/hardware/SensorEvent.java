@@ -111,6 +111,27 @@ public class SensorEvent {
      * This can be achieved by applying a <i>high-pass</i> filter. Conversely, a
      * <i>low-pass</i> filter can be used to isolate the force of gravity.
      * </p>
+     *
+     * <pre class="prettyprint">
+     *
+     *     public void onSensorChanged(SensorEvent event)
+     *     {
+     *          // alpha is calculated as t / (t + dT)
+     *          // with t, the low-pass filter's time-constant
+     *          // and dT, the event delivery rate
+     *
+     *          final float alpha = 0.8;
+     *
+     *          gravity[0] = alpha * gravity[0] + (1 - alpha) * event.data[0];
+     *          gravity[1] = alpha * gravity[1] + (1 - alpha) * event.data[1];
+     *          gravity[2] = alpha * gravity[2] + (1 - alpha) * event.data[2];
+     *
+     *          linear_acceleration[0] = event.data[0] - gravity[0];
+     *          linear_acceleration[1] = event.data[1] - gravity[1];
+     *          linear_acceleration[2] = event.data[2] - gravity[2];
+     *     }
+     * </pre>
+     *
      * <p>
      * <u>Examples</u>:
      * <ul>
@@ -143,8 +164,41 @@ public class SensorEvent {
      *  standard mathematical definition of positive rotation and does not agree with the
      *  definition of roll given earlier.
      *
+     * <ul>
+     * <p>
+     * values[0]: Angular speed around the x-axis
+     * </p>
+     * <p>
+     * values[1]: Angular speed around the y-axis
+     * </p>
+     * <p>
+     * values[2]: Angular speed around the z-axis
+     * </p>
+     * </ul>
+     * <p>
+     * Typically the output of the gyroscope is integrated over time to calculate
+     * an angle, for example:
+     * </p>
+     * <pre class="prettyprint">
+     *     private static final float NS2S = 1.0f / 1000000000.0f;
+     *     private float timestamp;
+     *     public void onSensorChanged(SensorEvent event)
+     *     {
+     *          if (timestamp != 0) {
+     *              final float dT = (event.timestamp - timestamp) * NS2S;
+     *              angle[0] += event.data[0] * dT;
+     *              angle[1] += event.data[1] * dT;
+     *              angle[2] += event.data[2] * dT;
+     *          }
+     *          timestamp = event.timestamp;
+     *     }
+     * </pre>
+     *
+     * <p>In practice, the gyroscope noise and offset will introduce some errors which need
+     * to be compensated for. This is usually done using the information from other
+     * sensors, but is beyond the scope of this document.</p>
+     *
      * <h4>{@link android.hardware.Sensor#TYPE_LIGHT Sensor.TYPE_LIGHT}:</h4>
-     * 
      * <ul>
      * <p>
      * values[0]: Ambient light level in SI lux units
