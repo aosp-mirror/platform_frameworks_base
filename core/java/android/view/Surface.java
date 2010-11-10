@@ -24,7 +24,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 /**
- * Handle on to a raw buffer that is being managed by the screen compositor.
+ * Handle onto a raw buffer that is being managed by the screen compositor.
  */
 public class Surface implements Parcelable {
     private static final String LOG_TAG = "Surface";
@@ -41,7 +41,7 @@ public class Surface implements Parcelable {
     @Deprecated
     public static final int HARDWARE            = 0x00000010;
 
-    /** Implies "HARDWARE", the surface is to be used by the GPU
+    /** Implies "HARDWARE", the surface is to be used by the GPU;
      * additionally the backbuffer is never preserved for these
      * surfaces. 
      * @deprecated this is ignored, this value is set automatically when needed.
@@ -81,9 +81,9 @@ public class Surface implements Parcelable {
     
     /**
      * Creates a surface without a rendering buffer. Instead, the content
-     * of the surface must be pushed by an external entity. This is type
+     * of the surface must be pushed by an external entity. This type
      * of surface can be used for efficient camera preview or movie
-     * play back.
+     * playback.
      *
      * @deprecated not support by the system anymore
      */
@@ -99,7 +99,7 @@ public class Surface implements Parcelable {
      */
     public static final int OPAQUE              = 0x00000400;
     
-    /** Creates a normal surface. This is the default */
+    /** Creates a normal surface. This is the default. */
     public static final int FX_SURFACE_NORMAL   = 0x00000000;
     
     /** Creates a Blur surface. Everything behind this surface is blurred
@@ -111,7 +111,7 @@ public class Surface implements Parcelable {
     public static final int FX_SURFACE_BLUR     = 0x00010000;
     
     /** Creates a Dim surface. Everything behind this surface is dimmed
-     * by the amount specified in setAlpha(). 
+     * by the amount specified in {@link #setAlpha}.
      * It is an error to lock a Dim surface, since it doesn't have
      * a backing store.
      */
@@ -122,14 +122,14 @@ public class Surface implements Parcelable {
 
     /* flags used with setFlags() (keep in sync with ISurfaceComposer.h) */
     
-    /** Hide the surface. Equivalent to calling hide() */
+    /** Hide the surface. Equivalent to calling hide(). */
     public static final int SURFACE_HIDDEN    = 0x01;
     
-    /** Freeze the surface. Equivalent to calling freeze() */ 
+    /** Freeze the surface. Equivalent to calling freeze(). */
     public static final int SURFACE_FROZEN     = 0x02;
 
     /**
-     * @deprecated use {@link #SURFACE_FROZEN} instead.
+     * @deprecated Use {@link #SURFACE_FROZEN} instead.
      */
     @Deprecated
     public static final int SURACE_FROZEN     = 0x02;
@@ -241,7 +241,7 @@ public class Surface implements Parcelable {
      *  like obtained from getMatrix. This is a hack to handle the case that an application
      *  uses getMatrix to keep the original matrix, set matrix of its own, then set the original
      *  matrix back. There is no perfect solution that works for all cases, and there are a lot of
-     *  cases that this model dose not work, but we hope this works for many apps.
+     *  cases that this model does not work, but we hope this works for many apps.
      * </ul>
      */
     private class CompatibleCanvas extends Canvas {
@@ -284,7 +284,7 @@ public class Surface implements Parcelable {
     }
 
     /**
-     * Sets the display metrics used to provide canva's width/height in compatibility mode.
+     * Sets the display metrics used to provide canvas's width/height in compatibility mode.
      */
     void setCompatibleDisplayMetrics(DisplayMetrics metrics, Translator translator) {
         mCompatibleDisplayMetrics = metrics;
