@@ -149,7 +149,7 @@ public class FileA3D extends BaseObj {
     }
 
     private void initEntries() {
-        int numFileEntries = mRS.nFileA3DGetNumIndexEntries(mID);
+        int numFileEntries = mRS.nFileA3DGetNumIndexEntries(getID());
         if(numFileEntries <= 0) {
             return;
         }
@@ -158,10 +158,10 @@ public class FileA3D extends BaseObj {
         int[] ids = new int[numFileEntries];
         String[] names = new String[numFileEntries];
 
-        mRS.nFileA3DGetIndexEntries(mID, numFileEntries, ids, names);
+        mRS.nFileA3DGetIndexEntries(getID(), numFileEntries, ids, names);
 
         for(int i = 0; i < numFileEntries; i ++) {
-            mFileEntries[i] = new IndexEntry(mRS, i, mID, names[i], ClassID.toClassID(ids[i]));
+            mFileEntries[i] = new IndexEntry(mRS, i, getID(), names[i], ClassID.toClassID(ids[i]));
         }
     }
 

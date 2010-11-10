@@ -106,7 +106,7 @@ public class Type extends BaseObj {
         // We have 6 integer to obtain mDimX; mDimY; mDimZ;
         // mDimLOD; mDimFaces; mElement;
         int[] dataBuffer = new int[6];
-        mRS.nTypeGetNativeData(mID, dataBuffer);
+        mRS.nTypeGetNativeData(getID(), dataBuffer);
 
         mDimX = dataBuffer[0];
         mDimY = dataBuffer[1];
@@ -135,7 +135,7 @@ public class Type extends BaseObj {
         }
 
         public Builder(RenderScript rs, Element e) {
-            if(e.mID == 0) {
+            if(e.getID() == 0) {
                 throw new RSIllegalArgumentException("Invalid element.");
             }
 

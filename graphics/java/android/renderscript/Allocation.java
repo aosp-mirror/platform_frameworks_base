@@ -45,9 +45,8 @@ public class Allocation extends BaseObj {
 
     @Override
     void updateFromNative() {
-        mRS.validate();
-        mName = mRS.nGetName(mID);
-        int typeID = mRS.nAllocationGetType(mID);
+        super.updateFromNative();
+        int typeID = mRS.nAllocationGetType(getID());
         if(typeID != 0) {
             mType = new Type(typeID, mRS);
             mType.updateFromNative();
@@ -60,17 +59,17 @@ public class Allocation extends BaseObj {
 
     public void uploadToTexture(int baseMipLevel) {
         mRS.validate();
-        mRS.nAllocationUploadToTexture(mID, false, baseMipLevel);
+        mRS.nAllocationUploadToTexture(getID(), false, baseMipLevel);
     }
 
     public void uploadToTexture(boolean genMips, int baseMipLevel) {
         mRS.validate();
-        mRS.nAllocationUploadToTexture(mID, genMips, baseMipLevel);
+        mRS.nAllocationUploadToTexture(getID(), genMips, baseMipLevel);
     }
 
     public void uploadToBufferObject() {
         mRS.validate();
-        mRS.nAllocationUploadToBufferObject(mID);
+        mRS.nAllocationUploadToBufferObject(getID());
     }
 
     public void data(int[] d) {
@@ -90,16 +89,15 @@ public class Allocation extends BaseObj {
         subData1D(0, mType.getElementCount(), d);
     }
 
-    public void updateFromBitmap(Bitmap b)
-        throws IllegalArgumentException {
+    public void updateFromBitmap(Bitmap b) {
 
         mRS.validate();
         if(mType.getX() != b.getWidth() ||
            mType.getY() != b.getHeight()) {
-            throw new IllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
+            throw new RSIllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
         }
 
-        mRS.nAllocationUpdateFromBitmap(mID, b);
+        mRS.nAllocationUpdateFromBitmap(getID(), b);
     }
 
     public void subData(int xoff, FieldPacker fp) {
@@ -108,100 +106,100 @@ public class Allocation extends BaseObj {
 
         int count = data.length / eSize;
         if ((eSize * count) != data.length) {
-            throw new IllegalArgumentException("Field packer length " + data.length +
+            throw new RSIllegalArgumentException("Field packer length " + data.length +
                                                " not divisible by element size " + eSize + ".");
         }
         data1DChecks(xoff, count, data.length, data.length);
-        mRS.nAllocationSubData1D(mID, xoff, count, data, data.length);
+        mRS.nAllocationSubData1D(getID(), xoff, count, data, data.length);
     }
 
 
     public void subElementData(int xoff, int component_number, FieldPacker fp) {
         if (component_number >= mType.mElement.mElements.length) {
-            throw new IllegalArgumentException("Component_number " + component_number + " out of range.");
+            throw new RSIllegalArgumentException("Component_number " + component_number + " out of range.");
         }
         if(xoff < 0) {
-            throw new IllegalArgumentException("Offset must be >= 0.");
+            throw new RSIllegalArgumentException("Offset must be >= 0.");
         }
 
         final byte[] data = fp.getData();
         int eSize = mType.mElement.mElements[component_number].getSizeBytes();
 
         if (data.length != eSize) {
-            throw new IllegalArgumentException("Field packer sizelength " + data.length +
+            throw new RSIllegalArgumentException("Field packer sizelength " + data.length +
                                                " does not match component size " + eSize + ".");
         }
 
-        mRS.nAllocationSubElementData1D(mID, xoff, component_number, data, data.length);
+        mRS.nAllocationSubElementData1D(getID(), xoff, component_number, data, data.length);
     }
 
     private void data1DChecks(int off, int count, int len, int dataSize) {
         mRS.validate();
         if(off < 0) {
-            throw new IllegalArgumentException("Offset must be >= 0.");
+            throw new RSIllegalArgumentException("Offset must be >= 0.");
         }
         if(count < 1) {
-            throw new IllegalArgumentException("Count must be >= 1.");
+            throw new RSIllegalArgumentException("Count must be >= 1.");
         }
         if((off + count) > mType.getElementCount()) {
-            throw new IllegalArgumentException("Overflow, Available count " + mType.getElementCount() +
+            throw new RSIllegalArgumentException("Overflow, Available count " + mType.getElementCount() +
                                                ", got " + count + " at offset " + off + ".");
         }
         if((len) < dataSize) {
-            throw new IllegalArgumentException("Array too small for allocation type.");
+            throw new RSIllegalArgumentException("Array too small for allocation type.");
         }
     }
 
     public void subData1D(int off, int count, int[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationSubData1D(mID, off, count, d, dataSize);
+        mRS.nAllocationSubData1D(getID(), off, count, d, dataSize);
     }
     public void subData1D(int off, int count, short[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 2, dataSize);
-        mRS.nAllocationSubData1D(mID, off, count, d, dataSize);
+        mRS.nAllocationSubData1D(getID(), off, count, d, dataSize);
     }
     public void subData1D(int off, int count, byte[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length, dataSize);
-        mRS.nAllocationSubData1D(mID, off, count, d, dataSize);
+        mRS.nAllocationSubData1D(getID(), off, count, d, dataSize);
     }
     public void subData1D(int off, int count, float[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationSubData1D(mID, off, count, d, dataSize);
+        mRS.nAllocationSubData1D(getID(), off, count, d, dataSize);
     }
 
 
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
         mRS.validate();
-        mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
+        mRS.nAllocationSubData2D(getID(), xoff, yoff, w, h, d, d.length * 4);
     }
 
     public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
         mRS.validate();
-        mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
+        mRS.nAllocationSubData2D(getID(), xoff, yoff, w, h, d, d.length * 4);
     }
 
     public void readData(int[] d) {
         mRS.validate();
-        mRS.nAllocationRead(mID, d);
+        mRS.nAllocationRead(getID(), d);
     }
 
     public void readData(float[] d) {
         mRS.validate();
-        mRS.nAllocationRead(mID, d);
+        mRS.nAllocationRead(getID(), d);
     }
 
     public synchronized void resize(int dimX) {
         if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.getFaces() || mType.getLOD()) {
-            throw new IllegalStateException("Resize only support for 1D allocations at this time.");
+            throw new RSInvalidStateException("Resize only support for 1D allocations at this time.");
         }
-        mRS.nAllocationResize1D(mID, dimX);
+        mRS.nAllocationResize1D(getID(), dimX);
         mRS.finish();  // Necessary because resize is fifoed and update is async.
 
-        int typeID = mRS.nAllocationGetType(mID);
+        int typeID = mRS.nAllocationGetType(getID());
         mType = new Type(typeID, mRS);
         mType.updateFromNative();
     }
@@ -209,12 +207,12 @@ public class Allocation extends BaseObj {
     /*
     public void resize(int dimX, int dimY) {
         if ((mType.getZ() > 0) || mType.getFaces() || mType.getLOD()) {
-            throw new IllegalStateException("Resize only support for 2D allocations at this time.");
+            throw new RSIllegalStateException("Resize only support for 2D allocations at this time.");
         }
         if (mType.getY() == 0) {
-            throw new IllegalStateException("Resize only support for 2D allocations at this time.");
+            throw new RSIllegalStateException("Resize only support for 2D allocations at this time.");
         }
-        mRS.nAllocationResize2D(mID, dimX, dimY);
+        mRS.nAllocationResize2D(getID(), dimX, dimY);
     }
     */
 
@@ -225,27 +223,27 @@ public class Allocation extends BaseObj {
 
         public void setConstraint(Dimension dim, int value) {
             mRS.validate();
-            mRS.nAdapter1DSetConstraint(mID, dim.mID, value);
+            mRS.nAdapter1DSetConstraint(getID(), dim.mID, value);
         }
 
         public void data(int[] d) {
             mRS.validate();
-            mRS.nAdapter1DData(mID, d);
+            mRS.nAdapter1DData(getID(), d);
         }
 
         public void data(float[] d) {
             mRS.validate();
-            mRS.nAdapter1DData(mID, d);
+            mRS.nAdapter1DData(getID(), d);
         }
 
         public void subData(int off, int count, int[] d) {
             mRS.validate();
-            mRS.nAdapter1DSubData(mID, off, count, d);
+            mRS.nAdapter1DSubData(getID(), off, count, d);
         }
 
         public void subData(int off, int count, float[] d) {
             mRS.validate();
-            mRS.nAdapter1DSubData(mID, off, count, d);
+            mRS.nAdapter1DSubData(getID(), off, count, d);
         }
     }
 
@@ -253,9 +251,9 @@ public class Allocation extends BaseObj {
         mRS.validate();
         int id = mRS.nAdapter1DCreate();
         if(id == 0) {
-            throw new IllegalStateException("allocation failed.");
+            throw new RSRuntimeException("Adapter creation failed.");
         }
-        mRS.nAdapter1DBindAllocation(id, mID);
+        mRS.nAdapter1DBindAllocation(id, getID());
         return new Adapter1D(id, mRS);
     }
 
@@ -267,27 +265,27 @@ public class Allocation extends BaseObj {
 
         public void setConstraint(Dimension dim, int value) {
             mRS.validate();
-            mRS.nAdapter2DSetConstraint(mID, dim.mID, value);
+            mRS.nAdapter2DSetConstraint(getID(), dim.mID, value);
         }
 
         public void data(int[] d) {
             mRS.validate();
-            mRS.nAdapter2DData(mID, d);
+            mRS.nAdapter2DData(getID(), d);
         }
 
         public void data(float[] d) {
             mRS.validate();
-            mRS.nAdapter2DData(mID, d);
+            mRS.nAdapter2DData(getID(), d);
         }
 
         public void subData(int xoff, int yoff, int w, int h, int[] d) {
             mRS.validate();
-            mRS.nAdapter2DSubData(mID, xoff, yoff, w, h, d);
+            mRS.nAdapter2DSubData(getID(), xoff, yoff, w, h, d);
         }
 
         public void subData(int xoff, int yoff, int w, int h, float[] d) {
             mRS.validate();
-            mRS.nAdapter2DSubData(mID, xoff, yoff, w, h, d);
+            mRS.nAdapter2DSubData(getID(), xoff, yoff, w, h, d);
         }
     }
 
@@ -295,9 +293,12 @@ public class Allocation extends BaseObj {
         mRS.validate();
         int id = mRS.nAdapter2DCreate();
         if(id == 0) {
-            throw new IllegalStateException("allocation failed.");
+            throw new RSRuntimeException("allocation failed.");
         }
-        mRS.nAdapter2DBindAllocation(id, mID);
+        mRS.nAdapter2DBindAllocation(id, getID());
+        if(id == 0) {
+            throw new RSRuntimeException("Adapter creation failed.");
+        }
         return new Adapter2D(id, mRS);
     }
 
@@ -309,14 +310,16 @@ public class Allocation extends BaseObj {
         mBitmapOptions.inScaled = false;
     }
 
-    static public Allocation createTyped(RenderScript rs, Type type)
-        throws IllegalArgumentException {
+    static public Allocation createTyped(RenderScript rs, Type type) {
 
         rs.validate();
-        if(type.mID == 0) {
-            throw new IllegalStateException("Bad Type");
+        if(type.getID() == 0) {
+            throw new RSInvalidStateException("Bad Type");
         }
-        int id = rs.nAllocationCreateTyped(type.mID);
+        int id = rs.nAllocationCreateTyped(type.getID());
+        if(id == 0) {
+            throw new RSRuntimeException("Allocation creation failed.");
+        }
         return new Allocation(id, rs, type);
     }
 
@@ -328,9 +331,9 @@ public class Allocation extends BaseObj {
         b.add(Dimension.X, count);
         Type t = b.create();
 
-        int id = rs.nAllocationCreateTyped(t.mID);
+        int id = rs.nAllocationCreateTyped(t.getID());
         if(id == 0) {
-            throw new IllegalStateException("Bad element.");
+            throw new RSRuntimeException("Allocation creation failed.");
         }
         return new Allocation(id, rs, t);
     }
@@ -349,7 +352,7 @@ public class Allocation extends BaseObj {
         if (bc == Bitmap.Config.RGB_565) {
             return Element.RGB_565(rs);
         }
-        throw new IllegalStateException("Bad bitmap type.");
+        throw new RSInvalidStateException("Bad bitmap type.");
     }
 
     static private Type typeFromBitmap(RenderScript rs, Bitmap b) {
@@ -360,28 +363,26 @@ public class Allocation extends BaseObj {
         return tb.create();
     }
 
-    static public Allocation createFromBitmap(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
-        throws IllegalArgumentException {
+    static public Allocation createFromBitmap(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips) {
 
         rs.validate();
         Type t = typeFromBitmap(rs, b);
 
-        int id = rs.nAllocationCreateFromBitmap(dstFmt.mID, genMips, b);
+        int id = rs.nAllocationCreateFromBitmap(dstFmt.getID(), genMips, b);
         if(id == 0) {
-            throw new IllegalStateException("Load failed.");
+            throw new RSRuntimeException("Load failed.");
         }
         return new Allocation(id, rs, t);
     }
 
-    static public Allocation createBitmapRef(RenderScript rs, Bitmap b)
-        throws IllegalArgumentException {
+    static public Allocation createBitmapRef(RenderScript rs, Bitmap b) {
 
         rs.validate();
         Type t = typeFromBitmap(rs, b);
 
         int id = rs.nAllocationCreateBitmapRef(t.getID(), b);
         if(id == 0) {
-            throw new IllegalStateException("Load failed.");
+            throw new RSRuntimeException("Load failed.");
         }
 
         Allocation a = new Allocation(id, rs, t);
@@ -389,8 +390,7 @@ public class Allocation extends BaseObj {
         return a;
     }
 
-    static public Allocation createFromBitmapResource(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips)
-        throws IllegalArgumentException {
+    static public Allocation createFromBitmapResource(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips) {
 
         rs.validate();
         InputStream is = null;
@@ -399,15 +399,12 @@ public class Allocation extends BaseObj {
             is = res.openRawResource(id, value);
 
             int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
-            int allocationId = rs.nAllocationCreateFromAssetStream(dstFmt.mID, genMips,
-                    asset);
+            int aId = rs.nAllocationCreateFromAssetStream(dstFmt.getID(), genMips, asset);
 
-            if(allocationId == 0) {
-                throw new IllegalStateException("Load failed.");
+            if (aId == 0) {
+                throw new RSRuntimeException("Load failed.");
             }
-            return new Allocation(allocationId, rs, null);
-        } catch (Exception e) {
-            // Ignore
+            return new Allocation(aId, rs, null);
         } finally {
             if (is != null) {
                 try {
@@ -417,12 +414,9 @@ public class Allocation extends BaseObj {
                 }
             }
         }
-
-        return null;
     }
 
-    static public Allocation createFromString(RenderScript rs, String str)
-        throws IllegalArgumentException {
+    static public Allocation createFromString(RenderScript rs, String str) {
         byte[] allocArray = null;
         try {
             allocArray = str.getBytes("UTF-8");
@@ -431,9 +425,8 @@ public class Allocation extends BaseObj {
             return alloc;
         }
         catch (Exception e) {
-            Log.e("rs", "could not convert string to utf-8");
+            throw new RSRuntimeException("Could not convert string to utf-8.");
         }
-        return null;
     }
 }
 
