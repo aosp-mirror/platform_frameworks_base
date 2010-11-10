@@ -74,10 +74,10 @@ void TextDropShadowCache::setMaxSize(uint32_t maxSize) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void TextDropShadowCache::operator()(ShadowText& text, ShadowTexture*& texture) {
-    const uint32_t size = texture->width * texture->height;
-    mSize -= size;
-
     if (texture) {
+        const uint32_t size = texture->width * texture->height;
+        mSize -= size;
+
         glDeleteTextures(1, &texture->id);
         delete texture;
     }
