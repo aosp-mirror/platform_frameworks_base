@@ -58,13 +58,13 @@ public class ProgramRaster extends BaseObj {
     void setLineWidth(float w) {
         mRS.validate();
         mLineWidth = w;
-        mRS.nProgramRasterSetLineWidth(mID, w);
+        mRS.nProgramRasterSetLineWidth(getID(), w);
     }
 
     void setCullMode(CullMode m) {
         mRS.validate();
         mCullMode = m;
-        mRS.nProgramRasterSetCullMode(mID, m.mID);
+        mRS.nProgramRasterSetCullMode(getID(), m.mID);
     }
 
     public static ProgramRaster CULL_BACK(RenderScript rs) {

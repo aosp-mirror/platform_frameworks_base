@@ -60,16 +60,16 @@ public class Mesh extends BaseObj {
 
     @Override
     void updateFromNative() {
-        mName = mRS.nGetName(mID);
-        int vtxCount = mRS.nMeshGetVertexBufferCount(mID);
-        int idxCount = mRS.nMeshGetIndexCount(mID);
+        super.updateFromNative();
+        int vtxCount = mRS.nMeshGetVertexBufferCount(getID());
+        int idxCount = mRS.nMeshGetIndexCount(getID());
 
         int[] vtxIDs = new int[vtxCount];
         int[] idxIDs = new int[idxCount];
         int[] primitives = new int[idxCount];
 
-        mRS.nMeshGetVertices(mID, vtxIDs, vtxCount);
-        mRS.nMeshGetIndices(mID, idxIDs, primitives, idxCount);
+        mRS.nMeshGetVertices(getID(), vtxIDs, vtxCount);
+        mRS.nMeshGetIndices(getID(), idxIDs, primitives, idxCount);
 
         mVertexBuffers = new Allocation[vtxCount];
         mIndexBuffers = new Allocation[idxCount];
@@ -292,7 +292,7 @@ public class Mesh extends BaseObj {
 
             for(int ct = 0; ct < b.mVertexTypeCount; ct ++) {
                 Entry entry = b.mVertexTypes[ct];
-                rs.nMeshBindVertex(id, entry.a.mID, ct);
+                rs.nMeshBindVertex(id, entry.a.getID(), ct);
                 newMesh.mVertexBuffers[ct] = entry.a;
             }
             rs.nMeshInitVertexAttribs(id);

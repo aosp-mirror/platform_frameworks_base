@@ -21,14 +21,24 @@ import android.util.Log;
 /**
  * @hide
  *
+ * BaseObj is the base class for interfacing with native renderscript objects.
+ * It primarly contains code for tracking the native object ID and forcably
+ * disconecting the object from the native allocation for early cleanup.
+ *
  **/
 class BaseObj {
-
     BaseObj(int id, RenderScript rs) {
         rs.validate();
         mRS = rs;
         mID = id;
         mDestroyed = false;
+    }
+
+    void setID(int id) {
+        if (mID != 0) {
+            throw new RSRuntimeException("Internal Error, reset of object ID.");
+        }
+        mID = id;
     }
 
     public int getID() {
@@ -38,9 +48,9 @@ class BaseObj {
         return mID;
     }
 
-    int mID;
-    boolean mDestroyed;
-    String mName;
+    private int mID;
+    private boolean mDestroyed;
+    private String mName;
     RenderScript mRS;
 
     public void setName(String s) {
@@ -74,7 +84,7 @@ class BaseObj {
         super.finalize();
     }
 
-    public void destroy() {
+    synchronized public void destroy() {
         if(mDestroyed) {
             throw new RSInvalidStateException("Object already destroyed.");
         }
@@ -85,6 +95,8 @@ class BaseObj {
     // If an object came from an a3d file, java fields need to be
     // created with objects from the native layer
     void updateFromNative() {
+        mRS.validate();
+        mName = mRS.nGetName(getID());
     }
 
 }

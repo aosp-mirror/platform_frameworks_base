@@ -38,19 +38,19 @@ public class Script extends BaseObj {
         }
 
         public void execute() {
-            mRS.nScriptInvoke(mScript.mID, mSlot);
+            mRS.nScriptInvoke(mScript.getID(), mSlot);
         }
     }
 
     protected void invoke(int slot) {
-        mRS.nScriptInvoke(mID, slot);
+        mRS.nScriptInvoke(getID(), slot);
     }
 
     protected void invoke(int slot, FieldPacker v) {
         if (v != null) {
-            mRS.nScriptInvokeV(mID, slot, v.getData());
+            mRS.nScriptInvokeV(getID(), slot, v.getData());
         } else {
-            mRS.nScriptInvoke(mID, slot);
+            mRS.nScriptInvoke(getID(), slot);
         }
     }
 
@@ -62,40 +62,40 @@ public class Script extends BaseObj {
     public void bindAllocation(Allocation va, int slot) {
         mRS.validate();
         if (va != null) {
-            mRS.nScriptBindAllocation(mID, va.mID, slot);
+            mRS.nScriptBindAllocation(getID(), va.getID(), slot);
         } else {
-            mRS.nScriptBindAllocation(mID, 0, slot);
+            mRS.nScriptBindAllocation(getID(), 0, slot);
         }
     }
 
     public void setVar(int index, float v) {
-        mRS.nScriptSetVarF(mID, index, v);
+        mRS.nScriptSetVarF(getID(), index, v);
     }
 
     public void setVar(int index, double v) {
-        mRS.nScriptSetVarD(mID, index, v);
+        mRS.nScriptSetVarD(getID(), index, v);
     }
 
     public void setVar(int index, int v) {
-        mRS.nScriptSetVarI(mID, index, v);
+        mRS.nScriptSetVarI(getID(), index, v);
     }
 
     public void setVar(int index, long v) {
-        mRS.nScriptSetVarJ(mID, index, v);
+        mRS.nScriptSetVarJ(getID(), index, v);
     }
 
     public void setVar(int index, boolean v) {
-        mRS.nScriptSetVarI(mID, index, v ? 1 : 0);
+        mRS.nScriptSetVarI(getID(), index, v ? 1 : 0);
     }
 
     public void setVar(int index, FieldPacker v) {
-        mRS.nScriptSetVarV(mID, index, v.getData());
+        mRS.nScriptSetVarV(getID(), index, v.getData());
     }
 
     public void setTimeZone(String timeZone) {
         mRS.validate();
         try {
-            mRS.nScriptSetTimeZone(mID, timeZone.getBytes("UTF-8"));
+            mRS.nScriptSetTimeZone(getID(), timeZone.getBytes("UTF-8"));
         } catch (java.io.UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
