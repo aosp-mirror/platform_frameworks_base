@@ -88,6 +88,9 @@ public:
     void                setDefaultValue(const uint16_t* string);
     void                setCurrentValue(const uint16_t* string);
 
+    void                setFormRange(int min, int max, int step);
+    void                setFormEnum(const int* values, int count);
+
     void                print();
 
     inline bool         isDeviceProperty() const {

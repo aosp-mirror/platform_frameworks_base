@@ -223,6 +223,95 @@ void MtpProperty::setCurrentValue(const uint16_t* string) {
         mCurrentValue.str = NULL;
 }
 
+void MtpProperty::setFormRange(int min, int max, int step) {
+    mFormFlag = kFormRange;
+    switch (mType) {
+        case MTP_TYPE_INT8:
+            mMinimumValue.u.i8 = min;
+            mMaximumValue.u.i8 = max;
+            mStepSize.u.i8 = step;
+            break;
+        case MTP_TYPE_UINT8:
+            mMinimumValue.u.u8 = min;
+            mMaximumValue.u.u8 = max;
+            mStepSize.u.u8 = step;
+            break;
+        case MTP_TYPE_INT16:
+            mMinimumValue.u.i16 = min;
+            mMaximumValue.u.i16 = max;
+            mStepSize.u.i16 = step;
+            break;
+        case MTP_TYPE_UINT16:
+            mMinimumValue.u.u16 = min;
+            mMaximumValue.u.u16 = max;
+            mStepSize.u.u16 = step;
+            break;
+        case MTP_TYPE_INT32:
+            mMinimumValue.u.i32 = min;
+            mMaximumValue.u.i32 = max;
+            mStepSize.u.i32 = step;
+            break;
+        case MTP_TYPE_UINT32:
+            mMinimumValue.u.u32 = min;
+            mMaximumValue.u.u32 = max;
+            mStepSize.u.u32 = step;
+            break;
+        case MTP_TYPE_INT64:
+            mMinimumValue.u.i64 = min;
+            mMaximumValue.u.i64 = max;
+            mStepSize.u.i64 = step;
+            break;
+        case MTP_TYPE_UINT64:
+            mMinimumValue.u.u64 = min;
+            mMaximumValue.u.u64 = max;
+            mStepSize.u.u64 = step;
+            break;
+        default:
+            LOGE("unsupported type for MtpProperty::setRange");
+            break;
+    }
+}
+
+void MtpProperty::setFormEnum(const int* values, int count) {
+     mFormFlag = kFormEnum;
+     delete[] mEnumValues;
+     mEnumValues = new MtpPropertyValue[count];
+     mEnumLength = count;
+
+    for (int i = 0; i < count; i++) {
+        int value = *values++;
+            switch (mType) {
+                case MTP_TYPE_INT8:
+                    mEnumValues[i].u.i8 = value;
+                    break;
+                case MTP_TYPE_UINT8:
+                    mEnumValues[i].u.u8 = value;
+                    break;
+                case MTP_TYPE_INT16:
+                    mEnumValues[i].u.i16 = value;
+                    break;
+                case MTP_TYPE_UINT16:
+                    mEnumValues[i].u.u16 = value;
+                    break;
+                case MTP_TYPE_INT32:
+                    mEnumValues[i].u.i32 = value;
+                    break;
+                case MTP_TYPE_UINT32:
+                    mEnumValues[i].u.u32 = value;
+                    break;
+                case MTP_TYPE_INT64:
+                    mEnumValues[i].u.i64 = value;
+                    break;
+                case MTP_TYPE_UINT64:
+                    mEnumValues[i].u.u64 = value;
+                    break;
+                default:
+                    LOGE("unsupported type for MtpProperty::setEnum");
+                    break;
+        }
+    }
+}
+
 void MtpProperty::print() {
     LOGV("MtpProperty %04X\n", mCode);
     LOGV("    type %04X\n", mType);
