@@ -63,7 +63,6 @@ static const CodeEntry sOperationCodes[] = {
 };
 
 static const CodeEntry sFormatCodes[] = {
-    { "MTP_OPERATION_GET_DEVICE_INFO",              0x1001 },
     { "MTP_FORMAT_UNDEFINED",                       0x3000 },
     { "MTP_FORMAT_ASSOCIATION",                     0x3001 },
     { "MTP_FORMAT_SCRIPT",                          0x3002 },
