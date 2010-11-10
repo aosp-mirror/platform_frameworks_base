@@ -29,6 +29,22 @@ struct GammaFontRenderer {
 
     FontRenderer& getFontRenderer(const SkPaint* paint);
 
+    uint32_t getFontRendererCount() const {
+        return 3;
+    }
+
+    uint32_t getFontRendererSize(uint32_t fontRenderer) const {
+        switch (fontRenderer) {
+            case 0:
+                return mDefaultRenderer.getCacheHeight() * mDefaultRenderer.getCacheWidth();
+            case 1:
+                return mBlackGammaRenderer.getCacheHeight() * mBlackGammaRenderer.getCacheWidth();
+            case 2:
+                return mWhiteGammaRenderer.getCacheHeight() * mWhiteGammaRenderer.getCacheWidth();
+        }
+        return 0;
+    }
+
 private:
     FontRenderer mDefaultRenderer;
     FontRenderer mBlackGammaRenderer;

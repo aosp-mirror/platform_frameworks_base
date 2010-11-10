@@ -25,6 +25,7 @@
 
 #include <SkXfermode.h>
 
+#include "Debug.h"
 #include "Program.h"
 
 namespace android {
@@ -35,10 +36,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_PROGRAM_CACHE 0
-
-// Debug
-#if DEBUG_PROGRAM_CACHE
+#if DEBUG_PROGRAMS
     #define PROGRAM_LOGD(...) LOGD(__VA_ARGS__)
 #else
     #define PROGRAM_LOGD(...)

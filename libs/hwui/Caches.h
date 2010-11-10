@@ -114,6 +114,11 @@ public:
      */
     TextureVertex* getRegionMesh();
 
+    /**
+     * Displays the memory usage of each cache and the total sum.
+     */
+    void dumpMemoryUsage();
+
     bool blend;
     GLenum lastSrcMode;
     GLenum lastDstMode;
