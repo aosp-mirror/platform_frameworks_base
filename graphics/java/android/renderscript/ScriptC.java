@@ -39,7 +39,8 @@ public class ScriptC extends Script {
 
     protected ScriptC(RenderScript rs, Resources resources, int resourceID) {
         super(0, rs);
-        mID = internalCreate(rs, resources, resourceID);
+        int id = internalCreate(rs, resources, resourceID);
+        setID(id);
     }
 
 

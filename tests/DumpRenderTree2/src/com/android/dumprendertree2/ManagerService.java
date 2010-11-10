@@ -127,7 +127,6 @@ public class ManagerService extends Service {
         }
     };
 
-    private FileFilter mFileFilter;
     private Summarizer mSummarizer;
 
     private String mCurrentlyRunningTest;
@@ -146,8 +145,7 @@ public class ManagerService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mFileFilter = new FileFilter();
-        mSummarizer = new Summarizer(mFileFilter, RESULTS_ROOT_DIR_PATH, getApplicationContext());
+        mSummarizer = new Summarizer(RESULTS_ROOT_DIR_PATH, getApplicationContext());
     }
 
     @Override
@@ -264,7 +262,7 @@ public class ManagerService extends Service {
         int size = EXPECTED_RESULT_LOCATION_RELATIVE_DIR_PREFIXES.size();
         for (int i = 0; bytes == null && i < size; i++) {
             relativePath = locations.get(i) + originalRelativePath;
-            bytes = FsUtils.readDataFromUrl(FileFilter.getUrl(relativePath));
+            bytes = FsUtils.readDataFromUrl(FileFilter.getUrl(relativePath, false));
         }
 
         mLastExpectedResultPathFetched = bytes == null ? null : relativePath;

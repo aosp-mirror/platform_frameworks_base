@@ -738,7 +738,7 @@ public class RenderScript {
 
     protected int safeID(BaseObj o) {
         if(o != null) {
-            return o.mID;
+            return o.getID();
         }
         return 0;
     }

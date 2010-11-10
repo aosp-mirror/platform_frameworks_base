@@ -50,13 +50,13 @@ public class TestsListPreloaderThread extends Thread {
      * @param doneMsg
      */
     public TestsListPreloaderThread(String path, Message doneMsg) {
-        mFileFilter = new FileFilter();
         mRelativePath = path;
         mDoneMsg = doneMsg;
     }
 
     @Override
     public void run() {
+        mFileFilter = new FileFilter();
         if (FileFilter.isTestFile(mRelativePath)) {
             mTestsList.add(mRelativePath);
         } else {

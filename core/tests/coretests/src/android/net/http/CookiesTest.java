@@ -19,15 +19,20 @@ package android.net.http;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 import junit.framework.TestCase;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import tests.http.MockResponse;
 import tests.http.MockWebServer;
+import tests.http.RecordedRequest;
 
 public final class CookiesTest extends TestCase {
 
@@ -65,5 +70,39 @@ public final class CookiesTest extends TestCase {
         } finally {
             logger.removeHandler(handler);
         }
+    }
+
+    /**
+     * Test that cookies aren't case-sensitive with respect to hostname.
+     * http://b/3167208
+     */
+    public void testCookiesWithNonMatchingCase() throws Exception {
+        // use a proxy so we can manipulate the origin server's host name
+        server = new MockWebServer();
+        server.enqueue(new MockResponse()
+                .addHeader("Set-Cookie: a=first; Domain=my.t-mobile.com")
+                .addHeader("Set-Cookie: b=second; Domain=.T-mobile.com")
+                .addHeader("Set-Cookie: c=third; Domain=.t-mobile.com")
+                .setBody("This response sets some cookies."));
+        server.enqueue(new MockResponse()
+                .setBody("This response gets those cookies back."));
+        server.play();
+
+        HttpClient client = new DefaultHttpClient();
+        client.getParams().setParameter(
+                ConnRoutePNames.DEFAULT_PROXY, new HttpHost("localhost", server.getPort()));
+
+        HttpResponse getCookies = client.execute(new HttpGet("http://my.t-mobile.com/"));
+        getCookies.getEntity().consumeContent();
+        server.takeRequest();
+
+        HttpResponse sendCookies = client.execute(new HttpGet("http://my.t-mobile.com/"));
+        sendCookies.getEntity().consumeContent();
+        RecordedRequest sendCookiesRequest = server.takeRequest();
+        assertContains(sendCookiesRequest.getHeaders(), "Cookie: a=first; b=second; c=third");
+    }
+
+    private void assertContains(List<String> headers, String header) {
+        assertTrue(headers.toString(), headers.contains(header));
     }
 }

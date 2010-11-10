@@ -288,15 +288,7 @@ public class ProgramStore extends BaseObj {
         }
 
         static synchronized ProgramStore internalCreate(RenderScript rs, Builder b) {
-            int inID = 0;
-            int outID = 0;
-            if (b.mIn != null) {
-                inID = b.mIn.mID;
-            }
-            if (b.mOut != null) {
-                outID = b.mOut.mID;
-            }
-            rs.nProgramStoreBegin(inID, outID);
+            rs.nProgramStoreBegin(0, 0);
             rs.nProgramStoreDepthFunc(b.mDepthFunc.mID);
             rs.nProgramStoreDepthMask(b.mDepthMask);
             rs.nProgramStoreColorMask(b.mColorMaskR,

@@ -439,7 +439,7 @@ public class LayoutTestsExecutor extends Activity {
         Log.i(LOG_TAG, "runNextTest(): Start: " + mCurrentTestRelativePath +
                 " (" + mCurrentTestIndex + ")");
 
-        mCurrentTestUri = FileFilter.getUrl(mCurrentTestRelativePath).toString();
+        mCurrentTestUri = FileFilter.getUrl(mCurrentTestRelativePath, true).toString();
 
         reset();
 

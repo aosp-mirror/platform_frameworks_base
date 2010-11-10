@@ -54,7 +54,7 @@ public class Program extends BaseObj {
             a.getType().getID() != mConstants[slot].getID()) {
             throw new IllegalArgumentException("Allocation type does not match slot type.");
         }
-        mRS.nProgramBindConstants(mID, slot, a.mID);
+        mRS.nProgramBindConstants(getID(), slot, a.getID());
     }
 
     public void bindTexture(Allocation va, int slot)
@@ -64,7 +64,7 @@ public class Program extends BaseObj {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
 
-        mRS.nProgramBindTexture(mID, slot, va.mID);
+        mRS.nProgramBindTexture(getID(), slot, va.getID());
     }
 
     public void bindSampler(Sampler vs, int slot)
@@ -74,7 +74,7 @@ public class Program extends BaseObj {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
 
-        mRS.nProgramBindSampler(mID, slot, vs.mID);
+        mRS.nProgramBindSampler(getID(), slot, vs.getID());
     }
 
 

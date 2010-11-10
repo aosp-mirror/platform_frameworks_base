@@ -39,6 +39,10 @@ namespace uirenderer {
     #define TEXTURE_LOGD(...)
 #endif
 
+///////////////////////////////////////////////////////////////////////////////
+// Classes
+///////////////////////////////////////////////////////////////////////////////
+
 /**
  * A simple LRU texture cache. The cache has a maximum size expressed in bytes.
  * Any texture added to the cache causing the cache to grow beyond the maximum

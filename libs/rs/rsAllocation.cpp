@@ -869,6 +869,8 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, uint32_t w, uint32_t h
         }
     } else {
         rsc->setError(RS_ERROR_BAD_VALUE, "Unsupported bitmap format");
+        delete texAlloc;
+        return NULL;
     }
 
     return texAlloc;

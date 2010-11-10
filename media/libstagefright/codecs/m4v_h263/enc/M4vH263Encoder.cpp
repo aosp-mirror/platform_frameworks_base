@@ -50,6 +50,7 @@ static status_t ConvertOmxProfileLevel(
                     profileLevel = CORE_PROFILE_LEVEL2;
                     break;
                 }
+                break;
             default:
                 LOGE("Unsupported profile (%d) for H263", omxProfile);
                 return BAD_VALUE;
@@ -74,7 +75,8 @@ static status_t ConvertOmxProfileLevel(
                         LOGE("Unsupported level (%d) for MPEG4 simple profile",
                             omxLevel);
                         return BAD_VALUE;
-            }
+                }
+                break;
             case OMX_VIDEO_MPEG4ProfileSimpleScalable:
                 switch (omxLevel) {
                     case OMX_VIDEO_MPEG4Level0b:
@@ -91,6 +93,7 @@ static status_t ConvertOmxProfileLevel(
                              "scalable profile", omxLevel);
                         return BAD_VALUE;
                 }
+                break;
             case OMX_VIDEO_MPEG4ProfileCore:
                 switch (omxLevel) {
                     case OMX_VIDEO_MPEG4Level1:
@@ -104,6 +107,7 @@ static status_t ConvertOmxProfileLevel(
                              "profile", omxLevel);
                         return BAD_VALUE;
                 }
+                break;
             case OMX_VIDEO_MPEG4ProfileCoreScalable:
                 switch (omxLevel) {
                     case OMX_VIDEO_MPEG4Level1:
@@ -120,6 +124,7 @@ static status_t ConvertOmxProfileLevel(
                              "scalable profile", omxLevel);
                         return BAD_VALUE;
                 }
+                break;
             default:
                 LOGE("Unsupported MPEG4 profile (%d)", omxProfile);
                 return BAD_VALUE;

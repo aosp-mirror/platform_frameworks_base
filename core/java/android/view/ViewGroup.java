@@ -3254,13 +3254,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // through
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
 
-            // Check whether the child that requests the invalidate is fully opaque
-            final boolean isOpaque = child.isOpaque() && !drawAnimation &&
-                    child.getAnimation() == null;
-            // Mark the child as dirty, using the appropriate flag
-            // Make sure we do not set both flags at the same time
-            final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
-
             if (dirty == null) {
                 do {
                     View view = null;
@@ -3286,10 +3279,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     } else if (view != null) {
                         if ((mPrivateFlags & DRAWN) == DRAWN) {
                             view.mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                            if (view != null && (view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
-                                view.mPrivateFlags =
-                                        (view.mPrivateFlags & ~DIRTY_MASK) | opaqueFlag;
-                            }
+                            view.mPrivateFlags |= DIRTY;
                             parent = view.mParent;
                         } else {
                             parent = null;
@@ -3297,6 +3287,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     }
                 } while (parent != null);
             } else {
+                // Check whether the child that requests the invalidate is fully opaque
+                final boolean isOpaque = child.isOpaque() && !drawAnimation &&
+                        child.getAnimation() == null;
+                // Mark the child as dirty, using the appropriate flag
+                // Make sure we do not set both flags at the same time
+                final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
+
                 final int[] location = attachInfo.mInvalidateChildLocation;
                 location[CHILD_LEFT_INDEX] = child.mLeft;
                 location[CHILD_TOP_INDEX] = child.mTop;

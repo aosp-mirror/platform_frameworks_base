@@ -92,10 +92,13 @@ void PathCache::setMaxSize(uint32_t maxSize) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void PathCache::operator()(PathCacheEntry& path, PathTexture*& texture) {
-    const uint32_t size = texture->width * texture->height;
-    mSize -= size;
-
     if (texture) {
+        const uint32_t size = texture->width * texture->height;
+        mSize -= size;
+
+        PATH_LOGD("PathCache::callback: delete path: name, size, mSize = %d, %d, %d",
+                texture->id, size, mSize);
+
         glDeleteTextures(1, &texture->id);
         delete texture;
     }
@@ -107,11 +110,17 @@ void PathCache::operator()(PathCacheEntry& path, PathTexture*& texture) {
 
 void PathCache::remove(SkPath* path) {
     Mutex::Autolock _l(mLock);
+
     // TODO: Linear search...
+    Vector<uint32_t> pathsToRemove;
     for (uint32_t i = 0; i < mCache.size(); i++) {
         if (mCache.getKeyAt(i).path == path) {
-            mCache.removeAt(i);
+            pathsToRemove.push(i);
         }
+    }
+
+    for (size_t i = 0; i < pathsToRemove.size(); i++) {
+        mCache.removeAt(pathsToRemove.itemAt(i));
     }
 }
 
@@ -188,6 +197,8 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
     if (size < mMaxSize) {
         mLock.lock();
         mSize += size;
+        PATH_LOGD("PathCache::get: create path: name, size, mSize = %d, %d, %d",
+                texture->id, size, mSize);
         mCache.put(entry, texture);
         mLock.unlock();
     } else {

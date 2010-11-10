@@ -22,9 +22,13 @@
     <scale android:fromXScale="1.0" android:toXScale="1.0"
             android:fromYScale="0.9" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"
+            android:fillEnabled="true" android:fillBefore="true"
             android:interpolator="@anim/decelerate_quint_interpolator"
+            android:startOffset="@android:integer/config_mediumAnimTime"
             android:duration="@android:integer/config_mediumAnimTime" />
     <alpha android:fromAlpha="0" android:toAlpha="1.0"
+            android:fillEnabled="true" android:fillBefore="true"
             android:interpolator="@anim/decelerate_cubic_interpolator"
+            android:startOffset="@android:integer/config_mediumAnimTime"
             android:duration="@android:integer/config_mediumAnimTime"/>
 </set>

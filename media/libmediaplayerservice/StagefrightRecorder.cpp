@@ -345,6 +345,17 @@ status_t StagefrightRecorder::setParamVideoEncodingBitRate(int32_t bitRate) {
     return OK;
 }
 
+// Always rotate clockwise, and only support 0, 90, 180 and 270 for now.
+status_t StagefrightRecorder::setParamVideoRotation(int32_t degrees) {
+    LOGV("setParamVideoRotation: %d", degrees);
+    if (degrees < 0 || degrees % 90 != 0) {
+        LOGE("Unsupported video rotation angle: %d", degrees);
+        return BAD_VALUE;
+    }
+    mRotationDegrees = degrees % 360;
+    return OK;
+}
+
 status_t StagefrightRecorder::setParamMaxFileDurationUs(int64_t timeUs) {
     LOGV("setParamMaxFileDurationUs: %lld us", timeUs);
     if (timeUs <= 0) {
@@ -598,6 +609,11 @@ status_t StagefrightRecorder::setParameter(
         int32_t video_bitrate;
         if (safe_strtoi32(value.string(), &video_bitrate)) {
             return setParamVideoEncodingBitRate(video_bitrate);
+        }
+    } else if (key == "video-param-rotation-angle-degrees") {
+        int32_t degrees;
+        if (safe_strtoi32(value.string(), &degrees)) {
+            return setParamVideoRotation(degrees);
         }
     } else if (key == "video-param-i-frames-interval") {
         int32_t seconds;
@@ -1254,6 +1270,9 @@ void StagefrightRecorder::setupMPEG4MetaData(int64_t startTimeUs, int32_t totalB
     }
     if (mTrackEveryTimeDurationUs > 0) {
         (*meta)->setInt64(kKeyTrackTimeStatus, mTrackEveryTimeDurationUs);
+    }
+    if (mRotationDegrees != 0) {
+        (*meta)->setInt32(kKeyRotation, mRotationDegrees);
     }
 }
 

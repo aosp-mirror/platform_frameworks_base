@@ -1023,12 +1023,14 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private void setJournalMode(final String dbPath, final String mode) {
         // journal mode can be set only for non-memory databases
-        if (!dbPath.equalsIgnoreCase(MEMORY_DB_PATH)) {
-            String s = DatabaseUtils.stringForQuery(this, "PRAGMA journal_mode=" + mode, null);
-            if (!s.equalsIgnoreCase(mode)) {
-                Log.e(TAG, "setting journal_mode to " + mode + " failed for db: " + dbPath +
-                        " (on pragma set journal_mode, sqlite returned:" + s);
-            }
+        // AND can't be set for readonly databases
+        if (dbPath.equalsIgnoreCase(MEMORY_DB_PATH) || isReadOnly()) {
+            return;
+        }
+        String s = DatabaseUtils.stringForQuery(this, "PRAGMA journal_mode=" + mode, null);
+        if (!s.equalsIgnoreCase(mode)) {
+            Log.e(TAG, "setting journal_mode to " + mode + " failed for db: " + dbPath +
+                    " (on pragma set journal_mode, sqlite returned:" + s);
         }
     }
 
@@ -2317,6 +2319,10 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return true if write-ahead-logging is set. false otherwise
      */
     public boolean enableWriteAheadLogging() {
+        // make sure the database is not READONLY. WAL doesn't make sense for readonly-databases.
+        if (isReadOnly()) {
+            return false;
+        }
         // acquire lock - no that no other thread is enabling WAL at the same time
         lock();
         try {

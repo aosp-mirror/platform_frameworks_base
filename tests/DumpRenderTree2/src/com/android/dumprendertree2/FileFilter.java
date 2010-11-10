@@ -240,23 +240,29 @@ public class FileFilter {
 
     /**
      * Checks if the file is a test.
-     * Currently we run .html and .xhtml tests.
+     * Currently we run .html, .xhtml and .php tests.
+     *
+     * @warning You MUST also call isTestDir() on the parent directory before
+     * assuming that a file is a test.
      *
      * @param testName
-     * @return
-     *      if the file is a test
+     * @return if the file is a test
      */
     public static boolean isTestFile(String testName) {
-        return testName.endsWith(".html") || testName.endsWith(".xhtml");
+        return testName.endsWith(".html")
+            || testName.endsWith(".xhtml")
+            || testName.endsWith(".php");
     }
 
     /**
      * Return a URL of the test on the server.
      *
      * @param relativePath
+     * @param allowHttps Whether to allow the use of HTTPS, even if the file is in the SSL
+     *     directory.
      * @return a URL of the test on the server
      */
-    public static URL getUrl(String relativePath) {
+    public static URL getUrl(String relativePath, boolean allowHttps) {
         String urlBase = ForwarderManager.getHostSchemePort(false);
 
         /**
@@ -265,7 +271,7 @@ public class FileFilter {
          */
         if (relativePath.startsWith(HTTP_TESTS_PATH)) {
             relativePath = relativePath.substring(HTTP_TESTS_PATH.length());
-            if (relativePath.startsWith(SSL_PATH)) {
+            if (relativePath.startsWith(SSL_PATH) && allowHttps) {
                 urlBase = ForwarderManager.getHostSchemePort(true);
             }
         } else {

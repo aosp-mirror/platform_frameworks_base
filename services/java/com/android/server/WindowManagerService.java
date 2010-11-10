@@ -23,8 +23,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -100,7 +98,6 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -128,7 +125,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
@@ -464,6 +460,11 @@ public class WindowManagerService extends IWindowManager.Stub
     // If non-null, we are in the middle of animating from one wallpaper target
     // to another, and this is the higher one in Z-order.
     WindowState mUpperWallpaperTarget = null;
+    // Window currently running an animation that has requested it be detached
+    // from the wallpaper.  This means we need to ensure the wallpaper is
+    // visible behind it in case it animates in a way that would allow it to be
+    // seen.
+    WindowState mWindowDetachedWallpaper = null;
     int mWallpaperAnimLayerAdjustment;
     float mLastWallpaperX = -1;
     float mLastWallpaperY = -1;
@@ -1709,6 +1710,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int foundI = 0;
         WindowState topCurW = null;
         int topCurI = 0;
+        int windowDetachedI = -1;
         int i = N;
         while (i > 0) {
             i--;
@@ -1721,13 +1723,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 continue;
             }
             topCurW = null;
-            if (w.mAppToken != null) {
+            if (w != mWindowDetachedWallpaper && w.mAppToken != null) {
                 // If this window's app token is hidden and not animating,
                 // it is of no interest to us.
                 if (w.mAppToken.hidden && w.mAppToken.animation == null) {
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
-                            "Skipping hidden or animating token: " + w);
-                    topCurW = null;
+                            "Skipping not hidden or animating token: " + w);
                     continue;
                 }
             }
@@ -1752,7 +1753,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
                 break;
+            } else if (w == mWindowDetachedWallpaper) {
+                windowDetachedI = i;
             }
+        }
+
+        if (foundW == null && windowDetachedI >= 0) {
+            if (DEBUG_WALLPAPER) Slog.v(TAG,
+                    "Found animating detached wallpaper activity: #" + i + "=" + w);
+            foundW = w;
+            foundI = windowDetachedI;
         }
 
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
@@ -8961,6 +8971,12 @@ public class WindowManagerService extends IWindowManager.Stub
         int curLayer = 0;
         int i;
 
+        if (DEBUG_LAYERS) {
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Log.v(TAG, "Assigning layers", here);
+        }
+
         for (i=0; i<N; i++) {
             WindowState w = mWindows.get(i);
             if (w.mBaseLayer == curBaseLayer || w.mIsImWindow
@@ -9297,6 +9313,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean tokenMayBeDrawn = false;
                 boolean wallpaperMayChange = false;
                 boolean forceHiding = false;
+                WindowState windowDetachedWallpaper = null;
 
                 mPolicy.beginAnimationLw(dw, dh);
 
@@ -9318,19 +9335,35 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                         }
 
-                        boolean wasAnimating = w.mAnimating;
-                        if (w.stepAnimationLocked(currentTime, dw, dh)) {
+                        final boolean wasAnimating = w.mAnimating;
+                        final boolean nowAnimating = w.stepAnimationLocked(currentTime, dw, dh);
+
+                        // If this window is animating, make a note that we have
+                        // an animating window and take care of a request to run
+                        // a detached wallpaper animation.
+                        if (nowAnimating) {
+                            if (w.mAnimation != null && w.mAnimation.getDetachWallpaper()) {
+                                windowDetachedWallpaper = w;
+                            }
                             animating = true;
-                            //w.dump("  ");
                         }
+
+                        // If this window's app token is running a detached wallpaper
+                        // animation, make a note so we can ensure the wallpaper is
+                        // displayed behind it.
+                        if (w.mAppToken != null && w.mAppToken.animation != null
+                                && w.mAppToken.animation.getDetachWallpaper()) {
+                            windowDetachedWallpaper = w;
+                        }
+
                         if (wasAnimating && !w.mAnimating && mWallpaperTarget == w) {
                             wallpaperMayChange = true;
                         }
 
                         if (mPolicy.doesForceHide(w, attrs)) {
-                            if (!wasAnimating && animating) {
+                            if (!wasAnimating && nowAnimating) {
                                 if (DEBUG_VISIBILITY) Slog.v(TAG,
-                                        "Animation done that could impact force hide: "
+                                        "Animation started that could impact force hide: "
                                         + w);
                                 wallpaperForceHidingChanged = true;
                                 mFocusMayChange = true;
@@ -9752,6 +9785,14 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                         }
                     }
+                }
+
+                if (mWindowDetachedWallpaper != windowDetachedWallpaper) {
+                    if (DEBUG_WALLPAPER) Slog.v(TAG,
+                            "Detached wallpaper changed from " + mWindowDetachedWallpaper
+                            + windowDetachedWallpaper);
+                    mWindowDetachedWallpaper = windowDetachedWallpaper;
+                    wallpaperMayChange = true;
                 }
 
                 if (wallpaperMayChange) {
@@ -11084,6 +11125,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mLowerWallpaperTarget != null && mUpperWallpaperTarget != null) {
                 pw.print("  mLowerWallpaperTarget="); pw.println(mLowerWallpaperTarget);
                 pw.print("  mUpperWallpaperTarget="); pw.println(mUpperWallpaperTarget);
+            }
+            if (mWindowDetachedWallpaper != null) {
+                pw.print("  mWindowDetachedWallpaper="); pw.println(mWindowDetachedWallpaper);
             }
             pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
             pw.print("  mInTouchMode="); pw.print(mInTouchMode);

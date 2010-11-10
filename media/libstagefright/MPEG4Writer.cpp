@@ -202,6 +202,7 @@ private:
 
     // Simple validation on the codec specific data
     status_t checkCodecSpecificData() const;
+    int32_t mRotation;
 
     void updateTrackSizeEstimate();
     void addOneStscTableEntry(size_t chunkId, size_t sampleId);
@@ -520,6 +521,59 @@ void MPEG4Writer::stopWriterThread() {
     LOGD("Writer thread stopped");
 }
 
+/*
+ * MP4 file standard defines a composition matrix:
+ * | a  b  u |
+ * | c  d  v |
+ * | x  y  w |
+ *
+ * the element in the matrix is stored in the following
+ * order: {a, b, u, c, d, v, x, y, w},
+ * where a, b, c, d, x, and y is in 16.16 format, while
+ * u, v and w is in 2.30 format.
+ */
+void MPEG4Writer::writeCompositionMatrix(int degrees) {
+    LOGV("writeCompositionMatrix");
+    uint32_t a = 0x00010000;
+    uint32_t b = 0;
+    uint32_t c = 0;
+    uint32_t d = 0x00010000;
+    switch (degrees) {
+        case 0:
+            break;
+        case 90:
+            a = 0;
+            b = 0x00010000;
+            c = 0xFFFF0000;
+            d = 0;
+            break;
+        case 180:
+            a = 0xFFFF0000;
+            d = 0xFFFF0000;
+            break;
+        case 270:
+            a = 0;
+            b = 0xFFFF0000;
+            c = 0x00010000;
+            d = 0;
+            break;
+        default:
+            CHECK(!"Should never reach this unknown rotation");
+            break;
+    }
+
+    writeInt32(a);           // a
+    writeInt32(b);           // b
+    writeInt32(0);           // u
+    writeInt32(c);           // c
+    writeInt32(d);           // d
+    writeInt32(0);           // v
+    writeInt32(0);           // x
+    writeInt32(0);           // y
+    writeInt32(0x40000000);  // w
+}
+
+
 status_t MPEG4Writer::stop() {
     if (mFile == NULL) {
         return OK;
@@ -585,15 +639,7 @@ status_t MPEG4Writer::stop() {
         writeInt16(0);             // reserved
         writeInt32(0);             // reserved
         writeInt32(0);             // reserved
-        writeInt32(0x10000);       // matrix
-        writeInt32(0);
-        writeInt32(0);
-        writeInt32(0);
-        writeInt32(0x10000);
-        writeInt32(0);
-        writeInt32(0);
-        writeInt32(0);
-        writeInt32(0x40000000);
+        writeCompositionMatrix(0); // matrix
         writeInt32(0);             // predefined
         writeInt32(0);             // predefined
         writeInt32(0);             // predefined
@@ -886,7 +932,8 @@ MPEG4Writer::Track::Track(
       mCodecSpecificData(NULL),
       mCodecSpecificDataSize(0),
       mGotAllCodecSpecificData(false),
-      mReachedEOS(false) {
+      mReachedEOS(false),
+      mRotation(0) {
     getCodecSpecificDataFromInputFormatIfPossible();
 
     const char *mime;
@@ -1177,6 +1224,11 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     int64_t startTimeUs;
     if (params == NULL || !params->findInt64(kKeyTime, &startTimeUs)) {
         startTimeUs = 0;
+    }
+
+    int32_t rotationDegrees;
+    if (!mIsAudio && params && params->findInt32(kKeyRotation, &rotationDegrees)) {
+        mRotation = rotationDegrees;
     }
 
     mIsRealTimeRecording = true;
@@ -2075,15 +2127,7 @@ void MPEG4Writer::Track::writeTrackHeader(
         mOwner->writeInt16(mIsAudio ? 0x100 : 0);  // volume
         mOwner->writeInt16(0);             // reserved
 
-        mOwner->writeInt32(0x10000);       // matrix
-        mOwner->writeInt32(0);
-        mOwner->writeInt32(0);
-        mOwner->writeInt32(0);
-        mOwner->writeInt32(0x10000);
-        mOwner->writeInt32(0);
-        mOwner->writeInt32(0);
-        mOwner->writeInt32(0);
-        mOwner->writeInt32(0x40000000);
+        mOwner->writeCompositionMatrix(mRotation);       // matrix
 
         if (mIsAudio) {
             mOwner->writeInt32(0);

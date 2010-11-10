@@ -127,7 +127,9 @@ DisplayList::DisplayList(const DisplayListRenderer& recorder) {
     }
 
     mPathHeap = recorder.mPathHeap;
-    mPathHeap->safeRef();
+    if (mPathHeap) {
+        mPathHeap->safeRef();
+    }
 }
 
 DisplayList::~DisplayList() {
@@ -155,7 +157,12 @@ DisplayList::~DisplayList() {
     }
     mMatrices.clear();
 
-    mPathHeap->safeUnref();
+    if (mPathHeap) {
+        for (int i = 0; i < mPathHeap->count(); i++) {
+            caches.pathCache.remove(&(*mPathHeap)[i]);
+        }
+        mPathHeap->safeUnref();
+    }
 }
 
 void DisplayList::init() {
