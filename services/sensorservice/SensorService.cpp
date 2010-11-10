@@ -175,10 +175,11 @@ status_t SensorService::dump(int fd, const Vector<String16>& args)
         for (size_t i=0 ; i<mSensorList.size() ; i++) {
             const Sensor& s(mSensorList[i]);
             const sensors_event_t& e(mLastEventSeen.valueFor(s.getHandle()));
-            snprintf(buffer, SIZE, "%s (vendor=%s, handle=%d, last=<%5.1f,%5.1f,%5.1f>)\n",
+            snprintf(buffer, SIZE, "%s (vendor=%s, handle=%d, maxRate=%.2fHz, last=<%5.1f,%5.1f,%5.1f>)\n",
                     s.getName().string(),
                     s.getVendor().string(),
                     s.getHandle(),
+                    s.getMinDelay() ? (1000000.0f / s.getMinDelay()) : 0.0f,
                     e.data[0], e.data[1], e.data[2]);
             result.append(buffer);
         }

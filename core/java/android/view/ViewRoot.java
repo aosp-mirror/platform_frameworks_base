@@ -754,7 +754,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             // object is not initialized to its backing store, but soon it
             // will be (assuming the window is visible).
             attachInfo.mSurface = mSurface;
-            attachInfo.mTranslucentWindow = PixelFormat.formatHasAlpha(lp.format);
+            attachInfo.mUse32BitDrawingCache = PixelFormat.formatHasAlpha(lp.format) ||
+                    lp.format == PixelFormat.RGBX_8888;
             attachInfo.mHasWindowFocus = false;
             attachInfo.mWindowVisibility = viewVisibility;
             attachInfo.mRecomputeGlobalAttributes = false;
@@ -1301,6 +1302,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             // Need to make sure we re-evaluate the window attributes next
             // time around, to ensure the window has the correct format.
             mWindowAttributesChanged = true;
+            requestLayout();
         }
     }
 

@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "NdefMessage"
-
 #include <stdlib.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
 
 #include "android_nfc.h"
-
-#include <utils/Log.h>
 
 namespace android {
 
@@ -53,7 +49,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
         return -1;
 
     /* Get the number of records in the message so we can allocate buffers */
-    LOGD("phFriNfc_NdefRecord_GetRecords(NULL)");
+    TRACE("phFriNfc_NdefRecord_GetRecords(NULL)");
 
     status = phFriNfc_NdefRecord_GetRecords((uint8_t *)raw_msg,
             (uint32_t)raw_msg_size, NULL, NULL, &num_of_records);
@@ -62,9 +58,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
         LOGE("phFriNfc_NdefRecord_GetRecords(NULL) returned 0x%04x", status);
         goto end;
     }
-    LOGD("phFriNfc_NdefRecord_GetRecords(NULL) returned 0x%04x", status);
-
-    LOGD("found %d records in message", num_of_records);
+    TRACE("phFriNfc_NdefRecord_GetRecords(NULL) returned 0x%04x, with %d records", status, num_of_records);
 
     is_chunked = (uint8_t*)malloc(num_of_records);
     if (is_chunked == NULL)
@@ -74,7 +68,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
         goto end;
 
     /* Now, actually retrieve records position in message */
-    LOGD("phFriNfc_NdefRecord_GetRecords()");
+    TRACE("phFriNfc_NdefRecord_GetRecords()");
 
     status = phFriNfc_NdefRecord_GetRecords((uint8_t *)raw_msg,
             (uint32_t)raw_msg_size, records, is_chunked, &num_of_records);
@@ -83,7 +77,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
         LOGE("phFriNfc_NdefRecord_GetRecords() returned 0x%04x", status);
         goto end;
     }
-    LOGD("phFriNfc_NdefRecord_GetRecords() returned 0x%04x", status);
+    TRACE("phFriNfc_NdefRecord_GetRecords() returned 0x%04x, with %d records", status, num_of_records);
 
     /* Build NDEF records array */
     record_cls = e->FindClass("android/nfc/NdefRecord");
@@ -94,13 +88,11 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
 
     ctor = e->GetMethodID(record_cls, "<init>", "(S[B[B[B)V");
 
-    LOGD("NFC_Number of records = %d\n", num_of_records);
-
     for (i = 0; i < num_of_records; i++) {
         jbyteArray type, id, payload;
         jobject new_record;
 
-        LOGD("phFriNfc_NdefRecord_Parse()");
+        TRACE("phFriNfc_NdefRecord_Parse()");
 
         status = phFriNfc_NdefRecord_Parse(&record, records[i]);
 
@@ -108,7 +100,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
             LOGE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
             goto end;
         }
-        LOGD("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
+        TRACE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
 
         type = e->NewByteArray(record.TypeLength);
         if (type == NULL) {

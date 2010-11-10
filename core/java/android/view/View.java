@@ -6533,11 +6533,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             final int drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
             final boolean opaque = drawingCacheBackgroundColor != 0 || isOpaque();
-            final boolean translucentWindow = attachInfo != null && attachInfo.mTranslucentWindow;
+            final boolean use32BitCache = attachInfo != null && attachInfo.mUse32BitDrawingCache;
 
             if (width <= 0 || height <= 0 ||
                      // Projected bitmap size in bytes
-                    (width * height * (opaque && !translucentWindow ? 2 : 4) >
+                    (width * height * (opaque && !use32BitCache ? 2 : 4) >
                             ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize())) {
                 destroyDrawingCache();
                 return;
@@ -6567,7 +6567,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 } else {
                     // Optimization for translucent windows
                     // If the window is translucent, use a 32 bits bitmap to benefit from memcpy()
-                    quality = translucentWindow ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+                    quality = use32BitCache ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
                 }
 
                 // Try to cleanup memory
@@ -6581,7 +6581,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     } else {
                         mUnscaledDrawingCache = new SoftReference<Bitmap>(bitmap);
                     }
-                    if (opaque && translucentWindow) bitmap.setHasAlpha(false);
+                    if (opaque && use32BitCache) bitmap.setHasAlpha(false);
                 } catch (OutOfMemoryError e) {
                     // If there is not enough memory to create the bitmap cache, just
                     // ignore the issue as bitmap caches are not required to draw the
@@ -9315,9 +9315,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         int mWindowTop;
 
         /**
-         * Indicates whether the window is translucent/transparent
+         * Indicates whether views need to use 32-bit drawing caches
          */
-        boolean mTranslucentWindow;        
+        boolean mUse32BitDrawingCache;
 
         /**
          * For windows that are full-screen but using insets to layout inside

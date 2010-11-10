@@ -1029,6 +1029,7 @@ public class WebSettings {
      * @deprecated This method has been deprecated in favor of
      *             {@link #setPluginState}
      */
+    @Deprecated
     public synchronized void setPluginsEnabled(boolean flag) {
         setPluginState(PluginState.ON);
     }
@@ -1211,6 +1212,7 @@ public class WebSettings {
      * @return True if plugins are enabled.
      * @deprecated This method has been replaced by {@link #getPluginState}
      */
+    @Deprecated
     public synchronized boolean getPluginsEnabled() {
         return mPluginState == PluginState.ON;
     }

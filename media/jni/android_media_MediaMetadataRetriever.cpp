@@ -36,6 +36,7 @@ struct fields_t {
     jfieldID context;
     jclass bitmapClazz;
     jmethodID bitmapConstructor;
+    jmethodID createBitmapMethod;
 };
 
 static fields_t fields;
@@ -174,6 +175,41 @@ static jobject android_media_MediaMetadataRetriever_captureFrame(JNIEnv *env, jo
         return NULL;
     }
 
+    jobject matrix = NULL;
+    if (videoFrame->mRotationAngle != 0) {
+        LOGD("Create a rotation matrix: %d degrees", videoFrame->mRotationAngle);
+        jclass matrixClazz = env->FindClass("android/graphics/Matrix");
+        if (matrixClazz == NULL) {
+            jniThrowException(env, "java/lang/RuntimeException",
+                "Can't find android/graphics/Matrix");
+            return NULL;
+        }
+        jmethodID matrixConstructor =
+            env->GetMethodID(matrixClazz, "<init>", "()V");
+        if (matrixConstructor == NULL) {
+            jniThrowException(env, "java/lang/RuntimeException",
+                "Can't find Matrix constructor");
+            return NULL;
+        }
+        matrix =
+            env->NewObject(matrixClazz, matrixConstructor);
+        if (matrix == NULL) {
+            LOGE("Could not create a Matrix object");
+            return NULL;
+        }
+
+        LOGV("Rotate the matrix: %d degrees", videoFrame->mRotationAngle);
+        jmethodID setRotateMethod =
+                env->GetMethodID(matrixClazz, "setRotate", "(F)V");
+        if (setRotateMethod == NULL) {
+            jniThrowException(env, "java/lang/RuntimeException",
+                "Can't find Matrix setRotate method");
+            return NULL;
+        }
+        env->CallVoidMethod(matrix, setRotateMethod, 1.0 * videoFrame->mRotationAngle);
+        env->DeleteLocalRef(matrixClazz);
+    }
+
     // Create a SkBitmap to hold the pixels
     SkBitmap *bitmap = new SkBitmap();
     if (bitmap == NULL) {
@@ -191,7 +227,19 @@ static jobject android_media_MediaMetadataRetriever_captureFrame(JNIEnv *env, jo
     // Since internally SkBitmap uses reference count to manage the reference to
     // its pixels, it is important that the pixels (along with SkBitmap) be
     // available after creating the Bitmap is returned to Java app.
-    return env->NewObject(fields.bitmapClazz, fields.bitmapConstructor, (int) bitmap, true, NULL, -1);
+    jobject jSrcBitmap = env->NewObject(fields.bitmapClazz,
+            fields.bitmapConstructor, (int) bitmap, true, NULL, -1);
+
+    LOGV("Return a new bitmap constructed with the rotation matrix");
+    return env->CallStaticObjectMethod(
+                fields.bitmapClazz, fields.createBitmapMethod,
+                jSrcBitmap,                     // source Bitmap
+                0,                              // x
+                0,                              // y
+                videoFrame->mDisplayWidth,      // width
+                videoFrame->mDisplayHeight,     // height
+                matrix,                         // transform matrix
+                false);                         // filter
 }
 
 static jbyteArray android_media_MediaMetadataRetriever_extractAlbumArt(JNIEnv *env, jobject thiz)
@@ -289,6 +337,15 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
     fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(IZ[BI)V");
     if (fields.bitmapConstructor == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Can't find Bitmap constructor");
+        return;
+    }
+    fields.createBitmapMethod =
+            env->GetStaticMethodID(fields.bitmapClazz, "createBitmap",
+                    "(Landroid/graphics/Bitmap;IIIILandroid/graphics/Matrix;Z)"
+                    "Landroid/graphics/Bitmap;");
+    if (fields.createBitmapMethod == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                "Can't find Bitmap.createBitmap method");
         return;
     }
 }

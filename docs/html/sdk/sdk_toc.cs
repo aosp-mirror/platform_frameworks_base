@@ -93,7 +93,7 @@
       <span style="display:none" class="zh-TW"></span>
       </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 0.9.9
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 8.0
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
@@ -115,7 +115,8 @@
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Download the Android NDK, r5</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Download the Android NDK, r5</a>
+        <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
     </ul>
   </li>

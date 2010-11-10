@@ -89,6 +89,7 @@ public class WebViewClient {
      * @deprecated This method is no longer called. When the WebView encounters
      *             a redirect loop, it will cancel the load.
      */
+    @Deprecated
     public void onTooManyRedirects(WebView view, Message cancelMsg,
             Message continueMsg) {
         cancelMsg.sendToTarget();

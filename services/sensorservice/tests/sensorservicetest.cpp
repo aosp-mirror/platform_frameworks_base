@@ -27,15 +27,25 @@ int receiver(int fd, int events, void* data)
     sp<SensorEventQueue> q((SensorEventQueue*)data);
     ssize_t n;
     ASensorEvent buffer[8];
+
+    static nsecs_t oldTimeStamp = 0;
+
     while ((n = q->read(buffer, 8)) > 0) {
         for (int i=0 ; i<n ; i++) {
-            if (buffer[i].type == Sensor::TYPE_ACCELEROMETER) {
+            if (buffer[i].type == Sensor::TYPE_GYROSCOPE) {
                 printf("time=%lld, value=<%5.1f,%5.1f,%5.1f>\n",
                         buffer[i].timestamp,
                         buffer[i].acceleration.x,
                         buffer[i].acceleration.y,
                         buffer[i].acceleration.z);
             }
+
+            if (oldTimeStamp) {
+                float t = float(buffer[i].timestamp - oldTimeStamp) / s2ns(1);
+                printf("%f ms (%f Hz)\n", t*1000, 1.0/t);
+            }
+            oldTimeStamp = buffer[i].timestamp;
+
         }
     }
     if (n<0 && n != -EAGAIN) {
@@ -56,7 +66,7 @@ int main(int argc, char** argv)
     sp<SensorEventQueue> q = mgr.createEventQueue();
     printf("queue=%p\n", q.get());
 
-    Sensor const* accelerometer = mgr.getDefaultSensor(Sensor::TYPE_ACCELEROMETER);
+    Sensor const* accelerometer = mgr.getDefaultSensor(Sensor::TYPE_GYROSCOPE);
     printf("accelerometer=%p (%s)\n",
             accelerometer, accelerometer->getName().string());
     q->enableSensor(accelerometer);
