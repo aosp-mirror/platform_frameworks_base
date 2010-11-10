@@ -564,7 +564,7 @@ class ZoomManager {
                 && exceedsMinScaleIncrement(mTextWrapScale, newTextWrapScale)) {
             mTextWrapScale = newTextWrapScale;
             refreshZoomScale(true);
-        } else if (!mInZoomOverview) {
+        } else if (!mInZoomOverview && willScaleTriggerZoom(getZoomOverviewScale())) {
             zoomToOverview();
         } else {
             zoomToReadingLevel();
@@ -589,8 +589,6 @@ class ZoomManager {
     }
 
     private void zoomToOverview() {
-        if (!willScaleTriggerZoom(getZoomOverviewScale())) return;
-
         // Force the titlebar fully reveal in overview mode
         int scrollY = mWebView.getScrollY();
         if (scrollY < mWebView.getTitleHeight()) {
@@ -800,9 +798,9 @@ class ZoomManager {
      */
     public void onNewPicture(WebViewCore.DrawData drawData) {
         final int viewWidth = mWebView.getViewWidth();
-
-        if (mWebView.getSettings().getUseWideViewPort()) {
-            if (!mWebView.getSettings().getUseFixedViewport()) {
+        WebSettings settings = mWebView.getSettings();
+        if (settings.getUseWideViewPort()) {
+            if (!settings.getUseFixedViewport()) {
                 // limit mZoomOverviewWidth upper bound to
                 // sMaxViewportWidth so that if the page doesn't behave
                 // well, the WebView won't go insane. limit the lower
@@ -812,7 +810,13 @@ class ZoomManager {
                             Math.max(drawData.mMinPrefWidth, drawData.mViewSize.x))));
             } else {
                 final int contentWidth = Math.max(drawData.mContentSize.x, drawData.mMinPrefWidth);
-                setZoomOverviewWidth(Math.min(WebView.sMaxViewportWidth, contentWidth));
+                final int newZoomOverviewWidth = Math.min(WebView.sMaxViewportWidth, contentWidth);
+                if (newZoomOverviewWidth != mZoomOverviewWidth) {
+                    setZoomOverviewWidth(newZoomOverviewWidth);
+                    if (settings.isNarrowColumnLayout() && (mInitialZoomOverview || mInZoomOverview)) {
+                        mTextWrapScale = getReadingLevelScale();
+                    }
+                }
             }
         }
 
