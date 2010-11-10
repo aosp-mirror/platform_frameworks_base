@@ -36,6 +36,7 @@ import android.text.TextUtils;
 import android.text.method.MovementMethod;
 import android.text.method.Touch;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -53,6 +54,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import junit.framework.Assert;
 
 /**
  * WebTextView is a specialized version of EditText used by WebView
@@ -144,6 +147,19 @@ import java.util.ArrayList;
         mWebView = webView;
         mMaxLength = -1;
         setAutoFillable(autoFillQueryId);
+        // Turn on subpixel text, and turn off kerning, so it better matches
+        // the text in webkit.
+        TextPaint paint = getPaint();
+        int flags = paint.getFlags() & ~Paint.DEV_KERN_TEXT_FLAG
+                | Paint.SUBPIXEL_TEXT_FLAG | Paint.DITHER_FLAG;
+        paint.setFlags(flags);
+
+        // Set the text color to black, regardless of the theme.  This ensures
+        // that other applications that use embedded WebViews will properly
+        // display the text in password textfields.
+        setTextColor(Color.BLACK);
+        // This helps to align the text better with the text in the web page.
+        setIncludeFontPadding(false);
     }
 
     public void setAutoFillable(int queryId) {
@@ -845,16 +861,6 @@ import java.util.ArrayList;
         mBackground = new OutlineDrawable();
 
         setGravity(Gravity.CENTER_VERTICAL);
-        // Turn on subpixel text, and turn off kerning, so it better matches
-        // the text in webkit.
-        TextPaint paint = getPaint();
-        int flags = paint.getFlags() | Paint.SUBPIXEL_TEXT_FLAG |
-                Paint.ANTI_ALIAS_FLAG & ~Paint.DEV_KERN_TEXT_FLAG;
-        paint.setFlags(flags);
-        // Set the text color to black, regardless of the theme.  This ensures
-        // that other applications that use embedded WebViews will properly
-        // display the text in password textfields.
-        setTextColor(Color.BLACK);
     }
 
     @Override
@@ -925,6 +931,20 @@ import java.util.ArrayList;
         mFromWebKit = true;
         Selection.setSelection(text, start, end);
         mFromWebKit = false;
+    }
+
+    /**
+     * Update the text size according to the size of the focus candidate's text
+     * size in mWebView.  Should only be called from mWebView.
+     */
+    /* package */ void updateTextSize() {
+        Assert.assertNotNull("updateTextSize should only be called from "
+                + "mWebView, so mWebView should never be null!", mWebView);
+        // Note that this is approximately WebView.contentToViewDimension,
+        // without being rounded.
+        float size = mWebView.nativeFocusCandidateTextSize()
+                * mWebView.getScale();
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
     }
 
     /**
