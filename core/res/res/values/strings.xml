@@ -1285,6 +1285,7 @@
       with Near Field Communication (NFC) tags, cards, and readers.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_disableKeyguard">disable keylock</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_disableKeyguard">Allows an application to disable
       the keylock and any associated password security. A legitimate example of
