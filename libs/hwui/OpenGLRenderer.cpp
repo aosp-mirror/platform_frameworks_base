@@ -161,6 +161,9 @@ void OpenGLRenderer::finish() {
         LOGD("GL error from OpenGLRenderer: 0x%x", status);
     }
 #endif
+#if DEBUG_MEMORY_USAGE
+    mCaches.dumpMemoryUsage();
+#endif
 }
 
 void OpenGLRenderer::acquireContext() {

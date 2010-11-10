@@ -19,6 +19,7 @@
 
 #include <SkBitmap.h>
 
+#include "Debug.h"
 #include "Texture.h"
 #include "utils/GenerationCache.h"
 
@@ -28,9 +29,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
-
-// Debug
-#define DEBUG_TEXTURES 0
 
 // Debug
 #if DEBUG_TEXTURES

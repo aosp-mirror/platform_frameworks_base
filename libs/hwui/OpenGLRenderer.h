@@ -30,6 +30,7 @@
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
 
+#include "Debug.h"
 #include "Extensions.h"
 #include "Matrix.h"
 #include "Program.h"
@@ -47,12 +48,8 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-// Debug
-#define DEBUG_OPENGL 1
-
 // If turned on, layers drawn inside FBOs are optimized with regions
 #define RENDER_LAYERS_AS_REGIONS 0
-#define DEBUG_LAYERS_AS_REGIONS 0
 
 ///////////////////////////////////////////////////////////////////////////////
 // Renderer

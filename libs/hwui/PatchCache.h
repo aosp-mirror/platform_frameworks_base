@@ -19,6 +19,7 @@
 
 #include <utils/KeyedVector.h>
 
+#include "Debug.h"
 #include "Patch.h"
 
 namespace android {
@@ -27,9 +28,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
-
-// Debug
-#define DEBUG_PATCHES 0
 
 // Debug
 #if DEBUG_PATCHES
@@ -53,6 +51,14 @@ public:
             const int32_t* xDivs, const int32_t* yDivs, const uint32_t* colors,
             const uint32_t width, const uint32_t height, const int8_t numColors);
     void clear();
+
+    uint32_t getSize() const {
+        return mCache.size();
+    }
+
+    uint32_t getMaxSize() const {
+        return mMaxEntries;
+    }
 
 private:
     uint32_t mMaxEntries;

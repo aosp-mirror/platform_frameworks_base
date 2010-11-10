@@ -17,6 +17,7 @@
 #ifndef ANDROID_HWUI_LAYER_CACHE_H
 #define ANDROID_HWUI_LAYER_CACHE_H
 
+#include "Debug.h"
 #include "Layer.h"
 #include "utils/SortedList.h"
 
@@ -26,9 +27,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
-
-// Debug
-#define DEBUG_LAYERS 0
 
 // Indicates whether to remove the biggest layers first, or the smaller ones
 #define LAYER_REMOVE_BIGGEST 0
