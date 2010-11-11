@@ -344,10 +344,8 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testWAVSeekToEnd() throws Exception {
-        if (isWMVEnable) {
-            boolean isEnd = CodecTest.seekToEnd(MediaNames.WAV);
-            assertTrue("WAV seekToEnd", isEnd);
-        }
+        boolean isEnd = CodecTest.seekToEnd(MediaNames.WAV);
+        assertTrue("WAV seekToEnd", isEnd);
     }  
     
     @MediumTest
