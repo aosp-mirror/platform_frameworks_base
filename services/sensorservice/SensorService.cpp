@@ -218,25 +218,13 @@ bool SensorService::threadLoop()
             break;
         }
 
+        recordLastValue(buffer, count);
+
         const SortedVector< wp<SensorEventConnection> > activeConnections(
                 getActiveConnections());
 
         size_t numConnections = activeConnections.size();
         if (numConnections) {
-            Mutex::Autolock _l(mLock);
-
-            // record the last event for each sensor
-            int32_t prev = buffer[0].sensor;
-            for (ssize_t i=1 ; i<count ; i++) {
-                // record the last event of each sensor type in this buffer
-                int32_t curr = buffer[i].sensor;
-                if (curr != prev) {
-                    mLastEventSeen.editValueFor(prev) = buffer[i-1];
-                    prev = curr;
-                }
-            }
-            mLastEventSeen.editValueFor(prev) = buffer[count-1];
-
             for (size_t i=0 ; i<numConnections ; i++) {
                 sp<SensorEventConnection> connection(activeConnections[i].promote());
                 if (connection != 0) {
@@ -249,6 +237,24 @@ bool SensorService::threadLoop()
 
     LOGW("Exiting SensorService::threadLoop!");
     return false;
+}
+
+void SensorService::recordLastValue(
+        sensors_event_t const * buffer, size_t count)
+{
+    Mutex::Autolock _l(mLock);
+
+    // record the last event for each sensor
+    int32_t prev = buffer[0].sensor;
+    for (size_t i=1 ; i<count ; i++) {
+        // record the last event of each sensor type in this buffer
+        int32_t curr = buffer[i].sensor;
+        if (curr != prev) {
+            mLastEventSeen.editValueFor(prev) = buffer[i-1];
+            prev = curr;
+        }
+    }
+    mLastEventSeen.editValueFor(prev) = buffer[count-1];
 }
 
 SortedVector< wp<SensorService::SensorEventConnection> >
