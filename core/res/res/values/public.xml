@@ -1366,6 +1366,12 @@
   <public type="attr" name="autoAdvanceViewId" />
   <public type="attr" name="useIntrinsicSizeAsMinimum" />
 
+  <public type="attr" name="actionModeCutDrawable" />
+  <public type="attr" name="actionModeCopyDrawable" />
+  <public type="attr" name="actionModePasteDrawable" />
+  <public type="attr" name="textEditPasteWindowLayout" />
+  <public type="attr" name="textEditNoPasteWindowLayout" />
+
   <public type="anim" name="animator_fade_in" />
   <public type="anim" name="animator_fade_out" />
 
@@ -1431,11 +1437,7 @@
   <public type="style" name="TextAppearance.Widget.PopupMenu.Small" />
   <public type="style" name="Widget.FragmentBreadCrumbs" />
 
+  <public type="style" name="Theme.Holo.DialogWhenLarge" />
+  
   <public type="string" name="selectTextMode" />
-
-  <public type="attr" name="actionModeCutDrawable" />
-  <public type="attr" name="actionModeCopyDrawable" />
-  <public type="attr" name="actionModePasteDrawable" />
-  <public type="attr" name="textEditPasteWindowLayout" />
-  <public type="attr" name="textEditNoPasteWindowLayout" />
 </resources>
