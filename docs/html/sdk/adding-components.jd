@@ -150,14 +150,19 @@ the "Downloadable SDK Components" section at left.</p>
 
 <p>For example, there may be a dependency between the ADT Plugin for Eclipse and
 the SDK Tools component. When you install the SDK Tools
-component, you would then need to upgrade to the required version of ADT (if you
-are developing in Eclipse). In this case, you would find dependencies listed in
-"Revisions" section of the <a href="{@docRoot}sdk/eclipse-adt.html#notes">ADT
-Plugin Notes</a> and <a href="{@docRoot}sdk/tools-notes.html#notes">SDK Tools
-Notes</a> documents. </p>
+component, you should also upgrade to the required version of ADT (if you
+are developing in Eclipse). In this case,  the major version number for your ADT plugin should
+always match the revision number of your SDK Tools (for example, ADT 8.x requires SDK Tools r8).
+</p>
 
-<p>Additionally, the development tools will notify you with debug warnings
-if there is dependency that you need to address. </p>
+<p>Also make sure that, each time you install a new version of the Android platform, you have
+the latest version of the SDK Platform-tools component. The SDK Platform-tools contain
+tools that are backward compatible with all versions of the Android platform and are
+often updated to support new features in the latest version of the Android platform.</p>
+
+<p>The development tools will notify you with debug warnings if there is dependency that you need to
+address. The SDK and AVD Manager also enforces dependencies by requiring that you download any
+components that are needed by those you have selected.</p>
 
 
 <h2 id="AddingSites">Adding New Sites</h2>
