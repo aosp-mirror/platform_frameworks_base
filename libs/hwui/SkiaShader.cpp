@@ -63,8 +63,7 @@ void SkiaShader::setupProgram(Program* program, const mat4& modelView, const Sna
         GLuint* textureUnit) {
 }
 
-void SkiaShader::bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT, GLuint textureUnit) {
-    glActiveTexture(gTextureUnitsMap[textureUnit]);
+void SkiaShader::bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT) {
     glBindTexture(GL_TEXTURE_2D, texture->id);
     if (wrapS != texture->wrapS) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
@@ -132,7 +131,7 @@ void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
     computeScreenSpaceMatrix(textureTransform, modelView);
 
     // Uniforms
-    bindTexture(texture, mWrapS, mWrapT, textureSlot);
+    bindTexture(texture, mWrapS, mWrapT);
     glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
             GL_FALSE, &textureTransform.data[0]);
@@ -204,7 +203,7 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
     computeScreenSpaceMatrix(screenSpace, modelView);
 
     // Uniforms
-    bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY], textureSlot);
+    bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY]);
     glUniform1i(program->getUniform("gradientSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }
@@ -297,7 +296,7 @@ void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelVi
     computeScreenSpaceMatrix(screenSpace, modelView);
 
     // Uniforms
-    bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY], textureSlot);
+    bindTexture(texture, gTileModes[mTileX], gTileModes[mTileY]);
     glUniform1i(program->getUniform("gradientSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }
