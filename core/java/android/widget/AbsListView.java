@@ -3856,11 +3856,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // Update this first, since setNextSelectedPositionInt inspects it
                 mNeedSync = false;
 
-                if (mTranscriptMode == TRANSCRIPT_MODE_ALWAYS_SCROLL ||
-                        (mTranscriptMode == TRANSCRIPT_MODE_NORMAL &&
-                                mFirstPosition + getChildCount() >= mOldItemCount)) {
+                if (mTranscriptMode == TRANSCRIPT_MODE_ALWAYS_SCROLL) {
                     mLayoutMode = LAYOUT_FORCE_BOTTOM;
                     return;
+                }
+                if (mTranscriptMode == TRANSCRIPT_MODE_NORMAL) {
+                    final int childCount = getChildCount();
+                    final int listBottom = getBottom() - getPaddingBottom();
+                    final View lastChild = getChildAt(childCount - 1);
+                    final int lastBottom = lastChild != null ? lastChild.getBottom() : listBottom;
+                    if (mFirstPosition + childCount >= mOldItemCount && lastBottom <= listBottom) {
+                        mLayoutMode = LAYOUT_FORCE_BOTTOM;
+                        return;
+                    }
+                    // Something new came in and we didn't scroll; give the user a clue that
+                    // there's something new.
+                    awakenScrollBars();
                 }
 
                 switch (mSyncMode) {
