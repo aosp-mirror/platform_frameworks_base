@@ -674,6 +674,8 @@ public class StackView extends AdapterViewAnimator {
             r = Math.max(0, r);
 
             mYProgress = r;
+            if (mView == null) return;
+
             final LayoutParams viewLp = (LayoutParams) mView.getLayoutParams();
             final LayoutParams highlightLp = (LayoutParams) mHighlight.getLayoutParams();
 
@@ -722,6 +724,7 @@ public class StackView extends AdapterViewAnimator {
 
             mXProgress = r;
 
+            if (mView == null) return;
             final LayoutParams viewLp = (LayoutParams) mView.getLayoutParams();
             final LayoutParams highlightLp = (LayoutParams) mHighlight.getLayoutParams();
 
