@@ -761,6 +761,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         BufferType bufferType = BufferType.EDITABLE;
 
+        final int variation =
+                inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
+        final boolean passwordInputType = variation
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+        final boolean webPasswordInputType = variation
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD);
+
         if (inputMethod != null) {
             Class<?> c;
 
@@ -856,19 +863,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (password) {
-            // Caller used the deprecated xml attribute "password".  Ensure that
-            // the inputType is correct.
-            boolean normalText = (mInputType & EditorInfo.TYPE_MASK_CLASS)
-                    == EditorInfo.TYPE_CLASS_TEXT;
-            if (normalText && !isPasswordInputType(mInputType)) {
+        // mInputType has been set from inputType, possibly modified by mInputMethod.
+        // Specialize mInputType to [web]password if we have a text class and the original input
+        // type was a password.
+        if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
+            if (password || passwordInputType) {
                 mInputType = (mInputType & ~(EditorInfo.TYPE_MASK_VARIATION))
-                    | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
+                        | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
             }
-        } else if (isPasswordInputType(mInputType)) {
-            // Caller did not use the deprecated xml attribute "password", but
-            // did set the input properly.  Set password to true.
-            password = true;
+            if (webPasswordInputType) {
+                mInputType = (mInputType & ~(EditorInfo.TYPE_MASK_VARIATION))
+                        | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD;
+            }
         }
 
         if (selectallonfocus) {
@@ -882,7 +888,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             drawableLeft, drawableTop, drawableRight, drawableBottom);
         setCompoundDrawablePadding(drawablePadding);
 
-        setSingleLine(singleLine);
+        // Same as setSingleLine, but make sure the transformation method is unchanged.
+        setInputTypeSingleLine(singleLine);
+        applySingleLine(singleLine, false);
+
         if (singleLine && mInput == null && ellipsize < 0) {
                 ellipsize = 3; // END
         }
@@ -911,13 +920,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         setRawTextSize(textSize);
 
-        if (password) {
+        if (password || passwordInputType || webPasswordInputType) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
             typefaceIndex = MONOSPACE;
-        } else if ((mInputType&(EditorInfo.TYPE_MASK_CLASS
-                |EditorInfo.TYPE_MASK_VARIATION))
-                == (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
+        } else if ((mInputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION))
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)) {
             typefaceIndex = MONOSPACE;
         }
 
@@ -1148,7 +1155,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } catch (IncompatibleClassChangeError e) {
                 mInputType = EditorInfo.TYPE_CLASS_TEXT;
             }
-            setSingleLine(mSingleLine);
+            // Change inputType, without affecting transformation.
+            // No need to applySingleLine since mSingleLine is unchanged.
+            setInputTypeSingleLine(mSingleLine);
         } else {
             mInputType = EditorInfo.TYPE_NULL;
         }
@@ -3051,21 +3060,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean isPasswordInputType(int inputType) {
-        final int variation = inputType & (EditorInfo.TYPE_MASK_CLASS
-                | EditorInfo.TYPE_MASK_VARIATION);
+        final int variation =
+                inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
         return variation
-                == (EditorInfo.TYPE_CLASS_TEXT
-                        | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)
-                        || variation == (EditorInfo.TYPE_CLASS_TEXT
-                        | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD);
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD)
+                || variation
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD);
     }
 
     private boolean isVisiblePasswordInputType(int inputType) {
-        final int variation = inputType & (EditorInfo.TYPE_MASK_CLASS
-                | EditorInfo.TYPE_MASK_VARIATION);
+        final int variation =
+                inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
         return variation
-                == (EditorInfo.TYPE_CLASS_TEXT
-                        | EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                == (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
     }
 
     /**
@@ -6075,6 +6082,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setSingleLine(boolean singleLine) {
+        setInputTypeSingleLine(singleLine);
+        applySingleLine(singleLine, true);
+    }
+
+    /**
+     * Adds or remove the EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE on the mInputType.
+     * @param singleLine
+     */
+    private void setInputTypeSingleLine(boolean singleLine) {
         if ((mInputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
             if (singleLine) {
                 mInputType &= ~EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
@@ -6082,7 +6098,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
             }
         }
-        applySingleLine(singleLine, true);
     }
 
     private void applySingleLine(boolean singleLine, boolean applyTransformation) {
@@ -7875,6 +7890,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (hasPasswordTransformationMethod()) {
                     // selectCurrentWord is not available on a password field and would return an
                     // arbitrary 10-charater selection around pressed position. Select all instead.
+                    // Note that cut/copy menu entries are not available for passwords.
+                    // This is however useful to delete or paste to replace the entire content.
                     Selection.setSelection((Spannable) mText, 0, mText.length());
                 } else {
                     selectCurrentWord();
