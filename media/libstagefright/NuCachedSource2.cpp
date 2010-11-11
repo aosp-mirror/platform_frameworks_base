@@ -325,15 +325,17 @@ void NuCachedSource2::onRead(const sp<AMessage> &msg) {
     mCondition.signal();
 }
 
-void NuCachedSource2::restartPrefetcherIfNecessary_l() {
+void NuCachedSource2::restartPrefetcherIfNecessary_l(
+        bool ignoreLowWaterThreshold) {
     static const size_t kGrayArea = 256 * 1024;
 
     if (mFetching || mFinalStatus != OK) {
         return;
     }
 
-    if (mCacheOffset + mCache->totalSize() - mLastAccessPos
-            >= kLowWaterThreshold) {
+    if (!ignoreLowWaterThreshold
+            && mCacheOffset + mCache->totalSize() - mLastAccessPos
+                >= kLowWaterThreshold) {
         return;
     }
 
@@ -508,6 +510,12 @@ void NuCachedSource2::onSuspend() {
 
     mFetching = false;
     mSuspended = true;
+}
+
+void NuCachedSource2::resumeFetchingIfNecessary() {
+    Mutex::Autolock autoLock(mLock);
+
+    restartPrefetcherIfNecessary_l(true /* ignore low water threshold */);
 }
 
 DecryptHandle* NuCachedSource2::DrmInitialization(DrmManagerClient* client) {
