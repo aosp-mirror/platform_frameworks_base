@@ -4006,6 +4006,20 @@ status_t QueryCodecs(
             caps->mProfileLevels.push(profileLevel);
         }
 
+        // Color format query
+        OMX_VIDEO_PARAM_PORTFORMATTYPE portFormat;
+        InitOMXParams(&portFormat);
+        portFormat.nPortIndex = queryDecoders ? 1 : 0;
+        for (portFormat.nIndex = 0;; ++portFormat.nIndex)  {
+            err = omx->getParameter(
+                    node, OMX_IndexParamVideoPortFormat,
+                    &portFormat, sizeof(portFormat));
+            if (err != OK) {
+                break;
+            }
+            caps->mColorFormats.push(portFormat.eColorFormat);
+        }
+
         CHECK_EQ(omx->freeNode(node), OK);
     }
 }

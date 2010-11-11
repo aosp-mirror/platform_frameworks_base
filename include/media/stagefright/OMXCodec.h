@@ -307,6 +307,7 @@ struct CodecProfileLevel {
 struct CodecCapabilities {
     String8 mComponentName;
     Vector<CodecProfileLevel> mProfileLevels;
+    Vector<OMX_U32> mColorFormats;
 };
 
 // Return a vector of componentNames with supported profile/level pairs
