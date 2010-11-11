@@ -76,7 +76,7 @@ public abstract class FragmentTransaction {
     public abstract FragmentTransaction hide(Fragment fragment);
     
     /**
-     * Hides a previously hidden fragment.  This is only relevant for fragments whose
+     * Shows a previously hidden fragment.  This is only relevant for fragments whose
      * views have been added to a container, as this will cause the view to
      * be shown.
      * 
