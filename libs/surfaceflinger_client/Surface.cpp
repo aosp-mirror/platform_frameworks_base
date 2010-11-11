@@ -855,6 +855,12 @@ int Surface::setBufferCount(int bufferCount)
     status_t err = mSharedBufferClient->setBufferCount(bufferCount, ipc);
     LOGE_IF(err, "ISurface::setBufferCount(%d) returned %s",
             bufferCount, strerror(-err));
+
+    if (err == NO_ERROR) {
+        // Clear out any references to the old buffers.
+        mBuffers.clear();
+    }
+
     return err;
 }
 
