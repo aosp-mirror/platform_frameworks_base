@@ -6529,8 +6529,11 @@ public class WebView extends AbsoluteLayout
                         // If the text entry has created more events, ignore
                         // this one.
                         } else if (msg.arg2 == mTextGeneration) {
-                            mWebTextView.setTextAndKeepSelection(
-                                    (String) msg.obj);
+                            String text = (String) msg.obj;
+                            if (null == text) {
+                                text = "";
+                            }
+                            mWebTextView.setTextAndKeepSelection(text);
                         }
                     }
                     break;
