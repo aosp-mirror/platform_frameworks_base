@@ -17,6 +17,7 @@
 package android.media.videoeditor;
 
 import java.io.IOException;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -161,6 +162,57 @@ public class MediaImageItem extends MediaItem {
      * @param durationMs The duration of the image in the storyboard timeline
      */
     public void setDuration(long durationMs) {
+        // Invalidate the beginning and end transitions if necessary
+        if (mBeginTransition != null) {
+            final long transitionDurationMs = mBeginTransition.getDuration();
+
+            // The begin transition must be invalidated if it overlaps with
+            // an effect. To optimize this code we could invalidate the
+            // begin transition only for a Ken Burns effect (color effects
+            // should not affect the begin transition) however when new effects
+            // will be added this code would have to be modified... so we
+            // opted to always invalidate the transition if there is an
+            // overlap.
+            final List<Effect> effects = getAllEffects();
+            for (Effect effect : effects) {
+                // Check if the effect overlaps with the begin transition
+                if (effect.getStartTime() < transitionDurationMs) {
+                    mBeginTransition.invalidate();
+                    break;
+                }
+            }
+        }
+
+        if (mEndTransition != null) {
+            final long transitionDurationMs = mEndTransition.getDuration();
+
+            // The end transition must be invalidated if it overlaps with
+            // an effect
+            final List<Effect> effects = getAllEffects();
+            for (Effect effect : effects) {
+                // Check if the effect overlaps with the end transition
+                if (effect.getStartTime() + effect.getDuration() >
+                            mDurationMs - transitionDurationMs) {
+                    mEndTransition.invalidate();
+                    break;
+                }
+            }
+
+            if (mEndTransition.isGenerated()) {
+                // The end transition must be invalidated if it overlaps with
+                // an overlay
+                final List<Overlay> overlays = getAllOverlays();
+                for (Overlay overlay : overlays) {
+                    // Check if the overlay overlaps with the end transition
+                    if (overlay.getStartTime() + overlay.getDuration() >
+                                mDurationMs - transitionDurationMs) {
+                        mEndTransition.invalidate();
+                        break;
+                    }
+                }
+            }
+        }
+
         mDurationMs = durationMs;
 
         adjustTransitions();
@@ -226,6 +278,64 @@ public class MediaImageItem extends MediaItem {
     }
 
     /**
+     * Adjust the start time and/or duration of effects.
+     */
+    private void adjustEffects() {
+        final List<Effect> effects = getAllEffects();
+        for (Effect effect : effects) {
+            // Adjust the start time if necessary
+            final long effectStartTimeMs;
+            if (effect.getStartTime() > getDuration()) {
+                effectStartTimeMs = 0;
+            } else {
+                effectStartTimeMs = effect.getStartTime();
+            }
+
+            // Adjust the duration if necessary
+            final long effectDurationMs;
+            if (effectStartTimeMs + effect.getDuration() > getDuration()) {
+                effectDurationMs = getDuration() - effectStartTimeMs;
+            } else {
+                effectDurationMs = effect.getDuration();
+            }
+
+            if (effectStartTimeMs != effect.getStartTime() ||
+                    effectDurationMs != effect.getDuration()) {
+                effect.setStartTimeAndDuration(effectStartTimeMs, effectDurationMs);
+            }
+        }
+    }
+
+    /**
+     * Adjust the start time and/or duration of overlays.
+     */
+    private void adjustOverlays() {
+        final List<Overlay> overlays = getAllOverlays();
+        for (Overlay overlay : overlays) {
+            // Adjust the start time if necessary
+            final long overlayStartTimeMs;
+            if (overlay.getStartTime() > getDuration()) {
+                overlayStartTimeMs = 0;
+            } else {
+                overlayStartTimeMs = overlay.getStartTime();
+            }
+
+            // Adjust the duration if necessary
+            final long overlayDurationMs;
+            if (overlayStartTimeMs + overlay.getDuration() > getDuration()) {
+                overlayDurationMs = getDuration() - overlayStartTimeMs;
+            } else {
+                overlayDurationMs = overlay.getDuration();
+            }
+
+            if (overlayStartTimeMs != overlay.getStartTime() ||
+                    overlayDurationMs != overlay.getDuration()) {
+                overlay.setStartTimeAndDuration(overlayStartTimeMs, overlayDurationMs);
+            }
+        }
+    }
+
+    /**
      * Resize a bitmap to the specified width and height
      *
      * @param filename The filename
@@ -234,8 +344,7 @@ public class MediaImageItem extends MediaItem {
      *
      * @return The resized bitmap
      */
-    private Bitmap scaleImage(String filename, int width, int height)
-            throws IOException {
+    private Bitmap scaleImage(String filename, int width, int height) throws IOException {
         final BitmapFactory.Options dbo = new BitmapFactory.Options();
         dbo.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filename, dbo);
