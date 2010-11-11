@@ -274,6 +274,7 @@ private:
     bool getBitrate(int64_t *bitrate);
 
     void finishSeekIfNecessary(int64_t videoTimeUs);
+    void ensureCacheIsFetching_l();
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
