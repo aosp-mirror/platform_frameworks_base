@@ -56,21 +56,38 @@ public class EventSenderImpl {
     private static final int MSG_SET_TOUCH_MODIFIER = 16;
     private static final int MSG_CANCEL_TOUCH_POINT = 17;
 
-    public static class TouchPoint {
-        WebView mWebView;
-        private int mId;
+    private static class Point {
         private int mX;
         private int mY;
+
+        public Point(int x, int y) {
+            mX = x;
+            mY = y;
+        }
+        public int x() {
+            return mX;
+        }
+        public int y() {
+            return mY;
+        }
+    }
+
+    private Point createViewPointFromContentCoordinates(int x, int y) {
+        return new Point((int)(x * mWebView.getScale()) - mWebView.getScrollX(),
+                         (int)(y * mWebView.getScale()) - mWebView.getScrollY());
+    }
+
+    public static class TouchPoint {
+        private int mId;
+        private Point mPoint;
         private long mDownTime;
         private boolean mReleased = false;
         private boolean mMoved = false;
         private boolean mCancelled = false;
 
-        public TouchPoint(WebView webView, int id, int x, int y) {
-            mWebView = webView;
+        public TouchPoint(int id, Point point) {
             mId = id;
-            mX = scaleX(x);
-            mY = scaleY(y);
+            mPoint = point;
         }
 
         public int getId() {
@@ -78,20 +95,19 @@ public class EventSenderImpl {
         }
 
         public int getX() {
-            return mX;
+            return mPoint.x();
         }
 
         public int getY() {
-            return mY;
+            return mPoint.y();
         }
 
         public boolean hasMoved() {
             return mMoved;
         }
 
-        public void move(int newX, int newY) {
-            mX = scaleX(newX);
-            mY = scaleY(newY);
+        public void move(Point point) {
+            mPoint = point;
             mMoved = true;
         }
 
@@ -121,14 +137,6 @@ public class EventSenderImpl {
 
         public void cancel() {
             mCancelled = true;
-        }
-
-        private int scaleX(int x) {
-            return (int)(x * mWebView.getScale()) - mWebView.getScrollX();
-        }
-
-        private int scaleY(int y) {
-            return (int)(y * mWebView.getScale()) - mWebView.getScrollY();
         }
     }
 
@@ -208,8 +216,8 @@ public class EventSenderImpl {
                     } else {
                         id = getTouchPoints().get(numPoints - 1).getId() + 1;
                     }
-                    getTouchPoints().add(new TouchPoint(mWebView, id,
-                            msg.arg1, msg.arg2));
+                    getTouchPoints().add(
+                            new TouchPoint(id, createViewPointFromContentCoordinates(msg.arg1, msg.arg2)));
                     break;
 
                 case MSG_TOUCH_START:
@@ -232,7 +240,8 @@ public class EventSenderImpl {
                         break;
                     }
 
-                    getTouchPoints().get(index).move(bundle.getInt("x"), bundle.getInt("y"));
+                    getTouchPoints().get(index).move(
+                            createViewPointFromContentCoordinates(bundle.getInt("x"), bundle.getInt("y")));
                     break;
 
                 case MSG_TOUCH_MOVE:
