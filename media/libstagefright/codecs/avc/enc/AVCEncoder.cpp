@@ -207,7 +207,7 @@ status_t AVCEncoder::initCheck(const sp<MetaData>& meta) {
     LOGV("initCheck");
     CHECK(meta->findInt32(kKeyWidth, &mVideoWidth));
     CHECK(meta->findInt32(kKeyHeight, &mVideoHeight));
-    CHECK(meta->findInt32(kKeySampleRate, &mVideoFrameRate));
+    CHECK(meta->findInt32(kKeyFrameRate, &mVideoFrameRate));
     CHECK(meta->findInt32(kKeyBitRate, &mVideoBitRate));
 
     // XXX: Add more color format support
@@ -322,7 +322,7 @@ status_t AVCEncoder::initCheck(const sp<MetaData>& meta) {
     mFormat->setInt32(kKeyWidth, mVideoWidth);
     mFormat->setInt32(kKeyHeight, mVideoHeight);
     mFormat->setInt32(kKeyBitRate, mVideoBitRate);
-    mFormat->setInt32(kKeySampleRate, mVideoFrameRate);
+    mFormat->setInt32(kKeyFrameRate, mVideoFrameRate);
     mFormat->setInt32(kKeyColorFormat, mVideoColorFormat);
     mFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
     mFormat->setCString(kKeyDecoderComponent, "AVCEncoder");
