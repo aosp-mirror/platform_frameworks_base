@@ -892,7 +892,7 @@ final class ApplicationPackageManager extends PackageManager {
                   + Integer.toHexString(resid) + " in package "
                   + packageName, e);
         } catch (NameNotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for"
+            Log.w("PackageManager", "Failure retrieving resources for "
                   + appInfo.packageName);
         }
         return null;
