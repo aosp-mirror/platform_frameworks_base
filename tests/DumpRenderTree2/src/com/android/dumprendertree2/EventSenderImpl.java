@@ -142,8 +142,7 @@ public class EventSenderImpl {
 
     private List<TouchPoint> mTouchPoints;
     private int mTouchMetaState;
-    private int mMouseX;
-    private int mMouseY;
+    private Point mMousePoint;
 
     private WebView mWebView;
 
@@ -185,15 +184,19 @@ public class EventSenderImpl {
                 /** MOUSE */
 
                 case MSG_MOUSE_DOWN:
-                    ts = SystemClock.uptimeMillis();
-                    event = MotionEvent.obtain(ts, ts, MotionEvent.ACTION_DOWN, mMouseX, mMouseY, 0);
-                    mWebView.onTouchEvent(event);
+                    if (mMousePoint != null) {
+                        ts = SystemClock.uptimeMillis();
+                        event = MotionEvent.obtain(ts, ts, MotionEvent.ACTION_DOWN, mMousePoint.x(), mMousePoint.y(), 0);
+                        mWebView.onTouchEvent(event);
+                    }
                     break;
 
                 case MSG_MOUSE_UP:
-                    ts = SystemClock.uptimeMillis();
-                    event = MotionEvent.obtain(ts, ts, MotionEvent.ACTION_UP, mMouseX, mMouseY, 0);
-                    mWebView.onTouchEvent(event);
+                    if (mMousePoint != null) {
+                        ts = SystemClock.uptimeMillis();
+                        event = MotionEvent.obtain(ts, ts, MotionEvent.ACTION_UP, mMousePoint.x(), mMousePoint.y(), 0);
+                        mWebView.onTouchEvent(event);
+                    }
                     break;
 
                 case MSG_MOUSE_CLICK:
@@ -202,8 +205,7 @@ public class EventSenderImpl {
                     break;
 
                 case MSG_MOUSE_MOVE_TO:
-                    mMouseX = msg.arg1;
-                    mMouseY = msg.arg2;
+                    mMousePoint = createViewPointFromContentCoordinates(msg.arg1, msg.arg2);
                     break;
 
                 /** TOUCH */
@@ -342,8 +344,7 @@ public class EventSenderImpl {
         mWebView = webView;
         mTouchPoints = null;
         mTouchMetaState = 0;
-        mMouseX = 0;
-        mMouseY = 0;
+        mMousePoint = null;
     }
 
     public void enableDOMUIEventLogging(int domNode) {
