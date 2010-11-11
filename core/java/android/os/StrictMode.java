@@ -112,6 +112,9 @@ public final class StrictMode {
     // Only show an annoying dialog at most every 30 seconds
     private static final long MIN_DIALOG_INTERVAL_MS = 30000;
 
+    // How many Span tags (e.g. animations) to report.
+    private static final int MAX_SPAN_TAGS = 20;
+
     // How many offending stacks to keep track of (and time) per loop
     // of the Looper.
     private static final int MAX_OFFENSES_PER_LOOP = 10;
@@ -1217,6 +1220,140 @@ public final class StrictMode {
     }
 
     /**
+     * A tracked, critical time span.  (e.g. during an animation.)
+     *
+     * The object itself is a linked list node, to avoid any allocations
+     * during rapid span entries and exits.
+     *
+     * @hide
+     */
+    public static class Span {
+        private String mName;
+        private long mCreateMillis;
+        private Span mNext;
+        private Span mPrev;  // not used when in freeList, only active
+        private final ThreadSpanState mContainerState;
+
+        Span(ThreadSpanState threadState) {
+            mContainerState = threadState;
+        }
+
+        /**
+         * To be called when the critical span is complete (i.e. the
+         * animation is done animating).  This can be called on any
+         * thread (even a different one from where the animation was
+         * taking place), but that's only a defensive implementation
+         * measure.  It really makes no sense for you to call this on
+         * thread other than that where you created it.
+         *
+         * @hide
+         */
+        public void finish() {
+            ThreadSpanState state = mContainerState;
+            synchronized (state) {
+                if (mName == null) {
+                    // Duplicate finish call.  Ignore.
+                    return;
+                }
+
+                // Remove ourselves from the active list.
+                if (mPrev != null) {
+                    mPrev.mNext = mNext;
+                }
+                if (mNext != null) {
+                    mNext.mPrev = mPrev;
+                }
+                if (state.mActiveHead == this) {
+                    state.mActiveHead = mNext;
+                }
+
+                this.mCreateMillis = -1;
+                this.mName = null;
+                this.mPrev = null;
+                this.mNext = null;
+                state.mActiveSize--;
+
+                // Add ourselves to the freeList, if it's not already
+                // too big.
+                if (state.mFreeListSize < 5) {
+                    this.mNext = state.mFreeListHead;
+                    state.mFreeListHead = this;
+                    state.mFreeListSize++;
+                }
+            }
+        }
+    }
+
+    /**
+     * Linked lists of active spans and a freelist.
+     *
+     * Locking notes: there's one of these structures per thread and
+     * all members of this structure (as well as the Span nodes under
+     * it) are guarded by the ThreadSpanState object instance.  While
+     * in theory there'd be no locking required because it's all local
+     * per-thread, the finish() method above is defensive against
+     * people calling it on a different thread from where they created
+     * the Span, hence the locking.
+     */
+    private static class ThreadSpanState {
+        public Span mActiveHead;    // doubly-linked list.
+        public int mActiveSize;
+        public Span mFreeListHead;  // singly-linked list.  only changes at head.
+        public int mFreeListSize;
+    }
+
+    private static final ThreadLocal<ThreadSpanState> sThisThreadSpanState =
+            new ThreadLocal<ThreadSpanState>() {
+        @Override protected ThreadSpanState initialValue() {
+            return new ThreadSpanState();
+        }
+    };
+
+    /**
+     * Enter a named critical span (e.g. an animation)
+     *
+     * <p>The name is an arbitary label (or tag) that will be applied
+     * to any strictmode violation that happens while this span is
+     * active.  You must call finish() on the span when done.
+     *
+     * <p>This will never return null, but on devices without debugging
+     * enabled, this may return a dummy object on which the finish()
+     * method is a no-op.
+     *
+     * <p>TODO: add CloseGuard to this, verifying callers call finish.
+     *
+     * @hide
+     */
+    public static Span enterCriticalSpan(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("name must be non-null and non-empty");
+        }
+        ThreadSpanState state = sThisThreadSpanState.get();
+        Span span = null;
+        synchronized (state) {
+            if (state.mFreeListHead != null) {
+                span = state.mFreeListHead;
+                state.mFreeListHead = span.mNext;
+                state.mFreeListSize--;
+            } else {
+                // Shouldn't have to do this often.
+                span = new Span(state);
+            }
+            span.mName = name;
+            span.mCreateMillis = SystemClock.uptimeMillis();
+            span.mNext = state.mActiveHead;
+            span.mPrev = null;
+            state.mActiveHead = span;
+            state.mActiveSize++;
+            if (span.mNext != null) {
+                span.mNext.mPrev = span;
+            }
+        }
+        return span;
+    }
+
+
+    /**
      * Parcelable that gets sent in Binder call headers back to callers
      * to report violations that happened during a cross-process call.
      *
@@ -1243,6 +1380,12 @@ public final class StrictMode {
          * The number of animations currently running.
          */
         public int numAnimationsRunning = 0;
+
+        /**
+         * List of tags from active Span instances during this
+         * violation, or null for none.
+         */
+        public String[] tags;
 
         /**
          * Which violation number this was (1-based) since the last Looper loop,
@@ -1284,6 +1427,23 @@ public final class StrictMode {
             if (broadcastIntent != null) {
                 broadcastIntentAction = broadcastIntent.getAction();
             }
+            ThreadSpanState state = sThisThreadSpanState.get();
+            synchronized (state) {
+                int spanActiveCount = state.mActiveSize;
+                if (spanActiveCount > MAX_SPAN_TAGS) {
+                    spanActiveCount = MAX_SPAN_TAGS;
+                }
+                if (spanActiveCount != 0) {
+                    this.tags = new String[spanActiveCount];
+                    Span iter = state.mActiveHead;
+                    int index = 0;
+                    while (iter != null && index < spanActiveCount) {
+                        this.tags[index] = iter.mName;
+                        index++;
+                        iter = iter.mNext;
+                    }
+                }
+            }
         }
 
         /**
@@ -1312,6 +1472,7 @@ public final class StrictMode {
             numAnimationsRunning = in.readInt();
             violationUptimeMillis = in.readLong();
             broadcastIntentAction = in.readString();
+            tags = in.readStringArray();
         }
 
         /**
@@ -1325,6 +1486,7 @@ public final class StrictMode {
             dest.writeInt(numAnimationsRunning);
             dest.writeLong(violationUptimeMillis);
             dest.writeString(broadcastIntentAction);
+            dest.writeStringArray(tags);
         }
 
 
@@ -1346,6 +1508,12 @@ public final class StrictMode {
             pw.println(prefix + "violationUptimeMillis: " + violationUptimeMillis);
             if (broadcastIntentAction != null) {
                 pw.println(prefix + "broadcastIntentAction: " + broadcastIntentAction);
+            }
+            if (tags != null) {
+                int index = 0;
+                for (String tag : tags) {
+                    pw.println(prefix + "tag[" + (index++) + "]: " + tag);
+                }
             }
         }
 
