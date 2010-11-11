@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.R;
 import android.content.ClipData;
+import android.content.ClipData.Item;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -88,6 +89,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextMenu;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
@@ -6731,10 +6733,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mMovement.onTakeFocus(this, (Spannable) mText, direction);
                 }
 
-                if (mSelectAllOnFocus) {
-                    Selection.setSelection((Spannable) mText, 0, mText.length());
-                }
-
                 // The DecorView does not have focus when the 'Done' ExtractEditText button is
                 // pressed. Since it is the ViewRoot's mView, it requests focus before
                 // ExtractEditText clears focus, which gives focus to the ExtractEditText.
@@ -6753,6 +6751,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                      */
                     Selection.setSelection((Spannable) mText, selStart, selEnd);
                 }
+
+                if (mSelectAllOnFocus) {
+                    Selection.setSelection((Spannable) mText, 0, mText.length());
+                }
+
                 mTouchFocusSelected = true;
             }
 
@@ -7029,12 +7032,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     || windowParams.type > WindowManager.LayoutParams.LAST_SUB_WINDOW;
         }
 
-        // TODO Add an extra android:cursorController flag to disable the controller?
-        if (windowSupportsHandles && mCursorVisible && mLayout != null) {
+        if (windowSupportsHandles && isTextEditable() && mCursorVisible && mLayout != null) {
             if (mInsertionPointCursorController == null) {
                 mInsertionPointCursorController = new InsertionPointCursorController();
             }
         } else {
+            hideInsertionPointCursorController();
             mInsertionPointCursorController = null;
         }
 
@@ -7044,7 +7047,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         } else {
             // Stop selection mode if the controller becomes unavailable.
-            stopSelectionActionMode();
+            if (mSelectionModifierCursorController != null) {
+                stopSelectionActionMode();
+            }
             mSelectionModifierCursorController = null;
         }
     }
@@ -7053,7 +7058,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return True iff this TextView contains a text that can be edited.
      */
     private boolean isTextEditable() {
-        return mText instanceof Editable && onCheckIsTextEditor();
+        return mText instanceof Editable && onCheckIsTextEditor() && isEnabled();
     }
 
     /**
@@ -7684,13 +7689,53 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return packRangeInLong(min, max);
     }
 
+    private DragThumbnailBuilder getTextThumbnailBuilder(CharSequence text) {
+        TextView thumbnail = (TextView) inflate(mContext,
+                com.android.internal.R.layout.text_drag_thumbnail, null);
+
+        if (thumbnail == null) {
+            throw new IllegalArgumentException("Unable to inflate text drag thumbnail");
+        }
+
+        if (text.length() > DRAG_THUMBNAIL_MAX_TEXT_LENGTH) {
+            text = text.subSequence(0, DRAG_THUMBNAIL_MAX_TEXT_LENGTH);
+        }
+        thumbnail.setText(text);
+        thumbnail.setTextColor(getTextColors());
+
+        thumbnail.setTextAppearance(mContext, R.styleable.Theme_textAppearanceLarge);
+        thumbnail.setGravity(Gravity.CENTER);
+
+        thumbnail.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        final int size = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        thumbnail.measure(size, size);
+
+        thumbnail.layout(0, 0, thumbnail.getMeasuredWidth(), thumbnail.getMeasuredHeight());
+        thumbnail.invalidate();
+        return new DragThumbnailBuilder(thumbnail);
+    }
+
     @Override
     public boolean performLongClick() {
         if (super.performLongClick()) {
             mEatTouchRelease = true;
             return true;
         }
-        
+
+        if (mSelectionActionMode != null && touchPositionIsInSelection()) {
+            final int start = getSelectionStart();
+            final int end = getSelectionEnd();
+            CharSequence selectedText = mTransformed.subSequence(start, end);
+            ClipData data = ClipData.newPlainText(null, null, selectedText);
+            startDrag(data, getTextThumbnailBuilder(selectedText), false);
+            stopSelectionActionMode();
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            mEatTouchRelease = true;
+            return true;
+        }
+
         if (startSelectionActionMode()) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mEatTouchRelease = true;
@@ -8728,6 +8773,46 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getOffsetForHorizontal(line, x);
     }
 
+    @Override
+    public boolean onDragEvent(DragEvent event) {
+        switch (event.getAction()) {
+            case DragEvent.ACTION_DRAG_STARTED:
+                return mInsertionPointCursorController != null;
+
+            case DragEvent.ACTION_DRAG_ENTERED:
+                TextView.this.requestFocus();
+                return true;
+
+            case DragEvent.ACTION_DRAG_LOCATION: {
+                final int offset = getOffset((int)event.getX(), (int)event.getY());
+                Selection.setSelection((Spannable)mText, offset);
+                return true;
+            }
+
+            case DragEvent.ACTION_DROP: {
+                StringBuilder content = new StringBuilder("");
+                ClipData clipData = event.getClipData();
+                final int itemCount = clipData.getItemCount();
+                for (int i=0; i < itemCount; i++) {
+                    Item item = clipData.getItem(i);
+                    content.append(item.coerceToText(TextView.this.mContext));
+                }
+                final int offset = getOffset((int) event.getX(), (int) event.getY());
+                long minMax = prepareSpacesAroundPaste(offset, offset, content);
+                int min = extractRangeStartFromLong(minMax);
+                int max = extractRangeEndFromLong(minMax);
+                Selection.setSelection((Spannable) mText, max);
+                ((Editable) mText).replace(min, max, content);
+                return true;
+            }
+
+            case DragEvent.ACTION_DRAG_EXITED:
+            case DragEvent.ACTION_DRAG_ENDED:
+            default:
+                return true;
+        }
+    }
+
 
     @ViewDebug.ExportedProperty(category = "text")
     private CharSequence            mText;
@@ -8822,4 +8907,5 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
     private InputFilter[] mFilters = NO_FILTERS;
     private static final Spanned EMPTY_SPANNED = new SpannedString("");
+    private static int DRAG_THUMBNAIL_MAX_TEXT_LENGTH = 20;
 }
