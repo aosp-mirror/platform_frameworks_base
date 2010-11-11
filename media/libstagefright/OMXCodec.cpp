@@ -1913,6 +1913,13 @@ void OMXCodec::on_message(const omx_message &msg) {
 
             // Buffer could not be released until empty buffer done is called.
             if (info->mMediaBuffer != NULL) {
+                if (mIsEncoder &&
+                    (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
+                    // If zero-copy mode is enabled this will send the
+                    // input buffer back to the upstream source.
+                    restorePatchedDataPointer(info);
+                }
+
                 info->mMediaBuffer->release();
                 info->mMediaBuffer = NULL;
             }
@@ -2462,6 +2469,7 @@ status_t OMXCodec::freeBuffer(OMX_U32 portIndex, size_t bufIndex) {
     status_t err = mOMX->freeBuffer(mNode, portIndex, info->mBuffer);
 
     if (err == OK && info->mMediaBuffer != NULL) {
+        CHECK_EQ(portIndex, kPortIndexOutput);
         info->mMediaBuffer->setObserver(NULL);
 
         // Make sure nobody but us owns this buffer at this point.
@@ -2474,6 +2482,7 @@ status_t OMXCodec::freeBuffer(OMX_U32 portIndex, size_t bufIndex) {
         }
 
         info->mMediaBuffer->release();
+        info->mMediaBuffer = NULL;
     }
 
     if (err == OK) {
@@ -2714,10 +2723,10 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         if (mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames)) {
             CHECK(mOMXLivesLocally && offset == 0);
             OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *) info->mBuffer;
+            CHECK(header->pBuffer == info->mData);
             header->pBuffer = (OMX_U8 *) srcBuffer->data() + srcBuffer->range_offset();
             releaseBuffer = false;
             info->mMediaBuffer = srcBuffer;
-            // FIXME: we are leaking memory
         } else {
             if (mIsMetaDataStoredInVideoBuffers) {
                 releaseBuffer = false;
@@ -3999,6 +4008,14 @@ status_t QueryCodecs(
 
         CHECK_EQ(omx->freeNode(node), OK);
     }
+}
+
+void OMXCodec::restorePatchedDataPointer(BufferInfo *info) {
+    CHECK(mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames));
+    CHECK(mOMXLivesLocally);
+
+    OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *)info->mBuffer;
+    header->pBuffer = (OMX_U8 *)info->mData;
 }
 
 }  // namespace android
