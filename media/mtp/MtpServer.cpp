@@ -736,6 +736,7 @@ static void deleteRecursive(const char* path) {
             unlink(pathbuf);
         }
     }
+    closedir(dir);
 }
 
 static void deletePath(const char* path) {
