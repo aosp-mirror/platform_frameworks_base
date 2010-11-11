@@ -15,159 +15,140 @@
 */
 
 #include <ui/KeyCharacterMap.h>
+#include <ui/Input.h>
 
-#include <nativehelper/jni.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <nativehelper/jni.h>
 #include <nativehelper/JNIHelp.h>
+
+#include "android_view_KeyEvent.h"
 
 namespace android {
 
-static jint
-ctor(JNIEnv *env, jobject clazz, jint id)
-{
-    return reinterpret_cast<int>(KeyCharacterMap::load(id));
+static struct {
+    jclass clazz;
+} gKeyEventClassInfo;
+
+static jint nativeLoad(JNIEnv *env, jobject clazz, jint deviceId) {
+    KeyCharacterMap* map;
+    status_t status = KeyCharacterMap::loadByDeviceId(deviceId, &map);
+    if (status) {
+        String8 msg;
+        msg.appendFormat("Could not load key character map for device %d due to error %d.  "
+                "Refer to the log for details.", deviceId, status);
+        jniThrowException(env, "android/view/KeyCharacterMap$KeyCharacterMapUnavailableException",
+                msg.string());
+        return 0;
+    }
+    return reinterpret_cast<jint>(map);
 }
 
-static void
-dtor(JNIEnv *env, jobject clazz, jint ptr)
-{
-    delete reinterpret_cast<KeyCharacterMap*>(ptr);
+static void nativeDispose(JNIEnv *env, jobject clazz, jint ptr) {
+    KeyCharacterMap* map = reinterpret_cast<KeyCharacterMap*>(ptr);
+    delete map;
 }
 
-static jchar
-get(JNIEnv *env, jobject clazz, jint ptr, jint keycode, jint meta)
-{
-    return reinterpret_cast<KeyCharacterMap*>(ptr)->get(keycode, meta);
+static jchar nativeGetCharacter(JNIEnv *env, jobject clazz, jint ptr,
+        jint keyCode, jint metaState) {
+    KeyCharacterMap* map = reinterpret_cast<KeyCharacterMap*>(ptr);
+    return map->getCharacter(keyCode, metaState);
 }
 
-static jchar
-getNumber(JNIEnv *env, jobject clazz, jint ptr, jint keycode)
-{
-    return reinterpret_cast<KeyCharacterMap*>(ptr)->getNumber(keycode);
+static jchar nativeGetNumber(JNIEnv *env, jobject clazz, jint ptr, jint keyCode) {
+    KeyCharacterMap* map = reinterpret_cast<KeyCharacterMap*>(ptr);
+    return map->getNumber(keyCode);
 }
 
-static jchar
-getMatch(JNIEnv *env, jobject clazz, jint ptr, jint keycode, jcharArray chars, jint modifiers)
-{
-    jchar rv;
-    jchar* ch = env->GetCharArrayElements(chars, NULL);
-    jsize chsize = env->GetArrayLength(chars);
+static jchar nativeGetMatch(JNIEnv *env, jobject clazz, jint ptr, jint keyCode,
+        jcharArray charsArray, jint metaState) {
+    KeyCharacterMap* map = reinterpret_cast<KeyCharacterMap*>(ptr);
 
-    rv = reinterpret_cast<KeyCharacterMap*>(ptr)->getMatch(keycode, ch, chsize, modifiers);
+    jsize numChars = env->GetArrayLength(charsArray);
+    jchar* chars = static_cast<jchar*>(env->GetPrimitiveArrayCritical(charsArray, NULL));
+    if (!chars) {
+        return 0;
+    }
 
-    env->ReleaseCharArrayElements(chars, ch, JNI_ABORT);
-    return rv;
+    char16_t result = map->getMatch(keyCode, chars, size_t(numChars), metaState);
+
+    env->ReleasePrimitiveArrayCritical(charsArray, chars, JNI_ABORT);
+    return result;
 }
 
-static jchar
-getDisplayLabel(JNIEnv *env, jobject clazz, jint ptr, jint keycode)
-{
-    return reinterpret_cast<KeyCharacterMap*>(ptr)->getDisplayLabel(keycode);
+static jchar nativeGetDisplayLabel(JNIEnv *env, jobject clazz, jint ptr, jint keyCode) {
+    KeyCharacterMap* map = reinterpret_cast<KeyCharacterMap*>(ptr);
+    return map->getDisplayLabel(keyCode);
 }
 
-static jfieldID gKeyDataMetaField;
-static jfieldID gKeyDataNumberField;
-static jfieldID gKeyDataDisplayLabelField;
-
-static jboolean
-getKeyData(JNIEnv *env, jobject clazz, jint ptr, jint keycode, jobject keydata)
-{
-    jboolean rv;
-
-    unsigned short displayLabel = env->GetCharField(keydata, gKeyDataDisplayLabelField);
-    unsigned short number = env->GetCharField(keydata, gKeyDataNumberField);
-
-    jcharArray chars = (jcharArray) env->GetObjectField(keydata, gKeyDataMetaField);
-    jchar* ch = env->GetCharArrayElements(chars, NULL);
-
-    KeyCharacterMap* kmap = reinterpret_cast<KeyCharacterMap*>(ptr);
-    rv = kmap->getKeyData(keycode, &displayLabel, &number, ch);
-
-    env->SetCharField(keydata, gKeyDataDisplayLabelField, displayLabel);
-    env->SetCharField(keydata, gKeyDataNumberField, number);
-
-    env->ReleaseCharArrayElements(chars, ch, 0);
-    return rv;
+static jint nativeGetKeyboardType(JNIEnv *env, jobject clazz, jint ptr) {
+    KeyCharacterMap* map = reinterpret_cast<KeyCharacterMap*>(ptr);
+    return map->getKeyboardType();
 }
 
-static jint
-getKeyboardType(JNIEnv *env, jobject clazz, jint ptr)
-{
-    return reinterpret_cast<KeyCharacterMap*>(ptr)->getKeyboardType();
-}
+static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jint ptr, jint deviceId,
+        jcharArray charsArray) {
+    KeyCharacterMap* map = reinterpret_cast<KeyCharacterMap*>(ptr);
 
-static jlongArray
-getEvents(JNIEnv *env, jobject clazz, jint ptr, jcharArray jchars)
-{
-    KeyCharacterMap* kmap = reinterpret_cast<KeyCharacterMap*>(ptr);
-
-    uint16_t* chars = env->GetCharArrayElements(jchars, NULL);
-    size_t len = env->GetArrayLength(jchars);
-
-    Vector<int32_t> keys;
-    Vector<uint32_t> modifiers;
-    bool success = kmap->getEvents(chars, len, &keys, &modifiers);
-
-    env->ReleaseCharArrayElements(jchars, chars, JNI_ABORT);
-
-    if (success) {
-        size_t N = keys.size();
-
-        jlongArray rv = env->NewLongArray(N);
-        uint64_t* results = (uint64_t*)env->GetLongArrayElements(rv, NULL);
-
-        for (size_t i=0; i<N; i++) {
-            uint64_t v = modifiers[i];
-            v <<= 32;
-            v |= keys[i];
-            results[i] = v;
-        }
-
-        env->ReleaseLongArrayElements(rv, (jlong*)results, 0);
-        return rv;
-    } else {
+    jchar* chars = env->GetCharArrayElements(charsArray, NULL);
+    if (!chars) {
         return NULL;
     }
+    jsize numChars = env->GetArrayLength(charsArray);
+
+    Vector<KeyEvent> events;
+    jobjectArray result = NULL;
+    if (map->getEvents(deviceId, chars, size_t(numChars), events)) {
+        result = env->NewObjectArray(jsize(events.size()), gKeyEventClassInfo.clazz, NULL);
+        if (result) {
+            for (size_t i = 0; i < events.size(); i++) {
+                jobject keyEventObj = android_view_KeyEvent_fromNative(env, &events.itemAt(i));
+                if (!keyEventObj) break; // threw OOM exception
+                env->SetObjectArrayElement(result, jsize(i), keyEventObj);
+                env->DeleteLocalRef(keyEventObj);
+            }
+        }
+    }
+
+    env->ReleaseCharArrayElements(charsArray, chars, JNI_ABORT);
+    return result;
 }
 
-// ============================================================================
+
 /*
  * JNI registration.
  */
 
 static JNINativeMethod g_methods[] = {
     /* name, signature, funcPtr */
-    { "ctor_native",             "(I)I",    (void*)ctor },
-    { "dtor_native",             "(I)V",    (void*)dtor },
-    { "get_native",              "(III)C", (void*)get },
-    { "getNumber_native",        "(II)C",   (void*)getNumber },
-    { "getMatch_native",         "(II[CI)C", (void*)getMatch },
-    { "getDisplayLabel_native",  "(II)C",   (void*)getDisplayLabel },
-    { "getKeyData_native",       "(IILandroid/view/KeyCharacterMap$KeyData;)Z",
-                                            (void*)getKeyData },
-    { "getKeyboardType_native",  "(I)I",    (void*)getKeyboardType },
-    { "getEvents_native",        "(I[C)[J", (void*)getEvents }
+    { "nativeLoad", "(I)I",
+            (void*)nativeLoad },
+    { "nativeDispose", "(I)V",
+            (void*)nativeDispose },
+    { "nativeGetCharacter", "(III)C",
+            (void*)nativeGetCharacter },
+    { "nativeGetNumber", "(II)C",
+            (void*)nativeGetNumber },
+    { "nativeGetMatch", "(II[CI)C",
+            (void*)nativeGetMatch },
+    { "nativeGetDisplayLabel", "(II)C",
+            (void*)nativeGetDisplayLabel },
+    { "nativeGetKeyboardType", "(I)I",
+            (void*)nativeGetKeyboardType },
+    { "nativeGetEvents", "(II[C)[Landroid/view/KeyEvent;",
+            (void*)nativeGetEvents },
 };
+
+#define FIND_CLASS(var, className) \
+        var = env->FindClass(className); \
+        LOG_FATAL_IF(! var, "Unable to find class " className); \
+        var = jclass(env->NewGlobalRef(var));
 
 int register_android_text_KeyCharacterMap(JNIEnv* env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("android/view/KeyCharacterMap$KeyData");
-    if (clazz == NULL) {
-        LOGE("Can't find android/view/KeyCharacterMap$KeyData");
-        return -1;
-    }
-
-    gKeyDataMetaField = env->GetFieldID(clazz, "meta", "[C");
-    gKeyDataNumberField = env->GetFieldID(clazz, "number", "C");
-    gKeyDataDisplayLabelField = env->GetFieldID(clazz, "displayLabel", "C");
+    FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
 
     return AndroidRuntime::registerNativeMethods(env,
             "android/view/KeyCharacterMap", g_methods, NELEM(g_methods));
 }
 
 }; // namespace android
-
-
-

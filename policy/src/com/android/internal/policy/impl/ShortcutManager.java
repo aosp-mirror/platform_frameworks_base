@@ -106,7 +106,7 @@ class ShortcutManager extends ContentObserver {
      * @return The intent that matches the shortcut, or null if not found.
      */
     public Intent getIntent(int keyCode, int modifiers) {
-        KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.BUILT_IN_KEYBOARD);
+        KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
         // First try the exact keycode (with modifiers)
         int shortcut = kcm.get(keyCode, modifiers);
         Intent intent = shortcut != 0 ? mShortcutIntents.get(shortcut) : null; 

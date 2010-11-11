@@ -22,9 +22,15 @@ import android.text.*;
 import android.text.method.TextKeyListener.Capitalize;
 import android.widget.TextView;
 
-public abstract class BaseKeyListener
-extends MetaKeyKeyListener
-implements KeyListener {
+/**
+ * Abstract base class for key listeners.
+ *
+ * Provides a basic foundation for entering and editing text.
+ * Subclasses should override {@link #onKeyDown} and {@link #onKeyUp} to insert
+ * characters as keys are pressed.
+ */
+public abstract class BaseKeyListener extends MetaKeyKeyListener
+        implements KeyListener {
     /* package */ static final Object OLD_SEL_START = new NoCopySpan.Concrete();
 
     /**
@@ -34,7 +40,7 @@ implements KeyListener {
      * if any;
      * ALT+DEL deletes everything on the line the cursor is on.
      *
-     * @return true if anything was deleted; false otherwise.   
+     * @return true if anything was deleted; false otherwise.
      */
     public boolean backspace(View view, Editable content, int keyCode,
                              KeyEvent event) {
@@ -72,7 +78,7 @@ implements KeyListener {
 
     private boolean altBackspace(View view, Editable content, int keyCode,
                                  KeyEvent event) {
-        if (getMetaState(content, META_ALT_ON) != 1) {
+        if (!event.isAltPressed() && getMetaState(content, META_ALT_ON) != 1) {
             return false;
         }
 

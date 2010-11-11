@@ -16,7 +16,6 @@
 //#define LOG_NDEBUG 0
 
 #include <ui/EventHub.h>
-#include <ui/KeycodeLabels.h>
 #include <hardware_legacy/power.h>
 
 #include <cutils/properties.h>
@@ -33,7 +32,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "KeyLayoutMap.h"
+#include <ui/KeyLayoutMap.h>
 
 #include <string.h>
 #include <stdint.h>
@@ -94,7 +93,7 @@ static inline const char* toString(bool value) {
 
 EventHub::device_t::device_t(int32_t _id, const char* _path, const char* name)
     : id(_id), path(_path), name(name), classes(0)
-    , keyBitmask(NULL), layoutMap(new KeyLayoutMap()), defaultKeyMap(false), fd(-1), next(NULL) {
+    , keyBitmask(NULL), layoutMap(NULL), fd(-1), next(NULL) {
 }
 
 EventHub::device_t::~device_t() {
@@ -204,8 +203,12 @@ int32_t EventHub::getKeyCodeState(int32_t deviceId, int32_t keyCode) const {
 }
 
 int32_t EventHub::getKeyCodeStateLocked(device_t* device, int32_t keyCode) const {
+    if (!device->layoutMap) {
+        return AKEY_STATE_UNKNOWN;
+    }
+
     Vector<int32_t> scanCodes;
-    device->layoutMap->findScancodes(keyCode, &scanCodes);
+    device->layoutMap->findScanCodes(keyCode, &scanCodes);
 
     uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
     memset(key_bitmask, 0, sizeof(key_bitmask));
@@ -273,7 +276,7 @@ bool EventHub::markSupportedKeyCodesLocked(device_t* device, size_t numCodes,
     for (size_t codeIndex = 0; codeIndex < numCodes; codeIndex++) {
         scanCodes.clear();
 
-        status_t err = device->layoutMap->findScancodes(keyCodes[codeIndex], &scanCodes);
+        status_t err = device->layoutMap->findScanCodes(keyCodes[codeIndex], &scanCodes);
         if (! err) {
             // check the possible scan codes identified by the layout map against the
             // map of codes actually emitted by the driver
@@ -448,14 +451,14 @@ bool EventHub::getEvent(RawEvent* outEvent)
                 }
                 outEvent->type = iev.type;
                 outEvent->scanCode = iev.code;
+                outEvent->flags = 0;
                 if (iev.type == EV_KEY) {
-                    status_t err = device->layoutMap->map(iev.code,
-                            & outEvent->keyCode, & outEvent->flags);
-                    LOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
-                        iev.code, outEvent->keyCode, outEvent->flags, err);
-                    if (err != 0) {
-                        outEvent->keyCode = AKEYCODE_UNKNOWN;
-                        outEvent->flags = 0;
+                    outEvent->keyCode = AKEYCODE_UNKNOWN;
+                    if (device->layoutMap) {
+                        status_t err = device->layoutMap->map(iev.code,
+                                &outEvent->keyCode, &outEvent->flags);
+                        LOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
+                                iev.code, outEvent->keyCode, outEvent->flags, err);
                     }
                 } else {
                     outEvent->keyCode = iev.code;
@@ -800,10 +803,11 @@ int EventHub::openDevice(const char *deviceName) {
         device->name = name;
 
         // Configure the keymap for the device.
+
         configureKeyMap(device);
 
         // Tell the world about the devname (the descriptive name)
-        if (!mHaveFirstKeyboard && !device->defaultKeyMap && strstr(name, "-keypad")) {
+        if (!mHaveFirstKeyboard && !device->keyMapInfo.isDefaultKeyMap && strstr(name, "-keypad")) {
             // the built-in keyboard has a well-known device ID of 0,
             // this device better not go away.
             mHaveFirstKeyboard = true;
@@ -819,11 +823,12 @@ int EventHub::openDevice(const char *deviceName) {
         setKeyboardProperties(device, false);
 
         // Load the keylayout.
-        if (!device->keyLayoutFilename.isEmpty()) {
-            status_t status = device->layoutMap->load(device->keyLayoutFilename);
+        if (!device->keyMapInfo.keyLayoutFile.isEmpty()) {
+            status_t status = KeyLayoutMap::load(device->keyMapInfo.keyLayoutFile,
+                    &device->layoutMap);
             if (status) {
                 LOGE("Error %d loading key layout file '%s'.", status,
-                        device->keyLayoutFilename.string());
+                        device->keyMapInfo.keyLayoutFile.string());
             }
         }
 
@@ -851,7 +856,8 @@ int EventHub::openDevice(const char *deviceName) {
 
         LOGI("New keyboard: device->id=0x%x devname='%s' keylayout='%s' keycharactermap='%s'\n",
                 device->id, name,
-                device->keyLayoutFilename.string(), device->keyCharacterMapFilename.string());
+                device->keyMapInfo.keyLayoutFile.string(),
+                device->keyMapInfo.keyCharacterMapFile.string());
     }
 
     // If the device isn't recognized as something we handle, don't monitor it.
@@ -878,106 +884,17 @@ int EventHub::openDevice(const char *deviceName) {
 }
 
 void EventHub::configureKeyMap(device_t* device) {
-    // As an initial key map name, try using the device name.
-    String8 keyMapName(device->name);
-    char* p = keyMapName.lockBuffer(keyMapName.size());
-    while (*p) {
-        if (*p == ' ') *p = '_';
-        p++;
-    }
-    keyMapName.unlockBuffer();
-
-    if (probeKeyMap(device, keyMapName, false)) return;
-
-    // TODO Consider allowing the user to configure a specific key map somehow.
-
-    // Try the Generic key map.
-    // TODO Apply some additional heuristics here to figure out what kind of
-    //      generic key map to use (US English, etc.).
-    keyMapName.setTo("Generic");
-    if (probeKeyMap(device, keyMapName, true)) return;
-
-    // Fall back on the old style catchall qwerty key map.
-    keyMapName.setTo("qwerty");
-    if (probeKeyMap(device, keyMapName, true)) return;
-
-    // Give up!
-    keyMapName.setTo("unknown");
-    selectKeyMap(device, keyMapName, true);
-    LOGE("Could not determine key map for device '%s'.", device->name.string());
-}
-
-bool EventHub::probeKeyMap(device_t* device, const String8& keyMapName, bool defaultKeyMap) {
-    const char* root = getenv("ANDROID_ROOT");
-
-    // TODO Consider also looking somewhere in a writeable partition like /data for a
-    //      custom keymap supplied by the user for this device.
-    bool haveKeyLayout = !device->keyLayoutFilename.isEmpty();
-    if (!haveKeyLayout) {
-        device->keyLayoutFilename.setTo(root);
-        device->keyLayoutFilename.append("/usr/keylayout/");
-        device->keyLayoutFilename.append(keyMapName);
-        device->keyLayoutFilename.append(".kl");
-        if (access(device->keyLayoutFilename.string(), R_OK)) {
-            device->keyLayoutFilename.clear();
-        } else {
-            haveKeyLayout = true;
-        }
-    }
-
-    bool haveKeyCharacterMap = !device->keyCharacterMapFilename.isEmpty();
-    if (!haveKeyCharacterMap) {
-        device->keyCharacterMapFilename.setTo(root);
-        device->keyCharacterMapFilename.append("/usr/keychars/");
-        device->keyCharacterMapFilename.append(keyMapName);
-        device->keyCharacterMapFilename.append(".kcm.bin");
-        if (access(device->keyCharacterMapFilename.string(), R_OK)) {
-            device->keyCharacterMapFilename.clear();
-        } else {
-            haveKeyCharacterMap = true;
-        }
-    }
-
-    if (haveKeyLayout || haveKeyCharacterMap) {
-        selectKeyMap(device, keyMapName, defaultKeyMap);
-    }
-    return haveKeyLayout && haveKeyCharacterMap;
-}
-
-void EventHub::selectKeyMap(device_t* device,
-        const String8& keyMapName, bool defaultKeyMap) {
-    if (device->keyMapName.isEmpty()) {
-        device->keyMapName.setTo(keyMapName);
-        device->defaultKeyMap = defaultKeyMap;
-    }
+    android::resolveKeyMap(device->name, device->keyMapInfo);
 }
 
 void EventHub::setKeyboardProperties(device_t* device, bool firstKeyboard) {
     int32_t id = firstKeyboard ? 0 : device->id;
-
-    char propName[100];
-    sprintf(propName, "hw.keyboards.%u.devname", id);
-    property_set(propName, device->name.string());
-    sprintf(propName, "hw.keyboards.%u.keymap", id);
-    property_set(propName, device->keyMapName.string());
-    sprintf(propName, "hw.keyboards.%u.klfile", id);
-    property_set(propName, device->keyLayoutFilename.string());
-    sprintf(propName, "hw.keyboards.%u.kcmfile", id);
-    property_set(propName, device->keyCharacterMapFilename.string());
+    android::setKeyboardProperties(id, device->name, device->keyMapInfo);
 }
 
 void EventHub::clearKeyboardProperties(device_t* device, bool firstKeyboard) {
     int32_t id = firstKeyboard ? 0 : device->id;
-
-    char propName[100];
-    sprintf(propName, "hw.keyboards.%u.devname", id);
-    property_set(propName, "");
-    sprintf(propName, "hw.keyboards.%u.keymap", id);
-    property_set(propName, "");
-    sprintf(propName, "hw.keyboards.%u.klfile", id);
-    property_set(propName, "");
-    sprintf(propName, "hw.keyboards.%u.kcmfile", id);
-    property_set(propName, "");
+    android::clearKeyboardProperties(id);
 }
 
 bool EventHub::hasKeycodeLocked(device_t* device, int keycode) const
@@ -987,7 +904,7 @@ bool EventHub::hasKeycodeLocked(device_t* device, int keycode) const
     }
     
     Vector<int32_t> scanCodes;
-    device->layoutMap->findScancodes(keycode, &scanCodes);
+    device->layoutMap->findScanCodes(keycode, &scanCodes);
     const size_t N = scanCodes.size();
     for (size_t i=0; i<N && i<=KEY_MAX; i++) {
         int32_t sc = scanCodes.itemAt(i);
@@ -1139,11 +1056,14 @@ void EventHub::dump(String8& dump) {
                 }
                 dump.appendFormat(INDENT3 "Classes: 0x%08x\n", device->classes);
                 dump.appendFormat(INDENT3 "Path: %s\n", device->path.string());
-                dump.appendFormat(INDENT3 "KeyMapName: %s\n", device->keyMapName.string());
-                dump.appendFormat(INDENT3 "KeyLayoutFilename: %s\n",
-                        device->keyLayoutFilename.string());
-                dump.appendFormat(INDENT3 "KeyCharacterMapFilename: %s\n",
-                        device->keyCharacterMapFilename.string());
+                dump.appendFormat(INDENT3 "IsDefaultKeyMap: %s\n",
+                        toString(device->keyMapInfo.isDefaultKeyMap));
+                dump.appendFormat(INDENT3 "KeyMapName: %s\n",
+                        device->keyMapInfo.keyMapName.string());
+                dump.appendFormat(INDENT3 "KeyLayoutFile: %s\n",
+                        device->keyMapInfo.keyLayoutFile.string());
+                dump.appendFormat(INDENT3 "KeyCharacterMapFile: %s\n",
+                        device->keyMapInfo.keyCharacterMapFile.string());
             }
         }
     } // release lock

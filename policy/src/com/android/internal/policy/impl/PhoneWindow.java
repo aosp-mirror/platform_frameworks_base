@@ -349,7 +349,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             // Set the proper keymap
-            KeyCharacterMap kmap = KeyCharacterMap.load(event != null ? event.getDeviceId() : 0);
+            KeyCharacterMap kmap = KeyCharacterMap.load(
+                    event != null ? event.getDeviceId() : KeyCharacterMap.VIRTUAL_KEYBOARD);
             st.qwertyMode = kmap.getKeyboardType() != KeyCharacterMap.NUMERIC;
             st.menu.setQwertyMode(st.qwertyMode);
         }

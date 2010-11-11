@@ -67,6 +67,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputQueue;
 import android.view.InputHandler;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowOrientationListener;
@@ -2126,7 +2127,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // only do it if the showing app doesn't process the key on its own.
                     long when = whenNanos / 1000000;
                     KeyEvent keyEvent = new KeyEvent(when, when, action, keyCode, 0, 0,
-                            0, scanCode, flags, InputDevice.SOURCE_KEYBOARD);
+                            KeyCharacterMap.VIRTUAL_KEYBOARD, scanCode, flags,
+                            InputDevice.SOURCE_KEYBOARD);
                     mBroadcastWakeLock.acquire();
                     mHandler.post(new PassHeadsetKey(keyEvent));
                 }

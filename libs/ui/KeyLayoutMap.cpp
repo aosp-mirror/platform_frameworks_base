@@ -1,234 +1,213 @@
+/*
+ * Copyright (C) 2008 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #define LOG_TAG "KeyLayoutMap"
 
-#include "KeyLayoutMap.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <utils/String8.h>
 #include <stdlib.h>
-#include <ui/KeycodeLabels.h>
+#include <android/keycodes.h>
+#include <ui/Keyboard.h>
+#include <ui/KeyLayoutMap.h>
 #include <utils/Log.h>
+#include <utils/Errors.h>
+#include <utils/Tokenizer.h>
+#include <utils/Timers.h>
+
+// Enables debug output for the parser.
+#define DEBUG_PARSER 0
+
+// Enables debug output for parser performance.
+#define DEBUG_PARSER_PERFORMANCE 0
+
+// Enables debug output for mapping.
+#define DEBUG_MAPPING 0
+
 
 namespace android {
 
-KeyLayoutMap::KeyLayoutMap()
-    :m_status(NO_INIT),
-     m_keys()
-{
+static const char* WHITESPACE = " \t\r";
+
+// --- KeyLayoutMap ---
+
+KeyLayoutMap::KeyLayoutMap() {
 }
 
-KeyLayoutMap::~KeyLayoutMap()
-{
+KeyLayoutMap::~KeyLayoutMap() {
 }
 
-static String8
-next_token(char const** p, int *line)
-{
-    bool begun = false;
-    const char* begin = *p;
-    const char* end = *p;
-    while (true) {
-        if (*end == '\n') {
-            (*line)++;
+status_t KeyLayoutMap::load(const String8& filename, KeyLayoutMap** outMap) {
+    *outMap = NULL;
+
+    Tokenizer* tokenizer;
+    status_t status = Tokenizer::open(filename, &tokenizer);
+    if (status) {
+        LOGE("Error %d opening key layout map file %s.", status, filename.string());
+    } else {
+        KeyLayoutMap* map = new KeyLayoutMap();
+        if (!map) {
+            LOGE("Error allocating key layout map.");
+            status = NO_MEMORY;
+        } else {
+#if DEBUG_PARSER_PERFORMANCE
+            nsecs_t startTime = systemTime(SYSTEM_TIME_MONOTONIC);
+#endif
+            Parser parser(map, tokenizer);
+            status = parser.parse();
+#if DEBUG_PARSER_PERFORMANCE
+            nsecs_t elapsedTime = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
+            LOGD("Parsed key layout map file '%s' %d lines in %0.3fms.",
+                    tokenizer->getFilename().string(), tokenizer->getLineNumber(),
+                    elapsedTime / 1000000.0);
+#endif
+            if (status) {
+                delete map;
+            } else {
+                *outMap = map;
+            }
         }
-        switch (*end)
-        {
-            case '#':
-                if (begun) {
-                    *p = end;
-                    return String8(begin, end-begin);
-                } else {
-                    do {
-                        begin++;
-                        end++;
-                    } while (*begin != '\0' && *begin != '\n');
-                }
-            case '\0':
-            case ' ':
-            case '\n':
-            case '\r':
-            case '\t':
-                if (begun || (*end == '\0')) {
-                    *p = end;
-                    return String8(begin, end-begin);
-                } else {
-                    begin++;
-                    end++;
-                    break;
-                }
-            default:
-                end++;
-                begun = true;
-        }
+        delete tokenizer;
     }
+    return status;
 }
 
-static int32_t
-token_to_value(const char *literal, const KeycodeLabel *list)
-{
-    while (list->literal) {
-        if (0 == strcmp(literal, list->literal)) {
-            return list->value;
-        }
-        list++;
-    }
-    return list->value;
-}
-
-status_t
-KeyLayoutMap::load(const char* filename)
-{
-    int fd = open(filename, O_RDONLY);
-    if (fd < 0) {
-        LOGE("error opening file=%s err=%s\n", filename, strerror(errno));
-        m_status = errno;
-        return errno;
-    }
-
-    off_t len = lseek(fd, 0, SEEK_END);
-    off_t errlen = lseek(fd, 0, SEEK_SET);
-    if (len < 0 || errlen < 0) {
-        close(fd);
-        LOGE("error seeking file=%s err=%s\n", filename, strerror(errno));
-        m_status = errno;
-        return errno;
-    }
-
-    char* buf = (char*)malloc(len+1);
-    if (read(fd, buf, len) != len) {
-        LOGE("error reading file=%s err=%s\n", filename, strerror(errno));
-        m_status = errno != 0 ? errno : ((int)NOT_ENOUGH_DATA);
-        return errno != 0 ? errno : ((int)NOT_ENOUGH_DATA);
-    }
-    errno = 0;
-    buf[len] = '\0';
-
-    int32_t scancode = -1;
-    int32_t keycode = -1;
-    uint32_t flags = 0;
-    uint32_t tmp;
-    char* end;
-    status_t err = NO_ERROR;
-    int line = 1;
-    char const* p = buf;
-    enum { BEGIN, SCANCODE, KEYCODE, FLAG } state = BEGIN;
-    while (true) {
-        String8 token = next_token(&p, &line);
-        if (*p == '\0') {
-            break;
-        }
-        switch (state)
-        {
-            case BEGIN:
-                if (token == "key") {
-                    state = SCANCODE;
-                } else {
-                    LOGE("%s:%d: expected key, got '%s'\n", filename, line,
-                            token.string());
-                    err = BAD_VALUE;
-                    goto done;
-                }
-                break;
-            case SCANCODE:
-                scancode = strtol(token.string(), &end, 0);
-                if (*end != '\0') {
-                    LOGE("%s:%d: expected scancode (a number), got '%s'\n",
-                            filename, line, token.string());
-                    goto done;
-                }
-                //LOGI("%s:%d: got scancode %d\n", filename, line, scancode );
-                state = KEYCODE;
-                break;
-            case KEYCODE:
-                keycode = token_to_value(token.string(), KEYCODES);
-                //LOGI("%s:%d: got keycode %d for %s\n", filename, line, keycode, token.string() );
-                if (keycode == 0) {
-                    LOGE("%s:%d: expected keycode, got '%s'\n",
-                            filename, line, token.string());
-                    goto done;
-                }
-                state = FLAG;
-                break;
-            case FLAG:
-                if (token == "key") {
-                    if (scancode != -1) {
-                        //LOGI("got key decl scancode=%d keycode=%d"
-                        //       " flags=0x%08x\n", scancode, keycode, flags);
-                        Key k = { keycode, flags };
-                        m_keys.add(scancode, k);
-                        state = SCANCODE;
-                        scancode = -1;
-                        keycode = -1;
-                        flags = 0;
-                        break;
-                    }
-                }
-                tmp = token_to_value(token.string(), FLAGS);
-                //LOGI("%s:%d: got flags %x for %s\n", filename, line, tmp, token.string() );
-                if (tmp == 0) {
-                    LOGE("%s:%d: expected flag, got '%s'\n",
-                            filename, line, token.string());
-                    goto done;
-                }
-                flags |= tmp;
-                break;
-        }
-    }
-    if (state == FLAG && scancode != -1 ) {
-        //LOGI("got key decl scancode=%d keycode=%d"
-        //       " flags=0x%08x\n", scancode, keycode, flags);
-        Key k = { keycode, flags };
-        m_keys.add(scancode, k);
-    }
-
-done:
-    free(buf);
-    close(fd);
-
-    m_status = err;
-    return err;
-}
-
-status_t
-KeyLayoutMap::map(int32_t scancode, int32_t *keycode, uint32_t *flags) const
-{
-    if (m_status != NO_ERROR) {
-        return m_status;
-    }
-
-    ssize_t index = m_keys.indexOfKey(scancode);
+status_t KeyLayoutMap::map(int32_t scanCode, int32_t* keyCode, uint32_t* flags) const {
+    ssize_t index = mKeys.indexOfKey(scanCode);
     if (index < 0) {
-        //LOGW("couldn't map scancode=%d\n", scancode);
+#if DEBUG_MAPPING
+        LOGD("map: scanCode=%d ~ Failed.", scanCode);
+#endif
+        *keyCode = AKEYCODE_UNKNOWN;
+        *flags = 0;
         return NAME_NOT_FOUND;
     }
 
-    const Key& k = m_keys.valueAt(index);
-
-    *keycode = k.keycode;
+    const Key& k = mKeys.valueAt(index);
+    *keyCode = k.keyCode;
     *flags = k.flags;
 
-    //LOGD("mapped scancode=%d to keycode=%d flags=0x%08x\n", scancode,
-    //        keycode, flags);
-
+#if DEBUG_MAPPING
+    LOGD("map: scanCode=%d ~ Result keyCode=%d, flags=0x%08x.", scanCode, *keyCode, *flags);
+#endif
     return NO_ERROR;
 }
 
-status_t
-KeyLayoutMap::findScancodes(int32_t keycode, Vector<int32_t>* outScancodes) const
-{
-    if (m_status != NO_ERROR) {
-        return m_status;
-    }
-    
-    const size_t N = m_keys.size();
+status_t KeyLayoutMap::findScanCodes(int32_t keyCode, Vector<int32_t>* outScanCodes) const {
+    const size_t N = mKeys.size();
     for (size_t i=0; i<N; i++) {
-        if (m_keys.valueAt(i).keycode == keycode) {
-            outScancodes->add(m_keys.keyAt(i));
+        if (mKeys.valueAt(i).keyCode == keyCode) {
+            outScanCodes->add(mKeys.keyAt(i));
         }
     }
-    
+    return NO_ERROR;
+}
+
+// --- KeyLayoutMap::Parser ---
+
+KeyLayoutMap::Parser::Parser(KeyLayoutMap* map, Tokenizer* tokenizer) :
+        mMap(map), mTokenizer(tokenizer) {
+}
+
+KeyLayoutMap::Parser::~Parser() {
+}
+
+status_t KeyLayoutMap::Parser::parse() {
+    while (!mTokenizer->isEof()) {
+#if DEBUG_PARSER
+        LOGD("Parsing %s: '%s'.", mTokenizer->getLocation().string(),
+                mTokenizer->peekRemainderOfLine().string());
+#endif
+
+        mTokenizer->skipDelimiters(WHITESPACE);
+
+        if (!mTokenizer->isEol() && mTokenizer->peekChar() != '#') {
+            String8 keywordToken = mTokenizer->nextToken(WHITESPACE);
+            if (keywordToken == "key") {
+                mTokenizer->skipDelimiters(WHITESPACE);
+                status_t status = parseKey();
+                if (status) return status;
+            } else {
+                LOGE("%s: Expected keyword, got '%s'.", mTokenizer->getLocation().string(),
+                        keywordToken.string());
+                return BAD_VALUE;
+            }
+
+            mTokenizer->skipDelimiters(WHITESPACE);
+            if (!mTokenizer->isEol()) {
+                LOGE("%s: Expected end of line, got '%s'.",
+                        mTokenizer->getLocation().string(),
+                        mTokenizer->peekRemainderOfLine().string());
+                return BAD_VALUE;
+            }
+        }
+
+        mTokenizer->nextLine();
+    }
+    return NO_ERROR;
+}
+
+status_t KeyLayoutMap::Parser::parseKey() {
+    String8 scanCodeToken = mTokenizer->nextToken(WHITESPACE);
+    char* end;
+    int32_t scanCode = int32_t(strtol(scanCodeToken.string(), &end, 0));
+    if (*end) {
+        LOGE("%s: Expected scan code number, got '%s'.", mTokenizer->getLocation().string(),
+                scanCodeToken.string());
+        return BAD_VALUE;
+    }
+    if (mMap->mKeys.indexOfKey(scanCode) >= 0) {
+        LOGE("%s: Duplicate entry for scan code '%s'.", mTokenizer->getLocation().string(),
+                scanCodeToken.string());
+        return BAD_VALUE;
+    }
+
+    mTokenizer->skipDelimiters(WHITESPACE);
+    String8 keyCodeToken = mTokenizer->nextToken(WHITESPACE);
+    int32_t keyCode = getKeyCodeByLabel(keyCodeToken.string());
+    if (!keyCode) {
+        LOGE("%s: Expected key code label, got '%s'.", mTokenizer->getLocation().string(),
+                keyCodeToken.string());
+        return BAD_VALUE;
+    }
+
+    uint32_t flags = 0;
+    for (;;) {
+        mTokenizer->skipDelimiters(WHITESPACE);
+        if (mTokenizer->isEol()) break;
+
+        String8 flagToken = mTokenizer->nextToken(WHITESPACE);
+        uint32_t flag = getKeyFlagByLabel(flagToken.string());
+        if (!flag) {
+            LOGE("%s: Expected flag label, got '%s'.", mTokenizer->getLocation().string(),
+                    flagToken.string());
+            return BAD_VALUE;
+        }
+        if (flags & flag) {
+            LOGE("%s: Duplicate flag '%s'.", mTokenizer->getLocation().string(),
+                    flagToken.string());
+            return BAD_VALUE;
+        }
+        flags |= flag;
+    }
+
+#if DEBUG_PARSER
+    LOGD("Parsed key: scanCode=%d, keyCode=%d, flags=0x%08x.", scanCode, keyCode, flags);
+#endif
+    Key key;
+    key.keyCode = keyCode;
+    key.flags = flags;
+    mMap->mKeys.add(scanCode, key);
     return NO_ERROR;
 }
 
