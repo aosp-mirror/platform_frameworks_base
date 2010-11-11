@@ -126,7 +126,7 @@ void ResourceCache::destructor(SkBitmap* resource) {
     if (ref == NULL) {
         // If we're not tracking this resource, just delete it
         if (Caches::hasInstance()) {
-            Caches::getInstance().textureCache.remove(resource);
+            Caches::getInstance().textureCache.removeDeferred(resource);
         }
         delete resource;
         return;
@@ -143,7 +143,7 @@ void ResourceCache::destructor(SkiaShader* resource) {
     if (ref == NULL) {
         // If we're not tracking this resource, just delete it
         if (Caches::hasInstance()) {
-            Caches::getInstance().gradientCache.remove(resource->getSkShader());
+            Caches::getInstance().gradientCache.removeDeferred(resource->getSkShader());
         }
         delete resource;
         return;
@@ -179,7 +179,7 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
             {
                 SkBitmap* bitmap = (SkBitmap*)resource;
                 if (Caches::hasInstance()) {
-                    Caches::getInstance().textureCache.remove(bitmap);
+                    Caches::getInstance().textureCache.removeDeferred(bitmap);
                 }
                 delete bitmap;
             }
@@ -188,7 +188,7 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
             {
                 SkiaShader* shader = (SkiaShader*)resource;
                 if (Caches::hasInstance()) {
-                    Caches::getInstance().gradientCache.remove(shader->getSkShader());
+                    Caches::getInstance().gradientCache.removeDeferred(shader->getSkShader());
                 }
                 delete shader;
             }

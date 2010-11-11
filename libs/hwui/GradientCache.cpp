@@ -54,7 +54,6 @@ GradientCache::GradientCache(uint32_t maxByteSize):
 }
 
 GradientCache::~GradientCache() {
-    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
@@ -63,17 +62,14 @@ GradientCache::~GradientCache() {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint32_t GradientCache::getSize() {
-    Mutex::Autolock _l(mLock);
     return mSize;
 }
 
 uint32_t GradientCache::getMaxSize() {
-    Mutex::Autolock _l(mLock);
     return mMaxSize;
 }
 
 void GradientCache::setMaxSize(uint32_t maxSize) {
-    Mutex::Autolock _l(mLock);
     mMaxSize = maxSize;
     while (mSize > mMaxSize) {
         mCache.removeOldest();
@@ -102,17 +98,28 @@ void GradientCache::operator()(SkShader*& shader, Texture*& texture) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* GradientCache::get(SkShader* shader) {
-    Mutex::Autolock _l(mLock);
     return mCache.get(shader);
 }
 
 void GradientCache::remove(SkShader* shader) {
-    Mutex::Autolock _l(mLock);
     mCache.remove(shader);
 }
 
-void GradientCache::clear() {
+void GradientCache::removeDeferred(SkShader* shader) {
     Mutex::Autolock _l(mLock);
+    mGarbage.push(shader);
+}
+
+void GradientCache::clearGarbage() {
+    Mutex::Autolock _l(mLock);
+    size_t count = mGarbage.size();
+    for (size_t i = 0; i < count; i++) {
+        mCache.remove(mGarbage.itemAt(i));
+    }
+    mGarbage.clear();
+}
+
+void GradientCache::clear() {
     mCache.clear();
 }
 
@@ -138,21 +145,17 @@ Texture* GradientCache::addLinearGradient(SkShader* shader, uint32_t* colors,
 
     canvas.drawRectCoords(0.0f, 0.0f, bitmap.width(), 1.0f, p);
 
-    mLock.lock();
     // Asume the cache is always big enough
     const uint32_t size = bitmap.rowBytes() * bitmap.height();
     while (mSize + size > mMaxSize) {
         mCache.removeOldest();
     }
-    mLock.unlock();
 
     Texture* texture = new Texture;
     generateTexture(&bitmap, texture);
 
-    mLock.lock();
     mSize += size;
     mCache.put(shader, texture);
-    mLock.unlock();
 
     return texture;
 }

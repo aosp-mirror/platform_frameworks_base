@@ -19,6 +19,8 @@
 
 #include <SkBitmap.h>
 
+#include <utils/Vector.h>
+
 #include "Debug.h"
 #include "Texture.h"
 #include "utils/GenerationCache.h"
@@ -64,10 +66,20 @@ public:
      */
     Texture* get(SkBitmap* bitmap);
     /**
-     * Removes the texture associated with the specified bitmap. Returns NULL
-     * if the texture cannot be found. Upon remove the texture is freed.
+     * Removes the texture associated with the specified bitmap.
+     * Upon remove the texture is freed.
      */
     void remove(SkBitmap* bitmap);
+    /**
+     * Removes the texture associated with the specified bitmap. This is meant
+     * to be called from threads that are not the EGL context thread.
+     */
+    void removeDeferred(SkBitmap* bitmap);
+    /**
+     * Process deferred removals.
+     */
+    void clearGarbage();
+
     /**
      * Clears the cache. This causes all textures to be deleted.
      */
@@ -109,10 +121,7 @@ private:
 
     bool mDebugEnabled;
 
-    /**
-     * Used to access mCache and mSize. All methods are accessed from a single
-     * thread except for remove().
-     */
+    Vector<SkBitmap*> mGarbage;
     mutable Mutex mLock;
 }; // class TextureCache
 

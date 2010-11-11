@@ -21,6 +21,8 @@
 #include <SkPaint.h>
 #include <SkPath.h>
 
+#include <utils/Vector.h>
+
 #include "Debug.h"
 #include "Texture.h"
 #include "utils/Compare.h"
@@ -146,6 +148,15 @@ public:
      * Removes an entry.
      */
     void remove(SkPath* path);
+    /**
+     * Removes the specified path. This is meant to be called from threads
+     * that are not the EGL context thread.
+     */
+    void removeDeferred(SkPath* path);
+    /**
+     * Process deferred removals.
+     */
+    void clearGarbage();
 
     /**
      * Sets the maximum size of the cache in bytes.
@@ -166,6 +177,8 @@ private:
      */
     void generateTexture(SkBitmap& bitmap, Texture* texture);
 
+    void removeTexture(PathTexture* texture);
+
     PathTexture* addTexture(const PathCacheEntry& entry, const SkPath *path, const SkPaint* paint);
 
     void init();
@@ -178,10 +191,7 @@ private:
 
     bool mDebugEnabled;
 
-    /**
-     * Used to access mCache and mSize. All methods are accessed from a single
-     * thread except for remove().
-     */
+    Vector<SkPath*> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache
 

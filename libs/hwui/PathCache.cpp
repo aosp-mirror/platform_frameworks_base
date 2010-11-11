@@ -53,7 +53,6 @@ PathCache::PathCache(uint32_t maxByteSize):
 }
 
 PathCache::~PathCache() {
-    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
@@ -72,17 +71,14 @@ void PathCache::init() {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint32_t PathCache::getSize() {
-    Mutex::Autolock _l(mLock);
     return mSize;
 }
 
 uint32_t PathCache::getMaxSize() {
-    Mutex::Autolock _l(mLock);
     return mMaxSize;
 }
 
 void PathCache::setMaxSize(uint32_t maxSize) {
-    Mutex::Autolock _l(mLock);
     mMaxSize = maxSize;
     while (mSize > mMaxSize) {
         mCache.removeOldest();
@@ -94,6 +90,14 @@ void PathCache::setMaxSize(uint32_t maxSize) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void PathCache::operator()(PathCacheEntry& path, PathTexture*& texture) {
+    removeTexture(texture);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Caching
+///////////////////////////////////////////////////////////////////////////////
+
+void PathCache::removeTexture(PathTexture* texture) {
     if (texture) {
         const uint32_t size = texture->width * texture->height;
         mSize -= size;
@@ -109,39 +113,46 @@ void PathCache::operator()(PathCacheEntry& path, PathTexture*& texture) {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Caching
-///////////////////////////////////////////////////////////////////////////////
-
 void PathCache::remove(SkPath* path) {
-    Mutex::Autolock _l(mLock);
-
     // TODO: Linear search...
     Vector<uint32_t> pathsToRemove;
     for (uint32_t i = 0; i < mCache.size(); i++) {
         if (mCache.getKeyAt(i).path == path) {
             pathsToRemove.push(i);
+            removeTexture(mCache.getValueAt(i));
         }
     }
 
+    mCache.setOnEntryRemovedListener(NULL);
     for (size_t i = 0; i < pathsToRemove.size(); i++) {
         mCache.removeAt(pathsToRemove.itemAt(i));
     }
+    mCache.setOnEntryRemovedListener(this);
+}
+
+void PathCache::removeDeferred(SkPath* path) {
+    Mutex::Autolock _l(mLock);
+    mGarbage.push(path);
+}
+
+void PathCache::clearGarbage() {
+    Mutex::Autolock _l(mLock);
+    size_t count = mGarbage.size();
+    for (size_t i = 0; i < count; i++) {
+        remove(mGarbage.itemAt(i));
+    }
+    mGarbage.clear();
 }
 
 PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
     PathCacheEntry entry(path, paint);
 
-    mLock.lock();
     PathTexture* texture = mCache.get(entry);
-    mLock.unlock();
 
     if (!texture) {
         texture = addTexture(entry, path, paint);
     } else if (path->getGenerationID() != texture->generation) {
-        mLock.lock();
         mCache.remove(entry);
-        mLock.unlock();
         texture = addTexture(entry, path, paint);
     }
 
@@ -167,11 +178,9 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
     const uint32_t size = width * height;
     // Don't even try to cache a bitmap that's bigger than the cache
     if (size < mMaxSize) {
-        mLock.lock();
         while (mSize + size > mMaxSize) {
             mCache.removeOldest();
         }
-        mLock.unlock();
     }
 
     PathTexture* texture = new PathTexture;
@@ -200,7 +209,6 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
     generateTexture(bitmap, texture);
 
     if (size < mMaxSize) {
-        mLock.lock();
         mSize += size;
         PATH_LOGD("PathCache::get: create path: name, size, mSize = %d, %d, %d",
                 texture->id, size, mSize);
@@ -208,7 +216,6 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
             LOGD("Path created, size = %d", size);
         }
         mCache.put(entry, texture);
-        mLock.unlock();
     } else {
         texture->cleanup = true;
     }
@@ -217,7 +224,6 @@ PathTexture* PathCache::addTexture(const PathCacheEntry& entry,
 }
 
 void PathCache::clear() {
-    Mutex::Autolock _l(mLock);
     mCache.clear();
 }
 
