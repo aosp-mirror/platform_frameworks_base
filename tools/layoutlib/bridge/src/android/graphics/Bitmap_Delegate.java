@@ -17,7 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
-import com.android.layoutlib.bridge.DelegateManager;
+import com.android.layoutlib.bridge.impl.DelegateManager;
 
 import android.graphics.Bitmap.Config;
 import android.os.Parcel;

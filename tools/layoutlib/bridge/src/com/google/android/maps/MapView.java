@@ -16,7 +16,7 @@
 
 package com.google.android.maps;
 
-import com.android.layoutlib.bridge.MockView;
+import com.android.layoutlib.bridge.android.MockView;
 
 import android.content.Context;
 import android.os.Bundle;
