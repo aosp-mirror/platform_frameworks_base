@@ -440,6 +440,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"允许应用程序查看本地蓝牙手机的配置，以及建立或接受与配对设备的连接。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"控制近距离通信"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"允许应用程序与近距离通信 (NFC) 标签、卡和读卡器进行通信。"</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"停用键锁"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"允许应用程序停用键锁和任何关联的密码安全设置。例如，在手机上接听电话时停用键锁，在通话结束后重新启用键锁。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"允许应用程序读取同步设置，例如是否为“联系人”启用同步。"</string>
