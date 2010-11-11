@@ -38,6 +38,7 @@ class FrameLoader {
     private String mReferrer;
     private String mContentType;
     private final String mUaprofHeader;
+    private final WebResourceResponse mInterceptResponse;
 
     private static final int URI_PROTOCOL = 0x100;
 
@@ -54,12 +55,13 @@ class FrameLoader {
     private static final String LOGTAG = "webkit";
     
     FrameLoader(LoadListener listener, WebSettings settings,
-            String method) {
+            String method, WebResourceResponse interceptResponse) {
         mListener = listener;
         mHeaders = null;
         mMethod = method;
         mCacheMode = WebSettings.LOAD_NORMAL;
         mSettings = settings;
+        mInterceptResponse = interceptResponse;
         mUaprofHeader = mListener.getContext().getResources().getString(
                 com.android.internal.R.string.config_useragentprofile_url, Build.MODEL);
     }
@@ -100,7 +102,17 @@ class FrameLoader {
     public boolean executeLoad() {
         String url = mListener.url();
 
-        if (URLUtil.isNetworkUrl(url)){
+        // Process intercepted requests first as they could be any url.
+        if (mInterceptResponse != null) {
+            if (mListener.isSynchronous()) {
+                mInterceptResponse.loader(mListener).load();
+            } else {
+                WebViewWorker.getHandler().obtainMessage(
+                        WebViewWorker.MSG_ADD_STREAMLOADER,
+                        mInterceptResponse.loader(mListener)).sendToTarget();
+            }
+            return true;
+        } else if (URLUtil.isNetworkUrl(url)){
             if (mSettings.getBlockNetworkLoads()) {
                 mListener.error(EventHandler.ERROR_BAD_URL,
                         mListener.getContext().getString(

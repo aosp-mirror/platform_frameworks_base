@@ -654,23 +654,6 @@ class BrowserFrame extends Handler {
     }
 
     /**
-     * Called by JNI.
-     * Read from an InputStream into a supplied byte[]
-     * This method catches any exceptions so they don't crash the JVM.
-     * @param inputStream InputStream to read from.
-     * @param output Bytearray that gets the output.
-     * @return the number of bytes read, or -i if then end of stream has been reached
-     */
-    private static int readFromStream(InputStream inputStream, byte[] output) {
-        try {
-            return inputStream.read(output);
-        } catch(java.io.IOException e) {
-            // If we get an exception, return end of stream
-            return -1;
-        }
-    }
-
-    /**
      * Get the InputStream for an Android resource
      * There are three different kinds of android resources:
      * - file:///android_res
@@ -859,8 +842,6 @@ class BrowserFrame extends Handler {
                 this, url, loaderHandle, synchronous, isMainFramePage,
                 mainResource, userGesture, postDataIdentifier, username, password);
 
-        mCallbackProxy.onLoadResource(url);
-
         if (LoadListener.getNativeLoaderCount() > MAX_OUTSTANDING_REQUESTS) {
             // send an error message, so that loadListener can be deleted
             // after this is returned. This is important as LoadListener's 
@@ -872,7 +853,11 @@ class BrowserFrame extends Handler {
             return loadListener;
         }
 
-        FrameLoader loader = new FrameLoader(loadListener, mSettings, method);
+        // Note that we are intentionally skipping
+        // inputStreamForAndroidResource.  This is so that FrameLoader will use
+        // the various StreamLoader classes to handle assets.
+        FrameLoader loader = new FrameLoader(loadListener, mSettings, method,
+                mCallbackProxy.shouldInterceptRequest(url));
         loader.setHeaders(headers);
         loader.setPostData(postData);
         // Set the load mode to the mode used for the current page.
@@ -887,6 +872,15 @@ class BrowserFrame extends Handler {
         checker.responseAlert("startLoadingResource succeed");
 
         return !synchronous ? loadListener : null;
+    }
+
+    // Called by jni from the chrome network stack.
+    private WebResourceResponse shouldInterceptRequest(String url) {
+        InputStream androidResource = inputStreamForAndroidResource(url);
+        if (androidResource != null) {
+            return new WebResourceResponse(null, null, androidResource);
+        }
+        return mCallbackProxy.shouldInterceptRequest(url);
     }
 
     /**

@@ -78,6 +78,26 @@ public class WebViewClient {
     }
 
     /**
+     * Notify the host application of a resource request and allow the
+     * application to return the data.  If the return value is null, the WebView
+     * will continue to load the resource as usual.  Otherwise, the return
+     * response and data will be used.  NOTE: This method is called by the
+     * network thread so clients should exercise caution when accessing private
+     * data.
+     *
+     * @param view The {@link android.webkit.WebView} that is requesting the
+     *             resource.
+     * @param url The raw url of the resource.
+     * @return A {@link android.webkit.WebResourceResponse} containing the
+     *         response information or null if the WebView should load the
+     *         resource itself.
+     */
+    public WebResourceResponse shouldInterceptRequest(WebView view,
+            String url) {
+        return null;
+    }
+
+    /**
      * Notify the host application that there have been an excessive number of
      * HTTP redirects. As the host application if it would like to continue
      * trying to load the resource. The default behavior is to send the cancel

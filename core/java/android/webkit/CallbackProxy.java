@@ -1008,13 +1008,17 @@ class CallbackProxy extends Handler {
         sendMessage(obtainMessage(UPDATE_VISITED, isReload ? 1 : 0, 0, url));
     }
 
-    public void onLoadResource(String url) {
-        // Do an unsynchronized quick check to avoid posting if no callback has
-        // been set.
+    WebResourceResponse shouldInterceptRequest(String url) {
         if (mWebViewClient == null) {
-            return;
+            return null;
         }
-        sendMessage(obtainMessage(LOAD_RESOURCE, url));
+        // Note: This method does _not_ send a message.
+        WebResourceResponse r =
+                mWebViewClient.shouldInterceptRequest(mWebView, url);
+        if (r == null) {
+            sendMessage(obtainMessage(LOAD_RESOURCE, url));
+        }
+        return r;
     }
 
     public void onUnhandledKeyEvent(KeyEvent event) {
