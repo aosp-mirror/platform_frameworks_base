@@ -345,6 +345,10 @@ int SC_divsi3(int a, int b) {
     return a / b;
 }
 
+int SC_modsi3(int a, int b) {
+    return a % b;
+}
+
 int SC_getAllocation(const void *ptr) {
     GET_TLS();
     const Allocation *alloc = sc->ptrToAllocation(ptr);
@@ -402,6 +406,7 @@ void SC_ForEach2(RsScript vs,
 
 static ScriptCState::SymbolTable_t gSyms[] = {
     { "__divsi3", (void *)&SC_divsi3, true },
+    { "__modsi3", (void *)&SC_modsi3, true },
 
     // allocation
     { "_Z19rsAllocationGetDimX13rs_allocation", (void *)&SC_allocGetDimX, true },
@@ -528,4 +533,3 @@ const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbol(const char *sym) 
     }
     return NULL;
 }
-
