@@ -53,5 +53,7 @@ LOCAL_CFLAGS := \
 
 LOCAL_MODULE := libstagefright_mp3dec
 
+LOCAL_ARM_MODE := arm
+
 include $(BUILD_STATIC_LIBRARY)
 
