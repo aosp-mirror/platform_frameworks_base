@@ -293,6 +293,8 @@ private:
             uint32_t flags,
             Vector<String8> *matchingCodecs);
 
+    void restorePatchedDataPointer(BufferInfo *info);
+
     OMXCodec(const OMXCodec &);
     OMXCodec &operator=(const OMXCodec &);
 };
