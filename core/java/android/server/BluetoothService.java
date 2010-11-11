@@ -2508,44 +2508,42 @@ public class BluetoothService extends IBluetooth.Stub {
         // dump
         pw.println("\n--Headset Service--");
         if (mBluetoothHeadset != null) {
-           List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
-           if (deviceList.size() == 0) {
-              pw.println("\n--No headsets connected--");
-           }
-           BluetoothDevice device = deviceList.get(0);
+            List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
+            if (deviceList.size() == 0) {
+                pw.println("\n--No headsets connected--");
+            } else {
+                BluetoothDevice device = deviceList.get(0);
+                pw.println("\ngetConnectedDevices[0] = " + device);
 
-            switch (mBluetoothHeadset.getConnectionState(device)) {
-                case BluetoothHeadset.STATE_DISCONNECTED:
-                    pw.println("getConnectionState() = STATE_DISCONNECTED");
-                    break;
-                case BluetoothHeadset.STATE_CONNECTING:
-                    pw.println("getConnectionState() = STATE_CONNECTING");
-                    break;
-                case BluetoothHeadset.STATE_CONNECTED:
-                    pw.println("getConnectionState() = STATE_CONNECTED");
-                    break;
-                case BluetoothHeadset.STATE_DISCONNECTING:
-                    pw.println("getConnectionState() = STATE_DISCONNECTING");
-                    break;
-                case BluetoothHeadset.STATE_AUDIO_CONNECTED:
-                    pw.println("getConnectionState() = STATE_AUDIO_CONNECTED");
-                    break;
+                switch (mBluetoothHeadset.getConnectionState(device)) {
+                    case BluetoothHeadset.STATE_CONNECTING:
+                        pw.println("getConnectionState() = STATE_CONNECTING");
+                        break;
+                    case BluetoothHeadset.STATE_CONNECTED:
+                        pw.println("getConnectionState() = STATE_CONNECTED");
+                        break;
+                    case BluetoothHeadset.STATE_DISCONNECTING:
+                        pw.println("getConnectionState() = STATE_DISCONNECTING");
+                        break;
+                    case BluetoothHeadset.STATE_AUDIO_CONNECTED:
+                        pw.println("getConnectionState() = STATE_AUDIO_CONNECTED");
+                        break;
+                }
+                pw.println("getBatteryUsageHint() = " +
+                             mBluetoothHeadset.getBatteryUsageHint(device));
             }
 
             deviceList.clear();
             deviceList = mBluetoothHeadset.getDevicesMatchingConnectionStates(new int[] {
                      BluetoothProfile.STATE_CONNECTED, BluetoothProfile.STATE_DISCONNECTED});
             pw.println("\n--Connected and Disconnected Headsets");
-            for (BluetoothDevice dev: deviceList) {
+            for (BluetoothDevice device: deviceList) {
                 pw.println(device);
                 if (mBluetoothHeadset.isAudioConnected(device)) {
                     pw.println("SCO audio connected to device:" + device);
                 }
             }
 
-            pw.println("\ngetCurrentHeadset() = " + device);
-            pw.println("getBatteryUsageHint() = " +
-                       mBluetoothHeadset.getBatteryUsageHint(device));
             mAdapter.closeProfileProxy(BluetoothProfile.HEADSET, mBluetoothHeadset);
         }
 
