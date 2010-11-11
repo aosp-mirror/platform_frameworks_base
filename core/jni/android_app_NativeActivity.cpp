@@ -580,6 +580,7 @@ static int mainWorkCallback(int fd, int events, void* data) {
                 code->env->CallVoidMethod(code->clazz,
                         gNativeActivityClassInfo.dispatchUnhandledKeyEvent, inputEventObj);
                 checkAndClearExceptionFromCallback(code->env, "dispatchUnhandledKeyEvent");
+                code->env->DeleteLocalRef(inputEventObj);
                 code->nativeInputQueue->finishEvent(keyEvent, true);
             }
             int seq;
@@ -589,6 +590,7 @@ static int mainWorkCallback(int fd, int events, void* data) {
                 code->env->CallVoidMethod(code->clazz,
                         gNativeActivityClassInfo.preDispatchKeyEvent, inputEventObj, seq);
                 checkAndClearExceptionFromCallback(code->env, "preDispatchKeyEvent");
+                code->env->DeleteLocalRef(inputEventObj);
             }
         } break;
         case CMD_FINISH: {
