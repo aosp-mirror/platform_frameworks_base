@@ -488,7 +488,10 @@ public abstract class Drawable {
      */
     public boolean setVisible(boolean visible, boolean restart) {
         boolean changed = mVisible != visible;
-        mVisible = visible;
+        if (changed) {
+            mVisible = visible;
+            invalidateSelf();
+        }
         return changed;
     }
 

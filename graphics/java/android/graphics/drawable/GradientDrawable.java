@@ -180,6 +180,7 @@ public class GradientDrawable extends Drawable {
     public void setCornerRadii(float[] radii) {
         mGradientState.setCornerRadii(radii);
         mPathIsDirty = true;
+        invalidateSelf();
     }
     
     /**
@@ -189,6 +190,7 @@ public class GradientDrawable extends Drawable {
     public void setCornerRadius(float radius) {
         mGradientState.setCornerRadius(radius);
         mPathIsDirty = true;
+        invalidateSelf();
     }
     
     /**
@@ -214,34 +216,41 @@ public class GradientDrawable extends Drawable {
             e = new DashPathEffect(new float[] { dashWidth, dashGap }, 0);
         }
         mStrokePaint.setPathEffect(e);
+        invalidateSelf();
     }
     
     public void setSize(int width, int height) {
         mGradientState.setSize(width, height);
         mPathIsDirty = true;
+        invalidateSelf();
     }
     
     public void setShape(int shape) {
         mRingPath = null;
         mPathIsDirty = true;
         mGradientState.setShape(shape);
+        invalidateSelf();
     }
 
     public void setGradientType(int gradient) {
         mGradientState.setGradientType(gradient);
         mRectIsDirty = true;
+        invalidateSelf();
     }
 
     public void setGradientCenter(float x, float y) {
         mGradientState.setGradientCenter(x, y);
+        invalidateSelf();
     }
 
     public void setGradientRadius(float gradientRadius) {
         mGradientState.setGradientRadius(gradientRadius);
+        invalidateSelf();
     }
 
     public void setUseLevel(boolean useLevel) {
         mGradientState.mUseLevel = useLevel;
+        invalidateSelf();
     }
     
     private int modulateAlpha(int alpha) {
@@ -433,6 +442,7 @@ public class GradientDrawable extends Drawable {
     public void setColor(int argb) {
         mGradientState.setSolidColor(argb);
         mFillPaint.setColor(argb);
+        invalidateSelf();
     }
 
     @Override
@@ -443,17 +453,26 @@ public class GradientDrawable extends Drawable {
     
     @Override
     public void setAlpha(int alpha) {
-        mAlpha = alpha;
+        if (alpha != mAlpha) {
+            mAlpha = alpha;
+            invalidateSelf();
+        }
     }
 
     @Override
     public void setDither(boolean dither) {
-        mDither = dither;
+        if (dither != mDither) {
+            mDither = dither;
+            invalidateSelf();
+        }
     }
 
     @Override
     public void setColorFilter(ColorFilter cf) {
-        mColorFilter = cf;
+        if (cf != mColorFilter) {
+            mColorFilter = cf;
+            invalidateSelf();
+        }
     }
 
     @Override
