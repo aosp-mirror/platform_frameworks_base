@@ -56,7 +56,6 @@
 #include "MetadataRetrieverClient.h"
 
 #include "MidiFile.h"
-#include <media/PVPlayer.h>
 #include "TestPlayerStub.h"
 #include "StagefrightPlayer.h"
 
@@ -196,11 +195,6 @@ extmap FILE_EXTS [] =  {
         {".rtttl", SONIVOX_PLAYER},
         {".rtx", SONIVOX_PLAYER},
         {".ota", SONIVOX_PLAYER},
-#ifndef NO_OPENCORE
-        {".wma", PV_PLAYER},
-        {".wmv", PV_PLAYER},
-        {".asf", PV_PLAYER},
-#endif
 };
 
 // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
@@ -691,14 +685,6 @@ player_type getPlayerType(int fd, int64_t offset, int64_t length)
     if (ident == 0x5367674f) // 'OggS'
         return STAGEFRIGHT_PLAYER;
 
-#ifndef NO_OPENCORE
-    if (ident == 0x75b22630) {
-        // The magic number for .asf files, i.e. wmv and wma content.
-        // These are not currently supported through stagefright.
-        return PV_PLAYER;
-    }
-#endif
-
     // Some kind of MIDI?
     EAS_DATA_HANDLE easdata;
     if (EAS_Init(&easdata) == EAS_SUCCESS) {
@@ -737,16 +723,6 @@ player_type getPlayerType(const char* url)
         }
     }
 
-    if (!strncasecmp(url, "rtsp://", 7)) {
-        char value[PROPERTY_VALUE_MAX];
-        if (property_get("media.stagefright.enable-rtsp", value, NULL)
-            && (strcmp(value, "1") && strcasecmp(value, "true"))) {
-            // For now, we're going to use PV for rtsp-based playback
-            // by default until we can clear up a few more issues.
-            return PV_PLAYER;
-        }
-    }
-
     return getDefaultPlayerType();
 }
 
@@ -755,12 +731,6 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
 {
     sp<MediaPlayerBase> p;
     switch (playerType) {
-#ifndef NO_OPENCORE
-        case PV_PLAYER:
-            LOGV(" create PVPlayer");
-            p = new PVPlayer();
-            break;
-#endif
         case SONIVOX_PLAYER:
             LOGV(" create MidiFile");
             p = new MidiFile();
@@ -773,6 +743,9 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
             LOGV("Create Test Player stub");
             p = new TestPlayerStub();
             break;
+        default:
+            LOGE("Unknown player type: %d", playerType);
+            return NULL;
     }
     if (p != NULL) {
         if (p->initCheck() == NO_ERROR) {

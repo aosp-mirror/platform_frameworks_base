@@ -35,7 +35,6 @@
 #include <binder/IServiceManager.h>
 #include <media/MediaMetadataRetrieverInterface.h>
 #include <media/MediaPlayerInterface.h>
-#include <media/PVMetadataRetriever.h>
 #include <private/media/VideoFrame.h>
 #include "MidiMetadataRetriever.h"
 #include "MetadataRetrieverClient.h"
@@ -107,12 +106,6 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
             p = new StagefrightMetadataRetriever;
             break;
         }
-#ifndef NO_OPENCORE
-        case PV_PLAYER:
-            LOGV("create pv metadata retriever");
-            p = new PVMetadataRetriever();
-            break;
-#endif
         case SONIVOX_PLAYER:
             LOGV("create midi metadata retriever");
             p = new MidiMetadataRetriever();
