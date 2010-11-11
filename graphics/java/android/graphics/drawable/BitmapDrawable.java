@@ -174,11 +174,14 @@ public class BitmapDrawable extends Drawable {
     }
     
     private void setBitmap(Bitmap bitmap) {
-        mBitmap = bitmap;
-        if (bitmap != null) {
-            computeBitmapSize();
-        } else {
-            mBitmapWidth = mBitmapHeight = -1;
+        if (bitmap != mBitmap) {
+            mBitmap = bitmap;
+            if (bitmap != null) {
+                computeBitmapSize();
+            } else {
+                mBitmapWidth = mBitmapHeight = -1;
+            }
+            invalidateSelf();
         }
     }
 
@@ -205,10 +208,7 @@ public class BitmapDrawable extends Drawable {
      * @see android.graphics.Bitmap#getDensity()
      */
     public void setTargetDensity(DisplayMetrics metrics) {
-        mTargetDensity = metrics.densityDpi;
-        if (mBitmap != null) {
-            computeBitmapSize();
-        }
+        setTargetDensity(metrics.densityDpi);
     }
 
     /**
@@ -220,9 +220,12 @@ public class BitmapDrawable extends Drawable {
      * @see android.graphics.Bitmap#getDensity()
      */
     public void setTargetDensity(int density) {
-        mTargetDensity = density == 0 ? DisplayMetrics.DENSITY_DEFAULT : density;
-        if (mBitmap != null) {
-            computeBitmapSize();
+        if (mTargetDensity != density) {
+            mTargetDensity = density == 0 ? DisplayMetrics.DENSITY_DEFAULT : density;
+            if (mBitmap != null) {
+                computeBitmapSize();
+            }
+            invalidateSelf();
         }
     }
 
@@ -239,22 +242,28 @@ public class BitmapDrawable extends Drawable {
      * @param gravity the gravity
      */
     public void setGravity(int gravity) {
-        mBitmapState.mGravity = gravity;
-        mApplyGravity = true;
+        if (mBitmapState.mGravity != gravity) {
+            mBitmapState.mGravity = gravity;
+            mApplyGravity = true;
+            invalidateSelf();
+        }
     }
 
     public void setAntiAlias(boolean aa) {
         mBitmapState.mPaint.setAntiAlias(aa);
+        invalidateSelf();
     }
     
     @Override
     public void setFilterBitmap(boolean filter) {
         mBitmapState.mPaint.setFilterBitmap(filter);
+        invalidateSelf();
     }
 
     @Override
     public void setDither(boolean dither) {
         mBitmapState.mPaint.setDither(dither);
+        invalidateSelf();
     }
 
     public Shader.TileMode getTileModeX() {
@@ -280,6 +289,7 @@ public class BitmapDrawable extends Drawable {
             state.mTileModeX = xmode;
             state.mTileModeY = ymode;
             mRebuildShader = true;
+            invalidateSelf();
         }
     }
 
@@ -336,11 +346,13 @@ public class BitmapDrawable extends Drawable {
     @Override
     public void setAlpha(int alpha) {
         mBitmapState.mPaint.setAlpha(alpha);
+        invalidateSelf();
     }
 
     @Override
     public void setColorFilter(ColorFilter cf) {
         mBitmapState.mPaint.setColorFilter(cf);
+        invalidateSelf();
     }
 
     /**

@@ -87,7 +87,10 @@ public class ColorDrawable extends Drawable {
      * @param color The color to draw.
      */
     public void setColor(int color) {
-        mState.mBaseColor = mState.mUseColor = color;
+        if (mState.mBaseColor != color || mState.mUseColor != color) {
+            invalidateSelf();
+            mState.mBaseColor = mState.mUseColor = color;
+        }
     }
 
     /**
@@ -109,6 +112,7 @@ public class ColorDrawable extends Drawable {
         int baseAlpha = mState.mBaseColor >>> 24;
         int useAlpha = baseAlpha * alpha >> 8;
         mState.mUseColor = (mState.mBaseColor << 8 >>> 8) | (useAlpha << 24);
+        invalidateSelf();
     }
 
     /**

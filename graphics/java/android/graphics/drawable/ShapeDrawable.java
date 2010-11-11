@@ -129,6 +129,7 @@ public class ShapeDrawable extends Drawable {
             }
             mShapeState.mPadding.set(left, top, right, bottom);
         }
+        invalidateSelf();
     }
     
     /**
@@ -144,6 +145,7 @@ public class ShapeDrawable extends Drawable {
             }
             mShapeState.mPadding.set(padding);
         }
+        invalidateSelf();
     }
     
     /**
@@ -153,6 +155,7 @@ public class ShapeDrawable extends Drawable {
      */
     public void setIntrinsicWidth(int width) {
         mShapeState.mIntrinsicWidth = width;
+        invalidateSelf();
     }
     
     /**
@@ -162,6 +165,7 @@ public class ShapeDrawable extends Drawable {
      */
     public void setIntrinsicHeight(int height) {
         mShapeState.mIntrinsicHeight = height;
+        invalidateSelf();
     }
     
     @Override
@@ -236,11 +240,13 @@ public class ShapeDrawable extends Drawable {
      */
     @Override public void setAlpha(int alpha) {
         mShapeState.mAlpha = alpha;
+        invalidateSelf();
     }
     
     @Override
     public void setColorFilter(ColorFilter cf) {
         mShapeState.mPaint.setColorFilter(cf);
+        invalidateSelf();
     }
     
     @Override
@@ -264,6 +270,7 @@ public class ShapeDrawable extends Drawable {
     @Override
     public void setDither(boolean dither) {
         mShapeState.mPaint.setDither(dither);
+        invalidateSelf();
     }
 
     @Override
@@ -344,6 +351,7 @@ public class ShapeDrawable extends Drawable {
                 mShapeState.mPaint.setShader(mShapeState.mShaderFactory.resize(w, h));
             }
         }
+        invalidateSelf();
     }
     
     @Override
