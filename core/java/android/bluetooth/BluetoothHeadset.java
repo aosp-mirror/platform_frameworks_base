@@ -184,29 +184,29 @@ public final class BluetoothHeadset implements BluetoothProfile {
             "android.bluetooth.headset.intent.category.companyid";
 
     /**
-     * Headset state when SCO audio is connected
+     * Headset state when SCO audio is not connected
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
      */
-    public static final int STATE_AUDIO_CONNECTED = 10;
+    public static final int STATE_AUDIO_DISCONNECTED = 10;
 
     /**
      * Headset state when SCO audio is connecting
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
-     * @hide
      */
-    public static final int STATE_AUDIO_CONNECTING = 12;
+    public static final int STATE_AUDIO_CONNECTING = 11;
 
     /**
-     * Headset state when SCO audio is not connected
+     * Headset state when SCO audio is connected
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
      */
-    public static final int STATE_AUDIO_DISCONNECTED = 11;
+    public static final int STATE_AUDIO_CONNECTED = 12;
+
 
     private Context mContext;
     private ServiceListener mServiceListener;
@@ -377,11 +377,15 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * audio connection.
      *
      * <p> Users can listen to {@link #ACTION_AUDIO_STATE_CHANGED}.
-     * {@link #EXTRA_STATE} will be set to {@link #STATE_AUDIO_CONNECTED}
-     * when the audio connection is established,
-     * and to {@link #STATE_AUDIO_DISCONNECTED} in case of failure.
+     * If this function returns true, this intent will be broadcasted with
+     * {@link #EXTRA_STATE} set to {@link #STATE_AUDIO_CONNECTING}.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p> {@link #EXTRA_STATE} will transition from
+     * {@link #STATE_AUDIO_CONNECTING} to {@link #STATE_AUDIO_CONNECTED} when
+     * audio connection is established and to {@link #STATE_AUDIO_DISCONNECTED}
+     * in case of failure to establish the audio connection.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Bluetooth headset
      * @return false if there is no headset connected of if the
