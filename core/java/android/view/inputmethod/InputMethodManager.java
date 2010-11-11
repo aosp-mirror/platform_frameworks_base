@@ -1432,6 +1432,17 @@ public final class InputMethodManager {
         }
     }
 
+    public boolean switchToLastInputMethod(IBinder imeToken) {
+        synchronized (mH) {
+            try {
+                return mService.switchToLastInputMethod(imeToken);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return false;
+            }
+        }
+    }
+
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method client state for " + this + ":");
