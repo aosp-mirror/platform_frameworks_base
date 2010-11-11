@@ -39,4 +39,17 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#FFFFFFFF</item>
     </style>
+
+    <style name="Animation" />
+
+    <style name="Animation.ShirtPocketPanel">
+        <item name="android:windowEnterAnimation">@*android:anim/grow_fade_in_from_bottom</item>
+        <item name="android:windowExitAnimation">@*android:anim/shrink_fade_out_from_bottom</item>
+    </style>
+
+    <style name="Animation.RecentPanel">
+        <item name="android:windowEnterAnimation">@*android:anim/grow_fade_in_from_bottom</item>
+        <item name="android:windowExitAnimation">@*android:anim/shrink_fade_out_from_bottom</item>
+    </style>
+
 </resources>

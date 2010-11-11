@@ -95,7 +95,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:scaleType="centerCrop"
-                android:src="@drawable/sysbar_battery"
                 />
             <TextView android:id="@+id/battery_info"
                 style="@style/TextAppearance.StatusBar.SystemPanel"
@@ -106,7 +105,7 @@
                 />
         </RelativeLayout>
 
-        <com.android.systemui.statusbar.Clock
+        <com.android.systemui.statusbar.policy.Clock
             style="@style/TextAppearance.StatusBar.SystemPanel"
             android:id="@+id/clock"
             android:layout_width="wrap_content"
@@ -130,7 +129,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:scaleType="centerCrop"
-                android:src="@drawable/sysbar_signal"
                 />
 
             <TextView android:id="@+id/signal_info"
@@ -200,7 +198,7 @@
             >
             <!-- TODO: alarm -->
             <!-- TODO: sync -->
-            <com.android.systemui.statusbar.DateView
+            <com.android.systemui.statusbar.policy.DateView
                 android:id="@+id/date"
                 style="@style/TextAppearance.StatusBar.SystemPanel"
                 android:layout_width="wrap_content"

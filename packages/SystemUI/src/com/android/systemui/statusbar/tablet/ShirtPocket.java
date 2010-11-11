@@ -206,7 +206,7 @@ public class ShirtPocket extends FrameLayout {
 //        lp.x = pos[1];
 //        lp.y = 0;
         lp.setTitle("ShirtPocket");
-        lp.windowAnimations = com.android.internal.R.style.Animation_SlidingCard;
+        lp.windowAnimations = R.style.Animation_ShirtPocketPanel;
 
         WindowManagerImpl.getDefault().addView(mWindow, lp);
 

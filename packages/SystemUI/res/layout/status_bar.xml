@@ -19,7 +19,7 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<com.android.systemui.statusbar.StatusBarView
+<com.android.systemui.statusbar.phone.PhoneStatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:background="@drawable/status_bar_background"
@@ -33,7 +33,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
             
-        <com.android.systemui.statusbar.IconMerger android:id="@+id/notificationIcons"
+        <com.android.systemui.statusbar.phone.IconMerger android:id="@+id/notificationIcons"
             android:layout_width="0dip"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -50,7 +50,7 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"/>    
 
-        <com.android.systemui.statusbar.Clock
+        <com.android.systemui.statusbar.policy.Clock
             android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -82,7 +82,7 @@
                 android:layout_height="25dip"
                 />
         </ImageSwitcher>
-        <com.android.systemui.statusbar.TickerView android:id="@+id/tickerText"
+        <com.android.systemui.statusbar.phone.TickerView android:id="@+id/tickerText"
             android:layout_width="0dip"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -100,10 +100,10 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 />
-        </com.android.systemui.statusbar.TickerView>
+        </com.android.systemui.statusbar.phone.TickerView>
     </LinearLayout>
 
-    <com.android.systemui.statusbar.DateView android:id="@+id/date"
+    <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
         android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -113,4 +113,4 @@
         android:paddingRight="6px"
         android:background="@drawable/status_bar_background"
         />
-</com.android.systemui.statusbar.StatusBarView>
+</com.android.systemui.statusbar.phone.PhoneStatusBarView>
