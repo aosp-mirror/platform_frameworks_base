@@ -157,20 +157,6 @@ public final class Bridge extends LayoutBridge {
             });
         }
 
-        // Override View.isInEditMode to return true.
-        //
-        // This allows custom views that are drawn in the Graphical Layout Editor to adapt their
-        // rendering for preview. Most important this let custom views know that they can't expect
-        // the rest of their activities to be alive.
-        OverrideMethod.setMethodListener("android.view.View#isInEditMode()Z",
-            new MethodAdapter() {
-                @Override
-                public int onInvokeI(String signature, boolean isNative, Object caller) {
-                    return 1;
-                }
-            }
-        );
-
         // load the fonts.
         FontLoader fontLoader = FontLoader.create(fontOsLocation);
         if (fontLoader != null) {

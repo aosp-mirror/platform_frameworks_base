@@ -43,10 +43,8 @@ import java.util.Map;
  */
 public final class BridgeTypedArray extends TypedArray {
 
-    @SuppressWarnings("hiding")
     private BridgeResources mResources;
     private BridgeContext mContext;
-    @SuppressWarnings("hiding")
     private IResourceValue[] mData;
     private String[] mNames;
     private final boolean mPlatformFile;

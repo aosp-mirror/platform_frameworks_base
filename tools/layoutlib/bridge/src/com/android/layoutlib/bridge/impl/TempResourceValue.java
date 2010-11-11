@@ -16,14 +16,14 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import com.android.layoutlib.api.ILayoutBridge;
 import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.api.LayoutBridge;
 
 /**
  * Basic implementation of IResourceValue for when it is needed to dynamically make a new
  * {@link IResourceValue} object.
  *
- * Most of the time, implementations of IResourceValue come through the {@link ILayoutBridge}
+ * Most of the time, implementations of IResourceValue come through the {@link LayoutBridge}
  * API.
  */
 public class TempResourceValue implements IResourceValue {

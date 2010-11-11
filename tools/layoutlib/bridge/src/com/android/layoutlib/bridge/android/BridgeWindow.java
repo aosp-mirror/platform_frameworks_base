@@ -49,7 +49,8 @@ public final class BridgeWindow implements IWindow {
         // pass for now.
     }
 
-    public void dispatchTrackball(MotionEvent arg0, long arg1, boolean arg2) throws RemoteException {
+    public void dispatchTrackball(MotionEvent arg0, long arg1, boolean arg2)
+    throws RemoteException {
         // pass for now.
     }
 
