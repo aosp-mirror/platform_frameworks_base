@@ -30,12 +30,22 @@ import android.view.SurfaceView;
 /**
  * @hide
  *
+ * The Graphics derivitive of RenderScript.  Extends the basic context to add a
+ * root script which is the display window for graphical output.  When the
+ * system needs to update the display the currently bound root script will be
+ * called.  This script is expected to issue the rendering commands to repaint
+ * the screen.
  **/
 public class RenderScriptGL extends RenderScript {
     private Surface mSurface;
     int mWidth;
     int mHeight;
 
+    /**
+     * Class which is used to describe a pixel format for a graphical buffer.
+     * This is used to describe the intended format of the display surface.
+     *
+     */
     public static class SurfaceConfig {
         int mDepthMin       = 0;
         int mDepthPref      = 0;
