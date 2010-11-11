@@ -176,6 +176,8 @@ private:
     uint32_t mMaxSize;
     GLuint mMaxTextureSize;
 
+    bool mDebugEnabled;
+
     /**
      * Used to access mCache and mSize. All methods are accessed from a single
      * thread except for remove().

@@ -18,11 +18,26 @@
 #define ANDROID_HWUI_PROPERTIES_H
 
 #include <cutils/properties.h>
+#include <stdlib.h>
 
 /**
  * This file contains the list of system properties used to configure
  * the OpenGLRenderer.
  */
+
+/**
+ * Debug level for app developers.
+ */
+#define PROPERTY_DEBUG "hwui.debug_level"
+
+/**
+ * Debug levels. Debug levels are used as flags.
+ */
+enum DebugLevel {
+    kDebugDisabled = 0,
+    kDebugMemory = 1,
+    kDebugCaches = 2
+};
 
 // These properties are defined in mega-bytes
 #define PROPERTY_TEXTURE_CACHE_SIZE "ro.hwui.texture_cache_size"
@@ -55,5 +70,13 @@
 #define DEFAULT_TEXT_GAMMA 1.4f
 #define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
 #define DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD 192
+
+static DebugLevel readDebugLevel() {
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_DEBUG, property, NULL) > 0) {
+        return (DebugLevel) atoi(property);
+    }
+    return kDebugDisabled;
+}
 
 #endif // ANDROID_HWUI_PROPERTIES_H

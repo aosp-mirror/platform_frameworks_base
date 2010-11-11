@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "Caches.h"
+#include "Properties.h"
 
 namespace android {
 
@@ -49,6 +50,9 @@ Caches::Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
 
     mCurrentBuffer = meshBuffer;
     mRegionMesh = NULL;
+
+    mDebugLevel = readDebugLevel();
+    LOGD("Enabling debug mode %d", mDebugLevel);
 }
 
 Caches::~Caches() {

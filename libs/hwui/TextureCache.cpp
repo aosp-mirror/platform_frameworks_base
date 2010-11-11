@@ -62,6 +62,8 @@ void TextureCache::init() {
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
     LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
+
+    mDebugEnabled = readDebugLevel() & kDebugCaches;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,6 +98,9 @@ void TextureCache::operator()(SkBitmap*& bitmap, Texture*& texture) {
         mSize -= texture->bitmapSize;
         TEXTURE_LOGD("TextureCache::callback: name, removed size, mSize = %d, %d, %d",
                 texture->id, texture->bitmapSize, mSize);
+        if (mDebugEnabled) {
+            LOGD("Texture deleted, size = %d", texture->bitmapSize);
+        }
         glDeleteTextures(1, &texture->id);
         delete texture;
     }
@@ -135,6 +140,9 @@ Texture* TextureCache::get(SkBitmap* bitmap) {
             mSize += size;
             TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
                      bitmap, texture->id, size, mSize);
+            if (mDebugEnabled) {
+                LOGD("Texture created, size = %d", size);
+            }
             mCache.put(bitmap, texture);
             mLock.unlock();
         } else {
