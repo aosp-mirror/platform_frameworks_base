@@ -153,7 +153,8 @@ public class TabletStatusBarService extends StatusBarService {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
         lp.setTitle("NotificationPanel");
@@ -188,7 +189,8 @@ public class TabletStatusBarService extends StatusBarService {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
         lp.setTitle("NotificationPeekWindow");
@@ -208,7 +210,8 @@ public class TabletStatusBarService extends StatusBarService {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
         lp.setTitle("SystemPanel");
@@ -232,7 +235,8 @@ public class TabletStatusBarService extends StatusBarService {
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                     PixelFormat.TRANSLUCENT);
             lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
             lp.setTitle("RecentsPanel");

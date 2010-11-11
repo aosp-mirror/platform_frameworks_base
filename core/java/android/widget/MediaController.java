@@ -298,7 +298,8 @@ public class MediaController extends FrameLayout {
             p.y = anchorpos[1] + mAnchor.getHeight() - p.height;
             p.format = PixelFormat.TRANSLUCENT;
             p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
-            p.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+            p.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
             p.token = null;
             p.windowAnimations = 0; // android.R.style.DropDownAnimationDown;
             mWindowManager.addView(mDecor, p);

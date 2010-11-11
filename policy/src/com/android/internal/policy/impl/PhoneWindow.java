@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY;
+import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
@@ -497,7 +498,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 WRAP_CONTENT, WRAP_CONTENT,
                 st.x, st.y, WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG,
                 WindowManager.LayoutParams.FLAG_DITHER
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 st.decorView.mDefaultOpacity);
 
         lp.gravity = st.gravity;
@@ -2162,6 +2164,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowShowWallpaper, false)) {
             setFlags(FLAG_SHOW_WALLPAPER, FLAG_SHOW_WALLPAPER&(~getForcedWindowFlags()));
+        }
+
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowEnableSplitTouch,
+                getContext().getApplicationInfo().targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.HONEYCOMB)) {
+            setFlags(FLAG_SPLIT_TOUCH, FLAG_SPLIT_TOUCH&(~getForcedWindowFlags()));
         }
 
         if (getContext().getApplicationInfo().targetSdkVersion

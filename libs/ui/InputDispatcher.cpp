@@ -157,6 +157,10 @@ bool InputWindow::isTrustedOverlay() const {
             || layoutParamsType == TYPE_SECURE_SYSTEM_OVERLAY;
 }
 
+bool InputWindow::supportsSplitTouch() const {
+    return layoutParamsFlags & InputWindow::FLAG_SPLIT_TOUCH;
+}
+
 
 // --- InputDispatcher ---
 
@@ -1110,8 +1114,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         }
 
         // Figure out whether splitting will be allowed for this window.
-        if (newTouchedWindow
-                && (newTouchedWindow->layoutParamsFlags & InputWindow::FLAG_SPLIT_TOUCH)) {
+        if (newTouchedWindow && newTouchedWindow->supportsSplitTouch()) {
             // New window supports splitting.
             isSplit = true;
         } else if (isSplit) {
@@ -2648,13 +2651,8 @@ bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,
 
                 mTouchState.windows.removeAt(i);
 
-                int32_t newTargetFlags = 0;
-                if (oldTargetFlags & InputTarget::FLAG_FOREGROUND) {
-                    newTargetFlags |= InputTarget::FLAG_FOREGROUND;
-                    if (toWindow->layoutParamsFlags & InputWindow::FLAG_SPLIT_TOUCH) {
-                        newTargetFlags |= InputTarget::FLAG_SPLIT;
-                    }
-                }
+                int32_t newTargetFlags = oldTargetFlags
+                        & (InputTarget::FLAG_FOREGROUND | InputTarget::FLAG_SPLIT);
                 mTouchState.addOrUpdateWindow(toWindow, newTargetFlags, pointerIds);
 
                 found = true;

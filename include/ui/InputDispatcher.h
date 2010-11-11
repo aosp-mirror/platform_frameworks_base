@@ -219,6 +219,8 @@ struct InputWindow {
      * motion events to be delivered to them with AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED.
      */
     bool isTrustedOverlay() const;
+
+    bool supportsSplitTouch() const;
 };
 
 
@@ -946,7 +948,7 @@ private:
     struct TouchedWindow {
         const InputWindow* window;
         int32_t targetFlags;
-        BitSet32 pointerIds;
+        BitSet32 pointerIds;        // zero unless target flag FLAG_SPLIT is set
         sp<InputChannel> channel;
     };
     struct TouchState {

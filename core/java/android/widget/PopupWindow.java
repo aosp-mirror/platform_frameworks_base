@@ -25,6 +25,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -87,7 +88,7 @@ public class PopupWindow {
     private boolean mTouchable = true;
     private boolean mOutsideTouchable = false;
     private boolean mClippingEnabled = true;
-    private boolean mSplitTouchEnabled;
+    private int mSplitTouchEnabled = -1;
     private boolean mLayoutInScreen;
     private boolean mClipToScreen;
 
@@ -602,14 +603,17 @@ public class PopupWindow {
      * @hide
      */
     public boolean isSplitTouchEnabled() {
-        return mSplitTouchEnabled;
+        if (mSplitTouchEnabled < 0 && mContext != null) {
+            return mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB;
+        }
+        return mSplitTouchEnabled == 1;
     }
 
     /**
      * <p>Allows the popup window to split touches across other windows that also
-     * support split touch.  When this flag is not set, the first pointer
+     * support split touch.  When this flag is false, the first pointer
      * that goes down determines the window to which all subsequent touches
-     * go until all pointers go up.  When this flag is set, each pointer
+     * go until all pointers go up.  When this flag is true, each pointer
      * (not necessarily the first) that goes down determines the window
      * to which all subsequent touches of that pointer will go until that
      * pointer goes up thereby enabling touches with multiple pointers
@@ -620,7 +624,7 @@ public class PopupWindow {
      * @hide
      */
     public void setSplitTouchEnabled(boolean enabled) {
-        mSplitTouchEnabled = enabled;
+        mSplitTouchEnabled = enabled ? 1 : 0;
     }
 
     /**
@@ -993,7 +997,7 @@ public class PopupWindow {
         if (!mClippingEnabled) {
             curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         }
-        if (mSplitTouchEnabled) {
+        if (isSplitTouchEnabled()) {
             curFlags |= WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
         }
         if (mLayoutInScreen) {
