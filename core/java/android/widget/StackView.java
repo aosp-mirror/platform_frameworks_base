@@ -122,7 +122,7 @@ public class StackView extends AdapterViewAnimator {
     private boolean mFirstLayoutHappened = false;
     private int mStackMode;
     private int mFramePadding;
-    private final Rect invalidateRect = new Rect();
+    private final Rect stackInvalidateRect = new Rect();
 
     public StackView(Context context) {
         super(context);
@@ -243,6 +243,7 @@ public class StackView extends AdapterViewAnimator {
     @Override
     @android.view.RemotableViewMethod
     public void showNext() {
+        if (mSwipeGestureType != GESTURE_NONE) return;
         if (!mTransitionIsSetup) {
             View v = getViewAtRelativeIndex(1);
             if (v != null) {
@@ -257,6 +258,7 @@ public class StackView extends AdapterViewAnimator {
     @Override
     @android.view.RemotableViewMethod
     public void showPrevious() {
+        if (mSwipeGestureType != GESTURE_NONE) return;
         if (!mTransitionIsSetup) {
             View v = getViewAtRelativeIndex(0);
             if (v != null) {
@@ -301,8 +303,11 @@ public class StackView extends AdapterViewAnimator {
         // Here we need to make sure that the z-order of the children is correct
         for (int i = mCurrentWindowEnd; i >= mCurrentWindowStart; i--) {
             int index = modulo(i, getWindowSize());
-            View v = mViewsMap.get(index).view;
-            if (v != null) v.bringToFront();
+            ViewAndIndex vi = mViewsMap.get(index);
+            if (vi != null) {
+                View v = mViewsMap.get(index).view;
+                if (v != null) v.bringToFront();
+            }
         }
         mTransitionIsSetup = false;
     }
@@ -331,16 +336,15 @@ public class StackView extends AdapterViewAnimator {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        canvas.getClipBounds(invalidateRect);
+        canvas.getClipBounds(stackInvalidateRect);
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
-            invalidateRect.union(lp.getInvalidateRect());
+            stackInvalidateRect.union(lp.getInvalidateRect());
             lp.resetInvalidateRect();
         }
-
         canvas.save(Canvas.CLIP_SAVE_FLAG);
-        canvas.clipRect(invalidateRect, Region.Op.UNION);
+        canvas.clipRect(stackInvalidateRect, Region.Op.UNION);
         super.dispatchDraw(canvas);
         canvas.restore();
     }
@@ -553,6 +557,10 @@ public class StackView extends AdapterViewAnimator {
 
         if (deltaY > mSwipeThreshold && mSwipeGestureType == GESTURE_SLIDE_DOWN
                 && mStackSlider.mMode == StackSlider.NORMAL_MODE) {
+            // We reset the gesture variable, because otherwise we will ignore showPrevious() /
+            // showNext();
+            mSwipeGestureType = GESTURE_NONE;
+
             // Swipe threshold exceeded, swipe down
             if (mStackMode == ITEMS_SLIDE_UP) {
                 showPrevious();
@@ -562,6 +570,10 @@ public class StackView extends AdapterViewAnimator {
             mHighlight.bringToFront();
         } else if (deltaY < -mSwipeThreshold && mSwipeGestureType == GESTURE_SLIDE_UP
                 && mStackSlider.mMode == StackSlider.NORMAL_MODE) {
+            // We reset the gesture variable, because otherwise we will ignore showPrevious() /
+            // showNext();
+            mSwipeGestureType = GESTURE_NONE;
+
             // Swipe threshold exceeded, swipe up
             if (mStackMode == ITEMS_SLIDE_UP) {
                 showNext();
@@ -897,7 +909,6 @@ public class StackView extends AdapterViewAnimator {
         int horizontalOffset;
         int verticalOffset;
         View mView;
-        int left, top, right, bottom;
         private final Rect parentRect = new Rect();
         private final Rect invalidateRect = new Rect();
         private final RectF invalidateRectf = new RectF();
@@ -952,44 +963,32 @@ public class StackView extends AdapterViewAnimator {
         }
 
         void resetInvalidateRect() {
-           invalidateRect.set(0, 0, 0, 0);
+            invalidateRect.set(0, 0, 0, 0);
         }
 
         // This is public so that ObjectAnimator can access it
         public void setVerticalOffset(int newVerticalOffset) {
-            int offsetDelta = newVerticalOffset - verticalOffset;
+            setOffsets(horizontalOffset, newVerticalOffset);
+        }
+
+        public void setHorizontalOffset(int newHorizontalOffset) {
+            setOffsets(newHorizontalOffset, verticalOffset);
+        }
+
+        public void setOffsets(int newHorizontalOffset, int newVerticalOffset) {
+            int horizontalOffsetDelta = newHorizontalOffset - horizontalOffset;
+            horizontalOffset = newHorizontalOffset;
+            int verticalOffsetDelta = newVerticalOffset - verticalOffset;
             verticalOffset = newVerticalOffset;
 
             if (mView != null) {
                 mView.requestLayout();
-                int top = Math.min(mView.getTop() + offsetDelta, mView.getTop());
-                int bottom = Math.max(mView.getBottom() + offsetDelta, mView.getBottom());
+                int left = Math.min(mView.getLeft() + horizontalOffsetDelta, mView.getLeft());
+                int right = Math.max(mView.getRight() + horizontalOffsetDelta, mView.getRight());
+                int top = Math.min(mView.getTop() + verticalOffsetDelta, mView.getTop());
+                int bottom = Math.max(mView.getBottom() + verticalOffsetDelta, mView.getBottom());
 
-                invalidateRectf.set(mView.getLeft(), top, mView.getRight(), bottom);
-
-                float xoffset = -invalidateRectf.left;
-                float yoffset = -invalidateRectf.top;
-                invalidateRectf.offset(xoffset, yoffset);
-                mView.getMatrix().mapRect(invalidateRectf);
-                invalidateRectf.offset(-xoffset, -yoffset);
-                invalidateRect.union((int) Math.floor(invalidateRectf.left),
-                        (int) Math.floor(invalidateRectf.top),
-                        (int) Math.ceil(invalidateRectf.right),
-                        (int) Math.ceil(invalidateRectf.bottom));
-
-                invalidateGlobalRegion(mView, invalidateRect);
-            }
-        }
-
-        public void setHorizontalOffset(int newHorizontalOffset) {
-            int offsetDelta = newHorizontalOffset - horizontalOffset;
-            horizontalOffset = newHorizontalOffset;
-
-            if (mView != null) {
-                mView.requestLayout();
-                int left = Math.min(mView.getLeft() + offsetDelta, mView.getLeft());
-                int right = Math.max(mView.getRight() + offsetDelta, mView.getRight());
-                invalidateRectf.set(left,  mView.getTop(), right, mView.getBottom());
+                invalidateRectf.set(left, top, right, bottom);
 
                 float xoffset = -invalidateRectf.left;
                 float yoffset = -invalidateRectf.top;
@@ -997,7 +996,7 @@ public class StackView extends AdapterViewAnimator {
                 mView.getMatrix().mapRect(invalidateRectf);
                 invalidateRectf.offset(-xoffset, -yoffset);
 
-                invalidateRect.union((int) Math.floor(invalidateRectf.left),
+                invalidateRect.set((int) Math.floor(invalidateRectf.left),
                         (int) Math.floor(invalidateRectf.top),
                         (int) Math.ceil(invalidateRectf.right),
                         (int) Math.ceil(invalidateRectf.bottom));

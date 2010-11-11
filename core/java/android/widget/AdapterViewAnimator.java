@@ -24,7 +24,6 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
