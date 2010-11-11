@@ -153,13 +153,13 @@ DisplayList::~DisplayList() {
     mPaints.clear();
 
     for (size_t i = 0; i < mMatrices.size(); i++) {
-        delete  mMatrices.itemAt(i);
+        delete mMatrices.itemAt(i);
     }
     mMatrices.clear();
 
     if (mPathHeap) {
         for (int i = 0; i < mPathHeap->count(); i++) {
-            caches.pathCache.remove(&(*mPathHeap)[i]);
+            caches.pathCache.removeDeferred(&(*mPathHeap)[i]);
         }
         mPathHeap->safeUnref();
     }

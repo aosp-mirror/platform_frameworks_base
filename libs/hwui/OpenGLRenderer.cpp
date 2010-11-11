@@ -135,6 +135,8 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::prepare(bool opaque) {
+    mCaches.clearGarbage();
+
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;

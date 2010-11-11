@@ -130,7 +130,7 @@ K GenerationCache<K, V>::getKeyAt(uint32_t index) const {
 
 template<typename K, typename V>
 V GenerationCache<K, V>::getValueAt(uint32_t index) const {
-    return mCache.valueAt(index);
+    return mCache.valueAt(index)->value;
 }
 
 template<typename K, typename V>
