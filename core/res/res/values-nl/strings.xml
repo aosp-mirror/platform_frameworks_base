@@ -440,6 +440,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Hiermee kan een toepassing de configuratie van een lokale Bluetooth-telefoon bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Near Field Communication regelen"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Hiermee kan een toepassing communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"toetsvergrendeling uitschakelen"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Hiermee kan een toepassing de toetsvergrendeling en bijbehorende wachtwoordbeveiliging uitschakelen. Een voorbeeld: de telefoon schakelt de toetsvergrendeling uit als er een oproep binnenkomt en schakelt de toetsvergrendeling weer in als de oproep is beëindigd."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"synchronisatie-instellingen lezen"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Hiermee kan een toepassing de synchronisatie-instellingen lezen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>

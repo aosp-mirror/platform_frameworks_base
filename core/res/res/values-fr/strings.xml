@@ -440,6 +440,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Permet à une application d\'obtenir la configuration du téléphone Bluetooth local et de créer et accepter des connexions à des appareils associés."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"contrôler la communication en champ proche"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Autorise une application à communiquer avec des tags, cartes et lecteurs prenant en charge la communication en champ proche (NFC)."</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"Désactivation du verrouillage des touches"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permet à une application de désactiver le verrouillage des touches et toute sécurité par mot de passe. Exemple : Votre téléphone désactive le verrouillage du clavier lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Lecture des paramètres de synchronisation"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Permet à une application de lire les paramètres de synchronisation (par ex. savoir si la synchronisation est activée pour les Contacts)."</string>

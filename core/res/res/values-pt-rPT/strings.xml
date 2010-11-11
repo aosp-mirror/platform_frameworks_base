@@ -440,6 +440,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Permite a uma aplicação ver a configuração do telefone Bluetooth local, bem como efectuar e aceitar ligações com dispositivos emparelhados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlo Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permite que uma aplicação comunique com etiquetas, cartões e leitores Near Field Communication (NFC)."</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"desactivar bloqueio de teclas"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permite a uma aplicação desactivar o bloqueio de teclas e qualquer segurança por palavra-passe associada. Um exemplo legítimo é a desactivação do bloqueio de teclas pelo telefone ao receber uma chamada, reactivando, em seguida, o bloqueio de teclas ao terminar a chamada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler definições de sincronização"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Permite a uma aplicação ler as definições de sincronização como, por exemplo, se a sincronização está activada para Contactos."</string>

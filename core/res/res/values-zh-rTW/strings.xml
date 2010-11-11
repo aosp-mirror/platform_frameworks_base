@@ -440,6 +440,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"允許應用程式檢視本機藍牙電話設定，並與其他配對裝置連線。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"控制近距離無線通訊"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"允許應用程式使用近距離無線通訊 (NFC) 標記、卡片及讀取程式進行通訊。"</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"停用按鍵鎖定"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性。例如：收到來電時解除按鍵鎖定，通話結束後重新啟動按鍵鎖定。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
     <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"允許應用程式讀取同步處理設定，例如：是否同步處理 [聯絡人]。"</string>
